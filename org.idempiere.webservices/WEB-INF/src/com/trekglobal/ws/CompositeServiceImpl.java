@@ -21,6 +21,7 @@ import javax.jws.WebService;
 import org.compiere.util.CLogger;
 import org.compiere.util.Trx;
 import org.idempiere.adInterface.x10.ADLoginRequest;
+import org.idempiere.adInterface.x10.ADLoginResponse;
 import org.idempiere.adInterface.x10.CompositeRequest;
 import org.idempiere.adInterface.x10.CompositeRequestDocument;
 import org.idempiere.adInterface.x10.CompositeResponse;
@@ -120,7 +121,12 @@ public class CompositeServiceImpl extends AbstractService implements CompositeSe
 			} finally {
 				trx.close();
 			}
-	
+			
+			if (isTokenSupported) {
+				ADLoginResponse loginRes = resps.addNewADLoginResponse();
+				setLoginResponseParam(loginRes);
+			}
+
 			return ret;
 		} finally {
 			if (!connected)

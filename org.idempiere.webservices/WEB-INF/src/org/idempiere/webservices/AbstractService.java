@@ -35,6 +35,9 @@ import org.adempiere.base.equinox.EquinoxExtensionLocator;
 import org.adempiere.exceptions.AdempiereException;
 import org.apache.commons.codec.binary.Base64;
 import org.compiere.model.Lookup;
+import org.compiere.model.MAuthorizationToken;
+import org.compiere.model.MClient;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.model.MWebService;
 import org.compiere.model.MWebServiceType;
@@ -48,11 +51,13 @@ import org.compiere.util.Login;
 import org.compiere.util.NamePair;
 import org.compiere.util.Trx;
 import org.idempiere.adInterface.x10.ADLoginRequest;
+import org.idempiere.adInterface.x10.ADLoginResponse;
 import org.idempiere.adInterface.x10.DataField;
 import org.idempiere.adInterface.x10.OutputField;
 import org.idempiere.adInterface.x10.OutputFields;
 import org.idempiere.adInterface.x10.StandardResponse;
 import org.idempiere.adInterface.x10.StandardResponseDocument;
+import org.idempiere.adinterface.AuthTokenContext;
 import org.idempiere.adinterface.CompiereService;
 import org.idempiere.webservices.fault.IdempiereServiceFault;
 
@@ -68,6 +73,9 @@ public class AbstractService {
 	private static final String ROLE_ACCESS_SQL = "SELECT IsActive FROM WS_WebServiceTypeAccess WHERE AD_Role_ID=? "
 	        + "AND WS_WebServiceType_ID=?";
 	private static final String COMPIERE_SERVICE = "CompiereService";
+	
+	protected boolean isTokenSupported = false;
+	
 	@Resource
 	protected WebServiceContext jaxwsContext; //soap context
 	
@@ -86,10 +94,20 @@ public class AbstractService {
 
 		CompiereService m_cs = getCompiereService();
 
-		if (m_cs.isLoggedIn() && m_cs.getAD_Client_ID() == loginRequest.getClientID() && loginRequest.getClientID() == Env.getAD_Client_ID(Env.getCtx())
-				&& m_cs.getAD_Org_ID() == loginRequest.getOrgID() && m_cs.getAD_Role_ID() == loginRequest.getRoleID()
-				&& m_cs.getM_Warehouse_ID() == loginRequest.getWarehouseID() && loginRequest.getUser().equals(m_cs.getUserName()))
-			return authenticate(webService, method, serviceType, m_cs); // already logged with same data
+		if (m_cs.isLoggedIn()
+				&& ((loginRequest.getToken() != null && loginRequest.getUser().equals(m_cs.getUserName()) && loginRequest
+						.getToken().equals(m_cs.getToken())) || (m_cs.getAD_Client_ID() == loginRequest.getClientID()
+						&& loginRequest.getClientID() == Env.getAD_Client_ID(Env.getCtx())
+						&& m_cs.getAD_Org_ID() == loginRequest.getOrgID()
+						&& m_cs.getAD_Role_ID() == loginRequest.getRoleID()
+						&& m_cs.getM_Warehouse_ID() == loginRequest.getWarehouseID() && loginRequest.getUser().equals(
+						m_cs.getUserName()))))
+			return authenticate(webService, method, serviceType, m_cs);
+
+		isTokenSupported = MSysConfig.getBooleanValue(MSysConfig.WEBSERVICE_SUPPORT_AUTH_TOKEN, true);
+		
+		if (loginRequest.getToken() == null)
+		{
 
 		String ret =invokeLoginValidator(loginRequest, m_cs.getCtx(), null, IWSValidator.TIMING_BEFORE_LOGIN);
 		if(ret!=null && ret.length()>0)
@@ -173,9 +191,12 @@ public class AbstractService {
 				return error;
 
 			int AD_User_ID = Env.getAD_User_ID(m_cs.getCtx());
-
+			String remoteIP = null;
 			
-			if (!m_cs.login(AD_User_ID, loginRequest.getRoleID(), loginRequest.getClientID(), loginRequest.getOrgID(), loginRequest.getWarehouseID(), loginRequest.getLang()))
+			if(isTokenSupported)
+				remoteIP = getHttpServletRequest().getRemoteAddr();
+			
+			if (!m_cs.login(AD_User_ID, loginRequest.getRoleID(), loginRequest.getClientID(), loginRequest.getOrgID(), loginRequest.getWarehouseID(), loginRequest.getLang(),remoteIP))
 				return "Error logging in";
 			
 		} else {
@@ -185,7 +206,79 @@ public class AbstractService {
 		ret =invokeLoginValidator(loginRequest, m_cs.getCtx(), null, IWSValidator.TIMING_AFTER_LOGIN);
 		if(ret!=null && ret.length()>0)
 			return ret;
-		
+		} else if (isTokenSupported) {
+			AuthTokenContext authContext = CompiereService
+					.getTokenContext(loginRequest.getToken());
+			MAuthorizationToken mAuthorizationToken = null; 
+			boolean isNewToken = false;
+			int timeOut = 30;
+			int AD_Client_ID = 0;
+			if (authContext != null && authContext.getPropertie() != null) {
+				m_cs.getCtx().putAll(authContext.getPropertie());
+				mAuthorizationToken = new MAuthorizationToken(m_cs.getCtx(),
+						authContext.getAuthToken().get_ID(), null);
+				isNewToken = false;
+			} else {
+				mAuthorizationToken = MAuthorizationToken.get(m_cs.getCtx(),
+						loginRequest.getUser(), loginRequest.getToken());
+				
+				isNewToken = true;
+			}
+
+			if (mAuthorizationToken == null
+					|| (!mAuthorizationToken.isWebservice())) {
+				return "Error logging in - Not Valid Token";
+			}
+
+			if(isNewToken)
+				AD_Client_ID = mAuthorizationToken.getAD_Client_ID();
+			else
+				 AD_Client_ID = Env.getContextAsInt(
+							authContext.getPropertie(), "#AD_Client_ID");
+			timeOut = MSysConfig.getIntValue(
+					MSysConfig.WEBSERVICE_Token_Timeout, 30, AD_Client_ID);
+			if (mAuthorizationToken.isValidForSameClient()) {
+				if (!mAuthorizationToken.getRemoteIP().equals(
+						getHttpServletRequest().getRemoteAddr())) {
+					return "Error logging in - Remote IP Invalid";
+				}
+			}
+
+			if (authTokenTimeout(mAuthorizationToken, timeOut, !isNewToken,
+					m_cs, loginRequest)) {
+				return "Error logging in - Token Expired";
+			}
+
+			if (isNewToken) {
+				m_cs.getCtx().setProperty("#AD_Client_ID",
+						"" + mAuthorizationToken.getAD_Client_ID());
+
+				m_cs.getCtx().setProperty("#AD_Role_ID",
+						"" + mAuthorizationToken.getAD_Role_ID());
+
+				m_cs.getCtx().setProperty("#AD_Client_Name",
+						MClient.get(m_cs.getCtx()).getName());
+
+				m_cs.getCtx().setProperty("#AD_Role_Name",
+						mAuthorizationToken.getAD_Role().getName());
+				
+				
+				MUser user = MUser.get(m_cs.getCtx(), loginRequest.getUser());
+				if (user != null) {
+					Env.setContext(m_cs.getCtx(), "#AD_User_ID",
+							user.getAD_User_ID());
+					Env.setContext(m_cs.getCtx(), "#AD_User_Name",
+							user.getName());
+					Env.setContext(m_cs.getCtx(), "#SalesRep_ID",
+							user.getAD_User_ID());
+				}
+			}
+			if (!m_cs.login(mAuthorizationToken))
+				return "Error logging in";
+		} else {
+			return "Error logging in - Token or Password Mandatory";
+		}
+
 		return authenticate(webService, method, serviceType, m_cs);
 	}
 
@@ -655,4 +748,57 @@ public class AbstractService {
 		return req;
 	}
 	
+	private boolean authTokenTimeout(MAuthorizationToken authToken, int timeoutmin, boolean needRequery,
+			CompiereService m_cs, ADLoginRequest loginRequest)
+	{
+		if(authToken.isManual()){
+			if(authToken.getValidTo()==null || authToken.getValidTo().after(new Timestamp(System.currentTimeMillis())))
+				return false;
+		    return true;
+		}
+		if ((System.currentTimeMillis() - authToken.getLastAccessTime().getTime())/(timeoutmin*6000) > timeoutmin)
+		{ 
+			if (needRequery)
+			{
+				authToken = MAuthorizationToken.get(m_cs.getCtx(), loginRequest.getUser(), loginRequest.getToken());
+				if ((System.currentTimeMillis() - authToken.getLastAccessTime().getTime())/(timeoutmin*6000) > timeoutmin)
+				{
+					CompiereService.removeToken(authToken.getToken());
+					authToken.setIsActive(false);
+					authToken.saveEx();
+					return true;
+				}
+				return false;
+			}
+			authToken.setIsActive(false);
+			authToken.saveEx();
+			return true;
+		}
+		return false;
+	}
+
+	public void setLoginResponseParam(ADLoginResponse loginRes)
+	{
+		CompiereService m_cs = getCompiereService();
+		boolean includeAllInResponse = MSysConfig.getBooleanValue(MSysConfig.WEBSERVICE_LOGIN_RESPONSE_ALL, false,m_cs.getAD_Client_ID());
+		if(includeAllInResponse){
+			loginRes.setWarehouses(m_cs.getM_Warehouse_ID());
+			loginRes.setClients(m_cs.getAD_Client_ID());
+			loginRes.setLangs(m_cs.getLanguage().getName());
+			loginRes.setOrgs(m_cs.getAD_Org_ID());
+			loginRes.setRoles(m_cs.getAD_Role_ID());
+		}
+		if(m_cs.getToken()!=null)
+			loginRes.setToken(m_cs.getToken());
+		
+	}
+	protected void setCompiereService(CompiereService m_sc)
+	{
+		if (m_sc != null)
+		{
+			HttpServletRequest req = getHttpServletRequest();
+			req.setAttribute(COMPIERE_SERVICE, m_sc);
+		}
+	}
+
 }

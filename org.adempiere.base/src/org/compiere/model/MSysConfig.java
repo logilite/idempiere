@@ -163,7 +163,9 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String ZK_SEQ_DEFAULT_VALUE_PANEL = "ZK_SEQ_DEFAULT_VALUE_PANEL";
 	public static final String ZK_SESSION_TIMEOUT_IN_SECONDS = "ZK_SESSION_TIMEOUT_IN_SECONDS";
     public static final String ZK_THEME = "ZK_THEME";
-
+    public static final String WEBSERVICE_SUPPORT_AUTH_TOKEN = "WEBSERVICE_SUPPORT_AUTH_TOKEN";
+    public static final String WEBSERVICE_Token_Timeout = "WEBSERVICE_Token_Timeout";
+	public static final String WEBSERVICE_LOGIN_RESPONSE_ALL = "WEBSERVICE_LOGIN_RESPONSE_ALL";
 	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
