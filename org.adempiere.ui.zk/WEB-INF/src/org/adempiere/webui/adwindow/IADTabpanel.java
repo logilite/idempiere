@@ -13,6 +13,7 @@
 package org.adempiere.webui.adwindow;
 
 import org.compiere.model.GridTab;
+import org.compiere.model.GridWindow;
 import org.compiere.util.Evaluatee;
 import org.zkoss.zk.ui.Component;
 
@@ -26,6 +27,7 @@ public interface IADTabpanel extends Component, Evaluatee {
 	public static final String ON_ACTIVATE_EVENT = "onActivate";
 	public static final String ATTR_ON_ACTIVATE_POSTED = "org.adempiere.webui.adwindow.IADTabpanel.onActivatePosted";
 
+	public void init(AbstractADWindowContent winPanel, int windowNo, GridTab gridTab,GridWindow gridWindow);
 	/**
 	 * @return display logic
 	 */

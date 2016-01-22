@@ -31,6 +31,8 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.logging.Level;
 
+import javax.print.ServiceUI;
+
 import org.adempiere.util.Callback;
 import org.adempiere.webui.AdempiereIdGenerator;
 import org.adempiere.webui.AdempiereWebUI;
@@ -119,6 +121,8 @@ import org.zkoss.zul.Grid;
 import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.Menupopup;
 import org.zkoss.zul.Window.Mode;
+
+import com.adempiere.webui.adwindow.factory.ServiceUtil;
 
 /**
  *
@@ -609,42 +613,61 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		{
 			gTab.setUpdateWindowContext(false);
 		}
+		
 
-		if (gTab.isSortTab())
-		{
+		String type = gTab.getTabType();
+		if(!Util.isEmpty(type)){
+			
+			IADTabpanel adTabPan = ServiceUtil.getADTabPanel(type);
+			gTab.addDataStatusListener(this);
+			adTabPan.init(this, curWindowNo, gTab, gridWindow);
+			adTabbox.addTab(gTab, adTabPan);
+			if (tabIndex == 0){
+				adTabPan.createUI();
+				if (!m_queryInitiating) 
+				{
+					initFirstTabpanel();
+				}
+			}
+
+			adTabPan.addEventListener(ADTabpanel.ON_DYNAMIC_DISPLAY_EVENT, this);
+			if (!m_queryInitiating && tabIndex == 0) {
+				initQueryOnNew(query);
+			}
+
+		} else if (gTab.isSortTab()) {
 			ADSortTab sortTab = new ADSortTab(curWindowNo, gTab);
+
 			adTabbox.addTab(gTab, sortTab);
 			sortTab.registerAPanel(this);
 			if (tabIndex == 0) {
 				sortTab.createUI();
-				if (!m_queryInitiating)
+				if (!m_queryInitiating) 
 				{
 					initFirstTabpanel();
 				}
 			}
 			gTab.addDataStatusListener(this);
-		}
-		else
-		{
+		}else{
 			ADTabpanel fTabPanel = new ADTabpanel();
-			fTabPanel.addEventListener(ADTabpanel.ON_DYNAMIC_DISPLAY_EVENT, this);
-	    	gTab.addDataStatusListener(this);
-	    	fTabPanel.init(this, curWindowNo, gTab, gridWindow);
-	    	adTabbox.addTab(gTab, fTabPanel);
-		    if (tabIndex == 0) {
-		    	fTabPanel.createUI();
-		    	if (!m_queryInitiating)
+
+			fTabPanel.addEventListener(ADTabpanel.ON_DYNAMIC_DISPLAY_EVENT,this);
+			gTab.addDataStatusListener(this);
+			fTabPanel.init(this, curWindowNo, gTab, gridWindow);
+			adTabbox.addTab(gTab, fTabPanel);
+			if (tabIndex == 0){
+				fTabPanel.createUI();
+				if (!m_queryInitiating) 
 				{
 					initFirstTabpanel();
 				}
-		    }
+			}
 
-		    if (!m_queryInitiating && tabIndex == 0)
-		    {
-		    	initQueryOnNew(query);
-		    }
+			if (!m_queryInitiating && tabIndex == 0) 
+			{
+				initQueryOnNew(query);
+			}
 		}
-
 		return gTab;
 	}
 
