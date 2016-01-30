@@ -862,7 +862,8 @@ public class MInvoiceLine extends X_C_InvoiceLine
 				setPrice();
 				// IDEMPIERE-1574 Sales Order Line lets Price under the Price Limit when updating
 				//	Check PriceLimit
-				boolean enforce = m_IsSOTrx && getParent().getM_PriceList().isEnforcePriceLimit();
+				boolean enforce = m_IsSOTrx && getParent().getM_PriceList().isEnforcePriceLimit()
+					&& (getC_OrderLine_ID() <= 0 || getC_OrderLine().getM_Promotion_ID() <= 0);
 				if (enforce && MRole.getDefault().isOverwritePriceLimit())
 					enforce = false;
 				//	Check Price Limit?

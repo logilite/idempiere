@@ -12,6 +12,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.                     *
  *****************************************************************************/
 package org.adempiere.model;
+import java.util.HashMap;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.I_C_Order;
@@ -19,11 +20,12 @@ import org.compiere.model.I_C_OrderLine;
 import org.compiere.model.MClient;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.util.DB;
-
+import org.compiere.util.Env;
 /**
  *
  * @author hengsin
@@ -32,13 +34,34 @@ import org.compiere.util.DB;
 public class PromotionValidator implements ModelValidator {
 
 	private int m_AD_Client_ID;
+	private HashMap<PromotionRule.Parameter, Integer> promotionLineMap = new HashMap<PromotionRule.Parameter, Integer>();
 
 	public String docValidate(PO po, int timing) {
 		if (po instanceof MOrder ) {
 			if (timing == TIMING_AFTER_PREPARE) {
 				MOrder order = (MOrder) po;
+				for (MOrderLine ol : order.getLines(true, MOrderLine.COLUMNNAME_M_Product_ID)) {
+					if (ol.getM_Promotion_ID() > 0 && ol.getM_Product_ID() > 0 && ol.getQtyOrdered().signum() == 0) {
+						ol.delete(false);
+					}
+				}
+			} else if (timing == TIMING_AFTER_VOID) {
+				MOrder order = (MOrder) po;
+				decreasePromotionCounter(order);
+			} else if(timing == TIMING_BEFORE_PREPARE) {
+
+				MOrder order = (MOrder) po;
+				
+				for (MOrderLine ol : order.getLines(true, MOrderLine.COLUMNNAME_M_Product_ID)) {
+					if (ol.getM_Promotion_ID() > 0 && ol.getM_Product_ID() > 0) {
+						ol.setQty(Env.ZERO);
+						ol.save();
+						promotionLineMap.put(new PromotionRule.Parameter(ol.getM_Product_ID(), ol.getM_Promotion_ID()), ol.get_ID());
+					}
+				}
+				
 				try {
-					PromotionRule.applyPromotions(order);
+					PromotionRule.applyPromotions(order, promotionLineMap);
 					order.getLines(true, null);
 					order.calculateTaxTotal();
 					order.saveEx();
@@ -49,13 +72,16 @@ public class PromotionValidator implements ModelValidator {
 					else
 						throw new AdempiereException(e.getLocalizedMessage(), e);
 				}
-			} else if (timing == TIMING_AFTER_VOID) {
-				MOrder order = (MOrder) po;
-				decreasePromotionCounter(order);
+				finally
+				{
+					promotionLineMap.clear();
+				}
+			
 			}
 		}
 		return null;
 	}
+
 
 	private void increasePromotionCounter(MOrder order) {
 		MOrderLine[] lines = order.getLines(false, null);
@@ -102,7 +128,7 @@ public class PromotionValidator implements ModelValidator {
 		String warehouseFilter = "M_PromotionPreCondition.M_Warehouse_ID IS NULL OR M_PromotionPreCondition.M_Warehouse_ID = ?";
 		String dateFilter = "M_PromotionPreCondition.StartDate <= ? AND (M_PromotionPreCondition.EndDate >= ? OR M_PromotionPreCondition.EndDate IS NULL)";
 
-		StringBuilder select = new StringBuilder();
+		StringBuffer select = new StringBuffer();
 		select.append(" SELECT M_PromotionPreCondition.M_PromotionPreCondition_ID FROM M_PromotionPreCondition ")
 			.append(" WHERE")
 			.append(" (" + bpFilter + ")")
@@ -153,8 +179,9 @@ public class PromotionValidator implements ModelValidator {
 
 	public String modelChange(PO po, int type) throws Exception {
 		if (po instanceof MOrderLine) {
+			MOrderLine ol = (MOrderLine) po;
+			
 			if (type == TYPE_AFTER_DELETE) {
-				MOrderLine ol = (MOrderLine) po;
 				MOrder order = ol.getParent();
 				String promotionCode = (String)order.get_Value("PromotionCode");
 				if (ol.getC_Charge_ID() > 0) {
@@ -170,6 +197,41 @@ public class PromotionValidator implements ModelValidator {
 					}
 				}
 			}
+			
+			if ( MSysConfig.getBooleanValue("Promotion_Apply_Immediate", false) && ol.getM_Promotion_ID() <= 0 && ((type == TYPE_AFTER_CHANGE
+					&& (ol.is_ValueChanged("M_Product_ID") || ol.is_ValueChanged("QtyOrdered") || ol.is_ValueChanged("PriceActual")))
+					|| type == TYPE_AFTER_NEW ))
+			{
+					MOrder order = ol.getParent();
+					try {
+						for (MOrderLine oline : order.getLines(true, MOrderLine.COLUMNNAME_M_Product_ID)) {
+							if (oline.getM_Promotion_ID() > 0 && oline.getM_Product_ID() > 0) {
+								oline.setQty(Env.ZERO);
+								oline.save();
+								promotionLineMap.put(new PromotionRule.Parameter(oline.getM_Product_ID(), oline.getM_Promotion_ID()), 
+										oline.get_ID());
+							}
+						}
+						
+						PromotionRule.applyPromotions(order, promotionLineMap);
+
+						order.getLines(true, null);
+						order.calculateTaxTotal();
+						order.saveEx();
+						increasePromotionCounter(order);
+					} catch (Exception e) {
+						if (e instanceof RuntimeException)
+							throw (RuntimeException)e;
+						else
+							throw new AdempiereException(e.getLocalizedMessage(), e);
+					}
+					finally
+					{
+						promotionLineMap.clear();
+					}
+
+			}
+
 		}
 		return null;
 	}
