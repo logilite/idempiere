@@ -40,6 +40,7 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
+import org.compiere.util.TrxEventListener;
 import org.compiere.util.ValueNamePair;
 
 /**
@@ -80,7 +81,9 @@ import org.compiere.util.ValueNamePair;
 public class MPayment extends X_C_Payment 
 	implements DocAction, ProcessCall, PaymentInterface
 {
-
+	/**
+	 * 
+	 */
 	private static final long serialVersionUID = -7179638016937305380L;
 
 	/**
@@ -551,64 +554,111 @@ public class MPayment extends X_C_Payment
 			setCreditCardNumber(PaymentUtil.encrpytCreditCard(getCreditCardNumber()));
 			setCreditCardVV(PaymentUtil.encrpytCvv(getCreditCardVV()));
 			
-			setDateTrx(new Timestamp(System.currentTimeMillis()));
-			setDateAcct(new Timestamp(System.currentTimeMillis()));
-			setProcessed(true);		// prevent editing of payment details once approved
+			if(!isProcessed())
+			{
+				setDateTrx(new Timestamp(System.currentTimeMillis()));
+				setDateAcct(new Timestamp(System.currentTimeMillis()));
+				setProcessed(true);		// prevent editing of payment details once approved
+			}
 		}
 		
 		setIsApproved(approved);
 		
-		Trx trx = Trx.get(Trx.createTrxName("ppt-"), true);
-		
-		try
+
+		final MPaymentTransaction m_mPaymentTransaction = createPaymentTransaction(null);
+		m_mPaymentTransaction.setIsApproved(approved);
+		if (getTrxType().equals(TRXTYPE_Void) || getTrxType().equals(TRXTYPE_CreditPayment))
+			m_mPaymentTransaction.setIsVoided(approved);
+		m_mPaymentTransaction.setProcessed(approved);
+		m_mPaymentTransaction.setC_Payment_ID(getC_Payment_ID());
+
+		final MOnlineTrxHistory history = new MOnlineTrxHistory(getCtx(), 0, null);
+		history.setAD_Table_ID(MPaymentTransaction.Table_ID);
+		history.setRecord_ID(m_mPaymentTransaction.getC_PaymentTransaction_ID());
+		history.setIsError(!approved);
+		history.setProcessed(approved);
+
+		StringBuilder msg = new StringBuilder();
+		if (approved)
 		{
-			trx.start();
-			
-			MPaymentTransaction m_mPaymentTransaction = createPaymentTransaction(trx.getTrxName());
-			m_mPaymentTransaction.setIsApproved(approved);
-			if(getTrxType().equals(TRXTYPE_Void) || getTrxType().equals(TRXTYPE_CreditPayment))
-				m_mPaymentTransaction.setIsVoided(approved);	
-			m_mPaymentTransaction.setProcessed(approved);
-			m_mPaymentTransaction.setC_Payment_ID(getC_Payment_ID());
-			m_mPaymentTransaction.saveEx();
-			
-			MOnlineTrxHistory history = new MOnlineTrxHistory(getCtx(), 0, trx.getTrxName());
-			history.setAD_Table_ID(MPaymentTransaction.Table_ID);
-			history.setRecord_ID(m_mPaymentTransaction.getC_PaymentTransaction_ID());
-			history.setIsError(!approved);
-			history.setProcessed(approved);
-			
-			StringBuilder msg = new StringBuilder();
-			if (approved)
-			{
-				if(getTrxType().equals(TRXTYPE_Void) || getTrxType().equals(TRXTYPE_CreditPayment))
-					msg.append(getR_VoidMsg() + "\n");
-				else
-				{
-					msg.append("Result: " + getR_Result() + "\n");
-					msg.append("Response Message: " + getR_RespMsg() + "\n");
-					msg.append("Reference: " + getR_PnRef() + "\n");
-					msg.append("Authorization Code: " + getR_AuthCode() + "\n");
-				}
-			}
+			if (getTrxType().equals(TRXTYPE_Void) || getTrxType().equals(TRXTYPE_CreditPayment))
+				msg.append(getR_VoidMsg() + "\n");
 			else
-				msg.append("ERROR: " + getErrorMessage() + "\n");
-			msg.append("Transaction Type: " + getTrxType());
-			history.setTextMsg(msg.toString());
-			
-			history.saveEx();
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, "processOnline", e);
-			setErrorMessage(Msg.getMsg(Env.getCtx(), "PaymentNotProcessed") + ": " + e.getMessage());
-		}
-		finally
-		{
-			if (trx != null)
 			{
-				trx.commit();
-				trx.close();
+				msg.append("Result: " + getR_Result() + "\n");
+				msg.append("Response Message: " + getR_RespMsg() + "\n");
+				msg.append("Reference: " + getR_PnRef() + "\n");
+				msg.append("Authorization Code: " + getR_AuthCode() + "\n");
+			}
+		}
+		else
+			msg.append("ERROR: " + getErrorMessage() + "\n");
+		msg.append("Transaction Type: " + getTrxType());
+		history.setTextMsg(msg.toString());
+
+		Trx payTrx = Trx.get(get_TrxName(), false);
+		if (payTrx != null)
+		{
+			payTrx.addTrxEventListener(new TrxEventListener() {
+
+				@Override
+				public void afterRollback(Trx trx, boolean success)
+				{
+				}
+
+				@Override
+				public void afterCommit(Trx trx, boolean success)
+				{
+				}
+
+				@Override
+				public void afterClose(Trx trx)
+				{
+					Trx pptTrx = Trx.get(Trx.createTrxName("ppt-"), true);
+					pptTrx.start();
+
+					try
+					{
+						// Check Whether PAyment Linked with Payment Transaction
+						// is exist or not.
+						String sql = "Select count(*) from C_Payment Where C_Payment_ID = ? and AD_Client_ID = ?";
+						int result = DB.getSQLValue(null, sql, m_mPaymentTransaction.getC_Payment_ID(),
+								m_mPaymentTransaction.getAD_Client_ID());
+						if (result <= 0)
+						{
+							m_mPaymentTransaction.setC_Payment_ID(0);
+						}
+
+						m_mPaymentTransaction.saveEx(pptTrx.getTrxName());
+						history.saveEx(pptTrx.getTrxName());
+					}
+					catch (Exception e)
+					{
+						log.log(Level.SEVERE, "processOnline", e);
+						setErrorMessage(Msg.getMsg(Env.getCtx(), "PaymentNotProcessed") + ": " + e.getMessage());
+					}
+					finally
+					{
+						if (pptTrx != null)
+						{
+							pptTrx.commit();
+							pptTrx.close();
+						}
+					}
+				}
+			});
+		}
+		else
+		{
+			try
+			{
+				m_mPaymentTransaction.saveEx();
+				history.saveEx();
+			}
+			catch (Exception e)
+			{
+				log.log(Level.SEVERE, "processOnline", e);
+				setErrorMessage(Msg.getMsg(Env.getCtx(), "PaymentNotProcessed") + ": " + e.getMessage());
 			}
 		}
 		
