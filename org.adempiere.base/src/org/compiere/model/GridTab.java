@@ -585,6 +585,10 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		m_mTable.addDataStatusListener(this);
 	//	m_mTable.addTableModelListener(this);
 	}   //  enableEvents
+	
+	public String getTabType(){
+		return m_vo.AD_TabType;
+	}
 
 	/**
 	 *	Assemble whereClause and query MTable and position to row 0.
