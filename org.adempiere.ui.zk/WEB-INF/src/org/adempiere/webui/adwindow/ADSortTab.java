@@ -39,6 +39,7 @@ import org.adempiere.webui.factory.ButtonFactory;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.GridTab;
+import org.compiere.model.GridWindow;
 import org.compiere.model.MRole;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -84,6 +85,10 @@ public class ADSortTab extends Panel implements IADTabpanel
 	 *  @param WindowNo Window No
 	 *  @param GridTab
 	 */
+	
+	public ADSortTab(){
+		
+	}
 	public ADSortTab(int WindowNo, GridTab gridTab)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("SortOrder=" + gridTab.getAD_ColumnSortOrder_ID() + ", SortYesNo=" + gridTab.getAD_ColumnSortYesNo_ID());
@@ -1031,6 +1036,34 @@ public class ADSortTab extends Panel implements IADTabpanel
 
 	public ADTreePanel getTreePanel() {
 		return null;
+	}
+
+	@Override
+	public void init(AbstractADWindowContent winPanel, int windowNo,
+			GridTab gridTab, GridWindow gridWindow) {
+		this.adWindowPanel = winPanel;
+		if (log.isLoggable(Level.CONFIG)) log.config("SortOrder=" + gridTab.getAD_ColumnSortOrder_ID() + ", SortYesNo=" + gridTab.getAD_ColumnSortYesNo_ID());
+		m_WindowNo = windowNo;
+		this.gridTab = gridTab;
+
+		m_AD_Table_ID = gridTab.getAD_Table_ID();
+		this.setVflex("true");
+		
+	}
+	@Override
+	public boolean isEnableCustomizeButton()
+	{
+		return false;
+	}
+	@Override
+	public boolean isEnableProcessButton()
+	{
+		return false;
+	}
+	@Override
+	public List<org.zkoss.zul.Button> getToolbarButtons()
+	{
+		return new ArrayList<org.zkoss.zul.Button>();
 	}
 }	//ADSortTab
 

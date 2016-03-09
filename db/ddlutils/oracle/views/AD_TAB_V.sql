@@ -16,7 +16,7 @@ SELECT t.AD_Tab_ID, t.AD_Window_ID, t.AD_Table_ID, t.Name, t.Description,
     t.WhereClause, t.OrderByClause, t.CommitWarning, t.ReadOnlyLogic, t.DisplayLogic,
     t.AD_Column_ID, t.AD_Process_ID, t.IsSortTab, t.IsInsertRecord, t.IsAdvancedTab,
     t.AD_ColumnSortOrder_ID, t.AD_ColumnSortYesNo_ID, t.Included_Tab_ID, t.Parent_Column_ID,
-    t.AD_Tab_UU, tbl.AD_Table_UU, t.TreeDisplayedOn
+    t.AD_Tab_UU, tbl.AD_Table_UU, t.TreeDisplayedOn, t.AD_TabType
 FROM AD_Tab t 
 	INNER JOIN AD_Table tbl ON (t.AD_Table_ID = tbl.AD_Table_ID)
 WHERE t.IsActive='Y'

@@ -416,8 +416,9 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 	
 	protected void onProcess(Component button) {
 		ProcessButtonPopup popup = new ProcessButtonPopup();
-		ADTabpanel adtab = (ADTabpanel) getSelectedADTabpanel();
-		popup.render(adtab.getToolbarButtons());
+		IADTabpanel adtab = getSelectedADTabpanel();
+		if(adtab instanceof ADTabpanel)
+			popup.render(adtab.getToolbarButtons());
 		
 		LayoutUtils.openPopupWindow(button, popup, "after_start");		
 	}
@@ -715,7 +716,7 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
         			if (adtab.getGridTab().isSortTab()) {
         				btn.setDisabled(true);
         			} else {
-        				btn.setDisabled(((ADTabpanel)adtab).getToolbarButtons().isEmpty());
+        				btn.setDisabled(adtab.getToolbarButtons().isEmpty());
         			}
         			break;
         		}

@@ -120,6 +120,8 @@ import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.Menupopup;
 import org.zkoss.zul.Window.Mode;
 
+import com.adempiere.webui.adwindow.factory.ServiceUtil;
+
 /**
  *
  * This class is based on org.compiere.apps.APanel written by Jorg Janke.
@@ -609,42 +611,61 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		{
 			gTab.setUpdateWindowContext(false);
 		}
+		
 
-		if (gTab.isSortTab())
-		{
+		String type = gTab.getTabType();
+		if(!Util.isEmpty(type)){
+			
+			IADTabpanel adTabPan = ServiceUtil.getADTabPanel(type);
+			gTab.addDataStatusListener(this);
+			adTabPan.init(this, curWindowNo, gTab, gridWindow);
+			adTabbox.addTab(gTab, adTabPan);
+			if (tabIndex == 0){
+				adTabPan.createUI();
+				if (!m_queryInitiating) 
+				{
+					initFirstTabpanel();
+				}
+			}
+
+			adTabPan.addEventListener(ADTabpanel.ON_DYNAMIC_DISPLAY_EVENT, this);
+			if (!m_queryInitiating && tabIndex == 0) {
+				initQueryOnNew(query);
+			}
+
+		} else if (gTab.isSortTab()) {
 			ADSortTab sortTab = new ADSortTab(curWindowNo, gTab);
+
 			adTabbox.addTab(gTab, sortTab);
 			sortTab.registerAPanel(this);
 			if (tabIndex == 0) {
 				sortTab.createUI();
-				if (!m_queryInitiating)
+				if (!m_queryInitiating) 
 				{
 					initFirstTabpanel();
 				}
 			}
 			gTab.addDataStatusListener(this);
-		}
-		else
-		{
+		}else{
 			ADTabpanel fTabPanel = new ADTabpanel();
-			fTabPanel.addEventListener(ADTabpanel.ON_DYNAMIC_DISPLAY_EVENT, this);
-	    	gTab.addDataStatusListener(this);
-	    	fTabPanel.init(this, curWindowNo, gTab, gridWindow);
-	    	adTabbox.addTab(gTab, fTabPanel);
-		    if (tabIndex == 0) {
-		    	fTabPanel.createUI();
-		    	if (!m_queryInitiating)
+
+			fTabPanel.addEventListener(ADTabpanel.ON_DYNAMIC_DISPLAY_EVENT,this);
+			gTab.addDataStatusListener(this);
+			fTabPanel.init(this, curWindowNo, gTab, gridWindow);
+			adTabbox.addTab(gTab, fTabPanel);
+			if (tabIndex == 0){
+				fTabPanel.createUI();
+				if (!m_queryInitiating) 
 				{
 					initFirstTabpanel();
 				}
-		    }
+			}
 
-		    if (!m_queryInitiating && tabIndex == 0)
-		    {
-		    	initQueryOnNew(query);
-		    }
+			if (!m_queryInitiating && tabIndex == 0) 
+			{
+				initQueryOnNew(query);
+			}
 		}
-
 		return gTab;
 	}
 
@@ -1026,7 +1047,8 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     	adTabbox.getSelectedTabpanel().switchRowPresentation();
     	//Deepak-Enabling customize button IDEMPIERE-364
         if(!(adTabbox.getSelectedTabpanel() instanceof ADSortTab))
-        	toolbar.enableCustomize(((ADTabpanel)adTabbox.getSelectedTabpanel()).isGridView());
+        	//toolbar.enableCustomize(((ADTabpanel)adTabbox.getSelectedTabpanel()).isGridView());
+        toolbar.enableCustomize(adTabbox.getSelectedTabpanel().isEnableCustomizeButton());
     	focusToActivePanel();
     }
 
@@ -1103,9 +1125,10 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     	}
     	else if (ADTabpanel.ON_DYNAMIC_DISPLAY_EVENT.equals(event.getName()))
     	{
-    		ADTabpanel adtab = (ADTabpanel) event.getTarget();
+    		IADTabpanel adtab = (IADTabpanel) event.getTarget();
     		if (adtab == adTabbox.getSelectedTabpanel()) {
-    			toolbar.enableProcessButton(adtab.getToolbarButtons().size() > 0 && !adTabbox.getSelectedGridTab().isNew());
+    			//toolbar.enableProcessButton(adtab.getToolbarButtons().size() > 0 && !adTabbox.getSelectedGridTab().isNew());
+    			toolbar.enableProcessButton(adtab.isEnableProcessButton());
     			toolbar.dynamicDisplay();
     		}
     	}
@@ -1298,7 +1321,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		toolbar.enablePrint(adTabbox.getSelectedGridTab().isPrinted() && !adTabbox.getSelectedGridTab().isNew());
 
         //Deepak-Enabling customize button IDEMPIERE-364
-        if(!(adTabbox.getSelectedTabpanel() instanceof ADSortTab))
+        /*if(!(adTabbox.getSelectedTabpanel() instanceof ADSortTab))
         {
         	toolbar.enableCustomize(((ADTabpanel)adTabbox.getSelectedTabpanel()).isGridView());
         }
@@ -1306,7 +1329,9 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         {
         	toolbar.enableCustomize(false);
         	toolbar.enableProcessButton(false);
-        }
+        }*/
+		
+		toolbar.enableCustomize(adTabbox.getSelectedTabpanel().isEnableCustomizeButton());
 
 	}
 
@@ -1661,7 +1686,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         }
 
         boolean isNewRow = adTabbox.getSelectedGridTab().getRowCount() == 0 || adTabbox.getSelectedGridTab().isNew();
-        toolbar.enableProcessButton(!isNewRow);
+        toolbar.enableProcessButton(!isNewRow && adTabbox.getSelectedTabpanel().isEnableProcessButton());
         toolbar.enableArchive(!isNewRow);
         toolbar.enableZoomAcross(!isNewRow);
         toolbar.enableActiveWorkflows(!isNewRow);
@@ -1676,8 +1701,11 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         toolbar.enableTabNavigation(breadCrumb.hasParentLink(), adTabbox.getSelectedDetailADTabpanel() != null);
         
         //Deepak-Enabling customize button IDEMPIERE-364
-        if(!(adTabbox.getSelectedTabpanel() instanceof ADSortTab))
-        	toolbar.enableCustomize(((ADTabpanel)adTabbox.getSelectedTabpanel()).isGridView());
+        /*if(!(adTabbox.getSelectedTabpanel() instanceof ADSortTab))
+        	toolbar.enableCustomize(((ADTabpanel)adTabbox.getSelectedTabpanel()).isGridView());*/
+        
+        toolbar.enableCustomize(adTabbox.getSelectedTabpanel().isEnableCustomizeButton());
+        
     }
 
     /**
@@ -3194,7 +3222,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	public void onProcess() {
 		ProcessButtonPopup popup = new ProcessButtonPopup();
 		popup.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "processButtonPopup");
-		ADTabpanel adtab = (ADTabpanel) adTabbox.getSelectedTabpanel();
+		IADTabpanel adtab = adTabbox.getSelectedTabpanel();
 		popup.render(adtab.getToolbarButtons());
 
 		LayoutUtils.openPopupWindow(toolbar.getButton("Process"), popup, "after_start");
