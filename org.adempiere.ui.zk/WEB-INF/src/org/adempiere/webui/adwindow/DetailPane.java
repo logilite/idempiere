@@ -417,7 +417,7 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 	protected void onProcess(Component button) {
 		ProcessButtonPopup popup = new ProcessButtonPopup();
 		IADTabpanel adtab = getSelectedADTabpanel();
-		if(adtab instanceof ADTabpanel)
+		if(adtab.getToolbarButtons()!=null && adtab.getToolbarButtons().size()>0)
 			popup.render(adtab.getToolbarButtons());
 		
 		LayoutUtils.openPopupWindow(button, popup, "after_start");		
