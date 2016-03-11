@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
@@ -38,15 +39,18 @@ import org.adempiere.webui.component.Grid;
 import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.ListItem;
 import org.adempiere.webui.component.Listbox;
-import org.adempiere.webui.component.NumberBox;
 import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.Row;
 import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Window;
+import org.adempiere.webui.editor.WEditor;
+import org.adempiere.webui.editor.WebEditorFactory;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.compiere.model.GridField;
+import org.compiere.model.GridFieldVO;
 import org.compiere.model.MAttribute;
 import org.compiere.model.MAttributeInstance;
 import org.compiere.model.MAttributeSet;
@@ -61,10 +65,11 @@ import org.compiere.model.MSerNoCtl;
 import org.compiere.model.X_M_MovementLine;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
-import org.zkoss.zk.ui.HtmlBasedComponent;
+import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -74,7 +79,6 @@ import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.Menupopup;
 import org.zkoss.zul.South;
 import org.zkoss.zul.Space;
-import org.zkoss.zul.impl.InputElement;
 
 /**
  *  Product Attribute Set Product/Instance Dialog Editor.
@@ -169,7 +173,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	/** Row Counter					*/
 	private int						m_row = 0;
 	/** List of Editors				*/
-	private ArrayList<HtmlBasedComponent>		m_editors = new ArrayList<HtmlBasedComponent>();
+	private ArrayList<WEditor>		m_editors = new ArrayList<WEditor>();
 	/** Length of Instance value (40)	*/
 	//private static final int		INSTANCE_VALUE_LENGTH = 40;
 
@@ -495,13 +499,8 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 			boolean rw = m_M_AttributeSetInstance_ID == 0;
 			for (int i = 0; i < m_editors.size(); i++)
 			{
-				HtmlBasedComponent editor = m_editors.get(i);
-				if (editor instanceof InputElement)
-					((InputElement)editor).setReadonly(!rw);
-				else if (editor instanceof Listbox)
-					((Listbox)editor).setEnabled(rw);
-				else if (editor instanceof NumberBox)
-					((NumberBox)editor).setEnabled(rw);
+				WEditor editor = m_editors.get(i);
+				editor.setReadWrite(rw);
 			}
 		}
 
@@ -530,115 +529,154 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		if (log.isLoggable(Level.FINE)) log.fine(attribute + ", Product=" + product + ", R/O=" + readOnly);
 		
 		m_row++;
-		Label label = new Label (attribute.getName());
-		if (product)
-			label.setStyle("font-weight: bold");
-			
-		if (attribute.getDescription() != null)
-			label.setTooltiptext(attribute.getDescription());
-		
-		Row row = rows.newRow();
-		row.appendChild(label.rightAlign());
+		WEditor editor = null;
 		//
-		
 		if (MAttribute.ATTRIBUTEVALUETYPE_List.equals(attribute.getAttributeValueType()))
 		{
-			MAttributeValue[] values = attribute.getMAttributeValues();	//	optional = null
-			Listbox editor = new Listbox();
-			editor.setMold("select");
-			for (MAttributeValue value : values) 
-			{
-				ListItem item = new ListItem(value != null ? value.getName() : "", value);
-				editor.appendChild(item);
-			}
-			if (readOnly)
-				editor.setEnabled(false);
-			else
-				m_editors.add (editor);
-			row.appendChild(editor);
-			editor.setHflex("1");
-			setListAttribute(attribute, editor);
+			editor = WebEditorFactory.getEditor(getListTypeGridField(attribute), true);
 		}
 		else if (MAttribute.ATTRIBUTEVALUETYPE_Number.equals(attribute.getAttributeValueType()))
 		{
-			NumberBox editor = new NumberBox(false);
-			setNumberAttribute(attribute, editor);
-			row.appendChild(editor);
-			editor.setHflex("1");
-			if (readOnly)
-				editor.setEnabled(false);
-			else
-				m_editors.add (editor);
+			editor = WebEditorFactory.getEditor(getNumberGridField(attribute), true);
 		}
-		else	//	Text Field
+		else if (MAttribute.ATTRIBUTEVALUETYPE_Reference.equals(attribute.getAttributeValueType()))
 		{
-			Textbox editor = new Textbox();
-			setStringAttribute(attribute, editor);
-			row.appendChild(editor);
-			editor.setHflex("1");
-			if (readOnly)
-				editor.setEnabled(false);
-			else
-				m_editors.add (editor);
+			editor = WebEditorFactory.getEditor(getGridField(attribute), true);
 		}
-	}	//	addAttributeLine
-
-	private void updateAttributeEditor(MAttribute attribute, int index) {
-		if (MAttribute.ATTRIBUTEVALUETYPE_List.equals(attribute.getAttributeValueType()))
-		{
-			Listbox editor = (Listbox) m_editors.get(index);
-			setListAttribute(attribute, editor);
-			
-		}
-		else if (MAttribute.ATTRIBUTEVALUETYPE_Number.equals(attribute.getAttributeValueType()))
-		{
-			NumberBox editor = (NumberBox) m_editors.get(index);
-			setNumberAttribute(attribute, editor);
-		}
-		else	//	Text Field
-		{
-			Textbox editor = (Textbox) m_editors.get(index);
-			setStringAttribute(attribute, editor);
-		}
-	}
-	
-	private void setStringAttribute(MAttribute attribute, Textbox editor) {
-		MAttributeInstance instance = attribute.getMAttributeInstance (m_M_AttributeSetInstance_ID);
-		if (instance != null)
-			editor.setText(instance.getValue());
-	}
-
-	private void setNumberAttribute(MAttribute attribute, NumberBox editor) {
-		MAttributeInstance instance = attribute.getMAttributeInstance (m_M_AttributeSetInstance_ID);
-		if (instance != null)
-			editor.setValue(instance.getValueNumber());
 		else
-			editor.setValue(Env.ZERO);		
+		// Text Field
+		{
+			editor = WebEditorFactory.getEditor(getStringGridField(attribute), true);
+		}
+
+		if (editor != null)
+		{
+			Row row = rows.newRow();
+
+			Label label = editor.getLabel();
+			if (label.getValue() == null || label.getValue().trim().length() < 1)
+				label.setValue(attribute.getName());
+
+			if (product)
+				label.setStyle("font-weight: bold");
+
+			row.appendChild(label.rightAlign());
+
+			editor.setMandatory(attribute.isMandatory());
+			editor.fillHorizontal();
+			setEditorAttribute(attribute, editor);
+
+			Component fieldEditor = editor.getComponent();
+			row.appendChild(fieldEditor);
+			editor.showMenu();
+			if (readOnly)
+				editor.setReadWrite(false);
+			else
+				m_editors.add(editor);
+		}
+        
+	}	//	addAttributeLine
+	
+	private GridField getGridField(MAttribute attribute)
+	{
+		GridFieldVO vo = GridFieldVO.createParameter(Env.getCtx(), m_WindowNo, AEnv.getADWindowID(m_WindowNo), 0, 0,
+				attribute.getName(), Msg.translate(Env.getCtx(), attribute.get_Translation("Name")),
+				attribute.getAD_Reference_ID(), attribute.getAD_Reference_Value_ID(), false, false);
+		String desc = attribute.get_Translation("Description");
+		vo.Description = desc != null ? desc : "";
+		GridField gridField = new GridField(vo);
+		return gridField;
 	}
 
-	private void setListAttribute(MAttribute attribute, Listbox editor) {
-		boolean found = false;
-		MAttributeInstance instance = attribute.getMAttributeInstance (m_M_AttributeSetInstance_ID);
-		MAttributeValue[] values = attribute.getMAttributeValues();	//	optional = null
+	private GridField getStringGridField(MAttribute attribute)
+	{
+		GridFieldVO vo = GridFieldVO.createParameter(Env.getCtx(), m_WindowNo, AEnv.getADWindowID(m_WindowNo), 0, 0,
+				attribute.getName(), Msg.translate(Env.getCtx(), attribute.get_Translation("Name")),
+				DisplayType.String, 0, false, false);
+		String desc = attribute.get_Translation("Description");
+		vo.Description = desc != null ? desc : "";
+		GridField gridField = new GridField(vo);
+		return gridField;
+	}
+
+	private GridField getNumberGridField(MAttribute attribute)
+	{
+		GridFieldVO vo = GridFieldVO.createParameter(Env.getCtx(), m_WindowNo, AEnv.getADWindowID(m_WindowNo), 0, 0,
+				attribute.getName(), Msg.translate(Env.getCtx(), attribute.get_Translation("Name")),
+				DisplayType.Number, 0, false, false);
+		String desc = attribute.get_Translation("Description");
+		vo.Description = desc != null ? desc : "";
+		GridField gridField = new GridField(vo);
+		return gridField;
+	}
+
+	private GridField getListTypeGridField(MAttribute attribute)
+	{
+		GridFieldVO vo = GridFieldVO.createParameter(Env.getCtx(), m_WindowNo, AEnv.getADWindowID(m_WindowNo), 0, 0,
+				"M_AttributeValue_ID", Msg.translate(Env.getCtx(), "M_AttributeValue_ID"), DisplayType.TableDir, 0,
+				false, false);
+		vo.ValidationCode = "M_AttributeValue.M_Attribute_ID=" + attribute.get_ID();
+		vo.lookupInfo.ValidationCode = vo.ValidationCode;
+		vo.lookupInfo.IsValidated = true;
+		vo = GridFieldVO.createParameter(vo);
+		String desc = attribute.get_Translation("Description");
+		vo.Description = desc != null ? desc : "";
+		GridField gridField = new GridField(vo);
+		return gridField;
+	}
+
+	private void updateAttributeEditor(MAttribute attribute, int index)
+	{
+		WEditor editor = m_editors.get(index);
+		if (editor != null)
+			setEditorAttribute(attribute, editor);
+	}
+
+	private void setEditorAttribute(MAttribute attribute, WEditor editor)
+	{
+		MAttributeInstance instance = attribute.getMAttributeInstance(m_M_AttributeSetInstance_ID);
 		if (instance != null)
 		{
-			for (int i = 0; i < values.length; i++)
+			if (MAttribute.ATTRIBUTEVALUETYPE_List.equals(attribute.getAttributeValueType()))
 			{
-				if (values[i] != null && values[i].getM_AttributeValue_ID () == instance.getM_AttributeValue_ID ())
+				if (instance.getM_AttributeValue_ID() > 0)
+					editor.setValue(instance.getM_AttributeValue_ID());
+			}
+			else
+			{
+
+				int displayType = editor.getGridField().getDisplayType();
+				if (displayType == DisplayType.Date || displayType == DisplayType.DateTime
+						|| displayType == DisplayType.Time)
 				{
-					editor.setSelectedIndex (i);
-					found = true;
-					break;
+					if (instance.getValueTimeStamp() != null)
+						editor.setValue(instance.getValueTimeStamp());
+				}
+				else if (displayType == DisplayType.Image || displayType == DisplayType.Assignment
+						|| displayType == DisplayType.Locator || displayType == DisplayType.Payment
+						|| displayType == DisplayType.TableDir || displayType == DisplayType.Table
+						|| displayType == DisplayType.List || displayType == DisplayType.Search
+						|| displayType == DisplayType.Account)
+				{
+					if (instance.getValueInt() > 0)
+						editor.setValue(instance.getValueInt());
+				}
+				else if (displayType == DisplayType.Integer)
+				{
+					editor.setValue(instance.getValueInt());
+				}
+				else if (DisplayType.isNumeric(displayType))
+				{
+					if (instance.getValueNumber() != null)
+						editor.setValue(instance.getValueNumber());
+				}
+				else
+				{
+					if (instance.getValue() != null)
+						editor.setValue(instance.getValue());
 				}
 			}
-			if (found ){
-				if (log.isLoggable(Level.FINE)) log.fine("Attribute=" + attribute.getName() + " #" + values.length + " - found: " + instance);
-			} else {
-				log.warning("Attribute=" + attribute.getName() + " #" + values.length + " - NOT found: " + instance);
-			}
-		}	//	setComboBox
-		else
-			if (log.isLoggable(Level.FINE)) log.fine("Attribute=" + attribute.getName() + " #" + values.length + " no instance");
+		}
 	}
 
 	/**
@@ -772,22 +810,9 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		m_masi = new MAttributeSetInstance (Env.getCtx(), m_M_AttributeSetInstance_ID, M_AttributeSet_ID, null);		
 		for (int i = 0; i < m_editors.size(); i++)
 		{
-			HtmlBasedComponent editor = m_editors.get(i);
-			if (editor instanceof InputElement)
-			{
-				((InputElement)editor).setReadonly(false);
-				((InputElement)editor).setText(null);
-			}
-			else if (editor instanceof Listbox)
-			{
-				((Listbox)editor).setEnabled(true);
-				((Listbox)editor).setSelectedItem(null);
-			}
-			else if (editor instanceof NumberBox)
-			{
-				((NumberBox)editor).setEnabled(true);
-				((NumberBox)editor).setValue(null);
-			}
+			WEditor editor = m_editors.get(i);
+			editor.setReadWrite(true);
+			editor.setValue(null);
 		}
 		fieldDescription.setText("");
 	}
@@ -796,13 +821,8 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		boolean check = cbNewEdit.isSelected();
 		for (int i = 0; i < m_editors.size(); i++)
 		{
-			HtmlBasedComponent editor = m_editors.get(i);
-			if (editor instanceof InputElement)
-				((InputElement)editor).setReadonly(!check);
-			else if (editor instanceof Listbox)
-				((Listbox)editor).setEnabled(check);
-			else if (editor instanceof NumberBox)
-				((NumberBox)editor).setEnabled(check);
+			WEditor editor = m_editors.get(i);
+			editor.setReadWrite(check);
 		}	
 		
 	}
@@ -895,13 +915,8 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		//
 		for (int i = 0; i < m_editors.size(); i++)
 		{
-			HtmlBasedComponent editor = m_editors.get(i);
-			if (editor instanceof InputElement)
-				((InputElement)editor).setReadonly(!rw);
-			else if (editor instanceof Listbox)
-				((Listbox)editor).setEnabled(rw);
-			else if (editor instanceof NumberBox)
-				((NumberBox)editor).setEnabled(rw);
+			WEditor editor = m_editors.get(i);
+			editor.setReadWrite(rw);
 		}	
 	}	//	cmd_newEdit
 
@@ -989,9 +1004,10 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		{
 			if (MAttribute.ATTRIBUTEVALUETYPE_List.equals(attributes[i].getAttributeValueType()))
 			{
-				Listbox editor = (Listbox)m_editors.get(i);
-				ListItem item = editor.getSelectedItem();
-				MAttributeValue value = item != null ? (MAttributeValue)item.getValue() : null;
+				WEditor editor = (WEditor) m_editors.get(i);
+				Object item = editor.getValue();
+				MAttributeValue value = (item != null && Integer.valueOf(String.valueOf(item)) > 0) ? new MAttributeValue(
+						Env.getCtx(), Integer.valueOf(String.valueOf(item)), null) : null;
 				if (log.isLoggable(Level.FINE)) log.fine(attributes[i].getName() + "=" + value);
 				if (attributes[i].isMandatory() && value == null)
 					mandatory += " - " + attributes[i].getName();
@@ -999,8 +1015,8 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 			}
 			else if (MAttribute.ATTRIBUTEVALUETYPE_Number.equals(attributes[i].getAttributeValueType()))
 			{
-				NumberBox editor = (NumberBox)m_editors.get(i);
-				BigDecimal value = editor.getValue();
+				WEditor editor = (WEditor)m_editors.get(i);
+				BigDecimal value = (BigDecimal) editor.getValue();
 				if (log.isLoggable(Level.FINE)) log.fine(attributes[i].getName() + "=" + value);
 				if (attributes[i].isMandatory() && value == null)
 					mandatory += " - " + attributes[i].getName();
@@ -1009,10 +1025,14 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 					value = value.setScale(1, BigDecimal.ROUND_HALF_UP);
 				attributes[i].setMAttributeInstance(m_M_AttributeSetInstance_ID, value);
 			}
+			else if(MAttribute.ATTRIBUTEVALUETYPE_Reference.equals(attributes[i].getAttributeValueType()))
+			{
+				setEditorValue(mandatory, attributes[i], m_editors.get(i));
+			}
 			else
 			{
-				Textbox editor = (Textbox)m_editors.get(i);
-				String value = editor.getText();
+				WEditor editor = m_editors.get(i);
+				String value = String.valueOf(editor.getValue());
 				if (log.isLoggable(Level.FINE)) log.fine(attributes[i].getName() + "=" + value);
 				if (attributes[i].isMandatory() && (value == null || value.length() == 0))
 					mandatory += " - " + attributes[i].getName();
@@ -1037,6 +1057,83 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		}
 		return true;
 	}	//	saveSelection
+
+	private String setEditorValue(String mandatory, MAttribute attributes, WEditor editor)
+	{
+		int displayType = editor.getGridField().getDisplayType();
+		if (displayType == DisplayType.YesNo)
+		{
+			String value = (boolean) editor.getValue() ? "Y" : "N";
+			attributes.setMAttributeInstance(m_M_AttributeSetInstance_ID, value);
+		}
+		else if (displayType == DisplayType.Date || displayType == DisplayType.DateTime
+				|| displayType == DisplayType.Time)
+		{
+			Timestamp valueTimeStamp = (Timestamp) editor.getValue();
+			if (attributes.isMandatory() && valueTimeStamp == null)
+				mandatory += " - " + attributes.getName();
+
+			String value = null;
+			if (valueTimeStamp != null)
+			{
+				if (displayType == DisplayType.Date)
+				{
+					SimpleDateFormat sdf = Env.getLanguage(Env.getCtx()).getDateFormat();
+					value = sdf.format(valueTimeStamp);
+				}
+				else if (displayType == DisplayType.DateTime)
+				{
+					SimpleDateFormat sdf = Env.getLanguage(Env.getCtx()).getDateTimeFormat();
+					value = sdf.format(valueTimeStamp);
+				}
+				else if (displayType == DisplayType.Time)
+				{
+					SimpleDateFormat sdf = Env.getLanguage(Env.getCtx()).getTimeFormat();
+					value = sdf.format(valueTimeStamp);
+				}
+			}
+			attributes.setMAttributeInstance(m_M_AttributeSetInstance_ID, valueTimeStamp, value);
+		}
+		else if (DisplayType.isNumeric(displayType))
+		{
+			Object value = editor.getValue();
+			if (attributes.isMandatory() && value == null)
+				mandatory += " - " + attributes.getName();
+			if (displayType == DisplayType.Integer)
+				attributes.setMAttributeInstance(m_M_AttributeSetInstance_ID,
+						value == null ? 0 : ((Number) value).intValue(), null);
+			else
+				attributes.setMAttributeInstance(m_M_AttributeSetInstance_ID, (BigDecimal) value);
+		}
+		else if (displayType == DisplayType.Image || displayType == DisplayType.Assignment
+				|| displayType == DisplayType.Locator || displayType == DisplayType.Payment
+				|| displayType == DisplayType.TableDir || displayType == DisplayType.Table
+				|| displayType == DisplayType.List || displayType == DisplayType.Search
+				|| displayType == DisplayType.Account)
+		{
+			Integer value = (Integer) editor.getValue();
+			if (attributes.isMandatory() && value == null)
+				mandatory += " - " + attributes.getName();
+
+			String valueLable = null;
+			if (displayType == DisplayType.TableDir || displayType == DisplayType.Table
+					|| displayType == DisplayType.List || displayType == DisplayType.Search
+					|| displayType == DisplayType.Account)
+			{
+				valueLable = editor.getDisplay();
+			}
+
+			attributes.setMAttributeInstance(m_M_AttributeSetInstance_ID, value == null ? 0 : value.intValue(), valueLable);
+		}
+		else
+		{
+			String value = String.valueOf(editor.getValue());
+			if (attributes.isMandatory() && value == null)
+				mandatory += " - " + attributes.getName();
+			attributes.setMAttributeInstance(m_M_AttributeSetInstance_ID, value);
+		}
+		return mandatory;
+	}
 
 	
 	/**************************************************************************

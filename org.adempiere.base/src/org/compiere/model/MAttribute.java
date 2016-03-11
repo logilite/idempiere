@@ -18,6 +18,7 @@ package org.compiere.model;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -215,6 +216,45 @@ public class MAttribute extends X_M_Attribute
 				M_AttributeSetInstance_ID, value, get_TrxName());
 		else
 			instance.setValueNumber(value);
+		instance.saveEx();
+	}	//	setAttributeInstance
+	
+	/**
+	 * 	Set Attribute Instance
+	 * 	@param valueInt Integer value
+	 * 	@param M_AttributeSetInstance_ID id
+	 * @param value 
+	 */
+	public void setMAttributeInstance (int M_AttributeSetInstance_ID, int valueInt, String value)
+	{
+		MAttributeInstance instance = getMAttributeInstance(M_AttributeSetInstance_ID);
+		if (instance == null)
+		{
+			instance = new MAttributeInstance(getCtx(), getM_Attribute_ID(),
+					M_AttributeSetInstance_ID, valueInt, get_TrxName());
+			instance.setValueInt(valueInt, value);
+		}
+		else
+			instance.setValueInt(valueInt, value);
+		instance.saveEx();
+	}	//	setAttributeInstance
+	
+	/**
+	 * 	Set Attribute Instance
+	 * 	@param valueTimeStamp TimeStamp value
+	 * 	@param M_AttributeSetInstance_ID id
+	 */
+	public void setMAttributeInstance (int M_AttributeSetInstance_ID, Timestamp valueTimeStamp, String value)
+	{
+		MAttributeInstance instance = getMAttributeInstance(M_AttributeSetInstance_ID);
+		if (instance == null)
+		{
+			instance = new MAttributeInstance (getCtx(), getM_Attribute_ID(), 
+					M_AttributeSetInstance_ID, valueTimeStamp, get_TrxName());
+			instance.setValueTimeStamp (valueTimeStamp,value);
+		}
+		else
+			instance.setValueTimeStamp (valueTimeStamp,value);
 		instance.saveEx();
 	}	//	setAttributeInstance
 	
