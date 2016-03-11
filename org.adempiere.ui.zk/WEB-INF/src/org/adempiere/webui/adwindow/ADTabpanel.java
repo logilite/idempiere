@@ -1770,6 +1770,18 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
 		super.onPageDetached(page);
 	}
 
+	@Override
+	public boolean isEnableCustomizeButton()
+	{
+		return isGridView();
+	}
+
+	@Override
+	public boolean isEnableProcessButton()
+	{
+		return getToolbarButtons().size() > 0 && !gridTab.isNew();
+	}
+
 	void savePreference(String attribute, String value)
 	{
 		int windowId = getGridTab().getAD_Window_ID();

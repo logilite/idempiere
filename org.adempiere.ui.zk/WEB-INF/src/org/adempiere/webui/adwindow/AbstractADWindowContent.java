@@ -1049,7 +1049,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     	adTabbox.getSelectedTabpanel().switchRowPresentation();
     	//Deepak-Enabling customize button IDEMPIERE-364
         if(!(adTabbox.getSelectedTabpanel() instanceof ADSortTab))
-        	toolbar.enableCustomize(((ADTabpanel)adTabbox.getSelectedTabpanel()).isGridView());
+        	toolbar.enableCustomize(adTabbox.getSelectedTabpanel().isEnableCustomizeButton());
     	focusToActivePanel();
     }
 
@@ -1126,9 +1126,9 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     	}
     	else if (ADTabpanel.ON_DYNAMIC_DISPLAY_EVENT.equals(event.getName()))
     	{
-    		ADTabpanel adtab = (ADTabpanel) event.getTarget();
+    		IADTabpanel adtab = (IADTabpanel) event.getTarget();
     		if (adtab == adTabbox.getSelectedTabpanel()) {
-    			toolbar.enableProcessButton(adtab.getToolbarButtons().size() > 0 && !adTabbox.getSelectedGridTab().isNew());
+    			toolbar.enableProcessButton(adtab.isEnableProcessButton());
     			toolbar.dynamicDisplay();
     		}
     	}
@@ -1319,17 +1319,8 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		}
 
 		toolbar.enablePrint(adTabbox.getSelectedGridTab().isPrinted() && !adTabbox.getSelectedGridTab().isNew());
-
-        //Deepak-Enabling customize button IDEMPIERE-364
-        if(!(adTabbox.getSelectedTabpanel() instanceof ADSortTab))
-        {
-        	toolbar.enableCustomize(((ADTabpanel)adTabbox.getSelectedTabpanel()).isGridView());
-        }
-        else 
-        {
-        	toolbar.enableCustomize(false);
-        	toolbar.enableProcessButton(false);
-        }
+		
+		toolbar.enableCustomize(adTabbox.getSelectedTabpanel().isEnableCustomizeButton());
 
 	}
 
@@ -1684,7 +1675,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         }
 
         boolean isNewRow = adTabbox.getSelectedGridTab().getRowCount() == 0 || adTabbox.getSelectedGridTab().isNew();
-        toolbar.enableProcessButton(!isNewRow);
+        toolbar.enableProcessButton(!isNewRow && adTabbox.getSelectedTabpanel().isEnableProcessButton());
         toolbar.enableArchive(!isNewRow);
         toolbar.enableZoomAcross(!isNewRow);
         toolbar.enableActiveWorkflows(!isNewRow);
@@ -1699,8 +1690,11 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         toolbar.enableTabNavigation(breadCrumb.hasParentLink(), adTabbox.getSelectedDetailADTabpanel() != null);
         
         //Deepak-Enabling customize button IDEMPIERE-364
-        if(!(adTabbox.getSelectedTabpanel() instanceof ADSortTab))
-        	toolbar.enableCustomize(((ADTabpanel)adTabbox.getSelectedTabpanel()).isGridView());
+        /*if(!(adTabbox.getSelectedTabpanel() instanceof ADSortTab))
+        	toolbar.enableCustomize(((ADTabpanel)adTabbox.getSelectedTabpanel()).isGridView());*/
+        
+        toolbar.enableCustomize(adTabbox.getSelectedTabpanel().isEnableCustomizeButton());
+        
     }
 
     /**
@@ -3217,7 +3211,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	public void onProcess() {
 		ProcessButtonPopup popup = new ProcessButtonPopup();
 		popup.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "processButtonPopup");
-		ADTabpanel adtab = (ADTabpanel) adTabbox.getSelectedTabpanel();
+		IADTabpanel adtab = adTabbox.getSelectedTabpanel();
 		popup.render(adtab.getToolbarButtons());
 
 		LayoutUtils.openPopupWindow(toolbar.getButton("Process"), popup, "after_start");

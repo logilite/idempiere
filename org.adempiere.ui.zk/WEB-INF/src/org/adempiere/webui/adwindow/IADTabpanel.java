@@ -12,10 +12,13 @@
  *****************************************************************************/
 package org.adempiere.webui.adwindow;
 
+import java.util.List;
+
 import org.compiere.model.GridTab;
 import org.compiere.model.GridWindow;
 import org.compiere.util.Evaluatee;
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zul.Button;
 
 /**
  * Interface for UI component that edit/display record using ad_tab definitions
@@ -193,4 +196,19 @@ public interface IADTabpanel extends Component, Evaluatee {
 	 */
 	public abstract ADTreePanel getTreePanel();	
 
+	/**
+	 * @return customization enabled/disabled for tab
+	 */
+	public abstract boolean isEnableCustomizeButton(); 
+	
+	/**
+	 * @return process Button Enabled/Disabled
+	 */
+	public abstract boolean isEnableProcessButton();
+	
+	/**
+	 * @return list of Buttons, 
+	 * Note: don't return null , it may throw NPException.
+	 */
+	public abstract List<Button> getToolbarButtons();
 }

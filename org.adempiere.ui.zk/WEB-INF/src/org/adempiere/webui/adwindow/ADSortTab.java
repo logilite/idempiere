@@ -1050,5 +1050,20 @@ public class ADSortTab extends Panel implements IADTabpanel
 		this.setVflex("true");
 		
 	}
+	@Override
+	public boolean isEnableCustomizeButton()
+	{
+		return false;
+	}
+	@Override
+	public boolean isEnableProcessButton()
+	{
+		return false;
+	}
+	@Override
+	public List<org.zkoss.zul.Button> getToolbarButtons()
+	{
+		return new ArrayList<org.zkoss.zul.Button>();
+	}
 }	//ADSortTab
 
