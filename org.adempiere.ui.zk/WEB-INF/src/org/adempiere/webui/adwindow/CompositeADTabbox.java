@@ -242,7 +242,7 @@ public class CompositeADTabbox extends AbstractADTabbox
 			headerTab.switchRowPresentation();
 		}
 		
-		if (!headerTab.getGridTab().isSortTab())
+		if (!headerTab.getGridTab().isSortTab() && headerTab instanceof ADTabpanel)
 			headerTab.getGridTab().setCurrentRow(row, true);
 		
 		if (headerTab.isGridView()) {
@@ -907,7 +907,7 @@ public class CompositeADTabbox extends AbstractADTabbox
 		}
 		tabPanel.setDetailPaneMode(true);
 		headerTab.getDetailPane().setVflex("true");
-		if (tabPanel instanceof ADSortTab) {
+		if (!(tabPanel instanceof ADTabpanel)) {
 			headerTab.getDetailPane().updateToolbar(false, true);
 		} else {
 			tabPanel.dynamicDisplay(0);
