@@ -275,6 +275,12 @@ public class AbstractService {
 				m_cs.getCtx().setProperty("#AD_Role_Name",
 						mAuthorizationToken.getAD_Role().getName());
 				
+				m_cs.getCtx().setProperty("#AD_Org_ID",
+						"" + mAuthorizationToken.getAD_Org_ID());
+
+				m_cs.getCtx().setProperty("#M_Warehouse_ID",
+						"" + mAuthorizationToken.getM_Warehouse_ID());
+				
 				
 				MUser user = MUser.get(m_cs.getCtx(), loginRequest.getUser());
 				if (user != null) {
