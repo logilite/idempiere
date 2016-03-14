@@ -472,6 +472,9 @@ public class CompiereService {
 	
 	public static void removeToken(String token){
 		authContexts.remove(token);
+	}
+	
+	/*
 	 * @return set password
 	 */
 	public void setPassword(String pass) {
