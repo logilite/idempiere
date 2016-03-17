@@ -2050,7 +2050,7 @@ public class MOrder extends X_C_Order implements DocAction
 			if (pp.isPostDated())
 				continue;
 
-			MPayment payment = new MPayment(this.getCtx(), 0, this.get_TrxName());
+			MPayment payment=(MPayment) MTable.get(this.getCtx(), MPayment.Table_ID).getPO(0,this.get_TrxName());
 			payment.setAD_Org_ID(this.getAD_Org_ID());
 
 			payment.setTenderType(pp.getTenderType());

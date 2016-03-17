@@ -115,7 +115,7 @@ public class MPaySelectionLine extends X_C_PaySelectionLine
 	public MInvoice getInvoice()
 	{
 		if (m_invoice == null)
-			m_invoice = new MInvoice (getCtx(), getC_Invoice_ID(), get_TrxName());
+			m_invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(getC_Invoice_ID(), get_TrxName());
 		return m_invoice;
 	}	//	getInvoice
 	

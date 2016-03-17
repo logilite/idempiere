@@ -26,6 +26,7 @@ import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MTable;
 import org.compiere.util.Env;
  
 /**
@@ -80,7 +81,7 @@ public class InvoiceCreateInOut extends SvrProcess
 		if (p_M_Warehouse_ID == 0)
 			throw new FillMandatoryException(PARAM_M_Warehouse_ID);
 		//
-		MInvoice invoice = new MInvoice (getCtx(), p_C_Invoice_ID, null);
+		MInvoice invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(p_C_Invoice_ID, null);
 		if (invoice.get_ID() <= 0)
 			throw new AdempiereException("@NotFound@ @C_Invoice_ID@");
 		if (!MInvoice.DOCSTATUS_Completed.equals(invoice.getDocStatus()))

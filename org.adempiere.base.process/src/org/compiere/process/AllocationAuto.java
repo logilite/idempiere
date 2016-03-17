@@ -30,6 +30,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MPaySelectionCheck;
 import org.compiere.model.MPaySelectionLine;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -277,7 +278,7 @@ public class AllocationAuto extends SvrProcess
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
-				MPayment payment = new MPayment (getCtx(), rs, get_TrxName());
+				MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(rs,get_TrxName());
 				BigDecimal allocated = payment.getAllocatedAmt(); 
 				if (allocated != null && allocated.compareTo(payment.getPayAmt()) == 0)
 				{
@@ -326,7 +327,7 @@ public class AllocationAuto extends SvrProcess
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
-				MInvoice invoice = new MInvoice (getCtx(), rs, get_TrxName());
+				MInvoice invoice=(MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(rs, get_TrxName());
 				if (invoice.getOpenAmt(false, null).signum() == 0)
 				{
 					invoice.setIsPaid(true);

@@ -28,6 +28,7 @@ import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MLocation;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.X_I_Invoice;
 import org.compiere.util.DB;
@@ -680,7 +681,7 @@ public class ImportInvoice extends SvrProcess
 					if (oldDocumentNo == null)
 						oldDocumentNo = "";
 					//
-					invoice = new MInvoice (getCtx(), 0, null);
+					invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(0, null);
 					invoice.setClientOrg (imp.getAD_Client_ID(), imp.getAD_Org_ID());
 					invoice.setC_DocTypeTarget_ID(imp.getC_DocType_ID());
 					invoice.setIsSOTrx(imp.isSOTrx());

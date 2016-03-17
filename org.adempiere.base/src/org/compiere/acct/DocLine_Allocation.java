@@ -21,6 +21,7 @@ import java.sql.Timestamp;
 
 import org.compiere.model.MAllocationLine;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.util.DB;
 
 /**
@@ -162,7 +163,7 @@ public class DocLine_Allocation extends DocLine
 	{
 		if (getC_Payment_ID() > 0)
 		{
-			MPayment payment = new MPayment(p_po.getCtx(), getC_Payment_ID(), p_po.get_TrxName());
+			MPayment payment=(MPayment) MTable.get(p_po.getCtx(), MPayment.Table_ID).getPO(getC_Payment_ID(),p_po.get_TrxName());
 			return payment.getDateAcct();  // use payment date
 		}
 		return super.getDateConv();

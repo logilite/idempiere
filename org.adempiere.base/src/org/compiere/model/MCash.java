@@ -508,7 +508,7 @@ public class MCash extends X_C_Cash implements DocAction
 			else if (MCashLine.CASHTYPE_BankAccountTransfer.equals(line.getCashType()))
 			{
 				//	Payment just as intermediate info
-				MPayment pay = new MPayment (getCtx(), 0, get_TrxName());
+				MPayment pay=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(0,get_TrxName());
 				pay.setAD_Org_ID(getAD_Org_ID());
 				String documentNo = getName();
 				pay.setDocumentNo(documentNo);
@@ -634,7 +634,7 @@ public class MCash extends X_C_Cash implements DocAction
 				if (cashline.getC_Payment_ID() == 0)
 					throw new IllegalStateException("Cannot reverse payment");
 					
-				MPayment payment = new MPayment(getCtx(), cashline.getC_Payment_ID(),get_TrxName());
+				MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(cashline.getC_Payment_ID(),get_TrxName());
 				payment.reverseCorrectIt();
 				payment.saveEx();
 			}

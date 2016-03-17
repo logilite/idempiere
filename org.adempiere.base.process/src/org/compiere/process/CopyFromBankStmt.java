@@ -22,7 +22,9 @@ import java.util.logging.Level;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MBankStatementLine;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 
 /**
  *  Copy BankStatement Lines :
@@ -89,7 +91,7 @@ public class CopyFromBankStmt extends SvrProcess
 				if (DB.getSQLValueEx(get_TrxName(), sql, fromLine.getC_Payment_ID()) < 0)
 				{
 					MBankStatementLine toLine = new MBankStatementLine(to);
-					toLine.setPayment(new MPayment(getCtx(), fromLine.getC_Payment_ID(), get_TrxName()));
+					toLine.setPayment((MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(fromLine.getC_Payment_ID(),get_TrxName()));
 					toLine.saveEx();
 					no++;
 				} else {

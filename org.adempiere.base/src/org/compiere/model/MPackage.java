@@ -397,7 +397,8 @@ public class MPackage extends X_M_Package
 		{
 			ioOut = new MInOut(getCtx(), getM_InOut_ID(), get_TrxName());
 			if (ioOut.getC_Invoice_ID() > 0)
-				invoice = new MInvoice(getCtx(), ioOut.getC_Invoice_ID(), get_TrxName());
+				invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(ioOut.getC_Invoice_ID(),
+						get_TrxName());
 			else
 			{
 				MMatchInv[] mis = MMatchInv.getInOut(getCtx(), ioOut.getM_InOut_ID(), get_TrxName());
@@ -406,7 +407,8 @@ public class MPackage extends X_M_Package
 					MInvoiceLine iol = new MInvoiceLine(getCtx(), mi.getC_InvoiceLine_ID(), get_TrxName());
 					if (iol.getC_Invoice_ID() > 0)
 					{
-						invoice = new MInvoice(getCtx(), iol.getC_Invoice_ID(), get_TrxName());
+						invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(iol.getC_Invoice_ID(),
+								get_TrxName());
 						break;
 					}
 				}
@@ -423,7 +425,7 @@ public class MPackage extends X_M_Package
 					sb.append("ORDER BY C_InvoiceLine_ID DESC");
 					int C_Invoice_ID = DB.getSQLValue(get_TrxName(), sb.toString(), getM_InOut_ID());
 					if (C_Invoice_ID > 0)
-						invoice = new MInvoice(getCtx(), C_Invoice_ID, get_TrxName());
+						invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, get_TrxName());
 				}
 			}
 
@@ -467,7 +469,7 @@ public class MPackage extends X_M_Package
 				sb.append("ORDER BY C_Invoice_ID DESC");
 				int C_Invoice_ID = DB.getSQLValue(get_TrxName(), sb.toString(), order.getC_Order_ID());
 				if (C_Invoice_ID > 0)
-					invoice = new MInvoice(getCtx(), C_Invoice_ID, get_TrxName());
+					invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, get_TrxName());
 			}
 		}
 		

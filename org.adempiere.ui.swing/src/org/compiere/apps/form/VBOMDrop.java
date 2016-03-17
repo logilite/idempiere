@@ -46,6 +46,7 @@ import org.compiere.model.MProduct;
 import org.compiere.model.MProject;
 import org.compiere.model.MProjectLine;
 import org.compiere.model.MRole;
+import org.compiere.model.MTable;
 import org.compiere.swing.CComboBox;
 import org.compiere.swing.CLabel;
 import org.compiere.swing.CPanel;
@@ -664,7 +665,7 @@ public class VBOMDrop extends CPanel
 	private boolean cmd_saveInvoice (int C_Invoice_ID)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_Invoice_ID=" + C_Invoice_ID);
-		MInvoice invoice = new MInvoice (Env.getCtx(), C_Invoice_ID, null);
+		MInvoice invoice = (MInvoice) MTable.get(Env.getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, null);
 		if (invoice.get_ID() == 0)
 		{
 			log.log(Level.SEVERE, "Not found - C_Invoice_ID=" + C_Invoice_ID);

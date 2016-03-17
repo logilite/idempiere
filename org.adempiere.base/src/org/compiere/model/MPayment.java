@@ -810,7 +810,8 @@ public class MPayment extends X_C_Payment
 		// there is bp and (invoice or order)
 		if (getC_BPartner_ID() != 0 && (getC_Invoice_ID() != 0 || getC_Order_ID() != 0)) {
 			if (getC_Invoice_ID() != 0) {
-				MInvoice inv = new MInvoice(getCtx(), getC_Invoice_ID(), get_TrxName());
+				MInvoice inv = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(getC_Invoice_ID(),
+						get_TrxName());
 				if (inv.getC_BPartner_ID() != getC_BPartner_ID()) {
 					log.saveError("Error", Msg.parseTranslation(getCtx(), "BP different from BP Invoice"));
 					return false;
@@ -959,7 +960,7 @@ public class MPayment extends X_C_Payment
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
-				MPayment pay = new MPayment (ctx, rs, trxName);
+				MPayment pay=(MPayment) MTable.get(ctx, MPayment.Table_ID).getPO(rs,trxName);
 				if (pay.testAllocation())
 					if (pay.save())
 						counter++;
@@ -2105,7 +2106,7 @@ public class MPayment extends X_C_Payment
 		//	update C_Invoice.C_Payment_ID and C_Order.C_Payment_ID reference
 		if (getC_Invoice_ID() != 0)
 		{
-			MInvoice inv = new MInvoice(getCtx(), getC_Invoice_ID(), get_TrxName());
+			MInvoice inv = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(getC_Invoice_ID(), get_TrxName());
 			if (inv.getC_Payment_ID() != getC_Payment_ID())
 			{
 				inv.setC_Payment_ID(getC_Payment_ID());
@@ -2200,7 +2201,7 @@ public class MPayment extends X_C_Payment
 		}
 
 		//	Deep Copy
-		MPayment counter = new MPayment (getCtx(), 0, get_TrxName());
+		MPayment counter=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(0,get_TrxName());
 		counter.setAD_Org_ID(counterAD_Org_ID);
 		counter.setC_BPartner_ID(counterBP.getC_BPartner_ID());
 		counter.setIsReceipt(!isReceipt());
@@ -2649,7 +2650,7 @@ public class MPayment extends X_C_Payment
 		MPeriod.testPeriodOpen(getCtx(), dateAcct, getC_DocType_ID(), getAD_Org_ID());
 		
 		//	Create Reversal
-		MPayment reversal = new MPayment (getCtx(), 0, get_TrxName());
+		MPayment reversal=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(0,get_TrxName());
 		copyValues(this, reversal);
 		reversal.setClientOrg(this);
 		// reversal.setC_Order_ID(0); // IDEMPIERE-1764
@@ -2927,7 +2928,7 @@ public class MPayment extends X_C_Payment
 	
 	public MPaymentTransaction createPaymentTransaction(String trxName)
 	{
-		MPaymentTransaction paymentTransaction = new MPaymentTransaction(getCtx(), 0, trxName);
+		MPaymentTransaction paymentTransaction=(MPaymentTransaction) MTable.get(getCtx(), MPaymentTransaction.Table_ID).getPO(0,trxName);
 		paymentTransaction.setA_City(getA_City());
 		paymentTransaction.setA_Country(getA_Country());
 		paymentTransaction.setA_EMail(getA_EMail());
@@ -3009,7 +3010,7 @@ public class MPayment extends X_C_Payment
 
 		if (getC_Invoice_ID() != 0)
 		{
-			MInvoice inv = new MInvoice(getCtx(), getC_Invoice_ID(), get_TrxName());
+			MInvoice inv=(MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(getC_Invoice_ID(), get_TrxName());
 			inv.setC_Payment_ID(0);
 			inv.saveEx();
 		}

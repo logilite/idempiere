@@ -22,8 +22,10 @@ import org.compiere.model.MBPartner;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPeriod;
+import org.compiere.model.MTable;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
+import org.compiere.util.Env;
 
 
 /**
@@ -64,7 +66,7 @@ public class InvoiceCalculateTax extends SvrProcess
 	@Override
 	protected String doIt() throws Exception
 	{
-		MInvoice invoice = new MInvoice(getCtx(), p_C_Invoice_ID, get_TrxName());
+		MInvoice invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(p_C_Invoice_ID, get_TrxName());
 		recalculateTax(invoice);
 		//
 		return "@ProcessOK@";

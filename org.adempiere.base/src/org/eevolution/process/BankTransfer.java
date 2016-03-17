@@ -22,6 +22,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.MBankAccount;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.AdempiereUserError;
@@ -149,7 +150,7 @@ public class BankTransfer extends SvrProcess
 		MBankAccount mBankFrom = new MBankAccount(getCtx(),p_From_C_BankAccount_ID, get_TrxName());
 		MBankAccount mBankTo = new MBankAccount(getCtx(),p_To_C_BankAccount_ID, get_TrxName());
 		
-		MPayment paymentBankFrom = new MPayment(getCtx(), 0 ,  get_TrxName());
+		MPayment paymentBankFrom=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(0,get_TrxName());
 		paymentBankFrom.setC_BankAccount_ID(mBankFrom.getC_BankAccount_ID());
 		paymentBankFrom.setAD_Org_ID(p_AD_Org_ID);
 		if (!Util.isEmpty(p_DocumentNo, true))
@@ -177,7 +178,7 @@ public class BankTransfer extends SvrProcess
 				MPayment.Table_ID, paymentBankFrom.getC_Payment_ID());
 		m_created++;
 
-		MPayment paymentBankTo = new MPayment(getCtx(), 0 ,  get_TrxName());
+		MPayment paymentBankTo=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(0,get_TrxName());
 		paymentBankTo.setC_BankAccount_ID(mBankTo.getC_BankAccount_ID());
 		paymentBankTo.setAD_Org_ID(p_AD_Org_ID);
 		if (!Util.isEmpty(p_DocumentNo, true))

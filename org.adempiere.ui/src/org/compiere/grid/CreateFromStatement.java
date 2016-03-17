@@ -26,6 +26,7 @@ import org.compiere.model.GridTab;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MBankStatementLine;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
@@ -139,7 +140,7 @@ public abstract class CreateFromStatement extends CreateFromBatch
 				//	
 				MBankStatementLine bsl = new MBankStatementLine (bs);
 				bsl.setStatementLineDate(trxDate);
-				bsl.setPayment(new MPayment(Env.getCtx(), C_Payment_ID, trxName));
+				bsl.setPayment((MPayment) MTable.get(Env.getCtx(), MPayment.Table_ID).getPO(C_Payment_ID,trxName));
 				
 				bsl.setTrxAmt(TrxAmt);
 				bsl.setStmtAmt(TrxAmt);

@@ -393,7 +393,7 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 			MBankStatementLine line = lines[i];
 			if (line.getC_Payment_ID() != 0)
 			{
-				MPayment payment = new MPayment (getCtx(), line.getC_Payment_ID(), get_TrxName());
+				MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(line.getC_Payment_ID(),get_TrxName());
 				payment.setIsReconciled(true);
 				payment.saveEx(get_TrxName());
 			}
@@ -485,7 +485,7 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 				line.setInterestAmt(Env.ZERO);
 				if (line.getC_Payment_ID() != 0)
 				{
-					MPayment payment = new MPayment (getCtx(), line.getC_Payment_ID(), get_TrxName());
+					MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(line.getC_Payment_ID(),get_TrxName());
 					payment.setIsReconciled(false);
 					payment.saveEx();
 					line.setC_Payment_ID(0);

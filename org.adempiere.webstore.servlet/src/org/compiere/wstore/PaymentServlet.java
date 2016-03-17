@@ -35,6 +35,7 @@ import org.compiere.model.MClient;
 import org.compiere.model.MMailMsg;
 import org.compiere.model.MPayment;
 import org.compiere.model.MPaymentValidate;
+import org.compiere.model.MTable;
 import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
@@ -190,7 +191,7 @@ public class PaymentServlet  extends HttpServlet
 
 		//	Create New Payment for Amt & optional Invoice
 		//	see OrderServlet.createPayment
-		p = new MPayment(ctx, 0, null);
+		p=(MPayment) MTable.get(ctx, MPayment.Table_ID).getPO(0,null);
 	//	p.setAD_Org_ID(..);
 		p.setIsSelfService(true);
 		p.setAmount(0, amt);			//	for CC selection ges default from Acct Currency

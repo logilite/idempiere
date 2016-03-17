@@ -255,7 +255,7 @@ public class CalloutPayment extends CalloutEngine
 		// Invoice
 		if (C_Invoice_ID != 0)
 		{
-			MInvoice inv = new MInvoice (ctx, C_Invoice_ID, null);
+			MInvoice inv = (MInvoice) MTable.get(ctx, MInvoice.Table_ID).getPO(C_Invoice_ID, null);
 			if (dt != null)
 			{
 				if (inv.isSOTrx () != dt.isSOTrx ())

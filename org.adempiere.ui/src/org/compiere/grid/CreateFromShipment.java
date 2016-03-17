@@ -35,6 +35,7 @@ import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
+import org.compiere.model.MTable;
 import org.compiere.model.MWarehouse;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
@@ -373,7 +374,7 @@ public abstract class CreateFromShipment extends CreateFrom
 	 */
 	protected Vector<Vector<Object>> getInvoiceData(int C_Invoice_ID)
 	{
-		m_invoice = new MInvoice(Env.getCtx(), C_Invoice_ID, null); // save
+		m_invoice = (MInvoice) MTable.get(Env.getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, null); // save
 		p_order = null;
 		m_rma = null;
 		

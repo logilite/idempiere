@@ -29,6 +29,7 @@ import org.compiere.model.MFactAcct;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderPaySchedule;
+import org.compiere.model.MTable;
 import org.compiere.model.X_T_CashFlow;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
@@ -335,7 +336,8 @@ public class CashFlow  extends SvrProcess {
 				BigDecimal openamt = rsActual.getBigDecimal("OpenAmt");
 				if (!issotrx)
 					openamt = openamt.negate();
-				MInvoice invoice = new MInvoice(getCtx(), rsActual.getInt("C_Invoice_ID"), get_TrxName());
+				MInvoice invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(
+						rsActual.getInt("C_Invoice_ID"), get_TrxName());
 				noInv++;
 				X_T_CashFlow cfactual = new X_T_CashFlow(getCtx(), 0, get_TrxName());
 				cfactual.setAD_Org_ID(rsActual.getInt("AD_Org_ID"));

@@ -34,7 +34,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.compiere.model.MInvoice;
+import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
+import org.compiere.util.Env;
 import org.compiere.util.WebEnv;
 import org.compiere.util.WebInfo;
 import org.compiere.util.WebSessionCtx;
@@ -172,7 +174,7 @@ public class InvoiceServlet extends HttpServlet
 
 		//	Get Invoice
 		Properties ctx = JSPEnv.getCtx(request);
-		MInvoice invoice = new MInvoice (ctx, C_Invoice_ID, null);
+		MInvoice invoice = (MInvoice) MTable.get(ctx, MInvoice.Table_ID).getPO(C_Invoice_ID, null);
 		if (invoice.getC_Invoice_ID() != C_Invoice_ID)
 		{
 			if (log.isLoggable(Level.FINE)) log.fine("Invoice not found - ID=" + C_Invoice_ID);

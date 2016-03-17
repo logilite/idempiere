@@ -172,7 +172,7 @@ public class MAllocationLine extends X_C_AllocationLine
 	public MInvoice getInvoice()
 	{
 		if (m_invoice == null && getC_Invoice_ID() != 0)
-			m_invoice = new MInvoice (getCtx(), getC_Invoice_ID(), get_TrxName());
+			m_invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(getC_Invoice_ID(), get_TrxName());
 		return m_invoice;
 	}	//	getInvoice
 
@@ -261,7 +261,7 @@ public class MAllocationLine extends X_C_AllocationLine
 		//	Update Payment
 		if (C_Payment_ID != 0)
 		{
-			MPayment payment = new MPayment (getCtx(), C_Payment_ID, get_TrxName());
+			MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(C_Payment_ID,get_TrxName());
 			if (getC_BPartner_ID() != payment.getC_BPartner_ID())
 				log.warning("C_BPartner_ID different - Invoice=" + getC_BPartner_ID() + " - Payment=" + payment.getC_BPartner_ID());
 			if (reverse)

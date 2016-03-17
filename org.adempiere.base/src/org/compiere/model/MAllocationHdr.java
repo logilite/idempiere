@@ -929,7 +929,8 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 				continue;
 
 			boolean isSOTrxInvoice = false;
-			MInvoice invoice = M_Invoice_ID > 0 ? new MInvoice (getCtx(), M_Invoice_ID, get_TrxName()) : null;
+			MInvoice invoice = M_Invoice_ID > 0 ? (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(
+					M_Invoice_ID, get_TrxName()) : null;
 			if (M_Invoice_ID > 0)
 				isSOTrxInvoice = invoice.isSOTrx();
 			
@@ -950,7 +951,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 				int convTypeID = 0;
 				Timestamp paymentDate = null;
 				
-				payment = new MPayment (getCtx(), C_Payment_ID, get_TrxName());
+				payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(C_Payment_ID,get_TrxName());
 				convTypeID = payment.getC_ConversionType_ID();
 				paymentDate = payment.getDateAcct();
 				paymentProcessed = payment.isProcessed();
@@ -1208,7 +1209,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 
 			if (line.getC_Payment_ID() != 0)
 			{
-				MPayment payment = new MPayment(getCtx(), line.getC_Payment_ID(), get_TrxName());
+				MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(line.getC_Payment_ID(),get_TrxName());
 				if (DOCSTATUS_Reversed.equals(payment.getDocStatus()))
 				{
 					MPayment reversal = (MPayment) payment.getReversal();

@@ -25,6 +25,7 @@ import org.compiere.model.MCommissionRun;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MTable;
 import org.compiere.util.Env;
 
 /**
@@ -75,7 +76,7 @@ public class CommissionAPInvoice extends SvrProcess
 			throw new IllegalArgumentException("CommissionAPInvoice - No BPartner");
 			
 		//	Create Invoice
-		MInvoice invoice = new MInvoice (getCtx(), 0, null);
+		MInvoice invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(0, null);
 		invoice.setClientOrg(com.getAD_Client_ID(), com.getAD_Org_ID());
 		invoice.setC_DocTypeTarget_ID(MDocType.DOCBASETYPE_APInvoice);	//	API
 		invoice.setBPartner(bp);

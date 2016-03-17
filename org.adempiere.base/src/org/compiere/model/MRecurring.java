@@ -22,6 +22,7 @@ import java.util.Calendar;
 import java.util.Properties;
 
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 /**
@@ -107,7 +108,7 @@ public class MRecurring extends X_C_Recurring
 		}
 		else if (getRecurringType().equals(MRecurring.RECURRINGTYPE_Invoice))
 		{
-			MInvoice from = new MInvoice (getCtx(), getC_Invoice_ID(), get_TrxName());
+			MInvoice from = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(getC_Invoice_ID(), get_TrxName());
 			MInvoice invoice = MInvoice.copyFrom (from, dateDoc, dateDoc,
 				from.getC_DocType_ID(), from.isSOTrx(), false, get_TrxName(), false);
 			run.setC_Invoice_ID(invoice.getC_Invoice_ID());
@@ -130,8 +131,8 @@ public class MRecurring extends X_C_Recurring
 		}
 		else if (getRecurringType().equals(MRecurring.RECURRINGTYPE_Payment))
 		{
-			MPayment from = new MPayment(getCtx(), getC_Payment_ID(), get_TrxName());
-			MPayment to = new MPayment(getCtx(), 0, get_TrxName());
+			MPayment from=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(getC_Payment_ID(), get_TrxName());
+			MPayment to=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(0, get_TrxName());
 			copyValues(from, to);
 			to.setAD_Org_ID(from.getAD_Org_ID());
 			to.setIsReconciled(false); // can't be already on a bank statement

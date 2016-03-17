@@ -23,6 +23,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MTable;
 import org.compiere.util.Env;
 
 /**
@@ -86,7 +87,7 @@ public class OrderRePrice extends SvrProcess
 		}
 		if (p_C_Invoice_ID != 0)
 		{
-			MInvoice invoice = new MInvoice (getCtx(), p_C_Invoice_ID, null);
+			MInvoice invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(p_C_Invoice_ID, null);
 			BigDecimal oldPrice = invoice.getGrandTotal();
 			MInvoiceLine[] lines = invoice.getLines(false);
 			for (int i = 0; i < lines.length; i++)
@@ -94,7 +95,7 @@ public class OrderRePrice extends SvrProcess
 				lines[i].setPrice(invoice.getM_PriceList_ID(), invoice.getC_BPartner_ID());
 				lines[i].saveEx();
 			}
-			invoice = new MInvoice (getCtx(), p_C_Invoice_ID, null);
+			invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(p_C_Invoice_ID, null);
 			BigDecimal newPrice = invoice.getGrandTotal();
 			if (retValue.length() > 0)
 				retValue.append(Env.NL);

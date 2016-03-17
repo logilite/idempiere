@@ -36,6 +36,7 @@ import org.compiere.model.MOrderPaySchedule;
 import org.compiere.model.MProduct;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
+import org.compiere.model.MTable;
 import org.compiere.model.MUOMConversion;
 import org.compiere.model.PO;
 import org.compiere.util.DB;
@@ -382,7 +383,7 @@ public abstract class CreateFromInvoice extends CreateFrom
 	{
 		//  Invoice
 		int C_Invoice_ID = ((Integer)getGridTab().getValue("C_Invoice_ID")).intValue();
-		MInvoice invoice = new MInvoice (Env.getCtx(), C_Invoice_ID, trxName);
+		MInvoice invoice=(MInvoice)MTable.get(Env.getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, trxName);
 		if (log.isLoggable(Level.CONFIG)) log.config(invoice.toString());
 
 		if (p_order != null)

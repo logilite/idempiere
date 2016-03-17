@@ -122,7 +122,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		int C_DocTypeTarget_ID, boolean isSOTrx, boolean counter,
 		String trxName, boolean setOrder, String documentNo)
 	{
-		MInvoice to = new MInvoice (from.getCtx(), 0, trxName);
+		MInvoice to = (MInvoice) MTable.get(from.getCtx(), MInvoice.Table_ID).getPO(0, trxName);
 		PO.copyValues (from, to, from.getAD_Client_ID(), from.getAD_Org_ID());
 		to.set_ValueNoCheck ("C_Invoice_ID", I_ZERO);
 		to.set_ValueNoCheck ("DocumentNo", documentNo);
@@ -250,7 +250,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		MInvoice retValue = (MInvoice) s_cache.get (key);
 		if (retValue != null)
 			return retValue;
-		retValue = new MInvoice (ctx, C_Invoice_ID, null);
+		retValue = (MInvoice) MTable.get(ctx, MInvoice.Table_ID).getPO(C_Invoice_ID, null);
 		if (retValue.get_ID () != 0)
 			s_cache.put (key, retValue);
 		return retValue;
@@ -1755,7 +1755,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 			if (doctype == null)
 				doctype = doctypes[0];
 
-			MPayment payment = new MPayment(getCtx(), 0, get_TrxName());
+			MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(0,get_TrxName());
 			payment.setAD_Org_ID(getAD_Org_ID());
 			payment.setTenderType(MPayment.TENDERTYPE_Cash);
 			payment.setC_BankAccount_ID(ba.getC_BankAccount_ID());
@@ -2010,7 +2010,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 				BigDecimal totalPayAmt = BigDecimal.ZERO;
 				for (int id : ids)
 				{
-					MPaymentTransaction pt = new MPaymentTransaction(getCtx(), id, get_TrxName());
+					MPaymentTransaction pt=(MPaymentTransaction) MTable.get(getCtx(), MPaymentTransaction.Table_ID).getPO(id,get_TrxName());
 					
 					if (!pt.setPaymentProcessor())
 					{

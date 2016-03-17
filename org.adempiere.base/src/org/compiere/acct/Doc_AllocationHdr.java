@@ -34,6 +34,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -104,7 +105,7 @@ public class Doc_AllocationHdr extends Doc
 			//	Get Payment Conversion Rate
 			if (line.getC_Payment_ID() != 0)
 			{
-				MPayment payment = new MPayment (getCtx(), line.getC_Payment_ID(), getTrxName());
+				MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(line.getC_Payment_ID(),getTrxName());
 				int C_ConversionType_ID = payment.getC_ConversionType_ID();
 				docLine.setC_ConversionType_ID(C_ConversionType_ID);
 			}
@@ -208,10 +209,10 @@ public class Doc_AllocationHdr extends Doc
 			//
 			MPayment payment = null;
 			if (line.getC_Payment_ID() != 0)
-				payment = new MPayment (getCtx(), line.getC_Payment_ID(), getTrxName());
+				payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(line.getC_Payment_ID(),getTrxName());
 			MInvoice invoice = null;
 			if (line.getC_Invoice_ID() != 0)
-				invoice = new MInvoice (getCtx(), line.getC_Invoice_ID(), getTrxName());
+				invoice=(MInvoice)MTable.get(getCtx(), MInvoice.Table_ID).getPO(line.getC_Invoice_ID(), getTrxName());
 
 			//	No Invoice
 			if (invoice == null)
@@ -500,13 +501,13 @@ public class Doc_AllocationHdr extends Doc
 			int orgpayment = startorg;
 			MPayment payment = null;
 			if (line.getC_Payment_ID() != 0) {
-				payment = new MPayment (getCtx(), line.getC_Payment_ID(), getTrxName());
+				payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(line.getC_Payment_ID(),getTrxName());
 				orgpayment = payment.getAD_Org_ID();
 			}
 			int orginvoice = startorg;
 			MInvoice invoice = null;
 			if (line.getC_Invoice_ID() != 0) {
-				invoice = new MInvoice (getCtx(), line.getC_Invoice_ID(), getTrxName());
+				invoice=(MInvoice)MTable.get(getCtx(), MInvoice.Table_ID).getPO(line.getC_Invoice_ID(), getTrxName());
 				orginvoice = invoice.getAD_Org_ID();
 			}
 			int orgcashline = startorg;

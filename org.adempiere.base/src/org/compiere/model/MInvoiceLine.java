@@ -205,7 +205,7 @@ public class MInvoiceLine extends X_C_InvoiceLine
 	public MInvoice getParent()
 	{
 		if (m_parent == null)
-			m_parent = new MInvoice(getCtx(), getC_Invoice_ID(), get_TrxName());
+			m_parent = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(getC_Invoice_ID(), get_TrxName());
 		return m_parent;
 	}	//	getParent
 

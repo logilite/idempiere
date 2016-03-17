@@ -51,6 +51,7 @@ import org.compiere.model.MProductBOM;
 import org.compiere.model.MProject;
 import org.compiere.model.MProjectLine;
 import org.compiere.model.MRole;
+import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -973,7 +974,8 @@ public class WBOMDrop extends ADForm implements EventListener<Event>
 	private boolean cmd_saveInvoice (int C_Invoice_ID, Trx trx)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_Invoice_ID=" + C_Invoice_ID);
-		MInvoice invoice = new MInvoice (Env.getCtx(), C_Invoice_ID, trx != null ? trx.getTrxName() : null);
+		MInvoice invoice = (MInvoice) MTable.get(Env.getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID,
+				trx != null ? trx.getTrxName() : null);
 		if (invoice.get_ID() == 0)
 		{
 			log.log(Level.SEVERE, "Not found - C_Invoice_ID=" + C_Invoice_ID);

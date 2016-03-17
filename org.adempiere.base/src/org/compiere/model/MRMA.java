@@ -182,7 +182,7 @@ public class MRMA extends X_M_RMA implements DocAction
            return null;
        }
 
-       return new MInvoice(getCtx(), invId, get_TrxName());
+		return (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(invId, get_TrxName());
     }
 
 	/**
@@ -270,7 +270,8 @@ public class MRMA extends X_M_RMA implements DocAction
 				}
 				else if (m_inout.getC_Invoice_ID() != 0)
 				{
-					MInvoice invoice = new MInvoice (getCtx(), m_inout.getC_Invoice_ID(), get_TrxName());
+					MInvoice invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(
+							m_inout.getC_Invoice_ID(), get_TrxName());
 					setC_Currency_ID(invoice.getC_Currency_ID());
 				}
 			}

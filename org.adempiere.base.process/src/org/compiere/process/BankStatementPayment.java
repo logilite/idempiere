@@ -24,6 +24,7 @@ import org.compiere.model.MBankStatement;
 import org.compiere.model.MBankStatementLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.model.X_I_BankStatement;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.AdempiereUserError;
@@ -169,7 +170,7 @@ public class BankStatementPayment extends SvrProcess
 		if (PayAmt == null)
 			PayAmt = Env.ZERO;
 		//
-		MPayment payment = new MPayment (getCtx(), 0, get_TrxName());
+		MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(0,get_TrxName());
 		payment.setAD_Org_ID(AD_Org_ID);
 		payment.setC_BankAccount_ID(C_BankAccount_ID);
 		payment.setTenderType(MPayment.TENDERTYPE_Check);
@@ -185,7 +186,7 @@ public class BankStatementPayment extends SvrProcess
 		//
 		if (C_Invoice_ID != 0)
 		{
-			MInvoice invoice = new MInvoice (getCtx(), C_Invoice_ID, null);
+			MInvoice invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, null);
 			payment.setC_DocType_ID(invoice.isSOTrx());		//	Receipt
 			payment.setC_Invoice_ID(invoice.getC_Invoice_ID());
 			payment.setC_BPartner_ID (invoice.getC_BPartner_ID());

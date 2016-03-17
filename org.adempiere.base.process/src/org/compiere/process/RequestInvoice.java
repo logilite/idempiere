@@ -27,8 +27,10 @@ import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MRequest;
 import org.compiere.model.MRequestType;
 import org.compiere.model.MRequestUpdate;
+import org.compiere.model.MTable;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 /**
@@ -193,7 +195,7 @@ public class RequestInvoice extends SvrProcess
 	 */
 	private void invoiceNew (MRequest request)
 	{
-		m_invoice = new MInvoice (getCtx(), 0, get_TrxName());
+		m_invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(0, get_TrxName());
 		m_invoice.setIsSOTrx(true);
 		
 		MBPartner partner = new MBPartner (getCtx(), request.getC_BPartner_ID(), null);
