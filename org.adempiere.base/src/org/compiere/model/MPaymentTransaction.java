@@ -125,9 +125,9 @@ public class MPaymentTransaction extends X_C_PaymentTransaction implements Proce
 	}
 	
 	/**	Temporary	Bank Account Processors		*/
-	private MBankAccountProcessor[]	m_mBankAccountProcessors = null;
+	protected MBankAccountProcessor[]	m_mBankAccountProcessors = null;
 	/**	Temporary	Bank Account Processor		*/
-	private MBankAccountProcessor	m_mBankAccountProcessor = null;
+	protected MBankAccountProcessor	m_mBankAccountProcessor = null;
 	
 	public boolean setPaymentProcessor (String tender, String CCType, int C_PaymentProcessor_ID)
 	{
@@ -425,7 +425,7 @@ public class MPaymentTransaction extends X_C_PaymentTransaction implements Proce
 	}
 	
 	/** Error Message						*/
-	private String				m_errorMessage = null;
+	protected String				m_errorMessage = null;
 	
 	public void setErrorMessage(String errorMessage)
 	{
@@ -530,7 +530,7 @@ public class MPaymentTransaction extends X_C_PaymentTransaction implements Proce
 	}
 
 	@SuppressWarnings("unused")
-	private IProcessUI m_processUI;
+	protected IProcessUI m_processUI;
 	
 	@Override
 	public void setProcessUI(IProcessUI processUI) {
