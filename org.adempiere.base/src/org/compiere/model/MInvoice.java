@@ -257,7 +257,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	} //	get
 
 	/**	Cache						*/
-	private static CCache<Integer,MInvoice>	s_cache	= new CCache<Integer,MInvoice>(Table_Name, 20, 2);	//	2 minutes
+	protected static CCache<Integer,MInvoice>	s_cache	= new CCache<Integer,MInvoice>(Table_Name, 20, 2);	//	2 minutes
 
 
 	/**************************************************************************
@@ -409,14 +409,14 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	}	//	MInvoice
 
 	/**	Open Amount				*/
-	private BigDecimal 		m_openAmt = null;
+	protected BigDecimal 		m_openAmt = null;
 
 	/**	Invoice Lines			*/
-	private MInvoiceLine[]	m_lines;
+	protected MInvoiceLine[]	m_lines;
 	/**	Invoice Taxes			*/
-	private MInvoiceTax[]	m_taxes;
+	protected MInvoiceTax[]	m_taxes;
 	/**	Logger			*/
-	private static CLogger s_log = CLogger.getCLogger(MInvoice.class);
+	protected static CLogger s_log = CLogger.getCLogger(MInvoice.class);
 
 	/**
 	 * 	Overwrite Client/Org if required
@@ -672,7 +672,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	 * 	@param whereClause starting with AND
 	 * 	@return lines
 	 */
-	private MInvoiceLine[] getLines (String whereClause)
+	protected MInvoiceLine[] getLines (String whereClause)
 	{
 		String whereClauseFinal = "C_Invoice_ID=? ";
 		if (whereClause != null)
@@ -801,13 +801,13 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	}	//	copyLinesFrom
 
 	/** Reversal Flag		*/
-	private boolean m_reversal = false;
+	protected boolean m_reversal = false;
 
 	/**
 	 * 	Set Reversal
 	 *	@param reversal reversal
 	 */
-	private void setReversal(boolean reversal)
+	protected void setReversal(boolean reversal)
 	{
 		m_reversal = reversal;
 	}	//	setReversal
@@ -1392,9 +1392,9 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	}	//	process
 
 	/**	Process Message 			*/
-	private String		m_processMsg = null;
+	protected String		m_processMsg = null;
 	/**	Just Prepared Flag			*/
-	private boolean		m_justPrepared = false;
+	protected boolean		m_justPrepared = false;
 
 	/**
 	 * 	Unlock Document.
@@ -1527,7 +1527,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	/**
 	 * 	Explode non stocked BOM.
 	 */
-	private void explodeBOM ()
+	protected void explodeBOM ()
 	{
 		String where = "AND IsActive='Y' AND EXISTS "
 			+ "(SELECT * FROM M_Product p WHERE C_InvoiceLine.M_Product_ID=p.M_Product_ID"
@@ -1638,7 +1638,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	 * 	(Re) Create Pay Schedule
 	 *	@return true if valid schedule
 	 */
-	private boolean createPaySchedule()
+	protected boolean createPaySchedule()
 	{
 		if (getC_PaymentTerm_ID() == 0)
 			return false;
@@ -2115,7 +2115,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	/* Save array of documents to process AFTER completing this one */
 	ArrayList<PO> docsPostProcess = new ArrayList<PO>();
 
-	private void addDocsPostProcess(PO doc) {
+	protected void addDocsPostProcess(PO doc) {
 		docsPostProcess.add(doc);
 	}
 
@@ -2126,7 +2126,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	/**
 	 * 	Set the definite document number after completed
 	 */
-	private void setDefiniteDocumentNo() {
+	protected void setDefiniteDocumentNo() {
 		if (isReversal() && ! MSysConfig.getBooleanValue(MSysConfig.Invoice_ReverseUseNewNumber, true, getAD_Client_ID())) // IDEMPIERE-1771
 			return;
 		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
@@ -2148,7 +2148,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	 * 	Create Counter Document
 	 * 	@return counter invoice
 	 */
-	private MInvoice createCounterDoc()
+	protected MInvoice createCounterDoc()
 	{
 		//	Is this a counter doc ?
 		if (getRef_Invoice_ID() != 0)
@@ -2364,7 +2364,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		return true;
 	}	//	reverseCorrectIt
 
-	private MInvoice reverse(boolean accrual) {
+	protected MInvoice reverse(boolean accrual) {
 		Timestamp reversalDate = accrual ? Env.getContextAsDate(getCtx(), "#Date") : getDateAcct();
 		if (reversalDate == null) {
 			reversalDate = new Timestamp(System.currentTimeMillis());
@@ -2531,7 +2531,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		return reversal;
 	}
 
-	private void reverseAllocations(boolean accrual, int invoiceID) {
+	protected void reverseAllocations(boolean accrual, int invoiceID) {
 		for (MAllocationHdr allocation : MAllocationHdr.getOfInvoice(getCtx(), invoiceID, get_TrxName())) {
 			if (accrual) {
 				allocation.setDocAction(DocAction.ACTION_Reverse_Accrual);
