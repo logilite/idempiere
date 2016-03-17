@@ -22,7 +22,6 @@ import java.util.Calendar;
 import java.util.Properties;
 
 import org.compiere.util.DB;
-import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 /**

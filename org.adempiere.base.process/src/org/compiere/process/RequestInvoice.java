@@ -30,7 +30,6 @@ import org.compiere.model.MRequestUpdate;
 import org.compiere.model.MTable;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.DB;
-import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 /**

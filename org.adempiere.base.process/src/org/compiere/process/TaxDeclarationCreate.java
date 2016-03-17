@@ -29,7 +29,6 @@ import org.compiere.model.MTaxDeclarationAcct;
 import org.compiere.model.MTaxDeclarationLine;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.DB;
-import org.compiere.util.Env;
 
 /**
  * 	Create Tax Declaration

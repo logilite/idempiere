@@ -19,7 +19,6 @@ import java.util.logging.Level;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.PaymentUtil;
 import org.compiere.model.GridTab;
-import org.compiere.model.I_C_Payment;
 import org.compiere.model.MBankAccountProcessor;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;

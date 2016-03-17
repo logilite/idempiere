@@ -36,7 +36,6 @@ import javax.servlet.http.HttpSession;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
-import org.compiere.util.Env;
 import org.compiere.util.WebEnv;
 import org.compiere.util.WebInfo;
 import org.compiere.util.WebSessionCtx;

@@ -21,7 +21,6 @@ import java.util.logging.Level;
 
 import org.compiere.model.MPayment;
 import org.compiere.model.MTable;
-import org.compiere.util.Env;
 
 
 /**

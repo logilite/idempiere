@@ -241,7 +241,7 @@ public class MInOut extends X_M_InOut implements DocAction
 			if (from.getC_Invoice_ID() != 0)
 			{
 				MInvoice peer = (MInvoice) MTable.get(from.getCtx(), MInvoice.Table_ID).getPO(from.getC_Invoice_ID(),
-						null);
+						from.get_TrxName());
 				if (peer.getRef_Invoice_ID() != 0)
 					to.setC_Invoice_ID(peer.getRef_Invoice_ID());
 			}
