@@ -73,7 +73,7 @@ public class MPaymentAllocate extends X_C_PaymentAllocate
 	}	//	MPaymentAllocate
 
 	/**	The Invoice				*/
-	private MInvoice	m_invoice = null;
+	protected MInvoice	m_invoice = null;
 	
 	/**
 	 * 	Load Cosntructor
