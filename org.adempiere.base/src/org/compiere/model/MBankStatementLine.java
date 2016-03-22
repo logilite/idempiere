@@ -211,7 +211,7 @@ import org.compiere.util.Msg;
 	}	//	beforeSave
 	
 	/** Parent					*/
-	private MBankStatement			m_parent = null;
+	protected MBankStatement m_parent = null;
 	
 	/**
 	 * 	Get Parent
@@ -252,7 +252,7 @@ import org.compiere.util.Msg;
 	/**
 	 * 	Update Header
 	 */
-	private boolean updateHeader()
+	protected boolean updateHeader()
 	{
 		StringBuilder sql = new StringBuilder("UPDATE C_BankStatement bs")
 			.append(" SET StatementDifference=(SELECT COALESCE(SUM(StmtAmt),0) FROM C_BankStatementLine bsl ")

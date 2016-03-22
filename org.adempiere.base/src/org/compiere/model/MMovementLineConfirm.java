@@ -79,7 +79,7 @@ public class MMovementLineConfirm extends X_M_MovementLineConfirm
 	}	//	MMovementLineConfirm
 
 	/**	Movement Line			*/
-	private MMovementLine 	m_line = null;
+	protected MMovementLine 	m_line = null;
 	
 	/**
 	 * 	Set Movement Line

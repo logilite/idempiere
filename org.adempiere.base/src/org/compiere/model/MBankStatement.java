@@ -117,7 +117,7 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 	}	//	MBankStatement
  
 	/**	Lines							*/
-	private MBankStatementLine[] 	m_lines = null;
+	protected MBankStatementLine[] m_lines = null;
 	
  	/**
  	 * 	Get Bank Statement Lines
@@ -265,9 +265,9 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 	}	//	processIt
 	
 	/**	Process Message 			*/
-	private String		m_processMsg = null;
+	protected String m_processMsg = null;
 	/**	Just Prepared Flag			*/
-	private boolean		m_justPrepared = false;
+	protected boolean m_justPrepared = false;
 
 	/**
 	 * 	Unlock Document.

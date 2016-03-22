@@ -127,15 +127,15 @@ public class MMovementConfirm extends X_M_MovementConfirm implements DocAction
 	}	//	MInOutConfirm
 	
 	/**	Confirm Lines					*/
-	private MMovementLineConfirm[]	m_lines = null;
+	protected MMovementLineConfirm[]	m_lines = null;
 	
 	/**	Physical Inventory From	*/
-	private MInventory				m_inventoryFrom = null;
+	protected MInventory				m_inventoryFrom = null;
 	/**	Physical Inventory To	*/
-	private MInventory				m_inventoryTo = null;
+	protected MInventory				m_inventoryTo = null;
 	/**	Physical Inventory Info	*/
-	private String					m_inventoryInfo = null;
-	private List<MInventory>		m_inventoryDoc = null;			
+	protected String					m_inventoryInfo = null;
+	protected List<MInventory>		m_inventoryDoc = null;		
 
 	/**
 	 * 	Get Lines
@@ -264,9 +264,9 @@ public class MMovementConfirm extends X_M_MovementConfirm implements DocAction
 	}	//	processIt
 	
 	/**	Process Message 			*/
-	private String		m_processMsg = null;
+	protected String		m_processMsg = null;
 	/**	Just Prepared Flag			*/
-	private boolean		m_justPrepared = false;
+	protected boolean		m_justPrepared = false;
 
 	/**
 	 * 	Unlock Document.
@@ -467,7 +467,7 @@ public class MMovementConfirm extends X_M_MovementConfirm implements DocAction
 	 *	@param confirm confirm line
 	 *	@return true if created
 	 */
-	private boolean createDifferenceDoc (MMovement move, MMovementLineConfirm confirm)
+	protected boolean createDifferenceDoc (MMovement move, MMovementLineConfirm confirm)
 	{
 		MMovementLine mLine = confirm.getLine();
 		
@@ -566,7 +566,7 @@ public class MMovementConfirm extends X_M_MovementConfirm implements DocAction
 	/**
 	 * 
 	 */
-	private void updateProcessMsg(String msg) {
+	protected void updateProcessMsg(String msg) {
 		if (m_processMsg != null)
 			m_processMsg = m_processMsg + " " + msg;
 		else
@@ -580,7 +580,7 @@ public class MMovementConfirm extends X_M_MovementConfirm implements DocAction
 	/**
 	 * @param inventory 
 	 */
-	private void setInventoryDocType(MInventory inventory) {
+	protected void setInventoryDocType(MInventory inventory) {
 		MDocType[] doctypes = MDocType.getOfDocBaseType(Env.getCtx(), X_C_DocType.DOCBASETYPE_MaterialPhysicalInventory);
 		for(MDocType doctype : doctypes)
 		{

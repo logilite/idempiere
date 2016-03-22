@@ -310,7 +310,7 @@ public class MMatchInv extends X_M_MatchInv
 	
 	//
 	//AZ Goodwill
-	private String deleteMatchInvCostDetail()
+	protected String deleteMatchInvCostDetail()
 	{
 		// Get Account Schemas to delete MCostDetail
 		MAcctSchema[] acctschemas = MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID());

@@ -110,7 +110,7 @@ public class MCashPlanLine extends X_C_CashPlanLine
 	 *	Update Header
 	 *	@return true if header updated
 	 */
-	private boolean updateHeader()
+	protected boolean updateHeader()
 	{
 		//	Update Cash Plan Header
 		StringBuilder sql = new StringBuilder("UPDATE C_CashPlan ")

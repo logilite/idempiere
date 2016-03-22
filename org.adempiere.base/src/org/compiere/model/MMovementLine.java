@@ -144,7 +144,7 @@ public class MMovementLine extends X_M_MovementLine
 	}	//	setMovementQty
 	
 	/** Parent							*/
-	private MMovement m_parent = null;
+	protected MMovement m_parent = null;
 	
 	/**
 	 * get Parent
