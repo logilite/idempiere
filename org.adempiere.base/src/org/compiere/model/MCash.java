@@ -203,9 +203,9 @@ public class MCash extends X_C_Cash implements DocAction
 	}	//	MCash
 	
 	/**	Lines					*/
-	protected MCashLine[]		m_lines = null;
+	private MCashLine[]		m_lines = null;
 	/** CashBook				*/
-	protected MCashBook		m_book = null;
+	private MCashBook		m_book = null;
 	
 	/**
 	 * 	Get Lines
@@ -324,9 +324,9 @@ public class MCash extends X_C_Cash implements DocAction
 	}	//	process
 	
 	/**	Process Message 			*/
-	protected String		m_processMsg = null;
+	private String		m_processMsg = null;
 	/**	Just Prepared Flag			*/
-	protected boolean		m_justPrepared = false;
+	private boolean		m_justPrepared = false;
 
 	/**
 	 * 	Unlock Document.
@@ -592,7 +592,7 @@ public class MCash extends X_C_Cash implements DocAction
 	 * 	Period needs to be open
 	 *	@return true if reversed
 	 */
-	protected boolean reverseIt() 
+	private boolean reverseIt() 
 	{
 		if (DOCSTATUS_Closed.equals(getDocStatus())
 			|| DOCSTATUS_Reversed.equals(getDocStatus())
