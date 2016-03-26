@@ -655,8 +655,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 				else if (displayType == DisplayType.Image || displayType == DisplayType.Assignment
 						|| displayType == DisplayType.Locator || displayType == DisplayType.Payment
 						|| displayType == DisplayType.TableDir || displayType == DisplayType.Table
-						|| displayType == DisplayType.List || displayType == DisplayType.Search
-						|| displayType == DisplayType.Account)
+						|| displayType == DisplayType.Search || displayType == DisplayType.Account)
 				{
 					if (instance.getValueInt() > 0)
 						editor.setValue(instance.getValueInt());
@@ -1108,8 +1107,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		else if (displayType == DisplayType.Image || displayType == DisplayType.Assignment
 				|| displayType == DisplayType.Locator || displayType == DisplayType.Payment
 				|| displayType == DisplayType.TableDir || displayType == DisplayType.Table
-				|| displayType == DisplayType.List || displayType == DisplayType.Search
-				|| displayType == DisplayType.Account)
+				|| displayType == DisplayType.Search || displayType == DisplayType.Account)
 		{
 			Integer value = (Integer) editor.getValue();
 			if (attributes.isMandatory() && value == null)
@@ -1117,8 +1115,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 
 			String valueLable = null;
 			if (displayType == DisplayType.TableDir || displayType == DisplayType.Table
-					|| displayType == DisplayType.List || displayType == DisplayType.Search
-					|| displayType == DisplayType.Account)
+					|| displayType == DisplayType.Search || displayType == DisplayType.Account)
 			{
 				valueLable = editor.getDisplay();
 			}
@@ -1130,6 +1127,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 			String value = String.valueOf(editor.getValue());
 			if (attributes.isMandatory() && value == null)
 				mandatory += " - " + attributes.getName();
+			
 			attributes.setMAttributeInstance(m_M_AttributeSetInstance_ID, value);
 		}
 		return mandatory;
