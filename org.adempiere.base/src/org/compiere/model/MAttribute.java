@@ -170,19 +170,17 @@ public class MAttribute extends X_M_Attribute
 			else
 				instance = new MAttributeInstance (getCtx(), getM_Attribute_ID(),
 					M_AttributeSetInstance_ID, 0, null, get_TrxName());
+			instance.saveEx();
+		}
+		if (value != null)
+		{
+			instance.setM_AttributeValue_ID (value.getM_AttributeValue_ID ());
+			instance.setValue (value.getName()); 	//	Cached !!
 		}
 		else
 		{
-			if (value != null)
-			{
-				instance.setM_AttributeValue_ID (value.getM_AttributeValue_ID ());
-				instance.setValue (value.getName()); 	//	Cached !!
-			}
-			else
-			{
-				instance.setM_AttributeValue_ID (0);
-				instance.setValue (null);
-			}
+			instance.setM_AttributeValue_ID (0);
+			instance.setValue (null);
 		}
 		instance.saveEx();
 	}	//	setAttributeInstance
@@ -196,10 +194,12 @@ public class MAttribute extends X_M_Attribute
 	{
 		MAttributeInstance instance = getMAttributeInstance(M_AttributeSetInstance_ID);
 		if (instance == null)
+		{
 			instance = new MAttributeInstance (getCtx(), getM_Attribute_ID(), 
 				M_AttributeSetInstance_ID, value, get_TrxName());
-		else
-			instance.setValue(value);
+			instance.saveEx();
+		}
+		instance.setValue(value);
 		instance.saveEx();
 	}	//	setAttributeInstance
 
@@ -212,10 +212,12 @@ public class MAttribute extends X_M_Attribute
 	{
 		MAttributeInstance instance = getMAttributeInstance(M_AttributeSetInstance_ID);
 		if (instance == null)
-			instance = new MAttributeInstance (getCtx(), getM_Attribute_ID(), 
+		{	
+			instance = new MAttributeInstance (getCtx(), getM_Attribute_ID(),
 				M_AttributeSetInstance_ID, value, get_TrxName());
-		else
-			instance.setValueNumber(value);
+			instance.saveEx();
+		}
+		instance.setValueNumber(value);
 		instance.saveEx();
 	}	//	setAttributeInstance
 	
@@ -232,10 +234,9 @@ public class MAttribute extends X_M_Attribute
 		{
 			instance = new MAttributeInstance(getCtx(), getM_Attribute_ID(),
 					M_AttributeSetInstance_ID, valueInt, get_TrxName());
-			instance.setValueInt(valueInt, value);
+			instance.saveEx();
 		}
-		else
-			instance.setValueInt(valueInt, value);
+		instance.setValueInt(valueInt, value);
 		instance.saveEx();
 	}	//	setAttributeInstance
 	
@@ -251,10 +252,9 @@ public class MAttribute extends X_M_Attribute
 		{
 			instance = new MAttributeInstance (getCtx(), getM_Attribute_ID(), 
 					M_AttributeSetInstance_ID, valueTimeStamp, get_TrxName());
-			instance.setValueTimeStamp (valueTimeStamp,value);
+			instance.saveEx();
 		}
-		else
-			instance.setValueTimeStamp (valueTimeStamp,value);
+		instance.setValueTimeStamp (valueTimeStamp,value);
 		instance.saveEx();
 	}	//	setAttributeInstance
 	

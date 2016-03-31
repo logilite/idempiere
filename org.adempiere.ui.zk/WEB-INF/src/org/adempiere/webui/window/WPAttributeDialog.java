@@ -613,7 +613,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	private GridField getListTypeGridField(MAttribute attribute)
 	{
 		GridFieldVO vo = GridFieldVO.createParameter(Env.getCtx(), m_WindowNo, AEnv.getADWindowID(m_WindowNo), 0, 0,
-				"M_AttributeValue_ID", Msg.translate(Env.getCtx(), "M_AttributeValue_ID"), DisplayType.TableDir, 0,
+				"M_AttributeValue_ID", attribute.getName(), DisplayType.TableDir, 0,
 				false, false);
 		vo.ValidationCode = "M_AttributeValue.M_Attribute_ID=" + attribute.get_ID();
 		vo.lookupInfo.ValidationCode = vo.ValidationCode;
@@ -1124,7 +1124,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		}
 		else
 		{
-			String value = String.valueOf(editor.getValue());
+			String value = (String) editor.getValue();
 			if (attributes.isMandatory() && value == null)
 				mandatory += " - " + attributes.getName();
 			
