@@ -103,7 +103,7 @@ public class InvoiceBatchProcess extends SvrProcess
 			//	New Invoice
 			if (m_invoice == null)
 			{
-				m_invoice = new MInvoice (batch, line);
+				m_invoice = MInvoice.createFrom(batch, line);
 				if (!m_invoice.save())
 					throw new AdempiereUserError("Cannot save Invoice");
 				//

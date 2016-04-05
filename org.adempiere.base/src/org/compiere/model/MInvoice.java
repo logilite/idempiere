@@ -317,11 +317,11 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	 *	@param C_DocTypeTarget_ID target document type
 	 *	@param invoiceDate date or null
 	 */
-	public MInvoice (MOrder order, int C_DocTypeTarget_ID, Timestamp invoiceDate)
+	public static MInvoice createFrom(MOrder order, int C_DocTypeTarget_ID, Timestamp invoiceDate)
 	{
-		this (order.getCtx(), 0, order.get_TrxName());
-		setClientOrg(order);
-		setOrder(order);	//	set base settings
+		MInvoice invoice = (MInvoice) MTable.get(order.getCtx(), MInvoice.Table_ID).getPO(0, order.get_TrxName());
+		invoice.setClientOrg(order);
+		invoice.setOrder(order); // set base settings
 		//
 		if (C_DocTypeTarget_ID <= 0)
 		{
@@ -330,83 +330,90 @@ public class MInvoice extends X_C_Invoice implements DocAction
 			{
 				C_DocTypeTarget_ID = odt.getC_DocTypeInvoice_ID();
 				if (C_DocTypeTarget_ID <= 0)
-					throw new AdempiereException("@NotFound@ @C_DocTypeInvoice_ID@ - @C_DocType_ID@:"+odt.get_Translation(MDocType.COLUMNNAME_Name));
+					throw new AdempiereException("@NotFound@ @C_DocTypeInvoice_ID@ - @C_DocType_ID@:"
+							+ odt.get_Translation(MDocType.COLUMNNAME_Name));
 			}
 		}
-		setC_DocTypeTarget_ID(C_DocTypeTarget_ID);
+		invoice.setC_DocTypeTarget_ID(C_DocTypeTarget_ID);
 		if (invoiceDate != null)
-			setDateInvoiced(invoiceDate);
-		setDateAcct(getDateInvoiced());
+			invoice.setDateInvoiced(invoiceDate);
+		invoice.setDateAcct(invoice.getDateInvoiced());
 		//
-		setSalesRep_ID(order.getSalesRep_ID());
+		invoice.setSalesRep_ID(order.getSalesRep_ID());
 		//
-		setC_BPartner_ID(order.getBill_BPartner_ID());
-		setC_BPartner_Location_ID(order.getBill_Location_ID());
-		setAD_User_ID(order.getBill_User_ID());
-	}	//	MInvoice
-
+		invoice.setC_BPartner_ID(order.getBill_BPartner_ID());
+		invoice.setC_BPartner_Location_ID(order.getBill_Location_ID());
+		invoice.setAD_User_ID(order.getBill_User_ID());
+		
+		return invoice;
+	}  //	MInvoice
+	
 	/**
 	 * 	Create Invoice from Shipment
 	 *	@param ship shipment
 	 *	@param invoiceDate date or null
 	 */
-	public MInvoice (MInOut ship, Timestamp invoiceDate)
+	public static MInvoice createFrom(MInOut ship, Timestamp invoiceDate)
 	{
-		this (ship.getCtx(), 0, ship.get_TrxName());
-		setClientOrg(ship);
-		setShipment(ship);	//	set base settings
+		MInvoice invoice = (MInvoice) MTable.get(ship.getCtx(), MInvoice.Table_ID).getPO(0, ship.get_TrxName());
+		invoice.setClientOrg(ship);
+		invoice.setShipment(ship); // set base settings
 		//
-		setC_DocTypeTarget_ID();
+		invoice.setC_DocTypeTarget_ID();
 		if (invoiceDate != null)
-			setDateInvoiced(invoiceDate);
-		setDateAcct(getDateInvoiced());
+			invoice.setDateInvoiced(invoiceDate);
+		invoice.setDateAcct(invoice.getDateInvoiced());
 		//
-		setSalesRep_ID(ship.getSalesRep_ID());
-	}	//	MInvoice
+		invoice.setSalesRep_ID(ship.getSalesRep_ID());
 
+		return invoice;
+	}  //	MInvoice
+	
 	/**
 	 * 	Create Invoice from Batch Line
 	 *	@param batch batch
 	 *	@param line batch line
 	 */
-	public MInvoice (MInvoiceBatch batch, MInvoiceBatchLine line)
+	public static MInvoice createFrom(MInvoiceBatch batch, MInvoiceBatchLine line)
 	{
-		this (line.getCtx(), 0, line.get_TrxName());
-		setClientOrg(line);
-		setDocumentNo(line.getDocumentNo());
+		MInvoice invoice = (MInvoice) MTable.get(line.getCtx(), MInvoice.Table_ID).getPO(0, line.get_TrxName());
+		invoice.setClientOrg(line);
+		invoice.setDocumentNo(line.getDocumentNo());
 		//
-		setIsSOTrx(batch.isSOTrx());
-		MBPartner bp = new MBPartner (line.getCtx(), line.getC_BPartner_ID(), line.get_TrxName());
-		setBPartner(bp);	//	defaults
+		invoice.setIsSOTrx(batch.isSOTrx());
+		MBPartner bp = new MBPartner(line.getCtx(), line.getC_BPartner_ID(), line.get_TrxName());
+		invoice.setBPartner(bp); // defaults
 		//
-		setIsTaxIncluded(line.isTaxIncluded());
-		//	May conflict with default price list
-		setC_Currency_ID(batch.getC_Currency_ID());
-		setC_ConversionType_ID(batch.getC_ConversionType_ID());
+		invoice.setIsTaxIncluded(line.isTaxIncluded());
+		// May conflict with default price list
+		invoice.setC_Currency_ID(batch.getC_Currency_ID());
+		invoice.setC_ConversionType_ID(batch.getC_ConversionType_ID());
 		//
-	//	setPaymentRule(order.getPaymentRule());
-	//	setC_PaymentTerm_ID(order.getC_PaymentTerm_ID());
-	//	setPOReference("");
-		setDescription(batch.getDescription());
-	//	setDateOrdered(order.getDateOrdered());
+		// setPaymentRule(order.getPaymentRule());
+		// setC_PaymentTerm_ID(order.getC_PaymentTerm_ID());
+		// setPOReference("");
+		invoice.setDescription(batch.getDescription());
+		// setDateOrdered(order.getDateOrdered());
 		//
-		setAD_OrgTrx_ID(line.getAD_OrgTrx_ID());
-		setC_Project_ID(line.getC_Project_ID());
-	//	setC_Campaign_ID(line.getC_Campaign_ID());
-		setC_Activity_ID(line.getC_Activity_ID());
-		setUser1_ID(line.getUser1_ID());
-		setUser2_ID(line.getUser2_ID());
+		invoice.setAD_OrgTrx_ID(line.getAD_OrgTrx_ID());
+		invoice.setC_Project_ID(line.getC_Project_ID());
+		// setC_Campaign_ID(line.getC_Campaign_ID());
+		invoice.setC_Activity_ID(line.getC_Activity_ID());
+		invoice.setUser1_ID(line.getUser1_ID());
+		invoice.setUser2_ID(line.getUser2_ID());
 		//
-		setC_DocTypeTarget_ID(line.getC_DocType_ID());
-		setDateInvoiced(line.getDateInvoiced());
-		setDateAcct(line.getDateAcct());
+		invoice.setC_DocTypeTarget_ID(line.getC_DocType_ID());
+		invoice.setDateInvoiced(line.getDateInvoiced());
+		invoice.setDateAcct(line.getDateAcct());
 		//
-		setSalesRep_ID(batch.getSalesRep_ID());
+		invoice.setSalesRep_ID(batch.getSalesRep_ID());
 		//
-		setC_BPartner_ID(line.getC_BPartner_ID());
-		setC_BPartner_Location_ID(line.getC_BPartner_Location_ID());
-		setAD_User_ID(line.getAD_User_ID());
-	}	//	MInvoice
+		invoice.setC_BPartner_ID(line.getC_BPartner_ID());
+		invoice.setC_BPartner_Location_ID(line.getC_BPartner_Location_ID());
+		invoice.setAD_User_ID(line.getAD_User_ID());
+		
+		return invoice;
+	}  //	MInvoice
 
 	/**	Open Amount				*/
 	protected BigDecimal 		m_openAmt = null;

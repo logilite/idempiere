@@ -375,7 +375,7 @@ public class InvoiceGenerate extends SvrProcess
 			} catch (SQLException e) {
 				throw new AdempiereException(e);
 			}
-			m_invoice = new MInvoice (order, 0, p_DateInvoiced);
+			m_invoice = MInvoice.createFrom(order, 0, p_DateInvoiced);
 			if (!m_invoice.save())
 				throw new IllegalStateException("Could not create Invoice (o)");
 		}
@@ -407,7 +407,7 @@ public class InvoiceGenerate extends SvrProcess
 			} catch (SQLException e) {
 				throw new AdempiereException(e);
 			}
-			m_invoice = new MInvoice (order, 0, p_DateInvoiced);
+			m_invoice = MInvoice.createFrom(order, 0, p_DateInvoiced);
 			if (!m_invoice.save())
 				throw new IllegalStateException("Could not create Invoice (s)");
 		}

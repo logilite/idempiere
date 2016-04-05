@@ -85,7 +85,7 @@ public class InOutCreateInvoice extends SvrProcess
 		if (!MInOut.DOCSTATUS_Completed.equals(ship.getDocStatus()))
 			throw new IllegalArgumentException("Shipment not completed");
 		
-		MInvoice invoice = new MInvoice (ship, null);
+		MInvoice invoice = MInvoice.createFrom(ship, null);
 		// Should not override pricelist for RMA
 		if (p_M_PriceList_ID != 0 && ship.getM_RMA_ID() == 0)
 			invoice.setM_PriceList_ID(p_M_PriceList_ID);

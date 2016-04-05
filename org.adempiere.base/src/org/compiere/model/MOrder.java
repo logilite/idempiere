@@ -2196,7 +2196,7 @@ public class MOrder extends X_C_Order implements DocAction
 	protected MInvoice createInvoice (MDocType dt, MInOut shipment, Timestamp invoiceDate)
 	{
 		if (log.isLoggable(Level.INFO)) log.info(dt.toString());
-		MInvoice invoice = new MInvoice (this, dt.getC_DocTypeInvoice_ID(), invoiceDate);
+		MInvoice invoice = MInvoice.createFrom(this, dt.getC_DocTypeInvoice_ID(), invoiceDate);
 		if (!invoice.save(get_TrxName()))
 		{
 			m_processMsg = "Could not create Invoice";

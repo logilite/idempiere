@@ -602,7 +602,7 @@ public class MInOutConfirm extends X_M_InOutConfirm implements DocAction
 			if (log.isLoggable(Level.INFO)) log.info("Difference=" + confirm.getDifferenceQty());
 			if (m_creditMemo == null)
 			{
-				m_creditMemo = new MInvoice (inout, null);
+				m_creditMemo = MInvoice.createFrom(inout, null);
 				StringBuilder msgd = new StringBuilder().append(Msg.translate(getCtx(), "M_InOutConfirm_ID")).append(" ").append(getDocumentNo());
 				m_creditMemo.setDescription(msgd.toString());
 				m_creditMemo.setC_DocTypeTarget_ID(MDocType.DOCBASETYPE_APCreditMemo);
