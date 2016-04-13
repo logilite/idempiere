@@ -258,7 +258,7 @@ public abstract class PaymentFormCash extends PaymentForm {
 		}
 		MOrder order = null;
 		if (invoice == null && C_Order_ID != 0)
-			order = new MOrder (Env.getCtx(), C_Order_ID, null);
+			order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(C_Order_ID, null);
 		
 		BigDecimal payAmount = newAmount;
 
@@ -343,7 +343,7 @@ public abstract class PaymentFormCash extends PaymentForm {
 						}	
 						if (order == null && C_Order_ID != 0)
 						{
-							order = new MOrder (Env.getCtx(), C_Order_ID, null);
+							order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(C_Order_ID, null);
 						}
 						if (order != null) {
 							order.setC_CashLine_ID(cl.getC_CashLine_ID());

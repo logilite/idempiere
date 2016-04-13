@@ -265,7 +265,7 @@ public class OrderServlet extends HttpServlet
 			return null;
 
 		if (log.isLoggable(Level.FINE)) log.fine("C_Order_ID=" + C_Order_ID);
-		return new MOrder (ctx, C_Order_ID, null);
+		return (MOrder) MTable.get(ctx, MOrder.Table_ID).getPO(C_Order_ID, null);
 	}	//	getOrder
 	
 	

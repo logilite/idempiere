@@ -290,7 +290,7 @@ public class MPaymentTerm extends X_C_PaymentTerm
 	 */
 	public boolean applyOrder (int C_Order_ID)
 	{
-		MOrder order = new MOrder (getCtx(), C_Order_ID, get_TrxName());
+		MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(C_Order_ID, get_TrxName());
 		if (order == null || order.get_ID() == 0)
 		{
 			log.log(Level.SEVERE, "apply - Not valid C_Order_ID=" + C_Order_ID);

@@ -183,7 +183,7 @@ public abstract class CreateFromInvoice extends CreateFrom
 		MInOut inout = new MInOut(Env.getCtx(), M_InOut_ID, null);
 		p_order = null;
 		if (inout.getC_Order_ID() != 0)
-			p_order = new MOrder (Env.getCtx(), inout.getC_Order_ID(), null);
+			p_order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(inout.getC_Order_ID(), null);
 
 		m_rma = null;
 		if (inout.getM_RMA_ID() != 0)

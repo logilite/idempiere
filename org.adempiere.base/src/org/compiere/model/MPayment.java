@@ -818,7 +818,7 @@ public class MPayment extends X_C_Payment
 				}
 			}
 			if (getC_Order_ID() != 0) {
-				MOrder ord = new MOrder(getCtx(), getC_Order_ID(), get_TrxName());
+				MOrder ord = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(getC_Order_ID(), get_TrxName());
 				if (ord.getC_BPartner_ID() != getC_BPartner_ID()) {
 					log.saveError("Error", Msg.parseTranslation(getCtx(), "BP different from BP Order"));
 					return false;
@@ -1877,7 +1877,7 @@ public class MPayment extends X_C_Payment
 		//	Waiting Payment - Need to create Invoice & Shipment
 		if (getC_Order_ID() != 0 && getC_Invoice_ID() == 0)
 		{	//	see WebOrder.process
-			MOrder order = new MOrder (getCtx(), getC_Order_ID(), get_TrxName());
+			MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(getC_Order_ID(), get_TrxName());
 			if (DOCSTATUS_WaitingPayment.equals(order.getDocStatus()))
 			{
 				order.setC_Payment_ID(getC_Payment_ID());
@@ -2115,7 +2115,7 @@ public class MPayment extends X_C_Payment
 		}		
 		if (getC_Order_ID() != 0)
 		{
-			MOrder ord = new MOrder(getCtx(), getC_Order_ID(), get_TrxName());
+			MOrder ord = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(getC_Order_ID(), get_TrxName());
 			if (ord.getC_Payment_ID() != getC_Payment_ID())
 			{
 				ord.setC_Payment_ID(getC_Payment_ID());
@@ -3016,7 +3016,7 @@ public class MPayment extends X_C_Payment
 		}
 		if (getC_Order_ID() != 0)
 		{
-			MOrder ord = new MOrder(getCtx(), getC_Order_ID(), get_TrxName());
+			MOrder ord = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(getC_Order_ID(), get_TrxName());
 			ord.setC_Payment_ID(0);
 			ord.saveEx();
 		}

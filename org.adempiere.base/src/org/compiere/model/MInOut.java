@@ -234,7 +234,8 @@ public class MInOut extends X_M_InOut implements DocAction
 			//	Try to find Order/Invoice link
 			if (from.getC_Order_ID() != 0)
 			{
-				MOrder peer = new MOrder (from.getCtx(), from.getC_Order_ID(), from.get_TrxName());
+				MOrder peer = (MOrder) MTable.get(from.getCtx(), MOrder.Table_ID).getPO(from.getC_Order_ID(),
+						from.get_TrxName());
 				if (peer.getRef_Order_ID() != 0)
 					to.setC_Order_ID(peer.getRef_Order_ID());
 			}
@@ -433,7 +434,8 @@ public class MInOut extends X_M_InOut implements DocAction
 		setMovementType (invoice.isSOTrx() ? MOVEMENTTYPE_CustomerShipment : MOVEMENTTYPE_VendorReceipts);
 		MOrder order = null;
 		if (invoice.getC_Order_ID() != 0)
-			order = new MOrder (invoice.getCtx(), invoice.getC_Order_ID(), invoice.get_TrxName());
+			order = (MOrder) MTable.get(invoice.getCtx(), MOrder.Table_ID).getPO(invoice.getC_Order_ID(),
+					invoice.get_TrxName());
 		if (C_DocTypeShipment_ID == 0 && order != null)
 			C_DocTypeShipment_ID = DB.getSQLValue(null,
 				"SELECT C_DocTypeShipment_ID FROM C_DocType WHERE C_DocType_ID=?",
@@ -1710,7 +1712,7 @@ public class MInOut extends X_M_InOut implements DocAction
 		if ( isSOTrx() || !isDropShip() || getC_Order_ID() == 0 )
 			return null;
 
-		int linkedOrderID = new MOrder (getCtx(), getC_Order_ID(), get_TrxName()).getLink_Order_ID();
+		int linkedOrderID = ((MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(getC_Order_ID(), get_TrxName())).getLink_Order_ID();
 		if (linkedOrderID <= 0)
 			return null;
 
@@ -1731,7 +1733,7 @@ public class MInOut extends X_M_InOut implements DocAction
 		dropShipment.setC_Order_ID(linkedOrderID);
 
 		// get invoice id from linked order
-		int invID = new MOrder (getCtx(), linkedOrderID, get_TrxName()).getC_Invoice_ID();
+		int invID = ((MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(linkedOrderID, get_TrxName())).getC_Invoice_ID();
 		if ( invID != 0 )
 			dropShipment.setC_Invoice_ID(invID);
 

@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.logging.Level;
 
 import org.compiere.model.MOrder;
+import org.compiere.model.MTable;
 
 /**
  *  Copy Order Lines
@@ -63,8 +64,8 @@ public class CopyFromOrder extends SvrProcess
 			throw new IllegalArgumentException("Target C_Order_ID == 0");
 		if (p_C_Order_ID == 0)
 			throw new IllegalArgumentException("Source C_Order_ID == 0");
-		MOrder from = new MOrder (getCtx(), p_C_Order_ID, get_TrxName());
-		MOrder to = new MOrder (getCtx(), To_C_Order_ID, get_TrxName());
+		MOrder from = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(p_C_Order_ID, get_TrxName());
+		MOrder to = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(To_C_Order_ID, get_TrxName());
 		//
 		int no = to.copyLinesFrom (from, false, false);		//	no Attributes
 		//

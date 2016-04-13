@@ -248,7 +248,7 @@ public class MOrderLine extends X_C_OrderLine
 	public MOrder getParent()
 	{
 		if (m_parent == null)
-			m_parent = new MOrder(getCtx(), getC_Order_ID(), get_TrxName());
+			m_parent = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(getC_Order_ID(), get_TrxName());
 		return m_parent;
 	}	//	getParent
 	

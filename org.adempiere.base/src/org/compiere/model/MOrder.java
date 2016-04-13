@@ -87,7 +87,7 @@ public class MOrder extends X_C_Order implements DocAction
 		int C_DocTypeTarget_ID, boolean isSOTrx, boolean counter, boolean copyASI, 
 		String trxName)
 	{
-		MOrder to = new MOrder (from.getCtx(), 0, trxName);
+		MOrder to = (MOrder) MTable.get(from.getCtx(), MOrder.Table_ID).getPO(0, trxName);
 		to.set_TrxName(trxName);
 		PO.copyValues(from, to, from.getAD_Client_ID(), from.getAD_Org_ID());
 		to.set_ValueNoCheck ("C_Order_ID", I_ZERO);
@@ -199,47 +199,48 @@ public class MOrder extends X_C_Order implements DocAction
 	}	//	MOrder
 
 	/**************************************************************************
-	 *  Project Constructor
 	 *  @param  project Project to create Order from
 	 *  @param IsSOTrx sales order
 	 * 	@param	DocSubTypeSO if SO DocType Target (default DocSubTypeSO_OnCredit)
 	 */
-	public MOrder (MProject project, boolean IsSOTrx, String DocSubTypeSO)
+	public static MOrder createFrom (MProject project, boolean IsSOTrx, String DocSubTypeSO)
 	{
-		this (project.getCtx(), 0, project.get_TrxName());
-		setAD_Client_ID(project.getAD_Client_ID());
-		setAD_Org_ID(project.getAD_Org_ID());
-		setC_Campaign_ID(project.getC_Campaign_ID());
-		setSalesRep_ID(project.getSalesRep_ID());
+		MOrder order = (MOrder) MTable.get(project.getCtx(), MTable.Table_ID).getPO(0, project.get_TrxName());
+		order.setAD_Client_ID(project.getAD_Client_ID());
+		order.setAD_Org_ID(project.getAD_Org_ID());
+		order.setC_Campaign_ID(project.getC_Campaign_ID());
+		order.setSalesRep_ID(project.getSalesRep_ID());
 		//
-		setC_Project_ID(project.getC_Project_ID());
-		setDescription(project.getName());
+		order.setC_Project_ID(project.getC_Project_ID());
+		order.setDescription(project.getName());
 		Timestamp ts = project.getDateContract();
 		if (ts != null)
-			setDateOrdered (ts);
+			order.setDateOrdered(ts);
 		ts = project.getDateFinish();
 		if (ts != null)
-			setDatePromised (ts);
+			order.setDatePromised(ts);
 		//
-		setC_BPartner_ID(project.getC_BPartner_ID());
-		setC_BPartner_Location_ID(project.getC_BPartner_Location_ID());
-		setAD_User_ID(project.getAD_User_ID());
+		order.setC_BPartner_ID(project.getC_BPartner_ID());
+		order.setC_BPartner_Location_ID(project.getC_BPartner_Location_ID());
+		order.setAD_User_ID(project.getAD_User_ID());
 		//
-		setM_Warehouse_ID(project.getM_Warehouse_ID());
-		setM_PriceList_ID(project.getM_PriceList_ID());
-		setC_PaymentTerm_ID(project.getC_PaymentTerm_ID());
+		order.setM_Warehouse_ID(project.getM_Warehouse_ID());
+		order.setM_PriceList_ID(project.getM_PriceList_ID());
+		order.setC_PaymentTerm_ID(project.getC_PaymentTerm_ID());
 		//
-		setIsSOTrx(IsSOTrx);
+		order.setIsSOTrx(IsSOTrx);
 		if (IsSOTrx)
 		{
 			if (DocSubTypeSO == null || DocSubTypeSO.length() == 0)
-				setC_DocTypeTarget_ID(DocSubTypeSO_OnCredit);
+				order.setC_DocTypeTarget_ID(DocSubTypeSO_OnCredit);
 			else
-				setC_DocTypeTarget_ID(DocSubTypeSO);
+				order.setC_DocTypeTarget_ID(DocSubTypeSO);
 		}
 		else
-			setC_DocTypeTarget_ID();
-	}	//	MOrder
+			order.setC_DocTypeTarget_ID();
+		return order;
+
+	}
 
 	/**
 	 *  Load Constructor
@@ -2387,7 +2388,7 @@ public class MOrder extends X_C_Order implements DocAction
 			return false;
 
 		if (getLink_Order_ID() > 0) {
-			MOrder so = new MOrder(getCtx(), getLink_Order_ID(), get_TrxName());
+			MOrder so = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(getLink_Order_ID(), get_TrxName());
 			so.setLink_Order_ID(0);
 			so.saveEx();
 		}

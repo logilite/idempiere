@@ -269,7 +269,7 @@ public class CalloutPayment extends CalloutEngine
 		// Order
 		if (C_Order_ID != 0)
 		{
-			MOrder ord = new MOrder (ctx, C_Order_ID, null);
+			MOrder ord = (MOrder) MTable.get(ctx, MOrder.Table_ID).getPO(C_Order_ID, null);
 			if (dt != null)
 			{
 				if (ord.isSOTrx () != dt.isSOTrx ())

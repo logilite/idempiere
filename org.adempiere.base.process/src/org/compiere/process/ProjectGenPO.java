@@ -150,7 +150,7 @@ public class ProjectGenPO extends SvrProcess
 			//	Vendor
 			MBPartner bp = new MBPartner (getCtx(), pos[0].getC_BPartner_ID(), get_TrxName());
 			//	New Order
-			order = new MOrder (project, false, null);
+			order = MOrder.createFrom(project, false, null);
 			int AD_Org_ID = projectLine.getAD_Org_ID();
 			if (AD_Org_ID == 0)
 			{

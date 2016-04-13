@@ -37,6 +37,7 @@ import org.compiere.model.MShipperPickupTypes;
 import org.compiere.model.MShippingTransaction;
 import org.compiere.model.MShippingTransactionLine;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MTable;
 import org.compiere.model.MUOM;
 import org.compiere.process.ProcessInfoLog;
 import org.compiere.process.ProcessInfoParameter;
@@ -71,7 +72,7 @@ public class SalesOrderRateInquiryProcess extends SvrProcess
 	@Override
 	protected String doIt() throws Exception 
 	{
-		MOrder m_order = new MOrder(getCtx(), getRecord_ID(), get_TrxName());
+		MOrder m_order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(getRecord_ID(), get_TrxName());
 		
 		if (m_order.getM_Shipper_ID() == 0)
 			throw new FillMandatoryException(MOrder.COLUMNNAME_M_Shipper_ID);

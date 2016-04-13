@@ -40,6 +40,7 @@ import org.compiere.model.MLocation;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MOrderPaySchedule;
+import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
@@ -211,7 +212,7 @@ public class InvoiceGenerate extends SvrProcess
 			while (rs.next ())
 			{
 				p_MinimumAmtInvSched = null;
-				MOrder order = new MOrder (getCtx(), rs, get_TrxName());
+				MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(rs, get_TrxName());
 				StringBuilder msgsup = new StringBuilder(Msg.getMsg(getCtx(), "Processing")).append(" ").append(order.getDocumentInfo());
 				statusUpdate(msgsup.toString());
 				
@@ -478,7 +479,7 @@ public class InvoiceGenerate extends SvrProcess
 	{
 		if (m_invoice != null)
 		{
-			MOrder order = new MOrder(getCtx(), m_invoice.getC_Order_ID(), get_TrxName());
+			MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(m_invoice.getC_Order_ID(), get_TrxName());
 			if (order != null) {
 				m_invoice.setPaymentRule(order.getPaymentRule());
 				m_invoice.setC_PaymentTerm_ID(order.getC_PaymentTerm_ID());

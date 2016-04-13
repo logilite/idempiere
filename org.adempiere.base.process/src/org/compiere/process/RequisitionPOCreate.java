@@ -32,6 +32,7 @@ import org.compiere.model.MProduct;
 import org.compiere.model.MProductPO;
 import org.compiere.model.MRequisition;
 import org.compiere.model.MRequisitionLine;
+import org.compiere.model.MTable;
 import org.compiere.model.POResultSet;
 import org.compiere.model.Query;
 import org.compiere.util.AdempiereUserError;
@@ -344,7 +345,7 @@ public class RequisitionPOCreate extends SvrProcess
 		m_order = m_cacheOrders.get(key);
 		if (m_order == null)
 		{
-			m_order = new MOrder(getCtx(), 0, get_TrxName());
+			m_order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 			m_order.setAD_Org_ID(rLine.getAD_Org_ID());
 			m_order.setM_Warehouse_ID(rLine.getParent().getM_Warehouse_ID());
 			m_order.setDatePromised(DateRequired);

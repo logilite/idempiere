@@ -343,7 +343,7 @@ public abstract class PaymentFormCreditCard extends PaymentForm {
 			invoice = (MInvoice) MTable.get(Env.getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, null);
 		MOrder order = null;
 		if (invoice == null && C_Order_ID != 0)
-			order = new MOrder (Env.getCtx(), C_Order_ID, null);
+			order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(C_Order_ID, null);
 		if (order != null)
 		{
 			m_mPayment.setC_Order_ID(C_Order_ID);

@@ -215,7 +215,7 @@ public class CashFlow  extends SvrProcess {
 				int order_id = rsOpenOrders.getInt("C_Order_ID");
 				boolean isPaySchedule = ("Y".equals(rsOpenOrders.getString("IsPayScheduleValid")));
 				BigDecimal pending = rsOpenOrders.getBigDecimal("Pending");
-				MOrder order = new MOrder(getCtx(), order_id, get_TrxName());
+				MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(order_id, get_TrxName());
 				MCurrency curr = MCurrency.get(getCtx(), order.getC_Currency_ID());
 				BigDecimal open = order.getGrandTotal().multiply(pending);
 				// subtract payments done directly to order still not allocated to an invoice

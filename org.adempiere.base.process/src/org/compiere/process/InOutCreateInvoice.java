@@ -27,6 +27,7 @@ import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MInvoicePaySchedule;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderPaySchedule;
+import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.util.Env;
  
@@ -109,7 +110,7 @@ public class InOutCreateInvoice extends SvrProcess
 		}
 				
 		if (invoice.getC_Order_ID() > 0) {
-			MOrder order = new MOrder(getCtx(), invoice.getC_Order_ID(), get_TrxName());
+			MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(invoice.getC_Order_ID(),get_TrxName());
 			invoice.setPaymentRule(order.getPaymentRule());
 			invoice.setC_PaymentTerm_ID(order.getC_PaymentTerm_ID());
 			invoice.saveEx();

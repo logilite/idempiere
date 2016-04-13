@@ -26,6 +26,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.WebUser;
 
@@ -77,7 +78,7 @@ public class WebOrder
 	 */
 	private boolean createOrder (WebUser wu, WebBasket wb)
 	{
-		m_order = new MOrder (m_ctx, 0, null);
+		m_order = (MOrder) MTable.get(m_ctx, MOrder.Table_ID).getPO(0, null);
 		if (log.isLoggable(Level.FINE)) log.fine("AD_Client_ID=" + m_order.getAD_Client_ID()
 			+ ",AD_Org_ID=" + m_order.getAD_Org_ID() + " - " + m_order);
 		//

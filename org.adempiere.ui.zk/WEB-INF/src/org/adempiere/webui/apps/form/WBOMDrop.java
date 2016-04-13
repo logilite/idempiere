@@ -918,7 +918,8 @@ public class WBOMDrop extends ADForm implements EventListener<Event>
 	private boolean cmd_saveOrder (int C_Order_ID, Trx trx)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_Order_ID=" + C_Order_ID);
-		MOrder order = new MOrder (Env.getCtx(), C_Order_ID, trx != null ? trx.getTrxName() : null);
+		MOrder order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(C_Order_ID,
+				trx != null ? trx.getTrxName() : null);
 		
 		if (order.get_ID() == 0)
 		{

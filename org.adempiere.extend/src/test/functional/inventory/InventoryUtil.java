@@ -42,6 +42,7 @@ import org.compiere.model.MPriceListVersion;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProductCategory;
 import org.compiere.model.MProductPrice;
+import org.compiere.model.MTable;
 import org.compiere.model.MTaxCategory;
 import org.compiere.model.MWarehouse;
 import org.compiere.model.PO;
@@ -192,7 +193,7 @@ public final class InventoryUtil
 		int AD_Org_ID = getFirst_Org_ID();
 		MLocator locator = getCreateLocator(AD_Org_ID, doc.LocatorValue, doc.LocatorValue);
 		//
-		MOrder order = new MOrder(ctx, 0, trxName);
+		MOrder order = (MOrder) MTable.get(ctx, MOrder.Table_ID).getPO(0, trxName);
 		order.setAD_Org_ID(AD_Org_ID);
 		order.setIsSOTrx(isSOTrx);
 		order.setC_DocTypeTarget_ID();

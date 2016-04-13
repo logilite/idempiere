@@ -23,6 +23,7 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
+import org.compiere.model.MTable;
 import org.compiere.process.SvrProcess;
 
 /**
@@ -61,7 +62,7 @@ public class RMACreateOrder extends SvrProcess
         }
         
         // Create new order and set the different values based on original order/RMA doc
-        MOrder order = new MOrder(getCtx(), 0, get_TrxName());
+		MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
         order.setAD_Org_ID(rma.getAD_Org_ID());
         order.setC_BPartner_ID(originalOrder.getC_BPartner_ID());
         order.setC_BPartner_Location_ID(originalOrder.getC_BPartner_Location_ID());

@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.util.logging.Level;
 
 import org.compiere.model.MOrder;
+import org.compiere.model.MTable;
 import org.compiere.util.AdempiereUserError;
 import org.compiere.util.DB;
 
@@ -137,7 +138,7 @@ public class OrderBatchProcess extends SvrProcess
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{
-				if (process(new MOrder(getCtx(),rs, get_TrxName())))
+				if (process((MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(rs, get_TrxName())))
 					counter++;
 				else
 					errCounter++;

@@ -39,6 +39,7 @@ import org.compiere.model.MProduct;
 import org.compiere.model.MRequisition;
 import org.compiere.model.MRequisitionLine;
 import org.compiere.model.MStorageOnHand;
+import org.compiere.model.MTable;
 import org.compiere.model.MWarehouse;
 import org.compiere.model.X_T_Replenish;
 import org.compiere.util.AdempiereSystemError;
@@ -419,7 +420,7 @@ public class ReplenishReport extends SvrProcess
 				|| order.getC_BPartner_ID() != replenish.getC_BPartner_ID()
 				|| order.getM_Warehouse_ID() != replenish.getM_Warehouse_ID())
 			{
-				order = new MOrder(getCtx(), 0, get_TrxName());
+				order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 				order.setIsSOTrx(false);
 				order.setC_DocTypeTarget_ID(p_C_DocType_ID);
 				MBPartner bp = new MBPartner(getCtx(), replenish.getC_BPartner_ID(), get_TrxName());

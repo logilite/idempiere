@@ -25,6 +25,7 @@ import org.compiere.model.MOrderLine;
 import org.compiere.model.MRfQ;
 import org.compiere.model.MRfQLine;
 import org.compiere.model.MRfQLineQty;
+import org.compiere.model.MTable;
 import org.compiere.util.Env;
 
 
@@ -82,7 +83,7 @@ public class RfQCreateSO extends SvrProcess
 			throw new Exception ("No Business Partner/Location");
 		MBPartner bp = new MBPartner (getCtx(), rfq.getC_BPartner_ID(), get_TrxName());
 		
-		MOrder order = new MOrder (getCtx(), 0, get_TrxName());
+		MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 		order.setIsSOTrx(true);
 		if (p_C_DocType_ID != 0)
 			order.setC_DocTypeTarget_ID(p_C_DocType_ID);

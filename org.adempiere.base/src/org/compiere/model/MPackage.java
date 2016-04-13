@@ -157,7 +157,7 @@ public class MPackage extends X_M_Package
 		
 		MOrder order = null;
 		if (shipment.getC_Order_ID() > 0)
-			order = new MOrder(getCtx(), shipment.getC_Order_ID(), get_TrxName());
+			order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(shipment.getC_Order_ID(), get_TrxName());
 		else
 		{
 			MMatchPO[] mos = MMatchPO.getInOut(getCtx(), shipment.getM_InOut_ID(), get_TrxName());
@@ -166,7 +166,7 @@ public class MPackage extends X_M_Package
 				MOrderLine ol = new MOrderLine(getCtx(), mo.getC_OrderLine_ID(), get_TrxName());
 				if (ol.getC_Order_ID() > 0)
 				{
-					order = new MOrder(getCtx(), ol.getC_Order_ID(), get_TrxName());
+					order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(ol.getC_Order_ID(), get_TrxName());
 					break;
 				}
 			}
@@ -430,7 +430,7 @@ public class MPackage extends X_M_Package
 			}
 
 			if (ioOut.getC_Order_ID() > 0)
-				order = new MOrder(getCtx(), ioOut.getC_Order_ID(), get_TrxName());
+				order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(ioOut.getC_Order_ID(), get_TrxName());
 			else
 			{
 				MMatchPO[] mos = MMatchPO.getInOut(getCtx(), ioOut.getM_InOut_ID(), get_TrxName());
@@ -439,7 +439,7 @@ public class MPackage extends X_M_Package
 					MOrderLine ol = new MOrderLine(getCtx(), mo.getC_OrderLine_ID(), get_TrxName());
 					if (ol.getC_Order_ID() > 0)
 					{
-						order = new MOrder(getCtx(), ol.getC_Order_ID(), get_TrxName());
+						order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(ol.getC_Order_ID(), get_TrxName());
 						break;
 					}
 				}
@@ -456,7 +456,7 @@ public class MPackage extends X_M_Package
 					sb.append("ORDER BY C_OrderLine_ID DESC");
 					int C_Order_ID = DB.getSQLValue(get_TrxName(), sb.toString(), getM_InOut_ID());
 					if (C_Order_ID > 0)
-						order = new MOrder(getCtx(), C_Order_ID, get_TrxName());
+						order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(C_Order_ID, get_TrxName());
 				}
 			}
 			

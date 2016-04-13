@@ -28,6 +28,7 @@ import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MLocation;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.X_I_Order;
 import org.compiere.util.DB;
@@ -687,7 +688,7 @@ public class ImportOrder extends SvrProcess
 					if (oldDocumentNo == null)
 						oldDocumentNo = "";
 					//
-					order = new MOrder (getCtx(), 0, get_TrxName());
+				    order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 					order.setClientOrg (imp.getAD_Client_ID(), imp.getAD_Org_ID());
 					order.setC_DocTypeTarget_ID(imp.getC_DocType_ID());
 					order.setIsSOTrx(imp.isSOTrx());

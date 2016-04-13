@@ -26,6 +26,7 @@ import org.compiere.model.MRfQ;
 import org.compiere.model.MRfQResponse;
 import org.compiere.model.MRfQResponseLine;
 import org.compiere.model.MRfQResponseLineQty;
+import org.compiere.model.MTable;
 
 /**
  * 	Create RfQ PO.
@@ -95,7 +96,7 @@ public class RfQCreatePO extends SvrProcess
 			//
 			MBPartner bp = new MBPartner(getCtx(), response.getC_BPartner_ID(), get_TrxName());
 			if (log.isLoggable(Level.CONFIG)) log.config("Winner=" + bp);
-			MOrder order = new MOrder (getCtx(), 0, get_TrxName());
+			MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 			order.setIsSOTrx(false);
 			if (p_C_DocType_ID != 0)
 				order.setC_DocTypeTarget_ID(p_C_DocType_ID);
@@ -167,7 +168,7 @@ public class RfQCreatePO extends SvrProcess
 				//	New Order
 				if (order == null)
 				{
-					order = new MOrder (getCtx(), 0, get_TrxName());
+					order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 					order.setIsSOTrx(false);
 					order.setC_DocTypeTarget_ID();
 					order.setBPartner(bp);

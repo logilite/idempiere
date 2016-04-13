@@ -519,7 +519,7 @@ public class Doc_AllocationHdr extends Doc
 			int orgorder = startorg;
 			MOrder order = null;
 			if (line.getC_Order_ID() != 0) {
-				order = new MOrder (getCtx(), line.getC_Order_ID(), getTrxName());
+				order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(line.getC_Order_ID(), getTrxName());
 				orgorder = order.getAD_Org_ID();
 			}
 

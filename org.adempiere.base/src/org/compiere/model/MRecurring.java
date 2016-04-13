@@ -98,7 +98,7 @@ public class MRecurring extends X_C_Recurring
 		//	Copy
 		if (getRecurringType().equals(MRecurring.RECURRINGTYPE_Order))
 		{
-			MOrder from = new MOrder (getCtx(), getC_Order_ID(), get_TrxName());
+			MOrder from = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(getC_Order_ID(), get_TrxName());
 			MOrder order = MOrder.copyFrom (from, dateDoc, 
 				from.getC_DocType_ID(), from.isSOTrx(), false, false, get_TrxName());
 			run.setC_Order_ID(order.getC_Order_ID());

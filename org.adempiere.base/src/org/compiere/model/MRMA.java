@@ -150,7 +150,8 @@ public class MRMA extends X_M_RMA implements DocAction
        {
            return null;
        }
-       return new MOrder(getCtx(), shipment.getC_Order_ID(), get_TrxName());
+       return (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(shipment.getC_Order_ID(), get_TrxName());
+
     }
 
     /**
@@ -265,7 +266,7 @@ public class MRMA extends X_M_RMA implements DocAction
 			{
 				if (m_inout.getC_Order_ID() != 0)
 				{
-					MOrder order = new MOrder (getCtx(), m_inout.getC_Order_ID(), get_TrxName());
+					MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(m_inout.getC_Order_ID(), get_TrxName());
 					setC_Currency_ID(order.getC_Currency_ID());
 				}
 				else if (m_inout.getC_Invoice_ID() != 0)
@@ -598,7 +599,7 @@ public class MRMA extends X_M_RMA implements DocAction
 		//	Try to find Order/Shipment/Receipt link
 		if (from.getC_Order_ID() != 0)
 		{
-			MOrder peer = new MOrder (from.getCtx(), from.getC_Order_ID(), from.get_TrxName());
+			MOrder peer = (MOrder) MTable.get(from.getCtx(), MOrder.Table_ID).getPO(from.getC_Order_ID(), from.get_TrxName());
 			if (peer.getRef_Order_ID() != 0)
 				to.setC_Order_ID(peer.getRef_Order_ID());
 		}

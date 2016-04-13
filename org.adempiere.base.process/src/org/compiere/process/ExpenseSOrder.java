@@ -27,6 +27,7 @@ import org.compiere.model.MConversionRate;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProject;
+import org.compiere.model.MTable;
 import org.compiere.model.MTimeExpense;
 import org.compiere.model.MTimeExpenseLine;
 import org.compiere.util.DB;
@@ -173,7 +174,7 @@ public class ExpenseSOrder extends SvrProcess
 		if (m_order == null)
 		{
 			if (log.isLoggable(Level.INFO)) log.info("New Order for " + bp + ", Project=" + tel.getC_Project_ID());
-			m_order = new MOrder (getCtx(), 0, get_TrxName());
+			m_order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 			m_order.setAD_Org_ID(tel.getAD_Org_ID());
 			m_order.setC_DocTypeTarget_ID(MOrder.DocSubTypeSO_OnCredit);
 			//

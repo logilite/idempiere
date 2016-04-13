@@ -465,7 +465,7 @@ public class DistributionRun extends SvrProcess
 			//
 			if (!p_IsTest)
 			{
-				singleOrder = new MOrder (getCtx(), 0, get_TrxName());
+				singleOrder =  (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 				singleOrder.setC_DocTypeTarget_ID(m_docType.getC_DocType_ID());
 				singleOrder.setC_DocType_ID(m_docType.getC_DocType_ID());
 				singleOrder.setIsSOTrx(m_docType.isSOTrx());
@@ -510,7 +510,7 @@ public class DistributionRun extends SvrProcess
 				bp = new MBPartner (getCtx(), detail.getC_BPartner_ID(), get_TrxName());
 				if (!p_IsTest)
 				{
-					order = new MOrder (getCtx(), 0, get_TrxName());
+				    order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 					order.setC_DocTypeTarget_ID(m_docType.getC_DocType_ID());
 					order.setC_DocType_ID(m_docType.getC_DocType_ID());
 					order.setIsSOTrx(m_docType.isSOTrx());

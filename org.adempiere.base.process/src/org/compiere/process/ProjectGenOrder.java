@@ -68,7 +68,7 @@ public class ProjectGenOrder extends SvrProcess
 
 		/** @todo duplicate invoice prevention */
 
-		MOrder order = new MOrder (fromProject, true, MOrder.DocSubTypeSO_OnCredit);
+		MOrder order =  MOrder.createFrom(fromProject, true, MOrder.DocSubTypeSO_OnCredit);
 		if (!order.save())
 			throw new Exception("Could not create Order");
 

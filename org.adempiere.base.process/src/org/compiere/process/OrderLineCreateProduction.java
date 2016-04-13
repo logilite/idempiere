@@ -24,6 +24,7 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProduction;
+import org.compiere.model.MTable;
 import org.compiere.model.MWarehouse;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -83,7 +84,7 @@ public class OrderLineCreateProduction extends SvrProcess
 		MOrderLine line = new MOrderLine (getCtx(), p_C_OrderLine_ID, get_TrxName());
 		if (line.get_ID() == 0)
 			throw new IllegalArgumentException("Order line not found");
-		MOrder order = new MOrder (getCtx(), line.getC_Order_ID(), get_TrxName());
+		MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(line.getC_Order_ID(), get_TrxName());
 		if (!MOrder.DOCSTATUS_Completed.equals(order.getDocStatus()))
 			throw new IllegalArgumentException("Order not completed");
 		

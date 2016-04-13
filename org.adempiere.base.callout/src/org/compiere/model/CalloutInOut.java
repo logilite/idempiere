@@ -56,7 +56,7 @@ public class CalloutInOut extends CalloutEngine
 			return "";
 
 		//	Get Details
-		MOrder order = new MOrder (ctx, C_Order_ID.intValue(), null);
+		MOrder order = (MOrder) MTable.get(ctx, MOrder.Table_ID).getPO(C_Order_ID.intValue(), null);
 		if (order.get_ID() != 0)
 		{
 			mTab.setValue("DateOrdered", order.getDateOrdered());

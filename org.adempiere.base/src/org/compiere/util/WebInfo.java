@@ -248,7 +248,7 @@ public class WebInfo
 			pstmt.setInt(1, getC_BPartner_ID());
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add(new MOrder (m_ctx, rs, null));
+				list.add((MOrder) MTable.get(m_ctx, MOrder.Table_ID).getPO(rs, null));
 		}
 		catch (Exception e)
 		{
@@ -289,7 +289,7 @@ public class WebInfo
 			pstmt.setInt(2, m_id);
 			rs = pstmt.executeQuery();
 			if (rs.next())
-				retValue = new MOrder (m_ctx, rs, null);
+				retValue = (MOrder) MTable.get(m_ctx, MOrder.Table_ID).getPO(rs, null);
 		}
 		catch (Exception e)
 		{

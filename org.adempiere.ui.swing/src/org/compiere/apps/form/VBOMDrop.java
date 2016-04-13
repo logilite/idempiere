@@ -625,7 +625,7 @@ public class VBOMDrop extends CPanel
 	private boolean cmd_saveOrder (int C_Order_ID)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_Order_ID=" + C_Order_ID);
-		MOrder order = new MOrder (Env.getCtx(), C_Order_ID, null);
+		MOrder order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(C_Order_ID, null);
 		if (order.get_ID() == 0)
 		{
 			log.log(Level.SEVERE, "Not found - C_Order_ID=" + C_Order_ID);

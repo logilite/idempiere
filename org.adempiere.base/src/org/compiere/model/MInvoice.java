@@ -169,7 +169,8 @@ public class MInvoice extends X_C_Invoice implements DocAction
 			//	Try to find Order link
 			if (from.getC_Order_ID() != 0)
 			{
-				MOrder peer = new MOrder (from.getCtx(), from.getC_Order_ID(), from.get_TrxName());
+				MOrder peer = (MOrder) MTable.get(from.getCtx(), MOrder.Table_ID).getPO(from.getC_Order_ID(),
+						from.get_TrxName());
 				if (peer.getRef_Order_ID() != 0)
 					to.setC_Order_ID(peer.getRef_Order_ID());
 			}
@@ -555,7 +556,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		if (ship.getC_Order_ID() != 0)
 		{
 			setC_Order_ID(ship.getC_Order_ID());
-			MOrder order = new MOrder (getCtx(), ship.getC_Order_ID(), get_TrxName());
+			MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(ship.getC_Order_ID(), get_TrxName());
 			setIsDiscountPrinted(order.isDiscountPrinted());
 			setM_PriceList_ID(order.getM_PriceList_ID());
 			setIsTaxIncluded(order.isTaxIncluded());
@@ -1010,7 +1011,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		
 		// assign cash plan line from order
 		if (getC_Order_ID() > 0 && getC_CashPlanLine_ID() <= 0) {
-			MOrder order = new MOrder(getCtx(), getC_Order_ID(), get_TrxName());
+			MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(getC_Order_ID(), get_TrxName());
 			if (order.getC_CashPlanLine_ID() > 0)
 				setC_CashPlanLine_ID(order.getC_CashPlanLine_ID());
 		}
@@ -2707,13 +2708,14 @@ public class MInvoice extends X_C_Invoice implements DocAction
 			MInvoice originalInvoice = rma.getOriginalInvoice();
 			if (originalInvoice.getC_Order_ID() > 0)
 			{
-				originalOrder = new MOrder(getCtx(), originalInvoice.getC_Order_ID(), get_TrxName());
+				originalOrder = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(originalInvoice.getC_Order_ID(),
+						get_TrxName());
 				if (originalOrder != null)
 					return originalOrder;
 			}
 		}
 		else if (getC_Order_ID() > 0)
-			return new MOrder(getCtx(), getC_Order_ID(), get_TrxName());
+			return (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(getC_Order_ID(), get_TrxName());
 		return null;
 	}
 

@@ -189,7 +189,7 @@ public abstract class CreateFromShipment extends CreateFrom
 		 *  InvoiceLine     - 8
 		 */
 		if (log.isLoggable(Level.CONFIG)) log.config("C_Order_ID=" + C_Order_ID);
-		p_order = new MOrder (Env.getCtx(), C_Order_ID, null);      //  save
+		p_order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(C_Order_ID, null);    //  save
 
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 		StringBuilder sql = new StringBuilder("SELECT "

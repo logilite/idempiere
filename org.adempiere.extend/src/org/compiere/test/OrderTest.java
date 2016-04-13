@@ -24,6 +24,7 @@ import org.compiere.Adempiere;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MTable;
 import org.compiere.process.DocAction;
 import org.compiere.util.CLogMgt;
 import org.compiere.util.CLogger;
@@ -79,7 +80,7 @@ public class OrderTest implements Runnable
 			Trx trx = Trx.get(Trx.createTrxName("Test" + m_no + "_" + i),true);
 			trx.start();
 			//
-			MOrder order = new MOrder(Env.getCtx(),0,trx.getTrxName());
+			MOrder order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(0,trx.getTrxName());
 			order.setDescription("#" + m_no + "_" + i);
 			order.setC_DocTypeTarget_ID(135); 	//	POS
 			order.setC_BPartner_ID(117);		//	C&W
