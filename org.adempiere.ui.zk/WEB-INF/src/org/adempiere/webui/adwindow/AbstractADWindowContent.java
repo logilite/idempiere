@@ -122,7 +122,8 @@ import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.Menupopup;
 import org.zkoss.zul.Window.Mode;
 
-import com.adempiere.webui.adwindow.factory.ServiceUtil;
+import org.adempiere.webui.factory.ServiceUtil;
+
 
 /**
  *
