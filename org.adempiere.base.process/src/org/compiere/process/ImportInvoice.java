@@ -723,7 +723,7 @@ public class ImportInvoice extends SvrProcess
 				}
 				imp.setC_Invoice_ID (invoice.getC_Invoice_ID());
 				//	New InvoiceLine
-				MInvoiceLine line = new MInvoiceLine (invoice);
+				MInvoiceLine line = MInvoiceLine.createFrom(invoice);
 				if (imp.getLineDescription() != null)
 					line.setDescription(imp.getLineDescription());
 				line.setLine(lineNo);

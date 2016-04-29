@@ -167,7 +167,7 @@ public class InvoiceGenerateRMA extends SvrProcess
             	throw new IllegalStateException(msgiste.toString());
             }
             
-            MInvoiceLine invLine = new MInvoiceLine(invoice);
+			MInvoiceLine invLine = MInvoiceLine.createFrom(invoice);
             invLine.setRMALine(rmaLine);
             
             if (!invLine.save())

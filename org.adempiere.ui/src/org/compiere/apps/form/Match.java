@@ -32,6 +32,7 @@ import org.compiere.model.MMatchPO;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MRole;
 import org.compiere.model.MStorageReservation;
+import org.compiere.model.MTable;
 import org.compiere.process.DocumentEngine;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -421,7 +422,7 @@ public class Match
 		if (invoice)	//	Shipment - Invoice
 		{
 			//	Update Invoice Line
-			MInvoiceLine iLine = new MInvoiceLine (Env.getCtx(), Line_ID, trxName);
+			MInvoiceLine iLine = (MInvoiceLine) MTable.get(Env.getCtx(), MInvoiceLine.Table_ID).getPO(Line_ID, trxName);
 			iLine.setM_InOutLine_ID(M_InOutLine_ID);
 			if (sLine.getC_OrderLine_ID() != 0)
 				iLine.setC_OrderLine_ID(sLine.getC_OrderLine_ID());

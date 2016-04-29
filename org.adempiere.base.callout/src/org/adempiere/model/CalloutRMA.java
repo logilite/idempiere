@@ -33,6 +33,7 @@ import org.compiere.model.MOrderLine;
 import org.compiere.model.MProductPricing;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
+import org.compiere.model.MTable;
 import org.compiere.model.Query;
 import org.compiere.model.Tax;
 import org.compiere.util.DB;
@@ -84,7 +85,8 @@ public class CalloutRMA extends CalloutEngine {
 
 		if (invoiceLine_ID != 0) 
 		{
-			MInvoiceLine invoiceLine = new MInvoiceLine(ctx, invoiceLine_ID, null);
+			MInvoiceLine invoiceLine = (MInvoiceLine) MTable.get(ctx, MInvoiceLine.Table_ID)
+					.getPO(invoiceLine_ID, null);
 			if (invoiceLine.getM_Product_ID() != 0) {
 				mTab.setValue(MRMALine.COLUMNNAME_M_Product_ID, invoiceLine.getM_Product_ID());
 				mTab.setValue(MRMALine.COLUMNNAME_C_Charge_ID, null);

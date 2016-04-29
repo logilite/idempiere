@@ -40,6 +40,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MMatchInv;
 import org.compiere.model.MOrderLandedCostAllocation;
+import org.compiere.model.MTable;
 import org.compiere.model.ProductCost;
 import org.compiere.model.X_M_Cost;
 import org.compiere.util.Env;
@@ -95,7 +96,8 @@ public class Doc_MatchInv extends Doc
 		setQty (m_matchInv.getQty());
 		//	Invoice Info
 		int C_InvoiceLine_ID = m_matchInv.getC_InvoiceLine_ID();
-		m_invoiceLine = new MInvoiceLine (getCtx(), C_InvoiceLine_ID, getTrxName());
+		m_invoiceLine = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID)
+				.getPO(C_InvoiceLine_ID, getTrxName());
 		//		BP for NotInvoicedReceipts
 		int C_BPartner_ID = m_invoiceLine.getParent().getC_BPartner_ID();
 		setC_BPartner_ID(C_BPartner_ID);

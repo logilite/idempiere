@@ -455,7 +455,7 @@ public abstract class CreateFromInvoice extends CreateFrom
 					+ ", OrderLine_ID=" + C_OrderLine_ID + ", InOutLine_ID=" + M_InOutLine_ID);
 
 				//	Create new Invoice Line
-				MInvoiceLine invoiceLine = new MInvoiceLine (invoice);
+				MInvoiceLine invoiceLine = MInvoiceLine.createFrom(invoice);
 				invoiceLine.setM_Product_ID(M_Product_ID, C_UOM_ID);	//	Line UOM
 				invoiceLine.setQty(QtyEntered);							//	Invoiced/Entered
 				BigDecimal QtyInvoiced = null;

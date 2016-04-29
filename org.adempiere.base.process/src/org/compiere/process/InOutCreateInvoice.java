@@ -98,7 +98,7 @@ public class InOutCreateInvoice extends SvrProcess
 		for (int i = 0; i < shipLines.length; i++)
 		{
 			MInOutLine sLine = shipLines[i];
-			MInvoiceLine line = new MInvoiceLine(invoice);
+			MInvoiceLine line = MInvoiceLine.createFrom(invoice);
 			line.setShipLine(sLine);
 			if (sLine.sameOrderLineUOM())
 				line.setQtyEntered(sLine.getQtyEntered());

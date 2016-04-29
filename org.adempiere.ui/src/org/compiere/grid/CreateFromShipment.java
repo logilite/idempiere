@@ -586,7 +586,8 @@ public abstract class CreateFromShipment extends CreateFrom
 				if (pp != null)
 					C_InvoiceLine_ID = pp.getKey();
 				if (C_InvoiceLine_ID != 0)
-					il = new MInvoiceLine (Env.getCtx(), C_InvoiceLine_ID, trxName);
+					il = (MInvoiceLine) MTable.get(Env.getCtx(), MInvoiceLine.Table_ID)
+							.getPO(C_InvoiceLine_ID, trxName);
 				//boolean isInvoiced = (C_InvoiceLine_ID != 0);
 				//	Precision of Qty UOM
 				int precision = 2;

@@ -119,7 +119,7 @@ public class InvoiceBatchProcess extends SvrProcess
 			}
 			
 			//	Add Line
-			MInvoiceLine invoiceLine = new MInvoiceLine (m_invoice);
+			MInvoiceLine invoiceLine = MInvoiceLine.createFrom(m_invoice);
 			invoiceLine.setDescription(line.getDescription());
 			invoiceLine.setC_Charge_ID(line.getC_Charge_ID());
 			invoiceLine.setQty(line.getQtyEntered());	// Entered/Invoiced

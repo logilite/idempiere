@@ -219,7 +219,7 @@ public class RequestInvoice extends SvrProcess
 			// if (updates[i].getC_InvoiceLine_ID() > 0)
 			//	continue;
 			
-			MInvoiceLine il = new MInvoiceLine(m_invoice);
+			MInvoiceLine il = MInvoiceLine.createFrom(m_invoice);
 			m_linecount++;
 			il.setLine(m_linecount*10);
 			//

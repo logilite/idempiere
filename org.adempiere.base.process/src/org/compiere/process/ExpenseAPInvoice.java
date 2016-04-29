@@ -168,7 +168,7 @@ public class ExpenseAPInvoice extends SvrProcess
 						throw new IllegalStateException("Cannot save Invoice");
 					
 					//	Create OrderLine
-					MInvoiceLine il = new MInvoiceLine (invoice);
+					MInvoiceLine il = MInvoiceLine.createFrom(invoice);
 					//
 					if (line.getM_Product_ID() != 0)
 						il.setM_Product_ID(line.getM_Product_ID(), true);

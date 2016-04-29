@@ -90,7 +90,7 @@ public class CommissionAPInvoice extends SvrProcess
 			throw new IllegalStateException("CommissionAPInvoice - cannot save Invoice");
 			
  		//	Create Invoice Line
- 		MInvoiceLine iLine = new MInvoiceLine(invoice);
+		MInvoiceLine iLine = MInvoiceLine.createFrom(invoice);
 		iLine.setC_Charge_ID(com.getC_Charge_ID());
  		iLine.setQty(1);
  		iLine.setPrice(comRun.getGrandTotal());

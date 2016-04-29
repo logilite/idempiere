@@ -381,7 +381,7 @@ public class InvoiceGenerate extends SvrProcess
 				throw new IllegalStateException("Could not create Invoice (o)");
 		}
 		//	
-		MInvoiceLine line = new MInvoiceLine (m_invoice);
+		MInvoiceLine line = MInvoiceLine.createFrom(m_invoice);
 		line.setOrderLine(orderLine);
 		line.setQtyInvoiced(qtyInvoiced);
 		line.setQtyEntered(qtyEntered);
@@ -434,7 +434,7 @@ public class InvoiceGenerate extends SvrProcess
 				.append(" - ").append(format.format(ship.getMovementDate()));
 			m_ship = ship;
 			//
-			MInvoiceLine line = new MInvoiceLine (m_invoice);
+			MInvoiceLine line = MInvoiceLine.createFrom(m_invoice);
 			line.setIsDescription(true);
 			line.setDescription(reference.toString());
 			line.setLine(m_line + sLine.getLine() - 2);
@@ -444,7 +444,7 @@ public class InvoiceGenerate extends SvrProcess
 			if (order.getBill_Location_ID() != ship.getC_BPartner_Location_ID())
 			{
 				MLocation addr = MLocation.getBPLocation(getCtx(), ship.getC_BPartner_Location_ID(), null);
-				line = new MInvoiceLine (m_invoice);
+				line = MInvoiceLine.createFrom(m_invoice);
 				line.setIsDescription(true);
 				line.setDescription(addr.toString());
 				line.setLine(m_line + sLine.getLine() - 1);
@@ -453,7 +453,7 @@ public class InvoiceGenerate extends SvrProcess
 			}
 		}
 		//	
-		MInvoiceLine line = new MInvoiceLine (m_invoice);
+		MInvoiceLine line = MInvoiceLine.createFrom(m_invoice);
 		line.setShipLine(sLine);
 		if (sLine.sameOrderLineUOM())
 			line.setQtyEntered(sLine.getQtyEntered());

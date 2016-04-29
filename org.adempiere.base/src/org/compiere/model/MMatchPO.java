@@ -694,7 +694,8 @@ public class MMatchPO extends X_M_MatchPO
 	public MInvoiceLine getInvoiceLine()
 	{
 		if (m_iLine == null && getC_InvoiceLine_ID() != 0)
-			m_iLine = new MInvoiceLine(getCtx(), getC_InvoiceLine_ID(), get_TrxName());
+			m_iLine = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(getC_InvoiceLine_ID(),
+					get_TrxName());
 		return m_iLine;
 	}	//	getInvoiceLine
 	
@@ -798,7 +799,8 @@ public class MMatchPO extends X_M_MatchPO
 					}
 					else // create MatchPO record for PO-Invoice if different quantity
 					{
-						MInvoiceLine il = new MInvoiceLine(getCtx(), mpi[i].getC_InvoiceLine_ID(), get_TrxName());						
+						MInvoiceLine il = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(
+								mpi[i].getC_InvoiceLine_ID(), get_TrxName());
 						MMatchPO match = new MMatchPO(il, getDateTrx(), mpi[i].getQty());
 						match.setC_OrderLine_ID(getC_OrderLine_ID());
 						if (!match.save())
@@ -882,7 +884,8 @@ public class MMatchPO extends X_M_MatchPO
 						+" AND C_InvoiceLine_ID="+getC_InvoiceLine_ID());
 				if (cnt <= 0)
 				{
-					MInvoiceLine invoiceLine = new MInvoiceLine(getCtx(), getC_InvoiceLine_ID(), get_TrxName());
+					MInvoiceLine invoiceLine = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(
+							getC_InvoiceLine_ID(), get_TrxName());
 					MInOutLine inoutLine = new MInOutLine(getCtx(), getM_InOutLine_ID(), get_TrxName());
 					throw new IllegalStateException("[MatchPO] Missing corresponding invoice matching record for invoice line "
 							+ invoiceLine + " and receipt line " + inoutLine);
@@ -918,7 +921,8 @@ public class MMatchPO extends X_M_MatchPO
 			
 			if (getC_InvoiceLine_ID() > 0)
 			{
-				MInvoiceLine line = new MInvoiceLine(getCtx(), getC_InvoiceLine_ID(), get_TrxName());
+				MInvoiceLine line = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(
+						getC_InvoiceLine_ID(), get_TrxName());
 				BigDecimal matchedQty = DB.getSQLValueBD(get_TrxName(), "SELECT Coalesce(SUM(Qty),0) FROM M_MatchPO WHERE C_InvoiceLine_ID=?" , getC_InvoiceLine_ID());
 				if (matchedQty != null && matchedQty.compareTo(line.getQtyInvoiced()) > 0)
 				{

@@ -748,7 +748,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		int count = 0;
 		for (int i = 0; i < fromLines.length; i++)
 		{
-			MInvoiceLine line = new MInvoiceLine (getCtx(), 0, get_TrxName());
+			MInvoiceLine line = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(0, get_TrxName());
 			MInvoiceLine fromLine = fromLines[i];
 			if (counter)	//	header
 				PO.copyValues (fromLine, line, getAD_Client_ID(), getAD_Org_ID());
@@ -1582,7 +1582,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 
 				for (MProductBOM bom : MProductBOM.getBOMLines(product))
 				{
-					MInvoiceLine newLine = new MInvoiceLine(this);
+					MInvoiceLine newLine = MInvoiceLine.createFrom(this);
 					newLine.setLine(++lineNo);
 					newLine.setM_Product_ID(bom.getM_ProductBOM_ID(), true);
 					newLine.setQty(line.getQtyInvoiced().multiply(bom.getBOMQty()));

@@ -238,7 +238,8 @@ public class MMatchInv extends X_M_MatchInv
 		
 		if (getC_InvoiceLine_ID() > 0)
 		{
-			MInvoiceLine line = new MInvoiceLine(getCtx(), getC_InvoiceLine_ID(), get_TrxName());
+			MInvoiceLine line = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(getC_InvoiceLine_ID(),
+					get_TrxName());
 			BigDecimal matchedQty = DB.getSQLValueBD(get_TrxName(), "SELECT Coalesce(SUM(Qty),0) FROM M_MatchInv WHERE C_InvoiceLine_ID=?" , getC_InvoiceLine_ID());
 			if (matchedQty != null && matchedQty.compareTo(line.getQtyInvoiced()) > 0)
 			{

@@ -38,6 +38,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MLandedCostAllocation;
 import org.compiere.model.MOrderLandedCostAllocation;
+import org.compiere.model.MTable;
 import org.compiere.model.MTax;
 import org.compiere.model.ProductCost;
 import org.compiere.model.X_M_Cost;
@@ -873,8 +874,9 @@ public class Doc_Invoice extends Doc
 
 		Map<String, BigDecimal> costDetailAmtMap = new HashMap<String, BigDecimal>();
 		
-		//	Create New
-		MInvoiceLine il = new MInvoiceLine (getCtx(), C_InvoiceLine_ID, getTrxName());
+		//	Create New		
+		MInvoiceLine il = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(C_InvoiceLine_ID,
+				getTrxName());
 		for (int i = 0; i < lcas.length; i++)
 		{
 			MLandedCostAllocation lca = lcas[i];

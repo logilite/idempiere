@@ -681,7 +681,7 @@ public class VBOMDrop extends CPanel
 				BigDecimal qty = (BigDecimal)((VNumber)m_qtyList.get(i)).getValue();
 				int M_Product_ID = ((Integer)m_productList.get(i)).intValue();
 				//	Create Line
-				MInvoiceLine il = new MInvoiceLine (invoice);
+				MInvoiceLine il = MInvoiceLine.createFrom(invoice);
 				il.setM_Product_ID(M_Product_ID, true);
 				il.setQty(qty);
 				il.setPrice();

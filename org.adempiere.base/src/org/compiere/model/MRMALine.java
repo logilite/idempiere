@@ -101,7 +101,8 @@ public class MRMALine extends X_M_RMALine
             //   --> m_ioLine.isInvoiced just work for sales orders - so it doesn't work for purchases
             if (getInvoiceLineId() != 0)
             {
-                MInvoiceLine invoiceLine = new MInvoiceLine(getCtx(), getInvoiceLineId(), get_TrxName());
+				MInvoiceLine invoiceLine = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(
+						getInvoiceLineId(), get_TrxName());
                 precision = invoiceLine.getPrecision();
                 unitAmount = invoiceLine.getPriceEntered();
                 originalQty = invoiceLine.getQtyInvoiced();

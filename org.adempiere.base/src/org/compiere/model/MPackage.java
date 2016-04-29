@@ -404,7 +404,8 @@ public class MPackage extends X_M_Package
 				MMatchInv[] mis = MMatchInv.getInOut(getCtx(), ioOut.getM_InOut_ID(), get_TrxName());
 				for (MMatchInv mi : mis)
 				{
-					MInvoiceLine iol = new MInvoiceLine(getCtx(), mi.getC_InvoiceLine_ID(), get_TrxName());
+					MInvoiceLine iol = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(
+							mi.getC_InvoiceLine_ID(), get_TrxName());
 					if (iol.getC_Invoice_ID() > 0)
 					{
 						invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(iol.getC_Invoice_ID(),

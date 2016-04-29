@@ -2215,7 +2215,7 @@ public class MOrder extends X_C_Order implements DocAction
 			{
 				MInOutLine sLine = sLines[i];
 				//
-				MInvoiceLine iLine = new MInvoiceLine(invoice);
+				MInvoiceLine iLine = MInvoiceLine.createFrom(invoice);
 				iLine.setShipLine(sLine);
 				//	Qty = Delivered	
 				if (sLine.sameOrderLineUOM())
@@ -2246,7 +2246,7 @@ public class MOrder extends X_C_Order implements DocAction
 			{
 				MOrderLine oLine = oLines[i];
 				//
-				MInvoiceLine iLine = new MInvoiceLine(invoice);
+				MInvoiceLine iLine = MInvoiceLine.createFrom(invoice);
 				iLine.setOrderLine(oLine);
 				//	Qty = Ordered - Invoiced	
 				iLine.setQtyInvoiced(oLine.getQtyOrdered().subtract(oLine.getQtyInvoiced()));

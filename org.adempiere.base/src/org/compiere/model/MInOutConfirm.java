@@ -609,7 +609,7 @@ public class MInOutConfirm extends X_M_InOutConfirm implements DocAction
 				m_creditMemo.saveEx();
 				setC_Invoice_ID(m_creditMemo.getC_Invoice_ID());
 			}
-			MInvoiceLine line = new MInvoiceLine (m_creditMemo);
+			MInvoiceLine line = MInvoiceLine.createFrom(m_creditMemo);
 			line.setShipLine(confirm.getLine());
 			if (confirm.getLine().getProduct() != null) {
 				// use product UOM in case the shipment hasn't the same uom than the order

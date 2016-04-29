@@ -140,16 +140,18 @@ public class MInvoiceLine extends X_C_InvoiceLine
 	 * 	Parent Constructor
 	 * 	@param invoice parent
 	 */
-	public MInvoiceLine (MInvoice invoice)
+	public static MInvoiceLine createFrom(MInvoice invoice)
 	{
-		this (invoice.getCtx(), 0, invoice.get_TrxName());
+		MInvoiceLine invoiceLine = (MInvoiceLine) MTable.get(invoice.getCtx(), MInvoiceLine.Table_ID).getPO(0,
+				invoice.get_TrxName());
 		if (invoice.get_ID() == 0)
 			throw new IllegalArgumentException("Header not saved");
-		setClientOrg(invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
-		setC_Invoice_ID (invoice.getC_Invoice_ID());
-		setInvoice(invoice);
-	}	//	MInvoiceLine
+		invoiceLine.setClientOrg(invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
+		invoiceLine.setC_Invoice_ID(invoice.getC_Invoice_ID());
+		invoiceLine.setInvoice(invoice);
 
+		return invoiceLine;
+	} // MInvoiceLine
 
 	/**
 	 *  Load Constructor
