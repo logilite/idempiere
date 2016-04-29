@@ -372,7 +372,7 @@ public class SalesOrderRateInquiryProcess extends SvrProcess
 		
 		int BoxCount = packages.size();
 		
-		MShippingTransaction st = new MShippingTransaction(ctx, 0, trxName);
+		MShippingTransaction st=(MShippingTransaction) MTable.get(ctx, MShippingTransaction.Table_ID).getPO(0,trxName);
 		st.setAction(action);
 //		st.setAD_Client_ID(m_order.getAD_Client_ID());
 		st.setAD_Org_ID(m_order.getAD_Org_ID());
