@@ -48,6 +48,7 @@ import org.adempiere.webui.editor.WebEditorFactory;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
+import org.adempiere.webui.factory.QuickEntryServiceUtil;
 import org.adempiere.webui.grid.WQuickEntry;
 import org.adempiere.webui.panel.InfoPanel;
 import org.adempiere.webui.session.SessionManager;
@@ -96,6 +97,7 @@ import org.zkoss.zul.Separator;
 import org.zkoss.zul.South;
 import org.zkoss.zul.Space;
 import org.zkoss.zul.Vbox;
+
 
 /**
  * AD_InfoWindow implementation
@@ -2053,7 +2055,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			GridWindow gridwindow = GridWindow.get(Env.getCtx(), 0, getADWindowID());
 			hasRightQuickEntry = gridwindow != null;
 			if (hasRightQuickEntry)
-				vqe = new WQuickEntry (0, getADWindowID());
+				vqe = QuickEntryServiceUtil.getWQuickEntry(0, getADWindowID());
 		}
 			
 		return hasNew && vqe != null && vqe.isAvailableQuickEdit();
@@ -2080,7 +2082,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		// each time close WQuickEntry dialog, 
 		// window is  un-registry, variable environment of this window as _QUICK_ENTRY_MODE_ is removed
 		// so if reuse WQuickEntry will let some field in child tab init at read only state
-		WQuickEntry vqe = new WQuickEntry (0, getADWindowID());
+		WQuickEntry vqe = QuickEntryServiceUtil.getWQuickEntry(0, getADWindowID());
 		
 		vqe.loadRecord (0);								
 		

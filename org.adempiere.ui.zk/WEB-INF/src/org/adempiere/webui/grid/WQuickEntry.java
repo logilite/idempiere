@@ -94,6 +94,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	 * 	@param WindowNo	Window No
 	 * 	@param AD_Window_ID
 	 */
+	
 
 	public WQuickEntry(int WindowNo, int AD_Window_ID)
 	{
@@ -133,7 +134,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	 * 	@throws Exception
 	 */
 
-	private void jbInit() throws Exception
+	protected void jbInit() throws Exception
 	{
 		this.setWidth("350px");
 		this.setBorder("normal");
