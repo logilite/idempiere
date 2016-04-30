@@ -458,7 +458,7 @@ public class RequisitionPOCreate extends SvrProcess
 		}
 		
 		//	No Order Line
-		m_orderLine = new MOrderLine(m_order);
+		m_orderLine = MOrderLine.createFrom(m_order);
 		m_orderLine.setDatePromised(rLine.getDateRequired());
 		if (product != null)
 		{

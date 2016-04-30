@@ -24,16 +24,17 @@ import java.util.logging.Level;
 
 import org.compiere.model.I_M_InOutLine;
 import org.compiere.model.I_M_RMALine;
-import org.compiere.model.MOrderLandedCostAllocation;
-import org.compiere.model.MTax;
-import org.compiere.model.MCurrency;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCostDetail;
+import org.compiere.model.MCurrency;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
+import org.compiere.model.MOrderLandedCostAllocation;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
+import org.compiere.model.MTable;
+import org.compiere.model.MTax;
 import org.compiere.model.ProductCost;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -412,7 +413,8 @@ public class Doc_InOut extends Doc
 					int C_OrderLine_ID = line.getC_OrderLine_ID();
 					if (C_OrderLine_ID > 0)
 					{
-						orderLine = new MOrderLine (getCtx(), C_OrderLine_ID, getTrxName());
+						orderLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(C_OrderLine_ID,
+								getTrxName());
 						MOrderLandedCostAllocation[] allocations = MOrderLandedCostAllocation.getOfOrderLine(C_OrderLine_ID, getTrxName());
 						for(MOrderLandedCostAllocation allocation : allocations) 
 						{														

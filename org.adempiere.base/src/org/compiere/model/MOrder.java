@@ -523,7 +523,7 @@ public class MOrder extends X_C_Order implements DocAction
 		int count = 0;
 		for (int i = 0; i < fromLines.length; i++)
 		{
-			MOrderLine line = new MOrderLine (this);
+			MOrderLine line = MOrderLine.createFrom(this);
 			PO.copyValues(fromLines[i], line, getAD_Client_ID(), getAD_Org_ID());
 			line.setC_Order_ID(getC_Order_ID());
 			//
@@ -1481,7 +1481,7 @@ public class MOrder extends X_C_Order implements DocAction
 		{
 			if (freightLine == null)
 			{
-				freightLine = new MOrderLine(this);
+				freightLine = MOrderLine.createFrom(this);
 			
 				if (ci.getC_ChargeFreight_ID() > 0)
 					freightLine.setC_Charge_ID(ci.getC_ChargeFreight_ID());
@@ -1545,7 +1545,7 @@ public class MOrder extends X_C_Order implements DocAction
 			{
 				if (freightLine == null)
 				{
-					freightLine = new MOrderLine(this);
+					freightLine = MOrderLine.createFrom(this);
 				
 					if (ci.getC_ChargeFreight_ID() > 0)
 						freightLine.setC_Charge_ID(ci.getC_ChargeFreight_ID());
@@ -1623,7 +1623,7 @@ public class MOrder extends X_C_Order implements DocAction
 
 				for (MProductBOM bom : MProductBOM.getBOMLines(product))
 				{
-					MOrderLine newLine = new MOrderLine(this);
+					MOrderLine newLine = MOrderLine.createFrom(this);
 					newLine.setLine(++lineNo);
 					newLine.setM_Product_ID(bom.getM_ProductBOM_ID(), true);
 					newLine.setQty(line.getQtyOrdered().multiply(bom.getBOMQty()));
@@ -2414,7 +2414,8 @@ public class MOrder extends X_C_Order implements DocAction
 				deleteMatchPOCostDetail(line);
 			}
 			if (line.getLink_OrderLine_ID() > 0) {
-				MOrderLine soline = new MOrderLine(getCtx(), line.getLink_OrderLine_ID(), get_TrxName());
+				MOrderLine soline = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(
+						line.getLink_OrderLine_ID(), get_TrxName());
 				soline.setLink_OrderLine_ID(0);
 				soline.saveEx();
 			}

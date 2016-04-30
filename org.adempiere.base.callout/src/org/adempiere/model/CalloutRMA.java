@@ -107,7 +107,8 @@ public class CalloutRMA extends CalloutEngine {
 		} 
 		else if (iol.getC_OrderLine_ID() != 0) 
 		{
-			MOrderLine orderLine = new MOrderLine(ctx, iol.getC_OrderLine_ID(), null);
+			MOrderLine orderLine = (MOrderLine) MTable.get(ctx, MOrderLine.Table_ID).getPO(iol.getC_OrderLine_ID(),
+					null);
 			if (orderLine.getM_Product_ID() != 0) {
 				mTab.setValue(MRMALine.COLUMNNAME_M_Product_ID, orderLine.getM_Product_ID());
 			    mTab.setValue(MRMALine.COLUMNNAME_C_Charge_ID, null);

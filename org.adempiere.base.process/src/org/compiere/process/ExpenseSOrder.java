@@ -221,7 +221,7 @@ public class ExpenseSOrder extends SvrProcess
 		}
 		
 		//	OrderLine
-		MOrderLine ol = new MOrderLine (m_order);
+		MOrderLine ol = MOrderLine.createFrom(m_order);
 		//
 		if (tel.getM_Product_ID() != 0)
 			ol.setM_Product_ID(tel.getM_Product_ID(), 

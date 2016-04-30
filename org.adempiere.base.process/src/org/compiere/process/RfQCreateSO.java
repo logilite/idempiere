@@ -106,7 +106,7 @@ public class RfQCreateSO extends SvrProcess
 				MRfQLineQty qty = qtys[j];
 				if (qty.isActive() && qty.isOfferQty())
 				{
-					MOrderLine ol = new MOrderLine (order);
+					MOrderLine ol = MOrderLine.createFrom(order);
 					ol.setM_Product_ID(line.getM_Product_ID(),
 						qty.getC_UOM_ID());
 					ol.setDescription(line.getDescription());

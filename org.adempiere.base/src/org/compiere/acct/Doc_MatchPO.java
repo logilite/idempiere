@@ -38,6 +38,7 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLandedCostAllocation;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
+import org.compiere.model.MTable;
 import org.compiere.model.MTax;
 import org.compiere.model.ProductCost;
 import org.compiere.model.X_M_InOut;
@@ -92,7 +93,7 @@ public class Doc_MatchPO extends Doc
 		setQty (m_matchPO.getQty());
 		//
 		m_C_OrderLine_ID = m_matchPO.getC_OrderLine_ID();
-		m_oLine = new MOrderLine (getCtx(), m_C_OrderLine_ID, getTrxName());
+		m_oLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(m_C_OrderLine_ID, getTrxName());
 		//
 		m_M_InOutLine_ID = m_matchPO.getM_InOutLine_ID();
 		m_ioLine = new MInOutLine (getCtx(), m_M_InOutLine_ID, getTrxName());

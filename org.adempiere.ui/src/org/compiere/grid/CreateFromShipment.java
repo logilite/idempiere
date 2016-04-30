@@ -616,7 +616,7 @@ public abstract class CreateFromShipment extends CreateFrom
 				if (C_OrderLine_ID != 0)
 				{
 					iol.setC_OrderLine_ID(C_OrderLine_ID);
-					ol = new MOrderLine (Env.getCtx(), C_OrderLine_ID, trxName);
+					ol = (MOrderLine) MTable.get(Env.getCtx(), MOrderLine.Table_ID).getPO(C_OrderLine_ID, trxName);
 					if (ol.getQtyEntered().compareTo(ol.getQtyOrdered()) != 0)
 					{
 						iol.setMovementQty(QtyEntered

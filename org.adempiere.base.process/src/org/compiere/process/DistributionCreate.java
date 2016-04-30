@@ -205,7 +205,7 @@ public class DistributionCreate extends SvrProcess
 		}
 
 		//	Create Order Line
-		MOrderLine line = new MOrderLine(order);
+		MOrderLine line = MOrderLine.createFrom(order);
 		line.setC_BPartner_ID(dll.getC_BPartner_ID());
 		if (dll.getC_BPartner_Location_ID() != 0)
 			line.setC_BPartner_Location_ID(dll.getC_BPartner_Location_ID());

@@ -207,7 +207,7 @@ public final class InventoryUtil
 		order.saveEx();
 		// 
 		MProduct product = getCreateProduct(doc.ProductValue, null);
-		MOrderLine line = new MOrderLine(order);
+		MOrderLine line = MOrderLine.createFrom(order);
 		line.setProduct(product);
 		line.setQty(doc.Qty);
 		line.saveEx();

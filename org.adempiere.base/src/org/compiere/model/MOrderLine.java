@@ -172,14 +172,17 @@ public class MOrderLine extends X_C_OrderLine
 			ol.saveEx();
 	 *  @param  order parent order
 	 */
-	public MOrderLine (MOrder order)
+	public static MOrderLine createFrom(MOrder order)
 	{
-		this (order.getCtx(), 0, order.get_TrxName());
+		MOrderLine orderLine = (MOrderLine) MTable.get(order.getCtx(), MOrderLine.Table_ID).getPO(0,
+				order.get_TrxName());
 		if (order.get_ID() == 0)
 			throw new IllegalArgumentException("Header not saved");
-		setC_Order_ID (order.getC_Order_ID());	//	parent
-		setOrder(order);
-	}	//	MOrderLine
+		orderLine.setC_Order_ID(order.getC_Order_ID()); // parent
+		orderLine.setOrder(order);
+
+		return orderLine;
+	} // MOrderLine
 
 	/**
 	 *  Load Constructor

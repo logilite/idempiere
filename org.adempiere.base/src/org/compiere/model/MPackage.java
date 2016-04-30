@@ -163,7 +163,8 @@ public class MPackage extends X_M_Package
 			MMatchPO[] mos = MMatchPO.getInOut(getCtx(), shipment.getM_InOut_ID(), get_TrxName());
 			for (MMatchPO mo : mos)
 			{
-				MOrderLine ol = new MOrderLine(getCtx(), mo.getC_OrderLine_ID(), get_TrxName());
+				MOrderLine ol = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(mo.getC_OrderLine_ID(),
+						get_TrxName());
 				if (ol.getC_Order_ID() > 0)
 				{
 					order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(ol.getC_Order_ID(), get_TrxName());
@@ -437,7 +438,8 @@ public class MPackage extends X_M_Package
 				MMatchPO[] mos = MMatchPO.getInOut(getCtx(), ioOut.getM_InOut_ID(), get_TrxName());
 				for (MMatchPO mo : mos)
 				{
-					MOrderLine ol = new MOrderLine(getCtx(), mo.getC_OrderLine_ID(), get_TrxName());
+					MOrderLine ol = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(
+							mo.getC_OrderLine_ID(), get_TrxName());
 					if (ol.getC_Order_ID() > 0)
 					{
 						order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(ol.getC_Order_ID(), get_TrxName());

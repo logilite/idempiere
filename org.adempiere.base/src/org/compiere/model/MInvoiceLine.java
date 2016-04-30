@@ -284,7 +284,8 @@ public class MInvoiceLine extends X_C_InvoiceLine
 		int C_OrderLine_ID = sLine.getC_OrderLine_ID();
 		if (C_OrderLine_ID != 0)
 		{
-			MOrderLine oLine = new MOrderLine (getCtx(), C_OrderLine_ID, get_TrxName());
+			MOrderLine oLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(C_OrderLine_ID,
+					get_TrxName());
 			setS_ResourceAssignment_ID(oLine.getS_ResourceAssignment_ID());
 			//
 			if (sLine.sameOrderLineUOM())

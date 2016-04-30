@@ -37,6 +37,7 @@ import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
+import org.compiere.model.MTable;
 import org.compiere.model.MWarehousePrice;
 import org.compiere.model.PO;
 import org.compiere.swing.CButton;
@@ -241,7 +242,7 @@ public class SubCurrentLine extends PosSubPanel implements ActionListener, Focus
 		{
 			if ( orderLineId > 0 )
 			{
-				MOrderLine line = new MOrderLine(p_ctx, orderLineId, null);
+				MOrderLine line = (MOrderLine) MTable.get(p_ctx, MOrderLine.Table_ID).getPO(orderLineId, null);
 				if ( line != null )
 				{
 					line.setQty(line.getQtyOrdered().add(Env.ONE));
@@ -255,7 +256,7 @@ public class SubCurrentLine extends PosSubPanel implements ActionListener, Focus
 		{
 			if ( orderLineId > 0 )
 			{
-				MOrderLine line = new MOrderLine(p_ctx, orderLineId, null);
+				MOrderLine line = (MOrderLine) MTable.get(p_ctx, MOrderLine.Table_ID).getPO(orderLineId, null);
 				if ( line != null )
 				{
 					line.setQty(line.getQtyOrdered().subtract(Env.ONE));
@@ -270,7 +271,7 @@ public class SubCurrentLine extends PosSubPanel implements ActionListener, Focus
 
 		//	VNumber
 		else if (e.getSource() == f_price)		{
-			MOrderLine line = new MOrderLine(p_ctx, orderLineId, null);
+			MOrderLine line = (MOrderLine) MTable.get(p_ctx, MOrderLine.Table_ID).getPO(orderLineId, null);
 			if ( line != null )
 			{
 				line.setQty(new BigDecimal(f_price.getValue().toString()));
@@ -280,7 +281,7 @@ public class SubCurrentLine extends PosSubPanel implements ActionListener, Focus
 		}
 		else if (e.getSource() == f_quantity && orderLineId > 0 )
 		{
-			MOrderLine line = new MOrderLine(p_ctx, orderLineId, null);
+			MOrderLine line = (MOrderLine) MTable.get(p_ctx, MOrderLine.Table_ID).getPO(orderLineId, null);
 			if ( line != null )
 			{
 				line.setQty(new BigDecimal(f_quantity.getValue().toString()));
@@ -707,7 +708,7 @@ public class SubCurrentLine extends PosSubPanel implements ActionListener, Focus
 			return;
 	
 		if (log.isLoggable(Level.FINE)) log.fine("SubCurrentLine - loading line " + lineId);
-		MOrderLine ol = new MOrderLine(p_ctx, lineId, null);
+		MOrderLine ol = (MOrderLine) MTable.get(p_ctx, MOrderLine.Table_ID).getPO(lineId, null);
 		if ( ol != null )
 		{
 			setPrice(ol.getPriceActual());

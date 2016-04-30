@@ -87,7 +87,7 @@ public class ProjectGenOrder extends SvrProcess
 			MProjectLine[] lines = fromProject.getLines ();
 			for (int i = 0; i < lines.length; i++)
 			{
-				MOrderLine ol = new MOrderLine(order);
+				MOrderLine ol = MOrderLine.createFrom(order);
 				ol.setLine(lines[i].getLine());
 				ol.setDescription(lines[i].getDescription());
 				//

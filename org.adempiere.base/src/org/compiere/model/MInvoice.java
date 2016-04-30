@@ -774,7 +774,8 @@ public class MInvoice extends X_C_Invoice implements DocAction
 				line.setRef_InvoiceLine_ID(fromLine.getC_InvoiceLine_ID());
 				if (fromLine.getC_OrderLine_ID() != 0)
 				{
-					MOrderLine peer = new MOrderLine (getCtx(), fromLine.getC_OrderLine_ID(), get_TrxName());
+					MOrderLine peer = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(
+							fromLine.getC_OrderLine_ID(), get_TrxName());
 					if (peer.getRef_OrderLine_ID() != 0)
 						line.setC_OrderLine_ID(peer.getRef_OrderLine_ID());
 				}
@@ -1830,7 +1831,8 @@ public class MInvoice extends X_C_Invoice implements DocAction
 				if (isSOTrx()
 					|| line.getM_Product_ID() == 0)
 				{
-					ol = new MOrderLine (getCtx(), line.getC_OrderLine_ID(), get_TrxName());
+					ol = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(line.getC_OrderLine_ID(),
+							get_TrxName());
 					if (line.getQtyInvoiced() != null)
 						ol.setQtyInvoiced(ol.getQtyInvoiced().add(line.getQtyInvoiced()));
 					if (!ol.save(get_TrxName()))

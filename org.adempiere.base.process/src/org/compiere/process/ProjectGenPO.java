@@ -168,7 +168,7 @@ public class ProjectGenPO extends SvrProcess
 		}
 
 		//	Create Line
-		MOrderLine orderLine = new MOrderLine (order);
+		MOrderLine orderLine = MOrderLine.createFrom(order);
 		orderLine.setM_Product_ID(projectLine.getM_Product_ID(), true);
 		orderLine.setQty(projectLine.getPlannedQty());
 		orderLine.setDescription(projectLine.getDescription());

@@ -161,7 +161,7 @@ public class PosOrderModel extends MOrder {
 		}
 
         //create new line
-		MOrderLine line = new MOrderLine(this);
+		MOrderLine line = MOrderLine.createFrom(this);
 		line.setProduct(product);
 		line.setQty(QtyOrdered);
 			

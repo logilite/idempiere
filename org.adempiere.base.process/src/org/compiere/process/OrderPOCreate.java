@@ -222,7 +222,7 @@ public class OrderPOCreate extends SvrProcess
 				{
 					if (soLines[i].getM_Product_ID() == M_Product_ID)
 					{
-						MOrderLine poLine = new MOrderLine (po);
+						MOrderLine poLine = MOrderLine.createFrom(po);
 						poLine.setLink_OrderLine_ID(soLines[i].getC_OrderLine_ID());
 						poLine.setM_Product_ID(soLines[i].getM_Product_ID());
 						poLine.setC_Charge_ID(soLines[i].getC_Charge_ID());

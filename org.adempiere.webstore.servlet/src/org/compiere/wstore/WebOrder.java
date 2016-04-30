@@ -107,7 +107,7 @@ public class WebOrder
 		for (int i = 0; i < lines.size(); i++)
 		{
 			WebBasketLine wbl = lines.get(i);
-			MOrderLine ol = new MOrderLine(m_order);
+			MOrderLine ol = MOrderLine.createFrom(m_order);
 			ol.setM_Product_ID(wbl.getM_Product_ID(), true);
 			ol.setQty(wbl.getQuantity());
 			ol.setPrice();

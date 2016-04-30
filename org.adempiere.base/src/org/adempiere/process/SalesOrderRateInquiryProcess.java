@@ -149,7 +149,7 @@ public class SalesOrderRateInquiryProcess extends SvrProcess
 			{
 				if (freightLine == null)
 				{
-					freightLine = new MOrderLine(m_order);
+					freightLine = MOrderLine.createFrom(m_order);
 				
 					if (ci.getC_ChargeFreight_ID() > 0)
 						freightLine.setC_Charge_ID(ci.getC_ChargeFreight_ID());

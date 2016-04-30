@@ -412,7 +412,7 @@ public class CalloutInOut extends CalloutEngine
 			return "";
 
 		//	Get Details
-		MOrderLine ol = new MOrderLine (ctx, C_OrderLine_ID.intValue(), null);
+		MOrderLine ol = (MOrderLine) MTable.get(ctx, MOrderLine.Table_ID).getPO(C_OrderLine_ID.intValue(), null);
 		if (ol.get_ID() != 0)
 		{
 			if (ol.getC_Charge_ID() > 0 && ol.getM_Product_ID() <= 0) {

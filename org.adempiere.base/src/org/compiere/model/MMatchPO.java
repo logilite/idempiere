@@ -310,7 +310,8 @@ public class MMatchPO extends X_M_MatchPO
 				for (MMatchPO matchpo : matchpos)
 				{
 					C_OrderLine_ID = matchpo.getC_OrderLine_ID();
-					MOrderLine orderLine = new MOrderLine(ctx, C_OrderLine_ID, trxName);
+					MOrderLine orderLine = (MOrderLine) MTable.get(ctx, MOrderLine.Table_ID).getPO(C_OrderLine_ID,
+							trxName);
 					BigDecimal toInvoice = orderLine.getQtyOrdered().subtract(orderLine.getQtyInvoiced());
 					if (toInvoice.signum() <= 0) 
 						continue;
@@ -734,7 +735,7 @@ public class MMatchPO extends X_M_MatchPO
 	{
 		if ((m_oLine == null && getC_OrderLine_ID() != 0) 
 			|| getC_OrderLine_ID() != m_oLine.getC_OrderLine_ID())
-			m_oLine = new MOrderLine(getCtx(), getC_OrderLine_ID(), get_TrxName());
+			m_oLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(getC_OrderLine_ID(), get_TrxName());
 		return m_oLine;
 	}	//	getOrderLine
 	
@@ -935,7 +936,8 @@ public class MMatchPO extends X_M_MatchPO
 				boolean validateOrderedQty = MSysConfig.getBooleanValue(MSysConfig.VALIDATE_MATCHING_TO_ORDERED_QTY, true, Env.getAD_Client_ID(Env.getCtx()));
 				if (validateOrderedQty)
 				{
-					MOrderLine line = new MOrderLine(getCtx(), getC_OrderLine_ID(), get_TrxName());
+					MOrderLine line = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(getC_OrderLine_ID(),
+							get_TrxName());
 					BigDecimal invoicedQty = DB.getSQLValueBD(get_TrxName(), "SELECT Coalesce(SUM(Qty),0) FROM M_MatchPO WHERE C_InvoiceLine_ID > 0 and C_OrderLine_ID=?" , getC_OrderLine_ID());
 					if (invoicedQty != null && invoicedQty.compareTo(line.getQtyOrdered()) > 0)
 					{
@@ -1057,7 +1059,8 @@ public class MMatchPO extends X_M_MatchPO
 		//	(Reserved in VMatch and MInOut.completeIt)
 		if (success && getC_OrderLine_ID() != 0)
 		{
-			MOrderLine orderLine = new MOrderLine (getCtx(), getC_OrderLine_ID(), get_TrxName());
+			MOrderLine orderLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(getC_OrderLine_ID(),
+					get_TrxName());
 			if (getM_InOutLine_ID() != 0)
 				orderLine.setQtyDelivered(orderLine.getQtyDelivered().subtract(getQty()));
 			if (getC_InvoiceLine_ID() != 0)

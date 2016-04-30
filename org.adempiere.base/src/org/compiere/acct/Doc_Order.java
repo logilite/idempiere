@@ -31,6 +31,7 @@ import org.compiere.model.MCurrency;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MRequisitionLine;
+import org.compiere.model.MTable;
 import org.compiere.model.MTax;
 import org.compiere.model.ProductCost;
 import org.compiere.util.DB;
@@ -523,7 +524,7 @@ public class Doc_Order extends Doc
 			{
 				if (maxQty.signum() == 0)
 					continue;
-				MOrderLine line = new MOrderLine (doc.getCtx(), rs, null);
+				MOrderLine line = (MOrderLine) MTable.get(doc.getCtx(), MOrderLine.Table_ID).getPO(rs, null);
 				DocLine docLine = new DocLine (line, doc);
 				//	Currency
 				if (precision == -1)
@@ -664,7 +665,7 @@ public class Doc_Order extends Doc
 			{
 				if (maxQty.signum() == 0)
 					continue;
-				MOrderLine line = new MOrderLine (doc.getCtx(), rs, null);
+				MOrderLine line = (MOrderLine) MTable.get(doc.getCtx(), MOrderLine.Table_ID).getPO(rs, null);
 				DocLine docLine = new DocLine (line, doc);
 				//	Currency
 				if (precision == -1)

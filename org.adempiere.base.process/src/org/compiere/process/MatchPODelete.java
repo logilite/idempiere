@@ -20,6 +20,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.MMatchPO;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MTable;
 import org.compiere.util.AdempiereUserError;
 
 
@@ -61,7 +62,8 @@ public class MatchPODelete extends SvrProcess
 		boolean isMatchReceipt = (po.getM_InOutLine_ID() != 0);			 
 		if (isMatchReceipt)
 		{
-			orderLine = new MOrderLine (getCtx(), po.getC_OrderLine_ID(), get_TrxName());
+			orderLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(po.getC_OrderLine_ID(),
+					get_TrxName());
 			orderLine.setQtyReserved(orderLine.getQtyReserved().add(po.getQty()));
 		}
 		//

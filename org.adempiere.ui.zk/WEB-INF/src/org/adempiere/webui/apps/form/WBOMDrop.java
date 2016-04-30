@@ -940,7 +940,7 @@ public class WBOMDrop extends ADForm implements EventListener<Event>
 					BigDecimal qty = m_qtyList.get(i).getValue();
 					int M_Product_ID = m_productList.get(i).intValue();
 					// Create Line
-					MOrderLine ol = new MOrderLine(order);
+					MOrderLine ol = MOrderLine.createFrom(order);
 					ol.setM_Product_ID(M_Product_ID, true);
 					ol.setQty(qty);
 					ol.setPrice();

@@ -706,7 +706,8 @@ public class MInOutLine extends X_M_InOutLine
 		if (getC_OrderLine_ID() <= 0)
 			return false;
 
-		MOrderLine oLine = new MOrderLine(getCtx(), getC_OrderLine_ID(), get_TrxName());
+		MOrderLine oLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(getC_OrderLine_ID(),
+				get_TrxName());
 
 		if (oLine.getC_UOM_ID() != getC_UOM_ID())
 			return false;

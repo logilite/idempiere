@@ -749,7 +749,8 @@ public class MInOut extends X_M_InOut implements DocAction
 				line.setRef_InOutLine_ID(fromLine.getM_InOutLine_ID());
 				if (fromLine.getC_OrderLine_ID() != 0)
 				{
-					MOrderLine peer = new MOrderLine (getCtx(), fromLine.getC_OrderLine_ID(), get_TrxName());
+					MOrderLine peer = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(
+							fromLine.getC_OrderLine_ID(), get_TrxName());
 					if (peer.getRef_OrderLine_ID() != 0)
 						line.setC_OrderLine_ID(peer.getRef_OrderLine_ID());
 				}
@@ -1305,7 +1306,8 @@ public class MInOut extends X_M_InOut implements DocAction
 			MOrderLine oLine = null;
 			if (sLine.getC_OrderLine_ID() != 0)
 			{
-				oLine = new MOrderLine (getCtx(), sLine.getC_OrderLine_ID(), get_TrxName());
+				oLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(sLine.getC_OrderLine_ID(),
+						get_TrxName());
 				if (log.isLoggable(Level.FINE)) log.fine("OrderLine - Reserved=" + oLine.getQtyReserved()
 					+ ", Delivered=" + oLine.getQtyDelivered());
 			}
@@ -1654,7 +1656,8 @@ public class MInOut extends X_M_InOut implements DocAction
 						}
 						
 						//	Update PO with ASI
-						oLine = new MOrderLine (getCtx(), iLine.getC_OrderLine_ID(), get_TrxName());
+						oLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(iLine.getC_OrderLine_ID(),
+								get_TrxName());
 						if (   oLine != null && oLine.getM_AttributeSetInstance_ID() == 0
 							&& sLine.getMovementQty().compareTo(oLine.getQtyOrdered()) == 0) //  just if full match [ 1876965 ]
 						{
@@ -1755,7 +1758,8 @@ public class MInOut extends X_M_InOut implements DocAction
 		for (int i = 0; i < lines.length; i++)
 		{
 			MInOutLine dropLine = lines[i];
-			MOrderLine ol = new MOrderLine(getCtx(), dropLine.getC_OrderLine_ID(), null);
+			MOrderLine ol = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(dropLine.getC_OrderLine_ID(),
+					null);	
 			if ( ol.getC_OrderLine_ID() != 0 ) {
 				dropLine.setC_OrderLine_ID(ol.getLink_OrderLine_ID());
 				dropLine.saveEx();

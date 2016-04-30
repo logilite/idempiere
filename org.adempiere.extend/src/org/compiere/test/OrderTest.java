@@ -96,7 +96,7 @@ public class OrderTest implements Runnable
 			int linesNumber = r.nextInt(m_maxLines) + 1;
 			for (int j = 0; j < linesNumber; j++)
 			{
-				MOrderLine line = new MOrderLine(order);
+				MOrderLine line = MOrderLine.createFrom(order);
 				line.setM_Product_ID(123);		//	Oak Tree
 				line.setQty(new BigDecimal(5));
 				if (!line.save())

@@ -440,7 +440,7 @@ public class ReplenishReport extends SvrProcess
 				info.append(" - "); 
 				info.append(order.getDocumentNo());
 			}
-			MOrderLine line = new MOrderLine (order);
+			MOrderLine line = MOrderLine.createFrom(order);
 			line.setM_Product_ID(replenish.getM_Product_ID());
 			line.setQty(replenish.getQtyToOrder());
 			line.setPrice();

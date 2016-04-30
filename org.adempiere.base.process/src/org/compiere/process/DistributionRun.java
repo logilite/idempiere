@@ -555,7 +555,7 @@ public class DistributionRun extends SvrProcess
 			}
 
 			//	Create Order Line
-			MOrderLine line = new MOrderLine(order);
+			MOrderLine line = MOrderLine.createFrom(order);
 			if (counter && bp.getAD_OrgBP_ID_Int() > 0)
 				;	//	don't overwrite counter doc
 			else	//	normal - optionally overwrite

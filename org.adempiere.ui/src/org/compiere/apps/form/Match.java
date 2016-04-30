@@ -465,7 +465,7 @@ public class Match
 		else	//	Shipment - Order
 		{
 			//	Update Order Line
-			MOrderLine oLine = new MOrderLine(Env.getCtx(), Line_ID, trxName);
+			MOrderLine oLine = (MOrderLine) MTable.get(Env.getCtx(), MOrderLine.Table_ID).getPO(Line_ID, trxName);
 			if (oLine.get_ID() != 0)	//	other in MInOut.completeIt
 			{
 				oLine.setQtyReserved(oLine.getQtyReserved().subtract(qty));

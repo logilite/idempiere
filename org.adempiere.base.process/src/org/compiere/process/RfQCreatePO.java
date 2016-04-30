@@ -126,7 +126,7 @@ public class RfQCreatePO extends SvrProcess
 					//	Create PO Lline for all Purchase Line Qtys
 					if (qty.getRfQLineQty().isActive() && qty.getRfQLineQty().isPurchaseQty())
 					{
-						MOrderLine ol = new MOrderLine (order);
+						MOrderLine ol = MOrderLine.createFrom(order);
 						ol.setM_Product_ID(line.getRfQLine().getM_Product_ID(), 
 							qty.getRfQLineQty().getC_UOM_ID());
 						ol.setDescription(line.getDescription());
@@ -185,7 +185,7 @@ public class RfQCreatePO extends SvrProcess
 					MRfQResponseLineQty qty = qtys[k];
 					if (qty.getRfQLineQty().isActive() && qty.getRfQLineQty().isPurchaseQty())
 					{
-						MOrderLine ol = new MOrderLine (order);
+						MOrderLine ol = MOrderLine.createFrom(order);
 						ol.setM_Product_ID(line.getRfQLine().getM_Product_ID(), 
 							qty.getRfQLineQty().getC_UOM_ID());
 						ol.setDescription(line.getDescription());

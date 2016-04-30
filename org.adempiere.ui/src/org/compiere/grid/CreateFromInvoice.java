@@ -469,7 +469,8 @@ public abstract class CreateFromInvoice extends CreateFrom
 				//  Info
 				MOrderLine orderLine = null;
 				if (C_OrderLine_ID != 0)
-					orderLine = new MOrderLine (Env.getCtx(), C_OrderLine_ID, trxName);
+					orderLine = (MOrderLine) MTable.get(Env.getCtx(), MOrderLine.Table_ID).getPO(C_OrderLine_ID,
+							trxName);
 				//
 				MRMALine rmaLine = null;
 				if (M_RMALine_ID > 0)
@@ -482,7 +483,8 @@ public abstract class CreateFromInvoice extends CreateFrom
 					if (orderLine == null && inoutLine.getC_OrderLine_ID() != 0)
 					{
 						C_OrderLine_ID = inoutLine.getC_OrderLine_ID();
-						orderLine = new MOrderLine (Env.getCtx(), C_OrderLine_ID, trxName);
+						orderLine = (MOrderLine) MTable.get(Env.getCtx(), MOrderLine.Table_ID).getPO(C_OrderLine_ID,
+								trxName);
 					}
 				}
 				else if (C_OrderLine_ID > 0)

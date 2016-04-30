@@ -743,7 +743,7 @@ public class ImportOrder extends SvrProcess
 				}
 				imp.setC_Order_ID(order.getC_Order_ID());
 				//	New OrderLine
-				MOrderLine line = new MOrderLine (order);
+				MOrderLine line = MOrderLine.createFrom(order);
 				line.setLine(lineNo);
 				lineNo += 10;
 				if (imp.getM_Product_ID() != 0)
