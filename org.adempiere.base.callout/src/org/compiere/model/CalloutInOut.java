@@ -470,7 +470,7 @@ public class CalloutInOut extends CalloutEngine
 			return "";
 
 		//	Get Details
-		MRMALine rl = new MRMALine (ctx, M_RMALine_id.intValue(), null);
+		MRMALine rl = (MRMALine) MTable.get(ctx, MRMALine.Table_ID).getPO(M_RMALine_id.intValue(), null);
 		if (rl.get_ID() != 0)
 		{
 			if (rl.getC_Charge_ID() > 0 && rl.getM_Product_ID() <= 0) {

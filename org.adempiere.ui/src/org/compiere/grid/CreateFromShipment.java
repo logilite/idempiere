@@ -657,7 +657,7 @@ public abstract class CreateFromShipment extends CreateFrom
 				}
 				else if (M_RMALine_ID != 0)
 				{
-					rmal = new MRMALine(Env.getCtx(), M_RMALine_ID, trxName);
+					rmal = (MRMALine) MTable.get(Env.getCtx(), MRMALine.Table_ID).getPO(M_RMALine_ID, trxName);
 					iol.setM_RMALine_ID(M_RMALine_ID);
 					iol.setQtyEntered(QtyEntered);
 					iol.setDescription(rmal.getDescription());

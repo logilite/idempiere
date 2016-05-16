@@ -636,7 +636,7 @@ public class MRMA extends X_M_RMA implements DocAction
 		int count = 0;
 		for (int i = 0; i < fromLines.length; i++)
 		{
-			MRMALine line = new MRMALine(getCtx(), 0, null);
+			MRMALine line = (MRMALine) MTable.get(getCtx(), MRMALine.Table_ID).getPO(0, null);
 			MRMALine fromLine = fromLines[i];
 			line.set_TrxName(get_TrxName());
 			if (counter)	//	header
@@ -882,7 +882,7 @@ public class MRMA extends X_M_RMA implements DocAction
 
         for (int i = 0; i < rmaLineIds.length; i++)
         {
-            MRMALine rmaLine = new MRMALine(getCtx(), rmaLineIds[i], get_TrxName());
+			MRMALine rmaLine = (MRMALine) MTable.get(getCtx(), MRMALine.Table_ID).getPO(rmaLineIds[i], get_TrxName());
             chargeLineList.add(rmaLine);
         }
 

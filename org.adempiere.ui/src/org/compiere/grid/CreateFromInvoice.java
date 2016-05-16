@@ -474,7 +474,7 @@ public abstract class CreateFromInvoice extends CreateFrom
 				//
 				MRMALine rmaLine = null;
 				if (M_RMALine_ID > 0)
-					rmaLine = new MRMALine (Env.getCtx(), M_RMALine_ID, null);
+					rmaLine = (MRMALine) MTable.get(Env.getCtx(), MRMALine.Table_ID).getPO(M_RMALine_ID, null);
 				//
 				MInOutLine inoutLine = null;
 				if (M_InOutLine_ID != 0)
