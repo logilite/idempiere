@@ -245,4 +245,14 @@ public class WCreateFromWindow extends Window implements EventListener<Event>, W
 	{
 		return isCancel;
 	}
+	
+	public StatusBarPanel getStatusBar()
+	{
+		return statusBar;
+	}
+
+	public void setStatusBar(StatusBarPanel statusBar)
+	{
+		this.statusBar = statusBar;
+	}
 }
