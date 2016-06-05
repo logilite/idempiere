@@ -716,7 +716,8 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
         			if (adtab.getGridTab().isSortTab()) {
         				btn.setDisabled(true);
         			} else {
-        				btn.setDisabled(adtab.getToolbarButtons().isEmpty());
+        				boolean isToolbarDisabled = (adtab.getToolbarButtons()==null || adtab.getToolbarButtons().isEmpty());
+        				btn.setDisabled(isToolbarDisabled);
         			}
         			break;
         		}

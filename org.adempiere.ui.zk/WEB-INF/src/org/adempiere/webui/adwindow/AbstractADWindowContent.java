@@ -31,8 +31,6 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.logging.Level;
 
-import javax.print.ServiceUI;
-
 import org.adempiere.util.Callback;
 import org.adempiere.webui.AdempiereIdGenerator;
 import org.adempiere.webui.AdempiereWebUI;
@@ -61,6 +59,7 @@ import org.adempiere.webui.event.ActionListener;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.event.ToolbarListener;
 import org.adempiere.webui.exception.ApplicationException;
+import org.adempiere.webui.factory.ServiceUtil;
 import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.panel.InfoPanel;
 import org.adempiere.webui.panel.WAttachment;
@@ -122,8 +121,6 @@ import org.zkoss.zul.Grid;
 import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.Menupopup;
 import org.zkoss.zul.Window.Mode;
-
-import org.adempiere.webui.factory.ServiceUtil;
 
 
 /**
@@ -621,20 +618,24 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		if(!Util.isEmpty(type)){
 			
 			IADTabpanel adTabPan = ServiceUtil.getADTabPanel(type);
-			gTab.addDataStatusListener(this);
-			adTabPan.init(this, curWindowNo, gTab, gridWindow);
-			adTabbox.addTab(gTab, adTabPan);
-			if (tabIndex == 0){
-				adTabPan.createUI();
-				if (!m_queryInitiating) 
-				{
-					initFirstTabpanel();
+			if (adTabPan != null) {
+				gTab.addDataStatusListener(this);
+				adTabPan.init(this, curWindowNo, gTab, gridWindow);
+				adTabbox.addTab(gTab, adTabPan);
+				if (tabIndex == 0) {
+					adTabPan.createUI();
+					if (!m_queryInitiating) {
+						initFirstTabpanel();
+					}
 				}
-			}
 
-			adTabPan.addEventListener(ADTabpanel.ON_DYNAMIC_DISPLAY_EVENT, this);
-			if (!m_queryInitiating && tabIndex == 0) {
-				initQueryOnNew(query);
+				adTabPan.addEventListener(ADTabpanel.ON_DYNAMIC_DISPLAY_EVENT,
+						this);
+				if (!m_queryInitiating && tabIndex == 0) {
+					initQueryOnNew(query);
+				}
+			} else {
+				//TODO
 			}
 
 		} else if (gTab.isSortTab()) {
@@ -1691,9 +1692,6 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         
         toolbar.enableTabNavigation(breadCrumb.hasParentLink(), adTabbox.getSelectedDetailADTabpanel() != null);
         
-        //Deepak-Enabling customize button IDEMPIERE-364
-        /*if(!(adTabbox.getSelectedTabpanel() instanceof ADSortTab))
-        	toolbar.enableCustomize(((ADTabpanel)adTabbox.getSelectedTabpanel()).isGridView());*/
         
         toolbar.enableCustomize(adTabbox.getSelectedTabpanel().isEnableCustomizeButton());
         

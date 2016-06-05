@@ -17,7 +17,7 @@ import org.adempiere.webui.adwindow.ADSortTab;
 import org.adempiere.webui.adwindow.ADTabpanel;
 import org.adempiere.webui.adwindow.IADTabpanel;
 
-public class ADTabPanelFactory implements IADTabPanelFactory{
+public class DefaultTabPanelFactory implements IADTabPanelFactory{
 
 	@Override
 	public IADTabpanel getInstance(String type) {
