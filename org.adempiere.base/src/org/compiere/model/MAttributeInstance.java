@@ -22,6 +22,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Properties;
 
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 
 /**
@@ -168,9 +169,34 @@ public class MAttributeInstance extends X_M_AttributeInstance
 	 * @param value 
 	 *	@param ValueTimeStamp TimeStamp
 	 */
-	public void setValueTimeStamp(Timestamp valueTimestamp, String value)
+	public void setValueTimeStamp(Timestamp valueTimestamp)
 	{
 		super.setValueTimeStamp(valueTimestamp);
+		if(valueTimestamp==null){
+			setValue(null);
+			return;
+		}
+		String value = null;
+		MAttribute attribute = MAttribute.get(getCtx(), getM_Attribute_ID());
+		int displayType = attribute.getAD_Reference_ID();
+		
+		//Based on reference type, Format timestamp into string value
+		if (displayType == DisplayType.Date)
+		{
+			SimpleDateFormat sdf = Env.getLanguage(Env.getCtx()).getDateFormat();
+			value = sdf.format(valueTimestamp);
+		}
+		else if (displayType == DisplayType.DateTime)
+		{
+			SimpleDateFormat sdf = Env.getLanguage(Env.getCtx()).getDateTimeFormat();
+			value = sdf.format(valueTimestamp);
+		}
+		else if (displayType == DisplayType.Time)
+		{
+			SimpleDateFormat sdf = Env.getLanguage(Env.getCtx()).getTimeFormat();
+			value = sdf.format(valueTimestamp);
+		}
+		
 		setValue(value);
 	}
 	

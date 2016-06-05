@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
@@ -1072,26 +1071,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 			if (attributes.isMandatory() && valueTimeStamp == null)
 				mandatory += " - " + attributes.getName();
 
-			String value = null;
-			if (valueTimeStamp != null)
-			{
-				if (displayType == DisplayType.Date)
-				{
-					SimpleDateFormat sdf = Env.getLanguage(Env.getCtx()).getDateFormat();
-					value = sdf.format(valueTimeStamp);
-				}
-				else if (displayType == DisplayType.DateTime)
-				{
-					SimpleDateFormat sdf = Env.getLanguage(Env.getCtx()).getDateTimeFormat();
-					value = sdf.format(valueTimeStamp);
-				}
-				else if (displayType == DisplayType.Time)
-				{
-					SimpleDateFormat sdf = Env.getLanguage(Env.getCtx()).getTimeFormat();
-					value = sdf.format(valueTimeStamp);
-				}
-			}
-			attributes.setMAttributeInstance(m_M_AttributeSetInstance_ID, valueTimeStamp, value);
+			attributes.setMAttributeInstance(m_M_AttributeSetInstance_ID, valueTimeStamp);
 		}
 		else if (DisplayType.isNumeric(displayType))
 		{
