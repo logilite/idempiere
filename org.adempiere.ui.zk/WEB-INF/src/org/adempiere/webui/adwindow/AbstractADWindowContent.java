@@ -635,7 +635,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 					initQueryOnNew(query);
 				}
 			} else {
-				//TODO
+				logger.log(Level.SEVERE, "No implementaton for tab type " + type + " Found");
 			}
 
 		} else if (gTab.isSortTab()) {
