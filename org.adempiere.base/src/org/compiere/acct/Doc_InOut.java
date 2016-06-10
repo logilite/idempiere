@@ -115,29 +115,29 @@ public class Doc_InOut extends Doc
 			if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(line.getProduct().getCostingLevel(m_as))
 					&& line.getM_AttributeSetInstance_ID() <= 0)
 			{
-				MInOutLineMA[] mas = MInOutLineMA.get(getCtx(), line.get_ID(), getTrxName());
+				MInOutLineMA[] lineMAs = MInOutLineMA.get(getCtx(), line.get_ID(), getTrxName());
 
 				HashMap<Integer, DocLine> map = new HashMap<Integer, DocLine>();
 
-				for (MInOutLineMA ma : mas)
+				for (MInOutLineMA lineMA : lineMAs)
 				{
-					if(ma.getMovementQty().signum()==0)
+					if(lineMA.getMovementQty().signum()==0)
 						continue;
 					
-					if (!map.containsKey(ma.getM_AttributeSetInstance_ID()))
+					if (!map.containsKey(lineMA.getM_AttributeSetInstance_ID()))
 					{
 						DocLine docLine = new DocLine(line, this);
-						docLine.setM_AttributeSetInstance_ID(ma.getM_AttributeSetInstance_ID());
-						docLine.setQty(ma.getMovementQty(), getDocumentType().equals(DOCTYPE_MatShipment));
+						docLine.setM_AttributeSetInstance_ID(lineMA.getM_AttributeSetInstance_ID());
+						docLine.setQty(lineMA.getMovementQty(), getDocumentType().equals(DOCTYPE_MatShipment));
 						docLine.setReversalLine_ID(line.getReversalLine_ID());
 						docLine.setPP_Cost_Collector_ID(PP_Cost_Collector_ID);
 						if (log.isLoggable(Level.FINE))
 							log.fine(docLine.toString());
-						map.put(ma.getM_AttributeSetInstance_ID(), docLine);
+						map.put(lineMA.getM_AttributeSetInstance_ID(), docLine);
 					}
 					else
 					{
-						DocLine docLine = map.get(ma.getM_AttributeSetInstance_ID());
+						DocLine docLine = map.get(lineMA.getM_AttributeSetInstance_ID());
 						
 						BigDecimal lineQty = docLine.getQty();
 						lineQty = lineQty == null ? Env.ZERO : lineQty;
@@ -148,7 +148,7 @@ public class Doc_InOut extends Doc
 							lineQty = lineQty.negate();
 						}
 						
-						docLine.setQty(lineQty.add(ma.getMovementQty()), getDocumentType().equals(DOCTYPE_MatShipment));
+						docLine.setQty(lineQty.add(lineMA.getMovementQty()), getDocumentType().equals(DOCTYPE_MatShipment));
 					}
 				}
 				list.addAll(map.values());

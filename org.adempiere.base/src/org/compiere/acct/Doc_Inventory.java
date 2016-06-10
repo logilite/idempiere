@@ -125,35 +125,35 @@ public class Doc_Inventory extends Doc
 					&& (MDocType.DOCSUBTYPEINV_InternalUseInventory.equals(docSubTypeInv) || MDocType.DOCSUBTYPEINV_PhysicalInventory
 							.equals(docSubTypeInv)))
 			{
-				MInventoryLineMA[] mas = MInventoryLineMA.get(getCtx(), line.get_ID(), getTrxName());
+				MInventoryLineMA[] lineMAs = MInventoryLineMA.get(getCtx(), line.get_ID(), getTrxName());
 				HashMap<Integer, DocLine> map = new HashMap<Integer, DocLine>();
 
-				for (MInventoryLineMA ma : mas)
+				for (MInventoryLineMA lineMA : lineMAs)
 				{
-					if (ma.getMovementQty() == null || ma.getMovementQty().signum() == 0)
+					if (lineMA.getMovementQty() == null || lineMA.getMovementQty().signum() == 0)
 					{
 						continue;
 					}
 					
-					if (!map.containsKey(ma.getM_AttributeSetInstance_ID()))
+					if (!map.containsKey(lineMA.getM_AttributeSetInstance_ID()))
 					{
 						DocLine docLine = new DocLine(line, this);
-						docLine.setM_AttributeSetInstance_ID(ma.getM_AttributeSetInstance_ID());
-						docLine.setQty(ma.getMovementQty().negate(), false);
+						docLine.setM_AttributeSetInstance_ID(lineMA.getM_AttributeSetInstance_ID());
+						docLine.setQty(lineMA.getMovementQty().negate(), false);
 						docLine.setReversalLine_ID(line.getReversalLine_ID());
 						if (log.isLoggable(Level.FINE))
 							log.fine(docLine.toString());
-						map.put(ma.getM_AttributeSetInstance_ID(), docLine);
+						map.put(lineMA.getM_AttributeSetInstance_ID(), docLine);
 					}
 					else
 					{
-						DocLine docLine = map.get(ma.getM_AttributeSetInstance_ID());
+						DocLine docLine = map.get(lineMA.getM_AttributeSetInstance_ID());
 						BigDecimal qty = docLine.getQty();
 						qty = qty == null ? Env.ZERO : qty;
-						docLine.setQty(qty.add(ma.getMovementQty().negate()), false);
+						docLine.setQty(qty.add(lineMA.getMovementQty().negate()), false);
 						if (docLine.getQty().compareTo(Env.ZERO) == 0)
 						{
-							map.remove(ma.getM_AttributeSetInstance_ID());
+							map.remove(lineMA.getM_AttributeSetInstance_ID());
 						}
 					}
 				}
