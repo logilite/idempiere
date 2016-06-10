@@ -179,7 +179,7 @@ public class MMovementLine extends X_M_MovementLine
 		}
 		
 		 //either movement between locator or movement between lot
-		if (getM_Locator_ID() == getM_LocatorTo_ID() && getM_AttributeSetInstance_ID() == getM_AttributeSetInstanceTo_ID())
+		if (getM_Locator_ID() == getM_LocatorTo_ID() && (getM_AttributeSetInstance_ID() == getM_AttributeSetInstanceTo_ID() && getM_AttributeSetInstance_ID() != 0))
 		{
 			log.saveError("Error", Msg.parseTranslation(getCtx(), "@M_Locator_ID@ == @M_LocatorTo_ID@ and @M_AttributeSetInstance_ID@ == @M_AttributeSetInstanceTo_ID@"));
 			return false;
