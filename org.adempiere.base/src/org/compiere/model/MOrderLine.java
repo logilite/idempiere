@@ -882,7 +882,7 @@ public class MOrderLine extends X_C_OrderLine
 			if (enforce && getPriceLimit() != Env.ZERO
 			  && getPriceActual().compareTo(getPriceLimit()) < 0)
 			{
-				log.saveError("UnderLimitPrice", "PriceEntered=" + getPriceEntered() + ", PriceLimit=" + getPriceLimit()); 
+				log.saveError("UnderLimitPrice", "PriceEntered=" + getPriceEntered() + ", PriceLimit=" + getPriceLimit() + ", Product = " + getProduct().getValue()); 
 				return false;
 			}
 			//
