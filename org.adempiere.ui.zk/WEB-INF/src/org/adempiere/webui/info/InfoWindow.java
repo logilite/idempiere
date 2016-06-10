@@ -1697,10 +1697,22 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			countSql = countSql.trim();
 			countSql = countSql.substring(0, countSql.length() - 5);
 		}
+		String otherClause = "";
+		 if (infoWindow.getOtherClause() != null && infoWindow.getOtherClause().trim().length() > 0) {
+	        	otherClause = infoWindow.getOtherClause();
+	        	if (otherClause.indexOf("@") >= 0) {
+	        		String s = Env.parseContext(infoContext, p_WindowNo, otherClause, true, false);
+	        		if (s.length() == 0) {
+	        			log.severe("Failed to parse other clause. " + otherClause);
+	        		} else {
+	        			otherClause = s;
+	        		}
+	        	}
+	        }
 		countSql = MRole.getDefault().addAccessSQL	(countSql, getTableName(),
 													MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO);
 		
-		countSql = "SELECT COUNT(*) FROM ( " + countSql + " ) a";			
+		countSql = "SELECT COUNT(*) FROM ( " + countSql + " " + otherClause +  " ) a";			
 		
 		if (log.isLoggable(Level.FINER))
 			log.finer(countSql);
