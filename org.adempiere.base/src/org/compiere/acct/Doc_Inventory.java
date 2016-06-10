@@ -246,10 +246,9 @@ public class Doc_Inventory extends Doc
 			
 			boolean doPosting = true;
 			String costingLevel = null;
-			MProduct product = null;
+			MProduct product = line.getProduct();;
 			if (costAdjustment)
 			{				
-				product = line.getProduct();
 				if (!product.isStocked())
 				{
 					doPosting = false;
@@ -299,8 +298,35 @@ public class Doc_Inventory extends Doc
 					// end MZ
 					if (costs == null || costs.signum() == 0)
 					{
-						p_Error = "No Costs for " + line.getProduct().getName();
-						return null;
+						if (product.isStocked())
+						{
+							//ok if we have purchased zero cost item from vendor before
+							String sql="SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)"
+									+ " AND AD_Client_ID = ? ";
+							ArrayList<Integer> list = new ArrayList<Integer>();
+							list.add(product.getM_Product_ID());
+							list.add(getAD_Client_ID());
+							
+							if(MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))
+							{
+								sql += " AND M_AttributeSetInstance_ID=?";
+								list.add(line.getM_AttributeSetInstance_ID());
+							}
+							
+							int count = DB.getSQLValue(null,sql,list.toArray());
+							if (count > 0)
+							{
+								costs = BigDecimal.ZERO;
+							}
+							else
+							{
+								p_Error = "No Costs for line " + line.getLine() +"-"+ line.getProduct().getName() ;
+								log.log(Level.WARNING, p_Error);
+								return null;
+							}
+						}
+						else	//	ignore service
+							doPosting = false;
 					}
 				}
 				else
