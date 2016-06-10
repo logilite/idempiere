@@ -19,6 +19,7 @@ package org.compiere.acct;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 
 import org.compiere.model.MAccount;
@@ -30,6 +31,7 @@ import org.compiere.model.MCostElement;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInventory;
 import org.compiere.model.MInventoryLine;
+import org.compiere.model.MInventoryLineMA;
 import org.compiere.model.MProduct;
 import org.compiere.model.ProductCost;
 import org.compiere.util.DB;
@@ -107,7 +109,8 @@ public class Doc_Inventory extends Doc
 			MInventoryLine line = lines[i];
 			String docSubTypeInv;
 			if (Util.isEmpty(parentDocSubTypeInv)) {
-				// IDEMPIERE-675: for backward compatibility - to post old documents that could have subtypeinv empty
+				// IDEMPIERE-675: for backward compatibility - to post old
+				// documents that could have subtypeinv empty
 				if (line.getQtyInternalUse().signum() != 0) {
 					docSubTypeInv = MDocType.DOCSUBTYPEINV_InternalUseInventory;
 				} else {
@@ -117,27 +120,70 @@ public class Doc_Inventory extends Doc
 				docSubTypeInv = parentDocSubTypeInv;
 			}
 
-			BigDecimal qtyDiff = Env.ZERO;
-			BigDecimal amtDiff = Env.ZERO;
-			if (MDocType.DOCSUBTYPEINV_InternalUseInventory.equals(docSubTypeInv))
-				qtyDiff = line.getQtyInternalUse().negate();
-			else if (MDocType.DOCSUBTYPEINV_PhysicalInventory.equals(docSubTypeInv))
-				qtyDiff = line.getQtyCount().subtract(line.getQtyBook());
-			else if (MDocType.DOCSUBTYPEINV_CostAdjustment.equals(docSubTypeInv))
-				amtDiff = line.getNewCostPrice().subtract(line.getCurrentCostPrice());
-			//	nothing to post
-			if (qtyDiff.signum() == 0 && amtDiff.signum() == 0)
-				continue;
-			//
-			DocLine docLine = new DocLine (line, this);
-			docLine.setQty (qtyDiff, false);		// -5 => -5
-			if (amtDiff.signum() != 0)
-			{				
-				docLine.setAmount(amtDiff);
+			if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(line.getProduct().getCostingLevel(m_as))
+					&& line.getM_AttributeSetInstance_ID() <= 0
+					&& (MDocType.DOCSUBTYPEINV_InternalUseInventory.equals(docSubTypeInv) || MDocType.DOCSUBTYPEINV_PhysicalInventory
+							.equals(docSubTypeInv)))
+			{
+				MInventoryLineMA[] lineMAs = MInventoryLineMA.get(getCtx(), line.get_ID(), getTrxName());
+				HashMap<Integer, DocLine> map = new HashMap<Integer, DocLine>();
+
+				for (MInventoryLineMA lineMA : lineMAs)
+				{
+					if (lineMA.getMovementQty() == null || lineMA.getMovementQty().signum() == 0)
+					{
+						continue;
+					}
+					
+					if (!map.containsKey(lineMA.getM_AttributeSetInstance_ID()))
+					{
+						DocLine docLine = new DocLine(line, this);
+						docLine.setM_AttributeSetInstance_ID(lineMA.getM_AttributeSetInstance_ID());
+						docLine.setQty(lineMA.getMovementQty().negate(), false);
+						docLine.setReversalLine_ID(line.getReversalLine_ID());
+						if (log.isLoggable(Level.FINE))
+							log.fine(docLine.toString());
+						map.put(lineMA.getM_AttributeSetInstance_ID(), docLine);
+					}
+					else
+					{
+						DocLine docLine = map.get(lineMA.getM_AttributeSetInstance_ID());
+						BigDecimal qty = docLine.getQty();
+						qty = qty == null ? Env.ZERO : qty;
+						docLine.setQty(qty.add(lineMA.getMovementQty().negate()), false);
+						if (docLine.getQty().compareTo(Env.ZERO) == 0)
+						{
+							map.remove(lineMA.getM_AttributeSetInstance_ID());
+						}
+					}
+				}
+				list.addAll(map.values());
 			}
-			docLine.setReversalLine_ID(line.getReversalLine_ID());
-			if (log.isLoggable(Level.FINE)) log.fine(docLine.toString());
-			list.add (docLine);
+			else
+			{
+				BigDecimal qtyDiff = Env.ZERO;
+				BigDecimal amtDiff = Env.ZERO;
+				if (MDocType.DOCSUBTYPEINV_InternalUseInventory.equals(docSubTypeInv))
+					qtyDiff = line.getQtyInternalUse().negate();
+				else if (MDocType.DOCSUBTYPEINV_PhysicalInventory.equals(docSubTypeInv))
+					qtyDiff = line.getQtyCount().subtract(line.getQtyBook());
+				else if (MDocType.DOCSUBTYPEINV_CostAdjustment.equals(docSubTypeInv))
+					amtDiff = line.getNewCostPrice().subtract(line.getCurrentCostPrice());
+				// nothing to post
+				if (qtyDiff.signum() == 0 && amtDiff.signum() == 0)
+					continue;
+				//
+				DocLine docLine = new DocLine(line, this);
+				docLine.setM_AttributeSetInstance_ID(line.getM_AttributeSetInstance_ID());
+				docLine.setQty(qtyDiff, false); // -5 => -5
+				if (amtDiff.signum() != 0)
+				{
+					docLine.setAmount(amtDiff);
+				}
+				docLine.setReversalLine_ID(line.getReversalLine_ID());
+				if (log.isLoggable(Level.FINE)) log.fine(docLine.toString());
+				list.add(docLine);
+			}
 		}
 
 		//	Return Array

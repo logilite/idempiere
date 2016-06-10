@@ -115,6 +115,8 @@ public class DocLine
 	private int					m_C_ConversionType_ID = -1;
 	/** Period						*/
 	private int					m_C_Period_ID = -1;
+	/** ASI							*/
+	private int	m_AttributeSetInstance_ID = 0;
 
 	/**
 	 *  Get Currency
@@ -578,20 +580,35 @@ public class DocLine
 	}	//	isItem
 
 	/**
-	 *  ASI
-	 *  @return M_AttributeSetInstance_ID
+	 * ASI
+	 * 
+	 * @return M_AttributeSetInstance_ID
 	 */
 	public int getM_AttributeSetInstance_ID()
 	{
-		int index = p_po.get_ColumnIndex("M_AttributeSetInstance_ID");
-		if (index != -1)
+		if (m_AttributeSetInstance_ID != 0)
 		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
+			return m_AttributeSetInstance_ID;
 		}
-		return 0;
+		else
+		{
+
+			int index = p_po.get_ColumnIndex("M_AttributeSetInstance_ID");
+			if (index != -1)
+			{
+				Integer ii = (Integer) p_po.get_Value(index);
+				if (ii != null)
+					return ii.intValue();
+			}
+			return 0;
+		}
 	}   //  getM_AttributeSetInstance_ID
+	
+	public void setM_AttributeSetInstance_ID(int m_AttributeSetInstance_ID)
+	{
+		this.m_AttributeSetInstance_ID = m_AttributeSetInstance_ID;
+	}
+
 
 	/**
 	 *  Get Warehouse Locator (from)
