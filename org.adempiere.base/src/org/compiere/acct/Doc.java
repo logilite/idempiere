@@ -301,7 +301,7 @@ public abstract class Doc
 	}   //  Doc
 
 	/** Accounting Schema */
-	private MAcctSchema    		m_as = null;
+	protected MAcctSchema    		m_as = null;
 	/** Properties					*/
 	private Properties			m_ctx = null;
 	/** Transaction Name			*/

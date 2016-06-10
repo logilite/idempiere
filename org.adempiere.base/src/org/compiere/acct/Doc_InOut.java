@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 
 import org.compiere.model.I_M_InOutLine;
@@ -30,6 +31,7 @@ import org.compiere.model.MCostDetail;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
+import org.compiere.model.MInOutLineMA;
 import org.compiere.model.MOrderLandedCostAllocation;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
@@ -106,18 +108,62 @@ public class Doc_InOut extends Doc
 				continue;
 			}
 
-			DocLine docLine = new DocLine (line, this);
-			BigDecimal Qty = line.getMovementQty();
-			docLine.setReversalLine_ID(line.getReversalLine_ID());
-			docLine.setQty (Qty, getDocumentType().equals(DOCTYPE_MatShipment));    //  sets Trx and Storage Qty
-
 			//Define if Outside Processing
 			String sql = "SELECT PP_Cost_Collector_ID  FROM C_OrderLine WHERE C_OrderLine_ID=? AND PP_Cost_Collector_ID IS NOT NULL";
 			int PP_Cost_Collector_ID = DB.getSQLValueEx(getTrxName(), sql, new Object[]{line.getC_OrderLine_ID()});
-			docLine.setPP_Cost_Collector_ID(PP_Cost_Collector_ID);
-			//
-			if (log.isLoggable(Level.FINE)) log.fine(docLine.toString());
-			list.add (docLine);
+			
+			if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(line.getProduct().getCostingLevel(m_as))
+					&& line.getM_AttributeSetInstance_ID() <= 0)
+			{
+				MInOutLineMA[] mas = MInOutLineMA.get(getCtx(), line.get_ID(), getTrxName());
+
+				HashMap<Integer, DocLine> map = new HashMap<Integer, DocLine>();
+
+				for (MInOutLineMA ma : mas)
+				{
+					if(ma.getMovementQty().signum()==0)
+						continue;
+					
+					if (!map.containsKey(ma.getM_AttributeSetInstance_ID()))
+					{
+						DocLine docLine = new DocLine(line, this);
+						docLine.setM_AttributeSetInstance_ID(ma.getM_AttributeSetInstance_ID());
+						docLine.setQty(ma.getMovementQty(), getDocumentType().equals(DOCTYPE_MatShipment));
+						docLine.setReversalLine_ID(line.getReversalLine_ID());
+						docLine.setPP_Cost_Collector_ID(PP_Cost_Collector_ID);
+						if (log.isLoggable(Level.FINE))
+							log.fine(docLine.toString());
+						map.put(ma.getM_AttributeSetInstance_ID(), docLine);
+					}
+					else
+					{
+						DocLine docLine = map.get(ma.getM_AttributeSetInstance_ID());
+						
+						BigDecimal lineQty = docLine.getQty();
+						lineQty = lineQty == null ? Env.ZERO : lineQty;
+						
+						// If SO trx then merge Qty with positive sign
+						if(getDocumentType().equals(DOCTYPE_MatShipment))
+						{
+							lineQty = lineQty.negate();
+						}
+						
+						docLine.setQty(lineQty.add(ma.getMovementQty()), getDocumentType().equals(DOCTYPE_MatShipment));
+					}
+				}
+				list.addAll(map.values());
+			}
+			else
+			{
+				DocLine docLine = new DocLine(line, this);
+				BigDecimal Qty = line.getMovementQty();
+				docLine.setQty(Qty, getDocumentType().equals(DOCTYPE_MatShipment));
+				docLine.setReversalLine_ID(line.getReversalLine_ID());
+				docLine.setPP_Cost_Collector_ID(PP_Cost_Collector_ID);
+				if (log.isLoggable(Level.FINE))
+					log.fine(docLine.toString());
+				list.add(docLine);
+			}
 		}
 
 		//	Return Array
