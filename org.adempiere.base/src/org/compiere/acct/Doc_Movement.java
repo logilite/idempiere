@@ -186,11 +186,11 @@ public class Doc_Movement extends Doc
 				costs = cr.getAcctBalance(); //get original cost
 			}
 
-			//	Only for between-org movements
-			if (dr.getAD_Org_ID() != cr.getAD_Org_ID())
+			//	Only for between-org movements OR between ASIs
+			if (dr.getAD_Org_ID() != cr.getAD_Org_ID() || line.getM_AttributeSetInstance_ID()!=line.getM_AttributeSetInstanceTo_ID())
 			{
 				String costingLevel = line.getProduct().getCostingLevel(as);
-				if (!MAcctSchema.COSTINGLEVEL_Organization.equals(costingLevel))
+				if (!MAcctSchema.COSTINGLEVEL_Organization.equals(costingLevel) && !MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))
 					continue;
 				//
 				String description = line.getDescription();
@@ -208,7 +208,7 @@ public class Doc_Movement extends Doc
 				}
 				//	Cost Detail To
 				if (!MCostDetail.createMovement(as, cr.getAD_Org_ID(),	//	locator org
-					line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+					line.getM_Product_ID(), line.getM_AttributeSetInstanceTo_ID(),
 					line.get_ID(), 0,
 					costs, line.getQty(), false,
 					description + "(|<-)", getTrxName()))
