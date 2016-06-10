@@ -231,15 +231,28 @@ public class Doc_InOut extends Doc
 						if (product.isStocked())
 						{
 							//ok if we have purchased zero cost item from vendor before
-							int count = DB.getSQLValue(null, "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)", 
-									product.getM_Product_ID());
+							String sql="SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)"
+									+ " AND AD_Client_ID = ? ";
+							ArrayList<Integer> list = new ArrayList<Integer>();
+							list.add(product.getM_Product_ID());
+							list.add(getAD_Client_ID());
+							
+							String costingLevel = product.getCostingLevel(as);
+							if(MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))
+							{
+								sql = "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)"
+									+ " AND AD_Client_ID = ?  AND M_AttributeSetInstance_ID=?";
+								list.add(line.getM_AttributeSetInstance_ID());
+							}
+							
+							int count = DB.getSQLValue(null,sql,list.toArray());
 							if (count > 0)
 							{
 								costs = BigDecimal.ZERO;
 							}
 							else
 							{
-								p_Error = "No Costs for " + line.getProduct().getName();
+								p_Error = "No Costs for line " + line.getLine() +"-"+ line.getProduct().getName() ;
 								log.log(Level.WARNING, p_Error);
 								return null;
 							}
@@ -358,9 +371,32 @@ public class Doc_InOut extends Doc
 					{
 						if (product.isStocked())
 						{
-							p_Error = "No Costs for " + line.getProduct().getName();
-							log.log(Level.WARNING, p_Error);
-							return null;
+							//ok if we have purchased zero cost item from vendor before
+							String sql="SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)"
+									+ " AND AD_Client_ID = ? ";
+							ArrayList<Integer> list = new ArrayList<Integer>();
+							list.add(product.getM_Product_ID());
+							list.add(getAD_Client_ID());
+							
+							String costingLevel = product.getCostingLevel(as);
+							if(MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))
+							{
+								sql += "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)"
+									+ " AND AD_Client_ID = ?  AND M_AttributeSetInstance_ID=?";
+								list.add(line.getM_AttributeSetInstance_ID());
+							}
+							
+							int count = DB.getSQLValue(null,sql,list.toArray());
+							if (count > 0)
+							{
+								costs = BigDecimal.ZERO;
+							}
+							else
+							{
+								p_Error = "No Costs for line " + line.getLine() +"-"+ line.getProduct().getName() ;
+								log.log(Level.WARNING, p_Error);
+								return null;
+							}
 						}
 						else	//	ignore service
 							continue;
