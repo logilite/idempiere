@@ -19,6 +19,8 @@ package org.compiere.acct;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.logging.Level;
 
@@ -185,6 +187,15 @@ public class Doc_Inventory extends Doc
 				list.add(docLine);
 			}
 		}
+		
+		// Sort lines in the decreasing order of MovementQty
+		Collections.sort(list, new Comparator<DocLine>() {
+			@Override
+			public int compare(DocLine line1, DocLine line2)
+			{
+				return line1.getQty().compareTo(line2.getQty()) * (-1);
+			}
+		});
 
 		//	Return Array
 		DocLine[] dls = new DocLine[list.size()];
