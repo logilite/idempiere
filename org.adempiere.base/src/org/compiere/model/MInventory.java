@@ -346,9 +346,9 @@ public class MInventory extends X_M_Inventory implements DocAction
 		// For Physical Inventory and Internal Use Inventory
 		if(!MDocType.DOCSUBTYPEINV_CostAdjustment.equals(docSubTypeInv))
 		{
-			// Check if Any Line Exists with ASI > 0 And Count(MALines) > 0 -
+			// Check if Any Line Exists with ASI > 0 And Count(lineMAs) > 0 -
 			// Show Error.
-			String sql = "Select " + " (il.line::text || '-' || p.value) as Description From M_InventoryLine il "
+			String sql = "Select (il.line::text || '-' || p.value) as Description From M_InventoryLine il "
 					+ " Inner Join M_Product p on il.M_Product_ID = p.M_Product_ID"
 					+ " Where Coalesce(il.M_AttributeSetInstance_ID, 0) > 0 AND  il.IsActive = 'Y'"
 					+ " AND p.IsStocked = 'Y' and p.ProductType = 'I'"
@@ -589,11 +589,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 				}
 			}
 
-			//IDEMPIERE-3050: Physical Inventory with manual ASI do not work when qty Diff is 0
-			/*//If Quantity Count minus Quantity Book = Zero, then no change in Inventory
-			if (qtyDiff.signum() == 0)
-				continue;*/
-
+			
 			//Ignore the Material Policy when is Reverse Correction
 			if(!isReversal()){
 				BigDecimal qtyOnLineMA = MInventoryLineMA.getManualQty(line.getM_InventoryLine_ID(), get_TrxName());
