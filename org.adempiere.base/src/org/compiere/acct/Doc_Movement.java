@@ -91,40 +91,34 @@ public class Doc_Movement extends Doc
 			if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(line.getProduct().getCostingLevel(m_as))
 					&& line.getM_AttributeSetInstance_ID() <= 0)
 			{
-				MMovementLineMA[] mas = MMovementLineMA.get(getCtx(), line.get_ID(), getTrxName());
+				MMovementLineMA[] lineMAs = MMovementLineMA.get(getCtx(), line.get_ID(), getTrxName());
 
 				HashMap<String, DocLine> map = new HashMap<String, DocLine>();
 
-				for (MMovementLineMA ma : mas)
+				for (MMovementLineMA lineMA : lineMAs)
 				{
-					if(ma.getMovementQty().signum()==0)
+					if(lineMA.getMovementQty().signum()==0)
 						continue;
-					
-					if (!map.containsKey(ma.getM_AttributeSetInstance_ID()))
+					String key = lineMA.getM_AttributeSetInstance_ID() + "_" + lineMA.getM_AttributeSetInstanceTo_ID();
+					if (!map.containsKey(key))
 					{
 						DocLine docLine = new DocLine(line, this);
-						docLine.setM_AttributeSetInstance_ID(ma.getM_AttributeSetInstance_ID());
-						docLine.setM_AttributeSetInstanceTo_ID(ma.getM_AttributeSetInstanceTo_ID());
-						docLine.setQty(ma.getMovementQty(), false);
+						docLine.setM_AttributeSetInstance_ID(lineMA.getM_AttributeSetInstance_ID());
+						docLine.setM_AttributeSetInstanceTo_ID(lineMA.getM_AttributeSetInstanceTo_ID());
+						docLine.setQty(lineMA.getMovementQty(), false);
 						docLine.setReversalLine_ID(line.getReversalLine_ID());
 						if (log.isLoggable(Level.FINE))
 							log.fine(docLine.toString());
-						map.put(ma.getM_AttributeSetInstance_ID() + "_" + ma.getM_AttributeSetInstanceTo_ID(), docLine);
+						map.put(key, docLine);
 					}
 					else
 					{
-						DocLine docLine = map.get(ma.getM_AttributeSetInstance_ID() + "_" + ma.getM_AttributeSetInstanceTo_ID());
+						DocLine docLine = map.get(key);
 						
 						BigDecimal lineQty = docLine.getQty();
 						lineQty = lineQty == null ? Env.ZERO : lineQty;
 						
-						// If SO trx then merge Qty with positive sign
-						if(getDocumentType().equals(DOCTYPE_MatShipment))
-						{
-							lineQty = lineQty.negate();
-						}
-						
-						docLine.setQty(lineQty.add(ma.getMovementQty()), false);
+						docLine.setQty(lineQty.add(lineMA.getMovementQty()), false);
 					}
 				}
 				list.addAll(map.values());
@@ -235,8 +229,6 @@ public class Doc_Movement extends Doc
 			}
 
 			//	Only for between-org movements OR between ASIs
-			
-			// Only for between-org / between-asis movements
 			String costingLevel = line.getProduct().getCostingLevel(as);
 			if (!MAcctSchema.COSTINGLEVEL_Organization.equals(costingLevel)
 					&& !MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))

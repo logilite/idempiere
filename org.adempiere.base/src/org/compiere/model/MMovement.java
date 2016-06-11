@@ -314,7 +314,8 @@ public class MMovement extends X_M_Movement implements DocAction
 						}
 					}
 				}
-			}
+			} 
+
 		}
 
 		//	Confirmation
@@ -853,18 +854,15 @@ public class MMovement extends X_M_Movement implements DocAction
 			}
 			
 			//We need to copy MA
-			if (rLine.getM_AttributeSetInstance_ID() == 0)
-			{
-				MMovementLineMA mas[] = MMovementLineMA.get(getCtx(),
+			MMovementLineMA mas[] = MMovementLineMA.get(getCtx(),
 						oLine.getM_MovementLine_ID(), get_TrxName());
 				for (int j = 0; j < mas.length; j++)
 				{
 					MMovementLineMA ma = new MMovementLineMA (rLine, 
-							mas[j].getM_AttributeSetInstance_ID(),
-							mas[j].getMovementQty().negate(),mas[j].getDateMaterialPolicy(),true);
+							mas[j].getM_AttributeSetInstance_ID(),mas[j].getM_AttributeSetInstanceTo_ID(),
+							mas[j].getMovementQty().negate(),mas[j].getDateMaterialPolicy(),mas[j].getDateMaterialPolicyTo(),true);
 					ma.saveEx();
 				}
-			}
 			
 		}
 		//
