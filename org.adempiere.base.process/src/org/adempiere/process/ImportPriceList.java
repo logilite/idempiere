@@ -27,6 +27,7 @@ package org.adempiere.process;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.logging.Level;
 
 import org.compiere.model.MPriceList;
@@ -368,17 +369,36 @@ public class ImportPriceList extends SvrProcess
 				// @TODO: C_UOM is intended for future USE - not useful at this moment
 				
 				// If bpartner then insert/update into M_ProductPriceVendorBreak, otherwise insert/update M_ProductPrice
-				if (imp.getC_BPartner_ID() > 0) {
+				if (imp.getC_BPartner_ID() > 0 || (imp.getBreakValue() != null && imp.getBreakValue().compareTo(Env.ONE) > 0)) {
 					// M_ProductPriceVendorBreak
-					int M_ProductPriceVendorBreak_ID = DB.getSQLValue(get_TrxName(), 
-							"SELECT M_ProductPriceVendorBreak_ID " +
-							"FROM M_ProductPriceVendorBreak " +
-							"WHERE M_PriceList_Version_ID=? AND " +
-							"IsActive='Y' AND " +
-							"C_BPartner_ID=? AND " +
-							"M_Product_ID=? AND " +
-							"BreakValue=?", 
-							new Object[]{pricelistversion.getM_PriceList_Version_ID(), imp.getC_BPartner_ID(), imp.getM_Product_ID(), imp.getBreakValue()});
+					
+					sql = new StringBuilder("SELECT M_ProductPriceVendorBreak_ID FROM M_ProductPriceVendorBreak "
+							+ " WHERE M_PriceList_Version_ID=? "
+							+ " AND IsActive='Y' AND ");
+					ArrayList<Object> paramList = new ArrayList<Object>();
+					paramList.add(pricelistversion.getM_PriceList_Version_ID());
+					
+					if(imp.getC_BPartner_ID() > 0) {
+						sql.append(" C_BPartner_ID=? AND ");
+						paramList.add(imp.getC_BPartner_ID());
+					}
+					else {
+						sql.append(" C_BPartner_ID IS NULL AND ");
+					}
+					sql.append(" M_Product_ID=? AND BreakValue=?");
+					paramList.add(imp.getM_Product_ID());
+					BigDecimal  breakVal = imp.getBreakValue();
+					if(breakVal==null)
+						breakVal = Env.ZERO;
+					paramList.add(breakVal);
+					
+					int M_ProductPriceVendorBreak_ID = 0;
+					
+					
+					M_ProductPriceVendorBreak_ID = DB.getSQLValue(get_TrxName(), sql.toString(),paramList);
+					
+					
+
 					if (M_ProductPriceVendorBreak_ID < 0)
 						M_ProductPriceVendorBreak_ID = 0;
 					X_M_ProductPriceVendorBreak ppvb = new X_M_ProductPriceVendorBreak(getCtx(), M_ProductPriceVendorBreak_ID, get_TrxName());
