@@ -105,7 +105,7 @@ public class Doc_Invoice extends Doc
 	 *	Load Invoice Taxes
 	 *  @return DocTax Array
 	 */
-	private DocTax[] loadTaxes()
+	protected DocTax[] loadTaxes()
 	{
 		ArrayList<DocTax> list = new ArrayList<DocTax>();
 		String sql = "SELECT it.C_Tax_ID, t.Name, t.Rate, it.TaxBaseAmt, it.TaxAmt, t.IsSalesTax "
@@ -155,7 +155,7 @@ public class Doc_Invoice extends Doc
 	 *	@param invoice invoice
 	 *  @return DocLine Array
 	 */
-	private DocLine[] loadLines (MInvoice invoice)
+	protected DocLine[] loadLines (MInvoice invoice)
 	{
 		ArrayList<DocLine> list = new ArrayList<DocLine>();
 		//
@@ -282,7 +282,7 @@ public class Doc_Invoice extends Doc
 	 * 	Get Currency Precision
 	 *	@return precision
 	 */
-	private int getStdPrecision()
+	protected int getStdPrecision()
 	{
 		if (m_precision == -1)
 			m_precision = MCurrency.getStdPrecision(getCtx(), getC_Currency_ID());

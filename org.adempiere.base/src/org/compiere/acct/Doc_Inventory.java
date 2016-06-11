@@ -55,10 +55,9 @@ import org.compiere.util.Util;
  */
 public class Doc_Inventory extends Doc
 {
-	private int				m_Reversal_ID = 0;
-	@SuppressWarnings("unused")
-	private String			m_DocStatus = "";
-	private String parentDocSubTypeInv;
+	protected int				m_Reversal_ID = 0;
+	protected String			m_DocStatus = "";
+	protected String parentDocSubTypeInv;
 
 	/**
 	 *  Constructor
@@ -102,7 +101,7 @@ public class Doc_Inventory extends Doc
 	 *	@param inventory inventory
 	 *  @return DocLine Array
 	 */
-	private DocLine[] loadLines(MInventory inventory)
+	protected DocLine[] loadLines(MInventory inventory)
 	{		
 		ArrayList<DocLine> list = new ArrayList<DocLine>();
 		MInventoryLine[] lines = inventory.getLines(false);
@@ -431,7 +430,7 @@ public class Doc_Inventory extends Doc
 		return facts;
 	}   //  createFact
 
-	private boolean isReversal(DocLine line) {
+	protected boolean isReversal(DocLine line) {
 		return m_Reversal_ID !=0 && line.getReversalLine_ID() != 0;
 	}
 

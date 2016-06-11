@@ -61,7 +61,7 @@ public class DocLine
 	/** Persistent Object		*/
 	protected PO				p_po = null;
 	/** Parent					*/
-	private Doc					m_doc = null;
+	protected Doc					m_doc = null;
 	/**	 Log					*/
 	protected CLogger			log = CLogger.getCLogger(getClass());
 
@@ -74,7 +74,7 @@ public class DocLine
 	/** Credit Journal Amt		*/
 	private BigDecimal      	m_AmtSourceCr = Env.ZERO;
 	/** Net Line Amt            */
-	private BigDecimal			m_LineNetAmt = null;
+	protected BigDecimal			m_LineNetAmt = null;
 	/** List Amount             */
 	private BigDecimal			m_ListAmt = Env.ZERO;
 	/** Discount Amount         */

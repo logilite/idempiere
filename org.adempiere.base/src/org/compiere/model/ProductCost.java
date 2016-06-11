@@ -54,16 +54,16 @@ public class ProductCost
 	}	//	ProductCost
 	
 	/** The ID					*/
-	private int				m_M_Product_ID = 0;
+	protected int				m_M_Product_ID = 0;
 	/** ASI						*/
-	private int				m_M_AttributeSetInstance_ID = 0;
+	protected int				m_M_AttributeSetInstance_ID = 0;
 	/** The Product				*/
 	private MProduct		m_product = null;
 	/** Transaction				*/
-	private String 			m_trxName = null;
+	protected String 			m_trxName = null;
 	
-	private int             m_C_UOM_ID = 0;
-	private BigDecimal      m_qty = Env.ZERO;
+	protected int             m_C_UOM_ID = 0;
+	protected BigDecimal      m_qty = Env.ZERO;
 
 	/**	Logger					*/
 	private static CLogger 	log = CLogger.getCLogger (ProductCost.class);
