@@ -309,7 +309,7 @@ public class MMovementLineMA extends X_M_MovementLineMA
 					return false;
 				}
 
-				if (!product.getAttributeSet().excludeTableEntry(MMovement.Table_ID, true))
+				if (!product.getAttributeSet().excludeTableEntry(MMovementLine.Table_ID, true))
 				{
 					log.saveError("Error", "@M_AttributeSet_ID@ @IsMandatory@ (@M_Product_ID@=" + product.getValue()
 							+ ")");
