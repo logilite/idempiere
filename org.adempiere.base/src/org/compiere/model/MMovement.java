@@ -295,7 +295,7 @@ public class MMovement extends X_M_Movement implements DocAction
 		for (MMovementLine line : lines) {
 			//      Mandatory Instance
 			MProduct product = line.getProduct();
-			if (line.getM_AttributeSetInstance_ID() == 0) {
+			if (line.getM_AttributeSetInstance_ID() == 0 || line.getM_AttributeSetInstanceTo_ID() == 0) {
 				if (product != null && product.isASIMandatory(true)) {
 					if (! product.getAttributeSet().excludeTableEntry(MMovementLine.Table_ID, true)) {  // outgoing
 						BigDecimal qtyDiff = line.getMovementQty();
@@ -314,17 +314,8 @@ public class MMovement extends X_M_Movement implements DocAction
 						}
 					}
 				}
-			}
-			if (line.getM_AttributeSetInstanceTo_ID() == 0)
-			{
-				if (product != null && product.isASIMandatory(false) && line.getM_AttributeSetInstanceTo_ID() == 0)
-				{
-					if (! product.getAttributeSet().excludeTableEntry(MMovementLine.Table_ID, false)) { // incoming
-						m_processMsg = "@Line@ " + line.getLine() + ": @FillMandatory@ @M_AttributeSetInstanceTo_ID@";
-						return DocAction.STATUS_Invalid;
-					}
-				}
-			}       //      ASI
+			} 
+
 		}
 
 		//	Confirmation
@@ -424,12 +415,12 @@ public class MMovement extends X_M_Movement implements DocAction
 			
 			//Stock Movement - Counterpart MOrder.reserveStock
 			MProduct product = line.getProduct();
+			BigDecimal qtyOnLineMA = MMovementLineMA.getManualQty(line.getM_MovementLine_ID(), get_TrxName());
 			if (product != null 
 					&& product.isStocked() )
 			{
 				//Ignore the Material Policy when is Reverse Correction
 				if(!isReversal()){
-					BigDecimal qtyOnLineMA = MMovementLineMA.getManualQty(line.getM_MovementLine_ID(), get_TrxName());
 					BigDecimal movementQty = line.getMovementQty();
 
 					if(qtyOnLineMA.compareTo(movementQty)>0)
@@ -441,10 +432,12 @@ public class MMovement extends X_M_Movement implements DocAction
 					
 					checkMaterialPolicy(line,movementQty.subtract(qtyOnLineMA));
 				}
-					
+				
+				BigDecimal qtyToAllocate = line.getMovementQty();
 
-				if (line.getM_AttributeSetInstance_ID() == 0)
+				if (qtyOnLineMA.signum() != 0)
 				{
+
 					MMovementLineMA mas[] = MMovementLineMA.get(getCtx(),
 							line.getM_MovementLine_ID(), get_TrxName());
 					for (int j = 0; j < mas.length; j++)
@@ -464,19 +457,21 @@ public class MMovement extends X_M_Movement implements DocAction
 							return DocAction.STATUS_Invalid;
 						}
 
-						int M_AttributeSetInstanceTo_ID = line.getM_AttributeSetInstanceTo_ID();
-						//only can be same asi if locator is different
-						if (M_AttributeSetInstanceTo_ID == 0 && line.getM_Locator_ID() != line.getM_LocatorTo_ID())
-						{
-							M_AttributeSetInstanceTo_ID = ma.getM_AttributeSetInstance_ID();
-						}
+						int M_AttributeSetInstanceTo_ID = ma.getM_AttributeSetInstanceTo_ID() == 0 ? ma
+								.getM_AttributeSetInstance_ID() : ma.getM_AttributeSetInstanceTo_ID();
+						
+						Timestamp dateMaterialPolicyTo = ma
+								.getDateMaterialPolicyTo() == null ? ma
+								.getDateMaterialPolicy() : ma
+								.getDateMaterialPolicyTo();
+
 						//Update Storage 
 						MLocator locatorTo = new MLocator (getCtx(), line.getM_LocatorTo_ID(), get_TrxName());
 						if (!MStorageOnHand.add(getCtx(),locatorTo.getM_Warehouse_ID(),
 								line.getM_LocatorTo_ID(),
 								line.getM_Product_ID(), 
 								M_AttributeSetInstanceTo_ID,
-								ma.getMovementQty(),ma.getDateMaterialPolicy(), get_TrxName()))
+								ma.getMovementQty(),dateMaterialPolicyTo, get_TrxName()))
 						{
 							String lastError = CLogger.retrieveErrorString("");
 							m_processMsg = "Cannot correct Inventory OnHand (MA) - " + lastError;
@@ -505,14 +500,16 @@ public class MMovement extends X_M_Movement implements DocAction
 							m_processMsg = "Transaction To not inserted (MA)";
 							return DocAction.STATUS_Invalid;
 						}
+						
+						qtyToAllocate = qtyToAllocate.subtract(ma.getMovementQty());
 					}
 				}
 				//	Fallback - We have ASI
-				if (trxFrom == null)
+				if (line.getM_AttributeSetInstance_ID() > 0 && qtyToAllocate.signum() != 0)
 				{
 					Timestamp dateMPolicy= null;
 					MStorageOnHand[] storages = null;
-					if (line.getMovementQty().compareTo(Env.ZERO) > 0) {
+					if (qtyToAllocate.compareTo(Env.ZERO) > 0) {
 						// Find Date Material Policy bases on ASI
 						storages = MStorageOnHand.getWarehouse(getCtx(), 0,
 								line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(), null,
@@ -526,7 +523,7 @@ public class MMovement extends X_M_Movement implements DocAction
 								line.getM_LocatorTo_ID(), get_TrxName());
 					}
 					for (MStorageOnHand storage : storages) {
-						if (storage.getQtyOnHand().compareTo(line.getMovementQty()) >= 0) {
+						if (storage.getQtyOnHand().compareTo(qtyToAllocate) >= 0) {
 							dateMPolicy = storage.getDateMaterialPolicy();
 							break;
 						}
@@ -547,7 +544,7 @@ public class MMovement extends X_M_Movement implements DocAction
 							line.getM_Locator_ID(),
 							line.getM_Product_ID(), 
 							line.getM_AttributeSetInstance_ID(),
-							line.getMovementQty().negate(),dateMPolicy, get_TrxName()))
+							qtyToAllocate.negate(),dateMPolicy, get_TrxName()))
 					{
 						String lastError = CLogger.retrieveErrorString("");
 						m_processMsg = "Cannot correct Inventory OnHand (MA) - " + lastError;
@@ -560,7 +557,7 @@ public class MMovement extends X_M_Movement implements DocAction
 							line.getM_LocatorTo_ID(),
 							line.getM_Product_ID(), 
 							line.getM_AttributeSetInstanceTo_ID(),
-							line.getMovementQty(),dateMPolicy, get_TrxName()))
+							qtyToAllocate,dateMPolicy, get_TrxName()))
 					{
 						String lastError = CLogger.retrieveErrorString("");
 						m_processMsg = "Cannot correct Inventory OnHand (MA) - " + lastError;
@@ -571,7 +568,7 @@ public class MMovement extends X_M_Movement implements DocAction
 					trxFrom = new MTransaction (getCtx(), line.getAD_Org_ID(), 
 							MTransaction.MOVEMENTTYPE_MovementFrom,
 							line.getM_Locator_ID(), line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
-							line.getMovementQty().negate(), getMovementDate(), get_TrxName());
+							qtyToAllocate.negate(), getMovementDate(), get_TrxName());
 					trxFrom.setM_MovementLine_ID(line.getM_MovementLine_ID());
 					if (!trxFrom.save())
 					{
@@ -582,7 +579,7 @@ public class MMovement extends X_M_Movement implements DocAction
 					MTransaction trxTo = new MTransaction (getCtx(), line.getAD_Org_ID(), 
 							MTransaction.MOVEMENTTYPE_MovementTo,
 							line.getM_LocatorTo_ID(), line.getM_Product_ID(), line.getM_AttributeSetInstanceTo_ID(),
-							line.getMovementQty(), getMovementDate(), get_TrxName());
+							qtyToAllocate, getMovementDate(), get_TrxName());
 					trxTo.setM_MovementLine_ID(line.getM_MovementLine_ID());
 					if (!trxTo.save())
 					{
@@ -636,8 +633,6 @@ public class MMovement extends X_M_Movement implements DocAction
 		if(Env.ZERO.compareTo(qtyToDeliver)==0)
 			return;
 		
-		boolean needSave = false;
-
 		//	Attribute Set Instance
 		if (line.getM_AttributeSetInstance_ID() == 0)
 		{
@@ -646,7 +641,7 @@ public class MMovement extends X_M_Movement implements DocAction
 			String MMPolicy = product.getMMPolicy();
 			MStorageOnHand[] storages = MStorageOnHand.getWarehouse(getCtx(), 0, line.getM_Product_ID(), 0, 
 					null, MClient.MMPOLICY_FiFo.equals(MMPolicy), true, line.getM_Locator_ID(), get_TrxName());
-
+			
 
 			for (MStorageOnHand storage: storages)
 			{
@@ -682,10 +677,6 @@ public class MMovement extends X_M_Movement implements DocAction
 			}
 		}	//	attributeSetInstance
 		
-		if (needSave)
-		{
-			line.saveEx();
-		}
 	}	//	checkMaterialPolicy
 
 	/**
@@ -863,18 +854,15 @@ public class MMovement extends X_M_Movement implements DocAction
 			}
 			
 			//We need to copy MA
-			if (rLine.getM_AttributeSetInstance_ID() == 0)
-			{
-				MMovementLineMA mas[] = MMovementLineMA.get(getCtx(),
+			MMovementLineMA mas[] = MMovementLineMA.get(getCtx(),
 						oLine.getM_MovementLine_ID(), get_TrxName());
 				for (int j = 0; j < mas.length; j++)
 				{
 					MMovementLineMA ma = new MMovementLineMA (rLine, 
-							mas[j].getM_AttributeSetInstance_ID(),
-							mas[j].getMovementQty().negate(),mas[j].getDateMaterialPolicy(),true);
+							mas[j].getM_AttributeSetInstance_ID(),mas[j].getM_AttributeSetInstanceTo_ID(),
+							mas[j].getMovementQty().negate(),mas[j].getDateMaterialPolicy(),mas[j].getDateMaterialPolicyTo(),true);
 					ma.saveEx();
 				}
-			}
 			
 		}
 		//

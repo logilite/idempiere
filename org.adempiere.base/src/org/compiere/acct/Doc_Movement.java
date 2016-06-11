@@ -19,12 +19,14 @@ package org.compiere.acct;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCostDetail;
 import org.compiere.model.MMovement;
 import org.compiere.model.MMovementLine;
+import org.compiere.model.MMovementLineMA;
 import org.compiere.model.ProductCost;
 import org.compiere.util.Env;
 
@@ -86,12 +88,52 @@ public class Doc_Movement extends Doc
 		for (int i = 0; i < lines.length; i++)
 		{
 			MMovementLine line = lines[i];
-			DocLine docLine = new DocLine (line, this);
-			docLine.setQty(line.getMovementQty(), false);
-			docLine.setReversalLine_ID(line.getReversalLine_ID());
-			if (log.isLoggable(Level.FINE)) log.fine(docLine.toString());
-			list.add (docLine);
-		}
+			if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(line.getProduct().getCostingLevel(m_as))
+					&& line.getM_AttributeSetInstance_ID() <= 0)
+			{
+				MMovementLineMA[] lineMAs = MMovementLineMA.get(getCtx(), line.get_ID(), getTrxName());
+
+				HashMap<String, DocLine> map = new HashMap<String, DocLine>();
+
+				for (MMovementLineMA lineMA : lineMAs)
+				{
+					if(lineMA.getMovementQty().signum()==0)
+						continue;
+					String key = lineMA.getM_AttributeSetInstance_ID() + "_" + lineMA.getM_AttributeSetInstanceTo_ID();
+					if (!map.containsKey(key))
+					{
+						DocLine docLine = new DocLine(line, this);
+						docLine.setM_AttributeSetInstance_ID(lineMA.getM_AttributeSetInstance_ID());
+						docLine.setM_AttributeSetInstanceTo_ID(lineMA.getM_AttributeSetInstanceTo_ID());
+						docLine.setQty(lineMA.getMovementQty(), false);
+						docLine.setReversalLine_ID(line.getReversalLine_ID());
+						if (log.isLoggable(Level.FINE))
+							log.fine(docLine.toString());
+						map.put(key, docLine);
+					}
+					else
+					{
+						DocLine docLine = map.get(key);
+						
+						BigDecimal lineQty = docLine.getQty();
+						lineQty = lineQty == null ? Env.ZERO : lineQty;
+						
+						docLine.setQty(lineQty.add(lineMA.getMovementQty()), false);
+					}
+				}
+				list.addAll(map.values());
+			}
+			else
+			{
+				DocLine docLine = new DocLine (line, this);
+				docLine.setQty(line.getMovementQty(), false);
+				docLine.setReversalLine_ID(line.getReversalLine_ID());
+				docLine.setM_AttributeSetInstance_ID(line.getM_AttributeSetInstance_ID());
+				docLine.setM_AttributeSetInstanceTo_ID(line.getM_AttributeSetInstanceTo_ID());
+				if (log.isLoggable(Level.FINE)) log.fine(docLine.toString());
+				list.add (docLine);
+			}
+ 		}
 
 		//	Return Array
 		DocLine[] dls = new DocLine[list.size()];
@@ -187,11 +229,15 @@ public class Doc_Movement extends Doc
 			}
 
 			//	Only for between-org movements OR between ASIs
-			if (dr.getAD_Org_ID() != cr.getAD_Org_ID() || line.getM_AttributeSetInstance_ID()!=line.getM_AttributeSetInstanceTo_ID())
+			String costingLevel = line.getProduct().getCostingLevel(as);
+			if (!MAcctSchema.COSTINGLEVEL_Organization.equals(costingLevel)
+					&& !MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))
+				continue;
+			
+			if ((dr.getAD_Org_ID() != cr.getAD_Org_ID() && MAcctSchema.COSTINGLEVEL_Organization.equals(costingLevel))
+					|| (line.getM_AttributeSetInstance_ID() != line.getM_AttributeSetInstanceTo_ID() && MAcctSchema.COSTINGLEVEL_BatchLot
+							.equals(costingLevel)))
 			{
-				String costingLevel = line.getProduct().getCostingLevel(as);
-				if (!MAcctSchema.COSTINGLEVEL_Organization.equals(costingLevel) && !MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))
-					continue;
 				//
 				String description = line.getDescription();
 				if (description == null)
