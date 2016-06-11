@@ -27,6 +27,7 @@ package org.adempiere.process;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.logging.Level;
 
 import org.compiere.model.MPriceList;
@@ -374,27 +375,27 @@ public class ImportPriceList extends SvrProcess
 					sql = new StringBuilder("SELECT M_ProductPriceVendorBreak_ID FROM M_ProductPriceVendorBreak "
 							+ " WHERE M_PriceList_Version_ID=? "
 							+ " AND IsActive='Y' AND ");
+					ArrayList<Object> paramList = new ArrayList<Object>();
+					paramList.add(pricelistversion.getM_PriceList_Version_ID());
 					
 					if(imp.getC_BPartner_ID() > 0) {
 						sql.append(" C_BPartner_ID=? AND ");
+						paramList.add(imp.getC_BPartner_ID());
 					}
 					else {
 						sql.append(" C_BPartner_ID IS NULL AND ");
 					}
 					sql.append(" M_Product_ID=? AND BreakValue=?");
+					paramList.add(imp.getM_Product_ID());
+					BigDecimal  breakVal = imp.getBreakValue();
+					if(breakVal==null)
+						breakVal = Env.ZERO;
+					paramList.add(breakVal);
 					
 					int M_ProductPriceVendorBreak_ID = 0;
 					
-					if(imp.getC_BPartner_ID() > 0) {
-						M_ProductPriceVendorBreak_ID = DB.getSQLValue(get_TrxName(), sql.toString(),
-								new Object[] { pricelistversion.getM_PriceList_Version_ID(), imp.getC_BPartner_ID(),
-										imp.getM_Product_ID(), imp.getBreakValue() });
-					}
-					else {
-						M_ProductPriceVendorBreak_ID = DB.getSQLValue(get_TrxName(), sql.toString(),
-								new Object[] { pricelistversion.getM_PriceList_Version_ID(),
-										imp.getM_Product_ID(), imp.getBreakValue() });
-					}
+					
+					M_ProductPriceVendorBreak_ID = DB.getSQLValue(get_TrxName(), sql.toString(),paramList);
 					
 					
 
