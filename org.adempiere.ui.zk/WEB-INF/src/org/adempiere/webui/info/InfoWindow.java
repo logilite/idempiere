@@ -1697,9 +1697,8 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			countSql = countSql.trim();
 			countSql = countSql.substring(0, countSql.length() - 5);
 		}
-		String otherClause = "";
-		 if (infoWindow.getOtherClause() != null && infoWindow.getOtherClause().trim().length() > 0) {
-	        	otherClause = infoWindow.getOtherClause();
+		String otherClause = infoWindow.getOtherClause();
+		 if (otherClause != null && otherClause.trim().length() > 0) {
 	        	if (otherClause.indexOf("@") >= 0) {
 	        		String s = Env.parseContext(infoContext, p_WindowNo, otherClause, true, false);
 	        		if (s.length() == 0) {
@@ -1708,7 +1707,9 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	        			otherClause = s;
 	        		}
 	        	}
-	        }
+	       }else{
+	    	   otherClause = "";
+	       }
 		countSql = MRole.getDefault().addAccessSQL	(countSql, getTableName(),
 													MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO);
 		
