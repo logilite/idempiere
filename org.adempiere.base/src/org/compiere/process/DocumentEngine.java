@@ -1088,6 +1088,7 @@ public class DocumentEngine implements DocAction
 			{
 				if (periodOpen) {
 					options[index++] = DocumentEngine.ACTION_Void;
+					options[index++] = DocumentEngine.ACTION_ReActivate;
 				}
 			}
 		}
