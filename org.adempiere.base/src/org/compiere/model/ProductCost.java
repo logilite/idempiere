@@ -58,7 +58,7 @@ public class ProductCost
 	/** ASI						*/
 	protected int				m_M_AttributeSetInstance_ID = 0;
 	/** The Product				*/
-	private MProduct		m_product = null;
+	protected MProduct		m_product = null;
 	/** Transaction				*/
 	protected String 			m_trxName = null;
 	

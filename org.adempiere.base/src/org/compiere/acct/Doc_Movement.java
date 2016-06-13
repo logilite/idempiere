@@ -43,9 +43,9 @@ import org.compiere.util.Env;
  */
 public class Doc_Movement extends Doc
 {
-	private int				m_Reversal_ID = 0;
+	protected int				m_Reversal_ID = 0;
 	@SuppressWarnings("unused")
-	private String			m_DocStatus = "";
+	protected String			m_DocStatus = "";
 
 	/**
 	 *  Constructor
@@ -81,7 +81,7 @@ public class Doc_Movement extends Doc
 	 *	@param move move
 	 *  @return document lines (DocLine_Material)
 	 */
-	private DocLine[] loadLines(MMovement move)
+	protected DocLine[] loadLines(MMovement move)
 	{
 		ArrayList<DocLine> list = new ArrayList<DocLine>();
 		MMovementLine[] lines = move.getLines(false);
@@ -271,7 +271,7 @@ public class Doc_Movement extends Doc
 		return facts;
 	}   //  createFact
 
-	private boolean isReversal(DocLine line) {
+	protected boolean isReversal(DocLine line) {
 		return m_Reversal_ID !=0 && line.getReversalLine_ID() != 0;
 	}
 
