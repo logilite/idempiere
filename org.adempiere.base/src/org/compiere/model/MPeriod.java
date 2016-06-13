@@ -143,6 +143,7 @@ public class MPeriod extends X_C_Period
 		while (it.hasNext())
 		{
 			MPeriod period = (MPeriod)it.next();
+			period.set_TrxName(null);
 			if (period.getC_Calendar_ID() == C_Calendar_ID && period.isStandardPeriod() && period.isInPeriod(DateAcct) 
 					&& period.getAD_Client_ID() == AD_Client_ID)  // globalqss - CarlosRuiz - Fix [ 1820810 ] Wrong Period Assigned to Fact_Acct
 				return period;
