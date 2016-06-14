@@ -803,28 +803,21 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				doc.getBody().setNeedClosingTag(false);
 				doc.appendHead("<meta charset=\"UTF-8\" />");
 				doc.appendBody(table);
-				appendInlineCss (doc);
+
 				if (extension != null && extension.getStyleURL() != null)
 				{
 					// maybe cache style content with key is path
 					String pathStyleFile = extension.getFullPathStyle(); // creates a temp file - delete below
-					Path path = Paths.get(pathStyleFile);
-				    List<String> styleLines = Files.readAllLines(path, Ini.getCharset());
-				    Files.delete(path); // delete temp file
-				    StringBuilder styleBuild = new StringBuilder();
-				    for (String styleLine : styleLines){
-				    	styleBuild.append(styleLine); //.append("\n");
-				    }
-				    appendInlineCss (doc, styleBuild);
+					appendInlineCss(doc, readResourceFile(pathStyleFile));
 				}
 				if (extension != null && extension.getScriptURL() != null && !isExport)
 				{
-					script jslink = new script();
-					jslink.setLanguage("javascript");
-					jslink.setSrc(extension.getScriptURL());
-					doc.appendHead(jslink);
+					embedExtendScript(doc, extension.getScriptURL());
 				}
 				
+				appendExtraScript(extension, isExport, doc);
+
+				appendInlineCss(doc);
 				if (extension != null && !isExport){
 					extension.setWebAttribute(doc.getBody());
 				}
@@ -1911,6 +1904,8 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		if (buildCssInline.length() > 0){
 			buildCssInline.insert(0, "<style>");
 			buildCssInline.append("</style>");
+			buildCssInline.insert(0, "<style type=\"text/css\" rel=\"stylesheet\">\n");
+			buildCssInline.append("\n</style>");
 			doc.appendHead(buildCssInline.toString());
 		}
 	}
@@ -2093,4 +2088,99 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		}
 	}
 
+	/**
+	 * if isExport, embed script content other embed script url
+	 * 
+	 * @param extension
+	 * @param isExport
+	 * @param doc
+	 * @throws IOException
+	 */
+	protected void appendExtraScript(IHTMLExtension extension, boolean isExport, XhtmlDocument doc) throws IOException
+	{
+		// embed extend script by link
+		if (extension != null && isExport)
+		{
+			for (String extraScriptPath : extension.getFullPathExtraScriptURLs())
+			{
+				appendInlineScriptContent(doc, readResourceFile(extraScriptPath));
+			}
+			// embed extend script by content
+		}
+		else if (extension != null && !isExport)
+		{
+			for (String extraScriptUrl : extension.getExtraScriptURLs())
+			{
+				embedExtendScript(doc, extraScriptUrl);
+			}
+		}
+
+		if (extension != null)
+		{
+			StringBuilder embedJs = new StringBuilder();
+			embedJs.append("<script type=\"text/javascript\">");
+			embedJs.append("\n");
+			embedJs.append("$(window).load(function() {");
+			embedJs.append("\n");
+			embedJs.append("$('.rp-table').floatThead();");
+			embedJs.append("\n");
+			embedJs.append("});");
+			embedJs.append("\n");
+			embedJs.append("</script>");
+
+			doc.appendHead(embedJs.toString());
+		}
+	}
+
+	/**
+	 * read all content from file into StringBuilder
+	 * 
+	 * @param pathStyleFile
+	 * @return
+	 * @throws IOException
+	 */
+	protected StringBuilder readResourceFile(String pathStyleFile) throws IOException
+	{
+		Path path = Paths.get(pathStyleFile);
+		List<String> styleLines = Files.readAllLines(path, Ini.getCharset());
+		StringBuilder styleBuild = new StringBuilder();
+		for (String styleLine : styleLines)
+		{
+			styleBuild.append(styleLine);
+			styleBuild.append("\n");
+		}
+
+		return styleBuild;
+	}
+
+	/**
+	 * embed script url into head tag
+	 * 
+	 * @param doc
+	 * @param scriptUrl
+	 */
+	protected void embedExtendScript(XhtmlDocument doc, String scriptUrl)
+	{
+		script jslink = new script();
+		jslink.setLanguage("javascript");
+		jslink.setSrc(scriptUrl);
+		doc.appendHead(jslink);
+	}
+
+	/**
+	 * embed script content into head tag
+	 * 
+	 * @param doc
+	 * @param buildScriptContent
+	 */
+	public void appendInlineScriptContent(XhtmlDocument doc, StringBuilder buildScriptContent)
+	{
+		if (buildScriptContent.length() > 0)
+		{
+			buildScriptContent.insert(0, "<script type=\"text/javascript\">\n");
+			buildScriptContent.append("\n</script>");
+			doc.appendHead(buildScriptContent.toString());
+		}
+	}
+	
 }	//	ReportEngine
