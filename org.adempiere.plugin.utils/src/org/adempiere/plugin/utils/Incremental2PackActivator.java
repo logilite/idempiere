@@ -135,6 +135,9 @@ public class Incremental2PackActivator implements BundleActivator, ServiceTracke
 				
 		//2Pack_1.0.0.zip, 2Pack_1.0.1.zip, etc
 		Enumeration<URL> urls = context.getBundle().findEntries("/META-INF", "2Pack_*.zip", false);
+		if(urls==null)
+			return;
+		
 		Version bundleVersion = new Version(bundleVersionPart);
 		if (!Util.isEmpty(installedVersionPart)) {
 			Version installedVersion = new Version(installedVersionPart);
