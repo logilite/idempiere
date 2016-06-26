@@ -502,8 +502,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	
 	protected boolean loadInfoDefinition() {
 		if (infoWindow != null) {
-			String tableName = null;
-				tableName = MTable.getTableName(Env.getCtx(), infoWindow.getAD_Table_ID());
+			String tableName = MTable.getTableName(Env.getCtx(), infoWindow.getAD_Table_ID());
 			
 			AccessSqlParser sqlParser = new AccessSqlParser("SELECT * FROM " + infoWindow.getFromClause());
 			tableInfos = sqlParser.getTableInfo(0);
@@ -523,7 +522,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 					keyColumnOfView = infoColumn;
 				String columnName = infoColumn.getColumnName();
 				/*!m_lookup && infoColumn.isMandatory():apply Mandatory only case open as window and only for criteria field*/
-				boolean isMandatory = !m_lookup && infoColumn.isMandatory() && infoColumn.isQueryCriteria();
+				boolean isMandatory = !m_lookup && infoColumn.isMandatory() && (infoColumn.isQueryCriteria() || !infoColumn.isReadOnly());
 				GridFieldVO vo = GridFieldVO.createParameter(infoContext, p_WindowNo, AEnv.getADWindowID(p_WindowNo), infoWindow.getAD_InfoWindow_ID(), 0,
 						columnName, infoColumn.get_Translation("Name"), infoColumn.getAD_Reference_ID(), 
 						infoColumn.getAD_Reference_Value_ID(), isMandatory, false);
