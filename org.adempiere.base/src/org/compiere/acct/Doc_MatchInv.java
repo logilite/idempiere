@@ -141,6 +141,13 @@ public class Doc_MatchInv extends Doc
 	public ArrayList<Fact> createFacts (MAcctSchema as)
 	{
 		ArrayList<Fact> facts = new ArrayList<Fact>();
+		
+		// Do not post if Match workbench is set.
+		if(m_matchInv.getM_MatchInvHdr_ID() > 0)
+		{
+			return facts;
+		}
+		
 		//  Nothing to do
 		if (getM_Product_ID() == 0								//	no Product
 			|| getQty().signum() == 0

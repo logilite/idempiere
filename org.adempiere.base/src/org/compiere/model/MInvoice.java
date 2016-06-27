@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
@@ -1813,15 +1814,34 @@ public class MInvoice extends X_C_Invoice implements DocAction
 
 				if (receiptLine.getMovementQty().compareTo(matchQty) < 0)
 					matchQty = receiptLine.getMovementQty();
+				
+				MMatchInvHdr matchWB = new MMatchInvHdr(getCtx(), 0, get_TrxName());
+				matchWB.setDateAcct(this.getDateAcct());
+				matchWB.setDateTrx(this.getDateInvoiced());
+				matchWB.setDescription(this.getDescription());
+				matchWB.saveEx();
+				
 
 				MMatchInv inv = new MMatchInv(line, getDateInvoiced(), matchQty);
+				inv.setM_MatchInvHdr_ID(matchWB.get_ID());
 				if (!inv.save(get_TrxName()))
 				{
 					m_processMsg = CLogger.retrieveErrorString("Could not create Invoice Matching");
 					return DocAction.STATUS_Invalid;
 				}
+
+				try
+				{
+					matchWB.processIt(DocAction.ACTION_Complete);
+				}
+				catch (Exception e)
+				{
+					log.log(Level.SEVERE, "Failed to complete match workbench", e);
+				}
+				matchWB.saveEx();
+				
 				matchInv++;
-				addDocsPostProcess(inv);
+				addDocsPostProcess(matchWB);
 			}
 					
 			//	Update Order Line
@@ -1866,7 +1886,16 @@ public class MInvoice extends X_C_Invoice implements DocAction
 						{
 							for(MMatchInv matchInvoice : matchInvoices)
 							{
-								if (!matchInvoice.isPosted())
+								if(matchInvoice.getM_MatchInvHdr_ID() > 0)
+								{
+									MMatchInvHdr matchWB = new MMatchInvHdr(getCtx(),
+											matchInvoice.getM_MatchInvHdr_ID(), get_TrxName());
+									if (!matchWB.isPosted())
+									{
+										addDocsPostProcess(matchWB);
+									}
+								}
+								else if (!matchInvoice.isPosted())
 								{
 									addDocsPostProcess(matchInvoice);
 								}
@@ -2389,10 +2418,17 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		if (!isSOTrx())
 		{
 			MMatchInv[] mInv = MMatchInv.getInvoice(getCtx(), getC_Invoice_ID(), get_TrxName());
+			HashSet<Integer> matchWorkBenchList = new HashSet<Integer>();
 			for (int i = 0; i < mInv.length; i++)
 			{
 				if (mInv[i].getReversal_ID() > 0)
 					continue;
+				
+				if(mInv[i].getM_MatchInvHdr_ID() > 0)
+				{
+					matchWorkBenchList.add(mInv[i].getM_MatchInvHdr_ID());
+					continue;
+				}
 				
 				if (!mInv[i].reverse(reversalDate)) 
 				{
@@ -2401,6 +2437,30 @@ public class MInvoice extends X_C_Invoice implements DocAction
 				}
 				addDocsPostProcess(new MMatchInv(Env.getCtx(), mInv[i].getReversal_ID(), get_TrxName()));
 			}
+			
+			for(int M_MatchInvHdr : matchWorkBenchList)
+			{
+				MMatchInvHdr mwb = new MMatchInvHdr(getCtx(), M_MatchInvHdr, get_TrxName());
+				try
+				{
+					if(mwb.processIt(DOCACTION_Reverse_Correct))
+					{
+						mwb.saveEx();
+					}
+					else
+					{
+						m_processMsg = "Failed to reverse macth workbench";
+						return null;	
+					}
+				}
+				catch (Exception e)
+				{
+					m_processMsg = "Failed to reverse macth workbench";
+					return null;
+				}
+				addDocsPostProcess(new MMatchInvHdr(getCtx(), mwb.getReversal_ID(), get_TrxName()));
+			}
+			
 			MMatchPO[] mPO = MMatchPO.getInvoice(getCtx(), getC_Invoice_ID(), get_TrxName());
 			for (int i = 0; i < mPO.length; i++)
 			{

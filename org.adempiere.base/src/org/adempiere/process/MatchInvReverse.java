@@ -48,6 +48,12 @@ public class MatchInvReverse extends SvrProcess {
 		if (inv.get_ID() != p_M_MatchInv_ID)
 			throw new AdempiereException("@NotFound@ @M_MatchInv_ID@ " + p_M_MatchInv_ID);
 		
+		if (inv.getM_MatchInvHdr_ID() > 0)
+		{
+			throw new AdempiereException("Match invoice is a part of Match Workbench. Please reverse workbench.");
+		}
+
+		
 		if (inv.isPosted())
 		{		
 			Timestamp reversalDate = Env.getContextAsDate(getCtx(), "#Date");

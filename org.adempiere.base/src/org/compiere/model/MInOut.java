@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -1594,7 +1595,15 @@ public class MInOut extends X_M_InOut implements DocAction
 						sLine.getM_InOutLine_ID(), iLine.getC_InvoiceLine_ID(), get_TrxName());
 					if (matches == null || matches.length == 0)
 					{
+						MMatchInvHdr matchWB = new MMatchInvHdr(getCtx(), 0, get_TrxName());
+						matchWB.setDateAcct(this.getDateAcct());
+						matchWB.setDateTrx(this.getMovementDate());
+						matchWB.setDescription(this.getDescription());
+						matchWB.saveEx();
+						
+						
 						MMatchInv inv = new MMatchInv (iLine, getMovementDate(), matchQty);
+						inv.setM_MatchInvHdr_ID(matchWB.get_ID());
 						if (sLine.getM_AttributeSetInstance_ID() != iLine.getM_AttributeSetInstance_ID())
 						{
 							iLine.setM_AttributeSetInstance_ID(sLine.getM_AttributeSetInstance_ID());
@@ -1606,7 +1615,18 @@ public class MInOut extends X_M_InOut implements DocAction
 							m_processMsg = CLogger.retrieveErrorString("Could not create Inv Matching");
 							return DocAction.STATUS_Invalid;
 						}
-						addDocsPostProcess(inv);
+						
+						try
+						{
+							matchWB.processIt(DocAction.ACTION_Complete);
+						}
+						catch (Exception e)
+						{
+							log.log(Level.SEVERE, "Failed to complete match workbench", e);
+						}
+						matchWB.saveEx();
+						
+						addDocsPostProcess(matchWB);
 					}
 				}
 
@@ -2286,11 +2306,17 @@ public class MInOut extends X_M_InOut implements DocAction
 
 	protected boolean reverseMatching(Timestamp reversalDate) {
 		MMatchInv[] mInv = MMatchInv.getInOut(getCtx(), getM_InOut_ID(), get_TrxName());
+		HashSet<Integer> matchWorkBenchList = new HashSet<Integer>();
 		for (MMatchInv mMatchInv : mInv)
 		{		
 			if (mMatchInv.getReversal_ID() > 0)
 				continue;
 			
+			if(mMatchInv.getM_MatchInvHdr_ID() > 0)
+			{
+				matchWorkBenchList.add(mMatchInv.getM_MatchInvHdr_ID());
+				continue;
+			}
 			String description = mMatchInv.getDescription();
 			if (description == null || !description.endsWith("<-)"))
 			{
@@ -2302,6 +2328,30 @@ public class MInOut extends X_M_InOut implements DocAction
 				addDocsPostProcess(new MMatchInv(Env.getCtx(), mMatchInv.getReversal_ID(), get_TrxName()));
 			}
 		}
+		
+		for(int M_MatchInvHdr : matchWorkBenchList)
+		{
+			MMatchInvHdr mwb = new MMatchInvHdr(getCtx(), M_MatchInvHdr, get_TrxName());
+			try
+			{
+				if(mwb.processIt(DOCACTION_Reverse_Correct))
+				{
+					mwb.saveEx();
+				}
+				else
+				{
+					log.log(Level.SEVERE, "Failed to reverse macth workbench");
+					return false;
+				}
+			}
+			catch (Exception e)
+			{
+				log.log(Level.SEVERE, "Failed to reverse macth workbench", e);
+				return false;
+			}
+			addDocsPostProcess(new MMatchInvHdr(getCtx(), mwb.getReversal_ID(), get_TrxName()));
+		}
+		
 		MMatchPO[] mMatchPOList = MMatchPO.getInOut(getCtx(), getM_InOut_ID(), get_TrxName());
 		for (MMatchPO mMatchPO : mMatchPOList) 
 		{
