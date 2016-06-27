@@ -3,11 +3,11 @@ SET DEFINE OFF
 
 -- IDEMPIERE-2618 : Matching PO-Receipt-Invoice do not respect Credit Memo
 -- Mar 13, 2016 3:34:11 PM IST
-INSERT INTO AD_Window (AD_Window_ID,Name,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,WindowType,Processing,EntityType,IsSOTrx,IsDefault,WinHeight,WinWidth,IsBetaFunctionality,AD_Window_UU) VALUES (200081,'Match Workbench',0,0,'Y',TO_DATE('2016-03-13 15:34:11','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:11','YYYY-MM-DD HH24:MI:SS'),100,'M','N','D','Y','N',0,0,'N','5a20c4a8-bf27-4aa5-bbe8-e6c8cd536099')
+INSERT INTO AD_Window (AD_Window_ID,Name,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,WindowType,Processing,EntityType,IsSOTrx,IsDefault,WinHeight,WinWidth,IsBetaFunctionality,AD_Window_UU) VALUES (200081,'Match Invoice Header',0,0,'Y',TO_DATE('2016-03-13 15:34:11','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:11','YYYY-MM-DD HH24:MI:SS'),100,'M','N','D','Y','N',0,0,'N','5a20c4a8-bf27-4aa5-bbe8-e6c8cd536099')
 ;
 
 -- Mar 13, 2016 3:34:11 PM IST
-INSERT INTO AD_Menu (AD_Menu_ID,Name,Action,AD_Window_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsSummary,IsSOTrx,IsReadOnly,EntityType,IsCentrallyMaintained,AD_Menu_UU) VALUES (200136,'Match Workbench','W',200081,0,0,'Y',TO_DATE('2016-03-13 15:34:11','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:11','YYYY-MM-DD HH24:MI:SS'),100,'N','N','N','D','Y','ef800042-6ba0-484f-a0a0-0281a6944f00')
+INSERT INTO AD_Menu (AD_Menu_ID,Name,Action,AD_Window_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsSummary,IsSOTrx,IsReadOnly,EntityType,IsCentrallyMaintained,AD_Menu_UU) VALUES (200136,'Match Invoice Header','W',200081,0,0,'Y',TO_DATE('2016-03-13 15:34:11','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:11','YYYY-MM-DD HH24:MI:SS'),100,'N','N','N','D','Y','ef800042-6ba0-484f-a0a0-0281a6944f00')
 ;
 
 -- Mar 13, 2016 3:34:11 PM IST
@@ -15,7 +15,7 @@ INSERT INTO AD_TREENODEMM(AD_Client_ID, AD_Org_ID, CreatedBy, UpdatedBy, Parent_
 ;
 
 -- 18-Nov-2015 16:59:37 IST
-INSERT INTO AD_Table (AD_Table_ID,Name,TableName,LoadSeq,AccessLevel,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsSecurityEnabled,IsDeleteable,IsHighVolume,IsView,EntityType,ImportTable,IsChangeLog,ReplicationType,CopyColumnsFromTable,IsCentrallyMaintained,AD_Table_UU,Processing,DatabaseViewDrop) VALUES (200196,'Match Workbench','M_MatchInvHdr',0,'3',0,0,'Y',TO_DATE('2015-11-18 16:59:36','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2015-11-18 16:59:36','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','N','N','D','N','Y','L','N','Y','c8d35b21-9307-4f8a-936c-73bac0c4de7a','N','N')
+INSERT INTO AD_Table (AD_Table_ID,Name,TableName,LoadSeq,AccessLevel,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsSecurityEnabled,IsDeleteable,IsHighVolume,IsView,EntityType,ImportTable,IsChangeLog,ReplicationType,CopyColumnsFromTable,IsCentrallyMaintained,AD_Table_UU,Processing,DatabaseViewDrop) VALUES (200196,'Match Invoice Header','M_MatchInvHdr',0,'3',0,0,'Y',TO_DATE('2015-11-18 16:59:36','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2015-11-18 16:59:36','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','N','N','D','N','Y','L','N','Y','c8d35b21-9307-4f8a-936c-73bac0c4de7a','N','N')
 ;
 
 -- 18-Nov-2015 16:59:38 IST
@@ -23,11 +23,11 @@ INSERT INTO AD_Sequence (Name,CurrentNext,IsAudited,StartNewYear,Description,IsA
 ;
 
 -- Mar 13, 2016 3:34:11 PM IST
-INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,ColumnName,Name,PrintName,EntityType,AD_Element_UU) VALUES (202950,0,0,'Y',TO_DATE('2016-03-13 15:34:11','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:11','YYYY-MM-DD HH24:MI:SS'),100,'M_MatchInvHdr_ID','Match Workbench','Match Workbench','D','7d5a58db-4b71-4d0f-a243-7526bce17b74')
+INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,ColumnName,Name,PrintName,EntityType,AD_Element_UU) VALUES (202950,0,0,'Y',TO_DATE('2016-03-13 15:34:11','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:11','YYYY-MM-DD HH24:MI:SS'),100,'M_MatchInvHdr_ID','Match Invoice Header','Match Invoice Header','D','7d5a58db-4b71-4d0f-a243-7526bce17b74')
 ;
 
 -- Mar 13, 2016 3:34:11 PM IST
-INSERT INTO AD_Column (AD_Column_ID,Version,Name,AD_Table_ID,ColumnName,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,FKConstraintType) VALUES (212548,0,'Match Workbench',200196,'M_MatchInvHdr_ID',22,'Y','N','Y','N','N',0,'N',13,0,0,'Y',TO_DATE('2016-03-13 15:34:11','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:11','YYYY-MM-DD HH24:MI:SS'),100,202950,'N','N','D','Y','N','N','Y','91401ee7-c757-411b-bea3-c197eb2544b9','N',0,'N','N','N')
+INSERT INTO AD_Column (AD_Column_ID,Version,Name,AD_Table_ID,ColumnName,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,FKConstraintType) VALUES (212548,0,'Match Invoice Header',200196,'M_MatchInvHdr_ID',22,'Y','N','Y','N','N',0,'N',13,0,0,'Y',TO_DATE('2016-03-13 15:34:11','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:11','YYYY-MM-DD HH24:MI:SS'),100,202950,'N','N','D','Y','N','N','Y','91401ee7-c757-411b-bea3-c197eb2544b9','N',0,'N','N','N')
 ;
 
 -- Mar 13, 2016 3:34:11 PM IST
@@ -194,7 +194,7 @@ ALTER TABLE M_MatchInvHdr MODIFY DocStatus VARCHAR2(2) DEFAULT 'DR'
 ;
 
 -- Mar 13, 2016 3:34:18 PM IST
-INSERT INTO AD_Workflow (Name,Description,AD_Workflow_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AccessLevel,EntityType,Author,WorkingTime,Duration,Version,Cost,DurationUnit,WaitingTime,PublishStatus,IsDefault,AD_Table_ID,Value,WorkflowType,IsValid,DocumentNo,QtyBatchSize,IsBetaFunctionality,Yield,AD_Workflow_UU) VALUES ('Process_Match_Workbench','(Standard Process Match Workbench)',200004,0,0,'Y',TO_DATE('2016-03-13 15:34:17','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:17','YYYY-MM-DD HH24:MI:SS'),100,'1','D','iDempiere, Inc.',0,1,0,0,'D',0,'R','N',200196,'Process_Match_Workbench','P','N','10000002',1,'N',100,'f86265cb-fa1b-4dfa-9e4a-2b90ecab6bbb')
+INSERT INTO AD_Workflow (Name,Description,AD_Workflow_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AccessLevel,EntityType,Author,WorkingTime,Duration,Version,Cost,DurationUnit,WaitingTime,PublishStatus,IsDefault,AD_Table_ID,Value,WorkflowType,IsValid,DocumentNo,QtyBatchSize,IsBetaFunctionality,Yield,AD_Workflow_UU) VALUES ('Process_Match_Invoice_Header','(Standard Process Match Invoice Header)',200004,0,0,'Y',TO_DATE('2016-03-13 15:34:17','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:17','YYYY-MM-DD HH24:MI:SS'),100,'1','D','iDempiere, Inc.',0,1,0,0,'D',0,'R','N',200196,'Process_Match_Invoice_Header','P','N','10000002',1,'N',100,'f86265cb-fa1b-4dfa-9e4a-2b90ecab6bbb')
 ;
 
 -- Mar 13, 2016 3:34:18 PM IST
@@ -218,7 +218,7 @@ UPDATE AD_Workflow SET AD_WF_Node_ID=200016, IsValid='Y',Updated=TO_DATE('2016-0
 ;
 
 -- Mar 13, 2016 3:34:21 PM IST
-INSERT INTO AD_Process (AD_Process_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,Name,IsReport,Value,IsDirectPrint,AccessLevel,EntityType,Statistic_Count,Statistic_Seconds,AD_Workflow_ID,IsBetaFunctionality,IsServerProcess,ShowHelp,CopyFromProcess,AD_Process_UU) VALUES (200091,0,0,'Y',TO_DATE('2016-03-13 15:34:21','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:21','YYYY-MM-DD HH24:MI:SS'),100,'Process Match Workbench','N','Process_Match_Workbench','N','3','D',0,0,200004,'N','N','Y','N','5cee451e-a77c-4d03-86a7-e0fb854448f5')
+INSERT INTO AD_Process (AD_Process_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,Name,IsReport,Value,IsDirectPrint,AccessLevel,EntityType,Statistic_Count,Statistic_Seconds,AD_Workflow_ID,IsBetaFunctionality,IsServerProcess,ShowHelp,CopyFromProcess,AD_Process_UU) VALUES (200091,0,0,'Y',TO_DATE('2016-03-13 15:34:21','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:21','YYYY-MM-DD HH24:MI:SS'),100,'Process Match Invoice Header','N','Process_Match_Invoice_Header','N','3','D',0,0,200004,'N','N','Y','N','5cee451e-a77c-4d03-86a7-e0fb854448f5')
 ;
 
 -- Mar 13, 2016 3:34:22 PM IST
@@ -274,7 +274,7 @@ ALTER TABLE M_MatchInvHdr MODIFY Reversal_ID NUMBER(10) DEFAULT NULL
 ;
 
 -- Mar 13, 2016 3:34:26 PM IST
-INSERT INTO AD_Tab (AD_Tab_ID,Name,AD_Window_ID,SeqNo,IsSingleRow,AD_Table_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,HasTree,IsInfoTab,IsTranslationTab,IsReadOnly,Processing,ImportFields,TabLevel,IsSortTab,EntityType,IsInsertRecord,IsAdvancedTab,AD_Tab_UU,TreeDisplayedOn) VALUES (200205,'Match Workbench',200081,10,'Y',200196,0,0,'Y',TO_DATE('2016-03-13 15:34:26','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:26','YYYY-MM-DD HH24:MI:SS'),100,'N','N','N','N','N','N',0,'N','D','Y','N','b23d0207-2a4a-45c2-a538-d1f32029605c','B')
+INSERT INTO AD_Tab (AD_Tab_ID,Name,AD_Window_ID,SeqNo,IsSingleRow,AD_Table_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,HasTree,IsInfoTab,IsTranslationTab,IsReadOnly,Processing,ImportFields,TabLevel,IsSortTab,EntityType,IsInsertRecord,IsAdvancedTab,AD_Tab_UU,TreeDisplayedOn) VALUES (200205,'Match Invoice Header',200081,10,'Y',200196,0,0,'Y',TO_DATE('2016-03-13 15:34:26','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:26','YYYY-MM-DD HH24:MI:SS'),100,'N','N','N','N','N','N',0,'N','D','Y','N','b23d0207-2a4a-45c2-a538-d1f32029605c','B')
 ;
 
 -- Mar 13, 2016 3:34:26 PM IST
@@ -289,7 +289,7 @@ There are two reasons for de-activating and not deleting records:
 ;
 
 -- Mar 13, 2016 3:34:26 PM IST
-INSERT INTO AD_Field (AD_Field_ID,Name,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLength,SeqNo,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,XPosition,ColumnSpan,NumLines,IsQuickEntry,IsDefaultFocus,IsAdvancedField) VALUES (204059,'Match Workbench',200205,212548,'N',22,0,'N','N','N','N',0,0,'Y',TO_DATE('2016-03-13 15:34:26','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:26','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','02a46139-1cc0-4ea2-9dba-a4d2fa0667a8','N',1,2,1,'N','N','N')
+INSERT INTO AD_Field (AD_Field_ID,Name,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLength,SeqNo,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,XPosition,ColumnSpan,NumLines,IsQuickEntry,IsDefaultFocus,IsAdvancedField) VALUES (204059,'Match Invoice Header',200205,212548,'N',22,0,'N','N','N','N',0,0,'Y',TO_DATE('2016-03-13 15:34:26','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:26','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','02a46139-1cc0-4ea2-9dba-a4d2fa0667a8','N',1,2,1,'N','N','N')
 ;
 
 -- Mar 13, 2016 3:34:26 PM IST
@@ -439,7 +439,7 @@ UPDATE AD_Column SET ColumnName='Reversal_ID', IsSyncDatabase='Y',Updated=TO_DAT
 ;
 
 -- Mar 13, 2016 3:34:32 PM IST
-INSERT INTO AD_Column (AD_Column_ID,Version,Name,AD_Table_ID,ColumnName,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,FKConstraintName,FKConstraintType) VALUES (212553,0,'Match Workbench',472,'M_MatchInvHdr_ID',22,'N','N','N','N','N',0,'N',19,0,0,'Y',TO_DATE('2016-03-13 15:34:32','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:32','YYYY-MM-DD HH24:MI:SS'),100,202950,'N','N','D','Y','N','N','Y','bca26a73-7a20-49f7-a0b7-f9debbb000b2','Y',0,'N','N','MMatchInvHdr_MMatchInv','N')
+INSERT INTO AD_Column (AD_Column_ID,Version,Name,AD_Table_ID,ColumnName,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,FKConstraintName,FKConstraintType) VALUES (212553,0,'Match Invoice Header',472,'M_MatchInvHdr_ID',22,'N','N','N','N','N',0,'N',19,0,0,'Y',TO_DATE('2016-03-13 15:34:32','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:32','YYYY-MM-DD HH24:MI:SS'),100,202950,'N','N','D','Y','N','N','Y','bca26a73-7a20-49f7-a0b7-f9debbb000b2','Y',0,'N','N','MMatchInvHdr_MMatchInv','N')
 ;
 
 -- Mar 13, 2016 3:34:32 PM IST
@@ -467,7 +467,7 @@ INSERT INTO AD_Field (AD_Field_ID,Name,Description,Help,AD_Tab_ID,AD_Column_ID,I
 ;
 
 -- Mar 13, 2016 3:34:35 PM IST
-INSERT INTO AD_Field (AD_Field_ID,Name,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLength,SeqNo,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,SeqNoGrid,XPosition,ColumnSpan,NumLines,IsQuickEntry,IsDefaultFocus,IsAdvancedField) VALUES (204157,'Match Workbench',200206,212553,'Y',22,30,'N','N','N','N',0,0,'Y',TO_DATE('2016-03-13 15:34:35','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:35','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','a0afd7d2-b4c1-471c-830f-3af161ded77c','Y',170,1,2,1,'N','N','N')
+INSERT INTO AD_Field (AD_Field_ID,Name,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLength,SeqNo,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,SeqNoGrid,XPosition,ColumnSpan,NumLines,IsQuickEntry,IsDefaultFocus,IsAdvancedField) VALUES (204157,'Match Invoice Header',200206,212553,'Y',22,30,'N','N','N','N',0,0,'Y',TO_DATE('2016-03-13 15:34:35','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-13 15:34:35','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','a0afd7d2-b4c1-471c-830f-3af161ded77c','Y',170,1,2,1,'N','N','N')
 ;
 
 -- Mar 13, 2016 3:34:35 PM IST
@@ -609,11 +609,11 @@ ALTER TABLE M_MatchInvHdr ADD UpdatedBy NUMBER(10) NOT NULL
 ;
 
 -- 14-Mar-2016 12:37:14 IST
-INSERT INTO AD_Message (MsgType,MsgText,MsgTip,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('I','Create Match Workbench','',0,0,'Y',TO_TIMESTAMP('2016-03-14 12:37:14','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2016-03-14 12:37:14','YYYY-MM-DD HH24:MI:SS'),100,200400,'CreateMatchWorkbench','D','96d63a62-479b-4375-b38c-a379ca2fcb38')
+INSERT INTO AD_Message (MsgType,MsgText,MsgTip,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('I','Create Match Invoice Header','',0,0,'Y',TO_TIMESTAMP('2016-03-14 12:37:14','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2016-03-14 12:37:14','YYYY-MM-DD HH24:MI:SS'),100,200400,'CreateMatchInvoiceHeader','D','96d63a62-479b-4375-b38c-a379ca2fcb38')
 ;
 
 -- 15-Mar-2016 15:24:53 IST
-INSERT INTO AD_Ref_List (AD_Ref_List_ID,Name,AD_Reference_ID,Value,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,EntityType,AD_Ref_List_UU) VALUES (200355,'Matching Workbench',183,'MWB',0,0,'Y',TO_DATE('2016-03-15 15:24:52','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-15 15:24:52','YYYY-MM-DD HH24:MI:SS'),100,'D','19589a87-d734-42af-bf51-f64e4b0a2509')
+INSERT INTO AD_Ref_List (AD_Ref_List_ID,Name,AD_Reference_ID,Value,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,EntityType,AD_Ref_List_UU) VALUES (200355,'Matching Invoice Header',183,'MWB',0,0,'Y',TO_DATE('2016-03-15 15:24:52','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-15 15:24:52','YYYY-MM-DD HH24:MI:SS'),100,'D','19589a87-d734-42af-bf51-f64e4b0a2509')
 ;
 -- 15-Mar-2016 15:32:44 IST
 INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,Help,AD_Table_ID,ColumnName,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure) VALUES (212687,0,'Document Type','Document type or rules','The Document Type determines document sequence and processing rules',200196,'C_DocType_ID',22,'N','N','Y','N','N',0,'N',19,0,0,'Y',TO_DATE('2016-03-15 15:32:43','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-15 15:32:43','YYYY-MM-DD HH24:MI:SS'),100,196,'N','N','D','N','N','N','Y','399c0782-1022-4821-98d9-169dfd6fe0fa','Y',0,'N','N')
@@ -656,7 +656,7 @@ UPDATE AD_Field SET IsReadOnly='Y',Updated=TO_DATE('2016-03-15 15:34:06','YYYY-M
 ;
 
 -- 16-Mar-2016 21:52:07 IST
-INSERT INTO AD_Field (AD_Field_ID,Name,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLength,SeqNo,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,SeqNoGrid,ColumnSpan) VALUES (204168,'Match Workbench',408,212553,'Y',22,160,'N','N','N','N',0,0,'Y',TO_DATE('2016-03-16 21:52:06','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-16 21:52:06','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','0eb3ca31-7113-411a-9724-54ff2bc62cf8','Y',170,2)
+INSERT INTO AD_Field (AD_Field_ID,Name,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLength,SeqNo,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,SeqNoGrid,ColumnSpan) VALUES (204168,'Match Invoice Header',408,212553,'Y',22,160,'N','N','N','N',0,0,'Y',TO_DATE('2016-03-16 21:52:06','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-16 21:52:06','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','0eb3ca31-7113-411a-9724-54ff2bc62cf8','Y',170,2)
 ;
 
 -- 16-Mar-2016 21:52:16 IST
@@ -664,7 +664,7 @@ UPDATE AD_Field SET IsDisplayed='Y', SeqNo=50, XPosition=1,Updated=TO_DATE('2016
 ;
 
 -- 16-Mar-2016 21:54:55 IST
-INSERT INTO AD_Field (AD_Field_ID,Name,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLength,SeqNo,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,SeqNoGrid,ColumnSpan) VALUES (204169,'Match Workbench',690,212553,'Y',22,120,'N','N','N','N',0,0,'Y',TO_DATE('2016-03-16 21:54:55','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-16 21:54:55','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','d2dd18e7-28c6-4f63-93c9-b08f99e7a39f','Y',140,2)
+INSERT INTO AD_Field (AD_Field_ID,Name,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLength,SeqNo,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,SeqNoGrid,ColumnSpan) VALUES (204169,'Match Invoice Header',690,212553,'Y',22,120,'N','N','N','N',0,0,'Y',TO_DATE('2016-03-16 21:54:55','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-16 21:54:55','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','d2dd18e7-28c6-4f63-93c9-b08f99e7a39f','Y',140,2)
 ;
 
 -- 16-Mar-2016 21:55:34 IST
@@ -688,7 +688,7 @@ UPDATE AD_Field SET SeqNo=0,Updated=TO_DATE('2016-03-16 21:55:34','YYYY-MM-DD HH
 ;
 
 -- 16-Mar-2016 21:56:32 IST
-INSERT INTO AD_Field (AD_Field_ID,Name,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLength,SeqNo,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,SeqNoGrid,ColumnSpan) VALUES (204170,'Match Workbench',689,212553,'Y',22,120,'N','N','N','N',0,0,'Y',TO_DATE('2016-03-16 21:56:31','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-16 21:56:31','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','2e1dedeb-4799-4fef-932c-b3bcf3a3f10c','Y',130,2)
+INSERT INTO AD_Field (AD_Field_ID,Name,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLength,SeqNo,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,SeqNoGrid,ColumnSpan) VALUES (204170,'Match Invoice Header',689,212553,'Y',22,120,'N','N','N','N',0,0,'Y',TO_DATE('2016-03-16 21:56:31','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2016-03-16 21:56:31','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','2e1dedeb-4799-4fef-932c-b3bcf3a3f10c','Y',130,2)
 ;
 
 -- 16-Mar-2016 21:56:54 IST
