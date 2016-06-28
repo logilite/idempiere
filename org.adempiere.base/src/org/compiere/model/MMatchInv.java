@@ -22,6 +22,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Properties;
 
+import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 
@@ -246,6 +247,32 @@ public class MMatchInv extends X_M_MatchInv
 				throw new IllegalStateException("Total matched qty > invoiced qty. MatchedQty="+matchedQty+", InvoicedQty="+line.getQtyInvoiced()+", Line="+line);
 			}
 		}
+		
+		if(newRecord)
+		{
+			if(this.getM_MatchInvHdr_ID() <= 0)
+			{
+				MMatchInvHdr matchWB = new MMatchInvHdr(getCtx(), 0, get_TrxName());
+				matchWB.setDateAcct(this.getDateAcct());
+				matchWB.setDateTrx(this.getDateTrx());
+				matchWB.setDescription(this.getDescription());
+				matchWB.saveEx();
+				this.setM_MatchInvHdr_ID(matchWB.get_ID());
+				this.saveEx();
+				
+				try
+				{
+					matchWB.processIt(DocAction.ACTION_Complete);
+					matchWB.saveEx();
+				}
+				catch (Exception e)
+				{
+					log.saveError("Failed to complete match workbench", e);
+					return false;
+				}
+			}
+		}
+		
 		return true;
 	}
 	
@@ -367,7 +394,8 @@ public class MMatchInv extends X_M_MatchInv
 	 */
 	public boolean reverse(Timestamp reversalDate)  
 	{
-		if (this.isPosted() && this.getReversal_ID() == 0)
+		boolean posted = this.getM_MatchInvHdr_ID() > 0 ? this.getM_MatchInvHdr().isPosted() : this.isPosted();
+		if (posted && this.getReversal_ID() == 0)
 		{		
 			MMatchInv reversal = new MMatchInv (getCtx(), 0, get_TrxName());
 			PO.copyValues(this, reversal);

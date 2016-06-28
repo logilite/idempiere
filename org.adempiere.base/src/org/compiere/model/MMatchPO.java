@@ -531,17 +531,27 @@ public class MMatchPO extends X_M_MatchPO
 			{
 				if (qty.signum() > 0)
 				{
-					retValue = new MMatchPO (iLine, dateTrx, qty);
-					retValue.setC_OrderLine_ID(C_OrderLine_ID);
-					if (!retValue.save())
+					BigDecimal qtyMatched = DB.getSQLValueBD(trxName,
+							"SELECT Coalesce(SUM(Qty),0) FROM M_MatchPO WHERE C_InvoiceLine_ID > 0 "
+									+ "and C_OrderLine_ID=?", C_OrderLine_ID);
+					MOrderLine oLine = new MOrderLine(ctx, C_OrderLine_ID, trxName);
+
+					qty = qty.min(oLine.getQtyOrdered().subtract(qtyMatched));
+					
+					if(qty.signum() > 0)
 					{
-						String msg = "Failed to update match po.";
-						ValueNamePair error = CLogger.retrieveError();
-						if (error != null)
+						retValue = new MMatchPO (iLine, dateTrx, qty);
+						retValue.setC_OrderLine_ID(C_OrderLine_ID);
+						if (!retValue.save())
 						{
-							msg = msg + " " + error.getName();
+							String msg = "Failed to update match po.";
+							ValueNamePair error = CLogger.retrieveError();
+							if (error != null)
+							{
+								msg = msg + " " + error.getName();
+							}
+							throw new RuntimeException(msg);
 						}
-						throw new RuntimeException(msg);
 					}
 				}
 			}

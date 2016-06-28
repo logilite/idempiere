@@ -447,7 +447,7 @@ public class DocLine
 	 * 	Get Charge
 	 * 	@return C_Charge_ID
 	 */
-	protected int getC_Charge_ID()
+	public int getC_Charge_ID()
 	{
 		int index = p_po.get_ColumnIndex("C_Charge_ID");
 		if (index != -1)

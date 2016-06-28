@@ -18,6 +18,7 @@ package org.compiere.model;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+
 import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_AcctSchema_Default
@@ -151,6 +152,17 @@ public interface I_C_AcctSchema_Default
 	public int getB_UnallocatedCash_Acct();
 
 	public I_C_ValidCombination getB_UnallocatedCash_A() throws RuntimeException;
+	
+	 /** Column name C_MatchInv_WriteOff_Acct */
+    public static final String COLUMNNAME_C_MatchInv_WriteOff_Acct = "C_MatchInv_WriteOff_Acct";
+
+	/** Set Match Invoice WriteOff Account	  */
+	public void setC_MatchInv_WriteOff_Acct (int C_MatchInv_WriteOff_Acct);
+
+	/** Get Match Invoice WriteOff Account	  */
+	public int getC_MatchInv_WriteOff_Acct();
+
+	public I_C_ValidCombination getC_MatchInv_WriteOff_A() throws RuntimeException;
 
     /** Column name C_AcctSchema_Default_UU */
     public static final String COLUMNNAME_C_AcctSchema_Default_UU = "C_AcctSchema_Default_UU";
