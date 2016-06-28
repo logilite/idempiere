@@ -84,7 +84,7 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		this.parent = parent;
 
 		Properties ctx = Env.getCtx();
-		setTitle(Msg.getMsg(Env.getCtx(),"Event"));
+		setTitle(Msg.getMsg(Env.getCtx(),"NewRequest"));
 		setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
 		setWidth("400px");
 		this.setSclass("popup-dialog");
@@ -275,6 +275,7 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		else if (e.getTarget() == confirmPanel.getButton(ConfirmPanel.A_OK)) {
 			// Check Mandatory fields
 			String fillMandatory = Msg.translate(Env.getCtx(), "FillMandatory");
+			fillMandatory = fillMandatory.replaceAll(":", "");
 			if (dueTypeField.getValue() == null || dueTypeField.getValue().equals(""))
 				throw new WrongValueException(dueTypeField.getComponent(), fillMandatory);
 			if (requestTypeField.getValue() == null || requestTypeField.getValue().equals(0))

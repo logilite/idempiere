@@ -59,7 +59,7 @@ public class EventWindow extends Window implements EventListener<Event> {
 		super();
 		
 		Properties ctx = Env.getCtx();
-		setTitle(Msg.getMsg(ctx,"Event"));
+		setTitle(Msg.getMsg(ctx,"NewRequest"));
 		setAttribute(Window.MODE_KEY, Window.MODE_POPUP);
 		setWidth("400px");
 		setHeight("310px");
