@@ -85,6 +85,8 @@ public class Match
 	private StringBuffer	m_linetype = null;
 	//private BigDecimal      m_xMatched = Env.ZERO;
 	//private BigDecimal      m_xMatchedTo = Env.ZERO;
+	
+	private MMatchInvHdr		matchInvHdr			= null;
 
 	
 	/**
@@ -111,7 +113,7 @@ public class Match
 	/**
 	 *  Search Button Pressed - Fill xMatched
 	 */
-	protected IMiniTable cmd_search(IMiniTable xMatchedTable, int display, String matchToString, Integer Product, Integer Vendor, Timestamp from, Timestamp to, boolean matched)
+	protected IMiniTable cmd_search(IMiniTable xMatchedTable, int display, String matchToString, Integer Product, Integer Vendor, Timestamp from, Timestamp to, boolean matched, int C_InvoiceLine_ID)
 	{
 		//  ** Create SQL **
 		//int display = matchFrom.getSelectedIndex();
@@ -122,7 +124,7 @@ public class Match
 		else if (matchToString.equals(m_matchOptions[MATCH_ORDER]))
 			matchToType = MATCH_ORDER;
 		//
-		tableInit(display, matchToType, matched);	//	sets m_sql
+		tableInit(display, matchToType, matched, C_InvoiceLine_ID);	//	sets m_sql
 
 		//  ** Add Where Clause **
 		//  Product
@@ -157,18 +159,18 @@ public class Match
 
 	/**
 	 *  Process Button Pressed - Process Matching
-	 * @param isCreateMatchWB 
+	 * @param isCreateMatchInvHdr 
 	 */
-	protected void cmd_process(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, int matchMode, int matchFrom, Object matchTo, BigDecimal m_xMatched, boolean isCreateMatchWB)
+	protected void cmd_process(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, int matchMode, int matchFrom, Object matchTo, BigDecimal m_xMatched, boolean isCreateMatchInvHdr)
 	{
 		log.config("");
-		if(!isCreateMatchWB)
+		matchInvHdr = null;
+		if(!isCreateMatchInvHdr)
 		{
 			//  Matched From
 			int matchedRow = xMatchedTable.getSelectedRow();
 			if (matchedRow < 0)
 				return;
-		//	KeyNamePair BPartner = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, I_BPartner);
 			KeyNamePair lineMatched = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, I_Line);
 			KeyNamePair Product = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, I_Product);
 	
@@ -219,7 +221,7 @@ public class Match
 					Trx innerTrx = Trx.get(innerTrxName, true);
 					
 					try{
-						if (createMatchRecord(invoice, M_InOutLine_ID, Line_ID, BigDecimal.valueOf(qty), innerTrxName, 0, 0))
+						if (createMatchRecord(invoice, M_InOutLine_ID, Line_ID, BigDecimal.valueOf(qty), innerTrxName, 0))
 							innerTrx.commit();
 						else
 							innerTrx.rollback();
@@ -233,32 +235,29 @@ public class Match
 				}
 			}
 		}
-		else //Create Match Workbench
+		else //Create Match invoice header
 		{
-			int M_InoutLine_ID = 0;
-			int M_AttributeSetInstance_ID = 0;
-			BigDecimal receivedQty = Env.ZERO;
+			//int M_AttributeSetInstance_ID = 0;
 			LinkedHashMap<Integer, BigDecimal> invoiceMap = new LinkedHashMap<Integer, BigDecimal>();
-			MMatchInvHdr matchWB = null;
+			LinkedHashMap<Integer, BigDecimal> recieptMap = new LinkedHashMap<Integer, BigDecimal>();
 
 			//Get Receipt line if available
-			for (int row = 0; row < xMatchedTable.getRowCount(); row++)
+			// Create Receipt Lines Map <receiptlineID, QtyToMatch>
+			for (int row = 0; row < xMatchedToTable.getRowCount(); row++)
 			{
-				IDColumn id = (IDColumn) xMatchedTable.getValueAt(row, 0);
+				IDColumn id = (IDColumn) xMatchedToTable.getValueAt(row, 0);
 				if (id != null && id.isSelected())
 				{
-					KeyNamePair lineMatched = (KeyNamePair) xMatchedTable.getValueAt(row, I_Line);
-					double qty = ((Double) xMatchedTable.getValueAt(row, I_QTY)).doubleValue(); // doc
-					qty -= ((Double) xMatchedTable.getValueAt(row, I_MATCHED)).doubleValue();
-					receivedQty = BigDecimal.valueOf(qty);
-					M_InoutLine_ID = lineMatched.getKey();
-					M_AttributeSetInstance_ID = new MInOutLine(Env.getCtx(), M_InoutLine_ID, null)
-							.getM_AttributeSetInstance_ID();
-					break;
+					KeyNamePair lineMatched = (KeyNamePair) xMatchedToTable.getValueAt(row, I_Line);
+					double qty = ((Double) xMatchedToTable.getValueAt(row, I_QTY)).doubleValue(); // doc
+					qty -= ((Double) xMatchedToTable.getValueAt(row, I_MATCHED)).doubleValue();
+					//M_AttributeSetInstance_ID = new MInOutLine(Env.getCtx(), M_InoutLine_ID, null)
+					//		.getM_AttributeSetInstance_ID();
+					recieptMap.put(lineMatched.getKey(), BigDecimal.valueOf(qty));
 				}
 			}
 			
-			//If ASI not found on receipt line, try to get it from matched invoice line.
+/*			//If ASI not found on receipt line, try to get it from matched invoice line.
 			if(M_AttributeSetInstance_ID <= 0)
 			{
 				for (int row = 0; row < xMatchedToTable.getRowCount(); row++)
@@ -284,16 +283,16 @@ public class Match
 					}
 				}
 			}
-
+*/
 			// Create Invoice Lines Map <InvoicelineID, QtyToMatch>
-			for (int row = 0; row < xMatchedToTable.getRowCount(); row++)
+			for (int row = 0; row < xMatchedTable.getRowCount(); row++)
 			{
-				IDColumn id = (IDColumn) xMatchedToTable.getValueAt(row, 0);
+				IDColumn id = (IDColumn) xMatchedTable.getValueAt(row, 0);
 				if (id != null && id.isSelected())
 				{
-					KeyNamePair lineMatched = (KeyNamePair) xMatchedToTable.getValueAt(row, I_Line);
-					double qty = ((Double) xMatchedToTable.getValueAt(row, I_QTY)).doubleValue(); // doc
-					qty -= ((Double) xMatchedToTable.getValueAt(row, I_MATCHED)).doubleValue();
+					KeyNamePair lineMatched = (KeyNamePair) xMatchedTable.getValueAt(row, I_Line);
+					double qty = ((Double) xMatchedTable.getValueAt(row, I_QTY)).doubleValue(); // doc
+					qty -= ((Double) xMatchedTable.getValueAt(row, I_MATCHED)).doubleValue();
 					invoiceMap.put(lineMatched.getKey(), BigDecimal.valueOf(qty));
 				}
 			}
@@ -353,22 +352,29 @@ public class Match
 							invoiceMap.put(entryCRM.getKey(), entryCRM.getValue().add(matchQty));
 							invoiceMap.put(entryInv.getKey(), entryInv.getValue().subtract(matchQty));
 							crmQty = crmQty.add(matchQty);
+							
+							int M_AttributeSetInstance_ID = 0;
 
-							//Create MAtch Workbench - Creates only one time.
-							if (matchWB == null)
+							if (invLine.getM_AttributeSetInstance_ID() > 0)
 							{
-								matchWB = new MMatchInvHdr(Env.getCtx(), TimeUtil.getDay(System.currentTimeMillis()),
-										innerTrxName);
-								matchWB.saveEx();
+								M_AttributeSetInstance_ID = invLine.getM_AttributeSetInstance_ID();
+							}
+							else if (invLine.getM_InOutLine_ID() > 0)
+							{
+								MInOutLine ioLine = (MInOutLine) invLine.getM_InOutLine();
+								if (ioLine.getM_AttributeSetInstance_ID() > 0)
+								{
+									M_AttributeSetInstance_ID = ioLine.getM_AttributeSetInstance_ID();
+								}
 							}
 
 							if (!createMatchRecord(true, 0, crmLine.get_ID(), matchQty.negate(), innerTrxName,
-									matchWB.get_ID(), M_AttributeSetInstance_ID))
+									M_AttributeSetInstance_ID))
 							{
 								throw new AdempiereException("Faild to create match record for InvoiceLine");
 							}
 
-							if (!createMatchRecord(true, 0, invLine.get_ID(), matchQty, innerTrxName, matchWB.get_ID(),
+							if (!createMatchRecord(true, 0, invLine.get_ID(), matchQty, innerTrxName,
 									M_AttributeSetInstance_ID))
 							{
 								throw new AdempiereException("Faild to create match record for InvoiceLine - MRLine");
@@ -393,49 +399,48 @@ public class Match
 					}
 				}
 
-				//Match Receipt Qty
-				if (receivedQty.signum() > 0)
+				// (2) Match Receipt Qty
+				for(Entry<Integer, BigDecimal> entryRec : recieptMap.entrySet())
 				{
-					for (Entry<Integer, BigDecimal> entryInv : invoiceMap.entrySet())
+					BigDecimal receivedQty = entryRec.getValue();
+					
+					if (receivedQty.signum() > 0)
 					{
-						int C_InvoiceLine_ID = entryInv.getKey();
-						BigDecimal invQty = entryInv.getValue();
-						invQty = invQty == null ? Env.ZERO : invQty;
-
-						if (invQty.signum() <= 0)
+						for (Entry<Integer, BigDecimal> entryInv : invoiceMap.entrySet())
 						{
-							continue;
-						}
+							int C_InvoiceLine_ID = entryInv.getKey();
+							BigDecimal invQty = entryInv.getValue();
+							invQty = invQty == null ? Env.ZERO : invQty;
 
-						BigDecimal matchQty = invQty.min(receivedQty);
+							if (invQty.signum() <= 0)
+							{
+								continue;
+							}
 
-						receivedQty = receivedQty.subtract(matchQty);
-						invoiceMap.put(C_InvoiceLine_ID, invoiceMap.get(C_InvoiceLine_ID).subtract(matchQty));
-						if (matchWB == null)
-						{
-							matchWB = new MMatchInvHdr(Env.getCtx(), TimeUtil.getDay(System.currentTimeMillis()),
-									innerTrxName);
-							matchWB.saveEx();
-						}
+							BigDecimal matchQty = invQty.min(receivedQty);
 
-						if (!createMatchRecord(true, M_InoutLine_ID, C_InvoiceLine_ID, matchQty, innerTrxName,
-								matchWB.get_ID(), 0))
-						{
-							throw new AdempiereException("Faild to create match record for InvoiceLine - MRLine ");
-						}
+							receivedQty = receivedQty.subtract(matchQty);
+							invoiceMap.put(C_InvoiceLine_ID, invoiceMap.get(C_InvoiceLine_ID).subtract(matchQty));
 
-						if (receivedQty.signum() <= 0)
-						{
-							break;
+							if (!createMatchRecord(true, entryRec.getKey(), C_InvoiceLine_ID, matchQty, innerTrxName, 0))
+							{
+								throw new AdempiereException("Faild to create match record for InvoiceLine - MRLine ");
+							}
+
+							if (receivedQty.signum() <= 0)
+							{
+								break;
+							}
 						}
 					}
 				}
 				
-				if(matchWB != null)
+				if(matchInvHdr != null)
 				{
-					matchWB.processIt(DocAction.ACTION_Complete);
-					matchWB.saveEx();
+					matchInvHdr.processIt(DocAction.ACTION_Complete);
+					matchInvHdr.saveEx();
 				}
+				
 			}
 			catch (Exception ex)
 			{
@@ -455,8 +460,7 @@ public class Match
 	 *  Fill xMatchedTo
 	 */
 	protected IMiniTable cmd_searchTo(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, String displayString,
-			int matchToType, boolean sameBPartner, boolean sameProduct, boolean sameQty, boolean matched,
-			boolean isCreateWB)
+			int matchToType, boolean sameBPartner, boolean sameProduct, boolean sameQty, boolean matched)
 	{
 		int row = xMatchedTable.getSelectedRow();
 		if (log.isLoggable(Level.CONFIG)) log.config("Row=" + row);
@@ -475,7 +479,7 @@ public class Match
 		if (log.isLoggable(Level.FINE)) log.fine("BPartner=" + BPartner + " - Product=" + Product);
 
 		//int matchToType = matchFrom.getSelectedIndex();
-		tableInit (display, matchToType, matched);	//	sets m_sql
+		tableInit (display, matchToType, matched, 0);	//	sets m_sql
 		//
 		if (sameBPartner)
 			m_sql.append(" AND hdr.C_BPartner_ID=").append(BPartner.getKey());
@@ -492,23 +496,6 @@ public class Match
 		return xMatchedToTable;
 	}   //  cmd_seachTo
 	
-	/**
-	 *  Fill xMatchedTo
-	 */
-	protected IMiniTable cmd_searchToWB(IMiniTable xMatchedToTable, int matchToType, int C_BPartner_ID, boolean matched, int M_Product_ID)
-	{
-		//int matchToType = matchFrom.getSelectedIndex();
-		tableInit (MATCH_INVOICE, matchToType, matched);	//	sets m_sql
-		//
-		m_sql.append(" AND hdr.C_BPartner_ID=").append(C_BPartner_ID)
-			.append(" AND lin.M_Product_ID=").append(M_Product_ID);
-		
-		//  ** Load Table **
-		tableLoad (xMatchedToTable);
-		return xMatchedToTable;
-	}   //  cmd_seachTo
-	
-	
 	/**************************************************************************
 	 *  Initialize Table access - create SQL, dateColumn.
 	 *  <br>
@@ -520,9 +507,10 @@ public class Match
 	 *  - If Matched - all (fully or partially) matched records are listed
 	 *  - If Not Matched - all not fully matched records are listed
 	 *  @param display (Invoice, Shipment, Order) see MATCH_*
-	 *  @param matchToType (Invoice, Shipment, Order) see MATCH_*
+	 *  @param matchToType (Invoice, Shipment, Order) see MATCH_
+	 * @param C_InvoiceLine_ID *
 	 */
-	protected void tableInit (int display, int matchToType, boolean matched)
+	protected void tableInit (int display, int matchToType, boolean matched, int C_InvoiceLine_ID)
 	{
 		//boolean matched = matchMode.getSelectedIndex() == MODE_MATCHED;
 		if (log.isLoggable(Level.CONFIG)) log.config("Display=" + m_matchOptions[display]
@@ -545,6 +533,17 @@ public class Match
 				+ " INNER JOIN C_DocType dt ON (hdr.C_DocType_ID=dt.C_DocType_ID AND dt.DocBaseType IN ('API','APC'))"
 				+ " FULL JOIN M_MatchInv mi ON (lin.C_InvoiceLine_ID=mi.C_InvoiceLine_ID) "
 				+ "WHERE hdr.DocStatus IN ('CO','CL')");
+			
+			if (C_InvoiceLine_ID > 0)
+			{
+				m_sql.append(" AND ((dt.DocBaseType = 'API' AND lin.C_InvoiceLine_ID =").append(C_InvoiceLine_ID)
+						.append(") OR (dt.DocBaseType = 'APC'))");
+			}
+			else
+			{
+				m_sql.append(" AND dt.DocBaseType <> 'APC' ");
+			}
+			
 			m_groupBy = " GROUP BY hdr.C_Invoice_ID, dt.C_DocType_ID, hdr.DocumentNo,hdr.DateInvoiced,bp.Name,hdr.C_BPartner_ID,"
 				+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,lin.QtyInvoiced, org.Name, hdr.AD_Org_ID " //JAVIER
 				+ "HAVING "
@@ -653,7 +652,7 @@ public class Match
 	 *  @return true if created
 	 */
 	protected boolean createMatchRecord (boolean invoice, int M_InOutLine_ID, int Line_ID,
-		BigDecimal qty, String trxName, int M_MatchInvHdr_ID, int M_AttributeSetInstance_ID)
+		BigDecimal qty, String trxName, int M_AttributeSetInstance_ID)
 	{
 		if (qty.compareTo(Env.ZERO) == 0)
 			return true;
@@ -692,21 +691,17 @@ public class Match
 					match.setM_AttributeSetInstance_ID(M_AttributeSetInstance_ID);
 				}
 				
-				if(M_MatchInvHdr_ID > 0)
+				if (matchInvHdr == null)
 				{
-					match.setM_MatchInvHdr_ID(M_MatchInvHdr_ID);
+					matchInvHdr = new MMatchInvHdr(Env.getCtx(), TimeUtil.getDay(System.currentTimeMillis()),
+							trxName);
+					matchInvHdr.saveEx();
 				}
-				
+
+				match.setM_MatchInvHdr_ID(matchInvHdr.getM_MatchInvHdr_ID());
 				match.saveEx();
 				
 				success = true;
-				
-				if (MClient.isClientAccountingImmediate()) {
-					String ignoreError = DocumentEngine.postImmediate(match.getCtx(), match.getAD_Client_ID(), match.get_Table_ID(), match.get_ID(), true, match.get_TrxName());						
-					if (ignoreError != null) {
-						log.info(ignoreError);
-					}
-				}
 			}
 			else
 				success = true;
