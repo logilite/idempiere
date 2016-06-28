@@ -142,7 +142,7 @@ public class Doc_MatchInv extends Doc
 	{
 		ArrayList<Fact> facts = new ArrayList<Fact>();
 		
-		// Do not post if Match workbench is set.
+		// Do not post if Match invoice header is set.
 		if(m_matchInv.getM_MatchInvHdr_ID() > 0)
 		{
 			return facts;

@@ -50,7 +50,7 @@ public class MatchInvReverse extends SvrProcess {
 		
 		if (inv.getM_MatchInvHdr_ID() > 0)
 		{
-			throw new AdempiereException("Match invoice is a part of Match Workbench. Please reverse workbench.");
+			throw new AdempiereException("Match invoice is a part of Match Invoice Header. Please reverse match inv. header.");
 		}
 
 		

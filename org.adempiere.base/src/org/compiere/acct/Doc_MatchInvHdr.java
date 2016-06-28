@@ -52,7 +52,7 @@ public class Doc_MatchInvHdr extends Doc
 
 	public Doc_MatchInvHdr(MAcctSchema as, ResultSet rs, String trxName)
 	{
-		super(as, MMatchInvHdr.class, rs, DOCTYPE_MatchWorkBench, trxName);
+		super(as, MMatchInvHdr.class, rs, DOCTYPE_MatchInvHdr, trxName);
 	}
 
 	@Override

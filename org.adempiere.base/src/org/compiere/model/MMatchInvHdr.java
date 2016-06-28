@@ -33,11 +33,11 @@ public class MMatchInvHdr extends X_M_MatchInvHdr implements DocAction
 		super(ctx, M_MatchInvHdr_ID, trxName);
 		setDateTrx(TimeUtil.getDay(System.currentTimeMillis()));
 		setDateAcct(getDateTrx());
-		if(MDocType.getDocType(MDocType.DOCBASETYPE_MatchWorkbench) <= 0)
+		if(MDocType.getDocType(MDocType.DOCBASETYPE_MatchInvHdr) <= 0)
 		{
-			throw new AdempiereException("Document type not available: 'Match Workbench'");
+			throw new AdempiereException("Document type not available: 'Match Invoice Header'");
 		}
-		setC_DocType_ID(MDocType.getDocType(MDocType.DOCBASETYPE_MatchWorkbench));
+		setC_DocType_ID(MDocType.getDocType(MDocType.DOCBASETYPE_MatchInvHdr));
 	}
 
 	public MMatchInvHdr(Properties ctx, ResultSet rs, String trxName)
@@ -153,7 +153,7 @@ public class MMatchInvHdr extends X_M_MatchInvHdr implements DocAction
 			boolean accrual = false;
 			try
 			{
-				MPeriod.testPeriodOpen(getCtx(), getDateTrx(), Doc.DOCTYPE_MatchWorkBench, getAD_Org_ID());
+				MPeriod.testPeriodOpen(getCtx(), getDateTrx(), Doc.DOCTYPE_MatchInvHdr, getAD_Org_ID());
 			}
 			catch (PeriodClosedException e)
 			{
@@ -230,7 +230,7 @@ public class MMatchInvHdr extends X_M_MatchInvHdr implements DocAction
 			}
 
 			// TODO MPeriod.testPeriodOpen(getCtx(), reversalDate,
-			// Doc.DOCTYPE_MatchWorkBench, getAD_Org_ID());
+			// Doc.DOCTYPE_MatchInvHdr, getAD_Org_ID());
 
 			MMatchInvHdr reversal = new MMatchInvHdr(getCtx(), 0, get_TrxName());
 			PO.copyValues(this, reversal);
@@ -266,7 +266,7 @@ public class MMatchInvHdr extends X_M_MatchInvHdr implements DocAction
 			}
 			catch (Exception e)
 			{
-				log.log(Level.SEVERE, "Failed to complete match workbench reversal", e);
+				log.log(Level.SEVERE, "Failed to complete match invoice header reversal", e);
 			}
 
 			return reversal;

@@ -175,8 +175,8 @@ public abstract class Doc
 	public static final String	DOCTYPE_ProjectIssue	= "PJI";
 	/** Purchase Requisition    */
 	public static final String	DOCTYPE_PurchaseRequisition	= "POR";
-	/** Match WorkBench */
-	public static final String	DOCTYPE_MatchWorkBench	= "MWB";
+	/** Match invoice header */
+	public static final String	DOCTYPE_MatchInvHdr	= "MWB";
 	
 
 

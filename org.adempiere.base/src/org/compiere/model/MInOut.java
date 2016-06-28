@@ -1622,7 +1622,7 @@ public class MInOut extends X_M_InOut implements DocAction
 						}
 						catch (Exception e)
 						{
-							log.log(Level.SEVERE, "Failed to complete match workbench", e);
+							log.log(Level.SEVERE, "Failed to complete match invoice header", e);
 						}
 						matchWB.saveEx();
 						
@@ -2306,7 +2306,7 @@ public class MInOut extends X_M_InOut implements DocAction
 
 	protected boolean reverseMatching(Timestamp reversalDate) {
 		MMatchInv[] mInv = MMatchInv.getInOut(getCtx(), getM_InOut_ID(), get_TrxName());
-		HashSet<Integer> matchWorkBenchList = new HashSet<Integer>();
+		HashSet<Integer> matchInvHdrList = new HashSet<Integer>();
 		for (MMatchInv mMatchInv : mInv)
 		{		
 			if (mMatchInv.getReversal_ID() > 0)
@@ -2314,7 +2314,7 @@ public class MInOut extends X_M_InOut implements DocAction
 			
 			if(mMatchInv.getM_MatchInvHdr_ID() > 0)
 			{
-				matchWorkBenchList.add(mMatchInv.getM_MatchInvHdr_ID());
+				matchInvHdrList.add(mMatchInv.getM_MatchInvHdr_ID());
 				continue;
 			}
 			String description = mMatchInv.getDescription();
@@ -2329,7 +2329,7 @@ public class MInOut extends X_M_InOut implements DocAction
 			}
 		}
 		
-		for(int M_MatchInvHdr : matchWorkBenchList)
+		for(int M_MatchInvHdr : matchInvHdrList)
 		{
 			MMatchInvHdr mwb = new MMatchInvHdr(getCtx(), M_MatchInvHdr, get_TrxName());
 			try
@@ -2340,13 +2340,13 @@ public class MInOut extends X_M_InOut implements DocAction
 				}
 				else
 				{
-					log.log(Level.SEVERE, "Failed to reverse macth workbench");
+					log.log(Level.SEVERE, "Failed to reverse macth invoice header");
 					return false;
 				}
 			}
 			catch (Exception e)
 			{
-				log.log(Level.SEVERE, "Failed to reverse macth workbench", e);
+				log.log(Level.SEVERE, "Failed to reverse macth invoice header", e);
 				return false;
 			}
 			addDocsPostProcess(new MMatchInvHdr(getCtx(), mwb.getReversal_ID(), get_TrxName()));

@@ -379,7 +379,7 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 	/** Fixed Assets Depreciation = FDP */
 	public static final String DOCBASETYPE_FixedAssetsDepreciation = "FDP";
 	/** Match Workbench = MWB */
-	public static final String DOCBASETYPE_MatchWorkbench = "MWB";
+	public static final String DOCBASETYPE_MatchInvHdr = "MWB";
 
 	/** Set Document BaseType.
 		@param DocBaseType 
