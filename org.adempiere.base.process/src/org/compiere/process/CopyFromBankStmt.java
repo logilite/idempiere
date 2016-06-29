@@ -24,6 +24,7 @@ import org.compiere.model.MBankStatementLine;
 import org.compiere.model.MPayment;
 import org.compiere.model.MTable;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 
 /**
  *  Copy BankStatement Lines :
@@ -68,8 +69,10 @@ public class CopyFromBankStmt extends SvrProcess
 		if (m_C_BankStatement_ID == 0)
 			throw new IllegalArgumentException("Source C_BankStatement_ID == 0");
 
-		MBankStatement from = new MBankStatement(getCtx(), m_C_BankStatement_ID, get_TrxName());
-		MBankStatement to = new MBankStatement (getCtx(), To_C_BankStatement_ID, get_TrxName());
+		MBankStatement from = (MBankStatement) MTable.get(getCtx(), MBankStatement.Table_ID).getPO(
+				m_C_BankStatement_ID, get_TrxName());
+		MBankStatement to = (MBankStatement) MTable.get(getCtx(), MBankStatement.Table_ID).getPO(To_C_BankStatement_ID,
+				get_TrxName());
 		int no = 0;
 		
 		if ( ! (MBankStatement.DOCSTATUS_Completed.equals(from.getDocStatus()) || MBankStatement.DOCSTATUS_Closed.equals(from.getDocStatus())) )

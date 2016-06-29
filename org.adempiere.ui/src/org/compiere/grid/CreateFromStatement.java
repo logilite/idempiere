@@ -120,7 +120,8 @@ public abstract class CreateFromStatement extends CreateFromBatch
 	{
 		//  fixed values
 		int C_BankStatement_ID = ((Integer) getGridTab().getValue("C_BankStatement_ID")).intValue();
-		MBankStatement bs = new MBankStatement (Env.getCtx(), C_BankStatement_ID, trxName);
+		MBankStatement bs = (MBankStatement) MTable.get(Env.getCtx(), MBankStatement.Table_ID).getPO(
+				C_BankStatement_ID, trxName);
 		if (log.isLoggable(Level.CONFIG)) log.config(bs.toString());
 
 		//  Lines

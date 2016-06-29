@@ -220,7 +220,8 @@ import org.compiere.util.Msg;
 	public MBankStatement getParent()
 	{
 		if (m_parent == null)
-			m_parent = new MBankStatement (getCtx(), getC_BankStatement_ID(), get_TrxName());
+			m_parent = (MBankStatement) MTable.get(getCtx(), MBankStatement.Table_ID).getPO(getC_BankStatement_ID(),
+					get_TrxName());
 		return m_parent;
 	}	//	getParent
 	

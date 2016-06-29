@@ -95,25 +95,27 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 	 *	@param account Bank Account
  	 * 	@param isManual Manual statement
  	 **/
-	public MBankStatement (MBankAccount account, boolean isManual)
+	public static MBankStatement createFrom(MBankAccount account, boolean isManual)
 	{
-		this (account.getCtx(), 0, account.get_TrxName());
-		setClientOrg(account);
-		setC_BankAccount_ID(account.getC_BankAccount_ID());
-		setStatementDate(new Timestamp(System.currentTimeMillis()));
-		setDateAcct(new Timestamp(System.currentTimeMillis()));
-		setBeginningBalance(account.getCurrentBalance());
-		setName(getStatementDate().toString());
-		setIsManual(isManual);
-	}	//	MBankStatement
-	
+		MBankStatement bankStatement = (MBankStatement) MTable.get(account.getCtx(), MBankStatement.Table_ID).getPO(0,
+				account.get_TrxName());
+		bankStatement.setClientOrg(account);
+		bankStatement.setC_BankAccount_ID(account.getC_BankAccount_ID());
+		bankStatement.setStatementDate(new Timestamp(System.currentTimeMillis()));
+		bankStatement.setDateAcct(new Timestamp(System.currentTimeMillis()));
+		bankStatement.setBeginningBalance(account.getCurrentBalance());
+		bankStatement.setName(bankStatement.getStatementDate().toString());
+		bankStatement.setIsManual(isManual);
+
+		return bankStatement;
+	} // MBankStatement
 	/**
 	 * 	Create a new Bank Statement
 	 *	@param account Bank Account
 	 */
-	public MBankStatement(MBankAccount account)
+	public static MBankStatement createFrom (MBankAccount account)
 	{
-		this(account, false);
+		return createFrom(account, false);
 	}	//	MBankStatement
  
 	/**	Lines							*/
