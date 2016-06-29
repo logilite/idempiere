@@ -18,6 +18,8 @@ package org.adempiere.webui.apps.form;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.logging.Level;
 
 import org.adempiere.webui.LayoutUtils;
@@ -59,8 +61,8 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
 import org.zkoss.zul.North;
-import org.zkoss.zul.South;
 import org.zkoss.zul.Separator;
+import org.zkoss.zul.South;
 import org.zkoss.zul.Space;
 
 /**
@@ -101,7 +103,6 @@ public class WMatch extends Match
 			southPanel.appendChild(statusBar);
 			LayoutUtils.addSclass("status-border", statusBar);
 			//
-			
 			MMatchPO.consolidate(Env.getCtx());
 			cmd_matchTo();
 		}
@@ -141,6 +142,7 @@ public class WMatch extends Match
 	private BigDecimal      m_xMatched = Env.ZERO;
 	private BigDecimal      m_xMatchedTo = Env.ZERO;
 
+	private int					selectedID			= 0;
 	//
 	private Panel mainPanel = new Panel();
 	private StatusBarPanel statusBar = new StatusBarPanel();
@@ -181,6 +183,7 @@ public class WMatch extends Match
 	private Checkbox sameProduct = new Checkbox();
 	private Checkbox sameBPartner = new Checkbox();
 	private Checkbox sameQty = new Checkbox();
+	private boolean				isCreateMatchInvHDR	= false;
 
 	/**
 	 *  Static Init.
@@ -239,7 +242,8 @@ public class WMatch extends Match
 		row = rows.newRow();
 		row.appendCellChild(matchModeLabel.rightAlign(), 1);
 		row.appendCellChild(matchMode, 1);
-		row.appendCellChild(new Space(), 3);
+		row.appendCellChild(new Space(), 1);
+		row.appendCellChild(new Space(), 1);
 		
 		row = rows.newRow();
 		row.appendChild(onlyVendorLabel.rightAlign());
@@ -341,6 +345,7 @@ public class WMatch extends Match
 		bSearch.addActionListener(this);
 		xMatchedTable.addEventListener(Events.ON_SELECT, this);
 		xMatchedToTable.getModel().addTableModelListener(this);
+		xMatchedTable.getModel().addTableModelListener(this);
 		bProcess.addActionListener(this);
 		sameBPartner.addActionListener(this);
 		sameProduct.addActionListener(this);
@@ -396,28 +401,53 @@ public class WMatch extends Match
 			//  sync To
 			matchTo.setSelectedIndex(0);
 			cmd_matchTo();
-			
 		}
 		else if (e.getTarget() == matchTo)
 			cmd_matchTo();
 		else if (e.getTarget() == bSearch)
 		{
-			//cmd_search();
-			xMatchedTable = (WListbox)cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem().getLabel(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
-
-			xMatched.setValue(Env.ZERO);
-			//  Status Info
-			statusBar.setStatusLine(matchFrom.getSelectedItem().getLabel()
-				+ "# = " + xMatchedTable.getRowCount(),
-				xMatchedTable.getRowCount() == 0);
-			statusBar.setStatusDB("0");
-			cmd_searchTo();
+			// Reset all things done for match invoice header
+			selectedID = 0;
+			isCreateMatchInvHDR = false;
+			
+			sameProduct.setSelected(true);
+			sameProduct.setEnabled(true);
+			
+			sameBPartner.setSelected(true);
+			sameBPartner.setEnabled(true);
+			
+			xMatchedTable.setMultiSelection(false);
+			
+			onSearch(product, vendor, from, to);
+			xMatchedTable.repaint();
 		}
 		else if (e.getTarget() == bProcess)
 		{
+			if(isCreateMatchInvHDR())
+			{
+				Comparator<Object> comparator = new Comparator<Object>() {
+					@SuppressWarnings("unchecked")
+					@Override
+					public int compare(Object o1, Object o2)
+					{
+						ArrayList<Object> list1 = (ArrayList<Object>) o1;
+						ArrayList<Object> list2 = (ArrayList<Object>) o2;
+
+						Double qty1 = ((Double) (list1.get(I_QTY) == null ? 0 : list1.get(I_QTY)))
+								- ((Double) (list1.get(I_MATCHED) == null ? 0 : list1.get(I_MATCHED)));
+						Double qty2 = ((Double) (list2.get(I_QTY) == null ? 0 : list2.get(I_QTY)))
+								- ((Double) (list2.get(I_MATCHED) == null ? 0 : list2.get(I_MATCHED)));
+
+						return qty1.compareTo(qty2);
+					}
+				};
+
+				xMatchedToTable.getModel().sort(comparator, false);
+				xMatchedTable.getModel().sort(comparator, false);
+			}
 			//cmd_process();
-			cmd_process(xMatchedTable, xMatchedToTable, matchMode.getSelectedIndex(), matchFrom.getSelectedIndex(), matchTo.getSelectedItem().getLabel(), m_xMatched);
-			xMatchedTable = (WListbox) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem().getLabel(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
+			cmd_process(xMatchedTable, xMatchedToTable, matchMode.getSelectedIndex(), matchFrom.getSelectedIndex(), matchTo.getSelectedItem().getLabel(), m_xMatched, isCreateMatchInvHDR());
+			xMatchedTable = (WListbox) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem().getLabel(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED, selectedID);
 			xMatched.setValue(Env.ZERO);
 			//  Status Info
 			statusBar.setStatusLine(matchFrom.getSelectedItem().getLabel()
@@ -426,13 +456,84 @@ public class WMatch extends Match
 			statusBar.setStatusDB("0");
 			cmd_searchTo();
 		}
-		else if (e.getTarget() == sameBPartner
+		else if ((e.getTarget() == sameBPartner
 			|| e.getTarget() == sameProduct
 			|| e.getTarget() == sameQty)
+			 && !isCreateMatchInvHDR())
 			cmd_searchTo();
 		else if (AEnv.contains(xMatchedTable, e.getTarget()))
-			cmd_searchTo();
+		{
+			if(!isCreateMatchInvHDR && matchFrom.getSelectedIndex() == MATCH_INVOICE && matchTo.getSelectedIndex() == 0)
+			{
+				isCreateMatchInvHDR = true;
+				
+				int row = xMatchedTable.getSelectedIndex();
+
+				//Set Only Product
+				KeyNamePair productKNP = (KeyNamePair) xMatchedTable.getValueAt(row, I_Product);
+				product = new Integer(productKNP.getKey());
+				onlyProduct.setValue(product);
+				
+				//Set Only Vendor
+				KeyNamePair bpartnerKNP = (KeyNamePair) xMatchedTable.getValueAt(row, I_BPartner);
+				vendor = new Integer(bpartnerKNP.getKey());
+				onlyVendor.setValue(vendor);
+				
+				// Set selected invoiceLine
+				KeyNamePair C_InvoiceLine_ID = (KeyNamePair) xMatchedTable.getValueAt(row, I_Line);
+				selectedID = C_InvoiceLine_ID.getKey();
+
+				//Set Multiselection True
+				xMatchedTable.setMultiple(true);
+				
+				//Search for AP Credit Memo
+				onSearch(product, vendor, from, to);
+				
+				//Mark AP Invoice as selected and Load MR for same product and BP
+				for (row = 0; row < xMatchedTable.getRowCount(); row++)
+				{
+					KeyNamePair C_InvoiceLineID = (KeyNamePair) xMatchedTable.getValueAt(row, I_Line);
+					if (C_InvoiceLineID != null && C_InvoiceLineID.getKey() == selectedID)
+					{
+						xMatchedTable.setSelectedIndex(row);
+						((IDColumn) xMatchedTable.getValueAt(row, 0)).setSelected(true);
+						xMatchedTable.getItemAtIndex(row).focus();
+
+						WTableModelEvent event = new WTableModelEvent(xMatchedTable.getListModel(), row, 0);
+						tableChanged(event);
+						break;
+					}
+				}
+				
+				cmd_searchTo();
+			}
+			else
+			{
+				cmd_searchTo();
+			}
+		}
 	}   //  actionPerformed
+
+	private void onSearch(Integer product, Integer vendor, Timestamp from, Timestamp to)
+	{
+		if(!(matchFrom.getSelectedIndex() == MATCH_INVOICE && matchTo.getSelectedIndex() == 0))
+		{
+			selectedID = 0;
+			isCreateMatchInvHDR = false;
+		}
+		
+		xMatchedTable = (WListbox) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String) matchTo
+				.getSelectedItem().getLabel(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED,
+				selectedID);
+		xMatched.setValue(Env.ZERO);
+		//  Status Info
+		statusBar.setStatusLine(matchFrom.getSelectedItem().getLabel()
+				+ "# = " + xMatchedTable.getRowCount(),
+				xMatchedTable.getRowCount() == 0);
+		statusBar.setStatusDB("0");
+		cmd_searchTo();
+//		xMatchedTable.repaint();
+	}
 
 	
 	/**
@@ -440,12 +541,25 @@ public class WMatch extends Match
 	 */
 	private void cmd_matchTo()
 	{
-	//	log.fine( "VMatch.cmd_matchTo");
+		//	log.fine( "VMatch.cmd_matchTo");
 		int index = matchTo.getSelectedIndex();
 		String selection = (String)matchTo.getModel().getElementAt(index);
 		xMatchedToBorder.setValue(selection);
 		//  Reset Table
 		xMatchedToTable.setRowCount(0);
+		//TODO
+		/*if(isCreateMatchInvHDR())
+		{
+			xMatchedTable.setMultiple(true);
+			sameBPartner.setEnabled(false);
+			sameProduct.setEnabled(false);
+		}
+		else
+		{
+			xMatchedTable.setMultiple(false);
+			sameBPartner.setEnabled(true);
+			sameProduct.setEnabled(true);
+		}*/
 	}   //  cmd_matchTo
 	
 
@@ -457,7 +571,6 @@ public class WMatch extends Match
 		int row = xMatchedTable.getSelectedRow();
 		if (log.isLoggable(Level.CONFIG)) log.config("Row=" + row);
 
-		double qty = 0.0;
 		if (row < 0)
 		{
 			xMatchedToTable.setRowCount(0);
@@ -465,18 +578,22 @@ public class WMatch extends Match
 		else
 		{
 			//  ** Create SQL **
-			String displayString = (String)matchTo.getSelectedItem().getLabel();
+ 			String displayString = (String)matchTo.getSelectedItem().getLabel();
 			int matchToType = matchFrom.getSelectedIndex();
-			double docQty = ((Double)xMatchedTable.getValueAt(row, I_QTY)).doubleValue();
-			double matchedQty = ((Double)xMatchedTable.getValueAt(row, I_MATCHED)).doubleValue();
-			qty = docQty - matchedQty;
-			xMatchedToTable = (WListbox) cmd_searchTo(xMatchedTable, xMatchedToTable, displayString, matchToType, sameBPartner.isSelected(), sameProduct.isSelected(), sameQty.isSelected(), matchMode.getSelectedIndex() == MODE_MATCHED);
+			xMatchedToTable = (WListbox) cmd_searchTo(xMatchedTable, xMatchedToTable, displayString, matchToType,
+					sameBPartner.isSelected(), sameProduct.isSelected(), sameQty.isSelected(),
+					matchMode.getSelectedIndex() == MODE_MATCHED);
 		}
-		//  Display To be Matched Qty
-		m_xMatched = BigDecimal.valueOf(qty);
-		xMatched.setValue(m_xMatched);
-		xMatchedTo.setValue(Env.ZERO);
-		difference.setValue(m_xMatched);
+		
+		if(xMatchedTable.getSelectedIndices().length == 1 && ((BigDecimal)difference.getValue()).compareTo(Env.ZERO) > 0)
+		{
+			bProcess.setEnabled(true);
+		}
+		else
+		{
+			bProcess.setEnabled(false);
+		}
+		
 		//  Status Info
 		statusBar.setStatusLine(matchFrom.getSelectedItem().getLabel()
 			+ "# = " + xMatchedTable.getRowCount() + " - "
@@ -497,49 +614,109 @@ public class WMatch extends Match
 	 */
 	public void tableChanged (WTableModelEvent e)
 	{
+		
 		if (e.getColumn() != 0)
 			return;
 		if (log.isLoggable(Level.CONFIG)) log.config("Row=" + e.getFirstRow() + "-" + e.getLastRow() + ", Col=" + e.getColumn()
 			+ ", Type=" + e.getType());
 
-		//  Matched From
-		int matchedRow = xMatchedTable.getSelectedRow();
-		KeyNamePair Product = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, 5);
+		KeyNamePair Product = null;
+		if(!isCreateMatchInvHDR())
+		{
+			int matchedRow = xMatchedTable.getSelectedRow();
+			if(matchedRow < 0)
+				return;
+			Product = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, 5);
+			
+			// make same Product and same BP as Read Only
+			sameProduct.setEnabled(true);
+			sameBPartner.setEnabled(true);
+		}
+		else
+		{
+			// Set same Product and same BP checked
+			sameProduct.setSelected(true);
+			sameBPartner.setSelected(true);
 
-		//  Matched To
-		double qty = 0.0;
+			// make same Product and same BP as Read Only
+			sameProduct.setEnabled(false);
+			sameBPartner.setEnabled(false);
+		}
+
+		//  Matched From
+		double matchedQty = 0.0;
 		int noRows = 0;
+		for (int row = 0; row < xMatchedTable.getRowCount(); row++)
+		{
+			IDColumn id = (IDColumn) xMatchedTable.getValueAt(row, 0);
+			if (id != null && id.isSelected())
+			{
+				if (matchMode.getSelectedIndex() == MODE_NOTMATCHED)
+					matchedQty += ((Double) xMatchedTable.getValueAt(row, I_QTY)).doubleValue(); // doc
+				matchedQty -= ((Double) xMatchedTable.getValueAt(row, I_MATCHED)).doubleValue(); // matched
+				noRows++;
+			}
+		}
+		
+		//  Matched To
+		double matchedToQty = 0.0;
 		for (int row = 0; row < xMatchedToTable.getRowCount(); row++)
 		{
 			IDColumn id = (IDColumn)xMatchedToTable.getValueAt(row, 0);
 			if (id != null && id.isSelected())
 			{
 				KeyNamePair ProductCompare = (KeyNamePair)xMatchedToTable.getValueAt(row, 5);
-				if (Product.getKey() != ProductCompare.getKey())
+				if (!isCreateMatchInvHDR() && Product.getKey() != ProductCompare.getKey() )
 				{
 					id.setSelected(false);
 				}
 				else
 				{
 					if (matchMode.getSelectedIndex() == MODE_NOTMATCHED)
-						qty += ((Double)xMatchedToTable.getValueAt(row, I_QTY)).doubleValue();  //  doc
-					qty -= ((Double)xMatchedToTable.getValueAt(row, I_MATCHED)).doubleValue();  //  matched
+						matchedToQty += ((Double)xMatchedToTable.getValueAt(row, I_QTY)).doubleValue();  //  doc
+					matchedToQty -= ((Double)xMatchedToTable.getValueAt(row, I_MATCHED)).doubleValue();  //  matched
 					noRows++;
 				}
 			}
 		}
+		
 		//  update qualtities
-		m_xMatchedTo = BigDecimal.valueOf(qty);
+		m_xMatchedTo = BigDecimal.valueOf(matchedToQty);
+		m_xMatched = BigDecimal.valueOf(matchedQty);
+		xMatched.setValue(m_xMatched);
 		xMatchedTo.setValue(m_xMatchedTo);
 		difference.setValue(m_xMatched.subtract(m_xMatchedTo));
-		bProcess.setEnabled(noRows != 0);
+		if(!isCreateMatchInvHDR())
+		{
+			bProcess.setEnabled(noRows != 0);
+		}
+		else
+		{
+			bProcess.setEnabled(((BigDecimal)difference.getValue()).signum() == 0);
+		}
 		//  Status
 		statusBar.setStatusDB(noRows + "");
 	}   //  tableChanged
 
 
+	private boolean isCreateMatchInvHDR()
+	{
+		if(!isCreateMatchInvHDR)
+		{
+			return false;
+		}
+		
+		if(matchFrom.getSelectedIndex() == MATCH_INVOICE && matchTo.getSelectedIndex() == 0)
+		{
+			return xMatchedTable.getSelectedIndices().length > 1;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
 	public ADForm getForm() {
 		return form;
 	}
-	
 }

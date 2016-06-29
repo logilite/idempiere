@@ -76,6 +76,15 @@ public interface I_C_ContactActivity
 	public int getAD_User_ID();
 
 	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException;
+	
+	/** Column name C_ContactActivityRelatedTo */
+    public static final String COLUMNNAME_C_ContactActivityRelatedTo = "C_ContactActivityRelatedTo";
+
+	/** Set Related To	  */
+	public void setC_ContactActivityRelatedTo (String C_ContactActivityRelatedTo);
+
+	/** Get Related To	  */
+	public String getC_ContactActivityRelatedTo();
 
     /** Column name C_ContactActivity_ID */
     public static final String COLUMNNAME_C_ContactActivity_ID = "C_ContactActivity_ID";
@@ -98,6 +107,21 @@ public interface I_C_ContactActivity
 
 	/** Get C_ContactActivity_UU	  */
 	public String getC_ContactActivity_UU();
+	
+	/** Column name C_Project_ID */
+    public static final String COLUMNNAME_C_Project_ID = "C_Project_ID";
+
+	/** Set Project.
+	  * Financial Project
+	  */
+	public void setC_Project_ID (int C_Project_ID);
+
+	/** Get Project.
+	  * Financial Project
+	  */
+	public int getC_Project_ID();
+
+	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException;
 
     /** Column name Comments */
     public static final String COLUMNNAME_Comments = "Comments";

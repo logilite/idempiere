@@ -175,6 +175,9 @@ public abstract class Doc
 	public static final String	DOCTYPE_ProjectIssue	= "PJI";
 	/** Purchase Requisition    */
 	public static final String	DOCTYPE_PurchaseRequisition	= "POR";
+	/** Match invoice header */
+	public static final String	DOCTYPE_MatchInvHdr	= "MWB";
+	
 
 
 	//  Posting Status - AD_Reference_ID=234     //
