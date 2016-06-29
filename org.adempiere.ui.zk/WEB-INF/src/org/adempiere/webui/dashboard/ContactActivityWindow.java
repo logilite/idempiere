@@ -18,7 +18,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -56,9 +55,9 @@ import org.compiere.model.X_AD_User;
 import org.compiere.model.X_AD_Workflow;
 import org.compiere.model.X_C_ContactActivity;
 import org.compiere.model.X_C_Opportunity;
-import org.compiere.process.ConvertLead;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
+import org.compiere.process.ServerProcessCtl;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
@@ -313,8 +312,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 
 			@Override
 			public void onEvent(Event event) throws Exception {
-				Date date = ((Datebox)event.getTarget()).getValue();
-				dbxEndDate.setValue(date);
+				dbxEndDate.setValue(dbxStartDate.getValue());
 			}
 		});
 		dbxEndDate = new DatetimeBox();
@@ -874,8 +872,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		// Lookup process in the AD, in this case by value
 		MProcess pr = new MProcess(Env.getCtx(), 53276, null);
 
-		// Create an instance of the actual process class.
-		ConvertLead process = new ConvertLead();
+		ProcessInfo piInfo=new ProcessInfo("Convert Lead", pr.getAD_Process_ID());
 
 		// Create process instance (mainly for logging/sync purpose)
 		MPInstance mpi = new MPInstance(Env.getCtx(), 0, null);
@@ -887,8 +884,11 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		pi.setAD_PInstance_ID(mpi.get_ID());
 
 		log.info("Starting process " + pr.getName());
-
-		return process.startProcess(Env.getCtx(), pi, null);
+		// return process.startProcess(Env.getCtx(), pi, null);
+		if (ServerProcessCtl.process(piInfo, null) != null)
+			return true;
+		else
+			return false;
 	}
 
 

@@ -33,12 +33,14 @@ import org.adempiere.base.event.IEventTopics;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ServerPushTemplate;
+import org.adempiere.webui.util.UserPreference;
 import org.compiere.model.I_R_Request;
 import org.compiere.model.MRefList;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.model.PO;
 import org.compiere.model.X_AD_Ref_List;
+import org.compiere.model.X_AD_User;
 import org.compiere.model.X_C_ContactActivity;
 import org.compiere.model.X_R_RequestType;
 import org.compiere.model.X_S_Resource;
@@ -103,7 +105,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 	
 	private static RequestEventHandler eventHandler;
 	private static TopicSubscriber subscriber;
-	public static ValueNamePair forAll = new ValueNamePair("0", "ALL");
+	public static ValueNamePair forAll = new ValueNamePair("0", "All");
 	
 	private static final CLogger log = CLogger.getCLogger(DPCalendar.class);
 	
@@ -227,7 +229,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		}		
 	}
 	
-	public static ArrayList<ADCalendarEvent> getEvents(int RequestTypeID, Properties ctx) {
+	public static ArrayList<ADCalendarEvent> getEvents(int RequestTypeID, Properties ctx, ArrayList<ValueNamePair> users) {
 		String mode = MSysConfig.getValue(MSysConfig.ZK_DASHBOARD_CALENDAR_REQUEST_DISPLAY_MODE, "CSU", Env.getAD_Client_ID(ctx));
 		
 		String modeCondition = "";
@@ -247,14 +249,30 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		}
 		
 		ArrayList<ADCalendarEvent> events = new ArrayList<ADCalendarEvent>();
+		String userStr = "";
+		if (users == null || users.size() == 0)
+			userStr += Env.getAD_User_ID(ctx);
+		else
+		{
+			for (ValueNamePair i : users)
+				userStr += Integer.parseInt(i.getID()) + ",";
+			userStr = userStr.substring(0, userStr.length() - 1);
+		}
+		
 		String sql = "SELECT DISTINCT r.R_Request_ID, r.DateNextAction, "
 				+ "r.DateStartPlan, r.DateCompletePlan, r.StartTime, r.EndTime, "
-				+ "r.Summary, rt.HeaderColor, rt.ContentColor, rt.R_RequestType_ID "
-				+ "FROM R_Request r, R_RequestType rt "
+				+ "u.Name || '-' || r.Summary AS Summary, rt.HeaderColor, rt.ContentColor, rt.R_RequestType_ID "
+				+ "FROM R_Request r "
+				+ "INNER JOIN R_RequestType rt ON rt.R_RequestType_ID=r.R_RequestType_ID "
+				+ "INNER JOIN AD_User u ON u.AD_User_ID=r.SalesRep_ID "
 				+ "WHERE r.R_RequestType_ID = rt.R_RequestType_ID "
-				+ "AND (" + modeCondition + ") "
-				+ "AND r.AD_Client_ID = ? AND r.IsActive = 'Y' "
+				+ "AND (" + modeCondition + ") ";
+		
+		if (users == null || !users.contains(forAll))
+			sql += "AND (r.SalesRep_ID IN (" + userStr + ")) ";
+		sql += "AND r.AD_Client_ID = ? AND r.IsActive = 'Y' "
 				+ "AND (r.R_Status_ID IS NULL OR r.R_Status_ID IN (SELECT R_Status_ID FROM R_Status WHERE IsClosed='N')) ";
+		
 		if(RequestTypeID > 0)
 			sql += "AND rt.R_RequestType_ID = ? ";
 
@@ -366,6 +384,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 			}
 		} catch (Exception e) {
 			log.log(Level.SEVERE,"Request not saved-"+e.getLocalizedMessage());
+			e.printStackTrace();
 		} finally {
 			DB.close(rs, ps);
 		}
@@ -373,15 +392,61 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		return events;
 	}
 	
-	public static ArrayList<ADCalendarContactActivity> getContactActivities(String ContactActivityType, Properties ctx)
+	public static ArrayList<X_AD_User> getUserList(Properties ctx, int AD_User_ID)
+	{
+		ArrayList<X_AD_User> types = new ArrayList<X_AD_User>();
+		String sql = "SELECT u.* FROM AD_USER u "
+				+ " INNER JOIN C_BPartner bp ON u.C_BPartner_ID=bp.C_BPartner_ID AND bp.IsSalesRep='Y' "
+				+ " WHERE u.IsActive='Y' AND bp.AD_Client_ID = ?";
+
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try
+		{
+			ps = DB.prepareStatement(sql, null);
+			ps.setInt(1, Env.getAD_Client_ID(Env.getCtx()));
+
+			rs = ps.executeQuery();
+
+			while (rs.next())
+			{
+				types.add(new X_AD_User(ctx, rs, null));
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			DB.close(rs, ps);
+		}
+
+		return types;
+	}
+
+	
+	public static ArrayList<ADCalendarContactActivity> getContactActivities(String ContactActivityType, Properties ctx,ArrayList<ValueNamePair> users)
 	{
 		ArrayList<ADCalendarContactActivity> events = new ArrayList<ADCalendarContactActivity>();
+		String userStr = "";
+		if (users == null || users.size() == 0)
+			userStr += Env.getAD_User_ID(ctx);
+		else
+		{
+			for (ValueNamePair i : users)
+				userStr += Integer.parseInt(i.getID()) + ",";
+			userStr = userStr.substring(0, userStr.length() - 1);
+		}
 		String sql = "SELECT DISTINCT c.C_ContactActivity_ID,c.StartDate,c.EndDate, "
 				+ "c.Description,c.Comments,c.ContactActivityType, Name, COALESCE(c.SalesRep_ID) AS SalesRep_ID, COALESCE(c.AD_User_ID,0) AS AD_User_ID " // CL-669
 				+ ", c.C_Opportunity_ID " + "FROM C_ContactActivity c "
 				+ "JOIN AD_Ref_List ref ON (ref.Value=c.ContactActivityType AND AD_Reference_ID = ?) "
 				+ "WHERE c.isActive='Y' " + "AND c.AD_Client_ID = ? "
 				+ "AND (c.SalesRep_ID = ? OR c.AD_User_ID = ? OR c.CreatedBy = ?) ";
+		if (users == null || !users.contains(forAll))
+			sql += "AND (c.SalesRep_ID IN (" + userStr + ")) ";
 		if (ContactActivityType.length() > 0)
 			sql += "AND ContactActivityType = ? ";
 
@@ -448,23 +513,23 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 
 				if (activityType.equals(X_C_ContactActivity.CONTACTACTIVITYTYPE_Email))
 				{
-					event.setHeaderColor("#aa4b09");
-					event.setContentColor("#f49a5c");
+					event.setHeaderColor(CalendarColor.DPCALENDAR_HDR_EMAIL);
+					event.setContentColor(CalendarColor.DPCALENDAR_CNT_EMAIL);
 				}
 				else if (activityType.equals(X_C_ContactActivity.CONTACTACTIVITYTYPE_PhoneCall))
 				{
-					event.setHeaderColor("red");
-					event.setContentColor("#ee999c");
+					event.setHeaderColor(CalendarColor.DPCALENDAR_HDR_PHONECALL);
+					event.setContentColor(CalendarColor.DPCALENDAR_CNT_PHONECALL);
 				}
 				else if (activityType.equals(X_C_ContactActivity.CONTACTACTIVITYTYPE_Meeting))
 				{
-					event.setHeaderColor("green");
-					event.setContentColor("#81d4b8");
+					event.setHeaderColor(CalendarColor.DPCALENDAR_HDR_MEETING);
+					event.setContentColor(CalendarColor.DPCALENDAR_CNT_MEETING);
 				}
 				else if (activityType.equals(X_C_ContactActivity.CONTACTACTIVITYTYPE_Task))
 				{
-					event.setHeaderColor("blue");
-					event.setContentColor("#789edc");
+					event.setHeaderColor(CalendarColor.DPCALENDAR_HDR_TASK);
+					event.setContentColor(CalendarColor.DPCALENDAR_CNT_TASK);
 				}
 
 				event.setContent(activityTypeName + ": " + description);
@@ -490,85 +555,92 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 
 	public static ArrayList<ADCalendarResourceAssignment> getResourceAssignments(int p_S_Resource_ID, Properties ctx) 
 	{
-		ArrayList<ADCalendarResourceAssignment> events = new ArrayList<ADCalendarResourceAssignment>();
-		String sql = "SELECT DISTINCT sa.S_ResourceAssignment_ID, sa.S_Resource_ID, sa.AssignDateFrom, sa.AssignDateTo, "
-				+ "(s.Name || ': ' ||sa.Name) AS Name, tt.ContentColor, tt.HeaderColor "
-				+ "FROM S_ResourceAssignment sa "
-				+ "JOIN S_Resource s ON s.S_Resource_ID=sa.S_Resource_ID "
-				+ "LEFT JOIN S_TimeExpenseLine tl ON sa.S_ResourceAssignment_ID=tl.S_ResourceAssignment_ID "
-				+ "LEFT JOIN S_TimeType tt ON tt.S_TimeType_ID=tl.S_TimeType_ID "
-				+ "WHERE sa.isActive='Y' "
-				+ "AND sa.AD_Client_ID = ? ";
-		if (p_S_Resource_ID > 0)
-			sql += "AND sa.S_Resource_ID = ? ";
+		UserPreference userPreference=new UserPreference();
+		userPreference.loadPreference(Env.getAD_User_ID(Env.getCtx()));
+		String showres=userPreference.getProperty(UserPreference.P_SHOWRESOURCES);
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try
+		if(showres.equalsIgnoreCase("Y"))
 		{
-			ps = DB.prepareStatement(sql, null);
-			ps.setInt(1, Env.getAD_Client_ID(ctx));
-
+			ArrayList<ADCalendarResourceAssignment> events = new ArrayList<ADCalendarResourceAssignment>();
+			String sql = "SELECT DISTINCT sa.S_ResourceAssignment_ID, sa.S_Resource_ID, sa.AssignDateFrom, sa.AssignDateTo, "
+					+ "(s.Name || ': ' ||sa.Name) AS Name, tt.ContentColor, tt.HeaderColor "
+					+ "FROM S_ResourceAssignment sa "
+					+ "JOIN S_Resource s ON s.S_Resource_ID=sa.S_Resource_ID "
+					+ "LEFT JOIN S_TimeExpenseLine tl ON sa.S_ResourceAssignment_ID=tl.S_ResourceAssignment_ID "
+					+ "LEFT JOIN S_TimeType tt ON tt.S_TimeType_ID=tl.S_TimeType_ID "
+					+ "WHERE sa.isActive='Y' "
+					+ "AND sa.AD_Client_ID = ? ";
 			if (p_S_Resource_ID > 0)
-				ps.setInt(2, p_S_Resource_ID);
+				sql += "AND sa.S_Resource_ID = ? ";
 
-			rs = ps.executeQuery();
-			while (rs.next())
+			PreparedStatement ps = null;
+			ResultSet rs = null;
+
+			try
 			{
-				int S_ResourceAssignment_ID = rs.getInt("S_ResourceAssignment_ID");
-				int S_Resource_ID = rs.getInt("S_Resource_ID");
-				Timestamp startTime = rs.getTimestamp("AssignDateFrom");
-				Timestamp endTime = rs.getTimestamp("AssignDateTo");
-				String name = rs.getString("Name");
-				String contentColor = rs.getString("ContentColor");
-				String headerColor = rs.getString("HeaderColor");
+				ps = DB.prepareStatement(sql, null);
+				ps.setInt(1, Env.getAD_Client_ID(ctx));
 
-				ADCalendarResourceAssignment event = new ADCalendarResourceAssignment();
-				event.setS_ResourceAssignment_ID(S_ResourceAssignment_ID);
-				event.setS_Resource_ID(S_Resource_ID);
+				if (p_S_Resource_ID > 0)
+					ps.setInt(2, p_S_Resource_ID);
 
-				if (endTime == null)
+				rs = ps.executeQuery();
+				while (rs.next())
 				{
-					Calendar calEnd = Calendar.getInstance();
-					calEnd.setTimeInMillis(startTime.getTime());
-					calEnd.set(Calendar.HOUR_OF_DAY, 23);
-					calEnd.set(Calendar.MINUTE, 59);
-					calEnd.set(Calendar.SECOND, 0);
-					calEnd.set(Calendar.MILLISECOND, 0);
-					endTime = new Timestamp(calEnd.getTimeInMillis());
+					int S_ResourceAssignment_ID = rs.getInt("S_ResourceAssignment_ID");
+					int S_Resource_ID = rs.getInt("S_Resource_ID");
+					Timestamp startTime = rs.getTimestamp("AssignDateFrom");
+					Timestamp endTime = rs.getTimestamp("AssignDateTo");
+					String name = rs.getString("Name");
+					String contentColor = rs.getString("ContentColor");
+					String headerColor = rs.getString("HeaderColor");
+
+					ADCalendarResourceAssignment event = new ADCalendarResourceAssignment();
+					event.setS_ResourceAssignment_ID(S_ResourceAssignment_ID);
+					event.setS_Resource_ID(S_Resource_ID);
+
+					if (endTime == null)
+					{
+						Calendar calEnd = Calendar.getInstance();
+						calEnd.setTimeInMillis(startTime.getTime());
+						calEnd.set(Calendar.HOUR_OF_DAY, 23);
+						calEnd.set(Calendar.MINUTE, 59);
+						calEnd.set(Calendar.SECOND, 0);
+						calEnd.set(Calendar.MILLISECOND, 0);
+						endTime = new Timestamp(calEnd.getTimeInMillis());
+					}
+
+					event.setContent(name);
+					event.setBeginDate(startTime);
+					event.setEndDate(endTime);
+
+					if (headerColor != null && headerColor.length() > 0)
+						event.setHeaderColor(headerColor);
+
+					if (contentColor != null && contentColor.length() > 0)
+						event.setContentColor(contentColor);
+
+					if (event.getBeginDate().compareTo(event.getEndDate()) >= 0)
+						continue;
+
+					event.setLocked(true);
+					events.add(event);
 				}
-
-				event.setContent(name);
-				event.setBeginDate(startTime);
-				event.setEndDate(endTime);
-
-				if (headerColor != null && headerColor.length() > 0)
-					event.setHeaderColor(headerColor);
-		
-
-				if (contentColor != null && contentColor.length() > 0)
-					event.setContentColor(contentColor);
-			
-
-				if (event.getBeginDate().compareTo(event.getEndDate()) >= 0)
-					continue;
-
-				event.setLocked(true);
-				events.add(event);
 			}
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE,"Resource not saved-"+e.getLocalizedMessage());
-		}
-		finally
-		{
-			DB.close(rs, ps);
-		}
+			catch (Exception e)
+			{
+				log.log(Level.SEVERE, "Resource not saved-" + e.getLocalizedMessage());
+			}
+			finally
+			{
+				DB.close(rs, ps);
+			}
 
-		return events;
-	}
+			return events;
+		}
+		return null;
+}
+
 	
 	public static ArrayList<X_R_RequestType> getRequestTypes(Properties ctx) {
 		ArrayList<X_R_RequestType> types = new ArrayList<X_R_RequestType>();
@@ -693,8 +765,9 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		
 		for (ADCalendarContactActivity activity : activities)
 			scm.add(activity);
-		for (ADCalendarResourceAssignment resource : assignments)
-			scm.add(resource);
+		if (assignments != null)
+			for (ADCalendarResourceAssignment resource : assignments)
+				scm.add(resource);
 		// calendars.setModel(scm);
 
 		calendars.invalidate();
@@ -706,8 +779,8 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 	}
 
 	private void refreshModel() {		
-		events = getEvents(0, ctx);
-		activities = getContactActivities("", ctx);
+		events = getEvents(0, ctx, null);
+		activities = getContactActivities("", ctx, null);
 		assignments = getResourceAssignments(0, ctx);
 	}
 	
