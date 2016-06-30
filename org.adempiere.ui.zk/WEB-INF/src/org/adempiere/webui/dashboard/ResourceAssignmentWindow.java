@@ -87,6 +87,7 @@ public class ResourceAssignmentWindow extends Window implements EventListener<Ev
 		setTitle(Msg.getElement(ctx, "S_ResourceAssignment_ID"));
 		setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
 		setWidth("550px");
+		setHeight("300px");
 		this.setSclass("popup-dialog");
 		this.setBorder("normal");
 		this.setShadow(true);
@@ -114,7 +115,7 @@ public class ResourceAssignmentWindow extends Window implements EventListener<Ev
 		txtName.setHeight("100%");
 
 		txtDescription = new Textbox();
-		txtDescription.setRows(3);
+		txtDescription.setMultiline(true);
 		txtDescription.setWidth("95%");
 		txtDescription.setHeight("100%");
 
@@ -178,6 +179,7 @@ public class ResourceAssignmentWindow extends Window implements EventListener<Ev
 		northPane.appendChild(grid);
 		grid.setVflex("1");
 		grid.setHflex("1");
+		grid.setHeight("200px");
 
 		South southPane = new South();
 		southPane.setSclass("dialog-footer");

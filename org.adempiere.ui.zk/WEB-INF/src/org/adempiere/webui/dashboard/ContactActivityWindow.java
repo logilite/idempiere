@@ -120,7 +120,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		Properties ctx = Env.getCtx();
 		setTitle(Msg.getMsg(ctx, "ActivityNew"));
 		setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
-		setWidth("800px");
+		setWidth("825px");
 
 		this.setSclass("popup-dialog");
 		this.setBorder("normal");
@@ -283,28 +283,28 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		activityRelatedTo.addValueChangeListener(this);
 
 		txtName = new Textbox();
-		txtName.setWidth("88%");
+		txtName.setWidth("100%");
 		txtName.setHeight("100%");
 
 		txtBPname = new Textbox();
-		txtBPname.setWidth("88%");
+		txtBPname.setWidth("100%");
 		txtBPname.setHeight("100%");
 
 		txtEMail = new Textbox();
-		txtEMail.setWidth("88%");
+		txtEMail.setWidth("100%");
 		txtEMail.setHeight("100%");
 
 		txtPhone = new Textbox();
-		txtPhone.setWidth("88%");
+		txtPhone.setWidth("100%");
 		txtPhone.setHeight("100%");
 
 		txtDescription = new Textbox();
-		txtDescription.setWidth("88%");
+		txtDescription.setWidth("100%");
 		txtDescription.setHeight("100%");
 
 		txtComments = new Textbox();
-		txtComments.setRows(2);
-		txtComments.setWidth("88%");
+		txtComments.setMultiline(true);
+		txtComments.setWidth("100%");
 		txtComments.setHeight("100%");
 
 		dbxStartDate = new DatetimeBox();
@@ -324,14 +324,14 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 
 		//follow activity
 		txtDescription2 = new Textbox();
-		txtDescription2.setWidth("88%");
+		txtDescription2.setWidth("100%");
 		txtDescription2.setHeight("100%");
 
 		dbxStartDate2 = new DatetimeBox();
 
 		txtComments2 = new Textbox();
-		txtComments2.setRows(2);
-		txtComments2.setWidth("88%");
+		txtComments2.setMultiline(true);
+		txtComments2.setWidth("100%");
 		txtComments2.setHeight("100%");
 
 		opportunityDesc = new Textbox();
@@ -351,7 +351,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 
 		column = new Column();
 		columns.appendChild(column);
-		column.setWidth("230px");
+		column.setWidth("240px");
 
 		column = new Column();
 		columns.appendChild(column);
@@ -368,6 +368,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		Row row = new Row();
 		rows.appendChild(row);
 		row.appendChild(lblActivityType.rightAlign());
+		activityTypeField.getComponent().setWidth("100%");
 		row.appendChild(activityTypeField.getComponent());
 		row.appendChild(lblActivityRelatedTo);
 		row.appendChild(lblEMpty);
@@ -400,6 +401,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		BPNameRow = new Row();
 		rows.appendChild(BPNameRow);
 		BPNameRow.appendChild(lblSalesRep.rightAlign());
+		salesRepField.getComponent().setWidth("100%");
 		BPNameRow.appendChild(salesRepField.getComponent());
 
 		locationRow = new Row();
@@ -410,6 +412,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		positionRow = new Row();
 		rows.appendChild(positionRow);
 		positionRow.appendChild(lblActivityType2.rightAlign());
+		activityTypeField2.getComponent().setWidth("100%");
 		positionRow.appendChild(activityTypeField2.getComponent());
 		lblActivityType2.setVisible(false);
 		activityTypeField2.setVisible(false);
@@ -423,7 +426,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 
 		statusRow = new Row();
 		rows.appendChild(statusRow);
-		statusRow.appendCellChild(lblStartDate2);
+		statusRow.appendCellChild(lblStartDate2.rightAlign());
 		statusRow.appendCellChild(dbxStartDate2);
 		statusRow.appendChild(lblBPLocation);
 		statusRow.appendChild(locationField.getComponent());

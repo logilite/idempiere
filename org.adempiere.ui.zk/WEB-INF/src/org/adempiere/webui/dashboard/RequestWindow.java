@@ -47,7 +47,6 @@ import org.zkoss.calendar.event.CalendarsEvent;
 import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
-import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.North;
 import org.zkoss.zul.South;
 import org.zkoss.zul.Timebox;
@@ -90,6 +89,8 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		setTitle(Msg.getMsg(Env.getCtx(),"NewRequest"));
 		setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
 		setWidth("400px");
+		setHeight("550px");
+		
 		this.setSclass("popup-dialog");
 		this.setBorder("normal");
 		this.setShadow(true);
@@ -172,7 +173,7 @@ public class RequestWindow extends Window implements EventListener<Event> {
 				entryConfidentialField.setValue(entryConfidentialField.getComponent().getItemAtIndex(1).getValue());
 		
 		txtSummary = new Textbox();
-		txtSummary.setRows(3);
+		txtSummary.setMultiline(true);
 		txtSummary.setWidth("95%");
 		txtSummary.setHeight("100%");
 		
@@ -277,6 +278,7 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		northPane.appendChild(grid);
 		grid.setVflex("1");
 		grid.setHflex("1");
+		grid.setHeight("450px");
 
 		South southPane = new South();
 		southPane.setSclass("dialog-footer");
