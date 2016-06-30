@@ -472,12 +472,10 @@ public class WMatch extends Match
 				//Set Only Product
 				KeyNamePair productKNP = (KeyNamePair) xMatchedTable.getValueAt(row, I_Product);
 				product = new Integer(productKNP.getKey());
-				onlyProduct.setValue(product);
 				
 				//Set Only Vendor
 				KeyNamePair bpartnerKNP = (KeyNamePair) xMatchedTable.getValueAt(row, I_BPartner);
 				vendor = new Integer(bpartnerKNP.getKey());
-				onlyVendor.setValue(vendor);
 				
 				// Set selected invoiceLine
 				KeyNamePair C_InvoiceLine_ID = (KeyNamePair) xMatchedTable.getValueAt(row, I_Line);
@@ -585,15 +583,6 @@ public class WMatch extends Match
 					matchMode.getSelectedIndex() == MODE_MATCHED);
 		}
 		
-		if(xMatchedTable.getSelectedIndices().length == 1 && ((BigDecimal)difference.getValue()).compareTo(Env.ZERO) > 0)
-		{
-			bProcess.setEnabled(true);
-		}
-		else
-		{
-			bProcess.setEnabled(false);
-		}
-		
 		//  Status Info
 		statusBar.setStatusLine(matchFrom.getSelectedItem().getLabel()
 			+ "# = " + xMatchedTable.getRowCount() + " - "
@@ -688,7 +677,7 @@ public class WMatch extends Match
 		difference.setValue(m_xMatched.subtract(m_xMatchedTo));
 		if(!isCreateMatchInvHDR())
 		{
-			bProcess.setEnabled(noRows != 0);
+			bProcess.setEnabled(xMatchedToTable.getSelectedCount() > 0);
 		}
 		else
 		{
