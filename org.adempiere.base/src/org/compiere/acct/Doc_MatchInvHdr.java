@@ -107,6 +107,7 @@ public class Doc_MatchInvHdr extends Doc
 	@Override
 	public ArrayList<Fact> createFacts(MAcctSchema as)
 	{
+		// create Fact Header
 		Fact fact = new Fact(this, as, Fact.POST_Actual);
 		setC_Currency_ID(as.getC_Currency_ID());
 		ArrayList<Fact> facts = new ArrayList<Fact>();
@@ -122,10 +123,6 @@ public class Doc_MatchInvHdr extends Doc
 				m_receiptLine = (MInOutLine) m_matchInv.getM_InOutLine();
 			}
 
-			ProductCost m_pc = new ProductCost(Env.getCtx(), line.getM_Product_ID(),
-					m_matchInv.getM_AttributeSetInstance_ID(), getTrxName());
-			m_pc.setQty(line.getQty());
-
 			// Nothing to do
 			if (line.getM_Product_ID() == 0 // no Product
 					|| line.getQty().signum() == 0
@@ -138,7 +135,7 @@ public class Doc_MatchInvHdr extends Doc
 				continue;
 			}
 
-			// create Fact Header
+			
 			boolean isInterOrg = isInterOrg(as, m_receiptLine, m_invoiceLine);
 
 			FactLine dr = null;
@@ -180,6 +177,11 @@ public class Doc_MatchInvHdr extends Doc
 					log.fine("CR - Amt(" + temp + "->" + dr.getAcctBalance() + ") - " + dr.toString());
 			}
 
+			
+			ProductCost m_pc = new ProductCost(Env.getCtx(), line.getM_Product_ID(),
+					m_matchInv.getM_AttributeSetInstance_ID(), getTrxName());
+			m_pc.setQty(line.getQty());
+			
 			// InventoryClearing CR
 			// From Invoice
 			MAccount expense = m_pc.getAccount(ProductCost.ACCTTYPE_P_InventoryClearing, as);
@@ -298,11 +300,7 @@ public class Doc_MatchInvHdr extends Doc
 				}
 				else
 				{
-					if (cr.getAcctBalance().signum() > 0)
-						dr = fact.createLine(line, writeOffAcct, as.getC_Currency_ID(), null, cr.getAcctBalance());
-					else
-						dr = fact.createLine(line, writeOffAcct, as.getC_Currency_ID(), cr.getAcctBalance().negate(),
-								null);
+					dr = fact.createLine(line, writeOffAcct, cr.getC_Currency_ID(), cr.getAcctBalance().negate());
 					
 					if (dr == null)
 					{
