@@ -38,6 +38,7 @@ import org.compiere.model.MMatchPO;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MRole;
 import org.compiere.model.MStorageReservation;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
@@ -61,11 +62,11 @@ public class Match
 		Msg.getElement(Env.getCtx(), "C_Invoice_ID", false),
 		Msg.getElement(Env.getCtx(), "M_InOut_ID", false),
 		Msg.getElement(Env.getCtx(), "C_Order_ID", false) };
+	
 	public static final int		MATCH_INVOICE = 0;
 	public static final int		MATCH_SHIPMENT = 1;
 	public static final int		MATCH_ORDER = 2;
-
-	private static final int		MODE_NOTMATCHED = 0;
+	private static final int	MODE_NOTMATCHED	= 0;
 	//private static final int		MODE_MATCHED = 1;
 
 	/**	Indexes in Table			*/
@@ -77,17 +78,27 @@ public class Match
 	//private static final int        I_Org = 8; //JAVIER 
 	
 
-
+	
 	private StringBuffer    m_sql = null;
 	private String          m_dateColumn = "";
 	private String          m_qtyColumn = "";
 	private String          m_groupBy = "";
 	private StringBuffer	m_linetype = null;
+	protected boolean		isMatchInvHdrEnabled = false;
+	
 	//private BigDecimal      m_xMatched = Env.ZERO;
 	//private BigDecimal      m_xMatchedTo = Env.ZERO;
 	
 	private MMatchInvHdr		matchInvHdr			= null;
-
+	
+	/**
+	 * 
+	 */
+	public Match()
+	{
+		isMatchInvHdrEnabled = MSysConfig.getBooleanValue(MSysConfig.MATCH_INV_HEADER_ENABLED, false,
+				Env.getAD_Client_ID(Env.getCtx()));
+	}
 	
 	/**
 	 *  Match From Changed - Fill Match To
@@ -165,7 +176,7 @@ public class Match
 	{
 		log.config("");
 		matchInvHdr = null;
-		if(!isCreateMatchInvHdr)
+		if(!isCreateMatchInvHdr || !isMatchInvHdrEnabled)
 		{
 			//  Matched From
 			int matchedRow = xMatchedTable.getSelectedRow();
@@ -691,14 +702,18 @@ public class Match
 					match.setM_AttributeSetInstance_ID(M_AttributeSetInstance_ID);
 				}
 				
-				if (matchInvHdr == null)
+				if (isMatchInvHdrEnabled)
 				{
-					matchInvHdr = new MMatchInvHdr(Env.getCtx(), TimeUtil.getDay(System.currentTimeMillis()),
-							trxName);
-					matchInvHdr.saveEx();
+					if (matchInvHdr == null)
+					{
+						matchInvHdr = new MMatchInvHdr(Env.getCtx(), TimeUtil.getDay(System.currentTimeMillis()),
+								trxName);
+						matchInvHdr.saveEx();
+					}
+					
+					match.setM_MatchInvHdr_ID(matchInvHdr.getM_MatchInvHdr_ID());
 				}
-
-				match.setM_MatchInvHdr_ID(matchInvHdr.getM_MatchInvHdr_ID());
+				
 				match.saveEx();
 				
 				success = true;

@@ -1815,33 +1815,45 @@ public class MInvoice extends X_C_Invoice implements DocAction
 				if (receiptLine.getMovementQty().compareTo(matchQty) < 0)
 					matchQty = receiptLine.getMovementQty();
 				
-				MMatchInvHdr matchWB = new MMatchInvHdr(getCtx(), 0, get_TrxName());
-				matchWB.setDateAcct(this.getDateAcct());
-				matchWB.setDateTrx(this.getDateInvoiced());
-				matchWB.setDescription(this.getDescription());
-				matchWB.saveEx();
 				
-
+				MMatchInvHdr matchInvHdr = null;
 				MMatchInv inv = new MMatchInv(line, getDateInvoiced(), matchQty);
-				inv.setM_MatchInvHdr_ID(matchWB.get_ID());
+				
+				if (MSysConfig.getBooleanValue(MSysConfig.MATCH_INV_HEADER_ENABLED, false, getAD_Client_ID()))
+				{
+					matchInvHdr = new MMatchInvHdr(getCtx(), 0, get_TrxName());
+					matchInvHdr.setDateAcct(this.getDateAcct());
+					matchInvHdr.setDateTrx(this.getDateInvoiced());
+					matchInvHdr.setDescription(this.getDescription());
+					matchInvHdr.saveEx();
+					inv.setM_MatchInvHdr_ID(matchInvHdr.get_ID());
+				}
+				
 				if (!inv.save(get_TrxName()))
 				{
 					m_processMsg = CLogger.retrieveErrorString("Could not create Invoice Matching");
 					return DocAction.STATUS_Invalid;
 				}
 
-				try
+				if (matchInvHdr != null)
 				{
-					matchWB.processIt(DocAction.ACTION_Complete);
+					try
+					{
+						matchInvHdr.processIt(DocAction.ACTION_Complete);
+					}
+					catch (Exception e)
+					{
+						log.log(Level.SEVERE, "Failed to complete match invoice header", e);
+					}
+					matchInvHdr.saveEx();
+					addDocsPostProcess(matchInvHdr);
 				}
-				catch (Exception e)
+				else
 				{
-					log.log(Level.SEVERE, "Failed to complete match invoice header", e);
+					addDocsPostProcess(inv);
 				}
-				matchWB.saveEx();
 				
 				matchInv++;
-				addDocsPostProcess(matchWB);
 			}
 					
 			//	Update Order Line

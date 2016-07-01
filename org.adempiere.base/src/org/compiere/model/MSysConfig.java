@@ -95,6 +95,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String LOCATION_MAX_CITY_ROWS = "LOCATION_MAX_CITY_ROWS";
     public static final String LOGIN_HELP_URL = "LOGIN_HELP_URL";
     public static final String LOGIN_SHOW_RESETPASSWORD = "LOGIN_SHOW_RESETPASSWORD";
+    public static final String MATCH_INV_HEADER_ENABLED = "MATCH_INV_HEADER_ENABLED";
 	public static final String MAIL_DONT_SEND_TO_ADDRESS = "MAIL_DONT_SEND_TO_ADDRESS";
     public static final String MAIL_SEND_BCC_TO_ADDRESS = "MAIL_SEND_BCC_TO_ADDRESS";
     public static final String MAIL_SEND_BCC_TO_FROM = "MAIL_SEND_BCC_TO_FROM";
