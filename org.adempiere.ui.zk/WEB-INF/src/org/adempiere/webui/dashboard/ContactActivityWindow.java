@@ -53,6 +53,7 @@ import org.compiere.model.MRole;
 import org.compiere.model.MUser;
 import org.compiere.model.X_AD_User;
 import org.compiere.model.X_AD_Workflow;
+import org.compiere.model.X_C_BPartner;
 import org.compiere.model.X_C_ContactActivity;
 import org.compiere.model.X_C_Opportunity;
 import org.compiere.process.ProcessInfo;
@@ -90,8 +91,10 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 
 	private WTableDirEditor activityTypeField, salesOpportunityField, leadField, salesRepField, jobField, leadSourceField, leadStatusField, activityRelatedTo;
 	private WTableDirEditor activityTypeField2,  salesStageField, currencyField;
-	private WSearchEditor contactField;
+	private WSearchEditor contactField, bpartnerField;
 	private WLocationEditor locationField;
+	private WTableDirEditor		bpcontact;
+	private static final int	COLUMNID_AD_USER_ID	= 212;
 
 	private ConfirmPanel confirmPanel;
 
@@ -108,7 +111,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 	private NumberBox opportunityAmt, nbxDuration;
 
 	Label lblLeadName, lblLeadBPName, lblSalesOpportunity, lblLead, lblBPLocation, lblPhone, lblEMail, lblJob, lblLeadSource, lblLeadStatus, lblActivityRelatedTo;
-	Label lblSalesRep, lblComments, lblActivityType2, lblDescription2, lblStartDate2, lblComments2, lblDuration;
+	Label lblSalesRep, lblComments, lblActivityType2, lblDescription2, lblStartDate2, lblComments2, lblDuration, lblcontact;
 	Label lblEMpty, lblEMpty2, lblEMpty3, lblEMpty4,lblOpportunityAmt, lblCloseDate, lblsalesStageField, lblOpportunityDesc, lblCurrency;
 
 	public ContactActivityWindow(CalendarsEvent ce, Window parent) {
@@ -162,6 +165,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		lblOpportunityDesc			= new Label(Msg.getMsg(ctx, "OpportunityName"));
 		lblCurrency					= new Label(Msg.getElement(ctx, X_C_Opportunity.COLUMNNAME_C_Currency_ID));
 		lblDuration					= new Label(Msg.getElement(ctx, X_AD_Workflow.COLUMNNAME_Duration));
+		lblcontact 					= new Label(Msg.getMsg(ctx, "Contact"));
 
 		int columnID = MColumn.getColumn_ID(X_C_ContactActivity.Table_Name, X_C_ContactActivity.COLUMNNAME_ContactActivityType);
 		MLookup lookup = MLookupFactory.get(ctx, 0, 0, columnID, DisplayType.List);
@@ -215,7 +219,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		lookup = MLookupFactory.get(ctx, 0, 0, columnID, DisplayType.List);
 		activityRelatedTo = new WTableDirEditor(X_C_ContactActivity.COLUMNNAME_C_ContactActivityRelatedTo, true, false, true, lookup);
 		activityRelatedTo.setValue(X_C_ContactActivity.C_CONTACTACTIVITYRELATEDTO_Lead);
-
+		 
 		columnID = MColumn.getColumn_ID(X_AD_User.Table_Name, X_AD_User.COLUMNNAME_C_Job_ID);
 		try{
 			//lookup = MLookupFactory.get(ctx, 0, 0, columnID, DisplayType.TableDir);
@@ -260,6 +264,10 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		columnID = MColumn.getColumn_ID(X_C_Opportunity.Table_Name, X_C_Opportunity.COLUMNNAME_C_Currency_ID);
 		lookup = MLookupFactory.get (ctx, 0, 0, columnID, DisplayType.TableDir);
 		currencyField = new WTableDirEditor(X_C_Opportunity.COLUMNNAME_C_Currency_ID, true, false, true, lookup);
+		
+		columnID = MColumn.getColumn_ID(X_C_BPartner.Table_Name, X_C_BPartner.COLUMNNAME_C_BPartner_ID);
+		lookup = MLookupFactory.get(ctx, 9999, Env.TAB_INFO, columnID, DisplayType.TableDir);
+		bpartnerField = new WSearchEditor("C_BPartner_ID", true, false, true, lookup);
 
 		//init default schema
 		MClientInfo clientInfo = MClientInfo.get(Env.getCtx(), Env.getAD_Client_ID(Env.getCtx()));
@@ -553,7 +561,8 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 				throw new WrongValueException(dbxStartDate, Msg.translate(Env.getCtx(), "CheckTime"));
 			if (!chbxCreateLead.isSelected() && (leadField.getValue() == null || leadField.getValue().equals("")) 
 					&& (salesOpportunityField.getValue() == null || salesOpportunityField.getValue().equals("")) 
-					&& (contactField.getValue() == null || contactField.getValue().equals("")))
+					&& (contactField.getValue() == null || contactField.getValue().equals(""))
+					&& (bpartnerField.getValue() == null || bpartnerField.getValue().equals("")))
 				throw new WrongValueException(activityRelatedTo.getComponent(), fillMandatory);
 
 			boolean createLead = chbxCreateLead.isSelected();
@@ -641,6 +650,12 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 			activity.setStartDate(new Timestamp(calBegin.getTimeInMillis()));
 			activity.setComments(txtComments.getText());
 			activity.setIsComplete(false);
+			
+			if (bpcontact != null)
+			{
+				if (bpcontact.getValue() != null && !"".equals(bpcontact.getValue()))
+					activity.setAD_User_ID((Integer) bpcontact.getValue());
+			}
 
 			// already create lead
 			if(lead_id > 0)
@@ -653,6 +668,8 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 					activity.setAD_User_ID((Integer) contactField.getValue());
 				if(salesOpportunityField.getValue() != null)
 					activity.setC_Opportunity_ID((Integer) salesOpportunityField.getValue());
+				if (bpartnerField.getValue() != null && !"".equals(bpartnerField.getValue()))
+					activity.setC_BPartner_ID((Integer) bpartnerField.getValue());
 			}
 
 			if(salesOpportunityField.getValue() != null)
@@ -677,6 +694,13 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 				activity2.setComments(txtComments2.getText());
 				if(salesRepField.getValue() != null)
 					activity2.setSalesRep_ID((Integer) salesRepField.getValue());
+				
+				if (bpcontact != null)
+				{
+					if (bpcontact.getValue() != null)
+						activity2.setAD_User_ID((Integer) bpcontact.getValue());
+				}
+				
 				// already create lead
 				if(lead_id > 0)
 					activity2.setAD_User_ID(lead_id);
@@ -688,6 +712,8 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 						activity2.setAD_User_ID((Integer) contactField.getValue());
 					if(salesOpportunityField.getValue() != null)
 						activity2.setC_Opportunity_ID((Integer) salesOpportunityField.getValue());
+					if (bpartnerField.getValue() != null && !"".equals(bpartnerField.getValue()))
+						activity2.setC_BPartner_ID((Integer) bpartnerField.getValue());
 				}
 				if (activity2.save())
 				{
@@ -793,23 +819,59 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 			if(activityRelatedTo.getValue().equals(X_C_ContactActivity.C_CONTACTACTIVITYRELATEDTO_SalesOpportunity)){
 				specialRow.removeChild(leadField.getComponent());
 				leadField.setValue("");
+				bpartnerField.setValue("");
 				specialRow.removeChild(contactField.getComponent());
 				contactField.setValue("");
 				specialRow.appendChild(salesOpportunityField.getComponent());
+				if (lblcontact != null)
+					newLeadLabelRow.removeChild(lblcontact);
+				if (bpcontact != null)
+				{
+					bpcontact.setValue("");
+					newLeadLabelRow.removeChild(bpcontact.getComponent());
+				}
 			}
 			else if(activityRelatedTo.getValue().equals(X_C_ContactActivity.C_CONTACTACTIVITYRELATEDTO_Contact)){
 				specialRow.removeChild(leadField.getComponent());
 				leadField.setValue("");
+				bpartnerField.setValue("");
 				specialRow.removeChild(salesOpportunityField.getComponent());
 				salesOpportunityField.setValue("");
 				specialRow.appendChild(contactField.getComponent());
+				if (lblcontact != null)
+					newLeadLabelRow.removeChild(lblcontact);
+				if (bpcontact != null)
+				{
+					bpcontact.setValue("");
+					newLeadLabelRow.removeChild(bpcontact.getComponent());
+				}
 			}
-			else{
-				specialRow.removeChild(salesOpportunityField.getComponent());
+			else if(activityRelatedTo.getValue().equals(X_C_ContactActivity.C_CONTACTACTIVITYRELATEDTO_Lead)){
 				salesOpportunityField.setValue("");
-				specialRow.removeChild(contactField.getComponent());
+				specialRow.removeChild(salesOpportunityField.getComponent());
 				contactField.setValue("");
+				bpartnerField.setValue("");
+				specialRow.removeChild(contactField.getComponent());
+				specialRow.removeChild(bpartnerField.getComponent());
 				specialRow.appendChild(leadField.getComponent());
+				if (lblcontact != null)
+					newLeadLabelRow.removeChild(lblcontact);
+				if (bpcontact != null)
+				{
+					bpcontact.setValue("");
+					newLeadLabelRow.removeChild(bpcontact.getComponent());
+				}
+			}
+			else
+			{
+				salesOpportunityField.setValue("");
+				contactField.setValue("");
+				leadField.setValue("");
+				specialRow.removeChild(contactField.getComponent());
+				specialRow.removeChild(leadField.getComponent());
+				specialRow.removeChild(salesOpportunityField.getComponent());
+				specialRow.appendChild(bpartnerField.getComponent());
+				bpartnerField.addValueChangeListener(this);
 			}
 	}
 
@@ -868,14 +930,12 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		ProcessInfoParameter pi6 = new ProcessInfoParameter("Description", desc, "", "", "");
 		ProcessInfoParameter pi7 = new ProcessInfoParameter("C_Currency_ID", C_Currency_ID, "", "", "");
 
-		// Create a process info instance. This is a composite class containing the parameters.
-		ProcessInfo pi = new ProcessInfo("", 0, MUser.Table_ID, Lead_ID);
-		pi.setParameter(new ProcessInfoParameter[] {pi1, pi2, pi3, pi4, pi5, pi6, pi7});
-
 		// Lookup process in the AD, in this case by value
 		MProcess pr = new MProcess(Env.getCtx(), 53276, null);
-
-		ProcessInfo piInfo=new ProcessInfo("Convert Lead", pr.getAD_Process_ID());
+		
+		// Create a process info instance. This is a composite class containing the parameters.
+		ProcessInfo pi = new ProcessInfo("", pr.getAD_Process_ID(), MUser.Table_ID, Lead_ID);
+		pi.setParameter(new ProcessInfoParameter[] { pi1, pi2, pi3, pi4, pi5, pi6, pi7 });
 
 		// Create process instance (mainly for logging/sync purpose)
 		MPInstance mpi = new MPInstance(Env.getCtx(), 0, null);
@@ -887,8 +947,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		pi.setAD_PInstance_ID(mpi.get_ID());
 
 		log.info("Starting process " + pr.getName());
-		// return process.startProcess(Env.getCtx(), pi, null);
-		if (ServerProcessCtl.process(piInfo, null) != null)
+		if (ServerProcessCtl.process(pi, null) != null)
 			return true;
 		else
 			return false;
@@ -902,22 +961,101 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 				leadField.setValue("");
 				specialRow.removeChild(leadField.getComponent());
 				contactField.setValue("");
+				bpartnerField.setValue("");
 				specialRow.removeChild(contactField.getComponent());
+				specialRow.removeChild(bpartnerField.getComponent());
 				specialRow.appendChild(salesOpportunityField.getComponent());
+				if (lblcontact != null)
+					newLeadLabelRow.removeChild(lblcontact);
+				if (bpcontact != null)
+				{
+					bpcontact.setValue("");
+					newLeadLabelRow.removeChild(bpcontact.getComponent());
+				}
 			}
 			else if(activityRelatedTo.getValue().equals(X_C_ContactActivity.C_CONTACTACTIVITYRELATEDTO_Contact)){
 				leadField.setValue("");
 				specialRow.removeChild(leadField.getComponent());
 				salesOpportunityField.setValue("");
+				bpartnerField.setValue("");
 				specialRow.removeChild(salesOpportunityField.getComponent());
+				specialRow.removeChild(bpartnerField.getComponent());
 				specialRow.appendChild(contactField.getComponent());
+				if (lblcontact != null)
+					newLeadLabelRow.removeChild(lblcontact);
+				if (bpcontact != null)
+				{
+					bpcontact.setValue("");
+					newLeadLabelRow.removeChild(bpcontact.getComponent());
+				}
 			}
-			else{
+			else if(activityRelatedTo.getValue().equals(X_C_ContactActivity.C_CONTACTACTIVITYRELATEDTO_Lead)){
 				salesOpportunityField.setValue("");
 				specialRow.removeChild(salesOpportunityField.getComponent());
 				contactField.setValue("");
+				bpartnerField.setValue("");
+				specialRow.removeChild(bpartnerField.getComponent());
 				specialRow.removeChild(contactField.getComponent());
 				specialRow.appendChild(leadField.getComponent());
+				if (lblcontact != null)
+					newLeadLabelRow.removeChild(lblcontact);
+				if (bpcontact != null)
+				{
+					bpcontact.setValue("");
+					newLeadLabelRow.removeChild(bpcontact.getComponent());
+				}
+			}
+			else if(activityRelatedTo.getValue().equals(X_C_ContactActivity.C_CONTACTACTIVITYRELATEDTO_BusinessPartner))
+			{
+				salesOpportunityField.setValue("");
+				contactField.setValue("");
+				leadField.setValue("");
+				specialRow.removeChild(contactField.getComponent());
+				specialRow.removeChild(leadField.getComponent());
+				specialRow.removeChild(salesOpportunityField.getComponent());
+				specialRow.appendChild(bpartnerField.getComponent());
+				bpartnerField.addValueChangeListener(this);
+			}
+
+		}
+		else if (e.getSource() == bpartnerField)
+		{
+			if ((Integer) e.getNewValue() != null)
+			{
+				if (lblcontact != null)
+					newLeadLabelRow.removeChild(lblcontact);
+				if (bpcontact != null)
+					newLeadLabelRow.removeChild(bpcontact.getComponent());
+
+				try
+				{
+					int ad_user_id = Env.getContextAsInt(Env.getCtx(), 9999, Env.TAB_INFO, "AD_User_ID");
+					if (ad_user_id == 0)
+					{
+						ad_user_id = DB.getSQLValue(null, "SELECT AD_User_ID FROM AD_USER WHERE C_Bpartner_ID="
+								+ (Integer) e.getNewValue());
+					}
+					MUser user = new MUser(Env.getCtx(), ad_user_id, null);
+
+					MLookup lookup = MLookupFactory.get(Env.getCtx(), 0, COLUMNID_AD_USER_ID, DisplayType.TableDir,
+							Env.getLanguage(Env.getCtx()), X_AD_User.COLUMNNAME_AD_User_ID, 0, true, " C_Bpartner_ID="
+									+ (Integer) e.getNewValue());
+					bpcontact = new WTableDirEditor(X_AD_User.COLUMNNAME_AD_User_ID, false, false, true, lookup);
+					for (int i = 0; i < bpcontact.getComponent().getItemCount(); i++)
+					{
+						if ((Integer) bpcontact.getComponent().getItemAtIndex(i).getValue() == user.getAD_User_ID())
+						{
+							bpcontact.getComponent().setSelectedIndex(i);
+							break;
+						}
+					}
+					newLeadLabelRow.appendChild(lblcontact);
+					newLeadLabelRow.appendChild(bpcontact.getComponent());
+				}
+				catch (Exception ex)
+				{
+					log.log(Level.SEVERE, "BP Contact not found.");
+				}
 			}
 
 		}

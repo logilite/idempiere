@@ -77,6 +77,22 @@ public interface I_C_ContactActivity
 
 	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException;
 	
+	/** Column name C_BPartner_ID */
+    public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
+
+	/** Set Business Partner .
+	  * Identifies a Business Partner
+	  */
+	public void setC_BPartner_ID (int C_BPartner_ID);
+
+	/** Get Business Partner .
+	  * Identifies a Business Partner
+	  */
+	public int getC_BPartner_ID();
+
+	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException;
+
+	
 	/** Column name C_ContactActivityRelatedTo */
     public static final String COLUMNNAME_C_ContactActivityRelatedTo = "C_ContactActivityRelatedTo";
 
