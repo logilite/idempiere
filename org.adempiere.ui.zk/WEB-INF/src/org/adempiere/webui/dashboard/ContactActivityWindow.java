@@ -18,7 +18,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -56,9 +55,9 @@ import org.compiere.model.X_AD_User;
 import org.compiere.model.X_AD_Workflow;
 import org.compiere.model.X_C_ContactActivity;
 import org.compiere.model.X_C_Opportunity;
-import org.compiere.process.ConvertLead;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
+import org.compiere.process.ServerProcessCtl;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
@@ -121,7 +120,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		Properties ctx = Env.getCtx();
 		setTitle(Msg.getMsg(ctx, "ActivityNew"));
 		setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
-		setWidth("800px");
+		setWidth("825px");
 
 		this.setSclass("popup-dialog");
 		this.setBorder("normal");
@@ -284,28 +283,28 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		activityRelatedTo.addValueChangeListener(this);
 
 		txtName = new Textbox();
-		txtName.setWidth("88%");
+		txtName.setWidth("100%");
 		txtName.setHeight("100%");
 
 		txtBPname = new Textbox();
-		txtBPname.setWidth("88%");
+		txtBPname.setWidth("100%");
 		txtBPname.setHeight("100%");
 
 		txtEMail = new Textbox();
-		txtEMail.setWidth("88%");
+		txtEMail.setWidth("100%");
 		txtEMail.setHeight("100%");
 
 		txtPhone = new Textbox();
-		txtPhone.setWidth("88%");
+		txtPhone.setWidth("100%");
 		txtPhone.setHeight("100%");
 
 		txtDescription = new Textbox();
-		txtDescription.setWidth("88%");
+		txtDescription.setWidth("100%");
 		txtDescription.setHeight("100%");
 
 		txtComments = new Textbox();
-		txtComments.setRows(2);
-		txtComments.setWidth("88%");
+		txtComments.setMultiline(true);
+		txtComments.setWidth("100%");
 		txtComments.setHeight("100%");
 
 		dbxStartDate = new DatetimeBox();
@@ -313,8 +312,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 
 			@Override
 			public void onEvent(Event event) throws Exception {
-				Date date = ((Datebox)event.getTarget()).getValue();
-				dbxEndDate.setValue(date);
+				dbxEndDate.setValue(dbxStartDate.getValue());
 			}
 		});
 		dbxEndDate = new DatetimeBox();
@@ -326,14 +324,14 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 
 		//follow activity
 		txtDescription2 = new Textbox();
-		txtDescription2.setWidth("88%");
+		txtDescription2.setWidth("100%");
 		txtDescription2.setHeight("100%");
 
 		dbxStartDate2 = new DatetimeBox();
 
 		txtComments2 = new Textbox();
-		txtComments2.setRows(2);
-		txtComments2.setWidth("88%");
+		txtComments2.setMultiline(true);
+		txtComments2.setWidth("100%");
 		txtComments2.setHeight("100%");
 
 		opportunityDesc = new Textbox();
@@ -353,7 +351,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 
 		column = new Column();
 		columns.appendChild(column);
-		column.setWidth("230px");
+		column.setWidth("240px");
 
 		column = new Column();
 		columns.appendChild(column);
@@ -370,6 +368,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		Row row = new Row();
 		rows.appendChild(row);
 		row.appendChild(lblActivityType.rightAlign());
+		activityTypeField.getComponent().setWidth("100%");
 		row.appendChild(activityTypeField.getComponent());
 		row.appendChild(lblActivityRelatedTo);
 		row.appendChild(lblEMpty);
@@ -402,6 +401,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		BPNameRow = new Row();
 		rows.appendChild(BPNameRow);
 		BPNameRow.appendChild(lblSalesRep.rightAlign());
+		salesRepField.getComponent().setWidth("100%");
 		BPNameRow.appendChild(salesRepField.getComponent());
 
 		locationRow = new Row();
@@ -412,6 +412,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		positionRow = new Row();
 		rows.appendChild(positionRow);
 		positionRow.appendChild(lblActivityType2.rightAlign());
+		activityTypeField2.getComponent().setWidth("100%");
 		positionRow.appendChild(activityTypeField2.getComponent());
 		lblActivityType2.setVisible(false);
 		activityTypeField2.setVisible(false);
@@ -425,7 +426,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 
 		statusRow = new Row();
 		rows.appendChild(statusRow);
-		statusRow.appendCellChild(lblStartDate2);
+		statusRow.appendCellChild(lblStartDate2.rightAlign());
 		statusRow.appendCellChild(dbxStartDate2);
 		statusRow.appendChild(lblBPLocation);
 		statusRow.appendChild(locationField.getComponent());
@@ -874,8 +875,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		// Lookup process in the AD, in this case by value
 		MProcess pr = new MProcess(Env.getCtx(), 53276, null);
 
-		// Create an instance of the actual process class.
-		ConvertLead process = new ConvertLead();
+		ProcessInfo piInfo=new ProcessInfo("Convert Lead", pr.getAD_Process_ID());
 
 		// Create process instance (mainly for logging/sync purpose)
 		MPInstance mpi = new MPInstance(Env.getCtx(), 0, null);
@@ -887,8 +887,11 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		pi.setAD_PInstance_ID(mpi.get_ID());
 
 		log.info("Starting process " + pr.getName());
-
-		return process.startProcess(Env.getCtx(), pi, null);
+		// return process.startProcess(Env.getCtx(), pi, null);
+		if (ServerProcessCtl.process(piInfo, null) != null)
+			return true;
+		else
+			return false;
 	}
 
 

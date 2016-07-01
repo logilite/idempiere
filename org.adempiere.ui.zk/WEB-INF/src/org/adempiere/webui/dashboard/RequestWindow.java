@@ -30,6 +30,7 @@ import org.adempiere.webui.component.Row;
 import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Window;
+import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MColumn;
@@ -41,11 +42,11 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 import org.zkoss.calendar.event.CalendarsEvent;
 import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
-import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.North;
 import org.zkoss.zul.South;
 import org.zkoss.zul.Timebox;
@@ -69,6 +70,7 @@ public class RequestWindow extends Window implements EventListener<Event> {
 	
 	private WTableDirEditor requestTypeField, dueTypeField, priorityField, 
 		confidentialField, salesRepField, entryConfidentialField;
+	private WSearchEditor bpartnerField;
 	private Textbox txtSummary;
 	private Datebox dbxStartPlan, dbxCompletePlan;
 	private Timebox tbxStartTime, tbxEndTime;
@@ -77,7 +79,7 @@ public class RequestWindow extends Window implements EventListener<Event> {
 	private Window parent;
 	private Calendar calBegin,calEnd;
 	
-	public RequestWindow(CalendarsEvent ce, Window parent) {
+	public RequestWindow(CalendarsEvent ce, Window parent) throws Exception {
 		
 		super();
 		
@@ -87,6 +89,8 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		setTitle(Msg.getMsg(Env.getCtx(),"NewRequest"));
 		setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
 		setWidth("400px");
+		setHeight("550px");
+		
 		this.setSclass("popup-dialog");
 		this.setBorder("normal");
 		this.setShadow(true);
@@ -107,6 +111,7 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		Label lblCompletePlan      = new Label(Msg.getElement(ctx, MRequest.COLUMNNAME_DateCompletePlan));
 		Label lblStartTime         = new Label(Msg.getElement(ctx, MRequest.COLUMNNAME_StartTime));
 		Label lblEndTime           = new Label(Msg.getElement(ctx, MRequest.COLUMNNAME_EndTime));
+		Label lblBPartner		   = new Label(Msg.getElement(ctx, MRequest.COLUMNNAME_C_BPartner_ID));
 
 		int columnID = MColumn.getColumn_ID(MRequest.Table_Name, MRequest.COLUMNNAME_DueType);
 		MLookup lookup = MLookupFactory.get(ctx, 0, 0, columnID, DisplayType.List);
@@ -115,6 +120,14 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		if(dueTypeField.getValue() == null || dueTypeField.getValue().equals(""))
 			if(dueTypeField.getComponent().getItemCount() > 1)
 				dueTypeField.setValue(dueTypeField.getComponent().getItemAtIndex(1).getValue());
+		
+		columnID = MColumn.getColumn_ID(MRequest.Table_Name, MRequest.COLUMNNAME_C_BPartner_ID);
+		lookup = MLookupFactory.get(ctx, 0, 0, columnID, DisplayType.TableDir);
+		bpartnerField = new WSearchEditor("C_BPartner_ID", true, false, true, lookup);
+		// if(bpartnerField.getValue() == null ||
+		// bpartnerField.getValue().equals(""))
+		// if(bpartnerField.getComponent().getText() != null)
+		// bpartnerField.setValue(bpartnerField.getComponent().getText());
 		
 		columnID = MColumn.getColumn_ID(MRequest.Table_Name, MRequest.COLUMNNAME_R_RequestType_ID);
 		lookup = MLookupFactory.get(ctx, 0, 0, columnID, DisplayType.TableDir);
@@ -141,11 +154,14 @@ public class RequestWindow extends Window implements EventListener<Event> {
 				confidentialField.setValue(confidentialField.getComponent().getItemAtIndex(1).getValue());
 		
 		columnID = MColumn.getColumn_ID(MRequest.Table_Name, MRequest.COLUMNNAME_SalesRep_ID);
-		lookup = MLookupFactory.get(ctx, 0, 0, columnID, DisplayType.TableDir);
-		salesRepField = new WTableDirEditor("SalesRep_ID", true, false, true, lookup);
-		salesRepField.setValue(Env.getContextAsInt(ctx, "SalesRep_ID"));
-		if(salesRepField.getValue() == null || salesRepField.getValue().equals(0))
-			if(salesRepField.getComponent().getItemCount() > 1)
+		lookup = MLookupFactory
+				.get(ctx, 0, columnID, DisplayType.TableDir, Env.getLanguage(Env.getCtx()),
+						MRequest.COLUMNNAME_AD_User_ID, 0, true,
+						" EXISTS (SELECT * FROM C_BPartner bp WHERE AD_User.C_BPartner_ID=bp.C_BPartner_ID AND bp.IsSalesRep='Y') ");
+		salesRepField = new WTableDirEditor(MRequest.COLUMNNAME_SalesRep_ID, true, false, true, lookup);
+		salesRepField.setValue(Env.getContextAsInt(ctx, MRequest.COLUMNNAME_SalesRep_ID));
+		if (salesRepField.getValue() == null || salesRepField.getValue().equals(0))
+			if (salesRepField.getComponent().getItemCount() > 1)
 				salesRepField.setValue(salesRepField.getComponent().getItemAtIndex(1).getValue());
 		
 		columnID = MColumn.getColumn_ID(MRequest.Table_Name, MRequest.COLUMNNAME_ConfidentialTypeEntry);
@@ -157,7 +173,7 @@ public class RequestWindow extends Window implements EventListener<Event> {
 				entryConfidentialField.setValue(entryConfidentialField.getComponent().getItemAtIndex(1).getValue());
 		
 		txtSummary = new Textbox();
-		txtSummary.setRows(3);
+		txtSummary.setMultiline(true);
 		txtSummary.setWidth("95%");
 		txtSummary.setHeight("100%");
 		
@@ -187,6 +203,11 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		grid.appendChild(rows);
 		
 		Row row = new Row();
+		rows.appendChild(row);
+		row.appendChild(lblBPartner.rightAlign());
+		row.appendChild(bpartnerField.getComponent());
+		
+		row = new Row();
 		rows.appendChild(row);
 		row.appendChild(lblDueType.rightAlign());
 		row.appendChild(dueTypeField.getComponent());
@@ -257,6 +278,7 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		northPane.appendChild(grid);
 		grid.setVflex("1");
 		grid.setHflex("1");
+		grid.setHeight("450px");
 
 		South southPane = new South();
 		southPane.setSclass("dialog-footer");
@@ -276,6 +298,8 @@ public class RequestWindow extends Window implements EventListener<Event> {
 			// Check Mandatory fields
 			String fillMandatory = Msg.translate(Env.getCtx(), "FillMandatory");
 			fillMandatory = fillMandatory.replaceAll(":", "");
+			if (bpartnerField.getValue() == null || bpartnerField.getValue().equals(""))
+				throw new WrongValueException(bpartnerField.getComponent(), fillMandatory);
 			if (dueTypeField.getValue() == null || dueTypeField.getValue().equals(""))
 				throw new WrongValueException(dueTypeField.getComponent(), fillMandatory);
 			if (requestTypeField.getValue() == null || requestTypeField.getValue().equals(0))
@@ -309,10 +333,13 @@ public class RequestWindow extends Window implements EventListener<Event> {
 			request.setStartTime(new Timestamp(calBegin.getTimeInMillis()));
 			request.setEndTime(new Timestamp(calEnd.getTimeInMillis()));
 			
+			if (bpartnerField.getValue() != null && !Util.isEmpty(bpartnerField.getValue().toString(), true))
+				request.setC_BPartner_ID((Integer) bpartnerField.getValue());
+			
 			if (request.save())
 			{
 				if (log.isLoggable(Level.FINE)) log.fine("R_Request_ID=" + request.getR_Request_ID());
-				Events.postEvent("onRefresh", parent, null);
+				//Events.postEvent("onRefresh", parent, null);
 //				Events.echoEvent("onRefresh", parent, null);
 			}
 			else
