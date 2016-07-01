@@ -20,6 +20,7 @@ import java.util.logging.Level;
 
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Borderlayout;
+import org.adempiere.webui.component.Checkbox;
 import org.adempiere.webui.component.Column;
 import org.adempiere.webui.component.Columns;
 import org.adempiere.webui.component.ConfirmPanel;
@@ -49,6 +50,7 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.North;
 import org.zkoss.zul.South;
+import org.zkoss.zul.Space;
 
 /**
  * Show/Edit Contact Activity 
@@ -75,6 +77,8 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 
 	private boolean m_readOnly;
 	private Window parent;
+	private Checkbox chbNextStep;
+	private ADCalendarContactActivity event;
 
 	public ActivityWindow(Window parent) {
 
@@ -161,6 +165,11 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 		txtSalesMan = new Textbox();
 		txtSalesMan.setWidth("95%");
 		txtSalesMan.setReadonly(!m_readOnly);
+		
+		chbNextStep = new Checkbox();
+		chbNextStep.setText(Msg.getMsg(ctx, "NextStep"));
+		chbNextStep.setChecked(false);
+		chbNextStep.addEventListener(Events.ON_CLICK, this);
 
 		confirmPanel = new ConfirmPanel(true, false, false, false, false, true);
 		confirmPanel.addActionListener(this);
@@ -220,6 +229,11 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 		rows.appendChild(row);
 		row.appendChild(lblOpportunity.rightAlign());
 		row.appendChild(opportunityField.getComponent());
+		
+		row = new Row();
+		rows.appendChild(row);
+		row.appendChild(new Space());
+		row.appendChild(chbNextStep);
 
 		Borderlayout borderlayout = new Borderlayout();
 		this.appendChild(borderlayout);
@@ -243,7 +257,7 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 	}
 
 	public void setData(ADCalendarContactActivity event) {
-
+		this.event = event;
 		activityTypeField.setValue(event.getContactActivityType());
 		salesRepField.setValue(event.getSalesRep_ID());
 
@@ -325,8 +339,14 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 
 	public void onEvent(Event e) throws Exception {
 		if (e.getTarget() == confirmPanel.getButton(ConfirmPanel.A_OK)){
-			if(!m_readOnly && C_ContactActivity_ID>0){
-
+			
+			X_C_ContactActivity activity = null;
+			
+			if (!m_readOnly && C_ContactActivity_ID > 0)
+				activity = new X_C_ContactActivity(Env.getCtx(), C_ContactActivity_ID, null);
+			else
+				activity = new X_C_ContactActivity(Env.getCtx(), 0, null);
+			
 				String fillMandatory = Msg.translate(Env.getCtx(), "FillMandatory");
 
 				if (activityTypeField.getValue() == null || activityTypeField.getValue().equals(""))
@@ -340,8 +360,6 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 				if (checkTime()) 
 					throw new WrongValueException(dtBeginDate, Msg.translate(Env.getCtx(), "CheckTime"));
 
-
-				X_C_ContactActivity activity = new X_C_ContactActivity(Env.getCtx(), C_ContactActivity_ID, null);
 
 				activity.setContactActivityType(activityTypeField.getValue().toString());
 				if(salesRepField.getValue() != null)
@@ -366,7 +384,7 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 					FDialog.error(0, this, "Request Activity not saved");
 					return;
 				}
-			}
+			chbNextStep.setChecked(false);
 			setVisible(false);
 		}
 		else if (e.getTarget() == confirmPanel.getButton(ConfirmPanel.A_CANCEL)){
@@ -377,5 +395,24 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 				AEnv.zoom(X_C_ContactActivity.Table_ID, C_ContactActivity_ID);
 			}
 		}
+		else if (e.getTarget() == chbNextStep)
+		{
+			if (chbNextStep.isChecked())
+			{
+				clearData();
+				C_ContactActivity_ID = 0;
+			}
+			else
+				setData(event);
+		}
+	}
+
+	public void clearData()
+	{
+		txtDescription.setValue(null);
+		txtComments.setValue(null);
+		txtSalesMan.setValue(null);
+		userField.setValue(null);
 	}
 }
+	
