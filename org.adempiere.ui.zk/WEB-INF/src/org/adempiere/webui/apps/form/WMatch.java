@@ -425,6 +425,26 @@ public class WMatch extends Match
 		{
 			if(isCreateMatchInvHDR())
 			{
+				ArrayList<Integer> matchedRows = new ArrayList<Integer>();
+				for (int row = 0; row < xMatchedTable.getRowCount(); row++)
+				{
+					IDColumn id = (IDColumn) xMatchedTable.getValueAt(row, 0);
+					if (id != null && id.isSelected())
+					{
+						matchedRows.add(id.getRecord_ID());
+					}
+				}
+
+				ArrayList<Integer> matchedToRows = new ArrayList<Integer>();
+				for (int row = 0; row < xMatchedToTable.getRowCount(); row++)
+				{
+					IDColumn id = (IDColumn) xMatchedToTable.getValueAt(row, 0);
+					if (id != null && id.isSelected())
+					{
+						matchedToRows.add(id.getRecord_ID());
+					}
+				}
+
 				Comparator<Object> comparator = new Comparator<Object>() {
 					@SuppressWarnings("unchecked")
 					@Override
@@ -444,9 +464,45 @@ public class WMatch extends Match
 
 				xMatchedToTable.getModel().sort(comparator, false);
 				xMatchedTable.getModel().sort(comparator, false);
+
+				ArrayList<Integer> selectedIndices = new ArrayList<Integer>();
+				for (int row = 0; row < xMatchedTable.getRowCount(); row++)
+				{
+					IDColumn id = (IDColumn) xMatchedTable.getValueAt(row, 0);
+					if (id != null && matchedRows.contains(id.getRecord_ID()))
+					{
+						id.setSelected(true);
+						selectedIndices.add(row);
+					}
+				}
+				xMatchedTable
+						.setSelectedIndices(toIntArray(selectedIndices.toArray(new Integer[selectedIndices.size()])));
+				selectedIndices.clear();
+
+				for (int row = 0; row < xMatchedToTable.getRowCount(); row++)
+				{
+					IDColumn id = (IDColumn) xMatchedToTable.getValueAt(row, 0);
+					if (id != null && matchedToRows.contains(id.getRecord_ID()))
+					{
+						id.setSelected(true);
+						selectedIndices.add(row);
+					}
+				}
+				xMatchedToTable.setSelectedIndices(toIntArray(selectedIndices.toArray(new Integer[selectedIndices
+						.size()])));
 			}
-			//cmd_process();
+			
 			cmd_process(xMatchedTable, xMatchedToTable, matchMode.getSelectedIndex(), matchFrom.getSelectedIndex(), matchTo.getSelectedItem().getLabel(), m_xMatched, isCreateMatchInvHDR());
+
+			// Reset all things done for match invoice header
+			selectedID = 0;
+			isCreateMatchInvHDR = false;
+			sameProduct.setSelected(true);
+			sameProduct.setEnabled(true);
+			sameBPartner.setSelected(true);
+			sameBPartner.setEnabled(true);
+			xMatchedTable.setMultiSelection(false);
+
 			xMatchedTable = (WListbox) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem().getLabel(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED, selectedID);
 			xMatched.setValue(Env.ZERO);
 			//  Status Info
@@ -463,7 +519,7 @@ public class WMatch extends Match
 			cmd_searchTo();
 		else if (AEnv.contains(xMatchedTable, e.getTarget()))
 		{
-			if(!isCreateMatchInvHDR && matchFrom.getSelectedIndex() == MATCH_INVOICE && matchTo.getSelectedIndex() == 0)
+			if(!isCreateMatchInvHDR && matchFrom.getSelectedIndex() == MATCH_INVOICE && matchTo.getSelectedIndex() == 0 && isMatchInvHdrEnabled)
 			{
 				isCreateMatchInvHDR = true;
 				
@@ -512,14 +568,18 @@ public class WMatch extends Match
 		}
 	}   //  actionPerformed
 
+	private int[] toIntArray(Integer[] array)
+	{
+		int[] returnVal = new int[array.length];
+		for(int i = 0; i< array.length; i++)
+		{
+			returnVal[i] = array[i].intValue();
+		}
+		return returnVal;
+	}
+
 	private void onSearch(Integer product, Integer vendor, Timestamp from, Timestamp to)
 	{
-		if(!(matchFrom.getSelectedIndex() == MATCH_INVOICE && matchTo.getSelectedIndex() == 0))
-		{
-			selectedID = 0;
-			isCreateMatchInvHDR = false;
-		}
-		
 		xMatchedTable = (WListbox) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String) matchTo
 				.getSelectedItem().getLabel(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED,
 				selectedID);
@@ -690,7 +750,7 @@ public class WMatch extends Match
 
 	private boolean isCreateMatchInvHDR()
 	{
-		if(!isCreateMatchInvHDR)
+		if(!isCreateMatchInvHDR || !isMatchInvHdrEnabled)
 		{
 			return false;
 		}

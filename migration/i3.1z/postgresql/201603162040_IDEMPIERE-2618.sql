@@ -973,6 +973,10 @@ as
     WHERE Posted <> 'Y' AND DocStatus <> 'VO'
 ;
 
+-- 30-Jun-2016 12:34:23 IST
+INSERT INTO AD_SysConfig (AD_SysConfig_ID,AD_Client_ID,AD_Org_ID,Created,Updated,CreatedBy,UpdatedBy,IsActive,Name,Value,Description,EntityType,ConfigurationLevel,AD_SysConfig_UU) VALUES (200078,0,0,TO_TIMESTAMP('2016-06-30 12:34:21','YYYY-MM-DD HH24:MI:SS'),TO_TIMESTAMP('2016-06-30 12:34:21','YYYY-MM-DD HH24:MI:SS'),100,100,'Y','MATCH_INV_HEADER_ENABLED','N','If ''Y'' is configured, System will created match invoice header for Receipt-Invoice matching records.','D','S','6d701d67-6694-4867-a64d-9816a2ca6f76')
+;
+
 -- Jan 22, 2016 11:53:09 AM IST
 SELECT register_migration_script('201603162040_IDEMPIERE-2618.sql') FROM dual
 ;

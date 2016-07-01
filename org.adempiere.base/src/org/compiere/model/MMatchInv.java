@@ -248,7 +248,8 @@ public class MMatchInv extends X_M_MatchInv
 			}
 		}
 		
-		if(newRecord)
+		if (newRecord && getReversal_ID() <= 0
+				&& MSysConfig.getBooleanValue(MSysConfig.MATCH_INV_HEADER_ENABLED, false, getAD_Client_ID()))
 		{
 			if(this.getM_MatchInvHdr_ID() <= 0)
 			{
@@ -267,7 +268,7 @@ public class MMatchInv extends X_M_MatchInv
 				}
 				catch (Exception e)
 				{
-					log.saveError("Failed to complete match workbench", e);
+					log.saveError("Failed to complete match invoice header", e);
 					return false;
 				}
 			}

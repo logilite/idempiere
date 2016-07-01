@@ -1595,15 +1595,21 @@ public class MInOut extends X_M_InOut implements DocAction
 						sLine.getM_InOutLine_ID(), iLine.getC_InvoiceLine_ID(), get_TrxName());
 					if (matches == null || matches.length == 0)
 					{
-						MMatchInvHdr matchWB = new MMatchInvHdr(getCtx(), 0, get_TrxName());
-						matchWB.setDateAcct(this.getDateAcct());
-						matchWB.setDateTrx(this.getMovementDate());
-						matchWB.setDescription(this.getDescription());
-						matchWB.saveEx();
 						
+						MMatchInvHdr matchInvHdr = null;
 						
 						MMatchInv inv = new MMatchInv (iLine, getMovementDate(), matchQty);
-						inv.setM_MatchInvHdr_ID(matchWB.get_ID());
+						
+						if(MSysConfig.getBooleanValue(MSysConfig.MATCH_INV_HEADER_ENABLED, false, getAD_Client_ID()))
+						{
+							matchInvHdr = new MMatchInvHdr(getCtx(), 0, get_TrxName());
+							matchInvHdr.setDateAcct(this.getDateAcct());
+							matchInvHdr.setDateTrx(this.getMovementDate());
+							matchInvHdr.setDescription(this.getDescription());
+							matchInvHdr.saveEx();
+							inv.setM_MatchInvHdr_ID(matchInvHdr.get_ID());
+						}
+						
 						if (sLine.getM_AttributeSetInstance_ID() != iLine.getM_AttributeSetInstance_ID())
 						{
 							iLine.setM_AttributeSetInstance_ID(sLine.getM_AttributeSetInstance_ID());
@@ -1616,17 +1622,23 @@ public class MInOut extends X_M_InOut implements DocAction
 							return DocAction.STATUS_Invalid;
 						}
 						
-						try
+						if (matchInvHdr != null)
 						{
-							matchWB.processIt(DocAction.ACTION_Complete);
+							try
+							{
+								matchInvHdr.processIt(DocAction.ACTION_Complete);
+							}
+							catch (Exception e)
+							{
+								log.log(Level.SEVERE, "Failed to complete match invoice header", e);
+							}
+							matchInvHdr.saveEx();
+							addDocsPostProcess(matchInvHdr);
 						}
-						catch (Exception e)
+						else
 						{
-							log.log(Level.SEVERE, "Failed to complete match invoice header", e);
+							addDocsPostProcess(inv);
 						}
-						matchWB.saveEx();
-						
-						addDocsPostProcess(matchWB);
 					}
 				}
 
