@@ -50,6 +50,7 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Trx;
 import org.compiere.util.TrxEventListener;
+import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
 import org.idempiere.distributed.IMessageService;
 import org.idempiere.distributed.ITopic;
@@ -416,7 +417,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			log.log(Level.SEVERE, "No Sales Representative Found");
 		}
 		finally
 		{
@@ -439,16 +440,17 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 				userStr += Integer.parseInt(i.getID()) + ",";
 			userStr = userStr.substring(0, userStr.length() - 1);
 		}
-		String sql = "SELECT DISTINCT c.C_ContactActivity_ID,c.StartDate,c.EndDate, "
-				+ "c.Description,c.Comments,c.ContactActivityType, Name, COALESCE(c.SalesRep_ID) AS SalesRep_ID, COALESCE(c.AD_User_ID,0) AS AD_User_ID " // CL-669
-				+ ", c.C_Opportunity_ID " + "FROM C_ContactActivity c "
-				+ "JOIN AD_Ref_List ref ON (ref.Value=c.ContactActivityType AND AD_Reference_ID = ?) "
-				+ "WHERE c.isActive='Y' " + "AND c.AD_Client_ID = ? "
-				+ "AND (c.SalesRep_ID = ? OR c.AD_User_ID = ? OR c.CreatedBy = ?) ";
+		String sql = "SELECT DISTINCT c.C_ContactActivity_ID,c.StartDate,c.EndDate,c.Comments,c.ContactActivityType,c.Description,ref.Name AS type"
+				+ " ,(SELECT  string_agg(distinct au.name,',') from AD_USER au"
+				+ " INNER JOIN C_ContactActivity_attendees cca ON (au.AD_USER_ID = cca.salesRep_ID  OR au.AD_User_ID=c.SalesRep_ID) AND (cca.C_ContactActivity_ID=c.C_ContactActivity_ID OR au.AD_User_ID=c.SalesRep_ID))||'-'||ref.Name AS Name"
+				+ " ,COALESCE(c.SalesRep_ID) AS SalesRep_ID,COALESCE(c.AD_User_ID,0) AS AD_User_ID , c.C_Opportunity_ID FROM C_ContactActivity c"
+				+ " JOIN AD_Ref_List ref ON (ref.Value=c.ContactActivityType AND AD_Reference_ID = ?)"
+				+ " LEFT JOIN C_ContactActivity_Attendees ca ON(c.C_ContactActivity_ID=ca.C_ContactActivity_ID)"
+				+ " WHERE c.isActive='Y' AND c.AD_Client_ID = ?";
 		if (users == null || !users.contains(forAll))
-			sql += "AND (c.SalesRep_ID IN (" + userStr + ")) ";
+			sql += " AND (ca.SalesRep_ID IN (" + userStr + ") OR c.SalesRep_ID IN(" + userStr + "))";
 		if (ContactActivityType.length() > 0)
-			sql += "AND ContactActivityType = ? ";
+			sql += " AND ContactActivityType = ? ";
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -458,12 +460,10 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 			ps = DB.prepareStatement(sql, null);
 			ps.setInt(1, X_C_ContactActivity.CONTACTACTIVITYTYPE_AD_Reference_ID);
 			ps.setInt(2, Env.getAD_Client_ID(ctx));
-			ps.setInt(3, Env.getAD_User_ID(ctx));
-			ps.setInt(4, Env.getAD_User_ID(ctx));
-			ps.setInt(5, Env.getAD_User_ID(ctx));
 
 			if (ContactActivityType.length() > 0)
-				ps.setString(6, ContactActivityType);
+				ps.setString(3, ContactActivityType);
+
 
 			rs = ps.executeQuery();
 
@@ -531,6 +531,10 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 					event.setHeaderColor(CalendarColor.DPCALENDAR_HDR_TASK);
 					event.setContentColor(CalendarColor.DPCALENDAR_CNT_TASK);
 				}
+				if (!(Util.isEmpty(rs.getString("name"))))
+					event.setContent(rs.getString("name"));
+				else
+					event.setContent(rs.getString("type"));
 
 				event.setContent(activityTypeName + ": " + description);
 				event.setContactActivityType(activityType);

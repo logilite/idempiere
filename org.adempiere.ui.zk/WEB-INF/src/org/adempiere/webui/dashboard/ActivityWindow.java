@@ -14,7 +14,9 @@
 package org.adempiere.webui.dashboard;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -28,6 +30,7 @@ import org.adempiere.webui.component.DatetimeBox;
 import org.adempiere.webui.component.Grid;
 import org.adempiere.webui.component.GridFactory;
 import org.adempiere.webui.component.Label;
+import org.adempiere.webui.component.MultiSelectionBox;
 import org.adempiere.webui.component.Row;
 import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.component.Textbox;
@@ -36,14 +39,18 @@ import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MColumn;
+import org.compiere.model.MContactActivity_Attendees;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MRole;
+import org.compiere.model.X_AD_User;
 import org.compiere.model.X_C_ContactActivity;
 import org.compiere.util.CLogger;
+import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.ValueNamePair;
 import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -70,8 +77,9 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 	private ConfirmPanel confirmPanel;
 	private Calendar calBegin,calEnd;
 
-	private WTableDirEditor activityTypeField, salesRepField, opportunityField;
+	private WTableDirEditor activityTypeField, opportunityField;
 	private WSearchEditor userField;
+	private MultiSelectionBox salesrepField;
 
 	private int C_ContactActivity_ID = 0;
 
@@ -79,6 +87,7 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 	private Window parent;
 	private Checkbox chbNextStep;
 	private ADCalendarContactActivity event;
+	private ArrayList<ValueNamePair>	previousActivity		= null;
 
 	public ActivityWindow(Window parent) {
 
@@ -109,19 +118,19 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 		Label lblsalesMan      	= new Label(Msg.getElement(ctx, X_C_ContactActivity.COLUMNNAME_SalesRep_ID));
 		Label lblUser      		= new Label(Msg.getElement(ctx, X_C_ContactActivity.COLUMNNAME_AD_User_ID));
 		Label lblOpportunity	= new Label(Msg.getElement(ctx, X_C_ContactActivity.COLUMNNAME_C_Opportunity_ID));
+		
+		
+		ArrayList<X_AD_User> usersList = DPCalendar.getUserList(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()));
+		ArrayList<ValueNamePair> supervisors = new ArrayList<ValueNamePair>();
+		supervisors.add(DPCalendar.forAll);
+		for (X_AD_User uType : usersList)
+			supervisors.add(new ValueNamePair(uType.getAD_User_ID() + "", uType.getName()));
+
+		salesrepField = new MultiSelectionBox(supervisors, true);
 
 		int columnID = MColumn.getColumn_ID(X_C_ContactActivity.Table_Name, X_C_ContactActivity.COLUMNNAME_ContactActivityType);
 		MLookup lookup = MLookupFactory.get(ctx, 0, 0, columnID, DisplayType.List);
 		activityTypeField = new WTableDirEditor(X_C_ContactActivity.COLUMNNAME_ContactActivityType, true, false, true, lookup);
-
-		columnID = MColumn.getColumn_ID(X_C_ContactActivity.Table_Name, X_C_ContactActivity.COLUMNNAME_SalesRep_ID);
-		try{
-			lookup = MLookupFactory.get(ctx, 0, columnID, DisplayType.TableDir, Env.getLanguage(Env.getCtx()), X_C_ContactActivity.COLUMNNAME_AD_User_ID, 0, true, " EXISTS (SELECT * FROM C_BPartner bp WHERE AD_User.C_BPartner_ID=bp.C_BPartner_ID AND bp.IsSalesRep='Y') ");
-			salesRepField = new WTableDirEditor(X_C_ContactActivity.COLUMNNAME_SalesRep_ID, true, false, true, lookup);
-		}
-		catch (Exception e) {
-			log.log(Level.SEVERE,"SalesRepresentative not found-"+e.getLocalizedMessage());
-		}
 
 		columnID = MColumn.getColumn_ID(X_C_ContactActivity.Table_Name, X_C_ContactActivity.COLUMNNAME_AD_User_ID);
 		try{
@@ -142,7 +151,6 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 		}
 
 		activityTypeField.setReadWrite(!m_readOnly);
-		salesRepField.setReadWrite(!m_readOnly);
 		userField.setReadWrite(!m_readOnly);
 		opportunityField.setReadWrite(!m_readOnly);
 
@@ -218,7 +226,7 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 		row = new Row();
 		rows.appendChild(row);
 		row.appendChild(lblsalesMan.rightAlign());
-		row.appendChild(salesRepField.getComponent());
+		row.appendChild(salesrepField);
 
 		row = new Row();
 		rows.appendChild(row);
@@ -259,7 +267,24 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 	public void setData(ADCalendarContactActivity event) {
 		this.event = event;
 		activityTypeField.setValue(event.getContactActivityType());
-		salesRepField.setValue(event.getSalesRep_ID());
+		
+		List<Object> param = new ArrayList<Object>();
+		param.add(event.getC_ContactActivity_ID());
+
+		ValueNamePair[] salerep = DB
+				.getValueNamePairs(
+						"SELECT ca.SalesRep_ID,u.name from C_ContactActivity_Attendees ca,AD_User u where ca.SalesRep_ID=u.AD_USer_ID AND ca.c_ContactActivity_ID=?",
+						false, param);
+
+		ArrayList<ValueNamePair> salesreps = new ArrayList<ValueNamePair>();
+
+		for (int i = 0; i < salerep.length; i++)
+		{
+			salesreps.add(new ValueNamePair(salerep[i].getID() + "", salerep[i].getName()));
+		}
+
+		salesrepField.setValues(salesreps);
+		previousActivity = salesrepField.getValues();
 
 		if(event.getAD_User_ID()>0)
 			userField.setValue(event.getAD_User_ID());
@@ -295,7 +320,6 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 
 		confirmPanel.getButton(ConfirmPanel.A_OK).setEnabled(!m_readOnly);
 		activityTypeField.setReadWrite(!m_readOnly);
-		salesRepField.setReadWrite(!m_readOnly);
 		userField.setReadWrite(!m_readOnly);
 		opportunityField.setReadWrite(!m_readOnly);
 		dtBeginDate.setEnabled(!m_readOnly);
@@ -362,8 +386,6 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 
 
 				activity.setContactActivityType(activityTypeField.getValue().toString());
-				if(salesRepField.getValue() != null)
-					activity.setSalesRep_ID((Integer) salesRepField.getValue());
 				if(userField.getValue() != null && !"".equals(userField.getValue()))
 					activity.setAD_User_ID((Integer) userField.getValue());
 				if(opportunityField.getValue() != null)
@@ -384,6 +406,7 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 					FDialog.error(0, this, "Request Activity not saved");
 					return;
 				}
+			markSalesRep(salesrepField.getValues(), activity.getC_ContactActivity_ID());
 			chbNextStep.setChecked(false);
 			setVisible(false);
 		}
@@ -413,6 +436,126 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 		txtComments.setValue(null);
 		txtSalesMan.setValue(null);
 		userField.setValue(null);
+	}
+	
+	public void markSalesRep(ArrayList<ValueNamePair> SalesReps, int newContactActivity_ID)
+	{
+		if (C_ContactActivity_ID > 0) // Check new Activity or existing
+		{
+			if (SalesReps.size() > 0)
+			{
+				MContactActivity_Attendees mContactActivity_Attendeees = null;
+				// Get pre-saved Attendetnts
+				for (int i = 0; i < SalesReps.size(); i++)
+				{
+
+					if (SalesReps.get(i).getName().equals(DPCalendar.forAll.getName()))
+					{
+						ArrayList<X_AD_User> usersList = DPCalendar.getUserList(Env.getCtx(),
+								Env.getAD_User_ID(Env.getCtx()));
+						for (X_AD_User uType : usersList)
+						{
+							int C_ContactActivity_Attendees_ID = DB
+									.getSQLValue(
+											null,
+											"SELECT C_ContactActivity_Attendees_ID FROM C_ContactActivity_Attendees WHERE SalesRep_ID=? AND C_ContactActivity_ID=?",
+											uType.getAD_User_ID(), C_ContactActivity_ID);
+
+							if (C_ContactActivity_Attendees_ID == -1)
+							{
+								MContactActivity_Attendees salesrep = new MContactActivity_Attendees(Env.getCtx(), 0,
+										null);
+								salesrep.setC_ContactActivity_ID(C_ContactActivity_ID);
+								salesrep.setSalesRep_ID(uType.getAD_User_ID());
+								salesrep.saveEx();
+							}
+						}
+					}
+					else
+					{
+						int ContactActivity_Attendees_ID = DB
+								.getSQLValue(
+										null,
+										"SELECT C_ContactActivity_Attendees_ID FROM C_ContactActivity_Attendees WHERE C_ContactActivity_ID=? AND SalesRep_ID=?",
+										C_ContactActivity_ID, Integer.parseInt(SalesReps.get(i).getID()));
+						// Update SalesRep_ID for exisiting attendees
+						if (ContactActivity_Attendees_ID == -1)
+						{
+							mContactActivity_Attendeees = new MContactActivity_Attendees(Env.getCtx(), 0, null);
+							mContactActivity_Attendeees.setC_ContactActivity_ID(C_ContactActivity_ID);
+							mContactActivity_Attendeees.setSalesRep_ID(Integer.parseInt(SalesReps.get(i).getID()));
+							mContactActivity_Attendeees.saveEx();
+						}
+						
+					}
+
+				}
+				int flag = 0;
+				// Check for newly added SalesRep_ID or removed.
+				for (int j = 0; j < previousActivity.size(); j++)
+				{
+					flag = 0;
+					// Check SalesRep_ID is same or not
+					for (int k = 0; k < SalesReps.size(); k++)
+					{
+						if (!(previousActivity.get(j).getID().equals(SalesReps.get(k).getID())))
+							flag = 0;
+						else
+						{
+							flag = 1;
+							break;
+						}
+					}
+
+					if (flag == 0) // Delete SalesRep_ID which are not in used.
+					{
+						DB.executeUpdate(
+								"DELETE FROM C_ContactActivity_Attendees WHERE C_ContactActivity_ID="
+										+ C_ContactActivity_ID + " AND SalesRep_ID="
+										+ Integer.parseInt(previousActivity.get(j).getID()), null);
+					}
+				}
+
+			}
+			else
+			// delete all salesrep_id if there is no salesrep is selected.
+			{
+				DB.executeUpdate("DELETE FROM C_ContactActivity_Attendees WHERE C_ContactActivity_ID="
+						+ C_ContactActivity_ID, null);
+			}
+		}
+		// New NExtstep record for another activity.
+		else if (chbNextStep.isChecked() && C_ContactActivity_ID <= 0)
+		{
+			if (SalesReps.size() > 0)
+			{
+				for (ValueNamePair i : SalesReps)
+				{
+					if (i.getName().equals(DPCalendar.forAll.getName()))
+					{
+						ArrayList<X_AD_User> usersList = DPCalendar.getUserList(Env.getCtx(),
+								Env.getAD_User_ID(Env.getCtx()));
+						ArrayList<ValueNamePair> supervisors = new ArrayList<ValueNamePair>();
+						supervisors.add(DPCalendar.forAll);
+						for (X_AD_User uType : usersList)
+						{
+							MContactActivity_Attendees salesrep = new MContactActivity_Attendees(Env.getCtx(), 0, null);
+							salesrep.setC_ContactActivity_ID(C_ContactActivity_ID);
+							salesrep.setSalesRep_ID(uType.getAD_User_ID());
+							salesrep.saveEx();
+						}
+					}
+					else
+					{
+						MContactActivity_Attendees salesrep = new MContactActivity_Attendees(Env.getCtx(), 0, null);
+						salesrep.setC_ContactActivity_ID(newContactActivity_ID);
+						salesrep.setSalesRep_ID(Integer.parseInt(i.getID()));
+						salesrep.saveEx();
+					}
+				}
+			}
+		}
+
 	}
 }
 	
