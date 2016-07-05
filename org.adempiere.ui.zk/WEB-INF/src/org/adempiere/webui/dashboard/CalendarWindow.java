@@ -149,7 +149,7 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 		
 		ArrayList<X_AD_User> usersList = DPCalendar.getUserList(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()));
 		ArrayList<ValueNamePair> supervisors = new ArrayList<ValueNamePair>();
-		supervisors.add(DPCalendar.forAll);
+		supervisors.add(DPCalendar.SALES_REPRESENTATIVE_ALL);
 		for (X_AD_User uType : usersList)
 			supervisors.add(new ValueNamePair(uType.getAD_User_ID() + "", uType.getName()));
 

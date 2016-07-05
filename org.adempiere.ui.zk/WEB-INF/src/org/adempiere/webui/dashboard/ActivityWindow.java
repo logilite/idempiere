@@ -122,7 +122,7 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 		
 		ArrayList<X_AD_User> usersList = DPCalendar.getUserList(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()));
 		ArrayList<ValueNamePair> supervisors = new ArrayList<ValueNamePair>();
-		supervisors.add(DPCalendar.forAll);
+		supervisors.add(DPCalendar.SALES_REPRESENTATIVE_ALL);
 		for (X_AD_User uType : usersList)
 			supervisors.add(new ValueNamePair(uType.getAD_User_ID() + "", uType.getName()));
 
@@ -449,7 +449,7 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 				for (int i = 0; i < SalesReps.size(); i++)
 				{
 
-					if (SalesReps.get(i).getName().equals(DPCalendar.forAll.getName()))
+					if (SalesReps.get(i).getName().equals(DPCalendar.SALES_REPRESENTATIVE_ALL.getName()))
 					{
 						ArrayList<X_AD_User> usersList = DPCalendar.getUserList(Env.getCtx(),
 								Env.getAD_User_ID(Env.getCtx()));
@@ -531,12 +531,12 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 			{
 				for (ValueNamePair i : SalesReps)
 				{
-					if (i.getName().equals(DPCalendar.forAll.getName()))
+					if (i.getName().equals(DPCalendar.SALES_REPRESENTATIVE_ALL.getName()))
 					{
 						ArrayList<X_AD_User> usersList = DPCalendar.getUserList(Env.getCtx(),
 								Env.getAD_User_ID(Env.getCtx()));
 						ArrayList<ValueNamePair> supervisors = new ArrayList<ValueNamePair>();
-						supervisors.add(DPCalendar.forAll);
+						supervisors.add(DPCalendar.SALES_REPRESENTATIVE_ALL);
 						for (X_AD_User uType : usersList)
 						{
 							MContactActivity_Attendees salesrep = new MContactActivity_Attendees(Env.getCtx(), 0, null);

@@ -30,6 +30,7 @@ import org.adempiere.base.Service;
 import org.adempiere.base.event.AbstractEventHandler;
 import org.adempiere.base.event.EventManager;
 import org.adempiere.base.event.IEventTopics;
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ServerPushTemplate;
@@ -39,7 +40,6 @@ import org.compiere.model.MRefList;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.model.PO;
-import org.compiere.model.X_AD_Ref_List;
 import org.compiere.model.X_AD_User;
 import org.compiere.model.X_C_ContactActivity;
 import org.compiere.model.X_R_RequestType;
@@ -106,7 +106,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 	
 	private static RequestEventHandler eventHandler;
 	private static TopicSubscriber subscriber;
-	public static ValueNamePair forAll = new ValueNamePair("0", "All");
+	public static ValueNamePair SALES_REPRESENTATIVE_ALL = new ValueNamePair("0", "All");
 	
 	private static final CLogger log = CLogger.getCLogger(DPCalendar.class);
 	
@@ -269,7 +269,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 				+ "WHERE r.R_RequestType_ID = rt.R_RequestType_ID "
 				+ "AND (" + modeCondition + ") ";
 		
-		if (users == null || !users.contains(forAll))
+		if (users == null || !users.contains(SALES_REPRESENTATIVE_ALL))
 			sql += "AND (r.SalesRep_ID IN (" + userStr + ")) ";
 		sql += "AND r.AD_Client_ID = ? AND r.IsActive = 'Y' "
 				+ "AND (r.R_Status_ID IS NULL OR r.R_Status_ID IN (SELECT R_Status_ID FROM R_Status WHERE IsClosed='N')) ";
@@ -430,27 +430,48 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 	
 	public static ArrayList<ADCalendarContactActivity> getContactActivities(String ContactActivityType, Properties ctx,ArrayList<ValueNamePair> users)
 	{
+		String userIDs = "";
 		ArrayList<ADCalendarContactActivity> events = new ArrayList<ADCalendarContactActivity>();
-		String userStr = "";
+		
 		if (users == null || users.size() == 0)
-			userStr += Env.getAD_User_ID(ctx);
+		{
+			userIDs += Env.getAD_User_ID(ctx);
+		}
 		else
 		{
 			for (ValueNamePair i : users)
-				userStr += Integer.parseInt(i.getID()) + ",";
-			userStr = userStr.substring(0, userStr.length() - 1);
+			{
+				userIDs += Integer.parseInt(i.getID()) + ",";
+			}
+			userIDs = userIDs.substring(0, userIDs.length() - 1);
 		}
-		String sql = "SELECT DISTINCT c.C_ContactActivity_ID,c.StartDate,c.EndDate,c.Comments,c.ContactActivityType,c.Description,ref.Name AS type"
-				+ " ,(SELECT  string_agg(distinct au.name,',') from AD_USER au"
-				+ " INNER JOIN C_ContactActivity_attendees cca ON (au.AD_USER_ID = cca.salesRep_ID  OR au.AD_User_ID=c.SalesRep_ID) AND (cca.C_ContactActivity_ID=c.C_ContactActivity_ID OR au.AD_User_ID=c.SalesRep_ID))||'-'||ref.Name AS Name"
-				+ " ,COALESCE(c.SalesRep_ID) AS SalesRep_ID,COALESCE(c.AD_User_ID,0) AS AD_User_ID , c.C_Opportunity_ID FROM C_ContactActivity c"
-				+ " JOIN AD_Ref_List ref ON (ref.Value=c.ContactActivityType AND AD_Reference_ID = ?)"
-				+ " LEFT JOIN C_ContactActivity_Attendees ca ON(c.C_ContactActivity_ID=ca.C_ContactActivity_ID)"
-				+ " WHERE c.isActive='Y' AND c.AD_Client_ID = ?";
-		if (users == null || !users.contains(forAll))
-			sql += " AND (ca.SalesRep_ID IN (" + userStr + ") OR c.SalesRep_ID IN(" + userStr + "))";
+		
+		StringBuilder where = new StringBuilder(" WHERE ca.IsActive = 'Y' AND ca.AD_Client_ID = ? ");
+		
+		if (users == null || !users.contains(SALES_REPRESENTATIVE_ALL))
+			where.append(" AND au.AD_USER_ID IN (").append(userIDs).append(") ");
+
 		if (ContactActivityType.length() > 0)
-			sql += " AND ContactActivityType = ? ";
+			where.append(" AND ca.ContactActivityType = '").append(ContactActivityType).append("' ");
+
+		
+		String sql = "WITH ContactActivityAttendess AS "
+				+ "( "
+				+ " SELECT ca.C_ContactActivity_ID, STRING_AGG(DISTINCT au.name,',') AS UserNameList "
+				+ " FROM C_ContactActivity ca "
+				+ " LEFT JOIN C_ContactActivity_Attendees cca ON (cca.C_ContactActivity_ID = ca.C_ContactActivity_ID) "
+				+ " LEFT JOIN AD_USER au ON (au.AD_USER_ID = cca.salesRep_ID OR au.AD_User_ID = ca.SalesRep_ID) "
+				+ where.toString()
+				+ " GROUP BY ca.C_ContactActivity_ID "
+				+ ") "
+				+ "SELECT c.C_ContactActivity_ID, c.StartDate, c.EndDate, c.Comments, c.ContactActivityType, c.Description, rl.Name AS Type, "
+				+ "		c.C_Meeting_Purpose_ID, c.IsObjectiveSuccess, c.Result,  COALESCE(c.C_BPartner_ID, 0) AS C_BPartner_ID, c.C_Opportunity_ID, "
+				+ "		UserNameList ||'-'|| rl.Name AS Name, c.SalesRep_ID AS SalesRep_ID, COALESCE(c.AD_User_ID, 0) AS AD_User_ID, "
+				+ "		COALESCE(rlt.Name, rl.Name) AS ActivityTypeName " 
+				+ "FROM C_ContactActivity c "
+				+ "INNER JOIN ContactActivityAttendess caa ON (caa.C_ContactActivity_ID = c.C_ContactActivity_ID) "
+				+ "INNER JOIN AD_Ref_List rl ON (rl.Value = c.ContactActivityType AND rl.AD_Reference_ID = ? ) "
+				+ "LEFT JOIN AD_Ref_List_Trl rlt ON (rlt.AD_Ref_List_ID = rl.AD_Ref_List_ID AND AD_Language = ? ) ";
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -458,11 +479,9 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		try
 		{
 			ps = DB.prepareStatement(sql, null);
-			ps.setInt(1, X_C_ContactActivity.CONTACTACTIVITYTYPE_AD_Reference_ID);
-			ps.setInt(2, Env.getAD_Client_ID(ctx));
-
-			if (ContactActivityType.length() > 0)
-				ps.setString(3, ContactActivityType);
+			ps.setInt(1, Env.getAD_Client_ID(ctx));
+			ps.setInt(2, X_C_ContactActivity.CONTACTACTIVITYTYPE_AD_Reference_ID);
+			ps.setString(3, Env.getAD_Language(Env.getCtx()));
 
 
 			rs = ps.executeQuery();
@@ -471,10 +490,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 			{
 				int C_ContactActivity_ID = rs.getInt("C_ContactActivity_ID");
 
-				MRefList r = MRefList.get(ctx, X_C_ContactActivity.CONTACTACTIVITYTYPE_AD_Reference_ID,
-						rs.getString("ContactActivityType"), null);
-				String activityTypeName = r.get_Translation(X_AD_Ref_List.COLUMNNAME_Name);
-
+				String activityTypeName = rs.getString("ActivityTypeName");
 				Timestamp startTime = rs.getTimestamp("StartDate");
 				Timestamp endTime = rs.getTimestamp("EndDate");
 				String description = rs.getString("Description");
@@ -547,11 +563,14 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		}
 		catch (Exception e)
 		{
-			log.log(Level.SEVERE,"Activity not saved-"+e.getLocalizedMessage());
+			log.log(Level.SEVERE, "Activity not sync with calendar - " + e);
+			throw new AdempiereException(e);
 		}
 		finally
 		{
 			DB.close(rs, ps);
+			rs = null;
+			ps = null;
 		}
 
 		return events;
