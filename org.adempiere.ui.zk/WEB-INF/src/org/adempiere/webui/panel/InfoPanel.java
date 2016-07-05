@@ -2022,7 +2022,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	{
 		int counter = 0;
 		StringBuilder select = new StringBuilder();
-		String insert = "INSERT INTO T_Selection_InfoWindow (AD_PINSTANCE_ID, T_SELECTION_ID, VIEWID, COLUMNNAME, VALUE_STRING, VALUE_NUMBER, VALUE_DATE) ";
+		String insert = "INSERT INTO T_Selection_InfoWindow (AD_PINSTANCE_ID, T_SELECTION_ID, VIEWID, COLUMNNAME, VALUE_STRING, VALUE_NUMBER, VALUE_DATE) VALUES ( ";
 		for (Entry<KeyNamePair, LinkedHashMap<String, Object>> records : m_values.entrySet())
 		{
 			// set Record ID
@@ -2032,8 +2032,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 			{
 				counter++;
 				if (counter > 1)
-					select.append(" UNION ");
-				select.append("SELECT ");
+					select.append(" , ( ");
 
 				select.append(AD_PInstance_ID).append(","); // AD_PINSTANCE_ID
 				select.append(knPair.getKey()).append(","); // T_SELECTION_ID
@@ -2098,12 +2097,15 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 				}
 				else
 				{
-					select.append("'").append(data).append("'");
+					if (data == null)
+						select.append("NULL");
+					else
+						select.append("'").append(data).append("'");
 					select.append(",NULL");
 					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
 				}
 
-				select.append(" FROM DUAL ");
+				select.append(" ) ");
 			}
 
 			if (counter >= 1000)
