@@ -82,6 +82,7 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 	private MultiSelectionBox salesrepField;
 
 	private int C_ContactActivity_ID = 0;
+	private static int  AD_Table_ID	 = 0; 		// ContactActivity_V Table_ID
 
 	private boolean m_readOnly;
 	private Window parent;
@@ -122,7 +123,7 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 		
 		ArrayList<X_AD_User> usersList = DPCalendar.getUserList(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()));
 		ArrayList<ValueNamePair> supervisors = new ArrayList<ValueNamePair>();
-		supervisors.add(DPCalendar.forAll);
+		supervisors.add(DPCalendar.SALES_REPRESENTATIVE_ALL);
 		for (X_AD_User uType : usersList)
 			supervisors.add(new ValueNamePair(uType.getAD_User_ID() + "", uType.getName()));
 
@@ -414,8 +415,14 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 			setVisible(false);
 		}
 		else if (e.getTarget() == confirmPanel.getButton(ConfirmPanel.A_ZOOM)) {
-			if (C_ContactActivity_ID > 0){
-				AEnv.zoom(X_C_ContactActivity.Table_ID, C_ContactActivity_ID);
+			if (C_ContactActivity_ID > 0)
+			{
+				if (AD_Table_ID == 0)
+				{
+					AD_Table_ID = DB.getSQLValue(null,
+							"SELECT AD_Table_ID FROM AD_Table WHERE tablename like 'C_ContactActivity_v'");
+				}
+				AEnv.zoom(AD_Table_ID, C_ContactActivity_ID);
 			}
 		}
 		else if (e.getTarget() == chbNextStep)
@@ -449,7 +456,7 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 				for (int i = 0; i < SalesReps.size(); i++)
 				{
 
-					if (SalesReps.get(i).getName().equals(DPCalendar.forAll.getName()))
+					if (SalesReps.get(i).getName().equals(DPCalendar.SALES_REPRESENTATIVE_ALL.getName()))
 					{
 						ArrayList<X_AD_User> usersList = DPCalendar.getUserList(Env.getCtx(),
 								Env.getAD_User_ID(Env.getCtx()));
@@ -531,12 +538,12 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 			{
 				for (ValueNamePair i : SalesReps)
 				{
-					if (i.getName().equals(DPCalendar.forAll.getName()))
+					if (i.getName().equals(DPCalendar.SALES_REPRESENTATIVE_ALL.getName()))
 					{
 						ArrayList<X_AD_User> usersList = DPCalendar.getUserList(Env.getCtx(),
 								Env.getAD_User_ID(Env.getCtx()));
 						ArrayList<ValueNamePair> supervisors = new ArrayList<ValueNamePair>();
-						supervisors.add(DPCalendar.forAll);
+						supervisors.add(DPCalendar.SALES_REPRESENTATIVE_ALL);
 						for (X_AD_User uType : usersList)
 						{
 							MContactActivity_Attendees salesrep = new MContactActivity_Attendees(Env.getCtx(), 0, null);
