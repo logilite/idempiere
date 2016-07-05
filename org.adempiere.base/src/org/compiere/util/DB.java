@@ -2338,15 +2338,14 @@ public final class DB
 	public static void createT_SelectionNew (int AD_PInstance_ID, Collection<KeyNamePair> saveKeys, String trxName)
 	{
 		StringBuilder insert = new StringBuilder();
-		insert.append("INSERT INTO T_SELECTION(AD_PINSTANCE_ID, T_SELECTION_ID, ViewID) ");
+		insert.append("INSERT INTO T_SELECTION(AD_PINSTANCE_ID, T_SELECTION_ID, ViewID) VALUES ( ");
 		int counter = 0;
 		for(KeyNamePair saveKey : saveKeys)
 		{
 			Integer selectedId = saveKey.getKey();
 			counter++;
 			if (counter > 1)
-				insert.append(" UNION ");
-			insert.append("SELECT ");
+				insert.append(", (");
 			insert.append(AD_PInstance_ID);
 			insert.append(", ");
 			insert.append(selectedId);
@@ -2362,13 +2361,13 @@ public final class DB
 				insert.append("'");
 			}
 			
-			insert.append(" FROM DUAL ");
+			insert.append(" ) ");
 
 			if (counter >= 1000)
 			{
 				DB.executeUpdateEx(insert.toString(), trxName);
 				insert = new StringBuilder();
-				insert.append("INSERT INTO T_SELECTION(AD_PINSTANCE_ID, T_SELECTION_ID, ViewID) ");
+				insert.append("INSERT INTO T_SELECTION(AD_PINSTANCE_ID, T_SELECTION_ID, ViewID) VALUES ( ");
 				counter = 0;
 			}
 		}

@@ -1331,6 +1331,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		}
 		
 		contentPanel.getModel().setSelection(lsSelectionRecord);
+		updateListSelected();
 	}
 	
 	
@@ -1693,9 +1694,8 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
             	}
             	if (contentPanel.isMultiple() && m_lastSelectedIndex >= 0) {
 					
-            		contentPanel.setSelectedIndex(m_lastSelectedIndex);
-					
             		model.clearSelection();
+
 					List<Object> lsSelectedItem = new ArrayList<Object>();
 					lsSelectedItem.add(model.getElementAt(m_lastSelectedIndex));
 					model.setSelection(lsSelectedItem);
@@ -2006,7 +2006,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 				{
 					// layout has same columns as selectedInfo
 					if (!p_layout[col].isReadOnly())
-						values.put(p_layout[col].getColHeader(), selectedInfo.getValue().get(col));
+						values.put(p_layout[col].getColumnName(), selectedInfo.getValue().get(col));
 				}
 				if(values.size() > 0)
 					m_values.put(kp, values);
@@ -2020,74 +2020,106 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	 */
 	public void createT_Selection_InfoWindow(int AD_PInstance_ID)
 	{
-		StringBuilder insert = new StringBuilder();
-		insert.append("INSERT INTO T_Selection_InfoWindow (AD_PINSTANCE_ID, T_SELECTION_ID, COLUMNNAME , VALUE_STRING, VALUE_NUMBER , VALUE_DATE ) VALUES(?,?,?,?,?,?) ");
-		for (Entry<KeyNamePair,LinkedHashMap<String, Object>> records : m_values.entrySet()) {
-			//set Record ID
-			
-				LinkedHashMap<String, Object> fields = records.getValue();
-				for(Entry<String, Object> field : fields.entrySet())
+		int counter = 0;
+		StringBuilder select = new StringBuilder();
+		String insert = "INSERT INTO T_Selection_InfoWindow (AD_PINSTANCE_ID, T_SELECTION_ID, VIEWID, COLUMNNAME, VALUE_STRING, VALUE_NUMBER, VALUE_DATE) VALUES ( ";
+		for (Entry<KeyNamePair, LinkedHashMap<String, Object>> records : m_values.entrySet())
+		{
+			// set Record ID
+			KeyNamePair knPair = records.getKey();
+			LinkedHashMap<String, Object> fields = records.getValue();
+			for (Entry<String, Object> field : fields.entrySet())
+			{
+				counter++;
+				if (counter > 1)
+					select.append(" , ( ");
+
+				select.append(AD_PInstance_ID).append(","); // AD_PINSTANCE_ID
+				select.append(knPair.getKey()).append(","); // T_SELECTION_ID
+				if (knPair.getName() == null) // VIEWID
+					select.append("NULL,");
+				else
+					select.append("'").append(knPair.getName()).append("',");
+
+				if (field.getKey() == null)// COLUMNNAME
+					select.append("NULL,");
+				else
+					select.append("'").append(field.getKey()).append("',");
+
+				// set Values as Like VALUE_STRING, VALUE_NUMBER, VALUE_DATE
+				Object data = field.getValue();
+				if (data instanceof IDColumn)
 				{
-					List<Object> parameters = new ArrayList<Object>();
-					parameters.add(AD_PInstance_ID);
-					parameters.add(records.getKey());
-					parameters.add(field.getKey());
-					
-					Object data = field.getValue();
-					// set Values					
-					if (data instanceof IDColumn)
+					IDColumn id = (IDColumn) data;
+					select.append("NULL,");
+					select.append(id.getRecord_ID());
+					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+				}
+				else if (data instanceof String)
+				{
+					select.append("'").append(data).append("'");
+					select.append(",NULL");
+					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+				}
+				else if (data instanceof BigDecimal || data instanceof Integer || data instanceof Double)
+				{
+					select.append("NULL,");
+					if (data instanceof Double)
 					{
-						IDColumn id = (IDColumn) data;
-						parameters.add(null);
-						parameters.add(id.getRecord_ID());
-						parameters.add(null);
+						BigDecimal value = BigDecimal.valueOf((Double) data);
+						select.append(value);
 					}
-					else if (data instanceof String)
+					else
+						select.append(data);
+					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+				}
+				else if (data instanceof Integer)
+				{
+					select.append("NULL,");
+					select.append((Integer) data);
+					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+				}
+				else if (data instanceof Timestamp || data instanceof Date)
+				{
+					select.append("NULL,");
+					select.append("NULL,");
+					select.append("'");
+					if (data instanceof Timestamp)
 					{
-						parameters.add(data);
-						parameters.add(null);
-						parameters.add(null);
-					}
-					else if (data instanceof BigDecimal || data instanceof Integer || data instanceof Double)
-					{
-						parameters.add(null);
-						if(data instanceof Double)
-						{	
-							BigDecimal value = BigDecimal.valueOf((Double)data);
-							parameters.add(value);
-						}	
-						else	
-							parameters.add(data);
-						parameters.add(null);
-					}
-					else if (data instanceof Integer)
-					{
-						parameters.add(null);
-						parameters.add((Integer)data);
-						parameters.add(null);
-					}
-					else if (data instanceof Timestamp || data instanceof Date)
-					{
-						parameters.add(null);
-						parameters.add(null);
-						if(data instanceof Date)
-						{
-							Timestamp value = new Timestamp(((Date)data).getTime());
-							parameters.add(value);
-						}
-						else 
-						parameters.add(data);
+						Timestamp value = new Timestamp(((Date) data).getTime());
+						select.append(value);
 					}
 					else
 					{
-						parameters.add(data);
-						parameters.add(null);
-						parameters.add(null);
+						select.append(data);
 					}
-					DB.executeUpdateEx(insert.toString(),parameters.toArray() , null);		
-						
+					select.append("'");
 				}
+				else
+				{
+					if (data == null)
+						select.append("NULL");
+					else
+						select.append("'").append(data).append("'");
+					select.append(",NULL");
+					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+				}
+
+				select.append(" ) ");
+			}
+
+			if (counter >= 1000)
+			{
+				DB.executeUpdateEx(insert + select.toString(), null);
+				select = new StringBuilder();
+				counter = 0;
+			}
 		}
+		if (counter > 0)
+		{
+			DB.executeUpdateEx(insert + select.toString(), null);
+		}
+
 	} // createT_Selection_InfoWindow
 	
     /**
