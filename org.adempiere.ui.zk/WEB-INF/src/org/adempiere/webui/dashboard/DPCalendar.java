@@ -432,10 +432,14 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 	{
 		String userIDs = "";
 		ArrayList<ADCalendarContactActivity> events = new ArrayList<ADCalendarContactActivity>();
-		
+		StringBuilder where = new StringBuilder(" WHERE ca.IsActive = 'Y' AND ca.AD_Client_ID = ? ");
+
 		if (users == null || users.size() == 0)
 		{
 			userIDs += Env.getAD_User_ID(ctx);
+			where.append(" AND (ca.SalesRep_ID = ").append(userIDs);
+			where.append(" OR au.AD_User_ID = ").append(userIDs);
+			where.append(" OR ca.CreatedBy = ").append(userIDs).append(")");
 		}
 		else
 		{
@@ -446,9 +450,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 			userIDs = userIDs.substring(0, userIDs.length() - 1);
 		}
 		
-		StringBuilder where = new StringBuilder(" WHERE ca.IsActive = 'Y' AND ca.AD_Client_ID = ? ");
-		
-		if (users == null || !users.contains(SALES_REPRESENTATIVE_ALL))
+		if (users != null && !users.contains(SALES_REPRESENTATIVE_ALL))
 			where.append(" AND au.AD_USER_ID IN (").append(userIDs).append(") ");
 
 		if (ContactActivityType.length() > 0)
