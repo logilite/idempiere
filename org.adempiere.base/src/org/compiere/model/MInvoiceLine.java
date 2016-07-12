@@ -1039,7 +1039,7 @@ public class MInvoiceLine extends X_C_InvoiceLine
 			{
 				//	Create List
 				ArrayList<MInOutLine> list = new ArrayList<MInOutLine>();
-				MInOut ship = new MInOut (getCtx(), lc.getM_InOut_ID(), get_TrxName());
+				MInOut ship = (MInOut) MTable.get(getCtx(), MInOut.Table_ID).getPO(lc.getM_InOut_ID(), get_TrxName());
 				MInOutLine[] lines = ship.getLines();
 				for (int i = 0; i < lines.length; i++)
 				{
@@ -1165,7 +1165,7 @@ public class MInvoiceLine extends X_C_InvoiceLine
 			MLandedCost lc = lcs[ii];
 			if (lc.getM_InOut_ID() != 0 && lc.getM_InOutLine_ID() == 0)		//	entire receipt
 			{
-				MInOut ship = new MInOut (getCtx(), lc.getM_InOut_ID(), get_TrxName());
+				MInOut ship = (MInOut) MTable.get(getCtx(), MInOut.Table_ID).getPO(lc.getM_InOut_ID(), get_TrxName());
 				MInOutLine[] lines = ship.getLines();
 				for (int i = 0; i < lines.length; i++)
 				{

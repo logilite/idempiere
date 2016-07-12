@@ -236,7 +236,7 @@ public final class InventoryUtil
 //		if (trxName != null && trxName.equals(order.get_TrxName()))
 //			throw new AdempiereException("Internal exception - not same trxName");
 		
-		MInOut io = new MInOut(order, 0, doc.Date);
+		MInOut io = MInOut.copyFrom(order, 0, doc.Date);
 		setGeneratedTag(io);
 		io.saveEx();
 		//

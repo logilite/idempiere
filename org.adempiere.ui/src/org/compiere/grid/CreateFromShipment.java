@@ -554,7 +554,7 @@ public abstract class CreateFromShipment extends CreateFrom
 		}
 		// Get Shipment
 		int M_InOut_ID = ((Integer) getGridTab().getValue("M_InOut_ID")).intValue();
-		MInOut inout = new MInOut(Env.getCtx(), M_InOut_ID, trxName);
+		MInOut inout = (MInOut) MTable.get(Env.getCtx(), MInOut.Table_ID).getPO(M_InOut_ID, trxName);
 		if (log.isLoggable(Level.CONFIG)) log.config(inout + ", C_Locator_ID=" + M_Locator_ID);
 
 		// Lines

@@ -180,7 +180,7 @@ public abstract class CreateFromInvoice extends CreateFrom
 	protected Vector<Vector<Object>> getShipmentData(int M_InOut_ID)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("M_InOut_ID=" + M_InOut_ID);
-		MInOut inout = new MInOut(Env.getCtx(), M_InOut_ID, null);
+		MInOut inout = (MInOut) MTable.get(Env.getCtx(), MInOut.Table_ID).getPO(M_InOut_ID, null);
 		p_order = null;
 		if (inout.getC_Order_ID() != 0)
 			p_order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(inout.getC_Order_ID(), null);

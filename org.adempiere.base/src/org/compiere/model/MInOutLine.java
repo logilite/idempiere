@@ -159,7 +159,7 @@ public class MInOutLine extends X_M_InOutLine
 	public MInOut getParent()
 	{
 		if (m_parent == null)
-			m_parent = new MInOut (getCtx(), getM_InOut_ID(), get_TrxName());
+			m_parent = (MInOut) MTable.get(getCtx(), MInOut.Table_ID).getPO(getM_InOut_ID(), get_TrxName());
 		return m_parent;
 	}	//	getParent
 

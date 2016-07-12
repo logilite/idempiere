@@ -135,7 +135,7 @@ public class MRMA extends X_M_RMA implements DocAction
 	public MInOut getShipment()
 	{
 		if (m_inout == null && getInOut_ID() != 0)
-			m_inout = new MInOut (getCtx(), getInOut_ID(), get_TrxName());
+			m_inout = (MInOut) MTable.get(getCtx(), MInOut.Table_ID).getPO(getInOut_ID(), get_TrxName());
 		return m_inout;
 	}	//	getShipment
 
@@ -605,7 +605,8 @@ public class MRMA extends X_M_RMA implements DocAction
 		}
 		if (from.getInOut_ID() != 0)
 		{
-			MInOut peer = new MInOut (from.getCtx(), from.getInOut_ID(), from.get_TrxName());
+			MInOut peer = (MInOut) MTable.get(from.getCtx(), MInOut.Table_ID).getPO(from.getInOut_ID(),
+					from.get_TrxName());
 			if (peer.getRef_InOut_ID() != 0)
 				to.setInOut_ID(peer.getRef_InOut_ID());
 		}

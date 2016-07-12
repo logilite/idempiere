@@ -332,7 +332,7 @@ public class WebInfo
 			pstmt.setInt(1, getC_BPartner_ID());
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add(new MInOut (m_ctx, rs, null));
+				list.add((MInOut) MTable.get(m_ctx, MInOut.Table_ID).getPO(rs, null));
 		}
 		catch (Exception e)
 		{

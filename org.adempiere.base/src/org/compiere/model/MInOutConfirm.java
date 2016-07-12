@@ -397,7 +397,7 @@ public class MInOutConfirm extends X_M_InOutConfirm implements DocAction
 			approveIt();
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 		//
-		MInOut inout = new MInOut (getCtx(), getM_InOut_ID(), get_TrxName());
+		MInOut inout = (MInOut) MTable.get(getCtx(), MInOut.Table_ID).getPO(getM_InOut_ID(), get_TrxName());
 		MInOutLineConfirm[] lines = getLines(false);
 		
 		//	Check if we need to split Shipment
@@ -493,7 +493,7 @@ public class MInOutConfirm extends X_M_InOutConfirm implements DocAction
 			// Create Header
 			if (split == null)
 			{
-				split = new MInOut (original, C_DocType_ID, original.getMovementDate());
+				split = MInOut.copyFrom(original, C_DocType_ID, original.getMovementDate());
 				StringBuilder msgd = new StringBuilder("Splitted from ").append(original.getDocumentNo());
 				split.addDescription(msgd.toString());
 				split.setIsInDispute(true);

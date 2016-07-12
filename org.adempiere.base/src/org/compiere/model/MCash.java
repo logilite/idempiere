@@ -93,7 +93,7 @@ public class MCash extends X_C_Cash implements DocAction
 		}
 		
 		//	Create New Journal
-		retValue = new MCash (cb, dateAcct);
+		retValue = MCash.copyFrom(cb, dateAcct);
 		retValue.save(trxName);
 		return retValue;
 	}	//	get
@@ -130,7 +130,7 @@ public class MCash extends X_C_Cash implements DocAction
 		}
 		
 		//	Create New Journal
-		retValue = new MCash (cb, dateAcct);
+		retValue = MCash.copyFrom(cb, dateAcct);
 		retValue.saveEx(trxName);
 		return retValue;
 	}	//	get
@@ -186,21 +186,23 @@ public class MCash extends X_C_Cash implements DocAction
 	 *	@param cb cash book
 	 *	@param today date - if null today
 	 */
-	public MCash (MCashBook cb, Timestamp today)
+	public static MCash copyFrom(MCashBook cb, Timestamp today)
 	{
-		this (cb.getCtx(), 0, cb.get_TrxName());
-		setClientOrg(cb);
-		setC_CashBook_ID(cb.getC_CashBook_ID());
+		MCash cash = (MCash) MTable.get(cb.getCtx(), MCash.Table_ID).getPO(0, cb.get_TrxName());
+		cash.setClientOrg(cb);
+		cash.setC_CashBook_ID(cb.getC_CashBook_ID());
 		if (today != null)
 		{
-			setStatementDate (today);	
-			setDateAcct (today);
-			StringBuilder name = new StringBuilder(DisplayType.getDateFormat(DisplayType.Date).format(today))
-				.append(" ").append(cb.getName());
-			setName (name.toString());
+			cash.setStatementDate(today);
+			cash.setDateAcct(today);
+			StringBuilder name = new StringBuilder(DisplayType.getDateFormat(DisplayType.Date).format(today)).append(
+					" ").append(cb.getName());
+			cash.setName(name.toString());
 		}
-		m_book = cb;
-	}	//	MCash
+		cash.setM_book(cb);
+
+		return cash;
+	} // MCash
 	
 	/**	Lines					*/
 	protected MCashLine[]		m_lines = null;
@@ -241,6 +243,15 @@ public class MCash extends X_C_Cash implements DocAction
 		return m_book;
 	}	//	getCashBook
 	
+	/**
+	 * 	Set Cash Book
+	 *	@param cash book
+	 */
+	public void setM_book(MCashBook m_book)
+	{
+		this.m_book = m_book;
+	}
+
 	/**
 	 * 	Get Document No 
 	 *	@return name

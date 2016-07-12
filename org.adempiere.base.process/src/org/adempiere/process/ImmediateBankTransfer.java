@@ -39,6 +39,7 @@ import org.compiere.model.MBankAccount;
 import org.compiere.model.MCash;
 import org.compiere.model.MCashBook;
 import org.compiere.model.MCashLine;
+import org.compiere.model.MTable;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
@@ -175,7 +176,7 @@ public class ImmediateBankTransfer extends SvrProcess
 	private MCash createCash()
 	{
 
-		MCash cash = new MCash (getCtx(), 0, get_TrxName());
+		MCash cash = (MCash) MTable.get(getCtx(), MCash.Table_ID).getPO(0, get_TrxName());
 
 		cash.setName(p_Name);
 		cash.setDescription(p_Description);

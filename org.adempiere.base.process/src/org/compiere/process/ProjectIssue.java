@@ -26,6 +26,7 @@ import org.compiere.model.MProject;
 import org.compiere.model.MProjectIssue;
 import org.compiere.model.MProjectLine;
 import org.compiere.model.MStorageOnHand;
+import org.compiere.model.MTable;
 import org.compiere.model.MTimeExpense;
 import org.compiere.model.MTimeExpenseLine;
 import org.compiere.util.Env;
@@ -133,7 +134,7 @@ public class ProjectIssue extends SvrProcess
 	 */
 	private String issueReceipt()
 	{
-		MInOut inOut = new MInOut (getCtx(), m_M_InOut_ID, null);
+		MInOut inOut = (MInOut) MTable.get(getCtx(), MInOut.Table_ID).getPO(m_M_InOut_ID, null);
 		if (inOut.isSOTrx() || !inOut.isProcessed()
 			|| !(MInOut.DOCSTATUS_Completed.equals(inOut.getDocStatus()) || MInOut.DOCSTATUS_Closed.equals(inOut.getDocStatus())))
 			throw new IllegalArgumentException ("Receipt not valid - " + inOut);

@@ -431,7 +431,7 @@ public class InOutGenerate extends SvrProcess
 		//	Create New Shipment
 		if (m_shipment == null)
 		{
-			m_shipment = new MInOut (order, 0, m_movementDate);
+			m_shipment = MInOut.copyFrom(order, 0, m_movementDate);
 			m_shipment.setM_Warehouse_ID(orderLine.getM_Warehouse_ID());	//	sets Org too
 			if (order.getC_BPartner_ID() != orderLine.getC_BPartner_ID())
 				m_shipment.setC_BPartner_ID(orderLine.getC_BPartner_ID());

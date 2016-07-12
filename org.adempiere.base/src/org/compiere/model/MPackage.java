@@ -396,7 +396,7 @@ public class MPackage extends X_M_Package
 		
 		if (getM_InOut_ID() > 0)
 		{
-			ioOut = new MInOut(getCtx(), getM_InOut_ID(), get_TrxName());
+			ioOut = (MInOut) MTable.get(getCtx(), MInOut.Table_ID).getPO(getM_InOut_ID(), get_TrxName());
 			if (ioOut.getC_Invoice_ID() > 0)
 				invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(ioOut.getC_Invoice_ID(),
 						get_TrxName());

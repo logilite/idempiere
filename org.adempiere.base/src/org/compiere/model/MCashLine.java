@@ -231,7 +231,7 @@ public class MCashLine extends X_C_CashLine
 	public MCash getParent()
 	{
 		if (m_parent == null)
-			m_parent = new MCash (getCtx(), getC_Cash_ID(), get_TrxName());
+			m_parent = (MCash) MTable.get(getCtx(), MCash.Table_ID).getPO(getC_Cash_ID(), get_TrxName());
 		return m_parent;
 	}	//	getCash
 	
