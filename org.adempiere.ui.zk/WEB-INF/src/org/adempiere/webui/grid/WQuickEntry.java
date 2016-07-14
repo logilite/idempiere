@@ -70,7 +70,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	private static CLogger log = CLogger.getCLogger(WQuickEntry.class);
 
 	protected int m_WindowNo;
-	private int parent_WindowNo;
+	protected int parent_WindowNo;
 
 	List<GridField> quickFields = new ArrayList<GridField>();
 	protected List<WEditor> quickEditors = new ArrayList<WEditor>();
@@ -79,15 +79,15 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	List<PO> quickPOs = new ArrayList<PO>();
 
 	/** Read Only				*/
-	private boolean m_readOnly = false;
+	protected boolean m_readOnly = false;
 
 	protected Vlayout centerPanel = new Vlayout();
 
-	private ConfirmPanel confirmPanel = new ConfirmPanel(true, false, false, false, false, false);
+	protected ConfirmPanel confirmPanel = new ConfirmPanel(true, false, false, false, false, false);
 
-	private int m_AD_Window_ID;
+	protected int m_AD_Window_ID;
 	
-	private boolean isHasField = false;
+	protected boolean isHasField = false;
 	/**
 	 *	Constructor.
 	 *	Requires call loadRecord
@@ -190,7 +190,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 		}
 	}	//	initPOs
 
-	private boolean isValidQuickEntryType(int refID) {
+	protected boolean isValidQuickEntryType(int refID) {
 		boolean valid =
 			! (
 				 refID == DisplayType.Button
@@ -200,7 +200,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 		return valid;
 	}
 
-	private void createLine(WEditor editor, boolean newTab, GridTab gt) {
+	protected void createLine(WEditor editor, boolean newTab, GridTab gt) {
 		if (newTab) {
 			Separator sep = new Separator();
 			centerPanel.appendChild(sep);
