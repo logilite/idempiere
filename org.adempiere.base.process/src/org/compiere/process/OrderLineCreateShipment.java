@@ -89,7 +89,7 @@ public class OrderLineCreateShipment extends SvrProcess
 				"SELECT C_DocTypeShipment_ID FROM C_DocType WHERE C_DocType_ID=?", 
 				order.getC_DocType_ID());
 		
-		MInOut shipment = MInOut.copyFrom(order, C_DocTypeShipment_ID, p_MovementDate);
+		MInOut shipment = MInOut.createFrom(order, C_DocTypeShipment_ID, p_MovementDate);
 		shipment.setM_Warehouse_ID(line.getM_Warehouse_ID());
 		shipment.setMovementDate(line.getDatePromised());
 		if (!shipment.save())

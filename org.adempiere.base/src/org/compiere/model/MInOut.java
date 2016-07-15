@@ -90,7 +90,7 @@ public class MInOut extends X_M_InOut implements DocAction
 		}
 
 		//	Create Header
-		MInOut retValue = MInOut.copyFrom(order, 0, movementDate);
+		MInOut retValue = MInOut.createFrom(order, 0, movementDate);
 		retValue.setDocAction(complete ? DOCACTION_Complete : DOCACTION_Prepare);
 
 		//	Check if we can create the lines
@@ -354,7 +354,7 @@ public class MInOut extends X_M_InOut implements DocAction
 	 *	@param movementDate optional movement date (default today)
 	 *	@param C_DocTypeShipment_ID document type or 0
 	 */
-	public static MInOut copyFrom(MOrder order, int C_DocTypeShipment_ID, Timestamp movementDate)
+	public static MInOut createFrom(MOrder order, int C_DocTypeShipment_ID, Timestamp movementDate)
 	{
 		MInOut inOut = (MInOut) MTable.get(order.getCtx(), MInOut.Table_ID).getPO(0, order.get_TrxName());
 		inOut.setClientOrg(order);
@@ -425,7 +425,7 @@ public class MInOut extends X_M_InOut implements DocAction
 	 *	@param movementDate optional movement date (default today)
 	 *	@param M_Warehouse_ID warehouse
 	 */
-	public static MInOut copyFrom(MInvoice invoice, int C_DocTypeShipment_ID, Timestamp movementDate, int M_Warehouse_ID)
+	public static MInOut createFrom(MInvoice invoice, int C_DocTypeShipment_ID, Timestamp movementDate, int M_Warehouse_ID)
 	{
 		MInOut inOut = (MInOut) MTable.get(invoice.getCtx(), MInOut.Table_ID).getPO(0, invoice.get_TrxName());
 		inOut.setClientOrg(invoice);

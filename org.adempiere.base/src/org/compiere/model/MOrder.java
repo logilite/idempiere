@@ -2136,7 +2136,7 @@ public class MOrder extends X_C_Order implements DocAction
 	protected MInOut createShipment(MDocType dt, Timestamp movementDate)
 	{
 		if (log.isLoggable(Level.INFO)) log.info("For " + dt);
-		MInOut shipment = MInOut.copyFrom(this, dt.getC_DocTypeShipment_ID(), movementDate);
+		MInOut shipment = MInOut.createFrom(this, dt.getC_DocTypeShipment_ID(), movementDate);
 	//	shipment.setDateAcct(getDateAcct());
 		if (!shipment.save(get_TrxName()))
 		{

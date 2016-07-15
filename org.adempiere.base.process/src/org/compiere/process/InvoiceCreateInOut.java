@@ -108,7 +108,7 @@ public class InvoiceCreateInOut extends SvrProcess
 	{
 		if (m_inout != null)
 			return m_inout;
-		m_inout = MInOut.copyFrom(invoice, 0, null, p_M_Warehouse_ID);
+		m_inout = MInOut.createFrom(invoice, 0, null, p_M_Warehouse_ID);
 		m_inout.saveEx();
 		return m_inout;
 	}
