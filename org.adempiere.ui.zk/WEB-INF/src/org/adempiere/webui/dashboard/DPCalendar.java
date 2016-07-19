@@ -467,7 +467,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 				+ " GROUP BY ca.C_ContactActivity_ID "
 				+ ") "
 				+ "SELECT c.C_ContactActivity_ID, c.StartDate, c.EndDate, c.Comments, c.ContactActivityType, c.Description, rl.Name AS Type, "
-				+ "		c.C_Meeting_Purpose_ID, c.IsObjectiveSuccess, c.Result,  COALESCE(c.C_BPartner_ID, 0) AS C_BPartner_ID, c.C_Opportunity_ID, "
+				+ "		COALESCE(c.C_BPartner_ID, 0) AS C_BPartner_ID, c.C_Opportunity_ID, "
 				+ "		UserNameList ||'-'|| rl.Name AS Name, c.SalesRep_ID AS SalesRep_ID, COALESCE(c.AD_User_ID, 0) AS AD_User_ID, "
 				+ "		COALESCE(rlt.Name, rl.Name) AS ActivityTypeName " 
 				+ "FROM C_ContactActivity c "
