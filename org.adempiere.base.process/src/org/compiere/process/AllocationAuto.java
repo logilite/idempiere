@@ -650,6 +650,8 @@ public class AllocationAuto extends SvrProcess
 			if (payment.getC_Currency_ID() != C_Currency_ID)
 				continue;
 			BigDecimal allocatedAmt = payment.getAllocatedAmt();
+			if (allocatedAmt == null)
+				allocatedAmt = Env.ZERO;
 			if (log.isLoggable(Level.INFO)) log.info(payment + ", Allocated=" + allocatedAmt);
 			BigDecimal availableAmt = payment.getPayAmt()
 				.add(payment.getDiscountAmt())
@@ -713,6 +715,8 @@ public class AllocationAuto extends SvrProcess
 			// comment following lines to allow partial allocation
 			// if (allocatedAmt != null && allocatedAmt.signum() != 0)
 			// 	continue;
+			if (allocatedAmt == null)
+				allocatedAmt = Env.ZERO;
 			BigDecimal availableAmt = payment.getPayAmt()
 				.add(payment.getDiscountAmt())
 				.add(payment.getWriteOffAmt())
