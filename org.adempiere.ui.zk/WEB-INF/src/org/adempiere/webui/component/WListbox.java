@@ -1121,7 +1121,13 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
         		model.updateComponent(event.getFirstRow());
         	if (indices != null && indices.length > 0)
         	{
-        		this.setSelectedIndices(indices);
+				this.setSelectedIndices(indices);
+				List<Integer> selectedRowKey = new ArrayList<Integer>();
+				for (Integer selectedIndex : indices)
+				{
+					selectedRowKey.add(getRowKeyAt(selectedIndex));
+				}
+				setSelectedByKeys(selectedRowKey);
         	}
         }
 
