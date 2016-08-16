@@ -435,75 +435,72 @@ public class MMovement extends X_M_Movement implements DocAction
 				
 				BigDecimal qtyToAllocate = line.getMovementQty();
 
-				if (qtyOnLineMA.signum() != 0)
+				MMovementLineMA mas[] = MMovementLineMA.get(getCtx(),
+						line.getM_MovementLine_ID(), get_TrxName());
+				for (int j = 0; j < mas.length; j++)
 				{
-
-					MMovementLineMA mas[] = MMovementLineMA.get(getCtx(),
-							line.getM_MovementLine_ID(), get_TrxName());
-					for (int j = 0; j < mas.length; j++)
+					MMovementLineMA ma = mas[j];
+					//
+					MLocator locator = new MLocator (getCtx(), line.getM_Locator_ID(), get_TrxName());
+					//Update Storage 
+					if (!MStorageOnHand.add(getCtx(),locator.getM_Warehouse_ID(),
+							line.getM_Locator_ID(),
+							line.getM_Product_ID(), 
+							ma.getM_AttributeSetInstance_ID(),
+							ma.getMovementQty().negate(),ma.getDateMaterialPolicy(), get_TrxName()))
 					{
-						MMovementLineMA ma = mas[j];
-						//
-						MLocator locator = new MLocator (getCtx(), line.getM_Locator_ID(), get_TrxName());
-						//Update Storage 
-						if (!MStorageOnHand.add(getCtx(),locator.getM_Warehouse_ID(),
-								line.getM_Locator_ID(),
-								line.getM_Product_ID(), 
-								ma.getM_AttributeSetInstance_ID(),
-								ma.getMovementQty().negate(),ma.getDateMaterialPolicy(), get_TrxName()))
-						{
-							String lastError = CLogger.retrieveErrorString("");
-							m_processMsg = "Cannot correct Inventory OnHand (MA) - " + lastError;
-							return DocAction.STATUS_Invalid;
-						}
-
-						int M_AttributeSetInstanceTo_ID = ma.getM_AttributeSetInstanceTo_ID() == 0 ? ma
-								.getM_AttributeSetInstance_ID() : ma.getM_AttributeSetInstanceTo_ID();
-						
-						Timestamp dateMaterialPolicyTo = ma
-								.getDateMaterialPolicyTo() == null ? ma
-								.getDateMaterialPolicy() : ma
-								.getDateMaterialPolicyTo();
-
-						//Update Storage 
-						MLocator locatorTo = new MLocator (getCtx(), line.getM_LocatorTo_ID(), get_TrxName());
-						if (!MStorageOnHand.add(getCtx(),locatorTo.getM_Warehouse_ID(),
-								line.getM_LocatorTo_ID(),
-								line.getM_Product_ID(), 
-								M_AttributeSetInstanceTo_ID,
-								ma.getMovementQty(),dateMaterialPolicyTo, get_TrxName()))
-						{
-							String lastError = CLogger.retrieveErrorString("");
-							m_processMsg = "Cannot correct Inventory OnHand (MA) - " + lastError;
-							return DocAction.STATUS_Invalid;
-						}
-
-						//
-						trxFrom = new MTransaction (getCtx(), line.getAD_Org_ID(), 
-								MTransaction.MOVEMENTTYPE_MovementFrom,
-								line.getM_Locator_ID(), line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
-								ma.getMovementQty().negate(), getMovementDate(), get_TrxName());
-						trxFrom.setM_MovementLine_ID(line.getM_MovementLine_ID());
-						if (!trxFrom.save())
-						{
-							m_processMsg = "Transaction From not inserted (MA)";
-							return DocAction.STATUS_Invalid;
-						}
-						//
-						MTransaction trxTo = new MTransaction (getCtx(), line.getAD_Org_ID(), 
-								MTransaction.MOVEMENTTYPE_MovementTo,
-								line.getM_LocatorTo_ID(), line.getM_Product_ID(), M_AttributeSetInstanceTo_ID,
-								ma.getMovementQty(), getMovementDate(), get_TrxName());
-						trxTo.setM_MovementLine_ID(line.getM_MovementLine_ID());
-						if (!trxTo.save())
-						{
-							m_processMsg = "Transaction To not inserted (MA)";
-							return DocAction.STATUS_Invalid;
-						}
-						
-						qtyToAllocate = qtyToAllocate.subtract(ma.getMovementQty());
+						String lastError = CLogger.retrieveErrorString("");
+						m_processMsg = "Cannot correct Inventory OnHand (MA) - " + lastError;
+						return DocAction.STATUS_Invalid;
 					}
+
+					int M_AttributeSetInstanceTo_ID = ma.getM_AttributeSetInstanceTo_ID() == 0 ? ma
+							.getM_AttributeSetInstance_ID() : ma.getM_AttributeSetInstanceTo_ID();
+					
+					Timestamp dateMaterialPolicyTo = ma
+							.getDateMaterialPolicyTo() == null ? ma
+							.getDateMaterialPolicy() : ma
+							.getDateMaterialPolicyTo();
+
+					//Update Storage 
+					MLocator locatorTo = new MLocator (getCtx(), line.getM_LocatorTo_ID(), get_TrxName());
+					if (!MStorageOnHand.add(getCtx(),locatorTo.getM_Warehouse_ID(),
+							line.getM_LocatorTo_ID(),
+							line.getM_Product_ID(), 
+							M_AttributeSetInstanceTo_ID,
+							ma.getMovementQty(),dateMaterialPolicyTo, get_TrxName()))
+					{
+						String lastError = CLogger.retrieveErrorString("");
+						m_processMsg = "Cannot correct Inventory OnHand (MA) - " + lastError;
+						return DocAction.STATUS_Invalid;
+					}
+
+					//
+					trxFrom = new MTransaction (getCtx(), line.getAD_Org_ID(), 
+							MTransaction.MOVEMENTTYPE_MovementFrom,
+							line.getM_Locator_ID(), line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
+							ma.getMovementQty().negate(), getMovementDate(), get_TrxName());
+					trxFrom.setM_MovementLine_ID(line.getM_MovementLine_ID());
+					if (!trxFrom.save())
+					{
+						m_processMsg = "Transaction From not inserted (MA)";
+						return DocAction.STATUS_Invalid;
+					}
+					//
+					MTransaction trxTo = new MTransaction (getCtx(), line.getAD_Org_ID(), 
+							MTransaction.MOVEMENTTYPE_MovementTo,
+							line.getM_LocatorTo_ID(), line.getM_Product_ID(), M_AttributeSetInstanceTo_ID,
+							ma.getMovementQty(), getMovementDate(), get_TrxName());
+					trxTo.setM_MovementLine_ID(line.getM_MovementLine_ID());
+					if (!trxTo.save())
+					{
+						m_processMsg = "Transaction To not inserted (MA)";
+						return DocAction.STATUS_Invalid;
+					}
+					
+					qtyToAllocate = qtyToAllocate.subtract(ma.getMovementQty());
 				}
+				
 				//	Fallback - We have ASI
 				if (line.getM_AttributeSetInstance_ID() > 0 && qtyToAllocate.signum() != 0)
 				{
@@ -636,7 +633,6 @@ public class MMovement extends X_M_Movement implements DocAction
 		//	Attribute Set Instance
 		if (line.getM_AttributeSetInstance_ID() == 0)
 		{
-						
 			MProduct product = MProduct.get(getCtx(), line.getM_Product_ID());
 			String MMPolicy = product.getMMPolicy();
 			MStorageOnHand[] storages = MStorageOnHand.getWarehouse(getCtx(), 0, line.getM_Product_ID(), 0, 
