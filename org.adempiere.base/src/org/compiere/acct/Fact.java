@@ -65,6 +65,8 @@ public final class Fact
 
 	/** Document            */
 	private Doc             m_doc = null;
+	
+
 	/** Accounting Schema   */
 	private MAcctSchema	    m_acctSchema = null;
 	/** Transaction			*/
@@ -946,4 +948,8 @@ public final class Fact
 		
 	}	//	Balance
 	
+	public Doc getDoc() {
+		return m_doc;
+	}
+
 }   //  Fact
