@@ -70,9 +70,9 @@ public class Doc_AllocationHdr extends Doc
 	}   //  Doc_Allocation
 
 	/**	Tolerance G&L				*/
-	private static final BigDecimal	TOLERANCE = BigDecimal.valueOf(0.02);
+	protected static final BigDecimal	TOLERANCE = BigDecimal.valueOf(0.02);
 	/** Facts						*/
-	private ArrayList<Fact>		m_facts = null;
+	protected ArrayList<Fact>		m_facts = null;
 
 
 	/**
@@ -93,7 +93,7 @@ public class Doc_AllocationHdr extends Doc
 	 *	@param alloc header
 	 *  @return DocLine Array
 	 */
-	private DocLine[] loadLines(MAllocationHdr alloc)
+	protected DocLine[] loadLines(MAllocationHdr alloc)
 	{
 		ArrayList<DocLine> list = new ArrayList<DocLine>();
 		MAllocationLine[] lines = alloc.getLines(false);
@@ -482,7 +482,7 @@ public class Doc_AllocationHdr extends Doc
 	/** Verify if the posting involves two or more organizations
 	@return true if there are more than one org involved on the posting
 	 */
-	private boolean isInterOrg(MAcctSchema as) {
+	protected boolean isInterOrg(MAcctSchema as) {
 		MAcctSchemaElement elementorg = as.getAcctSchemaElement(MAcctSchemaElement.ELEMENTTYPE_Organization);
 		if (elementorg == null || !elementorg.isBalanced()) {
 			// no org element or not need to be balanced
@@ -541,7 +541,7 @@ public class Doc_AllocationHdr extends Doc
 	 * @param factLine
 	 * @return boolean indicating if both dimension ID's are equal
 	 */
-	private boolean equalFactLineIDs(FactLine prevFactLine, FactLine factLine) {
+	protected boolean equalFactLineIDs(FactLine prevFactLine, FactLine factLine) {
 		return (factLine.getA_Asset_ID() == prevFactLine.getA_Asset_ID()
 				&& factLine.getAccount_ID() == prevFactLine.getAccount_ID()
 				&& factLine.getAD_Client_ID() == prevFactLine.getAD_Client_ID()
@@ -580,7 +580,7 @@ public class Doc_AllocationHdr extends Doc
 	 *	@param allocationSource allocation amount (incl discount, writeoff)
 	 *	@return Accounted Amt
 	 */
-	private BigDecimal createCashBasedAcct (MAcctSchema as, Fact fact, MInvoice invoice,
+	protected BigDecimal createCashBasedAcct (MAcctSchema as, Fact fact, MInvoice invoice,
 		BigDecimal allocationSource)
 	{
 		BigDecimal allocationAccounted = Env.ZERO;
@@ -622,7 +622,7 @@ public class Doc_AllocationHdr extends Doc
 	 *	@param C_Payment_ID payment
 	 *	@return acct
 	 */
-	private MAccount getPaymentAcct (MAcctSchema as, int C_Payment_ID)
+	protected MAccount getPaymentAcct (MAcctSchema as, int C_Payment_ID)
 	{
 		setC_BankAccount_ID(0);
 		//	Doc.ACCTTYPE_UnallocatedCash (AR) or C_Prepayment
@@ -679,7 +679,7 @@ public class Doc_AllocationHdr extends Doc
 	 *	@param C_CashLine_ID
 	 *	@return acct
 	 */
-	private MAccount getCashAcct (MAcctSchema as, int C_CashLine_ID)
+	protected MAccount getCashAcct (MAcctSchema as, int C_CashLine_ID)
 	{
 		String sql = "SELECT c.C_CashBook_ID "
 				+ "FROM C_Cash c, C_CashLine cl "
@@ -707,7 +707,7 @@ public class Doc_AllocationHdr extends Doc
 	 *	@param allocationAccounted acct amt
 	 *	@return Error Message or null if OK
 	 */
-	private String createRealizedGainLoss (DocLine line, MAcctSchema as, Fact fact, MAccount acct,
+	protected String createRealizedGainLoss (DocLine line, MAcctSchema as, Fact fact, MAccount acct,
 		MInvoice invoice, BigDecimal allocationSource, BigDecimal allocationAccounted)
 	{
 		BigDecimal invoiceSource = null;
@@ -843,7 +843,7 @@ public class Doc_AllocationHdr extends Doc
 	 *	@param WriteOffAccoint write off acct
 	 *	@return true if created
 	 */
-	private boolean createTaxCorrection (MAcctSchema as, Fact fact,
+	protected boolean createTaxCorrection (MAcctSchema as, Fact fact,
 		DocLine_Allocation line,
 		MAccount DiscountAccount, MAccount WriteOffAccoint, boolean isSOTrx)
 	{
@@ -925,14 +925,14 @@ class Doc_AllocationTax
 
 	private CLogger				log = CLogger.getCLogger(getClass());
 
-	private MAccount			m_DiscountAccount;
-	private BigDecimal 			m_DiscountAmt;
-	private MAccount			m_WriteOffAccount;
-	private BigDecimal 			m_WriteOffAmt;
-	private boolean 			m_IsSOTrx;
+	protected MAccount			m_DiscountAccount;
+	protected BigDecimal 			m_DiscountAmt;
+	protected MAccount			m_WriteOffAccount;
+	protected BigDecimal 			m_WriteOffAmt;
+	protected boolean 			m_IsSOTrx;
 
-	private ArrayList<MFactAcct>	m_facts  = new ArrayList<MFactAcct>();
-	private int					m_totalIndex = 0;
+	protected ArrayList<MFactAcct>	m_facts  = new ArrayList<MFactAcct>();
+	protected int					m_totalIndex = 0;
 
 	/**
 	 * 	Add Invoice Fact Line
@@ -1091,7 +1091,7 @@ class Doc_AllocationTax
 	 *	@param precision precision
 	 *	@return tax / total * amt
 	 */
-	private BigDecimal calcAmount (BigDecimal tax, BigDecimal total, BigDecimal amt, int precision)
+	protected BigDecimal calcAmount (BigDecimal tax, BigDecimal total, BigDecimal amt, int precision)
 	{
 		if (log.isLoggable(Level.FINE)) log.fine("Amt=" + amt + " - Total=" + total + ", Tax=" + tax);
 		if (tax.signum() == 0
