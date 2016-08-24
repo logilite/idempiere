@@ -175,10 +175,12 @@ public class CompiereService {
 	/**
 	 * @return true if started
 	 */
-	public boolean isConnected() 
-	{
+	public boolean isConnected() {
+		if (this.getCtx().isEmpty())
+			m_connected = false;
 		return m_connected;
 	}
+
 
 	/**
 	 * @return Language of current request
