@@ -249,7 +249,6 @@ public class Doc_MatchInvHdr extends Doc
 			else
 			// Cash Acct
 			{
-				MInvoice invoice = m_invoiceLine.getParent();
 				if (as.getC_Currency_ID() != invoice.getC_Currency_ID())
 					LineNetAmt = MConversionRate.convert(getCtx(), LineNetAmt, invoice.getC_Currency_ID(),
 							as.getC_Currency_ID(), invoice.getDateAcct(), invoice.getC_ConversionType_ID(),
