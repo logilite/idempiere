@@ -1738,7 +1738,10 @@ public class MInOut extends X_M_InOut implements DocAction
 	ArrayList<PO> docsPostProcess = new ArrayList<PO>();
 
 	protected void addDocsPostProcess(PO doc) {
-		docsPostProcess.add(doc);
+		if(!docsPostProcess.contains(doc))
+		{
+			docsPostProcess.add(doc);
+		}
 	}
 
 	public ArrayList<PO> getDocsPostProcess() {

@@ -116,11 +116,24 @@ public class Doc_MatchInvHdr extends Doc
 		{
 			MMatchInv m_matchInv = (MMatchInv) line.getPO();
 			MInvoiceLine m_invoiceLine = (MInvoiceLine) m_matchInv.getC_InvoiceLine();
+			
+			MInvoice invoice = m_invoiceLine.getParent();
+			if(as.isAccrual() && m_matchInv.getReversal_ID() <= 0 && !invoice.isPosted())
+			{
+				p_Error = "Invoice not posted yet";
+				return null;
+			}
 
 			MInOutLine m_receiptLine = null;
 			if (m_matchInv.getM_InOutLine_ID() > 0)
 			{
 				m_receiptLine = (MInOutLine) m_matchInv.getM_InOutLine();
+				MInOut inout = m_receiptLine.getParent();
+				if(as.isAccrual() && m_matchInv.getReversal_ID() <= 0 && !inout.isPosted())
+				{
+					p_Error = "Mat.Receipt not posted yet";
+					return null;
+				}
 			}
 
 			// Nothing to do
