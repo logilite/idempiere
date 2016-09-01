@@ -385,5 +385,5 @@ INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,Help,AD_Table_ID,Co
 UPDATE AD_Tab SET AD_Table_ID=200178, AD_Column_ID=212275,Updated=TO_DATE('2015-10-08 17:11:41','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Tab_ID=200193
 ;
 
-SELECT register_migration_script('201510131538_IDEMPIERE-2870') FROM dual
+SELECT register_migration_script('201510131538_IDEMPIERE-2870.sql') FROM dual
 ;
