@@ -33,5 +33,5 @@ WITH (
 ALTER TABLE t_selection_infowindow
   OWNER TO adempiere;
 
-SELECT register_migration_script('201507032015_IDEMPIERE-2709') FROM dual
+SELECT register_migration_script('201507032015_IDEMPIERE-2709.sql') FROM dual
 ;
