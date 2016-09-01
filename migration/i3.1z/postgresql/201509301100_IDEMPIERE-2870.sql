@@ -133,5 +133,5 @@ INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,
 INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('I','Request',0,0,'Y',TO_TIMESTAMP('2015-09-29 19:26:43','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2015-09-29 19:26:43','YYYY-MM-DD HH24:MI:SS'),100,523859,'NewRequest','D','8c814142-c9ab-47c0-abfa-a93414a3c4a9')
 ;
 
-SELECT register_migration_script('201509301100_IDEMPIERE-2870') FROM dual
+SELECT register_migration_script('201509301100_IDEMPIERE-2870.sql') FROM dual
 ;

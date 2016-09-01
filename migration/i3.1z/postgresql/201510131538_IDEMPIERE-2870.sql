@@ -385,6 +385,6 @@ UPDATE AD_Tab SET AD_Table_ID=200178, AD_Column_ID=212275,Updated=TO_TIMESTAMP('
 ;
 
 
-SELECT register_migration_script('201510131538_IDEMPIERE-2870') FROM dual
+SELECT register_migration_script('201510131538_IDEMPIERE-2870.sql') FROM dual
 ;
 
