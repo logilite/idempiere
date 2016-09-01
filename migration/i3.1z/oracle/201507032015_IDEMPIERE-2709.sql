@@ -31,5 +31,5 @@ CREATE TABLE t_selection_infowindow
   CONSTRAINT t_selection_infowindow_key PRIMARY KEY (ad_pinstance_id, t_selection_id, columnname)
 );
 
-SELECT register_migration_script('201507032015_IDEMPIERE-2709') FROM dual
+SELECT register_migration_script('201507032015_IDEMPIERE-2709.sql') FROM dual
 ;
