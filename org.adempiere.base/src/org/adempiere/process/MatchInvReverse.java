@@ -54,7 +54,7 @@ public class MatchInvReverse extends SvrProcess {
 		}
 
 		
-		if (inv.isPosted())
+		if (inv.isProcessed())
 		{		
 			Timestamp reversalDate = Env.getContextAsDate(getCtx(), "#Date");
 			if (reversalDate == null) {

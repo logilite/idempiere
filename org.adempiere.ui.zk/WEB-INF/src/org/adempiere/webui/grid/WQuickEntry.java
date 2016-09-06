@@ -63,7 +63,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 6033101081045706748L;
+	private static final long serialVersionUID = -8530102231615195037L;
 
 	public static final String QUICK_ENTRY_MODE = "_QUICK_ENTRY_MODE_";
 
