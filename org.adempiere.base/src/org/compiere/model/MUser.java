@@ -173,7 +173,7 @@ public class MUser extends X_AD_User
 	{
 		if (name == null || name.length() == 0 || password == null || password.length() == 0)
 		{
-			s_log.warning ("Invalid Name/Password = " + name + "/" + password);
+			s_log.warning ("Invalid Name/Password = " + name);
 			return null;
 		}
 		boolean hash_password = MSysConfig.getBooleanValue(MSysConfig.USER_PASSWORD_HASH, false);
@@ -198,7 +198,7 @@ public class MUser extends X_AD_User
 		
 		List<MUser> users = new Query(ctx, MUser.Table_Name, where.toString(), null)
 			.setParameters(name)
-			.setOrderBy(MUser.COLUMNNAME_AD_User_ID)
+			.setOrderBy("AD_Client_ID, AD_User_ID") // prefer first user on System
 			.list();
 		
 		if (users.size() == 0) {
@@ -223,6 +223,7 @@ public class MUser extends X_AD_User
 			
 			if (valid){
 				retValue=user;
+				break;
 			}
 		}	
 	
@@ -886,20 +887,34 @@ public class MUser extends X_AD_User
 		if (newRecord || super.getValue() == null || is_ValueChanged("Value"))
 			setValue(super.getValue());
 
-		boolean email_login = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
-		if (email_login && getPassword() != null && getPassword().length() > 0) {
-			// email is mandatory for users with password
-			if (getEMail() == null || getEMail().length() == 0) {
-				log.saveError("SaveError", Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), COLUMNNAME_EMail) + " - " + toString());
-				return false;
-			}
-			// email with password must be unique on the same tenant
-			int cnt = DB.getSQLValue(get_TrxName(),
-					"SELECT COUNT(*) FROM AD_User WHERE Password IS NOT NULL AND EMail=? AND AD_Client_ID=? AND AD_User_ID!=?",
-					getEMail(), getAD_Client_ID(), getAD_User_ID());
-			if (cnt > 0) {
-				log.saveError("SaveError", Msg.getMsg(getCtx(), DBException.SAVE_ERROR_NOT_UNIQUE_MSG, true) + Msg.getElement(getCtx(), COLUMNNAME_EMail));
-				return false;
+		if (getPassword() != null && getPassword().length() > 0) {
+			boolean email_login = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
+			if (email_login) {
+				// email is mandatory for users with password
+				if (getEMail() == null || getEMail().length() == 0) {
+					log.saveError("SaveError", Msg.getMsg(getCtx(), "FillMandatory") + Msg.getElement(getCtx(), COLUMNNAME_EMail) + " - " + toString());
+					return false;
+				}
+				// email with password must be unique on the same tenant
+				int cnt = DB.getSQLValue(get_TrxName(),
+						"SELECT COUNT(*) FROM AD_User WHERE Password IS NOT NULL AND EMail=? AND AD_Client_ID=? AND AD_User_ID!=?",
+						getEMail(), getAD_Client_ID(), getAD_User_ID());
+				if (cnt > 0) {
+					log.saveError("SaveError", Msg.getMsg(getCtx(), DBException.SAVE_ERROR_NOT_UNIQUE_MSG, true) + Msg.getElement(getCtx(), COLUMNNAME_EMail));
+					return false;
+				}
+			} else {
+				// IDEMPIERE-1672 check duplicate name in client
+				String nameToValidate = getLDAPUser();
+				if (Util.isEmpty(nameToValidate))
+					nameToValidate = getName();
+				int cnt = DB.getSQLValue(get_TrxName(),
+						"SELECT COUNT(*) FROM AD_User WHERE Password IS NOT NULL AND COALESCE(LDAPUser,Name)=? AND AD_Client_ID=? AND AD_User_ID!=?",
+						nameToValidate, getAD_Client_ID(), getAD_User_ID());
+				if (cnt > 0) {
+					log.saveError("SaveError", Msg.getMsg(getCtx(), DBException.SAVE_ERROR_NOT_UNIQUE_MSG, true) + Msg.getElement(getCtx(), COLUMNNAME_Name) + " / " + Msg.getElement(getCtx(), COLUMNNAME_LDAPUser));
+					return false;
+				}
 			}
 		}
 			
