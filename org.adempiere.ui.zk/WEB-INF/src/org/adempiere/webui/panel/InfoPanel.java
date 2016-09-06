@@ -2175,14 +2175,14 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
         	// just evaluate display logic of process button when requery by use click requery button
         	if (isQueryByUser){
         		bindInfoProcess();
-        		// reset selected list
-                recordSelectedData.clear();
                 isRequeryByRunSuccessProcess = false;
         	}
         	if (isRequeryByRunSuccessProcess){
         		syncSelectedAfterRequery();
         		restoreSelectedInPage();
         	}
+			// reset selected list
+			recordSelectedData.clear();
         	// IDEMPIERE-1334 after refresh, restore prev selected item end
         	updateSubcontent ();
         }
