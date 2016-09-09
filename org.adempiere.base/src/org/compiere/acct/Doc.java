@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.model.FactsValidator;
 import org.compiere.model.I_C_AllocationHdr;
 import org.compiere.model.I_C_BankStatement;
 import org.compiere.model.I_C_Cash;
@@ -648,7 +649,7 @@ public abstract class Doc
 			return STATUS_Error;
 
 		// call modelValidator
-		String validatorMsg = ModelValidationEngine.get().fireFactsValidate(m_as, facts, getPO());
+		String validatorMsg = ModelValidationEngine.get().fireFactsValidate(m_as, facts, getPO(),FactsValidator.TIME_AFTER_FACTCREATE);
 		if (validatorMsg != null) {
 			p_Error = validatorMsg;
 			return STATUS_Error;
@@ -697,6 +698,12 @@ public abstract class Doc
 
 		}	//	for all facts
 
+		validatorMsg = ModelValidationEngine.get().fireFactsValidate(m_as, facts, getPO(),FactsValidator.TIME_AFTER_FACTBALANCED);
+		if (validatorMsg != null) {
+			p_Error = validatorMsg;
+			return STATUS_Error;
+		}
+		
 		return STATUS_Posted;
 	}   //  postLogic
 

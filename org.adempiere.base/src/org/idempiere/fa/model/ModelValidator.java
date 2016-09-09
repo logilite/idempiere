@@ -264,7 +264,7 @@ implements org.compiere.model.ModelValidator, org.compiere.model.FactsValidator
 	
 
 	
-	public String factsValidate(MAcctSchema schema, List<Fact> facts, PO po) {
+	public String factsValidate(MAcctSchema schema, List<Fact> facts, PO po,int time) {
 		// TODO: implement it
 		return null;
 	}
