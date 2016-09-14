@@ -22,7 +22,7 @@ Declare
 value1 Integer;
 rec  M_InoutLineMA%rowtype;
 Begin
-value1 := SELECT Coalesce((SELECT MAX(M_InOutLineMA_ID)FROM M_InOutLineMA) ,1000000) FROM DUAL LIMIT 1;
+value1 := (SELECT Coalesce((SELECT MAX(M_InOutLineMA_ID)FROM M_InOutLineMA) ,1000000) FROM DUAL LIMIT 1);
 for rec IN 
 Select * From M_InoutLineMA WHERE M_InOutLineMA_ID IS NULL Order By Created ASC 
 Loop 

@@ -19,7 +19,7 @@ Declare
 value1 Integer;
 rec  M_InoutLineMA%rowtype;
 Begin
-value1 := SELECT Coalesce((SELECT MAX(M_InOutLineMA_ID)FROM M_InOutLineMA) ,1000000) FROM DUAL FETCH FIRST ROW ONLY;
+value1 := (SELECT Coalesce((SELECT MAX(M_InOutLineMA_ID)FROM M_InOutLineMA) ,1000000) FROM DUAL FETCH FIRST ROW ONLY);
 for rec IN 
 Select * From M_InoutLineMA WHERE M_InOutLineMA_ID IS NULL Order By Created ASC 
 Loop 
@@ -52,11 +52,11 @@ INSERT INTO t_alter_column values('m_inoutlinema','M_AttributeSetInstance_ID','N
 ;
 
 -- Feb 6, 2015 3:04:21 PM IST
-ALTER TABLE M_InOutLineMA DROP CONSTRAINT masi_minourlinema
+ALTER TABLE M_InOutLineMA DROP CONSTRAINT masi_minoutlinema
 ;
 
 -- Feb 6, 2015 3:04:21 PM IST
-ALTER TABLE M_InOutLineMA ADD CONSTRAINT masi_minourlinema FOREIGN KEY (M_AttributeSetInstance_ID) REFERENCES m_attributesetinstance(m_attributesetinstance_id) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED
+ALTER TABLE M_InOutLineMA ADD CONSTRAINT masi_minoutlinema FOREIGN KEY (M_AttributeSetInstance_ID) REFERENCES m_attributesetinstance(m_attributesetinstance_id) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED
 ;
 
 -- Feb 6, 2015 3:04:28 PM IST
