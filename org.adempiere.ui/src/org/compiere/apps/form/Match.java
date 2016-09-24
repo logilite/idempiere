@@ -533,7 +533,7 @@ public class Match
 
 		m_sql = new StringBuffer ();
 		int Line_ID = 0;
-		if (lineMatched != null )
+		if (matched && lineMatched != null )
 		{
 			Line_ID = lineMatched.getKey();
 		}
