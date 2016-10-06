@@ -84,7 +84,7 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 	private static final String SAVE_IMAGE = "images/Save16.png";
 
 
-	private ToolBarButton btnNew;
+	private ToolBarButton btnNew, btnSave;
 	private long prevKeyEventTime = 0;
 	private KeyEvent prevKeyEvent;
 
@@ -311,18 +311,18 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 		button.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Delete")));
         buttons.put(BTN_DELETE_ID.substring(3, BTN_DELETE_ID.length()), button);
 
-		button = new ToolBarButton();
-		button.setImage(ThemeManager.getThemeResource(SAVE_IMAGE));
-		button.setId(BTN_SAVE_ID);
-		button.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
+		btnSave = new ToolBarButton();
+		btnSave.setImage(ThemeManager.getThemeResource(SAVE_IMAGE));
+		btnSave.setId(BTN_SAVE_ID);
+		btnSave.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
 			@Override
 			public void onEvent(Event event) throws Exception {
 				Event openEvent = new Event(ON_SAVE_EVENT, DetailPane.this);
 				eventListener.onEvent(openEvent);
 			}
 		});
-		button.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Save")));
-        buttons.put(BTN_SAVE_ID.substring(3, BTN_SAVE_ID.length()), button);
+		btnSave.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Save")));
+        buttons.put(BTN_SAVE_ID.substring(3, BTN_SAVE_ID.length()), btnSave);
 
 		
 		if (!tabPanel.getGridTab().isSortTab()) {
@@ -834,11 +834,15 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 	}
 
     public static final int VK_N              = 0x4E;
+    public static final int VK_S              = 0x53;
 	private void onCtrlKeyEvent(KeyEvent keyEvent) {
 		ToolBarButton btn = null;
 		if (keyEvent.isAltKey() && !keyEvent.isCtrlKey() && keyEvent.isShiftKey()) { // Shift+Alt key
 			if (keyEvent.getKeyCode() == VK_N) { // Shift+Alt+N
 				btn = btnNew;
+			}
+			if (keyEvent.getKeyCode() == VK_S) { // Shift+Alt+S
+				btn = btnSave;
 			}
 		}
 		if (btn != null) {
