@@ -22,8 +22,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.logging.Level;
-
 import org.adempiere.util.Callback;
 import org.adempiere.webui.component.ADTabListModel;
 import org.adempiere.webui.component.ADTabListModel.ADTabLabel;
@@ -153,6 +151,7 @@ public class CompositeADTabbox extends AbstractADTabbox
 						showLastError();
 					} 
 					tabPanel.getGridTab().dataRefreshAll(true, true);
+					tabPanel.getGridTab().refreshParentTabs();
 				}
 				else if (DetailPane.ON_DELETE_EVENT.equals(event.getName())) {
 					onDelete();
