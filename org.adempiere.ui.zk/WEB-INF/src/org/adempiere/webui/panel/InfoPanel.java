@@ -119,9 +119,9 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 3761627143274259211L;
-	private final static int DEFAULT_PAGE_SIZE = 100;
-	private final static int DEFAULT_PAGE_PRELOAD = 4;
+	protected static final long serialVersionUID = 3761627143274259211L;
+	protected final static int DEFAULT_PAGE_SIZE = 100;
+	protected final static int DEFAULT_PAGE_PRELOAD = 4;
 	protected List<Button> btProcessList = new ArrayList<Button>();
 	protected Map<String, WEditor> editorMap = new HashMap<String, WEditor>();
 	protected final static String PROCESS_ID_KEY = "processId";
@@ -334,15 +334,15 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	protected String			p_whereClause = "";
 	protected StatusBarPanel statusBar = new StatusBarPanel();
 	/**                    */
-    private List<Object> line;
+    protected List<Object> line;
 
-	private boolean			    m_ok = false;
+	protected boolean			    m_ok = false;
 	/** Cancel pressed - need to differentiate between OK - Cancel - Exit	*/
-	private boolean			    m_cancel = false;
+	protected boolean			    m_cancel = false;
 	/** Result IDs              */
-	private ArrayList<Integer>	m_results = new ArrayList<Integer>(3);
+	protected ArrayList<Integer>	m_results = new ArrayList<Integer>(3);
 
-    private ListModelTable model;
+    protected ListModelTable model;
 	/** Layout of Grid          */
 	protected ColumnInfo[]     p_layout;
 	/** Main SQL Statement      */
@@ -353,13 +353,13 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	protected String              m_sqlOrder;
 	protected String              m_sqlUserOrder;
 	/**ValueChange listeners       */
-    private ArrayList<ValueChangeListener> listeners = new ArrayList<ValueChangeListener>();
+    protected ArrayList<ValueChangeListener> listeners = new ArrayList<ValueChangeListener>();
 	/** Loading success indicator       */
 	protected boolean	        p_loadedOK = false;
 	/**	SO Zoom Window						*/
-	private int					m_SO_Window_ID = -1;
+	protected int					m_SO_Window_ID = -1;
 	/**	PO Zoom Window						*/
-	private int					m_PO_Window_ID = -1;
+	protected int					m_PO_Window_ID = -1;
 	
 	protected MInfoWindow infoWindow;
 
@@ -370,12 +370,12 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	protected Paging paging;
 	protected int pageNo;
 	protected int m_count;
-	private int cacheStart;
-	private int cacheEnd;
-	private boolean m_useDatabasePaging = false;
-	private BusyDialog progressWindow;
+	protected int cacheStart;
+	protected int cacheEnd;
+	protected boolean m_useDatabasePaging = false;
+	protected BusyDialog progressWindow;
 	// in case double click to item. this store clicked item (maybe it's un-select item)
-	private int m_lastSelectedIndex = -1;
+	protected int m_lastSelectedIndex = -1;
 	protected GridField m_gridfield;
 
 	/**
@@ -393,7 +393,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	protected List<Object> prevParameterValues = null;
 	protected List<String> prevQueryOperators = null;
 	protected List<WEditor> prevRefParmeterEditor = null;
-	private static final String[] lISTENER_EVENTS = {};
+	protected static final String[] lISTENER_EVENTS = {};
 
 	/**
 	* All info process of this infoWindow
@@ -794,7 +794,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
         setStatusDB(no == Integer.MAX_VALUE?"?":Integer.toString(no));
     }
     
-    private List<Object> readLine(int start, int end) {
+    protected List<Object> readLine(int start, int end) {
     	//cacheStart & cacheEnd - 1 based index, start & end - 0 based index
     	if (getCacheStart() >= 1 && cacheEnd > getCacheStart())
     	{
@@ -2401,7 +2401,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	/**
 	 * @param cacheStart the cacheStart to set
 	 */
-	private void setCacheStart(int cacheStart) {
+	protected void setCacheStart(int cacheStart) {
 		this.cacheStart = cacheStart;
 	}
 	
