@@ -25,9 +25,9 @@ import java.util.logging.Level;
 
 import org.compiere.model.I_M_InOutLine;
 import org.compiere.model.I_M_RMALine;
-import org.compiere.model.MConversionRate;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
+import org.compiere.model.MConversionRate;
 import org.compiere.model.MCostDetail;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MInOut;
@@ -68,9 +68,9 @@ public class Doc_InOut extends Doc
 		super (as, MInOut.class, rs, null, trxName);
 	}   //  DocInOut
 
-	private int				m_Reversal_ID = 0;
+	protected int				m_Reversal_ID = 0;
 	@SuppressWarnings("unused")
-	private String			m_DocStatus = "";
+	protected String			m_DocStatus = "";
 
 	/**
 	 *  Load Document Details
@@ -94,7 +94,7 @@ public class Doc_InOut extends Doc
 	 *	@param inout shipment/receipt
 	 *  @return DocLine Array
 	 */
-	private DocLine[] loadLines(MInOut inout)
+	protected DocLine[] loadLines(MInOut inout)
 	{
 		ArrayList<DocLine> list = new ArrayList<DocLine>();
 		MInOutLine[] lines = inout.getLines(false);
@@ -821,11 +821,11 @@ public class Doc_InOut extends Doc
 		return facts;
 	}   //  createFact
 
-	private boolean isReversal(DocLine line) {
+	protected boolean isReversal(DocLine line) {
 		return m_Reversal_ID !=0 && line.getReversalLine_ID() != 0;
 	}
 
-	private String createVendorRMACostDetail(MAcctSchema as, DocLine line, BigDecimal costs)
+	protected String createVendorRMACostDetail(MAcctSchema as, DocLine line, BigDecimal costs)
 	{		
 		BigDecimal tQty = line.getQty();
 		BigDecimal tAmt = costs;
