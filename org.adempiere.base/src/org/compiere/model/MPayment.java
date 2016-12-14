@@ -2993,7 +2993,7 @@ public class MPayment extends X_C_Payment
 	
 	protected boolean voidOnlinePayment() 
 	{
-		if (getTenderType().equals(TENDERTYPE_CreditCard) && isOnline())
+		if ((getTenderType().equals(TENDERTYPE_CreditCard) || getTenderType().equals(TENDERTYPE_Check)) && isOnline())
 		{
 			setOrig_TrxID(getR_PnRef());
 			setTrxType(TRXTYPE_Void);
