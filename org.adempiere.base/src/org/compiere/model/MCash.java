@@ -452,6 +452,7 @@ public class MCash extends X_C_Cash implements DocAction
 		if (!m_justPrepared)
 		{
 			String status = prepareIt();
+			m_justPrepared = false;
 			if (!DocAction.STATUS_InProgress.equals(status))
 				return status;
 		}

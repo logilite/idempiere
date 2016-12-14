@@ -1329,7 +1329,6 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 
 	}
 
-	private String prevdbInfo = "";
 	/**
 	 * @param e
 	 * @see DataStatusListener#dataStatusChanged(DataStatusEvent)
@@ -1362,15 +1361,12 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	        breadCrumb.setStatusDB(dbInfo, e);
 
 	        String adInfo = e.getAD_Message();
-	        if (   ! prevdbInfo.equals(dbInfo)
-	        	&& (   adInfo == null
-	        	    || GridTab.DEFAULT_STATUS_MESSAGE.equals(adInfo)
-	        	    || GridTable.DATA_REFRESH_MESSAGE.equals(adInfo)
-	        	    || GridTable.DATA_INSERTED_MESSAGE.equals(adInfo)
-	        	    || GridTable.DATA_UPDATE_COPIED_MESSAGE.equals(adInfo)
-	        	   )
+	        if (   adInfo == null
+	        	|| GridTab.DEFAULT_STATUS_MESSAGE.equals(adInfo)
+	        	|| GridTable.DATA_REFRESH_MESSAGE.equals(adInfo)
+	        	|| GridTable.DATA_INSERTED_MESSAGE.equals(adInfo)
+	        	|| GridTable.DATA_UPDATE_COPIED_MESSAGE.equals(adInfo)
 	           ) {
-	        	prevdbInfo = dbInfo;
 
 		        String prefix = null;
 		        if (dbInfo.contains("*"))
@@ -3277,7 +3273,6 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     		Env.setContext(ctx, curWindowNo, "Value", "");
     		Env.setContext(ctx, curWindowNo, "Name", "");
         }
-        prevdbInfo = "";		
 	}
 
 }
