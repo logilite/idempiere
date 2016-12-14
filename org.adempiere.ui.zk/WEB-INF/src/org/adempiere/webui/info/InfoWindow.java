@@ -53,6 +53,7 @@ import org.adempiere.webui.grid.WQuickEntry;
 import org.adempiere.webui.panel.InfoPanel;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.EmbedWinInfo;
@@ -584,7 +585,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		if (relatedInfoList.length > 0) { // setup the panel
 
 			//embeddedPane.setTitle(Msg.translate(Env.getCtx(), "Related Information"));
-			embeddedPane.setHeight("100%");
+			ZKUpdateUtil.setHeight(embeddedPane, "100%");
 			//tabPanels = new Tabpanels();
 			embeddedPane.appendChild(tabPanels);
 			//tabs = new Tabs();
@@ -629,7 +630,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				embeddedTbl.autoSize();
 
 				embeddedTbl.getModel().addTableModelListener(this);
-				embeddedTbl.setVflex("1");
+				ZKUpdateUtil.setVflex(embeddedTbl, "1");
 
 				
 				//Xolali - add embeddedTbl to list, add m_sqlembedded to list
@@ -646,7 +647,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				tabs.appendChild(tab);
 				Tabpanel desktopTabPanel = new Tabpanel();
 				//desktopTabPanel.
-				desktopTabPanel.setHeight("100%");
+				ZKUpdateUtil.setHeight(desktopTabPanel, "100%");
 				desktopTabPanel.appendChild(embeddedTbl);
 				tabPanels.appendChild(desktopTabPanel);
 			}
@@ -1095,8 +1096,8 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	{		
 		setTitle(infoWindow.get_Translation("Name"));
 		layout = new Borderlayout();
-        layout.setWidth("100%");
-        layout.setHeight("100%");
+		ZKUpdateUtil.setWidth(layout, "100%");
+		ZKUpdateUtil.setHeight(layout, "100%");
         if (!isLookup())
         {
         	layout.setStyle("position: absolute");
@@ -1104,10 +1105,10 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
         this.appendChild(layout);
 		
         if (isLookup())
-			contentPanel.setWidth("99%");
+        	ZKUpdateUtil.setWidth(contentPanel, "99%");
         else
         	contentPanel.setStyle("width: 99%; margin: 0px auto;");
-        contentPanel.setVflex(true);
+        ZKUpdateUtil.setVflex(contentPanel, true);
         contentPanel.setSizedByContent(true);
         contentPanel.setSpan(true);
         
@@ -1148,7 +1149,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 
 	protected void renderFooter(South south) {		
 		southBody = new Vbox();
-		southBody.setHflex("1");
+		ZKUpdateUtil.setHflex(southBody, "1");
 		south.appendChild(southBody);
 		southBody.appendChild(new Separator());
 		southBody.appendChild(confirmPanel);
@@ -1163,13 +1164,13 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	protected void renderContentPane(Center center) {				
 		Div div = new Div();
 		div.setStyle("width :100%; height: 100%");
-		div.setVflex("1");
-		div.setHflex("1");
+		ZKUpdateUtil.setVflex(div, "1");
+		ZKUpdateUtil.setHflex(div, "1");
 		div.appendChild(contentPanel);				
 
 		Borderlayout inner = new Borderlayout();
-		inner.setWidth("100%");
-		inner.setHeight("100%");
+		ZKUpdateUtil.setWidth(inner, "100%");
+		ZKUpdateUtil.setHeight(inner, "100%");
 		int height = SessionManager.getAppDesktop().getClientInfo().desktopHeight * 90 / 100;
 		if (isLookup())
 			inner.setStyle("border: none; position: relative; ");
@@ -1182,7 +1183,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		if (embeddedWinList.size() > 0) {
 			South south = new South();
 			int detailHeight = (height * 25 / 100);
-			south.setHeight(detailHeight + "px");
+			ZKUpdateUtil.setHeight(south, detailHeight + "px");
 			south.setAutoscroll(true);
 			south.setCollapsible(true);
 			south.setSplittable(true);
@@ -1203,8 +1204,8 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			//south.sets
 			inner.appendChild(south);
 			embeddedPane.setSclass("info-product-tabbedpane");
-			embeddedPane.setVflex("1");
-			embeddedPane.setHflex("1");
+			ZKUpdateUtil.setVflex(embeddedPane, "1");
+			ZKUpdateUtil.setHflex(embeddedPane, "1");
 
 			south.appendChild(embeddedPane);
 
@@ -1228,7 +1229,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			columns.appendChild(new Column());
 		
 		Column column = new Column();
-		column.setWidth("100px");
+		ZKUpdateUtil.setWidth(column, "100px");
 		column.setAlign("right");
 		columns.appendChild(column);
 		

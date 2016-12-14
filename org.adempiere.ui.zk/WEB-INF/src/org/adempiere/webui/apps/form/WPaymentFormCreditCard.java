@@ -30,6 +30,7 @@ import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.editor.WNumberEditor;
 import org.adempiere.webui.factory.ButtonFactory;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.grid.PaymentFormCreditCard;
 import org.compiere.model.GridTab;
@@ -97,13 +98,13 @@ public class WPaymentFormCreditCard extends PaymentFormCreditCard implements Eve
 		
 		Column column = new Column();
 		columns.appendChild(column);
-		column.setWidth("40%");
+		ZKUpdateUtil.setWidth(column, "40%");
 		
 		column = new Column();
 		columns.appendChild(column);
-		column.setWidth("60%");
+		ZKUpdateUtil.setWidth(column, "60%");
 		
-		kAmountField.getComponent().setWidth("150px");
+		ZKUpdateUtil.setWidth(kAmountField.getComponent(), "150px");
 		kAmountField.getComponent().setId("K_Ammount");
 		
 		Rows rows = kLayout.newRows();

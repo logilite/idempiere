@@ -38,6 +38,7 @@ import org.adempiere.webui.factory.QuickEntryServiceUtil;
 import org.adempiere.webui.grid.WQuickEntry;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.WFieldRecordInfo;
 import org.adempiere.webui.window.WLocationDialog;
 import org.compiere.model.GridField;
@@ -153,7 +154,7 @@ ContextMenuListener, IZoomableEditor
     
     private void init()
     {
-        getComponent().setWidth("200px"); 
+    	ZKUpdateUtil.setWidth(getComponent(), "200px"); 
         getComponent().setAutocomplete(true);
         getComponent().setAutodrop(true);
         getComponent().addEventListener(Events.ON_BLUR, this);

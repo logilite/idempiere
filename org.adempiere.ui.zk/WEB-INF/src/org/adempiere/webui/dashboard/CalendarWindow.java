@@ -37,6 +37,7 @@ import org.adempiere.webui.panel.ITabOnCloseHandler;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.UserPreference;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.MRefList;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.X_AD_User;
@@ -140,8 +141,8 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 
 		Borderlayout borderlayout = (Borderlayout) component.getFellow("main");
 		borderlayout.setStyle("position: absolute");
-		borderlayout.setWidth("100%");
-		borderlayout.setHeight("100%");
+		ZKUpdateUtil.setWidth(borderlayout, "100%");
+		ZKUpdateUtil.setHeight(borderlayout, "100%");
 		
 		Grid grid = new Grid();
 		Rows rows = new Rows();

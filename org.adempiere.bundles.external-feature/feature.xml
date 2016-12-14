@@ -2,7 +2,7 @@
 <feature
       id="org.adempiere.bundles.external"
       label="External bundles"
-      version="3.1.0.qualifier"
+      version="4.1.0.qualifier"
       provider-name="Adempiere.org">
 
    <description url="http://www.example.com/description">
@@ -96,13 +96,6 @@
 
    <plugin
          id="org.restlet"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.restlet.ext.net"
          download-size="0"
          install-size="0"
          version="0.0.0"

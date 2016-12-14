@@ -109,6 +109,7 @@ public class CopyFromBankStmt extends SvrProcess
 				toLine.setTrxAmt(fromLine.getTrxAmt());
 				toLine.setChargeAmt(fromLine.getChargeAmt());
 				toLine.setInterestAmt(fromLine.getInterestAmt());
+				toLine.setDescription(fromLine.getDescription());
 				toLine.saveEx();
 				no++;
 			}

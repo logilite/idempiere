@@ -37,6 +37,7 @@ import org.adempiere.webui.part.WindowContainer;
 import org.adempiere.webui.process.WProcessInfo;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.adempiere.webui.window.SimplePDFViewer;
 import org.compiere.model.MProcess;
@@ -70,11 +71,11 @@ import org.zkoss.zul.Html;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Vlayout;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.pdf.PdfContentByte;
-import com.lowagie.text.pdf.PdfImportedPage;
-import com.lowagie.text.pdf.PdfReader;
-import com.lowagie.text.pdf.PdfWriter;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfImportedPage;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfWriter;
 
 /**
  *	Dialog to Start process or report.
@@ -345,7 +346,7 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 		if (resultPanelLayout == null){
 			resultPanelLayout = new Vlayout();
 			resultPanelLayout.setSclass("result-parameter-layout");
-			resultPanelLayout.setVflex("true");
+			ZKUpdateUtil.setVflex(resultPanelLayout, "true");
 			// reference for update late
 			messageResultContent = setHeadMessage(resultPanelLayout, null);
 			

@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: iDempiere Web Client
 Bundle-SymbolicName: org.adempiere.ui.zk;singleton:=true
-Bundle-Version: 3.1.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Version: 4.1.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: javax.activation,
  javax.annotation;version="1.2.0",
  javax.annotation.processing,
@@ -31,11 +31,7 @@ Import-Package: javax.activation,
  org.slf4j.helpers;version="1.7.2",
  org.slf4j.spi;version="1.7.2"
 DynamicImport-Package: action.images
-Bundle-ClassPath: .,
- WEB-INF/lib/atmosphere-compat-jbossweb-1.0.4.jar,
- WEB-INF/lib/atmosphere-compat-tomcat-1.0.4.jar,
- WEB-INF/lib/atmosphere-compat-tomcat7-1.0.4.jar,
- WEB-INF/lib/atmosphere-runtime-1.0.4.jar
+Bundle-ClassPath: .
 Export-Package: fi.jawsy.jawwa.zk.atmosphere,
  metainfo.zk,
  org.adempiere.webui,
@@ -68,34 +64,26 @@ Export-Package: fi.jawsy.jawwa.zk.atmosphere,
  org.adempiere.webui.theme,
  org.adempiere.webui.util,
  org.adempiere.webui.window,
- org.apache.catalina,
- org.apache.catalina.comet,
- org.atmosphere.cache,
- org.atmosphere.client,
- org.atmosphere.config,
- org.atmosphere.config.service,
- org.atmosphere.container,
- org.atmosphere.container.version,
- org.atmosphere.cpr,
- org.atmosphere.di,
- org.atmosphere.handler,
- org.atmosphere.interceptor,
- org.atmosphere.util,
- org.atmosphere.util.uri,
- org.atmosphere.websocket,
- org.atmosphere.websocket.protocol,
- org.jboss.servlet.http,
  org.zkforge.keylistener,
- web.js.jawwa.atmosphere,
  web.js.zkforge,
  web.js.zkforge.mold
-Require-Bundle: org.adempiere.base;bundle-version="3.1.0",
- org.adempiere.ui;bundle-version="3.1.0",
- org.zkoss.zk.library;bundle-version="7.0.0",
- org.adempiere.base.process;bundle-version="3.1.0"
+Require-Bundle: org.adempiere.base;bundle-version="0.0.0",
+ org.adempiere.ui;bundle-version="0.0.0",
+ org.idempiere.zk.extra;bundle-version="0.0.0",
+ zcommon;bundle-version="0.0.0",
+ zel;bundle-version="0.0.0",
+ zhtml;bundle-version="0.0.0",
+ zk;bundle-version="0.0.0",
+ zkbind;bundle-version="0.0.0",
+ zkplus;bundle-version="0.0.0",
+ zul;bundle-version="0.0.0",
+ zweb;bundle-version="0.0.0",
+ org.junit;bundle-version="0.0.0",
+ org.apache.commons.io;bundle-version="0.0.0",
+ com.itextpdf;bundle-version="0.0.0",
+ org.atmosphere.runtime;bundle-version="0.0.0"
 Bundle-Activator: org.adempiere.webui.WebUIActivator
 Eclipse-ExtensibleAPI: true
-Eclipse-RegisterBuddy: org.zkoss.zk.library
 Web-ContextPath: webui
 Service-Component: OSGI-INF/reportviewerprovider.xml, OSGI-INF/defaultinfofactory.xml, OSGI-INF/defaulteditorfactory.xml, OSGI-INF/jrviewerprovider.xml, OSGI-INF/resourcefinder.xml, OSGI-INF/defaultpaymentformfactory.xml, OSGI-INF/processfactory.xml, OSGI-INF/defaultprintshippinglabel.xml, OSGI-INF/defaultcreatefromfactory.xml, OSGI-INF/defaultformfactory.xml, OSGI-INF/feedbackservice.xml, OSGI-INF/zulgadgetfactory.xml, OSGI-INF/jfgchartrenderer.xml,OSGI-INF/tabpanelfactory.xml,
  OSGI-INF/defaultquickentryfactory.xml

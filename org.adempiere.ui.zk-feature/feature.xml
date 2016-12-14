@@ -2,7 +2,7 @@
 <feature
       id="org.adempiere.ui.zk"
       label="Zk Client-feature"
-      version="3.1.0.qualifier">
+      version="4.1.0.qualifier">
 
    <description url="http://www.example.com/description">
       [Enter Feature Description here.]
@@ -17,20 +17,19 @@
    </license>
 
    <requires>
-      <import feature="org.adempiere.base" version="3.1.0.qualifier"/>
+      <import feature="org.adempiere.base" version="0.0.0"/>
    </requires>
 
    <plugin
          id="org.adempiere.ui.zk"
          download-size="0"
          install-size="0"
-         version="3.1.0.qualifier"/>
-
+         version="4.1.0.qualifier"/>
+         
    <plugin
-         id="org.zkoss.zk.library"
+         id="org.atmosphere.runtime"
          download-size="0"
          install-size="0"
-         version="7.0.7.qualifier"
+         version="0.0.0"
          unpack="false"/>
-
 </feature>

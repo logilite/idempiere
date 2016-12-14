@@ -25,6 +25,7 @@ import java.util.List;
 import org.adempiere.util.Callback;
 import org.adempiere.webui.component.ADTabListModel;
 import org.adempiere.webui.component.ADTabListModel.ADTabLabel;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.DataStatusEvent;
 import org.compiere.model.DataStatusListener;
@@ -66,8 +67,6 @@ public class CompositeADTabbox extends AbstractADTabbox
 
 	public static final String ON_SELECTION_CHANGED_EVENT = "onSelectionChanged";
 	
-	/** Logger                  */
-	private static CLogger  log = CLogger.getCLogger (CompositeADTabbox.class);
 
     private List<ADTabListModel.ADTabLabel> tabLabelList = new ArrayList<ADTabListModel.ADTabLabel>();
     
@@ -256,8 +255,8 @@ public class CompositeADTabbox extends AbstractADTabbox
     protected Component doCreatePart(Component parent)
     {
     	layout = new Vlayout();
-    	layout.setHeight("100%");
-    	layout.setWidth("100%");
+    	ZKUpdateUtil.setHeight(layout, "100%");
+    	ZKUpdateUtil.setWidth(layout, "100%");
     	layout.setStyle("position: relative");
     	if (parent != null) {
     		layout.setParent(parent);
@@ -407,7 +406,7 @@ public class CompositeADTabbox extends AbstractADTabbox
     			headerTab.setDetailPane(createDetailPane());
     		} else
     			tabPanel.setVisible(false);
-    		headerTab.getDetailPane().setHflex("1");
+    		ZKUpdateUtil.setHflex(headerTab.getDetailPane(), "1");
     		headerTab.getDetailPane().addADTabpanel(tabPanel, tabLabel);
     		tabPanel.setDetailPaneMode(true);
     		headerTab.getDetailPane().setVflex("true");
@@ -417,8 +416,8 @@ public class CompositeADTabbox extends AbstractADTabbox
     		headerTab.getDetailPane().setVflex("true");
     	}
     	HtmlBasedComponent htmlComponent = (HtmlBasedComponent) tabPanel;
-        htmlComponent.setVflex("1"); 
-        htmlComponent.setWidth("100%");
+    	ZKUpdateUtil.setVflex(htmlComponent, "1"); 
+    	ZKUpdateUtil.setWidth(htmlComponent, "100%");
         
         tabPanel.getGridTab().addDataStatusListener(new SyncDataStatusListener(tabPanel));        
 	}
@@ -543,7 +542,7 @@ public class CompositeADTabbox extends AbstractADTabbox
 				}
 				detailPane.setAttribute("detailpane.tablist", list);
 				
-				detailPane.setVflex("true");
+				ZKUpdateUtil.setVflex(detailPane, "true");
 				if (headerTab.getDetailPane() == null) {
 					headerTab.setDetailPane(detailPane);
 				} 

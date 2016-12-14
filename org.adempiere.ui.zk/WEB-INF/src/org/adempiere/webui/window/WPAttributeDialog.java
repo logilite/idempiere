@@ -48,6 +48,7 @@ import org.adempiere.webui.editor.WebEditorFactory;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.GridField;
 import org.compiere.model.GridFieldVO;
 import org.compiere.model.MAttribute;
@@ -110,9 +111,9 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	{
 		super ();
 		this.setTitle(Msg.translate(Env.getCtx(), "M_AttributeSetInstance_ID"));
-		this.setWidth("500px");
+		ZKUpdateUtil.setWidth(this, "500px");
 		this.setSclass("popup-dialog");
-//		this.setHeight("600px");
+//		ZKUpdateUtil.setHeight(this, "600px");
 		this.setBorder("normal");
 		this.setShadow(true);
 		this.setSizable(true);
@@ -210,14 +211,14 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	private void init () throws Exception
 	{
 		mainLayout.setParent(this);
-		mainLayout.setHflex("1");
-		mainLayout.setVflex("min");
+		ZKUpdateUtil.setHflex(mainLayout, "1");
+		ZKUpdateUtil.setVflex(mainLayout, "min");
 		
 		Center center = new Center();
 		center.setSclass("dialog-content");
 		center.setParent(mainLayout);
-		centerPanel.setVflex("min");
-		centerPanel.setHflex("min");
+		ZKUpdateUtil.setVflex(centerPanel, "min");
+		ZKUpdateUtil.setHflex(centerPanel, "min");
 		center.appendChild(centerPanel);
 
 		South south = new South();
@@ -242,11 +243,11 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		
 		Column column = new Column();
 		column.setParent(columns);
-		column.setWidth("30%");
+		ZKUpdateUtil.setWidth(column, "30%");
 		
 		column = new Column();
 		column.setParent(columns);
-		column.setWidth("70%");
+		ZKUpdateUtil.setWidth(column, "70%");
 		
 		Rows rows = new Rows();
 		rows.setParent(centerLayout);
@@ -314,7 +315,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 			}
 			existingCombo.addActionListener(this);
 			row.appendChild(existingCombo);
-			existingCombo.setHflex("1");
+			ZKUpdateUtil.setHflex(existingCombo, "1");
 			
 			row = new Row();
 			row.setParent(rows);
@@ -354,7 +355,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 			bSelect.setImage(ThemeManager.getThemeResource("images/PAttribute16.png"));
 			bSelect.addEventListener(Events.ON_CLICK, this);
 			row.appendChild(bSelect);
-			bSelect.setHflex("1");
+			ZKUpdateUtil.setHflex(bSelect, "1");
 			rows.appendChild(row);
 			
 			//	All Attributes
@@ -373,7 +374,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 			Label label = new Label (Msg.translate(Env.getCtx(), "Lot"));
 			row.appendChild(label);
 			row.appendChild(fieldLotString);
-			fieldLotString.setHflex("1");
+			ZKUpdateUtil.setHflex(fieldLotString, "1");
 			fieldLotString.setText (m_masi.getLot());
 			//	M_Lot_ID
 		//	int AD_Column_ID = 9771;	//	M_AttributeSetInstance.M_Lot_ID
@@ -397,7 +398,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 			m_row++;
 			row.appendChild(label);
 			row.appendChild(fieldLot);
-			fieldLot.setHflex("1");
+			ZKUpdateUtil.setHflex(fieldLot, "1");
 			if (m_masi.getM_Lot_ID() != 0)
 			{
 				for (int i = 1; i < fieldLot.getItemCount(); i++)
@@ -444,7 +445,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 			Label label = new Label (Msg.translate(Env.getCtx(), "SerNo"));
 			row.appendChild(label);
 			row.appendChild(fieldSerNo);
-			fieldSerNo.setHflex("1");
+			ZKUpdateUtil.setHflex(fieldSerNo, "1");
 			fieldSerNo.setText(m_masi.getSerNo());
 			
 			//	New SerNo Button
@@ -512,7 +513,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		row.setParent(rows);
 		row.appendChild(label);
 		row.appendChild(fieldDescription);
-		fieldDescription.setHflex("1");
+		ZKUpdateUtil.setHflex(fieldDescription, "1");
 		
 		return true;
 	}	//	initAttribute

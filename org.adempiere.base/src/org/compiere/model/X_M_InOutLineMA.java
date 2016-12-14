@@ -26,7 +26,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_InOutLineMA
  *  @author iDempiere (generated) 
- *  @version Release 2.1 - $Id$ */
+ *  @version Release 4.1 - $Id$ */
 public class X_M_InOutLineMA extends PO implements I_M_InOutLineMA, I_Persistent 
 {
 
