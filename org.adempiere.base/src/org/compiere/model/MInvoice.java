@@ -350,6 +350,35 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		return invoice;
 	}  //	MInvoice
 	
+	@Deprecated
+	public MInvoice (MOrder order, int C_DocTypeTarget_ID, Timestamp invoiceDate)
+	{
+		this (order.getCtx(), 0, order.get_TrxName());
+		setClientOrg(order);
+		setOrder(order);	//	set base settings
+		//
+		if (C_DocTypeTarget_ID <= 0)
+		{
+			MDocType odt = MDocType.get(order.getCtx(), order.getC_DocType_ID());
+			if (odt != null)
+			{
+				C_DocTypeTarget_ID = odt.getC_DocTypeInvoice_ID();
+				if (C_DocTypeTarget_ID <= 0)
+					throw new AdempiereException("@NotFound@ @C_DocTypeInvoice_ID@ - @C_DocType_ID@:"+odt.get_Translation(MDocType.COLUMNNAME_Name));
+			}
+		}
+		setC_DocTypeTarget_ID(C_DocTypeTarget_ID);
+		if (invoiceDate != null)
+			setDateInvoiced(invoiceDate);
+		setDateAcct(getDateInvoiced());
+		//
+		setSalesRep_ID(order.getSalesRep_ID());
+		//
+		setC_BPartner_ID(order.getBill_BPartner_ID());
+		setC_BPartner_Location_ID(order.getBill_Location_ID());
+		setAD_User_ID(order.getBill_User_ID());
+	}	//	MInvoice
+	
 	/**
 	 * 	Create Invoice from Shipment
 	 *	@param ship shipment
@@ -370,6 +399,21 @@ public class MInvoice extends X_C_Invoice implements DocAction
 
 		return invoice;
 	}  //	MInvoice
+	
+	@Deprecated
+	public MInvoice (MInOut ship, Timestamp invoiceDate)
+	{
+		this (ship.getCtx(), 0, ship.get_TrxName());
+		setClientOrg(ship);
+		setShipment(ship);	//	set base settings
+		//
+		setC_DocTypeTarget_ID();
+		if (invoiceDate != null)
+			setDateInvoiced(invoiceDate);
+		setDateAcct(getDateInvoiced());
+		//
+		setSalesRep_ID(ship.getSalesRep_ID());
+	}	//	MInvoice
 	
 	/**
 	 * 	Create Invoice from Batch Line
@@ -416,6 +460,46 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		
 		return invoice;
 	}  //	MInvoice
+	
+	@Deprecated
+	public MInvoice (MInvoiceBatch batch, MInvoiceBatchLine line)
+	{
+		this (line.getCtx(), 0, line.get_TrxName());
+		setClientOrg(line);
+		setDocumentNo(line.getDocumentNo());
+		//
+		setIsSOTrx(batch.isSOTrx());
+		MBPartner bp = new MBPartner (line.getCtx(), line.getC_BPartner_ID(), line.get_TrxName());
+		setBPartner(bp);	//	defaults
+		//
+		setIsTaxIncluded(line.isTaxIncluded());
+		//	May conflict with default price list
+		setC_Currency_ID(batch.getC_Currency_ID());
+		setC_ConversionType_ID(batch.getC_ConversionType_ID());
+		//
+	//	setPaymentRule(order.getPaymentRule());
+	//	setC_PaymentTerm_ID(order.getC_PaymentTerm_ID());
+	//	setPOReference("");
+		setDescription(batch.getDescription());
+	//	setDateOrdered(order.getDateOrdered());
+		//
+		setAD_OrgTrx_ID(line.getAD_OrgTrx_ID());
+		setC_Project_ID(line.getC_Project_ID());
+	//	setC_Campaign_ID(line.getC_Campaign_ID());
+		setC_Activity_ID(line.getC_Activity_ID());
+		setUser1_ID(line.getUser1_ID());
+		setUser2_ID(line.getUser2_ID());
+		//
+		setC_DocTypeTarget_ID(line.getC_DocType_ID());
+		setDateInvoiced(line.getDateInvoiced());
+		setDateAcct(line.getDateAcct());
+		//
+		setSalesRep_ID(batch.getSalesRep_ID());
+		//
+		setC_BPartner_ID(line.getC_BPartner_ID());
+		setC_BPartner_Location_ID(line.getC_BPartner_Location_ID());
+		setAD_User_ID(line.getAD_User_ID());
+	}	//	MInvoice
 
 	/**	Open Amount				*/
 	protected BigDecimal 		m_openAmt = null;

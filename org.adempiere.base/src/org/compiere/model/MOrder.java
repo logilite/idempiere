@@ -241,6 +241,44 @@ public class MOrder extends X_C_Order implements DocAction
 		return order;
 
 	}
+	
+	@Deprecated
+	public MOrder (MProject project, boolean IsSOTrx, String DocSubTypeSO)
+	{
+		this (project.getCtx(), 0, project.get_TrxName());
+		setAD_Client_ID(project.getAD_Client_ID());
+		setAD_Org_ID(project.getAD_Org_ID());
+		setC_Campaign_ID(project.getC_Campaign_ID());
+		setSalesRep_ID(project.getSalesRep_ID());
+		//
+		setC_Project_ID(project.getC_Project_ID());
+		setDescription(project.getName());
+		Timestamp ts = project.getDateContract();
+		if (ts != null)
+			setDateOrdered (ts);
+		ts = project.getDateFinish();
+		if (ts != null)
+			setDatePromised (ts);
+		//
+		setC_BPartner_ID(project.getC_BPartner_ID());
+		setC_BPartner_Location_ID(project.getC_BPartner_Location_ID());
+		setAD_User_ID(project.getAD_User_ID());
+		//
+		setM_Warehouse_ID(project.getM_Warehouse_ID());
+		setM_PriceList_ID(project.getM_PriceList_ID());
+		setC_PaymentTerm_ID(project.getC_PaymentTerm_ID());
+		//
+		setIsSOTrx(IsSOTrx);
+		if (IsSOTrx)
+		{
+			if (DocSubTypeSO == null || DocSubTypeSO.length() == 0)
+				setC_DocTypeTarget_ID(DocSubTypeSO_OnCredit);
+			else
+				setC_DocTypeTarget_ID(DocSubTypeSO);
+		}
+		else
+			setC_DocTypeTarget_ID();
+	}	//	MOrder
 
 	/**
 	 *  Load Constructor

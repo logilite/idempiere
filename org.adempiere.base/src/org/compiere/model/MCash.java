@@ -204,6 +204,23 @@ public class MCash extends X_C_Cash implements DocAction
 		return cash;
 	} // MCash
 	
+	@Deprecated
+	public MCash (MCashBook cb, Timestamp today)
+	{
+		this (cb.getCtx(), 0, cb.get_TrxName());
+		setClientOrg(cb);
+		setC_CashBook_ID(cb.getC_CashBook_ID());
+		if (today != null)
+		{
+			setStatementDate (today);	
+			setDateAcct (today);
+			StringBuilder name = new StringBuilder(DisplayType.getDateFormat(DisplayType.Date).format(today))
+				.append(" ").append(cb.getName());
+			setName (name.toString());
+		}
+		m_book = cb;
+	}	//	MCash
+	
 	/**	Lines					*/
 	protected MCashLine[]		m_lines = null;
 	/** CashBook				*/

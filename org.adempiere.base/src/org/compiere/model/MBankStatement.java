@@ -109,6 +109,20 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 
 		return bankStatement;
 	} // MBankStatement
+	
+	@Deprecated
+	public MBankStatement (MBankAccount account, boolean isManual)
+	{
+		this (account.getCtx(), 0, account.get_TrxName());
+		setClientOrg(account);
+		setC_BankAccount_ID(account.getC_BankAccount_ID());
+		setStatementDate(new Timestamp(System.currentTimeMillis()));
+		setDateAcct(new Timestamp(System.currentTimeMillis()));
+		setBeginningBalance(account.getCurrentBalance());
+		setName(getStatementDate().toString());
+		setIsManual(isManual);
+	}	//	MBankStatement
+	
 	/**
 	 * 	Create a new Bank Statement
 	 *	@param account Bank Account
@@ -116,6 +130,12 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 	public static MBankStatement createFrom (MBankAccount account)
 	{
 		return createFrom(account, false);
+	}	//	MBankStatement
+	
+	@Deprecated
+	public MBankStatement(MBankAccount account)
+	{
+		this(account, false);
 	}	//	MBankStatement
  
 	/**	Lines							*/
