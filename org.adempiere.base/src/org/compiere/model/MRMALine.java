@@ -415,7 +415,7 @@ public class MRMALine extends X_M_RMALine
 		return true;
 	}
     
-    protected boolean updateOrderTax(boolean oldTax) 
+    public boolean updateOrderTax(boolean oldTax) 
     {
 		MRMATax tax = MRMATax.get (this, getPrecision(), oldTax, get_TrxName());
 		if (tax != null) 

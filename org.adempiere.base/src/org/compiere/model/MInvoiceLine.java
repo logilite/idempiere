@@ -943,7 +943,7 @@ public class MInvoiceLine extends X_C_InvoiceLine
 	 *
 	 * @author teo_sarca [ 1583825 ]
 	 */
-	protected boolean updateInvoiceTax(boolean oldTax) {
+	public boolean updateInvoiceTax(boolean oldTax) {
 		MInvoiceTax tax = MInvoiceTax.get (this, getPrecision(), oldTax, get_TrxName());
 		if (tax != null) {
 			if (!tax.calculateTaxFromLines())
