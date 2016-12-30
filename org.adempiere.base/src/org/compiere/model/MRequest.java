@@ -558,7 +558,7 @@ public class MRequest extends X_R_Request
 		if (m_partner != null && m_partner.getC_BPartner_ID() != getC_BPartner_ID())
 			m_partner = null;
 		if (m_partner == null)
-			m_partner = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
+			m_partner = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(getC_BPartner_ID(), get_TrxName());
 		return m_partner;
 	}	//	getBPartner
 

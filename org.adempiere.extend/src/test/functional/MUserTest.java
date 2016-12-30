@@ -7,6 +7,7 @@ import java.sql.SQLException;
 
 import org.compiere.model.MBPGroup;
 import org.compiere.model.MBPartner;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -514,7 +515,7 @@ public class MUserTest extends AdempiereTestCase {
     {
 	try {
 
-		m_partner = new MBPartner (getCtx(), 0, getTrxName());
+		m_partner = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(0, getTrxName());
 		m_partner.setValue ("");
 		m_partner.setName ("Test MBPartner with contact");
 		m_partner.setName2 (null);

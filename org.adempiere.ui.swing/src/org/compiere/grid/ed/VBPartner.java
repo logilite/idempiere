@@ -38,6 +38,7 @@ import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MLocation;
 import org.compiere.model.MLocationLookup;
 import org.compiere.model.MRole;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.swing.CDialog;
 import org.compiere.swing.CLabel;
@@ -297,7 +298,7 @@ public final class VBPartner extends CDialog implements ActionListener
 			return true;
 		}
 
-		m_partner = new MBPartner (Env.getCtx(), C_BPartner_ID, null);
+		m_partner = (MBPartner) MTable.get(Env.getCtx(), MBPartner.Table_ID).getPO(C_BPartner_ID, null);
 		if (m_partner.get_ID() == 0)
 		{
 			ADialog.error(m_WindowNo, this, "BPartnerNotFound");

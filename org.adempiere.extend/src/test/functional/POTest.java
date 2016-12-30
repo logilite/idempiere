@@ -3,6 +3,7 @@ package test.functional;
 import java.util.Properties;
 
 import org.compiere.model.MBPartner;
+import org.compiere.model.MTable;
 import org.compiere.model.MTest;
 import org.compiere.model.POInfo;
 import org.compiere.util.DB;
@@ -246,7 +247,7 @@ public class POTest extends AdempiereTestCase
 	 */
 	public void testAD_OrgBP_ID_Issue() throws Exception
 	{
-		MBPartner bp = new MBPartner(getCtx(), 50004, getTrxName()); // Store Central
+		MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(50004, getTrxName());
 		//
 		// Try to change AD_OrgBP_ID field value to a new value
 		final int old_org_id = bp.getAD_OrgBP_ID_Int();

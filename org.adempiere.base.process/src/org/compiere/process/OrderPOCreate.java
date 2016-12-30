@@ -279,7 +279,7 @@ public class OrderPOCreate extends SvrProcess
 		po.setSalesRep_ID(so.getSalesRep_ID());
 		po.setM_Warehouse_ID(so.getM_Warehouse_ID());
 		//	Set Vendor
-		MBPartner vendor = new MBPartner (getCtx(), C_BPartner_ID, get_TrxName());
+		MBPartner vendor = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(C_BPartner_ID, get_TrxName());
 		po.setBPartner(vendor);
 		//	Drop Ship
 		if ( p_IsDropShip )

@@ -32,8 +32,6 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.adempiere.plaf.AdempierePLAF;
 import org.compiere.apps.ADialog;
 import org.compiere.model.MBPartner;
@@ -43,6 +41,7 @@ import org.compiere.model.MCurrency;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MPriceListVersion;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.swing.CButton;
 import org.compiere.swing.CComboBox;
@@ -53,6 +52,8 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
+
+import net.miginfocom.swing.MigLayout;
 
 
 /**
@@ -414,7 +415,7 @@ public class SubOrder extends PosSubPanel
 			m_bpartner = null;
 		else
 		{
-			m_bpartner = new MBPartner(p_ctx, C_BPartner_ID, null);
+			m_bpartner = (MBPartner) MTable.get(p_ctx, MBPartner.Table_ID).getPO(C_BPartner_ID, null);
 			if (m_bpartner.get_ID() == 0)
 				m_bpartner = null;
 		}

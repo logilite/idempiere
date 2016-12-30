@@ -70,7 +70,7 @@ public class OrderTest implements Runnable
 	{
 		long time = System.currentTimeMillis();
 		int count = 0;
-		MBPartner bp = new MBPartner(Env.getCtx(), 117, null);
+		MBPartner bp = (MBPartner) MTable.get(Env.getCtx(), MBPartner.Table_ID).getPO(117, null);
 		bp.setSOCreditStatus(MBPartner.SOCREDITSTATUS_NoCreditCheck);
 		bp.saveEx();
 		

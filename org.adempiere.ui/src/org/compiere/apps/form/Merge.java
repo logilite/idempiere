@@ -20,6 +20,7 @@ import java.util.logging.Level;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.model.X_M_Cost;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -241,7 +242,7 @@ public class Merge
 		}
 		else if (ColumnName.equals(C_BPARTNER_ID))
 		{
-			MBPartner bp = new MBPartner (Env.getCtx(), to_ID, null);
+			MBPartner bp = (MBPartner) MTable.get(Env.getCtx(), MBPartner.Table_ID).getPO(to_ID, null);
 			if (bp.get_ID() != 0)
 			{
 				MPayment[] payments = MPayment.getOfBPartner(Env.getCtx(), bp.getC_BPartner_ID(), null);

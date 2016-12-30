@@ -809,7 +809,7 @@ public class Allocation
 			if (log.isLoggable(Level.CONFIG)) log.config("Payment #" + i + (pay.isAllocated() ? " not" : " is") 
 					+ " fully allocated");
 		}
-		MBPartner bpartner = new MBPartner(Env.getCtx(), m_C_BPartner_ID, trxName);
+		MBPartner bpartner = (MBPartner) MTable.get(Env.getCtx(), MBPartner.Table_ID).getPO(m_C_BPartner_ID, trxName);
 		bpartner.setTotalOpenBalance();
 		bpartner.save();
 		paymentList.clear();

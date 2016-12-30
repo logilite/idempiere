@@ -34,6 +34,7 @@ import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MLocation;
 import org.compiere.model.MLocationLookup;
 import org.compiere.model.MRole;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -307,7 +308,7 @@ public class WBPartner extends Window implements EventListener<Event>, ValueChan
 			return true;
 		}
 
-		m_partner = new MBPartner (Env.getCtx(), C_BPartner_ID, null);
+		m_partner = (MBPartner) MTable.get(Env.getCtx(), MBPartner.Table_ID).getPO(C_BPartner_ID, null);
 		
 		if (m_partner.get_ID() == 0)
 		{

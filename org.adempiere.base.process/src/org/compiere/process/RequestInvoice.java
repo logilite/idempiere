@@ -197,7 +197,8 @@ public class RequestInvoice extends SvrProcess
 		m_invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(0, get_TrxName());
 		m_invoice.setIsSOTrx(true);
 		
-		MBPartner partner = new MBPartner (getCtx(), request.getC_BPartner_ID(), null);
+		MBPartner partner = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(request.getC_BPartner_ID(),
+				null);
 		m_invoice.setBPartner(partner);
 		
 		m_invoice.saveEx();

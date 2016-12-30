@@ -1239,7 +1239,7 @@ public class WebInfo
 				&& rfq.isRfQResponseAccepted() && !rfq.isInvitedVendorsOnly() 
 				&& getC_BPartner_ID() > 0 && getAD_User_ID() > 0)
 			{
-				MBPartner bp = new MBPartner (m_ctx, getC_BPartner_ID(), null);
+				MBPartner bp = (MBPartner) MTable.get(m_ctx, MBPartner.Table_ID).getPO(getC_BPartner_ID(), null);
 				bp.setPrimaryAD_User_ID(getAD_User_ID());				
 				retValue = new MRfQResponse (rfq, bp);	//	may have no lines
 				retValue.saveEx();

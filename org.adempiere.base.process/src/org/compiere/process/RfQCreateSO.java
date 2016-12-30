@@ -81,7 +81,8 @@ public class RfQCreateSO extends SvrProcess
 		
 		if (rfq.getC_BPartner_ID() == 0 || rfq.getC_BPartner_Location_ID() == 0)
 			throw new Exception ("No Business Partner/Location");
-		MBPartner bp = new MBPartner (getCtx(), rfq.getC_BPartner_ID(), get_TrxName());
+		MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(rfq.getC_BPartner_ID(),
+				get_TrxName());
 		
 		MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 		order.setIsSOTrx(true);

@@ -227,7 +227,8 @@ public class InvoiceGenerate extends SvrProcess
 				boolean doInvoice = false;
 				if (MOrder.INVOICERULE_CustomerScheduleAfterDelivery.equals(order.getInvoiceRule()))
 				{
-					m_bp = new MBPartner (getCtx(), order.getBill_BPartner_ID(), null);
+					m_bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(order.getBill_BPartner_ID(),
+							null);
 					if (m_bp.getC_InvoiceSchedule_ID() == 0)
 					{
 						log.warning("BPartner has no Schedule - set to After Delivery");
@@ -418,7 +419,8 @@ public class InvoiceGenerate extends SvrProcess
 		{
 			MDocType dt = MDocType.get(getCtx(), ship.getC_DocType_ID());
 			if (m_bp == null || m_bp.getC_BPartner_ID() != ship.getC_BPartner_ID())
-				m_bp = new MBPartner (getCtx(), ship.getC_BPartner_ID(), get_TrxName());
+				m_bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(ship.getC_BPartner_ID(),
+						get_TrxName());
 			
 			//	Reference: Delivery: 12345 - 12.12.12
 			MClient client = MClient.get(getCtx(), order.getAD_Client_ID ());

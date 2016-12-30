@@ -148,7 +148,7 @@ public final class InventoryUtil
 						.firstOnly();
 		if (bp == null)
 		{
-			bp = new MBPartner(ctx, 0, null);
+			bp = (MBPartner) MTable.get(ctx, MBPartner.Table_ID).getPO(0, null);
 		}
 		bp.setValue(value);
 		bp.setName(value);

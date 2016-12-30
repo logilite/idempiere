@@ -529,7 +529,7 @@ public class ImportOrder extends SvrProcess
 				MBPartner bp = MBPartner.get (getCtx(), imp.getBPartnerValue(), get_TrxName());
 				if (bp == null)
 				{
-					bp = new MBPartner (getCtx (), -1, get_TrxName());
+					bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(-1, get_TrxName());
 					bp.setClientOrg (imp.getAD_Client_ID (), imp.getAD_Org_ID ());
 					bp.setValue (imp.getBPartnerValue ());
 					bp.setName (imp.getName ());

@@ -407,7 +407,7 @@ public class MShippingTransaction extends X_M_ShippingTransaction
 */		
 		if (partyInfo == null)
 		{
-			MBPartner recipient = new MBPartner(getCtx(), getC_BPartner_ID(), get_TrxName());
+			MBPartner recipient = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(getC_BPartner_ID(), get_TrxName());
 		    MBPartnerLocation ra = new MBPartnerLocation(getCtx(), getC_BPartner_Location_ID(), get_TrxName());
 		    MUser contact = new MUser(getCtx(), getAD_User_ID(), get_TrxName());
 		    

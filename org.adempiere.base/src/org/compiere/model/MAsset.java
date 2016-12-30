@@ -119,7 +119,8 @@ public class MAsset extends X_A_Asset
 			setM_Product_ID(inoutLine.getM_Product_ID());
 			setM_AttributeSetInstance_ID(inoutLine.getM_AttributeSetInstance_ID());
 		}
-		MBPartner bp = new MBPartner(getCtx(), invoiceLine.getC_Invoice().getC_BPartner_ID(), null);
+		MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID)
+				.getPO(invoiceLine.getC_Invoice().getC_BPartner_ID(), null);
 		name += bp.getName()+"-"+invoiceLine.getC_Invoice().getDocumentNo();
 		if (log.isLoggable(Level.FINE)) log.fine("name=" + name);
 		setValue(name);

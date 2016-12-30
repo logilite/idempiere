@@ -935,7 +935,8 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 			if (M_Invoice_ID > 0)
 				isSOTrxInvoice = invoice.isSOTrx();
 			
-			MBPartner bpartner = new MBPartner (getCtx(), line.getC_BPartner_ID(), get_TrxName());
+			MBPartner bpartner = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(line.getC_BPartner_ID(),
+					get_TrxName());
 			DB.getDatabase().forUpdate(bpartner, 0);
 
 			BigDecimal allocAmt = line.getAmount().add(line.getDiscountAmt()).add(line.getWriteOffAmt());
@@ -1257,7 +1258,8 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 		String sysconfig_desc = MSysConfig.getValue(MSysConfig.ALLOCATION_DESCRIPTION, "@#AD_User_Name@", getAD_Client_ID());
 		String description = "";
 		if (sysconfig_desc.contains("@")) {
-			description = Env.parseVariable(sysconfig_desc, new MBPartner(getCtx(), bpartnerID, null), trxName, true);
+			description = Env.parseVariable(sysconfig_desc,
+					(MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(bpartnerID, trxName), trxName, true);
 			description = Env.parseVariable(description, this, trxName, true);
 			description = Msg.parseTranslation(getCtx(), description);
 		} else

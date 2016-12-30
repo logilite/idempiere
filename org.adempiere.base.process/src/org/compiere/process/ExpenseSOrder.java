@@ -135,7 +135,8 @@ public class ExpenseSOrder extends SvrProcess
 					|| oldBPartner.getC_BPartner_ID() != tel.getC_BPartner_ID())
 				{
 					completeOrder ();
-					oldBPartner = new MBPartner (getCtx(), tel.getC_BPartner_ID(), get_TrxName());
+					oldBPartner = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(tel.getC_BPartner_ID(),
+							get_TrxName());
 				}
 				//	New Project - New Order
 				if (old_Project_ID != tel.getC_Project_ID())

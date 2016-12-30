@@ -31,6 +31,7 @@ import org.compiere.model.MBPartner;
 import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MContactInterest;
 import org.compiere.model.MLocation;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.X_I_BPartner;
@@ -327,7 +328,7 @@ implements ImportProcess
 
 					if (impBP.getC_BPartner_ID() == 0)	//	Insert new BPartner
 					{
-						bp = new MBPartner(impBP);
+						bp = MBPartner.createFrom(impBP);
 						ModelValidationEngine.get().fireImportValidate(this, impBP, bp, ImportValidator.TIMING_AFTER_IMPORT);
 						
 						setTypeOfBPartner(impBP,bp);
@@ -351,7 +352,7 @@ implements ImportProcess
 					}
 					else				//	Update existing BPartner
 					{
-						bp = new MBPartner(getCtx(), impBP.getC_BPartner_ID(), get_TrxName());
+						bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(impBP.getC_BPartner_ID(), get_TrxName());
 						//	if (impBP.getValue() != null)			//	not to overwite
 						//		bp.setValue(impBP.getValue());
 						if (impBP.getName() != null)

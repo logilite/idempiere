@@ -118,7 +118,8 @@ public class ExpenseAPInvoice extends SvrProcess
 				if (te.getC_BPartner_ID() != old_BPartner_ID)
 				{
 					completeInvoice (invoice);
-					MBPartner bp = new MBPartner (getCtx(), te.getC_BPartner_ID(), get_TrxName());
+					MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(te.getC_BPartner_ID(),
+							get_TrxName());
 					//
 					if (log.isLoggable(Level.INFO)) log.info("New Invoice for " + bp);
 					invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(0, get_TrxName());
