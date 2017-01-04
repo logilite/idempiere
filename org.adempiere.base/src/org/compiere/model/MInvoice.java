@@ -869,7 +869,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 				line.setM_InOutLine_ID(0);
 				if (fromLine.getM_InOutLine_ID() != 0)
 				{
-					MInOutLine peer = new MInOutLine (getCtx(), fromLine.getM_InOutLine_ID(), get_TrxName());
+					MInOutLine peer = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(fromLine.getM_InOutLine_ID(), get_TrxName());
 					if (peer.getRef_InOutLine_ID() != 0)
 						line.setM_InOutLine_ID(peer.getRef_InOutLine_ID());
 				}
@@ -1156,7 +1156,8 @@ public class MInvoice extends X_C_Invoice implements DocAction
 			MInvoiceLine[] lines = getLines(false);
 			for (int i = 0; i < lines.length; i++) {
 				if (lines[i].getM_InOutLine_ID() > 0) {
-					MInOutLine sLine = new MInOutLine(getCtx(), lines[i].getM_InOutLine_ID(), get_TrxName());
+					MInOutLine sLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(
+							lines[i].getM_InOutLine_ID(), get_TrxName());
 					sLine.setIsInvoiced(false);
 					sLine.saveEx();
 				}
@@ -1896,7 +1897,8 @@ public class MInvoice extends X_C_Invoice implements DocAction
 				&& line.getM_Product_ID() != 0
 				&& !isReversal())
 			{
-				MInOutLine receiptLine = new MInOutLine (getCtx(),line.getM_InOutLine_ID(), get_TrxName());
+				MInOutLine receiptLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(
+						line.getM_InOutLine_ID(), get_TrxName());
 				BigDecimal matchQty = line.getQtyInvoiced();
 
 				if (receiptLine.getMovementQty().compareTo(matchQty) < 0)
@@ -2418,7 +2420,8 @@ public class MInvoice extends X_C_Invoice implements DocAction
 					//	Unlink Shipment
 					if (line.getM_InOutLine_ID() != 0)
 					{
-						MInOutLine ioLine = new MInOutLine(getCtx(), line.getM_InOutLine_ID(), get_TrxName());
+						MInOutLine ioLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(
+								line.getM_InOutLine_ID(), get_TrxName());
 						ioLine.setIsInvoiced(false);
 						ioLine.saveEx(get_TrxName());
 						line.setM_InOutLine_ID(0);
@@ -2655,7 +2658,8 @@ public class MInvoice extends X_C_Invoice implements DocAction
 			MInvoiceLine iLine = iLines[i];
 			if (iLine.getM_InOutLine_ID() != 0)
 			{
-				MInOutLine ioLine = new MInOutLine(getCtx(), iLine.getM_InOutLine_ID(), get_TrxName());
+				MInOutLine ioLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(
+						iLine.getM_InOutLine_ID(), get_TrxName());
 				ioLine.setIsInvoiced(false);
 				ioLine.saveEx(get_TrxName());
 				//	Reconsiliation

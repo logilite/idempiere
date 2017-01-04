@@ -96,7 +96,7 @@ public class Doc_MatchPO extends Doc
 		m_oLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(m_C_OrderLine_ID, getTrxName());
 		//
 		m_M_InOutLine_ID = m_matchPO.getM_InOutLine_ID();
-		m_ioLine = new MInOutLine (getCtx(), m_M_InOutLine_ID, getTrxName());
+		m_ioLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(m_M_InOutLine_ID, getTrxName());
 
 		m_C_InvoiceLine_ID = m_matchPO.getC_InvoiceLine_ID();
 
@@ -184,7 +184,8 @@ public class Doc_MatchPO extends Doc
 			}	//	correct included Tax
 		}
 
-		MInOutLine receiptLine = new MInOutLine (getCtx(), m_M_InOutLine_ID, getTrxName());
+		MInOutLine receiptLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(m_M_InOutLine_ID,
+				getTrxName());
 		MInOut inOut = receiptLine.getParent();
 		boolean isReturnTrx = inOut.getMovementType().equals(X_M_InOut.MOVEMENTTYPE_VendorReturns);
 

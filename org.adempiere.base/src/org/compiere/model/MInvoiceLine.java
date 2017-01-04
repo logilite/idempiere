@@ -993,7 +993,8 @@ public class MInvoiceLine extends X_C_InvoiceLine
 		// reset shipment line invoiced flag
 		if ( getM_InOutLine_ID() > 0 )
 		{
-			MInOutLine sLine = new MInOutLine(getCtx(), getM_InOutLine_ID(), get_TrxName());
+			MInOutLine sLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(getM_InOutLine_ID(),
+					get_TrxName());
 			sLine.setIsInvoiced(false);
 			sLine.saveEx();
 		}
@@ -1106,7 +1107,8 @@ public class MInvoiceLine extends X_C_InvoiceLine
 			//	Single Line
 			else if (lc.getM_InOutLine_ID() != 0)
 			{
-				MInOutLine iol = new MInOutLine (getCtx(), lc.getM_InOutLine_ID(), get_TrxName());
+				MInOutLine iol = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(lc.getM_InOutLine_ID(),
+						get_TrxName());
 				if (iol.isDescription() || iol.getM_Product_ID() == 0){
 					msgreturn = new StringBuilder("Invalid Receipt Line - ").append(iol);
 					return msgreturn.toString();
@@ -1190,7 +1192,8 @@ public class MInvoiceLine extends X_C_InvoiceLine
 			}
 			else if (lc.getM_InOutLine_ID() != 0)	//	receipt line
 			{
-				MInOutLine iol = new MInOutLine (getCtx(), lc.getM_InOutLine_ID(), get_TrxName());
+				MInOutLine iol = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(lc.getM_InOutLine_ID(),
+						get_TrxName());
 				if (!iol.isDescription() && iol.getM_Product_ID() != 0)
 					list.add(iol);
 			}

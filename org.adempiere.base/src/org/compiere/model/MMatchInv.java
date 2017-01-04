@@ -216,7 +216,8 @@ public class MMatchInv extends X_M_MatchInv
 		}
 		if (getM_AttributeSetInstance_ID() == 0 && getM_InOutLine_ID() != 0)
 		{
-			MInOutLine iol = new MInOutLine (getCtx(), getM_InOutLine_ID(), get_TrxName());
+			MInOutLine iol = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(getM_InOutLine_ID(),
+					get_TrxName());
 			setM_AttributeSetInstance_ID(iol.getM_AttributeSetInstance_ID());
 		}
 		return true;
@@ -229,7 +230,8 @@ public class MMatchInv extends X_M_MatchInv
 		
 		if (getM_InOutLine_ID() > 0)
 		{
-			MInOutLine line = new MInOutLine(getCtx(), getM_InOutLine_ID(), get_TrxName());
+			MInOutLine line = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(getM_InOutLine_ID(),
+					get_TrxName());
 			BigDecimal matchedQty = DB.getSQLValueBD(get_TrxName(), "SELECT Coalesce(SUM(Qty),0) FROM M_MatchInv WHERE M_InOutLine_ID=?" , getM_InOutLine_ID());
 			if (matchedQty != null && matchedQty.compareTo(line.getMovementQty()) > 0)
 			{

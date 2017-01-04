@@ -243,7 +243,7 @@ public final class InventoryUtil
 		MInOutLine iol = null;
 		for (MOrderLine oline : order.getLines(true, null))
 		{
-			iol = new MInOutLine(io);
+			iol = MInOutLine.createFrom(io);
 			iol.setOrderLine(oline, 0, doc.Qty);
 			iol.setQty(doc.Qty);
 			iol.saveEx();

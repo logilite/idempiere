@@ -103,7 +103,7 @@ public class Doc_MatchInv extends Doc
 		setC_BPartner_ID(C_BPartner_ID);
 		//
 		int M_InOutLine_ID = m_matchInv.getM_InOutLine_ID();
-		m_receiptLine = new MInOutLine (getCtx(), M_InOutLine_ID, getTrxName());
+		m_receiptLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(M_InOutLine_ID, getTrxName());
 		//
 		m_pc = new ProductCost (Env.getCtx(),
 			getM_Product_ID(), m_matchInv.getM_AttributeSetInstance_ID(), getTrxName());

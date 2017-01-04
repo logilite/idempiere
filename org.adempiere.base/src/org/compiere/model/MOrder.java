@@ -2189,7 +2189,7 @@ public class MOrder extends X_C_Order implements DocAction
 		{
 			MOrderLine oLine = oLines[i];
 			//
-			MInOutLine ioLine = new MInOutLine(shipment);
+			MInOutLine ioLine = MInOutLine.createFrom(shipment);
 			//	Qty = Ordered - Delivered
 			BigDecimal MovementQty = oLine.getQtyOrdered().subtract(oLine.getQtyDelivered()); 
 			//	Location

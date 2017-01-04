@@ -140,7 +140,7 @@ public class MInOut extends X_M_InOut implements DocAction
 				BigDecimal lineQty = storages[ll].getQtyOnHand();
 				if (lineQty.compareTo(qty) > 0)
 					lineQty = qty;
-				MInOutLine line = new MInOutLine (retValue);
+				MInOutLine line = MInOutLine.createFrom(retValue);
 				line.setOrderLine(oLines[i], storages[ll].getM_Locator_ID(),
 					order.isSOTrx() ? lineQty : Env.ZERO);
 				line.setQty(lineQty);	//	Correct UOM for QtyEntered
@@ -898,7 +898,7 @@ public class MInOut extends X_M_InOut implements DocAction
 		int count = 0;
 		for (int i = 0; i < fromLines.length; i++)
 		{
-			MInOutLine line = new MInOutLine (this);
+			MInOutLine line = MInOutLine.createFrom(this);
 			MInOutLine fromLine = fromLines[i];
 			line.set_TrxName(get_TrxName());
 			if (counter)	//	header

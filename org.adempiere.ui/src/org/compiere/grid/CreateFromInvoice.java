@@ -479,7 +479,8 @@ public abstract class CreateFromInvoice extends CreateFrom
 				MInOutLine inoutLine = null;
 				if (M_InOutLine_ID != 0)
 				{
-					inoutLine = new MInOutLine (Env.getCtx(), M_InOutLine_ID, trxName);
+					inoutLine = (MInOutLine) MTable.get(Env.getCtx(), MInOutLine.Table_ID).getPO(M_InOutLine_ID,
+							trxName);
 					if (orderLine == null && inoutLine.getC_OrderLine_ID() != 0)
 					{
 						C_OrderLine_ID = inoutLine.getC_OrderLine_ID();

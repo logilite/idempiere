@@ -96,7 +96,8 @@ public class MAsset extends X_A_Asset
 		
 		MInvoiceLine invoiceLine = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(
 				match.getC_InvoiceLine_ID(), get_TrxName());
-		MInOutLine inoutLine = new MInOutLine(getCtx(), match.getM_InOutLine_ID(), get_TrxName());
+		MInOutLine inoutLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(match.getM_InOutLine_ID(),
+				get_TrxName());
 		
 		setIsOwned(true);
 		setIsInPosession(true);

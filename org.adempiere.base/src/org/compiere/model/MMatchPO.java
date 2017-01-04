@@ -788,7 +788,8 @@ public class MMatchPO extends X_M_MatchPO
 		//	Set ASI from Receipt
 		if (getM_AttributeSetInstance_ID() == 0 && getM_InOutLine_ID() != 0)
 		{
-			MInOutLine iol = new MInOutLine (getCtx(), getM_InOutLine_ID(), get_TrxName());
+			MInOutLine iol = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(getM_InOutLine_ID(),
+					get_TrxName());
 			setM_AttributeSetInstance_ID(iol.getM_AttributeSetInstance_ID());
 		}
 		
@@ -840,7 +841,8 @@ public class MMatchPO extends X_M_MatchPO
 			}	//	get from invoice
 			if (getC_OrderLine_ID() == 0 && getM_InOutLine_ID() != 0)
 			{
-				MInOutLine iol = new MInOutLine (getCtx(), getM_InOutLine_ID(), get_TrxName());
+				MInOutLine iol = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(getM_InOutLine_ID(),
+						get_TrxName());
 				if (iol.getC_OrderLine_ID() != 0)
 				{
 					setC_OrderLine_ID(iol.getC_OrderLine_ID());
@@ -897,7 +899,8 @@ public class MMatchPO extends X_M_MatchPO
 				{
 					MInvoiceLine invoiceLine = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(
 							getC_InvoiceLine_ID(), get_TrxName());
-					MInOutLine inoutLine = new MInOutLine(getCtx(), getM_InOutLine_ID(), get_TrxName());
+					MInOutLine inoutLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(
+							getM_InOutLine_ID(), get_TrxName());
 					throw new IllegalStateException("[MatchPO] Missing corresponding invoice matching record for invoice line "
 							+ invoiceLine + " and receipt line " + inoutLine);
 				}
@@ -922,7 +925,8 @@ public class MMatchPO extends X_M_MatchPO
 		{
 			if (getM_InOutLine_ID() > 0)
 			{
-				MInOutLine line = new MInOutLine(getCtx(), getM_InOutLine_ID(), get_TrxName());
+				MInOutLine line = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(getM_InOutLine_ID(),
+						get_TrxName());
 				BigDecimal matchedQty = DB.getSQLValueBD(get_TrxName(), "SELECT Coalesce(SUM(Qty),0) FROM M_MatchPO WHERE M_InOutLine_ID=?" , getM_InOutLine_ID());
 				if (matchedQty != null && matchedQty.compareTo(line.getMovementQty()) > 0)
 				{
@@ -990,7 +994,8 @@ public class MMatchPO extends X_M_MatchPO
 			if (orderLine.getM_AttributeSetInstance_ID() == 0
 				&& getM_InOutLine_ID() != 0)
 			{
-				MInOutLine iol = new MInOutLine (getCtx(), getM_InOutLine_ID(), get_TrxName());
+				MInOutLine iol = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(getM_InOutLine_ID(),
+						get_TrxName());
 				if (iol.getMovementQty().compareTo(orderLine.getQtyOrdered()) == 0)
 					orderLine.setM_AttributeSetInstance_ID(iol.getM_AttributeSetInstance_ID());
 			}

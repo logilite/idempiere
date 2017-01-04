@@ -675,7 +675,7 @@ public class Match
 		MInOutLine sLine = null;
 		
 		if(M_InOutLine_ID > 0)
-			sLine = new MInOutLine (Env.getCtx(), M_InOutLine_ID, trxName);
+			sLine = (MInOutLine) MTable.get(Env.getCtx(), MInOutLine.Table_ID).getPO(M_InOutLine_ID, trxName);
 		
 		if (invoice)	//	Shipment - Invoice
 		{
