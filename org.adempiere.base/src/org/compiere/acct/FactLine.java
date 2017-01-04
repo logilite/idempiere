@@ -469,6 +469,23 @@ public final class FactLine extends X_Fact_Acct
 		return m_docLine;
 	}	//	getDocLine
 	
+	
+	/**
+	 * get Document Header
+	 * @return Doc
+	 */
+	public Doc getM_doc() {
+		return m_doc;
+	}
+	
+	/**
+	 * set Document Header
+	 * @param m_doc
+	 */
+	public void setM_doc(Doc m_doc) {
+		this.m_doc = m_doc;
+	}
+	
 	/**
 	 * 	Set Description
 	 *	@param description description
@@ -995,7 +1012,7 @@ public final class FactLine extends X_Fact_Acct
 	 *  @param UserElement2_ID user element 2
 	 *  @return Account_ID for Unearned Revenue or Revenue Account if not found
 	 */
-	private int createRevenueRecognition (
+	public int createRevenueRecognition (
 		int C_RevenueRecognition_ID, int C_InvoiceLine_ID,
 		int AD_Client_ID, int AD_Org_ID, int AD_User_ID, 
 		int Account_ID, int C_SubAcct_ID,

@@ -409,7 +409,7 @@ public final class Fact
 	 *  Balance Source Segment
 	 *  @param elementType segment element type
 	 */
-	private void balanceSegment (String elementType)
+	public void balanceSegment (String elementType)
 	{
 		//  no lines -> balanced
 		if (m_lines.size() == 0)
@@ -853,7 +853,7 @@ public final class Fact
 	 * 	@param trxName
 	 */
 	@SuppressWarnings("unused")
-	private void set_TrxName(String trxName) 
+	public void set_TrxName(String trxName) 
 	{
 		m_trxName = trxName;
 	}	//	set_TrxName
@@ -950,6 +950,21 @@ public final class Fact
 	
 	public Doc getDoc() {
 		return m_doc;
+	}
+	/**
+	 * Get Posting Type
+	 * @return String
+	 */
+	public String getPostingType() {
+		return m_postingType;
+	}
+
+	/**
+	 * Set Posting Type
+	 * @param m_postingType
+	 */
+	public void setPostingType(String m_postingType) {
+		this.m_postingType = m_postingType;
 	}
 
 }   //  Fact
