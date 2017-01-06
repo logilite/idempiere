@@ -247,7 +247,7 @@ public class MYear extends X_C_Year
 			MPeriod period = MPeriod.findByCalendar(getCtx(), start, getC_Calendar_ID(), get_TrxName());
 			if (period == null)
 			{
-				period = new MPeriod (this, month+1, name, start, end);
+				period = MPeriod.copyFrom(this, month + 1, name, start, end);
 			}
 			else
 			{
