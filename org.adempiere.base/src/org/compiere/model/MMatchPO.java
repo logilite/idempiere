@@ -75,7 +75,7 @@ public class MMatchPO extends X_M_MatchPO
 		if (C_OrderLine_ID == 0 || C_InvoiceLine_ID == 0)
 			return new MMatchPO[]{};
 		//
-		String sql = "SELECT * FROM M_MatchPO WHERE C_OrderLine_ID=? AND C_InvoiceLine_ID=?";
+		String sql = "SELECT * FROM M_MatchPO WHERE C_OrderLine_ID=? AND C_InvoiceLine_ID=? AND Reversal_ID is null";
 		ArrayList<MMatchPO> list = new ArrayList<MMatchPO>();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -346,7 +346,7 @@ public class MMatchPO extends X_M_MatchPO
 			MInOutLine sLine, int C_OrderLine_ID, Timestamp dateTrx,
 			BigDecimal qty, String trxName) {
 		MMatchPO retValue = null;
-		String sql = "SELECT * FROM M_MatchPO WHERE C_OrderLine_ID=? ORDER BY M_MatchPO_ID";
+		String sql = "SELECT * FROM M_MatchPO WHERE C_OrderLine_ID=? and Reversal_ID IS NULL ORDER BY M_MatchPO_ID";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
@@ -952,13 +952,13 @@ public class MMatchPO extends X_M_MatchPO
 				{
 					MOrderLine line = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(getC_OrderLine_ID(),
 							get_TrxName());
-					BigDecimal invoicedQty = DB.getSQLValueBD(get_TrxName(), "SELECT Coalesce(SUM(Qty),0) FROM M_MatchPO WHERE C_InvoiceLine_ID > 0 and C_OrderLine_ID=?" , getC_OrderLine_ID());
+					BigDecimal invoicedQty = DB.getSQLValueBD(get_TrxName(), "SELECT Coalesce(SUM(Qty),0) FROM M_MatchPO WHERE C_InvoiceLine_ID > 0 and C_OrderLine_ID=? and Reversal_ID IS NULL" , getC_OrderLine_ID());
 					if (invoicedQty != null && invoicedQty.compareTo(line.getQtyOrdered()) > 0)
 					{
 						throw new IllegalStateException("Total matched invoiced qty > ordered qty. MatchedInvoicedQty="+invoicedQty+", OrderedQty="+line.getQtyOrdered()+", Line="+line);
 					}
 					
-					BigDecimal deliveredQty = DB.getSQLValueBD(get_TrxName(), "SELECT Coalesce(SUM(Qty),0) FROM M_MatchPO WHERE M_InOutLine_ID > 0 and C_OrderLine_ID=?" , getC_OrderLine_ID());
+					BigDecimal deliveredQty = DB.getSQLValueBD(get_TrxName(), "SELECT Coalesce(SUM(Qty),0) FROM M_MatchPO WHERE M_InOutLine_ID > 0 and C_OrderLine_ID=? and Reversal_ID IS NULL" , getC_OrderLine_ID());
 					if (deliveredQty != null && deliveredQty.compareTo(line.getQtyOrdered()) > 0)
 					{
 						throw new IllegalStateException("Total matched delivered qty > ordered qty. MatchedDeliveredQty="+deliveredQty+", OrderedQty="+line.getQtyOrdered()+", Line="+line);
