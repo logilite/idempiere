@@ -435,13 +435,13 @@ public class MPeriod extends X_C_Period
 	}	//	getFirstInYear
 
 	/**	Cache							*/
-	private static CCache<Integer,MPeriod> s_cache = new CCache<Integer,MPeriod>(Table_Name, 10);
+	protected static CCache<Integer,MPeriod> s_cache = new CCache<Integer,MPeriod>(Table_Name, 10);
 	
 	/**	Logger							*/
 	private static CLogger			s_log = CLogger.getCLogger (MPeriod.class); 
 	
 	/** Calendar 					   */
-	private int 					m_C_Calendar_ID = 0;
+	protected int 					m_C_Calendar_ID = 0;
 	
 	
 	/**************************************************************************
@@ -519,7 +519,7 @@ public class MPeriod extends X_C_Period
 	
 	
 	/**	Period Controls			*/
-	private MPeriodControl[] m_controls = null;
+	protected MPeriodControl[] m_controls = null;
 		
 	/**
 	 * 	Get Period Control
