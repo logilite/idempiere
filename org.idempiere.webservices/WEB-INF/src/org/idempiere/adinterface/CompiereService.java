@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.adempiere.util.ServerContext;
 import org.compiere.model.MAuthorizationToken;
 import org.compiere.model.MSession;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
@@ -67,6 +68,7 @@ public class CompiereService {
 	private String m_IPAddress;
 	private static Map<String,CompiereService> csMap = new HashMap<String, CompiereService>();
 	private static Map<String,Properties> ctxMap = new HashMap<String, Properties>();
+	private boolean isValidForSameClient = true;
 
 	private boolean m_loggedin = false; 
 	
@@ -318,7 +320,8 @@ public class CompiereService {
 			token.setM_Warehouse_ID(M_Warehouse_ID);
 			token.setIsManual(false);
 			token.setisWebservice(true);
-			token.setValidForSameClient(true);
+			isValidForSameClient = MSysConfig.getBooleanValue(MSysConfig.WEBSERVICE_TOKEN_CHECK_CLIENT, true);
+			token.setValidForSameClient(isValidForSameClient);
 			token.setRemoteIP(remoteIP);
 			token.setLastAccessTime(ts);
 			token.setToken(UUID.randomUUID().toString());
