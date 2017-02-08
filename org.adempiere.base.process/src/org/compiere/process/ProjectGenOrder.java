@@ -23,6 +23,7 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProject;
 import org.compiere.model.MProjectLine;
+import org.compiere.model.MTable;
 import org.compiere.util.Env;
 
 /**
@@ -63,7 +64,7 @@ public class ProjectGenOrder extends SvrProcess
 		if (log.isLoggable(Level.INFO)) log.info("C_Project_ID=" + m_C_Project_ID);
 		if (m_C_Project_ID == 0)
 			throw new IllegalArgumentException("C_Project_ID == 0");
-		MProject fromProject = getProject (getCtx(), m_C_Project_ID, get_TrxName());
+		MProject fromProject = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(m_C_Project_ID, get_TrxName());
 		Env.setSOTrx(getCtx(), true);	//	Set SO context
 
 		/** @todo duplicate invoice prevention */
@@ -118,7 +119,8 @@ public class ProjectGenOrder extends SvrProcess
 	 */
 	static protected MProject getProject (Properties ctx, int C_Project_ID, String trxName)
 	{
-		MProject fromProject = new MProject (ctx, C_Project_ID, trxName);
+		MProject fromProject = (MProject) MTable.get(ctx, MProject.Table_ID).getPO(C_Project_ID, trxName);
+
 		if (fromProject.getC_Project_ID() == 0)
 			throw new IllegalArgumentException("Project not found C_Project_ID=" + C_Project_ID);
 		if (fromProject.getM_PriceList_Version_ID() == 0)

@@ -2115,7 +2115,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		//	Update Project
 		if (isSOTrx() && getC_Project_ID() != 0)
 		{
-			MProject project = new MProject (getCtx(), getC_Project_ID(), get_TrxName());
+			MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(getC_Project_ID(), get_TrxName());
 			BigDecimal amt = getGrandTotal(true);
 			int C_CurrencyTo_ID = project.getC_Currency_ID();
 			if (C_CurrencyTo_ID != getC_Currency_ID())

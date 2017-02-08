@@ -199,7 +199,8 @@ public class ExpenseSOrder extends SvrProcess
 			{
 				m_order.setC_Project_ID(tel.getC_Project_ID());
 				//	Optionally Overwrite BP Price list from Project
-				MProject project = new MProject (getCtx(), tel.getC_Project_ID(), get_TrxName());
+				MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(tel.getC_Project_ID(),
+						get_TrxName());
 				if (project.getM_PriceList_ID() != 0)
 					m_order.setM_PriceList_ID(project.getM_PriceList_ID());
 			}

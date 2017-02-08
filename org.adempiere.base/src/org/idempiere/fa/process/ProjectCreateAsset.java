@@ -22,6 +22,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.MProductCategory;
 import org.compiere.model.MProject;
+import org.compiere.model.MTable;
 import org.compiere.model.MProduct;
 import org.compiere.model.MAssetAddition;
 import org.compiere.process.DocAction;
@@ -92,8 +93,7 @@ public class ProjectCreateAsset extends SvrProcess
 		if (m_C_Project_ID == 0 || m_Product_ID == 0) {
 			return "Missing Mandatory Field Value (Project / Product)";
 		}
-		
-		MProject project = new MProject (getCtx(), m_C_Project_ID, get_TrxName());
+		MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(m_C_Project_ID, get_TrxName());
 		if (log.isLoggable(Level.INFO)) log.info("doIt - " + project);
 		
 		MProduct product = new MProduct(getCtx(), m_Product_ID, get_TrxName());

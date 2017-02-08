@@ -48,11 +48,11 @@ public class MProject extends X_C_Project
 	 */
 	public static MProject copyFrom (Properties ctx, int C_Project_ID, Timestamp dateDoc, String trxName)
 	{
-		MProject from = new MProject (ctx, C_Project_ID, trxName);
+		MProject from = (MProject) MTable.get(ctx, MProject.Table_ID).getPO(C_Project_ID, trxName);
 		if (from.getC_Project_ID() == 0)
 			throw new IllegalArgumentException ("From Project not found C_Project_ID=" + C_Project_ID);
 		//
-		MProject to = new MProject (ctx, 0, trxName);
+		MProject to = (MProject) MTable.get(ctx, MProject.Table_ID).getPO(0, trxName);
 		PO.copyValues(from, to, from.getAD_Client_ID(), from.getAD_Org_ID());
 		to.set_ValueNoCheck ("C_Project_ID", I_ZERO);
 		//	Set Value with Time

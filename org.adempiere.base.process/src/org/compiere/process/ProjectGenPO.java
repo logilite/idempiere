@@ -85,12 +85,13 @@ public class ProjectGenPO extends SvrProcess
 		if (m_C_ProjectLine_ID != 0)
 		{
 			MProjectLine projectLine = new MProjectLine(getCtx(), m_C_ProjectLine_ID, get_TrxName());
-			MProject project = new MProject (getCtx(), projectLine.getC_Project_ID(), get_TrxName());
+			MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(projectLine.getC_Project_ID(),
+					get_TrxName());
 			createPO (project, projectLine);
 		}
 		else if (m_C_ProjectPhase_ID != 0)
 		{
-			MProject project = new MProject (getCtx(), m_C_Project_ID, get_TrxName());
+			MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(m_C_Project_ID, get_TrxName());
 			for (MProjectLine line : project.getPhaseLines(m_C_ProjectPhase_ID)) {
 				if (line.isActive()) {
 					createPO (project, line);
@@ -99,7 +100,7 @@ public class ProjectGenPO extends SvrProcess
 		}
 		else
 		{
-			MProject project = new MProject (getCtx(), m_C_Project_ID, get_TrxName());
+			MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(m_C_Project_ID, get_TrxName());
 			for (MProjectLine line : project.getLines()) {
 				if (line.isActive()) {
 					createPO (project, line);

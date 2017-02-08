@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.logging.Level;
 
 import org.compiere.model.MProject;
+import org.compiere.model.MTable;
 
 /**
  *  Copy Project Details
@@ -62,8 +63,8 @@ public class CopyFromProject extends SvrProcess
 			throw new IllegalArgumentException("Target C_Project_ID == 0");
 		if (m_C_Project_ID == 0)
 			throw new IllegalArgumentException("Source C_Project_ID == 0");
-		MProject from = new MProject (getCtx(), m_C_Project_ID, get_TrxName());
-		MProject to = new MProject (getCtx(), To_C_Project_ID, get_TrxName());
+		MProject from = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(m_C_Project_ID, get_TrxName());
+		MProject to = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(To_C_Project_ID, get_TrxName());
 		//
 		int no = to.copyDetailsFrom (from);
 

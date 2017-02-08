@@ -26,6 +26,7 @@ import org.compiere.model.MAcctSchema;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProject;
 import org.compiere.model.MProjectIssue;
+import org.compiere.model.MTable;
 import org.compiere.model.ProductCost;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -122,7 +123,8 @@ public class Doc_ProjectIssue extends Doc
 		Fact fact = new Fact(this, as, Fact.POST_Actual);
 		setC_Currency_ID (as.getC_Currency_ID());
 
-		MProject project = new MProject (getCtx(), m_issue.getC_Project_ID(), getTrxName());
+		MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(m_issue.getC_Project_ID(),
+				getTrxName());
 		String ProjectCategory = project.getProjectCategory();
 		MProduct product = MProduct.get(getCtx(), m_issue.getM_Product_ID());
 

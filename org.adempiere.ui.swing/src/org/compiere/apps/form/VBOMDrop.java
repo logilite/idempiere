@@ -705,7 +705,7 @@ public class VBOMDrop extends CPanel
 	private boolean cmd_saveProject (int C_Project_ID)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_Project_ID=" + C_Project_ID);
-		MProject project = new MProject (Env.getCtx(), C_Project_ID, null);
+		MProject project = (MProject) MTable.get(Env.getCtx(), MProject.Table_ID).getPO(C_Project_ID, null);
 		if (project.get_ID() == 0)
 		{
 			log.log(Level.SEVERE, "Not found - C_Project_ID=" + C_Project_ID);

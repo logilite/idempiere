@@ -58,7 +58,8 @@ public class MProduction extends X_M_Production implements DocAction {
 
 	public MProduction( MProjectLine line ) {
 		super( line.getCtx(), 0, line.get_TrxName());
-		MProject project = new MProject(line.getCtx(), line.getC_Project_ID(), line.get_TrxName());
+		MProject project = (MProject) MTable.get(line.getCtx(), MProject.Table_ID).getPO(line.getC_Project_ID(),
+				line.get_TrxName());
 		MWarehouse wh = new MWarehouse(line.getCtx(), project.getM_Warehouse_ID(), line.get_TrxName());
 		
 		MLocator M_Locator = null;
