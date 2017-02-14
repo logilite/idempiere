@@ -261,7 +261,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		}
 		
 		String sql = "SELECT DISTINCT r.R_Request_ID, r.DateNextAction, "
-				+ "r.DateStartPlan, r.DateCompletePlan, r.StartTime, r.EndTime, "
+				+ "r.DateStartPlan, r.DateCompletePlan, "
 				+ "u.Name || '-' || r.Summary AS Summary, rt.HeaderColor, rt.ContentColor, rt.R_RequestType_ID "
 				+ "FROM R_Request r "
 				+ "INNER JOIN R_RequestType rt ON rt.R_RequestType_ID=r.R_RequestType_ID "
@@ -300,10 +300,8 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 			while (rs.next()) {
 				int R_Request_ID = rs.getInt("R_Request_ID");
 				Date dateNextAction = rs.getDate("DateNextAction");
-				Date dateStartPlan = rs.getDate("DateStartPlan");
-				Date dateCompletePlan = rs.getDate("DateCompletePlan");
-				Timestamp startTime = rs.getTimestamp("StartTime");
-				Timestamp endTime = rs.getTimestamp("EndTime");
+				Timestamp dateStartPlan = rs.getTimestamp("DateStartPlan");
+				Timestamp dateCompletePlan = rs.getTimestamp("DateCompletePlan");
 				String summary = rs.getString("Summary");
 				String headerColor = rs.getString("HeaderColor");
 				String contentColor = rs.getString("ContentColor");
@@ -335,42 +333,11 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 
 				if (dateStartPlan != null && dateCompletePlan != null) {
 							
-					Calendar calBegin = Calendar.getInstance();
-					calBegin.setTime(dateStartPlan);
-					if (startTime != null) {
-						Calendar cal1 = Calendar.getInstance();
-						cal1.setTimeInMillis(startTime.getTime());
-						calBegin.set(Calendar.HOUR_OF_DAY, cal1.get(Calendar.HOUR_OF_DAY));
-						calBegin.set(Calendar.MINUTE, cal1.get(Calendar.MINUTE));
-						calBegin.set(Calendar.SECOND, 0);
-						calBegin.set(Calendar.MILLISECOND, 0);
-						
-					} else {
-						calBegin.set(Calendar.HOUR_OF_DAY, 0);
-						calBegin.set(Calendar.MINUTE, 0);
-						calBegin.set(Calendar.SECOND, 0);
-						calBegin.set(Calendar.MILLISECOND, 0);
-					}
-					
-					Calendar calEnd = Calendar.getInstance();
-					calEnd.setTime(dateCompletePlan);
-					if (endTime != null) {
-						Calendar cal1 = Calendar.getInstance();
-						cal1.setTimeInMillis(endTime.getTime());
-						calEnd.set(Calendar.HOUR_OF_DAY, cal1.get(Calendar.HOUR_OF_DAY));
-						calEnd.set(Calendar.MINUTE, cal1.get(Calendar.MINUTE));
-						calEnd.set(Calendar.SECOND, 0);
-						calEnd.set(Calendar.MILLISECOND, 0);
-						
-					} else {
-						calEnd.add(Calendar.HOUR_OF_DAY, 24);
-					}
-										
 					ADCalendarEvent event = new ADCalendarEvent();
 					event.setR_Request_ID(R_Request_ID);
 					
-					event.setBeginDate(calBegin.getTime());
-					event.setEndDate(calEnd.getTime());
+					event.setBeginDate(dateStartPlan);
+					event.setEndDate(dateCompletePlan);
 					
 					if(event.getBeginDate().compareTo(event.getEndDate()) >= 0)
 						continue;

@@ -22,7 +22,7 @@ import org.adempiere.webui.component.Borderlayout;
 import org.adempiere.webui.component.Column;
 import org.adempiere.webui.component.Columns;
 import org.adempiere.webui.component.ConfirmPanel;
-import org.adempiere.webui.component.Datebox;
+import org.adempiere.webui.component.DatetimeBox;
 import org.adempiere.webui.component.Grid;
 import org.adempiere.webui.component.GridFactory;
 import org.adempiere.webui.component.Label;
@@ -49,7 +49,6 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zul.North;
 import org.zkoss.zul.South;
-import org.zkoss.zul.Timebox;
 
 /**
  * 
@@ -72,8 +71,7 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		confidentialField, salesRepField, entryConfidentialField;
 	private WSearchEditor bpartnerField;
 	private Textbox txtSummary;
-	private Datebox dbxStartPlan, dbxCompletePlan;
-	private Timebox tbxStartTime, tbxEndTime;
+	private DatetimeBox dbxStartPlan, dbxCompletePlan;
 	private ConfirmPanel confirmPanel;
 	
 	private Window parent;
@@ -88,8 +86,8 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		Properties ctx = Env.getCtx();
 		setTitle(Msg.getMsg(Env.getCtx(),"NewRequest"));
 		setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
-		setWidth("400px");
-		setHeight("550px");
+		setWidth("450px");
+		setHeight("500px");
 		
 		this.setSclass("popup-dialog");
 		this.setBorder("normal");
@@ -109,8 +107,6 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		Label lblEntryConfidential = new Label(Msg.getElement(ctx, MRequest.COLUMNNAME_ConfidentialTypeEntry));
 		Label lblStartPlan         = new Label(Msg.getElement(ctx, MRequest.COLUMNNAME_DateStartPlan));
 		Label lblCompletePlan      = new Label(Msg.getElement(ctx, MRequest.COLUMNNAME_DateCompletePlan));
-		Label lblStartTime         = new Label(Msg.getElement(ctx, MRequest.COLUMNNAME_StartTime));
-		Label lblEndTime           = new Label(Msg.getElement(ctx, MRequest.COLUMNNAME_EndTime));
 		Label lblBPartner		   = new Label(Msg.getElement(ctx, MRequest.COLUMNNAME_C_BPartner_ID));
 
 		int columnID = MColumn.getColumn_ID(MRequest.Table_Name, MRequest.COLUMNNAME_DueType);
@@ -176,12 +172,10 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		txtSummary.setMultiline(true);
 		txtSummary.setWidth("95%");
 		txtSummary.setHeight("100%");
+		txtSummary.setRows(3);
 		
-		dbxStartPlan = new Datebox();
-		dbxCompletePlan = new Datebox();
-		
-		tbxStartTime = new Timebox();
-		tbxEndTime = new Timebox();
+		dbxStartPlan = new DatetimeBox();
+		dbxCompletePlan = new DatetimeBox();
 		
 		confirmPanel = new ConfirmPanel(true);
 		confirmPanel.addActionListener(this);
@@ -191,13 +185,15 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		
 		Columns columns = new Columns();
 		grid.appendChild(columns);
+		columns.setVflex("1");
 		
 		Column column = new Column();
+		column.setWidth("35%");
 		columns.appendChild(column);
 		
 		column = new Column();
 		columns.appendChild(column);
-		column.setWidth("250px");
+		column.setWidth("65%");
 		
 		Rows rows = new Rows();
 		grid.appendChild(rows);
@@ -253,18 +249,6 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		row.appendChild(lblCompletePlan.rightAlign());
 		row.appendChild(dbxCompletePlan);
 		
-		row = new Row();
-		rows.appendChild(row);
-		row.appendChild(lblStartTime.rightAlign());
-		row.appendChild(tbxStartTime);
-		tbxStartTime.setWidth("40%");
-		
-		row = new Row();
-		rows.appendChild(row);
-		row.appendChild(lblEndTime.rightAlign());
-		row.appendChild(tbxEndTime);
-		tbxEndTime.setWidth("40%");
-		
 		Borderlayout borderlayout = new Borderlayout();
 		this.appendChild(borderlayout);
 		borderlayout.setHflex("1");
@@ -278,7 +262,7 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		northPane.appendChild(grid);
 		grid.setVflex("1");
 		grid.setHflex("1");
-		grid.setHeight("450px");
+		grid.setHeight("400px");
 
 		South southPane = new South();
 		southPane.setSclass("dialog-footer");
@@ -287,8 +271,6 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		
 		dbxStartPlan.setValue(ce.getBeginDate());
 		dbxCompletePlan.setValue(ce.getEndDate());
-		tbxStartTime.setValue(ce.getBeginDate());
-		tbxEndTime.setValue(ce.getEndDate());
 	}
 	
 	public void onEvent(Event e) throws Exception {
@@ -316,9 +298,17 @@ public class RequestWindow extends Window implements EventListener<Event> {
 				throw new WrongValueException(entryConfidentialField.getComponent(), fillMandatory);
 			if (dbxStartPlan.getValue().compareTo(dbxCompletePlan.getValue()) > 0) 
 				throw new WrongValueException(dbxCompletePlan, Msg.translate(Env.getCtx(), "DateCompletePlan"));	
-			if (checkTime()) 
-				throw new WrongValueException(tbxStartTime, Msg.translate(Env.getCtx(), "CheckTime"));	
-					
+			
+			calBegin = Calendar.getInstance();
+			calBegin.setTime(dbxStartPlan.getValue());
+			calBegin.set(Calendar.SECOND, 0);
+			calBegin.set(Calendar.MILLISECOND, 0);
+
+			calEnd = Calendar.getInstance();
+			calEnd.setTime(dbxCompletePlan.getValue());
+			calEnd.set(Calendar.SECOND, 0);
+			calEnd.set(Calendar.MILLISECOND, 0);
+			
 			MRequest request = new MRequest(Env.getCtx(), 0, null);
 			request.setAD_Org_ID(Env.getAD_Org_ID(Env.getCtx()));
 			request.setDueType((String) dueTypeField.getValue());
@@ -330,8 +320,6 @@ public class RequestWindow extends Window implements EventListener<Event> {
 			request.setConfidentialTypeEntry((String) entryConfidentialField.getValue());
 			request.setDateStartPlan(new Timestamp(calBegin.getTimeInMillis()));
 			request.setDateCompletePlan(new Timestamp(calEnd.getTimeInMillis()));
-			request.setStartTime(new Timestamp(calBegin.getTimeInMillis()));
-			request.setEndTime(new Timestamp(calEnd.getTimeInMillis()));
 			
 			if (bpartnerField.getValue() != null && !Util.isEmpty(bpartnerField.getValue().toString(), true))
 				request.setC_BPartner_ID((Integer) bpartnerField.getValue());
@@ -354,31 +342,4 @@ public class RequestWindow extends Window implements EventListener<Event> {
 			this.detach();
 	}
 	
-	//Check, Start time is not  >=  End time, when Start Plan == Complete Plan
-	private boolean checkTime()
-	{
-		calBegin = Calendar.getInstance();
-		calBegin.setTime(dbxStartPlan.getValue());
-		Calendar cal1 = Calendar.getInstance();
-		cal1.setTimeInMillis(tbxStartTime.getValue().getTime());
-		calBegin.set(Calendar.HOUR_OF_DAY, cal1.get(Calendar.HOUR_OF_DAY));
-		calBegin.set(Calendar.MINUTE, cal1.get(Calendar.MINUTE));
-		calBegin.set(Calendar.SECOND, 0);
-		calBegin.set(Calendar.MILLISECOND, 0);
-		
-		calEnd = Calendar.getInstance();
-		calEnd.setTime(dbxCompletePlan.getValue());
-		Calendar cal2 = Calendar.getInstance();
-		cal2.setTimeInMillis(tbxEndTime.getValue().getTime());
-		calEnd.set(Calendar.HOUR_OF_DAY, cal2.get(Calendar.HOUR_OF_DAY));
-		calEnd.set(Calendar.MINUTE, cal2.get(Calendar.MINUTE));
-		calEnd.set(Calendar.SECOND, 0);
-		calEnd.set(Calendar.MILLISECOND, 0);
-
-		if (calBegin.compareTo(calEnd) >= 0) {
-			return true;
-		} else {
-			return false;
-		}	
-	}
 }
