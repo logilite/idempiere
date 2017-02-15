@@ -72,54 +72,54 @@ public class WLocatorDialog extends Window implements EventListener<Event>
 	 */
 	private static final long serialVersionUID = -2441739966645819543L;
 
-	private Grid mainPanel = GridFactory.newGridLayout();
+	protected Grid mainPanel = GridFactory.newGridLayout();
 	
-	private Listbox lstLocator = new Listbox();
-	private Listbox lstWarehouse = new Listbox();
-	private Listbox lstLocatorType = new Listbox();
+	protected Listbox lstLocator = new Listbox();
+	protected Listbox lstWarehouse = new Listbox();
+	protected Listbox lstLocatorType = new Listbox();
 	
-	private Checkbox chkCreateNew = new Checkbox();
+	protected Checkbox chkCreateNew = new Checkbox();
 
-	private Textbox txtWarehouse = new Textbox();
-	private Textbox txtLocatorType = new Textbox();
-	private Textbox txtAisleX = new Textbox();
-	private Textbox txtBinY = new Textbox();
-	private Textbox txtLevelZ = new Textbox();
-	private Textbox txtKey = new Textbox();
+	protected Textbox txtWarehouse = new Textbox();
+	protected Textbox txtLocatorType = new Textbox();
+	protected Textbox txtAisleX = new Textbox();
+	protected Textbox txtBinY = new Textbox();
+	protected Textbox txtLevelZ = new Textbox();
+	protected Textbox txtKey = new Textbox();
 	
-	private Label lblLocator = new Label();
-	private Label lblWarehouse = new Label();
-	private Label lblWarehouse2 = new Label();
-	private Label lblLocatorType = new Label();
-	private Label lblLocatorType2 = new Label();
-	private Label lblAisleX = new Label();
-	private Label lblBinY = new Label();
-	private Label lblLevelZ = new Label();
-	private Label lblKey = new Label();
+	protected Label lblLocator = new Label();
+	protected Label lblWarehouse = new Label();
+	protected Label lblWarehouse2 = new Label();
+	protected Label lblLocatorType = new Label();
+	protected Label lblLocatorType2 = new Label();
+	protected Label lblAisleX = new Label();
+	protected Label lblBinY = new Label();
+	protected Label lblLevelZ = new Label();
+	protected Label lblKey = new Label();
 	
-	private ConfirmPanel confirmPanel;
+	protected ConfirmPanel confirmPanel;
 
-	private MLocatorLookup m_mLocator;
+	protected MLocatorLookup m_mLocator;
 	
-	private int m_WindowNo;
-	private int m_M_Locator_ID;
+	protected int m_WindowNo;
+	protected int m_M_Locator_ID;
 	@SuppressWarnings("unused")
-	private int m_AD_Client_ID;
+	protected int m_AD_Client_ID;
 	@SuppressWarnings("unused")
-	private int m_AD_Org_ID;
-	private int m_only_Warehouse_ID;
-	private int m_M_Warehouse_ID;
+	protected int m_AD_Org_ID;
+	protected int m_only_Warehouse_ID;
+	protected int m_M_Warehouse_ID;
 	
-	private boolean m_mandatory;
+	protected boolean m_mandatory;
 	
 	@SuppressWarnings("unused")
-	private String m_M_WarehouseName;
-	private String m_M_WarehouseValue;
-	private String m_Separator;
+	protected String m_M_WarehouseName;
+	protected String m_M_WarehouseValue;
+	protected String m_Separator;
 
-	private boolean m_change;
+	protected boolean m_change;
 
-	private String title;
+	protected String title;
 
 	private static CLogger log = CLogger.getCLogger(WLocatorDialog.class);
 	
@@ -152,7 +152,7 @@ public class WLocatorDialog extends Window implements EventListener<Event>
 		initLocator();
 	} // WLocatorDialog
 	
-	private void initComponents()
+	public void initComponents()
 	{
 		lblLocator.setValue(Msg.translate(Env.getCtx(), "M_Locator_ID"));
 		lblWarehouse.setValue(Msg.translate(Env.getCtx(), "M_Warehouse_ID"));
@@ -282,7 +282,7 @@ public class WLocatorDialog extends Window implements EventListener<Event>
 		this.setSizable(true); // Elaine 2009/02/02 - window set to resizable
 	}
 	
-	private void initLocator()
+	public void initLocator()
 	{
 		log.fine("");
 
@@ -403,7 +403,7 @@ public class WLocatorDialog extends Window implements EventListener<Event>
 		
 	} // initLocator
 
-	private void displayLocator()
+	public void displayLocator()
 	{
 		MLocator l = null;
 		ListItem listitem = lstLocator.getSelectedItem();
@@ -466,7 +466,7 @@ public class WLocatorDialog extends Window implements EventListener<Event>
 	 *	Enable/disable New data entry
 	 */
 	
-	private void enableNew()
+	public void enableNew()
 	{
 		boolean sel = chkCreateNew.isChecked();
 		//lblWarehouse.setVisible(sel);
@@ -495,7 +495,7 @@ public class WLocatorDialog extends Window implements EventListener<Event>
 	 *	Get Warehouse Info
 	 *  @param M_Warehouse_ID warehouse
 	 */
-	private void getWarehouseInfo (int M_Warehouse_ID)
+	public void getWarehouseInfo (int M_Warehouse_ID)
 	{
 		if (M_Warehouse_ID == m_M_Warehouse_ID)
 			return;
@@ -545,7 +545,7 @@ public class WLocatorDialog extends Window implements EventListener<Event>
 	 *	Create Locator-Value
 	 */
 	
-	private void createValue()
+	public void createValue()
 	{
 		// Get Warehouse Info
 		
@@ -569,7 +569,7 @@ public class WLocatorDialog extends Window implements EventListener<Event>
 	 * 	OK - check for changes (save them) & Exit
 	 */
 	
-	private void actionOK()
+	public void actionOK()
 	{
 		if (chkCreateNew.isChecked())
 		{
@@ -686,5 +686,345 @@ public class WLocatorDialog extends Window implements EventListener<Event>
 		else if (chkCreateNew.isChecked()
 				 && (event.getTarget() == lstWarehouse || event.getTarget() == txtAisleX || event.getTarget() == txtBinY || event.getTarget() == txtLevelZ))
 			createValue();
+	}
+
+	public Grid getMainPanel()
+	{
+		return mainPanel;
+	}
+
+	public void setMainPanel(Grid mainPanel)
+	{
+		this.mainPanel = mainPanel;
+	}
+
+	public Listbox getLstLocator()
+	{
+		return lstLocator;
+	}
+
+	public void setLstLocator(Listbox lstLocator)
+	{
+		this.lstLocator = lstLocator;
+	}
+
+	public Listbox getLstWarehouse()
+	{
+		return lstWarehouse;
+	}
+
+	public void setLstWarehouse(Listbox lstWarehouse)
+	{
+		this.lstWarehouse = lstWarehouse;
+	}
+
+	public Listbox getLstLocatorType()
+	{
+		return lstLocatorType;
+	}
+
+	public void setLstLocatorType(Listbox lstLocatorType)
+	{
+		this.lstLocatorType = lstLocatorType;
+	}
+
+	public Checkbox getChkCreateNew()
+	{
+		return chkCreateNew;
+	}
+
+	public void setChkCreateNew(Checkbox chkCreateNew)
+	{
+		this.chkCreateNew = chkCreateNew;
+	}
+
+	public Textbox getTxtWarehouse()
+	{
+		return txtWarehouse;
+	}
+
+	public void setTxtWarehouse(Textbox txtWarehouse)
+	{
+		this.txtWarehouse = txtWarehouse;
+	}
+
+	public Textbox getTxtLocatorType()
+	{
+		return txtLocatorType;
+	}
+
+	public void setTxtLocatorType(Textbox txtLocatorType)
+	{
+		this.txtLocatorType = txtLocatorType;
+	}
+
+	public Textbox getTxtAisleX()
+	{
+		return txtAisleX;
+	}
+
+	public void setTxtAisleX(Textbox txtAisleX)
+	{
+		this.txtAisleX = txtAisleX;
+	}
+
+	public Textbox getTxtBinY()
+	{
+		return txtBinY;
+	}
+
+	public void setTxtBinY(Textbox txtBinY)
+	{
+		this.txtBinY = txtBinY;
+	}
+
+	public Textbox getTxtLevelZ()
+	{
+		return txtLevelZ;
+	}
+
+	public void setTxtLevelZ(Textbox txtLevelZ)
+	{
+		this.txtLevelZ = txtLevelZ;
+	}
+
+	public Textbox getTxtKey()
+	{
+		return txtKey;
+	}
+
+	public void setTxtKey(Textbox txtKey)
+	{
+		this.txtKey = txtKey;
+	}
+
+	public Label getLblLocator()
+	{
+		return lblLocator;
+	}
+
+	public void setLblLocator(Label lblLocator)
+	{
+		this.lblLocator = lblLocator;
+	}
+
+	public Label getLblWarehouse()
+	{
+		return lblWarehouse;
+	}
+
+	public void setLblWarehouse(Label lblWarehouse)
+	{
+		this.lblWarehouse = lblWarehouse;
+	}
+
+	public Label getLblWarehouse2()
+	{
+		return lblWarehouse2;
+	}
+
+	public void setLblWarehouse2(Label lblWarehouse2)
+	{
+		this.lblWarehouse2 = lblWarehouse2;
+	}
+
+	public Label getLblLocatorType()
+	{
+		return lblLocatorType;
+	}
+
+	public void setLblLocatorType(Label lblLocatorType)
+	{
+		this.lblLocatorType = lblLocatorType;
+	}
+
+	public Label getLblLocatorType2()
+	{
+		return lblLocatorType2;
+	}
+
+	public void setLblLocatorType2(Label lblLocatorType2)
+	{
+		this.lblLocatorType2 = lblLocatorType2;
+	}
+
+	public Label getLblAisleX()
+	{
+		return lblAisleX;
+	}
+
+	public void setLblAisleX(Label lblAisleX)
+	{
+		this.lblAisleX = lblAisleX;
+	}
+
+	public Label getLblBinY()
+	{
+		return lblBinY;
+	}
+
+	public void setLblBinY(Label lblBinY)
+	{
+		this.lblBinY = lblBinY;
+	}
+
+	public Label getLblLevelZ()
+	{
+		return lblLevelZ;
+	}
+
+	public void setLblLevelZ(Label lblLevelZ)
+	{
+		this.lblLevelZ = lblLevelZ;
+	}
+
+	public Label getLblKey()
+	{
+		return lblKey;
+	}
+
+	public void setLblKey(Label lblKey)
+	{
+		this.lblKey = lblKey;
+	}
+
+	public ConfirmPanel getConfirmPanel()
+	{
+		return confirmPanel;
+	}
+
+	public void setConfirmPanel(ConfirmPanel confirmPanel)
+	{
+		this.confirmPanel = confirmPanel;
+	}
+
+	public MLocatorLookup getM_mLocator()
+	{
+		return m_mLocator;
+	}
+
+	public void setM_mLocator(MLocatorLookup m_mLocator)
+	{
+		this.m_mLocator = m_mLocator;
+	}
+
+	public int getM_WindowNo()
+	{
+		return m_WindowNo;
+	}
+
+	public void setM_WindowNo(int m_WindowNo)
+	{
+		this.m_WindowNo = m_WindowNo;
+	}
+
+	public int getM_M_Locator_ID()
+	{
+		return m_M_Locator_ID;
+	}
+
+	public void setM_M_Locator_ID(int m_M_Locator_ID)
+	{
+		this.m_M_Locator_ID = m_M_Locator_ID;
+	}
+
+	public int getM_AD_Client_ID()
+	{
+		return m_AD_Client_ID;
+	}
+
+	public void setM_AD_Client_ID(int m_AD_Client_ID)
+	{
+		this.m_AD_Client_ID = m_AD_Client_ID;
+	}
+
+	public int getM_AD_Org_ID()
+	{
+		return m_AD_Org_ID;
+	}
+
+	public void setM_AD_Org_ID(int m_AD_Org_ID)
+	{
+		this.m_AD_Org_ID = m_AD_Org_ID;
+	}
+
+	public int getM_only_Warehouse_ID()
+	{
+		return m_only_Warehouse_ID;
+	}
+
+	public void setM_only_Warehouse_ID(int m_only_Warehouse_ID)
+	{
+		this.m_only_Warehouse_ID = m_only_Warehouse_ID;
+	}
+
+	public int getM_M_Warehouse_ID()
+	{
+		return m_M_Warehouse_ID;
+	}
+
+	public void setM_M_Warehouse_ID(int m_M_Warehouse_ID)
+	{
+		this.m_M_Warehouse_ID = m_M_Warehouse_ID;
+	}
+
+	public boolean isM_mandatory()
+	{
+		return m_mandatory;
+	}
+
+	public void setM_mandatory(boolean m_mandatory)
+	{
+		this.m_mandatory = m_mandatory;
+	}
+
+	public String getM_M_WarehouseName()
+	{
+		return m_M_WarehouseName;
+	}
+
+	public void setM_M_WarehouseName(String m_M_WarehouseName)
+	{
+		this.m_M_WarehouseName = m_M_WarehouseName;
+	}
+
+	public String getM_M_WarehouseValue()
+	{
+		return m_M_WarehouseValue;
+	}
+
+	public void setM_M_WarehouseValue(String m_M_WarehouseValue)
+	{
+		this.m_M_WarehouseValue = m_M_WarehouseValue;
+	}
+
+	public String getM_Separator()
+	{
+		return m_Separator;
+	}
+
+	public void setM_Separator(String m_Separator)
+	{
+		this.m_Separator = m_Separator;
+	}
+
+	public boolean isM_change()
+	{
+		return m_change;
+	}
+
+	public void setM_change(boolean m_change)
+	{
+		this.m_change = m_change;
+	}
+
+	public String getTitle()
+	{
+		return title;
+	}
+
+	public void setTitle(String title)
+	{
+		this.title = title;
 	}
 }
