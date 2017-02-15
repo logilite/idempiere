@@ -1845,7 +1845,14 @@ public class MInOut extends X_M_InOut implements DocAction
 							addDocsPostProcess(po);
 						MMatchInv matchInvCreated = po.getMatchInvCreated();
 						if (matchInvCreated != null) {
-							addDocsPostProcess(matchInvCreated);
+							if(matchInvCreated.getM_MatchInvHdr_ID() > 0)
+							{
+								addDocsPostProcess((PO) matchInvCreated.getM_MatchInvHdr());
+							}
+							else
+							{
+								addDocsPostProcess(matchInvCreated);
+							}
 						}
 					}
 					//	Update PO with ASI
