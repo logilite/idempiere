@@ -182,6 +182,11 @@ public final class FactLine extends X_Fact_Acct
 					if (m_doc == null)
 						throw new IllegalArgumentException("Document not set yet");
 					ID1 = m_doc.getValue(ColumnName1);
+					
+					if (ID1 == 0 && m_docLine != null)
+						ID1 = m_docLine.getValue("UserElement1_ID");
+					if (ID1 == 0 && m_doc != null)
+						ID1 = m_doc.getValue("UserElement1_ID");
 				}
 				if (ID1 != 0)
 					setUserElement1_ID(ID1);
@@ -202,6 +207,11 @@ public final class FactLine extends X_Fact_Acct
 					if (m_doc == null)
 						throw new IllegalArgumentException("Document not set yet");
 					ID2 = m_doc.getValue(ColumnName2);
+					
+					if (ID2 == 0 && m_docLine != null)
+						ID2 = m_docLine.getValue("UserElement2_ID");
+					if (ID2 == 0 && m_doc != null)
+						ID2 = m_doc.getValue("UserElement2_ID");
 				}
 				if (ID2 != 0)
 					setUserElement2_ID(ID2);
