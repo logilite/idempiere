@@ -141,7 +141,7 @@ public class Doc_Inventory extends Doc
 					
 					if (!map.containsKey(lineMA.getM_AttributeSetInstance_ID()))
 					{
-						DocLine docLine = new DocLine(line, this);
+						DocLine docLine = new DocLine(line, this, lineMA);
 						docLine.setM_AttributeSetInstance_ID(lineMA.getM_AttributeSetInstance_ID());
 						docLine.setQty(lineMA.getMovementQty().negate(), false);
 						docLine.setReversalLine_ID(line.getReversalLine_ID());
