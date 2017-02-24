@@ -40,20 +40,20 @@ import org.compiere.util.Util;
  **/
 public class BankTransfer extends SvrProcess
 {
-	private String 		p_DocumentNo= "";				// Document No
-	private String 		p_Description= "";				// Description
-	private int 		p_C_BPartner_ID = 0;   			// Business Partner to be used as bridge
-	private int			p_C_Currency_ID = 0;			// Payment Currency
-	private int 		p_C_ConversionType_ID = 0;		// Payment Conversion Type
-	private int			p_C_Charge_ID = 0;				// Charge to be used as bridge
+	protected String 		p_DocumentNo= "";				// Document No
+	protected String 		p_Description= "";				// Description
+	protected int 		p_C_BPartner_ID = 0;   			// Business Partner to be used as bridge
+	protected int			p_C_Currency_ID = 0;			// Payment Currency
+	protected int 		p_C_ConversionType_ID = 0;		// Payment Conversion Type
+	protected int			p_C_Charge_ID = 0;				// Charge to be used as bridge
 
-	private BigDecimal 	p_Amount = Env.ZERO;  			// Amount to be transfered between the accounts
-	private int 		p_From_C_BankAccount_ID = 0;	// Bank Account From
-	private int 		p_To_C_BankAccount_ID= 0;		// Bank Account To
-	private Timestamp	p_StatementDate = null;  		// Date Statement
-	private Timestamp	p_DateAcct = null;  			// Date Account
-	private int         p_AD_Org_ID = 0;
-	private int         m_created = 0;
+	protected BigDecimal 	p_Amount = Env.ZERO;  			// Amount to be transfered between the accounts
+	protected int 		p_From_C_BankAccount_ID = 0;	// Bank Account From
+	protected int 		p_To_C_BankAccount_ID= 0;		// Bank Account To
+	protected Timestamp	p_StatementDate = null;  		// Date Statement
+	protected Timestamp	p_DateAcct = null;  			// Date Account
+	protected int         p_AD_Org_ID = 0;
+	protected int         m_created = 0;
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -144,7 +144,7 @@ public class BankTransfer extends SvrProcess
 	 * Generate BankTransfer()
 	 *
 	 */
-	private void generateBankTransfer()
+	public void generateBankTransfer()
 	{
 
 		MBankAccount mBankFrom = new MBankAccount(getCtx(),p_From_C_BankAccount_ID, get_TrxName());

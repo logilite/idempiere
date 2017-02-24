@@ -34,9 +34,9 @@ import org.compiere.util.DB;
 public class PeriodStatus extends SvrProcess
 {
 	/** Period						*/
-	private int			p_C_Period_ID = 0;
+	protected int			p_C_Period_ID = 0;
 	/** Action						*/
-	private String		p_PeriodAction = null;
+	protected String		p_PeriodAction = null;
 	
 	
 	/**

@@ -53,14 +53,14 @@ public class ImportBPartner extends SvrProcess
 implements ImportProcess
 {
 	/**	Client to be imported to		*/
-	private int				m_AD_Client_ID = 0;
+	protected int				m_AD_Client_ID = 0;
 	/**	Delete old Imported				*/
-	private boolean			m_deleteOldImported = false;
+	protected boolean			m_deleteOldImported = false;
 	/**	Only validate, don't import		*/
-	private boolean			p_IsValidateOnly = false;
+	protected boolean			p_IsValidateOnly = false;
 
 	/** Effective						*/
-	private Timestamp		m_DateValue = null;
+	protected Timestamp		m_DateValue = null;
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -633,7 +633,7 @@ implements ImportProcess
 	 * @param X_I_BPartner impBP
 	 * @param MBPartner bp
 	 */
-	private void setTypeOfBPartner(X_I_BPartner impBP, MBPartner bp){
+	public void setTypeOfBPartner(X_I_BPartner impBP, MBPartner bp){
 		if (impBP.isVendor()){		
 			bp.setIsVendor(true);
 			bp.setIsCustomer(false); // It is put to false since by default in C_BPartner is true

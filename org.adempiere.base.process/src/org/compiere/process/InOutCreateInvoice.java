@@ -40,11 +40,11 @@ import org.compiere.util.Env;
 public class InOutCreateInvoice extends SvrProcess
 {
 	/**	Shipment					*/
-	private int 	p_M_InOut_ID = 0;
+	protected int 	p_M_InOut_ID = 0;
 	/**	Price List Version			*/
-	private int		p_M_PriceList_ID = 0;
+	protected int		p_M_PriceList_ID = 0;
 	/* Document No					*/
-	private String	p_InvoiceDocumentNo = null;
+	protected String	p_InvoiceDocumentNo = null;
 	
 	/**
 	 *  Prepare - e.g., get Parameters.

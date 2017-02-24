@@ -58,36 +58,36 @@ import org.compiere.util.Trx;
 public class InvoiceGenerate extends SvrProcess
 {
 	/**	Manual Selection		*/
-	private boolean 	p_Selection = false;
+	protected boolean 	p_Selection = false;
 	/**	Date Invoiced			*/
-	private Timestamp	p_DateInvoiced = null;
+	protected Timestamp	p_DateInvoiced = null;
 	/**	Org						*/
-	private int			p_AD_Org_ID = 0;
+	protected int			p_AD_Org_ID = 0;
 	/** BPartner				*/
-	private int			p_C_BPartner_ID = 0;
+	protected int			p_C_BPartner_ID = 0;
 	/** Order					*/
-	private int			p_C_Order_ID = 0;
+	protected int			p_C_Order_ID = 0;
 	/** Consolidate				*/
-	private boolean		p_ConsolidateDocument = true;
+	protected boolean		p_ConsolidateDocument = true;
 	/** Invoice Document Action	*/
-	private String		p_docAction = DocAction.ACTION_Complete;
+	protected String		p_docAction = DocAction.ACTION_Complete;
 	
 	/**	The current Invoice	*/
-	private MInvoice 	m_invoice = null;
+	protected MInvoice 	m_invoice = null;
 	/**	The current Shipment	*/
-	private MInOut	 	m_ship = null;
+	protected MInOut	 	m_ship = null;
 	/** Numner of Invoices		*/
-	private int			m_created = 0;
+	protected int			m_created = 0;
 	/**	Line Number				*/
-	private int			m_line = 0;
+	protected int			m_line = 0;
 	/**	Business Partner		*/
-	private MBPartner	m_bp = null;
+	protected MBPartner	m_bp = null;
 	/**	Minimum Amount to Invoice */
-	private BigDecimal p_MinimumAmt = null;
+	protected BigDecimal p_MinimumAmt = null;
 	/**	Minimum Amount to Invoice according to Invoice Schedule */
-	private BigDecimal p_MinimumAmtInvSched = null;
+	protected BigDecimal p_MinimumAmtInvSched = null;
 	/**	Per Invoice Savepoint */
-	private Savepoint m_savepoint = null;
+	protected Savepoint m_savepoint = null;
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -203,7 +203,7 @@ public class InvoiceGenerate extends SvrProcess
 	 * 	@param pstmt order query 
 	 *	@return info
 	 */
-	private String generate (PreparedStatement pstmt)
+	public String generate (PreparedStatement pstmt)
 	{
 		ResultSet rs = null;
 		try
@@ -365,7 +365,7 @@ public class InvoiceGenerate extends SvrProcess
 	 *	@param qtyInvoiced qty
 	 *	@param qtyEntered qty
 	 */
-	private void createLine (MOrder order, MOrderLine orderLine, 
+	public void createLine (MOrder order, MOrderLine orderLine, 
 		BigDecimal qtyInvoiced, BigDecimal qtyEntered)
 	{
 		if (m_invoice == null)
@@ -398,7 +398,7 @@ public class InvoiceGenerate extends SvrProcess
 	 *	@param ship shipment header
 	 *	@param sLine shipment line
 	 */
-	private void createLine (MOrder order, MInOut ship, MInOutLine sLine)
+	public void createLine (MOrder order, MInOut ship, MInOutLine sLine)
 	{
 		if (m_invoice == null)
 		{
@@ -477,7 +477,7 @@ public class InvoiceGenerate extends SvrProcess
 	/**
 	 * 	Complete Invoice
 	 */
-	private void completeInvoice()
+	public void completeInvoice()
 	{
 		if (m_invoice != null)
 		{
