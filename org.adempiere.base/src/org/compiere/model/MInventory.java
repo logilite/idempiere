@@ -407,8 +407,13 @@ public class MInventory extends X_M_Inventory implements DocAction
 					+ " Inner Join M_Product p on iol.M_Product_ID = p.M_Product_ID"
 					+ " Where iol.M_Inventory_ID = ? and iol.isActive = 'Y' and Coalesce(ma.IsActive, 'Y') = 'Y' "
 					+ " and Coalesce(iol.M_AttributeSetInstance_ID, 0) = 0"
-					+ " AND p.IsStocked = 'Y' and p.ProductType = 'I' " + " Group By iol.M_InventoryLine_ID, p.value"
-					+ " Having  (iol.QtyBook - iol.QtyCount) <> Sum(Coalesce(ma.MovementQty, 0))";
+					+ " AND p.IsStocked = 'Y' and p.ProductType = 'I' " + " Group By iol.M_InventoryLine_ID, p.value";
+			
+			if (MDocType.DOCSUBTYPEINV_InternalUseInventory.equals(docSubTypeInv))
+				sql += " Having  Sum(Coalesce(iol.QtyInternalUse, 0)) <> Sum(Coalesce(ma.MovementQty, 0))";
+			else
+				sql += " Having  (iol.QtyBook - iol.QtyCount) <> Sum(Coalesce(ma.MovementQty, 0))";
+			
 			try
 			{
 				sb = new StringBuilder();
@@ -422,7 +427,6 @@ public class MInventory extends X_M_Inventory implements DocAction
 					{
 						sb.append(" ,");
 					}
-
 					sb.append(rs.getString("Description"));
 					isFirst = false;
 				}
