@@ -154,6 +154,9 @@ public class EventWindow extends Window implements EventListener<Event> {
 		txtHeaderColor.setStyle("background-color: " + event.getHeaderColor());
 		txtContentColor.setStyle("background-color: " + event.getContentColor());
 		
+		dtBeginDate.getTimebox().setFormat(DPCalendar.getTimeFormat());
+		dtEndDate.getTimebox().setFormat(DPCalendar.getTimeFormat());
+
 		dtBeginDate.setValue(event.getBeginDate());
 		dtEndDate.setValue(event.getEndDate());
 		txtContent.setText(event.getContent());

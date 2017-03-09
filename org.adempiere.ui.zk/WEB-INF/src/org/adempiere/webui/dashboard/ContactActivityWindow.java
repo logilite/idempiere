@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -485,9 +486,11 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		borderlayout.appendChild(southPane);
 		southPane.appendChild(confirmPanel);
 
-		dbxStartDate.setValue(ce.getBeginDate());
-		dbxEndDate.setValue(ce.getEndDate());
+		dbxStartDate.getTimebox().setFormat(DPCalendar.getTimeFormat());
+		dbxEndDate.getTimebox().setFormat(DPCalendar.getTimeFormat());
 
+		dbxStartDate.setValue(new Date(ce.getBeginDate().getTime() + DPCalendar.getStartTimeHour()));
+		dbxEndDate.setValue(new Date(ce.getBeginDate().getTime() + DPCalendar.getEndTimeHour()));
 	}
 
 	public void initSaleStages(){

@@ -15,6 +15,7 @@ package org.adempiere.webui.dashboard;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -269,8 +270,11 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		borderlayout.appendChild(southPane);
 		southPane.appendChild(confirmPanel);
 		
-		dbxStartPlan.setValue(ce.getBeginDate());
-		dbxCompletePlan.setValue(ce.getEndDate());
+		dbxStartPlan.getTimebox().setFormat(DPCalendar.getTimeFormat());
+		dbxCompletePlan.getTimebox().setFormat(DPCalendar.getTimeFormat());
+
+		dbxStartPlan.setValue(new Date(ce.getBeginDate().getTime() + DPCalendar.getStartTimeHour()));
+		dbxCompletePlan.setValue(new Date(ce.getBeginDate().getTime() + DPCalendar.getEndTimeHour()));
 	}
 	
 	public void onEvent(Event e) throws Exception {

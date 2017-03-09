@@ -936,4 +936,19 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 			trx.removeTrxEventListener(this);
 		}		
 	}
+
+	public static String getTimeFormat()
+	{
+		return MSysConfig.getValue("CALENDAR_TIME_FORMAT", "HH:mm", Env.getAD_Client_ID(Env.getCtx()));
+	}
+
+	public static int getStartTimeHour()
+	{
+		return (int) (MSysConfig.getDoubleValue("CALENDAR_START_TIME_HOUR", 0, Env.getAD_Client_ID(Env.getCtx())) * 60 * 60 * 1000);
+	}
+
+	public static int getEndTimeHour()
+	{
+		return (int) (MSysConfig.getDoubleValue("CALENDAR_END_TIME_HOUR", 24, Env.getAD_Client_ID(Env.getCtx())) * 60 * 60 * 1000);
+	}
 }

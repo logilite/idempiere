@@ -161,6 +161,9 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 		dtEndDate = new DatetimeBox();
 		dtEndDate.setEnabled(!m_readOnly);
 
+		dtBeginDate.getTimebox().setFormat(DPCalendar.getTimeFormat());
+		dtEndDate.getTimebox().setFormat(DPCalendar.getTimeFormat());
+		
 		txtComments = new Textbox();
 		txtComments.setRows(5);
 		txtComments.setWidth("95%");
