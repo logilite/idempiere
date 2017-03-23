@@ -70,7 +70,7 @@ public class Doc_Production extends Doc
 		return null;
 	}   //  loadDocumentDetails
 
-	private Map<Integer, BigDecimal> mQtyProduced;
+	protected Map<Integer, BigDecimal> mQtyProduced;
 	
 	/**
 	 * IDEMPIERE-3082
@@ -80,7 +80,7 @@ public class Doc_Production extends Doc
 	 * @param addMoreQty when you want get value, just pass null
 	 * @return
 	 */
-	private BigDecimal manipulateQtyProduced (Map<Integer, BigDecimal> mQtyProduced, X_M_ProductionLine line, Boolean isUsePlan, BigDecimal addMoreQty){
+	public BigDecimal manipulateQtyProduced (Map<Integer, BigDecimal> mQtyProduced, X_M_ProductionLine line, Boolean isUsePlan, BigDecimal addMoreQty){
 		BigDecimal qtyProduced = null;
 		Integer key = isUsePlan?line.getM_ProductionPlan_ID():line.getM_Production_ID();
 		
@@ -103,7 +103,7 @@ public class Doc_Production extends Doc
 	 *	@param prod production
 	 *  @return DoaLine Array
 	 */
-	private DocLine[] loadLines(X_M_Production prod)
+	public DocLine[] loadLines(X_M_Production prod)
 	{
 		ArrayList<DocLine> list = new ArrayList<DocLine>();
 		mQtyProduced = new HashMap<>(); 

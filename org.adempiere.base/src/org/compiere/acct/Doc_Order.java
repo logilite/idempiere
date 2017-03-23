@@ -60,11 +60,11 @@ public class Doc_Order extends Doc
 	}	//	Doc_Order
 
 	/** Contained Optional Tax Lines    */
-	private DocTax[]        m_taxes = null;
+	protected DocTax[]        m_taxes = null;
 	/** Requisitions					*/
-	private DocLine[]		m_requisitions = null;
+	protected DocLine[]		m_requisitions = null;
 	/** Order Currency Precision		*/
-	private int				m_precision = -1;
+	protected int				m_precision = -1;
 
 	/**
 	 *  Load Specific Document Details
@@ -93,7 +93,7 @@ public class Doc_Order extends Doc
 	 *	@param order order
 	 *  @return DocLine Array
 	 */
-	private DocLine[] loadLines(MOrder order)
+	public DocLine[] loadLines(MOrder order)
 	{
 		ArrayList<DocLine> list = new ArrayList<DocLine>();
 		MOrderLine[] lines = order.getLines();
@@ -152,7 +152,7 @@ public class Doc_Order extends Doc
 	 * 	Load Requisitions
 	 *	@return requisition lines of Order
 	 */
-	private DocLine[] loadRequisitions ()
+	public DocLine[] loadRequisitions ()
 	{
 		MOrder order = (MOrder)getPO();
 		MOrderLine[] oLines = order.getLines();
@@ -220,7 +220,7 @@ public class Doc_Order extends Doc
 	 * 	Get Currency Precision
 	 *	@return precision
 	 */
-	private int getStdPrecision()
+	public int getStdPrecision()
 	{
 		if (m_precision == -1)
 			m_precision = MCurrency.getStdPrecision(getCtx(), getC_Currency_ID());
@@ -231,7 +231,7 @@ public class Doc_Order extends Doc
 	 *	Load Invoice Taxes
 	 *  @return DocTax Array
 	 */
-	private DocTax[] loadTaxes()
+	public DocTax[] loadTaxes()
 	{
 		ArrayList<DocTax> list = new ArrayList<DocTax>();
 		StringBuilder sql = new StringBuilder("SELECT it.C_Tax_ID, t.Name, t.Rate, it.TaxBaseAmt, it.TaxAmt, t.IsSalesTax ")
@@ -457,7 +457,7 @@ public class Doc_Order extends Doc
 	 * 	Update ProductPO PriceLastPO
 	 *	@param as accounting schema
 	 */
-	private void updateProductPO(MAcctSchema as)
+	public void updateProductPO(MAcctSchema as)
 	{
 		MClientInfo ci = MClientInfo.get(getCtx(), as.getAD_Client_ID());
 		if (ci.getC_AcctSchema1_ID() != as.getC_AcctSchema_ID())
