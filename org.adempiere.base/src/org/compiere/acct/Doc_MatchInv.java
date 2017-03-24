@@ -74,12 +74,12 @@ public class Doc_MatchInv extends Doc
 	}   //  Doc_MatchInv
 
 	/** Invoice Line			*/
-	private MInvoiceLine	m_invoiceLine = null;
+	protected MInvoiceLine	m_invoiceLine = null;
 	/** Material Receipt		*/
-	private MInOutLine		m_receiptLine = null;
+	protected MInOutLine		m_receiptLine = null;
 
-	private ProductCost		m_pc = null;
-	private MMatchInv m_matchInv;
+	protected ProductCost		m_pc = null;
+	protected MMatchInv m_matchInv;
 
 	/** Commitments			*/
 //	private DocLine[]		m_commitments = null;
@@ -437,7 +437,7 @@ public class Doc_MatchInv extends Doc
 	/** Verify if the posting involves two or more organizations
 	@return true if there are more than one org involved on the posting
 	 */
-	private boolean isInterOrg(MAcctSchema as) {
+	public boolean isInterOrg(MAcctSchema as) {
 		MAcctSchemaElement elementorg = as.getAcctSchemaElement(MAcctSchemaElement.ELEMENTTYPE_Organization);
 		if (elementorg == null || !elementorg.isBalanced()) {
 			// no org element or not need to be balanced
@@ -452,7 +452,7 @@ public class Doc_MatchInv extends Doc
 	}
 
 	// Elaine 2008/6/20	
-	private String createMatchInvCostDetail(MAcctSchema as)
+	public String createMatchInvCostDetail(MAcctSchema as)
 	{
 		if (m_invoiceLine != null && m_invoiceLine.get_ID() > 0 
 			&& m_receiptLine != null && m_receiptLine.get_ID() > 0)
