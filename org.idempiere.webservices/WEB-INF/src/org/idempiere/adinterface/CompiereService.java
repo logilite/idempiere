@@ -272,7 +272,7 @@ public class CompiereService {
 	 * @param remoteIP 
 	 * @return true if login is successful
 	 */
-	public boolean login( int AD_User_ID, int AD_Role_ID, int AD_Client_ID, int AD_Org_ID, int M_Warehouse_ID, String Lang,String remoteIP ) {
+	public boolean login( int AD_User_ID, int AD_Role_ID, int AD_Client_ID, int AD_Org_ID, int M_Warehouse_ID, String Lang,String remoteIP,boolean isValidForSameClient ) {
 		m_loggedin = false;
 		String loginInfo = checkLogin (getCtx(), AD_User_ID, AD_Role_ID, AD_Client_ID, AD_Org_ID, M_Warehouse_ID );				
 		if (loginInfo == null)
@@ -318,7 +318,7 @@ public class CompiereService {
 			token.setM_Warehouse_ID(M_Warehouse_ID);
 			token.setIsManual(false);
 			token.setisWebservice(true);
-			token.setValidForSameClient(true);
+			token.setValidForSameClient(isValidForSameClient);
 			token.setRemoteIP(remoteIP);
 			token.setLastAccessTime(ts);
 			token.setToken(UUID.randomUUID().toString());
