@@ -75,7 +75,7 @@ public class CalloutRMA extends CalloutEngine {
 		if (M_InOutLine_ID == null || M_InOutLine_ID.intValue() == 0)
 			return "";
 
-		MInOutLine iol = new MInOutLine(ctx, M_InOutLine_ID, null);
+		MInOutLine iol = (MInOutLine) MTable.get(ctx, MInOutLine.Table_ID).getPO(M_InOutLine_ID, null);
 
 		int invoiceLine_ID = new Query(ctx, I_C_InvoiceLine.Table_Name,
 				"M_InOutLine_ID=?", null).setParameters(M_InOutLine_ID)

@@ -155,60 +155,65 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		AEnv.showCenterScreen(this);
 	}	//	VPAttributeDialog
 
-	private int						m_WindowNo;
-	private MAttributeSetInstance	m_masi;
-	private int 					m_M_AttributeSetInstance_ID;
-	private int 					m_M_Locator_ID;
-	private String					m_M_AttributeSetInstanceName;
-	private int 					m_M_Product_ID;
-	private int						m_C_BPartner_ID;
-	private int						m_AD_Column_ID;
-	private int						m_WindowNoParent;
-	/**	Enter Product Attributes		*/
-	private boolean					m_productWindow = false;
-	/**	Change							*/
-	private boolean					m_changed = false;
-	
-	private CLogger					log = CLogger.getCLogger(getClass());
-	/** Row Counter					*/
-	private int						m_row = 0;
-	/** List of Editors				*/
-	private ArrayList<WEditor>		m_editors = new ArrayList<WEditor>();
-	/** Length of Instance value (40)	*/
-	//private static final int		INSTANCE_VALUE_LENGTH = 40;
+	protected int					m_WindowNo;
+	protected MAttributeSetInstance	m_masi;
+	protected int					m_M_AttributeSetInstance_ID;
+	protected int					m_M_Locator_ID;
+	protected String				m_M_AttributeSetInstanceName;
+	protected int					m_M_Product_ID;
+	protected int					m_C_BPartner_ID;
+	protected int					m_AD_Column_ID;
+	protected int					m_WindowNoParent;
+	/** Enter Product Attributes */
+	protected boolean				m_productWindow		= false;
+	/** Change */
+	protected boolean				m_changed			= false;
 
-	private Checkbox	cbNewEdit = new Checkbox();
-	private Button		bNewRecord = new Button(Msg.getMsg(Env.getCtx(), "NewRecord"));
-	private Listbox		existingCombo = new Listbox();
-	private Button		bSelect = new Button(); 
-	//	Lot
-//	private VString fieldLotString = new VString ("Lot", false, false, true, 20, 20, null, null);
-	private Textbox fieldLotString = new Textbox();
-	private Listbox fieldLot = new Listbox();
-	private Button bLot = new Button(Msg.getMsg (Env.getCtx(), "New"));
-	//	Lot Popup
-	Menupopup 					popupMenu = new Menupopup();
-	private Menuitem 			mZoom;
-	//	Ser No
-	private Textbox fieldSerNo = new Textbox();
-	private Button bSerNo = new Button(Msg.getMsg (Env.getCtx(), "New"));
-	//	Date
-	private Datebox fieldGuaranteeDate = new Datebox();
+	public CLogger					log					= CLogger.getCLogger(getClass());
+	/** Row Counter */
+	protected int					m_row				= 0;
+	/** List of Editors */
+	protected ArrayList<WEditor>	m_editors			= new ArrayList<WEditor>();
+	/** Length of Instance value (40) */
+	// private static final int INSTANCE_VALUE_LENGTH = 40;
+
+	protected Checkbox				cbNewEdit			= new Checkbox();
+	protected Button				bNewRecord			= new Button(Msg.getMsg(Env.getCtx(), "NewRecord"));
+	protected Listbox				existingCombo		= new Listbox();
+	protected Button				bSelect				= new Button();
+	// Lot
+	// private VString fieldLotString = new VString ("Lot", false, false, true,
+	// 20, 20, null, null);
+	protected Textbox				fieldLotString		= new Textbox();
+	protected Listbox				fieldLot			= new Listbox();
+	protected Button				bLot				= new Button(Msg.getMsg(Env.getCtx(), "New"));
+	// Lot Popup
+	protected Menupopup				popupMenu			= new Menupopup();
+	protected Menuitem				mZoom;
+	// Ser No
+	protected Textbox				fieldSerNo			= new Textbox();
+	protected Button				bSerNo				= new Button(Msg.getMsg(Env.getCtx(), "New"));
+	// Date
+	protected Datebox				fieldGuaranteeDate	= new Datebox();
 	//
-	private Textbox fieldDescription = new Textbox(); //TODO: set length to 20
+	protected Textbox				fieldDescription	= new Textbox();										// TODO:
+																												// set
+																												// length
+																												// to
+																												// 20
 	//
-	private Borderlayout mainLayout = new Borderlayout();
-	private Panel centerPanel = new Panel();
-	private Grid centerLayout = new Grid();
-	private ConfirmPanel confirmPanel = new ConfirmPanel (true);
-	
-	private String m_columnName = null;
+	protected Borderlayout			mainLayout			= new Borderlayout();
+	protected Panel					centerPanel			= new Panel();
+	protected Grid					centerLayout		= new Grid();
+	protected ConfirmPanel			confirmPanel		= new ConfirmPanel(true);
+
+	protected String				m_columnName		= null;
 
 	/**
 	 *	Layout
 	 * 	@throws Exception
 	 */
-	private void init () throws Exception
+	public void init () throws Exception
 	{
 		mainLayout.setParent(this);
 		ZKUpdateUtil.setHflex(mainLayout, "1");
@@ -236,7 +241,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	 *	Dyanmic Init.
 	 *  @return true if initialized
 	 */
-	private boolean initAttributes ()
+	public boolean initAttributes ()
 	{
 		Columns columns = new Columns();
 		columns.setParent(centerLayout);
@@ -524,7 +529,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	 * 	@param product product level attribute
 	 * 	@param readOnly value is read only
 	 */
-	private void addAttributeLine (Rows rows, MAttribute attribute, boolean product, boolean readOnly)
+	public void addAttributeLine (Rows rows, MAttribute attribute, boolean product, boolean readOnly)
 	{
 		if (log.isLoggable(Level.FINE)) log.fine(attribute + ", Product=" + product + ", R/O=" + readOnly);
 		
@@ -577,7 +582,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
         
 	}	//	addAttributeLine
 	
-	private GridField getGridField(MAttribute attribute)
+	public GridField getGridField(MAttribute attribute)
 	{
 		GridFieldVO vo = GridFieldVO.createParameter(Env.getCtx(), m_WindowNo, AEnv.getADWindowID(m_WindowNo), 0, 0,
 				attribute.getName(), Msg.translate(Env.getCtx(), attribute.get_Translation("Name")),
@@ -588,7 +593,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		return gridField;
 	}
 
-	private GridField getStringGridField(MAttribute attribute)
+	public GridField getStringGridField(MAttribute attribute)
 	{
 		GridFieldVO vo = GridFieldVO.createParameter(Env.getCtx(), m_WindowNo, AEnv.getADWindowID(m_WindowNo), 0, 0,
 				attribute.getName(), Msg.translate(Env.getCtx(), attribute.get_Translation("Name")),
@@ -599,7 +604,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		return gridField;
 	}
 
-	private GridField getNumberGridField(MAttribute attribute)
+	public GridField getNumberGridField(MAttribute attribute)
 	{
 		GridFieldVO vo = GridFieldVO.createParameter(Env.getCtx(), m_WindowNo, AEnv.getADWindowID(m_WindowNo), 0, 0,
 				attribute.getName(), Msg.translate(Env.getCtx(), attribute.get_Translation("Name")),
@@ -610,7 +615,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		return gridField;
 	}
 
-	private GridField getListTypeGridField(MAttribute attribute)
+	public GridField getListTypeGridField(MAttribute attribute)
 	{
 		GridFieldVO vo = GridFieldVO.createParameter(Env.getCtx(), m_WindowNo, AEnv.getADWindowID(m_WindowNo), 0, 0,
 				"M_AttributeValue_ID", attribute.getName(), DisplayType.TableDir, 0,
@@ -625,14 +630,14 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		return gridField;
 	}
 
-	private void updateAttributeEditor(MAttribute attribute, int index)
+	public void updateAttributeEditor(MAttribute attribute, int index)
 	{
 		WEditor editor = m_editors.get(index);
 		if (editor != null)
 			setEditorAttribute(attribute, editor);
 	}
 
-	private void setEditorAttribute(MAttribute attribute, WEditor editor)
+	public void setEditorAttribute(MAttribute attribute, WEditor editor)
 	{
 		MAttributeInstance instance = attribute.getMAttributeInstance(m_M_AttributeSetInstance_ID);
 		if (instance != null)
@@ -778,7 +783,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 			log.log(Level.SEVERE, "not found - " + e);
 	}	//	actionPerformed
 
-	private void cmd_existingCombo() {
+	public void cmd_existingCombo() {
 		ListItem pp = existingCombo.getSelectedItem();
 		if (pp != null && (Integer)pp.getValue() != -1)
 		{
@@ -798,7 +803,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		}
 	}
 
-	private void cmd_newRecord() {
+	public void cmd_newRecord() {
 		cbNewEdit.setSelected(false);
 		cbNewEdit.setEnabled(false);
 		bNewRecord.setEnabled(false);
@@ -816,7 +821,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		fieldDescription.setText("");
 	}
 
-	private void cmd_edit() {
+	public void cmd_edit() {
 		boolean check = cbNewEdit.isSelected();
 		for (int i = 0; i < m_editors.size(); i++)
 		{
@@ -830,7 +835,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	 * 	Instance Selection Button
 	 * 	@return true if selected
 	 */
-	private void cmd_select()
+	public void cmd_select()
 	{
 		log.config("");
 		
@@ -899,7 +904,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	/**
 	 * 	Instance New/Edit
 	 */
-	private void cmd_newEdit()
+	public void cmd_newEdit()
 	{
 		boolean rw = cbNewEdit.isChecked();
 		if (log.isLoggable(Level.CONFIG)) log.config("R/W=" + rw + " " + m_masi);
@@ -922,7 +927,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	/**
 	 * 	Zoom M_Lot
 	 */
-	private void cmd_zoom()
+	public void cmd_zoom()
 	{
 		int M_Lot_ID = 0;
 		ListItem pp = fieldLot.getSelectedItem();
@@ -950,7 +955,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	 *	Save Selection
 	 *	@return true if saved
 	 */
-	private boolean saveSelection()
+	public boolean saveSelection()
 	{
 		log.info("");
 		MAttributeSet as = m_masi.getMAttributeSet();
@@ -1057,7 +1062,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		return true;
 	}	//	saveSelection
 
-	private String setEditorValue(String mandatory, MAttribute attributes, WEditor editor)
+	public String setEditorValue(String mandatory, MAttribute attributes, WEditor editor)
 	{
 		int displayType = editor.getGridField().getDisplayType();
 		if (displayType == DisplayType.YesNo)
@@ -1150,5 +1155,327 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	{
 		return m_changed;
 	}	//	isChanged
+
+	public int getM_WindowNo()
+	{
+		return m_WindowNo;
+	}
+
+	public void setM_WindowNo(int m_WindowNo)
+	{
+		this.m_WindowNo = m_WindowNo;
+	}
+
+	public MAttributeSetInstance getM_masi()
+	{
+		return m_masi;
+	}
+
+	public void setM_masi(MAttributeSetInstance m_masi)
+	{
+		this.m_masi = m_masi;
+	}
+
+	public int getM_M_AttributeSetInstance_ID()
+	{
+		return m_M_AttributeSetInstance_ID;
+	}
+
+	public void setM_M_AttributeSetInstance_ID(int m_M_AttributeSetInstance_ID)
+	{
+		this.m_M_AttributeSetInstance_ID = m_M_AttributeSetInstance_ID;
+	}
+
+	public int getM_M_Locator_ID()
+	{
+		return m_M_Locator_ID;
+	}
+
+	public void setM_M_Locator_ID(int m_M_Locator_ID)
+	{
+		this.m_M_Locator_ID = m_M_Locator_ID;
+	}
+
+	public String getM_M_AttributeSetInstanceName()
+	{
+		return m_M_AttributeSetInstanceName;
+	}
+
+	public void setM_M_AttributeSetInstanceName(String m_M_AttributeSetInstanceName)
+	{
+		this.m_M_AttributeSetInstanceName = m_M_AttributeSetInstanceName;
+	}
+
+	public int getM_M_Product_ID()
+	{
+		return m_M_Product_ID;
+	}
+
+	public void setM_M_Product_ID(int m_M_Product_ID)
+	{
+		this.m_M_Product_ID = m_M_Product_ID;
+	}
+
+	public int getM_C_BPartner_ID()
+	{
+		return m_C_BPartner_ID;
+	}
+
+	public void setM_C_BPartner_ID(int m_C_BPartner_ID)
+	{
+		this.m_C_BPartner_ID = m_C_BPartner_ID;
+	}
+
+	public int getM_AD_Column_ID()
+	{
+		return m_AD_Column_ID;
+	}
+
+	public void setM_AD_Column_ID(int m_AD_Column_ID)
+	{
+		this.m_AD_Column_ID = m_AD_Column_ID;
+	}
+
+	public int getM_WindowNoParent()
+	{
+		return m_WindowNoParent;
+	}
+
+	public void setM_WindowNoParent(int m_WindowNoParent)
+	{
+		this.m_WindowNoParent = m_WindowNoParent;
+	}
+
+	public boolean isM_productWindow()
+	{
+		return m_productWindow;
+	}
+
+	public void setM_productWindow(boolean m_productWindow)
+	{
+		this.m_productWindow = m_productWindow;
+	}
+
+	public boolean isM_changed()
+	{
+		return m_changed;
+	}
+
+	public void setM_changed(boolean m_changed)
+	{
+		this.m_changed = m_changed;
+	}
+
+	public CLogger getLog()
+	{
+		return log;
+	}
+
+	public void setLog(CLogger log)
+	{
+		this.log = log;
+	}
+
+	public int getM_row()
+	{
+		return m_row;
+	}
+
+	public void setM_row(int m_row)
+	{
+		this.m_row = m_row;
+	}
+
+	public ArrayList<WEditor> getM_editors()
+	{
+		return m_editors;
+	}
+
+	public void setM_editors(ArrayList<WEditor> m_editors)
+	{
+		this.m_editors = m_editors;
+	}
+
+	public Checkbox getCbNewEdit()
+	{
+		return cbNewEdit;
+	}
+
+	public void setCbNewEdit(Checkbox cbNewEdit)
+	{
+		this.cbNewEdit = cbNewEdit;
+	}
+
+	public Button getbNewRecord()
+	{
+		return bNewRecord;
+	}
+
+	public void setbNewRecord(Button bNewRecord)
+	{
+		this.bNewRecord = bNewRecord;
+	}
+
+	public Listbox getExistingCombo()
+	{
+		return existingCombo;
+	}
+
+	public void setExistingCombo(Listbox existingCombo)
+	{
+		this.existingCombo = existingCombo;
+	}
+
+	public Button getbSelect()
+	{
+		return bSelect;
+	}
+
+	public void setbSelect(Button bSelect)
+	{
+		this.bSelect = bSelect;
+	}
+
+	public Textbox getFieldLotString()
+	{
+		return fieldLotString;
+	}
+
+	public void setFieldLotString(Textbox fieldLotString)
+	{
+		this.fieldLotString = fieldLotString;
+	}
+
+	public Listbox getFieldLot()
+	{
+		return fieldLot;
+	}
+
+	public void setFieldLot(Listbox fieldLot)
+	{
+		this.fieldLot = fieldLot;
+	}
+
+	public Button getbLot()
+	{
+		return bLot;
+	}
+
+	public void setbLot(Button bLot)
+	{
+		this.bLot = bLot;
+	}
+
+	public Menupopup getPopupMenu()
+	{
+		return popupMenu;
+	}
+
+	public void setPopupMenu(Menupopup popupMenu)
+	{
+		this.popupMenu = popupMenu;
+	}
+
+	public Menuitem getmZoom()
+	{
+		return mZoom;
+	}
+
+	public void setmZoom(Menuitem mZoom)
+	{
+		this.mZoom = mZoom;
+	}
+
+	public Textbox getFieldSerNo()
+	{
+		return fieldSerNo;
+	}
+
+	public void setFieldSerNo(Textbox fieldSerNo)
+	{
+		this.fieldSerNo = fieldSerNo;
+	}
+
+	public Button getbSerNo()
+	{
+		return bSerNo;
+	}
+
+	public void setbSerNo(Button bSerNo)
+	{
+		this.bSerNo = bSerNo;
+	}
+
+	public Datebox getFieldGuaranteeDate()
+	{
+		return fieldGuaranteeDate;
+	}
+
+	public void setFieldGuaranteeDate(Datebox fieldGuaranteeDate)
+	{
+		this.fieldGuaranteeDate = fieldGuaranteeDate;
+	}
+
+	public Textbox getFieldDescription()
+	{
+		return fieldDescription;
+	}
+
+	public void setFieldDescription(Textbox fieldDescription)
+	{
+		this.fieldDescription = fieldDescription;
+	}
+
+	public Borderlayout getMainLayout()
+	{
+		return mainLayout;
+	}
+
+	public void setMainLayout(Borderlayout mainLayout)
+	{
+		this.mainLayout = mainLayout;
+	}
+
+	public Panel getCenterPanel()
+	{
+		return centerPanel;
+	}
+
+	public void setCenterPanel(Panel centerPanel)
+	{
+		this.centerPanel = centerPanel;
+	}
+
+	public Grid getCenterLayout()
+	{
+		return centerLayout;
+	}
+
+	public void setCenterLayout(Grid centerLayout)
+	{
+		this.centerLayout = centerLayout;
+	}
+
+	public ConfirmPanel getConfirmPanel()
+	{
+		return confirmPanel;
+	}
+
+	public void setConfirmPanel(ConfirmPanel confirmPanel)
+	{
+		this.confirmPanel = confirmPanel;
+	}
+
+	public String getM_columnName()
+	{
+		return m_columnName;
+	}
+
+	public void setM_columnName(String m_columnName)
+	{
+		this.m_columnName = m_columnName;
+	}
+	
+	
 
 } //	WPAttributeDialog

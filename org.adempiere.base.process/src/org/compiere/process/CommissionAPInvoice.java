@@ -71,7 +71,8 @@ public class CommissionAPInvoice extends SvrProcess
 			throw new IllegalArgumentException("CommissionAPInvoice - No Commission");
 		if (com.getC_Charge_ID() == 0)
 			throw new IllegalArgumentException("CommissionAPInvoice - No Charge on Commission");
-		MBPartner bp = new MBPartner (getCtx(), com.getC_BPartner_ID(), get_TrxName());
+		MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(com.getC_BPartner_ID(),
+				get_TrxName());
 		if (bp.get_ID() == 0)
 			throw new IllegalArgumentException("CommissionAPInvoice - No BPartner");
 			

@@ -23,9 +23,9 @@ import org.compiere.wf.MWorkflow;
  */
 public class ProductionProcess extends SvrProcess {
 
-	private int p_M_Production_ID=0;
-	private Timestamp p_MovementDate = null;
-	private MProduction m_production = null;
+	protected int p_M_Production_ID=0;
+	protected Timestamp p_MovementDate = null;
+	protected MProduction m_production = null;
 	
 	
 	protected void prepare() {

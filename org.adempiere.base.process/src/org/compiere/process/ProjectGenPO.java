@@ -27,6 +27,7 @@ import org.compiere.model.MOrderLine;
 import org.compiere.model.MProductPO;
 import org.compiere.model.MProject;
 import org.compiere.model.MProjectLine;
+import org.compiere.model.MTable;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -84,12 +85,13 @@ public class ProjectGenPO extends SvrProcess
 		if (m_C_ProjectLine_ID != 0)
 		{
 			MProjectLine projectLine = new MProjectLine(getCtx(), m_C_ProjectLine_ID, get_TrxName());
-			MProject project = new MProject (getCtx(), projectLine.getC_Project_ID(), get_TrxName());
+			MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(projectLine.getC_Project_ID(),
+					get_TrxName());
 			createPO (project, projectLine);
 		}
 		else if (m_C_ProjectPhase_ID != 0)
 		{
-			MProject project = new MProject (getCtx(), m_C_Project_ID, get_TrxName());
+			MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(m_C_Project_ID, get_TrxName());
 			for (MProjectLine line : project.getPhaseLines(m_C_ProjectPhase_ID)) {
 				if (line.isActive()) {
 					createPO (project, line);
@@ -98,7 +100,7 @@ public class ProjectGenPO extends SvrProcess
 		}
 		else
 		{
-			MProject project = new MProject (getCtx(), m_C_Project_ID, get_TrxName());
+			MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(m_C_Project_ID, get_TrxName());
 			for (MProjectLine line : project.getLines()) {
 				if (line.isActive()) {
 					createPO (project, line);
@@ -148,7 +150,7 @@ public class ProjectGenPO extends SvrProcess
 		if (order == null)	//	create new Order
 		{
 			//	Vendor
-			MBPartner bp = new MBPartner (getCtx(), pos[0].getC_BPartner_ID(), get_TrxName());
+			MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(pos[0].getC_BPartner_ID(), get_TrxName());
 			//	New Order
 			order = MOrder.createFrom(project, false, null);
 			int AD_Org_ID = projectLine.getAD_Org_ID();

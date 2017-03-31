@@ -1929,7 +1929,8 @@ public class MPayment extends X_C_Payment
 		//	Do not pay when Credit Stop/Hold
 		if (!isReceipt())
 		{
-			MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
+			MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(getC_BPartner_ID(),
+					get_TrxName());
 			if (X_C_BPartner.SOCREDITSTATUS_CreditStop.equals(bp.getSOCreditStatus()))
 			{
 				m_processMsg = "@BPartnerCreditStop@ - @TotalOpenBalance@=" 
@@ -2026,7 +2027,8 @@ public class MPayment extends X_C_Payment
 		//	Update BP for Prepayments
 		if (getC_BPartner_ID() != 0 && getC_Invoice_ID() == 0 && getC_Charge_ID() == 0 && MPaymentAllocate.get(this).length == 0 && !createdAllocationRecords)
 		{
-			MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
+			MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(getC_BPartner_ID(),
+					get_TrxName());
 			DB.getDatabase().forUpdate(bp, 0);
 			//	Update total balance to include this payment 
 			BigDecimal payAmt = MConversionRate.convertBase(getCtx(), getPayAmt(), 
@@ -2174,12 +2176,13 @@ public class MPayment extends X_C_Payment
 		if (counterC_BPartner_ID == 0)
 			return null;
 		//	Business Partner needs to be linked to Org
-		MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
+		MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(getC_BPartner_ID(), get_TrxName());
 		int counterAD_Org_ID = bp.getAD_OrgBP_ID_Int(); 
 		if (counterAD_Org_ID == 0)
 			return null;
 		
-		MBPartner counterBP = new MBPartner (getCtx(), counterC_BPartner_ID, get_TrxName());
+		MBPartner counterBP = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(counterC_BPartner_ID,
+				get_TrxName());
 	//	MOrgInfo counterOrgInfo = MOrgInfo.get(getCtx(), counterAD_Org_ID);
 		if (log.isLoggable(Level.INFO)) log.info("Counter BP=" + counterBP.getName());
 
@@ -2744,7 +2747,8 @@ public class MPayment extends X_C_Payment
 		//	Update BPartner
 		if (getC_BPartner_ID() != 0)
 		{
-			MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
+			MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(getC_BPartner_ID(),
+					get_TrxName());
 			bp.setTotalOpenBalance();
 			bp.saveEx(get_TrxName());
 		}
@@ -2993,7 +2997,7 @@ public class MPayment extends X_C_Payment
 	
 	protected boolean voidOnlinePayment() 
 	{
-		if (getTenderType().equals(TENDERTYPE_CreditCard) && isOnline())
+		if ((getTenderType().equals(TENDERTYPE_CreditCard) || getTenderType().equals(TENDERTYPE_Check)) && isOnline())
 		{
 			setOrig_TrxID(getR_PnRef());
 			setTrxType(TRXTYPE_Void);

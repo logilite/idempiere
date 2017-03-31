@@ -11,6 +11,7 @@ import org.compiere.model.I_A_Asset_Addition;
 import org.compiere.model.MAssetAddition;
 import org.compiere.model.MConversionRateUtil;
 import org.compiere.model.MProject;
+import org.compiere.model.MTable;
 import org.compiere.model.SetGetUtil;
 import org.compiere.util.Env;
 import org.compiere.util.TimeUtil;
@@ -48,7 +49,8 @@ public class CalloutA_Asset_Addition extends CalloutEngine
 		//
 		BigDecimal amt = Env.ZERO;
 		if (project_id > 0) {
-			MProject prj = new MProject(ctx, project_id, null);
+			MProject prj = (MProject) MTable.get(ctx, MProject.Table_ID).getPO(project_id, null);
+
 			amt = prj.getProjectBalanceAmt();
 			mTab.setValue(MAssetAddition.COLUMNNAME_C_Currency_ID, prj.getC_Currency_ID());
 		}

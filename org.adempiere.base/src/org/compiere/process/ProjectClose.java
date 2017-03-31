@@ -21,6 +21,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.MProject;
 import org.compiere.model.MProjectLine;
+import org.compiere.model.MTable;
  
 /**
  *  Close Project.
@@ -61,7 +62,7 @@ public class ProjectClose extends SvrProcess
 	 */
 	protected String doIt() throws Exception
 	{
-		MProject project = new MProject (getCtx(), m_C_Project_ID, get_TrxName());
+		MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(m_C_Project_ID, get_TrxName());
 		if (log.isLoggable(Level.INFO)) log.info("doIt - " + project);
 
 		MProjectLine[] projectLines = project.getLines();

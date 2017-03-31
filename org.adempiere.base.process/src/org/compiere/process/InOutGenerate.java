@@ -443,7 +443,7 @@ public class InOutGenerate extends SvrProcess
 		//	Non Inventory Lines
 		if (storages == null)
 		{
-			MInOutLine line = new MInOutLine (m_shipment);
+			MInOutLine line = MInOutLine.createFrom(m_shipment);
 			line.setOrderLine(orderLine, 0, Env.ZERO);
 			line.setQty(qty);	//	Correct UOM
 			if (orderLine.getQtyEntered().compareTo(orderLine.getQtyOrdered()) != 0)
@@ -496,7 +496,7 @@ public class InOutGenerate extends SvrProcess
 			}
 			if (line == null)	//	new line
 			{
-				line = new MInOutLine (m_shipment);
+				line = MInOutLine.createFrom(m_shipment);
 				line.setOrderLine(orderLine, M_Locator_ID, order.isSOTrx() ? deliver : Env.ZERO);
 				line.setQty(deliver);
 				list.add(line);
@@ -526,7 +526,7 @@ public class InOutGenerate extends SvrProcess
 			else 
 			{
 				
-				 MInOutLine line = new MInOutLine (m_shipment);
+				MInOutLine line = MInOutLine.createFrom(m_shipment);
 				 line.setOrderLine(orderLine, 0, order.isSOTrx() ? toDeliver : Env.ZERO);
 				 line.setQty(toDeliver);
 				 if (orderLine.getQtyEntered().compareTo(orderLine.getQtyOrdered()) != 0)

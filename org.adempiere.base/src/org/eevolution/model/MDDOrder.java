@@ -37,6 +37,7 @@ import org.compiere.model.MProduct;
 import org.compiere.model.MProject;
 import org.compiere.model.MRefList;
 import org.compiere.model.MStorageOnHand;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -630,7 +631,7 @@ public class MDDOrder extends X_DD_Order implements DocAction
 		if (getC_BPartner_ID() == 0)
 			setBPartner(MBPartner.getTemplate(getCtx(), getAD_Client_ID()));
 		if (getC_BPartner_Location_ID() == 0)
-			setBPartner(new MBPartner(getCtx(), getC_BPartner_ID(), null));
+			setBPartner((MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(getC_BPartner_ID(), null));
 
 
 		//	Default Sales Rep

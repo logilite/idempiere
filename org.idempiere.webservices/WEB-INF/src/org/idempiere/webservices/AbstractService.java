@@ -50,6 +50,7 @@ import org.compiere.util.KeyNamePair;
 import org.compiere.util.Login;
 import org.compiere.util.NamePair;
 import org.compiere.util.Trx;
+import org.compiere.util.Util;
 import org.idempiere.adInterface.x10.ADLoginRequest;
 import org.idempiere.adInterface.x10.ADLoginResponse;
 import org.idempiere.adInterface.x10.DataField;
@@ -212,8 +213,10 @@ public class AbstractService {
 			
 			if(isTokenSupported)
 				remoteIP = getHttpServletRequest().getRemoteAddr();
+			boolean validForSameClient = isValidForSameClient(webService, method, serviceType, m_cs,
+					loginRequest.getClientID(), loginRequest.getRoleID());
 			
-			if (!m_cs.login(AD_User_ID, loginRequest.getRoleID(), loginRequest.getClientID(), loginRequest.getOrgID(), loginRequest.getWarehouseID(), loginRequest.getLang(),remoteIP))
+			if (!m_cs.login(AD_User_ID, loginRequest.getRoleID(), loginRequest.getClientID(), loginRequest.getOrgID(), loginRequest.getWarehouseID(), loginRequest.getLang(),remoteIP,validForSameClient))
 				return "Error logging in";
 			
 		} else {
@@ -303,6 +306,47 @@ public class AbstractService {
 		}
 
 		return authenticate(webService, method, serviceType, m_cs);
+	}
+	
+	protected boolean isValidForSameClient(String webServiceValue, String methodValue, String serviceTypeValue,
+			CompiereService m_cs, int AD_Client_ID, int AD_Role_ID) {
+		MWebService m_webservice = MWebService.get(m_cs.getCtx(), webServiceValue);
+		if (m_webservice == null || !m_webservice.isActive())
+			return true;
+
+		X_WS_WebServiceMethod m_webservicemethod = m_webservice.getMethod(methodValue);
+		if (m_webservicemethod == null || !m_webservicemethod.isActive())
+			return true;
+
+		final String sql = "SELECT WSA.IsValidForSameClient FROM WS_WebServiceType WST "
+				+ " JOIN WS_WebServiceTypeAccess WSA ON WSA.WS_WebServiceType_ID = WST.WS_WebServiceType_ID "
+				+ " WHERE WST.AD_Client_ID=? AND WST.WS_WebService_ID=?  " 
+				+ " AND WST.WS_WebServiceMethod_ID=? AND WST.Value= ? " 
+				+ " AND WST.IsActive='Y' AND WSA.IsActive='Y' " 
+				+ " AND WSA.AD_Role_ID =? "; 
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try {
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, AD_Client_ID);
+			pstmt.setInt(2, m_webservice.getWS_WebService_ID());
+			pstmt.setInt(3, m_webservicemethod.getWS_WebServiceMethod_ID());
+			pstmt.setString(4, serviceTypeValue);
+			pstmt.setInt(5, AD_Role_ID);
+			rs = pstmt.executeQuery();
+			if (rs.next()){
+				String result = rs.getString("IsValidForSameClient");
+				return (!Util.isEmpty(result) && result.equalsIgnoreCase("Y"));
+			}
+		} catch (Exception e) {
+			throw new IdempiereServiceFault(e.getClass().toString() + " " + e.getMessage() + " sql=" + sql,
+					e.getCause(), new QName("authenticate"));
+		} finally {
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		return true;
 	}
 
 	/**

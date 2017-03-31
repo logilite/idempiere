@@ -140,7 +140,7 @@ public class MInOut extends X_M_InOut implements DocAction
 				BigDecimal lineQty = storages[ll].getQtyOnHand();
 				if (lineQty.compareTo(qty) > 0)
 					lineQty = qty;
-				MInOutLine line = new MInOutLine (retValue);
+				MInOutLine line = MInOutLine.createFrom(retValue);
 				line.setOrderLine(oLines[i], storages[ll].getM_Locator_ID(),
 					order.isSOTrx() ? lineQty : Env.ZERO);
 				line.setQty(lineQty);	//	Correct UOM for QtyEntered
@@ -417,6 +417,68 @@ public class MInOut extends X_M_InOut implements DocAction
 
 		return inOut;
 	} // MInOut
+	
+	@Deprecated
+	public MInOut (MOrder order, int C_DocTypeShipment_ID, Timestamp movementDate)
+	{
+		this (order.getCtx(), 0, order.get_TrxName());
+		setClientOrg(order);
+		setC_BPartner_ID (order.getC_BPartner_ID());
+		setC_BPartner_Location_ID (order.getC_BPartner_Location_ID());	//	shipment address
+		setAD_User_ID(order.getAD_User_ID());
+		//
+		setM_Warehouse_ID (order.getM_Warehouse_ID());
+		setIsSOTrx (order.isSOTrx());
+		if (C_DocTypeShipment_ID == 0)
+			C_DocTypeShipment_ID = DB.getSQLValue(null,
+				"SELECT C_DocTypeShipment_ID FROM C_DocType WHERE C_DocType_ID=?",
+				order.getC_DocType_ID());
+		setC_DocType_ID (C_DocTypeShipment_ID);
+
+		// patch suggested by Armen
+		// setMovementType (order.isSOTrx() ? MOVEMENTTYPE_CustomerShipment : MOVEMENTTYPE_VendorReceipts);
+		String movementTypeShipment = null;
+		MDocType dtShipment = new MDocType(order.getCtx(), C_DocTypeShipment_ID, order.get_TrxName()); 
+		if (dtShipment.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialDelivery)) 
+			movementTypeShipment = dtShipment.isSOTrx() ? MOVEMENTTYPE_CustomerShipment : MOVEMENTTYPE_VendorReturns; 
+		else if (dtShipment.getDocBaseType().equals(MDocType.DOCBASETYPE_MaterialReceipt)) 
+			movementTypeShipment = dtShipment.isSOTrx() ? MOVEMENTTYPE_CustomerReturns : MOVEMENTTYPE_VendorReceipts;  
+		setMovementType (movementTypeShipment); 
+		
+		//	Default - Today
+		if (movementDate != null)
+			setMovementDate (movementDate);
+		setDateAcct (getMovementDate());
+
+		//	Copy from Order
+		setC_Order_ID(order.getC_Order_ID());
+		setDeliveryRule (order.getDeliveryRule());
+		setDeliveryViaRule (order.getDeliveryViaRule());
+		setM_Shipper_ID(order.getM_Shipper_ID());
+		setFreightCostRule (order.getFreightCostRule());
+		setFreightAmt(order.getFreightAmt());
+		setSalesRep_ID(order.getSalesRep_ID());
+		//
+		setC_Activity_ID(order.getC_Activity_ID());
+		setC_Campaign_ID(order.getC_Campaign_ID());
+		setC_Charge_ID(order.getC_Charge_ID());
+		setChargeAmt(order.getChargeAmt());
+		//
+		setC_Project_ID(order.getC_Project_ID());
+		setDateOrdered(order.getDateOrdered());
+		setDescription(order.getDescription());
+		setPOReference(order.getPOReference());
+		setSalesRep_ID(order.getSalesRep_ID());
+		setAD_OrgTrx_ID(order.getAD_OrgTrx_ID());
+		setUser1_ID(order.getUser1_ID());
+		setUser2_ID(order.getUser2_ID());
+		setPriorityRule(order.getPriorityRule());
+		// Drop shipment
+		setIsDropShip(order.isDropShip());
+		setDropShip_BPartner_ID(order.getDropShip_BPartner_ID());
+		setDropShip_Location_ID(order.getDropShip_Location_ID());
+		setDropShip_User_ID(order.getDropShip_User_ID());
+	}	//	MInOut
 
 	/**
 	 * 	Invoice Constructor - create header only
@@ -488,6 +550,69 @@ public class MInOut extends X_M_InOut implements DocAction
 
 		return inOut;
 	} // MInOut
+	
+	@Deprecated
+	public MInOut (MInvoice invoice, int C_DocTypeShipment_ID, Timestamp movementDate, int M_Warehouse_ID)
+	{
+		this (invoice.getCtx(), 0, invoice.get_TrxName());
+		setClientOrg(invoice);
+		setC_BPartner_ID (invoice.getC_BPartner_ID());
+		setC_BPartner_Location_ID (invoice.getC_BPartner_Location_ID());	//	shipment address
+		setAD_User_ID(invoice.getAD_User_ID());
+		//
+		setM_Warehouse_ID (M_Warehouse_ID);
+		setIsSOTrx (invoice.isSOTrx());
+		setMovementType (invoice.isSOTrx() ? MOVEMENTTYPE_CustomerShipment : MOVEMENTTYPE_VendorReceipts);
+		MOrder order = null;
+		if (invoice.getC_Order_ID() != 0)
+			order = (MOrder) MTable.get(invoice.getCtx(), MOrder.Table_ID).getPO(invoice.getC_Order_ID(),
+					invoice.get_TrxName());
+		if (C_DocTypeShipment_ID == 0 && order != null)
+			C_DocTypeShipment_ID = DB.getSQLValue(null,
+				"SELECT C_DocTypeShipment_ID FROM C_DocType WHERE C_DocType_ID=?",
+				order.getC_DocType_ID());
+		if (C_DocTypeShipment_ID != 0)
+			setC_DocType_ID (C_DocTypeShipment_ID);
+		else
+			setC_DocType_ID();
+
+		//	Default - Today
+		if (movementDate != null)
+			setMovementDate (movementDate);
+		setDateAcct (getMovementDate());
+
+		//	Copy from Invoice
+		setC_Order_ID(invoice.getC_Order_ID());
+		setSalesRep_ID(invoice.getSalesRep_ID());
+		//
+		setC_Activity_ID(invoice.getC_Activity_ID());
+		setC_Campaign_ID(invoice.getC_Campaign_ID());
+		setC_Charge_ID(invoice.getC_Charge_ID());
+		setChargeAmt(invoice.getChargeAmt());
+		//
+		setC_Project_ID(invoice.getC_Project_ID());
+		setDateOrdered(invoice.getDateOrdered());
+		setDescription(invoice.getDescription());
+		setPOReference(invoice.getPOReference());
+		setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());
+		setUser1_ID(invoice.getUser1_ID());
+		setUser2_ID(invoice.getUser2_ID());
+
+		if (order != null)
+		{
+			setDeliveryRule (order.getDeliveryRule());
+			setDeliveryViaRule (order.getDeliveryViaRule());
+			setM_Shipper_ID(order.getM_Shipper_ID());
+			setFreightCostRule (order.getFreightCostRule());
+			setFreightAmt(order.getFreightAmt());
+
+			// Drop Shipment
+			setIsDropShip(order.isDropShip());
+			setDropShip_BPartner_ID(order.getDropShip_BPartner_ID());
+			setDropShip_Location_ID(order.getDropShip_Location_ID());
+			setDropShip_User_ID(order.getDropShip_User_ID());
+		}
+	}	//	MInOut
 
 	/**
 	 * 	Copy Constructor - create header only
@@ -548,6 +673,59 @@ public class MInOut extends X_M_InOut implements DocAction
 
 		return inOut;
 	} // MInOut
+	
+	@Deprecated
+	public MInOut (MInOut original, int C_DocTypeShipment_ID, Timestamp movementDate)
+	{
+		this (original.getCtx(), 0, original.get_TrxName());
+		setClientOrg(original);
+		setC_BPartner_ID (original.getC_BPartner_ID());
+		setC_BPartner_Location_ID (original.getC_BPartner_Location_ID());	//	shipment address
+		setAD_User_ID(original.getAD_User_ID());
+		//
+		setM_Warehouse_ID (original.getM_Warehouse_ID());
+		setIsSOTrx (original.isSOTrx());
+		setMovementType (original.getMovementType());
+		if (C_DocTypeShipment_ID == 0)
+			setC_DocType_ID(original.getC_DocType_ID());
+		else
+			setC_DocType_ID (C_DocTypeShipment_ID);
+
+		//	Default - Today
+		if (movementDate != null)
+			setMovementDate (movementDate);
+		setDateAcct (getMovementDate());
+
+		//	Copy from Order
+		setC_Order_ID(original.getC_Order_ID());
+		setDeliveryRule (original.getDeliveryRule());
+		setDeliveryViaRule (original.getDeliveryViaRule());
+		setM_Shipper_ID(original.getM_Shipper_ID());
+		setFreightCostRule (original.getFreightCostRule());
+		setFreightAmt(original.getFreightAmt());
+		setSalesRep_ID(original.getSalesRep_ID());
+		//
+		setC_Activity_ID(original.getC_Activity_ID());
+		setC_Campaign_ID(original.getC_Campaign_ID());
+		setC_Charge_ID(original.getC_Charge_ID());
+		setChargeAmt(original.getChargeAmt());
+		//
+		setC_Project_ID(original.getC_Project_ID());
+		setDateOrdered(original.getDateOrdered());
+		setDescription(original.getDescription());
+		setPOReference(original.getPOReference());
+		setSalesRep_ID(original.getSalesRep_ID());
+		setAD_OrgTrx_ID(original.getAD_OrgTrx_ID());
+		setUser1_ID(original.getUser1_ID());
+		setUser2_ID(original.getUser2_ID());
+
+		// DropShipment
+		setIsDropShip(original.isDropShip());
+		setDropShip_BPartner_ID(original.getDropShip_BPartner_ID());
+		setDropShip_Location_ID(original.getDropShip_Location_ID());
+		setDropShip_User_ID(original.getDropShip_User_ID());
+
+	}	//	MInOut
 
 
 	/**	Lines					*/
@@ -720,7 +898,7 @@ public class MInOut extends X_M_InOut implements DocAction
 		int count = 0;
 		for (int i = 0; i < fromLines.length; i++)
 		{
-			MInOutLine line = new MInOutLine (this);
+			MInOutLine line = MInOutLine.createFrom(this);
 			MInOutLine fromLine = fromLines[i];
 			line.set_TrxName(get_TrxName());
 			if (counter)	//	header
@@ -837,7 +1015,7 @@ public class MInOut extends X_M_InOut implements DocAction
 	public MBPartner getBPartner()
 	{
 		if (m_partner == null)
-			m_partner = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
+			m_partner = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(getC_BPartner_ID(), get_TrxName());
 		return m_partner;
 	}	//	getPartner
 
@@ -1151,7 +1329,8 @@ public class MInOut extends X_M_InOut implements DocAction
 					&& !MSysConfig.getBooleanValue(MSysConfig.CHECK_CREDIT_ON_PREPAY_ORDER, true, getAD_Client_ID(), getAD_Org_ID())) {
 				// ignore -- don't validate Prepay Orders depending on sysconfig parameter
 			} else {
-				MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
+				MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(getC_BPartner_ID(),
+						get_TrxName());
 				if (MBPartner.SOCREDITSTATUS_CreditStop.equals(bp.getSOCreditStatus()))
 				{
 					m_processMsg = "@BPartnerCreditStop@ - @TotalOpenBalance@="
@@ -1666,7 +1845,14 @@ public class MInOut extends X_M_InOut implements DocAction
 							addDocsPostProcess(po);
 						MMatchInv matchInvCreated = po.getMatchInvCreated();
 						if (matchInvCreated != null) {
-							addDocsPostProcess(matchInvCreated);
+							if(matchInvCreated.getM_MatchInvHdr_ID() > 0)
+							{
+								addDocsPostProcess((PO) matchInvCreated.getM_MatchInvHdr());
+							}
+							else
+							{
+								addDocsPostProcess(matchInvCreated);
+							}
 						}
 					}
 					//	Update PO with ASI
@@ -2012,12 +2198,12 @@ public class MInOut extends X_M_InOut implements DocAction
 		if (counterC_BPartner_ID == 0)
 			return null;
 		//	Business Partner needs to be linked to Org
-		MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
+		MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(getC_BPartner_ID(), get_TrxName());
 		int counterAD_Org_ID = bp.getAD_OrgBP_ID_Int();
 		if (counterAD_Org_ID == 0)
 			return null;
 
-		MBPartner counterBP = new MBPartner (getCtx(), counterC_BPartner_ID, null);
+		MBPartner counterBP = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(counterC_BPartner_ID, null);
 		MOrgInfo counterOrgInfo = MOrgInfo.get(getCtx(), counterAD_Org_ID, get_TrxName());
 		if (log.isLoggable(Level.INFO)) log.info("Counter BP=" + counterBP.getName());
 

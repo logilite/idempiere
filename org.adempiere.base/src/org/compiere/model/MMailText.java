@@ -266,7 +266,7 @@ public class MMailText extends X_R_MailText
 	 */
 	public void setBPartner (int C_BPartner_ID)
 	{
-		m_bpartner = new MBPartner (getCtx(), C_BPartner_ID, get_TrxName());
+		m_bpartner = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(C_BPartner_ID, get_TrxName());
 	}	//	setBPartner
 	
 	/**

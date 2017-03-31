@@ -216,7 +216,7 @@ public class MRMALine extends X_M_RMALine
 	public MInOutLine getShipLine()
 	{
 		if ((m_ioLine == null || is_ValueChanged(COLUMNNAME_M_InOutLine_ID)) && getM_InOutLine_ID() != 0)
-			m_ioLine = new MInOutLine (getCtx(), getM_InOutLine_ID(), get_TrxName());
+			m_ioLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(getM_InOutLine_ID(), get_TrxName());
 		return m_ioLine;
 	}	//	getShipLine
 	
@@ -415,7 +415,7 @@ public class MRMALine extends X_M_RMALine
 		return true;
 	}
     
-    protected boolean updateOrderTax(boolean oldTax) 
+    public boolean updateOrderTax(boolean oldTax) 
     {
 		MRMATax tax = MRMATax.get (this, getPrecision(), oldTax, get_TrxName());
 		if (tax != null) 

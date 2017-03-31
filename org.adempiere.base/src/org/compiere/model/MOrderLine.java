@@ -183,6 +183,16 @@ public class MOrderLine extends X_C_OrderLine
 
 		return orderLine;
 	} // MOrderLine
+	
+	@Deprecated
+	public MOrderLine (MOrder order)
+	{
+		this (order.getCtx(), 0, order.get_TrxName());
+		if (order.get_ID() == 0)
+			throw new IllegalArgumentException("Header not saved");
+		setC_Order_ID (order.getC_Order_ID());	//	parent
+		setOrder(order);
+	}	//	MOrderLine
 
 	/**
 	 *  Load Constructor

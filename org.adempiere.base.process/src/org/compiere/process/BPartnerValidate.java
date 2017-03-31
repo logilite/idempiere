@@ -25,6 +25,7 @@ import org.compiere.model.I_C_BPartner;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.model.Query;
 import org.compiere.util.AdempiereUserError;
 import org.compiere.util.Msg;
@@ -78,7 +79,7 @@ public class BPartnerValidate extends SvrProcess
 		
 		if (p_C_BP_Group_ID == 0)
 		{
-			MBPartner bp = new MBPartner (getCtx(), p_C_BPartner_ID, get_TrxName());
+			MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(p_C_BPartner_ID, get_TrxName());
 			if (bp.get_ID() == 0)
 				throw new AdempiereUserError ("Business Partner not found - C_BPartner_ID=" + p_C_BPartner_ID);
 			checkBP (bp);

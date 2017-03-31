@@ -182,7 +182,7 @@ public class InOutGenerateRMA extends SvrProcess
         {
         	if (rmaLine.getM_InOutLine_ID() != 0 || rmaLine.getC_Charge_ID() != 0 || rmaLine.getM_Product_ID() != 0)
             {
-                MInOutLine shipLine = new MInOutLine(shipment);
+				MInOutLine shipLine = MInOutLine.createFrom(shipment);
                 shipLine.setM_RMALine_ID(rmaLine.get_ID());
                 shipLine.setLine(rmaLine.getLine());
                 shipLine.setDescription(rmaLine.getDescription());

@@ -79,6 +79,9 @@ public class AssignmentWindow extends Window implements EventListener<Event> {
 
 		dtEndDate = new DatetimeBox();
 		dtEndDate.setEnabled(false);
+		
+		dtBeginDate.getTimebox().setFormat(DPCalendar.getTimeFormat());
+		dtEndDate.getTimebox().setFormat(DPCalendar.getTimeFormat());
 
 		resourceName = new Textbox();
 		resourceName.setWidth("95%");

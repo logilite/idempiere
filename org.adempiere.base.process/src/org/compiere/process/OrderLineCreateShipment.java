@@ -96,7 +96,7 @@ public class OrderLineCreateShipment extends SvrProcess
 			throw new IllegalArgumentException("Cannot save shipment header");
 		
 		
-		MInOutLine sline = new MInOutLine( shipment );
+		MInOutLine sline = MInOutLine.createFrom(shipment);
 		sline.setOrderLine(line, 0, line.getQtyReserved());
 		//sline.setDatePromised(line.getDatePromised());
 		sline.setQtyEntered(line.getQtyReserved());

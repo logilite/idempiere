@@ -506,7 +506,7 @@ public class MRMA extends X_M_RMA implements DocAction
 		if (counterC_BPartner_ID == 0)
 			return null;
 		//	Business Partner needs to be linked to Org
-		MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
+		MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(getC_BPartner_ID(), get_TrxName());
 		int counterAD_Org_ID = bp.getAD_OrgBP_ID_Int();
 		if (counterAD_Org_ID == 0)
 			return null;
@@ -652,7 +652,8 @@ public class MRMA extends X_M_RMA implements DocAction
 				line.setRef_RMALine_ID(fromLine.getM_RMALine_ID());
 				if (fromLine.getM_InOutLine_ID() != 0)
 				{
-					MInOutLine peer = new MInOutLine (getCtx(), fromLine.getM_InOutLine_ID(), get_TrxName());
+					MInOutLine peer = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(
+							fromLine.getM_InOutLine_ID(), get_TrxName());
 					if (peer.getRef_InOutLine_ID() != 0)
 						line.setM_InOutLine_ID(peer.getRef_InOutLine_ID());
 				}

@@ -130,7 +130,7 @@ public class InvoiceCreateInOut extends SvrProcess
 			return null;
 		}
 		MInOut inout = getCreateHeader(invoice);
-		MInOutLine sLine = new MInOutLine(inout);
+		MInOutLine sLine = MInOutLine.createFrom(inout);
 		sLine.setInvoiceLine(invoiceLine, 0,	//	Locator 
 			invoice.isSOTrx() ? qtyNotMatched : Env.ZERO);
 		sLine.setQtyEntered(qtyNotMatched);

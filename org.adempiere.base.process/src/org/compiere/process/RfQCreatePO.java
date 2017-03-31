@@ -94,7 +94,8 @@ public class RfQCreatePO extends SvrProcess
 			if (!response.isSelectedWinner())
 				continue;
 			//
-			MBPartner bp = new MBPartner(getCtx(), response.getC_BPartner_ID(), get_TrxName());
+			MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(response.getC_BPartner_ID(),
+					get_TrxName());
 			if (log.isLoggable(Level.CONFIG)) log.config("Winner=" + bp);
 			MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 			order.setIsSOTrx(false);
@@ -161,7 +162,8 @@ public class RfQCreatePO extends SvrProcess
 				//	New/different BP
 				if (bp == null || bp.getC_BPartner_ID() != response.getC_BPartner_ID())
 				{
-					bp = new MBPartner(getCtx(), response.getC_BPartner_ID(), get_TrxName());
+					bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(response.getC_BPartner_ID(),
+							get_TrxName());
 					order = null;
 				}
 				if (log.isLoggable(Level.CONFIG)) log.config("Line=" + line + ", Winner=" + bp);

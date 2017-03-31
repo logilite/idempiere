@@ -109,6 +109,20 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 
 		return bankStatement;
 	} // MBankStatement
+	
+	@Deprecated
+	public MBankStatement (MBankAccount account, boolean isManual)
+	{
+		this (account.getCtx(), 0, account.get_TrxName());
+		setClientOrg(account);
+		setC_BankAccount_ID(account.getC_BankAccount_ID());
+		setStatementDate(new Timestamp(System.currentTimeMillis()));
+		setDateAcct(new Timestamp(System.currentTimeMillis()));
+		setBeginningBalance(account.getCurrentBalance());
+		setName(getStatementDate().toString());
+		setIsManual(isManual);
+	}	//	MBankStatement
+	
 	/**
 	 * 	Create a new Bank Statement
 	 *	@param account Bank Account
@@ -116,6 +130,12 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 	public static MBankStatement createFrom (MBankAccount account)
 	{
 		return createFrom(account, false);
+	}	//	MBankStatement
+	
+	@Deprecated
+	public MBankStatement(MBankAccount account)
+	{
+		this(account, false);
 	}	//	MBankStatement
  
 	/**	Lines							*/
@@ -581,6 +601,34 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REACTIVATE);
 		if (m_processMsg != null)
 			return false;		
+
+		if (isApproved())
+			setIsApproved(false);
+		
+		if (log.isLoggable(Level.INFO)) log.info("ReactivateIt - " + toString());
+		
+		//	Set Payment reconciled false
+		MBankStatementLine[] lines = getLines(false);
+		for (int i = 0; i < lines.length; i++)
+		{
+			MBankStatementLine line = lines[i];
+			if (line.getC_Payment_ID() != 0)
+			{
+				MPayment payment = new MPayment (getCtx(), line.getC_Payment_ID(), get_TrxName());
+				payment.setIsReconciled(false);
+				payment.saveEx(get_TrxName());
+			}
+		}
+		//	Update Bank Account
+		MBankAccount ba = getBankAccount();
+		ba.load(get_TrxName());
+
+		ba.setCurrentBalance(ba.getCurrentBalance().subtract(getStatementDifference()));
+		ba.saveEx(get_TrxName());
+		
+		MFactAcct.deleteEx(MBankStatement.Table_ID, getC_BankStatement_ID(), get_TrxName());
+		setPosted(false);
+		
 		
 		// After reActivate
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REACTIVATE);

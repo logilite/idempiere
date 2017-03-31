@@ -607,7 +607,7 @@ public abstract class CreateFromShipment extends CreateFrom
 					QtyEntered = QtyEntered.negate();
 
 				//	Create new InOut Line
-				MInOutLine iol = new MInOutLine (inout);
+				MInOutLine iol = MInOutLine.createFrom(inout);
 				iol.setM_Product_ID(M_Product_ID, C_UOM_ID);	//	Line UOM
 				iol.setQty(QtyEntered);							//	Movement/Entered
 				//

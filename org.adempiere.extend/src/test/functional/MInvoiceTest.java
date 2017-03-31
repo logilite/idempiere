@@ -16,6 +16,7 @@ package test.functional;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MTable;
 import org.compiere.util.Env;
 
 import test.AdempiereTestCase;
@@ -47,7 +48,7 @@ public class MInvoiceTest extends AdempiereTestCase
 			invoice.getTaxes(true); // test query
 		}
 		//test MinvoiceLine getOfInOutLine
-		MInOutLine iol = new MInOutLine(getCtx(),101,getTrxName()); //get InOutLine thats from InvoiceLine
+		MInOutLine iol = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(101, getTrxName()); //get InOutLine thats from InvoiceLine
 		MInvoiceLine invl = MInvoiceLine.getOfInOutLine(iol);
 		assertTrue("getOfInOutLine must work",invl.get_ID()>0);
 	}

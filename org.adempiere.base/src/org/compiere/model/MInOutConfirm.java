@@ -504,7 +504,7 @@ public class MInOutConfirm extends X_M_InOutConfirm implements DocAction
 				original.saveEx();
 			}
 			//
-			MInOutLine splitLine = new MInOutLine (split);
+			MInOutLine splitLine = MInOutLine.createFrom(split);
 			splitLine.setC_OrderLine_ID(oldLine.getC_OrderLine_ID());
 			splitLine.setC_UOM_ID(oldLine.getC_UOM_ID());
 			splitLine.setDescription(oldLine.getDescription());

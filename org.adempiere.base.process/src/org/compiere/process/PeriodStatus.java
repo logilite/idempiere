@@ -20,6 +20,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.MPeriod;
 import org.compiere.model.MPeriodControl;
+import org.compiere.model.MTable;
 import org.compiere.util.AdempiereUserError;
 import org.compiere.util.CacheMgt;
 import org.compiere.util.DB;
@@ -33,9 +34,9 @@ import org.compiere.util.DB;
 public class PeriodStatus extends SvrProcess
 {
 	/** Period						*/
-	private int			p_C_Period_ID = 0;
+	protected int			p_C_Period_ID = 0;
 	/** Action						*/
-	private String		p_PeriodAction = null;
+	protected String		p_PeriodAction = null;
 	
 	
 	/**
@@ -65,7 +66,7 @@ public class PeriodStatus extends SvrProcess
 	protected String doIt() throws Exception
 	{
 		if (log.isLoggable(Level.INFO)) log.info ("C_Period_ID=" + p_C_Period_ID + ", PeriodAction=" + p_PeriodAction);
-		MPeriod period = new MPeriod (getCtx(), p_C_Period_ID, get_TrxName());
+		MPeriod period = (MPeriod) MTable.get(getCtx(), MPeriod.Table_ID).getPO(p_C_Period_ID, get_TrxName());
 		if (period.get_ID() == 0)
 			throw new AdempiereUserError("@NotFound@  @C_Period_ID@=" + p_C_Period_ID);
 

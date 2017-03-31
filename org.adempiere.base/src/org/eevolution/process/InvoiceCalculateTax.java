@@ -84,7 +84,8 @@ public class InvoiceCalculateTax extends SvrProcess
 		invoice.saveEx();
 		//
 		// Update balance
-		MBPartner bp = new MBPartner (invoice.getCtx(), invoice.getC_BPartner_ID(), invoice.get_TrxName());
+		MBPartner bp = (MBPartner) MTable.get(invoice.getCtx(), MBPartner.Table_ID).getPO(invoice.getC_BPartner_ID(),
+				invoice.get_TrxName());
 		bp.setTotalOpenBalance();
 		bp.setSOCreditStatus();
 		bp.saveEx();

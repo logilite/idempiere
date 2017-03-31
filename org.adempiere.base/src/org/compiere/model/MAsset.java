@@ -96,7 +96,8 @@ public class MAsset extends X_A_Asset
 		
 		MInvoiceLine invoiceLine = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(
 				match.getC_InvoiceLine_ID(), get_TrxName());
-		MInOutLine inoutLine = new MInOutLine(getCtx(), match.getM_InOutLine_ID(), get_TrxName());
+		MInOutLine inoutLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(match.getM_InOutLine_ID(),
+				get_TrxName());
 		
 		setIsOwned(true);
 		setIsInPosession(true);
@@ -119,7 +120,8 @@ public class MAsset extends X_A_Asset
 			setM_Product_ID(inoutLine.getM_Product_ID());
 			setM_AttributeSetInstance_ID(inoutLine.getM_AttributeSetInstance_ID());
 		}
-		MBPartner bp = new MBPartner(getCtx(), invoiceLine.getC_Invoice().getC_BPartner_ID(), null);
+		MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID)
+				.getPO(invoiceLine.getC_Invoice().getC_BPartner_ID(), null);
 		name += bp.getName()+"-"+invoiceLine.getC_Invoice().getDocumentNo();
 		if (log.isLoggable(Level.FINE)) log.fine("name=" + name);
 		setValue(name);

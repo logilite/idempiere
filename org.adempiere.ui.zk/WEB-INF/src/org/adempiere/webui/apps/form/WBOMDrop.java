@@ -1030,7 +1030,8 @@ public class WBOMDrop extends ADForm implements EventListener<Event>
 	private boolean cmd_saveProject (int C_Project_ID, Trx trx)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_Project_ID=" + C_Project_ID);
-		MProject project = new MProject (Env.getCtx(), C_Project_ID, trx != null ? trx.getTrxName() : null);
+		MProject project = (MProject) MTable.get(Env.getCtx(), MProject.Table_ID).getPO(C_Project_ID,
+				trx != null ? trx.getTrxName() : null);
 		if (project.get_ID() == 0)
 		{
 			log.log(Level.SEVERE, "Not found - C_Project_ID=" + C_Project_ID);

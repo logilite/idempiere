@@ -1,13 +1,14 @@
 CREATE OR REPLACE VIEW M_INOUT_CANDIDATE_V
 (AD_CLIENT_ID, AD_ORG_ID, C_BPARTNER_ID, C_ORDER_ID, DOCUMENTNO, 
  DATEORDERED, C_DOCTYPE_ID, POREFERENCE, DESCRIPTION, SALESREP_ID, 
- M_WAREHOUSE_ID, TOTALLINES)
+ M_WAREHOUSE_ID, TOTALLINES, OrderLine_OrgID)
 AS 
 SELECT	
 	o.AD_Client_ID, o.AD_Org_ID, o.C_BPartner_ID, o.C_Order_ID,
 	o.DocumentNo, o.DateOrdered, o.C_DocType_ID, 
     o.POReference, o.Description, o.SalesRep_ID,
     l.M_Warehouse_ID,
+    l.AD_Org_ID AS OrderLine_OrgID,
 	SUM((l.QtyOrdered-l.QtyDelivered)*l.PriceActual) AS TotalLines
 FROM C_Order o
   INNER JOIN C_OrderLine l ON (o.C_Order_ID=l.C_Order_ID)
@@ -31,7 +32,7 @@ WHERE	(o.DocStatus = 'CO' AND o.IsDelivered='N')  --  Status must be CO - not CL
 	--
 GROUP BY o.AD_Client_ID, o.AD_Org_ID, o.C_BPartner_ID, o.C_Order_ID,
 	o.DocumentNo, o.DateOrdered, o.C_DocType_ID,
-    o.POReference, o.Description, o.SalesRep_ID, l.M_Warehouse_ID;
+    o.POReference, o.Description, o.SalesRep_ID, l.M_Warehouse_ID,l.AD_Org_ID;
 
 
 

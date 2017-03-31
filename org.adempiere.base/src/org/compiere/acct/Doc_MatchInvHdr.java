@@ -36,7 +36,7 @@ import org.compiere.util.Trx;
 public class Doc_MatchInvHdr extends Doc
 {
 
-	private MMatchInvHdr	m_matchInvHdr;
+	protected MMatchInvHdr	m_matchInvHdr;
 
 	/**
 	 * @param as
@@ -79,7 +79,7 @@ public class Doc_MatchInvHdr extends Doc
 	 * @param prod production
 	 * @return DocLine Array
 	 */
-	private DocLine[] loadLines()
+	public DocLine[] loadLines()
 	{
 		ArrayList<DocLine> list = new ArrayList<DocLine>();
 		MMatchInv[] matInvList = m_matchInvHdr.getLines(true, "");
@@ -392,7 +392,7 @@ public class Doc_MatchInvHdr extends Doc
 	 * 
 	 * @return true if there are more than one org involved on the posting
 	 */
-	private boolean isInterOrg(MAcctSchema as, MInOutLine m_receiptLine, MInvoiceLine m_invoiceLine)
+	public boolean isInterOrg(MAcctSchema as, MInOutLine m_receiptLine, MInvoiceLine m_invoiceLine)
 	{
 		MAcctSchemaElement elementorg = as.getAcctSchemaElement(MAcctSchemaElement.ELEMENTTYPE_Organization);
 		if (elementorg == null || !elementorg.isBalanced())
@@ -514,7 +514,7 @@ public class Doc_MatchInvHdr extends Doc
 	}
 
 	// Elaine 2008/6/20
-	private String createMatchInvCostDetail(DocLine line, MAcctSchema as, MInvoiceLine m_invoiceLine,
+	public String createMatchInvCostDetail(DocLine line, MAcctSchema as, MInvoiceLine m_invoiceLine,
 			MInOutLine m_receiptLine)
 	{
 		if (m_invoiceLine != null && m_invoiceLine.get_ID() > 0 && m_receiptLine != null && m_receiptLine.get_ID() > 0)

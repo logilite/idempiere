@@ -127,7 +127,7 @@ public class DistributionCreate extends SvrProcess
 		//	Create Single Order
 		if (!p_IsTest && p_IsCreateSingleOrder) 
 		{
-			MBPartner bp = new MBPartner (getCtx(), p_Bill_BPartner_ID, get_TrxName());
+			MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(p_Bill_BPartner_ID, get_TrxName());
 			if (bp.get_ID() == 0)
 				throw new IllegalArgumentException("Single Business Partner not found - C_BPartner_ID=" + p_Bill_BPartner_ID);
 			//
@@ -168,7 +168,8 @@ public class DistributionCreate extends SvrProcess
 	 */
 	private boolean createOrder (MDistributionListLine dll)
 	{
-		MBPartner bp = new MBPartner (getCtx(), dll.getC_BPartner_ID(), get_TrxName());
+		MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(dll.getC_BPartner_ID(),
+				get_TrxName());
 		if (bp.get_ID() == 0)
 			throw new IllegalArgumentException("Business Partner not found - C_BPartner_ID=" + dll.getC_BPartner_ID());
 
