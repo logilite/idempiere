@@ -30,7 +30,7 @@ public class X_AD_PrintFormat extends PO implements I_AD_PrintFormat, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20151030L;
+	private static final long serialVersionUID = 20170404L;
 
     /** Standard Constructor */
     public X_AD_PrintFormat (Properties ctx, int AD_PrintFormat_ID, String trxName)
@@ -583,5 +583,22 @@ public class X_AD_PrintFormat extends PO implements I_AD_PrintFormat, I_Persiste
 	public String getPrinterName () 
 	{
 		return (String)get_Value(COLUMNNAME_PrinterName);
+	}
+
+	/** Set Record Limit.
+		@param RecordLimit Record Limit	  */
+	public void setRecordLimit (int RecordLimit)
+	{
+		set_Value (COLUMNNAME_RecordLimit, Integer.valueOf(RecordLimit));
+	}
+
+	/** Get Record Limit.
+		@return Record Limit	  */
+	public int getRecordLimit () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_RecordLimit);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 }

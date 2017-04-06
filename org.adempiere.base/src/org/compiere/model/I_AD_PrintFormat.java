@@ -381,6 +381,15 @@ public interface I_AD_PrintFormat
 	  */
 	public String getPrinterName();
 
+    /** Column name RecordLimit */
+    public static final String COLUMNNAME_RecordLimit = "RecordLimit";
+
+	/** Set Record Limit	  */
+	public void setRecordLimit (int RecordLimit);
+
+	/** Get Record Limit	  */
+	public int getRecordLimit();
+
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";
 

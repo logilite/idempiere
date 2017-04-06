@@ -715,6 +715,10 @@ public class DataEngine
 			}
 		} // Report view order by clause.
 		
+		if (format.getRecordLimit() > 0)
+		{
+			finalSQL.append(" FETCH FIRST ").append(format.getRecordLimit()).append(" ROWS ONLY ");
+		} // Record Limit
 
 		//	Print Data
 		PrintData pd = new PrintData (ctx, reportName);
