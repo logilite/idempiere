@@ -274,6 +274,28 @@ public interface I_AD_ToolBarButton
 	  */
 	public String getName();
 
+    /** Column name PressedLogic */
+    public static final String COLUMNNAME_PressedLogic = "PressedLogic";
+
+	/** Set Pressed Logic	  */
+	public void setPressedLogic (String PressedLogic);
+
+	/** Get Pressed Logic	  */
+	public String getPressedLogic();
+
+    /** Column name ReadOnlyLogic */
+    public static final String COLUMNNAME_ReadOnlyLogic = "ReadOnlyLogic";
+
+	/** Set Read Only Logic.
+	  * Logic to determine if field is read only (applies only when field is read-write)
+	  */
+	public void setReadOnlyLogic (String ReadOnlyLogic);
+
+	/** Get Read Only Logic.
+	  * Logic to determine if field is read only (applies only when field is read-write)
+	  */
+	public String getReadOnlyLogic();
+
     /** Column name SeqNo */
     public static final String COLUMNNAME_SeqNo = "SeqNo";
 

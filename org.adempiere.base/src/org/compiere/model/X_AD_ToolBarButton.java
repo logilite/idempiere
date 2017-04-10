@@ -30,7 +30,7 @@ public class X_AD_ToolBarButton extends PO implements I_AD_ToolBarButton, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20151030L;
+	private static final long serialVersionUID = 20170407L;
 
     /** Standard Constructor */
     public X_AD_ToolBarButton (Properties ctx, int AD_ToolBarButton_ID, String trxName)
@@ -406,6 +406,37 @@ public class X_AD_ToolBarButton extends PO implements I_AD_ToolBarButton, I_Pers
     {
         return new KeyNamePair(get_ID(), getName());
     }
+
+	/** Set Pressed Logic.
+		@param PressedLogic Pressed Logic	  */
+	public void setPressedLogic (String PressedLogic)
+	{
+		set_Value (COLUMNNAME_PressedLogic, PressedLogic);
+	}
+
+	/** Get Pressed Logic.
+		@return Pressed Logic	  */
+	public String getPressedLogic () 
+	{
+		return (String)get_Value(COLUMNNAME_PressedLogic);
+	}
+
+	/** Set Read Only Logic.
+		@param ReadOnlyLogic 
+		Logic to determine if field is read only (applies only when field is read-write)
+	  */
+	public void setReadOnlyLogic (String ReadOnlyLogic)
+	{
+		set_Value (COLUMNNAME_ReadOnlyLogic, ReadOnlyLogic);
+	}
+
+	/** Get Read Only Logic.
+		@return Logic to determine if field is read only (applies only when field is read-write)
+	  */
+	public String getReadOnlyLogic () 
+	{
+		return (String)get_Value(COLUMNNAME_ReadOnlyLogic);
+	}
 
 	/** Set Sequence.
 		@param SeqNo 
