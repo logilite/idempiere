@@ -1,3 +1,7 @@
+﻿-- View: m_inout_candidate_v
+
+ DROP VIEW m_inout_candidate_v;
+
 CREATE OR REPLACE VIEW M_INOUT_CANDIDATE_V
 (AD_CLIENT_ID, AD_ORG_ID, C_BPARTNER_ID, C_ORDER_ID, DOCUMENTNO, 
  DATEORDERED, C_DOCTYPE_ID, POREFERENCE, DESCRIPTION, SALESREP_ID, 
@@ -35,5 +39,5 @@ GROUP BY o.AD_Client_ID, o.AD_Org_ID, o.C_BPartner_ID, o.C_Order_ID,
     o.POReference, o.Description, o.SalesRep_ID, l.M_Warehouse_ID,l.AD_Org_ID
 ;
 
-
-
+SELECT register_migration_script('201704131050_IDEMPIERE-3319.sql') FROM dual
+;
