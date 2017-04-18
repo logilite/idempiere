@@ -181,6 +181,26 @@ public class MInOut extends X_M_InOut implements DocAction
 	public static MInOut copyFrom (MInOut from, Timestamp dateDoc, Timestamp dateAcct,
 		int C_DocType_ID, boolean isSOTrx, boolean counter, String trxName, boolean setOrder)
 	{
+		return copyFrom(from, dateDoc, dateAcct, C_DocType_ID, isSOTrx, counter, trxName, setOrder, false);
+	}
+	
+	
+	/**
+	 * 	Create new Shipment by copying
+	 * 	@param from shipment
+	 * 	@param dateDoc date of the document date
+	 * 	@param C_DocType_ID doc type
+	 * 	@param isSOTrx sales order
+	 * 	@param counter create counter links
+	 * 	@param trxName trx
+	 * 	@param setOrder set the order link
+	 *  @param isReverse copying to create Reverse document
+	 *	@return Shipment
+	 *
+	 */
+	public static MInOut copyFrom (MInOut from, Timestamp dateDoc, Timestamp dateAcct,
+		int C_DocType_ID, boolean isSOTrx, boolean counter, String trxName, boolean setOrder, boolean isReverse)
+	{
 		MInOut to = (MInOut) MTable.get(from.getCtx(), MInOut.Table_ID).getPO(0, null);
 		to.set_TrxName(trxName);
 		copyValues(from, to, from.getAD_Client_ID(), from.getAD_Org_ID());
@@ -270,7 +290,7 @@ public class MInOut extends X_M_InOut implements DocAction
 		if (counter)
 			from.setRef_InOut_ID(to.getM_InOut_ID());
 
-		if (to.copyLinesFrom(from, counter, setOrder) <= 0)
+		if (to.copyLinesFrom(from, counter, setOrder, isReverse) <= 0)
 			throw new IllegalStateException("Could not create Shipment Lines");
 
 		return to;
@@ -892,6 +912,20 @@ public class MInOut extends X_M_InOut implements DocAction
 	 */
 	public int copyLinesFrom (MInOut otherShipment, boolean counter, boolean setOrder)
 	{
+		return copyLinesFrom(otherShipment, counter, setOrder, false);
+	}
+	
+	
+	/**
+	 * 	Copy Lines From other Shipment
+	 *	@param otherShipment shipment
+	 *	@param counter set counter info
+	 *	@param setOrder set order link
+	 *  @param isReverse copy lines to create Reverse document
+	 *	@return number of lines copied
+	 */
+	public int copyLinesFrom (MInOut otherShipment, boolean counter, boolean setOrder, boolean isReverse)
+	{
 		if (isProcessed() || isPosted() || otherShipment == null)
 			return 0;
 		MInOutLine[] fromLines = otherShipment.getLines(false);
@@ -929,6 +963,14 @@ public class MInOut extends X_M_InOut implements DocAction
 				line.setM_Locator_ID(0);
 				line.setM_Locator_ID(Env.ZERO);
 			}
+			
+			if (isReverse)
+			{
+				line.setM_AttributeSetInstance_ID(fromLine.getM_AttributeSetInstance_ID());
+				// Goodwill: store original (voided/reversed) document line
+				line.setReversalLine_ID(fromLine.getM_InOutLine_ID());
+			}
+			
 			//
 			if (counter)
 			{
@@ -2429,7 +2471,7 @@ public class MInOut extends X_M_InOut implements DocAction
 
 		//	Deep Copy
 		MInOut reversal = copyFrom (this, reversalMovementDate, reversalDate,
-			getC_DocType_ID(), isSOTrx(), false, get_TrxName(), true);
+			getC_DocType_ID(), isSOTrx(), false, get_TrxName(), true, true);
 		if (reversal == null)
 		{
 			m_processMsg = "Could not create Ship Reversal";
@@ -2446,9 +2488,7 @@ public class MInOut extends X_M_InOut implements DocAction
 			rLine.setQtyEntered(rLine.getQtyEntered().negate());
 			rLine.setMovementQty(rLine.getMovementQty().negate());
 			rLine.setQtyOverReceipt(rLine.getQtyOverReceipt().negate());
-			rLine.setM_AttributeSetInstance_ID(sLines[i].getM_AttributeSetInstance_ID());
-			// Goodwill: store original (voided/reversed) document line
-			rLine.setReversalLine_ID(sLines[i].getM_InOutLine_ID());
+			
 			if (!rLine.save(get_TrxName()))
 			{
 				m_processMsg = "Could not correct Ship Reversal Line";
