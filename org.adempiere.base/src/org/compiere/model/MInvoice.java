@@ -2243,7 +2243,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 			}
 		}
 
-		if (PAYMENTRULE_Cash.equals(getPaymentRule())) {
+		if (PAYMENTRULE_Cash.equals(getPaymentRule()) || PAYMENTRULE_CreditCard.equals(getPaymentRule())) {
 			if (testAllocation(true)) {
 				saveEx();
 			}
