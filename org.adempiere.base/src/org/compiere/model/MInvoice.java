@@ -2240,13 +2240,21 @@ public class MInvoice extends X_C_Invoice implements DocAction
 						}					
 					}
 				}
+				
+				if (testAllocation(true)) {
+					saveEx();
+				}
+				
+				MAllocationHdr[] allocs = MAllocationHdr.getOfInvoice(getCtx(), getC_Invoice_ID(), get_TrxName());
+				for(MAllocationHdr alloc : allocs)
+				{
+					if(!alloc.isPosted())
+						addDocsPostProcess(alloc);
+				}
 			}
 		}
 
-		if (PAYMENTRULE_Cash.equals(getPaymentRule()) || PAYMENTRULE_CreditCard.equals(getPaymentRule())) {
-			if (testAllocation(true)) {
-				saveEx();
-			}
+		if (PAYMENTRULE_Cash.equals(getPaymentRule())) {
 		}
 		//	User Validation
 		String valid = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_COMPLETE);

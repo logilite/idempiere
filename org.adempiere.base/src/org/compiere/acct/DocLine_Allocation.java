@@ -80,12 +80,22 @@ public class DocLine_Allocation extends DocLine
 	 */
 	public int getInvoiceC_Currency_ID()
 	{
+		return getInvoiceC_Currency_ID(null);
+	}	//	getInvoiceC_Currency_ID
+	
+	/**
+	 * Get Invoice C_Currency_ID
+	 * @param trxName
+	 * @return 0 if no invoice -1 if not found
+	 */
+	public int getInvoiceC_Currency_ID(String trxName)
+	{
 		if (m_C_Invoice_ID == 0)
 			return 0;
 		String sql = "SELECT C_Currency_ID "
 			+ "FROM C_Invoice "
 			+ "WHERE C_Invoice_ID=?";
-		return  DB.getSQLValue(null, sql, m_C_Invoice_ID);
+		return  DB.getSQLValue(trxName, sql, m_C_Invoice_ID);
 
 	}	//	getInvoiceC_Currency_ID
 

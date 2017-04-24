@@ -429,14 +429,13 @@ public class Doc_AllocationHdr extends Doc
 			//	Realized Gain & Loss
 			if (invoice != null
 				&& (getC_Currency_ID() != as.getC_Currency_ID()			//	payment allocation in foreign currency
-					|| getC_Currency_ID() != line.getInvoiceC_Currency_ID()))	//	allocation <> invoice currency
+					|| getC_Currency_ID() != line.getInvoiceC_Currency_ID(getTrxName())))	//	allocation <> invoice currency
 			{
 				p_Error = createRealizedGainLoss (line, as, fact, bpAcct, invoice,
 					allocationSource, allocationAccounted);
 				if (p_Error != null)
 					return null;
 			}
-
 		}	//	for all lines
 
 		// FR [ 1840016 ] Avoid usage of clearing accounts - subject to C_AcctSchema.IsPostIfClearingEqual
