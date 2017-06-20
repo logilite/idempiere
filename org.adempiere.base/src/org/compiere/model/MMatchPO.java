@@ -796,7 +796,7 @@ public class MMatchPO extends X_M_MatchPO
 		// Bayu, Sistematika
 		// BF [ 2240484 ] Re MatchingPO, MMatchPO doesn't contains Invoice info
 		// If newRecord, set c_invoiceline_id while null
-		if (newRecord && getC_InvoiceLine_ID() == 0) 
+		if (newRecord && getC_InvoiceLine_ID() == 0 && getReversal_ID()==0) 
 		{
 			MMatchInv[] mpi = MMatchInv.getInOutLine(getCtx(), getM_InOutLine_ID(), get_TrxName());
 			for (int i = 0; i < mpi.length; i++) 
