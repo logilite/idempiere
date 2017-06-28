@@ -116,6 +116,8 @@ public class SystemIDs
 	public final static int REFERENCE_DATATYPE_URL = 40;
 	public final static int REFERENCE_DATATYPE_YES_NO = 20;
 	public final static int REFERENCE_DATATYPE_CHART = 53370;
+	public final static int REFERENCE_DATATYPE_MULTI_SELECT_TABLE = 200138;
+	public final static int REFERENCE_DATATYPE_MULTI_SELECT_LIST = 200139;
 
 	public final static int REFERENCE_AD_USER = 110;
 	public final static int REFERENCE_DOCUMENTACTION = 135;

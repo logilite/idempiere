@@ -50,6 +50,8 @@ import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_TIME;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_URL;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_YES_NO;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_CHART;
+import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_MULTI_SELECT_TABLE;
+import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_MULTI_SELECT_LIST;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -144,7 +146,11 @@ public final class DisplayType
 	public static final int Payment  = REFERENCE_DATATYPE_PAYMENT;
 	
 	public static final int Chart = REFERENCE_DATATYPE_CHART;
-
+	/** Display Type 200138	Multi Select Table	*/
+	public static final int MultiSelectTable = REFERENCE_DATATYPE_MULTI_SELECT_TABLE;
+	/** Display Type 200139	Multi Select List */
+	public static final int MultiSelectList = REFERENCE_DATATYPE_MULTI_SELECT_LIST;
+	
 	/**
 	 *	- New Display Type
 		INSERT INTO AD_REFERENCE
@@ -299,7 +305,8 @@ public final class DisplayType
 	public static boolean isLookup(int displayType)
 	{
 		if (displayType == List || displayType == Table
-			|| displayType == TableDir || displayType == Search)
+			|| displayType == TableDir || displayType == Search 
+			|| displayType == MultiSelectTable || displayType == MultiSelectList)
 			return true;
 		
 		List<IDisplayTypeFactory> factoryList = Service.locator().list(IDisplayTypeFactory.class).getServices();
@@ -549,6 +556,10 @@ public final class DisplayType
 			return String.class;
 		else if (isLOB(displayType))	//	CLOB is String
 			return byte[].class;
+		else if (displayType == MultiSelectTable)
+			return Integer[].class;
+		else if (displayType == MultiSelectList)
+			return String[].class;
 		else
 		{
 			List<IDisplayTypeFactory> factoryList = Service.locator().list(IDisplayTypeFactory.class).getServices();
@@ -623,6 +634,17 @@ public final class DisplayType
 				return "NUMBER(10)";
 			else
 				return "CHAR(" + fieldLength + ")";
+		}
+		if (displayType == MultiSelectTable)
+		{
+			return "NUMBER(10)[]";
+		}
+		if (displayType == MultiSelectList)
+		{
+			if (fieldLength == 1)
+				return "CHAR(" + fieldLength + ")[]";
+			else
+				return "VARCHAR2(" + fieldLength + ")[]";
 		}
 		
 		List<IDisplayTypeFactory> factoryList = Service.locator().list(IDisplayTypeFactory.class).getServices();
@@ -713,7 +735,11 @@ public final class DisplayType
 			return "Payment";
 		if (displayType == Chart)
 			return "Chart";
-		
+		if (displayType == MultiSelectTable)
+			return "MultiSelectTable";
+		if (displayType == MultiSelectList)
+			return "MultiSelectList";
+
 		List<IDisplayTypeFactory> factoryList = Service.locator().list(IDisplayTypeFactory.class).getServices();
 		for(IDisplayTypeFactory factory : factoryList){
 			String osgiDescription = factory.getDescription(displayType);

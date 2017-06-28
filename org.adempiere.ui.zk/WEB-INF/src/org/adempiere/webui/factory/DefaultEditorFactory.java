@@ -26,6 +26,8 @@ import org.adempiere.webui.editor.WFilenameEditor;
 import org.adempiere.webui.editor.WImageEditor;
 import org.adempiere.webui.editor.WLocationEditor;
 import org.adempiere.webui.editor.WLocatorEditor;
+import org.adempiere.webui.editor.WMultiSelectListEditor;
+import org.adempiere.webui.editor.WMultiSelectTableEditor;
 import org.adempiere.webui.editor.WNumberEditor;
 import org.adempiere.webui.editor.WPAttributeEditor;
 import org.adempiere.webui.editor.WPasswordEditor;
@@ -182,6 +184,14 @@ public class DefaultEditorFactory implements IEditorFactory {
         {
         	editor = new WAssignmentEditor(gridField);
         }
+		else if (displayType == DisplayType.MultiSelectTable)
+		{
+			editor = new WMultiSelectTableEditor(gridField);
+		}
+		else if (displayType == DisplayType.MultiSelectList)
+		{
+			editor = new WMultiSelectListEditor(gridField);
+		}
         else
         {
             editor = new WUnknownEditor(gridField);

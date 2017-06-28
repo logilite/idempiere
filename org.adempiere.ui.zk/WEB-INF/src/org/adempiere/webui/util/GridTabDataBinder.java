@@ -24,6 +24,7 @@ import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.GridTable;
 import org.compiere.util.CLogger;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Trx;
 
@@ -97,11 +98,24 @@ public class GridTabDataBinder implements ValueChangeListener {
         	mTable.setValueAt (e.getNewValue(), row, col);
         else
         {
+			boolean isMultiSelect = false;
+			Object source = e.getSource();
+			if (source instanceof WEditor)
+			{
+				WEditor editor = (WEditor) source;
+				GridField gridField = editor.getGridField();
+
+				if (gridField != null && (gridField.getDisplayType() == DisplayType.MultiSelectTable
+						|| gridField.getDisplayType() == DisplayType.MultiSelectList))
+				{
+					isMultiSelect = true;
+				}
+			}
         	
         	Object newValue = e.getNewValue();
 			Integer newValues[] = null;
 			
-			if (newValue instanceof Integer[])
+			if (newValue instanceof Integer[] && !isMultiSelect)
 			{
 				newValues = ((Integer[])newValue);
 				newValue = newValues[0];
@@ -117,7 +131,7 @@ public class GridTabDataBinder implements ValueChangeListener {
 					newValues = null;
 				}
 			}
-			else if (newValue instanceof Object[])
+			else if (newValue instanceof Object[] && !isMultiSelect)
 			{
 				logger.severe("Multiple values can only be processed for IDs (Integer)");
 				throw new IllegalArgumentException("Multiple Selection values not available for this field. " + e.getPropertyName());
@@ -137,7 +151,7 @@ public class GridTabDataBinder implements ValueChangeListener {
 				}
             }
             
-			if (newValues != null && newValues.length > 0)
+			if (newValues != null && newValues.length > 0 && !isMultiSelect)
 			{
 				// Save data, since record need to be used for generating clones.
 				if (!gridTab.dataSave(false))

@@ -660,7 +660,13 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 					m_findFields[i] = postedfield;
 					mField = postedfield;
 				}
-			} else {
+			}
+			else if (mField.getVO().displayType == DisplayType.MultiSelectTable
+					|| mField.getVO().displayType == DisplayType.MultiSelectList)
+			{
+				// ignore
+			}
+			else {
 				// clone the field and clean gridtab - IDEMPIERE-1105
 		        GridField findField = (GridField) mField.clone(m_findCtx);        
 		        findField.setGridTab(null);
@@ -670,7 +676,10 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 			if (mField.isSelectionColumn()) {
             	gridFieldList.add(mField); // isSelectionColumn 
             } else {
-            	if (isDisplayed && mField.getDisplayType() != DisplayType.Button && !mField.getColumnName().equals("AD_Client_ID"))
+				if (isDisplayed && mField.getDisplayType() != DisplayType.Button
+						&& !mField.getColumnName().equals("AD_Client_ID")
+						&& mField.getDisplayType() != DisplayType.MultiSelectTable
+						&& mField.getDisplayType() != DisplayType.MultiSelectList)
             		moreFieldList.add(mField);
             }
         }   //  for all target tab fields

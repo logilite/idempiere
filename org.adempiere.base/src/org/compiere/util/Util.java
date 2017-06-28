@@ -19,6 +19,7 @@ package org.compiere.util;
 import java.awt.Color;
 import java.awt.font.TextAttribute;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
@@ -707,4 +708,42 @@ public class Util
         cal.set(Calendar.MILLISECOND, 0);
         return new Timestamp(cal.getTimeInMillis());
     }
+	
+	/**
+	 * Convert BigDecimal array to Integer array
+	 * 
+	 * @param arrayBD
+	 * @return converted integer array
+	 */
+	public static Integer[] convertArrayBigDemicalToInteger(BigDecimal[] arrayBD)
+	{
+		Integer[] arrayInt = null;
+		if (arrayBD != null)
+		{
+			arrayInt = new Integer[arrayBD.length];
+			for (int i = 0; i < arrayBD.length; i++)
+			{
+				arrayInt[i] = new Integer(arrayBD[i].intValue());
+			}
+		}
+		return arrayInt;
+	} // convertArrayBigDemicalToInteger
+	
+	/**
+	 * Convert array argument to String to insert/update directly into DB
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	public static String arrayArgsToStringForDB(Object obj)
+	{
+		// TODO :: 
+		if (obj instanceof String[])
+			;
+
+		else if (obj instanceof Integer[])
+			;
+		return obj.toString();
+	}
+
 }   //  Util

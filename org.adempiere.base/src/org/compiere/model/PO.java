@@ -21,6 +21,7 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.PreparedStatement;
@@ -66,6 +67,7 @@ import org.compiere.util.Msg;
 import org.compiere.util.SecureEngine;
 import org.compiere.util.Trace;
 import org.compiere.util.Trx;
+import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
 import org.osgi.service.event.Event;
 import org.w3c.dom.Document;
@@ -1407,6 +1409,22 @@ public abstract class PO
 					m_oldValues[index] = decrypt(index, rs.getTimestamp(columnName));
 				else if (DisplayType.isLOB(dt))
 					m_oldValues[index] = get_LOB (rs.getObject(columnName));
+				else if (clazz == Integer[].class)
+				{
+					Array arr = rs.getArray(columnName);
+					Object javaArray = null;
+					if (arr != null)
+						javaArray = (Object) Util.convertArrayBigDemicalToInteger((BigDecimal[]) arr.getArray());
+					m_oldValues[index] = decrypt(index, javaArray);
+				}
+				else if (clazz == String[].class)
+				{
+					Array arr = rs.getArray(columnName);
+					Object javaArray = null;
+					if (arr != null)
+						javaArray = (String[]) arr.getArray();
+					m_oldValues[index] = decrypt(index, javaArray);
+				}
 				else if (clazz == String.class)
 				{
 					String value = (String)decrypt(index, rs.getString(columnName));
@@ -1484,6 +1502,10 @@ public abstract class PO
 				else if (DisplayType.isLOB(dt))
 					m_oldValues[index] = null;	//	get_LOB (rs.getObject(columnName));
 				else if (clazz == String.class)
+					m_oldValues[index] = value;
+				else if (clazz == Integer[].class)
+					m_oldValues[index] = value;
+				else if (clazz == String[].class)
 					m_oldValues[index] = value;
 				else
 					m_oldValues[index] = null;	// loadSpecial(rs, index);

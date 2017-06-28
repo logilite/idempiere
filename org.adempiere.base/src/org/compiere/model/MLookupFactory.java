@@ -208,14 +208,15 @@ public class MLookupFactory
 	{
 		MLookupInfo info = null;
 		boolean needToAddSecurity = true;
-		//	List
-		if (AD_Reference_ID == DisplayType.List)	//	17
+		//	List or MultiSelectList
+		if (AD_Reference_ID == DisplayType.List || AD_Reference_ID == DisplayType.MultiSelectList)	//	17, 200139
 		{
 			info = getLookup_List(language, AD_Reference_Value_ID);
 			needToAddSecurity = false;
 		}
-		//	Table or Search with Reference_Value
-		else if ((AD_Reference_ID == DisplayType.Table || AD_Reference_ID == DisplayType.Search)
+		//	Table or Search or MultiSelectTable with Reference_Value
+		else if ((AD_Reference_ID == DisplayType.Table || AD_Reference_ID == DisplayType.Search 
+				|| AD_Reference_ID == DisplayType.MultiSelectTable)
 			&& AD_Reference_Value_ID != 0)
 		{
 			info = getLookup_Table (ctx, language, WindowNo, AD_Reference_Value_ID);

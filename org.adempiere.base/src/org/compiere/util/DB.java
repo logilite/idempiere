@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
+import java.sql.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -856,6 +857,16 @@ public final class DB
 			pstmt.setString(index, ((Boolean)param).booleanValue() ? "Y" : "N");
 		else if (param instanceof byte[])
 			pstmt.setBytes(index, (byte[]) param);
+		else if (param instanceof Integer[])
+		{
+			Array array = DB.getConnectionRW().createArrayOf("numeric", (Integer[]) param);
+			pstmt.setArray(index, array);
+		}
+		else if (param instanceof String[])
+		{
+			Array array = DB.getConnectionRW().createArrayOf("text", (String[]) param);
+			pstmt.setArray(index, array);
+		}
 		else
 			throw new DBException("Unknown parameter type "+index+" - "+param);
 	}
