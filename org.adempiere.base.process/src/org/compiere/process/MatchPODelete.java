@@ -18,10 +18,13 @@ package org.compiere.process;
 
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MMatchPO;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MStorageReservation;
 import org.compiere.model.MTable;
 import org.compiere.util.AdempiereUserError;
+import org.compiere.util.CLogger;
 
 
 /**
@@ -65,6 +68,17 @@ public class MatchPODelete extends SvrProcess
 			orderLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(po.getC_OrderLine_ID(),
 					get_TrxName());
 			orderLine.setQtyReserved(orderLine.getQtyReserved().add(po.getQty()));
+			
+			if (!MStorageReservation.add(getCtx(), orderLine
+					.getM_Warehouse_ID(), orderLine.getM_Product_ID(),
+					orderLine.getM_AttributeSetInstance_ID(), po.getQty(), false, get_TrxName()))
+			{
+				String lastError = CLogger.retrieveErrorString("");
+				throw new AdempiereException(
+						"Cannot correct Inventory Ordered (MA) - ["
+								+ orderLine.getM_Product().getValue() + "] "
+								+ lastError);
+			}
 		}
 		//
 		if (po.delete(true))
