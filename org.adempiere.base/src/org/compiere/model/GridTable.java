@@ -1963,8 +1963,6 @@ public class GridTable extends AbstractTableModel
 						else if (field.getDisplayType() == DisplayType.MultiSelectTable)
 						{
 							Integer[] ids = (Integer[]) rowData[col];
-							// if (encrypted)
-							// ids = (Integer[]) encrypt(ids, getAD_Client_ID());
 							if (manualUpdate)
 								createUpdateSql(columnName, Util.arrayArgsToStringForDB(ids));
 							else
@@ -1977,8 +1975,6 @@ public class GridTable extends AbstractTableModel
 						else if (field.getDisplayType() == DisplayType.MultiSelectList)
 						{
 							String[] ids = (String[]) rowData[col];
-							// if (encrypted)
-							// ids = (String[]) encrypt(ids, getAD_Client_ID());
 							if (manualUpdate)
 								createUpdateSql(columnName, Util.arrayArgsToStringForDB(ids));
 							else
