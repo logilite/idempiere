@@ -38,6 +38,8 @@ import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 
+import org.compiere.model.MLookup;
+
 /**
  *  General Utilities
  *
@@ -708,14 +710,14 @@ public class Util
         cal.set(Calendar.MILLISECOND, 0);
         return new Timestamp(cal.getTimeInMillis());
     }
-	
+
 	/**
-	 * Convert BigDecimal array to Integer array
+	 * Convert BigDecimal array to Integer array ( IDEMPIERE-3413 )
 	 * 
-	 * @param arrayBD
-	 * @return converted integer array
+	 * @param arrayBD - BigDecimal Array
+	 * @return Convert to integer array
 	 */
-	public static Integer[] convertArrayBigDemicalToInteger(BigDecimal[] arrayBD)
+	public static Integer[] convertBigDecimalToInteger(BigDecimal[] arrayBD)
 	{
 		Integer[] arrayInt = null;
 		if (arrayBD != null)
@@ -727,23 +729,117 @@ public class Util
 			}
 		}
 		return arrayInt;
-	} // convertArrayBigDemicalToInteger
-	
+	} // convertBigDecimalToInteger
+
 	/**
-	 * Convert array argument to String to insert/update directly into DB
+	 * Convert array argument to String for insert/update directly into DB.
+	 * ( IDEMPIERE-3413 )
 	 * 
-	 * @param obj
-	 * @return
+	 * @param array - Array items of Integer/String
+	 * @return string - to build query value
 	 */
-	public static String arrayArgsToStringForDB(Object obj)
+	public static String convertArrayToStringForDB(Object array)
 	{
-		// TODO :: 
-		if (obj instanceof String[])
+		if (array == null)
+			return "NULL";
+
+		StringBuilder sb = new StringBuilder("{");
+		if (array instanceof String[])
+		{
+			String[] objStr = (String[]) array;
+			int iMax = objStr.length - 1;
+			if (iMax == -1)
+				return "{}";
+
+			for (int i = 0;; i++)
+			{
+				sb.append(String.valueOf(objStr[i]));
+				if (i == iMax)
+					return sb.append('}').toString();
+				sb.append(", ");
+			}
+		}
+		else if (array instanceof Integer[])
+		{
+			Integer[] objStr = (Integer[]) array;
+			int iMax = objStr.length - 1;
+			if (iMax == -1)
+				return "{}";
+
+			for (int i = 0;; i++)
+			{
+				sb.append(String.valueOf(objStr[i]));
+				if (i == iMax)
+					return sb.append('}').toString();
+				sb.append(", ");
+			}
+		}
+		else
+		{
+			log.warning("Invalid array object.");
+		}
+		return array.toString();
+	} // convertArrayToStringForDB
+
+	/**
+	 * From value string to array object ( IDEMPIERE-3413 )
+	 * 
+	 * @param dt - Display Type
+	 * @param strValue - Key values
+	 * @return Array of object as Integer/String
+	 */
+	public static Object getArrayObjectFromString(int dt, String strValue)
+	{
+		if (dt <= 0 || strValue == null || strValue.length() <= 0 || strValue.trim().equals("{}"))
+			return null;
+
+		strValue = strValue.replaceAll("([{}])", "");
+		String[] values = strValue.split(",");
+
+		if (dt == DisplayType.MultiSelectTable)
+		{
+			Integer[] arr = new Integer[values.length];
+			for (int i = 0; i < values.length; i++)
+				arr[i] = Integer.parseInt(values[i].trim());
+			return arr;
+		}
+		else if (dt == DisplayType.MultiSelectList)
+		{
+			String[] arr = new String[values.length];
+			for (int i = 0; i < values.length; i++)
+				arr[i] = values[i].trim();
+			return arr;
+		}
+		else
 			;
 
-		else if (obj instanceof Integer[])
-			;
-		return obj.toString();
-	}
+		return null;
+	} // getArrayObjectFromString
+
+	/**
+	 * Get the list of name from the Key values ( IDEMPIERE-3413 )
+	 * 
+	 * @param value - comma separated keys in string
+	 * @param dt - DisplayType
+	 * @param lookup - reference Lookup
+	 * @return String of the Names.
+	 */
+	public static String getNameListFromKeyValues(String value, int dt, MLookup lookup)
+	{
+		StringBuilder sb = new StringBuilder();
+		if (value != null)
+		{
+			Object[] keys = (Object[]) Util.getArrayObjectFromString(dt, value);
+			if (keys == null)
+				return null;
+			for (int i = 0; i < keys.length; i++)
+			{
+				NamePair pp = lookup.get(keys[i]);
+				if (pp != null)
+					sb.append(pp.getName()).append("; ");
+			}
+		}
+		return sb.toString();
+	} // getNameListFromKeyValues
 
 }   //  Util

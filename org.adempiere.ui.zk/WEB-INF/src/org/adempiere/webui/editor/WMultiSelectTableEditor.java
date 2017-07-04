@@ -30,7 +30,7 @@ import org.zkoss.zk.ui.event.OpenEvent;
 import org.zkoss.zul.Checkbox;
 
 /**
- * Multiple Selection items from the Table
+ * Multiple Selection items from the Table ( IDEMPIERE-3413 )
  * 
  * @author Logilite Technologies
  * @since June 28, 2017
@@ -62,10 +62,7 @@ public class WMultiSelectTableEditor extends WEditor implements EventListener<Ev
 		if (lookup != null)
 		{
 			lookup.setMandatory(true);
-
-			// no need to refresh read only lookup
-			if (isReadWrite())
-				lookup.refresh();
+			lookup.refresh();
 			refreshList();
 		}
 
@@ -98,6 +95,7 @@ public class WMultiSelectTableEditor extends WEditor implements EventListener<Ev
 					ValueChangeEvent changeValue = new ValueChangeEvent(this, getColumnName(), oldValue, nValue);
 					super.fireValueChange(changeValue);
 					oldValue = nValue;
+					setCompTextboxValue(getPrintableValue(nValue));
 				}
 			}
 		}
@@ -138,7 +136,12 @@ public class WMultiSelectTableEditor extends WEditor implements EventListener<Ev
 		}
 
 		oldValue = values;
-		String txtBoxValue = "";
+		setCompTextboxValue(getPrintableValue(values));
+	} // setValue
+
+	private String getPrintableValue(Integer[] values)
+	{
+		StringBuffer sb = new StringBuffer();
 		for (Checkbox cbx : getComponent().getCheckboxList())
 		{
 			for (Integer intval : values)
@@ -147,14 +150,14 @@ public class WMultiSelectTableEditor extends WEditor implements EventListener<Ev
 						new Integer(cbx.getAttribute(MultiSelectBox.ATTRIBUTE_MULTI_SELECT).toString())) == 0)
 				{
 					cbx.setChecked(true);
-					txtBoxValue += cbx.getLabel() + "; ";
+					sb.append(cbx.getLabel()).append("; ");
 					break;
 				}
 				cbx.setChecked(false);
 			}
 		}
-		setCompTextboxValue(txtBoxValue);
-	} // setValue
+		return sb.toString();
+	} // getPrintableValue
 
 	@Override
 	public Object getValue()
@@ -211,7 +214,7 @@ public class WMultiSelectTableEditor extends WEditor implements EventListener<Ev
 	 */
 	private void refreshList()
 	{
-		if (isReadWrite() && lookup != null)
+		if (lookup != null)
 		{
 			setCompTextboxValue(Msg.getMsg(Env.getCtx(), "PleaseSelect"));
 

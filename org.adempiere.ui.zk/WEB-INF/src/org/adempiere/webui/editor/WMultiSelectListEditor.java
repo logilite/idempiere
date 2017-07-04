@@ -30,7 +30,7 @@ import org.zkoss.zk.ui.event.OpenEvent;
 import org.zkoss.zul.Checkbox;
 
 /**
- * Multiple Selection items from the List
+ * Multiple Selection items from the List ( IDEMPIERE-3413 )
  * 
  * @author Logilite Technologies
  * @since June 28, 2017
@@ -62,10 +62,7 @@ public class WMultiSelectListEditor extends WEditor implements EventListener<Eve
 		if (lookup != null)
 		{
 			lookup.setMandatory(true);
-
-			// no need to refresh read only lookup
-			if (isReadWrite())
-				lookup.refresh();
+			lookup.refresh();
 			refreshList();
 		}
 
@@ -98,6 +95,7 @@ public class WMultiSelectListEditor extends WEditor implements EventListener<Eve
 					ValueChangeEvent changeValue = new ValueChangeEvent(this, getColumnName(), oldValue, nValue);
 					super.fireValueChange(changeValue);
 					oldValue = nValue;
+					setCompTextboxValue(getPrintableValue(nValue));
 				}
 			}
 		}
@@ -139,6 +137,11 @@ public class WMultiSelectListEditor extends WEditor implements EventListener<Eve
 		}
 
 		oldValue = values;
+		setCompTextboxValue(getPrintableValue(values));
+	} // setValue
+
+	private String getPrintableValue(String[] values)
+	{
 		String txtBoxValue = "";
 		for (Checkbox cbx : getComponent().getCheckboxList())
 		{
@@ -153,8 +156,8 @@ public class WMultiSelectListEditor extends WEditor implements EventListener<Eve
 				cbx.setChecked(false);
 			}
 		}
-		setCompTextboxValue(txtBoxValue);
-	} // setValue
+		return txtBoxValue;
+	} // getPrintableValue
 
 	@Override
 	public Object getValue()
@@ -211,7 +214,7 @@ public class WMultiSelectListEditor extends WEditor implements EventListener<Eve
 	 */
 	private void refreshList()
 	{
-		if (isReadWrite() && lookup != null)
+		if (lookup != null)
 		{
 			setCompTextboxValue(Msg.getMsg(Env.getCtx(), "PleaseSelect"));
 

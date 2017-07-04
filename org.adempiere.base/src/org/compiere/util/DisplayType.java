@@ -635,11 +635,11 @@ public final class DisplayType
 			else
 				return "CHAR(" + fieldLength + ")";
 		}
-		if (displayType == MultiSelectTable)
+		if (displayType == DisplayType.MultiSelectTable)
 		{
 			return "NUMBER(10)[]";
 		}
-		if (displayType == MultiSelectList)
+		if (displayType == DisplayType.MultiSelectList)
 		{
 			if (fieldLength == 1)
 				return "CHAR(" + fieldLength + ")[]";

@@ -31,6 +31,9 @@ public abstract class Convert_SQL92 extends Convert {
 	/**	Logger	*/
 	private static CLogger	log	= CLogger.getCLogger (Convert_SQL92.class);
 	
+	public static final String	PG_ARRAY_CONTAINS_ALIAS_EXP	= "<=>";
+	public static final String	PG_ARRAY_CONTAINS_EXP		= "@>";
+	
 	/**************************************************************************
 	 *  Convert Outer Join.
 	 *  Converting joins can ve very complex when multiple tables/keys are involved.

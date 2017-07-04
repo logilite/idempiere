@@ -1964,7 +1964,7 @@ public class GridTable extends AbstractTableModel
 						{
 							Integer[] ids = (Integer[]) rowData[col];
 							if (manualUpdate)
-								createUpdateSql(columnName, Util.arrayArgsToStringForDB(ids));
+								createUpdateSql(columnName, Util.convertArrayToStringForDB(ids));
 							else
 							{
 								Array array = DB.getConnectionRW().createArrayOf("numeric", (Integer[]) ids);
@@ -1976,7 +1976,7 @@ public class GridTable extends AbstractTableModel
 						{
 							String[] ids = (String[]) rowData[col];
 							if (manualUpdate)
-								createUpdateSql(columnName, Util.arrayArgsToStringForDB(ids));
+								createUpdateSql(columnName, Util.convertArrayToStringForDB(ids));
 							else
 							{
 								Array array = DB.getConnectionRW().createArrayOf("text", (String[]) ids);
@@ -3307,7 +3307,7 @@ public class GridTable extends AbstractTableModel
 					Array arr = rs.getArray(j + 1);
 					Object javaArray = null;
 					if (arr != null)
-						javaArray = (Object) Util.convertArrayBigDemicalToInteger((BigDecimal[]) arr.getArray());
+						javaArray = (Object) Util.convertBigDecimalToInteger((BigDecimal[]) arr.getArray());
 					rowData[j] = javaArray;
 				}
 				else if (displayType == DisplayType.MultiSelectList)

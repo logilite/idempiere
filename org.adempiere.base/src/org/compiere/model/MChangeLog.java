@@ -25,6 +25,7 @@ import java.util.logging.Level;
 
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
+import org.compiere.util.Util;
 
 /**
  *	Change Log Model
@@ -193,7 +194,12 @@ public class MChangeLog extends X_AD_ChangeLog
 		if (OldValue == null)
 			super.setOldValue (NULL);
 		else
-			super.setOldValue (OldValue.toString());
+		{
+			if (OldValue instanceof Integer[] || OldValue instanceof String[])
+				super.setOldValue(Util.convertArrayToStringForDB(OldValue));
+			else
+				super.setOldValue(OldValue.toString());
+		}
 	}	//	setOldValue
 
 	/**
@@ -215,7 +221,12 @@ public class MChangeLog extends X_AD_ChangeLog
 		if (NewValue == null)
 			super.setNewValue (NULL);
 		else
-			super.setNewValue (NewValue.toString());
+		{
+			if (NewValue instanceof Integer[] || NewValue instanceof String[])
+				super.setNewValue(Util.convertArrayToStringForDB(NewValue));
+			else
+				super.setNewValue(NewValue.toString());
+		}
 	}	//	setNewValue
 	
 	/**

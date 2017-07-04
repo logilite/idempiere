@@ -20,7 +20,7 @@ import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vbox;
 
 /**
- * Layout for handle multiple selection items
+ * Layout for handle multiple selection items ( IDEMPIERE-3413 )
  * 
  * @author Logilite Technologies
  * @since June 28, 2017
@@ -51,16 +51,15 @@ public class MultiSelectBox extends Div
 
 	private void init()
 	{
-		LayoutUtils.addSclass(".z-popup", this);
+		LayoutUtils.addSclass(".multi-select-box", this);
 
 		popup = new Popup();
-		ZkCssHelper.appendStyle(popup, "max-height:350px; min-width:350px; overflow: auto;");
+		LayoutUtils.addSclass("multi-select-popup", popup);
 		appendChild(popup);
 
 		vbox = new Vbox();
 		vbox.setHflex("1");
-		ZkCssHelper.appendStyle(vbox,
-				"background-color: #ffffff; border-color:#ffffff; border:none; background:#ffffff;");
+		LayoutUtils.addSclass("multi-select-vbox", vbox);
 		popup.appendChild(vbox);
 
 		textbox = new Textbox("") {
@@ -82,7 +81,7 @@ public class MultiSelectBox extends Div
 
 		textbox.setReadonly(true);
 		textbox.setHflex("1");
-		ZkCssHelper.appendStyle(textbox, "background-color: white");
+		LayoutUtils.addSclass("multi-select-textbox", textbox);
 		appendChild(textbox);
 	} // init
 
@@ -118,9 +117,15 @@ public class MultiSelectBox extends Div
 		if (textbox != null)
 		{
 			if (!isEnabled())
+			{
+				LayoutUtils.addSclass("multi-select-textbox-readonly", textbox);
 				textbox.setPopup((Popup) null);
+			}
 			else
+			{
+				LayoutUtils.addSclass("multi-select-textbox", textbox);
 				textbox.setPopup("uuid(" + popup.getUuid() + "), after_start");
+			}
 		}
 	} // setEditable
 

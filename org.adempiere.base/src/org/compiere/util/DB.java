@@ -2534,4 +2534,41 @@ public final class DB
     	return rowsArray;
 	}
 
+	/**
+	 * Get Array Value from SQL ( IDEMPIERE-3413 )
+	 * 
+	 * @param trxName - Transaction
+	 * @param sql - Selection Query
+	 * @param params - Array of parameters
+	 * @return first value or null if not found
+	 * @throws DBException - if there is any SQLException
+	 */
+	public static Array getSQLArrayValueEx(String trxName, String sql, Object... params) throws DBException
+	{
+		Array retArray = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = prepareStatement(sql, trxName);
+			setParameters(pstmt, params);
+			rs = pstmt.executeQuery();
+			if (rs.next())
+				retArray = rs.getArray(1);
+			else if (log.isLoggable(Level.FINE))
+				log.fine("No Value " + sql);
+		}
+		catch (SQLException e)
+		{
+			throw new DBException(e, sql);
+		}
+		finally
+		{
+			close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		return retArray;
+	} // getSQLArrayValueEx
+
 }	//	DB

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.dbPort.Convert_SQL92;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -428,6 +429,8 @@ public class MQuery implements Serializable
 	public static final String 	NOT_NULL = " IS NOT NULL ";
 	/** For IDEMPIERE-377	*/
 	public static final String 	NULL = " IS NULL ";
+	/** For IDEMPIERE-3413 */
+	public static final String	CONTAINS = "CONTAINS";
 
 	/**	Operators for Strings				*/
 	public static final ValueNamePair[]	OPERATORS = new ValueNamePair[] {
@@ -464,6 +467,10 @@ public class MQuery implements Serializable
 		new ValueNamePair (NOT_NULL,		" !NULL ")
 	};
 	
+	/** Operators for Multi Select items */
+	public static final ValueNamePair[]	OPERATORS_MULTISELECT	= new ValueNamePair[] {
+			new ValueNamePair(Convert_SQL92.PG_ARRAY_CONTAINS_ALIAS_EXP, CONTAINS)
+	};
 	/*************************************************************************
 	 * 	Add Restriction
 	 * 	@param ColumnName ColumnName

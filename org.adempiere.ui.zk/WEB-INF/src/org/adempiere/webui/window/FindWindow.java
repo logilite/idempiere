@@ -53,6 +53,7 @@ import org.adempiere.webui.component.ListHead;
 import org.adempiere.webui.component.ListHeader;
 import org.adempiere.webui.component.ListItem;
 import org.adempiere.webui.component.Listbox;
+import org.adempiere.webui.component.MultiSelectBox;
 import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.Row;
 import org.adempiere.webui.component.Rows;
@@ -72,6 +73,7 @@ import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.factory.ButtonFactory;
 import org.adempiere.webui.part.MultiTabPart;
 import org.adempiere.webui.theme.ThemeManager;
+import org.compiere.dbPort.Convert_SQL92;
 import org.compiere.model.GridField;
 import org.compiere.model.GridFieldVO;
 import org.compiere.model.GridTab;
@@ -91,6 +93,7 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.SecureEngine;
+import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
 import org.zkoss.zk.au.out.AuFocus;
 import org.zkoss.zk.ui.Component;
@@ -661,11 +664,6 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 					mField = postedfield;
 				}
 			}
-			else if (mField.getVO().displayType == DisplayType.MultiSelectTable
-					|| mField.getVO().displayType == DisplayType.MultiSelectList)
-			{
-				// ignore
-			}
 			else {
 				// clone the field and clean gridtab - IDEMPIERE-1105
 		        GridField findField = (GridField) mField.clone(m_findCtx);        
@@ -677,9 +675,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
             	gridFieldList.add(mField); // isSelectionColumn 
             } else {
 				if (isDisplayed && mField.getDisplayType() != DisplayType.Button
-						&& !mField.getColumnName().equals("AD_Client_ID")
-						&& mField.getDisplayType() != DisplayType.MultiSelectTable
-						&& mField.getDisplayType() != DisplayType.MultiSelectList)
+						&& !mField.getColumnName().equals("AD_Client_ID"))
             		moreFieldList.add(mField);
             }
         }   //  for all target tab fields
@@ -906,11 +902,16 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	        if (columnName == null || columnName == "")
 	        	return;
 	    	String value = fields.length > INDEX_VALUE ? fields[INDEX_VALUE] : "";
-	    	if(value.length() > 0)
-	    	{
-	    		cellQueryFrom.setAttribute("value", value); // Elaine 2009/03/16 - set attribute value
-		        cellQueryFrom.appendChild(parseString(getTargetMField(columnName), value, listItem, false));
-	    	}
+			if (value.length() > 0)
+			{
+				GridField gfield = getTargetMField(columnName);
+				if (gfield.getDisplayType() == DisplayType.MultiSelectTable
+						|| gfield.getDisplayType() == DisplayType.MultiSelectList)
+					cellQueryFrom.setAttribute("value", Util.getArrayObjectFromString(gfield.getDisplayType(), value));
+				else
+					cellQueryFrom.setAttribute("value", value); // Elaine 2009/03/16 - set attribute value
+				cellQueryFrom.appendChild(parseString(gfield, value, listItem, false));
+			}
 	    	// QueryTo
 	    	String value2 = fields.length > INDEX_VALUE2 ? fields[INDEX_VALUE2] : "";
 	    	if(value2.length() > 0)
@@ -1015,6 +1016,13 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
             	}
             }
             if(!selected) listColumn.setSelectedIndex(0);
+
+			MTable table = MTable.get(Env.getCtx(), m_tableName);
+			MColumn col = table.getColumn(columnName);
+
+			if (DisplayType.MultiSelectList == col.getAD_Reference_ID()
+					|| DisplayType.MultiSelectTable == col.getAD_Reference_ID())
+				op = MQuery.OPERATORS_MULTISELECT;
 
             selected = false;
             for (int i = 0; i < op.length; i++)
@@ -1354,7 +1362,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	 * 	@param in value
 	 * @param to
 	 * @param listItem
-	 * 	@return data type corected value
+	 * 	@return data type corrected value
 	 */
 	private Component parseString(GridField field, String in, ListItem listItem, boolean to)
 	{
@@ -1403,6 +1411,8 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 			}
 			else if (dt == DisplayType.YesNo)
 				editor.setValue(Boolean.valueOf(in));
+			else if (dt == DisplayType.MultiSelectTable || dt == DisplayType.MultiSelectList)
+				editor.setValue(Util.getArrayObjectFromString(dt, in));
 			else
 				editor.setValue(in);
 
@@ -1498,6 +1508,9 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
             	  if(dtbox.getValue() != null)
             		 value = new Timestamp(((Date)dtbox.getValue()).getTime());
             }
+            else if(compo instanceof MultiSelectBox) {
+				value = Util.convertArrayToStringForDB(cellQueryFrom.getAttribute("value"));
+			}
             else {
             	value = cellQueryFrom.getAttribute("value");
             }
@@ -1516,7 +1529,8 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
             if (parsedValue == null)
                 continue;
             String infoDisplay = value.toString();
-            if (field.isLookup())
+			if (field.isLookup() && field.getDisplayType() != DisplayType.MultiSelectTable
+					&& field.getDisplayType() != DisplayType.MultiSelectList)
                 infoDisplay = field.getLookup().getDisplay(value);
             else if (field.getDisplayType() == DisplayType.YesNo)
                 infoDisplay = Msg.getMsg(Env.getCtx(), infoDisplay);
@@ -1716,7 +1730,19 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
                     } else if (isProductCategoryField && value instanceof Integer) {
                         m_query.addRestriction(getSubCategoryWhereClause(((Integer) value).intValue()));
                         appendCode(code, ColumnName, MQuery.EQUAL, value.toString(), "", "AND", "", "");
-                    } else {
+                    }
+                    else if (value instanceof Integer[] || value instanceof String[])
+					{
+						if ((value instanceof Integer[] && ((Integer[]) value).length > 0)
+								|| (value instanceof String[] && ((String[]) value).length > 0))
+						{
+							String sValue = Util.convertArrayToStringForDB(value);
+							String oper = Convert_SQL92.PG_ARRAY_CONTAINS_ALIAS_EXP;
+							m_query.addRestriction(ColumnSQL.toString(), oper, sValue, ColumnName, wed.getDisplay());
+							appendCode(code, ColumnName, oper, sValue, "", "AND", "", "");
+						}
+					}
+                    else {
                     	String oper = MQuery.EQUAL;
                     	if (wedTo != null) {
                             ToolBarButton wedFlag = m_sEditorsFlag.get(i);
@@ -1843,7 +1869,11 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     		MColumn col = table.getColumn(columnName);
     		referenceType = col.getAD_Reference_ID();
     	}
-        if (DisplayType.isLookup(referenceType)
+    	if (DisplayType.MultiSelectList == referenceType || DisplayType.MultiSelectTable == referenceType)
+        {
+        	addOperators(MQuery.OPERATORS_MULTISELECT, listOperator);
+        }
+    	else if (DisplayType.isLookup(referenceType)
         		|| DisplayType.YesNo == referenceType
         		|| DisplayType.Button == referenceType)
         {
@@ -2096,7 +2126,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         finalSQL = Env.parseContext(Env.getCtx(), m_targetWindowNo, finalSQL, false);
         Env.setContext(Env.getCtx(), m_targetWindowNo, TABNO, GridTab.CTX_FindSQL, finalSQL);
 
-        //  Execute Qusery
+        //  Execute Query
         m_total = 999999;
         Statement stmt = null;
         ResultSet rs = null;
@@ -2349,6 +2379,8 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
             	Env.setContext(m_findCtx, m_targetWindowNo, editor.getColumnName(), (Boolean)evt.getNewValue());
             else if (evt.getNewValue() instanceof Timestamp)
             	Env.setContext(m_findCtx, m_targetWindowNo, editor.getColumnName(), (Timestamp)evt.getNewValue());
+            else if (evt.getNewValue() instanceof Integer[] || evt.getNewValue() instanceof String[])
+            	Env.setContext(m_findCtx, m_targetWindowNo, editor.getColumnName(), Util.convertArrayToStringForDB(evt.getNewValue()));
             else
             	Env.setContext(m_findCtx, m_targetWindowNo, editor.getColumnName(), evt.getNewValue().toString());
         }
