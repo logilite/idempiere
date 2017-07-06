@@ -17,6 +17,8 @@
 package org.compiere.print;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.sql.Array;
 import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -406,7 +408,7 @@ public class DataEngine
 				}
 
 				//	-- Table --
-				else if (AD_Reference_ID == DisplayType.Table
+				else if (AD_Reference_ID == DisplayType.Table || AD_Reference_ID == DisplayType.MultiSelectTable
 						|| (AD_Reference_ID == DisplayType.Search && AD_Reference_Value_ID != 0)
 					)
 				{
@@ -416,8 +418,11 @@ public class DataEngine
 					}
 
 					String eSql;
-
-					eSql = MLookupFactory.getLookup_TableEmbed(m_language, ColumnName, tableName, AD_Reference_Value_ID);
+					
+					if (AD_Reference_ID == DisplayType.MultiSelectTable)
+						eSql = MLookupFactory.getLookup_MultiSelectTableEmbed(m_language, ColumnName, tableName, AD_Reference_Value_ID);
+					else
+						eSql = MLookupFactory.getLookup_TableEmbed(m_language, ColumnName, tableName, AD_Reference_Value_ID);
 
 					//  DisplayColumn
 					String display = ColumnName;
@@ -476,6 +481,52 @@ public class DataEngine
 					// 	TableName.ColumnName,
 					sqlSELECT.append(lookupSQL).append(" AS ").append(ColumnName).append(",");
 					pdc = new PrintDataColumn(AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak);
+					synonymNext();
+				}
+				else if (AD_Reference_ID == DisplayType.MultiSelectList)
+				{
+					if (ColumnSQL.length() > 0)
+					{
+						lookupSQL = ColumnSQL;
+					}
+					
+					String alias = "";
+					if (Env.isBaseLanguage(m_language, "AD_Ref_List"))
+					{
+						// (SELECT STRING_AGG(O.Name,',') FROM AD_Ref_List O
+						// WHERE O.Value=ANY(C_Order.Multi_DocBaseType) AND O.AD_Reference_ID=183) AS O.Multi_DocBaseType
+
+						sqlSELECT.append("(SELECT STRING_AGG(").append(m_synonym).append(".Name")
+								.append(DB.isPostgreSQL() ? ",',')" : ")");
+						sqlSELECT.append(" FROM AD_Ref_List ").append(m_synonym);
+
+						groupByColumns.add(lookupSQL);
+						orderName = lookupSQL;
+					}
+					else
+					{
+						// (SELECT STRING_AGG(NVL(O.Name,XO.Name),',') FROM AD_Ref_List XO
+						// LEFT OUTER JOIN AD_Ref_List_Trl O ON (O.AD_Ref_List_ID=XO.AD_Ref_List_ID AND O.AD_Language='es_CO')
+						// WHERE (XO.Value=ANY(C_Order.Multi_DocBaseType) AND XO.AD_Reference_ID=183)) AS OMulti_DocBaseType
+						alias = "X";
+						sqlSELECT.append("(SELECT STRING_AGG(NVL(").append(m_synonym).append(".Name, ").append(alias)
+								.append(m_synonym).append(".Name)").append(DB.isPostgreSQL() ? ",',')" : ")");
+						sqlSELECT.append(" FROM AD_Ref_List ").append(alias).append(m_synonym)
+								.append(" LEFT OUTER JOIN AD_Ref_List_Trl ").append(m_synonym).append(" ON (")
+								.append(m_synonym).append(".AD_Ref_List_ID=").append(alias).append(m_synonym)
+								.append(".AD_Ref_List_ID AND ").append(m_synonym).append(".AD_Language='")
+								.append(m_language.getAD_Language()).append("')");
+
+						groupByColumns.add(lookupSQL);
+						orderName = m_synonym + ColumnName;
+					}
+					
+					sqlSELECT.append(" WHERE ").append(alias).append(m_synonym).append(".Value=ANY(")
+							.append(lookupSQL).append(") AND ").append(alias).append(m_synonym)
+							.append(".AD_Reference_ID=").append(AD_Reference_Value_ID).append(")").append(" AS ")
+							.append(m_synonym).append(ColumnName).append(",");
+					pdc = new PrintDataColumn(AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName,
+							isPageBreak);
 					synonymNext();
 				}
 
@@ -952,7 +1003,16 @@ public class DataEngine
 						{
 							//	DisplayColumn first
 							String display = rs.getString(counter++);
-							if (pdc.getColumnName().endsWith("_ID"))
+							if (pdc.getDisplayType() == DisplayType.MultiSelectTable || pdc.getDisplayType() == DisplayType.MultiSelectList)
+							{
+								if (pdc.getDisplayType() == DisplayType.MultiSelectTable)
+									counter++;
+								if (display != null && !rs.wasNull())
+								{
+									pde = new PrintDataElement(pdc.getColumnName(), display, pdc.getDisplayType(), pdc.getFormatPattern(), pdc.getForeignColumnName());
+								}
+							}
+							else if (pdc.getColumnName().endsWith("_ID"))
 							{
 								int id = rs.getInt(counter++);
 								if (display != null && !rs.wasNull())
@@ -1008,6 +1068,22 @@ public class DataEngine
                                 Timestamp datetime = rs.getTimestamp(counter++);
                                 pde = new PrintDataElement(pdc.getColumnName(), datetime, pdc.getDisplayType(), pdc.getFormatPattern());
                             }
+                            else if (pdc.getDisplayType() == DisplayType.MultiSelectTable)
+							{
+								Array array = rs.getArray(counter++);
+								Object javaArray = null;
+								if (array != null)
+									javaArray = (Object) Util.convertBigDecimalToInteger((BigDecimal[]) array.getArray());
+								pde = new PrintDataElement(pdc.getColumnName(), (Serializable) Util.convertArrayToStringForDB(javaArray), pdc.getDisplayType(), pdc.getFormatPattern());
+							}
+            				else if (pdc.getDisplayType() == DisplayType.MultiSelectList)
+            				{
+            					Array arr = rs.getArray(counter++);
+            					Object javaArray = null;
+            					if (arr != null)
+            						javaArray = (String[]) arr.getArray();
+            					pde = new PrintDataElement(pdc.getColumnName(), (Serializable) Util.convertArrayToStringForDB(javaArray), pdc.getDisplayType(), pdc.getFormatPattern());
+            				}
 							else
 							//	The general case
 							{
