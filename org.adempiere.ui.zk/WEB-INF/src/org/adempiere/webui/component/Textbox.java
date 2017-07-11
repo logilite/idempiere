@@ -34,7 +34,7 @@ public class Textbox extends org.zkoss.zul.Textbox implements EventListener<Even
     /**
 	 * 
 	 */
-	private static final long serialVersionUID = 2201466028538929955L;
+	private static final long serialVersionUID = -3919623360765045602L;
 
 	private Obscure	m_obscure = null;
 
@@ -94,7 +94,7 @@ public class Textbox extends org.zkoss.zul.Textbox implements EventListener<Even
 
 	@Override
 	public void setValue(String value) throws WrongValueException {
-		if (m_obscure != null && !m_infocus)
+		if (m_obscure != null && ("password".equals(getType()) || !m_infocus))
 		{
 			super.setValue(m_obscure.getObscuredValue(value));
 		}
@@ -118,4 +118,12 @@ public class Textbox extends org.zkoss.zul.Textbox implements EventListener<Even
 				setValue(getValue());
 		}		
 	}
+
+	@Override
+	public void setType(String type) throws WrongValueException {
+		if ("password".equals(type))
+			setObscureType(Obscure.OBSCURETYPE_ObscureAllAsterisk);
+		super.setType(type);
+	}
+
 }
