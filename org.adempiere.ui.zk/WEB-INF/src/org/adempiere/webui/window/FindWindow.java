@@ -1559,6 +1559,8 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
                 }
                 m_query.addRestriction(getSubCategoryWhereClause(((Integer) parsedValue).intValue()), and, openBrackets);
             }
+			else if (MQuery.OPERATORS[MQuery.LIKE_INDEX].getValue().equals(Operator))
+				m_query.addRestriction(ColumnSQL, Operator, parsedValue, infoName, infoDisplay, and, openBrackets, true);
             else
             	m_query.addRestriction(ColumnSQL, Operator, parsedValue,
             			infoName, infoDisplay, and, openBrackets);
@@ -1704,12 +1706,12 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
                         if (!valueStr.toString().endsWith("%"))
                             valueStr.append("%");
                         //
-                        ColumnSQL = new StringBuilder("UPPER(").append(ColumnSQL).append(")");
+                        // ColumnSQL = new StringBuilder("UPPER(").append(ColumnSQL).append(")");
                         value = valueStr.toString();
                     }
                     //
                     if (value.toString().indexOf('%') != -1) {
-                        m_query.addRestriction(ColumnSQL.toString(), MQuery.LIKE, value, ColumnName, wed.getDisplay());
+                        m_query.addRestriction(ColumnSQL.toString(), MQuery.LIKE, value, ColumnName, wed.getDisplay(), true);
                         appendCode(code, ColumnName, MQuery.LIKE, value.toString(), "", "AND", "", "");
                     } else if (isProductCategoryField && value instanceof Integer) {
                         m_query.addRestriction(getSubCategoryWhereClause(((Integer) value).intValue()));
