@@ -267,7 +267,6 @@ public class Doc_Inventory extends Doc
 			BigDecimal adjustmentDiff = null;
 			if (costAdjustment)
 			{
-				costs = line.getAmtSource();
 				int orgId = line.getAD_Org_ID();
 				int asiId = line.getM_AttributeSetInstance_ID();
 				if (MAcctSchema.COSTINGLEVEL_Client.equals(costingLevel))
@@ -279,13 +278,28 @@ public class Doc_Inventory extends Doc
 					asiId = 0;
 				else if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))
 					orgId = 0;
-				MCostElement ce = MCostElement.getMaterialCostElement(getCtx(), docCostingMethod, orgId);
-				MCost cost = MCost.get(product, asiId, as, 
-						orgId, ce.getM_CostElement_ID(), getTrxName());					
-				DB.getDatabase().forUpdate(cost, 120);
-				BigDecimal currentQty = cost.getCurrentQty();
-				adjustmentDiff = costs;
-				costs = costs.multiply(currentQty);
+
+				MCostDetail cd = MCostDetail.get(Env.getCtx(), "M_InventoryLine_ID=?", line.get_ID(), asiId,
+						as.getC_AcctSchema_ID(), line.getPO().get_TrxName());
+				if (cd != null)
+				{
+					costs = cd.getAmt(); 
+					BigDecimal currentQty = cd.getCurrentQty();
+					adjustmentDiff = costs;
+					costs = costs.multiply(currentQty);
+				}
+				else
+				{
+					MCostElement ce = MCostElement.getMaterialCostElement(getCtx(), docCostingMethod, orgId);
+					MCost cost = MCost.get(product, asiId, as, 
+							orgId, ce.getM_CostElement_ID(), getTrxName());					
+					DB.getDatabase().forUpdate(cost, 120);
+
+					costs = line.getAmtSource();
+					BigDecimal currentQty = cost.getCurrentQty();
+					adjustmentDiff = costs;
+					costs = costs.multiply(currentQty);
+				}
 			}
 			else 
 			{

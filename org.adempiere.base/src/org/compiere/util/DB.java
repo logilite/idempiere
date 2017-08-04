@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
+import java.sql.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -856,6 +857,16 @@ public final class DB
 			pstmt.setString(index, ((Boolean)param).booleanValue() ? "Y" : "N");
 		else if (param instanceof byte[])
 			pstmt.setBytes(index, (byte[]) param);
+		else if (param instanceof Integer[])
+		{
+			Array array = DB.getConnectionRW().createArrayOf("numeric", (Integer[]) param);
+			pstmt.setArray(index, array);
+		}
+		else if (param instanceof String[])
+		{
+			Array array = DB.getConnectionRW().createArrayOf("text", (String[]) param);
+			pstmt.setArray(index, array);
+		}
 		else
 			throw new DBException("Unknown parameter type "+index+" - "+param);
 	}
@@ -2522,5 +2533,42 @@ public final class DB
     		return null;
     	return rowsArray;
 	}
+
+	/**
+	 * Get Array Value from SQL ( IDEMPIERE-3413 )
+	 * 
+	 * @param trxName - Transaction
+	 * @param sql - Selection Query
+	 * @param params - Array of parameters
+	 * @return first value or null if not found
+	 * @throws DBException - if there is any SQLException
+	 */
+	public static Array getSQLArrayValueEx(String trxName, String sql, Object... params) throws DBException
+	{
+		Array retArray = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = prepareStatement(sql, trxName);
+			setParameters(pstmt, params);
+			rs = pstmt.executeQuery();
+			if (rs.next())
+				retArray = rs.getArray(1);
+			else if (log.isLoggable(Level.FINE))
+				log.fine("No Value " + sql);
+		}
+		catch (SQLException e)
+		{
+			throw new DBException(e, sql);
+		}
+		finally
+		{
+			close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		return retArray;
+	} // getSQLArrayValueEx
 
 }	//	DB

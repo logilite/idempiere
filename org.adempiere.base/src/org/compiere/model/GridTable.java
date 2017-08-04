@@ -25,6 +25,7 @@ import java.beans.VetoableChangeListener;
 import java.beans.VetoableChangeSupport;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.PreparedStatement;
@@ -1959,6 +1960,30 @@ public class GridTable extends AbstractTableModel
 							else
 								rs.updateString (colRs, yn); 					//	***
 						}
+						else if (field.getDisplayType() == DisplayType.MultiSelectTable)
+						{
+							Integer[] ids = (Integer[]) rowData[col];
+							if (manualUpdate)
+								createUpdateSql(columnName, Util.convertArrayToStringForDB(ids));
+							else
+							{
+								Array array = DB.getConnectionRW().createArrayOf("numeric", (Integer[]) ids);
+								rs.updateArray(colRs, array);
+							}
+							type = "NUMBER[]";
+						}
+						else if (field.getDisplayType() == DisplayType.MultiSelectList)
+						{
+							String[] ids = (String[]) rowData[col];
+							if (manualUpdate)
+								createUpdateSql(columnName, Util.convertArrayToStringForDB(ids));
+							else
+							{
+								Array array = DB.getConnectionRW().createArrayOf("text", (String[]) ids);
+								rs.updateArray(colRs, array);
+							}
+							type = "String[]";
+						}
 						//	String and others
 						else	
 						{
@@ -2195,8 +2220,12 @@ public class GridTable extends AbstractTableModel
 					|| (value == null && dbValue == null)
 					|| (value != null && value.equals (dbValue)) 
 					|| ((oldValue != null && dbValue != null && oldValue.getClass().equals(byte[].class) && dbValue.getClass().equals(byte[].class)) && Arrays.equals((byte[])oldValue, (byte[])dbValue))
-					|| ((value != null && dbValue != null && value.getClass().equals(byte[].class) && dbValue.getClass().equals(byte[].class)) && Arrays.equals((byte[])oldValue, (byte[])dbValue)) 
-						)
+					|| ((value != null && dbValue != null && value.getClass().equals(byte[].class) && dbValue.getClass().equals(byte[].class)) && Arrays.equals((byte[])oldValue, (byte[])dbValue))
+					|| (oldValue != null && dbValue != null && field.getDisplayType() == DisplayType.MultiSelectTable
+						&& oldValue instanceof Integer[] && dbValue instanceof Integer[] && Arrays.equals((Integer[]) oldValue, (Integer[]) dbValue))
+					|| (oldValue != null && dbValue != null && field.getDisplayType() == DisplayType.MultiSelectList
+						&& oldValue instanceof String[] && dbValue instanceof String[] && Arrays.equals((String[]) oldValue, (String[]) dbValue))
+					)
 				{
 					if (!po.set_ValueNoCheck (columnName, value))
 					{
@@ -3273,6 +3302,22 @@ public class GridTable extends AbstractTableModel
 					else if (value instanceof byte[])
 						rowData[j] = value;
 				}
+				else if (displayType == DisplayType.MultiSelectTable)
+				{
+					Array arr = rs.getArray(j + 1);
+					Object javaArray = null;
+					if (arr != null)
+						javaArray = (Object) Util.convertBigDecimalToInteger((BigDecimal[]) arr.getArray());
+					rowData[j] = javaArray;
+				}
+				else if (displayType == DisplayType.MultiSelectList)
+				{
+					Array arr = rs.getArray(j + 1);
+					Object javaArray = null;
+					if (arr != null)
+						javaArray = (String[]) arr.getArray();
+					rowData[j] = javaArray;
+				}
 				//	String
 				else
 					rowData[j] = rs.getString(j+1);				//	String
@@ -3906,7 +3951,12 @@ public class GridTable extends AbstractTableModel
 				}
 				else
 				{
-					bChanged = !oldValue.equals(value);
+					if (oldValue instanceof Integer[])
+						bChanged = !Arrays.equals((Integer[]) oldValue, (Integer[]) value);
+					else if (oldValue instanceof String[])
+						bChanged = !Arrays.equals((String[]) oldValue, (String[]) value);
+					else
+						bChanged = !oldValue.equals(value);
 				}
 			}
 			else if(value != null)

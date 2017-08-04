@@ -87,3 +87,63 @@ table.z-vbox > tbody > tr > td > table {
 <c:include page="fragment/borderlayout.css.dsp" />
 
 <c:include page="fragment/parameter-process.css.dsp" />
+
+<%-- User Favorite Dashboard Panel Start --%>
+
+.fav-tree-panel {
+  padding: 2px;
+  background-color: #eee;
+  border-radius: 5px;
+}
+
+.fav-toolbar {
+  padding: 10px;
+  background-color: #eee;
+  border: 1px solid #d8d8d8;
+  border-radius: 5px;
+}
+
+.fav-button-add {
+  margin-left: 10px !important;
+}
+
+.fav-folder-textbox {
+  margin-left: 10px;
+  width: 60%;
+}
+
+.fav-chkbox {
+  margin-left: 10px;
+}
+
+<%-- User Favorite Dashboard Panel End --%>
+
+<%-- Multi Select List & Table Editor Start --%>
+
+.multi-select-box {
+}
+
+.multi-select-popup {
+  background: #f5f5f5;
+  border: solid 1px #828282;
+  border-radius: 5px;
+  max-height: 350px;
+  min-width: 250px;
+  overflow: auto;
+}
+
+.multi-select-vbox {
+  background: white;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.multi-select-textbox {
+  background-color: white !important;
+}
+
+.multi-select-textbox-readonly {
+  background-color: #F0F0F0 !important;
+}
+
+<%-- Multi Select List & Table Editor End --%>

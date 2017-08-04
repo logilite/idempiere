@@ -208,14 +208,15 @@ public class MLookupFactory
 	{
 		MLookupInfo info = null;
 		boolean needToAddSecurity = true;
-		//	List
-		if (AD_Reference_ID == DisplayType.List)	//	17
+		//	List or MultiSelectList
+		if (AD_Reference_ID == DisplayType.List || AD_Reference_ID == DisplayType.MultiSelectList)	//	17, 200139
 		{
 			info = getLookup_List(language, AD_Reference_Value_ID);
 			needToAddSecurity = false;
 		}
-		//	Table or Search with Reference_Value
-		else if ((AD_Reference_ID == DisplayType.Table || AD_Reference_ID == DisplayType.Search)
+		//	Table or Search or MultiSelectTable with Reference_Value
+		else if ((AD_Reference_ID == DisplayType.Table || AD_Reference_ID == DisplayType.Search 
+				|| AD_Reference_ID == DisplayType.MultiSelectTable)
 			&& AD_Reference_Value_ID != 0)
 		{
 			info = getLookup_Table (ctx, language, WindowNo, AD_Reference_Value_ID);
@@ -739,6 +740,135 @@ public class MLookupFactory
 
 		return embedSQL.toString();
 	}	//	getLookup_TableEmbed
+	
+	/**
+	 * Get Embedded Lookup SQL for Multi Select Table Lookup ( IDEMPIERE-3413 )
+	 * 
+	 * @param language - report language
+	 * @param BaseColumn - base column name
+	 * @param BaseTable - base table name
+	 * @param AD_Reference_Value_ID - reference value
+	 * @return Sub-query to contains element Name
+	 */
+	static public String getLookup_MultiSelectTableEmbed(Language language, String BaseColumn, String BaseTable,
+			int AD_Reference_Value_ID)
+	{
+		String sql = "SELECT t.TableName,ck.ColumnName AS KeyColumn,"
+				+ "cd.ColumnName AS DisplayColumn,rt.isValueDisplayed,cd.IsTranslated, cd.AD_Column_ID AS columnDisplay_ID "
+				+ "FROM AD_Ref_Table rt" + " INNER JOIN AD_Table t ON (rt.AD_Table_ID=t.AD_Table_ID)"
+				+ " INNER JOIN AD_Column ck ON (rt.AD_Key=ck.AD_Column_ID)"
+				+ " INNER JOIN AD_Column cd ON (rt.AD_Display=cd.AD_Column_ID) " + "WHERE rt.AD_Reference_ID=?"
+				+ " AND rt.IsActive='Y' AND t.IsActive='Y'";
+		//
+		String KeyColumn, DisplayColumn, TableName, TableNameAlias;
+		boolean IsTranslated, isValueDisplayed;
+		Integer columnDisplay_ID = 0;
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, AD_Reference_Value_ID);
+			rs = pstmt.executeQuery();
+			if (!rs.next())
+			{
+				s_log.log(Level.SEVERE, "Cannot find Reference Table, ID=" + AD_Reference_Value_ID + ", Base="
+						+ BaseTable + "." + BaseColumn);
+				return null;
+			}
+
+			TableName = rs.getString(1);
+			KeyColumn = rs.getString(2);
+			DisplayColumn = rs.getString(3);
+			isValueDisplayed = rs.getString(4).equals("Y");
+			IsTranslated = rs.getString(5).equals("Y");
+			columnDisplay_ID = rs.getInt(6);
+
+		}
+		catch (SQLException e)
+		{
+			s_log.log(Level.SEVERE, sql, e);
+			return null;
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+
+		// If it's self referencing then use other alias
+		if (TableName.equals(BaseTable))
+		{
+			TableNameAlias = TableName + "1";
+		}
+		else
+		{
+			TableNameAlias = TableName;
+		}
+
+		StringBuilder embedSQL = new StringBuilder("SELECT STRING_AGG(");
+
+		if (isValueDisplayed)
+			embedSQL.append(TableNameAlias).append(".Value||'-'||");
+
+		MColumn columnDisplay = new MColumn(Env.getCtx(), columnDisplay_ID, null);
+
+		boolean translated = false;
+		// Translated
+		if (IsTranslated && !Env.isBaseLanguage(language, TableName))
+		{
+			translated = true;
+
+			if (columnDisplay.isVirtualColumn())
+			{
+				s_log.warning("Column SQL should not be Translated");
+				return null;
+			}
+			else
+				embedSQL.append(TableName).append("_Trl.").append(DisplayColumn);
+
+			embedSQL.append(DB.isPostgreSQL() ? ", ',')" : ")");
+			embedSQL.append(" FROM ").append(TableName).append(" ").append(TableNameAlias).append(" INNER JOIN ")
+					.append(TableName).append("_TRL ON (").append(TableNameAlias).append(".").append(KeyColumn)
+					.append("=").append(TableName).append("_Trl.").append(KeyColumn).append(" AND ").append(TableName)
+					.append("_Trl.AD_Language='").append(language.getAD_Language()).append("')");
+		}
+		// Not Translated
+		else
+		{
+			if (columnDisplay.isVirtualColumn())
+				embedSQL.append(columnDisplay.getColumnSQL()).append(" AS ").append(KeyColumn);
+			else
+				embedSQL.append(TableNameAlias).append(".").append(DisplayColumn);
+
+			embedSQL.append(DB.isPostgreSQL() ? ", ',')" : ")");
+			embedSQL.append(" FROM ").append(TableName).append(" ").append(TableNameAlias);
+		}
+
+		embedSQL.append(" WHERE ");
+
+		int Column_ID = MColumn.getColumn_ID(BaseTable, BaseColumn);
+		MColumn column = MColumn.get(Env.getCtx(), Column_ID);
+		// If is not virtual column
+		if (!column.isVirtualColumn())
+		{
+			embedSQL.append(TableNameAlias).append(".").append(KeyColumn);
+			embedSQL.append("=ANY(").append(BaseTable).append(".").append(BaseColumn).append(")");
+		}
+		else if (translated)
+		{
+			embedSQL.append(TableNameAlias).append(".").append(KeyColumn).append("=ANY(").append(column.getColumnSQL())
+					.append(")");
+		}
+		else
+		{
+			embedSQL.append(KeyColumn).append("=ANY(").append(column.getColumnSQL()).append(")");
+		}
+
+		return embedSQL.toString();
+	} // getLookup_MultiSelectTableEmbed
 
 
 	/**************************************************************************

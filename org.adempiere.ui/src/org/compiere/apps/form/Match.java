@@ -233,7 +233,13 @@ public class Match
 					
 					try{
 						if (createMatchRecord(invoice, M_InOutLine_ID, Line_ID, BigDecimal.valueOf(qty), innerTrxName, 0))
+						{
+							if(matchInvHdr != null)
+							{
+								completeMatchInvHeader();
+							}
 							innerTrx.commit();
+						}
 						else
 							innerTrx.rollback();
 					}catch(Exception ex){
@@ -366,17 +372,18 @@ public class Match
 							
 							int M_AttributeSetInstance_ID = 0;
 
-							if (invLine.getM_AttributeSetInstance_ID() > 0)
-							{
-								M_AttributeSetInstance_ID = invLine.getM_AttributeSetInstance_ID();
-							}
-							else if (invLine.getM_InOutLine_ID() > 0)
+							if (invLine.getM_InOutLine_ID() > 0)
 							{
 								MInOutLine ioLine = (MInOutLine) invLine.getM_InOutLine();
 								if (ioLine.getM_AttributeSetInstance_ID() > 0)
 								{
 									M_AttributeSetInstance_ID = ioLine.getM_AttributeSetInstance_ID();
 								}
+							}
+							
+							if (M_AttributeSetInstance_ID == 0 && invLine.getM_AttributeSetInstance_ID() > 0)
+							{
+								M_AttributeSetInstance_ID = invLine.getM_AttributeSetInstance_ID();
 							}
 
 							if (!createMatchRecord(true, 0, crmLine.get_ID(), matchQty.negate(), innerTrxName,
@@ -448,8 +455,7 @@ public class Match
 				
 				if(matchInvHdr != null)
 				{
-					matchInvHdr.processIt(DocAction.ACTION_Complete);
-					matchInvHdr.saveEx();
+					completeMatchInvHeader();
 				}
 				
 			}
@@ -465,6 +471,15 @@ public class Match
 			}
 		}
 	}   //  cmd_process
+
+	private void completeMatchInvHeader() throws Exception
+	{
+		if(matchInvHdr.processIt(DocAction.ACTION_Complete))
+		{
+			matchInvHdr.setDocStatus(MMatchInvHdr.DOCSTATUS_Completed);
+			matchInvHdr.saveEx();
+		}
+	}
 	
 
 	/**
@@ -685,7 +700,7 @@ public class Match
 			{
 				iLine.setM_InOutLine_ID(M_InOutLine_ID);
 				iLine.setC_OrderLine_ID(sLine.getC_OrderLine_ID());
-				iLine.saveEx();
+ 				iLine.saveEx();
 			}
 			
 			//	Create Shipment - Invoice Link
@@ -784,7 +799,7 @@ public class Match
 					if (sLine.getProduct() != null && sLine.getProduct().isStocked())
 						success = MStorageReservation.add (Env.getCtx(), sLine.getM_Warehouse_ID(),
 							sLine.getM_Product_ID(),
-							sLine.getM_AttributeSetInstance_ID(),
+							oLine.getM_AttributeSetInstance_ID(),
 							qty.negate(), false, trxName);
 				}
 			}

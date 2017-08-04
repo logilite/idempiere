@@ -168,7 +168,7 @@ public class MProductionLine extends X_M_ProductionLine {
 						}
 						matTrx = new MTransaction (getCtx(), getAD_Org_ID(), 
 								"P-", 
-								getM_Locator_ID(), getM_Product_ID(), asi.get_ID(), 
+								getM_Locator_ID(), getM_Product_ID(), storages[sl].getM_AttributeSetInstance_ID(), 
 								lineQty.negate(), date, get_TrxName());
 						matTrx.setM_ProductionLine_ID(get_ID());
 						if ( !matTrx.save(get_TrxName()) ) {

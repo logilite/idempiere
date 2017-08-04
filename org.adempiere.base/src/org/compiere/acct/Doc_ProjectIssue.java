@@ -54,9 +54,9 @@ public class Doc_ProjectIssue extends Doc
 	}   //  Doc_ProjectIssue
 
 	/**	Pseudo Line								*/
-	private DocLine				m_line = null;
+	protected DocLine 			m_line = null;
 	/** Issue									*/
-	private MProjectIssue		m_issue = null;
+	protected MProjectIssue		m_issue = null;
 
 	/**
 	 *  Load Document Details
@@ -176,7 +176,7 @@ public class Doc_ProjectIssue extends Doc
 	 *	@param as Account Schema
 	 *	@return Unit PO Cost
 	 */
-	private BigDecimal getPOCost(MAcctSchema as)
+	protected BigDecimal getPOCost(MAcctSchema as)
 	{
 		BigDecimal retValue = null;
 		//	Uses PO Date
@@ -221,7 +221,7 @@ public class Doc_ProjectIssue extends Doc
 	 *	@return Unit Labor Cost
 	 */
 
-	private BigDecimal getLaborCost(MAcctSchema as)
+	protected BigDecimal getLaborCost(MAcctSchema as)
 	{
 		// Todor Lulov 30.01.2008
 		BigDecimal retValue = Env.ZERO;

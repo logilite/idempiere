@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -796,7 +797,7 @@ public class MMatchPO extends X_M_MatchPO
 		// Bayu, Sistematika
 		// BF [ 2240484 ] Re MatchingPO, MMatchPO doesn't contains Invoice info
 		// If newRecord, set c_invoiceline_id while null
-		if (newRecord && getC_InvoiceLine_ID() == 0) 
+		if (newRecord && getC_InvoiceLine_ID() == 0 && getReversal_ID()==0) 
 		{
 			MMatchInv[] mpi = MMatchInv.getInOutLine(getCtx(), getM_InOutLine_ID(), get_TrxName());
 			for (int i = 0; i < mpi.length; i++) 
@@ -1213,6 +1214,29 @@ public class MMatchPO extends X_M_MatchPO
 			this.setDescription("(" + reversal.getDocumentNo() + "<-)");			
 			this.setReversal_ID(reversal.getM_MatchPO_ID());
 			this.saveEx();
+			
+			if(getC_OrderLine_ID() > 0)
+			{
+				MOrderLine orderLine = (MOrderLine) MTable.get(getCtx(),
+						MOrderLine.Table_ID).getPO(
+						reversal.getC_OrderLine_ID(), get_TrxName());
+				orderLine.setQtyReserved(orderLine.getQtyReserved().add(
+						getQty()));
+				orderLine.saveEx();
+
+				if (!MStorageReservation.add(getCtx(),
+						orderLine.getM_Warehouse_ID(),
+						orderLine.getM_Product_ID(),
+						orderLine.getM_AttributeSetInstance_ID(), getQty(),
+						false, get_TrxName()))
+				{
+					String lastError = CLogger.retrieveErrorString("");
+					throw new AdempiereException(
+							"Cannot correct Inventory Ordered (MA) - ["
+									+ orderLine.getM_Product().getValue()
+									+ "] " + lastError);
+				}
+			}
 			return true;
 		}
 		return false;

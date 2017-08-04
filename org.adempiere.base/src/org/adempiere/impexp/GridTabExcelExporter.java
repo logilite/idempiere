@@ -84,7 +84,36 @@ public class GridTabExcelExporter extends AbstractExcelExporter implements IGrid
 		//
 		if (lookup != null)
 		{
-			value = lookup.getDisplay(key);
+			if (f.getDisplayType() == DisplayType.MultiSelectTable || f.getDisplayType() == DisplayType.MultiSelectList)
+			{
+				StringBuilder sb = new StringBuilder();
+				Object[] array;
+				if (f.getDisplayType() == DisplayType.MultiSelectTable)
+					array = (Integer[]) key;
+				else
+					array = (String[]) key;
+
+				if (array != null)
+				{
+					int iMax = array.length - 1;
+					if (iMax != -1)
+					{
+						for (int j = 0;; j++)
+						{
+							sb.append(lookup.getDisplay(array[j].toString().trim()));
+							if (j == iMax)
+								break;
+							sb.append(", ");
+						}
+					}
+
+					if (sb != null && sb.length() > 0)
+						sb.insert(0, "\"").append("\"").toString();
+				}
+				value = sb.toString();
+			}
+			else
+				value = lookup.getDisplay(key);
 		}
 		return value;
 	}
