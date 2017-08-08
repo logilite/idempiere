@@ -530,12 +530,6 @@ public class MMovement extends X_M_Movement implements DocAction
 					if (dateMPolicy == null && storages.length > 0)
 						dateMPolicy = storages[0].getDateMaterialPolicy();
 					
-					if (dateMPolicy==null && line.getM_AttributeSetInstanceTo_ID()!=0) {
-						I_M_AttributeSetInstance asi = line.getM_AttributeSetInstance();
-						dateMPolicy = asi.getCreated();
-					} else if(dateMPolicy==null)
-						dateMPolicy = getMovementDate();
-
 					MLocator locator = new MLocator (getCtx(), line.getM_Locator_ID(), get_TrxName());
 					//Update Storage 
 					if (!MStorageOnHand.add(getCtx(),locator.getM_Warehouse_ID(),

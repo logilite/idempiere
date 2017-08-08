@@ -234,7 +234,7 @@ public class DunningPrint extends SvrProcess
 			if (printed)
 			{
 				entry.setProcessed (true);
-				entry.save ();
+				entry.saveEx();
 			}
 
 		}	//	for all dunning letters

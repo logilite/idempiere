@@ -98,6 +98,13 @@ public class ADSortTab extends Panel implements IADTabpanel
 
 		m_AD_Table_ID = gridTab.getAD_Table_ID();
 		ZKUpdateUtil.setVflex(this, "true");
+
+		addEventListener(ON_ACTIVATE_EVENT, new EventListener<Event>() {
+			@Override
+			public void onEvent(Event event) throws Exception {
+				removeAttribute(ATTR_ON_ACTIVATE_POSTED);
+			}
+		});
 	}	//	ADSortTab
 
 	/**	Logger			*/
@@ -362,13 +369,6 @@ public class ADSortTab extends Panel implements IADTabpanel
 		ZKUpdateUtil.setVflex(yesList, true);
 		ZKUpdateUtil.setHflex(yesList, "1");
 		hlayout.appendChild(yesList);
-		
-		addEventListener(ON_ACTIVATE_EVENT, new EventListener<Event>() {
-			@Override
-			public void onEvent(Event event) throws Exception {
-				removeAttribute(ATTR_ON_ACTIVATE_POSTED);
-			}
-		});
 	}	//	Init
 
 	/* (non-Javadoc)

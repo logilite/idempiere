@@ -111,7 +111,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 5446672147679386907L;
+	private static final long serialVersionUID = -2946624717834888117L;
 
 	public static final String DEFAULT_STATUS_MESSAGE = "NavigateOrUpdate";
 
@@ -1184,11 +1184,6 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 			return retValue;
 		setCurrentRow(m_currentRow + 1, true);
 
-		//  check validity of defaults
-		for (GridField field : getFields()) {
-			field.refreshLookup();
-			field.validateValueNoDirect();
-		}
 		//  process all Callouts (no dependency check - assumed that settings are valid)
 		for (int i = 0; i < getFieldCount(); i++)
 			processCallout(getField(i));
@@ -1586,6 +1581,17 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 			return false;
 		return m_vo.IsInsertRecord;
 	}	//	isInsertRecord
+
+	/**
+	 *	Can we Delete Records?
+	 *  @return true not read only and allowed
+	 */
+	public boolean isDeleteRecord()
+	{
+		if (isReadOnly())
+			return false;
+		return m_vo.IsDeleteable;
+	}	//	isDeleteRecord
 
 	/**
 	 *	Is the Tab Visible.
@@ -2561,8 +2567,6 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 			{
 				Object value = m_mTable.getValueAt(m_currentRow, i);
 				mField.setValue(value, m_mTable.isInserting());
-				if (m_mTable.isInserting())		//	set invalid values to null
-					mField.validateValue();
 				if (mField.isKey())
 					keyCalloutDelayed = mField;
 			}

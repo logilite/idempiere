@@ -163,7 +163,7 @@ public class ProjectGenPO extends SvrProcess
 			}
 			order.setClientOrg (projectLine.getAD_Client_ID (), AD_Org_ID);
 			order.setBPartner (bp);
-			order.save ();
+			order.saveEx();
 			//	optionally save for consolidation
 			if (m_ConsolidateDocument)
 				m_pos.add(order);

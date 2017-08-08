@@ -80,15 +80,6 @@ public class MStorageOnHand extends X_M_StorageOnHand
 			sqlWhere += "(M_AttributeSetInstance_ID=? OR M_AttributeSetInstance_ID IS NULL)";
 		else
 			sqlWhere += "M_AttributeSetInstance_ID=?";
-	
-		if (dateMPolicy == null)
-		{
-			if (M_AttributeSetInstance_ID > 0)
-			{
-				MAttributeSetInstance asi = new MAttributeSetInstance(ctx, M_AttributeSetInstance_ID, trxName);
-				dateMPolicy = asi.getCreated();
-			}
-		}
 
 		if (dateMPolicy != null)
 			sqlWhere += " AND DateMaterialPolicy=trunc(cast(? as date))";
@@ -191,7 +182,7 @@ public class MStorageOnHand extends X_M_StorageOnHand
 		}
 		else
 		{
-			query.setOrderBy(MStorageOnHand.COLUMNNAME_DateMaterialPolicy);
+			query.setOrderBy(MStorageOnHand.COLUMNNAME_DateMaterialPolicy+","+ MStorageOnHand.COLUMNNAME_M_AttributeSetInstance_ID);
 		}
 		if (forUpdate)
 		{
@@ -344,7 +335,9 @@ public class MStorageOnHand extends X_M_StorageOnHand
 		}
 		sql += "ORDER BY l.PriorityNo DESC, DateMaterialPolicy ";
 		if (!FiFo)
-			sql += " DESC";
+			sql += " DESC, s.M_AttributeSetInstance_ID DESC ";
+		else
+			sql += ", s.M_AttributeSetInstance_ID ";
 		//	All Attribute Set Instances
 		if (allAttributeInstances)
 		{
@@ -378,13 +371,17 @@ public class MStorageOnHand extends X_M_StorageOnHand
 			if(product.isUseGuaranteeDateForMPolicy()){
 				sql += "ORDER BY l.PriorityNo DESC, COALESCE(asi.GuaranteeDate,s.DateMaterialPolicy)";
 				if (!FiFo)
-					sql += " DESC";
+					sql += " DESC, s.M_AttributeSetInstance_ID DESC ";
+				else
+					sql += ", s.M_AttributeSetInstance_ID ";
 			}
 			else
 			{
 				sql += "ORDER BY l.PriorityNo DESC, l.M_Locator_ID, s.DateMaterialPolicy";
 				if (!FiFo)
-					sql += " DESC";
+					sql += " DESC, s.M_AttributeSetInstance_ID DESC ";
+				else
+					sql += ", s.M_AttributeSetInstance_ID ";
 			}
 			
 			sql += ", s.QtyOnHand DESC";
@@ -532,7 +529,9 @@ public class MStorageOnHand extends X_M_StorageOnHand
 		{
 			sql += "ORDER BY l.PriorityNo DESC, l.M_Locator_ID, s.DateMaterialPolicy";
 			if (!FiFo)
-				sql += " DESC";
+				sql += " DESC, s.M_AttributeSetInstance_ID DESC ";
+			else
+				sql += ", s.M_AttributeSetInstance_ID ";
 		}
 		
 		sql += ", s.QtyOnHand DESC";
@@ -629,12 +628,10 @@ public class MStorageOnHand extends X_M_StorageOnHand
 		if (M_Locator_ID == 0)
 			throw new IllegalArgumentException("M_Locator_ID=0");
 		if (M_Product_ID == 0)
-			throw new IllegalArgumentException("M_Product_ID=0");
-		if (dateMPolicy == null)
-			dateMPolicy = new Timestamp(new Date().getTime());
-		
-		dateMPolicy = Util.removeTime(dateMPolicy);
-		
+			throw new IllegalArgumentException("M_Product_ID=0");		
+		if (dateMPolicy != null)
+			dateMPolicy = Util.removeTime(dateMPolicy);
+
 		MStorageOnHand retValue = get(ctx, M_Locator_ID, M_Product_ID, M_AttributeSetInstance_ID,dateMPolicy, trxName);
 		if (retValue != null)
 		{
@@ -648,6 +645,11 @@ public class MStorageOnHand extends X_M_StorageOnHand
 		if (locator.get_ID() != M_Locator_ID)
 			throw new IllegalArgumentException("Not found M_Locator_ID=" + M_Locator_ID);
 		//
+		if (dateMPolicy == null)
+		{
+			dateMPolicy = new Timestamp(new Date().getTime());		
+			dateMPolicy = Util.removeTime(dateMPolicy);
+		}
 		retValue = new MStorageOnHand (locator, M_Product_ID, M_AttributeSetInstance_ID,dateMPolicy);
 		retValue.saveEx(trxName);
 		if (s_log.isLoggable(Level.FINE)) s_log.fine("New " + retValue);
@@ -696,21 +698,9 @@ public class MStorageOnHand extends X_M_StorageOnHand
 		if (diffQtyOnHand == null || diffQtyOnHand.signum() == 0)
 			return true;
 
-		if (dateMPolicy == null)
-		{
-			if (M_AttributeSetInstance_ID > 0)
-			{
-				MAttributeSetInstance asi = new MAttributeSetInstance(ctx, M_AttributeSetInstance_ID, trxName);
-				dateMPolicy = asi.getCreated();
-			}
-			else
-			{
-				dateMPolicy = new Timestamp(System.currentTimeMillis());
-			}
-		}
-		
-		dateMPolicy = Util.removeTime(dateMPolicy);
-		
+		if (dateMPolicy != null)
+			dateMPolicy = Util.removeTime(dateMPolicy);
+
 		//	Get Storage
 		MStorageOnHand storage = getCreate (ctx, M_Locator_ID, M_Product_ID, M_AttributeSetInstance_ID, dateMPolicy, trxName, true, 120);
 		//	Verify
@@ -724,11 +714,6 @@ public class MStorageOnHand extends X_M_StorageOnHand
 		}
 
 		storage.addQtyOnHand(diffQtyOnHand);
-		if (storage.getQtyOnHand().signum() == -1) {
-			if (MWarehouse.get(Env.getCtx(), M_Warehouse_ID).isDisallowNegativeInv()) {
-				throw new AdempiereException(Msg.getMsg(ctx, "NegativeInventoryDisallowed"));
-			}
-		}
 		if (s_log.isLoggable(Level.FINE)) {
 			StringBuilder diffText = new StringBuilder("(OnHand=").append(diffQtyOnHand).append(") -> ").append(storage.toString());
 			s_log.fine(diffText.toString());
@@ -747,6 +732,12 @@ public class MStorageOnHand extends X_M_StorageOnHand
 			new Object[] {addition, Env.getAD_User_ID(Env.getCtx()), getM_Product_ID(), getM_Locator_ID(), getM_AttributeSetInstance_ID(), getDateMaterialPolicy()}, 
 			get_TrxName());
 		load(get_TrxName());
+		if (getQtyOnHand().signum() == -1) {
+			MWarehouse wh = MWarehouse.get(Env.getCtx(), getM_Warehouse_ID());
+			if (wh.isDisallowNegativeInv()) {
+				throw new AdempiereException(Msg.getMsg(Env.getCtx(), "NegativeInventoryDisallowed"));
+			}
+		}
 	}
 
 	/**************************************************************************
@@ -911,6 +902,12 @@ public class MStorageOnHand extends X_M_StorageOnHand
 					log.saveError("Error", Msg.getMsg(getCtx(), "NegativeInventoryDisallowed"));
 					return false;
 				}
+				
+				if (getM_AttributeSetInstance_ID() > 0 && getQtyOnHand().signum() < 0)
+				{
+					log.saveError("Error", Msg.getMsg(getCtx(), "NegativeInventoryDisallowed"));
+					return false;
+				}
 			}
 		}
 
@@ -1039,6 +1036,9 @@ public class MStorageOnHand extends X_M_StorageOnHand
 	 * @return
 	 */
 	public static Timestamp getDateMaterialPolicy(int M_Product_ID, int M_AttributeSetInstance_ID,String trxName){
+		
+		if (M_Product_ID <= 0  || M_AttributeSetInstance_ID <= 0)
+			return null;
 		
 		String sql = "SELECT dateMaterialPolicy FROM M_StorageOnHand WHERE M_Product_ID=? and M_AttributeSetInstance_ID=?";
 		

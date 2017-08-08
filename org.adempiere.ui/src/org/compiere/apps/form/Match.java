@@ -230,6 +230,7 @@ public class Match
 					//  Create it
 					String innerTrxName = Trx.createTrxName("Match");
 					Trx innerTrx = Trx.get(innerTrxName, true);
+				innerTrx.setDisplayName(getClass().getName()+"_cmd_process");
 					
 					try{
 						if (createMatchRecord(invoice, M_InOutLine_ID, Line_ID, BigDecimal.valueOf(qty), innerTrxName, 0))

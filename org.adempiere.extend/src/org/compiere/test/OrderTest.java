@@ -78,6 +78,7 @@ public class OrderTest implements Runnable
 		for (int i = 0; i < m_numberOrders; i++)
 		{
 			Trx trx = Trx.get(Trx.createTrxName("Test" + m_no + "_" + i),true);
+			trx.setDisplayName(getClass().getName()+"_run");
 			trx.start();
 			//
 			MOrder order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(0,trx.getTrxName());

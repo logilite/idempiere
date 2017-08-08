@@ -895,7 +895,7 @@ public class DataEngine
 					boolean force = false;
 					
 					//	Check Columns for Function Columns
-					for (int i = 0; i < pd.getColumnInfo().length; i++)
+					for (int i = 0; i < pd.getColumnInfo().length; i++)	
 					{
 						PrintDataColumn group_pdc = pd.getColumnInfo()[i];
 						if (!m_group.isGroupColumn(group_pdc.getColumnName()))
@@ -911,11 +911,12 @@ public class DataEngine
 							force = true; // all subsequent groups force change
 						}
 					}
-												
-					for (int j = changedGroups.size() - 1; j >= 0; j--) // backwards (least group first)
+					
+					for (int j = changedGroups.size() - 1; j >= 0; j--) //	backwards (least group first)
 					{
 						PrintDataColumn group_pdc = changedGroups.get(j);
 						Object value = changedValues.get(j);
+						
 							char[] functions = m_group.getFunctions(group_pdc.getColumnName());
 							for (int f = 0; f < functions.length; f++)
 							{

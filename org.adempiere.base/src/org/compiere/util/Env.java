@@ -48,6 +48,7 @@ import javax.swing.JFrame;
 import org.adempiere.base.Core;
 import org.adempiere.base.IResourceFinder;
 import org.adempiere.util.IProcessUI;
+import org.adempiere.util.ServerContext;
 import org.adempiere.util.ServerContextProvider;
 import org.compiere.Adempiere;
 import org.compiere.db.CConnection;
@@ -245,6 +246,11 @@ public final class Env
 	{
 		if (ctx == null)
 			throw new IllegalArgumentException ("Require Context");
+		
+		//nothing to do if ctx is already the current context
+		if (ServerContext.getCurrentInstance() == ctx)
+			return;
+		
 		getCtx().clear();
 		getCtx().putAll(ctx);
 	}   //  setCtx
@@ -550,7 +556,7 @@ public final class Env
 		if (s == null)
 		{
 			//	Explicit Base Values
-			if (context.startsWith("#") || context.startsWith("$"))
+			if (context.startsWith("#") || context.startsWith("$") || context.startsWith("P|"))
 				return getContext(ctx, context);
 			if (onlyWindow)			//	no Default values
 				return "";
@@ -2028,9 +2034,9 @@ public final class Env
 	public static int getZoomWindowID(int AD_Table_ID, int Record_ID, int windowNo)
 	{
 		int AD_Window_ID = MZoomCondition.findZoomWindowByTableId(AD_Table_ID, Record_ID, windowNo);
-		MTable table = MTable.get(Env.getCtx(), AD_Table_ID);
 		if (AD_Window_ID <= 0)
 		{
+			MTable table = MTable.get(Env.getCtx(), AD_Table_ID);
 			AD_Window_ID = table.getAD_Window_ID();
 			//  Nothing to Zoom to
 			if (AD_Window_ID == 0)

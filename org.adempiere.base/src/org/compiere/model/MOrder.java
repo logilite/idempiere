@@ -39,6 +39,7 @@ import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ServerProcessCtl;
+import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -70,7 +71,7 @@ public class MOrder extends X_C_Order implements DocAction
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -4032643956656204341L;
+	private static final long serialVersionUID = -7784588474522162502L;
 
 	/**
 	 * 	Create new Order by copying
@@ -959,6 +960,7 @@ public class MOrder extends X_C_Order implements DocAction
 	}	//	validatePaySchedule
 
 	
+	private volatile static boolean recursiveCall = false;
 	/**************************************************************************
 	 * 	Before Save
 	 *	@param newRecord new
@@ -1124,6 +1126,19 @@ public class MOrder extends X_C_Order implements DocAction
 						return false;
 					}
 				}
+			}
+		}
+
+		if (! recursiveCall && (newRecord || is_ValueChanged(COLUMNNAME_C_PaymentTerm_ID))) {
+			recursiveCall = true;
+			try {
+				MPaymentTerm pt = new MPaymentTerm (getCtx(), getC_PaymentTerm_ID(), get_TrxName());
+				boolean valid = pt.applyOrder(this);
+				setIsPayScheduleValid(valid);
+			} catch (Exception e) {
+				throw e;
+			} finally {
+				recursiveCall = false;
 			}
 		}
 
@@ -1394,7 +1409,10 @@ public class MOrder extends X_C_Order implements DocAction
 			lines = getLines(true, MOrderLine.COLUMNNAME_M_Product_ID);
 		if (!reserveStock(dt, lines))
 		{
+			String innerMsg = CLogger.retrieveErrorString("");
 			m_processMsg = "Cannot reserve Stock";
+			if (! Util.isEmpty(innerMsg))
+				m_processMsg = m_processMsg + " -> " + innerMsg;
 			return DocAction.STATUS_Invalid;
 		}
 		if (!calculateTaxTotal())
@@ -1656,7 +1674,7 @@ public class MOrder extends X_C_Order implements DocAction
 							newLine.setDescription (bomline.getDescription ());
 						//
 						newLine.setPrice ();
-						newLine.save (get_TrxName());
+						newLine.saveEx(get_TrxName());
 					}
 				}	*/
 
@@ -1669,7 +1687,7 @@ public class MOrder extends X_C_Order implements DocAction
 					if (bom.getDescription() != null)
 						newLine.setDescription(bom.getDescription());
 					newLine.setPrice();
-					newLine.save(get_TrxName());
+					newLine.saveEx(get_TrxName());
 				}
 				
 				//	Convert into Comment Line
@@ -1687,7 +1705,7 @@ public class MOrder extends X_C_Order implements DocAction
 				if (line.getDescription () != null)
 					description += " " + line.getDescription ();
 				line.setDescription (description);
-				line.save (get_TrxName());
+				line.saveEx(get_TrxName());
 			}	//	for all lines with BOM
 
 			m_lines = null;		//	force requery
@@ -2105,6 +2123,8 @@ public class MOrder extends X_C_Order implements DocAction
 			payment.setC_BankAccount_ID(ba.getC_BankAccount_ID());
 			payment.setRoutingNo(pp.getRoutingNo());
 			payment.setAccountNo(pp.getAccountNo());
+			payment.setSwiftCode(pp.getSwiftCode());
+			payment.setIBAN(pp.getIBAN());
 			payment.setCheckNo(pp.getCheckNo());
 			payment.setMicr(pp.getMicr());
 			payment.setIsPrepayment(false);

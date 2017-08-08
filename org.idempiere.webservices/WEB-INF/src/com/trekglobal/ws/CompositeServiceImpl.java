@@ -94,6 +94,7 @@ public class CompositeServiceImpl extends AbstractService implements CompositeSe
 			String trxName = Trx.createTrxName(webServiceName);
 	
 			Trx trx = Trx.get(trxName, true);
+			trx.setDisplayName(getClass().getName()+"_"+webServiceName+"_compositeOperation");
 	
 			try {
 				modelADService.setLocalTrxName(trxName);

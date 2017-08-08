@@ -811,7 +811,7 @@ public class Allocation
 		}
 		MBPartner bpartner = (MBPartner) MTable.get(Env.getCtx(), MBPartner.Table_ID).getPO(m_C_BPartner_ID, trxName);
 		bpartner.setTotalOpenBalance();
-		bpartner.save();
+		bpartner.saveEx();
 		paymentList.clear();
 		amountList.clear();
 		

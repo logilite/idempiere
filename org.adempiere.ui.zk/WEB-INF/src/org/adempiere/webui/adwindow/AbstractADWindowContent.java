@@ -1550,6 +1550,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         boolean readOnly = adTabbox.getSelectedGridTab().isReadOnly();
         boolean processed = adTabbox.getSelectedGridTab().isProcessed();
         boolean insertRecord = !readOnly;
+        boolean deleteRecord = !readOnly;
         if (!detailTab)
         {
 	        //  update Change
@@ -1562,7 +1563,11 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	        toolbar.enableNew(!changed && insertRecord && !tabPanel.getGridTab().isSortTab());
 	        toolbar.enableCopy(!changed && insertRecord && !tabPanel.getGridTab().isSortTab() && adTabbox.getSelectedGridTab().getRowCount()>0);
 	        toolbar.enableRefresh(!changed);
-	        toolbar.enableDelete(!changed && !readOnly && !tabPanel.getGridTab().isSortTab() && !processed);
+	        if (deleteRecord)
+	        {
+	        	deleteRecord = tabPanel.getGridTab().isDeleteRecord();
+	        }
+	        toolbar.enableDelete(!changed && deleteRecord && !tabPanel.getGridTab().isSortTab() && !processed);
 	        //
 	        if (readOnly && adTabbox.getSelectedGridTab().isAlwaysUpdateField())
 	        {
@@ -1776,6 +1781,10 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     	if (sortColumn != null)
     	{
     		sortColumn.setSortDirection("natural");
+    	}
+    	if (gridTab.isSortTab()) { // refresh is not refreshing sort tabs
+    		IADTabpanel tabPanel = adTabbox.getSelectedTabpanel();
+    		tabPanel.query(false, 0, 0);
     	}
     }
 

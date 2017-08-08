@@ -271,7 +271,7 @@ public class MMovementLineMA extends X_M_MovementLineMA
 			Timestamp dateMPolicy = getDateMaterialPolicy();
 			if(dateMPolicy == null && getM_AttributeSetInstance_ID()>0)
 			{
-				dateMPolicy = getM_AttributeSetInstance().getCreated();
+				dateMPolicy = MStorageOnHand.getDateMaterialPolicy(line.getM_Product_ID(), getM_AttributeSetInstance_ID(), get_TrxName());
 			}
 			
 			if(dateMPolicy == null)

@@ -365,10 +365,17 @@ public interface I_M_AttributeSet
 	
 	/** Column name M_AttributeSet_Type */
     public static final String COLUMNNAME_M_AttributeSet_Type = "M_AttributeSet_Type";
+	  /** Column name IsAutoGenerateLot */
+	public static final String COLUMNNAME_IsAutoGenerateLot = "IsAutoGenerateLot";
 
 	/** Set M_AttributeSet_Type	  */
 	public void setM_AttributeSet_Type (String M_AttributeSet_Type);
+	/** Set Auto Generate Lot  */
+	public void setIsAutoGenerateLot (boolean IsAutoGenerateLot);
 
 	/** Get M_AttributeSet_Type	  */
 	public String getM_AttributeSet_Type();
+	/** Get Auto Generate Lot	  */
+	public boolean isAutoGenerateLot();
+	
 }

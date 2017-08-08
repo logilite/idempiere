@@ -1263,7 +1263,12 @@ public class MCostDetail extends X_M_CostDetail
 				}
 				else if (addition)
 				{
-					cost.add(amt, qty);
+					MProductionLine productionLine = getM_ProductionLine_ID() > 0 ? new MProductionLine(getCtx(), getM_ProductionLine_ID(), get_TrxName()) : null;
+					if (productionLine != null && productionLine.getProductionReversalId() > 0)
+						cost.setCurrentQty(cost.getCurrentQty().add(qty));						
+					else
+						cost.add(amt, qty);
+
 					//	Initial
 					if (cost.getCurrentCostPrice().signum() == 0
 						&& cost.getCurrentCostPriceLL().signum() == 0
@@ -1292,6 +1297,11 @@ public class MCostDetail extends X_M_CostDetail
 			{
 				//Should not happen
 				if (log.isLoggable(Level.FINER)) log.finer("QtyAdjust - ?none? - " + cost);
+			} 
+			else if (ce.isStandardCosting() && isVendorRMA)
+			{
+				cost.add(amt, qty);
+
 			}
 			else
 				log.warning("QtyAdjust - " + ce + " - " + cost);

@@ -133,7 +133,7 @@ public class MInOut extends X_M_InOut implements DocAction
 			}
 			//	Create Line
 			if (retValue.get_ID() == 0)	//	not saved yet
-				retValue.save(trxName);
+				retValue.saveEx(trxName);
 			//	Create a line until qty is reached
 			for (int ll = 0; ll < storages.length; ll++)
 			{
@@ -149,11 +149,11 @@ public class MInOut extends X_M_InOut implements DocAction
 						.multiply(oLines[i].getQtyEntered())
 						.divide(oLines[i].getQtyOrdered(), 12, BigDecimal.ROUND_HALF_UP));
 				line.setC_Project_ID(oLines[i].getC_Project_ID());
-				line.save(trxName);
+				line.saveEx(trxName);
 				//	Delivered everything ?
 				qty = qty.subtract(lineQty);
 			//	storage[ll].changeQtyOnHand(lineQty, !order.isSOTrx());	// Credit Memo not considered
-			//	storage[ll].save(get_TrxName());
+			//	storage[ll].saveEx(get_TrxName());
 				if (qty.signum() == 0)
 					break;
 			}
@@ -1664,20 +1664,10 @@ public class MInOut extends X_M_InOut implements DocAction
 				if (mtrx == null)
 				{
 					Timestamp dateMPolicy= null;
-					MStorageOnHand[] storages = null;
-					if (sLine.getMovementQty().compareTo(Env.ZERO) > 0) {
-						// Find Date Material Policy bases on ASI
-						storages = MStorageOnHand.getWarehouse(getCtx(), 0,
-								sLine.getM_Product_ID(), sLine.getM_AttributeSetInstance_ID(), null,
-								MClient.MMPOLICY_FiFo.equals(product.getMMPolicy()), false,
-								sLine.getM_Locator_ID(), get_TrxName());
-					} else {
-						//Case of reversal
-						storages = MStorageOnHand.getWarehouse(getCtx(), 0,
-								sLine.getM_Product_ID(), sLine.getM_AttributeSetInstance_ID(), null,
-								MClient.MMPOLICY_FiFo.equals(product.getMMPolicy()), false,
-								sLine.getM_Locator_ID(), get_TrxName());
-					}
+					MStorageOnHand[] storages = MStorageOnHand.getWarehouse(getCtx(), 0,
+							sLine.getM_Product_ID(), sLine.getM_AttributeSetInstance_ID(), null,
+							MClient.MMPOLICY_FiFo.equals(product.getMMPolicy()), false,
+							sLine.getM_Locator_ID(), get_TrxName());
 					for (MStorageOnHand storage : storages) {
 						if (storage.getQtyOnHand().compareTo(sLine.getMovementQty()) >= 0) {
 							dateMPolicy = storage.getDateMaterialPolicy();
@@ -1688,10 +1678,7 @@ public class MInOut extends X_M_InOut implements DocAction
 					if (dateMPolicy == null && storages.length > 0)
 						dateMPolicy = storages[0].getDateMaterialPolicy();
 
-					if (dateMPolicy==null && sLine.getM_AttributeSetInstance_ID()!=0) {
-						I_M_AttributeSetInstance asi = sLine.getM_AttributeSetInstance();
-						dateMPolicy = asi.getCreated();
-					} else if(dateMPolicy==null)
+					if(dateMPolicy==null)
 						dateMPolicy = getMovementDate();
 					
 					//	Fallback: Update Storage - see also VMatch.createMatchRecord
@@ -2131,9 +2118,9 @@ public class MInOut extends X_M_InOut implements DocAction
 						MInOutLineMA shipmentMAS[] = MInOutLineMA.getNonReturned(getCtx(), rmaLine.getM_InOutLine_ID(), get_TrxName());
 						
 						for(MInOutLineMA sMA : shipmentMAS){
-							BigDecimal lineMAQty = qtyToReturn;
-							if(lineMAQty.compareTo(Env.ZERO)>0){
-								lineMAQty = Env.ZERO;
+							BigDecimal lineMAQty = sMA.getMovementQty();
+							if(lineMAQty.compareTo(qtyToReturn)>0){
+								lineMAQty = qtyToReturn;
 							}
 							
 							MInOutLineMA ma = MInOutLineMA.addOrCreate(line, sMA.getM_AttributeSetInstance_ID(), lineMAQty, sMA.getDateMaterialPolicy(),true); 
