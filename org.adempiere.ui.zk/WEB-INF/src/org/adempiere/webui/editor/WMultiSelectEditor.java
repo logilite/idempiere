@@ -20,7 +20,9 @@ import org.adempiere.webui.event.ContextMenuListener;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.compiere.model.GridField;
 import org.compiere.model.Lookup;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
+import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.compiere.util.ValueNamePair;
 import org.zkoss.zk.ui.event.Event;
@@ -33,9 +35,9 @@ import org.zkoss.zul.Checkbox;
  * Multiple Selection items from the List ( IDEMPIERE-3413 )
  * 
  * @author Logilite Technologies
- * @since June 28, 2017
+ * @since Aug 07, 2017
  */
-public class WMultiSelectListEditor extends WEditor implements EventListener<Event>, ContextMenuListener
+public class WMultiSelectEditor extends WEditor implements EventListener<Event>, ContextMenuListener
 {
 
 	private static final String[]	LISTENER_EVENTS	= { Events.ON_CLICK, Events.ON_OK };
@@ -43,7 +45,7 @@ public class WMultiSelectListEditor extends WEditor implements EventListener<Eve
 	private Lookup					lookup;
 	private Object					oldValue;
 
-	public WMultiSelectListEditor(GridField gridField)
+	public WMultiSelectEditor(GridField gridField)
 	{
 		super(new MultiSelectBox(), gridField);
 
@@ -89,13 +91,27 @@ public class WMultiSelectListEditor extends WEditor implements EventListener<Eve
 			OpenEvent oe = (OpenEvent) event;
 			if (!oe.isOpen())
 			{
-				String[] nValue = (String[]) getValue();
-				if (!Arrays.equals(getSortedSelectedItems(false), nValue))
+				if (DisplayType.MultiSelectTable == lookup.getDisplayType())
 				{
-					ValueChangeEvent changeValue = new ValueChangeEvent(this, getColumnName(), oldValue, nValue);
-					super.fireValueChange(changeValue);
-					oldValue = nValue;
-					setCompTextboxValue(getPrintableValue(nValue));
+					Integer[] nValue = (Integer[]) getValue();
+					if (!Arrays.equals(getSortedSelectedItems(false), nValue))
+					{
+						ValueChangeEvent changeValue = new ValueChangeEvent(this, getColumnName(), oldValue, nValue);
+						super.fireValueChange(changeValue);
+						oldValue = nValue;
+						setComponentTextValue(getPrintableValue(nValue));
+					}
+				}
+				else
+				{
+					String[] nValue = (String[]) getValue();
+					if (!Arrays.equals(getSortedSelectedItems(false), nValue))
+					{
+						ValueChangeEvent changeValue = new ValueChangeEvent(this, getColumnName(), oldValue, nValue);
+						super.fireValueChange(changeValue);
+						oldValue = nValue;
+						setComponentTextValue(getPrintableValue(nValue));
+					}
 				}
 			}
 		}
@@ -116,7 +132,11 @@ public class WMultiSelectListEditor extends WEditor implements EventListener<Eve
 	@Override
 	public void setValue(Object newValue)
 	{
-		if (newValue == null || (newValue instanceof String[] && ((String[]) newValue).length == 0))
+		if (newValue == null
+				|| (DisplayType.MultiSelectTable == lookup.getDisplayType() && newValue instanceof Integer[]
+						&& ((Integer[]) newValue).length == 0)
+				|| (DisplayType.MultiSelectList == lookup.getDisplayType() && newValue instanceof String[]
+						&& ((String[]) newValue).length == 0))
 		{
 			for (Checkbox cbx : getComponent().getCheckboxList())
 			{
@@ -124,39 +144,68 @@ public class WMultiSelectListEditor extends WEditor implements EventListener<Eve
 					cbx.setChecked(false);
 			}
 			oldValue = null;
-			setCompTextboxValue(Msg.getMsg(Env.getCtx(), "PleaseSelect"));
+			setComponentTextValue(Msg.getMsg(Env.getCtx(), "PleaseSelect"));
 
 			return;
 		}
 
-		String values[] = (String[]) newValue;
-		if (Arrays.equals(getSortedSelectedItems(false), values))
+		if (DisplayType.MultiSelectTable == lookup.getDisplayType())
 		{
+			Integer values[] = (Integer[]) newValue;
+			if (Arrays.equals(getSortedSelectedItems(false), values))
+				return;
 			oldValue = values;
-			return;
+		}
+		else
+		{
+			String values[] = (String[]) newValue;
+			if (Arrays.equals(getSortedSelectedItems(false), values))
+				return;
+			oldValue = values;
 		}
 
-		oldValue = values;
-		setCompTextboxValue(getPrintableValue(values));
+		setComponentTextValue(getPrintableValue(oldValue));
 	} // setValue
 
-	private String getPrintableValue(String[] values)
+	public String getPrintableValue(Object values)
 	{
-		String txtBoxValue = "";
+		StringBuffer sb = new StringBuffer();
+
+		if (values == null)
+			return Msg.getMsg(Env.getCtx(), "PleaseSelect");
+
 		for (Checkbox cbx : getComponent().getCheckboxList())
 		{
-			for (String intval : values)
+			String val = cbx.getAttribute(MultiSelectBox.ATTRIBUTE_MULTI_SELECT).toString();
+			if (DisplayType.MultiSelectTable == lookup.getDisplayType())
 			{
-				if (intval.equals(cbx.getAttribute(MultiSelectBox.ATTRIBUTE_MULTI_SELECT).toString()))
+				for (Integer value : (Integer[]) values)
 				{
-					cbx.setChecked(true);
-					txtBoxValue += cbx.getLabel() + "; ";
-					break;
+					if (value.compareTo(new Integer(val)) == 0)
+					{
+						cbx.setChecked(true);
+						sb.append(cbx.getLabel()).append("; ");
+						break;
+					}
+					cbx.setChecked(false);
 				}
-				cbx.setChecked(false);
+			}
+			else
+			{
+				for (String value : (String[]) values)
+				{
+					if (value.equals(val))
+					{
+						cbx.setChecked(true);
+						sb.append(cbx.getLabel()).append("; ");
+						break;
+					}
+					cbx.setChecked(false);
+				}
 			}
 		}
-		return txtBoxValue;
+
+		return sb.toString();
 	} // getPrintableValue
 
 	@Override
@@ -184,39 +233,62 @@ public class WMultiSelectListEditor extends WEditor implements EventListener<Eve
 	 *            list
 	 * @return return the sorted array items
 	 */
-	private String[] getSortedSelectedItems(boolean isNewValue)
+	private Object[] getSortedSelectedItems(boolean isNewValue)
 	{
-		List<String> items = new ArrayList<String>();
+		Object obj[] = null;
+		List<String> itemsStr = new ArrayList<String>();
+		List<Integer> itemsInt = new ArrayList<Integer>();
 		if (isNewValue)
 		{
 			for (Checkbox cbx : getComponent().getCheckboxList())
-				if (cbx.isChecked())
-					items.add(cbx.getAttribute(MultiSelectBox.ATTRIBUTE_MULTI_SELECT).toString());
-		}
-		else
-		{
-			if (oldValue != null && oldValue instanceof String[])
 			{
-				String values[] = (String[]) oldValue;
-				for (String value : values)
+				if (cbx.isChecked())
 				{
-					items.add(value);
+					String val = cbx.getAttribute(MultiSelectBox.ATTRIBUTE_MULTI_SELECT).toString();
+					if (DisplayType.MultiSelectTable == lookup.getDisplayType())
+						itemsInt.add(new Integer(val));
+					else
+						itemsStr.add(val);
 				}
 			}
 		}
+		else if (oldValue != null)
+		{
+			if (DisplayType.MultiSelectTable == lookup.getDisplayType() && oldValue instanceof Integer[])
+			{
+				Integer values[] = (Integer[]) oldValue;
+				for (Integer value : values)
+					itemsInt.add(value);
+			}
+			else
+			{
+				String values[] = (String[]) oldValue;
+				for (String value : values)
+					itemsStr.add(value);
+			}
+		}
 
-		Collections.sort(items);
-		return items.toArray(new String[items.size()]);
+		if (itemsInt != null && itemsInt.size() > 0)
+		{
+			Collections.sort(itemsInt);
+			obj = itemsInt.toArray(new Integer[itemsInt.size()]);
+		}
+		else if (itemsStr != null && itemsStr.size() > 0)
+		{
+			Collections.sort(itemsStr);
+			obj = itemsStr.toArray(new String[itemsStr.size()]);
+		}
+		return obj;
 	} // getSortedSelectedItems
 
 	/**
-	 * Re/Generate selection list items
+	 * Re-Generate selection list items
 	 */
 	private void refreshList()
 	{
 		if (lookup != null)
 		{
-			setCompTextboxValue(Msg.getMsg(Env.getCtx(), "PleaseSelect"));
+			setComponentTextValue(Msg.getMsg(Env.getCtx(), "PleaseSelect"));
 
 			// Clear the component
 			for (Checkbox cbx : getComponent().getCheckboxList())
@@ -228,15 +300,22 @@ public class WMultiSelectListEditor extends WEditor implements EventListener<Eve
 			// fill the component
 			for (int i = 0; i < lookup.getSize(); i++)
 			{
-				Object obj = lookup.getElementAt(i);
-				if (obj instanceof ValueNamePair)
+				Checkbox cbx = null;
+				Object pair = lookup.getElementAt(i);
+				if (pair instanceof KeyNamePair)
 				{
-					ValueNamePair vnp = (ValueNamePair) obj;
-					Checkbox cbx = new Checkbox(vnp.getName());
-					cbx.setAttribute(MultiSelectBox.ATTRIBUTE_MULTI_SELECT, vnp.getValue());
-					getComponent().getCheckboxList().add(cbx);
-					getComponent().getVBox().appendChild(cbx);
+					KeyNamePair knp = (KeyNamePair) pair;
+					cbx = new Checkbox(knp.getName());
+					cbx.setAttribute(MultiSelectBox.ATTRIBUTE_MULTI_SELECT, knp.getKey());
 				}
+				else if (pair instanceof ValueNamePair)
+				{
+					ValueNamePair vnp = (ValueNamePair) pair;
+					cbx = new Checkbox(vnp.getName());
+					cbx.setAttribute(MultiSelectBox.ATTRIBUTE_MULTI_SELECT, vnp.getValue());
+				}
+				getComponent().getCheckboxList().add(cbx);
+				getComponent().getVBox().appendChild(cbx);
 			}
 		}
 	} // refreshList
@@ -247,8 +326,8 @@ public class WMultiSelectListEditor extends WEditor implements EventListener<Eve
 
 	}
 
-	private void setCompTextboxValue(String textValue)
+	private void setComponentTextValue(String textValue)
 	{
 		getComponent().getTextbox().setValue(textValue.trim());
-	}
+	} // setComponentTextValue
 }
