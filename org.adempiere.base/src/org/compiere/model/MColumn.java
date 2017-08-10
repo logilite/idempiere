@@ -862,7 +862,7 @@ public class MColumn extends X_AD_Column
 		if (!column.isKey() && !column.getColumnName().equals(PO.getUUIDColumnName(table.getTableName())) && !column.isVirtualColumn())
 		{
 			int refid = column.getAD_Reference_ID();
-			if (refid != DisplayType.List && refid != DisplayType.Payment)
+			if (refid != DisplayType.List && refid != DisplayType.Payment && refid != DisplayType.MultiSelectList && refid != DisplayType.MultiSelectTable)
 			{
 				String referenceTableName = column.getReferenceTableName();
 				if (referenceTableName != null)

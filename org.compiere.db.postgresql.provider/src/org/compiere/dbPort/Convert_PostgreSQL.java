@@ -179,8 +179,9 @@ public class Convert_PostgreSQL extends Convert_SQL92 {
 		// Convert datatypes from CAST(.. as datatypes):
 		retValue = convertCast(retValue);
 		
-		// Replace contains expression for array data types
-		retValue = retValue.replaceAll(PG_ARRAY_CONTAINS_ALIAS_EXP, PG_ARRAY_CONTAINS_EXP);
+		// Replace HAVE/IN expression for array data types
+		retValue = retValue.replaceAll(PG_ARRAY_HAVE_ALIAS_EXP, PG_ARRAY_HAVE_EXP);
+		retValue = retValue.replaceAll(PG_ARRAY_IN_ALIAS_EXP, PG_ARRAY_IN_EXP);
 
 		return retValue;
 	} // convertComplexStatement
