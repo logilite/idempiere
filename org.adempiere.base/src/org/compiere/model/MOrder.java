@@ -958,7 +958,8 @@ public class MOrder extends X_C_Order implements DocAction
 		return valid;
 	}	//	validatePaySchedule
 
-	
+	private volatile static boolean recursiveCall = false;
+
 	/**************************************************************************
 	 * 	Before Save
 	 *	@param newRecord new
@@ -1127,6 +1128,19 @@ public class MOrder extends X_C_Order implements DocAction
 			}
 		}
 
+		if (! recursiveCall && (newRecord || is_ValueChanged(COLUMNNAME_C_PaymentTerm_ID))) {
+			recursiveCall = true;
+			try {
+				MPaymentTerm pt = new MPaymentTerm (getCtx(), getC_PaymentTerm_ID(), get_TrxName());
+				boolean valid = pt.applyOrder(this);
+				setIsPayScheduleValid(valid);
+			} catch (Exception e) {
+				throw e;
+			} finally {
+				recursiveCall = false;
+			}
+		}
+		
 		return true;
 	}	//	beforeSave
 	
