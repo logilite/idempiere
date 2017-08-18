@@ -27,7 +27,6 @@ import org.compiere.model.MCostDetail;
 import org.compiere.model.MMovement;
 import org.compiere.model.MMovementLine;
 import org.compiere.model.MMovementLineMA;
-import org.compiere.model.MProduct;
 import org.compiere.model.ProductCost;
 import org.compiere.util.Env;
 
@@ -45,7 +44,6 @@ import org.compiere.util.Env;
 public class Doc_Movement extends Doc
 {
 	protected int				m_Reversal_ID = 0;
-	@SuppressWarnings("unused")
 	protected String			m_DocStatus = "";
 
 	/**
@@ -96,8 +94,13 @@ public class Doc_Movement extends Doc
 
 				HashMap<String, DocLine> map = new HashMap<String, DocLine>();
 
+//				int iq = 0;
+				
 				for (MMovementLineMA lineMA : lineMAs)
 				{
+					int iq = lineMA.get_ID();
+					System.out.println(iq);
+					
 					if(lineMA.getMovementQty().signum()==0)
 						continue;
 					String key = lineMA.getM_AttributeSetInstance_ID() + "_" + lineMA.getM_AttributeSetInstanceTo_ID();
@@ -122,6 +125,7 @@ public class Doc_Movement extends Doc
 						docLine.setQty(lineQty.add(lineMA.getMovementQty()), false);
 					}
 				}
+				
 				list.addAll(map.values());
 			}
 			else
@@ -180,42 +184,10 @@ public class Doc_Movement extends Doc
 			
 			if (!isReversal(line))
 			{
-				MProduct product = (MProduct) line.getProduct();
-				String costingLevel = product.getCostingLevel(as);
-				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel) )
-				{
-					if (line.getM_AttributeSetInstance_ID() == 0 ) 
-					{
-						MMovementLine mLine = (MMovementLine) line.getPO();
-						MMovementLineMA mas[] = MMovementLineMA.get(getCtx(), mLine.get_ID(), getTrxName());
-						if (mas != null && mas.length > 0 )
-						{
-							costs  = BigDecimal.ZERO;
-							for (int j = 0; j < mas.length; j++)
-							{
-								MMovementLineMA ma = mas[j];
-								BigDecimal QtyMA = ma.getMovementQty();
-								ProductCost pc = line.getProductCost();
-								pc.setQty(QtyMA);
-								pc.setM_M_AttributeSetInstance_ID(ma.getM_AttributeSetInstance_ID());
-								BigDecimal maCosts = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_MovementLine_ID=? AND IsSOTrx='N'");
-							
-								costs = costs.add(maCosts);
-							}						
-						}
-					} 
-					else 
-					{
-						costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_MovementLine_ID=? AND IsSOTrx='N'");
-					}
-				}
-				else
-				{
-					// MZ Goodwill
-					// if Inventory Move CostDetail exist then get Cost from Cost Detail
-					costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_MovementLine_ID=? AND IsSOTrx='N'");
-					// end MZ
-				}
+				// MZ Goodwill
+				// if Inventory Move CostDetail exist then get Cost from Cost Detail
+				costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_MovementLine_ID=? AND IsSOTrx='N'");
+				// end MZ
 			}
 			else
 			{
