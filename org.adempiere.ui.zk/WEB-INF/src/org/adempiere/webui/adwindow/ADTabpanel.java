@@ -1753,18 +1753,6 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
 			if (formContainer.getSouth().isVisible() && formContainer.getSouth().isOpen()) {
 				String height = formContainer.getSouth().getHeight();
 				if (! Util.isEmpty(height)) {
-	@Override
-	public boolean isEnableCustomizeButton()
-	{
-		return isGridView();
-	}
-
-	@Override
-	public boolean isEnableProcessButton()
-	{
-		return getToolbarButtons().size() > 0 && !gridTab.isNew();
-	}
-
 		    		int windowId = getGridTab().getAD_Window_ID();
 		    		int adTabId = getGridTab().getAD_Tab_ID();
 		    		if (windowId > 0 && adTabId > 0) {
@@ -1789,6 +1777,18 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
 			}
 		}
 		super.onPageDetached(page);
+	}
+	
+	@Override
+	public boolean isEnableCustomizeButton()
+	{
+		return isGridView();
+	}
+
+	@Override
+	public boolean isEnableProcessButton()
+	{
+		return getToolbarButtons().size() > 0 && !gridTab.isNew();
 	}
 
 }
