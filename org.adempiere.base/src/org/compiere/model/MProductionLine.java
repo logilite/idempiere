@@ -413,7 +413,7 @@ public class MProductionLine extends X_M_ProductionLine {
 	public MProductionLineMA[] getLineMAs() {
 		ArrayList<MProductionLineMA> list = new ArrayList<MProductionLineMA>();
 		
-		String sql = "SELECT pl.M_ProductionLine_ID, pl,M_AttributeSetInstance_ID , pl.MovementQty, pl.DateMaterialPolicy "
+		String sql = "SELECT pl.M_ProductionLine_ID, pl.M_AttributeSetInstance_ID , pl.MovementQty, pl.DateMaterialPolicy "
 			+ "FROM M_ProductionLineMA pl "
 			+ "WHERE pl.M_ProductionLine_ID = ?";
 		
