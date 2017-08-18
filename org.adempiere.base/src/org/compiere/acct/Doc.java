@@ -43,9 +43,11 @@ import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MMatchInv;
+import org.compiere.model.MMatchInvHdr;
 import org.compiere.model.MMatchPO;
 import org.compiere.model.MNote;
 import org.compiere.model.MPeriod;
+import org.compiere.model.MTable;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -289,15 +291,33 @@ public abstract class Doc
 				if (AD_Table_ID == MInvoice.Table_ID)
 				{
 					MMatchInv[] matchInvs = MMatchInv.getInvoice(Env.getCtx(), Record_ID, trx.getTrxName());
+					HashSet<Integer> macthInvHdrs = new HashSet<Integer>();
 					for (MMatchInv matchInv : matchInvs) 
 					{
-						if (!matchInv.isPosted())
+						if(matchInv.getM_MatchInvHdr_ID() == 0)
 						{
-							error = postImmediate(ass, matchInv.get_Table_ID(), matchInv.get_ID(), force, matchInv.get_TrxName());
-							if (!Util.isEmpty(error))
-								break;
+							if (!matchInv.isPosted())
+							{
+								error = postImmediate(ass, matchInv.get_Table_ID(), matchInv.get_ID(), force, matchInv.get_TrxName());
+								if (!Util.isEmpty(error))
+									break;
+							}
 						}
-					}	
+						else 
+						{
+							macthInvHdrs.add(matchInv.getM_MatchInvHdr_ID());
+						}
+					}
+					
+					for(int M_MatchInvHadr_ID : macthInvHdrs)
+					{
+						MMatchInvHdr matchInvHdr = (MMatchInvHdr) MTable.get(Env.getCtx(), MMatchInvHdr.Table_ID)
+								.getPO(M_MatchInvHadr_ID, trx.getTrxName());
+						error = postImmediate(ass, matchInvHdr.get_Table_ID(), matchInvHdr.get_ID(), force,
+								matchInvHdr.get_TrxName());
+						if (!Util.isEmpty(error))
+							break;
+					}
 				}
 			}
 			if (Util.isEmpty(error))

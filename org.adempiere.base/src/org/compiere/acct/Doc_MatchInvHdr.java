@@ -179,8 +179,12 @@ public class Doc_MatchInvHdr extends Doc
 				}
 				else
 				{
+					BigDecimal effMultiplier = multiplier;
+					if (getQty().signum() < 0)
+						effMultiplier = effMultiplier.negate();
+					
 					if (!dr.updateReverseLine(MInOut.Table_ID, // Amt updated
-							m_receiptLine.getM_InOut_ID(), m_receiptLine.getM_InOutLine_ID(), multiplier))
+							m_receiptLine.getM_InOut_ID(), m_receiptLine.getM_InOutLine_ID(), effMultiplier))
 					{
 						p_Error = "Mat.Receipt not posted yet";
 						return null;
@@ -234,10 +238,14 @@ public class Doc_MatchInvHdr extends Doc
 				}
 				else
 				{
-					cr.setQty(line.getQty().negate());
+					cr.setQty(getQty().negate());
+					BigDecimal effMultiplier = multiplier;
+					if (getQty().signum() < 0)
+						effMultiplier = effMultiplier.negate();
+					
 					// Set AmtAcctCr/Dr from Invoice (sets also Project)
 					if (!cr.updateReverseLine(MInvoice.Table_ID, // Amt updated
-							m_invoiceLine.getC_Invoice_ID(), m_invoiceLine.getC_InvoiceLine_ID(), multiplier))
+							m_invoiceLine.getC_Invoice_ID(), m_invoiceLine.getC_InvoiceLine_ID(), effMultiplier))
 					{
 						p_Error = "Invoice not posted yet";
 						return null;
@@ -488,11 +496,13 @@ public class Doc_MatchInvHdr extends Doc
 		}
 
 		String costingMethod = m_pc.getProduct().getCostingMethod(as);
+		MAccount account = m_pc.getAccount(ProductCost.ACCTTYPE_P_Asset, as);
+		if (m_pc.isService())
+			account = m_pc.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
 		if (X_M_Cost.COSTINGMETHOD_AveragePO.equals(costingMethod))
 		{
-			MAccount account = zeroQty ? m_pc.getAccount(ProductCost.ACCTTYPE_P_AverageCostVariance, as) : m_pc
-					.getAccount(ProductCost.ACCTTYPE_P_Asset, as);
-
+			if (zeroQty)
+				account = m_pc.getAccount(ProductCost.ACCTTYPE_P_AverageCostVariance, as);
 			FactLine factLine = fact.createLine(line, m_pc.getAccount(ProductCost.ACCTTYPE_P_IPV, as),
 					as.getC_Currency_ID(), ipv.negate());
 			updateFactLine(factLine, m_invoiceLine);
@@ -502,8 +512,6 @@ public class Doc_MatchInvHdr extends Doc
 		}
 		else if (X_M_Cost.COSTINGMETHOD_AverageInvoice.equals(costingMethod) && !zeroQty)
 		{
-			MAccount account = m_pc.getAccount(ProductCost.ACCTTYPE_P_Asset, as);
-
 			FactLine factLine = fact.createLine(line, m_pc.getAccount(ProductCost.ACCTTYPE_P_IPV, as),
 					as.getC_Currency_ID(), ipv.negate());
 			updateFactLine(factLine, m_invoiceLine);
