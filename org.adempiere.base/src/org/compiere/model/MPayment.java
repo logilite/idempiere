@@ -570,8 +570,6 @@ public class MPayment extends X_C_Payment
 		
 		setIsApproved(approved);
 		
-		trx.setDisplayName(getClass().getName()+"_processOnline");
-
 		final MPaymentTransaction m_mPaymentTransaction = createPaymentTransaction(null);
 		m_mPaymentTransaction.setIsApproved(approved);
 		if (getTrxType().equals(TRXTYPE_Void) || getTrxType().equals(TRXTYPE_CreditPayment))
@@ -622,6 +620,7 @@ public class MPayment extends X_C_Payment
 				public void afterClose(Trx trx)
 				{
 					Trx pptTrx = Trx.get(Trx.createTrxName("ppt-"), true);
+					pptTrx.setDisplayName(getClass().getName()+"_processOnline");
 					pptTrx.start();
 
 					try
