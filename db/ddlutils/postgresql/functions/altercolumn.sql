@@ -1,5 +1,6 @@
-create or replace function altercolumn(tablename name, columnname name, datatype name,
-nullclause varchar, defaultclause varchar) returns void as $$
+CREATE OR REPLACE FUNCTION altercolumn(tablename name, columnname name, datatype name, nullclause character varying, defaultclause character varying, usingclause character varying)
+  RETURNS void AS
+$$
 declare
    command text;
    viewtext text[];
@@ -83,6 +84,9 @@ begin
                    end;
 		end if;
 		command := 'alter table ' || lower(tablename) || ' alter column ' || lower(columnname) || ' type ' || lower(datatype);
+		if usingclause is not null then
+		   command := command || ' ' || usingclause;
+		end if;
 		raise notice 'executing -> %', command;
 		execute command;
                 i := array_upper(dropviews, 1);
@@ -126,9 +130,9 @@ $$ language plpgsql;
 
 /*
 create table t_alter_column
-( tablename name, columnname name, datatype name, nullclause varchar(10), defaultclause varchar(200));
+( tablename name, columnname name, datatype name, nullclause varchar(10), defaultclause varchar(200), usingclause  varchar(200));
 
 create rule alter_column_rule as on insert to t_alter_column
 do instead select altercolumn(new.tablename, new.columnname, new.datatype, new.nullclause,
-new.defaultclause);
+new.defaultclause, new.usingclause);
 */
