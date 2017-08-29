@@ -1017,7 +1017,11 @@ public class GridField
 			//	Boolean
 			if (m_vo.displayType == DisplayType.YesNo)
 				return Boolean.valueOf ("Y".equals(value));
-			
+
+			// Multi-Select
+			if (m_vo.displayType == DisplayType.MultiSelectTable || m_vo.displayType == DisplayType.MultiSelectList)
+				return Util.getArrayObjectFromString(m_vo.displayType, value);
+
 			//	Default
 			return value;
 		}
@@ -1062,7 +1066,8 @@ public class GridField
 		} 
 
 		//  cannot be validated
-		if (!isLookup() || m_lookup == null)
+		if (!isLookup() || m_lookup == null || getDisplayType() == DisplayType.MultiSelectTable
+				|| getDisplayType() == DisplayType.MultiSelectList)
 			return true;
 		if (m_lookup.containsKeyNoDirect(m_value)) {
 			String name = m_lookup.get(m_value).getName();

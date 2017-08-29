@@ -9,22 +9,31 @@
 
 package org.adempiere.webui.editor;
 
+import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
+
+import org.adempiere.webui.ValuePreference;
 import org.adempiere.webui.component.MultiSelectBox;
 import org.adempiere.webui.event.ContextMenuEvent;
 import org.adempiere.webui.event.ContextMenuListener;
 import org.adempiere.webui.event.ValueChangeEvent;
+import org.adempiere.webui.window.WFieldRecordInfo;
 import org.compiere.model.GridField;
 import org.compiere.model.Lookup;
+import org.compiere.util.CCache;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -37,10 +46,12 @@ import org.zkoss.zul.Checkbox;
  * @author Logilite Technologies
  * @since Aug 07, 2017
  */
-public class WMultiSelectEditor extends WEditor implements EventListener<Event>, ContextMenuListener
+public class WMultiSelectEditor extends WEditor implements EventListener<Event>, ContextMenuListener, ListDataListener
 {
 
 	private static final String[]	LISTENER_EVENTS	= { Events.ON_CLICK, Events.ON_OK };
+
+	public CCacheListener			tableCacheListener;
 
 	private Lookup					lookup;
 	private Object					oldValue;
@@ -48,7 +59,7 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 	public WMultiSelectEditor(GridField gridField)
 	{
 		super(new MultiSelectBox(), gridField);
-
+		((MultiSelectBox) getComponent()).editor = this;
 		lookup = gridField.getLookup();
 		init();
 	}
@@ -63,11 +74,8 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 
 		if (lookup != null)
 		{
-			lookup.setMandatory(true);
-			lookup.refresh();
 			refreshList();
 		}
-
 		popupMenu = new WEditorPopupMenu(false, true, isShowPreference());
 		addChangeLogMenu(popupMenu);
 	} // init
@@ -91,28 +99,8 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 			OpenEvent oe = (OpenEvent) event;
 			if (!oe.isOpen())
 			{
-				if (DisplayType.MultiSelectTable == lookup.getDisplayType())
-				{
-					Integer[] nValue = (Integer[]) getValue();
-					if (!Arrays.equals(getSortedSelectedItems(false), nValue))
-					{
-						ValueChangeEvent changeValue = new ValueChangeEvent(this, getColumnName(), oldValue, nValue);
-						super.fireValueChange(changeValue);
-						oldValue = nValue;
-						setComponentTextValue(getPrintableValue(nValue));
-					}
-				}
-				else
-				{
-					String[] nValue = (String[]) getValue();
-					if (!Arrays.equals(getSortedSelectedItems(false), nValue))
-					{
-						ValueChangeEvent changeValue = new ValueChangeEvent(this, getColumnName(), oldValue, nValue);
-						super.fireValueChange(changeValue);
-						oldValue = nValue;
-						setComponentTextValue(getPrintableValue(nValue));
-					}
-				}
+				isValueChange(getValue(), true);
+				setComponentTextValue(getPrintableValue(oldValue));
 			}
 		}
 	} // onEvent
@@ -145,27 +133,52 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 			}
 			oldValue = null;
 			setComponentTextValue(Msg.getMsg(Env.getCtx(), "PleaseSelect"));
-
 			return;
 		}
 
+		boolean isValueSame = isValueChange(newValue, false);
+
+		setComponentTextValue(getPrintableValue(oldValue));
+
+		/**
+		 * Fire value change event. For Example, Item X is selected and Deleting
+		 * X item from the referenced table then fires value change event for
+		 * the field that containing window is opened.
+		 */
+		if (isValueSame)
+			isValueChange(getValue(), true);
+
+	} // setValue
+
+	public boolean isValueChange(Object newValue, boolean isFireChangeEvent)
+	{
 		if (DisplayType.MultiSelectTable == lookup.getDisplayType())
 		{
 			Integer values[] = (Integer[]) newValue;
 			if (Arrays.equals(getSortedSelectedItems(false), values))
-				return;
+				return true;
+			if (isFireChangeEvent)
+			{
+				ValueChangeEvent changeValue = new ValueChangeEvent(this, getColumnName(), oldValue, values);
+				super.fireValueChange(changeValue);
+			}
 			oldValue = values;
 		}
 		else
 		{
 			String values[] = (String[]) newValue;
 			if (Arrays.equals(getSortedSelectedItems(false), values))
-				return;
+				return true;
+			if (isFireChangeEvent)
+			{
+				ValueChangeEvent changeValue = new ValueChangeEvent(this, getColumnName(), oldValue, values);
+				super.fireValueChange(changeValue);
+			}
 			oldValue = values;
 		}
 
-		setComponentTextValue(getPrintableValue(oldValue));
-	} // setValue
+		return false;
+	} // isValueChange
 
 	public String getPrintableValue(Object values)
 	{
@@ -288,6 +301,9 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 	{
 		if (lookup != null)
 		{
+			lookup.setMandatory(true);
+			lookup.refresh();
+
 			setComponentTextValue(Msg.getMsg(Env.getCtx(), "PleaseSelect"));
 
 			// Clear the component
@@ -323,11 +339,142 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 	@Override
 	public void onMenu(ContextMenuEvent evt)
 	{
-
+		if (WEditorPopupMenu.REQUERY_EVENT.equals(evt.getContextEvent()))
+		{
+			actionRefresh();
+		}
+		else if (WEditorPopupMenu.PREFERENCE_EVENT.equals(evt.getContextEvent()))
+		{
+			if (isShowPreference())
+				ValuePreference.start(getComponent(), this.getGridField(), Util.convertArrayToStringForDB(getValue()),
+						null);
+		}
+		else if (WEditorPopupMenu.CHANGE_LOG_EVENT.equals(evt.getContextEvent()))
+		{
+			WFieldRecordInfo.start(gridField);
+		}
 	}
 
 	private void setComponentTextValue(String textValue)
 	{
 		getComponent().getTextbox().setValue(textValue.trim());
 	} // setComponentTextValue
+
+	public void actionRefresh()
+	{
+		refreshList();
+
+		if (oldValue != null)
+			setValue(oldValue);
+	} // actionRefresh
+
+	public void createCacheListener()
+	{
+		if (lookup != null)
+		{
+			String columnName = lookup.getColumnName();
+			int dotIndex = columnName.indexOf(".");
+			if (dotIndex > 0)
+			{
+				String tableName = columnName.substring(0, dotIndex);
+				tableCacheListener = new CCacheListener(tableName, this);
+			}
+		}
+	} // createCacheListener
+
+	@Override
+	public void contentsChanged(ListDataEvent e)
+	{
+		actionRefresh();
+	}
+
+	@Override
+	public void intervalAdded(ListDataEvent e)
+	{
+	}
+
+	@Override
+	public void intervalRemoved(ListDataEvent e)
+	{
+	}
+
+	@Override
+	public void dynamicDisplay()
+	{
+		if ((lookup != null) && (!lookup.isValidated() || !lookup.isLoaded()
+				|| (isReadWrite() && lookup.getSize() != getComponent().getCheckboxList().size())))
+		{
+			this.actionRefresh();
+		}
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if ("FieldValue".equals(evt.getPropertyName()))
+		{
+			setValue(evt.getNewValue());
+		}
+	}
+
+	private static class CCacheListener extends CCache<String, Object>
+	{
+
+		/**
+		 * 
+		 */
+		private static final long	serialVersionUID	= 5317205647791598504L;
+
+		private WMultiSelectEditor	editor;
+
+		protected CCacheListener(String tableName, WMultiSelectEditor editor)
+		{
+			super(tableName, tableName, 0, true);
+			this.editor = editor;
+		}
+
+		@Override
+		public int reset()
+		{
+			if (editor.getComponent().getDesktop() != null && editor.isReadWrite())
+			{
+				refreshLookupList();
+			}
+			return 0;
+		} // reset
+
+		private void refreshLookupList()
+		{
+			Executions.schedule(editor.getComponent().getDesktop(), new EventListener<Event>() {
+
+				@Override
+				public void onEvent(Event event)
+				{
+					try
+					{
+						if (editor.isReadWrite())
+						{
+							editor.actionRefresh();
+						}
+					}
+					catch (Exception e)
+					{
+					}
+				}
+
+			}, new Event("onResetLookupList"));
+
+		} // refreshLookupList
+
+		@Override
+		public void newRecord(int record_ID)
+		{
+			if (editor.getComponent().getDesktop() != null && editor.isReadWrite())
+			{
+				refreshLookupList();
+			}
+		} // newRecord
+
+	} // CCacheListener class
+
 }

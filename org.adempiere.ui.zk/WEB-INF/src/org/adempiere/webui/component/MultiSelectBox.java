@@ -12,7 +12,12 @@ package org.adempiere.webui.component;
 import java.util.ArrayList;
 
 import org.adempiere.webui.LayoutUtils;
+import org.adempiere.webui.editor.WMultiSelectEditor;
+import org.compiere.util.CacheMgt;
+import org.zkoss.zk.ui.Desktop;
+import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.WrongValueException;
+import org.zkoss.zk.ui.util.DesktopCleanup;
 import org.zkoss.zul.Checkbox;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Popup;
@@ -34,6 +39,9 @@ public class MultiSelectBox extends Div
 	private static final long	serialVersionUID		= -632973531627268781L;
 
 	public static final String	ATTRIBUTE_MULTI_SELECT	= "ATTRIBUTE_MULTI_SELECT";
+
+	public WMultiSelectEditor	editor;
+	protected DesktopCleanup	listener				= null;
 
 	private Textbox				textbox;
 	private Popup				popup;
@@ -129,4 +137,42 @@ public class MultiSelectBox extends Div
 		}
 	} // setEditable
 
+	@Override
+	public void onPageAttached(Page newpage, Page oldpage)
+	{
+		super.onPageAttached(newpage, oldpage);
+		if (editor.tableCacheListener == null)
+		{
+			editor.createCacheListener();
+			if (listener == null)
+			{
+				listener = new DesktopCleanup() {
+					@Override
+					public void cleanup(Desktop desktop) throws Exception
+					{
+						MultiSelectBox.this.cleanup();
+					}
+				};
+				newpage.getDesktop().addListener(listener);
+			}
+		}
+	} // onPageAttached
+
+	@Override
+	public void onPageDetached(Page page)
+	{
+		super.onPageDetached(page);
+		if (listener != null && page.getDesktop() != null)
+			page.getDesktop().removeListener(listener);
+		cleanup();
+	} // onPageDetached
+
+	protected void cleanup()
+	{
+		if (editor.tableCacheListener != null)
+		{
+			CacheMgt.get().unregister(editor.tableCacheListener);
+			editor.tableCacheListener = null;
+		}
+	} // cleanup
 }

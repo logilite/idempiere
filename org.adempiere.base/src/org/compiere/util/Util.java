@@ -817,14 +817,15 @@ public class Util
 	} // getArrayObjectFromString
 
 	/**
-	 * Get the list of name from the Key values ( IDEMPIERE-3413 )
+	 * Get the list of printable name from the Keys ( IDEMPIERE-3413 )
 	 * 
 	 * @param value - comma separated keys in string
 	 * @param dt - DisplayType
 	 * @param lookup - reference Lookup
-	 * @return String of the Names.
+	 * @return String of the Printable Names. It may contains Key only when
+	 *         referenced lookup item is removed.
 	 */
-	public static String getNameListFromKeyValues(String value, int dt, MLookup lookup)
+	public static String getPrintableNameFromMultiKey(String value, int dt, MLookup lookup)
 	{
 		StringBuilder sb = new StringBuilder();
 		if (value != null)
@@ -837,9 +838,11 @@ public class Util
 				NamePair pp = lookup.get(keys[i]);
 				if (pp != null)
 					sb.append(pp.getName()).append("; ");
+				else
+					sb.append(keys[i]).append("; ");
 			}
 		}
 		return sb.toString();
-	} // getNameListFromKeyValues
+	} // getPrintableNameFromMultiKey
 
 }   //  Util
