@@ -478,6 +478,7 @@ public class Match
 		{
 			matchInvHdr.setDocStatus(MMatchInvHdr.DOCSTATUS_Completed);
 			matchInvHdr.saveEx();
+			matchInvHdr = null;
 		}
 	}
 	
