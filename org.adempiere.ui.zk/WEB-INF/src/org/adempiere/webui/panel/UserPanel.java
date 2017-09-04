@@ -31,6 +31,7 @@ import org.adempiere.webui.window.WPreference;
 import org.compiere.model.MClient;
 import org.compiere.model.MOrg;
 import org.compiere.model.MRole;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -101,15 +102,21 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
     	logout.addEventListener(Events.ON_CLICK, this);
     	
     	feedbackMenu = new Menupopup();
-    	Menuitem mi = new Menuitem(Msg.getMsg(Env.getCtx(), "RequestNew"));
-    	mi.setId("CreateRequest");
-    	feedbackMenu.appendChild(mi);
-    	mi.addEventListener(Events.ON_CLICK, this);
-    	mi = new Menuitem(Msg.getMsg(Env.getCtx(), "EMailSupport"));
-    	mi.setId("EmailSupport");
-    	mi.addEventListener(Events.ON_CLICK, this);
-    	feedbackMenu.appendChild(mi);
-    	
+    	Menuitem mi = null;
+		if (MSysConfig.getBooleanValue("FEEDBACK_SHOW_REQUEST_NEW", true, Env.getAD_Client_ID(Env.getCtx())))
+		{
+			mi = new Menuitem(Msg.getMsg(Env.getCtx(), "RequestNew"));
+			mi.setId("CreateRequest");
+			feedbackMenu.appendChild(mi);
+			mi.addEventListener(Events.ON_CLICK, this);
+		}
+		if (MSysConfig.getBooleanValue("FEEDBACK_SHOW_EMAIL_SUPPORT", true, Env.getAD_Client_ID(Env.getCtx())))
+		{
+			mi = new Menuitem(Msg.getMsg(Env.getCtx(), "EMailSupport"));
+			mi.setId("EmailSupport");
+			mi.addEventListener(Events.ON_CLICK, this);
+			feedbackMenu.appendChild(mi);
+		}
     	SessionManager.getSessionApplication().getKeylistener().addEventListener(Events.ON_CTRL_KEY, this);
     	component.addEventListener("onEmailSupport", this);
 
