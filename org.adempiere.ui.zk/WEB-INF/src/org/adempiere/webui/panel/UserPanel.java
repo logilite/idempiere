@@ -238,11 +238,11 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
 			KeyEvent ke = (KeyEvent) event;
 			if (ke.getKeyCode() == 0x55)
 			{
-				if (ke.isAltKey())
+				if (ke.isAltKey() && MSysConfig.getBooleanValue("FEEDBACK_SHOW_EMAIL_SUPPORT", true, Env.getAD_Client_ID(Env.getCtx())))
 				{
 					FeedbackManager.emailSupport(false);
 				}
-				else if (ke.isCtrlKey())
+				else if (ke.isCtrlKey() && MSysConfig.getBooleanValue("FEEDBACK_SHOW_REQUEST_NEW", true, Env.getAD_Client_ID(Env.getCtx())))
 				{
 					FeedbackManager.createNewRequest();
 				}
