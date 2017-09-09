@@ -7,14 +7,14 @@
 	border-style: solid;
 	border-collapse: collapse;
 	width: 90%;
-	background-color: #EBF1EF;	
+/* 	background-color: #EBF1EF;	 */
 	border-width: 0px;
 }
 .rp-table th {
 	text-align:	center;
 	padding: 2px;
 	font-weight: bold;
-	background-color: #C6D1CD;
+	background-color: #c5c5c5;
 	border-width: 1px;
 	border-color: black;
 	border-width: 2px 1px 2px 0px;
@@ -38,12 +38,12 @@
 }
 
 .rp-number {
-	background-color: #EBF1EF;
+/* 	background-color: #EBF1EF; */
 	text-align: right !important;
 	padding: 3px;
 }
 .rp-text, .rp-date {
-	background-color: #EBF1EF;
+/* 	background-color: #EBF1EF; */
 	text-align: left;
 	padding: 3px;
 }
@@ -66,5 +66,9 @@
 
 .rp-functionrow td:last-child {
 	border-width: 0px 0px 0px 0px;
+}
+
+.rp-odd {
+    background-color: #f3f3f3;
 }
 
