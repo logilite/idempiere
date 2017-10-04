@@ -14,7 +14,7 @@
 	text-align:	center;
 	padding: 2px;
 	font-weight: bold;
-	background-color: #c5c5c5;
+	background-color: #DAF3FF;
 	border-width: 1px;
 	border-color: black;
 	border-width: 2px 1px 2px 0px;
@@ -59,7 +59,7 @@
 }
 
 .rp-functionrow td {
-	background-color: #C6D1CD;
+	background-color: #DAF3FF;
 	font-weight: bold;
 	border-width: 0px 1px 0px 0px;
 }
@@ -69,6 +69,6 @@
 }
 
 .rp-odd {
-    background-color: #f3f3f3;
+    background-color: #EFFAFF;
 }
 

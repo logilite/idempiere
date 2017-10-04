@@ -630,8 +630,8 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			{
 				MPrintFont pFont = (MPrintFont) m_printFormat.getAD_PrintFont();
 				Font font = pFont.getFont();
-				if (!Util.isEmpty(getCSSFontFamily(font.getFontName())))
-					headerCSS = "font-family: " + getCSSFontFamily(font.getFontName()) + ";";
+				if (!Util.isEmpty(getCSSFontFamily(font.getName())))
+					headerCSS = "font-family: " + getCSSFontFamily(font.getName()) + ";";
 				if (font.isBold())
 					headerCSS = headerCSS + "font-weight: bold;";
 				if (font.isItalic())
@@ -760,6 +760,24 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 						{
 							td td = new td();
 							tr.addElement(td);
+							String style = "";
+							if (item.isFixedWidth() && item.getMaxWidth() > 0)
+							{
+								// convert to pixels assuming 96dpi
+								int pxs = (item.getMaxWidth() * 96);
+								pxs = pxs / 72;
+								style = "min-width:" + pxs + ";max-width:" + pxs + "; overflow: hidden";
+							}
+
+							if (item.isHeightOneLine())
+							{
+								if (style.length() > 0)
+									style += ";";
+								style += "white-space: nowrap;";
+							}
+
+							td.setStyle(style);
+
 							Object obj = m_printData.getNode(new Integer(item.getAD_Column_ID()));
 							if (obj == null){
 								td.addElement("&nbsp;");
