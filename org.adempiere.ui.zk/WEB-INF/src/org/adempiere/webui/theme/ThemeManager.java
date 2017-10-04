@@ -16,9 +16,11 @@ package org.adempiere.webui.theme;
 import java.io.IOException;
 
 import org.adempiere.webui.apps.AEnv;
+import org.apache.commons.codec.binary.Base64;
 import org.compiere.model.MClientInfo;
 import org.compiere.model.MImage;
 import org.compiere.model.MSysConfig;
+import org.compiere.util.CCache;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
 import org.zkoss.image.AImage;
@@ -30,10 +32,15 @@ import org.zkoss.image.AImage;
  */
 public final class ThemeManager {
 
+	private static CCache<Integer, String> logoCache = new CCache<Integer, String>(null, "LogoImages", 5, false);
+
 	/**
 	 * @return url for large logo
 	 */
 	public static String getLargeLogo() {
+		String logo = getLogo(true);
+		if (!Util.isEmpty(logo))
+			return logo;
 		String theme = getTheme();
 		String def = ITheme.THEME_PATH_PREFIX+theme+ITheme.LOGIN_LOGO_IMAGE;
 		return MSysConfig.getValue(MSysConfig.ZK_LOGO_LARGE, def);
@@ -43,12 +50,41 @@ public final class ThemeManager {
 	 * @return url for small logo
 	 */
 	public static String getSmallLogo() {
+		String logo = getLogo(false);
+		if (!Util.isEmpty(logo))
+			return logo;
 		String theme = getTheme();
 		String def = ITheme.THEME_PATH_PREFIX+theme+ITheme.HEADER_LOGO_IMAGE;
 		String url = MSysConfig.getValue(MSysConfig.ZK_LOGO_SMALL, null);
 		if (url == null)
 			url = MSysConfig.getValue(MSysConfig.WEBUI_LOGOURL, def);
 		return url;
+	}
+
+	/**
+	 * @param isLargeLogo
+	 * @return logo data if exists
+	 */
+	public static String getLogo(boolean isLargeLogo)
+	{
+		int logoID = 0;
+		MClientInfo clientInfo = MClientInfo.get(Env.getCtx(), Env.getAD_Client_ID(Env.getCtx()));
+		if (isLargeLogo)
+			logoID = clientInfo.getLogoWeb_ID();
+		else
+			logoID = clientInfo.getLogoWebHeader_ID();
+
+		if (logoCache.containsKey(logoID))
+			return logoCache.get(logoID);
+
+		if (logoID > 0)
+		{
+			MImage image = MImage.get(Env.getCtx(), logoID);
+			String value = "data:image;base64," + new String(Base64.encodeBase64(image.getData()));
+			logoCache.put(logoID, value);
+			return value;
+		}
+		return null;
 	}
 
 	/**
@@ -83,8 +119,9 @@ public final class ThemeManager {
 	/**
 	 * @return title text for the browser window
 	 */
-	public static String getBrowserTitle() {		
-		return AEnv.getDesktop().getWebApp().getAppName();
+	public static String getBrowserTitle() {
+		return MSysConfig.getValue(MSysConfig.ZK_BROWSER_TITLE, AEnv.getDesktop().getWebApp().getAppName(),
+				Env.getAD_Client_ID(Env.getCtx()));
 	}
 
 	/**

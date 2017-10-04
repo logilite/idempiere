@@ -64,7 +64,7 @@ public class HeaderPanel extends Panel implements EventListener<Event>
     	image = (Image) getFellow("logo");
     	image.setSrc(ThemeManager.getSmallLogo());
     	image.addEventListener(Events.ON_CLICK, this);
-    	image.setStyle("cursor: pointer;");
+    	image.setStyle("cursor: pointer; max-height: 38px; min-width: 100px;");
 
     	createPopupMenu();
     	
