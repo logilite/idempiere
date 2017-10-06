@@ -2143,7 +2143,8 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	}
 	
 	public void cleanTempObj (){
-		m_layout = null;
+		// Fix bug of DropDown list in Report Toolbar to select another Print Format is not evaluated.
+		// m_layout = null;
 	}
 	
 	/**
