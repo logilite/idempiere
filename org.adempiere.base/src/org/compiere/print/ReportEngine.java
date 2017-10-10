@@ -844,9 +844,14 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 										a href = new a("javascript:void(0)");									
 										href.setID(pde.getColumnName() + "_" + row + "_a");									
 										td.addElement(href);
-										href.addElement(Util.maskHTML(value));
-										if (cssPrefix != null)
-											href.setClass(cssPrefix + "-href");
+										if (item.getColumnName().equals("Record_ID")) {
+											if (cssPrefix != null)
+												href.setClass(cssPrefix + "-image");
+										} else {
+											href.addElement(Util.maskHTML(value));
+											if (cssPrefix != null)
+												href.setClass(cssPrefix + "-href");
+										}
 										extension.extendIDColumn(row, td, href, pde);
 									} else {
 										td.addElement(Util.maskHTML(value));

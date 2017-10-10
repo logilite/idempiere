@@ -14,7 +14,7 @@
 	text-align:	center;
 	padding: 2px;
 	font-weight: bold;
-	background-color: #DAF3FF;
+	background-color: #D9E5EF;
 	border-width: 1px;
 	border-color: black;
 	border-width: 2px 1px 2px 0px;
@@ -60,7 +60,7 @@
 }
 
 .rp-functionrow td {
-	background-color: #DAF3FF;
+	background-color: #D9E5EF;
 	font-weight: bold;
 	border-width: 0px 1px 0px 0px;
 }
@@ -73,3 +73,8 @@
     background-color: #EFFAFF;
 }
 
+.rp-image {
+	background: url(/webui/theme/default/images/Find24.png) no-repeat center;
+	height: 24px;
+	display: block;
+}
