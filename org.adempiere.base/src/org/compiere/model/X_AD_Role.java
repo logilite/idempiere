@@ -32,7 +32,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20151030L;
+	private static final long serialVersionUID = 20171017L;
 
     /** Standard Constructor */
     public X_AD_Role (Properties ctx, int AD_Role_ID, String trxName)
@@ -69,6 +69,8 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 			setIsCanExport (true);
 // Y
 			setIsCanReport (true);
+// Y
+			setIsCanSaveColumnWidthEveryone (true);
 // Y
 			setIsChangeLog (false);
 // N
@@ -663,6 +665,30 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isCanReport () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsCanReport);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Can Save Column Width to Everyone.
+		@param IsCanSaveColumnWidthEveryone 
+		On Grid view save default customized column width/order for everyone
+	  */
+	public void setIsCanSaveColumnWidthEveryone (boolean IsCanSaveColumnWidthEveryone)
+	{
+		set_Value (COLUMNNAME_IsCanSaveColumnWidthEveryone, Boolean.valueOf(IsCanSaveColumnWidthEveryone));
+	}
+
+	/** Get Can Save Column Width to Everyone.
+		@return On Grid view save default customized column width/order for everyone
+	  */
+	public boolean isCanSaveColumnWidthEveryone () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsCanSaveColumnWidthEveryone);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 
