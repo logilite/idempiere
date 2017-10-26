@@ -32,7 +32,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20171017L;
+	private static final long serialVersionUID = 20171026L;
 
     /** Standard Constructor */
     public X_AD_Role (Properties ctx, int AD_Role_ID, String trxName)
@@ -70,8 +70,8 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 // Y
 			setIsCanReport (true);
 // Y
-			setIsCanSaveColumnWidthEveryone (true);
-// Y
+			setIsCanSaveGridCustPrefEveryone (false);
+// N 
 			setIsChangeLog (false);
 // N
 			setIsDiscountAllowedOnTotal (false);
@@ -674,21 +674,21 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 		return false;
 	}
 
-	/** Set Can Save Column Width to Everyone.
-		@param IsCanSaveColumnWidthEveryone 
-		On Grid view save default customized column width/order for everyone
+	/** Set Can Save Grid Customize Preference for Everyone.
+		@param IsCanSaveGridCustPrefEveryone 
+		On Grid view, Allow to save column width and order preference for everyone
 	  */
-	public void setIsCanSaveColumnWidthEveryone (boolean IsCanSaveColumnWidthEveryone)
+	public void setIsCanSaveGridCustPrefEveryone (boolean IsCanSaveGridCustPrefEveryone)
 	{
-		set_Value (COLUMNNAME_IsCanSaveColumnWidthEveryone, Boolean.valueOf(IsCanSaveColumnWidthEveryone));
+		set_Value (COLUMNNAME_IsCanSaveGridCustPrefEveryone, Boolean.valueOf(IsCanSaveGridCustPrefEveryone));
 	}
 
-	/** Get Can Save Column Width to Everyone.
-		@return On Grid view save default customized column width/order for everyone
+	/** Get Can Save Grid Customize Preference for Everyone.
+		@return On Grid view, Allow to save column width and order preference for everyone
 	  */
-	public boolean isCanSaveColumnWidthEveryone () 
+	public boolean isCanSaveGridCustPrefEveryone () 
 	{
-		Object oo = get_Value(COLUMNNAME_IsCanSaveColumnWidthEveryone);
+		Object oo = get_Value(COLUMNNAME_IsCanSaveGridCustPrefEveryone);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 

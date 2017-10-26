@@ -288,7 +288,7 @@ public class CustomizeGridViewPanel extends Panel
 				else if (event.getTarget().equals(confirmPanel.getButton(ConfirmPanel.A_RESET)))
 				{
 					MRole currRole = MRole.get(Env.getCtx(), Env.getAD_Role_ID(Env.getCtx()));
-					if (currRole.isCanSaveColumnWidthEveryone())
+					if (currRole.isCanSaveGridCustPrefEveryone())
 					{
 						FDialog.ask(m_WindowNo, null, "GRIDVIEW_RESET_SUPERUSER_CUSTOM_PREF", new Callback<Boolean>() {
 
@@ -304,6 +304,12 @@ public class CustomizeGridViewPanel extends Panel
 									tabCust.deleteEx(true);
 							}
 						});
+					}
+					else
+					{
+						MTabCustomization tabCust = MTabCustomization.get(Env.getCtx(), m_AD_User_ID, m_AD_Tab_ID, null);
+						if (tabCust != null && tabCust.getAD_Tab_Customization_ID() > 0)
+							tabCust.deleteEx(true);
 					}
 				}
 			}
@@ -570,7 +576,7 @@ public class CustomizeGridViewPanel extends Panel
 			gridview = lstGridMode.getSelectedItem().toString();
 		final String dView = gridview;
 		MRole currRole = MRole.get(Env.getCtx(), Env.getAD_Role_ID(Env.getCtx()));
-		if (currRole.isCanSaveColumnWidthEveryone())
+		if (currRole.isCanSaveGridCustPrefEveryone())
 		{
 			FDialog.ask(m_WindowNo, this, "GRIDVIEW_APPLY_CUSTOM_PREF_EVERYONE", new Callback<Boolean>() {
 
@@ -597,6 +603,23 @@ public class CustomizeGridViewPanel extends Panel
 
 				}
 			});
+		}
+		else
+		{
+			boolean ok = MTabCustomization.saveData(Env.getCtx(), m_AD_Tab_ID, m_AD_User_ID, custom.toString(), dView, null);
+			if (ok)
+			{
+				m_saved = true;
+				getParent().detach();
+				if (gridPanel != null)
+				{
+					Events.postEvent("onCustomizeGrid", gridPanel, null);
+				}
+			}
+			else
+			{
+				FDialog.error(m_WindowNo, null, "SaveError", custom.toString());
+			}
 		}
 	}	//	saveData
 

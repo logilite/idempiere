@@ -374,18 +374,18 @@ public interface I_AD_Role
 	  */
 	public boolean isCanReport();
 
-    /** Column name IsCanSaveColumnWidthEveryone */
-    public static final String COLUMNNAME_IsCanSaveColumnWidthEveryone = "IsCanSaveColumnWidthEveryone";
+    /** Column name IsCanSaveGridCustPrefEveryone */
+    public static final String COLUMNNAME_IsCanSaveGridCustPrefEveryone = "IsCanSaveGridCustPrefEveryone";
 
-	/** Set Can Save Column Width to Everyone.
-	  * On Grid view save default customized column width/order for everyone
+	/** Set Can Save Grid Customize Preference for Everyone.
+	  * On Grid view, Allow to save column width and order preference for everyone
 	  */
-	public void setIsCanSaveColumnWidthEveryone (boolean IsCanSaveColumnWidthEveryone);
+	public void setIsCanSaveGridCustPrefEveryone (boolean IsCanSaveGridCustPrefEveryone);
 
-	/** Get Can Save Column Width to Everyone.
-	  * On Grid view save default customized column width/order for everyone
+	/** Get Can Save Grid Customize Preference for Everyone.
+	  * On Grid view, Allow to save column width and order preference for everyone
 	  */
-	public boolean isCanSaveColumnWidthEveryone();
+	public boolean isCanSaveGridCustPrefEveryone();
 
     /** Column name IsChangeLog */
     public static final String COLUMNNAME_IsChangeLog = "IsChangeLog";
