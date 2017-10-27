@@ -287,29 +287,23 @@ public class CustomizeGridViewPanel extends Panel
 				}
 				else if (event.getTarget().equals(confirmPanel.getButton(ConfirmPanel.A_RESET)))
 				{
+					MTabCustomization tabCust = MTabCustomization.get(Env.getCtx(), m_AD_User_ID, m_AD_Tab_ID, null);
+					if (tabCust != null && tabCust.getAD_Tab_Customization_ID() > 0)
+						tabCust.deleteEx(true);
+
 					MRole currRole = MRole.get(Env.getCtx(), Env.getAD_Role_ID(Env.getCtx()));
 					if (currRole.isCanSaveGridCustPrefEveryone())
 					{
 						FDialog.ask(m_WindowNo, null, "GRIDVIEW_RESET_SUPERUSER_CUSTOM_PREF", new Callback<Boolean>() {
 
 							@Override
-							public void onCallback(Boolean userPreference)
+							public void onCallback(Boolean result)
 							{
-								MTabCustomization tabCust = MTabCustomization.get(Env.getCtx(), m_AD_User_ID, m_AD_Tab_ID, null);
-								if (tabCust != null && tabCust.getAD_Tab_Customization_ID() > 0)
-									tabCust.deleteEx(true);
-
-								tabCust = MTabCustomization.get(Env.getCtx(), MTabCustomization.SUPERUSER, m_AD_Tab_ID, null);
-								if (userPreference && tabCust != null && tabCust.getAD_Tab_Customization_ID() > 0)
+								MTabCustomization tabCust = MTabCustomization.get(Env.getCtx(), MTabCustomization.SUPERUSER, m_AD_Tab_ID, null);
+								if (result && tabCust != null && tabCust.getAD_Tab_Customization_ID() > 0)
 									tabCust.deleteEx(true);
 							}
 						});
-					}
-					else
-					{
-						MTabCustomization tabCust = MTabCustomization.get(Env.getCtx(), m_AD_User_ID, m_AD_Tab_ID, null);
-						if (tabCust != null && tabCust.getAD_Tab_Customization_ID() > 0)
-							tabCust.deleteEx(true);
 					}
 				}
 			}
@@ -575,51 +569,45 @@ public class CustomizeGridViewPanel extends Panel
 		if (lstGridMode.getSelectedItem() != null && lstGridMode.getSelectedItem().toString().length() > 0)
 			gridview = lstGridMode.getSelectedItem().toString();
 		final String dView = gridview;
-		MRole currRole = MRole.get(Env.getCtx(), Env.getAD_Role_ID(Env.getCtx()));
-		if (currRole.isCanSaveGridCustPrefEveryone())
+		
+		boolean ok = MTabCustomization.saveData(Env.getCtx(), m_AD_Tab_ID, m_AD_User_ID, custom.toString(), dView, null);
+		if (!ok)
 		{
+			FDialog.error(m_WindowNo, null, "SaveError", custom.toString());
+			return;
+		}
+
+		MRole currRole = MRole.get(Env.getCtx(), Env.getAD_Role_ID(Env.getCtx()));
+		if (currRole.isCanSaveGridCustPrefEveryone() && MTabCustomization.SUPERUSER != m_AD_User_ID)
+		{
+			// Save default preference for every user.
 			FDialog.ask(m_WindowNo, this, "GRIDVIEW_APPLY_CUSTOM_PREF_EVERYONE", new Callback<Boolean>() {
 
 				@Override
-				public void onCallback(Boolean userPreference)
+				public void onCallback(Boolean result)
 				{
-					boolean ok = MTabCustomization.saveData(Env.getCtx(), m_AD_Tab_ID, m_AD_User_ID, custom.toString(), dView, null);
-					if (ok && userPreference && m_AD_User_ID != MTabCustomization.SUPERUSER)
-						ok = MTabCustomization.saveData(Env.getCtx(), m_AD_Tab_ID, MTabCustomization.SUPERUSER, custom.toString(), dView, null);
-					//
-					if (ok)
+					if (result)
 					{
-						m_saved = true;
-						getParent().detach();
-						if (gridPanel != null)
+						boolean isSave = MTabCustomization.saveData(Env.getCtx(), m_AD_Tab_ID, MTabCustomization.SUPERUSER, custom.toString(), dView, null);
+						if (!isSave)
 						{
-							Events.postEvent("onCustomizeGrid", gridPanel, null);
+							FDialog.error(m_WindowNo, null, "SaveError", custom.toString());
+							return;
 						}
 					}
-					else
-					{
-						FDialog.error(m_WindowNo, null, "SaveError", custom.toString());
-					}
-
+					m_saved = true;
+					getParent().detach();
+					if (gridPanel != null)
+						Events.postEvent("onCustomizeGrid", gridPanel, null);
 				}
 			});
 		}
 		else
 		{
-			boolean ok = MTabCustomization.saveData(Env.getCtx(), m_AD_Tab_ID, m_AD_User_ID, custom.toString(), dView, null);
-			if (ok)
-			{
-				m_saved = true;
-				getParent().detach();
-				if (gridPanel != null)
-				{
-					Events.postEvent("onCustomizeGrid", gridPanel, null);
-				}
-			}
-			else
-			{
-				FDialog.error(m_WindowNo, null, "SaveError", custom.toString());
-			}
+			m_saved = true;
+			getParent().detach();
+			if (gridPanel != null)
+				Events.postEvent("onCustomizeGrid", gridPanel, null);
 		}
 	}	//	saveData
 
