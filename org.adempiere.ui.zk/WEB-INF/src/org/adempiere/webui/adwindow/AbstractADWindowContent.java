@@ -47,6 +47,7 @@ import org.adempiere.webui.apps.HelpWindow;
 import org.adempiere.webui.apps.ProcessModalDialog;
 import org.adempiere.webui.apps.form.WCreateFromFactory;
 import org.adempiere.webui.apps.form.WCreateFromWindow;
+import org.adempiere.webui.apps.form.WQuickForm;
 import org.adempiere.webui.component.Mask;
 import org.adempiere.webui.component.ProcessInfoDialog;
 import org.adempiere.webui.component.Window;
@@ -1074,6 +1075,25 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     	
     }
 
+	public void onQuickForm()
+	{
+		logger.log(Level.FINE, "Invoke Quick Form");
+		int table_ID = adTabbox.getSelectedGridTab().getAD_Table_ID();
+		if (table_ID == -1)
+			return;
+		WQuickForm form = new WQuickForm(this, m_onlyCurrentRows, m_onlyCurrentDays);
+		form.setTitle(this.getADTab().getSelectedGridTab().getName());
+		form.setVisible(true);
+		form.setSizable(true);
+		form.setMaximizable(true);
+		form.setMaximized(true);
+		form.setPosition("center");
+		ZkCssHelper.appendStyle(form, "min-width: 500px; min-height: 400px; width: 900px; height:550px;");
+
+		AEnv.showWindow(form);
+
+	}
+    
     /**
      * @param event
      * @see EventListener#onEvent(Event)
@@ -1328,7 +1348,21 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		toolbar.enablePrint(adTabbox.getSelectedGridTab().isPrinted() && !adTabbox.getSelectedGridTab().isNew());
 		
 		toolbar.enableCustomize(adTabbox.getSelectedTabpanel().isEnableCustomizeButton());
-
+		 boolean hasQuickForm = false;
+	        if (adTabbox.getSelectedGridTab() != null) {
+	        	GridField[] fields = adTabbox.getSelectedGridTab().getFields();
+	        	for (GridField field : fields) {
+	        		if (field.isQuickForm()) {
+	        			hasQuickForm = true;
+	        			break;
+	        		}
+	        	}
+	        }
+	    	if (hasQuickForm && !adTabbox.getSelectedGridTab().isReadOnly())
+	    		toolbar.enableQuickForm(true);
+			else
+				toolbar.enableQuickForm(false);
+		
 	}
 
 	/**
@@ -2118,6 +2152,9 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 				} else {
 					focusToActivePanel();
 				}
+				
+				if(adTabbox.getSelectedGridTab().isQuickForm())
+					onRefresh(true, true);
 			}
 		});
     }
@@ -3016,6 +3053,9 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 				showBusyMask(dialog);
 				LayoutUtils.openOverlappedWindow(getComponent(), dialog, "middle_center");
 				dialog.focus();
+			}
+			if (adTabbox.getSelectedGridTab().isQuickForm()) {
+				adTabbox.getSelectedGridTab().dataRefreshAll(false, false);
 			}
 			else
 			{

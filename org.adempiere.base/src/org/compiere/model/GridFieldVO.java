@@ -200,6 +200,8 @@ public class GridFieldVO implements Serializable
 					vo.AD_Reference_Value_ID = rs.getInt(i);
 				else if (columnName.equalsIgnoreCase("ValidationCode"))
 					vo.ValidationCode = rs.getString(i);
+				else if (columnName.equalsIgnoreCase("IsQuickForm"))
+					vo.IsQuickForm = "Y".equals(rs.getString (i));
 				else if (columnName.equalsIgnoreCase("ColumnSQL")) {
 					vo.ColumnSQL = rs.getString(i);
 					if (vo.ColumnSQL != null && vo.ColumnSQL.contains("@")) {
@@ -671,6 +673,9 @@ public class GridFieldVO implements Serializable
 	
 	public int AD_FieldStyle_ID = 0;
 	
+	/**	Displayed in Quick Entry Form		*/
+	public boolean      IsQuickForm = false;
+	
 	/**
 	 *  Set Context including contained elements
 	 *  @param newCtx new context
@@ -802,6 +807,7 @@ public class GridFieldVO implements Serializable
 		clone.IsDefaultFocus = IsDefaultFocus;
 		clone.AD_FieldStyle_ID = AD_FieldStyle_ID;
 		clone.AD_LabelStyle_ID = AD_LabelStyle_ID;
+		clone.IsQuickForm = IsQuickForm;
 		
 		//	Lookup
 		clone.ValidationCode = ValidationCode;
