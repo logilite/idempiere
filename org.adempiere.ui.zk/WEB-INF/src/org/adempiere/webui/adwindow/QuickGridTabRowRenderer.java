@@ -1,6 +1,16 @@
 /******************************************************************************
- * Logilite * 
+ * Copyright (C) 2016 Logilite Technologies LLP								  *
+ * This program is free software; you can redistribute it and/or modify it    *
+ * under the terms version 2 of the GNU General Public License as published   *
+ * by the Free Software Foundation. This program is distributed in the hope   *
+ * that it will be useful, but WITHOUT ANY WARRANTY; without even the implied *
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.           *
+ * See the GNU General Public License for more details.                       *
+ * You should have received a copy of the GNU General Public License along    *
+ * with this program; if not, write to the Free Software Foundation, Inc.,    *
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.                     *
  *****************************************************************************/
+
 package org.adempiere.webui.adwindow;
 
 import java.util.ArrayList;
@@ -31,7 +41,6 @@ import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WebEditorFactory;
 import org.adempiere.webui.event.ActionEvent;
 import org.adempiere.webui.event.ActionListener;
-import org.adempiere.webui.panel.HelpController;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.GridTabDataBinder;
 import org.compiere.model.GridField;
@@ -40,7 +49,6 @@ import org.compiere.model.MSysConfig;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
-import org.compiere.util.Util;
 import org.zkoss.zk.au.out.AuScript;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
@@ -378,13 +386,6 @@ public class QuickGridTabRowRenderer
 		cell.appendChild(selection);
 		row.appendChild(cell);
 		
-		cell = new Cell();
-		cell.addEventListener(Events.ON_CLICK, this);
-		cell.setStyle("border: none;");
-		cell.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "EditRecord")));
-		
-		row.appendChild(cell);
-		
 		Boolean isActive = null;
 		int colIndex = -1;
 		for (int i = 0; i < columnCount; i++) {
@@ -392,23 +393,6 @@ public class QuickGridTabRowRenderer
 				continue;
 			}
 
-			WEditor editor = getEditorCell(gridPanelFields[i], currentValues[i]);
-			if (editor != null) {
-				editors.put(gridPanelFields[i], editor);
-				if (editor instanceof WButtonEditor) {
-					((WButtonEditor) editor).addActionListener(buttonListener);
-				}
-				
-				editor.getComponent().setWidgetOverride("fieldHeader", HelpController.escapeJavascriptContent(gridPanelFields[i].getHeader()));
-    			editor.getComponent().setWidgetOverride("fieldDescription", HelpController.escapeJavascriptContent(gridPanelFields[i].getDescription()));
-    			editor.getComponent().setWidgetOverride("fieldHelp", HelpController.escapeJavascriptContent(gridPanelFields[i].getHelp()));
-    			editor.getComponent().setWidgetListener("onFocus", "zWatch.fire('onFieldTooltip', this, null, this.fieldHeader(), this.fieldDescription(), this.fieldHelp());");
-
-				// Default Focus
-				if (defaultFocusField == null && gridPanelFields[i].isDefaultFocus())
-					defaultFocusField = editor;
-			}
-			
 			if ("IsActive".equals(gridPanelFields[i].getColumnName())) {
 				isActive = Boolean.FALSE;
 				if (currentValues[i] != null) {
@@ -491,7 +475,7 @@ public class QuickGridTabRowRenderer
 			LayoutUtils.addSclass("grid-inactive-row", row);
 		}
 		if (currentCell == null || currentCell.getUuid() == null) {
-			setCurrentCell(gridTab.getCurrentRow(), 2, KeyEvent.RIGHT);
+			setCurrentCell(gridTab.getCurrentRow(), 1, KeyEvent.RIGHT);
 		}
 	}
 
@@ -535,15 +519,15 @@ public class QuickGridTabRowRenderer
 			currentRowIndex = gridTab.getCurrentRow();
 			currentRow.setStyle(CURRENT_ROW_STYLE);
 		}
+		
+		setCurrentRow(currentRow);
 
 		if (grid.getCell(pgIndex, col) instanceof Cell) {
 			currentCell = (Cell) grid.getCell(pgIndex, col);
 		}
 		if (currentCell != null && code != 0) {
 			setFocusOnCurrentCell();
-		} else if (currentCell == null) {
-			setCurrentCell(row, 1, code);
-		}
+		} 
 	}
 
 	private boolean isEditable(int row, int col) {
@@ -642,9 +626,13 @@ public class QuickGridTabRowRenderer
 			}
 		}
 		currentRow = row;
-		Cell cell = (Cell) currentRow.getChildren().get(1);
-		if (cell != null) {
-			cell.setSclass("row-indicator-selected");
+		if (currentRow.getChildren().size() > 1)
+		{
+			Cell cell = (Cell) currentRow.getChildren().get(1);
+			if (cell != null)
+			{
+				cell.setSclass("row-indicator-selected");
+			}
 		}
 
 		String script = "jq('#" + row.getUuid() + "').addClass('highlight').siblings().removeClass('highlight')";

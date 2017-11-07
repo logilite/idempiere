@@ -12,15 +12,15 @@ ALTER TABLE AD_Field ADD COLUMN IsQuickForm CHAR(1) DEFAULT 'N' CHECK (IsQuickFo
 ;
 
 -- Oct 31, 2017 5:26:16 PM IST
-UPDATE AD_Element SET Description='Display in Quick Form', Help='The field will be displayed in Quick Form for easy encoding.',Updated=TO_TIMESTAMP('2017-10-31 17:26:16','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Element_ID=203142
+UPDATE AD_Element SET Description='Display in Quick Form', Help='The field will be displayed in Quick Form for easy entry.',Updated=TO_TIMESTAMP('2017-10-31 17:26:16','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Element_ID=203142
 ;
 
 -- Oct 31, 2017 5:26:16 PM IST
-UPDATE AD_Column SET ColumnName='IsQuickForm', Name='Quick Form', Description='Display in Quick Form', Help='The field will be displayed in Quick Form for easy encoding.' WHERE AD_Element_ID=203142
+UPDATE AD_Column SET ColumnName='IsQuickForm', Name='Quick Form', Description='Display in Quick Form', Help='The field will be displayed in Quick Form for easy entry.' WHERE AD_Element_ID=203142
 ;
 
 -- Oct 31, 2017 5:28:18 PM IST
-INSERT INTO AD_Field (AD_Field_ID,Name,Description,Help,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLength,SeqNo,SortNo,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,SeqNoGrid,XPosition,ColumnSpan,NumLines,IsQuickEntry,IsDefaultFocus,IsAdvancedField) VALUES (205244,'Quick Form','Display in Quick Form','The field will be displayed in Quick Form for easy encoding.',107,213257,'Y',0,440,0,'N','N','N','N',0,0,'Y',TO_TIMESTAMP('2017-10-31 17:28:17','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2017-10-31 17:28:17','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','ada991db-87ad-45a3-8fd7-b8fefd16e50a','Y',420,1,1,1,'N','N','N')
+INSERT INTO AD_Field (AD_Field_ID,Name,Description,Help,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLength,SeqNo,SortNo,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,SeqNoGrid,XPosition,ColumnSpan,NumLines,IsQuickEntry,IsDefaultFocus,IsAdvancedField) VALUES (205244,'Quick Form','Display in Quick Form','The field will be displayed in Quick Form for easy entry.',107,213257,'Y',0,440,0,'N','N','N','N',0,0,'Y',TO_TIMESTAMP('2017-10-31 17:28:17','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2017-10-31 17:28:17','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','ada991db-87ad-45a3-8fd7-b8fefd16e50a','Y',420,1,1,1,'N','N','N')
 ;
 
 -- Oct 31, 2017 5:29:05 PM IST

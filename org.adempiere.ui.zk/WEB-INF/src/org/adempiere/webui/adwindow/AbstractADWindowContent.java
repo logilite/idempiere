@@ -1075,6 +1075,9 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     	
     }
 
+	/**
+	 * Invoke when quick form is click
+	 */
 	public void onQuickForm()
 	{
 		logger.log(Level.FINE, "Invoke Quick Form");
@@ -1091,9 +1094,8 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		ZkCssHelper.appendStyle(form, "min-width: 500px; min-height: 400px; width: 900px; height:550px;");
 
 		AEnv.showWindow(form);
-
 	}
-    
+
     /**
      * @param event
      * @see EventListener#onEvent(Event)
@@ -1348,21 +1350,9 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		toolbar.enablePrint(adTabbox.getSelectedGridTab().isPrinted() && !adTabbox.getSelectedGridTab().isNew());
 		
 		toolbar.enableCustomize(adTabbox.getSelectedTabpanel().isEnableCustomizeButton());
-		 boolean hasQuickForm = false;
-	        if (adTabbox.getSelectedGridTab() != null) {
-	        	GridField[] fields = adTabbox.getSelectedGridTab().getFields();
-	        	for (GridField field : fields) {
-	        		if (field.isQuickForm()) {
-	        			hasQuickForm = true;
-	        			break;
-	        		}
-	        	}
-	        }
-	    	if (hasQuickForm && !adTabbox.getSelectedGridTab().isReadOnly())
-	    		toolbar.enableQuickForm(true);
-			else
-				toolbar.enableQuickForm(false);
-		
+
+		toolbar.enableQuickForm(adTabbox.getSelectedTabpanel().isEnableQuickFormButton() && !adTabbox.getSelectedGridTab().isReadOnly());
+
 	}
 
 	/**

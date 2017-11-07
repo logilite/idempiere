@@ -201,10 +201,9 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
         btnProcess.setTooltiptext(btnProcess.getTooltiptext()+ "    Alt+O");
         btnProcess.setDisabled(false);
         
-		btnQuickForm = createButton("QuickForm", "QuickForm", "QuickForm");
-		btnQuickForm.setTooltiptext(btnQuickForm.getTooltiptext());
-		btnQuickForm.setDisabled(false);
-
+        btnQuickForm = createButton("QuickForm", "QuickForm", "QuickForm");
+        btnQuickForm.setDisabled(false);
+        
         // Help and Exit should always be enabled
         btnHelp.setDisabled(false);
         btnGridToggle.setDisabled(false);

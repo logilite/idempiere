@@ -244,10 +244,10 @@ public class GridTable extends AbstractTableModel
 	/** Keep track of last sorted column index and sort direction */
 	private int 				m_lastSortColumnIndex = -1;
 	private boolean 			m_lastSortedAscending = true;
-
-	public ArrayList<Integer>				rowChanged				= new ArrayList<Integer>();
-
-	private HashMap<Integer, Object[]>		rowChangedData			= new HashMap<Integer, Object[]>();
+	/** keep track of row updated by QuickForm */
+	public ArrayList<Integer>				m_rowChangedQuickForm		= new ArrayList<Integer>();
+	/** Store updated data from QuickForm */
+	private HashMap<Integer, Object[]>		m_rowChangedDataQuickForm	= new HashMap<Integer, Object[]>();
 
 	/**
 	 *	Set Table Name
@@ -468,20 +468,26 @@ public class GridTable extends AbstractTableModel
 		//
 		m_fields.add(field);
 	}	//	addColumn
-	
+
+	/**
+	 * Save all updated rows
+	 * 
+	 * @param boolean manualCmd
+	 */
 	public char saveDataAll(boolean manualCmd)
 	{
-		for (Integer i : rowChanged)
+		// save updated rows
+		for (Integer i : m_rowChangedQuickForm)
 		{
 			m_rowChanged = i;
-			m_rowData = rowChangedData.get(i);
-			
+			m_rowData = m_rowChangedDataQuickForm.get(i);
+
 			char saveStatus = dataSave(manualCmd);
 			if (saveStatus != SAVE_OK)
 				return saveStatus;
 		}
-		rowChangedData.clear();
-		rowChanged.clear();
+		m_rowChangedDataQuickForm.clear();
+		m_rowChangedQuickForm.clear();
 		return SAVE_OK;
 	}
 
@@ -1309,8 +1315,9 @@ public class GridTable extends AbstractTableModel
 			if (log.isLoggable(Level.FINEST)) log.finest("r=" + row + " c=" + col + " - R/O=" + m_readOnly + ", Rows=" + m_rowCount + " - Ignored");
 			return;
 		}
-		if(!rowChanged.contains(row))
-			rowChanged.add(row);
+		// Add updated row
+		if (!m_rowChangedQuickForm.contains(row))
+			m_rowChangedQuickForm.add(row);
 		dataSave(row, false);
 
 		//	Has anything changed?
@@ -1350,15 +1357,17 @@ public class GridTable extends AbstractTableModel
 			for (int i = 0; i < size; i++)
 				m_rowData[i] = rowData[i];
 		}
-		if(rowChangedData.containsKey(row))
+		
+		// update data in the respected row if present otherwise add new data
+		if (m_rowChangedDataQuickForm.containsKey(row))
 		{
-			rowChangedData.get(row)[col]=oldValue;
+			m_rowChangedDataQuickForm.get(row)[col] = oldValue;
 		}
 		else
 		{
-			Object[] o = new Object[rowData.length];
-			System.arraycopy( rowData, 0, o, 0,rowData.length);
-			rowChangedData.put(row, o);
+			Object[] obj = new Object[rowData.length];
+			System.arraycopy(rowData, 0, obj, 0, rowData.length);
+			m_rowChangedDataQuickForm.put(row, obj);
 		}
 
 		//	save & update
@@ -2728,11 +2737,13 @@ public class GridTable extends AbstractTableModel
 				field.setValue(rowData[i], m_inserting);
 			}
 		}
+
+		// For new record
 		Object[] obj = new Object[rowData.length];
 		System.arraycopy(rowData, 0, obj, 0, rowData.length);
-		rowChangedData.put(m_newRow, obj);
-		if (!rowChanged.contains(m_newRow))
-			rowChanged.add(m_newRow);
+		m_rowChangedDataQuickForm.put(m_newRow, obj);
+		if (!m_rowChangedQuickForm.contains(m_newRow))
+			m_rowChangedQuickForm.add(m_newRow);
 		m_rowChanged = -1;  //  only changed in setValueAt
 
 		//	inform
@@ -2879,13 +2890,18 @@ public class GridTable extends AbstractTableModel
 					ptr.index--;	//	move up
 			}
 		}
-		if(rowChanged.contains(row))
+
+		// Delete row in m_rowChangedQuickForm
+		if (m_rowChangedQuickForm.contains(row))
 		{
-			rowChangedData.remove(row);
+			m_rowChangedDataQuickForm.remove(row);
 			int i = 0;
-			for (int changed : rowChanged) {
-				if (changed == row) {
-					rowChanged.remove(i);
+			for (int changed : m_rowChangedQuickForm)
+			{
+				if (changed == row)
+				{
+					// it passes the element index instead of the key
+					m_rowChangedQuickForm.remove(i);
 					break;
 				}
 				i++;
@@ -2907,6 +2923,7 @@ public class GridTable extends AbstractTableModel
 	 */
 	public void dataIgnore()
 	{
+		boolean m_insertingQF = m_inserting;
 		if (!m_inserting && !m_changed && m_rowChanged < 0)
 		{
 			if (log.isLoggable(Level.FINE))
@@ -2937,7 +2954,7 @@ public class GridTable extends AbstractTableModel
 			m_changed = false;
 			m_rowData = null;
 			m_rowChanged = -1;
-//			m_inserting = false;
+			m_inserting = false;
 			//	inform
 			fireTableRowsDeleted(m_newRow, m_newRow);
 		}
@@ -2951,23 +2968,26 @@ public class GridTable extends AbstractTableModel
 			m_changed = false;
 			m_rowData = null;
 			m_rowChanged = -1;
-//			m_inserting = false;
+			m_inserting = false;
 			//	inform
 		//	fireTableRowsUpdated(m_rowChanged, m_rowChanged); >> messes up display?? (clearSelection)
 		}
-		if(m_fields.get(0).getGridTab().isQuickForm()){
-		if(!m_inserting && rowChanged.size()> 0)
+
+		if (m_fields.get(0).getGridTab().isQuickForm())
 		{
-			for(int i=0 ; i<rowChanged.size() ; i++)
+			// update buffer
+			if (!m_insertingQF && m_rowChangedQuickForm.size() > 0)
 			{
-				setDataAtRow(rowChanged.get(i), rowChangedData.get(rowChanged.get(i)));
+				for (int i = 0; i < m_rowChangedQuickForm.size(); i++)
+				{
+					setDataAtRow(m_rowChangedQuickForm.get(i),
+							m_rowChangedDataQuickForm.get(m_rowChangedQuickForm.get(i)));
+				}
 			}
-		}
-		rowChangedData.clear();
-		rowChanged.clear();
+			m_rowChangedDataQuickForm.clear();
+			m_rowChangedQuickForm.clear();
 		}
 		m_newRow = -1;
-		m_inserting = false;
 		fireDataStatusIEvent("Ignored", "");
 	}	//	dataIgnore
 
@@ -3014,9 +3034,8 @@ public class GridTable extends AbstractTableModel
 
 		Object[] rowData = getDataAtRow(row);
 
-		//  ignore
-		if (!m_fields.get(0).getGridTab().isQuickForm())
-			dataIgnore();
+		// ignore
+		dataIgnore();
 
 		//	Create SQL
 		String where = getWhereClause(rowData);
@@ -3056,8 +3075,8 @@ public class GridTable extends AbstractTableModel
 		m_changed = false;
 		m_rowChanged = -1;
 		m_inserting = false;
-		rowChangedData.clear();
-		rowChanged.clear();
+		m_rowChangedDataQuickForm.clear();
+		m_rowChangedQuickForm.clear();
 		fireTableRowsUpdated(row, row);
 		if (fireStatusEvent)
 			fireDataStatusIEvent(DATA_REFRESH_MESSAGE, "");
@@ -3089,8 +3108,7 @@ public class GridTable extends AbstractTableModel
 	{
 		log.info("");
 		m_inserting = false;	//	should not happen
-		if(!m_fields.get(0).getGridTab().isQuickForm())
-			dataIgnore();
+		dataIgnore();
 		String retainedWhere = null;
 		if (rowToRetained >= 0)
 		{
@@ -3116,8 +3134,8 @@ public class GridTable extends AbstractTableModel
 		m_changed = false;
 		m_rowChanged = -1;
 		m_inserting = false;
-		rowChangedData.clear();
-		rowChanged.clear();
+		m_rowChangedDataQuickForm.clear();
+		m_rowChangedQuickForm.clear();
 		if (m_lastSortColumnIndex >= 0)
 		{
 			loadComplete();
@@ -3149,6 +3167,8 @@ public class GridTable extends AbstractTableModel
 		m_changed = false;
 		m_rowChanged = -1;
 		m_inserting = false;
+		m_rowChangedDataQuickForm.clear();
+		m_rowChangedQuickForm.clear();
 		if (m_lastSortColumnIndex >= 0)
 		{
 			loadComplete();
@@ -4098,8 +4118,11 @@ public class GridTable extends AbstractTableModel
 		m_lastSortedAscending = true;
 	}
 	
-	public ArrayList<Integer> getRowChanged()
+	/**
+	 * Index of updated row's from Quick form
+	 */
+	public ArrayList<Integer> getRowChangedQuickForm()
 	{
-		return rowChanged;
+		return m_rowChangedQuickForm;
 	}
 }

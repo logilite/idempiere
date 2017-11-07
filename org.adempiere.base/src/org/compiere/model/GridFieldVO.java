@@ -673,8 +673,8 @@ public class GridFieldVO implements Serializable
 	
 	public int AD_FieldStyle_ID = 0;
 	
-	/**	Displayed in Quick Entry Form		*/
-	public boolean      IsQuickForm = false;
+	/** Allow to show field in Quick Form */
+	public boolean IsQuickForm = false;
 	
 	/**
 	 *  Set Context including contained elements

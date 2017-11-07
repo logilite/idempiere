@@ -1,3 +1,16 @@
+/******************************************************************************
+ * Copyright (C) 2016 Logilite Technologies LLP								  *
+ * This program is free software; you can redistribute it and/or modify it    *
+ * under the terms version 2 of the GNU General Public License as published   *
+ * by the Free Software Foundation. This program is distributed in the hope   *
+ * that it will be useful, but WITHOUT ANY WARRANTY; without even the implied *
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.           *
+ * See the GNU General Public License for more details.                       *
+ * You should have received a copy of the GNU General Public License along    *
+ * with this program; if not, write to the Free Software Foundation, Inc.,    *
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.                     *
+ *****************************************************************************/
+
 package org.adempiere.webui.adwindow;
 
 import java.util.ArrayList;
@@ -199,6 +212,7 @@ public class QuickGridView extends Vbox
 		
 		addEventListener("onSelectRow", this);
 		addEventListener("onCustomizeGrid", this);
+		addEventListener("onPageNavigate", this);
 	}
 
 	public QuickGridView(AbstractADWindowContent abstractADWindowContent, GridTab gridTab)
@@ -504,14 +518,7 @@ public class QuickGridView extends Vbox
 		selectAll.setId("selectAll");
 		selectAll.addEventListener(Events.ON_CHECK, this);
 		columns.appendChild(selection);
-		
-		org.zkoss.zul.Column indicator = new Column();				
-		indicator.setWidth("22px");
-		try {
-			indicator.setSort("none");
-		} catch (Exception e) {}
-		indicator.setStyle("border-left: none");
-		columns.appendChild(indicator);
+
 		listbox.appendChild(columns);
 		columns.setSizable(true);
 		columns.setMenupopup("none");
@@ -731,7 +738,8 @@ public class QuickGridView extends Vbox
 				onSelectedRowChange(0);
 				gridTab.clearSelection();
 				Clients.resize(listbox);
-				renderer.setCurrentCell(0, 2, KeyEvent.LEFT);
+				Event e = new Event("onPageNavigate", this, null); 
+				Events.postEvent(e);
 			}
 		}
 		else if (event.getTarget() == selectAll)
@@ -786,12 +794,13 @@ public class QuickGridView extends Vbox
 
 			if (code == KeyEvent.DOWN || code == KeyEvent.UP || code == KeyEvent.HOME || code == KeyEvent.END)
 			{
-				ArrayList<Integer> rowChangeIndex = gridTab.getTableModel().getRowChanged();
+				ArrayList<Integer> rowChangeIndex = gridTab.getTableModel().getRowChangedQuickForm();
 				int currentRow = row % paging.getPageSize() + (paging.getActivePage() * paging.getPageSize());
 				if (rowChangeIndex.contains(currentRow))
 				{
 					if (!save(code, row, col))
 					{
+						event.stopPropagation();
 						return;
 					}
 				}
@@ -804,7 +813,7 @@ public class QuickGridView extends Vbox
 						|| (row % paging.getPageSize() == 0 && paging.getActivePage() == (paging.getPageCount() - 1)))
 				{
 					createNewLine();
-
+					updateListIndex();
 					if (!(row % paging.getPageSize() == 0))
 					{
 						return;
@@ -859,6 +868,7 @@ public class QuickGridView extends Vbox
 					|| col >= gridTab.getTableModel().getColumnCount())
 			{
 				renderer.setFocusOnCurrentCell();
+				event.stopPropagation();
 				return;
 			}
 
@@ -893,7 +903,7 @@ public class QuickGridView extends Vbox
 
 				if (row != rowChange)
 				{
-					ArrayList<Integer> rows = gridTab.getTableModel().getRowChanged();
+					ArrayList<Integer> rows = gridTab.getTableModel().getRowChangedQuickForm();
 					if (rows.contains(row))
 					{
 						if (!save(KeyEvent.RIGHT, row, col))
@@ -901,6 +911,11 @@ public class QuickGridView extends Vbox
 					}
 				}
 			}
+		}
+		else if (event.getName().equals("onPageNavigate"))
+		{
+			renderer.setCurrentCell(null);
+			renderer.setCurrentCell(0, 1, KeyEvent.RIGHT);
 		}
 		event.stopPropagation();
 	}
@@ -998,6 +1013,7 @@ public class QuickGridView extends Vbox
 				listbox.renderRow(row);
 			} else {
 				renderer.setCurrentRow(row);
+				renderer.setCurrentCell(rowIndex, 1, KeyEvent.RIGHT);
 				//remark: following 3 line cause the previously selected row being render twice
 //				if (old != null && old != row && oldIndex >= 0 && oldIndex != gridTab.getCurrentRow())
 //				{
