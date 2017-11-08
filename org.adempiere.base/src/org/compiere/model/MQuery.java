@@ -430,8 +430,10 @@ public class MQuery implements Serializable
 	/** For IDEMPIERE-377	*/
 	public static final String 	NULL = " IS NULL ";
 	/** For IDEMPIERE-3413 */
-	public static final String	CONTAINS = "CONTAINS";
-
+	public static final String	HAVE = "HAVE";
+	/** For IDEMPIERE-3413 */
+	public static final String	IN = "IN";
+	
 	/**	Operators for Strings				*/
 	public static final ValueNamePair[]	OPERATORS = new ValueNamePair[] {
 		new ValueNamePair (EQUAL,			" = "),		//	0 - EQUAL_INDEX
@@ -468,8 +470,11 @@ public class MQuery implements Serializable
 	};
 	
 	/** Operators for Multi Select items */
-	public static final ValueNamePair[]	OPERATORS_MULTISELECT	= new ValueNamePair[] {
-			new ValueNamePair(Convert_SQL92.PG_ARRAY_CONTAINS_ALIAS_EXP, CONTAINS)
+	public static final ValueNamePair[]	OPERATORS_MULTISELECT	= new ValueNamePair[] { 
+		new ValueNamePair(EQUAL, " = "),
+		new ValueNamePair("<>", " != "), 
+		new ValueNamePair(Convert_SQL92.PG_ARRAY_IN_ALIAS_EXP, IN),
+		new ValueNamePair(Convert_SQL92.PG_ARRAY_HAVE_ALIAS_EXP, HAVE) 
 	};
 	/*************************************************************************
 	 * 	Add Restriction

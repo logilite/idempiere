@@ -405,8 +405,8 @@ public class WRecordInfo extends Window implements EventListener<Event>
 				if (column.getAD_Reference_ID() == DisplayType.MultiSelectTable
 						|| column.getAD_Reference_ID() == DisplayType.MultiSelectList)
 				{
-					showOldValue = Util.getNameListFromKeyValues(OldValue, column.getAD_Reference_ID(), lookup);
-					showNewValue = Util.getNameListFromKeyValues(NewValue, column.getAD_Reference_ID(), lookup);
+					showOldValue = Util.getPrintableNameFromMultiKey(OldValue, column.getAD_Reference_ID(), lookup);
+					showNewValue = Util.getPrintableNameFromMultiKey(NewValue, column.getAD_Reference_ID(), lookup);
 				}
 				else
 				{

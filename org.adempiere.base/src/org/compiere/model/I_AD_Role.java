@@ -374,6 +374,19 @@ public interface I_AD_Role
 	  */
 	public boolean isCanReport();
 
+    /** Column name IsCanSaveGridCustPrefEveryone */
+    public static final String COLUMNNAME_IsCanSaveGridCustPrefEveryone = "IsCanSaveGridCustPrefEveryone";
+
+	/** Set Can Save Grid Customize Preference for Everyone.
+	  * On Grid view, Allow to save column width and order preference for everyone
+	  */
+	public void setIsCanSaveGridCustPrefEveryone (boolean IsCanSaveGridCustPrefEveryone);
+
+	/** Get Can Save Grid Customize Preference for Everyone.
+	  * On Grid view, Allow to save column width and order preference for everyone
+	  */
+	public boolean isCanSaveGridCustPrefEveryone();
+
     /** Column name IsChangeLog */
     public static final String COLUMNNAME_IsChangeLog = "IsChangeLog";
 

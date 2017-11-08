@@ -147,3 +147,32 @@ table.z-vbox > tbody > tr > td > table {
 }
 
 <%-- Multi Select List & Table Editor End --%>
+
+<%-- Attachment by Drag & Drop Start --%>
+
+.drop-btn-holder {
+	background: #eee;
+    border: 5px dashed #ccc;
+    width: 99%;
+    min-height: 100px;
+    margin: 1px 1px !important;
+}
+
+.drop-btn-holder:hover {
+    border: 5px dashed #2184ba;
+}
+
+.attachment-drag-entered {
+    border: 5px dashed #3fb900;
+}
+
+.drop-progress-meter
+{
+	width:100% !important;
+}
+
+.z-progressmeter-image {
+	background: linear-gradient(to bottom, #1eff00 0%, #1a6b18 100%);
+}
+
+<%-- Attachment by Drag & Drop End --%>

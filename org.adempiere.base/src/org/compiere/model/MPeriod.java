@@ -543,6 +543,9 @@ public class MPeriod extends X_C_Period
 			rs = pstmt.executeQuery();
 			while (rs.next())
 				list.add (new MPeriodControl (getCtx(), rs, null));
+			//
+			m_controls = new MPeriodControl[list.size ()];
+			list.toArray (m_controls);
 		}
 		catch (Exception e)
 		{
@@ -553,9 +556,6 @@ public class MPeriod extends X_C_Period
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
 		}
-		//
-		m_controls = new MPeriodControl[list.size ()];
-		list.toArray (m_controls);
 		return m_controls;
 	}	//	getPeriodControls
 	
@@ -569,6 +569,10 @@ public class MPeriod extends X_C_Period
 		if (DocBaseType == null)
 			return null;
 		getPeriodControls(false);
+		
+		if (m_controls == null)
+			return null;
+		
 		for (int i = 0; i < m_controls.length; i++)
 		{
 		//	log.fine("getPeriodControl - " + 1 + " - " + m_controls[i]);

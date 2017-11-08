@@ -515,7 +515,7 @@ public class GridTabCSVExporter implements IGridTabExporter
 			}
 		} else {
 			value = gridTab.getValue(i, headName);
-			if (value instanceof String[])
+			if (value instanceof String[] || value instanceof Integer[])
 			{
 				String s = Util.convertArrayToStringForDB(value);
 				if (s != null && s.length() > 0)

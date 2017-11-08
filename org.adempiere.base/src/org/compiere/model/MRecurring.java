@@ -164,7 +164,7 @@ public class MRecurring extends X_C_Recurring
 	 *	Calculate & set remaining Runs
 	 *	@return true if runs left
 	 */
-	private boolean calculateRuns()
+	protected boolean calculateRuns()
 	{
 		String sql = "SELECT COUNT(*) FROM C_Recurring_Run WHERE C_Recurring_ID=?";
 		int current = DB.getSQLValue(get_TrxName(), sql, getC_Recurring_ID());
@@ -177,7 +177,7 @@ public class MRecurring extends X_C_Recurring
 	/**
 	 *	Calculate next run date
 	 */
-	private void setDateNextRun()
+	protected void setDateNextRun()
 	{
 		if (getFrequency() < 1)
 			setFrequency(1);

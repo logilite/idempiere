@@ -262,8 +262,10 @@ public class GridView extends Vbox implements EventListener<Event>, IdSpace, IFi
 		columnWidthMap = new HashMap<Integer, String>();
 		GridField[] tmpFields = ((GridTable)tableModel).getFields();
 		MTabCustomization tabCustomization = MTabCustomization.get(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()), gridTab.getAD_Tab_ID(), null);
-		isHasCustomizeData = tabCustomization != null && tabCustomization.getAD_Tab_Customization_ID() > 0 
-				&& tabCustomization.getCustom() != null && tabCustomization.getCustom().trim().length() > 0;
+		if (tabCustomization == null || Util.isEmpty(tabCustomization.getCustom(), true))
+			tabCustomization = MTabCustomization.get(Env.getCtx(), MTabCustomization.SUPERUSER, gridTab.getAD_Tab_ID(), null);
+		isHasCustomizeData = tabCustomization != null && tabCustomization.getAD_Tab_Customization_ID() > 0
+				&& !Util.isEmpty(tabCustomization.getCustom(), true);
 		if (isHasCustomizeData) {
 			String custom = tabCustomization.getCustom().trim();
 			String[] customComponent = custom.split(";");

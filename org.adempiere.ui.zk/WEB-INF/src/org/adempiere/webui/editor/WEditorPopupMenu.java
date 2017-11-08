@@ -126,7 +126,7 @@ public class WEditorPopupMenu extends Menupopup implements EventListener<Event>
     		Boolean canAccessPO = null;
 			if (winIDPO > 0)
 				canAccessPO = MRole.getDefault().getWindowAccess(winIDPO);
-			if ((winID <= 0 || canAccess == null) && (canAccessPO == null || canAccessPO == false)) {
+			if ((winID <= 0 || canAccess == null) && (winIDPO <= 0 || canAccessPO == null))	{
     	    	this.zoomEnabled = false;
     	    	this.newEnabled = false;
     	    	this.updateEnabled = false;

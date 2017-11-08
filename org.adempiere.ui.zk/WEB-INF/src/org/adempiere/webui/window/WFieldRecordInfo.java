@@ -46,6 +46,7 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.NamePair;
+import org.compiere.util.Util;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -313,19 +314,29 @@ public class WFieldRecordInfo extends Window implements EventListener<Event>
 					Env.getLanguage(Env.getCtx()), column.getColumnName(),
 					column.getAD_Reference_Value_ID(),
 					column.isParent(), null);
-				if (OldValue != null)
+
+				if (DisplayType.MultiSelectTable == column.getAD_Reference_ID()
+						|| DisplayType.MultiSelectList == column.getAD_Reference_ID())
 				{
-					Object key = OldValue; 
-					NamePair pp = lookup.get(key);
-					if (pp != null)
-						showOldValue = pp.getName();
+					showOldValue = Util.getPrintableNameFromMultiKey(OldValue, column.getAD_Reference_ID(), lookup);
+					showNewValue = Util.getPrintableNameFromMultiKey(NewValue, column.getAD_Reference_ID(), lookup);
 				}
-				if (NewValue != null)
+				else
 				{
-					Object key = NewValue; 
-					NamePair pp = lookup.get(key);
-					if (pp != null)
-						showNewValue = pp.getName();
+					if (OldValue != null)
+					{
+						Object key = OldValue;
+						NamePair pp = lookup.get(key);
+						if (pp != null)
+							showOldValue = pp.getName();
+					}
+					if (NewValue != null)
+					{
+						Object key = NewValue;
+						NamePair pp = lookup.get(key);
+						if (pp != null)
+							showNewValue = pp.getName();
+					}
 				}
 			}
 			else if (DisplayType.isLOB (column.getAD_Reference_ID ()))

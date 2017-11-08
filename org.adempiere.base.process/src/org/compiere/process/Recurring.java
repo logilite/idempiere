@@ -19,6 +19,7 @@ package org.compiere.process;
 import java.util.logging.Level;
 
 import org.compiere.model.MRecurring;
+import org.compiere.model.MTable;
  
 /**
  * 	Recurring Process
@@ -51,7 +52,8 @@ public class Recurring extends SvrProcess
 	 */
 	protected String doIt() throws Exception
 	{
-		MRecurring rec = new MRecurring (getCtx(), getRecord_ID(), get_TrxName());
+		MRecurring rec = (MRecurring) MTable.get(getCtx(),MRecurring.Table_ID).getPO(getRecord_ID(), get_TrxName());
+		
 		if (log.isLoggable(Level.INFO)) log.info(rec.toString());
 		return rec.executeRun();
 	}	//	doIt

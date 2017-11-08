@@ -1020,7 +1020,7 @@ public class MInOut extends X_M_InOut implements DocAction
 	 * 	Set Reversal
 	 *	@param reversal reversal
 	 */
-	protected void setReversal(boolean reversal)
+	public void setReversal(boolean reversal)
 	{
 		m_reversal = reversal;
 	}	//	setReversal

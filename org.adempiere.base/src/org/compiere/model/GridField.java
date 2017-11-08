@@ -1050,7 +1050,11 @@ public class GridField
 			//	Boolean
 			if (m_vo.displayType == DisplayType.YesNo)
 				return Boolean.valueOf ("Y".equals(value));
-			
+
+			// Multi-Select
+			if (m_vo.displayType == DisplayType.MultiSelectTable || m_vo.displayType == DisplayType.MultiSelectList)
+				return Util.getArrayObjectFromString(m_vo.displayType, value);
+
 			//	Default
 			return value;
 		}
@@ -1096,7 +1100,8 @@ public class GridField
 		} 
 
 		//  cannot be validated
-		if (!isLookup() || m_lookup == null)
+		if (!isLookup() || m_lookup == null || getDisplayType() == DisplayType.MultiSelectTable
+				|| getDisplayType() == DisplayType.MultiSelectList)
 			return true;
 		if (m_lookup.containsKeyNoDirect(m_value)) {
 			String name = m_lookup.get(m_value).getName();
@@ -1234,7 +1239,6 @@ public class GridField
 			foreignColumn = variableName.substring(f+1, variableName.length());
 			variableName = variableName.substring(0, f);
 		}
-		
 		String value = null;
 		if( m_vo.TabNo == 0)
 	    	value = Env.getContext (ctx, m_vo.WindowNo, variableName, true);
@@ -1934,6 +1938,20 @@ public class GridField
 				Env.setContext(m_vo.ctx, m_vo.WindowNo, m_vo.TabNo, m_vo.ColumnName, stringValue);
 			}
 			// KTU - Fix Thai Date		
+		}
+		else if (m_value instanceof Integer[] || m_value instanceof String[])
+		{
+			String value = Util.convertArrayToStringForDB(m_value);
+			backupValue();
+			if (!isParentTabField() && isUpdateWindowContext())
+			{
+				Env.setContext(m_vo.ctx, m_vo.WindowNo, m_vo.ColumnName, value.equals("NULL") ? null : value);
+			}
+			if (m_gridTab != null)
+			{
+				Env.setContext(m_vo.ctx, m_vo.WindowNo, m_vo.TabNo, m_vo.ColumnName,
+						value.equals("NULL") ? null : value);
+			}
 		}
 		else
 		{

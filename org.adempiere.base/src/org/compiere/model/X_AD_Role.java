@@ -70,6 +70,8 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 // Y
 			setIsCanReport (true);
 // Y
+			setIsCanSaveGridCustPrefEveryone (false);
+// N 
 			setIsChangeLog (false);
 // N
 			setIsDiscountAllowedOnTotal (false);
@@ -663,6 +665,30 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isCanReport () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsCanReport);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Can Save Grid Customize Preference for Everyone.
+		@param IsCanSaveGridCustPrefEveryone 
+		On Grid view, Allow to save column width and order preference for everyone
+	  */
+	public void setIsCanSaveGridCustPrefEveryone (boolean IsCanSaveGridCustPrefEveryone)
+	{
+		set_Value (COLUMNNAME_IsCanSaveGridCustPrefEveryone, Boolean.valueOf(IsCanSaveGridCustPrefEveryone));
+	}
+
+	/** Get Can Save Grid Customize Preference for Everyone.
+		@return On Grid view, Allow to save column width and order preference for everyone
+	  */
+	public boolean isCanSaveGridCustPrefEveryone () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsCanSaveGridCustPrefEveryone);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 

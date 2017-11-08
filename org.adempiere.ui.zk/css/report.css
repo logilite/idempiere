@@ -7,14 +7,14 @@
 	border-style: solid;
 	border-collapse: collapse;
 	width: 90%;
-	background-color: #EBF1EF;	
+/* 	background-color: #EBF1EF;	 */
 	border-width: 0px;
 }
 .rp-table th {
 	text-align:	center;
 	padding: 2px;
 	font-weight: bold;
-	background-color: #C6D1CD;
+	background-color: #D9E5EF;
 	border-width: 1px;
 	border-color: black;
 	border-width: 2px 1px 2px 0px;
@@ -31,6 +31,7 @@
 	border-style: solid;
 	border-width: 1px 1px 1px 0px;
 	padding: 3px;
+	vertical-align: top;
 }
 
 .rp-table td:last-child {
@@ -38,12 +39,12 @@
 }
 
 .rp-number {
-	background-color: #EBF1EF;
+/* 	background-color: #EBF1EF; */
 	text-align: right !important;
 	padding: 3px;
 }
 .rp-text, .rp-date {
-	background-color: #EBF1EF;
+/* 	background-color: #EBF1EF; */
 	text-align: left;
 	padding: 3px;
 }
@@ -59,7 +60,7 @@
 }
 
 .rp-functionrow td {
-	background-color: #C6D1CD;
+	background-color: #D9E5EF;
 	font-weight: bold;
 	border-width: 0px 1px 0px 0px;
 }
@@ -68,3 +69,12 @@
 	border-width: 0px 0px 0px 0px;
 }
 
+.rp-odd {
+    background-color: #EFFAFF;
+}
+
+.rp-image {
+	background: url(/webui/theme/default/images/Find24.png) no-repeat center;
+	height: 24px;
+	display: block;
+}

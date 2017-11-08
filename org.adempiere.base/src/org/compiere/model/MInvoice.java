@@ -903,7 +903,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	 * 	Set Reversal
 	 *	@param reversal reversal
 	 */
-	protected void setReversal(boolean reversal)
+	public void setReversal(boolean reversal)
 	{
 		m_reversal = reversal;
 	}	//	setReversal
@@ -1022,6 +1022,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		return valid;
 	}	//	validatePaySchedule
 
+	private volatile static boolean recursiveCall = false;
 
 	private volatile static boolean recursiveCall = false;
 	/**************************************************************************
@@ -1125,7 +1126,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 			}
 		}
 
-		if (! recursiveCall && (!newRecord && is_ValueChanged(COLUMNNAME_C_PaymentTerm_ID))) {
+		if (!recursiveCall && (newRecord || is_ValueChanged(COLUMNNAME_C_PaymentTerm_ID))) {
 			recursiveCall = true;
 			try {
 				MPaymentTerm pt = new MPaymentTerm (getCtx(), getC_PaymentTerm_ID(), get_TrxName());
@@ -1137,7 +1138,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 				recursiveCall = false;
 			}
 		}
-
+		
 		return true;
 	}	//	beforeSave
 

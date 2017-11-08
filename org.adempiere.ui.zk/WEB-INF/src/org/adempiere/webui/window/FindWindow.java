@@ -74,7 +74,6 @@ import org.adempiere.webui.factory.ButtonFactory;
 import org.adempiere.webui.part.MultiTabPart;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.compiere.dbPort.Convert_SQL92;
 import org.compiere.model.GridField;
 import org.compiere.model.GridFieldVO;
 import org.compiere.model.GridTab;
@@ -477,6 +476,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 
         ListHeader lstHOperator = new ListHeader();
         lstHOperator.setLabel(Msg.getMsg(Env.getCtx(), "Operator"));
+        lstHOperator.setWidth("6%");
 
         ListHeader lstHQueryValue = new ListHeader();
         lstHQueryValue.setLabel(Msg.getMsg(Env.getCtx(), "QueryValue"));
@@ -1786,7 +1786,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 								|| (value instanceof String[] && ((String[]) value).length > 0))
 						{
 							String sValue = Util.convertArrayToStringForDB(value);
-							String oper = Convert_SQL92.PG_ARRAY_CONTAINS_ALIAS_EXP;
+							String oper = MQuery.EQUAL;
 							m_query.addRestriction(ColumnSQL.toString(), oper, sValue, ColumnName, wed.getDisplay());
 							appendCode(code, ColumnName, oper, sValue, "", "AND", "", "");
 						}

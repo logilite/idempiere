@@ -42,6 +42,7 @@ import javax.sql.RowSet;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.DBException;
 import org.adempiere.util.ProcessUtil;
 import org.compiere.Adempiere;
@@ -859,13 +860,45 @@ public final class DB
 			pstmt.setBytes(index, (byte[]) param);
 		else if (param instanceof Integer[])
 		{
-			Array array = DB.getConnectionRW().createArrayOf("numeric", (Integer[]) param);
-			pstmt.setArray(index, array);
+			Connection conn = null;
+			
+			try {
+				conn = DB.getConnectionRW();
+				if ( conn != null )
+				{
+					Array array = conn.createArrayOf("numeric", (Integer[]) param);
+					pstmt.setArray(index, array);
+				}
+				else
+					throw new AdempiereException("Unable to create multi-select table array, no DB connection");
+			} catch (SQLException e) {
+				throw new AdempiereException("Error setting multi-select table array parameter", e);
+			}
+			finally {
+				if ( conn != null )
+					conn.close();
+			}
 		}
 		else if (param instanceof String[])
 		{
-			Array array = DB.getConnectionRW().createArrayOf("text", (String[]) param);
-			pstmt.setArray(index, array);
+			Connection conn = null;
+			
+			try {
+				conn = DB.getConnectionRW();
+				if ( conn != null )
+				{
+					Array array = conn.createArrayOf("text", (String[]) param);
+					pstmt.setArray(index, array);
+				}
+				else
+					throw new AdempiereException("Unable to create multi-select list array, no DB connection");
+			} catch (SQLException e) {
+				throw new AdempiereException("Error setting multi-select list array parameter", e);
+			}
+			finally {
+				if ( conn != null )
+					conn.close();
+			}
 		}
 		else
 			throw new DBException("Unknown parameter type "+index+" - "+param);
@@ -2570,5 +2603,42 @@ public final class DB
 		}
 		return retArray;
 	} // getSQLArrayValueEx
+	
+	/**
+	 * Get Boolean Value from SQL
+	 * 
+	 * @param trxName trx
+	 * @param sql sql
+	 * @param params array of parameters
+	 * @return first value or false
+	 * @throws DBException if there is any SQLException
+	 */
+	public static boolean getSQLValueBooleanEx(String trxName, String sql, Object... params)
+	{
+		boolean retValue = false;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = prepareStatement(sql, trxName);
+			setParameters(pstmt, params);
+			rs = pstmt.executeQuery();
+			if (rs.next())
+				retValue = rs.getBoolean(1);
+			else if (log.isLoggable(Level.FINE))
+				log.fine("No Value " + sql);
+		}
+		catch (SQLException e)
+		{
+			throw new DBException(e, sql);
+		}
+		finally
+		{
+			close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		return retValue;
+	} // getSQLValueBooleanEx
 
 }	//	DB
