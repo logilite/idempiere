@@ -309,6 +309,7 @@ ContextMenuListener, IZoomableEditor
         else
         {
             getComponent().setValue(null);
+            getComponent().setSelectedItem(null);
             oldValue = value;
         }                                
     }

@@ -78,6 +78,7 @@ public class Doc_MatchPO extends Doc
 	protected ProductCost m_pc;
 	protected int			m_M_AttributeSetInstance_ID = 0;
 	protected MMatchPO m_matchPO;
+	private boolean 			m_deferPosting = false;
 
 	/**
 	 *  Load Specific Document Details
@@ -103,7 +104,25 @@ public class Doc_MatchPO extends Doc
 		//
 		m_pc = new ProductCost (Env.getCtx(),
 			getM_Product_ID(), m_M_AttributeSetInstance_ID, getTrxName());
-		m_pc.setQty(getQty());
+		m_pc.setQty(getQty());		
+		
+		if (m_M_InOutLine_ID == 0)
+		{
+			MMatchPO[] matchPOs = MMatchPO.getOrderLine(getCtx(), m_oLine.getC_OrderLine_ID(), getTrxName());
+			for (MMatchPO matchPO : matchPOs)
+			{
+				if (matchPO.getM_InOutLine_ID() > 0 && matchPO.getC_InvoiceLine_ID() == 0)
+				{
+					m_M_InOutLine_ID = matchPO.getM_InOutLine_ID();
+					break;
+				}
+			}
+		}
+
+		if (m_M_InOutLine_ID == 0)	//  Defer posting if not matched to Shipment
+		{
+			m_deferPosting = true;
+		}
 		return null;
 	}   //  loadDocumentDetails
 
@@ -489,4 +508,11 @@ public class Doc_MatchPO extends Doc
 		return null;
 	}
 
+
+	@Override
+	public boolean isDeferPosting() {
+		return m_deferPosting;
+	}
+
+	
 }   //  Doc_MatchPO

@@ -1676,6 +1676,9 @@ public final class Env
 								outStr.append(mf.format(v));
 							}
 						} else {
+							if (colToken != null && colToken.isSecure()) {
+								v = "********";
+							}
 							outStr.append(v.toString());
 						}
 					}
@@ -1686,7 +1689,14 @@ public final class Env
 					outStr.append("@");
 				}
 			}
-
+			else if (keepUnparseable)
+			{
+				outStr.append("@"+token);
+				if (format.length() > 0)
+					outStr.append("<"+format+">");
+				outStr.append("@");
+			}
+			
 			inStr = inStr.substring(j+1, inStr.length());	// from second @
 			i = inStr.indexOf('@');
 		}

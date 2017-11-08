@@ -1129,7 +1129,7 @@ public class MOrder extends X_C_Order implements DocAction
 			}
 		}
 
-		if (! recursiveCall && (newRecord || is_ValueChanged(COLUMNNAME_C_PaymentTerm_ID))) {
+		if (! recursiveCall && (!newRecord && is_ValueChanged(COLUMNNAME_C_PaymentTerm_ID))) {
 			recursiveCall = true;
 			try {
 				MPaymentTerm pt = new MPaymentTerm (getCtx(), getC_PaymentTerm_ID(), get_TrxName());
@@ -2509,6 +2509,8 @@ public class MOrder extends X_C_Order implements DocAction
 		if (m_processMsg != null)
 			return false;
 		
+		setTotalLines(Env.ZERO);
+		setGrandTotal(Env.ZERO);
 		setProcessed(true);
 		setDocAction(DOCACTION_None);
 		return true;

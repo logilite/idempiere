@@ -123,7 +123,7 @@ public class WEditorPopupMenu extends Menupopup implements EventListener<Event>
     		int winID = lookup.getZoom();
     		int winIDPO = lookup.getZoom(false);
     		Boolean canAccess = MRole.getDefault().getWindowAccess(winID);
-			Boolean canAccessPO = null;
+    		Boolean canAccessPO = null;
 			if (winIDPO > 0)
 				canAccessPO = MRole.getDefault().getWindowAccess(winIDPO);
 			if ((winID <= 0 || canAccess == null) && (canAccessPO == null || canAccessPO == false)) {
