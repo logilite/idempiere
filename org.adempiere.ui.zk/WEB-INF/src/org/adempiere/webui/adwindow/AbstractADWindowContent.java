@@ -3235,7 +3235,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 			gridFieldIds.add(fields[i].getAD_Field_ID());
 
 		}
-		CustomizeGridViewDialog.showCustomize(0, adTabbox.getSelectedGridTab().getAD_Tab_ID(), columnsWidth,gridFieldIds,tabPanel.getGridView());
+		CustomizeGridViewDialog.showCustomize(0, adTabbox.getSelectedGridTab().getAD_Tab_ID(), columnsWidth,gridFieldIds,tabPanel.getGridView(), null, false);
 	}
 
 	/**

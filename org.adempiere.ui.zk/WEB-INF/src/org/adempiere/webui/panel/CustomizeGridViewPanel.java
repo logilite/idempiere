@@ -570,7 +570,7 @@ public class CustomizeGridViewPanel extends Panel
 			gridview = lstGridMode.getSelectedItem().toString();
 		final String dView = gridview;
 		
-		boolean ok = MTabCustomization.saveData(Env.getCtx(), m_AD_Tab_ID, m_AD_User_ID, custom.toString(), dView, null);
+		boolean ok = MTabCustomization.saveData(Env.getCtx(), m_AD_Tab_ID, m_AD_User_ID, custom.toString(), dView, null, false);
 		if (!ok)
 		{
 			FDialog.error(m_WindowNo, null, "SaveError", custom.toString());
@@ -588,7 +588,7 @@ public class CustomizeGridViewPanel extends Panel
 				{
 					if (result)
 					{
-						boolean isSave = MTabCustomization.saveData(Env.getCtx(), m_AD_Tab_ID, MTabCustomization.SUPERUSER, custom.toString(), dView, null);
+						boolean isSave = MTabCustomization.saveData(Env.getCtx(), m_AD_Tab_ID, MTabCustomization.SUPERUSER, custom.toString(), dView, null, false);
 						if (!isSave)
 						{
 							FDialog.error(m_WindowNo, null, "SaveError", custom.toString());

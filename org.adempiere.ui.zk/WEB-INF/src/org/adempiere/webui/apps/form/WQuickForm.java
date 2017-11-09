@@ -13,7 +13,11 @@
 
 package org.adempiere.webui.apps.form;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.adempiere.webui.adwindow.AbstractADWindowContent;
 import org.adempiere.webui.adwindow.QuickGridView;
@@ -23,14 +27,19 @@ import org.adempiere.webui.component.ConfirmPanel;
 import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.component.ZkCssHelper;
+import org.adempiere.webui.window.CustomizeGridViewDialog;
+import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MRole;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
+import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zul.Column;
+import org.zkoss.zul.Columns;
 
 /**
  * Quick entry form
@@ -58,6 +67,7 @@ public class WQuickForm extends Window implements EventListener<Event>
 	private Button					bDelete					= confirmPanel.createButton(ConfirmPanel.A_DELETE);
 	private Button					bSave					= confirmPanel.createButton("Save");
 	private Button					bIgnore					= confirmPanel.createButton("Ignore");
+	private Button					bCustomize				= confirmPanel.createButton("Customize");
 
 	private boolean					onlyCurrentRows			= false;
 
@@ -105,10 +115,12 @@ public class WQuickForm extends Window implements EventListener<Event>
 		bSave.addEventListener(Events.ON_CLICK, this);
 		bDelete.addEventListener(Events.ON_CLICK, this);
 		bIgnore.addEventListener(Events.ON_CLICK, this);
+		bCustomize.addEventListener(Events.ON_CLICK, this);
 
 		confirmPanel.addComponentsLeft(bSave);
 		confirmPanel.addComponentsLeft(bDelete);
 		confirmPanel.addComponentsLeft(bIgnore);
+		confirmPanel.addComponentsLeft(bCustomize);
 		confirmPanel.addActionListener(this);
 
 		mainLayout.appendCenter(Center);
@@ -149,7 +161,36 @@ public class WQuickForm extends Window implements EventListener<Event>
 			quickGridView.getRenderer().setCurrentCell(null);
 			onIgnore();
 		}
+		else if (event.getTarget() == confirmPanel.getButton("Customize"))
+		{
+			onCustomize();
+		}
 		event.stopPropagation();
+	}
+
+	private void onCustomize()
+	{
+		Columns columns = quickGridView.getListbox().getColumns();
+		List<Component> columnList = columns.getChildren();
+		GridField[] fields = quickGridView.getGridField();
+		Map<Integer, String> columnsWidth = new HashMap<Integer, String>();
+		ArrayList<Integer> gridFieldIds = new ArrayList<Integer>();
+
+		for (int i = 0; i < fields.length; i++)
+		{
+			Column column = (Column) columnList.get(i + 1);
+			String width = column.getWidth();
+			columnsWidth.put(fields[i].getAD_Field_ID(), width);
+			gridFieldIds.add(fields[i].getAD_Field_ID());
+		}
+		
+		quickGridView.setWidth(getWidth());
+		quickGridView.setHeight(getHeight());
+
+		CustomizeGridViewDialog.showCustomize(0, gridTab.getAD_Tab_ID(), columnsWidth, gridFieldIds, null,
+				quickGridView, true);
+
+		quickGridView.setStatusLine("Windows settings saved.", false, true);
 	}
 
 	private void onIgnore()
@@ -209,11 +250,7 @@ public class WQuickForm extends Window implements EventListener<Event>
 
 	private void onSave(boolean isShowError)
 	{
-		int rowChangedIndex = gridTab.getTableModel().getRowChanged();
-		if (rowChangedIndex >= 0)
-		{
-			quickGridView.dataSave(0);
-		}
+		quickGridView.dataSave(0);
 
 		quickGridView.setStatusLine("Saved", false, true);
 		gridTab.dataRefreshAll();

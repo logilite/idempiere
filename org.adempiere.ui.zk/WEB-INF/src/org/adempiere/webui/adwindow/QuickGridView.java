@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -35,6 +36,7 @@ import org.adempiere.webui.component.Grid;
 import org.adempiere.webui.component.NumberBox;
 import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.editor.WEditor;
+import org.adempiere.webui.panel.QuickCustomizeGridViewPanel;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.SortComparator;
 import org.compiere.model.GridField;
@@ -43,6 +45,7 @@ import org.compiere.model.GridTable;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.StateChangeEvent;
 import org.compiere.model.StateChangeListener;
+import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -83,6 +86,8 @@ public class QuickGridView extends Vbox
 	 * 
 	 */
 	private static final long serialVersionUID = -2966799998482667434L;
+	
+	static CLogger log = CLogger.getCLogger(QuickGridView.class);
 
 	private static final String HEADER_GRID_STYLE = "border: none; margin:0; padding: 0;";
 
@@ -112,7 +117,7 @@ public class QuickGridView extends Vbox
 	 * list field display in grid mode, in case user customize grid
 	 * this list container only customize list.
 	 */
-	private GridField[] gridField;
+	private GridField[] gridFields;
 	private AbstractTableModel tableModel;
 
 	private int numColumns = 5;
@@ -160,11 +165,11 @@ public class QuickGridView extends Vbox
 	}
 
 	public GridField[] getGridField() {
-		return gridField;
+		return gridFields;
 	}
 
 	public void setGridField(GridField[] gridField) {
-		this.gridField = gridField;
+		this.gridFields = gridField;
 	}
 
 	public QuickGridTabRowRenderer getRenderer() {
@@ -298,20 +303,29 @@ public class QuickGridView extends Vbox
 		
 		tableModel = gridTab.getTableModel();
 		columnWidthMap = new HashMap<Integer, String>();
-		GridField[] tmpFields = ((GridTable)tableModel).getFields();
-		MTabCustomization tabCustomization = MTabCustomization.get(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()), gridTab.getAD_Tab_ID(), null);
+		GridField[] modelFields = ((GridTable)tableModel).getFields();
+		MTabCustomization tabCustomization = MTabCustomization.get(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()), gridTab.getAD_Tab_ID(), null,true);
 		isHasCustomizeData = tabCustomization != null && tabCustomization.getAD_Tab_Customization_ID() > 0 
 				&& tabCustomization.getCustom() != null && tabCustomization.getCustom().trim().length() > 0;
 		if (isHasCustomizeData) {
 			String custom = tabCustomization.getCustom().trim();
 			String[] customComponent = custom.split(";");
 			String[] fieldIds = customComponent[0].split("[,]");
-			List<GridField> fieldList = new ArrayList<GridField>();
-			for(String fieldIdStr : fieldIds) {
-				fieldIdStr = fieldIdStr.trim();
-				if (fieldIdStr.length() == 0) continue;
-				int AD_Field_ID = Integer.parseInt(fieldIdStr);
-				for(GridField gridField : tmpFields) {
+			List<GridField> gridFieldsList = new ArrayList<GridField>();
+			for(String fieldId : fieldIds) {
+				fieldId = fieldId.trim();
+				int AD_Field_ID=0;
+				if (fieldId.length() == 0) continue;
+				try
+				{
+					AD_Field_ID = Integer.parseInt(fieldId);
+				}
+				catch (NumberFormatException e)
+				{
+					log.log(Level.SEVERE, "", e);
+					continue;
+				}
+				for(GridField gridField : modelFields) {
 					if (gridField.getAD_Field_ID() == AD_Field_ID) {
 						// IDEMPIERE-2204 add field in tabCustomization list to
 						// display list event this field have showInGrid = false
@@ -322,40 +336,55 @@ public class QuickGridView extends Vbox
 						// add field in tabCustomization list to display list
 						// event this field have showInGrid = false
 						if (gridField.isQuickForm())
-							fieldList.add(gridField);
+							gridFieldsList.add(gridField);
 
 						break;
 					}
 				}
 			}
-			gridField = fieldList.toArray(new GridField[0]);			
+			gridFields = gridFieldsList.toArray(new GridField[0]);
+			// if any new column added for quick form.
+			for (GridField field : modelFields) {
+				if (field.isQuickForm()) {
+					boolean isFieldAvailable = false;
+					for (GridField gField : gridFields) {
+						if (gField.getAD_Field_ID() == field.getAD_Field_ID()) {
+							isFieldAvailable = true;
+							break;
+						}
+					}
+					if (!isFieldAvailable)
+						gridFieldsList.add(field);
+				}
+			}
+			gridFields = gridFieldsList.toArray(new GridField[0]);
 			if (customComponent.length == 2) {
 				String[] widths = customComponent[1].split("[,]");
-				for(int i = 0; i< gridField.length && i<widths.length; i++) {
-					columnWidthMap.put(gridField[i].getAD_Field_ID(), widths[i]);
+				for(int i = 0; i< gridFields.length && i<widths.length; i++) {
+					columnWidthMap.put(gridFields[i].getAD_Field_ID(), widths[i]);
 				}
 			}
 		} else {
-			ArrayList<GridField> gridFieldList = new ArrayList<GridField>();
+			ArrayList<GridField> gridFieldsList = new ArrayList<GridField>();
 			
-			for(GridField field:tmpFields){
+			for(GridField field:modelFields){
 				if (field.isQuickForm())
 				{
-					gridFieldList.add(field);
+					gridFieldsList.add(field);
 				}
 			}
 			
-			Collections.sort(gridFieldList, new Comparator<GridField>() {
+			Collections.sort(gridFieldsList, new Comparator<GridField>() {
 				@Override
 				public int compare(GridField o1, GridField o2) {
 					return o1.getSeqNoGrid()-o2.getSeqNoGrid();
 				}
 			});
 			
-			gridField = new GridField[gridFieldList.size()];
-			gridFieldList.toArray(gridField);
+			gridFields = new GridField[gridFieldsList.size()];
+			gridFieldsList.toArray(gridFields);
 		}
-		numColumns = gridField.length;
+		numColumns = gridFields.length;
 	}
 
 	/**
@@ -502,7 +531,7 @@ public class QuickGridView extends Vbox
 		{
 			Frozen frozen = new Frozen();
 			//freeze selection and indicator column
-			frozen.setColumns(2);
+			frozen.setColumns(1);
 			listbox.appendChild(frozen);
 		}
 		
@@ -529,35 +558,35 @@ public class QuickGridView extends Vbox
 		for (int i = 0; i < numColumns; i++)
 		{
 			// IDEMPIERE-2148: when has tab customize, ignore check properties isDisplayedGrid
-			if (gridField[i].isQuickForm())
+			if (gridFields[i].isQuickForm())
 			{
-				colnames.put(index, gridField[i].getHeader());
+				colnames.put(index, gridFields[i].getHeader());
 				index++;
 				org.zkoss.zul.Column column = new Column();
-				int colindex =tableModel.findColumn(gridField[i].getColumnName()); 
+				int colindex =tableModel.findColumn(gridFields[i].getColumnName()); 
 				column.setSortAscending(new SortComparator(colindex, true, Env.getLanguage(Env.getCtx())));
 				column.setSortDescending(new SortComparator(colindex, false, Env.getLanguage(Env.getCtx())));
 				//IDEMPIERE-2898 - UX: Field only showing title at header on grid
-				if( gridField[i].isFieldOnly() )
+				if( gridFields[i].isFieldOnly() )
 					column.setLabel("");
 				else {
-					column.setLabel(gridField[i].getHeader());
-					column.setTooltiptext(gridField[i].getDescription());
+					column.setLabel(gridFields[i].getHeader());
+					column.setTooltiptext(gridFields[i].getDescription());
 				}
-				if (columnWidthMap != null && columnWidthMap.get(gridField[i].getAD_Field_ID()) != null && !columnWidthMap.get(gridField[i].getAD_Field_ID()).equals("")) {
-					column.setWidth(columnWidthMap.get(gridField[i].getAD_Field_ID()));
+				if (columnWidthMap != null && columnWidthMap.get(gridFields[i].getAD_Field_ID()) != null && !columnWidthMap.get(gridFields[i].getAD_Field_ID()).equals("")) {
+					column.setWidth(columnWidthMap.get(gridFields[i].getAD_Field_ID()));
 				} else {
-					if (gridField[i].getDisplayType()==DisplayType.YesNo) {
+					if (gridFields[i].getDisplayType()==DisplayType.YesNo) {
 						if (i > 0) {
 							column.setHflex("min");
 						} else {
 							int estimatedWidth=60;
-							int headerWidth = (gridField[i].getHeader().length()+2) * 8;
+							int headerWidth = (gridFields[i].getHeader().length()+2) * 8;
 							if (headerWidth > estimatedWidth)
 								estimatedWidth = headerWidth;
 							column.setWidth(estimatedWidth + "px");
 						}
-					} else if (DisplayType.isNumeric(gridField[i].getDisplayType()) && "Line".equals(gridField[i].getColumnName())) {
+					} else if (DisplayType.isNumeric(gridFields[i].getDisplayType()) && "Line".equals(gridFields[i].getColumnName())) {
 						//special treatment for line
 						if (i > 0)
 							column.setHflex("min");
@@ -565,33 +594,33 @@ public class QuickGridView extends Vbox
 							column.setWidth("60px");
 					} else {
 						int estimatedWidth = 0;
-						if (DisplayType.isNumeric(gridField[i].getDisplayType()))
+						if (DisplayType.isNumeric(gridFields[i].getDisplayType()))
 							estimatedWidth = MIN_NUMERIC_COL_WIDTH;
-						else if (DisplayType.isLookup(gridField[i].getDisplayType()))
+						else if (DisplayType.isLookup(gridFields[i].getDisplayType()))
 							estimatedWidth = MIN_COMBOBOX_WIDTH;
-						else if (DisplayType.isText(gridField[i].getDisplayType()))
-							estimatedWidth = gridField[i].getDisplayLength() * 8;
+						else if (DisplayType.isText(gridFields[i].getDisplayType()))
+							estimatedWidth = gridFields[i].getDisplayLength() * 8;
 						else
 							estimatedWidth = MIN_COLUMN_WIDTH;
 
-						int headerWidth = (gridField[i].getHeader().length() + 2) * 8;
+						int headerWidth = (gridFields[i].getHeader().length() + 2) * 8;
 						if (headerWidth > estimatedWidth)
 							estimatedWidth = headerWidth;
 						
 						//hflex=min for first column not working well
 						if (i > 0)
 						{
-							if (DisplayType.isLookup(gridField[i].getDisplayType()))
+							if (DisplayType.isLookup(gridFields[i].getDisplayType()))
 							{
 								if (headerWidth > MIN_COMBOBOX_WIDTH)
 									column.setHflex("min");
 							}
-							else if (DisplayType.isNumeric(gridField[i].getDisplayType()))
+							else if (DisplayType.isNumeric(gridFields[i].getDisplayType()))
 							{
 								if (headerWidth > MIN_NUMERIC_COL_WIDTH)
 									column.setHflex("min");
 							}
-							else if (!DisplayType.isText(gridField[i].getDisplayType()))
+							else if (!DisplayType.isText(gridFields[i].getDisplayType()))
 							{
 								if (headerWidth > MIN_COLUMN_WIDTH)
 									column.setHflex("min");
@@ -764,6 +793,7 @@ public class QuickGridView extends Vbox
 					selectAll.setChecked(false);
 			}
 			onSelectedRowChange(rowIndex % paging.getPageSize());
+			isNewLineSaved = true;
 		}
 		else if (event.getName().equals("onCustomizeGrid"))
 		{
@@ -795,7 +825,7 @@ public class QuickGridView extends Vbox
 			{
 				int rowChangedIndex = gridTab.getTableModel().getRowChanged();
 				int currentRow = row % paging.getPageSize() + (paging.getActivePage() * paging.getPageSize());
-				if (rowChangedIndex == currentRow)
+				if (rowChangedIndex == currentRow || !isNewLineSaved)
 				{
 					if (!save(code, row, col))
 					{
@@ -815,6 +845,7 @@ public class QuickGridView extends Vbox
 					updateListIndex();
 					if (!(row % paging.getPageSize() == 0))
 					{
+						event.stopPropagation();
 						return;
 					}
 				}
@@ -1036,6 +1067,7 @@ public class QuickGridView extends Vbox
 				listbox.renderRow(row);
 			} else {
 				renderer.setCurrentRow(row);
+				renderer.setCurrentCell(rowIndex, 1, KeyEvent.RIGHT);
 				//remark: following 3 line cause the previously selected row being render twice
 //				if (old != null && old != row && oldIndex >= 0 && oldIndex != gridTab.getCurrentRow())
 //				{
@@ -1313,7 +1345,7 @@ public class QuickGridView extends Vbox
 	 * this list container only customize list.
 	 */
 	public GridField[] getFields() {
-		return gridField;
+		return gridFields;
 	}
 	
 	public void onEditCurrentRow() {
