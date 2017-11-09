@@ -1011,10 +1011,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 				return false;
 
 			boolean retValue = false;
-			if(isQuickForm)
-				retValue= (m_mTable.saveDataAll(manualCmd) == GridTable.SAVE_OK);
-			else
-				retValue = (m_mTable.dataSave(manualCmd) == GridTable.SAVE_OK);
+			retValue = (m_mTable.dataSave(manualCmd) == GridTable.SAVE_OK);
 			if (manualCmd)
 			{
 				setCurrentRow(m_currentRow, false);

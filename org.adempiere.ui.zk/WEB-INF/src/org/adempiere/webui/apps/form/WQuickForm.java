@@ -13,7 +13,6 @@
 
 package org.adempiere.webui.apps.form;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.adempiere.webui.adwindow.AbstractADWindowContent;
@@ -210,8 +209,8 @@ public class WQuickForm extends Window implements EventListener<Event>
 
 	private void onSave(boolean isShowError)
 	{
-		ArrayList<Integer> rows = gridTab.getTableModel().getRowChangedQuickForm();
-		if (rows.size() > 0)
+		int rowChangedIndex = gridTab.getTableModel().getRowChanged();
+		if (rowChangedIndex >= 0)
 		{
 			quickGridView.dataSave(0);
 		}

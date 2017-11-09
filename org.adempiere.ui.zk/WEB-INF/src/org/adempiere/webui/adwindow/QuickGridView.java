@@ -177,7 +177,7 @@ public class QuickGridView extends Vbox
 	public QuickGridView(int windowNo)
 	{
 		this.windowNo = windowNo;
-		setId("gridView");
+		setId("quickGridView");
 		createListbox();
 
 		this.setHflex("1");
@@ -199,7 +199,6 @@ public class QuickGridView extends Vbox
 				Library.setProperty(CustomGridDataLoader.GRID_DATA_LOADER_LIMIT, Integer.toString(pageSize));
 			}
 		}
-		pageSize = 10;
 		//default true for better UI experience
 		modeless = MSysConfig.getBooleanValue(MSysConfig.ZK_GRID_EDIT_MODELESS, true);
 		
@@ -794,9 +793,9 @@ public class QuickGridView extends Vbox
 
 			if (code == KeyEvent.DOWN || code == KeyEvent.UP || code == KeyEvent.HOME || code == KeyEvent.END)
 			{
-				ArrayList<Integer> rowChangeIndex = gridTab.getTableModel().getRowChangedQuickForm();
+				int rowChangedIndex = gridTab.getTableModel().getRowChanged();
 				int currentRow = row % paging.getPageSize() + (paging.getActivePage() * paging.getPageSize());
-				if (rowChangeIndex.contains(currentRow))
+				if (rowChangedIndex == currentRow)
 				{
 					if (!save(code, row, col))
 					{
@@ -903,8 +902,8 @@ public class QuickGridView extends Vbox
 
 				if (row != rowChange)
 				{
-					ArrayList<Integer> rows = gridTab.getTableModel().getRowChangedQuickForm();
-					if (rows.contains(row))
+					int rowChangedIndex = gridTab.getTableModel().getRowChanged();
+					if (rowChangedIndex == row)
 					{
 						if (!save(KeyEvent.RIGHT, row, col))
 							return;
