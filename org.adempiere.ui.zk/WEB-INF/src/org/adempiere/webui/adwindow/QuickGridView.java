@@ -759,6 +759,7 @@ public class QuickGridView extends Vbox
 		}
 		else if (event.getTarget() == paging)
 		{
+			isNewLineSaved = true;
 			int pgNo = paging.getActivePage();
 			if (pgNo != listModel.getPage())
 			{
@@ -766,13 +767,14 @@ public class QuickGridView extends Vbox
 				onSelectedRowChange(0);
 				gridTab.clearSelection();
 				Clients.resize(listbox);
-				Event e = new Event("onPageNavigate", this, null); 
+				Event e = new Event("onPageNavigate", this, null);
 				Events.postEvent(e);
 			}
 		}
 		else if (event.getTarget() == selectAll)
 		{
 			toggleSelectionForAll(selectAll.isChecked());
+			isNewLineSaved = true;
 		}
 		else if (event.getName().equals("onSelectRow"))
 		{
@@ -825,7 +827,14 @@ public class QuickGridView extends Vbox
 			{
 				int rowChangedIndex = gridTab.getTableModel().getRowChanged();
 				int currentRow = row % paging.getPageSize() + (paging.getActivePage() * paging.getPageSize());
-				if (rowChangedIndex == currentRow || !isNewLineSaved)
+				// update index of pagination if multiple records created 
+				// (e.g select multiple products)
+				if (paging.getTotalSize() != gridTab.getRowCount())
+				{
+					updateListIndex();
+					isNewLineSaved = true;
+				}
+				if (rowChangedIndex == currentRow)
 				{
 					if (!save(code, row, col))
 					{
@@ -838,8 +847,9 @@ public class QuickGridView extends Vbox
 			{
 				row += 1;
 				int currentRow = row % paging.getPageSize() + (paging.getActivePage() * paging.getPageSize());
-				if ((currentRow == totalRow && isNewLineSaved)
+				if (((currentRow == totalRow)
 						|| (row % paging.getPageSize() == 0 && paging.getActivePage() == (paging.getPageCount() - 1)))
+						&& isNewLineSaved)
 				{
 					createNewLine();
 					updateListIndex();
@@ -849,6 +859,14 @@ public class QuickGridView extends Vbox
 						return;
 					}
 				}
+				// stop from creating new record if new record blank or not save
+				else if (((currentRow == totalRow)
+						|| (row % paging.getPageSize() == 0 && paging.getActivePage() == (paging.getPageCount() - 1))))
+				{
+					event.stopPropagation();
+					return;
+				}
+
 				if (row % paging.getPageSize() == 0)
 				{
 					updateListIndex();
@@ -869,6 +887,15 @@ public class QuickGridView extends Vbox
 			}
 			else if (code == KeyEvent.UP && !isCtrl && !isAlt && !isShift)
 			{
+				// remove new record if blank
+				// TODO Test for Click EVENT
+				int currentRow = gridTab.getCurrentRow();
+				if ((totalRow - 1) == currentRow && !isNewLineSaved)
+				{
+					gridTab.query(false);
+					gridTab.setCurrentRow(currentRow);
+				}
+
 				row -= 1;
 				if (paging.getActivePage() > 0 && (row + 1) % paging.getPageSize() == 0)
 				{
@@ -877,6 +904,13 @@ public class QuickGridView extends Vbox
 					listModel.setPage(paging.getActivePage());
 					updateModelIndex(paging.getPageSize() - 1);
 					row = currenRow;
+				}
+
+				// update page index after remove new record
+				if (!isNewLineSaved)
+				{
+					updateListIndex();
+					isNewLineSaved = true;
 				}
 
 				if (row < 0)
@@ -917,6 +951,14 @@ public class QuickGridView extends Vbox
 		}
 		else if (event.getName().equals(Events.ON_FOCUS))
 		{
+			// update index of pagination if multiple records created if user use mouse to select record
+			// (e.g select multiple products)
+			if (paging.getTotalSize() != gridTab.getRowCount())
+			{
+				updateListIndex();
+				isNewLineSaved = true;
+			}
+
 			Component source = event.getTarget();
 			while (source != null && !(source.getClass() == Cell.class))
 			{
@@ -1020,7 +1062,9 @@ public class QuickGridView extends Vbox
 		if (isSave)
 		{
 			int currentRow = gridTab.getCurrentRow();
-			gridTab.query(true);
+			// is use it not give exception and functionality is working
+			// properly (i.e for payment term window)
+			gridTab.query(false);
 			gridTab.setCurrentRow(currentRow);
 		}
 		else
@@ -1445,8 +1489,8 @@ public class QuickGridView extends Vbox
 	 */
 	public boolean dataSave(int code) {
 		boolean isSave = false;
-		isSave = gridTab.dataSave(true);
-
+		//save only if new record modify 
+		isSave = gridTab.dataSave(false);
 		if (isSave) {
 			isNewLineSaved = true;
 		}
