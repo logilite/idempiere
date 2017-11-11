@@ -202,6 +202,7 @@ public class WQuickForm extends Window implements EventListener<Event>
 		if (gridTab.getRowCount() <= 0)
 			quickGridView.createNewLine();
 		quickGridView.updateListIndex();
+		Events.echoEvent("onSetFocusToFirstCell", quickGridView, null);
 	}
 
 	private void onDelete()
@@ -209,15 +210,10 @@ public class WQuickForm extends Window implements EventListener<Event>
 		if (gridTab == null)
 			return;
 
-		if (!quickGridView.isNewLineSaved)
-		{
-			quickGridView.setStatusLine("First, Save new record!", true, true);
-			return;
-		}
-
 		final int[] indices = gridTab.getSelection();
 		if (indices.length > 0)
 		{
+			quickGridView.isNewLineSaved = true;
 			StringBuilder sb = new StringBuilder();
 			sb.append(Env.getContext(Env.getCtx(), gridTab.getWindowNo(), "_WinInfo_WindowName", false)).append(" - ")
 					.append(indices.length).append(" ").append(Msg.getMsg(Env.getCtx(), "Selected"));
@@ -246,6 +242,7 @@ public class WQuickForm extends Window implements EventListener<Event>
 			}
 			quickGridView.updateListIndex();
 		}
+		Events.echoEvent("onSetFocusToFirstCell", quickGridView, null);
 	}
 
 	private void onSave(boolean isShowError)
@@ -254,6 +251,7 @@ public class WQuickForm extends Window implements EventListener<Event>
 
 		quickGridView.setStatusLine("Saved", false, true);
 		gridTab.dataRefreshAll();
+		Events.echoEvent("onSetFocusToFirstCell", quickGridView, null);
 	}
 
 	private void onRefresh()
@@ -261,6 +259,7 @@ public class WQuickForm extends Window implements EventListener<Event>
 		gridTab.dataRefreshAll();
 		quickGridView.isNewLineSaved = true;
 		quickGridView.updateListIndex();
+		Events.echoEvent("onSetFocusToFirstCell", quickGridView, null);
 	}
 
 	@Override

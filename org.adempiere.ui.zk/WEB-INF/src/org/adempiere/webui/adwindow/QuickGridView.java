@@ -217,6 +217,10 @@ public class QuickGridView extends Vbox
 		addEventListener("onSelectRow", this);
 		addEventListener("onCustomizeGrid", this);
 		addEventListener("onPageNavigate", this);
+		addEventListener("onClickToNavigate", this);
+		addEventListener("onSetFocusToFirstCell", this);
+		
+		
 	}
 
 	public QuickGridView(AbstractADWindowContent abstractADWindowContent, GridTab gridTab)
@@ -476,7 +480,7 @@ public class QuickGridView extends Vbox
 			if (paging.getActivePage() != pgNo) {
 				paging.setActivePage(pgNo);
 			}
-			if (rowIndex >= 0 && pgIndex >= 0) {
+			if (rowIndex >= 0 && pgIndex >= 0 && isNewLineSaved) {
 				echoOnPostSelectedRowChanged();
 			}
 		} else {
@@ -774,12 +778,16 @@ public class QuickGridView extends Vbox
 		else if (event.getTarget() == selectAll)
 		{
 			toggleSelectionForAll(selectAll.isChecked());
-			isNewLineSaved = true;
 		}
 		else if (event.getName().equals("onSelectRow"))
 		{
 			Checkbox checkbox = (Checkbox) event.getData();
 			int rowIndex = (Integer) checkbox.getAttribute(GridTabRowRenderer.GRID_ROW_INDEX_ATTR);
+			if ((gridTab.getRowCount() - 1) == rowIndex && !isNewLineSaved)
+			{
+				checkbox.setChecked(false);
+				return;
+			}
 			if (checkbox.isChecked())
 			{
 				gridTab.addToSelection(rowIndex);
@@ -853,10 +861,10 @@ public class QuickGridView extends Vbox
 				{
 					createNewLine();
 					updateListIndex();
+					toggleSelectionForAll(false);
 					if (!(row % paging.getPageSize() == 0))
 					{
 						event.stopPropagation();
-						return;
 					}
 				}
 				// stop from creating new record if new record blank or not save
@@ -888,11 +896,10 @@ public class QuickGridView extends Vbox
 			else if (code == KeyEvent.UP && !isCtrl && !isAlt && !isShift)
 			{
 				// remove new record if blank
-				// TODO Test for Click EVENT
 				int currentRow = gridTab.getCurrentRow();
 				if ((totalRow - 1) == currentRow && !isNewLineSaved)
 				{
-					gridTab.query(false);
+					gridTab.dataIgnore();
 					gridTab.setCurrentRow(currentRow);
 				}
 
@@ -956,6 +963,15 @@ public class QuickGridView extends Vbox
 			if (paging.getTotalSize() != gridTab.getRowCount())
 			{
 				updateListIndex();
+			}
+			int totalRow = gridTab.getRowCount();
+			int currentRow = gridTab.getCurrentRow();
+			if ((totalRow - 1) != currentRow && !isNewLineSaved)
+			{
+				gridTab.dataIgnore();
+				gridTab.setCurrentRow(currentRow);
+				isNewLineSaved = false;
+				updateListIndex();
 				isNewLineSaved = true;
 			}
 
@@ -972,7 +988,7 @@ public class QuickGridView extends Vbox
 				setFocusOnDiv(source);
 
 				int rowChange = renderer.getCurrentRowIndex();
-
+				int currentcol = renderer.getCurrentRow().getChildren().indexOf(renderer.getCurrentCell());
 				if (row != rowChange)
 				{
 					int rowChangedIndex = gridTab.getTableModel().getRowChanged();
@@ -980,6 +996,7 @@ public class QuickGridView extends Vbox
 					{
 						if (!save(KeyEvent.RIGHT, row, col))
 							return;
+						Events.postEvent("onClickToNavigate", this, currentcol);
 					}
 				}
 			}
@@ -988,6 +1005,25 @@ public class QuickGridView extends Vbox
 		{
 			renderer.setCurrentCell(null);
 			renderer.setCurrentCell(0, 1, KeyEvent.RIGHT);
+		}
+		else if (event.getName().equals("onClickToNavigate"))
+		{
+			int row = renderer.getCurrentRowIndex();
+			int col = (int) event.getData();
+
+			renderer.setCurrentCell(row, col, KeyEvent.RIGHT);
+
+			Row currntRow = renderer.getCurrentRow();
+			currntRow.setStyle(QuickGridTabRowRenderer.CURRENT_ROW_STYLE);
+		}
+		else if (event.getName().equals("onSetFocusToFirstCell"))
+		{
+			int row = renderer.getCurrentRowIndex() % paging.getPageSize();
+
+			renderer.setCurrentCell(row, 1, KeyEvent.RIGHT);
+
+			Row currntRow = renderer.getCurrentRow();
+			currntRow.setStyle(QuickGridTabRowRenderer.CURRENT_ROW_STYLE);
 		}
 		event.stopPropagation();
 	}
@@ -1039,6 +1075,11 @@ public class QuickGridView extends Vbox
 				Checkbox checkbox = (Checkbox) firstChild;
 				checkbox.setChecked(b);
 				int rowIndex = (Integer) checkbox.getAttribute(GridTabRowRenderer.GRID_ROW_INDEX_ATTR);
+				if ((gridTab.getRowCount() - 1) == rowIndex && !isNewLineSaved)
+				{
+					checkbox.setChecked(false);
+					continue;
+				}
 				if (b)
 					gridTab.addToSelection(rowIndex);
 				else
@@ -1061,11 +1102,7 @@ public class QuickGridView extends Vbox
 		boolean isSave = dataSave(code);
 		if (isSave)
 		{
-			int currentRow = gridTab.getCurrentRow();
-			// is use it not give exception and functionality is working
-			// properly (i.e for payment term window)
-			gridTab.query(false);
-			gridTab.setCurrentRow(currentRow);
+			gridTab.dataRefreshAll();
 		}
 		else
 		{

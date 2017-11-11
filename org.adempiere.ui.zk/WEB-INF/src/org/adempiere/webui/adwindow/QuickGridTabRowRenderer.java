@@ -81,7 +81,7 @@ public class QuickGridTabRowRenderer
 	private static final String CELL_DIV_STYLE = "height: 100%; cursor: pointer; ";
 	private static final String CELL_DIV_STYLE_ALIGN_CENTER = CELL_DIV_STYLE + "text-align:center; ";
 	private static final String CELL_DIV_STYLE_ALIGN_RIGHT = CELL_DIV_STYLE + "text-align:right; ";
-	private static final String CURRENT_ROW_STYLE = "border-top: 2px solid #6f97d2; border-bottom: 2px solid #6f97d2";
+	public static final String CURRENT_ROW_STYLE = "border-top: 2px solid #6f97d2; border-bottom: 2px solid #6f97d2";
 
 	private static final int MAX_TEXT_LENGTH_DEFAULT = 60;
 	private GridTab gridTab;
@@ -647,7 +647,7 @@ public class QuickGridTabRowRenderer
 			}
 		}
 		if (isActive != null && !isActive.booleanValue()) {
-			script = "jq('#"+row.getUuid()+"').addClass('grid-inactive-row').siblings().removeClass('highlight')"; // TODO commented
+			script = "jq('#"+row.getUuid()+"').addClass('grid-inactive-row').siblings().removeClass('highlight')";
 		}
 		
 		Clients.response(new AuScript(script));
@@ -866,4 +866,6 @@ public class QuickGridTabRowRenderer
 			Events.sendEvent(gridPanel, new Event("onSelectRow", gridPanel, checkBox));
 		}
 	}
+
+	
 }
