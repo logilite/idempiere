@@ -422,8 +422,8 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 			CompiereService m_cs = getCompiereService();
 			addLoginResponse(m_cs,rResp);
 
-			if (response != null && response.getRunProcessResponse() != null && response.getRunProcessResponse().getIsError())
-				log.warning("Error running webservice " + serviceType + " -> " + response.getRunProcessResponse().getError());
+			if (response != null && response.getStandardResponse() != null && response.getStandardResponse().getIsError())
+				log.warning("Error running webservice " + serviceType + " -> " + response.getStandardResponse().getError());
 			return response;
 		} finally {
 			if (!connected)
