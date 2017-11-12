@@ -961,7 +961,6 @@ public class MOrder extends X_C_Order implements DocAction
 
 	private volatile static boolean recursiveCall = false;
 
-	private volatile static boolean recursiveCall = false;
 	/**************************************************************************
 	 * 	Before Save
 	 *	@param newRecord new

@@ -1024,7 +1024,6 @@ public class MInvoice extends X_C_Invoice implements DocAction
 
 	private volatile static boolean recursiveCall = false;
 
-	private volatile static boolean recursiveCall = false;
 	/**************************************************************************
 	 * 	Before Save
 	 *	@param newRecord new
