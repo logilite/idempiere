@@ -2460,7 +2460,8 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
             }
             else if (evt.getNewValue() instanceof Integer[] || evt.getNewValue() instanceof String[])
             {
-            	Env.setContext(m_findCtx, m_targetWindowNo, editor.getColumnName(), Util.convertArrayToStringForDB(evt.getNewValue()));
+            	Env.setContext(ctx, m_targetWindowNo, editor.getColumnName(), Util.convertArrayToStringForDB(evt.getNewValue()));
+            	Env.setContext(ctx, m_targetWindowNo, TABNO, editor.getColumnName(), Util.convertArrayToStringForDB(evt.getNewValue()));
             }
             else
             {
