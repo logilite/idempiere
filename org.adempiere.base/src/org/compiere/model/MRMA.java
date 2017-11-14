@@ -28,8 +28,12 @@ import java.util.logging.Level;
 import org.adempiere.base.Core;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.model.ITaxProvider;
+import org.compiere.print.MPrintFormat;
+import org.compiere.print.ReportEngine;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
+import org.compiere.process.ProcessInfo;
+import org.compiere.process.ServerProcessCtl;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -235,10 +239,27 @@ public class MRMA extends X_M_RMA implements DocAction
 	 */
 	public File createPDF (File file)
 	{
-	//	ReportEngine re = ReportEngine.get (getCtx(), ReportEngine.INVOICE, getC_Invoice_ID());
-	//	if (re == null)
+		ReportEngine re = ReportEngine.get (getCtx(), ReportEngine.RMA, getM_RMA_ID(), get_TrxName());
+		
+		if (re == null)
 			return null;
-	//	return re.getPDF(file);
+		MPrintFormat format = re.getPrintFormat();
+		// We have a Jasper Print Format
+		// ==============================
+		if(format.getJasperProcess_ID() > 0)	
+		{
+			ProcessInfo pi = new ProcessInfo ("", format.getJasperProcess_ID());
+			pi.setRecord_ID ( getM_RMA_ID() );
+			pi.setIsBatch(true);
+			
+			ServerProcessCtl.process(pi, null);
+			
+			return pi.getPDFReport();
+		}
+		// Standard Print Format (Non-Jasper)
+		// ==================================
+		return re.getPDF(file);
+			
 	}	//	createPDF
 
 
