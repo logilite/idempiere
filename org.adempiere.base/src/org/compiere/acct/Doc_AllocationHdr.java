@@ -222,7 +222,10 @@ public class Doc_AllocationHdr extends Doc
 					fl = fact.createLine (line, getPaymentAcct(as, line.getC_Payment_ID()),
 						getC_Currency_ID(), line.getAmtSource(), null);
 					if (fl != null && payment != null)
+					{
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
+						fl.setC_BPartner_ID(payment.getC_BPartner_ID());
+					}
 				}
 				else
 				{
@@ -263,7 +266,10 @@ public class Doc_AllocationHdr extends Doc
 						fl = fact.createLine (line, getPaymentAcct(as, line.getC_Payment_ID()),
 							getC_Currency_ID(), line.getAmtSource(), null);
 						if (fl != null && payment != null)
+						{
 							fl.setAD_Org_ID(payment.getAD_Org_ID());
+							fl.setC_BPartner_ID(payment.getC_BPartner_ID());
+						}
 					}
 					else if (line.getC_CashLine_ID() != 0)
 					{
@@ -283,7 +289,10 @@ public class Doc_AllocationHdr extends Doc
 					fl = fact.createLine (line, getAccount(Doc.ACCTTYPE_DiscountExp, as),
 						getC_Currency_ID(), line.getDiscountAmt(), null);
 					if (fl != null && payment != null)
+					{
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
+						fl.setC_BPartner_ID(payment.getC_BPartner_ID());
+					}
 				}
 				//	Write off		DR
 				if (Env.ZERO.compareTo(line.getWriteOffAmt()) != 0)
@@ -291,7 +300,10 @@ public class Doc_AllocationHdr extends Doc
 					fl = fact.createLine (line, getAccount(Doc.ACCTTYPE_WriteOff, as),
 						getC_Currency_ID(), line.getWriteOffAmt(), null);
 					if (fl != null && payment != null)
+					{
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
+						fl.setC_BPartner_ID(payment.getC_BPartner_ID());
+					}
 				}
 
 				//	AR Invoice Amount	CR
@@ -303,7 +315,10 @@ public class Doc_AllocationHdr extends Doc
 					if (fl != null)
 						allocationAccounted = fl.getAcctBalance().negate();
 					if (fl != null && invoice != null)
+					{
 						fl.setAD_Org_ID(invoice.getAD_Org_ID());
+						fl.setC_BPartner_ID(invoice.getC_BPartner_ID());
+					}
 
 					// for Realized Gain & Loss
 					flForRGL = factForRGL.createLine (line, bpAcct,
@@ -356,7 +371,10 @@ public class Doc_AllocationHdr extends Doc
 					if (fl != null)
 						allocationAccounted = fl.getAcctBalance();
 					if (fl != null && invoice != null)
+					{
 						fl.setAD_Org_ID(invoice.getAD_Org_ID());
+						fl.setC_BPartner_ID(invoice.getC_BPartner_ID());
+					}
 
 					// for Realized Gain & Loss
 					flForRGL = factForRGL.createLine (line, bpAcct,
@@ -377,7 +395,10 @@ public class Doc_AllocationHdr extends Doc
 					fl = fact.createLine (line, getAccount(Doc.ACCTTYPE_DiscountRev, as),
 						getC_Currency_ID(), null, line.getDiscountAmt().negate());
 					if (fl != null && payment != null)
+					{
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
+						fl.setC_BPartner_ID(payment.getC_BPartner_ID());
+					}
 				}
 				//	Write off		CR
 				if (Env.ZERO.compareTo(line.getWriteOffAmt()) != 0)
@@ -385,7 +406,10 @@ public class Doc_AllocationHdr extends Doc
 					fl = fact.createLine (line, getAccount(Doc.ACCTTYPE_WriteOff, as),
 						getC_Currency_ID(), null, line.getWriteOffAmt().negate());
 					if (fl != null && payment != null)
+					{
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
+						fl.setC_BPartner_ID(payment.getC_BPartner_ID());
+					}
 				}
 				//	Payment/Cash	CR
 				if (isUsingClearing && line.getC_Payment_ID() != 0) // Avoid usage of clearing accounts
@@ -393,7 +417,10 @@ public class Doc_AllocationHdr extends Doc
 					fl = fact.createLine (line, getPaymentAcct(as, line.getC_Payment_ID()),
 						getC_Currency_ID(), null, line.getAmtSource().negate());
 					if (fl != null && payment != null)
+					{
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
+						fl.setC_BPartner_ID(payment.getC_BPartner_ID());
+					}
 				}
 				else if (isUsingClearing && line.getC_CashLine_ID() != 0) // Avoid usage of clearing accounts
 				{
