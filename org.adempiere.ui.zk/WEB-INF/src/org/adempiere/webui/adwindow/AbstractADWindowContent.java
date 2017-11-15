@@ -2752,7 +2752,16 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	 */
 	private void actionButton0 (String col, final IProcessButton wButton)
 	{
-		final IADTabpanel adtabPanel = findADTabpanel(wButton);
+		//To perform button action (adtabPanel is null in QuickForm)  
+		IADTabpanel adtabPanel = null;
+		if (adTabbox.getSelectedGridTab().isQuickForm())
+		{
+			adtabPanel=this.getADTab().getSelectedTabpanel();
+		}
+		else
+		{
+			adtabPanel = findADTabpanel(wButton);
+		}
 		boolean startWOasking = false;
 		if (adtabPanel == null) {
 			return;
@@ -3005,7 +3014,15 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 			ProcessInfo pi = new ProcessInfo (title, wButton.getProcess_ID(), table_ID, record_ID);
 			pi.setAD_User_ID (Env.getAD_User_ID(ctx));
 			pi.setAD_Client_ID (Env.getAD_Client_ID(ctx));
-			final IADTabpanel adtabPanel = findADTabpanel(wButton);
+			IADTabpanel adtabPanel = null;
+			if (adTabbox.getSelectedGridTab().isQuickForm())
+			{
+				adtabPanel=this.getADTab().getSelectedTabpanel();
+			}
+			else
+			{
+				adtabPanel = findADTabpanel(wButton);
+			}
 			GridTab gridTab = null;
 			if (adtabPanel != null)
 				gridTab = adtabPanel.getGridTab();
@@ -3090,7 +3107,15 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	 */
 	private String processButtonCallout (IProcessButton button)
 	{
-		IADTabpanel adtab = findADTabpanel(button);
+		IADTabpanel adtab = null;
+		if (adTabbox.getSelectedGridTab().isQuickForm())
+		{
+			adtab=this.getADTab().getSelectedTabpanel();
+		}
+		else
+		{
+			adtab = findADTabpanel(button);
+		}
 		if (adtab != null) {
 			GridField field = adtab.getGridTab().getField(button.getColumnName());
 			if (field != null)
