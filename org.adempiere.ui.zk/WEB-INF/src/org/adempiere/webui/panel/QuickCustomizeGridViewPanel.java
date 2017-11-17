@@ -420,6 +420,7 @@ public class QuickCustomizeGridViewPanel extends Panel {
 		ok = MTabCustomization.saveData(Env.getCtx(), m_AD_Tab_ID, m_AD_User_ID, custom.toString(), null, null,true);
 		if (ok) {
 			m_saved = true;
+			gridview.setStatusLine("Customize Preference Saved.", false);
 			if (gridview != null) {
 				Events.postEvent("onCustomizeGrid", gridview, null);
 			}

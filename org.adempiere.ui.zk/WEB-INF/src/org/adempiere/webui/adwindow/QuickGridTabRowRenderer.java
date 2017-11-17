@@ -28,8 +28,12 @@ import org.adempiere.webui.component.Combobox;
 import org.adempiere.webui.component.Datebox;
 import org.adempiere.webui.component.DatetimeBox;
 import org.adempiere.webui.component.EditorBox;
+import org.adempiere.webui.component.FilenameBox;
 import org.adempiere.webui.component.Locationbox;
+import org.adempiere.webui.component.MultiSelectBox;
 import org.adempiere.webui.component.NumberBox;
+import org.adempiere.webui.component.PAttributebox;
+import org.adempiere.webui.component.Paymentbox;
 import org.adempiere.webui.component.Searchbox;
 import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Urlbox;
@@ -67,6 +71,7 @@ import org.zkoss.zul.RendererCtrl;
 import org.zkoss.zul.Row;
 import org.zkoss.zul.RowRenderer;
 import org.zkoss.zul.RowRendererExt;
+import org.zkoss.zul.Timebox;
 
 /**
  * Row renderer for Quick GridTab grid.
@@ -434,6 +439,10 @@ public class QuickGridTabRowRenderer
 				else if (DisplayType.isNumeric(gridPanelFields[i].getDisplayType())) {
 					divStyle = CELL_DIV_STYLE_ALIGN_RIGHT;
 				}
+				if (isDisableReadonlyComponent(component))
+				{
+					divStyle +="color: black !important;" ;
+				}
 				
 				GridRowCtx ctx = new GridRowCtx(Env.getCtx(), gridTab, rowIndex);
 				if (!gridPanelFields[i].isDisplayed(ctx, true)){
@@ -479,6 +488,128 @@ public class QuickGridTabRowRenderer
 		}
 	}
 
+	/**
+	 * Disable Read-only components for while pressing tab button focus goes to
+	 * read-only component.
+	 * 
+	 * @param component
+	 * @return
+	 */
+	private boolean isDisableReadonlyComponent(Component component)
+	{
+		boolean isReadonly = false;
+		if (component instanceof NumberBox)
+		{
+			if (((NumberBox) component).getDecimalbox().isReadonly())
+			{
+				((NumberBox) component).getDecimalbox().setDisabled(true);
+				isReadonly = true;
+			}
+		}
+		else if (component instanceof Textbox)
+		{
+			if (((Textbox) component).isReadonly())
+			{
+				((Textbox) component).setDisabled(true);
+				isReadonly = true;
+			}
+		}
+		else if (component instanceof Datebox)
+		{
+			if (((Datebox) component).isReadonly())
+			{
+				((Datebox) component).setDisabled(true);
+				isReadonly = true;
+			}
+		}
+		else if (component instanceof DatetimeBox)
+		{
+			if (((DatetimeBox) component).getTimebox().isReadonly())
+			{
+				((DatetimeBox) component).getTimebox().setDisabled(true);
+				isReadonly = true;
+			}
+			if (((DatetimeBox) component).getDatebox().isReadonly())
+			{
+				((DatetimeBox) component).getDatebox().setDisabled(true);
+				isReadonly = true;
+			}
+		}
+		else if (component instanceof Searchbox)
+		{
+			if (((Searchbox) component).getTextbox().isReadonly())
+			{
+				((Searchbox) component).getTextbox().setDisabled(true);
+				isReadonly = true;
+			}
+		}
+		else if (component instanceof Combinationbox)
+		{
+			if (((Combinationbox) component).getTextbox().isReadonly())
+			{
+				((Combinationbox) component).getTextbox().setDisabled(true);
+				isReadonly = true;
+			}
+		}
+		else if (component instanceof EditorBox)
+		{
+			if (((EditorBox) component).getTextbox().isReadonly())
+			{
+				((EditorBox) component).getTextbox().setDisabled(true);
+				isReadonly = true;
+			}
+		}
+		else if (component instanceof Urlbox)
+		{
+			if (((Urlbox) component).getTextbox().isReadonly())
+			{
+				((Urlbox) component).getTextbox().setDisabled(true);
+				isReadonly = true;
+			}
+		}
+		else if (component instanceof FilenameBox)
+		{
+			if (((FilenameBox) component).getTextbox().isReadonly())
+			{
+				((FilenameBox) component).getTextbox().setDisabled(true);
+				isReadonly = true;
+			}
+		}
+		else if (component instanceof Timebox)
+		{
+			if (((Timebox) component).isReadonly())
+			{
+				((Timebox) component).setDisabled(true);
+				isReadonly = true;
+			}
+		}
+		else if (component instanceof Paymentbox)
+		{
+			if (((Paymentbox) component).getCombobox().isReadonly())
+			{
+				((Paymentbox) component).getCombobox().setDisabled(true);
+				isReadonly = true;
+			}
+		}
+		else if (component instanceof PAttributebox)
+		{
+			if (((PAttributebox) component).getTextbox().isReadonly())
+			{
+				((PAttributebox) component).getTextbox().setDisabled(true);
+				isReadonly = true;
+			}
+		}
+		else if (component instanceof MultiSelectBox)
+		{
+			if (((MultiSelectBox) component).getTextbox().isReadonly())
+			{
+				((MultiSelectBox) component).getTextbox().setDisabled(true);
+				isReadonly = true;
+			}
+		}
+		return isReadonly;
+	}
+
 	private Cell currentCell = null;
 
 	public Cell getCurrentCell() {
@@ -492,16 +623,70 @@ public class QuickGridTabRowRenderer
 	public void setCurrentCell(int row, int col, int code) {
 		if (col < 0)
 			return;
-		while (!isEditable(row, col)) {
-			if (!(code == KeyEvent.RIGHT || code == KeyEvent.LEFT))
+		int currentCol = col;
+		boolean isLastCell = false;
+		while (!isEditable(row, col))
+		{
+			if (!(code == KeyEvent.RIGHT || code == KeyEvent.LEFT || code == KeyEvent.DOWN || code == KeyEvent.UP))
+			{
 				break;
+			}
 			else if (code == KeyEvent.RIGHT)
+			{
 				++col;
+			}
 			else if (code == KeyEvent.LEFT)
+			{
 				--col;
+			}
+			// on UP/DOWN go to next editable field if move field is not
+			// editable
+			else if (code == KeyEvent.DOWN || code == KeyEvent.UP)
+			{
+				if (isLastCell)
+				{
+					col--;
 
-			if (col < 1) {
+				}
+				else
+				{
+					col++;
+					if (col > gridPanel.getGridField().length)
+					{
+						col = currentCol;
+						isLastCell = true;
+					}
+
+				}
+			}
+
+			if (col < 1 && !isLastCell)
+			{
 				setFocusOnCurrentCell();
+				return;
+			}
+		}
+		// skip the record if no editable field present
+		if (col < 1 && isLastCell)
+		{
+			if (code == KeyEvent.DOWN || code == KeyEvent.UP)
+			{
+				if (code == KeyEvent.DOWN)
+				{
+					row++;
+					if (row >= gridTab.getRowCount() % paging.getPageSize()
+							+ (paging.getActivePage() * paging.getPageSize()))
+					{
+						gridPanel.createNewLine();
+						gridPanel.updateListIndex();
+						row = row % paging.getPageSize() + (paging.getActivePage() * paging.getPageSize());
+					}
+				}
+				if (code == KeyEvent.UP)
+				{
+					row--;
+				}
+				setCurrentCell(row, currentCol, code);
 				return;
 			}
 		}
@@ -545,36 +730,57 @@ public class QuickGridTabRowRenderer
 			return true;
 		if (cell.getChildren().size() <= 0)
 			return false;
-
-		if (cell.getChildren().get(0) instanceof NumberBox
-				&& (!((NumberBox) cell.getChildren().get(0)).getDecimalbox().isDisabled()
-						&& !((NumberBox) cell.getChildren().get(0)).getDecimalbox().isReadonly()))
+		//get component of cell 
+		Component component = cell.getChildren().get(0);
+		if (component instanceof NumberBox && (!((NumberBox) component).getDecimalbox().isDisabled()
+				&& !((NumberBox) component).getDecimalbox().isReadonly()
+				&& ((NumberBox) component).getDecimalbox().isVisible()))
 			return true;
-		else if (cell.getChildren().get(0) instanceof Checkbox && ((Checkbox) cell.getChildren().get(0)).isEnabled())
+		else if (component instanceof Checkbox
+				&& (((Checkbox) component).isEnabled() && ((Checkbox) component).isVisible()))
 			return true;
-		else if (cell.getChildren().get(0) instanceof Combobox && ((Combobox) cell.getChildren().get(0)).isEnabled())
+		else if (component instanceof Combobox
+				&& (((Combobox) component).isEnabled() && ((Combobox) component).isVisible()))
 			return true;
-		else if (cell.getChildren().get(0) instanceof Textbox && (!((Textbox) cell.getChildren().get(0)).isDisabled()
-				&& !((Textbox) cell.getChildren().get(0)).isReadonly()))
+		else if (component instanceof Textbox && (!((Textbox) component).isDisabled()
+				&& !((Textbox) component).isReadonly() && ((Textbox) component).isVisible()))
 			return true;
-		else if (cell.getChildren().get(0) instanceof Datebox && ((Datebox) cell.getChildren().get(0)).isEnabled())
+		else if (component instanceof Datebox
+				&& (((Datebox) component).isEnabled() && ((Datebox) component).isVisible()))
 			return true;
-		else if (cell.getChildren().get(0) instanceof DatetimeBox
-				&& ((DatetimeBox) cell.getChildren().get(0)).isEnabled())
+		else if (component instanceof DatetimeBox
+				&& (((DatetimeBox) component).isEnabled() && ((DatetimeBox) component).isVisible()))
 			return true;
-		else if (cell.getChildren().get(0) instanceof Locationbox
-				&& ((Locationbox) cell.getChildren().get(0)).isEnabled())
+		else if (component instanceof Locationbox
+				&& (((Locationbox) component).isEnabled() && ((Locationbox) component).isVisible()))
 			return true;
-		else if (cell.getChildren().get(0) instanceof Searchbox
-				&& (!((Searchbox) cell.getChildren().get(0)).getTextbox().isDisabled()
-						&& !((Searchbox) cell.getChildren().get(0)).getTextbox().isReadonly()))
+		else if (component instanceof Searchbox && (!((Searchbox) component).getTextbox().isDisabled()
+				&& !((Searchbox) component).getTextbox().isReadonly()
+				&& ((Searchbox) component).getTextbox().isVisible()))
 			return true;
-		else if (cell.getChildren().get(0) instanceof Button && ((Button) cell.getChildren().get(0)).isEnabled())
+		else if (component instanceof Button && (((Button) component).isEnabled() && ((Button) component).isVisible()))
 			return true;
-		else if (cell.getChildren().get(0) instanceof Combinationbox
-				&& ((Combinationbox) cell.getChildren().get(0)).isEnabled())
+		else if (component instanceof Combinationbox
+				&& (((Combinationbox) component).isEnabled() && ((Combinationbox) component).isVisible()))
 			return true;
-		else if (cell.getChildren().get(0) instanceof EditorBox && ((EditorBox) cell.getChildren().get(0)).isEnabled())
+		else if (component instanceof EditorBox
+				&& (((EditorBox) component).isEnabled() && ((EditorBox) component).isVisible()))
+			return true;
+		else if (component instanceof Urlbox && (((Urlbox) component).isEnabled() && ((Urlbox) component).isVisible()))
+			return true;
+		else if (component instanceof FilenameBox
+				&& (((FilenameBox) component).isEnabled() && ((FilenameBox) component).isVisible()))
+			return true;
+		else if (component instanceof Timebox && ((Timebox) component).isVisible())
+			return true;
+		else if (component instanceof Paymentbox
+				&& (((Paymentbox) component).isEnabled() && ((Paymentbox) component).isVisible()))
+			return true;
+		else if (component instanceof PAttributebox
+				&& (((PAttributebox) component).isEnabled() && ((PAttributebox) component).isVisible()))
+			return true;
+		else if (component instanceof MultiSelectBox
+				&& (((MultiSelectBox) component).isEnabled() && ((MultiSelectBox) component).isVisible()))
 			return true;
 		else
 			return false;
@@ -585,32 +791,53 @@ public class QuickGridTabRowRenderer
 			return;
 		}
 
-		if (currentCell.getChildren().get(0) instanceof NumberBox) {
-			((NumberBox) currentCell.getChildren().get(0)).focus();
-			((NumberBox) currentCell.getChildren().get(0)).getDecimalbox().select();
-		} else if (currentCell.getChildren().get(0) instanceof Checkbox)
-			((Checkbox) currentCell.getChildren().get(0)).focus();
-		else if (currentCell.getChildren().get(0) instanceof Combobox)
-			((Combobox) currentCell.getChildren().get(0)).focus();
-		else if (currentCell.getChildren().get(0) instanceof Textbox) {
-			((Textbox) currentCell.getChildren().get(0)).focus();
-			((Textbox) currentCell.getChildren().get(0)).select();
-		} else if (currentCell.getChildren().get(0) instanceof Datebox)
-			((Datebox) currentCell.getChildren().get(0)).focus();
-		else if (currentCell.getChildren().get(0) instanceof DatetimeBox)
-			((DatetimeBox) currentCell.getChildren().get(0)).focus();
-		else if (currentCell.getChildren().get(0) instanceof Locationbox)
-			((Locationbox) currentCell.getChildren().get(0)).focus();
-		else if (currentCell.getChildren().get(0) instanceof Combinationbox) {
-			((Combinationbox) currentCell.getChildren().get(0)).getTextbox().focus();
-			((Combinationbox) currentCell.getChildren().get(0)).getTextbox().select();
-		} else if (currentCell.getChildren().get(0) instanceof Searchbox) {
-			((Searchbox) currentCell.getChildren().get(0)).getTextbox().focus();
-			((Searchbox) currentCell.getChildren().get(0)).getTextbox().select();
-		} else if (currentCell.getChildren().get(0) instanceof Button)
-			((Button) currentCell.getChildren().get(0)).focus();
-		else if (currentCell.getChildren().get(0) instanceof EditorBox)
-			((EditorBox) currentCell.getChildren().get(0)).focus();
+		Component component = currentCell.getChildren().get(0);
+		if (component instanceof NumberBox)
+		{
+			((NumberBox) component).focus();
+			((NumberBox) component).getDecimalbox().select();
+		}
+		else if (component instanceof Checkbox)
+			((Checkbox) component).focus();
+		else if (component instanceof Combobox)
+			((Combobox) component).focus();
+		else if (component instanceof Textbox)
+		{
+			((Textbox) component).focus();
+			((Textbox) component).select();
+		}
+		else if (component instanceof Datebox)
+			((Datebox) component).focus();
+		else if (component instanceof DatetimeBox)
+			((DatetimeBox) component).focus();
+		else if (component instanceof Locationbox)
+			((Locationbox) component).focus();
+		else if (component instanceof Combinationbox)
+		{
+			((Combinationbox) component).getTextbox().focus();
+			((Combinationbox) component).getTextbox().select();
+		}
+		else if (component instanceof Searchbox)
+		{
+			((Searchbox) component).getTextbox().focus();
+			((Searchbox) component).getTextbox().select();
+		}
+		else if (component instanceof Button)
+			((Button) component).focus();
+		else if (component instanceof EditorBox)
+			((EditorBox) component).focus();
+		else if (component instanceof Urlbox)
+			((Urlbox) component).focus();
+		else if (component instanceof FilenameBox)
+			((FilenameBox) component).focus();
+		else if (component instanceof Timebox)
+			((Timebox) component).focus();
+		else if (component instanceof Paymentbox)
+			((Paymentbox) component).focus();
+		else if (component instanceof PAttributebox)
+			((PAttributebox) component).focus();
+		else if (component instanceof MultiSelectBox)
+			((MultiSelectBox) component).focus();
 		else
 			((HtmlBasedComponent) currentCell).focus();
 	} // setFocusOnCurrentCell
@@ -619,21 +846,7 @@ public class QuickGridTabRowRenderer
 	 * @param row
 	 */
 	public void setCurrentRow(Row row) {
-		if (currentRow != null && currentRow.getParent() != null && currentRow != row) {
-			Cell cell = (Cell) currentRow.getChildren().get(1);
-			if (cell != null) {
-				cell.setSclass("row-indicator");
-			}
-		}
 		currentRow = row;
-		if (currentRow.getChildren().size() > 1)
-		{
-			Cell cell = (Cell) currentRow.getChildren().get(1);
-			if (cell != null)
-			{
-				cell.setSclass("row-indicator-selected");
-			}
-		}
 
 		String script = "jq('#" + row.getUuid() + "').addClass('highlight').siblings().removeClass('highlight')";
 

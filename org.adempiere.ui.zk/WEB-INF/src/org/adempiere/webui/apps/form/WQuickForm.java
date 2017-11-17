@@ -1,14 +1,13 @@
 /******************************************************************************
- * Copyright (C) 2016 Logilite Technologies LLP								  *
- * This program is free software; you can redistribute it and/or modify it    *
- * under the terms version 2 of the GNU General Public License as published   *
- * by the Free Software Foundation. This program is distributed in the hope   *
- * that it will be useful, but WITHOUT ANY WARRANTY; without even the implied *
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.           *
- * See the GNU General Public License for more details.                       *
- * You should have received a copy of the GNU General Public License along    *
- * with this program; if not, write to the Free Software Foundation, Inc.,    *
- * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.                     *
+ * Copyright (C) 2016 Logilite Technologies LLP * This program is free software;
+ * you can redistribute it and/or modify it * under the terms version 2 of the
+ * GNU General Public License as published * by the Free Software Foundation.
+ * This program is distributed in the hope * that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied * warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. * See the GNU General Public License for
+ * more details. * You should have received a copy of the GNU General Public
+ * License along * with this program; if not, write to the Free Software
+ * Foundation, Inc., * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA. *
  *****************************************************************************/
 
 package org.adempiere.webui.apps.form;
@@ -53,38 +52,36 @@ public class WQuickForm extends Window implements EventListener<Event>
 	/**
 	 * 
 	 */
-	private static final long		serialVersionUID		= -5095168843989540551L;
+	private static final long		serialVersionUID	= -5095168843989540551L;
 
-	public Trx						trx						= null;
+	public Trx						trx					= null;
 
-	private Borderlayout			mainLayout				= new Borderlayout();
-	private AbstractADWindowContent	abstractADWindowContent	= null;
-	private QuickGridView			quickGridView			= null;
+	private Borderlayout			mainLayout			= new Borderlayout();
+	private AbstractADWindowContent	adWinContent		= null;
+	private QuickGridView			quickGridView		= null;
 	private GridTab					gridTab;
 
-	private ConfirmPanel			confirmPanel			= new ConfirmPanel(true, true, false, false, false, false);
+	private ConfirmPanel			confirmPanel		= new ConfirmPanel(true, true, false, false, false, false);
 
-	private Button					bDelete					= confirmPanel.createButton(ConfirmPanel.A_DELETE);
-	private Button					bSave					= confirmPanel.createButton("Save");
-	private Button					bIgnore					= confirmPanel.createButton("Ignore");
-	private Button					bCustomize				= confirmPanel.createButton("Customize");
+	private Button					bDelete				= confirmPanel.createButton(ConfirmPanel.A_DELETE);
+	private Button					bSave				= confirmPanel.createButton("Save");
+	private Button					bIgnore				= confirmPanel.createButton("Ignore");
+	private Button					bCustomize			= confirmPanel.createButton("Customize");
 
-	private boolean					onlyCurrentRows			= false;
+	private boolean					onlyCurrentRows		= false;
 
-	private int						onlyCurrentDays			= 0;
+	private int						onlyCurrentDays		= 0;
 
 	public WQuickForm(AbstractADWindowContent winContent, boolean m_onlyCurrentRows, int m_onlyCurrentDays)
 	{
 		super();
 
-		abstractADWindowContent = winContent;
+		adWinContent = winContent;
 		onlyCurrentRows = m_onlyCurrentRows;
 		onlyCurrentDays = m_onlyCurrentDays;
-
-		this.gridTab = abstractADWindowContent.getADTab().getSelectedGridTab();
-		this.quickGridView = new QuickGridView(abstractADWindowContent, gridTab);
+		this.gridTab = adWinContent.getADTab().getSelectedGridTab();
+		this.quickGridView = new QuickGridView(adWinContent, gridTab);
 		this.quickGridView.setVisible(true);
-
 		initForm();
 		gridTab.isQuickForm = true;
 	}
@@ -105,8 +102,12 @@ public class WQuickForm extends Window implements EventListener<Event>
 
 		// South
 		Panel south = new Panel();
+
+		// Adding statusBar for Quick Form
+		south.appendChild(adWinContent.getStatusBarQF());
+		ZkCssHelper.appendStyle(adWinContent.getStatusBarQF(), "height: 20px; padding-bottom: 3px background: white");
 		south.appendChild(confirmPanel);
-		ZkCssHelper.appendStyle(south, "height: 50px; padding-top: 9px; background: #9c9c9c;");
+		ZkCssHelper.appendStyle(confirmPanel, "height: 50px; padding-top: 9px; background: #9c9c9c;");
 
 		bSave.setEnabled(!gridTab.isReadOnly());
 		bDelete.setEnabled(!gridTab.isReadOnly());
@@ -183,21 +184,19 @@ public class WQuickForm extends Window implements EventListener<Event>
 			columnsWidth.put(fields[i].getAD_Field_ID(), width);
 			gridFieldIds.add(fields[i].getAD_Field_ID());
 		}
-		
+
 		quickGridView.setWidth(getWidth());
 		quickGridView.setHeight(getHeight());
 
 		CustomizeGridViewDialog.showCustomize(0, gridTab.getAD_Tab_ID(), columnsWidth, gridFieldIds, null,
 				quickGridView, true);
-
-		quickGridView.setStatusLine("Windows settings saved.", false, true);
 	}
 
 	private void onIgnore()
 	{
-		quickGridView.setStatusLine("Changes rolled back", false, true);
 		gridTab.dataIgnore();
 		gridTab.dataRefreshAll();
+		adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "Ignored"), false);
 		quickGridView.isNewLineSaved = true;
 		if (gridTab.getRowCount() <= 0)
 			quickGridView.createNewLine();
@@ -209,7 +208,6 @@ public class WQuickForm extends Window implements EventListener<Event>
 	{
 		if (gridTab == null)
 			return;
-
 		final int[] indices = gridTab.getSelection();
 		if (indices.length > 0)
 		{
@@ -219,6 +217,7 @@ public class WQuickForm extends Window implements EventListener<Event>
 					.append(indices.length).append(" ").append(Msg.getMsg(Env.getCtx(), "Selected"));
 
 			gridTab.clearSelection();
+			quickGridView.toggleSelectionForAll(false);
 			Arrays.sort(indices);
 			int offset = 0;
 			int count = 0;
@@ -230,9 +229,13 @@ public class WQuickForm extends Window implements EventListener<Event>
 					offset++;
 					count++;
 				}
+				else
+				{
+					break;
+				}
 			}
-			gridTab.dataRefresh(true);
-			quickGridView.setStatusLine(count + " Record(s) deleted.", false, true);
+			if (count == indices.length)
+				adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "Deleted") + ": " + count, false);
 
 			// if all records is deleted then it will show default with new
 			// record.
@@ -247,16 +250,18 @@ public class WQuickForm extends Window implements EventListener<Event>
 
 	private void onSave(boolean isShowError)
 	{
-		quickGridView.dataSave(0);
-
-		quickGridView.setStatusLine("Saved", false, true);
-		gridTab.dataRefreshAll();
+		if (quickGridView.dataSave(0))
+		{
+			gridTab.dataRefreshAll();
+			adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "Saved"), false);
+		}
 		Events.echoEvent("onSetFocusToFirstCell", quickGridView, null);
 	}
 
 	private void onRefresh()
 	{
 		gridTab.dataRefreshAll();
+		adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "Refresh"), false);
 		quickGridView.isNewLineSaved = true;
 		quickGridView.updateListIndex();
 		Events.echoEvent("onSetFocusToFirstCell", quickGridView, null);
@@ -270,7 +275,7 @@ public class WQuickForm extends Window implements EventListener<Event>
 		gridTab.setQuickForm(false);
 		onIgnore();
 		quickGridView.dispose();
-		abstractADWindowContent.getADTab().getSelectedTabpanel().query(onlyCurrentRows, onlyCurrentDays,
+		adWinContent.getADTab().getSelectedTabpanel().query(onlyCurrentRows, onlyCurrentDays,
 				MRole.getDefault().getMaxQueryRecords()); // autoSize
 	}
 
@@ -286,7 +291,7 @@ public class WQuickForm extends Window implements EventListener<Event>
 			}
 			else
 			{
-				quickGridView.setStatusLine("Cannot insert records on the tab.", true, true);
+				adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "NewError"), true);
 			}
 		}
 	}
