@@ -28,6 +28,7 @@ import org.adempiere.base.Core;
 import org.adempiere.model.MTabCustomization;
 import org.adempiere.util.GridRowCtx;
 import org.adempiere.webui.apps.AEnv;
+import org.adempiere.webui.component.Button;
 import org.adempiere.webui.component.Checkbox;
 import org.adempiere.webui.component.Columns;
 import org.adempiere.webui.component.Combobox;
@@ -106,7 +107,7 @@ public class QuickGridView extends Vbox
 
 	private static final String ATTR_ON_POST_SELECTED_ROW_CHANGED = "org.adempiere.webui.adwindow.GridView.onPostSelectedRowChanged";
 
-	private static final String	CNTRL_KEYS	= "#left#right#up#down#home#enter";
+	public static final String	CNTRL_KEYS	= "#left#right#up#down#home#enter^k";
 	
 	private Grid listbox = null;
 
@@ -127,9 +128,9 @@ public class QuickGridView extends Vbox
 
 	private boolean init;
 
-	private GridTableListModel listModel;
+	public GridTableListModel listModel;
 
-	private Paging paging;
+	public Paging paging;
 
 	private QuickGridTabRowRenderer renderer;
 
@@ -155,13 +156,11 @@ public class QuickGridView extends Vbox
 
 	public boolean isNewLineSaved = true;
 
-	public boolean isNewLineSaved() {
-		return isNewLineSaved;
-	}
+	// Save and Close Quick form by 'Ctrl + K'
+	private static final int		KEYBOARD_KEY_K						= 75;
 
-	public void setNewLineSaved(boolean isNewLineSaved) {
-		this.isNewLineSaved = isNewLineSaved;
-	}
+	public Button					bOK;
+
 
 	public GridField[] getGridField() {
 		return gridFields;
@@ -197,7 +196,7 @@ public class QuickGridView extends Vbox
 		}
 		else
 		{
-			pageSize = MSysConfig.getIntValue(MSysConfig.ZK_PAGING_SIZE, DEFAULT_PAGE_SIZE, Env.getAD_Client_ID(Env.getCtx()));
+			pageSize = MSysConfig.getIntValue(MSysConfig.QUICKFORM_PAGE_SIZE, DEFAULT_PAGE_SIZE, Env.getAD_Client_ID(Env.getCtx()));
 			String limit = Library.getProperty(CustomGridDataLoader.GRID_DATA_LOADER_LIMIT);
 			if (limit == null || !(limit.equals(Integer.toString(pageSize)))) {
 				Library.setProperty(CustomGridDataLoader.GRID_DATA_LOADER_LIMIT, Integer.toString(pageSize));
@@ -243,7 +242,7 @@ public class QuickGridView extends Vbox
 	public void setDetailPaneMode(boolean detailPaneMode) {
 		if (this.detailPaneMode != detailPaneMode) {
 			this.detailPaneMode = detailPaneMode;
-			pageSize =  detailPaneMode ? DEFAULT_DETAIL_PAGE_SIZE : MSysConfig.getIntValue(MSysConfig.ZK_PAGING_SIZE, 20, Env.getAD_Client_ID(Env.getCtx()));
+			pageSize =  detailPaneMode ? DEFAULT_DETAIL_PAGE_SIZE : MSysConfig.getIntValue(MSysConfig.QUICKFORM_PAGE_SIZE, 20, Env.getAD_Client_ID(Env.getCtx()));
 			updatePaging();
 		}
 	}
@@ -650,8 +649,6 @@ public class QuickGridView extends Vbox
 		updateEmptyMessage();
 		
 		listbox.addEventListener(Events.ON_CLICK, this);
-		
-		SessionManager.getSessionApplication().getKeylistener().addEventListener(Events.ON_CTRL_KEY, this);
 
 		updateModel();
 
@@ -863,6 +860,7 @@ public class QuickGridView extends Vbox
 					toggleSelectionForAll(false);
 					if (!(row % paging.getPageSize() == 0))
 					{
+						Events.echoEvent("onSetFocusToFirstCell", this, null);
 						event.stopPropagation();
 					}
 				}
@@ -928,6 +926,10 @@ public class QuickGridView extends Vbox
 			{
 				row = 0;
 			}
+			else if (code == KEYBOARD_KEY_K && isCtrl && !isAlt && !isShift)
+			{
+				Events.echoEvent(Events.ON_CLICK, bOK, null);
+			}
 			else
 			{
 				renderer.setCurrentCell(row, col, code);
@@ -967,11 +969,11 @@ public class QuickGridView extends Vbox
 			int currentRow = gridTab.getCurrentRow();
 			if ((totalRow - 1) != currentRow && !isNewLineSaved)
 			{
-				gridTab.dataIgnore();
-				gridTab.setCurrentRow(currentRow);
-				isNewLineSaved = false;
+
 				updateListIndex();
 				isNewLineSaved = true;
+				gridTab.dataIgnore();
+				gridTab.setCurrentRow(currentRow);
 			}
 
 			Component source = event.getTarget();
@@ -1254,7 +1256,7 @@ public class QuickGridView extends Vbox
 		return true;
 	}
 
-	private boolean updateModelIndex(int rowIndex) {
+	public boolean updateModelIndex(int rowIndex) {
 		if (pageSize > 0) {
 			int start = listModel.getPage() * listModel.getPageSize();
 			rowIndex = start + rowIndex;
@@ -1559,9 +1561,5 @@ public class QuickGridView extends Vbox
 		super.onPageDetached(page);
 		keyListener.setCtrlKeys(keyListener.getCtrlKeys().replaceAll(CNTRL_KEYS, ""));
 		keyListener.removeEventListener(Events.ON_CTRL_KEY, this);
-	}
-	
-	public void dispose() {
-		SessionManager.getSessionApplication().getKeylistener().removeEventListener(Events.ON_CTRL_KEY, this);
 	}
 }

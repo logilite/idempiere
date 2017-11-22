@@ -26,6 +26,7 @@ import org.adempiere.webui.component.ConfirmPanel;
 import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.component.ZkCssHelper;
+import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.window.CustomizeGridViewDialog;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
@@ -33,6 +34,7 @@ import org.compiere.model.MRole;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
+import org.zkforge.keylistener.Keylistener;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -72,6 +74,8 @@ public class WQuickForm extends Window implements EventListener<Event>
 
 	private int						onlyCurrentDays		= 0;
 
+	QuickGridView					prevQGV				= null;
+
 	public WQuickForm(AbstractADWindowContent winContent, boolean m_onlyCurrentRows, int m_onlyCurrentDays)
 	{
 		super();
@@ -84,6 +88,12 @@ public class WQuickForm extends Window implements EventListener<Event>
 		this.quickGridView.setVisible(true);
 		initForm();
 		gridTab.isQuickForm = true;
+
+		quickGridView.bOK = confirmPanel.getButton(ConfirmPanel.A_OK);
+
+		// To maintain parent-child Quick Form
+		prevQGV = adWinContent.getCurrQGV();
+		adWinContent.setCurrQGV(quickGridView);
 	}
 
 	protected void initForm()
@@ -274,7 +284,27 @@ public class WQuickForm extends Window implements EventListener<Event>
 
 		gridTab.setQuickForm(false);
 		onIgnore();
-		quickGridView.dispose();
+		int tabLevel = adWinContent.getToolbar().getQuickFormTabHrchyLevel();
+		if (tabLevel > 0)
+		{
+			adWinContent.getToolbar().setQuickFormTabHrchyLevel(tabLevel - 1);
+			Keylistener keyListener = SessionManager.getSessionApplication().getKeylistener();
+			keyListener.setCtrlKeys(keyListener.getCtrlKeys() + QuickGridView.CNTRL_KEYS);
+
+			// Add Key-listener of parent Quick Form
+			if (prevQGV != null)
+			{
+				adWinContent.onParentRecord();
+				SessionManager.getSessionApplication().getKeylistener().addEventListener(Events.ON_CTRL_KEY, prevQGV);
+			}
+			// TODO need to set focus on last focused row of parent Form.
+			Events.echoEvent("onPageNavigate", prevQGV, null);
+			adWinContent.setCurrQGV(prevQGV);
+		}
+		else
+		{
+			adWinContent.setCurrQGV(null);
+		}
 		adWinContent.getADTab().getSelectedTabpanel().query(onlyCurrentRows, onlyCurrentDays,
 				MRole.getDefault().getMaxQueryRecords()); // autoSize
 	}

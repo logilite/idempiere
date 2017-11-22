@@ -130,6 +130,10 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 	private long prevKeyEventTime = 0;
 
 	private KeyEvent prevKeyEvent;
+	
+	// Maintain hierarchical Quick form by its parent-child tab while open leaf
+	// tab once & dispose and doing same action
+	private int							quickFormTabHrchyLevel		= 0;
 
 	/**	Last Modifier of Action Event					*/
 //	public int 				lastModifiers;
@@ -594,10 +598,33 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 			}
 		}
 		else if (!keyEvent.isAltKey() && keyEvent.isCtrlKey() && !keyEvent.isShiftKey())
-			btn = ctrlKeyMap.get(keyEvent.getKeyCode());
+		{
+			if (keyEvent.getKeyCode() == KeyEvent.F2)
+			{
+				quickFormTabHrchyLevel = quickFormTabHrchyLevel + 1;
+				fireButtonClickEvent(keyEvent, btnDetailRecord);
+				fireButtonClickEvent(keyEvent, btnQuickForm);
+				return;
+			}
+			else
+			{
+				btn = ctrlKeyMap.get(keyEvent.getKeyCode());
+			}
+		}
 		else if (!keyEvent.isAltKey() && !keyEvent.isCtrlKey() && !keyEvent.isShiftKey())
 			btn = keyMap.get(keyEvent.getKeyCode());
+		else if (!keyEvent.isAltKey() && !keyEvent.isCtrlKey() && keyEvent.isShiftKey())
+		{
+			if (keyEvent.getKeyCode() == KeyEvent.F2)
+			{
+				btn = btnQuickForm;
+			}
+		}
+		fireButtonClickEvent(keyEvent, btn);
+	}
 
+	private void fireButtonClickEvent(KeyEvent keyEvent, ToolBarButton btn)
+	{
 		if (btn != null) {
 			prevKeyEventTime = System.currentTimeMillis();
         	prevKeyEvent = keyEvent;
@@ -801,5 +828,21 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 		if (newpage != null) {
 			SessionManager.getSessionApplication().getKeylistener().addEventListener(Events.ON_CTRL_KEY, this);
 		}
+	}
+
+	/**
+	 * @return
+	 */
+	public int getQuickFormTabHrchyLevel()
+	{
+		return quickFormTabHrchyLevel;
+	}
+
+	/**
+	 * @param quickFormHrchyTabLevel
+	 */
+	public void setQuickFormTabHrchyLevel(int quickFormHrchyTabLevel)
+	{
+		this.quickFormTabHrchyLevel = quickFormHrchyTabLevel;
 	}
 }

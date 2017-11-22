@@ -40,6 +40,7 @@ import org.adempiere.webui.component.Urlbox;
 import org.adempiere.webui.editor.WButtonEditor;
 import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.editor.WImageEditor;
+import org.adempiere.webui.editor.WNumberEditor;
 import org.adempiere.webui.editor.WPAttributeEditor;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WebEditorFactory;
@@ -429,6 +430,11 @@ public class QuickGridTabRowRenderer
 					((WSearchEditor) componenteditor).getComponent().getButton().addEventListener(Events.ON_FOCUS,
 							gridPanel);
 				}
+				else if (componenteditor instanceof WNumberEditor)
+				{
+					((WNumberEditor) componenteditor).getComponent().getButton().addEventListener(Events.ON_FOCUS,
+							gridPanel);
+				}
 				if (gridPanelFields[i].isHeading()) {
 					component.setVisible(false);
 				}
@@ -485,6 +491,23 @@ public class QuickGridTabRowRenderer
 		}
 		if (currentCell == null || currentCell.getUuid() == null) {
 			setCurrentCell(gridTab.getCurrentRow(), 1, KeyEvent.RIGHT);
+		}
+		// Set focus to first editable cell of the last record if multiple
+		// records inserted
+		if (gridPanel.paging.getTotalSize() != gridTab.getRowCount())
+		{
+			gridPanel.updateListIndex();
+			if (!gridPanel.isNewLineSaved)
+			{
+			        gridPanel.isNewLineSaved = true;
+				paging.setActivePage(
+						paging.getActivePage() + (paging.getActivePage() == (paging.getPageCount() - 1) ? 0 : 1));
+				gridPanel.listModel.setPage(paging.getActivePage());
+				gridPanel.updateModelIndex(0);
+				setCurrentCell(gridTab.getRowCount() - 1 % paging.getPageSize()
+						- (paging.getActivePage() * paging.getPageSize()), 1, KeyEvent.RIGHT);
+			}
+			Events.echoEvent("onSetFocusToFirstCell", gridPanel, null);
 		}
 	}
 
@@ -687,7 +710,6 @@ public class QuickGridTabRowRenderer
 					row--;
 				}
 				setCurrentCell(row, currentCol, code);
-				return;
 			}
 		}
 

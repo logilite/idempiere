@@ -1092,7 +1092,14 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 			return;
 		
 		statusBarQF = new StatusBar();
-		
+		// Remove Key-listener of parent Quick Form
+		int tabLevel = getToolbar().getQuickFormTabHrchyLevel();
+		if (tabLevel > 0 && getCurrQGV() != null)
+		{
+			SessionManager.getSessionApplication().getKeylistener().removeEventListener(Events.ON_CTRL_KEY,
+					getCurrQGV());
+		}
+
 		WQuickForm form = new WQuickForm(this, m_onlyCurrentRows, m_onlyCurrentDays);
 		form.setTitle(this.getADTab().getSelectedGridTab().getName());
 		form.setVisible(true);
@@ -3451,6 +3458,27 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	public StatusBar getStatusBarQF()
 	{
 		return statusBarQF;
+	}
+	
+	/**
+	 * Implementation to work key listener for the current opened Quick Form.
+	 */
+	QuickGridView currQGV = null;
+
+	/**
+	 * @return
+	 */
+	public QuickGridView getCurrQGV()
+	{
+		return currQGV;
+	}
+
+	/**
+	 * @param currQGV
+	 */
+	public void setCurrQGV(QuickGridView currQGV)
+	{
+		this.currQGV = currQGV;
 	}
 
 }
