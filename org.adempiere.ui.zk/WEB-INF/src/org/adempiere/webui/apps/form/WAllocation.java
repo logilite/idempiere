@@ -82,7 +82,7 @@ public class WAllocation extends Allocation
 	implements IFormController, EventListener<Event>, WTableModelListener, ValueChangeListener
 {
 
-	private CustomForm form = new CustomForm();
+	protected CustomForm form = new CustomForm();
 
 	/**
 	 *	Initialize Panel
@@ -108,50 +108,50 @@ public class WAllocation extends Allocation
 	}	//	init
 	
 	//
-	private Borderlayout mainLayout = new Borderlayout();
-	private Panel parameterPanel = new Panel();
-	private Panel allocationPanel = new Panel();
-	private Grid parameterLayout = GridFactory.newGridLayout();
-	private Label bpartnerLabel = new Label();
-	private WSearchEditor bpartnerSearch = null;
-	private WListbox invoiceTable = ListboxFactory.newDataTable();
-	private WListbox paymentTable = ListboxFactory.newDataTable();
-	private Borderlayout infoPanel = new Borderlayout();
-	private Panel paymentPanel = new Panel();
-	private Panel invoicePanel = new Panel();
-	private Label paymentLabel = new Label();
-	private Label invoiceLabel = new Label();
-	private Borderlayout paymentLayout = new Borderlayout();
-	private Borderlayout invoiceLayout = new Borderlayout();
-	private Label paymentInfo = new Label();
-	private Label invoiceInfo = new Label();
-	private Grid allocationLayout = GridFactory.newGridLayout();
-	private Label differenceLabel = new Label();
-	private Textbox differenceField = new Textbox();
-	private Button allocateButton = new Button();
-	private Button refreshButton = new Button();
-	private Label currencyLabel = new Label();
-	private WTableDirEditor currencyPick = null;
-	private Checkbox multiCurrency = new Checkbox();
-	private Label chargeLabel = new Label();
-	private WTableDirEditor chargePick = null;
-	private Label DocTypeLabel = new Label();
-	private WTableDirEditor DocTypePick = null;
-	private Label allocCurrencyLabel = new Label();
-	private Hlayout statusBar = new Hlayout();
-	private Label dateLabel = new Label();
-	private WDateEditor dateField = new WDateEditor();
-	private Checkbox autoWriteOff = new Checkbox();
-	private Label organizationLabel = new Label();
-	private WTableDirEditor organizationPick;
+	protected Borderlayout mainLayout = new Borderlayout();
+	protected Panel parameterPanel = new Panel();
+	protected Panel allocationPanel = new Panel();
+	protected Grid parameterLayout = GridFactory.newGridLayout();
+	protected Label bpartnerLabel = new Label();
+	protected WSearchEditor bpartnerSearch = null;
+	protected WListbox invoiceTable = ListboxFactory.newDataTable();
+	protected WListbox paymentTable = ListboxFactory.newDataTable();
+	protected Borderlayout infoPanel = new Borderlayout();
+	protected Panel paymentPanel = new Panel();
+	protected Panel invoicePanel = new Panel();
+	protected Label paymentLabel = new Label();
+	protected Label invoiceLabel = new Label();
+	protected Borderlayout paymentLayout = new Borderlayout();
+	protected Borderlayout invoiceLayout = new Borderlayout();
+	protected Label paymentInfo = new Label();
+	protected Label invoiceInfo = new Label();
+	protected Grid allocationLayout = GridFactory.newGridLayout();
+	protected Label differenceLabel = new Label();
+	protected Textbox differenceField = new Textbox();
+	protected Button allocateButton = new Button();
+	protected Button refreshButton = new Button();
+	protected Label currencyLabel = new Label();
+	protected WTableDirEditor currencyPick = null;
+	protected Checkbox multiCurrency = new Checkbox();
+	protected Label chargeLabel = new Label();
+	protected WTableDirEditor chargePick = null;
+	protected Label DocTypeLabel = new Label();
+	protected WTableDirEditor DocTypePick = null;
+	protected Label allocCurrencyLabel = new Label();
+	protected Hlayout statusBar = new Hlayout();
+	protected Label dateLabel = new Label();
+	protected WDateEditor dateField = new WDateEditor();
+	protected Checkbox autoWriteOff = new Checkbox();
+	protected Label organizationLabel = new Label();
+	protected WTableDirEditor organizationPick;
 	
-	private Panel southPanel = new Panel();
+	protected Panel southPanel = new Panel();
 
 	/**
 	 *  Static Init
 	 *  @throws Exception
 	 */
-	private void zkInit() throws Exception
+	public void zkInit() throws Exception
 	{
 		//
 		form.appendChild(mainLayout);
@@ -492,7 +492,7 @@ public class WAllocation extends Allocation
 			loadBPartner();
 	}   //  vetoableChange
 	
-	private void setAllocateButton() {
+	public void setAllocateButton() {
 			if (totalDiff.signum() == 0 ^ m_C_Charge_ID > 0 )
 			{
 				allocateButton.setEnabled(true);
@@ -514,7 +514,7 @@ public class WAllocation extends Allocation
 	 *  - Payments
 	 *  - Invoices
 	 */
-	private void loadBPartner ()
+	public void loadBPartner ()
 	{
 		checkBPartner();
 		
@@ -578,7 +578,7 @@ public class WAllocation extends Allocation
 	/**************************************************************************
 	 *  Save Data
 	 */
-	private MAllocationHdr saveData()
+	public MAllocationHdr saveData()
 	{
 		if (m_AD_Org_ID > 0)
 			Env.setContext(Env.getCtx(), form.getWindowNo(), "AD_Org_ID", m_AD_Org_ID);
