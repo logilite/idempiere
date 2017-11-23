@@ -1541,8 +1541,8 @@ public class MInOut extends X_M_InOut implements DocAction
 				MOrderLine oLine = null;
 				if (sLine.getC_OrderLine_ID() != 0)
 				{
-				oLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(sLine.getC_OrderLine_ID(),
-						get_TrxName());
+					oLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(sLine.getC_OrderLine_ID(),
+							get_TrxName());
 					if (log.isLoggable(Level.FINE)) log.fine("OrderLine - Reserved=" + oLine.getQtyReserved()
 						+ ", Delivered=" + oLine.getQtyDelivered());
 				}
@@ -1553,8 +1553,8 @@ public class MInOut extends X_M_InOut implements DocAction
 	
 	            if (sLine.getM_RMALine_ID() != 0)
 	            {
-				rmaLine = (MRMALine) MTable.get(getCtx(), MRMALine.Table_ID).getPO(sLine.getM_RMALine_ID(),
-						get_TrxName());
+					rmaLine = (MRMALine) MTable.get(getCtx(), MRMALine.Table_ID).getPO(sLine.getM_RMALine_ID(),
+							get_TrxName());
 	            }
 	
 				if (log.isLoggable(Level.INFO)) log.info("Line=" + sLine.getLine() + " - Qty=" + sLine.getMovementQty());
@@ -1662,7 +1662,6 @@ public class MInOut extends X_M_InOut implements DocAction
 								}
 							}
 						}
-						
 					}
 					//	sLine.getM_AttributeSetInstance_ID() != 0
 					if (mtrx == null)
@@ -1815,21 +1814,20 @@ public class MInOut extends X_M_InOut implements DocAction
 							sLine.getM_InOutLine_ID(), iLine.getC_InvoiceLine_ID(), get_TrxName());
 						if (matches == null || matches.length == 0)
 						{
-						
-						MMatchInvHdr matchInvHdr = null;
-						
+							MMatchInvHdr matchInvHdr = null;
+							
 							MMatchInv inv = new MMatchInv (iLine, getMovementDate(), matchQty);
-						
-						if(MSysConfig.getBooleanValue(MSysConfig.MATCH_INV_HEADER_ENABLED, false, getAD_Client_ID()))
-						{
-							matchInvHdr = new MMatchInvHdr(getCtx(), 0, get_TrxName());
-							matchInvHdr.setDateAcct(this.getDateAcct());
-							matchInvHdr.setDateTrx(this.getMovementDate());
-							matchInvHdr.setDescription(this.getDescription());
-							matchInvHdr.saveEx();
-							inv.setM_MatchInvHdr_ID(matchInvHdr.get_ID());
-						}
-						
+							
+							if(MSysConfig.getBooleanValue(MSysConfig.MATCH_INV_HEADER_ENABLED, false, getAD_Client_ID()))
+							{
+								matchInvHdr = new MMatchInvHdr(getCtx(), 0, get_TrxName());
+								matchInvHdr.setDateAcct(this.getDateAcct());
+								matchInvHdr.setDateTrx(this.getMovementDate());
+								matchInvHdr.setDescription(this.getDescription());
+								matchInvHdr.saveEx();
+								inv.setM_MatchInvHdr_ID(matchInvHdr.get_ID());
+							}
+							
 							if (sLine.getM_AttributeSetInstance_ID() != iLine.getM_AttributeSetInstance_ID())
 							{
 								iLine.setM_AttributeSetInstance_ID(sLine.getM_AttributeSetInstance_ID());
@@ -1842,25 +1840,25 @@ public class MInOut extends X_M_InOut implements DocAction
 								return DocAction.STATUS_Invalid;
 							}
 						
-						if (matchInvHdr != null)
-						{
-							try
+							if (matchInvHdr != null)
 							{
-								matchInvHdr.processIt(DocAction.ACTION_Complete);
+								try
+								{
+									matchInvHdr.processIt(DocAction.ACTION_Complete);
+								}
+								catch (Exception e)
+								{
+									log.log(Level.SEVERE, "Failed to complete match invoice header", e);
+								}
+								matchInvHdr.saveEx();
+								addDocsPostProcess(matchInvHdr);
 							}
-							catch (Exception e)
+							else
 							{
-								log.log(Level.SEVERE, "Failed to complete match invoice header", e);
+								addDocsPostProcess(inv);
 							}
-							matchInvHdr.saveEx();
-							addDocsPostProcess(matchInvHdr);
-						}
-						else
-						{
-							addDocsPostProcess(inv);
 						}
 					}
-				}
 	
 					//	Link to Order
 					if (sLine.getC_OrderLine_ID() != 0)
@@ -1878,16 +1876,16 @@ public class MInOut extends X_M_InOut implements DocAction
 								addDocsPostProcess(po);
 							MMatchInv matchInvCreated = po.getMatchInvCreated();
 							if (matchInvCreated != null) {
-							if(matchInvCreated.getM_MatchInvHdr_ID() > 0)
-							{
-								addDocsPostProcess((PO) matchInvCreated.getM_MatchInvHdr());
-							}
-							else
-							{
-								addDocsPostProcess(matchInvCreated);
+								if(matchInvCreated.getM_MatchInvHdr_ID() > 0)
+								{
+									addDocsPostProcess((PO) matchInvCreated.getM_MatchInvHdr());
+								}
+								else
+								{
+									addDocsPostProcess(matchInvCreated);
+								}
 							}
 						}
-					}
 						//	Update PO with ASI
 						if (   oLine != null && oLine.getM_AttributeSetInstance_ID() == 0
 							&& sLine.getMovementQty().compareTo(oLine.getQtyOrdered()) == 0) //  just if full match [ 1876965 ]
@@ -1905,7 +1903,7 @@ public class MInOut extends X_M_InOut implements DocAction
 							log.fine("PO(Inv) Matching");
 							//	Ship - Invoice
 							MMatchPO po = MMatchPO.create (iLine, sLine,
-								getMovementDate(), matchQty);
+								getMovementDate(), matchQty);	
 							if (po != null) {
 								if (!po.save(get_TrxName()))
 								{
@@ -1915,10 +1913,10 @@ public class MInOut extends X_M_InOut implements DocAction
 								if (!po.isPosted())
 									addDocsPostProcess(po);
 							}
-							
+						
 							//	Update PO with ASI
-						oLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(iLine.getC_OrderLine_ID(),
-								get_TrxName());
+							oLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(iLine.getC_OrderLine_ID(),
+									get_TrxName());
 							if (   oLine != null && oLine.getM_AttributeSetInstance_ID() == 0
 								&& sLine.getMovementQty().compareTo(oLine.getQtyOrdered()) == 0) //  just if full match [ 1876965 ]
 							{

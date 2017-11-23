@@ -593,7 +593,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 							return DocAction.STATUS_Invalid; 
 						}
 					
-					continue;
+						continue;
 					}
 				}
 	
@@ -622,10 +622,10 @@ public class MInventory extends X_M_Inventory implements DocAction
 					log.fine("Material Transaction");
 					MTransaction mtrx = null; 
 	
-				MInventoryLineMA mas[] = MInventoryLineMA.get(getCtx(), line.getM_InventoryLine_ID(), get_TrxName());
+					MInventoryLineMA mas[] = MInventoryLineMA.get(getCtx(), line.getM_InventoryLine_ID(), get_TrxName());
 				
-				if(mas.length > 0)
-				{
+					if(mas.length > 0)
+					{
 						for (int j = 0; j < mas.length; j++)
 						{
 							MInventoryLineMA ma = mas[j];
@@ -668,28 +668,27 @@ public class MInventory extends X_M_Inventory implements DocAction
 									line.getM_Locator_ID(), line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
 									QtyMA.negate(), getMovementDate(), get_TrxName());
 							
-								mtrx.setM_InventoryLine_ID(line.getM_InventoryLine_ID());
-								if (!mtrx.save())
-								{
-									m_processMsg = "Transaction not inserted(2)";
-									return DocAction.STATUS_Invalid;
-								}
-								
-								qtyDiff = QtyNew;						
-	
+							mtrx.setM_InventoryLine_ID(line.getM_InventoryLine_ID());
+							if (!mtrx.save())
+							{
+								m_processMsg = "Transaction not inserted(2)";
+								return DocAction.STATUS_Invalid;
+							}
+							
+							qtyDiff = QtyNew;						
 						}	
 					}
-				else
+					else
 					{
-					if(qtyDiff.signum() == 0)
+						if(qtyDiff.signum() == 0)
 						{
-						continue;
+							continue;
 						}
 						
-					Timestamp dateMPolicy= getMovementDate();
-					I_M_AttributeSetInstance asi = line.getM_AttributeSetInstance();
-					if (asi != null)
-						dateMPolicy =asi.getCreated();
+						Timestamp dateMPolicy= getMovementDate();
+						I_M_AttributeSetInstance asi = line.getM_AttributeSetInstance();
+						if (asi != null)
+							dateMPolicy =asi.getCreated();
 					
 						//Fallback: Update Storage - see also VMatch.createMatchRecord
 						if (!MStorageOnHand.add(getCtx(), getM_Warehouse_ID(),
