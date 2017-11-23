@@ -1087,6 +1087,12 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	public void onQuickForm()
 	{
 		logger.log(Level.FINE, "Invoke Quick Form");
+		// Not open Quick Form if already open.
+		if (!SessionManager.registerQuickFormTab(getADTab().getSelectedGridTab().getAD_Tab_ID()))
+		{
+			logger.fine("TabID=" + getActiveGridTab().getAD_Tab_ID() + "  is already opened.");
+			return;
+		}
 		int table_ID = adTabbox.getSelectedGridTab().getAD_Table_ID();
 		if (table_ID == -1)
 			return;

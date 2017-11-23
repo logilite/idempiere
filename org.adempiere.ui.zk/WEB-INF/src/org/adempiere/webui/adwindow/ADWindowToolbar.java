@@ -355,6 +355,7 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 		altKeyMap.put(VK_R, btnReport);		
 		altKeyMap.put(VK_P, btnPrint);
 		altKeyMap.put(VK_O, btnProcess);
+		altKeyMap.put(VK_L, btnCustomize);
 	}
 
 	protected void addSeparator()
@@ -388,6 +389,8 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
         } else if (eventName.equals(Events.ON_CTRL_KEY))
         {
         	KeyEvent keyEvent = (KeyEvent) event;
+        	if (SessionManager.getOpenQuickFormTabs().size() > 0  && !(keyEvent.getKeyCode() == KeyEvent.F2))
+        		return;
         	if (LayoutUtils.isReallyVisible(this)) {
 	        	//filter same key event that is too close
 	        	//firefox fire key event twice when grid is visible

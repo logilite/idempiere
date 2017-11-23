@@ -28,7 +28,7 @@ import org.adempiere.base.Core;
 import org.adempiere.model.MTabCustomization;
 import org.adempiere.util.GridRowCtx;
 import org.adempiere.webui.apps.AEnv;
-import org.adempiere.webui.component.Button;
+import org.adempiere.webui.apps.form.WQuickForm;
 import org.adempiere.webui.component.Checkbox;
 import org.adempiere.webui.component.Columns;
 import org.adempiere.webui.component.Combobox;
@@ -107,7 +107,7 @@ public class QuickGridView extends Vbox
 
 	private static final String ATTR_ON_POST_SELECTED_ROW_CHANGED = "org.adempiere.webui.adwindow.GridView.onPostSelectedRowChanged";
 
-	public static final String	CNTRL_KEYS	= "#left#right#up#down#home#enter^k";
+	public static final String  CNTRL_KEYS  = "#left#right#up#down#home@k";
 	
 	private Grid listbox = null;
 
@@ -156,11 +156,24 @@ public class QuickGridView extends Vbox
 
 	public boolean isNewLineSaved = true;
 
-	// Save and Close Quick form by 'Ctrl + K'
+	// 'Alt + K' for Save and Close
 	private static final int		KEYBOARD_KEY_K						= 75;
+	// 'Alt + S' for Save
+	private static final int		KEYBOARD_KEY_S						= 83;
+	// 'Alt + Z' for Ignore
+	private static final int		KEYBOARD_KEY_Z						= 90;
+	// 'Alt + E' for Refresh
+	private static final int		KEYBOARD_KEY_E						= 69;
+	// 'Enter' Work as Down key
+	private static final int		KEYBOARD_KEY_ENTER					= 13;
+	// 'Alt + D' for Delete
+	private static final int		KEYBOARD_KEY_D						= 68;
+	// 'Alt + X' for Close
+	private static final int		KEYBOARD_KEY_X						= 88;
+	// 'Alt + L' for opening Customize grid panel
+	private static final int		KEYBOARD_KEY_L						= 76;
 
-	public Button					bOK;
-
+	public WQuickForm				quickForm;
 
 	public GridField[] getGridField() {
 		return gridFields;
@@ -221,11 +234,11 @@ public class QuickGridView extends Vbox
 		
 	}
 
-	public QuickGridView(AbstractADWindowContent abstractADWindowContent, GridTab gridTab)
+	public QuickGridView(AbstractADWindowContent abstractADWindowContent, GridTab gridTab, WQuickForm wQuickForm)
 	{
 		this(abstractADWindowContent.getWindowNo());
 		setADWindowPanel(abstractADWindowContent);
-
+		this.quickForm = wQuickForm;
 		init(gridTab);
 	}
 
@@ -821,6 +834,11 @@ public class QuickGridView extends Vbox
 			if (col == -1 && (code == KeyEvent.LEFT || code == KeyEvent.RIGHT))
 				col = code == KeyEvent.LEFT ? 3 : 0;
 
+			if (code == KEYBOARD_KEY_ENTER && !isCtrl && !isAlt && !isShift)
+			{
+				code = KeyEvent.DOWN;
+			}
+
 			if ((code == KeyEvent.DOWN || code == KeyEvent.UP)
 					&& renderer.getCurrentCell().getChildren().get(0) instanceof Combobox)
 			{
@@ -926,9 +944,41 @@ public class QuickGridView extends Vbox
 			{
 				row = 0;
 			}
-			else if (code == KEYBOARD_KEY_K && isCtrl && !isAlt && !isShift)
+			else if (code == KEYBOARD_KEY_K && !isCtrl && isAlt && !isShift)
 			{
-				Events.echoEvent(Events.ON_CLICK, bOK, null);
+				quickForm.onSave(true);
+				quickForm.dispose();
+			}
+			else if (code == KEYBOARD_KEY_S && !isCtrl && isAlt && !isShift)
+			{
+				quickForm.onSave(true);
+			}
+			else if (code == KEYBOARD_KEY_D && !isCtrl && isAlt && !isShift)
+			{
+				if (!isNewLineSaved)
+					return;
+				int rowIndex = renderer.getCurrentRowIndex();
+				if (!gridTab.isSelected(rowIndex))
+				{
+					gridTab.addToSelection(rowIndex);
+				}
+				quickForm.onDelete();
+			}
+			else if (code == KEYBOARD_KEY_Z && !isCtrl && isAlt && !isShift)
+			{
+				quickForm.onIgnore();
+			}
+			else if (code == KEYBOARD_KEY_E && !isCtrl && isAlt && !isShift)
+			{
+				quickForm.onRefresh();
+			}
+			else if (code == KEYBOARD_KEY_X && !isCtrl && isAlt && !isShift)
+			{
+				quickForm.dispose();
+			}
+			else if (code == KEYBOARD_KEY_L && !isCtrl && isAlt && !isShift)
+			{
+				quickForm.onCustomize();
 			}
 			else
 			{
@@ -969,7 +1019,6 @@ public class QuickGridView extends Vbox
 			int currentRow = gridTab.getCurrentRow();
 			if ((totalRow - 1) != currentRow && !isNewLineSaved)
 			{
-
 				updateListIndex();
 				isNewLineSaved = true;
 				gridTab.dataIgnore();

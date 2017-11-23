@@ -84,12 +84,10 @@ public class WQuickForm extends Window implements EventListener<Event>
 		onlyCurrentRows = m_onlyCurrentRows;
 		onlyCurrentDays = m_onlyCurrentDays;
 		this.gridTab = adWinContent.getADTab().getSelectedGridTab();
-		this.quickGridView = new QuickGridView(adWinContent, gridTab);
+		this.quickGridView = new QuickGridView(adWinContent, gridTab, this);
 		this.quickGridView.setVisible(true);
 		initForm();
 		gridTab.isQuickForm = true;
-
-		quickGridView.bOK = confirmPanel.getButton(ConfirmPanel.A_OK);
 
 		// To maintain parent-child Quick Form
 		prevQGV = adWinContent.getCurrQGV();
@@ -179,7 +177,7 @@ public class WQuickForm extends Window implements EventListener<Event>
 		event.stopPropagation();
 	}
 
-	private void onCustomize()
+	public void onCustomize()
 	{
 		Columns columns = quickGridView.getListbox().getColumns();
 		List<Component> columnList = columns.getChildren();
@@ -202,7 +200,7 @@ public class WQuickForm extends Window implements EventListener<Event>
 				quickGridView, true);
 	}
 
-	private void onIgnore()
+	public void onIgnore()
 	{
 		gridTab.dataIgnore();
 		gridTab.dataRefreshAll();
@@ -214,7 +212,7 @@ public class WQuickForm extends Window implements EventListener<Event>
 		Events.echoEvent("onSetFocusToFirstCell", quickGridView, null);
 	}
 
-	private void onDelete()
+	public void onDelete()
 	{
 		if (gridTab == null)
 			return;
@@ -258,7 +256,7 @@ public class WQuickForm extends Window implements EventListener<Event>
 		Events.echoEvent("onSetFocusToFirstCell", quickGridView, null);
 	}
 
-	private void onSave(boolean isShowError)
+	public void onSave(boolean isShowError)
 	{
 		if (quickGridView.dataSave(0))
 		{
@@ -268,7 +266,7 @@ public class WQuickForm extends Window implements EventListener<Event>
 		Events.echoEvent("onSetFocusToFirstCell", quickGridView, null);
 	}
 
-	private void onRefresh()
+	public void onRefresh()
 	{
 		gridTab.dataRefreshAll();
 		adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "Refresh"), false);
@@ -284,6 +282,7 @@ public class WQuickForm extends Window implements EventListener<Event>
 
 		gridTab.setQuickForm(false);
 		onIgnore();
+		SessionManager.closeQuickFormTab(gridTab.getAD_Tab_ID());
 		int tabLevel = adWinContent.getToolbar().getQuickFormTabHrchyLevel();
 		if (tabLevel > 0)
 		{
@@ -296,9 +295,9 @@ public class WQuickForm extends Window implements EventListener<Event>
 			{
 				adWinContent.onParentRecord();
 				SessionManager.getSessionApplication().getKeylistener().addEventListener(Events.ON_CTRL_KEY, prevQGV);
+				// TODO need to set focus on last focused row of parent Form.
+				Events.echoEvent("onPageNavigate", prevQGV, null);
 			}
-			// TODO need to set focus on last focused row of parent Form.
-			Events.echoEvent("onPageNavigate", prevQGV, null);
 			adWinContent.setCurrQGV(prevQGV);
 		}
 		else
