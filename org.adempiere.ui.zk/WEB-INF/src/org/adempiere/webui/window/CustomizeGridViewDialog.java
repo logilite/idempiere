@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import org.adempiere.webui.adwindow.GridView;
+import org.adempiere.webui.adwindow.QuickGridView;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.panel.CustomizeGridViewPanel;
+import org.adempiere.webui.panel.QuickCustomizeGridViewPanel;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -18,6 +20,8 @@ public class CustomizeGridViewDialog extends Window {
 	private static final long serialVersionUID = -4093048147438176240L;
 	
 	private CustomizeGridViewPanel customizePanel;
+	private QuickCustomizeGridViewPanel quickCustomizePanel;
+	private boolean isQuickForm = false;
 
 	/**
 	 *	Standard Constructor
@@ -25,31 +29,61 @@ public class CustomizeGridViewDialog extends Window {
 	 *  @param AD_Tab_ID tab
 	 * 	@param AD_User_ID user
 	 * @param columnsWidth 
+	 * @param isQuickForm 
 	 */
-	public CustomizeGridViewDialog(int windowNo, int AD_Tab_ID, int AD_User_ID, Map<Integer, String> columnsWidth,ArrayList<Integer> gridFieldIds)
-	{
+	public CustomizeGridViewDialog(int windowNo, int AD_Tab_ID, int AD_User_ID, Map<Integer, String> columnsWidth,
+			ArrayList<Integer> gridFieldIds, boolean isQuickForm) {
 		setClosable(true);
 		setTitle(Msg.getMsg(Env.getCtx(), "Customize"));
-		initComponent(windowNo,AD_Tab_ID, AD_User_ID, columnsWidth,gridFieldIds);		
+		this.isQuickForm = isQuickForm;
+		initComponent(windowNo, AD_Tab_ID, AD_User_ID, columnsWidth, gridFieldIds);
 	}
 	
-	private void initComponent(int windowNo, int AD_Tab_ID, int AD_User_ID, Map<Integer, String> columnsWidth,ArrayList<Integer> gridFieldIds) {
-		customizePanel = new CustomizeGridViewPanel(windowNo, AD_Tab_ID, AD_User_ID, columnsWidth,gridFieldIds);
+	private void initComponent(int windowNo, int AD_Tab_ID, int AD_User_ID, Map<Integer, String> columnsWidth,
+			ArrayList<Integer> gridFieldIds) {
+
+		if (isQuickForm)
+		{
+			quickCustomizePanel = new QuickCustomizeGridViewPanel(windowNo, AD_Tab_ID, AD_User_ID, columnsWidth,
+					gridFieldIds);
+		}
+		else
+		{
+			customizePanel = new CustomizeGridViewPanel(windowNo, AD_Tab_ID, AD_User_ID, columnsWidth, gridFieldIds);
+		}
+		
 		this.setStyle("position : absolute;");
-		this.setWidth("600px");
-		this.setHeight("500px");
 		this.setBorder("normal");
 		this.setSclass("popup-dialog");
-		appendChild(customizePanel);
-		customizePanel.createUI();
-		customizePanel.query();
+		
+		if (isQuickForm)
+		{
+			this.setWidth("500px");
+			this.setHeight("410px");
+			quickCustomizePanel.createUI();
+			quickCustomizePanel.loadData();
+			appendChild(quickCustomizePanel);
+		}
+		else
+		{
+			this.setWidth("600px");
+			this.setHeight("500px");
+			appendChild(customizePanel);
+			customizePanel.createUI();
+			customizePanel.query();
+		}
 	}
 
 	/**
 	 * @return whether change have been successfully save to db
 	 */
 	public boolean isSaved() {
-		return customizePanel.isSaved();
+		boolean isSaved;
+		if (isQuickForm)
+			isSaved = quickCustomizePanel.isSaved();
+		else
+			isSaved = customizePanel.isSaved();
+		return isSaved;
 	}
 	
 	public void setGridPanel(GridView gridPanel){
@@ -63,13 +97,32 @@ public class CustomizeGridViewDialog extends Window {
 	 * @param columnsWidth 
 	 * @param gridFieldIds list fieldId current display in gridview
 	 * @param gridPanel
+	 * @param isQuickForm
+	 * @param quickGridView 
 	 */
-	public static boolean showCustomize (int WindowNo, int AD_Tab_ID, Map<Integer, String> columnsWidth,ArrayList<Integer> gridFieldIds,GridView gridPanel)
+	public static boolean showCustomize(int WindowNo, int AD_Tab_ID, Map<Integer, String> columnsWidth,
+			ArrayList<Integer> gridFieldIds, GridView gridPanel, QuickGridView quickGridView, boolean isQuickForm)
 	{
-		CustomizeGridViewDialog customizeWindow = new CustomizeGridViewDialog(WindowNo, AD_Tab_ID, Env.getAD_User_ID(Env.getCtx()), columnsWidth,gridFieldIds);
-		customizeWindow.setGridPanel(gridPanel);
+		CustomizeGridViewDialog customizeWindow = new CustomizeGridViewDialog(WindowNo, AD_Tab_ID,
+				Env.getAD_User_ID(Env.getCtx()), columnsWidth, gridFieldIds, isQuickForm);
+		if (isQuickForm)
+		{
+			customizeWindow.setquickGridView(quickGridView);
+		}
+		else
+		{
+			customizeWindow.setGridPanel(gridPanel);
+		}
 		AEnv.showWindow(customizeWindow);
 		return customizeWindow.isSaved();
-	}   //  showProduct
-    
+	} // showProduct
+
+	/**
+	 * @param QuickGridView
+	 */
+	private void setquickGridView(QuickGridView quickGridView)
+	{
+		quickCustomizePanel.setGridPanel(quickGridView);
+	}
+
 }

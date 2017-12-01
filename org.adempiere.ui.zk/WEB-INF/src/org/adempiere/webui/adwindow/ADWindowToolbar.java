@@ -103,6 +103,8 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
     private ToolBarButton btnCSVImport;
 
     private ToolBarButton btnProcess;
+    
+    private ToolBarButton btnQuickForm;
 
     private HashMap<String, ToolBarButton> buttons = new HashMap<String, ToolBarButton>();
 
@@ -128,6 +130,10 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 	private long prevKeyEventTime = 0;
 
 	private KeyEvent prevKeyEvent;
+	
+	// Maintain hierarchical Quick form by its parent-child tab while open leaf
+	// tab once & dispose and doing same action
+	private int							quickFormTabHrchyLevel		= 0;
 
 	/**	Last Modifier of Action Event					*/
 //	public int 				lastModifiers;
@@ -198,7 +204,10 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
         btnProcess= createButton("Process", "Process", "Process");
         btnProcess.setTooltiptext(btnProcess.getTooltiptext()+ "    Alt+O");
         btnProcess.setDisabled(false);
-
+        
+        btnQuickForm = createButton("QuickForm", "QuickForm", "QuickForm");
+        btnQuickForm.setDisabled(false);
+        
         // Help and Exit should always be enabled
         btnHelp.setDisabled(false);
         btnGridToggle.setDisabled(false);
@@ -346,6 +355,7 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 		altKeyMap.put(VK_R, btnReport);		
 		altKeyMap.put(VK_P, btnPrint);
 		altKeyMap.put(VK_O, btnProcess);
+		altKeyMap.put(VK_L, btnCustomize);
 	}
 
 	protected void addSeparator()
@@ -379,6 +389,8 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
         } else if (eventName.equals(Events.ON_CTRL_KEY))
         {
         	KeyEvent keyEvent = (KeyEvent) event;
+        	if (SessionManager.getOpenQuickFormTabs().size() > 0  && !(keyEvent.getKeyCode() == KeyEvent.F2))
+        		return;
         	if (LayoutUtils.isReallyVisible(this)) {
 	        	//filter same key event that is too close
 	        	//firefox fire key event twice when grid is visible
@@ -550,6 +562,11 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
     	btnRequests.setDisabled(!enabled);
     }
 
+	public void enableQuickForm(boolean enabled)
+	{
+		btnQuickForm.setDisabled(!enabled);
+	}
+
     public void lock(boolean locked)
     {
     	this.btnLock.setPressed(locked);
@@ -584,10 +601,33 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 			}
 		}
 		else if (!keyEvent.isAltKey() && keyEvent.isCtrlKey() && !keyEvent.isShiftKey())
-			btn = ctrlKeyMap.get(keyEvent.getKeyCode());
+		{
+			if (keyEvent.getKeyCode() == KeyEvent.F2)
+			{
+				quickFormTabHrchyLevel = quickFormTabHrchyLevel + 1;
+				fireButtonClickEvent(keyEvent, btnDetailRecord);
+				fireButtonClickEvent(keyEvent, btnQuickForm);
+				return;
+			}
+			else
+			{
+				btn = ctrlKeyMap.get(keyEvent.getKeyCode());
+			}
+		}
 		else if (!keyEvent.isAltKey() && !keyEvent.isCtrlKey() && !keyEvent.isShiftKey())
 			btn = keyMap.get(keyEvent.getKeyCode());
+		else if (!keyEvent.isAltKey() && !keyEvent.isCtrlKey() && keyEvent.isShiftKey())
+		{
+			if (keyEvent.getKeyCode() == KeyEvent.F2)
+			{
+				btn = btnQuickForm;
+			}
+		}
+		fireButtonClickEvent(keyEvent, btn);
+	}
 
+	private void fireButtonClickEvent(KeyEvent keyEvent, ToolBarButton btn)
+	{
 		if (btn != null) {
 			prevKeyEventTime = System.currentTimeMillis();
         	prevKeyEvent = keyEvent;
@@ -791,5 +831,21 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 		if (newpage != null) {
 			SessionManager.getSessionApplication().getKeylistener().addEventListener(Events.ON_CTRL_KEY, this);
 		}
+	}
+
+	/**
+	 * @return
+	 */
+	public int getQuickFormTabHrchyLevel()
+	{
+		return quickFormTabHrchyLevel;
+	}
+
+	/**
+	 * @param quickFormHrchyTabLevel
+	 */
+	public void setQuickFormTabHrchyLevel(int quickFormHrchyTabLevel)
+	{
+		this.quickFormTabHrchyLevel = quickFormHrchyTabLevel;
 	}
 }

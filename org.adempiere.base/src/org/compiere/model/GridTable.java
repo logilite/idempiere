@@ -1289,7 +1289,6 @@ public class GridTable extends AbstractTableModel
 			if (log.isLoggable(Level.FINEST)) log.finest("r=" + row + " c=" + col + " - R/O=" + m_readOnly + ", Rows=" + m_rowCount + " - Ignored");
 			return;
 		}
-
 		dataSave(row, false);
 
 		//	Has anything changed?
@@ -1329,7 +1328,7 @@ public class GridTable extends AbstractTableModel
 			for (int i = 0; i < size; i++)
 				m_rowData[i] = rowData[i];
 		}
-
+		
 		//	save & update
 		rowData[col] = value;
 		setDataAtRow(row, rowData);
@@ -2697,7 +2696,7 @@ public class GridTable extends AbstractTableModel
 				field.setValue(rowData[i], m_inserting);
 			}
 		}
-		
+
 		m_rowChanged = -1;  //  only changed in setValueAt
 
 		//	inform
@@ -2908,6 +2907,7 @@ public class GridTable extends AbstractTableModel
 			//	inform
 		//	fireTableRowsUpdated(m_rowChanged, m_rowChanged); >> messes up display?? (clearSelection)
 		}
+
 		m_newRow = -1;
 		fireDataStatusIEvent("Ignored", "");
 	}	//	dataIgnore
@@ -2955,7 +2955,7 @@ public class GridTable extends AbstractTableModel
 
 		Object[] rowData = getDataAtRow(row);
 
-		//  ignore
+		// ignore
 		dataIgnore();
 
 		//	Create SQL
@@ -4031,5 +4031,13 @@ public class GridTable extends AbstractTableModel
 	public void resetCacheSortState() {
 		m_lastSortColumnIndex = -1;
 		m_lastSortedAscending = true;
+	}
+	
+	/**
+	 * Index of updated row's
+	 */
+	public int getRowChanged()
+	{
+		return m_rowChanged;
 	}
 }

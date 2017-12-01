@@ -18,6 +18,7 @@
 package org.adempiere.webui.adwindow;
 
 import org.adempiere.webui.LayoutUtils;
+import org.adempiere.webui.apps.form.WQuickForm;
 import org.adempiere.webui.component.DocumentLink;
 import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.Panel;
@@ -160,7 +161,7 @@ public class StatusBar extends Panel implements EventListener<Event>
 		
     	String labelText = buildLabelText(m_statusText);
     	if (error) {
-    		Clients.showNotification(buildNotificationText(m_statusText), "error", findTabpanel(this), "top_left", 3500, true);
+    		Clients.showNotification(buildNotificationText(m_statusText), "error", findPanelComponent(this), "top_left", 3500, true);
     	}
     	Label label = new Label(labelText);
     	messageContainer.setSclass(error ? "docstatus-error" : "docstatus-normal");
@@ -229,12 +230,14 @@ public class StatusBar extends Panel implements EventListener<Event>
 		return statusText.substring(0, 136) + " ...";
 	}
 	
-	private Component findTabpanel(Component comp) {
+	private Component findPanelComponent(Component comp) {
 		Component parent = comp.getParent();
 		while (parent != null) {
 			if (parent instanceof Tabpanel)
 				return parent;
-			
+			else if (parent instanceof WQuickForm)
+				return parent;
+
 			parent = parent.getParent();
 		}
 		return null;

@@ -1,0 +1,1614 @@
+/******************************************************************************
+ * Copyright (C) 2016 Logilite Technologies LLP								  *
+ * This program is free software; you can redistribute it and/or modify it    *
+ * under the terms version 2 of the GNU General Public License as published   *
+ * by the Free Software Foundation. This program is distributed in the hope   *
+ * that it will be useful, but WITHOUT ANY WARRANTY; without even the implied *
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.           *
+ * See the GNU General Public License for more details.                       *
+ * You should have received a copy of the GNU General Public License along    *
+ * with this program; if not, write to the Free Software Foundation, Inc.,    *
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.                     *
+ *****************************************************************************/
+
+package org.adempiere.webui.adwindow;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.logging.Level;
+
+import javax.swing.table.AbstractTableModel;
+
+import org.adempiere.base.Core;
+import org.adempiere.model.MTabCustomization;
+import org.adempiere.util.GridRowCtx;
+import org.adempiere.webui.apps.AEnv;
+import org.adempiere.webui.apps.form.WQuickForm;
+import org.adempiere.webui.component.Checkbox;
+import org.adempiere.webui.component.Columns;
+import org.adempiere.webui.component.Combobox;
+import org.adempiere.webui.component.EditorBox;
+import org.adempiere.webui.component.Grid;
+import org.adempiere.webui.component.NumberBox;
+import org.adempiere.webui.component.Rows;
+import org.adempiere.webui.editor.WEditor;
+import org.adempiere.webui.session.SessionManager;
+import org.adempiere.webui.util.SortComparator;
+import org.compiere.model.GridField;
+import org.compiere.model.GridTab;
+import org.compiere.model.GridTable;
+import org.compiere.model.MSysConfig;
+import org.compiere.model.StateChangeEvent;
+import org.compiere.model.StateChangeListener;
+import org.compiere.util.CLogger;
+import org.compiere.util.DisplayType;
+import org.compiere.util.Env;
+import org.compiere.util.Msg;
+import org.compiere.util.Util;
+import org.zkforge.keylistener.Keylistener;
+import org.zkoss.lang.Library;
+import org.zkoss.zk.au.out.AuFocus;
+import org.zkoss.zk.au.out.AuScript;
+import org.zkoss.zk.ui.AbstractComponent;
+import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.IdSpace;
+import org.zkoss.zk.ui.Page;
+import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.event.EventListener;
+import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.event.KeyEvent;
+import org.zkoss.zk.ui.util.Clients;
+import org.zkoss.zul.Cell;
+import org.zkoss.zul.Column;
+import org.zkoss.zul.Div;
+import org.zkoss.zul.Frozen;
+import org.zkoss.zul.Paging;
+import org.zkoss.zul.Row;
+import org.zkoss.zul.Tabpanel;
+import org.zkoss.zul.Vbox;
+import org.zkoss.zul.event.ZulEvents;
+import org.zkoss.zul.impl.CustomGridDataLoader;
+
+/**
+ * Quick Grid view implemented using the Grid component.
+ * 
+ * @author Logilite Technologies
+ * @since Nov 03, 2017
+ */
+public class QuickGridView extends Vbox
+		implements EventListener<Event>, IdSpace, IFieldEditorContainer, StateChangeListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2966799998482667434L;
+	
+	static CLogger log = CLogger.getCLogger(QuickGridView.class);
+
+	private static final String HEADER_GRID_STYLE = "border: none; margin:0; padding: 0;";
+
+	private static final int DEFAULT_DETAIL_PAGE_SIZE = 10;
+
+	private static final int DEFAULT_PAGE_SIZE = 20;
+
+	private static final int MIN_COLUMN_WIDTH = 100;
+
+	private static final int MAX_COLUMN_WIDTH = 300;
+
+	private static final int MIN_COMBOBOX_WIDTH = 160;
+
+	private static final int MIN_NUMERIC_COL_WIDTH = 120;
+
+	public static final int SALES_ORDER_LINE_TAB_ID = 187;
+
+	private static final String ATTR_ON_POST_SELECTED_ROW_CHANGED = "org.adempiere.webui.adwindow.GridView.onPostSelectedRowChanged";
+
+	public static final String  CNTRL_KEYS  = "#left#right#up#down#home@k";
+	
+	private Grid listbox = null;
+
+	private int pageSize = DEFAULT_PAGE_SIZE;
+
+	/**
+	 * list field display in grid mode, in case user customize grid
+	 * this list container only customize list.
+	 */
+	private GridField[] gridFields;
+	private AbstractTableModel tableModel;
+
+	private int numColumns = 5;
+
+	private int windowNo;
+
+	private GridTab gridTab;
+
+	private boolean init;
+
+	public GridTableListModel listModel;
+
+	public Paging paging;
+
+	private QuickGridTabRowRenderer renderer;
+
+	private Div gridFooter;
+
+	private boolean modeless = true;
+
+	private String columnOnClick;
+
+	private AbstractADWindowContent windowPanel;
+
+	private boolean refreshing;
+
+	private Map<Integer, String> columnWidthMap;
+
+	private boolean detailPaneMode;
+
+	protected Checkbox selectAll;
+	
+	boolean isHasCustomizeData = false;
+
+	Keylistener keyListener;
+
+	public boolean isNewLineSaved = true;
+
+	// 'Alt + K' for Save and Close
+	private static final int		KEYBOARD_KEY_K						= 75;
+	// 'Alt + S' for Save
+	private static final int		KEYBOARD_KEY_S						= 83;
+	// 'Alt + Z' for Ignore
+	private static final int		KEYBOARD_KEY_Z						= 90;
+	// 'Alt + E' for Refresh
+	private static final int		KEYBOARD_KEY_E						= 69;
+	// 'Enter' Work as Down key
+	private static final int		KEYBOARD_KEY_ENTER					= 13;
+	// 'Alt + D' for Delete
+	private static final int		KEYBOARD_KEY_D						= 68;
+	// 'Alt + X' for Close
+	private static final int		KEYBOARD_KEY_X						= 88;
+	// 'Alt + L' for opening Customize grid panel
+	private static final int		KEYBOARD_KEY_L						= 76;
+
+	public WQuickForm				quickForm;
+
+	public GridField[] getGridField() {
+		return gridFields;
+	}
+
+	public void setGridField(GridField[] gridField) {
+		this.gridFields = gridField;
+	}
+
+	public QuickGridTabRowRenderer getRenderer() {
+		return renderer;
+	}
+
+	/**
+	 * @param windowNo
+	 */
+	public QuickGridView(int windowNo)
+	{
+		this.windowNo = windowNo;
+		setId("quickGridView");
+		createListbox();
+
+		this.setHflex("1");
+		
+		gridFooter = new Div();
+		gridFooter.setVflex("0");
+		
+		//default paging size
+		if (AEnv.isTablet())
+		{
+			//anything more than 20 is very slow on a tablet
+			pageSize = 10;
+		}
+		else
+		{
+			pageSize = MSysConfig.getIntValue(MSysConfig.QUICKFORM_PAGE_SIZE, DEFAULT_PAGE_SIZE, Env.getAD_Client_ID(Env.getCtx()));
+			String limit = Library.getProperty(CustomGridDataLoader.GRID_DATA_LOADER_LIMIT);
+			if (limit == null || !(limit.equals(Integer.toString(pageSize)))) {
+				Library.setProperty(CustomGridDataLoader.GRID_DATA_LOADER_LIMIT, Integer.toString(pageSize));
+			}
+		}
+		//default true for better UI experience
+		modeless = MSysConfig.getBooleanValue(MSysConfig.ZK_GRID_EDIT_MODELESS, true);
+		
+		appendChild(listbox);
+		appendChild(gridFooter);								
+		this.setVflex("true");
+		
+		setStyle(HEADER_GRID_STYLE);
+		gridFooter.setStyle(HEADER_GRID_STYLE);
+		
+		addEventListener("onSelectRow", this);
+		addEventListener("onCustomizeGrid", this);
+		addEventListener("onPageNavigate", this);
+		addEventListener("onClickToNavigate", this);
+		addEventListener("onSetFocusToFirstCell", this);
+		
+		
+	}
+
+	public QuickGridView(AbstractADWindowContent abstractADWindowContent, GridTab gridTab, WQuickForm wQuickForm)
+	{
+		this(abstractADWindowContent.getWindowNo());
+		setADWindowPanel(abstractADWindowContent);
+		this.quickForm = wQuickForm;
+		init(gridTab);
+	}
+
+	protected void createListbox()
+	{
+		listbox = new Grid();
+		listbox.setSizedByContent(false);
+		listbox.setVflex("1");
+		listbox.setHflex("1");
+		listbox.setSclass("adtab-grid");
+		listbox.setEmptyMessage(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Processing")));
+	}
+	
+	public void setDetailPaneMode(boolean detailPaneMode) {
+		if (this.detailPaneMode != detailPaneMode) {
+			this.detailPaneMode = detailPaneMode;
+			pageSize =  detailPaneMode ? DEFAULT_DETAIL_PAGE_SIZE : MSysConfig.getIntValue(MSysConfig.QUICKFORM_PAGE_SIZE, 20, Env.getAD_Client_ID(Env.getCtx()));
+			updatePaging();
+		}
+	}
+
+	public boolean isDetailPaneMode() {
+		return this.detailPaneMode;
+	}
+	
+	private void updatePaging() {
+		if (paging != null && paging.getPageSize() != pageSize) {
+			paging.setPageSize(pageSize);
+			updateModel();
+			if (paging.getPageSize() > 1) {
+				showPagingControl();
+			} else {
+				hidePagingControl();
+			}
+		}
+	}
+
+	/**
+	 *
+	 * @param gridTab
+	 */
+	public void init(GridTab gridTab)
+	{
+		if (init) return;
+
+		if (this.gridTab != null)
+			this.gridTab.removeStateChangeListener(this);
+		
+		setupFields(gridTab);
+
+		setupColumns();
+		render();
+
+		updateListIndex();
+
+		this.init = true;
+		
+		showRecordsCount();
+	}
+
+	private void showRecordsCount() {
+		Component parent = this.getParent();
+		while (parent != null) {
+			if (parent instanceof DetailPane) {
+				DetailPane p = (DetailPane) parent;
+				if (p.getSelectedADTabpanel() != null && p.getSelectedADTabpanel().getGridTab() == this.gridTab)
+					p.setStatusMessage(tableModel.getRowCount() + " " + Msg.getMsg(Env.getCtx(), "Records"), false);
+				break;
+			} 
+			parent = parent.getParent();					
+		}
+	}
+	
+	private void setupFields(GridTab gridTab) {		
+		this.gridTab = gridTab;		
+		gridTab.addStateChangeListener(this);
+		
+		tableModel = gridTab.getTableModel();
+		columnWidthMap = new HashMap<Integer, String>();
+		GridField[] modelFields = ((GridTable)tableModel).getFields();
+		MTabCustomization tabCustomization = MTabCustomization.get(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()), gridTab.getAD_Tab_ID(), null,true);
+		isHasCustomizeData = tabCustomization != null && tabCustomization.getAD_Tab_Customization_ID() > 0 
+				&& tabCustomization.getCustom() != null && tabCustomization.getCustom().trim().length() > 0;
+		if (isHasCustomizeData) {
+			String custom = tabCustomization.getCustom().trim();
+			String[] customComponent = custom.split(";");
+			String[] fieldIds = customComponent[0].split("[,]");
+			List<GridField> gridFieldsList = new ArrayList<GridField>();
+			for(String fieldId : fieldIds) {
+				fieldId = fieldId.trim();
+				int AD_Field_ID=0;
+				if (fieldId.length() == 0) continue;
+				try
+				{
+					AD_Field_ID = Integer.parseInt(fieldId);
+				}
+				catch (NumberFormatException e)
+				{
+					log.log(Level.SEVERE, "", e);
+					continue;
+				}
+				for(GridField gridField : modelFields) {
+					if (gridField.getAD_Field_ID() == AD_Field_ID) {
+						// IDEMPIERE-2204 add field in tabCustomization list to
+						// display list event this field have showInGrid = false
+						// if ((gridField.isDisplayedGrid() ||
+						// gridField.isDisplayed())
+						// && !gridField.isToolbarOnlyButton())
+
+						// add field in tabCustomization list to display list
+						// event this field have showInGrid = false
+						if (gridField.isQuickForm())
+							gridFieldsList.add(gridField);
+
+						break;
+					}
+				}
+			}
+			gridFields = gridFieldsList.toArray(new GridField[0]);
+			// if any new column added for quick form.
+			for (GridField field : modelFields) {
+				if (field.isQuickForm()) {
+					boolean isFieldAvailable = false;
+					for (GridField gField : gridFields) {
+						if (gField.getAD_Field_ID() == field.getAD_Field_ID()) {
+							isFieldAvailable = true;
+							break;
+						}
+					}
+					if (!isFieldAvailable)
+						gridFieldsList.add(field);
+				}
+			}
+			gridFields = gridFieldsList.toArray(new GridField[0]);
+			if (customComponent.length == 2) {
+				String[] widths = customComponent[1].split("[,]");
+				for(int i = 0; i< gridFields.length && i<widths.length; i++) {
+					columnWidthMap.put(gridFields[i].getAD_Field_ID(), widths[i]);
+				}
+			}
+		} else {
+			ArrayList<GridField> gridFieldsList = new ArrayList<GridField>();
+			
+			for(GridField field:modelFields){
+				if (field.isQuickForm())
+				{
+					gridFieldsList.add(field);
+				}
+			}
+			
+			Collections.sort(gridFieldsList, new Comparator<GridField>() {
+				@Override
+				public int compare(GridField o1, GridField o2) {
+					return o1.getSeqNoGrid()-o2.getSeqNoGrid();
+				}
+			});
+			
+			gridFields = new GridField[gridFieldsList.size()];
+			gridFieldsList.toArray(gridFields);
+		}
+		numColumns = gridFields.length;
+	}
+
+	/**
+	 *
+	 * @return boolean
+	 */
+	public boolean isInit() {
+		return init;
+	}
+
+	/**
+	 * call when tab is activated
+	 * @param gridTab
+	 */
+	public void activate(GridTab gridTab) {
+		if (!isInit()) {
+			init(gridTab);
+		} else {
+			showRecordsCount();
+		}
+		if (this.isVisible())
+			Clients.resize(listbox);
+	}
+
+	/**
+	 * refresh after switching from form view
+	 * @param gridTab
+	 */
+	public void refresh(GridTab gridTab) {
+		if (this.gridTab != gridTab || !isInit())
+		{
+			init = false;
+			init(gridTab);
+		}
+		else
+		{
+			refreshing = true;
+			listbox.setModel(listModel);
+			updateListIndex();
+			refreshing = false;			
+			if (gridTab.getRowCount() == 0 && selectAll.isChecked())
+				selectAll.setChecked(false);
+		}
+	}
+
+	public boolean isRefreshing() {
+		return refreshing;
+	}
+
+	/**
+	 * Update current row from model
+	 */
+	public void updateListIndex() {
+		if (gridTab == null || !gridTab.isOpen()) return;
+
+		updateEmptyMessage();		
+		
+		int rowIndex  = gridTab.getCurrentRow();
+		if (pageSize > 0) {
+			if (paging.getTotalSize() != gridTab.getRowCount())
+				paging.setTotalSize(gridTab.getRowCount());
+			if (paging.getPageCount() > 1 && !gridFooter.isVisible()) {
+				showPagingControl();
+			}
+			int pgIndex = rowIndex >= 0 ? rowIndex % pageSize : 0;
+			int pgNo = rowIndex >= 0 ? (rowIndex - pgIndex) / pageSize : 0;
+			if (listModel.getPage() != pgNo) {
+				listModel.setPage(pgNo);
+				if (renderer.isEditing()) {
+					renderer.stopEditing(false);
+				}
+			} else if (rowIndex == renderer.getCurrentRowIndex()){
+				if (modeless && !renderer.isEditing())
+					echoOnPostSelectedRowChanged();
+				return;
+			} else {
+				if (renderer.isEditing()) {
+					renderer.stopEditing(false);
+					int editingRow = renderer.getCurrentRowIndex();
+					if (editingRow >= 0) {
+						int editingPgIndex = editingRow % pageSize;
+						int editingPgNo = (editingRow - editingPgIndex) / pageSize;
+						if (editingPgNo == pgNo) {
+							listModel.updateComponent(renderer.getCurrentRowIndex() % pageSize);
+						}
+					}
+				}
+			}
+			if (paging.getActivePage() != pgNo) {
+				paging.setActivePage(pgNo);
+			}
+			if (rowIndex >= 0 && pgIndex >= 0 && isNewLineSaved) {
+				echoOnPostSelectedRowChanged();
+			}
+		} else {
+			if (rowIndex >= 0) {
+				echoOnPostSelectedRowChanged();
+			}
+		}		
+	}
+
+	private void hidePagingControl() {
+		if (gridFooter.isVisible())
+			gridFooter.setVisible(false);
+	}
+
+	private void showPagingControl() {
+		if (!gridFooter.isVisible())
+			gridFooter.setVisible(true);		
+	}
+
+	/**
+	 * 
+	 */
+	protected void echoOnPostSelectedRowChanged() {
+		if (getAttribute(ATTR_ON_POST_SELECTED_ROW_CHANGED) == null) {
+			setAttribute(ATTR_ON_POST_SELECTED_ROW_CHANGED, Boolean.TRUE);
+			Events.echoEvent("onPostSelectedRowChanged", this, null);
+		}
+	}
+
+	/**
+	 * set paging size
+	 * @param pageSize
+	 */
+	public void setPageSize(int pageSize)
+	{
+		this.pageSize = pageSize;
+	}
+
+	public void clear()
+	{
+		this.getChildren().clear();
+	}
+
+	private void setupColumns()
+	{
+		if (init) return;
+
+		Columns columns = new Columns();
+		
+		//frozen not working well on tablet devices yet
+		if (!AEnv.isTablet())
+		{
+			Frozen frozen = new Frozen();
+			//freeze selection and indicator column
+			frozen.setColumns(1);
+			listbox.appendChild(frozen);
+		}
+		
+		org.zkoss.zul.Column selection = new Column();
+		selection.setWidth("22px");
+		try{
+			selection.setSort("none");
+		} catch (Exception e) {}
+		selection.setStyle("border-right: none");
+		selectAll = new Checkbox();
+		selection.appendChild(selectAll);
+		selectAll.setId("selectAll");
+		selectAll.addEventListener(Events.ON_CHECK, this);
+		columns.appendChild(selection);
+
+		listbox.appendChild(columns);
+		columns.setSizable(true);
+		columns.setMenupopup("none");
+		columns.setColumnsgroup(false);
+
+		Map<Integer, String> colnames = new HashMap<Integer, String>();
+		int index = 0;
+		
+		for (int i = 0; i < numColumns; i++)
+		{
+			// IDEMPIERE-2148: when has tab customize, ignore check properties isDisplayedGrid
+			if (gridFields[i].isQuickForm())
+			{
+				colnames.put(index, gridFields[i].getHeader());
+				index++;
+				org.zkoss.zul.Column column = new Column();
+				int colindex =tableModel.findColumn(gridFields[i].getColumnName()); 
+				column.setSortAscending(new SortComparator(colindex, true, Env.getLanguage(Env.getCtx())));
+				column.setSortDescending(new SortComparator(colindex, false, Env.getLanguage(Env.getCtx())));
+				//IDEMPIERE-2898 - UX: Field only showing title at header on grid
+				if( gridFields[i].isFieldOnly() )
+					column.setLabel("");
+				else {
+					column.setLabel(gridFields[i].getHeader());
+					column.setTooltiptext(gridFields[i].getDescription());
+				}
+				if (columnWidthMap != null && columnWidthMap.get(gridFields[i].getAD_Field_ID()) != null && !columnWidthMap.get(gridFields[i].getAD_Field_ID()).equals("")) {
+					column.setWidth(columnWidthMap.get(gridFields[i].getAD_Field_ID()));
+				} else {
+					if (gridFields[i].getDisplayType()==DisplayType.YesNo) {
+						if (i > 0) {
+							column.setHflex("min");
+						} else {
+							int estimatedWidth=60;
+							int headerWidth = (gridFields[i].getHeader().length()+2) * 8;
+							if (headerWidth > estimatedWidth)
+								estimatedWidth = headerWidth;
+							column.setWidth(estimatedWidth + "px");
+						}
+					} else if (DisplayType.isNumeric(gridFields[i].getDisplayType()) && "Line".equals(gridFields[i].getColumnName())) {
+						//special treatment for line
+						if (i > 0)
+							column.setHflex("min");
+						else
+							column.setWidth("60px");
+					} else {
+						int estimatedWidth = 0;
+						if (DisplayType.isNumeric(gridFields[i].getDisplayType()))
+							estimatedWidth = MIN_NUMERIC_COL_WIDTH;
+						else if (DisplayType.isLookup(gridFields[i].getDisplayType()))
+							estimatedWidth = MIN_COMBOBOX_WIDTH;
+						else if (DisplayType.isText(gridFields[i].getDisplayType()))
+							estimatedWidth = gridFields[i].getDisplayLength() * 8;
+						else
+							estimatedWidth = MIN_COLUMN_WIDTH;
+
+						int headerWidth = (gridFields[i].getHeader().length() + 2) * 8;
+						if (headerWidth > estimatedWidth)
+							estimatedWidth = headerWidth;
+						
+						//hflex=min for first column not working well
+						if (i > 0)
+						{
+							if (DisplayType.isLookup(gridFields[i].getDisplayType()))
+							{
+								if (headerWidth > MIN_COMBOBOX_WIDTH)
+									column.setHflex("min");
+							}
+							else if (DisplayType.isNumeric(gridFields[i].getDisplayType()))
+							{
+								if (headerWidth > MIN_NUMERIC_COL_WIDTH)
+									column.setHflex("min");
+							}
+							else if (!DisplayType.isText(gridFields[i].getDisplayType()))
+							{
+								if (headerWidth > MIN_COLUMN_WIDTH)
+									column.setHflex("min");
+							}
+						}
+						
+						//set estimated width if not using hflex=min
+						if (!"min".equals(column.getHflex())) {
+							if (estimatedWidth > MAX_COLUMN_WIDTH)
+								estimatedWidth = MAX_COLUMN_WIDTH;
+							else if (estimatedWidth < MIN_COLUMN_WIDTH)
+								estimatedWidth = MIN_COLUMN_WIDTH;
+							column.setWidth(Integer.toString(estimatedWidth) + "px");
+						}
+					}
+				}
+				columns.appendChild(column);
+			}
+		}
+	}
+
+	private void render()
+	{
+		updateEmptyMessage();
+		
+		listbox.addEventListener(Events.ON_CLICK, this);
+
+		updateModel();
+
+		if (pageSize > 0)
+		{
+			paging = new Paging();
+			paging.setPageSize(pageSize);
+			paging.setTotalSize(tableModel.getRowCount());
+			paging.setDetailed(true);
+			paging.setId("paging");
+			gridFooter.appendChild(paging);			
+			paging.addEventListener(ZulEvents.ON_PAGING, this);
+			renderer.setPaging(paging);
+			showPagingControl();				
+			positionPagingControl();
+		}
+		else
+		{
+			hidePagingControl();
+		}		
+	}
+
+	private void updateEmptyMessage() {
+		if (gridTab.getRowCount() == 0)
+		{
+			listbox.setEmptyMessage(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "FindZeroRecords")));
+		}
+		else
+		{
+			listbox.setEmptyMessage(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Processing")));
+		}
+	}
+
+	private void updateModel() {
+		if (listModel != null)
+			((GridTable)tableModel).removeTableModelListener(listModel);
+		listModel = new GridTableListModel((GridTable)tableModel, windowNo);
+		listModel.setPageSize(pageSize);
+		if (renderer != null && renderer.isEditing())
+			renderer.stopEditing(false);
+		renderer = new QuickGridTabRowRenderer(gridTab, windowNo);
+		renderer.setGridPanel(this);
+		renderer.setADWindowPanel(windowPanel);
+		if (pageSize > 0 && paging != null)
+			renderer.setPaging(paging);
+
+		listbox.setModel(listModel);
+		if (listbox.getRows() == null) 
+			listbox.appendChild(new Rows());
+		listbox.setRowRenderer(renderer);
+	}
+
+	/**
+	 * deactivate panel
+	 */
+	public void deactivate() {
+		if (renderer != null && renderer.isEditing())
+			renderer.stopEditing(true);
+	}
+
+	public void onEvent(Event event) throws Exception
+	{
+		if (event == null)
+			return;
+		else if (event.getTarget() == listbox && Events.ON_CLICK.equals(event.getName()))
+		{
+			Object data = event.getData();
+			org.zkoss.zul.Row row = null;
+			String columnName = null;
+			if (data != null && data instanceof Component)
+			{
+				if (data instanceof org.zkoss.zul.Row)
+					row = (org.zkoss.zul.Row) data;
+				else
+				{
+					AbstractComponent cmp = (AbstractComponent) data;
+					if (cmp.getParent() instanceof org.zkoss.zul.Row)
+					{
+						row = (Row) cmp.getParent();
+						columnName = (String) cmp.getAttribute("columnName");
+					}
+				}
+			}
+			if (row != null)
+			{
+				// click on selected row to enter edit mode
+				if (row == renderer.getCurrentRow())
+				{
+					if (!renderer.isEditing())
+					{
+						renderer.editCurrentRow();
+						if (columnName != null && columnName.trim().length() > 0)
+							setFocusToField(columnName);
+						else
+							renderer.focusToFirstEditor();
+					}
+				}
+				else
+				{
+					int index = listbox.getRows().getChildren().indexOf(row);
+					if (index >= 0)
+					{
+						columnOnClick = columnName;
+						onSelectedRowChange(index);
+					}
+				}
+			}
+		}
+		else if (event.getTarget() == paging)
+		{
+			isNewLineSaved = true;
+			int pgNo = paging.getActivePage();
+			if (pgNo != listModel.getPage())
+			{
+				listModel.setPage(pgNo);
+				onSelectedRowChange(0);
+				gridTab.clearSelection();
+				Clients.resize(listbox);
+				Event e = new Event("onPageNavigate", this, null);
+				Events.postEvent(e);
+			}
+		}
+		else if (event.getTarget() == selectAll)
+		{
+			toggleSelectionForAll(selectAll.isChecked());
+		}
+		else if (event.getName().equals("onSelectRow"))
+		{
+			Checkbox checkbox = (Checkbox) event.getData();
+			int rowIndex = (Integer) checkbox.getAttribute(GridTabRowRenderer.GRID_ROW_INDEX_ATTR);
+			if ((gridTab.getRowCount() - 1) == rowIndex && !isNewLineSaved)
+			{
+				checkbox.setChecked(false);
+				return;
+			}
+			if (checkbox.isChecked())
+			{
+				gridTab.addToSelection(rowIndex);
+				if (!selectAll.isChecked() && isAllSelected())
+				{
+					selectAll.setChecked(true);
+				}
+			}
+			else
+			{
+				gridTab.removeFromSelection(rowIndex);
+				if (selectAll.isChecked())
+					selectAll.setChecked(false);
+			}
+			onSelectedRowChange(rowIndex % paging.getPageSize());
+			isNewLineSaved = true;
+		}
+		else if (event.getName().equals("onCustomizeGrid"))
+		{
+			reInit();
+		}
+		else if (event.getName().equals(Events.ON_CTRL_KEY))
+		{
+			KeyEvent keyEvent = (KeyEvent) event;
+			int code = keyEvent.getKeyCode();
+			boolean isAlt = keyEvent.isAltKey();
+			boolean isCtrl = keyEvent.isCtrlKey();
+			boolean isShift = keyEvent.isShiftKey();
+
+			int row = renderer.getCurrentRowIndex() % paging.getPageSize();
+			int col = renderer.getCurrentRow().getChildren().indexOf(renderer.getCurrentCell());
+			int totalRow = gridTab.getRowCount();
+
+			// Not focus on specific component through mouse
+			if (col == -1 && (code == KeyEvent.LEFT || code == KeyEvent.RIGHT))
+				col = code == KeyEvent.LEFT ? 3 : 0;
+
+			if (code == KEYBOARD_KEY_ENTER && !isCtrl && !isAlt && !isShift)
+			{
+				code = KeyEvent.DOWN;
+			}
+
+			if ((code == KeyEvent.DOWN || code == KeyEvent.UP)
+					&& renderer.getCurrentCell().getChildren().get(0) instanceof Combobox)
+			{
+				return;
+			}
+
+			if (code == KeyEvent.DOWN || code == KeyEvent.UP || code == KeyEvent.HOME || code == KeyEvent.END)
+			{
+				int rowChangedIndex = gridTab.getTableModel().getRowChanged();
+				int currentRow = row % paging.getPageSize() + (paging.getActivePage() * paging.getPageSize());
+				// update index of pagination if multiple records created 
+				// (e.g select multiple products)
+				if (paging.getTotalSize() != gridTab.getRowCount())
+				{
+					updateListIndex();
+					isNewLineSaved = true;
+				}
+				if (rowChangedIndex == currentRow)
+				{
+					if (!save(code, row, col))
+					{
+						event.stopPropagation();
+						return;
+					}
+				}
+			}
+			if (code == KeyEvent.DOWN && !isCtrl && !isAlt && !isShift)
+			{
+				row += 1;
+				int currentRow = row % paging.getPageSize() + (paging.getActivePage() * paging.getPageSize());
+				if (((currentRow == totalRow)
+						|| (row % paging.getPageSize() == 0 && paging.getActivePage() == (paging.getPageCount() - 1)))
+						&& isNewLineSaved)
+				{
+					createNewLine();
+					updateListIndex();
+					toggleSelectionForAll(false);
+					if (!(row % paging.getPageSize() == 0))
+					{
+						Events.echoEvent("onSetFocusToFirstCell", this, null);
+						event.stopPropagation();
+					}
+				}
+				// stop from creating new record if new record blank or not save
+				else if (((currentRow == totalRow)
+						|| (row % paging.getPageSize() == 0 && paging.getActivePage() == (paging.getPageCount() - 1))))
+				{
+					event.stopPropagation();
+					return;
+				}
+
+				if (row % paging.getPageSize() == 0)
+				{
+					updateListIndex();
+					paging.setActivePage(
+							paging.getActivePage() + (paging.getActivePage() == (paging.getPageCount() - 1) ? 0 : 1));
+					listModel.setPage(paging.getActivePage());
+					updateModelIndex(0);
+					row = 0;
+				}
+			}
+			else if (code == KeyEvent.LEFT && !isCtrl && !isAlt && !isShift)
+			{
+				col -= 1;
+			}
+			else if (code == KeyEvent.RIGHT && !isCtrl && !isAlt && !isShift)
+			{
+				col += 1;
+			}
+			else if (code == KeyEvent.UP && !isCtrl && !isAlt && !isShift)
+			{
+				// remove new record if blank
+				int currentRow = gridTab.getCurrentRow();
+				if ((totalRow - 1) == currentRow && !isNewLineSaved)
+				{
+					gridTab.dataIgnore();
+					gridTab.setCurrentRow(currentRow);
+				}
+
+				row -= 1;
+				if (paging.getActivePage() > 0 && (row + 1) % paging.getPageSize() == 0)
+				{
+					int currenRow = paging.getPageSize() * paging.getActivePage() - 1;
+					paging.setActivePage(paging.getActivePage() - 1);
+					listModel.setPage(paging.getActivePage());
+					updateModelIndex(paging.getPageSize() - 1);
+					row = currenRow;
+				}
+
+				// update page index after remove new record
+				if (!isNewLineSaved)
+				{
+					updateListIndex();
+					isNewLineSaved = true;
+				}
+
+				if (row < 0)
+				{
+					row = 0;
+				}
+			}
+			else if (code == KeyEvent.HOME)
+			{
+				row = 0;
+			}
+			else if (code == KEYBOARD_KEY_K && !isCtrl && isAlt && !isShift)
+			{
+				quickForm.onSave(true);
+				quickForm.dispose();
+			}
+			else if (code == KEYBOARD_KEY_S && !isCtrl && isAlt && !isShift)
+			{
+				quickForm.onSave(true);
+			}
+			else if (code == KEYBOARD_KEY_D && !isCtrl && isAlt && !isShift)
+			{
+				if (!isNewLineSaved)
+					return;
+				int rowIndex = renderer.getCurrentRowIndex();
+				if (!gridTab.isSelected(rowIndex))
+				{
+					gridTab.addToSelection(rowIndex);
+				}
+				quickForm.onDelete();
+			}
+			else if (code == KEYBOARD_KEY_Z && !isCtrl && isAlt && !isShift)
+			{
+				quickForm.onIgnore();
+			}
+			else if (code == KEYBOARD_KEY_E && !isCtrl && isAlt && !isShift)
+			{
+				quickForm.onRefresh();
+			}
+			else if (code == KEYBOARD_KEY_X && !isCtrl && isAlt && !isShift)
+			{
+				quickForm.dispose();
+			}
+			else if (code == KEYBOARD_KEY_L && !isCtrl && isAlt && !isShift)
+			{
+				quickForm.onCustomize();
+			}
+			else
+			{
+				renderer.setCurrentCell(row, col, code);
+				return;
+			}
+
+			if (row < 0 || row >= gridTab.getTableModel().getRowCount() || col < 1
+					|| col >= gridTab.getTableModel().getColumnCount())
+			{
+				renderer.setFocusOnCurrentCell();
+				event.stopPropagation();
+				return;
+			}
+
+			Component source = listbox.getCell(row, col);
+			if (source == null)
+			{
+				listbox.renderAll();
+				source = listbox.getCell(row, col);
+			}
+
+			while (source != null && !(source.getClass() == Cell.class))
+			{
+				source = source.getParent();
+			}
+			renderer.setCurrentCell(row, col, code);
+		}
+		else if (event.getName().equals(Events.ON_FOCUS))
+		{
+			// update index of pagination if multiple records created if user use mouse to select record
+			// (e.g select multiple products)
+			if (paging.getTotalSize() != gridTab.getRowCount())
+			{
+				updateListIndex();
+			}
+			int totalRow = gridTab.getRowCount();
+			int currentRow = gridTab.getCurrentRow();
+			if ((totalRow - 1) != currentRow && !isNewLineSaved)
+			{
+				updateListIndex();
+				isNewLineSaved = true;
+				gridTab.dataIgnore();
+				gridTab.setCurrentRow(currentRow);
+			}
+
+			Component source = event.getTarget();
+			while (source != null && !(source.getClass() == Cell.class))
+			{
+				source = source.getParent();
+			}
+			if (renderer.getCurrentCell() != null && !renderer.getCurrentCell().equals(source))
+			{
+				int row = renderer.getCurrentRowIndex();
+				int col = renderer.getCurrentRow().getChildren().indexOf(renderer.getCurrentCell());
+
+				setFocusOnDiv(source);
+
+				int rowChange = renderer.getCurrentRowIndex();
+				int currentcol = renderer.getCurrentRow().getChildren().indexOf(renderer.getCurrentCell());
+				if (row != rowChange)
+				{
+					int rowChangedIndex = gridTab.getTableModel().getRowChanged();
+					if (rowChangedIndex == row)
+					{
+						if (!save(KeyEvent.RIGHT, row, col))
+							return;
+						Events.postEvent("onClickToNavigate", this, currentcol);
+					}
+				}
+			}
+		}
+		else if (event.getName().equals("onPageNavigate"))
+		{
+			renderer.setCurrentCell(null);
+			renderer.setCurrentCell(0, 1, KeyEvent.RIGHT);
+		}
+		else if (event.getName().equals("onClickToNavigate"))
+		{
+			int row = renderer.getCurrentRowIndex();
+			int col = (int) event.getData();
+
+			renderer.setCurrentCell(row, col, KeyEvent.RIGHT);
+
+			Row currntRow = renderer.getCurrentRow();
+			currntRow.setStyle(QuickGridTabRowRenderer.CURRENT_ROW_STYLE);
+		}
+		else if (event.getName().equals("onSetFocusToFirstCell"))
+		{
+			int row = renderer.getCurrentRowIndex() % paging.getPageSize();
+
+			renderer.setCurrentCell(row, 1, KeyEvent.RIGHT);
+
+			Row currntRow = renderer.getCurrentRow();
+			currntRow.setStyle(QuickGridTabRowRenderer.CURRENT_ROW_STYLE);
+		}
+		event.stopPropagation();
+	}
+
+	private void setFocusOnDiv(Component source) {
+		int rowCount = gridTab.getTableModel().getRowCount();
+		int colCount = renderer.getCurrentRow().getChildren().size();
+		for (int i = 0; i < rowCount; i++) {
+			for (int j = 0; j < colCount; j++) {
+				if (listbox.getCell(i, j) != null && listbox.getCell(i, j).equals(source)) {
+					renderer.setCurrentCell(i, j, 0);
+					return;
+				}
+			}
+		}
+	}
+
+	private boolean isAllSelected() {
+		org.zkoss.zul.Rows rows = listbox.getRows();
+		List<Component> childs = rows.getChildren();
+		boolean all = false;
+		for (Component comp : childs) {
+			org.zkoss.zul.Row row = (org.zkoss.zul.Row) comp;
+			Component firstChild = row.getFirstChild();
+			if (firstChild instanceof Cell) {
+				firstChild = firstChild.getFirstChild();
+			}
+			if (firstChild instanceof Checkbox) {
+				Checkbox checkbox = (Checkbox) firstChild;
+				if (!checkbox.isChecked())
+					return false;
+				else
+					all = true;
+			}
+		}
+		return all;
+	}
+
+	public void toggleSelectionForAll(boolean b) {
+		org.zkoss.zul.Rows rows = listbox.getRows();
+		List<Component> childs = rows.getChildren();
+		for (Component comp : childs) {
+			org.zkoss.zul.Row row = (org.zkoss.zul.Row) comp;
+			Component firstChild = row.getFirstChild();
+			if (firstChild instanceof Cell) {
+				firstChild = firstChild.getFirstChild();
+			}
+			if (firstChild instanceof Checkbox) {
+				Checkbox checkbox = (Checkbox) firstChild;
+				checkbox.setChecked(b);
+				int rowIndex = (Integer) checkbox.getAttribute(GridTabRowRenderer.GRID_ROW_INDEX_ATTR);
+				if ((gridTab.getRowCount() - 1) == rowIndex && !isNewLineSaved)
+				{
+					checkbox.setChecked(false);
+					continue;
+				}
+				if (b)
+					gridTab.addToSelection(rowIndex);
+				else
+					gridTab.removeFromSelection(rowIndex);
+			}
+		}
+	}
+
+	private void onSelectedRowChange(int index) {
+		if (updateModelIndex(index)) {
+			updateListIndex();
+		}
+	}
+
+	/**
+	 * Event after the current selected row change
+	 */
+	private boolean save(int code, int row, int col)
+	{
+		boolean isSave = dataSave(code);
+		if (isSave)
+		{
+			gridTab.dataRefreshAll();
+		}
+		else
+		{
+			renderer.setCurrentCell(row, col, code);
+		}
+		return isSave;
+	}
+
+	public void onPostSelectedRowChanged() {
+		removeAttribute(ATTR_ON_POST_SELECTED_ROW_CHANGED);
+		if (listbox.getRows() == null || listbox.getRows().getChildren().isEmpty())
+			return;
+
+		int rowIndex = gridTab.isOpen() ? gridTab.getCurrentRow() : -1;
+		if (rowIndex >= 0 && pageSize > 0) {
+			int pgIndex = rowIndex >= 0 ? rowIndex % pageSize : 0;
+			org.zkoss.zul.Row row = (org.zkoss.zul.Row) listbox.getRows().getChildren().get(pgIndex);
+			if (!isRowRendered(row, pgIndex)) {
+				listbox.renderRow(row);
+			} else {
+				renderer.setCurrentRow(row);
+				renderer.setCurrentCell(rowIndex, 1, KeyEvent.RIGHT);
+				//remark: following 3 line cause the previously selected row being render twice
+//				if (old != null && old != row && oldIndex >= 0 && oldIndex != gridTab.getCurrentRow())
+//				{
+//					listModel.updateComponent(oldIndex % pageSize);
+//				}
+			}
+			if (modeless && !renderer.isEditing()) {
+				renderer.editCurrentRow();
+				if (columnOnClick != null && columnOnClick.trim().length() > 0) {
+					setFocusToField(columnOnClick);
+					columnOnClick = null;
+				} else {
+					focusToFirstEditorIfNotDetailTab();
+				}
+			} else {
+				focusToRow(row);
+			}
+		} else if (rowIndex >= 0) {
+			org.zkoss.zul.Row row = (org.zkoss.zul.Row) listbox.getRows().getChildren().get(rowIndex);
+			if (!isRowRendered(row, rowIndex)) {
+				listbox.renderRow(row);
+			} else {
+				renderer.setCurrentRow(row);
+				renderer.setCurrentCell(rowIndex, 1, KeyEvent.RIGHT);
+				//remark: following 3 line cause the previously selected row being render twice
+//				if (old != null && old != row && oldIndex >= 0 && oldIndex != gridTab.getCurrentRow())
+//				{
+//					listModel.updateComponent(oldIndex);
+//				}
+			}
+			if (modeless && !renderer.isEditing()) {
+				renderer.editCurrentRow();
+				if (columnOnClick != null && columnOnClick.trim().length() > 0) {
+					setFocusToField(columnOnClick);
+					columnOnClick = null;
+				} else {
+					renderer.focusToFirstEditor();
+				}
+			} else {
+				focusToRow(row);
+			}
+		}
+	}
+
+	private void focusToFirstEditorIfNotDetailTab() {
+		ADTabpanel adtabpanel = null;
+		boolean setFocus = true;
+		Component parent = listbox.getParent();
+		while (parent != null) {
+			if (parent instanceof ADTabpanel) {
+				adtabpanel = (ADTabpanel) parent;
+				break;
+			}
+			parent = parent.getParent();
+		}					
+		if (adtabpanel != null)
+		{
+			ADWindow adwindow = ADWindow.findADWindow(adtabpanel);
+			if (adwindow != null) {
+				IADTabpanel selectedADTabpanel = adwindow.getADWindowContent().getADTab().getSelectedTabpanel();
+				IADTabpanel  selectedADDetailTabpanel = null ;
+				if(selectedADTabpanel.getDetailPane() != null)
+					selectedADDetailTabpanel = selectedADTabpanel.getDetailPane().getSelectedADTabpanel();
+				
+				if (selectedADTabpanel != adtabpanel && selectedADDetailTabpanel != null && selectedADDetailTabpanel != adtabpanel)
+					setFocus = false;
+			}
+		}
+		if (setFocus)
+			renderer.focusToFirstEditor();
+	}
+
+	/**
+	 * scroll grid to the current focus row
+	 */
+	public void scrollToCurrentRow() {
+		onPostSelectedRowChanged();
+	}
+	
+	private void focusToRow(org.zkoss.zul.Row row) {
+		if (renderer.isEditing()) {
+			if (columnOnClick != null && columnOnClick.trim().length() > 0) {
+				setFocusToField(columnOnClick);
+				columnOnClick = null;
+			} else {
+				focusToFirstEditorIfNotDetailTab();
+			}
+		} else {
+			Component cmp = null;
+			List<?> childs = row.getChildren();
+			for (Object o : childs) {
+				Component c = (Component) o;
+				if (!c.isVisible())
+					continue;
+				if (c instanceof Cell) {
+					cmp = c;
+					break;
+				}
+			}
+			if (cmp != null)
+				Clients.response(new AuScript(null, "scrollToRow('" + cmp.getUuid() + "');"));
+
+			if (columnOnClick != null && columnOnClick.trim().length() > 0) {
+				List<?> list = row.getChildren();
+				for (Object element : list) {
+					if (element instanceof Cell) {
+						Cell cell = (Cell) element;
+						if (columnOnClick.equals(cell.getAttribute("columnName"))) {
+							cmp = cell.getFirstChild();
+							Clients.response(new AuScript(null, "scrollToRow('" + cmp.getUuid() + "');"));
+							break;
+						}
+					}
+				}
+				columnOnClick = null;
+			}
+		}
+	}
+
+	private boolean isRowRendered(org.zkoss.zul.Row row, int index) {
+		if (row.getChildren().size() == 0) {
+			return false;
+		} else if (row.getChildren().size() == 1) {
+			if (!(row.getChildren().get(0) instanceof Cell)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public boolean updateModelIndex(int rowIndex) {
+		if (pageSize > 0) {
+			int start = listModel.getPage() * listModel.getPageSize();
+			rowIndex = start + rowIndex;
+		}
+
+		if (gridTab.getCurrentRow() != rowIndex) {
+			gridTab.navigate(rowIndex);
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * @return Grid
+	 */
+	public Grid getListbox() {
+		return listbox;
+	}
+
+	/**
+	 * Validate display properties of fields of current row
+	 * @param col
+	 */
+	public void dynamicDisplay(int col) {
+		if (gridTab == null || !gridTab.isOpen())
+        {
+            return;
+        }
+		
+		if (renderer.getEditors().isEmpty())
+			listbox.onInitRender();
+
+        //  Selective
+        if (col > 0)
+        {
+        	GridField changedField = gridTab.getField(col);
+            String columnName = changedField.getColumnName();
+            ArrayList<?> dependants = gridTab.getDependantFields(columnName);
+			if ( ! (   dependants.size() > 0
+					|| changedField.getCallout().length() > 0
+					|| Core.findCallout(gridTab.getTableName(), columnName).size() > 0)) {
+                return;
+            }
+        }
+
+        boolean noData = gridTab.getRowCount() == 0;
+        List<WEditor> list =  renderer.getEditors();
+        dynamicDisplayEditors(noData, list);   //  all components
+        
+        if (gridTab.getRowCount() == 0 && selectAll.isChecked())
+			selectAll.setChecked(false);        
+	}
+
+	private void dynamicDisplayEditors(boolean noData, List<WEditor> list) {
+		for (WEditor comp : list)
+        {
+            GridField mField = comp.getGridField();
+            if (mField != null)
+            {
+                if (noData)
+                {
+                    comp.setReadWrite(false);
+                }
+                else
+                {
+                	comp.dynamicDisplay();
+                    boolean rw = mField.isEditableGrid(true);   //  r/w - check Context
+                    comp.setReadWrite(rw);
+                }
+                
+                Properties ctx = isDetailPane() ? new GridRowCtx(Env.getCtx(), gridTab, gridTab.getCurrentRow()) 
+            		: mField.getVO().ctx;
+                
+                comp.setVisible((isHasCustomizeData || mField.isDisplayedGrid()) && mField.isDisplayed(ctx, true));
+            }
+        }
+	}
+
+	private boolean isDetailPane() {
+		Component parent = this.getParent();
+		while (parent != null) {
+			if (parent instanceof DetailPane) {
+				return true;
+			} 
+			parent = parent.getParent();					
+		}
+		return false;
+	}
+	
+	/**
+	 *
+	 * @param windowNo
+	 */
+	public void setWindowNo(int windowNo) {
+		this.windowNo = windowNo;
+	}
+
+	@Override
+	public void focus() {
+		if (renderer != null && renderer.isEditing()) {
+			renderer.focusToFirstEditor();
+		}
+	}
+
+	/**
+	 * Handle enter key event
+	 */
+	public boolean onEnterKey() {
+		if (!modeless && renderer != null && !renderer.isEditing()) {
+			renderer.editCurrentRow();
+			renderer.focusToFirstEditor();
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * @param columnName
+	 */
+	public void setFocusToField(String columnName) {
+		for (WEditor editor : renderer.getEditors()) {
+			if (columnName.equals(editor.getColumnName())) {
+				Component c = editor.getComponent();
+				if (c instanceof EditorBox) {
+					c = ((EditorBox)c).getTextbox();
+				} else if (c instanceof NumberBox) {
+					c = ((NumberBox)c).getDecimalbox();
+				}
+				Clients.response(new AuFocus(c));
+				break;
+			}
+		}
+	}
+
+	/**
+	 * @param winPanel
+	 */
+	public void setADWindowPanel(AbstractADWindowContent winPanel) {
+		windowPanel = winPanel;
+		if (renderer != null)
+			renderer.setADWindowPanel(windowPanel);
+	}
+
+	public void reInit() {
+		listbox.getChildren().clear();
+		listbox.detach();
+		
+		if (paging != null) {
+			paging.detach();
+			paging = null;
+		}
+		
+		renderer = null;
+		init = false;
+		
+		Grid tmp = listbox;
+		createListbox();
+		tmp.copyEventListeners(listbox);
+		insertBefore(listbox, gridFooter);
+		
+		refresh(gridTab);
+		scrollToCurrentRow();
+		Clients.resize(listbox);
+	}
+
+	/**
+	 * list field display in grid mode, in case user customize grid
+	 * this list container only customize list.
+	 */
+	public GridField[] getFields() {
+		return gridFields;
+	}
+	
+	public void onEditCurrentRow() {
+		onEditCurrentRow(null);
+	}
+	
+	public void onEditCurrentRow(Event event) {
+		if (!renderer.isEditing()) {
+			Row currentRow = renderer.getCurrentRow();
+			if (currentRow == null || currentRow.getParent() == null || !currentRow.isVisible()) {
+				if (event == null) {
+					Events.postEvent("onEditCurrentRow", this, null);
+				}
+			} else {
+				renderer.editCurrentRow();
+				renderer.focusToFirstEditor();
+			}
+		} 
+	}
+
+	@Override
+	public void focusToFirstEditor() {
+		if (renderer.isEditing()) {
+			renderer.focusToFirstEditor();
+		}
+	}
+
+	@Override
+	public void focusToNextEditor(WEditor ref) {
+		if (renderer.isEditing()) {
+			renderer.focusToNextEditor(ref);
+		}
+	}
+
+	@Override
+	public void stateChange(StateChangeEvent event) {
+		switch(event.getEventType()) {
+			case StateChangeEvent.DATA_NEW:
+			case StateChangeEvent.DATA_QUERY:
+			case StateChangeEvent.DATA_REFRESH_ALL:
+				if (selectAll.isChecked())
+					selectAll.setChecked(false);
+				break;
+			case StateChangeEvent.DATA_DELETE:
+			case StateChangeEvent.DATA_IGNORE:
+				if (!selectAll.isChecked() && isAllSelected())
+					selectAll.setChecked(true);
+				break;
+		}
+	}
+
+	protected void onADTabPanelParentChanged() {
+		positionPagingControl();
+	}
+
+	private void positionPagingControl() {
+		if (isDetailPane()) {
+			Component parent = this.getParent();
+			while (parent != null) {
+				if (parent instanceof Tabpanel) {
+					Component firstChild = parent.getFirstChild();
+					if ( gridFooter.getParent() != firstChild ) { 
+						firstChild.appendChild(gridFooter);
+						gridFooter.setHflex("0");
+						gridFooter.setSclass("adwindow-detailpane-adtab-grid-south");												
+					}
+					break;
+				}
+				parent = parent.getParent();
+			}
+			if (paging != null)
+				paging.setDetailed(false);
+		}
+		else 
+		{
+			if (gridFooter.getParent() != this) {
+				gridFooter.setHflex("1");
+				gridFooter.setSclass("adtab-grid-south");
+				appendChild(gridFooter);
+			}
+			if (paging != null)
+				paging.setDetailed(true);			
+		}
+	}
+
+	public void setStatusLine(String text, boolean error)
+	{
+		windowPanel.getStatusBarQF().setStatusLine(text, error);
+	}
+
+	public void createNewLine() {
+		isNewLineSaved = false;
+		gridTab.dataNew(false);
+	}
+
+	/**
+	 * @param code
+	 */
+	public boolean dataSave(int code) {
+		boolean isSave = false;
+		//save only if new record modify 
+		isSave = gridTab.dataSave(false);
+		if (isSave) {
+			isNewLineSaved = true;
+		}
+
+		int row = renderer.getCurrentRowIndex();
+		int col = renderer.getCurrentRow().getChildren().indexOf(renderer.getCurrentCell());
+		if (code != KeyEvent.DOWN && code != KeyEvent.UP) {
+			renderer.setCurrentCell(row, col, code);
+		}
+		return isSave;
+	}
+
+	@Override
+	public void onPageAttached(Page newpage, Page oldpage)
+	{
+		super.onPageAttached(newpage, oldpage);
+
+		if (newpage != null)
+		{
+			keyListener = SessionManager.getSessionApplication().getKeylistener();
+			keyListener.setCtrlKeys(keyListener.getCtrlKeys() + CNTRL_KEYS);
+			keyListener.addEventListener(Events.ON_CTRL_KEY, this);
+		}
+	}
+
+	@Override
+	public void onPageDetached(Page page)
+	{
+		super.onPageDetached(page);
+		keyListener.setCtrlKeys(keyListener.getCtrlKeys().replaceAll(CNTRL_KEYS, ""));
+		keyListener.removeEventListener(Events.ON_CTRL_KEY, this);
+	}
+}

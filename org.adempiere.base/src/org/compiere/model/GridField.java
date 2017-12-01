@@ -1856,7 +1856,11 @@ public class GridField
 		Object oldValue = m_oldValue;
 		if (inserting)
 			oldValue = INSERTING;
-		m_propertyChangeListeners.firePropertyChange(PROPERTY, oldValue, m_value);
+		// every columns value overwrite with current value
+		if (getGridTab() == null || (getGridTab() != null && !getGridTab().isQuickForm()))
+		{
+			m_propertyChangeListeners.firePropertyChange(PROPERTY, oldValue, m_value);
+		}
 	}   //  setValue
 
 	/**
@@ -2504,6 +2508,13 @@ public class GridField
 	public boolean isLookupEditorSettingValue()
 	{
 		return m_lookupEditorSettingValue;
+	}
+	/**
+	 * Is Quick Form
+	 * @return true if displayed in Quick Form
+	 */
+	public boolean isQuickForm() {
+		return m_vo.IsQuickForm;
 	}
 
 }   //  GridField
