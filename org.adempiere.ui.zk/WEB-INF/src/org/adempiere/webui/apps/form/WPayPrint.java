@@ -82,7 +82,7 @@ import com.lowagie.text.pdf.PdfReader;
 */
 public class WPayPrint extends PayPrint implements IFormController, EventListener<Event>, ValueChangeListener
 {
-	private CustomForm form = new CustomForm();
+	protected CustomForm form = new CustomForm();
 
 	/**
 	 *	Initialize Panel
