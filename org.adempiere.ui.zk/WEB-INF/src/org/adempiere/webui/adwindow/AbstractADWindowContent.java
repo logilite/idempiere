@@ -47,6 +47,7 @@ import org.adempiere.webui.apps.HelpWindow;
 import org.adempiere.webui.apps.ProcessModalDialog;
 import org.adempiere.webui.apps.form.WCreateFromFactory;
 import org.adempiere.webui.apps.form.WCreateFromWindow;
+import org.adempiere.webui.apps.form.WQuickForm;
 import org.adempiere.webui.component.Mask;
 import org.adempiere.webui.component.ProcessInfoDialog;
 import org.adempiere.webui.component.Window;
@@ -194,6 +195,12 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	private int adWindowId;
 
 	private MImage image;
+	
+	
+	/**
+	 * Quick Form Status bar
+	 */
+	protected StatusBar statusBarQF;
 
 	/**
 	 * Constructor
@@ -1075,6 +1082,43 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     	
     }
 
+	/**
+	 * Invoke when quick form is click
+	 */
+	public void onQuickForm()
+	{
+		logger.log(Level.FINE, "Invoke Quick Form");
+		// Not open Quick Form if already open.
+		if (!SessionManager.registerQuickFormTab(getADTab().getSelectedGridTab().getAD_Tab_ID()))
+		{
+			logger.fine("TabID=" + getActiveGridTab().getAD_Tab_ID() + "  is already opened.");
+			return;
+		}
+		int table_ID = adTabbox.getSelectedGridTab().getAD_Table_ID();
+		if (table_ID == -1)
+			return;
+		
+		statusBarQF = new StatusBar();
+		// Remove Key-listener of parent Quick Form
+		int tabLevel = getToolbar().getQuickFormTabHrchyLevel();
+		if (tabLevel > 0 && getCurrQGV() != null)
+		{
+			SessionManager.getSessionApplication().getKeylistener().removeEventListener(Events.ON_CTRL_KEY,
+					getCurrQGV());
+		}
+
+		WQuickForm form = new WQuickForm(this, m_onlyCurrentRows, m_onlyCurrentDays);
+		form.setTitle(this.getADTab().getSelectedGridTab().getName());
+		form.setVisible(true);
+		form.setSizable(true);
+		form.setMaximizable(true);
+		form.setMaximized(true);
+		form.setPosition("center");
+		ZkCssHelper.appendStyle(form, "min-width: 500px; min-height: 400px; width: 900px; height:550px;");
+
+		AEnv.showWindow(form);
+	}
+
     /**
      * @param event
      * @see EventListener#onEvent(Event)
@@ -1124,11 +1168,31 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     		hideBusyMask();
     		ProcessModalDialog dialog = (ProcessModalDialog) event.getTarget();
     		onModalClose(dialog.getProcessInfo());
-    		String s = statusBar.getStatusLine(); 
-    		boolean b = statusBar.getStatusError();
-    		ProcessInfoLog[] logs = statusBar.getPLogs();
+			String s = null;
+			boolean b = false;
+			ProcessInfoLog[] logs = null;
+    		if (getActiveGridTab().isQuickForm)
+			{
+				s = statusBarQF.getStatusLine();
+				b = statusBarQF.getStatusError();
+				logs = statusBarQF.getPLogs();
+			}
+    		else
+			{
+				s = statusBar.getStatusLine();
+				b = statusBar.getStatusError();
+				logs = statusBar.getPLogs();
+			}
     		onRefresh(true, false);
-    		statusBar.setStatusLine(s, b, logs);       	
+    		if (getActiveGridTab().isQuickForm)
+			{
+    			statusBarQF.setStatusLine(s, b, logs);
+			}
+    		else
+			{
+    			statusBar.setStatusLine(s, b, logs);
+			}
+    		    	
     	}
     	else if (ADTabpanel.ON_DYNAMIC_DISPLAY_EVENT.equals(event.getName()))
     	{
@@ -1330,6 +1394,8 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		
 		toolbar.enableCustomize(adTabbox.getSelectedTabpanel().isEnableCustomizeButton());
 
+		toolbar.enableQuickForm(adTabbox.getSelectedTabpanel().isEnableQuickFormButton() && !adTabbox.getSelectedGridTab().isReadOnly());
+
 	}
 
 	/**
@@ -1430,9 +1496,18 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         		if (detailTab) {
         			String msg = e.getTotalRows() + " " + Msg.getMsg(Env.getCtx(), "Records");
                 	adTabbox.setDetailPaneStatusMessage(msg, false);
-                } else {
-                	statusBar.setStatusLine ("", false);
-                }
+				}
+				else
+				{
+					if (getActiveGridTab().isQuickForm)
+					{
+						statusBarQF.setStatusLine("", false);
+					}
+					else
+					{
+						statusBar.setStatusLine("", false);
+					}
+				}
         	}
         	else
         	{
@@ -1505,7 +1580,14 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	                if (detailTab) {
 	                	adTabbox.setDetailPaneStatusMessage(sb.toString (), e.isError ());
 	                } else {
-	                	statusBar.setStatusLine (sb.toString (), e.isError ());
+	                	if (getActiveGridTab().isQuickForm)
+						{
+	                		statusBarQF.setStatusLine(sb.toString(), e.isError());
+						}
+						else
+						{
+							statusBar.setStatusLine(sb.toString(), e.isError());
+						}
 	                }
 	            }
         	}
@@ -2113,14 +2195,29 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 			{
 				if (result)
 				{
-		    		String statusLine = statusBar.getStatusLine();
-		    		adTabbox.getSelectedGridTab().dataRefreshAll(true, true);
-		    		adTabbox.getSelectedGridTab().refreshParentTabs();
-		    		statusBar.setStatusLine(statusLine);
-		    		if( adTabbox.getSelectedDetailADTabpanel() != null && 
-		    				adTabbox.getSelectedDetailADTabpanel().getGridTab() != null )
-		    			adTabbox.getSelectedDetailADTabpanel().getGridTab().dataRefreshAll(true, true);
-		    	}
+					String statusLine = null;
+					if (getActiveGridTab().isQuickForm)
+					{
+						statusLine = statusBarQF.getStatusLine();
+					}
+					else
+					{
+						statusLine = statusBar.getStatusLine();
+					}
+					adTabbox.getSelectedGridTab().dataRefreshAll(true, true);
+					adTabbox.getSelectedGridTab().refreshParentTabs();
+					if (getActiveGridTab().isQuickForm)
+					{
+						statusBarQF.setStatusLine(statusLine);
+					}
+					else
+					{
+						statusBar.setStatusLine(statusLine);
+					}
+					if (adTabbox.getSelectedDetailADTabpanel() != null
+							&& adTabbox.getSelectedDetailADTabpanel().getGridTab() != null)
+						adTabbox.getSelectedDetailADTabpanel().getGridTab().dataRefreshAll(true, true);
+				}
 				if (dirtyTabpanel != null) {
 					if (dirtyTabpanel == adTabbox.getSelectedDetailADTabpanel())
 						Clients.scrollIntoView(dirtyTabpanel);
@@ -2128,6 +2225,9 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 				} else {
 					focusToActivePanel();
 				}
+				
+				if(adTabbox.getSelectedGridTab().isQuickForm())
+					onRefresh(true, true);
 			}
 		});
     }
@@ -2238,9 +2338,17 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		} else if (dirtyTabpanel instanceof ADSortTab) {
 			ADSortTab sortTab = (ADSortTab) dirtyTabpanel;
 			if (!sortTab.isChanged()) {
-    			if (sortTab == adTabbox.getSelectedTabpanel()) {
-    				statusBar.setStatusLine(Msg.getMsg(Env.getCtx(), "Saved"));
-    			} else {
+				if (sortTab == adTabbox.getSelectedTabpanel())
+				{
+					if (getActiveGridTab().isQuickForm)
+					{
+						statusBarQF.setStatusLine(Msg.getMsg(Env.getCtx(), "Saved"));
+					}
+					else
+					{
+						statusBar.setStatusLine(Msg.getMsg(Env.getCtx(), "Saved"));
+					}
+				} else {
     				adTabbox.setDetailPaneStatusMessage(Msg.getMsg(Env.getCtx(), "Saved"), false);
     			}
     		}
@@ -2303,7 +2411,14 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		String msg = CLogger.retrieveErrorString(null);
 		if (msg != null)
 		{
-			statusBar.setStatusLine(Msg.getMsg(Env.getCtx(), msg), true);
+			if (getActiveGridTab().isQuickForm)
+			{
+				statusBarQF.setStatusLine(Msg.getMsg(Env.getCtx(), msg), true);
+			}
+			else
+			{
+				statusBar.setStatusLine(Msg.getMsg(Env.getCtx(), msg), true);
+			}
 		}
 		//other error will be catch in the dataStatusChanged event
 	}
@@ -2437,14 +2552,28 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 			    		adTabbox.getSelectedGridTab().refreshParentTabs();
 						
 						adTabbox.getSelectedTabpanel().dynamicDisplay(0);
-						statusBar.setStatusLine(Msg.getMsg(Env.getCtx(), "Deleted")+": "+count, false);
+						if (getActiveGridTab().isQuickForm)
+						{
+							statusBarQF.setStatusLine(Msg.getMsg(Env.getCtx(), "Deleted") + ": " + count, false);
+						}
+						else
+						{
+							statusBar.setStatusLine(Msg.getMsg(Env.getCtx(), "Deleted") + ": " + count, false);
+						}
 					}
 					if (postCallback != null)
 						postCallback.onCallback(result);
 				}
 			});
 		} else {
-			statusBar.setStatusLine(Msg.getMsg(Env.getCtx(), "Selected")+": 0", false);
+			if (getActiveGridTab().isQuickForm)
+			{
+				statusBarQF.setStatusLine(Msg.getMsg(Env.getCtx(), "Selected") + ": 0", false);
+			}
+			else
+			{
+				statusBar.setStatusLine(Msg.getMsg(Env.getCtx(), "Selected") + ": 0", false);
+			}
 			if (postCallback != null)
 				postCallback.onCallback(false);
 		}
@@ -2735,7 +2864,16 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	 */
 	private void actionButton0 (String col, final IProcessButton wButton)
 	{
-		final IADTabpanel adtabPanel = findADTabpanel(wButton);
+		//To perform button action (adtabPanel is null in QuickForm)  
+		IADTabpanel adtabPanel = null;
+		if (adTabbox.getSelectedGridTab().isQuickForm())
+		{
+			adtabPanel=this.getADTab().getSelectedTabpanel();
+		}
+		else
+		{
+			adtabPanel = findADTabpanel(wButton);
+		}
 		boolean startWOasking = false;
 		if (adtabPanel == null) {
 			return;
@@ -2897,7 +3035,16 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 							onRefresh(true, false);
 
 							if (error != null)
-								statusBar.setStatusLine(error, true);
+							{
+								if (getActiveGridTab().isQuickForm)
+								{
+									statusBarQF.setStatusLine(error, true);
+								}
+								else
+								{
+									statusBar.setStatusLine(error, true);
+								}
+							}
 						}
 					}
 				});
@@ -2988,7 +3135,15 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 			ProcessInfo pi = new ProcessInfo (title, wButton.getProcess_ID(), table_ID, record_ID);
 			pi.setAD_User_ID (Env.getAD_User_ID(ctx));
 			pi.setAD_Client_ID (Env.getAD_Client_ID(ctx));
-			final IADTabpanel adtabPanel = findADTabpanel(wButton);
+			IADTabpanel adtabPanel = null;
+			if (adTabbox.getSelectedGridTab().isQuickForm())
+			{
+				adtabPanel=this.getADTab().getSelectedTabpanel();
+			}
+			else
+			{
+				adtabPanel = findADTabpanel(wButton);
+			}
 			GridTab gridTab = null;
 			if (adtabPanel != null)
 				gridTab = adtabPanel.getGridTab();
@@ -3027,6 +3182,9 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 				LayoutUtils.openOverlappedWindow(getComponent(), dialog, "middle_center");
 				dialog.focus();
 			}
+			if (adTabbox.getSelectedGridTab().isQuickForm()) {
+				adTabbox.getSelectedGridTab().dataRefreshAll(false, false);
+			}
 			else
 			{
 				onRefresh(true, false);
@@ -3045,7 +3203,14 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 				String error = processButtonCallout((IProcessButton) event.getSource());
 				if (error != null && error.trim().length() > 0)
 				{
-					statusBar.setStatusLine(error, true);
+					if (getActiveGridTab().isQuickForm)
+					{
+						statusBarQF.setStatusLine(error, true);
+					}
+					else
+					{
+						statusBar.setStatusLine(error, true);
+					}
 					return;
 				}
 				actionButton((IProcessButton) event.getSource());
@@ -3070,7 +3235,15 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	 */
 	private String processButtonCallout (IProcessButton button)
 	{
-		IADTabpanel adtab = findADTabpanel(button);
+		IADTabpanel adtab = null;
+		if (adTabbox.getSelectedGridTab().isQuickForm())
+		{
+			adtab=this.getADTab().getSelectedTabpanel();
+		}
+		else
+		{
+			adtab = findADTabpanel(button);
+		}
 		if (adtab != null) {
 			GridField field = adtab.getGridTab().getField(button.getColumnName());
 			if (field != null)
@@ -3163,7 +3336,15 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		//		Get Log Info
 		ProcessInfoUtil.setLogFromDB(pi);
 		ProcessInfoLog m_logs[] = pi.getLogs();
-		statusBar.setStatusLine(pi.getSummary(), pi.isError(),m_logs);
+		if (getActiveGridTab().isQuickForm)
+		{
+			statusBarQF.setStatusLine(pi.getSummary(), pi.isError(), m_logs);
+		}
+		else
+		{
+			statusBar.setStatusLine(pi.getSummary(), pi.isError(), m_logs);
+		}
+		
 		
 		if (m_logs != null && m_logs.length > 0) {
 			ProcessInfoDialog.showProcessInfo(pi, curWindowNo, getComponent(), false);
@@ -3215,7 +3396,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 			gridFieldIds.add(fields[i].getAD_Field_ID());
 
 		}
-		CustomizeGridViewDialog.showCustomize(0, adTabbox.getSelectedGridTab().getAD_Tab_ID(), columnsWidth,gridFieldIds,tabPanel.getGridView());
+		CustomizeGridViewDialog.showCustomize(0, adTabbox.getSelectedGridTab().getAD_Tab_ID(), columnsWidth,gridFieldIds,tabPanel.getGridView(), null, false);
 	}
 
 	/**
@@ -3285,6 +3466,35 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     		Env.setContext(ctx, curWindowNo, "Value", "");
     		Env.setContext(ctx, curWindowNo, "Name", "");
         }
+	}
+	
+	/**
+	 * @return Quick Form StatusBar
+	 */
+	public StatusBar getStatusBarQF()
+	{
+		return statusBarQF;
+	}
+	
+	/**
+	 * Implementation to work key listener for the current opened Quick Form.
+	 */
+	QuickGridView currQGV = null;
+
+	/**
+	 * @return
+	 */
+	public QuickGridView getCurrQGV()
+	{
+		return currQGV;
+	}
+
+	/**
+	 * @param currQGV
+	 */
+	public void setCurrQGV(QuickGridView currQGV)
+	{
+		this.currQGV = currQGV;
 	}
 
 }

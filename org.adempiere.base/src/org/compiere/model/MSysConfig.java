@@ -181,6 +181,7 @@ public class MSysConfig extends X_AD_SysConfig
 	public static final String WEBSERVICE_LOGIN_RESPONSE_ALL = "WEBSERVICE_LOGIN_RESPONSE_ALL";
 	public static final String LDAP_IS_OPEN_LDAP = "LDAP_IS_OPEN_LDAP";
 	public static final String ZK_ENABLE_CLIENT_URL = "ZK_ENABLE_CLIENT_URL";
+	public static final String QUICKFORM_PAGE_SIZE = "QUICKFORM_PAGE_SIZE";
 	/**
 	 * 	Standard Constructor
 	 *	@param ctx context

@@ -211,4 +211,9 @@ public interface IADTabpanel extends Component, Evaluatee {
 	 * Note: don't return null , it may throw NPException.
 	 */
 	public abstract List<Button> getToolbarButtons();
+	
+	/**
+	 * @return Quick Form Button Enabled/Disabled
+	 */
+	public abstract boolean isEnableQuickFormButton();
 }

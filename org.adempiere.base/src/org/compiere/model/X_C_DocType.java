@@ -970,4 +970,33 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 	{
 		return (String)get_Value(COLUMNNAME_PrintName);
 	}
+	
+	/**
+	 * Set Override Doc Control.
+	 * 
+	 * @param IsOverrideDocControl Allow posting to Document Controlled accounts
+	 *            from GL Journal
+	 */
+	public void setIsOverrideDocControl(boolean IsOverrideDocControl)
+	{
+		set_Value(COLUMNNAME_IsOverrideDocControl, Boolean.valueOf(IsOverrideDocControl));
+	}
+
+	/**
+	 * Get Override Doc Control.
+	 * 
+	 * @return Allow posting to Document Controlled accounts from GL Journal
+	 */
+	public boolean isOverrideDocControl()
+	{
+		Object oo = get_Value(COLUMNNAME_IsOverrideDocControl);
+		if (oo != null)
+		{
+			if (oo instanceof Boolean)
+				return ((Boolean) oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 }

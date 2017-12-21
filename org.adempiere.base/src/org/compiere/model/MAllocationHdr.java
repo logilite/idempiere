@@ -22,7 +22,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -512,6 +514,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 
 		//	Link
 		getLines(false);
+		updateOpenBalForMultipleBP(false);
 		if(!updateBP(isReversal()))
 			return DocAction.STATUS_Invalid;
 		
@@ -891,6 +894,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 			
 			//	Unlink Invoices
 			getLines(true);
+			updateOpenBalForMultipleBP(true);
 			if(!updateBP(true))
 				return false;
 			
@@ -1140,7 +1144,66 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 
 		return true;
 	}	//	updateBP
-	
+
+	/**
+	 * Update open balance of BP
+	 * when multiple business partner
+	 * 
+	 * @param isReverseCorrectIt = true allocation amount will be negate.
+	 */
+
+	private void updateOpenBalForMultipleBP(boolean isReverseCorrectIt)
+	{
+		HashMap<Integer, BigDecimal> openBPBal = new HashMap<Integer, BigDecimal>();
+		for (MAllocationLine line : m_lines)
+		{
+			int C_Payment_ID = line.getC_Payment_ID();
+			int M_Invoice_ID = line.getC_Invoice_ID();
+
+			MInvoice invoice = M_Invoice_ID > 0
+					? (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(M_Invoice_ID, get_TrxName()) : null;
+
+			MPayment payment = C_Payment_ID > 0
+					? (MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(C_Payment_ID, get_TrxName()) : null;
+
+			BigDecimal allocationAmt = isReverseCorrectIt ? line.getAmount().negate() : line.getAmount();
+			BigDecimal bpOpenBal = Env.ZERO;
+
+			if (invoice != null)
+			{
+				int bPartnerID = invoice.getC_BPartner_ID();
+				bpOpenBal = openBPBal.get(bPartnerID) == null ? Env.ZERO : openBPBal.get(bPartnerID);
+				bpOpenBal = bpOpenBal.subtract(allocationAmt);
+				openBPBal.put(bPartnerID, bpOpenBal);
+			} 
+		   if (payment != null)
+			{
+			    int bPartnerID = payment.getC_BPartner_ID();
+			    bpOpenBal = openBPBal.get(bPartnerID) == null ? Env.ZERO : openBPBal.get(bPartnerID);
+			    bpOpenBal = bpOpenBal.add(allocationAmt);
+				openBPBal.put(bPartnerID, bpOpenBal);
+			} 
+		}
+		
+		/* Update open balance for invoice BP */
+		if (!openBPBal.isEmpty())
+		{
+			for (Map.Entry<Integer, BigDecimal> entry : openBPBal.entrySet())
+			{
+				int bPartnerID = entry.getKey();
+				BigDecimal allocAmt = entry.getValue();
+				if (Env.ZERO.compareTo(allocAmt) != 0)
+				{
+					MBPartner bPartner = MBPartner.get(getCtx(), bPartnerID);
+					DB.getDatabase().forUpdate(bPartner, 0);
+					BigDecimal bpOpenBal = bPartner.getTotalOpenBalance().add(allocAmt);
+					bPartner.setTotalOpenBalance(bpOpenBal);
+					bPartner.saveEx();
+				}
+			}
+		}
+	}
+
 	/**
 	 * 	Document Status is Complete or Closed
 	 *	@return true if CO, CL or RE

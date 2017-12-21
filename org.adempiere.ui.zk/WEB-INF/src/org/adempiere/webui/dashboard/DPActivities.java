@@ -60,7 +60,7 @@ public class DPActivities extends DashboardPanel implements EventListener<Event>
 
 	private String labelN, labelR, labelW, labelU;
 	
-	private int noOfNotice, noOfRequest, noOfWorkflow, noOfUnprocessed;
+	protected int noOfNotice, noOfRequest, noOfWorkflow, noOfUnprocessed;
 
 	public DPActivities()
 	{

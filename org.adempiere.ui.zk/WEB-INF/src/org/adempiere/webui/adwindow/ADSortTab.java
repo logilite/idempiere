@@ -1066,5 +1066,10 @@ public class ADSortTab extends Panel implements IADTabpanel
 	{
 		return new ArrayList<org.zkoss.zul.Button>();
 	}
+	@Override
+	public boolean isEnableQuickFormButton() 
+	{
+		return false;
+	}
 }	//ADSortTab
 

@@ -15,10 +15,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 
+import org.adempiere.util.Callback;
+import org.adempiere.webui.adwindow.ADTabpanel;
+import org.adempiere.webui.adwindow.ADWindow;
 import org.adempiere.webui.event.DialogEvents;
+import org.adempiere.webui.exception.ApplicationException;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.window.WTextEditorDialog;
+import org.compiere.model.MMenu;
+import org.compiere.model.MQuery;
 import org.compiere.model.MTreeFavorite;
 import org.compiere.model.MTreeFavoriteNode;
 import org.compiere.model.MTreeNode;
@@ -30,6 +36,7 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.DefaultTreeNode;
+import org.zkoss.zul.Toolbarbutton;
 import org.zkoss.zul.Tree;
 import org.zkoss.zul.TreeNode;
 import org.zkoss.zul.Treecell;
@@ -207,6 +214,14 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 				ti.setTooltiptext(mNode.getDescription());
 				if (mNode.isSummary())
 					ZkCssHelper.appendStyle(tc, "font-weight: bold");
+
+				if (mNode.isWindow())
+				{
+					Toolbarbutton newBtn = new Toolbarbutton(null, ThemeManager.getThemeResource("images/New10.png"));
+					newBtn.setSclass("menu-href-newbtn");
+					newBtn.addEventListener(Events.ON_CLICK, this);
+					tc.appendChild(newBtn);
+				}
 			}
 		}
 		else
@@ -257,6 +272,13 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 		 */
 		if (Events.ON_CLICK.equals(eventName) || Events.ON_SELECT.equals(eventName))
 		{
+			boolean newRecord = false;
+			if (comp instanceof Toolbarbutton)
+			{
+				comp = comp.getParent().getParent();
+				newRecord = true;
+			}
+			
 			if (comp instanceof Treerow)
 			{
 				Treerow treerow = (Treerow) comp;
@@ -265,7 +287,12 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 
 				DefaultTreeNode<?> dtNode = (DefaultTreeNode<?>) value;
 				MTreeNode mtn = (MTreeNode) dtNode.getData();
-				if (!mtn.isSummary())
+
+				if (newRecord)
+				{
+					onNewRecord(mtn.getMenu_ID());
+				}
+				else if (!mtn.isSummary())
 				{
 					int menuId = mtn.getMenu_ID();
 					SessionManager.getAppDesktop().onMenuSelected(menuId);
@@ -360,5 +387,34 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 	{
 		return (DefaultTreeNode<Object>) (parent).getChildAt(index);
 	} // getChild
+	
+	private void onNewRecord(int menuID)
+	{
+		try
+		{
+			MMenu menu = new MMenu(Env.getCtx(), menuID, null);
+
+			MQuery query = new MQuery("");
+			query.addRestriction("1=2");
+			query.setRecordCount(0);
+
+			SessionManager.getAppDesktop().openWindow(menu.getAD_Window_ID(), query, new Callback<ADWindow>() {
+				@Override
+				public void onCallback(ADWindow result)
+				{
+					if (result == null)
+						return;
+
+					result.getADWindowContent().onNew();
+					ADTabpanel adtabpanel = (ADTabpanel) result.getADWindowContent().getADTab().getSelectedTabpanel();
+					adtabpanel.focusToFirstEditor(false);
+				}
+			});
+		}
+		catch (Exception e)
+		{
+			throw new ApplicationException(e.getMessage(), e);
+		}
+	} // onNewRecord
 
 }

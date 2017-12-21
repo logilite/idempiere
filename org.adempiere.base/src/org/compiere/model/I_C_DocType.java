@@ -544,4 +544,18 @@ public interface I_C_DocType
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+	
+	/** Column name IsOverrideDocControl */
+    public static final String COLUMNNAME_IsOverrideDocControl = "IsOverrideDocControl";
+
+	/** Set Override Doc Control.
+	  * Allow posting to Document Controlled accounts from GL Journal
+	  */
+	public void setIsOverrideDocControl (boolean IsOverrideDocControl);
+
+	/** Get Override Doc Control.
+	  * Allow posting to Document Controlled accounts from GL Journal
+	  */
+	public boolean isOverrideDocControl();
+
 }
