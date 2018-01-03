@@ -765,7 +765,7 @@ public class MPeriod extends X_C_Period
 			{
 				MDocType type = types[i];
 				String DocBaseType = type.getDocBaseType();
-				if (baseTypes.contains(DocBaseType))
+				if (baseTypes.contains(DocBaseType) || Util.isEmpty(DocBaseType, true))
 					continue;
 				MPeriodControl pc = new MPeriodControl(this, DocBaseType);
 				pc.saveEx();
