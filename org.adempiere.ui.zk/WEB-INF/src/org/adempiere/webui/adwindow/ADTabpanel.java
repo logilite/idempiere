@@ -1795,7 +1795,7 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
 		return getToolbarButtons().size() > 0 && !gridTab.isNew();
 	}
 
-	}
+
 
 	@Override
 	public boolean isEnableQuickFormButton()
@@ -1821,4 +1821,5 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
 		}
 		
 		return hasQuickForm;
+	}
 }
