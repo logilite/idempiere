@@ -3,6 +3,9 @@
 ALTER TABLE t_alter_column ADD COLUMN usingclause character varying(200)
 ;
 
+DROP RULE alter_column_rule ON t_alter_column
+;
+
 DROP FUNCTION altercolumn(name, name, name, character varying, character varying)
 ;
 
@@ -160,9 +163,6 @@ BEGIN
 END;
 $BODY$
   LANGUAGE plpgsql VOLATILE
-;
-
-DROP RULE alter_column_rule ON t_alter_column
 ;
 
 CREATE OR REPLACE RULE alter_column_rule AS
