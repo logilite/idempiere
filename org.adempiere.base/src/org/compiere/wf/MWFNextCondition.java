@@ -23,6 +23,9 @@ import java.util.logging.Level;
 
 import org.compiere.model.PO;
 import org.compiere.model.X_AD_WF_NextCondition;
+import org.compiere.util.DB;
+import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 /**
  *	Workflow Transition Condition
@@ -81,7 +84,7 @@ public class MWFNextCondition extends X_AD_WF_NextCondition
 	 */
 	public boolean evaluate (MWFActivity activity)
 	{
-		if (getAD_Column_ID() == 0)
+		if (!getOperation().equals(OPERATION_Sql) && getAD_Column_ID() == 0)
 			throw new IllegalStateException("No Column defined - " + this);
 			
 		PO po = activity.getPO();
@@ -100,7 +103,43 @@ public class MWFNextCondition extends X_AD_WF_NextCondition
 		
 		String resultStr = "PO:{" + valueObj + "} " + getOperation() + " Condition:{" + value1 + "}";
 		if (getOperation().equals(OPERATION_Sql))
-			throw new IllegalArgumentException("SQL Operator not implemented yet: " + resultStr);
+		{
+			if (DB.isReadOnly(value1) != null)
+			{
+				log.log(Level.SEVERE, "SQL must not update or insert record. : " + value1);
+				return false;
+			}
+			int i = value1.indexOf('@');
+			StringBuffer query = new StringBuffer();
+			while (i != -1)
+			{
+				query.append(value1.substring(0, i));			// up to @
+				value1 = value1.substring(i + 1, value1.length());	// from first @
+
+				int j = value1.indexOf('@');						// next @
+				if (j < 0)
+				{
+					log.log(Level.SEVERE, "No second tag: " + value1);
+					return false;						//	no second tag
+				}
+				String token = value1.substring(0, j);
+
+				String value = Env.getContext(Env.getCtx(), 0, token, false);	// get context
+				if (value.length() == 0 && (token.startsWith("#") || token.startsWith("$")))
+					value = Env.getContext(Env.getCtx(), token);	// get global context
+				if (value.length() == 0)
+				{
+					query.append(po.get_Value(token).toString());
+				}
+				else
+					query.append(value);
+				value1 = value1.substring(j + 1, value1.length());	// from second @
+				i = value1.indexOf('@');
+			}
+			query.append(value1);
+			String result = DB.getSQLValueString(null, query.toString());
+			return result.equalsIgnoreCase("t") || result.equalsIgnoreCase("Y") ? true : false;
+		}
 		if (getOperation().equals(OPERATION_X))
 			resultStr += "{" + value2 + "}";
 
@@ -294,5 +333,20 @@ public class MWFNextCondition extends X_AD_WF_NextCondition
 			.append ("]");
 		return sb.toString ();
 	} //	toString
-	
+
+	@Override
+	protected boolean beforeSave(boolean newRecord)
+	{
+		super.beforeSave(newRecord);
+		String error = null;
+		if (getOperation().equals(OPERATION_Sql))
+			error = DB.isReadOnly(getValue());
+		if (error != null && error.length() > 0)
+		{
+			log.saveError("SQLReadOnly", Msg.getElement(getCtx(), "Value"));
+			return false;
+		}
+		return true;
+	}
+
 }	//	MWFNextCondition

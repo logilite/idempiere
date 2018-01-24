@@ -2480,6 +2480,13 @@ public final class DB
 		return false;
 	}
 
+	public static String isReadOnly(String sql) {
+		sql = sql.trim().toLowerCase();
+		if (sql.startsWith("insert") || sql.startsWith("update") || sql.startsWith("delete"))
+			return "SQL must not update or insert record.";
+		return null;
+	}
+
     /**
      * Get an array of objects from sql (one per each column on the select clause), column indexing starts with 0
      * @param trxName trx
