@@ -143,7 +143,6 @@ public class Doc_ProjectIssue extends Doc
 		if (cost == null)	//	standard Product Costs
 		{
 			cost = m_line.getProductCosts(as, getAD_Org_ID(), false);
-			cost = cost.multiply(m_line.getQty().abs());
 		}
 
 		
