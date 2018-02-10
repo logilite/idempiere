@@ -134,10 +134,8 @@ public class Doc_ProjectIssue extends Doc
 
 		//  Issue Cost
 		BigDecimal cost = null;
-		if (m_issue.getM_InOutLine_ID() != 0){
+		if (m_issue.getM_InOutLine_ID() != 0)
 			cost = getPOCost(as);
-			cost = cost.multiply(m_line.getQty().abs());
-		}
 		else if (m_issue.getS_TimeExpenseLine_ID() != 0)
 			cost = getLaborCost(as);
 		if (cost == null)	//	standard Product Costs
