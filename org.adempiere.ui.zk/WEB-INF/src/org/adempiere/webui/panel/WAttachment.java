@@ -41,6 +41,7 @@ import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MAttachment;
 import org.compiere.model.MAttachmentEntry;
+import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
@@ -116,6 +117,8 @@ public class WAttachment extends Window implements EventListener<Event>
 
 	private int displayIndex;
 
+	boolean isAllowDeleteAttachment; 
+	
 	private static List<String> autoPreviewList;
 
 	static {
@@ -158,6 +161,9 @@ public class WAttachment extends Window implements EventListener<Event>
 						int AD_Table_ID, int Record_ID, String trxName, EventListener<Event> eventListener)
 	{
 		super();
+		
+		MRole role = MRole.get(Env.getCtx(), Env.getAD_Role_ID(Env.getCtx()));
+		isAllowDeleteAttachment = role.isAllowDeleteAttachment();
 
 		if (log.isLoggable(Level.CONFIG)) log.config("ID=" + AD_Attachment_ID + ", Table=" + AD_Table_ID + ", Record=" + Record_ID);
 
@@ -293,6 +299,7 @@ public class WAttachment extends Window implements EventListener<Event>
 		bLoad.setUpload("multiple=true," + AdempiereWebUI.getUploadSetting());
 		bLoad.addEventListener(Events.ON_UPLOAD, this);
 
+		bDelete.setEnabled(isAllowDeleteAttachment);
 		bDelete.addEventListener(Events.ON_CLICK, this);
 
 		previewPanel.appendChild(preview);
@@ -321,6 +328,7 @@ public class WAttachment extends Window implements EventListener<Event>
 		bDeleteAll.setSclass("img-btn");
 		bDeleteAll.addEventListener(Events.ON_CLICK, this);
 		bDeleteAll.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "DeleteAll")));
+		bDeleteAll.setEnabled(isAllowDeleteAttachment);
 
 		bRefresh.addEventListener(Events.ON_CLICK, this);
 
@@ -398,7 +406,7 @@ public class WAttachment extends Window implements EventListener<Event>
 			sizeLabel.setText(size.toPlainString() + unit);
 
 			bSave.setEnabled(true);
-			bDelete.setEnabled(true);
+			bDelete.setEnabled(isAllowDeleteAttachment);
 
 			if (autoPreviewList.contains(mimeType))
 			{
@@ -571,23 +579,52 @@ public class WAttachment extends Window implements EventListener<Event>
 		log.config(fileName);
 		int cnt = m_attachment.getEntryCount();
 
-		//update
-		for (int i = 0; i < cnt; i++)
+		if (!MSysConfig.getBooleanValue(MSysConfig.ATTACHMENT_AUTO_VERSION_ENABLED, false))
 		{
-			if (m_attachment.getEntryName(i).equals(fileName))
+			// update
+			for (int i = 0; i < cnt; i++)
 			{
-				m_attachment.updateEntry(i, getMediaData(media));
-				cbContent.setSelectedIndex(i);
-				m_change = true;
-				return;
+				if (m_attachment.getEntryName(i).equals(fileName))
+				{
+					m_attachment.updateEntry(i, getMediaData(media));
+					cbContent.setSelectedIndex(i);
+					m_change = true;
+					return;
+				}
 			}
+		}
+		else
+		{
+			// Retrieve filename version
+			int fileVersion = getFileVersion(fileName);
+			String compareFilename = removeSuffix(fileName);
+
+			for (int i = 0; i < cnt; i++)
+			{
+				if (removeSuffix(m_attachment.getEntryName(i)).equals(compareFilename))
+				{
+					int version = getFileVersion(m_attachment.getEntryName(i));
+					if (fileVersion <= version)
+					{
+						fileVersion = version + 1;
+					}
+				}
+			}
+
+			if (fileVersion != 0)
+			{
+				String[] fileParts = getFileParts(fileName);
+				fileName = fileParts[0] + "(" + fileVersion + ")" + fileParts[1];
+			}
+
+			log.config("After versioning " + fileName);
 		}
 
 		//new
 		if (m_attachment.addEntry(fileName, getMediaData(media)))
 		{
-			cbContent.appendItem(media.getName(), media.getName());
-			cbContent.setSelectedIndex(cbContent.getItemCount()-1);
+			cbContent.appendItem(fileName, fileName);
+			cbContent.setSelectedIndex(cbContent.getItemCount() - 1);
 			m_change = true;
 		}
 	}
@@ -712,4 +749,76 @@ public class WAttachment extends Window implements EventListener<Event>
 		}
 		return "UTF-8";
 	}
+	
+	/**
+	 * Remove suffix before comparing name
+	 * 
+	 * @param fileName
+	 * @return Filename by removing (version)
+	 */
+	private String removeSuffix(String fileName)
+	{
+		String[] fileParts = getFileParts(fileName);
+
+		return fileParts[0] + fileParts[1];
+	} // removeSuffix
+
+	/**
+	 * Get file version
+	 * 
+	 * @param fileName
+	 * @return version of file
+	 */
+	private int getFileVersion(String fileName)
+	{
+		String[] fileParts = getFileParts(fileName);
+
+		int version = 0;
+		try
+		{
+			version = Integer.parseInt(fileParts[2]);
+		}
+		catch (Exception e)
+		{
+		}
+
+		return version;
+	} // getFileVersion
+
+	/**
+	 * Get file parts
+	 * 
+	 * @param fileName
+	 * @return File parts (file, type, version)
+	 */
+	private String[] getFileParts(String fileName)
+	{
+		String[] fileParts = new String[3];
+
+		String format = "";
+		String version = "0";
+		String file = fileName;
+		int lastIndex = fileName.lastIndexOf(".");
+
+		if (lastIndex != -1)
+		{
+			file = fileName.substring(0, lastIndex);
+			format = fileName.substring(lastIndex);
+		}
+
+		if (file.lastIndexOf("(") != -1 && file.lastIndexOf(")") != -1)
+		{
+			version = file.substring(file.lastIndexOf("(") + 1, file.lastIndexOf(")"));
+			if (version.length() == 0 || version.matches(".*[a-zA-Z$&+,:;=?@#|'<>-^*()%!\\.+\\s+].*"))
+				version = "0";
+			else
+				file = file.substring(0, file.lastIndexOf("("));
+		}
+
+		fileParts[0] = file;
+		fileParts[1] = format;
+		fileParts[2] = version;
+
+		return fileParts;
+	} // getFilecomponent
 }

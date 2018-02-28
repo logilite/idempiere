@@ -100,9 +100,7 @@ function DropToAttachFiles() {
             // "Content-Type: multipart/form-data; boundary=---90519140415446"
 
             xhr.onload = function() {
-                progressBarUploadStatus(progBarID, progLabelID, 100, '');
-                progressbar.style = 'display: none';
-                progressbar.parentNode.style = 'display: none';
+            	disableProgressInfo(100);
             };
 
             if (isSupported.progress) {
@@ -142,9 +140,11 @@ function DropToAttachFiles() {
 
                             } else {
                                 alert('Ooops! Something went wrong...!!!');
+                                disableProgressInfo(0);
                             }
                         } else {
                             alert('Something went wrong...!!! \nPlease you can try with clicking to upload button.')
+                            disableProgressInfo(0);
                         }
                     }
                 };
@@ -167,12 +167,20 @@ function DropToAttachFiles() {
                     msg = 'Uncaught Error.\n' + xhr.responseText;
                 }
 
+                disableProgressInfo(0);
                 console.log(errorType + " - " + exception + " - " + msg);
                 alert(msg);
             };
 
             xhr.send(formData);
         } // uploadFiles
+
+        function disableProgressInfo(val) {
+        	progressBarUploadStatus(progBarID, progLabelID, val, '');
+        	progressbar.style = 'display: none';
+        	progressbar.parentNode.style = 'display: none';
+        } // disableProgressInfo
+
     } // init
 
     function findAndReplace(str, target, replacement) {
