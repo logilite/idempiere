@@ -1643,7 +1643,7 @@ public class MInOut extends X_M_InOut implements DocAction
 					
 					if (oLine!=null && mtrx!=null && oLine.getQtyOrdered().signum() > 0)
 					{					
-						if (sLine.getC_OrderLine_ID() != 0)
+						if (isSOTrx() && sLine.getC_OrderLine_ID() != 0)
 						{
 							if (!MStorageReservation.add(getCtx(), oLine.getM_Warehouse_ID(),
 									sLine.getM_Product_ID(),
@@ -1732,7 +1732,7 @@ public class MInOut extends X_M_InOut implements DocAction
 			}	//	stock movement
 
 			//	Correct Order Line
-			if (product != null && oLine != null)		//	other in VMatch.createMatchRecord
+			if (isSOTrx() && product != null && oLine != null)		//	other in MMatchPO.aftersave
 			{
 				oLine.setQtyReserved(oLine.getQtyReserved().subtract(sLine.getMovementQty().subtract(sLine.getQtyOverReceipt())));
 			}

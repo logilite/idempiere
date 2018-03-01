@@ -757,13 +757,7 @@ public class Match
 		}
 		else	//	Shipment - Order
 		{
-			//	Update Order Line
 			MOrderLine oLine = (MOrderLine) MTable.get(Env.getCtx(), MOrderLine.Table_ID).getPO(Line_ID, trxName);
-			if (oLine.get_ID() != 0)	//	other in MInOut.completeIt
-			{
-				oLine.setQtyReserved(oLine.getQtyReserved().subtract(qty));
-				oLine.saveEx();
-			}
 
 			// Update Shipment Line
 			BigDecimal toDeliver = oLine.getQtyOrdered().subtract(oLine.getQtyDelivered());
@@ -796,12 +790,6 @@ public class Match
 				else
 				{
 					success = true;
-					//	Correct Ordered Qty for Stocked Products (see MOrder.reserveStock / MInOut.processIt)
-					if (sLine.getProduct() != null && sLine.getProduct().isStocked())
-						success = MStorageReservation.add (Env.getCtx(), sLine.getM_Warehouse_ID(),
-							sLine.getM_Product_ID(),
-							oLine.getM_AttributeSetInstance_ID(),
-							qty.negate(), false, trxName);
 				}
 			}
 			else
