@@ -579,7 +579,8 @@ public class WAttachment extends Window implements EventListener<Event>
 		log.config(fileName);
 		int cnt = m_attachment.getEntryCount();
 
-		if (!MSysConfig.getBooleanValue(MSysConfig.ATTACHMENT_AUTO_VERSION_ENABLED, false))
+		if (!MSysConfig.getBooleanValue(MSysConfig.ATTACHMENT_AUTO_VERSION_ENABLED, false,
+				Env.getAD_Client_ID(Env.getCtx())))
 		{
 			// update
 			for (int i = 0; i < cnt; i++)
