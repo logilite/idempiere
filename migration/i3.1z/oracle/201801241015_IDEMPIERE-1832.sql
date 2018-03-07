@@ -30,3 +30,5 @@ ALTER TABLE AD_WF_NextCondition ADD CONSTRAINT adcolumn_adwfnextcondition FOREIG
 UPDATE AD_Field SET DisplayLogic='@Operation@!''SQ''',Updated=TO_DATE('2014-03-19 17:47:59','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=10101
 ;
 
+SELECT register_migration_script('201801241015_IDEMPIERE-1832.sql') FROM dual
+;
