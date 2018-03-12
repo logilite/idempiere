@@ -49,6 +49,7 @@ public class MProduction extends X_M_Production implements DocAction {
 		super(ctx, rs, trxName);
 	}
 	
+	@Deprecated
 	public MProduction( MOrderLine line ) {
 		super( line.getCtx(), 0, line.get_TrxName());
 		setAD_Client_ID(line.getAD_Client_ID());
@@ -56,6 +57,7 @@ public class MProduction extends X_M_Production implements DocAction {
 		setMovementDate( line.getDatePromised() );
 	}
 
+	@Deprecated
 	public MProduction( MProjectLine line ) {
 		super( line.getCtx(), 0, line.get_TrxName());
 		MProject project = (MProject) MTable.get(line.getCtx(), MProject.Table_ID).getPO(line.getC_Project_ID(),
@@ -84,6 +86,47 @@ public class MProduction extends X_M_Production implements DocAction {
 		setC_ProjectPhase_ID(line.getC_ProjectPhase_ID());
 		setC_ProjectTask_ID(line.getC_ProjectTask_ID());
 		setMovementDate( Env.getContextAsDate(p_ctx, "#Date"));
+	}
+
+	public static MProduction createFrom(MOrderLine line)
+	{
+		MProduction production = (MProduction) MTable.get(line.getCtx(), MProduction.Table_ID).getPO(0, line.get_TrxName());
+		production.setClientOrg(line.getAD_Client_ID(), line.getAD_Org_ID());
+		production.setMovementDate(line.getDatePromised());
+
+		return production;
+	}
+
+	public static MProduction createFrom(MProjectLine line)
+	{
+		MProduction production = (MProduction) MTable.get(line.getCtx(), MProduction.Table_ID).getPO(0, line.get_TrxName());
+		MProject project = (MProject) MTable.get(line.getCtx(), MProject.Table_ID).getPO(line.getC_Project_ID(), line.get_TrxName());
+		MWarehouse wh = new MWarehouse(line.getCtx(), project.getM_Warehouse_ID(), line.get_TrxName());
+
+		MLocator M_Locator = null;
+		int M_Locator_ID = 0;
+
+		if (wh != null)
+		{
+			M_Locator = wh.getDefaultLocator();
+			M_Locator_ID = M_Locator.getM_Locator_ID();
+		}
+		production.setAD_Client_ID(line.getAD_Client_ID());
+		production.setAD_Org_ID(line.getAD_Org_ID());
+		production.setM_Product_ID(line.getM_Product_ID());
+		production.setProductionQty(line.getPlannedQty());
+		production.setM_Locator_ID(M_Locator_ID);
+		production.setDescription(project.getValue() + "_" + project.getName() + " Line: " + line.getLine() + " (project)");
+		production.setC_Project_ID(line.getC_Project_ID());
+		production.setC_BPartner_ID(project.getC_BPartner_ID());
+		production.setC_Campaign_ID(project.getC_Campaign_ID());
+		production.setAD_OrgTrx_ID(project.getAD_OrgTrx_ID());
+		production.setC_Activity_ID(project.getC_Activity_ID());
+		production.setC_ProjectPhase_ID(line.getC_ProjectPhase_ID());
+		production.setC_ProjectTask_ID(line.getC_ProjectTask_ID());
+		production.setMovementDate(Env.getContextAsDate(line.getCtx(), "#Date"));
+
+		return production;
 	}
 
 	@Override
@@ -190,7 +233,7 @@ public class MProduction extends X_M_Production implements DocAction {
 			pstmt.setInt(1, get_ID());
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add( new MProductionLine( getCtx(), rs.getInt(1), get_TrxName() ) );	
+				list.add((MProductionLine) MTable.get(getCtx(), MProductionLine.Table_ID).getPO(rs.getInt(1), get_TrxName()));
 		}
 		catch (SQLException ex)
 		{
@@ -227,7 +270,7 @@ public class MProduction extends X_M_Production implements DocAction {
 		MProduct finishedProduct = new MProduct(getCtx(), getM_Product_ID(), get_TrxName());
 		
 
-		MProductionLine line = new MProductionLine( this );
+		MProductionLine line = MProductionLine.createFrom( this );
 		line.setLine( lineno );
 		line.setM_Product_ID( finishedProduct.get_ID() );
 		line.setM_Locator_ID( getM_Locator_ID() );
@@ -284,24 +327,9 @@ public class MProduction extends X_M_Production implements DocAction {
 					if ( defaultLocator == 0 )
 						defaultLocator = getM_Locator_ID();
 
-					if (!bomproduct.isStocked())
+					if (!bomproduct.isStocked() || BOMMovementQty.signum() == 0)
 					{					
-						MProductionLine BOMLine = null;
-						BOMLine = new MProductionLine( this );
-						BOMLine.setLine( lineno );
-						BOMLine.setM_Product_ID( BOMProduct_ID );
-						BOMLine.setM_Locator_ID( defaultLocator );  
-						BOMLine.setQtyUsed(BOMMovementQty );
-						BOMLine.setPlannedQty( BOMMovementQty );
-						BOMLine.saveEx(get_TrxName());
-
-						lineno = lineno + 10;
-						count++;					
-					}
-					else if (BOMMovementQty.signum() == 0) 
-					{
-						MProductionLine BOMLine = null;
-						BOMLine = new MProductionLine( this );
+						MProductionLine BOMLine = MProductionLine.createFrom( this );
 						BOMLine.setLine( lineno );
 						BOMLine.setM_Product_ID( BOMProduct_ID );
 						BOMLine.setM_Locator_ID( defaultLocator );  
@@ -364,7 +392,7 @@ public class MProduction extends X_M_Production implements DocAction {
 								}
 								// otherwise create new line
 								else {
-									BOMLine = new MProductionLine( this );
+									BOMLine = MProductionLine.createFrom( this );
 									BOMLine.setLine( lineno );
 									BOMLine.setM_Product_ID( BOMProduct_ID );
 									BOMLine.setM_Locator_ID( loc );
@@ -403,7 +431,7 @@ public class MProduction extends X_M_Production implements DocAction {
 								// otherwise create new line
 								else {
 
-									BOMLine = new MProductionLine( this );
+									BOMLine = MProductionLine.createFrom( this );
 									BOMLine.setLine( lineno );
 									BOMLine.setM_Product_ID( BOMProduct_ID );
 									BOMLine.setM_Locator_ID( defaultLocator );  
@@ -737,7 +765,7 @@ public class MProduction extends X_M_Production implements DocAction {
 	}
 
 	protected MProduction copyFrom(Timestamp reversalDate) {
-		MProduction to = new MProduction(getCtx(), 0, get_TrxName());
+		MProduction to = (MProduction) MTable.get(getCtx(), MProduction.Table_ID).getPO(0, get_TrxName());
 		PO.copyValues (this, to, getAD_Client_ID(), getAD_Org_ID());
 
 		to.set_ValueNoCheck ("DocumentNo", null);
@@ -755,7 +783,7 @@ public class MProduction extends X_M_Production implements DocAction {
 			Query planQuery = new Query(Env.getCtx(), I_M_ProductionPlan.Table_Name, "M_ProductionPlan.M_Production_ID=?", get_TrxName());
 			List<MProductionPlan> fplans = planQuery.setParameters(getM_Production_ID()).list();
 			for(MProductionPlan fplan : fplans) {
-				MProductionPlan tplan = new MProductionPlan(getCtx(), 0, get_TrxName());
+				MProductionPlan tplan = (MProductionPlan) MTable.get(getCtx(), MProductionPlan.Table_ID).getPO(0, get_TrxName());
 				PO.copyValues (fplan, tplan, getAD_Client_ID(), getAD_Org_ID());
 				tplan.setM_Production_ID(to.getM_Production_ID());
 				tplan.setProductionQty(fplan.getProductionQty().negate());
@@ -764,7 +792,7 @@ public class MProduction extends X_M_Production implements DocAction {
 
 				MProductionLine[] flines = fplan.getLines();
 				for(MProductionLine fline : flines) {
-					MProductionLine tline = new MProductionLine(tplan);
+					MProductionLine tline = (MProductionLine) MTable.get(getCtx(), MProductionLine.Table_ID).getPO(0, get_TrxName());
 					PO.copyValues (fline, tline, getAD_Client_ID(), getAD_Org_ID());
 					tline.setM_ProductionPlan_ID(tplan.getM_ProductionPlan_ID());
 					tline.setMovementQty(fline.getMovementQty().negate());
@@ -778,7 +806,7 @@ public class MProduction extends X_M_Production implements DocAction {
 			to.saveEx();
 			MProductionLine[] flines = getLines();
 			for(MProductionLine fline : flines) {
-				MProductionLine tline = new MProductionLine(to);
+				MProductionLine tline = (MProductionLine) MTable.get(getCtx(), MProductionLine.Table_ID).getPO(0, get_TrxName());
 				PO.copyValues (fline, tline, getAD_Client_ID(), getAD_Org_ID());
 				tline.setM_Production_ID(to.getM_Production_ID());
 				tline.setMovementQty(fline.getMovementQty().negate());

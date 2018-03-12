@@ -52,6 +52,7 @@ public class MProductionLine extends X_M_ProductionLine {
 	 * Parent Constructor
 	 * @param plan
 	 */
+	@Deprecated
 	public MProductionLine( MProduction header ) {
 		super( header.getCtx(), 0, header.get_TrxName() );
 		setM_Production_ID( header.get_ID());
@@ -60,13 +61,31 @@ public class MProductionLine extends X_M_ProductionLine {
 		productionParent = header;
 	}
 	
+	@Deprecated
 	public MProductionLine( MProductionPlan header ) {
 		super( header.getCtx(), 0, header.get_TrxName() );
 		setM_ProductionPlan_ID( header.get_ID());
 		setAD_Client_ID(header.getAD_Client_ID());
 		setAD_Org_ID(header.getAD_Org_ID());
 	}
-	
+
+	public static MProductionLine createFrom(MProduction header)
+	{
+		MProductionLine line = (MProductionLine) MTable.get(header.getCtx(), MProductionLine.Table_ID).getPO(0, header.get_TrxName());
+		line.setM_Production_ID(header.get_ID());
+		line.setClientOrg(header);
+
+		return line;
+	}
+
+	public static MProductionLine createFrom(MProductionPlan header)
+	{
+		MProductionLine line = (MProductionLine) MTable.get(header.getCtx(), MProductionLine.Table_ID).getPO(0,	header.get_TrxName());
+		line.setM_ProductionPlan_ID(header.get_ID());
+		line.setClientOrg(header);
+
+		return line;
+	}
 
 	/**
 	 * 
@@ -103,8 +122,7 @@ public class MProductionLine extends X_M_ProductionLine {
 			}
 			
 			dateMPolicy = Util.removeTime(dateMPolicy);
-			MProductionLineMA lineMA = new MProductionLineMA( this,
-					asi.get_ID(), getMovementQty(),dateMPolicy);
+			MProductionLineMA lineMA = MProductionLineMA.createFrom(this, asi.get_ID(), getMovementQty(), dateMPolicy);
 			if ( !lineMA.save(get_TrxName()) ) {
 				log.log(Level.SEVERE, "Could not save MA for " + toString());
 				errorString.append("Could not save MA for " + toString() + "\n" );
@@ -280,7 +298,7 @@ public class MProductionLine extends X_M_ProductionLine {
 	protected boolean beforeSave(boolean newRecord) 
 	{
 		if (productionParent == null && getM_Production_ID() > 0)
-			productionParent = new MProduction(getCtx(), getM_Production_ID(), get_TrxName());
+			productionParent = (MProduction) MTable.get(getCtx(), MProduction.Table_ID).getPO(getM_Production_ID(), get_TrxName());
 
 		if (getM_Production_ID() > 0) 
 		{

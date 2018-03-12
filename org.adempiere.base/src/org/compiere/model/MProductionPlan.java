@@ -60,7 +60,7 @@ public class MProductionPlan extends X_M_ProductionPlan {
 			pstmt.setInt(1, get_ID());
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add( new MProductionLine( getCtx(), rs.getInt(1), get_TrxName() ) );	
+				list.add((MProductionLine) MTable.get(getCtx(), MProductionLine.Table_ID).getPO(rs.getInt(1), get_TrxName()));	
 		}
 		catch (SQLException ex)
 		{
@@ -97,7 +97,7 @@ public class MProductionPlan extends X_M_ProductionPlan {
 		MProduct finishedProduct = new MProduct(getCtx(), getM_Product_ID(), get_TrxName());
 		
 
-		MProductionLine line = new MProductionLine( this );
+		MProductionLine line = MProductionLine.createFrom( this );
 		line.setLine( lineno );
 		line.setM_Product_ID( finishedProduct.get_ID() );
 		line.setM_Locator_ID( getM_Locator_ID() );
@@ -158,7 +158,7 @@ public class MProductionPlan extends X_M_ProductionPlan {
 					if (!bomproduct.isStocked())
 					{					
 						MProductionLine BOMLine = null;
-						BOMLine = new MProductionLine( this );
+						BOMLine = MProductionLine.createFrom( this );
 						BOMLine.setLine( lineno );
 						BOMLine.setM_Product_ID( BOMProduct_ID );
 						BOMLine.setM_Locator_ID( defaultLocator );  
@@ -172,7 +172,7 @@ public class MProductionPlan extends X_M_ProductionPlan {
 					else if (BOMMovementQty.signum() == 0) 
 					{
 						MProductionLine BOMLine = null;
-						BOMLine = new MProductionLine( this );
+						BOMLine = MProductionLine.createFrom( this );
 						BOMLine.setLine( lineno );
 						BOMLine.setM_Product_ID( BOMProduct_ID );
 						BOMLine.setM_Locator_ID( defaultLocator );  
@@ -235,7 +235,7 @@ public class MProductionPlan extends X_M_ProductionPlan {
 								}
 								// otherwise create new line
 								else {
-									BOMLine = new MProductionLine( this );
+									BOMLine = MProductionLine.createFrom( this );
 									BOMLine.setLine( lineno );
 									BOMLine.setM_Product_ID( BOMProduct_ID );
 									BOMLine.setM_Locator_ID( loc );
@@ -274,7 +274,7 @@ public class MProductionPlan extends X_M_ProductionPlan {
 								// otherwise create new line
 								else {
 
-									BOMLine = new MProductionLine( this );
+									BOMLine = MProductionLine.createFrom( this );
 									BOMLine.setLine( lineno );
 									BOMLine.setM_Product_ID( BOMProduct_ID );
 									BOMLine.setM_Locator_ID( defaultLocator );  

@@ -113,7 +113,7 @@ public class OrderLineCreateProduction extends SvrProcess
 			}
 		}
 		
-		MProduction production = new MProduction( line );
+		MProduction production = MProduction.createFrom( line );
 		MProduct product = new MProduct (getCtx(), line.getM_Product_ID(), get_TrxName());
 		
 		production.setM_Product_ID(line.getM_Product_ID());
