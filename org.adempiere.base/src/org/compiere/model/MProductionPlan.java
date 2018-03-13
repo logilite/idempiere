@@ -121,8 +121,6 @@ public class MProductionPlan extends X_M_ProductionPlan {
 		
 		int M_Warehouse_ID = finishedLocator.getM_Warehouse_ID();
 		
-		int asi = 0;
-
 		// products used in production
 		String sql = "SELECT M_ProductBom_ID, BOMQty" + " FROM M_Product_BOM"
 				+ " WHERE M_Product_ID=" + finishedProduct.getM_Product_ID() + " ORDER BY Line";
@@ -155,22 +153,8 @@ public class MProductionPlan extends X_M_ProductionPlan {
 					if ( defaultLocator == 0 )
 						defaultLocator = getM_Locator_ID();
 
-					if (!bomproduct.isStocked())
+					if (!bomproduct.isStocked() || BOMMovementQty.signum() == 0)
 					{					
-						MProductionLine BOMLine = null;
-						BOMLine = MProductionLine.createFrom( this );
-						BOMLine.setLine( lineno );
-						BOMLine.setM_Product_ID( BOMProduct_ID );
-						BOMLine.setM_Locator_ID( defaultLocator );  
-						BOMLine.setQtyUsed(BOMMovementQty );
-						BOMLine.setPlannedQty( BOMMovementQty );
-						BOMLine.saveEx(get_TrxName());
-
-						lineno = lineno + 10;
-						count++;					
-					}
-					else if (BOMMovementQty.signum() == 0) 
-					{
 						MProductionLine BOMLine = null;
 						BOMLine = MProductionLine.createFrom( this );
 						BOMLine.setLine( lineno );
@@ -221,7 +205,7 @@ public class MProductionPlan extends X_M_ProductionPlan {
 
 								int loc = storages[sl].getM_Locator_ID();
 								int slASI = storages[sl].getM_AttributeSetInstance_ID();
-								int locAttribSet = new MAttributeSetInstance(getCtx(), asi,
+								int locAttribSet = new MAttributeSetInstance(getCtx(), slASI,
 										get_TrxName()).getM_AttributeSet_ID();
 
 								// roll up costing attributes if in the same locator

@@ -180,6 +180,10 @@ public class MProduction extends X_M_Production implements DocAction {
 			}
 		}
 
+		//
+		if (!reserveStock(false))
+			return DocAction.STATUS_Invalid;
+
 		//		User Validation
 		String valid = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_COMPLETE);
 		if (valid != null)
@@ -293,8 +297,6 @@ public class MProduction extends X_M_Production implements DocAction {
 		
 		int M_Warehouse_ID = finishedLocator.getM_Warehouse_ID();
 		
-		int asi = 0;
-
 		// products used in production
 		String sql = "SELECT M_ProductBom_ID, BOMQty" + " FROM M_Product_BOM"
 				+ " WHERE M_Product_ID=" + finishedProduct.getM_Product_ID() + " ORDER BY Line";
@@ -378,7 +380,7 @@ public class MProduction extends X_M_Production implements DocAction {
 
 								int loc = storages[sl].getM_Locator_ID();
 								int slASI = storages[sl].getM_AttributeSetInstance_ID();
-								int locAttribSet = new MAttributeSetInstance(getCtx(), asi,
+								int locAttribSet = new MAttributeSetInstance(getCtx(), slASI,
 										get_TrxName()).getM_AttributeSet_ID();
 
 								// roll up costing attributes if in the same locator
@@ -525,6 +527,10 @@ public class MProduction extends X_M_Production implements DocAction {
 				}
 			}
 		}
+
+		//
+		if (!reserveStock(true))
+			return DocAction.STATUS_Invalid;
 
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
@@ -919,4 +925,29 @@ public class MProduction extends X_M_Production implements DocAction {
 		}
 		return true;
 	}
+
+	/**
+	 * @param isReserveStock - If True then reserving otherwise releasing stock
+	 * @return True if no error
+	 */
+	protected boolean reserveStock(boolean isReserveStock)
+	{
+		for (MProductionLine line : getLines())
+		{
+			m_processMsg = line.stockReservation(isReserveStock, false);
+			if (!Util.isEmpty(m_processMsg, true))
+			{
+				log.severe(m_processMsg);
+				return false;
+			}
+			if (!line.save(get_TrxName()))
+			{
+				m_processMsg = "Unable to save QtyReserved while " + (isReserveStock ? "reserving" : "releasing")
+						+ " stock on line #" + line.getLine();
+				log.severe(m_processMsg);
+				return false;
+			}
+		}
+		return true;
+	} // reserveStock
 }

@@ -32,7 +32,7 @@ public class X_M_ProductionLine extends PO implements I_M_ProductionLine, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20151030L;
+	private static final long serialVersionUID = 20180305L;
 
     /** Standard Constructor */
     public X_M_ProductionLine (Properties ctx, int M_ProductionLine_ID, String trxName)
@@ -420,6 +420,26 @@ public class X_M_ProductionLine extends PO implements I_M_ProductionLine, I_Pers
 	public BigDecimal getQtyAvailable () 
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyAvailable);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Reserved Quantity.
+		@param QtyReserved 
+		Reserved Quantity
+	  */
+	public void setQtyReserved (BigDecimal QtyReserved)
+	{
+		set_Value (COLUMNNAME_QtyReserved, QtyReserved);
+	}
+
+	/** Get Reserved Quantity.
+		@return Reserved Quantity
+	  */
+	public BigDecimal getQtyReserved () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyReserved);
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
