@@ -58,6 +58,7 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 import org.zkoss.util.media.AMedia;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Desktop;
@@ -146,12 +147,43 @@ public class DashboardController implements EventListener<Event> {
         			dps = MDashboardPreference.getForSession(AD_User_ID, AD_Role_ID);
         		}
         	}
-        	               
-        	noOfCols = MDashboardPreference.getForSessionColumnCount(isShowInDashboard, AD_User_ID, AD_Role_ID);
-            
+
+			String[] size = null;
+			String height = "100%";
+			String proportion = MSysConfig.getValue(MSysConfig.DP_COLUMN_WIDTH_PROPORTION,
+					Env.getAD_Client_ID(Env.getCtx()));
+			if (!Util.isEmpty(proportion, true))
+				size = proportion.split(",");
+
+			noOfCols = MDashboardPreference.getForSessionColumnCount(isShowInDashboard, AD_User_ID, AD_Role_ID);
+
         	int dashboardWidth = isShowInDashboard ? DEFAULT_DASHBOARD_WIDTH : 100;
             width = noOfCols <= 0 ? dashboardWidth : dashboardWidth / noOfCols;
             int extraWidth = 100 - (noOfCols <= 0 ? dashboardWidth : width * noOfCols) - (100 - dashboardWidth - 1);
+            
+            try
+            {
+            	int totalwidth = 0;
+            	for (int i = 0; i < size.length; i++)
+            	{
+            		if (!Util.isEmpty(size[i], true))
+            			totalwidth += Integer.parseInt(size[i].trim());
+            		else
+            			totalwidth += width;
+            	}
+            	// Panels get overlap if width is greater than 100.
+            	if (totalwidth > 100)
+            	{
+            		height = "";
+            	}
+            }
+            catch (NumberFormatException e)
+            {
+            	size = null;
+            	logger.log(Level.SEVERE, "Invalid data of DP column width proportion in SysConfig", e);
+            }
+            
+            int currentColumn = 0;
             for (final MDashboardPreference dp : dps)            	
 			{            	            	            	
             	if(!dp.isActive())
@@ -162,24 +194,31 @@ public class DashboardController implements EventListener<Event> {
             	
             	MDashboardContent dc = new MDashboardContent(dp.getCtx(), dp.getPA_DashboardContent_ID(), dp.get_TrxName());
             	
+				int currentWidth = width;
 	        	int columnNo = dp.getColumnNo();
-	        	if(dashboardColumnLayout == null || currentColumnNo != columnNo)
-	        	{
-	        		dashboardColumnLayout = new Vlayout();
-	        		dashboardColumnLayout.setAttribute("ColumnNo", columnNo);
-	        		dashboardColumnLayout.setAttribute("IsShowInDashboard", isShowInDashboard);
-	        		dashboardColumnLayout.setAttribute("IsAdditionalColumn", false);
-	        		Anchorchildren dashboardColumn = new Anchorchildren();
-	        		dashboardColumn.setAnchor(width + "%" + " 100%");
-	        		dashboardColumn.setDroppable("true");
-	        		dashboardColumn.addEventListener(Events.ON_DROP, this);
-	        		dashboardColumn.appendChild(dashboardColumnLayout);
-	        		columnList.add(dashboardColumn);
-	                dashboardLayout.appendChild(dashboardColumn);
-	                dashboardColumnLayout.setHflex("1");
+				if (dashboardColumnLayout == null || currentColumnNo != columnNo)
+				{
+					if (isShowInDashboard && size != null && size.length > 0 && size.length >= noOfCols
+							&& size.length > currentColumn && !Util.isEmpty(size[currentColumn], true))
+					{
+						currentWidth = Integer.parseInt(size[currentColumn].trim());
+					}
+					dashboardColumnLayout = new Vlayout();
+					dashboardColumnLayout.setAttribute("ColumnNo", columnNo);
+					dashboardColumnLayout.setAttribute("IsShowInDashboard", isShowInDashboard);
+					dashboardColumnLayout.setAttribute("IsAdditionalColumn", false);
+					Anchorchildren dashboardColumn = new Anchorchildren();
+					dashboardColumn.setAnchor(currentWidth + "% " + height);
+					dashboardColumn.setDroppable("true");
+					dashboardColumn.addEventListener(Events.ON_DROP, this);
+					dashboardColumn.appendChild(dashboardColumnLayout);
+					columnList.add(dashboardColumn);
+					dashboardLayout.appendChild(dashboardColumn);
+					dashboardColumnLayout.setHflex("1");
 
-	                currentColumnNo = columnNo;
-	        	}
+					currentColumnNo = columnNo;
+					currentColumn++;
+				}
 
 	        	Panel panel = new Panel();
 	        	Caption caption = new Caption(dc.get_Translation(MDashboardContent.COLUMNNAME_Name));
