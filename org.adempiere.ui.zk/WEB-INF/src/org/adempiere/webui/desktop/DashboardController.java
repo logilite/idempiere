@@ -152,37 +152,39 @@ public class DashboardController implements EventListener<Event> {
 			String height = "100%";
 			String proportion = MSysConfig.getValue(MSysConfig.DP_COLUMN_WIDTH_PROPORTION,
 					Env.getAD_Client_ID(Env.getCtx()));
-			if (!Util.isEmpty(proportion, true))
-				size = proportion.split(",");
 
 			noOfCols = MDashboardPreference.getForSessionColumnCount(isShowInDashboard, AD_User_ID, AD_Role_ID);
 
         	int dashboardWidth = isShowInDashboard ? DEFAULT_DASHBOARD_WIDTH : 100;
             width = noOfCols <= 0 ? dashboardWidth : dashboardWidth / noOfCols;
             int extraWidth = 100 - (noOfCols <= 0 ? dashboardWidth : width * noOfCols) - (100 - dashboardWidth - 1);
-            
-            try
-            {
-            	int totalwidth = 0;
-            	for (int i = 0; i < size.length; i++)
-            	{
-            		if (!Util.isEmpty(size[i], true))
-            			totalwidth += Integer.parseInt(size[i].trim());
-            		else
-            			totalwidth += width;
-            	}
-            	// Panels get overlap if width is greater than 100.
-            	if (totalwidth > 100)
-            	{
-            		height = "";
-            	}
-            }
-            catch (NumberFormatException e)
-            {
-            	size = null;
-            	logger.log(Level.SEVERE, "Invalid data of DP column width proportion in SysConfig", e);
-            }
-            
+
+			if (!Util.isEmpty(proportion, true))
+			{
+				size = proportion.split(",");
+				try
+				{
+					int totalwidth = 0;
+					for (int i = 0; i < size.length; i++)
+					{
+						if (!Util.isEmpty(size[i], true))
+							totalwidth += Integer.parseInt(size[i].trim());
+						else
+							totalwidth += width;
+					}
+					// Panels get overlap if width is greater than 100.
+					if (totalwidth > 100)
+					{
+						height = "";
+					}
+				}
+				catch (NumberFormatException e)
+				{
+					size = null;
+					logger.log(Level.SEVERE, "Invalid data of DP column width proportion in SysConfig", e);
+				}
+			}
+
             int currentColumn = 0;
             for (final MDashboardPreference dp : dps)            	
 			{            	            	            	
