@@ -19,23 +19,20 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.logging.Level;
 
 import javax.swing.table.AbstractTableModel;
 
 import org.adempiere.base.Core;
 import org.adempiere.model.MTabCustomization;
-import org.adempiere.util.GridRowCtx;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.apps.form.WQuickForm;
 import org.adempiere.webui.component.Checkbox;
 import org.adempiere.webui.component.Columns;
 import org.adempiere.webui.component.Combobox;
-import org.adempiere.webui.component.EditorBox;
 import org.adempiere.webui.component.Grid;
-import org.adempiere.webui.component.NumberBox;
 import org.adempiere.webui.component.Rows;
+import org.adempiere.webui.component.Searchbox;
 import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.SortComparator;
@@ -52,7 +49,6 @@ import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.zkforge.keylistener.Keylistener;
 import org.zkoss.lang.Library;
-import org.zkoss.zk.au.out.AuFocus;
 import org.zkoss.zk.au.out.AuScript;
 import org.zkoss.zk.ui.AbstractComponent;
 import org.zkoss.zk.ui.Component;
@@ -69,7 +65,6 @@ import org.zkoss.zul.Div;
 import org.zkoss.zul.Frozen;
 import org.zkoss.zul.Paging;
 import org.zkoss.zul.Row;
-import org.zkoss.zul.Tabpanel;
 import org.zkoss.zul.Vbox;
 import org.zkoss.zul.event.ZulEvents;
 import org.zkoss.zul.impl.CustomGridDataLoader;
@@ -91,8 +86,6 @@ public class QuickGridView extends Vbox
 
 	private static final String HEADER_GRID_STYLE = "border: none; margin:0; padding: 0;";
 
-	private static final int DEFAULT_DETAIL_PAGE_SIZE = 10;
-
 	private static final int DEFAULT_PAGE_SIZE = 20;
 
 	private static final int MIN_COLUMN_WIDTH = 100;
@@ -108,6 +101,17 @@ public class QuickGridView extends Vbox
 	private static final String ATTR_ON_POST_SELECTED_ROW_CHANGED = "org.adempiere.webui.adwindow.GridView.onPostSelectedRowChanged";
 
 	public static final String  CNTRL_KEYS  = "#left#right#up#down#home@k";
+	
+	// Event Listeners
+	public static final String		EVENT_ON_SELECT_ROW					= "onSelectRow";
+	public static final String		EVENT_ON_CUSTOMIZE_GRID				= "onCustomizeGrid";
+	public static final String		EVENT_ON_PAGE_NAVIGATE				= "onPageNavigate";
+	public static final String		EVENT_ON_CLICK_TO_NAVIGATE			= "onClickToNavigate";
+	public static final String		EVENT_ON_SET_FOCUS_TO_FIRST_CELL	= "onSetFocusToFirstCell";
+	
+	// Code for navigation to setcurrentcell
+	public static final int			NAVIGATE_CODE						= 1;
+	public static final int			FOCUS_CODE							= 0;
 	
 	private Grid listbox = null;
 
@@ -138,15 +142,11 @@ public class QuickGridView extends Vbox
 
 	private boolean modeless = true;
 
-	private String columnOnClick;
-
 	private AbstractADWindowContent windowPanel;
 
 	private boolean refreshing;
 
 	private Map<Integer, String> columnWidthMap;
-
-	private boolean detailPaneMode;
 
 	protected Checkbox selectAll;
 	
@@ -155,6 +155,9 @@ public class QuickGridView extends Vbox
 	Keylistener keyListener;
 
 	public boolean isNewLineSaved = true;
+	
+	// To prevent 'onFocus' event fire twice on same component.
+	private Component preEventComponent;
 
 	// 'Alt + K' for Save and Close
 	private static final int		KEYBOARD_KEY_K						= 75;
@@ -225,13 +228,11 @@ public class QuickGridView extends Vbox
 		setStyle(HEADER_GRID_STYLE);
 		gridFooter.setStyle(HEADER_GRID_STYLE);
 		
-		addEventListener("onSelectRow", this);
-		addEventListener("onCustomizeGrid", this);
-		addEventListener("onPageNavigate", this);
-		addEventListener("onClickToNavigate", this);
-		addEventListener("onSetFocusToFirstCell", this);
-		
-		
+		addEventListener(EVENT_ON_SELECT_ROW, this);
+		addEventListener(EVENT_ON_CUSTOMIZE_GRID, this);
+		addEventListener(EVENT_ON_PAGE_NAVIGATE, this);
+		addEventListener(EVENT_ON_CLICK_TO_NAVIGATE, this);
+		addEventListener(EVENT_ON_SET_FOCUS_TO_FIRST_CELL, this);
 	}
 
 	public QuickGridView(AbstractADWindowContent abstractADWindowContent, GridTab gridTab, WQuickForm wQuickForm)
@@ -252,30 +253,6 @@ public class QuickGridView extends Vbox
 		listbox.setEmptyMessage(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Processing")));
 	}
 	
-	public void setDetailPaneMode(boolean detailPaneMode) {
-		if (this.detailPaneMode != detailPaneMode) {
-			this.detailPaneMode = detailPaneMode;
-			pageSize =  detailPaneMode ? DEFAULT_DETAIL_PAGE_SIZE : MSysConfig.getIntValue(MSysConfig.QUICKFORM_PAGE_SIZE, 20, Env.getAD_Client_ID(Env.getCtx()));
-			updatePaging();
-		}
-	}
-
-	public boolean isDetailPaneMode() {
-		return this.detailPaneMode;
-	}
-	
-	private void updatePaging() {
-		if (paging != null && paging.getPageSize() != pageSize) {
-			paging.setPageSize(pageSize);
-			updateModel();
-			if (paging.getPageSize() > 1) {
-				showPagingControl();
-			} else {
-				hidePagingControl();
-			}
-		}
-	}
-
 	/**
 	 *
 	 * @param gridTab
@@ -295,23 +272,8 @@ public class QuickGridView extends Vbox
 		updateListIndex();
 
 		this.init = true;
-		
-		showRecordsCount();
 	}
 
-	private void showRecordsCount() {
-		Component parent = this.getParent();
-		while (parent != null) {
-			if (parent instanceof DetailPane) {
-				DetailPane p = (DetailPane) parent;
-				if (p.getSelectedADTabpanel() != null && p.getSelectedADTabpanel().getGridTab() == this.gridTab)
-					p.setStatusMessage(tableModel.getRowCount() + " " + Msg.getMsg(Env.getCtx(), "Records"), false);
-				break;
-			} 
-			parent = parent.getParent();					
-		}
-	}
-	
 	private void setupFields(GridTab gridTab) {		
 		this.gridTab = gridTab;		
 		gridTab.addStateChangeListener(this);
@@ -411,20 +373,6 @@ public class QuickGridView extends Vbox
 	}
 
 	/**
-	 * call when tab is activated
-	 * @param gridTab
-	 */
-	public void activate(GridTab gridTab) {
-		if (!isInit()) {
-			init(gridTab);
-		} else {
-			showRecordsCount();
-		}
-		if (this.isVisible())
-			Clients.resize(listbox);
-	}
-
-	/**
 	 * refresh after switching from form view
 	 * @param gridTab
 	 */
@@ -468,16 +416,12 @@ public class QuickGridView extends Vbox
 			int pgNo = rowIndex >= 0 ? (rowIndex - pgIndex) / pageSize : 0;
 			if (listModel.getPage() != pgNo) {
 				listModel.setPage(pgNo);
-				if (renderer.isEditing()) {
-					renderer.stopEditing(false);
-				}
 			} else if (rowIndex == renderer.getCurrentRowIndex()){
 				if (modeless && !renderer.isEditing())
 					echoOnPostSelectedRowChanged();
 				return;
 			} else {
 				if (renderer.isEditing()) {
-					renderer.stopEditing(false);
 					int editingRow = renderer.getCurrentRowIndex();
 					if (editingRow >= 0) {
 						int editingPgIndex = editingRow % pageSize;
@@ -495,7 +439,7 @@ public class QuickGridView extends Vbox
 				echoOnPostSelectedRowChanged();
 			}
 		} else {
-			if (rowIndex >= 0) {
+			if (rowIndex >= 0 && isNewLineSaved) {
 				echoOnPostSelectedRowChanged();
 			}
 		}		
@@ -700,8 +644,6 @@ public class QuickGridView extends Vbox
 			((GridTable)tableModel).removeTableModelListener(listModel);
 		listModel = new GridTableListModel((GridTable)tableModel, windowNo);
 		listModel.setPageSize(pageSize);
-		if (renderer != null && renderer.isEditing())
-			renderer.stopEditing(false);
 		renderer = new QuickGridTabRowRenderer(gridTab, windowNo);
 		renderer.setGridPanel(this);
 		renderer.setADWindowPanel(windowPanel);
@@ -714,14 +656,6 @@ public class QuickGridView extends Vbox
 		listbox.setRowRenderer(renderer);
 	}
 
-	/**
-	 * deactivate panel
-	 */
-	public void deactivate() {
-		if (renderer != null && renderer.isEditing())
-			renderer.stopEditing(true);
-	}
-
 	public void onEvent(Event event) throws Exception
 	{
 		if (event == null)
@@ -730,7 +664,6 @@ public class QuickGridView extends Vbox
 		{
 			Object data = event.getData();
 			org.zkoss.zul.Row row = null;
-			String columnName = null;
 			if (data != null && data instanceof Component)
 			{
 				if (data instanceof org.zkoss.zul.Row)
@@ -741,7 +674,6 @@ public class QuickGridView extends Vbox
 					if (cmp.getParent() instanceof org.zkoss.zul.Row)
 					{
 						row = (Row) cmp.getParent();
-						columnName = (String) cmp.getAttribute("columnName");
 					}
 				}
 			}
@@ -753,10 +685,6 @@ public class QuickGridView extends Vbox
 					if (!renderer.isEditing())
 					{
 						renderer.editCurrentRow();
-						if (columnName != null && columnName.trim().length() > 0)
-							setFocusToField(columnName);
-						else
-							renderer.focusToFirstEditor();
 					}
 				}
 				else
@@ -764,7 +692,6 @@ public class QuickGridView extends Vbox
 					int index = listbox.getRows().getChildren().indexOf(row);
 					if (index >= 0)
 					{
-						columnOnClick = columnName;
 						onSelectedRowChange(index);
 					}
 				}
@@ -779,8 +706,10 @@ public class QuickGridView extends Vbox
 				listModel.setPage(pgNo);
 				onSelectedRowChange(0);
 				gridTab.clearSelection();
+				// Clear Map on page change.
+				renderer.clearMaps();
 				Clients.resize(listbox);
-				Event e = new Event("onPageNavigate", this, null);
+				Event e = new Event(EVENT_ON_PAGE_NAVIGATE, this, null);
 				Events.postEvent(e);
 			}
 		}
@@ -788,7 +717,7 @@ public class QuickGridView extends Vbox
 		{
 			toggleSelectionForAll(selectAll.isChecked());
 		}
-		else if (event.getName().equals("onSelectRow"))
+		else if (event.getName().equals(EVENT_ON_SELECT_ROW))
 		{
 			Checkbox checkbox = (Checkbox) event.getData();
 			int rowIndex = (Integer) checkbox.getAttribute(GridTabRowRenderer.GRID_ROW_INDEX_ATTR);
@@ -814,7 +743,7 @@ public class QuickGridView extends Vbox
 			onSelectedRowChange(rowIndex % paging.getPageSize());
 			isNewLineSaved = true;
 		}
-		else if (event.getName().equals("onCustomizeGrid"))
+		else if (event.getName().equals(EVENT_ON_CUSTOMIZE_GRID))
 		{
 			reInit();
 		}
@@ -827,7 +756,9 @@ public class QuickGridView extends Vbox
 			boolean isShift = keyEvent.isShiftKey();
 
 			int row = renderer.getCurrentRowIndex() % paging.getPageSize();
-			int col = renderer.getCurrentRow().getChildren().indexOf(renderer.getCurrentCell());
+			int col = 0;
+			if(renderer.getCurrentCell() != null)
+			  col = renderer.getCurrentRow().getChildren().indexOf(renderer.getCurrentCell());
 			int totalRow = gridTab.getRowCount();
 
 			// Not focus on specific component through mouse
@@ -836,10 +767,18 @@ public class QuickGridView extends Vbox
 
 			if (code == KEYBOARD_KEY_ENTER && !isCtrl && !isAlt && !isShift)
 			{
+				// If Search text is empty on ENTER key event then as default behavior to open Search Dialog otherwise move to down.
+				Cell cell = renderer.getCurrentCell();
+				if (cell != null && cell.getChildren().get(0) instanceof Searchbox
+						&& ((Searchbox) cell.getChildren().get(0)).getText().isEmpty())
+				{
+					event.stopPropagation();
+					return;
+				}
 				code = KeyEvent.DOWN;
 			}
 
-			if ((code == KeyEvent.DOWN || code == KeyEvent.UP)
+			if ((code == KeyEvent.DOWN || code == KeyEvent.UP) && renderer.getCurrentCell() != null
 					&& renderer.getCurrentCell().getChildren().get(0) instanceof Combobox)
 			{
 				return;
@@ -878,7 +817,7 @@ public class QuickGridView extends Vbox
 					toggleSelectionForAll(false);
 					if (!(row % paging.getPageSize() == 0))
 					{
-						Events.echoEvent("onSetFocusToFirstCell", this, null);
+						Events.echoEvent(EVENT_ON_SET_FOCUS_TO_FIRST_CELL, this, null);
 						event.stopPropagation();
 					}
 				}
@@ -892,11 +831,15 @@ public class QuickGridView extends Vbox
 
 				if (row % paging.getPageSize() == 0)
 				{
+					// Clear Map on page change.
+					renderer.clearMaps();
 					updateListIndex();
 					paging.setActivePage(
 							paging.getActivePage() + (paging.getActivePage() == (paging.getPageCount() - 1) ? 0 : 1));
 					listModel.setPage(paging.getActivePage());
 					updateModelIndex(0);
+					// on page change set focus to first editable cell of row
+					Events.echoEvent(EVENT_ON_SET_FOCUS_TO_FIRST_CELL, this, null);
 					row = 0;
 				}
 			}
@@ -921,11 +864,14 @@ public class QuickGridView extends Vbox
 				row -= 1;
 				if (paging.getActivePage() > 0 && (row + 1) % paging.getPageSize() == 0)
 				{
-					int currenRow = paging.getPageSize() * paging.getActivePage() - 1;
+					// Clear Map on page change.
+					renderer.clearMaps();
 					paging.setActivePage(paging.getActivePage() - 1);
 					listModel.setPage(paging.getActivePage());
 					updateModelIndex(paging.getPageSize() - 1);
-					row = currenRow;
+					// on page change set focus to first editable cell of row
+					Events.echoEvent(EVENT_ON_SET_FOCUS_TO_FIRST_CELL, this, null);
+					return;
 				}
 
 				// update page index after remove new record
@@ -944,49 +890,54 @@ public class QuickGridView extends Vbox
 			{
 				row = 0;
 			}
-			else if (code == KEYBOARD_KEY_K && !isCtrl && isAlt && !isShift)
+			else if (!isCtrl && isAlt && !isShift)
 			{
-				quickForm.onSave(true);
-				quickForm.dispose();
-			}
-			else if (code == KEYBOARD_KEY_S && !isCtrl && isAlt && !isShift)
-			{
-				quickForm.onSave(true);
-			}
-			else if (code == KEYBOARD_KEY_D && !isCtrl && isAlt && !isShift)
-			{
-				if (!isNewLineSaved)
-					return;
-				int rowIndex = renderer.getCurrentRowIndex();
-				if (!gridTab.isSelected(rowIndex))
+				if (code == KEYBOARD_KEY_K)
 				{
-					gridTab.addToSelection(rowIndex);
+					quickForm.onSave();
+					quickForm.dispose();
 				}
-				quickForm.onDelete();
-			}
-			else if (code == KEYBOARD_KEY_Z && !isCtrl && isAlt && !isShift)
-			{
-				quickForm.onIgnore();
-			}
-			else if (code == KEYBOARD_KEY_E && !isCtrl && isAlt && !isShift)
-			{
-				quickForm.onRefresh();
-			}
-			else if (code == KEYBOARD_KEY_X && !isCtrl && isAlt && !isShift)
-			{
-				quickForm.dispose();
-			}
-			else if (code == KEYBOARD_KEY_L && !isCtrl && isAlt && !isShift)
-			{
-				quickForm.onCustomize();
+				else if (code == KEYBOARD_KEY_S)
+				{
+					quickForm.onSave();
+				}
+				else if (code == KEYBOARD_KEY_D)
+				{
+					if (!isNewLineSaved)
+						return;
+					if (gridTab.getSelection().length == 0)
+					{
+						gridTab.addToSelection(renderer.getCurrentRowIndex());
+					}
+					quickForm.onDelete();
+				}
+				else if (code == KEYBOARD_KEY_Z)
+				{
+					quickForm.onIgnore();
+				}
+				else if (code == KEYBOARD_KEY_E)
+				{
+					quickForm.onRefresh();
+				}
+				else if (code == KEYBOARD_KEY_X)
+				{
+					quickForm.dispose();
+				}
+				else if (code == KEYBOARD_KEY_L)
+				{
+					quickForm.onCustomize();
+				}
+				event.stopPropagation();
+				return;
 			}
 			else
 			{
 				renderer.setCurrentCell(row, col, code);
+				event.stopPropagation();
 				return;
 			}
 
-			if (row < 0 || row >= gridTab.getTableModel().getRowCount() || col < 1
+			if (row < 0 || row >= gridTab.getTableModel().getRowCount() || col < 0
 					|| col >= gridTab.getTableModel().getColumnCount())
 			{
 				renderer.setFocusOnCurrentCell();
@@ -1009,6 +960,8 @@ public class QuickGridView extends Vbox
 		}
 		else if (event.getName().equals(Events.ON_FOCUS))
 		{
+			Component eventComponent = event.getTarget();
+
 			// update index of pagination if multiple records created if user use mouse to select record
 			// (e.g select multiple products)
 			if (paging.getTotalSize() != gridTab.getRowCount())
@@ -1024,6 +977,12 @@ public class QuickGridView extends Vbox
 				gridTab.dataIgnore();
 				gridTab.setCurrentRow(currentRow);
 			}
+
+			// Prevent to fire event again on same component
+			if (eventComponent == preEventComponent)
+				return;
+
+			preEventComponent = eventComponent;
 
 			Component source = event.getTarget();
 			while (source != null && !(source.getClass() == Cell.class))
@@ -1041,36 +1000,40 @@ public class QuickGridView extends Vbox
 				int currentcol = renderer.getCurrentRow().getChildren().indexOf(renderer.getCurrentCell());
 				if (row != rowChange)
 				{
+					// remove all pop-up dialog list box
+					String script = "$('.z-combobox-open').remove()";
+					Clients.response(new AuScript(script));
+					
 					int rowChangedIndex = gridTab.getTableModel().getRowChanged();
 					if (rowChangedIndex == row)
 					{
 						if (!save(KeyEvent.RIGHT, row, col))
 							return;
-						Events.postEvent("onClickToNavigate", this, currentcol);
+						Events.postEvent(EVENT_ON_CLICK_TO_NAVIGATE, this, currentcol);
 					}
 				}
 			}
 		}
-		else if (event.getName().equals("onPageNavigate"))
+		else if (event.getName().equals(EVENT_ON_PAGE_NAVIGATE))
 		{
 			renderer.setCurrentCell(null);
-			renderer.setCurrentCell(0, 1, KeyEvent.RIGHT);
+			renderer.setCurrentCell(0, 1, NAVIGATE_CODE);
 		}
-		else if (event.getName().equals("onClickToNavigate"))
+		else if (event.getName().equals(EVENT_ON_CLICK_TO_NAVIGATE))
 		{
 			int row = renderer.getCurrentRowIndex();
 			int col = (int) event.getData();
 
-			renderer.setCurrentCell(row, col, KeyEvent.RIGHT);
+			renderer.setCurrentCell(row, col, NAVIGATE_CODE);
 
 			Row currntRow = renderer.getCurrentRow();
 			currntRow.setStyle(QuickGridTabRowRenderer.CURRENT_ROW_STYLE);
 		}
-		else if (event.getName().equals("onSetFocusToFirstCell"))
+		else if (event.getName().equals(EVENT_ON_SET_FOCUS_TO_FIRST_CELL))
 		{
 			int row = renderer.getCurrentRowIndex() % paging.getPageSize();
 
-			renderer.setCurrentCell(row, 1, KeyEvent.RIGHT);
+			renderer.setCurrentCell(row, 1, NAVIGATE_CODE);
 
 			Row currntRow = renderer.getCurrentRow();
 			currntRow.setStyle(QuickGridTabRowRenderer.CURRENT_ROW_STYLE);
@@ -1084,14 +1047,14 @@ public class QuickGridView extends Vbox
 		for (int i = 0; i < rowCount; i++) {
 			for (int j = 0; j < colCount; j++) {
 				if (listbox.getCell(i, j) != null && listbox.getCell(i, j).equals(source)) {
-					renderer.setCurrentCell(i, j, 0);
+					renderer.setCurrentCell(i, j, FOCUS_CODE);
 					return;
 				}
 			}
 		}
 	}
 
-	private boolean isAllSelected() {
+	public boolean isAllSelected() {
 		org.zkoss.zul.Rows rows = listbox.getRows();
 		List<Component> childs = rows.getChildren();
 		boolean all = false;
@@ -1152,7 +1115,7 @@ public class QuickGridView extends Vbox
 		boolean isSave = dataSave(code);
 		if (isSave)
 		{
-			gridTab.dataRefreshAll();
+			gridTab.getTableModel().dataRefreshAll();
 		}
 		else
 		{
@@ -1174,23 +1137,7 @@ public class QuickGridView extends Vbox
 				listbox.renderRow(row);
 			} else {
 				renderer.setCurrentRow(row);
-				renderer.setCurrentCell(rowIndex, 1, KeyEvent.RIGHT);
-				//remark: following 3 line cause the previously selected row being render twice
-//				if (old != null && old != row && oldIndex >= 0 && oldIndex != gridTab.getCurrentRow())
-//				{
-//					listModel.updateComponent(oldIndex % pageSize);
-//				}
-			}
-			if (modeless && !renderer.isEditing()) {
-				renderer.editCurrentRow();
-				if (columnOnClick != null && columnOnClick.trim().length() > 0) {
-					setFocusToField(columnOnClick);
-					columnOnClick = null;
-				} else {
-					focusToFirstEditorIfNotDetailTab();
-				}
-			} else {
-				focusToRow(row);
+				renderer.setCurrentCell(rowIndex, 1, NAVIGATE_CODE);
 			}
 		} else if (rowIndex >= 0) {
 			org.zkoss.zul.Row row = (org.zkoss.zul.Row) listbox.getRows().getChildren().get(rowIndex);
@@ -1198,53 +1145,9 @@ public class QuickGridView extends Vbox
 				listbox.renderRow(row);
 			} else {
 				renderer.setCurrentRow(row);
-				renderer.setCurrentCell(rowIndex, 1, KeyEvent.RIGHT);
-				//remark: following 3 line cause the previously selected row being render twice
-//				if (old != null && old != row && oldIndex >= 0 && oldIndex != gridTab.getCurrentRow())
-//				{
-//					listModel.updateComponent(oldIndex);
-//				}
-			}
-			if (modeless && !renderer.isEditing()) {
-				renderer.editCurrentRow();
-				if (columnOnClick != null && columnOnClick.trim().length() > 0) {
-					setFocusToField(columnOnClick);
-					columnOnClick = null;
-				} else {
-					renderer.focusToFirstEditor();
-				}
-			} else {
-				focusToRow(row);
+				renderer.setCurrentCell(rowIndex, 1, NAVIGATE_CODE);
 			}
 		}
-	}
-
-	private void focusToFirstEditorIfNotDetailTab() {
-		ADTabpanel adtabpanel = null;
-		boolean setFocus = true;
-		Component parent = listbox.getParent();
-		while (parent != null) {
-			if (parent instanceof ADTabpanel) {
-				adtabpanel = (ADTabpanel) parent;
-				break;
-			}
-			parent = parent.getParent();
-		}					
-		if (adtabpanel != null)
-		{
-			ADWindow adwindow = ADWindow.findADWindow(adtabpanel);
-			if (adwindow != null) {
-				IADTabpanel selectedADTabpanel = adwindow.getADWindowContent().getADTab().getSelectedTabpanel();
-				IADTabpanel  selectedADDetailTabpanel = null ;
-				if(selectedADTabpanel.getDetailPane() != null)
-					selectedADDetailTabpanel = selectedADTabpanel.getDetailPane().getSelectedADTabpanel();
-				
-				if (selectedADTabpanel != adtabpanel && selectedADDetailTabpanel != null && selectedADDetailTabpanel != adtabpanel)
-					setFocus = false;
-			}
-		}
-		if (setFocus)
-			renderer.focusToFirstEditor();
 	}
 
 	/**
@@ -1254,46 +1157,6 @@ public class QuickGridView extends Vbox
 		onPostSelectedRowChanged();
 	}
 	
-	private void focusToRow(org.zkoss.zul.Row row) {
-		if (renderer.isEditing()) {
-			if (columnOnClick != null && columnOnClick.trim().length() > 0) {
-				setFocusToField(columnOnClick);
-				columnOnClick = null;
-			} else {
-				focusToFirstEditorIfNotDetailTab();
-			}
-		} else {
-			Component cmp = null;
-			List<?> childs = row.getChildren();
-			for (Object o : childs) {
-				Component c = (Component) o;
-				if (!c.isVisible())
-					continue;
-				if (c instanceof Cell) {
-					cmp = c;
-					break;
-				}
-			}
-			if (cmp != null)
-				Clients.response(new AuScript(null, "scrollToRow('" + cmp.getUuid() + "');"));
-
-			if (columnOnClick != null && columnOnClick.trim().length() > 0) {
-				List<?> list = row.getChildren();
-				for (Object element : list) {
-					if (element instanceof Cell) {
-						Cell cell = (Cell) element;
-						if (columnOnClick.equals(cell.getAttribute("columnName"))) {
-							cmp = cell.getFirstChild();
-							Clients.response(new AuScript(null, "scrollToRow('" + cmp.getUuid() + "');"));
-							break;
-						}
-					}
-				}
-				columnOnClick = null;
-			}
-		}
-	}
-
 	private boolean isRowRendered(org.zkoss.zul.Row row, int index) {
 		if (row.getChildren().size() == 0) {
 			return false;
@@ -1335,9 +1198,6 @@ public class QuickGridView extends Vbox
             return;
         }
 		
-		if (renderer.getEditors().isEmpty())
-			listbox.onInitRender();
-
         //  Selective
         if (col > 0)
         {
@@ -1352,47 +1212,63 @@ public class QuickGridView extends Vbox
         }
 
         boolean noData = gridTab.getRowCount() == 0;
-        List<WEditor> list =  renderer.getEditors();
-        dynamicDisplayEditors(noData, list);   //  all components
+        // Get editors list of Current Row
+		List<WEditor> list = renderer.editorsListMap.get(renderer.getCurrentRow());
+		if (list != null)
+			dynamicDisplayEditors(noData, list); // all components
         
         if (gridTab.getRowCount() == 0 && selectAll.isChecked())
 			selectAll.setChecked(false);        
 	}
 
+	/**
+	 * Change display properties of current row
+	 * 
+	 * @param noData
+	 * @param list
+	 */
 	private void dynamicDisplayEditors(boolean noData, List<WEditor> list) {
+		// Get read-only editors list of Current Row
+		ArrayList<WEditor> readOnlyEditorsList = renderer.readOnlyEditorsListMap.get(renderer.getCurrentRow());
 		for (WEditor comp : list)
-        {
-            GridField mField = comp.getGridField();
-            if (mField != null)
-            {
-                if (noData)
-                {
-                    comp.setReadWrite(false);
-                }
-                else
-                {
-                	comp.dynamicDisplay();
-                    boolean rw = mField.isEditableGrid(true);   //  r/w - check Context
-                    comp.setReadWrite(rw);
-                }
-                
-                Properties ctx = isDetailPane() ? new GridRowCtx(Env.getCtx(), gridTab, gridTab.getCurrentRow()) 
-            		: mField.getVO().ctx;
-                
-                comp.setVisible((isHasCustomizeData || mField.isDisplayedGrid()) && mField.isDisplayed(ctx, true));
-            }
-        }
-	}
-
-	private boolean isDetailPane() {
-		Component parent = this.getParent();
-		while (parent != null) {
-			if (parent instanceof DetailPane) {
-				return true;
-			} 
-			parent = parent.getParent();					
+		{
+			GridField mField = comp.getGridField();
+			if (mField != null)
+			{
+				if (noData)
+				{
+					comp.setReadWrite(false);
+				}
+				else
+				{
+					// Enable read-only Component to get proper value of read &
+					// write logic.
+					if (readOnlyEditorsList != null && readOnlyEditorsList.contains(comp))
+					{
+						renderer.isDisableReadonlyComponent(comp.getComponent(), false);
+						readOnlyEditorsList.remove(comp);
+					}
+					// r/w - check Context
+					boolean rw = mField.isEditable(true);
+					// IDEMPIERE-3421 - if it was read-only the list can contain
+					// direct values
+					if (rw && !comp.isReadWrite())
+						mField.refreshLookup();
+					comp.setReadWrite(rw);
+					comp.setMandatory(mField.isMandatory(true));
+					comp.dynamicDisplay();
+					// Disable read-only Component for while pressing tab button
+					// focus goes to read-only component.
+					if (readOnlyEditorsList != null && renderer.isDisableReadonlyComponent(comp.getComponent(), true))
+					{
+						readOnlyEditorsList.add(comp);
+					}
+				}
+				comp.setVisible((isHasCustomizeData || mField.isDisplayedGrid())
+						&& mField.isDisplayed(mField.getVO().ctx, true));
+			}
 		}
-		return false;
+		renderer.readOnlyEditorsListMap.put(renderer.getCurrentRow(), readOnlyEditorsList);
 	}
 	
 	/**
@@ -1401,43 +1277,6 @@ public class QuickGridView extends Vbox
 	 */
 	public void setWindowNo(int windowNo) {
 		this.windowNo = windowNo;
-	}
-
-	@Override
-	public void focus() {
-		if (renderer != null && renderer.isEditing()) {
-			renderer.focusToFirstEditor();
-		}
-	}
-
-	/**
-	 * Handle enter key event
-	 */
-	public boolean onEnterKey() {
-		if (!modeless && renderer != null && !renderer.isEditing()) {
-			renderer.editCurrentRow();
-			renderer.focusToFirstEditor();
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * @param columnName
-	 */
-	public void setFocusToField(String columnName) {
-		for (WEditor editor : renderer.getEditors()) {
-			if (columnName.equals(editor.getColumnName())) {
-				Component c = editor.getComponent();
-				if (c instanceof EditorBox) {
-					c = ((EditorBox)c).getTextbox();
-				} else if (c instanceof NumberBox) {
-					c = ((NumberBox)c).getDecimalbox();
-				}
-				Clients.response(new AuFocus(c));
-				break;
-			}
-		}
 	}
 
 	/**
@@ -1479,36 +1318,12 @@ public class QuickGridView extends Vbox
 		return gridFields;
 	}
 	
-	public void onEditCurrentRow() {
-		onEditCurrentRow(null);
-	}
-	
-	public void onEditCurrentRow(Event event) {
-		if (!renderer.isEditing()) {
-			Row currentRow = renderer.getCurrentRow();
-			if (currentRow == null || currentRow.getParent() == null || !currentRow.isVisible()) {
-				if (event == null) {
-					Events.postEvent("onEditCurrentRow", this, null);
-				}
-			} else {
-				renderer.editCurrentRow();
-				renderer.focusToFirstEditor();
-			}
-		} 
-	}
-
 	@Override
 	public void focusToFirstEditor() {
-		if (renderer.isEditing()) {
-			renderer.focusToFirstEditor();
-		}
 	}
 
 	@Override
 	public void focusToNextEditor(WEditor ref) {
-		if (renderer.isEditing()) {
-			renderer.focusToNextEditor(ref);
-		}
 	}
 
 	@Override
@@ -1532,34 +1347,16 @@ public class QuickGridView extends Vbox
 		positionPagingControl();
 	}
 
-	private void positionPagingControl() {
-		if (isDetailPane()) {
-			Component parent = this.getParent();
-			while (parent != null) {
-				if (parent instanceof Tabpanel) {
-					Component firstChild = parent.getFirstChild();
-					if ( gridFooter.getParent() != firstChild ) { 
-						firstChild.appendChild(gridFooter);
-						gridFooter.setHflex("0");
-						gridFooter.setSclass("adwindow-detailpane-adtab-grid-south");												
-					}
-					break;
-				}
-				parent = parent.getParent();
-			}
-			if (paging != null)
-				paging.setDetailed(false);
-		}
-		else 
+	private void positionPagingControl()
+	{
+		if (gridFooter.getParent() != this)
 		{
-			if (gridFooter.getParent() != this) {
-				gridFooter.setHflex("1");
-				gridFooter.setSclass("adtab-grid-south");
-				appendChild(gridFooter);
-			}
-			if (paging != null)
-				paging.setDetailed(true);			
+			gridFooter.setHflex("1");
+			gridFooter.setSclass("adtab-grid-south");
+			appendChild(gridFooter);
 		}
+		if (paging != null)
+			paging.setDetailed(true);
 	}
 
 	public void setStatusLine(String text, boolean error)
