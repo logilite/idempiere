@@ -41,6 +41,7 @@ import org.compiere.model.MRole;
 import org.compiere.model.MScheduler;
 import org.compiere.model.MSchedulerLog;
 import org.compiere.model.MSchedulerPara;
+import org.compiere.model.MSession;
 import org.compiere.model.MUser;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoUtil;
@@ -110,7 +111,9 @@ public class Scheduler extends AdempiereServer
 		Timestamp ts = new Timestamp(System.currentTimeMillis());
 		SimpleDateFormat dateFormat4Timestamp = new SimpleDateFormat("yyyy-MM-dd"); 
 		Env.setContext(getCtx(), "#Date", dateFormat4Timestamp.format(ts)+" 00:00:00" );    //  JDBC format
-
+		
+		//Create new Session and set #AD_Session_ID to context
+		MSession session = MSession.get(getCtx(), true);
 		MProcess process = new MProcess(getCtx(), m_model.getAD_Process_ID(), null);
 		try
 		{
@@ -129,6 +132,9 @@ public class Scheduler extends AdempiereServer
 		{
 			if (m_trx != null)
 				m_trx.close();
+			
+			session.logout();
+			getCtx().remove("#AD_Session_ID");
 		}
 		
 		//
