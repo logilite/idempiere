@@ -1705,7 +1705,7 @@ public class MInOut extends X_M_InOut implements DocAction
 						m_processMsg = "Cannot correct Inventory OnHand [" + product.getValue() + "] - " + lastError;
 						return DocAction.STATUS_Invalid;
 					}
-					if (oLine!=null && oLine.getQtyOrdered().signum() > 0)  
+					if (isSOTrx() && oLine!=null && oLine.getQtyOrdered().signum() > 0)  
 					{
 						if (!MStorageReservation.add(getCtx(), oLine.getM_Warehouse_ID(),
 								sLine.getM_Product_ID(),
