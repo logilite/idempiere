@@ -357,8 +357,8 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 			throw new AdempiereException(Msg.getMsg(Env.getCtx(), "NodeNotCreate"));
 		}
 		MMenu menu = new MMenu(Env.getCtx(), menuID, null);
-		MTreeNode mNode = new MTreeNode(mtFavNode.getAD_Tree_Favorite_Node_ID(), mtFavNode.getSeqNo(), menu.getName(),
-				menu.getName(), mtFavNode.getParent_ID(), mtFavNode.isSummary(), mtFavNode.getAD_Menu_ID(),
+		MTreeNode mNode = new MTreeNode(mtFavNode.getAD_Tree_Favorite_Node_ID(), mtFavNode.getSeqNo(), menu.get_Translation(MMenu.COLUMNNAME_Name),
+				menu.get_Translation(MMenu.COLUMNNAME_Name), mtFavNode.getParent_ID(), mtFavNode.isSummary(), mtFavNode.getAD_Menu_ID(),
 				menu.getAction(), false);
 
 		DefaultTreeNode<Object> node = new DefaultTreeNode<Object>(mNode);

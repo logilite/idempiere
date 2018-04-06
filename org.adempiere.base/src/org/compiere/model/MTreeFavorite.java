@@ -102,7 +102,7 @@ public class MTreeFavorite extends X_AD_Tree_Favorite
 				{
 					menuID = rs.getInt(6);
 					MMenu mMenu = new MMenu(Env.getCtx(), menuID, null);
-					name = mMenu.getName();
+					name = mMenu.get_Translation(MMenu.COLUMNNAME_Name);
 					img = mMenu.getAction();
 				}
 
