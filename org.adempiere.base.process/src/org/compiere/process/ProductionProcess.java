@@ -8,6 +8,7 @@ import org.compiere.model.I_M_ProductionPlan;
 import org.compiere.model.MProduction;
 import org.compiere.model.MProductionLine;
 import org.compiere.model.MProductionPlan;
+import org.compiere.model.MTable;
 import org.compiere.model.Query;
 import org.compiere.util.AdempiereUserError;
 import org.compiere.util.Env;
@@ -45,7 +46,7 @@ public class ProductionProcess extends SvrProcess {
 		
 		p_M_Production_ID = getRecord_ID();
 		if (p_M_Production_ID > 0)
-			m_production = new MProduction(getCtx(), p_M_Production_ID, get_TrxName());
+			m_production = (MProduction) MTable.get(getCtx(), MProduction.Table_ID).getPO(p_M_Production_ID, get_TrxName());
 
 	}	//prepare
 

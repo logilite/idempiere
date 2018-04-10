@@ -176,3 +176,19 @@ table.z-vbox > tbody > tr > td > table {
 }
 
 <%-- Attachment by Drag & Drop End --%>
+
+input[type="checkbox"]:focus
+{
+ 	 outline: #0000ff auto 1px;
+	-moz-outline-radius: 3px;
+}
+
+<%-- Quick Form Read-only Component --%>
+.quickform-readonly .z-textbox-readonly, .quickform-readonly .z-intbox-readonly, .quickform-readonly .z-longbox-readonly, .quickform-readonly .z-doublebox-readonly,
+.quickform-readonly .z-decimalbox-readonly, .quickform-readonly .z-datebox-readonly, .quickform-readonly .z-timebox-readonly, .quickform-readonly .editor-input-disd,
+.quickform-readonly .z-textbox[readonly], .quickform-readonly .z-intbox[readonly], .quickform-readonly .z-longbox[readonly], .quickform-readonly .z-doublebox[readonly],
+.quickform-readonly .z-decimalbox[readonly], .quickform-readonly .z-datebox[readonly], .quickform-readonly .z-timebox[readonly]
+{
+    color: #252525 !important;
+    opacity: .8;
+}

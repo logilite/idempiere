@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.adempiere.util.GridRowCtx;
 import org.adempiere.webui.LayoutUtils;
@@ -39,7 +38,6 @@ import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Urlbox;
 import org.adempiere.webui.editor.WButtonEditor;
 import org.adempiere.webui.editor.WEditor;
-import org.adempiere.webui.editor.WImageEditor;
 import org.adempiere.webui.editor.WNumberEditor;
 import org.adempiere.webui.editor.WPAttributeEditor;
 import org.adempiere.webui.editor.WSearchEditor;
@@ -50,7 +48,6 @@ import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.GridTabDataBinder;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
-import org.compiere.model.MSysConfig;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -65,8 +62,6 @@ import org.zkoss.zk.ui.event.KeyEvent;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Cell;
 import org.zkoss.zul.Grid;
-import org.zkoss.zul.Html;
-import org.zkoss.zul.Label;
 import org.zkoss.zul.Paging;
 import org.zkoss.zul.RendererCtrl;
 import org.zkoss.zul.Row;
@@ -88,13 +83,12 @@ public class QuickGridTabRowRenderer
 	private static final String CELL_DIV_STYLE_ALIGN_CENTER = CELL_DIV_STYLE + "text-align:center; ";
 	private static final String CELL_DIV_STYLE_ALIGN_RIGHT = CELL_DIV_STYLE + "text-align:right; ";
 	public static final String CURRENT_ROW_STYLE = "border-top: 2px solid #6f97d2; border-bottom: 2px solid #6f97d2";
+	// CSS for Disabled component to visible text properly.
+	public static final String CSS_READ_ONLY_COMPONENT = "quickform-readonly ";
 
-	private static final int MAX_TEXT_LENGTH_DEFAULT = 60;
 	private GridTab gridTab;
 	private int windowNo;
 	private GridTabDataBinder dataBinder;
-	private Map<GridField, WEditor> editors = new LinkedHashMap<GridField, WEditor>();
-	private Map<GridField, WEditor> readOnlyEditors = new LinkedHashMap<GridField, WEditor>();
 	private Paging paging;
 
 	private RowListener rowListener;
@@ -104,16 +98,18 @@ public class QuickGridTabRowRenderer
 	private Row currentRow;
 	private Object[] currentValues;
 	private boolean editing = false;
-	private int currentRowIndex = -1;
+	public int currentRowIndex = -1;
 	private AbstractADWindowContent m_windowPanel;
 	private ActionListener buttonListener;
+	// Row-wise Editors Map
+	public Map<Row, ArrayList<WEditor>>	editorsListMap					= new LinkedHashMap<Row, ArrayList<WEditor>>();
+	// Row-wise read-only Editors Map
+	public Map<Row, ArrayList<WEditor>>	readOnlyEditorsListMap			= new LinkedHashMap<Row, ArrayList<WEditor>>();
 	/**
 	 * Flag detect this view has customized column or not
 	 * value is set at {@link #render(Row, Object[], int)}
 	 */
 	private boolean isGridViewCustomized = false;
-	/** DefaultFocusField		*/
-	private WEditor	defaultFocusField = null;
 
 	/**
 	 *
@@ -130,9 +126,6 @@ public class QuickGridTabRowRenderer
 		WEditor editor = WebEditorFactory.getEditor(gridField, true);
 		if (editor != null) {
 			prepareFieldEditor(gridField, editor);
-			editor.addValueChangeListener(dataBinder);
-			gridField.removePropertyChangeListener(editor);
-			gridField.addPropertyChangeListener(editor);
 			editor.setValue(object);
 		}
 		return editor;
@@ -172,145 +165,10 @@ public class QuickGridTabRowRenderer
 	}
 
 	/**
-	 * call {@link #getDisplayText(Object, GridField, int, boolean)} with isForceGetValue = false
-	 * @param value
-	 * @param gridField
-	 * @param rowIndex
-	 * @return
-	 */
-	private String getDisplayText(Object value, GridField gridField, int rowIndex){
-		return getDisplayText(value, gridField, rowIndex, false);
-	}
-	
-	/**
-	 * Get display text of a field. when field have isDisplay = false always return empty string, except isForceGetValue = true
-	 * @param value
-	 * @param gridField
-	 * @param rowIndex
-	 * @param isForceGetValue
-	 * @return
-	 */
-	private String getDisplayText(Object value, GridField gridField, int rowIndex, boolean isForceGetValue)
-	{
-		if (value == null)
-			return "";
-
-		if (rowIndex >= 0) {
-			GridRowCtx gridRowCtx = new GridRowCtx(Env.getCtx(), gridTab, rowIndex);
-			if (!isForceGetValue && !gridField.isDisplayed(gridRowCtx, true)) {
-				return "";
-			}
-		}
-		
-		if (gridField.isEncryptedField())
-		{
-			return "********";
-		}		
-		else if (readOnlyEditors.get(gridField) != null) 
-		{
-			WEditor editor = readOnlyEditors.get(gridField);			
-			return editor.getDisplayTextForGridView(value);
-		}
-    	else
-    		return value.toString();
-	}
-	
-	/**
-	 * @param text
-	 * @param label
-	 */
-	private void setLabelText(String text, Label label) {
-		String display = text;
-		final int MAX_TEXT_LENGTH = MSysConfig.getIntValue(MSysConfig.MAX_TEXT_LENGTH_ON_GRID_VIEW,MAX_TEXT_LENGTH_DEFAULT,Env.getAD_Client_ID(Env.getCtx()));
-		if (text != null && text.length() > MAX_TEXT_LENGTH)
-			display = text.substring(0, MAX_TEXT_LENGTH - 3) + "...";
-		// since 5.0.8, the org.zkoss.zhtml.Text is encoded by default
-//		if (display != null)
-//			display = XMLs.encodeText(display);
-		label.setValue(display);
-		
-		final int MIN_TOOLTIP_TEXT_LENGTH = MSysConfig.getIntValue(MSysConfig.MIN_TOOLTIP_TEXT_LENGTH_ON_GRID_VIEW, MAX_TEXT_LENGTH_DEFAULT, Env.getAD_Client_ID(Env.getCtx()));
-		if (text != null && (text.length() > MAX_TEXT_LENGTH || text.length() > MIN_TOOLTIP_TEXT_LENGTH))
-			label.setTooltiptext(text);
-	}
-
-	/**
-	 *
-	 * @return active editor list
-	 */
-	public List<WEditor> getEditors() {
-		List<WEditor> editorList = new ArrayList<WEditor>();
-		if (!editors.isEmpty())
-			editorList.addAll(editors.values());
-
-		return editorList;
-	}
-	
-	/**
 	 * @param paging
 	 */
 	public void setPaging(Paging paging) {
 		this.paging = paging;
-	}
-
-	/**
-	 * Detach all editor and optionally set the current value of the editor as cell label.
-	 * @param updateCellLabel
-	 */
-	public void stopEditing(boolean updateCellLabel) {
-		if (!editing) {
-			return;
-		} else {
-			editing = false;
-		}
-		Row row = null;
-		for (Entry<GridField, WEditor> entry : editors.entrySet()) {
-			if (entry.getValue().getComponent().getParent() != null) {
-				Component child = entry.getValue().getComponent();
-				Cell div = null;
-				while (div == null && child != null) {
-					Component parent = child.getParent();
-					if (parent instanceof Cell && parent.getParent() instanceof Row)
-						div = (Cell)parent;
-					else
-						child = parent;
-				}
-				Component component = div!=null ? (Component) div.getAttribute("display.component") : null;
-				if (updateCellLabel) {
-					if (component instanceof Label) {
-						Label label = (Label)component;
-						label.getChildren().clear();
-						String text = getDisplayText(entry.getValue().getValue(), entry.getValue().getGridField(), -1);
-						setLabelText(text, label);
-					} else if (component instanceof Checkbox) {
-						Checkbox checkBox = (Checkbox)component;
-						Object value = entry.getValue().getValue();
-						if (value != null && "true".equalsIgnoreCase(value.toString()))
-							checkBox.setChecked(true);
-						else
-							checkBox.setChecked(false);
-					} else if (component instanceof Html){
-						((Html)component).setContent(getDisplayText(entry.getValue().getValue(), entry.getValue().getGridField(), -1));
-					}
-				}
-				component.setVisible(true);
-				if (row == null)
-					row = ((Row)div.getParent());
-
-				entry.getValue().getComponent().detach();
-				entry.getKey().removePropertyChangeListener(entry.getValue());
-				entry.getValue().removeValuechangeListener(dataBinder);
-				
-				if (component.getParent() == null || component.getParent() != div)
-					div.appendChild(component);
-				else if (!component.isVisible()) {
-					component.setVisible(true);
-				}
-			}
-		}
-
-		GridTableListModel model = (GridTableListModel) grid.getModel();
-		model.setEditing(false);
 	}
 
 	/**
@@ -357,7 +215,10 @@ public class QuickGridTabRowRenderer
 			List<Object> dataList = new ArrayList<Object>();
 			for(GridField gridField : gridPanelFields) {
 				for(int i = 0; i < gridTabFields.length; i++) {
+					gridTabFields[i].setValue(data[i], false);
 					if (gridField.getAD_Field_ID() == gridTabFields[i].getAD_Field_ID()) {
+						// Update value of gridField for Context Parsing.
+						gridField.setValue(data[i], false);
 						dataList.add(data[i]);
 						break;
 					}
@@ -394,6 +255,10 @@ public class QuickGridTabRowRenderer
 		
 		Boolean isActive = null;
 		int colIndex = -1;
+		// Editors List of Current Rendered Row
+		ArrayList<WEditor> editorsList = new ArrayList<WEditor>();
+		// Read-only editors List of Current Rendered Row
+		ArrayList<WEditor> readOnlyEditorsList = new ArrayList<WEditor>();
 		for (int i = 0; i < columnCount; i++) {
 			if (!gridPanelFields[i].isQuickForm()){
 				continue;
@@ -418,21 +283,22 @@ public class QuickGridTabRowRenderer
 			String divStyle = CELL_DIV_STYLE;
 			org.zkoss.zul.Column column = (org.zkoss.zul.Column) columns.getChildren().get(colIndex);
 			if (column.isVisible()) {
-				WEditor componenteditor = getEditorCell(gridPanelFields[i], currentValues[i]);
-				componenteditor.getComponent().addEventListener(Events.ON_FOCUS, gridPanel);
-				Component component = componenteditor.getComponent();
+				WEditor componentEditor = getEditorCell(gridPanelFields[i], currentValues[i]);
+				editorsList.add(componentEditor);
+				componentEditor.getComponent().addEventListener(Events.ON_FOCUS, gridPanel);
+				Component component = componentEditor.getComponent();
 				div.appendChild(component);
 				div.setAttribute("display.component", component);
-				if (componenteditor instanceof WPAttributeEditor) {
-					((WPAttributeEditor) componenteditor).getComponent().getButton().addEventListener(Events.ON_FOCUS,
+				if (componentEditor instanceof WPAttributeEditor) {
+					((WPAttributeEditor) componentEditor).getComponent().getButton().addEventListener(Events.ON_FOCUS,
 							gridPanel);
-				} else if (componenteditor instanceof WSearchEditor) {
-					((WSearchEditor) componenteditor).getComponent().getButton().addEventListener(Events.ON_FOCUS,
+				} else if (componentEditor instanceof WSearchEditor) {
+					((WSearchEditor) componentEditor).getComponent().getButton().addEventListener(Events.ON_FOCUS,
 							gridPanel);
 				}
-				else if (componenteditor instanceof WNumberEditor)
+				else if (componentEditor instanceof WNumberEditor)
 				{
-					((WNumberEditor) componenteditor).getComponent().getButton().addEventListener(Events.ON_FOCUS,
+					((WNumberEditor) componentEditor).getComponent().getButton().addEventListener(Events.ON_FOCUS,
 							gridPanel);
 				}
 				if (gridPanelFields[i].isHeading()) {
@@ -445,12 +311,14 @@ public class QuickGridTabRowRenderer
 				else if (DisplayType.isNumeric(gridPanelFields[i].getDisplayType())) {
 					divStyle = CELL_DIV_STYLE_ALIGN_RIGHT;
 				}
-				if (isDisableReadonlyComponent(component))
+				if (isDisableReadonlyComponent(component, true))
 				{
-					divStyle +="color: black !important;" ;
+					readOnlyEditorsList.add(componentEditor);
 				}
 				
 				GridRowCtx ctx = new GridRowCtx(Env.getCtx(), gridTab, rowIndex);
+				// Enable or Disable Component
+				componentEditor.setReadWrite(gridPanelFields[i].isEditable(ctx, true, false));
 				if (!gridPanelFields[i].isDisplayed(ctx, true)){
 					// IDEMPIERE-2253 
 					component.setVisible(false);
@@ -466,6 +334,9 @@ public class QuickGridTabRowRenderer
 			model.setEditing(true);
 			row.appendChild(div);
 		}
+
+		editorsListMap.put(row, editorsList);
+		readOnlyEditorsListMap.put(row, readOnlyEditorsList);
 
 		if (rowIndex == gridTab.getCurrentRow()) {
 			setCurrentRow(row);
@@ -489,9 +360,6 @@ public class QuickGridTabRowRenderer
 		if (isActive != null && !isActive.booleanValue()) {
 			LayoutUtils.addSclass("grid-inactive-row", row);
 		}
-		if (currentCell == null || currentCell.getUuid() == null) {
-			setCurrentCell(gridTab.getCurrentRow(), 1, KeyEvent.RIGHT);
-		}
 		// Set focus to first editable cell of the last record if multiple
 		// records inserted
 		if (gridPanel.paging.getTotalSize() != gridTab.getRowCount())
@@ -507,130 +375,183 @@ public class QuickGridTabRowRenderer
 				setCurrentCell(gridTab.getRowCount() - 1 % paging.getPageSize()
 						- (paging.getActivePage() * paging.getPageSize()), 1, KeyEvent.RIGHT);
 			}
-			Events.echoEvent("onSetFocusToFirstCell", gridPanel, null);
+			Events.echoEvent(QuickGridView.EVENT_ON_SET_FOCUS_TO_FIRST_CELL, gridPanel, null);
 		}
 	}
 
 	/**
 	 * Disable Read-only components for while pressing tab button focus goes to
 	 * read-only component.
+	 * Enable Read-only component before display Logic update.
+	 * Add/Remove CSS Class from read-only component
 	 * 
 	 * @param component
+	 * @param isDisable
 	 * @return
 	 */
-	private boolean isDisableReadonlyComponent(Component component)
+	public boolean isDisableReadonlyComponent(Component component, boolean isDisable)
 	{
 		boolean isReadonly = false;
 		if (component instanceof NumberBox)
 		{
-			if (((NumberBox) component).getDecimalbox().isReadonly())
+			NumberBox comp = ((NumberBox) component);
+			if (comp.getDecimalbox().isReadonly())
 			{
-				((NumberBox) component).getDecimalbox().setDisabled(true);
+				comp.getDecimalbox().setDisabled(isDisable);
+				comp.setZclass(addOrRemoveCssClass(comp.getZclass(), isDisable));
 				isReadonly = true;
 			}
 		}
 		else if (component instanceof Textbox)
 		{
-			if (((Textbox) component).isReadonly())
+			Textbox comp = ((Textbox) component);
+			if (comp.isReadonly())
 			{
-				((Textbox) component).setDisabled(true);
+				comp.setDisabled(isDisable);
+				comp.setZclass(addOrRemoveCssClass(comp.getZclass(), isDisable));
 				isReadonly = true;
 			}
 		}
 		else if (component instanceof Datebox)
 		{
-			if (((Datebox) component).isReadonly())
+			Datebox comp = ((Datebox) component);
+			if (comp.isReadonly())
 			{
-				((Datebox) component).setDisabled(true);
+				comp.setDisabled(isDisable);
+				comp.setZclass(addOrRemoveCssClass(comp.getZclass(), isDisable));
 				isReadonly = true;
 			}
 		}
 		else if (component instanceof DatetimeBox)
 		{
-			if (((DatetimeBox) component).getTimebox().isReadonly())
+			DatetimeBox comp = ((DatetimeBox) component);
+			if (comp.getTimebox().isReadonly())
 			{
-				((DatetimeBox) component).getTimebox().setDisabled(true);
+				comp.getTimebox().setDisabled(isDisable);
+				comp.setZclass(addOrRemoveCssClass(comp.getZclass(), isDisable));
 				isReadonly = true;
 			}
-			if (((DatetimeBox) component).getDatebox().isReadonly())
+			if (comp.getDatebox().isReadonly())
 			{
-				((DatetimeBox) component).getDatebox().setDisabled(true);
+				comp.getDatebox().setDisabled(isDisable);
+				comp.setZclass(addOrRemoveCssClass(comp.getZclass(), isDisable));
 				isReadonly = true;
 			}
 		}
 		else if (component instanceof Searchbox)
 		{
-			if (((Searchbox) component).getTextbox().isReadonly())
+			Searchbox comp = ((Searchbox) component);
+			if (comp.getTextbox().isReadonly())
 			{
-				((Searchbox) component).getTextbox().setDisabled(true);
+				comp.getTextbox().setDisabled(isDisable);
+				comp.setZclass(addOrRemoveCssClass(comp.getZclass(), isDisable));
 				isReadonly = true;
 			}
 		}
 		else if (component instanceof Combinationbox)
 		{
-			if (((Combinationbox) component).getTextbox().isReadonly())
+			Combinationbox comp = ((Combinationbox) component);
+			if (comp.getTextbox().isReadonly())
 			{
-				((Combinationbox) component).getTextbox().setDisabled(true);
+				comp.getTextbox().setDisabled(isDisable);
+				comp.setZclass(addOrRemoveCssClass(comp.getZclass(), isDisable));
 				isReadonly = true;
 			}
 		}
 		else if (component instanceof EditorBox)
 		{
-			if (((EditorBox) component).getTextbox().isReadonly())
+			EditorBox comp = ((EditorBox) component);
+			if (comp.getTextbox().isReadonly())
 			{
-				((EditorBox) component).getTextbox().setDisabled(true);
+				comp.getTextbox().setDisabled(isDisable);
+				comp.setZclass(addOrRemoveCssClass(comp.getZclass(), isDisable));
 				isReadonly = true;
 			}
 		}
 		else if (component instanceof Urlbox)
 		{
-			if (((Urlbox) component).getTextbox().isReadonly())
+			Urlbox comp = ((Urlbox) component);
+			if (comp.getTextbox().isReadonly())
 			{
-				((Urlbox) component).getTextbox().setDisabled(true);
+				comp.getTextbox().setDisabled(isDisable);
+				comp.setZclass(addOrRemoveCssClass(comp.getZclass(), isDisable));
 				isReadonly = true;
 			}
 		}
 		else if (component instanceof FilenameBox)
 		{
-			if (((FilenameBox) component).getTextbox().isReadonly())
+			FilenameBox comp = ((FilenameBox) component);
+			if (comp.getTextbox().isReadonly())
 			{
-				((FilenameBox) component).getTextbox().setDisabled(true);
+				comp.getTextbox().setDisabled(isDisable);
+				comp.setZclass(addOrRemoveCssClass(comp.getZclass(), isDisable));
 				isReadonly = true;
 			}
 		}
 		else if (component instanceof Timebox)
 		{
-			if (((Timebox) component).isReadonly())
+			Timebox comp = ((Timebox) component);
+			if (comp.isReadonly())
 			{
-				((Timebox) component).setDisabled(true);
+				comp.setDisabled(isDisable);
+				comp.setZclass(addOrRemoveCssClass(comp.getZclass(), isDisable));
 				isReadonly = true;
 			}
 		}
 		else if (component instanceof Paymentbox)
 		{
-			if (((Paymentbox) component).getCombobox().isReadonly())
+			Paymentbox comp = ((Paymentbox) component);
+			if (comp.getCombobox().isReadonly())
 			{
-				((Paymentbox) component).getCombobox().setDisabled(true);
+				comp.getCombobox().setDisabled(isDisable);
+				comp.setZclass(addOrRemoveCssClass(comp.getZclass(), isDisable));
 				isReadonly = true;
 			}
 		}
 		else if (component instanceof PAttributebox)
 		{
-			if (((PAttributebox) component).getTextbox().isReadonly())
+			PAttributebox comp = ((PAttributebox) component);
+			if (comp.getTextbox().isReadonly())
 			{
-				((PAttributebox) component).getTextbox().setDisabled(true);
+				comp.getTextbox().setDisabled(isDisable);
+				comp.setZclass(addOrRemoveCssClass(comp.getZclass(), isDisable));
 				isReadonly = true;
 			}
 		}
 		else if (component instanceof MultiSelectBox)
 		{
-			if (((MultiSelectBox) component).getTextbox().isReadonly())
+			MultiSelectBox comp = ((MultiSelectBox) component);
+			if (comp.getTextbox().isReadonly())
 			{
-				((MultiSelectBox) component).getTextbox().setDisabled(true);
+				comp.getTextbox().setDisabled(isDisable);
+				comp.setZclass(addOrRemoveCssClass(comp.getZclass(), isDisable));
 				isReadonly = true;
 			}
 		}
 		return isReadonly;
+	}
+
+	/**
+	 * Add/Remove CSS class from Read-only Component
+	 * 
+	 * @param zclass
+	 * @param isDisable
+	 * @return
+	 */
+	private String addOrRemoveCssClass(String zclass, boolean isDisable)
+	{
+		if (zclass == null)
+			zclass = "";
+		if (isDisable)
+		{
+			zclass += CSS_READ_ONLY_COMPONENT;
+		}
+		else
+		{
+			if (zclass.contains(CSS_READ_ONLY_COMPONENT))
+				zclass.replaceAll(CSS_READ_ONLY_COMPONENT, "");
+		}
+		return zclass;
 	}
 
 	private Cell currentCell = null;
@@ -650,11 +571,12 @@ public class QuickGridTabRowRenderer
 		boolean isLastCell = false;
 		while (!isEditable(row, col))
 		{
-			if (!(code == KeyEvent.RIGHT || code == KeyEvent.LEFT || code == KeyEvent.DOWN || code == KeyEvent.UP))
+			if (!(code == KeyEvent.RIGHT || code == KeyEvent.LEFT || code == KeyEvent.DOWN || code == KeyEvent.UP
+					|| code == QuickGridView.NAVIGATE_CODE))
 			{
 				break;
 			}
-			else if (code == KeyEvent.RIGHT)
+			else if (code == KeyEvent.RIGHT || code == QuickGridView.NAVIGATE_CODE)
 			{
 				++col;
 			}
@@ -683,34 +605,19 @@ public class QuickGridTabRowRenderer
 				}
 			}
 
-			if (col < 1 && !isLastCell)
+			if (col < 0 && !isLastCell)
 			{
 				setFocusOnCurrentCell();
 				return;
 			}
 		}
-		// skip the record if no editable field present
-		if (col < 1 && isLastCell)
+		if (code == KeyEvent.DOWN || code == KeyEvent.UP || code == QuickGridView.FOCUS_CODE
+				|| code == QuickGridView.NAVIGATE_CODE || code == KeyEvent.HOME)
 		{
-			if (code == KeyEvent.DOWN || code == KeyEvent.UP)
-			{
-				if (code == KeyEvent.DOWN)
-				{
-					row++;
-					if (row >= gridTab.getRowCount() % paging.getPageSize()
-							+ (paging.getActivePage() * paging.getPageSize()))
-					{
-						gridPanel.createNewLine();
-						gridPanel.updateListIndex();
-						row = row % paging.getPageSize() + (paging.getActivePage() * paging.getPageSize());
-					}
-				}
-				if (code == KeyEvent.UP)
-				{
-					row--;
-				}
-				setCurrentCell(row, currentCol, code);
-			}
+			// Remove current row property change listener
+			ArrayList<WEditor> editorsList = editorsListMap.get(getCurrentRow());
+			if (editorsList != null)
+				removeEditorPropertyChangeListener(editorsList);
 		}
 
 		int pgIndex = row >= 0 ? row % paging.getPageSize() : 0;
@@ -728,13 +635,53 @@ public class QuickGridTabRowRenderer
 		}
 		
 		setCurrentRow(currentRow);
+		
+		if (code == KeyEvent.DOWN || code == KeyEvent.UP || code == QuickGridView.FOCUS_CODE
+				|| code == QuickGridView.NAVIGATE_CODE || code == KeyEvent.HOME)
+		{
+			// Add property change listener to new current row
+			ArrayList<WEditor> editorsList = editorsListMap.get(getCurrentRow());
+			if (editorsList != null)
+				addEditorPropertyChangeListener(editorsList);
+		}
 
 		if (grid.getCell(pgIndex, col) instanceof Cell) {
 			currentCell = (Cell) grid.getCell(pgIndex, col);
 		}
-		if (currentCell != null && code != 0) {
+		if (currentCell != null && code != QuickGridView.FOCUS_CODE) {
 			setFocusOnCurrentCell();
 		} 
+	}
+
+	/**
+	 * Set Property change listener of editor field
+	 * 
+	 * @param editorsList
+	 */
+	public void addEditorPropertyChangeListener(ArrayList<WEditor> editorsList)
+	{
+		GridField[] fields = gridPanel.getFields();
+		for (int i = 0; i < editorsList.size(); i++)
+		{
+			editorsList.get(i).addValueChangeListener(dataBinder);
+			fields[i].removePropertyChangeListener(editorsList.get(i));
+			fields[i].addPropertyChangeListener(editorsList.get(i));
+		}
+	}
+
+	/**
+	 * Remove Property change listener of editor field
+	 * 
+	 * @param editorsList
+	 */
+	public void removeEditorPropertyChangeListener(ArrayList<WEditor> editorsList)
+	{
+		GridField[] fields = gridPanel.getFields();
+		for (int i = 0; i < editorsList.size(); i++)
+		{
+			fields[i].removePropertyChangeListener(editorsList.get(i));
+			editorsList.get(i).removeValuechangeListener(dataBinder);
+		}
 	}
 
 	private boolean isEditable(int row, int col) {
@@ -867,24 +814,17 @@ public class QuickGridTabRowRenderer
 	/**
 	 * @param row
 	 */
-	public void setCurrentRow(Row row) {
+	public void setCurrentRow(Row row)
+	{
 		currentRow = row;
 
 		String script = "jq('#" + row.getUuid() + "').addClass('highlight').siblings().removeClass('highlight')";
 
-		Boolean isActive = null;
-		Object isActiveValue = gridTab.getValue(currentRowIndex, "IsActive");
-		if (isActiveValue != null) {
-			if ("true".equalsIgnoreCase(isActiveValue.toString())) {							
-				isActive = Boolean.TRUE;
-			} else {
-				isActive = Boolean.FALSE;
-			}
+		if (!gridTab.getValueAsBoolean("IsActive"))
+		{
+			script = "jq('#" + row.getUuid() + "').addClass('grid-inactive-row').siblings().removeClass('highlight')";
 		}
-		if (isActive != null && !isActive.booleanValue()) {
-			script = "jq('#"+row.getUuid()+"').addClass('grid-inactive-row').siblings().removeClass('highlight')";
-		}
-		
+
 		Clients.response(new AuScript(script));
 	}
 
@@ -953,71 +893,6 @@ public class QuickGridTabRowRenderer
 	 * @see RendererCtrl#doTry()
 	 */
 	public void doTry() {
-	}
-
-	/**
-	 * set focus to first active editor
-	 */
-	public void focusToFirstEditor() {
-		if (currentRow != null && currentRow.getParent() != null) {
-			WEditor toFocus = null;
-			WEditor firstEditor = null;
-			if (defaultFocusField != null 
-					&& defaultFocusField.isVisible() && defaultFocusField.isReadWrite() && defaultFocusField.getComponent().getParent() != null
-					&& !(defaultFocusField instanceof WImageEditor)) {
-				toFocus = defaultFocusField;
-			}
-			else
-			{
-				for (WEditor editor : getEditors()) {
-					if (editor.isVisible() && editor.getComponent().getParent() != null) {
-						if (editor.isReadWrite()) {
-							toFocus = editor;
-							break;
-						}
-						if (firstEditor == null)
-							firstEditor = editor;
-					}
-				}
-			}
-			if (toFocus != null) {
-				focusToEditor(toFocus);
-			} else if (firstEditor != null) {
-				focusToEditor(firstEditor);
-			}
-		}
-	}
-
-	protected void focusToEditor(WEditor toFocus) {
-		Component c = toFocus.getComponent();
-		if (c instanceof EditorBox) {
-			c = ((EditorBox)c).getTextbox();
-		} else if (c instanceof NumberBox) {
-			c = ((NumberBox)c).getDecimalbox();
-		} else if (c instanceof Urlbox) {
-			c = ((Urlbox) c).getTextbox();
-		}
-		((HtmlBasedComponent)c).focus();
-	}
-	
-	/**
-	 * set focus to next readwrite editor from ref
-	 * @param ref
-	 */
-	public void focusToNextEditor(WEditor ref) {
-		boolean found = false;
-		for (WEditor editor : getEditors()) {
-			if (editor == ref) {
-				found = true;
-				continue;
-			}
-			if (found) {
-				if (editor.isVisible() && editor.isReadWrite()) {
-					focusToEditor(editor);
-					break;
-				}
-			}
-		}
 	}
 
 	/**
@@ -1102,5 +977,12 @@ public class QuickGridTabRowRenderer
 		}
 	}
 
-	
+	/**
+	 * Clear editorsListmap on page change and dispose.
+	 */
+	public void clearMaps()
+	{
+		editorsListMap.clear();
+		readOnlyEditorsListMap.clear();
+	}
 }

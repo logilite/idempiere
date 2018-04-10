@@ -982,8 +982,7 @@ public class MMatchPO extends X_M_MatchPO
 			}
 		}
 				
-		//	Purchase Order Delivered/Invoiced
-		//	(Reserved in VMatch and MInOut.completeIt)
+		//	Purchase Order Delivered/Invoiced/Reserved
 		if (success && getC_OrderLine_ID() != 0)
 		{
 			MOrderLine orderLine = getOrderLine();
@@ -995,6 +994,16 @@ public class MMatchPO extends X_M_MatchPO
 				else //	if (getM_InOutLine_ID() == 0)					//	reset to 0
 					orderLine.setQtyDelivered(orderLine.getQtyDelivered().subtract(getQty()));
 				orderLine.setDateDelivered(getDateTrx());	//	overwrite=last
+				
+				// Reserved Qty
+				orderLine.setQtyReserved(orderLine.getQtyReserved().subtract(getQty()));
+				orderLine.saveEx();
+				
+				if (orderLine.getProduct() != null && orderLine.getProduct().isStocked())
+				{
+					MStorageReservation.add(Env.getCtx(), orderLine.getM_Warehouse_ID(), orderLine.getM_Product_ID(),
+							orderLine.getM_AttributeSetInstance_ID(), getQty().negate(), false, get_TrxName());
+				}
 			}
 			if (m_isInvoiceLineChange && (newRecord || getC_InvoiceLine_ID() != get_ValueOldAsInt("C_InvoiceLine_ID")))
 			{
@@ -1218,28 +1227,6 @@ public class MMatchPO extends X_M_MatchPO
 			this.setReversal_ID(reversal.getM_MatchPO_ID());
 			this.saveEx();
 			
-			if(getC_OrderLine_ID() > 0)
-			{
-				MOrderLine orderLine = (MOrderLine) MTable.get(getCtx(),
-						MOrderLine.Table_ID).getPO(
-						reversal.getC_OrderLine_ID(), get_TrxName());
-				orderLine.setQtyReserved(orderLine.getQtyReserved().add(
-						getQty()));
-				orderLine.saveEx();
-
-				if (!MStorageReservation.add(getCtx(),
-						orderLine.getM_Warehouse_ID(),
-						orderLine.getM_Product_ID(),
-						orderLine.getM_AttributeSetInstance_ID(), getQty(),
-						false, get_TrxName()))
-				{
-					String lastError = CLogger.retrieveErrorString("");
-					throw new AdempiereException(
-							"Cannot correct Inventory Ordered (MA) - ["
-									+ orderLine.getM_Product().getValue()
-									+ "] " + lastError);
-				}
-			}
 			return true;
 		}
 		return false;

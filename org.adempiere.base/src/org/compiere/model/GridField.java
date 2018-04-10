@@ -1891,11 +1891,7 @@ public class GridField
 		Object oldValue = m_oldValue;
 		if (inserting)
 			oldValue = INSERTING;
-		// every columns value overwrite with current value
-		if (getGridTab() == null || (getGridTab() != null && !getGridTab().isQuickForm()))
-		{
-			m_propertyChangeListeners.firePropertyChange(PROPERTY, oldValue, m_value);
-		}
+		m_propertyChangeListeners.firePropertyChange(PROPERTY, oldValue, m_value);
 	}   //  setValue
 
 	/**

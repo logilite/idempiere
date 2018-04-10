@@ -19,6 +19,7 @@ package org.compiere.process;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.MInOutLine;
 import org.compiere.model.MMatchPO;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MStorageReservation;
@@ -62,6 +63,7 @@ public class MatchPODelete extends SvrProcess
 			throw new AdempiereUserError("@NotFound@ @M_MatchPO_ID@ " + p_M_MatchPO_ID);
 		//
 		MOrderLine orderLine = null;
+		MInOutLine inOutLine = null;
 		boolean isMatchReceipt = (po.getM_InOutLine_ID() != 0);			 
 		if (isMatchReceipt)
 		{
@@ -79,6 +81,11 @@ public class MatchPODelete extends SvrProcess
 								+ orderLine.getM_Product().getValue() + "] "
 								+ lastError);
 			}
+			
+			inOutLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(po.getM_InOutLine_ID(),
+					get_TrxName());
+			inOutLine.set_ValueOfColumn(MOrderLine.COLUMNNAME_C_OrderLine_ID, null);
+			inOutLine.saveEx();
 		}
 		//
 		if (po.delete(true))

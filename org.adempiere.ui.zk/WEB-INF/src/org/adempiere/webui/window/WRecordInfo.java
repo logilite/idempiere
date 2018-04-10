@@ -100,6 +100,7 @@ public class WRecordInfo extends Window implements EventListener<Event>
 		this.setClosable(true);
 		this.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "recordInfo");
 		this.setSclass("popup-dialog");
+		this.setMaximizable(true);
 		
 		try
 		{

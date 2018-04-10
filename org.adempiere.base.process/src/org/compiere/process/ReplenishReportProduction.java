@@ -830,7 +830,7 @@ public class ReplenishReportProduction extends SvrProcess
 				{
 					qtyToProduce = Env.ZERO;
 				}
-				production = new MProduction (getCtx(), 0, get_TrxName());
+				production = (MProduction)MTable.get(getCtx(), MProduction.Table_ID).getPO(0, get_TrxName());
 				production.setDescription(Msg.getMsg(getCtx(), "Replenishment"));
 				//	Set Org/WH
 				production.setAD_Org_ID(wh.getAD_Org_ID());

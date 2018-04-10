@@ -32,7 +32,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20161030L;
+	private static final long serialVersionUID = 20180227L;
 
     /** Standard Constructor */
     public X_AD_Role (Properties ctx, int AD_Role_ID, String trxName)
@@ -593,6 +593,30 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isAccessAllOrgs () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsAccessAllOrgs);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Allow Delete Attachment.
+		@param IsAllowDeleteAttachment 
+		Allow Delete File In Attachment Dialog 
+	  */
+	public void setIsAllowDeleteAttachment (boolean IsAllowDeleteAttachment)
+	{
+		set_Value (COLUMNNAME_IsAllowDeleteAttachment, Boolean.valueOf(IsAllowDeleteAttachment));
+	}
+
+	/** Get Allow Delete Attachment.
+		@return Allow Delete File In Attachment Dialog 
+	  */
+	public boolean isAllowDeleteAttachment () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsAllowDeleteAttachment);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 

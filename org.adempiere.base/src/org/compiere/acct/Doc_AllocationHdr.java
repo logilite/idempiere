@@ -602,8 +602,12 @@ public class Doc_AllocationHdr extends Doc
 		BigDecimal allocationSource)
 	{
 		BigDecimal allocationAccounted = Env.ZERO;
+		//Skip Allocation for zero amounts
+		if(invoice.getGrandTotal().doubleValue()==0 || allocationSource.doubleValue() == 0)
+			return null;
+		
 		//	Multiplier
-		double percent = invoice.getGrandTotal().doubleValue() / allocationSource.doubleValue();
+		double percent = allocationSource.doubleValue() / invoice.getGrandTotal().doubleValue();
 		if (percent > 0.99 && percent < 1.01)
 			percent = 1.0;
 		if (log.isLoggable(Level.CONFIG)) log.config("Multiplier=" + percent + " - GrandTotal=" + invoice.getGrandTotal()

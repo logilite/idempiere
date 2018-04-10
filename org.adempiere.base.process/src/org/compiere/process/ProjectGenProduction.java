@@ -143,7 +143,7 @@ public class ProjectGenProduction extends SvrProcess
 		MProduction production = null;
 
 		//	New Production Header
-		production = new MProduction (projectLine);
+		production = MProduction.createFrom(projectLine);
 		int AD_Org_ID = projectLine.getAD_Org_ID();
 		if (AD_Org_ID == 0)
 		{

@@ -28,6 +28,8 @@ import org.adempiere.webui.component.Window;
 import org.adempiere.webui.component.ZkCssHelper;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.window.CustomizeGridViewDialog;
+import org.compiere.model.DataStatusEvent;
+import org.compiere.model.DataStatusListener;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MRole;
@@ -36,6 +38,7 @@ import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 import org.zkforge.keylistener.Keylistener;
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -48,7 +51,7 @@ import org.zkoss.zul.Columns;
  * @author Logilite Technologies
  * @since Nov 03, 2017
  */
-public class WQuickForm extends Window implements EventListener<Event>
+public class WQuickForm extends Window implements EventListener<Event>, DataStatusListener
 {
 
 	/**
@@ -88,6 +91,8 @@ public class WQuickForm extends Window implements EventListener<Event>
 		this.quickGridView.setVisible(true);
 		initForm();
 		gridTab.isQuickForm = true;
+		
+		gridTab.addDataStatusListener(this);
 
 		// To maintain parent-child Quick Form
 		prevQGV = adWinContent.getCurrQGV();
@@ -152,13 +157,13 @@ public class WQuickForm extends Window implements EventListener<Event>
 		}
 		if (event.getTarget() == confirmPanel.getButton(ConfirmPanel.A_OK))
 		{
-			onSave(true);
+			onSave();
 			dispose();
 		}
 		else if (event.getTarget() == confirmPanel.getButton("Save"))
 		{
 			quickGridView.getRenderer().setCurrentCell(null);
-			onSave(true);
+			onSave();
 		}
 		else if (event.getTarget() == confirmPanel.getButton(ConfirmPanel.A_DELETE))
 		{
@@ -179,6 +184,7 @@ public class WQuickForm extends Window implements EventListener<Event>
 
 	public void onCustomize()
 	{
+		onSave();
 		Columns columns = quickGridView.getListbox().getColumns();
 		List<Component> columnList = columns.getChildren();
 		GridField[] fields = quickGridView.getGridField();
@@ -209,13 +215,14 @@ public class WQuickForm extends Window implements EventListener<Event>
 		if (gridTab.getRowCount() <= 0)
 			quickGridView.createNewLine();
 		quickGridView.updateListIndex();
-		Events.echoEvent("onSetFocusToFirstCell", quickGridView, null);
+		Events.echoEvent(QuickGridView.EVENT_ON_SET_FOCUS_TO_FIRST_CELL, quickGridView, null);
 	}
 
 	public void onDelete()
 	{
 		if (gridTab == null)
 			return;
+		boolean isAllSelected = quickGridView.isAllSelected();
 		final int[] indices = gridTab.getSelection();
 		if (indices.length > 0)
 		{
@@ -253,17 +260,28 @@ public class WQuickForm extends Window implements EventListener<Event>
 			}
 			quickGridView.updateListIndex();
 		}
-		Events.echoEvent("onSetFocusToFirstCell", quickGridView, null);
+		// Set focus on the first row if all Row's are selected.
+		if (isAllSelected)
+			Events.echoEvent(QuickGridView.EVENT_ON_PAGE_NAVIGATE, quickGridView, null);
+		else
+			Events.echoEvent(QuickGridView.EVENT_ON_SET_FOCUS_TO_FIRST_CELL, quickGridView, null);
 	}
 
-	public void onSave(boolean isShowError)
+	public void onSave()
 	{
-		if (quickGridView.dataSave(0))
+		if (gridTab.getTableModel().getRowChanged() == gridTab.getCurrentRow())
 		{
-			gridTab.dataRefreshAll();
-			adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "Saved"), false);
+			if (quickGridView.dataSave(0))
+			{
+				gridTab.dataRefreshAll();
+				adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "Saved"), false);
+				Events.echoEvent(QuickGridView.EVENT_ON_SET_FOCUS_TO_FIRST_CELL, quickGridView, null);
+			}
 		}
-		Events.echoEvent("onSetFocusToFirstCell", quickGridView, null);
+		else
+		{
+			onIgnore();
+		}
 	}
 
 	public void onRefresh()
@@ -272,7 +290,7 @@ public class WQuickForm extends Window implements EventListener<Event>
 		adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "Refresh"), false);
 		quickGridView.isNewLineSaved = true;
 		quickGridView.updateListIndex();
-		Events.echoEvent("onSetFocusToFirstCell", quickGridView, null);
+		Events.echoEvent(QuickGridView.EVENT_ON_SET_FOCUS_TO_FIRST_CELL, quickGridView, null);
 	}
 
 	@Override
@@ -282,7 +300,9 @@ public class WQuickForm extends Window implements EventListener<Event>
 
 		gridTab.setQuickForm(false);
 		onIgnore();
+		gridTab.removeDataStatusListener(this);
 		SessionManager.closeQuickFormTab(gridTab.getAD_Tab_ID());
+		quickGridView.getRenderer().clearMaps();
 		int tabLevel = adWinContent.getToolbar().getQuickFormTabHrchyLevel();
 		if (tabLevel > 0)
 		{
@@ -296,7 +316,7 @@ public class WQuickForm extends Window implements EventListener<Event>
 				adWinContent.onParentRecord();
 				SessionManager.getSessionApplication().getKeylistener().addEventListener(Events.ON_CTRL_KEY, prevQGV);
 				// TODO need to set focus on last focused row of parent Form.
-				Events.echoEvent("onPageNavigate", prevQGV, null);
+				Events.echoEvent(QuickGridView.EVENT_ON_PAGE_NAVIGATE, prevQGV, null);
 			}
 			adWinContent.setCurrQGV(prevQGV);
 		}
@@ -323,5 +343,17 @@ public class WQuickForm extends Window implements EventListener<Event>
 				adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "NewError"), true);
 			}
 		}
+	}
+
+	@Override
+	public void dataStatusChanged(DataStatusEvent e)
+	{
+		// ignore background event
+		if (Executions.getCurrent() == null || e.isInitEdit())
+			return;
+
+		// update Dynamic display on data Status change.
+		int col = e.getChangedColumn();
+		quickGridView.dynamicDisplay(col);
 	}
 }

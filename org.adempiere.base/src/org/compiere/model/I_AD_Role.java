@@ -335,6 +335,19 @@ public interface I_AD_Role
 	  */
 	public boolean isActive();
 
+    /** Column name IsAllowDeleteAttachment */
+    public static final String COLUMNNAME_IsAllowDeleteAttachment = "IsAllowDeleteAttachment";
+
+	/** Set Allow Delete Attachment.
+	  * Allow Delete File In Attachment Dialog 
+	  */
+	public void setIsAllowDeleteAttachment (boolean IsAllowDeleteAttachment);
+
+	/** Get Allow Delete Attachment.
+	  * Allow Delete File In Attachment Dialog 
+	  */
+	public boolean isAllowDeleteAttachment();
+
     /** Column name IsCanApproveOwnDoc */
     public static final String COLUMNNAME_IsCanApproveOwnDoc = "IsCanApproveOwnDoc";
 
