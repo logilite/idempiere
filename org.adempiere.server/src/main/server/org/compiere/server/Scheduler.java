@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Level;
 
 import org.compiere.model.MAttachment;
@@ -42,10 +43,12 @@ import org.compiere.model.MScheduler;
 import org.compiere.model.MSchedulerLog;
 import org.compiere.model.MSchedulerPara;
 import org.compiere.model.MSession;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoUtil;
 import org.compiere.process.ServerProcessCtl;
+import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -82,6 +85,9 @@ public class Scheduler extends AdempiereServer
 	protected StringBuffer 		m_summary = new StringBuffer();
 	/** Transaction					*/
 	protected Trx					m_trx = null;
+	
+	private static CCache<Integer, Integer> sessionCache = new CCache<Integer, Integer>(
+			"AD_Session_ID", 40, 30);
 
 	/**
 	 * 	Work
@@ -113,7 +119,9 @@ public class Scheduler extends AdempiereServer
 		Env.setContext(getCtx(), "#Date", dateFormat4Timestamp.format(ts)+" 00:00:00" );    //  JDBC format
 		
 		//Create new Session and set #AD_Session_ID to context
-		MSession session = MSession.get(getCtx(), true);
+		int AD_Session_ID = getAD_Session_ID(getCtx());
+		Env.setContext(getCtx(), "#AD_Session_ID", AD_Session_ID);
+		
 		MProcess process = new MProcess(getCtx(), m_model.getAD_Process_ID(), null);
 		try
 		{
@@ -132,8 +140,6 @@ public class Scheduler extends AdempiereServer
 		{
 			if (m_trx != null)
 				m_trx.close();
-			
-			session.logout();
 			getCtx().remove("#AD_Session_ID");
 		}
 		
@@ -567,6 +573,47 @@ public class Scheduler extends AdempiereServer
 			}
 		}	//	@variable@
 		return value;
+	}
+	
+	/**
+	 * Creates AD_Session per scheduler record
+	 * @param ctx
+	 * @param AD_Scheduler_ID
+	 * @return AD_Session_ID
+	 */
+	private int getAD_Session_ID(Properties ctx)
+	{
+		int AD_Scheduler_ID = m_model.getAD_Scheduler_ID();
+		
+		// If sessionID is available in cache, use it.
+		if (sessionCache.get(AD_Scheduler_ID) != null && sessionCache.get(AD_Scheduler_ID) > 0)
+		{
+			return sessionCache.get(AD_Scheduler_ID);
+		}
+
+		int AD_Session_ID = 0;
+
+		// Look for session on scheduler record
+		if (m_model.getAD_Session_ID() > 0)
+		{
+			MSession session = (MSession) MTable.get(ctx, MSession.Table_ID).getPO(m_model.getAD_Session_ID(), null);
+			if (!session.isProcessed())
+			{
+				AD_Session_ID = session.getAD_Session_ID();
+			}
+		}
+
+		// If session not found on scheduler, Create new session
+		if (AD_Session_ID == 0)
+		{
+			MSession session = MSession.get(ctx, true);
+			AD_Session_ID = session.getAD_Session_ID();
+
+			m_model.setAD_Session_ID(AD_Session_ID);
+		}
+
+		sessionCache.put(AD_Scheduler_ID, AD_Session_ID);
+		return AD_Session_ID;
 	}
 
 

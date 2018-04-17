@@ -31,7 +31,7 @@ public class X_AD_Scheduler extends PO implements I_AD_Scheduler, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20151030L;
+	private static final long serialVersionUID = 20180413L;
 
     /** Standard Constructor */
     public X_AD_Scheduler (Properties ctx, int AD_Scheduler_ID, String trxName)
@@ -165,6 +165,34 @@ public class X_AD_Scheduler extends PO implements I_AD_Scheduler, I_Persistent
 	public String getAD_Scheduler_UU () 
 	{
 		return (String)get_Value(COLUMNNAME_AD_Scheduler_UU);
+	}
+
+	public org.compiere.model.I_AD_Session getAD_Session() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_Session)MTable.get(getCtx(), org.compiere.model.I_AD_Session.Table_Name)
+			.getPO(getAD_Session_ID(), get_TrxName());	}
+
+	/** Set Session.
+		@param AD_Session_ID 
+		User Session Online or Web
+	  */
+	public void setAD_Session_ID (int AD_Session_ID)
+	{
+		if (AD_Session_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_AD_Session_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_AD_Session_ID, Integer.valueOf(AD_Session_ID));
+	}
+
+	/** Get Session.
+		@return User Session Online or Web
+	  */
+	public int getAD_Session_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Session_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException
