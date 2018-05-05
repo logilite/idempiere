@@ -107,8 +107,7 @@ public class WInOutGen extends InOutGen implements IFormController, EventListene
 
 		Row row = form.getParameterPanel().newRows().newRow();
 		row.appendCellChild(lOrg.rightAlign());
-		fOrg.getComponent().setHflex("true");
-		fOrg.getComponent().setWidth("100%");
+		ZKUpdateUtil.setHflex(fOrg.getComponent(), "true");
 		row.appendCellChild(fOrg.getComponent());
 		row.appendCellChild(lWarehouse.rightAlign());
 		ZKUpdateUtil.setHflex(fWarehouse.getComponent(), "true");
