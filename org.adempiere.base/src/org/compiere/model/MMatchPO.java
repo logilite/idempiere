@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import org.adempiere.exceptions.AdempiereException;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -535,7 +534,7 @@ public class MMatchPO extends X_M_MatchPO
 					BigDecimal qtyMatched = DB.getSQLValueBD(trxName,
 							"SELECT Coalesce(SUM(Qty),0) FROM M_MatchPO WHERE C_InvoiceLine_ID > 0 "
 									+ "and C_OrderLine_ID=?", C_OrderLine_ID);
-					MOrderLine oLine = new MOrderLine(ctx, C_OrderLine_ID, trxName);
+					MOrderLine oLine = (MOrderLine) MTable.get(ctx, MOrderLine.Table_ID).getPO(C_OrderLine_ID, trxName);
 
 					qty = qty.min(oLine.getQtyOrdered().subtract(qtyMatched));
 					

@@ -37,7 +37,6 @@ import org.compiere.model.MMatchInvHdr;
 import org.compiere.model.MMatchPO;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MRole;
-import org.compiere.model.MStorageReservation;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.process.DocAction;
@@ -335,7 +334,8 @@ public class Match
 
 					int CreditMemo_InvLine_ID = entryCRM.getKey();
 
-					MInvoiceLine crmLine = new MInvoiceLine(Env.getCtx(), CreditMemo_InvLine_ID, innerTrxName);
+					MInvoiceLine crmLine = (MInvoiceLine) MTable.get(Env.getCtx(), MInvoiceLine.Table_ID).getPO(
+							CreditMemo_InvLine_ID, innerTrxName);
 					int crmCurrencyID = crmLine.getC_Invoice().getC_Currency_ID();
 					BigDecimal crmPrice = crmLine.getPriceActual();
 
@@ -349,7 +349,8 @@ public class Match
 						}
 						int C_InvoiceLine_ID = entryInv.getKey();
 
-						MInvoiceLine invLine = new MInvoiceLine(Env.getCtx(), C_InvoiceLine_ID, innerTrxName);
+						MInvoiceLine invLine = (MInvoiceLine) MTable.get(Env.getCtx(), MInvoiceLine.Table_ID).getPO(
+								C_InvoiceLine_ID, innerTrxName);
 						int invCurrencyID = invLine.getParent().getC_Currency_ID();
 						BigDecimal invPrice = invLine.getPriceActual();
 
@@ -696,7 +697,7 @@ public class Match
 		if (invoice)	//	Shipment - Invoice
 		{
 			//	Update Invoice Line
-			MInvoiceLine iLine = new MInvoiceLine (Env.getCtx(), Line_ID, trxName);
+			MInvoiceLine iLine = (MInvoiceLine) MTable.get(Env.getCtx(), MInvoiceLine.Table_ID).getPO(Line_ID, trxName);
 			if(M_InOutLine_ID > 0)
 			{
 				iLine.setM_InOutLine_ID(M_InOutLine_ID);
