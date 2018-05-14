@@ -60,6 +60,7 @@ import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.util.ReaderInputStream;
+import org.adempiere.webui.window.FDialog;
 import org.compiere.model.GridTab;
 import org.compiere.model.MImportTemplate;
 import org.compiere.util.DB;
@@ -338,6 +339,9 @@ public class CSVImportAction implements EventListener<Event>
 			media = new AMedia(theCSVImporter.getSuggestedFileName(panel.getActiveGridTab()), null, theCSVImporter.getContentType(), outFile, true);
 			Filedownload.save(media);
 
+			if (media.getName().startsWith("Error"))
+				FDialog.error(panel.getActiveGridTab().getWindowNo(), theCSVImporter.getErrorMessage());
+			
 		} catch (Exception e) {
 			throw new AdempiereException(e);
 		} finally {

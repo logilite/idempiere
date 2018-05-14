@@ -331,6 +331,9 @@ public class FileImportAction implements EventListener<Event>
 			AMedia media = null;
 			media = new AMedia(importer.getSuggestedFileName(panel.getActiveGridTab()), null, importer.getContentType(), outFile, true);
 			Filedownload.save(media);
+			
+			if (media.getName().startsWith("Error"))
+				FDialog.error(panel.getActiveGridTab().getWindowNo(), importer.getErrorMessage());
 
 		} catch (Exception e) {
 			throw new AdempiereException(e);
