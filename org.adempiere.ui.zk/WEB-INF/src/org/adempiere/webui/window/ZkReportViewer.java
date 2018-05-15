@@ -390,6 +390,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 		toolBar.appendChild(bRefresh);
 		bRefresh.addEventListener(Events.ON_CLICK, this);
 
+		bWizard.setName("Wizard");
 		bWizard.setImage(ThemeManager.getThemeResource("images/Wizard24.png"));
 		bWizard.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "PrintWizard")));
 		toolBar.appendChild(bWizard);
