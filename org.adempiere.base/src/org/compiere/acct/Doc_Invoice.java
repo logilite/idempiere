@@ -795,11 +795,11 @@ public class Doc_Invoice extends Doc
 				}
 				BigDecimal amt = line.getAmtSource().multiply(multiplier);
 				BigDecimal amt2 = null;
-				if (creditMemo)
+				/*if (creditMemo)
 				{
 					amt2 = amt;
 					amt = null;
-				}
+				}*/
 				if (payables)	//	Vendor = DR
 					fl = fact.createLine (line, acct,
 						getC_Currency_ID(), amt, amt2);
@@ -815,11 +815,11 @@ public class Doc_Invoice extends Doc
 		{
 			BigDecimal amt = m_taxes[i].getAmount();
 			BigDecimal amt2 = null;
-			if (creditMemo)
+			/*if (creditMemo)
 			{
 				amt2 = amt;
 				amt = null;
-			}
+			}*/
 			FactLine tl = null;
 			if (payables)
 				tl = fact.createLine (null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as),

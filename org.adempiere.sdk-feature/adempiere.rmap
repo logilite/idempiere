@@ -11,6 +11,9 @@
   <rm:locator pattern="^org\.idempiere\.hazelcast\.service$" searchPathRef="workspace.feature" failOnError="false"/>
   <rm:locator pattern="^org\.idempiere\.hazelcast\.service$" searchPathRef="workspace.project"/>
   <rm:locator pattern="^org\.apache\.poi$" searchPathRef="orbit"/>
+  <rm:locator pattern="^org\.apache\.poi\.ooxml$" searchPathRef="orbit"/>
+  <rm:locator pattern="^org\.apache\.poi\.ooxml\.schemas$" searchPathRef="orbit"/>
+  <rm:locator pattern="^org\.dom4j$" searchPathRef="orbit"/>
   <rm:locator pattern="^org\.eclipse\.jdt\.core\.compiler\.batch$" searchPathRef="bundles.maven"/>
   <rm:locator pattern="^org\.apache\.commons\.collections4$" searchPathRef="bundles.maven"/>
   <rm:locator pattern="^org\.apache\.commons\.configuration$" searchPathRef="bundles.maven"/>

@@ -58,7 +58,8 @@ public class DocLine_Allocation extends DocLine
 		//	Get Payment Conversion Rate
 		if (line.getC_Payment_ID() != 0)
 		{
-			MPayment payment = new MPayment (doc.getCtx(), line.getC_Payment_ID(), doc.getTrxName());
+			MPayment payment = (MPayment) MTable.get(doc.getCtx(), MPayment.Table_ID).getPO(line.getC_Payment_ID(),
+					doc.getTrxName());
 			int C_ConversionType_ID = payment.getC_ConversionType_ID();
 			this.setC_ConversionType_ID(C_ConversionType_ID);
 		}

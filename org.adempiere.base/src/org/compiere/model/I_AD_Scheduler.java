@@ -110,6 +110,21 @@ public interface I_AD_Scheduler
 	/** Get AD_Scheduler_UU	  */
 	public String getAD_Scheduler_UU();
 
+    /** Column name AD_Session_ID */
+    public static final String COLUMNNAME_AD_Session_ID = "AD_Session_ID";
+
+	/** Set Session.
+	  * User Session Online or Web
+	  */
+	public void setAD_Session_ID (int AD_Session_ID);
+
+	/** Get Session.
+	  * User Session Online or Web
+	  */
+	public int getAD_Session_ID();
+
+	public org.compiere.model.I_AD_Session getAD_Session() throws RuntimeException;
+
     /** Column name AD_Table_ID */
     public static final String COLUMNNAME_AD_Table_ID = "AD_Table_ID";
 

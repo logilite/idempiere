@@ -95,21 +95,22 @@ public abstract class CreateFromInvoice extends CreateFrom
 		StringBuffer sql = new StringBuffer("SELECT s.M_InOut_ID,").append(display)
 			.append(" FROM M_InOut s "
 			+ "WHERE s.C_BPartner_ID=? AND s.IsSOTrx=? AND s.DocStatus IN ('CL','CO')"
-			+ " AND s.M_InOut_ID IN "
-				+ "(SELECT sl.M_InOut_ID FROM M_InOutLine sl");
+			+ " AND s.M_InOut_ID IN ( ");
+
 			if(!isSOTrx)
-				sql.append(" LEFT OUTER JOIN M_MatchInv mi ON (sl.M_InOutLine_ID=mi.M_InOutLine_ID) "
+				sql.append(" SELECT sl.M_InOut_ID FROM M_InOutLine sl LEFT OUTER JOIN M_MatchInv mi ON (sl.M_InOutLine_ID=mi.M_InOutLine_ID) "
 					+ " JOIN M_InOut s2 ON (sl.M_InOut_ID=s2.M_InOut_ID) "
 					+ " WHERE s2.C_BPartner_ID=? AND s2.IsSOTrx=? AND s2.DocStatus IN ('CL','CO') "
 					+ " GROUP BY sl.M_InOut_ID,sl.MovementQty,mi.M_InOutLine_ID"
 					+ " HAVING (sl.MovementQty<>SUM(mi.Qty) AND mi.M_InOutLine_ID IS NOT NULL)"
 					+ " OR mi.M_InOutLine_ID IS NULL ");
 			else
-				sql.append(" INNER JOIN M_InOut s2 ON (sl.M_InOut_ID=s2.M_InOut_ID)"
+				sql.append(" SELECT M_InOut_ID FROM (SELECT sl.M_InOut_ID, sl.M_InOutLine_ID, sl.MovementQty, SUM(COALESCE(il.QtyInvoiced,0)) AS QtyInvoiced FROM M_InOutLine sl "
+					+ " INNER JOIN M_InOut s2 ON (sl.M_InOut_ID=s2.M_InOut_ID)"
 					+ " LEFT JOIN C_InvoiceLine il ON sl.M_InOutLine_ID = il.M_InOutLine_ID"
 					+ " WHERE s2.C_BPartner_ID=? AND s2.IsSOTrx=? AND s2.DocStatus IN ('CL','CO')"
-					+ " GROUP BY sl.M_InOutLine_ID"
-					+ " HAVING sl.MovementQty - sum(COALESCE(il.QtyInvoiced,0)) > 0");
+					+ " GROUP BY sl.M_InOut_ID, sl.M_InOutLine_ID, sl.MovementQty) InOutData "
+					+ " WHERE MovementQty - QtyInvoiced > 0 ");
 			sql.append(") ORDER BY s.MovementDate");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
