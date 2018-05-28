@@ -133,7 +133,7 @@ public class RequestInvoice extends SvrProcess
 			int oldC_BPartner_ID = 0;
 			while (rs.next ())
 			{
-				MRequest request = new MRequest (getCtx(), rs, get_TrxName());
+				MRequest request = (MRequest) MTable.get(getCtx(), MRequest.Table_ID).getPO(rs, get_TrxName());
 				if (!request.isInvoiced())
 					continue;
 				if (oldC_BPartner_ID != request.getC_BPartner_ID())

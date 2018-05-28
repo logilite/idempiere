@@ -404,7 +404,7 @@ public class WebInfo
 			}
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add (new MRequest (m_ctx, rs, null));
+				list.add((MRequest) MTable.get(m_ctx, MRequest.Table_ID).getPO(rs, null));
 		}
 		catch (Exception e)
 		{
@@ -442,7 +442,7 @@ public class WebInfo
 			pstmt.setInt(3, getC_BPartner_ID());
 			rs = pstmt.executeQuery();
 			if (rs.next())
-				retValue = new MRequest (m_ctx, rs, null);
+				retValue = (MRequest) MTable.get(m_ctx, MRequest.Table_ID).getPO(rs, null);
  		}
 		catch (Exception e)
 		{

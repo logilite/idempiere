@@ -107,33 +107,33 @@ public class MRequest extends X_R_Request
 	}	//	MRequest
 
 	/**
-	 * 	SelfService Constructor
 	 * 	@param ctx context
 	 * 	@param SalesRep_ID SalesRep
 	 * 	@param R_RequestType_ID request type
 	 * 	@param Summary summary
 	 * 	@param isSelfService self service
 	 *	@param trxName transaction
+	 *	@return MRequest
 	 */
-	public MRequest (Properties ctx, int SalesRep_ID,
-		int R_RequestType_ID, String Summary, boolean isSelfService, String trxName)
+	public static MRequest createRequest(Properties ctx, int SalesRep_ID, int R_RequestType_ID, String Summary,
+			boolean isSelfService, String trxName)
 	{
-		this(ctx, 0, trxName);
-		set_Value ("SalesRep_ID", new Integer(SalesRep_ID));	//	could be 0
-		set_Value ("R_RequestType_ID", new Integer(R_RequestType_ID));
-		setSummary (Summary);
-		setIsSelfService(isSelfService);
-		getRequestType();
-		if (m_requestType != null)
+		MRequest request = (MRequest) MTable.get(ctx, MRequest.Table_ID).getPO(0, trxName);
+		request.set_Value("SalesRep_ID", new Integer(SalesRep_ID));
+		request.set_Value("R_RequestType_ID", new Integer(R_RequestType_ID));
+		request.setSummary(Summary);
+		request.setIsSelfService(isSelfService);
+		if (request.getRequestType() != null)
 		{
-			String ct = m_requestType.getConfidentialType();
+			String ct = request.getRequestType().getConfidentialType();
 			if (ct != null)
 			{
-				setConfidentialType (ct);
-				setConfidentialTypeEntry (ct);
+				request.setConfidentialType(ct);
+				request.setConfidentialTypeEntry(ct);
 			}
 		}
-	}	//	MRequest
+		return request;
+	} // MRequest
 
 	/**
 	 * 	Load Constructor
