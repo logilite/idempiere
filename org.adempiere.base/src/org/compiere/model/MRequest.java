@@ -73,9 +73,9 @@ public class MRequest extends X_R_Request
 	/**	Static Logger					*/
 	private static CLogger	s_log	= CLogger.getCLogger (MRequest.class);
 	/** Request Tag Start				*/
-	private static final String		TAG_START = "[Req#";
+	protected static final String		TAG_START = "[Req#";
 	/** Request Tag End					*/
-	private static final String		TAG_END = "#ID]";
+	protected static final String		TAG_END = "#ID]";
 
 	
 	
@@ -147,13 +147,13 @@ public class MRequest extends X_R_Request
 	}	//	MRequest
 
 	/** Request Type				*/
-	private MRequestType	m_requestType = null;
+	protected MRequestType	m_requestType = null;
 	/**	Changed						*/
-	private boolean			m_changed = false;
+	protected boolean			m_changed = false;
 	/**	BPartner					*/
-	private MBPartner		m_partner = null;
+	protected MBPartner		m_partner = null;
 	/** User/Contact				*/
-	private MUser			m_user = null;
+	protected MUser			m_user = null;
 
 	/** Separator line				*/
 	public static final String	SEPARATOR = 
@@ -584,7 +584,7 @@ public class MRequest extends X_R_Request
 	/**
 	 * 	Set Priority
 	 */
-	private void setPriority()
+	public void setPriority()
 	{
 		if (getPriorityUser() == null)
 			setPriorityUser(PRIORITYUSER_Low);
