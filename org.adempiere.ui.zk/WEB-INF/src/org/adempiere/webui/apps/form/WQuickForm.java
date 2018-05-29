@@ -131,6 +131,21 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		bIgnore.addEventListener(Events.ON_CLICK, this);
 		bCustomize.addEventListener(Events.ON_CLICK, this);
 
+		// Add Shortcut Key info in tool-tip
+		bSave.setTooltiptext(bSave.getTooltiptext() + "	(Alt+S)");
+		bIgnore.setTooltiptext(bIgnore.getTooltiptext() + "	(Alt+Z)");
+		bDelete.setTooltiptext(bDelete.getTooltiptext() + "	(Alt+D)");
+		bCustomize.setTooltiptext(bCustomize.getTooltiptext() + "	(Alt+L)");
+		
+		Button bRefresh = confirmPanel.getButton(ConfirmPanel.A_REFRESH);
+		bRefresh.setTooltiptext(bRefresh.getTooltiptext() + "	(Alt+E)");
+		
+		Button bCancle = confirmPanel.getButton(ConfirmPanel.A_CANCEL);
+		bCancle.setTooltiptext(bCancle.getTooltiptext() + "	(Alt+X)");
+		
+		Button bok = confirmPanel.getButton(ConfirmPanel.A_OK);
+		bok.setTooltiptext(bok.getTooltiptext() + " (Alt+K)");
+		
 		confirmPanel.addComponentsLeft(bSave);
 		confirmPanel.addComponentsLeft(bDelete);
 		confirmPanel.addComponentsLeft(bIgnore);
@@ -291,6 +306,9 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		quickGridView.isNewLineSaved = true;
 		quickGridView.updateListIndex();
 		Events.echoEvent(QuickGridView.EVENT_ON_SET_FOCUS_TO_FIRST_CELL, quickGridView, null);
+		// Create new record if no record present.
+		if (gridTab.getRowCount() <= 0)
+			createNewRow();
 	}
 
 	@Override
@@ -331,7 +349,9 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 	private void createNewRow()
 	{
 		int row = gridTab.getRowCount();
-		if (row <= 0)
+		// creating the first record from the parent tab first record is duplicated on KEY DOWN.
+		// If a grid does not have a record or blank record then create a new row.
+		if (row <= 0 || (gridTab.isNew() && row == 1))
 		{
 			gridTab.dataIgnore();
 			if (gridTab.isInsertRecord())

@@ -215,10 +215,10 @@ public class QuickGridTabRowRenderer
 			List<Object> dataList = new ArrayList<Object>();
 			for(GridField gridField : gridPanelFields) {
 				for(int i = 0; i < gridTabFields.length; i++) {
-					gridTabFields[i].setValue(data[i], false);
+					gridTabFields[i].setValue(data[i], !gridPanel.isNewLineSaved);
 					if (gridField.getAD_Field_ID() == gridTabFields[i].getAD_Field_ID()) {
 						// Update value of gridField for Context Parsing.
-						gridField.setValue(data[i], false);
+						gridField.setValue(data[i], !gridPanel.isNewLineSaved);
 						dataList.add(data[i]);
 						break;
 					}
@@ -611,13 +611,10 @@ public class QuickGridTabRowRenderer
 				return;
 			}
 		}
-		if (code == KeyEvent.DOWN || code == KeyEvent.UP || code == QuickGridView.FOCUS_CODE
-				|| code == QuickGridView.NAVIGATE_CODE || code == KeyEvent.HOME)
+		if (isAddRemoveListener(code))
 		{
 			// Remove current row property change listener
-			ArrayList<WEditor> editorsList = editorsListMap.get(getCurrentRow());
-			if (editorsList != null)
-				removeEditorPropertyChangeListener(editorsList);
+			addRemovePropertyChangeListener(false);
 		}
 
 		int pgIndex = row >= 0 ? row % paging.getPageSize() : 0;
@@ -636,13 +633,13 @@ public class QuickGridTabRowRenderer
 		
 		setCurrentRow(currentRow);
 		
-		if (code == KeyEvent.DOWN || code == KeyEvent.UP || code == QuickGridView.FOCUS_CODE
-				|| code == QuickGridView.NAVIGATE_CODE || code == KeyEvent.HOME)
+		if (isAddRemoveListener(code))
 		{
 			// Add property change listener to new current row
 			ArrayList<WEditor> editorsList = editorsListMap.get(getCurrentRow());
 			if (editorsList != null)
 				addEditorPropertyChangeListener(editorsList);
+			gridPanel.dynamicDisplay(0);
 		}
 
 		if (grid.getCell(pgIndex, col) instanceof Cell) {
@@ -658,7 +655,7 @@ public class QuickGridTabRowRenderer
 	 * 
 	 * @param editorsList
 	 */
-	public void addEditorPropertyChangeListener(ArrayList<WEditor> editorsList)
+	private void addEditorPropertyChangeListener(ArrayList<WEditor> editorsList)
 	{
 		GridField[] fields = gridPanel.getFields();
 		for (int i = 0; i < editorsList.size(); i++)
@@ -674,7 +671,7 @@ public class QuickGridTabRowRenderer
 	 * 
 	 * @param editorsList
 	 */
-	public void removeEditorPropertyChangeListener(ArrayList<WEditor> editorsList)
+	private void removeEditorPropertyChangeListener(ArrayList<WEditor> editorsList)
 	{
 		GridField[] fields = gridPanel.getFields();
 		for (int i = 0; i < editorsList.size(); i++)
@@ -683,8 +680,54 @@ public class QuickGridTabRowRenderer
 			editorsList.get(i).removeValuechangeListener(dataBinder);
 		}
 	}
+	
+	/**
+	 * If true add Property Change Listener, a false Remove Property Change Listener
+	 * 
+	 * @param isadd
+	 */
+	public void addRemovePropertyChangeListener(boolean isadd)
+	{
+		ArrayList<WEditor> editorsList = editorsListMap.get(getCurrentRow());
+		if (editorsList != null)
+		{
+			if (isadd)
+			{
+				addEditorPropertyChangeListener(editorsList);
+				gridPanel.dynamicDisplay(0);
+			}
+			else
+			{
+				removeEditorPropertyChangeListener(editorsList);
+			}
+		}
+	} // addRemovePropertyChangeListener
+	
+	/**
+	 * @param code
+	 * @return
+	 */
+	public Boolean isAddRemoveListener(int code)
+	{
+		if (code == KeyEvent.DOWN || code == KeyEvent.UP || code == QuickGridView.FOCUS_CODE
+				|| code == QuickGridView.NAVIGATE_CODE || code == KeyEvent.HOME)
+			return true;
+		return false;
+	} // isAddRemoveListener
+	
+	/**
+	 * @param row
+	 */
+	public void setRowTo(int row)
+	{
+		int pgIndex = row >= 0 ? row % paging.getPageSize() : 0;
+		currentRow = ((Row) grid.getRows().getChildren().get(pgIndex));
+		currentRow.setStyle(QuickGridTabRowRenderer.CURRENT_ROW_STYLE);
+		setCurrentRow(currentRow);
+	}
 
-	private boolean isEditable(int row, int col) {
+	private boolean isEditable(int row, int col)
+	{
 		Cell cell = null;
 
 		if (col > getCurrentRow().getChildren().size())
@@ -699,7 +742,7 @@ public class QuickGridTabRowRenderer
 			return true;
 		if (cell.getChildren().size() <= 0)
 			return false;
-		//get component of cell 
+		// get component of cell
 		Component component = cell.getChildren().get(0);
 		if (component instanceof NumberBox && (!((NumberBox) component).getDecimalbox().isDisabled()
 				&& !((NumberBox) component).getDecimalbox().isReadonly()
@@ -708,14 +751,14 @@ public class QuickGridTabRowRenderer
 		else if (component instanceof Checkbox
 				&& (((Checkbox) component).isEnabled() && ((Checkbox) component).isVisible()))
 			return true;
-		else if (component instanceof Combobox
-				&& (((Combobox) component).isEnabled() && ((Combobox) component).isVisible()))
+		else if (component instanceof Combobox && (!((Combobox) component).isReadonly()
+				&& ((Combobox) component).isEnabled() && ((Combobox) component).isVisible()))
 			return true;
 		else if (component instanceof Textbox && (!((Textbox) component).isDisabled()
 				&& !((Textbox) component).isReadonly() && ((Textbox) component).isVisible()))
 			return true;
-		else if (component instanceof Datebox
-				&& (((Datebox) component).isEnabled() && ((Datebox) component).isVisible()))
+		else if (component instanceof Datebox && (!((Datebox) component).isReadonly()
+				&& ((Datebox) component).isEnabled() && ((Datebox) component).isVisible()))
 			return true;
 		else if (component instanceof DatetimeBox
 				&& (((DatetimeBox) component).isEnabled() && ((DatetimeBox) component).isVisible()))
@@ -729,26 +772,27 @@ public class QuickGridTabRowRenderer
 			return true;
 		else if (component instanceof Button && (((Button) component).isEnabled() && ((Button) component).isVisible()))
 			return true;
-		else if (component instanceof Combinationbox
-				&& (((Combinationbox) component).isEnabled() && ((Combinationbox) component).isVisible()))
+		else if (component instanceof Combinationbox && (!((Combinationbox) component).getTextbox().isReadonly()
+				&& ((Combinationbox) component).isEnabled() && ((Combinationbox) component).isVisible()))
 			return true;
-		else if (component instanceof EditorBox
-				&& (((EditorBox) component).isEnabled() && ((EditorBox) component).isVisible()))
+		else if (component instanceof EditorBox && (!((EditorBox) component).getTextbox().isReadonly()
+				&& ((EditorBox) component).isEnabled() && ((EditorBox) component).isVisible()))
 			return true;
 		else if (component instanceof Urlbox && (((Urlbox) component).isEnabled() && ((Urlbox) component).isVisible()))
 			return true;
-		else if (component instanceof FilenameBox
-				&& (((FilenameBox) component).isEnabled() && ((FilenameBox) component).isVisible()))
+		else if (component instanceof FilenameBox && (!((FilenameBox) component).getTextbox().isReadonly()
+				&& ((FilenameBox) component).isEnabled() && ((FilenameBox) component).isVisible()))
 			return true;
-		else if (component instanceof Timebox && ((Timebox) component).isVisible())
+		else if (component instanceof Timebox && !((Timebox) component).isReadonly()
+				&& ((Timebox) component).isVisible())
 			return true;
 		else if (component instanceof Paymentbox
 				&& (((Paymentbox) component).isEnabled() && ((Paymentbox) component).isVisible()))
 			return true;
-		else if (component instanceof PAttributebox
+		else if (component instanceof PAttributebox && !((PAttributebox) component).getTextbox().isReadonly()
 				&& (((PAttributebox) component).isEnabled() && ((PAttributebox) component).isVisible()))
 			return true;
-		else if (component instanceof MultiSelectBox
+		else if (component instanceof MultiSelectBox && !((MultiSelectBox) component).getTextbox().isReadonly()
 				&& (((MultiSelectBox) component).isEnabled() && ((MultiSelectBox) component).isVisible()))
 			return true;
 		else

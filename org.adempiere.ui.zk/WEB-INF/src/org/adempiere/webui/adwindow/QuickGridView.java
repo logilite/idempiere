@@ -435,7 +435,9 @@ public class QuickGridView extends Vbox
 			if (paging.getActivePage() != pgNo) {
 				paging.setActivePage(pgNo);
 			}
-			if (rowIndex >= 0 && pgIndex >= 0 && isNewLineSaved) {
+			// Fire event for first record.
+			if (rowIndex >= 0 && pgIndex >= 0 && isNewLineSaved || rowIndex == 0 && pgIndex == 0 && !isNewLineSaved)
+			{
 				echoOnPostSelectedRowChanged();
 			}
 		} else {
@@ -525,6 +527,7 @@ public class QuickGridView extends Vbox
 				int colindex =tableModel.findColumn(gridFields[i].getColumnName()); 
 				column.setSortAscending(new SortComparator(colindex, true, Env.getLanguage(Env.getCtx())));
 				column.setSortDescending(new SortComparator(colindex, false, Env.getLanguage(Env.getCtx())));
+				column.addEventListener(Events.ON_SORT, this);
 				//IDEMPIERE-2898 - UX: Field only showing title at header on grid
 				if( gridFields[i].isFieldOnly() )
 					column.setLabel("");
@@ -802,6 +805,21 @@ public class QuickGridView extends Vbox
 						event.stopPropagation();
 						return;
 					}
+					else
+					{
+						// If a row is removed after filtering, update the rowIndex.
+						if (totalRow != gridTab.getRowCount())
+						{
+							if (code == KeyEvent.DOWN)
+							{
+								row -= 1;
+								totalRow = gridTab.getRowCount();
+								gridTab.setCurrentRow((row >= 0 ? row % paging.getPageSize() : 0)
+										+ paging.getActivePage() * paging.getPageSize());
+								renderer.currentRowIndex = gridTab.getCurrentRow();
+							}
+						}
+					}
 				}
 			}
 			if (code == KeyEvent.DOWN && !isCtrl && !isAlt && !isShift)
@@ -855,7 +873,8 @@ public class QuickGridView extends Vbox
 			{
 				// remove new record if blank
 				int currentRow = gridTab.getCurrentRow();
-				if ((totalRow - 1) == currentRow && !isNewLineSaved)
+				// Ignore all blank record except first blank record.
+				if (totalRow > 1 && (totalRow - 1) == currentRow && !isNewLineSaved)
 				{
 					gridTab.dataIgnore();
 					gridTab.setCurrentRow(currentRow);
@@ -874,8 +893,9 @@ public class QuickGridView extends Vbox
 					return;
 				}
 
+				// check is new record is ignore
 				// update page index after remove new record
-				if (!isNewLineSaved)
+				if (currentRow != gridTab.getCurrentRow() && !isNewLineSaved)
 				{
 					updateListIndex();
 					isNewLineSaved = true;
@@ -1003,7 +1023,7 @@ public class QuickGridView extends Vbox
 					// remove all pop-up dialog list box
 					String script = "$('.z-combobox-open').remove()";
 					Clients.response(new AuScript(script));
-					
+
 					int rowChangedIndex = gridTab.getTableModel().getRowChanged();
 					if (rowChangedIndex == row)
 					{
@@ -1035,8 +1055,35 @@ public class QuickGridView extends Vbox
 
 			renderer.setCurrentCell(row, 1, NAVIGATE_CODE);
 
-			Row currntRow = renderer.getCurrentRow();
-			currntRow.setStyle(QuickGridTabRowRenderer.CURRENT_ROW_STYLE);
+			// on sort current index remain same but rows get sorted so set current index row as current row.
+			// remove property change listener to new current row
+			renderer.addRemovePropertyChangeListener(false);
+			// set focus to row.
+			renderer.setRowTo(row);
+			// Add property change listener to new current row
+			renderer.addRemovePropertyChangeListener(true);
+		}
+		else if (Events.ON_SORT.equals(event.getName()))
+		{
+			int row = renderer.getCurrentRowIndex();
+			int col = renderer.getCurrentRow().getChildren().indexOf(renderer.getCurrentCell());
+			int rowChangedIndex = gridTab.getTableModel().getRowChanged();
+			if (rowChangedIndex == row)
+			{
+				if (!save(KeyEvent.RIGHT, row, col))
+				{
+					event.stopPropagation();
+					return;
+				}
+			}
+			else if (gridTab.getRowCount() <= 1 && !isNewLineSaved)
+			{
+				event.stopPropagation();
+				setStatusLine("NO record to Sort", false);
+				return;
+			}
+			Events.echoEvent(EVENT_ON_PAGE_NAVIGATE, this, null);
+			return;
 		}
 		event.stopPropagation();
 	}
