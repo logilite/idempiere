@@ -703,7 +703,7 @@ public class ReportStarter implements ProcessCall, ClientProcess
 	                } else {
 	                    if (log.isLoggable(Level.INFO)) log.info( "ReportStarter.startProcess run report -"+jasperPrint.getName());
 	                    JRViewerProvider viewerLauncher = Service.locator().locate(JRViewerProvider.class).getService();
-	                    viewerLauncher.openViewer(jasperPrint, pi.getTitle());
+	                    viewerLauncher.openViewer(jasperPrint, pi.getTitle(), pi);
 	                }
                 }
                 else

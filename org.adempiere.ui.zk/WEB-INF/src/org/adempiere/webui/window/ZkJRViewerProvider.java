@@ -8,16 +8,17 @@ import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.part.WindowContainer;
 import org.adempiere.webui.session.SessionManager;
+import org.compiere.process.ProcessInfo;
 
 public class ZkJRViewerProvider implements JRViewerProvider {
 
-	public void openViewer(final JasperPrint jasperPrint, final String title)
+	public void openViewer(final JasperPrint jasperPrint, final String title, final ProcessInfo proccessInfo)
 			throws JRException {
 		Runnable runnable = new Runnable() {
 			
 			@Override
 			public void run() {
-				Window viewer = new ZkJRViewer(jasperPrint, title);
+				Window viewer = new ZkJRViewer(jasperPrint, title, proccessInfo);
 				
 				viewer.setAttribute(Window.MODE_KEY, Window.MODE_EMBEDDED);
 				viewer.setAttribute(Window.INSERT_POSITION_KEY, Window.INSERT_NEXT);

@@ -18,6 +18,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 
 import org.compiere.db.CConnection;
+import org.compiere.process.ProcessInfo;
 
 
 public class JasperViewer extends javax.swing.JFrame {
@@ -25,6 +26,7 @@ public class JasperViewer extends javax.swing.JFrame {
 	private static final long serialVersionUID = 1192807883081180999L;
 	
 	private String m_title;
+	private ProcessInfo m_processInfo;
 	
     /** Creates new form JasperViewer */
     /**
@@ -32,11 +34,12 @@ public class JasperViewer extends javax.swing.JFrame {
      * @param frameTitle Title to be displayed
      * @throws JRException
      */
-    protected JasperViewer(JasperPrint jasperPrint,String frameTitle) throws JRException {
+    protected JasperViewer(JasperPrint jasperPrint,String frameTitle, ProcessInfo pi) throws JRException {
         this.m_title = frameTitle;
     	initComponents();
         JasperReportViewer viewer = new JasperReportViewer(this, jasperPrint);
         this.pnlMain.add(viewer, BorderLayout.CENTER);
+        m_processInfo=pi;
     }
 
 
@@ -85,12 +88,12 @@ public class JasperViewer extends javax.swing.JFrame {
     /**
      *
      */
-    public static void viewReport(JasperPrint jasperPrint) throws JRException {
-        JasperViewer jasperViewer = new JasperViewer(jasperPrint,"JasperReport");
+    public static void viewReport(JasperPrint jasperPrint, ProcessInfo pi) throws JRException {
+        JasperViewer jasperViewer = new JasperViewer(jasperPrint,"JasperReport", pi);
         jasperViewer.setVisible(true);
     }
-    public static void viewReport(JasperPrint jasperPrint,String frameTitle) throws JRException {
-        JasperViewer jasperViewer = new JasperViewer(jasperPrint,frameTitle);
+    public static void viewReport(JasperPrint jasperPrint,String frameTitle, ProcessInfo pi) throws JRException {
+        JasperViewer jasperViewer = new JasperViewer(jasperPrint,frameTitle, pi);
         jasperViewer.setVisible(true);
     }
 
@@ -105,7 +108,7 @@ public class JasperViewer extends javax.swing.JFrame {
         try {
         	JasperReport myjasperReport = (JasperReport) JasperCompileManager.compileReport(args[0] );
         	JasperPrint myjasperPrint = JasperFillManager.fillReport( myjasperReport, new HashMap<String,Object>(), getConnection());
-            JasperViewer.viewReport(myjasperPrint);
+            JasperViewer.viewReport(myjasperPrint, null);
            } 
         catch (Exception e) {
             e.printStackTrace();

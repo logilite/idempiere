@@ -1,6 +1,8 @@
 package org.adempiere.webui.window;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -57,6 +59,8 @@ import org.zkoss.zul.North;
 import org.zkoss.zul.Separator;
 import org.zkoss.zul.Tab;
 import org.zkoss.zul.Toolbar;
+import org.compiere.model.MArchive;
+import org.compiere.process.ProcessInfo;
 
 public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCloseHandler {
 	/**
@@ -80,17 +84,21 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 	private KeyEvent prevKeyEvent;
 
 	private String m_title; // local title - embedded windows clear the title
+	protected ToolBarButton		bArchive			= new ToolBarButton();
+	private ProcessInfo			m_processInfo;
 	
-	public ZkJRViewer(JasperPrint jasperPrint, String title) {
+	public ZkJRViewer(JasperPrint jasperPrint, String title, ProcessInfo pi)
+	{
 		super();
 		this.setTitle(title);
 		m_title = title;
 		this.jasperPrint = jasperPrint;
 		m_WindowNo = SessionManager.getAppDesktop().registerWindow(this);
 		setAttribute(IDesktop.WINDOWNO_ATTRIBUTE, m_WindowNo);
+		m_processInfo = pi;
 		init();
 	}
-
+	
 	@Override
 	public void onPageAttached(Page newpage, Page oldpage) {
 		super.onPageAttached(newpage, oldpage);
@@ -171,6 +179,13 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 		bSendMail.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "SendMail")));
 		toolbar.appendChild(bSendMail);
 		bSendMail.addEventListener(Events.ON_CLICK, this);
+		
+		toolbar.appendChild(new Separator("vertical"));
+		bArchive.setName("Archive");
+		bArchive.setImage(ThemeManager.getThemeResource("images/Archive24.png"));
+		bArchive.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Archive")));
+		toolbar.appendChild(bArchive);
+		bArchive.addEventListener(Events.ON_CLICK, this);
 
 		North north = new North();
 		layout.appendChild(north);
@@ -220,6 +235,10 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 			cmd_render();
 		else if (e.getTarget() == bSendMail)  // Added by Martin Augustine - Ntier software services 09/10/2013
 			cmd_sendMail();
+		
+		else if (e.getTarget() == bArchive)
+			cmd_archive();
+		
 	}	//	actionPerformed
 
 	private void cmd_render() {
@@ -423,6 +442,66 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 			jasperPrint = null;
 			m_WindowNo = -1;
 		}
+	}
+  	
+	/**
+	 * Create archive for jasper report
+	 */
+	protected void cmd_archive()
+	{
+		boolean success = false;
+		try
+		{
+			byte[] data = getFileByteData(getPDF());
+			if (data != null && m_processInfo != null)
+			{
+				MArchive archive = new MArchive(Env.getCtx(), 0, null);
+				archive.setAD_Table_ID(m_processInfo.getTable_ID());
+				archive.setRecord_ID(m_processInfo.getRecord_ID());
+				archive.setBinaryData(data);
+				archive.setName(m_title);
+				success = archive.save();
+			}
+			if (success)
+				FDialog.info(m_WindowNo, this, "Archived");
+			else
+				FDialog.error(m_WindowNo, this, "ArchiveError");
+		}
+		catch (IOException e)
+		{
+			log.log(Level.SEVERE, "Exception while reading file " + e);
+		}
+		catch (JRException e)
+		{
+			log.log(Level.SEVERE, "Error loading object from InputStream" + e);
+		}
+
+	} // cmd_archive
+	
+	/** 
+	 * convert File data into Byte Data
+	 * @param tempFile
+	 * @return file in ByteData 
+	 */
+	private byte[] getFileByteData(File tempFile)
+	{
+		byte fileContent[] = new byte[(int) tempFile.length()];
+
+		try
+		{
+			FileInputStream fis = new FileInputStream(tempFile);
+			fis.read(fileContent);
+			fis.close();
+		}
+		catch (FileNotFoundException e)
+		{
+			log.log(Level.SEVERE, "File not found  " + e);
+		}
+		catch (IOException ioe)
+		{
+			log.log(Level.SEVERE, "Exception while reading file " + ioe);
+		}
+		return fileContent;
 	}
 
 }
