@@ -709,7 +709,7 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 				}
 				else if (BTN_QUICK_FORM_ID.equals(btn.getId()))
 				{
-					btn.setDisabled(!adtab.isEnableQuickFormButton());
+					btn.setDisabled(!(adtab.isEnableQuickFormButton() && !adtab.getGridTab().isReadOnly()));
 				}
         		if (windowRestrictList.contains(btn.getId())) {
         			btn.setVisible(false);
