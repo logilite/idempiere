@@ -18,15 +18,14 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 
 import org.compiere.db.CConnection;
-import org.compiere.process.ProcessInfo;
-
+import org.compiere.model.PrintInfo;
 
 public class JasperViewer extends javax.swing.JFrame {
 
 	private static final long serialVersionUID = 1192807883081180999L;
 	
 	private String m_title;
-	private ProcessInfo m_processInfo;
+	private  PrintInfo m_printInfo;
 	
     /** Creates new form JasperViewer */
     /**
@@ -34,12 +33,12 @@ public class JasperViewer extends javax.swing.JFrame {
      * @param frameTitle Title to be displayed
      * @throws JRException
      */
-    protected JasperViewer(JasperPrint jasperPrint,String frameTitle, ProcessInfo pi) throws JRException {
+    protected JasperViewer(JasperPrint jasperPrint,String frameTitle, PrintInfo printInfo) throws JRException {
         this.m_title = frameTitle;
     	initComponents();
         JasperReportViewer viewer = new JasperReportViewer(this, jasperPrint);
         this.pnlMain.add(viewer, BorderLayout.CENTER);
-        m_processInfo=pi;
+		m_printInfo = printInfo;
     }
 
 
@@ -88,12 +87,12 @@ public class JasperViewer extends javax.swing.JFrame {
     /**
      *
      */
-    public static void viewReport(JasperPrint jasperPrint, ProcessInfo pi) throws JRException {
-        JasperViewer jasperViewer = new JasperViewer(jasperPrint,"JasperReport", pi);
+    public static void viewReport(JasperPrint jasperPrint, PrintInfo printInfo) throws JRException {
+        JasperViewer jasperViewer = new JasperViewer(jasperPrint,"JasperReport", printInfo);
         jasperViewer.setVisible(true);
     }
-    public static void viewReport(JasperPrint jasperPrint,String frameTitle, ProcessInfo pi) throws JRException {
-        JasperViewer jasperViewer = new JasperViewer(jasperPrint,frameTitle, pi);
+    public static void viewReport(JasperPrint jasperPrint,String frameTitle, PrintInfo printInfo) throws JRException {
+        JasperViewer jasperViewer = new JasperViewer(jasperPrint,frameTitle, printInfo);
         jasperViewer.setVisible(true);
     }
 

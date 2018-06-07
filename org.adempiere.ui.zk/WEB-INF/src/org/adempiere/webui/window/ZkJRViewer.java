@@ -38,6 +38,7 @@ import org.adempiere.webui.theme.ThemeManager;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
+import org.compiere.model.PrintInfo;
 import org.compiere.tools.FileUtil;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
@@ -60,7 +61,6 @@ import org.zkoss.zul.Separator;
 import org.zkoss.zul.Tab;
 import org.zkoss.zul.Toolbar;
 import org.compiere.model.MArchive;
-import org.compiere.process.ProcessInfo;
 
 public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCloseHandler {
 	/**
@@ -85,9 +85,9 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 
 	private String m_title; // local title - embedded windows clear the title
 	protected ToolBarButton		bArchive			= new ToolBarButton();
-	private ProcessInfo			m_processInfo;
+	private PrintInfo			m_printInfo;
 	
-	public ZkJRViewer(JasperPrint jasperPrint, String title, ProcessInfo pi)
+	public ZkJRViewer(JasperPrint jasperPrint, String title, PrintInfo printInfo)
 	{
 		super();
 		this.setTitle(title);
@@ -95,7 +95,7 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 		this.jasperPrint = jasperPrint;
 		m_WindowNo = SessionManager.getAppDesktop().registerWindow(this);
 		setAttribute(IDesktop.WINDOWNO_ATTRIBUTE, m_WindowNo);
-		m_processInfo = pi;
+		m_printInfo = printInfo;
 		init();
 	}
 	
@@ -453,13 +453,10 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 		try
 		{
 			byte[] data = getFileByteData(getPDF());
-			if (data != null && m_processInfo != null)
+			if (data != null && m_printInfo != null)
 			{
-				MArchive archive = new MArchive(Env.getCtx(), 0, null);
-				archive.setAD_Table_ID(m_processInfo.getTable_ID());
-				archive.setRecord_ID(m_processInfo.getRecord_ID());
+				MArchive archive = new MArchive(Env.getCtx(), m_printInfo, null);
 				archive.setBinaryData(data);
-				archive.setName(m_title);
 				success = archive.save();
 			}
 			if (success)
