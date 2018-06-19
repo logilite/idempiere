@@ -40,6 +40,7 @@ import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MRequest;
 import org.compiere.model.MRole;
+import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -314,7 +315,7 @@ public class RequestWindow extends Window implements EventListener<Event> {
 			calEnd.set(Calendar.SECOND, 0);
 			calEnd.set(Calendar.MILLISECOND, 0);
 			
-			MRequest request = new MRequest(Env.getCtx(), 0, null);
+			MRequest request = (MRequest) MTable.get(Env.getCtx(), MRequest.Table_ID).getPO(0, null);
 			request.setAD_Org_ID(Env.getAD_Org_ID(Env.getCtx()));
 			request.setDueType((String) dueTypeField.getValue());
 			request.setR_RequestType_ID((Integer) requestTypeField.getValue());

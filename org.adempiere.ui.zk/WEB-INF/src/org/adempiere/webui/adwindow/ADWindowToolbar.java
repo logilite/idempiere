@@ -607,7 +607,15 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 			{
 				quickFormTabHrchyLevel = quickFormTabHrchyLevel + 1;
 				fireButtonClickEvent(keyEvent, btnDetailRecord);
-				fireButtonClickEvent(keyEvent, btnQuickForm);
+				if (!btnQuickForm.isDisabled() && btnQuickForm.isVisible())
+				{
+					fireButtonClickEvent(keyEvent, btnQuickForm);
+				}
+				else if (!btnParentRecord.isDisabled() && btnParentRecord.isVisible())
+				{
+					fireButtonClickEvent(keyEvent, btnParentRecord);
+					quickFormTabHrchyLevel = quickFormTabHrchyLevel - 1;
+				}
 				return;
 			}
 			else

@@ -45,6 +45,7 @@ import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MRequest;
 import org.compiere.model.MRole;
+import org.compiere.model.MTable;
 import org.compiere.util.ByteArrayDataSource;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
@@ -303,7 +304,7 @@ public class FeedbackRequestWindow extends Window implements EventListener<Event
 	}
 
 	protected MRequest createMRequest(Trx trx) {
-		MRequest request = new MRequest(Env.getCtx(), 0, trx.getTrxName());
+		MRequest request = (MRequest) MTable.get(Env.getCtx(), MRequest.Table_ID).getPO(0, trx.getTrxName());
 		request.setAD_Org_ID(Env.getAD_Org_ID(Env.getCtx()));
 		request.setR_RequestType_ID((Integer) requestTypeField.getValue());
 		request.setPriority((String) priorityField.getValue());

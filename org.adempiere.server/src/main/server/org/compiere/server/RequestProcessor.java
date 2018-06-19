@@ -32,6 +32,7 @@ import org.compiere.model.MRequestProcessor;
 import org.compiere.model.MRequestProcessorLog;
 import org.compiere.model.MRequestProcessorRoute;
 import org.compiere.model.MStatus;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.util.DB;
 import org.compiere.util.Msg;
@@ -114,7 +115,7 @@ public class RequestProcessor extends AdempiereServer
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
-				MRequest request = new MRequest (getCtx(), rs, null);
+				MRequest request = (MRequest) MTable.get(getCtx(), MRequest.Table_ID).getPO(rs, null);
 				request.setDueType();
 				if (request.isDue())
 				{
@@ -169,7 +170,7 @@ public class RequestProcessor extends AdempiereServer
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
-				MRequest request = new MRequest (getCtx(), rs, null);
+				MRequest request = (MRequest) MTable.get(getCtx(), MRequest.Table_ID).getPO(rs, null);
 				request.setDueType();
 				if (request.isOverdue())
 				{
@@ -229,7 +230,7 @@ public class RequestProcessor extends AdempiereServer
 				rs = pstmt.executeQuery();
 				while (rs.next())
 				{
-					MRequest request = new MRequest (getCtx(), rs, null);
+					MRequest request = (MRequest) MTable.get(getCtx(), MRequest.Table_ID).getPO(rs, null);
 					request.setDueType();
 					if (request.getRequestType().isEMailWhenOverdue()
 						&& (request.getDateLastAlert() == null
@@ -285,7 +286,7 @@ public class RequestProcessor extends AdempiereServer
 				rs = pstmt.executeQuery();
 				while (rs.next())
 				{
-					MRequest request = new MRequest (getCtx(), rs, null);
+					MRequest request = (MRequest) MTable.get(getCtx(), MRequest.Table_ID).getPO(rs, null);
 					if (escalate(request))
 						count++;
 				}
@@ -330,7 +331,7 @@ public class RequestProcessor extends AdempiereServer
 				rs = pstmt.executeQuery();
 				while (rs.next())
 				{
-					MRequest request = new MRequest (getCtx(), rs, null);
+					MRequest request = (MRequest) MTable.get(getCtx(), MRequest.Table_ID).getPO(rs, null);
 					request.setDueType();
 					if (request.getDateLastAlert() == null
 						|| !TimeUtil.isSameDay(request.getDateLastAlert(), null))
@@ -445,7 +446,7 @@ public class RequestProcessor extends AdempiereServer
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
-				MRequest r = new MRequest(getCtx(), rs, null);
+				MRequest r = (MRequest) MTable.get(getCtx(), MRequest.Table_ID).getPO(rs, null);
 				//	Get/Check Status
 				if (status == null || status.getR_Status_ID() != r.getR_Status_ID())
 					status = MStatus.get(getCtx(), r.getR_Status_ID());
@@ -507,7 +508,7 @@ public class RequestProcessor extends AdempiereServer
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
-				MRequest r = new MRequest (getCtx(), rs, null);
+				MRequest r = (MRequest) MTable.get(getCtx(), MRequest.Table_ID).getPO(rs, null);
 				MGroup rg = MGroup.get(getCtx(), r.getR_Group_ID());
 				MChangeRequest ecr = new MChangeRequest (r, rg);
 				if (r.save())
@@ -575,7 +576,7 @@ public class RequestProcessor extends AdempiereServer
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{
-				MRequest request = new MRequest (ctx, rs, null);
+				MRequest request = (MRequest) MTable.get(ctx, MRequest.Table_ID).getPO(rs, null);
 				if (request.getSalesRep_ID() != 0)
 					continue;
 				int SalesRep_ID = findSalesRep(request);

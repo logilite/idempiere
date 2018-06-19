@@ -617,6 +617,8 @@ public class Doc_AllocationHdr extends Doc
 		Doc_Invoice docInvoice = (Doc_Invoice)Doc.get(as,
 			MInvoice.Table_ID, invoice.getC_Invoice_ID(), getTrxName());
 		docInvoice.loadDocumentDetails();
+		docInvoice.setDateDoc(getDateDoc());
+		docInvoice.setDateAcct(getDateAcct());
 		allocationAccounted = docInvoice.createFactCash(as, fact, BigDecimal.valueOf(percent));
 		if (log.isLoggable(Level.CONFIG)) log.config("Allocation Accounted=" + allocationAccounted);
 
