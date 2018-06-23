@@ -182,6 +182,11 @@ public final class FactLine extends X_Fact_Acct
 					if (m_doc == null)
 						throw new IllegalArgumentException("Document not set yet");
 					ID1 = m_doc.getValue(ColumnName1);
+					
+					if (ID1 == 0 && m_docLine != null)
+						ID1 = m_docLine.getValue("UserElement1_ID");
+					if (ID1 == 0 && m_doc != null)
+						ID1 = m_doc.getValue("UserElement1_ID");
 				}
 				if (ID1 != 0)
 					setUserElement1_ID(ID1);
@@ -202,6 +207,11 @@ public final class FactLine extends X_Fact_Acct
 					if (m_doc == null)
 						throw new IllegalArgumentException("Document not set yet");
 					ID2 = m_doc.getValue(ColumnName2);
+					
+					if (ID2 == 0 && m_docLine != null)
+						ID2 = m_docLine.getValue("UserElement2_ID");
+					if (ID2 == 0 && m_doc != null)
+						ID2 = m_doc.getValue("UserElement2_ID");
 				}
 				if (ID2 != 0)
 					setUserElement2_ID(ID2);
@@ -468,6 +478,23 @@ public final class FactLine extends X_Fact_Acct
 	{
 		return m_docLine;
 	}	//	getDocLine
+	
+	
+	/**
+	 * get Document Header
+	 * @return Doc
+	 */
+	public Doc getM_doc() {
+		return m_doc;
+	}
+	
+	/**
+	 * set Document Header
+	 * @param m_doc
+	 */
+	public void setM_doc(Doc m_doc) {
+		this.m_doc = m_doc;
+	}
 	
 	/**
 	 * 	Set Description
@@ -995,7 +1022,7 @@ public final class FactLine extends X_Fact_Acct
 	 *  @param UserElement2_ID user element 2
 	 *  @return Account_ID for Unearned Revenue or Revenue Account if not found
 	 */
-	private int createRevenueRecognition (
+	public int createRevenueRecognition (
 		int C_RevenueRecognition_ID, int C_InvoiceLine_ID,
 		int AD_Client_ID, int AD_Org_ID, int AD_User_ID, 
 		int Account_ID, int C_SubAcct_ID,
@@ -1004,7 +1031,7 @@ public final class FactLine extends X_Fact_Acct
 		int	C_Campaign_ID, int C_Activity_ID, 
 		int User1_ID, int User2_ID, int UserElement1_ID, int UserElement2_ID)
 	{
-		if (log.isLoggable(Level.FINE)) log.fine("From Accout_ID=" + Account_ID);
+		if (log.isLoggable(Level.FINE)) log.fine("From Account_ID=" + Account_ID);
 		//  get VC for P_Revenue (from Product)
 		MAccount revenue = MAccount.get(getCtx(),
 			AD_Client_ID, AD_Org_ID, getC_AcctSchema_ID(), Account_ID, C_SubAcct_ID,
@@ -1019,12 +1046,20 @@ public final class FactLine extends X_Fact_Acct
 			log.severe ("Revenue_Acct not found");
 			return Account_ID;
 		}
+		
+		int unearnedAcctFromPlan = DB.getSQLValue(get_TrxName(),
+				"SELECT vc.Account_ID FROM C_RevenueRecognition_Plan rp "
+						+ " JOIN C_ValidCombination vc ON rp.UnearnedRevenue_Acct=vc.C_ValidCombination_ID "
+						+ " WHERE rp.C_InvoiceLine_ID = ? AND rp.C_AcctSchema_ID = ? ", C_InvoiceLine_ID,
+				getC_AcctSchema_ID());
+		if (unearnedAcctFromPlan > 0)
+			return unearnedAcctFromPlan;
+
 		int P_Revenue_Acct = revenue.get_ID();
 
 		//  get Unearned Revenue Acct from BPartner Group
-		int UnearnedRevenue_Acct = 0;
 		int new_Account_ID = 0;
-		String sql = "SELECT ga.UnearnedRevenue_Acct, vc.Account_ID "
+		String sql = "SELECT vc.Account_ID "
 				+ "FROM C_BP_Group_Acct ga, C_BPartner p, C_ValidCombination vc "
 				+ "WHERE ga.C_BP_Group_ID=p.C_BP_Group_ID"
 				+ " AND ga.UnearnedRevenue_Acct=vc.C_ValidCombination_ID"
@@ -1039,8 +1074,7 @@ public final class FactLine extends X_Fact_Acct
 			rs = pstmt.executeQuery();
 			if (rs.next())
 			{
-				UnearnedRevenue_Acct = rs.getInt(1);
-				new_Account_ID = rs.getInt(2);
+				new_Account_ID = rs.getInt(1);
 			}
 		}
 		catch (SQLException e)
@@ -1057,11 +1091,17 @@ public final class FactLine extends X_Fact_Acct
 			return Account_ID;
 		}
 
-		MRevenueRecognitionPlan plan = new MRevenueRecognitionPlan(getCtx(), 0, null);
+		MAccount unearned = MAccount.get(getCtx(), AD_Client_ID, AD_Org_ID, getC_AcctSchema_ID(), new_Account_ID,
+				C_SubAcct_ID, M_Product_ID, C_BPartner_ID, AD_OrgTrx_ID, C_LocFrom_ID, C_LocTo_ID, C_SRegion_ID,
+				C_Project_ID, C_Campaign_ID, C_Activity_ID, User1_ID, User2_ID, UserElement1_ID, UserElement2_ID,
+				get_TrxName());
+
+		MRevenueRecognitionPlan plan = new MRevenueRecognitionPlan(getCtx(), 0, get_TrxName());
+		plan.setAD_Org_ID(AD_Org_ID);
 		plan.setC_RevenueRecognition_ID (C_RevenueRecognition_ID);
 		plan.setC_AcctSchema_ID (getC_AcctSchema_ID());
 		plan.setC_InvoiceLine_ID (C_InvoiceLine_ID);
-		plan.setUnEarnedRevenue_Acct (UnearnedRevenue_Acct);
+		plan.setUnEarnedRevenue_Acct (unearned.getC_ValidCombination_ID());
 		plan.setP_Revenue_Acct (P_Revenue_Acct);
 		plan.setC_Currency_ID (getC_Currency_ID());
 		plan.setTotalAmt (getAcctBalance());
@@ -1070,8 +1110,8 @@ public final class FactLine extends X_Fact_Acct
 			log.severe ("Plan NOT created");
 			return Account_ID;
 		}
-		if (log.isLoggable(Level.FINE)) log.fine("From Acctount_ID=" + Account_ID + " to " + new_Account_ID
-			+ " - Plan from UnearnedRevenue_Acct=" + UnearnedRevenue_Acct + " to Revenue_Acct=" + P_Revenue_Acct);
+		if (log.isLoggable(Level.FINE)) log.fine("From Account_ID=" + Account_ID + " to " + new_Account_ID
+			+ " - Plan from UnearnedRevenue_Acct=" + unearned.getC_ValidCombination_ID() + " to Revenue_Acct=" + P_Revenue_Acct);
 		return new_Account_ID;
 	}   //  createRevenueRecognition
 

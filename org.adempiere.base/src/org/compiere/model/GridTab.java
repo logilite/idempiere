@@ -210,6 +210,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 
 	//Contains currently selected rows
 	private ArrayList<Integer> selection = null;
+	public boolean isQuickForm = false;
 	
 	// Context property names:
 	public static final String CTX_KeyColumnName = "_TabInfo_KeyColumnName";
@@ -224,6 +225,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	public static final String CTX_FindSQL = "_TabInfo_FindSQL";
 	public static final String CTX_SQL = "_TabInfo_SQL";
 	public static final String CTX_IsSortTab = "_TabInfo_IsSortTab";
+	public static final String CTX_Record_ID = "_TabInfo_Record_ID";
 
 	//private HashMap<Integer,Integer>	m_PostIts = null;
 
@@ -582,6 +584,10 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		m_mTable.addDataStatusListener(this);
 	//	m_mTable.addTableModelListener(this);
 	}   //  enableEvents
+	
+	public String getTabType(){
+		return m_vo.AD_TabType;
+	}
 
 	/**
 	 *	Assemble whereClause and query MTable and position to row 0.
@@ -1001,7 +1007,8 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 			if (hasChangedCurrentTabAndParents())
 				return false;
 
-			boolean retValue = (m_mTable.dataSave(manualCmd) == GridTable.SAVE_OK);
+			boolean retValue = false;
+			retValue = (m_mTable.dataSave(manualCmd) == GridTable.SAVE_OK);
 			if (manualCmd)
 			{
 				setCurrentRow(m_currentRow, false);
@@ -3339,6 +3346,14 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	public void clearSelection()
 	{
 		selection.clear();
+	}
+
+	public boolean isQuickForm() {
+		return isQuickForm;
+	}
+
+	public void setQuickForm(boolean isQuickForm) {
+		this.isQuickForm = isQuickForm;
 	}
 
 	public GridWindow getGridWindow()

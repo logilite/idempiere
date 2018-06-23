@@ -62,11 +62,11 @@ import org.zkoss.zk.ui.event.Events;
 
 public class WLocatorEditor extends WEditor implements EventListener<Event>, PropertyChangeListener, ContextMenuListener, IZoomableEditor
 {
-	private static final String[] LISTENER_EVENTS = {Events.ON_CLICK};
+	public static final String[] LISTENER_EVENTS = {Events.ON_CLICK};
     
-	private MLocatorLookup m_mLocator;
-	private Object m_value;
-	private int m_WindowNo;
+	protected MLocatorLookup m_mLocator;
+	protected Object m_value;
+	protected int m_WindowNo;
 	
 	private static CLogger log = CLogger.getCLogger(WLocatorEditor.class);
 	/**
@@ -135,7 +135,7 @@ public class WLocatorEditor extends WEditor implements EventListener<Event>, Pro
 	 *	@param fire data binding
 	 */
 	
-	private void setValue (Object value, boolean fire)
+	public void setValue (Object value, boolean fire)
 	{
 		if(m_mLocator==null)
 		{
@@ -337,7 +337,7 @@ public class WLocatorEditor extends WEditor implements EventListener<Event>, Pro
 	 * 	@return true if found
 	 */
 	
-	private boolean actionText(int only_Warehouse_ID, int only_Product_ID)
+	public boolean actionText(int only_Warehouse_ID, int only_Product_ID)
 	{
 		String text = getComponent().getText();
 		log.fine(text);
@@ -438,7 +438,7 @@ public class WLocatorEditor extends WEditor implements EventListener<Event>, Pro
 	 *	@return	M_Warehouse_ID or 0
 	 */
 	
-	private int getOnly_Warehouse_ID()
+	public int getOnly_Warehouse_ID()
 	{
 		String only_Warehouse = Env.getContext(Env.getCtx(), m_WindowNo, "M_Warehouse_ID", true);
 		int only_Warehouse_ID = 0;
@@ -460,7 +460,7 @@ public class WLocatorEditor extends WEditor implements EventListener<Event>, Pro
 	 *	@return	M_Product_ID or 0
 	 */
 	
-	private int getOnly_Product_ID()
+	public int getOnly_Product_ID()
 	{
 		if (!Env.isSOTrx(Env.getCtx(), m_WindowNo))
 			return 0; // No product restrictions for PO
@@ -486,7 +486,7 @@ public class WLocatorEditor extends WEditor implements EventListener<Event>, Pro
 	 * @since 3.1.4
 	 */
 	
-	private void setDefault_Locator_ID()
+	public void setDefault_Locator_ID()
 	{
 		// teo_sarca, FR [ 1661546 ] Mandatory locator fields should use defaults
 		
@@ -542,6 +542,36 @@ public class WLocatorEditor extends WEditor implements EventListener<Event>, Pro
 	public void setTableEditor(boolean b) {
 		super.setTableEditor(b);
 		getComponent().setTableEditorMode(b);
+	}
+
+	public MLocatorLookup getM_mLocator()
+	{
+		return m_mLocator;
+	}
+
+	public void setM_mLocator(MLocatorLookup m_mLocator)
+	{
+		this.m_mLocator = m_mLocator;
+	}
+
+	public Object getM_value()
+	{
+		return m_value;
+	}
+
+	public void setM_value(Object m_value)
+	{
+		this.m_value = m_value;
+	}
+
+	public int getM_WindowNo()
+	{
+		return m_WindowNo;
+	}
+
+	public void setM_WindowNo(int m_WindowNo)
+	{
+		this.m_WindowNo = m_WindowNo;
 	}
     
     

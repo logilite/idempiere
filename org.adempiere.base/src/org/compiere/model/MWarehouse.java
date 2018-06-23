@@ -109,7 +109,7 @@ public class MWarehouse extends X_M_Warehouse
 	}	//	get
 	
 	/**	Cache					*/
-	private static CCache<Integer,MWarehouse> s_cache = new CCache<Integer,MWarehouse>(Table_Name, 50 );	
+	protected static CCache<Integer,MWarehouse> s_cache = new CCache<Integer,MWarehouse>(Table_Name, 50 );	
 	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
@@ -154,7 +154,7 @@ public class MWarehouse extends X_M_Warehouse
 	}	//	MWarehouse
 
 	/**	Warehouse Locators				*/
-	private MLocator[]	m_locators = null;
+	protected MLocator[]	m_locators = null;
 	
 	/**
 	 * 	Get Locators

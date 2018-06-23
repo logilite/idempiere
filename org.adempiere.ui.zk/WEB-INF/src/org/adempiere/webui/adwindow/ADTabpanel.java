@@ -81,6 +81,7 @@ import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.model.X_AD_FieldGroup;
 import org.compiere.model.X_AD_ToolBarButton;
+import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -210,6 +211,8 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
 	public static final String ON_TOGGLE_EVENT = "onToggle";
 
 	private static final String DEFAULT_PANEL_WIDTH = "300px";
+	private static CCache<Integer, Boolean> quickFormCache = new CCache<Integer, Boolean>(null, "QuickForm", 20, false);
+
 
 	private static enum SouthEvent {
     	SLIDE(),
@@ -1952,5 +1955,44 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
 		editorTraverse(editorTaverseCallback, editors);
 		
 	}
+	
+	@Override
+	public boolean isEnableCustomizeButton()
+	{
+		return isGridView();
+	}
 
+	@Override
+	public boolean isEnableProcessButton()
+	{
+		return getToolbarButtons().size() > 0 && !gridTab.isNew();
+	}
+
+
+
+	@Override
+	public boolean isEnableQuickFormButton()
+	{
+		boolean hasQuickForm = false;
+		int tabID = getGridTab().getAD_Tab_ID();
+		
+		if (quickFormCache.containsKey(tabID))
+		{
+			hasQuickForm = quickFormCache.get(tabID);
+		}
+		else if (getGridTab() != null)
+		{
+			for (GridField field : getGridTab().getFields())
+			{
+				if (field.isQuickForm())
+				{
+					hasQuickForm = true;
+					break;
+				}
+			}
+			quickFormCache.put(tabID, hasQuickForm);
+		}
+		
+		return hasQuickForm;
+	}
 }

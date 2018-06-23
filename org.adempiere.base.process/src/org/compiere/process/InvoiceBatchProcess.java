@@ -103,7 +103,7 @@ public class InvoiceBatchProcess extends SvrProcess
 			//	New Invoice
 			if (m_invoice == null)
 			{
-				m_invoice = new MInvoice (batch, line);
+				m_invoice = MInvoice.createFrom(batch, line);
 				if (!m_invoice.save())
 					throw new AdempiereUserError("Cannot save Invoice");
 				//
@@ -119,7 +119,7 @@ public class InvoiceBatchProcess extends SvrProcess
 			}
 			
 			//	Add Line
-			MInvoiceLine invoiceLine = new MInvoiceLine (m_invoice);
+			MInvoiceLine invoiceLine = MInvoiceLine.createFrom(m_invoice);
 			invoiceLine.setDescription(line.getDescription());
 			invoiceLine.setC_Charge_ID(line.getC_Charge_ID());
 			invoiceLine.setQty(line.getQtyEntered());	// Entered/Invoiced

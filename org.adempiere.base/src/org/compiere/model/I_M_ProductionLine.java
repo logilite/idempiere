@@ -292,6 +292,19 @@ public interface I_M_ProductionLine
 	  */
 	public BigDecimal getQtyAvailable();
 
+    /** Column name QtyReserved */
+    public static final String COLUMNNAME_QtyReserved = "QtyReserved";
+
+	/** Set Reserved Quantity.
+	  * Reserved Quantity
+	  */
+	public void setQtyReserved (BigDecimal QtyReserved);
+
+	/** Get Reserved Quantity.
+	  * Reserved Quantity
+	  */
+	public BigDecimal getQtyReserved();
+
     /** Column name QtyUsed */
     public static final String COLUMNNAME_QtyUsed = "QtyUsed";
 

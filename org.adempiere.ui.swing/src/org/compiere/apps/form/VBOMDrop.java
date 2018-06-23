@@ -46,6 +46,7 @@ import org.compiere.model.MProduct;
 import org.compiere.model.MProject;
 import org.compiere.model.MProjectLine;
 import org.compiere.model.MRole;
+import org.compiere.model.MTable;
 import org.compiere.swing.CComboBox;
 import org.compiere.swing.CLabel;
 import org.compiere.swing.CPanel;
@@ -624,7 +625,7 @@ public class VBOMDrop extends CPanel
 	private boolean cmd_saveOrder (int C_Order_ID)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_Order_ID=" + C_Order_ID);
-		MOrder order = new MOrder (Env.getCtx(), C_Order_ID, null);
+		MOrder order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(C_Order_ID, null);
 		if (order.get_ID() == 0)
 		{
 			log.log(Level.SEVERE, "Not found - C_Order_ID=" + C_Order_ID);
@@ -640,7 +641,7 @@ public class VBOMDrop extends CPanel
 				BigDecimal qty = (BigDecimal)((VNumber)m_qtyList.get(i)).getValue();
 				int M_Product_ID = ((Integer)m_productList.get(i)).intValue();
 				//	Create Line
-				MOrderLine ol = new MOrderLine (order);
+				MOrderLine ol = MOrderLine.createFrom(order);
 				ol.setM_Product_ID(M_Product_ID, true);
 				ol.setQty(qty);
 				ol.setPrice();
@@ -664,7 +665,7 @@ public class VBOMDrop extends CPanel
 	private boolean cmd_saveInvoice (int C_Invoice_ID)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_Invoice_ID=" + C_Invoice_ID);
-		MInvoice invoice = new MInvoice (Env.getCtx(), C_Invoice_ID, null);
+		MInvoice invoice = (MInvoice) MTable.get(Env.getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, null);
 		if (invoice.get_ID() == 0)
 		{
 			log.log(Level.SEVERE, "Not found - C_Invoice_ID=" + C_Invoice_ID);
@@ -680,7 +681,7 @@ public class VBOMDrop extends CPanel
 				BigDecimal qty = (BigDecimal)((VNumber)m_qtyList.get(i)).getValue();
 				int M_Product_ID = ((Integer)m_productList.get(i)).intValue();
 				//	Create Line
-				MInvoiceLine il = new MInvoiceLine (invoice);
+				MInvoiceLine il = MInvoiceLine.createFrom(invoice);
 				il.setM_Product_ID(M_Product_ID, true);
 				il.setQty(qty);
 				il.setPrice();
@@ -704,7 +705,7 @@ public class VBOMDrop extends CPanel
 	private boolean cmd_saveProject (int C_Project_ID)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_Project_ID=" + C_Project_ID);
-		MProject project = new MProject (Env.getCtx(), C_Project_ID, null);
+		MProject project = (MProject) MTable.get(Env.getCtx(), MProject.Table_ID).getPO(C_Project_ID, null);
 		if (project.get_ID() == 0)
 		{
 			log.log(Level.SEVERE, "Not found - C_Project_ID=" + C_Project_ID);

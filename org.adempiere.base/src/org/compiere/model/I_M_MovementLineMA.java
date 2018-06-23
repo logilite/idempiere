@@ -18,6 +18,7 @@ package org.compiere.model;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+
 import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for M_MovementLineMA
@@ -90,6 +91,19 @@ public interface I_M_MovementLineMA
 	  * Time used for LIFO and FIFO Material Policy
 	  */
 	public Timestamp getDateMaterialPolicy();
+	
+	/** Column name DateMaterialPolicyTo */
+    public static final String COLUMNNAME_DateMaterialPolicyTo = "DateMaterialPolicyTo";
+
+	/** Set Date  Material Policy To.
+	  * Time used for LIFO and FIFO Material Policy
+	  */
+	public void setDateMaterialPolicyTo (Timestamp DateMaterialPolicyTo);
+
+	/** Get Date  Material Policy To.
+	  * Time used for LIFO and FIFO Material Policy
+	  */
+	public Timestamp getDateMaterialPolicyTo();
 
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
@@ -127,6 +141,21 @@ public interface I_M_MovementLineMA
 	public int getM_AttributeSetInstance_ID();
 
 	public I_M_AttributeSetInstance getM_AttributeSetInstance() throws RuntimeException;
+	
+	 /** Column name M_AttributeSetInstanceTo_ID */
+    public static final String COLUMNNAME_M_AttributeSetInstanceTo_ID = "M_AttributeSetInstanceTo_ID";
+
+	/** Set Attribute Set Instance To.
+	  * Target Product Attribute Set Instance
+	  */
+	public void setM_AttributeSetInstanceTo_ID (int M_AttributeSetInstanceTo_ID);
+
+	/** Get Attribute Set Instance To.
+	  * Target Product Attribute Set Instance
+	  */
+	public int getM_AttributeSetInstanceTo_ID();
+
+	public I_M_AttributeSetInstance getM_AttributeSetInstanceTo() throws RuntimeException;
 
     /** Column name M_MovementLine_ID */
     public static final String COLUMNNAME_M_MovementLine_ID = "M_MovementLine_ID";

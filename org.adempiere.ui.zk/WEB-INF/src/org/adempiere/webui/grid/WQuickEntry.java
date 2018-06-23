@@ -74,7 +74,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	private static CLogger log = CLogger.getCLogger(WQuickEntry.class);
 
 	protected int m_WindowNo;
-	private int parent_WindowNo;
+	protected int parent_WindowNo;
 
 	List<GridField> quickFields = new ArrayList<GridField>();
 	protected List<WEditor> quickEditors = new ArrayList<WEditor>();
@@ -83,15 +83,15 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	List<PO> quickPOs = new ArrayList<PO>();
 
 	/** Read Only				*/
-	private boolean m_readOnly = false;
+	protected boolean m_readOnly = false;
 
 	protected Vlayout centerPanel = new Vlayout();
 
-	private ConfirmPanel confirmPanel = new ConfirmPanel(true, false, false, false, false, false);
+	protected ConfirmPanel confirmPanel = new ConfirmPanel(true, false, false, false, false, false);
 
 	protected int m_AD_Window_ID;
 	
-	private boolean isHasField = false;
+	protected boolean isHasField = false;
 
 	private String orientation;
 	/**
@@ -100,6 +100,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	 * 	@param WindowNo	Window No
 	 * 	@param AD_Window_ID
 	 */
+	
 
 	public WQuickEntry(int WindowNo, int AD_Window_ID)
 	{
@@ -140,7 +141,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	 * 	@throws Exception
 	 */
 
-	private void jbInit() throws Exception
+	protected void jbInit() throws Exception
 	{
 		if (!ThemeManager.isUseCSSForWindowSize()) {
 			ZKUpdateUtil.setWindowWidthX(this, 350);
@@ -228,7 +229,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 		}
 	}	//	initPOs
 
-	private boolean isValidQuickEntryType(int refID) {
+	protected boolean isValidQuickEntryType(int refID) {
 		boolean valid =
 			! (
 				 refID == DisplayType.Button
@@ -238,7 +239,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 		return valid;
 	}
 
-	private void createLine(WEditor editor, boolean newTab, GridTab gt) {
+	protected void createLine(WEditor editor, boolean newTab, GridTab gt) {
 		if (newTab) {
 			Separator sep = new Separator();
 			centerPanel.appendChild(sep);

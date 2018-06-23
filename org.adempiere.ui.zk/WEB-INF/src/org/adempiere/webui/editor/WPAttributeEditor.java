@@ -44,22 +44,22 @@ import org.zkoss.zk.ui.event.Events;
  */
 public class WPAttributeEditor extends WEditor implements ContextMenuListener
 {
-	private static final String[] LISTENER_EVENTS = {Events.ON_CLICK, Events.ON_CHANGE, Events.ON_OK};
+	public static String[]			LISTENER_EVENTS	= { Events.ON_CLICK, Events.ON_CHANGE, Events.ON_OK };
 
-	private static final CLogger log = CLogger.getCLogger(WPAttributeEditor.class);
+	private static final CLogger	log				= CLogger.getCLogger(WPAttributeEditor.class);
 
-	private int m_WindowNo;
+	protected int					m_WindowNo;
 
-	private Lookup m_mPAttribute;
+	protected Lookup				m_mPAttribute;
 
-	private int m_C_BPartner_ID;
+	protected int					m_C_BPartner_ID;
 
-	private Object m_value;
+	protected Object				m_value;
 
-	private GridTab m_GridTab;
+	protected GridTab				m_GridTab;
 
-	/**	No Instance Key					*/
-	private static Integer		NO_INSTANCE = new Integer(0);
+	/** No Instance Key */
+	public static Integer			NO_INSTANCE		= new Integer(0);
 
 	public WPAttributeEditor(GridTab gridTab, GridField gridField)
 	{
@@ -68,7 +68,7 @@ public class WPAttributeEditor extends WEditor implements ContextMenuListener
 		initComponents();
 	}
 
-	private void initComponents() {
+	public void initComponents() {
 		getComponent().setButtonImage(ThemeManager.getThemeResource("images/PAttribute16.png"));
 		// getComponent().addEventListener(Events.ON_CLICK, this); // IDEMPIERE-426 - dup listener, already set at WEditor
 
@@ -150,7 +150,7 @@ public class WPAttributeEditor extends WEditor implements ContextMenuListener
 	/**
 	 *  Start dialog
 	 */
-	private void cmd_dialog()
+	public void cmd_dialog()
 	{
 		//
 		Integer oldValue = (Integer)getValue ();
@@ -263,7 +263,7 @@ public class WPAttributeEditor extends WEditor implements ContextMenuListener
 		**/		
 	}   //  cmd_file
 
-	private void processChanges(int oldValueInt, int M_AttributeSetInstance_ID) {
+	public void processChanges(int oldValueInt, int M_AttributeSetInstance_ID) {
 		if (log.isLoggable(Level.FINEST)) log.finest("Changed M_AttributeSetInstance_ID=" + M_AttributeSetInstance_ID);
 		m_value = new Object();				//	force re-query display
 		if (M_AttributeSetInstance_ID == 0)
@@ -318,5 +318,55 @@ public class WPAttributeEditor extends WEditor implements ContextMenuListener
 	public void setTableEditor(boolean b) {
 		super.setTableEditor(b);
 		getComponent().setTableEditorMode(b);
+	}
+
+	public int getM_WindowNo()
+	{
+		return m_WindowNo;
+	}
+
+	public void setM_WindowNo(int m_WindowNo)
+	{
+		this.m_WindowNo = m_WindowNo;
+	}
+
+	public Lookup getM_mPAttribute()
+	{
+		return m_mPAttribute;
+	}
+
+	public void setM_mPAttribute(Lookup m_mPAttribute)
+	{
+		this.m_mPAttribute = m_mPAttribute;
+	}
+
+	public int getM_C_BPartner_ID()
+	{
+		return m_C_BPartner_ID;
+	}
+
+	public void setM_C_BPartner_ID(int m_C_BPartner_ID)
+	{
+		this.m_C_BPartner_ID = m_C_BPartner_ID;
+	}
+
+	public Object getM_value()
+	{
+		return m_value;
+	}
+
+	public void setM_value(Object m_value)
+	{
+		this.m_value = m_value;
+	}
+
+	public GridTab getM_GridTab()
+	{
+		return m_GridTab;
+	}
+
+	public void setM_GridTab(GridTab m_GridTab)
+	{
+		this.m_GridTab = m_GridTab;
 	}
 }

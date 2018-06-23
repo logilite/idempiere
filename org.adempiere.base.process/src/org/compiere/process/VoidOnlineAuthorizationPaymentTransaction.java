@@ -4,6 +4,7 @@ import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MPaymentTransaction;
+import org.compiere.model.MTable;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -26,7 +27,7 @@ public class VoidOnlineAuthorizationPaymentTransaction extends SvrProcess {
 	{
 		if (log.isLoggable(Level.INFO)) log.info("Record_ID=" + getRecord_ID());
 		//	get Payment
-		MPaymentTransaction pt = new MPaymentTransaction (getCtx(), getRecord_ID(), get_TrxName());
+		MPaymentTransaction pt=(MPaymentTransaction) MTable.get(getCtx(), MPaymentTransaction.Table_ID).getPO(getRecord_ID(),get_TrxName());
 		
 		if (!pt.getTenderType().equals(MPaymentTransaction.TENDERTYPE_CreditCard) || !pt.isOnline() || !pt.getTrxType().equals(MPaymentTransaction.TRXTYPE_Authorization))
 			throw new AdempiereException(Msg.getMsg(Env.getCtx(), "ActionNotSupported"));

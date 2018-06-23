@@ -29,6 +29,7 @@ import org.compiere.model.MDunningRunEntry;
 import org.compiere.model.MDunningRunLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 
@@ -458,7 +459,7 @@ public class DunningRunCreate extends SvrProcess
 		try {
 			entry = m_run.getEntry (C_BPartner_ID, p_C_Currency_ID, p_SalesRep_ID, c_DunningLevel_ID);
 		} catch (BPartnerNoAddressException e) {
-			MPayment payment = new MPayment(getCtx(), C_Payment_ID, null);
+			MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(C_Payment_ID,null);
 			
 			StringBuilder msg = new StringBuilder("@Skip@ @C_Payment_ID@ ");
 				msg.append(payment.getDocumentInfo().toString());

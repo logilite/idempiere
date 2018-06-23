@@ -61,7 +61,7 @@ public class DocLine
 	/** Persistent Object		*/
 	protected PO				p_po = null;
 	/** Parent					*/
-	private Doc					m_doc = null;
+	protected Doc					m_doc = null;
 	/**	 Log					*/
 	protected CLogger			log = CLogger.getCLogger(getClass());
 
@@ -74,7 +74,7 @@ public class DocLine
 	/** Credit Journal Amt		*/
 	private BigDecimal      	m_AmtSourceCr = Env.ZERO;
 	/** Net Line Amt            */
-	private BigDecimal			m_LineNetAmt = null;
+	protected BigDecimal			m_LineNetAmt = null;
 	/** List Amount             */
 	private BigDecimal			m_ListAmt = Env.ZERO;
 	/** Discount Amount         */
@@ -115,6 +115,11 @@ public class DocLine
 	private int					m_C_ConversionType_ID = -1;
 	/** Period						*/
 	private int					m_C_Period_ID = -1;
+	/**ASI To 					*/
+	protected int 				m_AttributeSetInstanceTo_ID = 0;
+	/** ASI							*/
+	private int	m_AttributeSetInstance_ID = 0;
+
 
 	/**
 	 *  Get Currency
@@ -442,7 +447,7 @@ public class DocLine
 	 * 	Get Charge
 	 * 	@return C_Charge_ID
 	 */
-	protected int getC_Charge_ID()
+	public int getC_Charge_ID()
 	{
 		int index = p_po.get_ColumnIndex("C_Charge_ID");
 		if (index != -1)
@@ -578,21 +583,65 @@ public class DocLine
 	}	//	isItem
 
 	/**
-	 *  ASI
-	 *  @return M_AttributeSetInstance_ID
+	 * ASI
+	 * 
+	 * @return M_AttributeSetInstance_ID
 	 */
 	public int getM_AttributeSetInstance_ID()
 	{
-		int index = p_po.get_ColumnIndex("M_AttributeSetInstance_ID");
-		if (index != -1)
+		if (m_AttributeSetInstance_ID != 0)
 		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
+			return m_AttributeSetInstance_ID;
 		}
-		return 0;
-	}   //  getM_AttributeSetInstance_ID
+		else
+		{
 
+			int index = p_po.get_ColumnIndex("M_AttributeSetInstance_ID");
+			if (index != -1)
+			{
+				Integer ii = (Integer) p_po.get_Value(index);
+				if (ii != null)
+					return ii.intValue();
+			}
+			return 0;
+		}
+	}   //  getM_AttributeSetInstance_ID
+	
+	public void setM_AttributeSetInstance_ID(int m_AttributeSetInstance_ID)
+	{
+		this.m_AttributeSetInstance_ID = m_AttributeSetInstance_ID;
+	}
+
+
+	
+	/**
+	 * @return ASI To
+	 */
+	public int getM_AttributeSetInstanceTo_ID() {
+		if (m_AttributeSetInstanceTo_ID != 0)
+		{
+			return m_AttributeSetInstanceTo_ID;
+		}
+		else
+		{
+
+			int index = p_po.get_ColumnIndex("M_AttributeSetInstanceTo_ID");
+			if (index != -1)
+			{
+				Integer ii = (Integer) p_po.get_Value(index);
+				if (ii != null)
+					return ii.intValue();
+			}
+			return 0;
+		}
+	}
+
+	/**
+	 * @param m_AttributeSetInstanceTo_ID
+	 */
+	public void setM_AttributeSetInstanceTo_ID(int m_AttributeSetInstanceTo_ID) {
+		this.m_AttributeSetInstanceTo_ID = m_AttributeSetInstanceTo_ID;
+	}
 	/**
 	 *  Get Warehouse Locator (from)
 	 *  @return M_Locator_ID

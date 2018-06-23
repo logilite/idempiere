@@ -26,6 +26,7 @@ import org.compiere.model.MProject;
 import org.compiere.model.MProjectIssue;
 import org.compiere.model.MProjectLine;
 import org.compiere.model.MStorageOnHand;
+import org.compiere.model.MTable;
 import org.compiere.model.MTimeExpense;
 import org.compiere.model.MTimeExpenseLine;
 import org.compiere.util.Env;
@@ -110,7 +111,8 @@ public class ProjectIssue extends SvrProcess
 	protected String doIt() throws Exception
 	{
 		//	Check Parameter
-		m_project = new MProject (getCtx(), m_C_Project_ID, get_TrxName());
+		m_project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(m_C_Project_ID, get_TrxName());
+
 		if (!(MProject.PROJECTCATEGORY_WorkOrderJob.equals(m_project.getProjectCategory())
 			|| MProject.PROJECTCATEGORY_AssetProject.equals(m_project.getProjectCategory())))
 			throw new IllegalArgumentException("Project not Work Order or Asset =" + m_project.getProjectCategory());
@@ -133,7 +135,7 @@ public class ProjectIssue extends SvrProcess
 	 */
 	private String issueReceipt()
 	{
-		MInOut inOut = new MInOut (getCtx(), m_M_InOut_ID, null);
+		MInOut inOut = (MInOut) MTable.get(getCtx(), MInOut.Table_ID).getPO(m_M_InOut_ID, null);
 		if (inOut.isSOTrx() || !inOut.isProcessed()
 			|| !(MInOut.DOCSTATUS_Completed.equals(inOut.getDocStatus()) || MInOut.DOCSTATUS_Closed.equals(inOut.getDocStatus())))
 			throw new IllegalArgumentException ("Receipt not valid - " + inOut);

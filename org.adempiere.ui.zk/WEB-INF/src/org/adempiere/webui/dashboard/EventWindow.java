@@ -60,7 +60,7 @@ public class EventWindow extends Window implements EventListener<Event> {
 		super();
 		
 		Properties ctx = Env.getCtx();
-		setTitle(Msg.getMsg(ctx,"Event"));
+		setTitle(Msg.getMsg(ctx,"NewRequest"));
 		setAttribute(Window.MODE_KEY, Window.MODE_POPUP);
 		ZKUpdateUtil.setWidth(this, "400px");
 		ZKUpdateUtil.setHeight(this, "310px");
@@ -69,8 +69,8 @@ public class EventWindow extends Window implements EventListener<Event> {
 		
 		Label lblHeaderColor  = new Label(Msg.getElement(ctx,MRequestType.COLUMNNAME_HeaderColor));
 		Label lblContentColor = new Label(Msg.getElement(ctx,MRequestType.COLUMNNAME_ContentColor));
-		Label lblBeginDate    = new Label(Msg.getElement(ctx,"StartDate"));
-		Label lblEndDate      = new Label(Msg.getElement(ctx,"EndDate"));
+		Label lblBeginDate    = new Label(Msg.getElement(ctx, MRequest.COLUMNNAME_DateStartPlan));
+		Label lblEndDate      = new Label(Msg.getElement(ctx, MRequest.COLUMNNAME_DateCompletePlan));
 		Label lblContent      = new Label(Msg.getElement(ctx,MRequest.COLUMNNAME_Summary));
 
 		dtBeginDate = new DatetimeBox();
@@ -155,6 +155,9 @@ public class EventWindow extends Window implements EventListener<Event> {
 		txtHeaderColor.setStyle("background-color: " + event.getHeaderColor());
 		txtContentColor.setStyle("background-color: " + event.getContentColor());
 		
+		dtBeginDate.getTimebox().setFormat(DPCalendar.getTimeFormat());
+		dtEndDate.getTimebox().setFormat(DPCalendar.getTimeFormat());
+
 		dtBeginDate.setValue(event.getBeginDate());
 		dtEndDate.setValue(event.getEndDate());
 		txtContent.setText(event.getContent());

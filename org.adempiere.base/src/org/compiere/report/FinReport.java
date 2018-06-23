@@ -52,59 +52,59 @@ import org.compiere.util.TimeUtil;
 public class FinReport extends SvrProcess
 {
 	/**	Period Parameter				*/
-	private int					p_C_Period_ID = 0;
+	protected int					p_C_Period_ID = 0;
 	/**	Org Parameter					*/
-	private int					p_Org_ID = 0;
+	protected int					p_Org_ID = 0;
 	/**	BPartner Parameter				*/
-	private int					p_C_BPartner_ID = 0;
+	protected int					p_C_BPartner_ID = 0;
 	/**	Product Parameter				*/
-	private int					p_M_Product_ID = 0;
+	protected int					p_M_Product_ID = 0;
 	/**	Project Parameter				*/
-	private int					p_C_Project_ID = 0;
+	protected int					p_C_Project_ID = 0;
 	/**	Activity Parameter				*/
-	private int					p_C_Activity_ID = 0;
+	protected int					p_C_Activity_ID = 0;
 	/**	SalesRegion Parameter			*/
-	private int					p_C_SalesRegion_ID = 0;
+	protected int					p_C_SalesRegion_ID = 0;
 	/**	Campaign Parameter				*/
-	private int					p_C_Campaign_ID = 0;
+	protected int					p_C_Campaign_ID = 0;
 	/** User 1 Parameter				*/
-	private int					p_User1_ID = 0;
+	protected int					p_User1_ID = 0;
 	/** User 2 Parameter				*/
-	private int					p_User2_ID = 0;
+	protected int					p_User2_ID = 0;
 	/** User Element 1 Parameter		*/
-	private int					p_UserElement1_ID = 0;
+	protected int					p_UserElement1_ID = 0;
 	/** User Element 2 Parameter		*/
-	private int					p_UserElement2_ID = 0;
+	protected int					p_UserElement2_ID = 0;
 	/** Details before Lines			*/
-	private boolean				p_DetailsSourceFirst = false;
+	protected boolean				p_DetailsSourceFirst = false;
 	/** Hierarchy						*/
-	private int					p_PA_Hierarchy_ID = 0;
+	protected int					p_PA_Hierarchy_ID = 0;
 	/** Optional report cube			*/
-	private int 				p_PA_ReportCube_ID = 0;
+	protected int 				p_PA_ReportCube_ID = 0;
 	/** Exclude Adjustment Period		*/
-	private String				p_AdjPeriodToExclude = "";
+	protected String				p_AdjPeriodToExclude = "";
 
 	/**	Start Time						*/
-	private long 				m_start = System.currentTimeMillis();
+	protected long 				m_start = System.currentTimeMillis();
 
 	/**	Report Definition				*/
-	private MReport				m_report = null;
+	protected MReport				m_report = null;
 	/**	Periods in Calendar				*/
-	private FinReportPeriod[]	m_periods = null;
+	protected FinReportPeriod[]	m_periods = null;
 	/**	Index of m_C_Period_ID in m_periods		**/
-	private int					m_reportPeriod = -1;
+	protected int					m_reportPeriod = -1;
 	/**	Parameter Where Clause			*/
-	private StringBuffer		m_parameterWhere = new StringBuffer();
+	protected StringBuffer		m_parameterWhere = new StringBuffer();
 	/**	The Report Columns				*/
-	private MReportColumn[] 	m_columns;
+	protected MReportColumn[] 	m_columns;
 	/** The Report Lines				*/
-	private MReportLine[] 		m_lines;
+	protected MReportLine[] 		m_lines;
 
 
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
-	protected void prepare()
+	public void prepare()
 	{
 		StringBuffer sb = new StringBuffer ("Record_ID=")
 			.append(getRecord_ID());
@@ -229,7 +229,7 @@ public class FinReport extends SvrProcess
 	/**
 	 * 	Set Periods
 	 */
-	private void setPeriods()
+	public void setPeriods()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("C_Calendar_ID=" + m_report.getC_Calendar_ID());
 		Timestamp today = TimeUtil.getDay(System.currentTimeMillis());
@@ -298,7 +298,7 @@ public class FinReport extends SvrProcess
 	 *  @return Message to be translated
 	 *  @throws Exception
 	 */
-	protected String doIt() throws Exception
+	public String doIt() throws Exception
 	{
 		if (log.isLoggable(Level.INFO)) log.info("AD_PInstance_ID=" + getAD_PInstance_ID());
 		
@@ -358,7 +358,7 @@ public class FinReport extends SvrProcess
 	 * 	For all columns (in a line) with relative period access
 	 * 	@param line line
 	 */
-	private void insertLine (int line)
+	public void insertLine (int line)
 	{
 		if (log.isLoggable(Level.INFO)) log.info("" + m_lines[line]);
 
@@ -530,7 +530,7 @@ public class FinReport extends SvrProcess
 	/**************************************************************************
 	 *	Line + Column calculation
 	 */
-	private void doCalculations()
+	public void doCalculations()
 	{
 		//	for all lines	***************************************************
 		for (int line = 0; line < m_lines.length; line++)
@@ -939,7 +939,7 @@ public class FinReport extends SvrProcess
 	/**
 	 * percentage calculation for column value against calculated line value for multiple range
 	 */
-	private void doColumnPercentageOfLineForMultiRange() {
+	public void doColumnPercentageOfLineForMultiRange() {
 		//	for all columns		***********************************************
 		for (int col = 0; col < m_columns.length; col++)
 		{
@@ -1098,7 +1098,7 @@ public class FinReport extends SvrProcess
 	 * 	@param toID to ID
 	 * 	@return comma separated list
 	 */
-	private String getLineIDs (int fromID, int toID)
+	public String getLineIDs (int fromID, int toID)
 	{
 		if (log.isLoggable(Level.FINEST)) log.finest("From=" + fromID + " To=" + toID);
 		int firstPA_ReportLine_ID = 0;
@@ -1145,7 +1145,7 @@ public class FinReport extends SvrProcess
 	 * 	@param PA_ReportColumn_ID PA_ReportColumn_ID
 	 * 	@return zero based index or if not found
 	 */
-	private int getColumnIndex (int PA_ReportColumn_ID)
+	public int getColumnIndex (int PA_ReportColumn_ID)
 	{
 		for (int i = 0; i < m_columns.length; i++)
 		{
@@ -1161,7 +1161,7 @@ public class FinReport extends SvrProcess
 	 * 	@param relativeOffset offset
 	 * 	@return reporting period
 	 */
-	private FinReportPeriod getPeriod (BigDecimal relativeOffset)
+	public FinReportPeriod getPeriod (BigDecimal relativeOffset)
 	{
 		if (relativeOffset == null)
 			return getPeriod(0);
@@ -1173,7 +1173,7 @@ public class FinReport extends SvrProcess
 	 * 	@param relativeOffset offset
 	 * 	@return reporting period
 	 */
-	private FinReportPeriod getPeriod (int relativeOffset)
+	public FinReportPeriod getPeriod (int relativeOffset)
 	{
 		//	find current reporting period C_Period_ID
 		if (m_reportPeriod < 0)
@@ -1213,7 +1213,7 @@ public class FinReport extends SvrProcess
 	/**************************************************************************
 	 *	Insert Detail Lines if enabled
 	 */
-	private void insertLineDetail()
+	public void insertLineDetail()
 	{
 		if (!m_report.isListSources())
 			return;
@@ -1274,7 +1274,7 @@ public class FinReport extends SvrProcess
 	 * 	- AD_PInstance_ID, PA_ReportLine_ID, variable, 0 - Level 1
 	 * 	@param line line
 	 */
-	private void insertLineSource (int line)
+	public void insertLineSource (int line)
 	{
 		if (log.isLoggable(Level.INFO)) log.info("Line=" + line + " - " + m_lines[line]);
 
@@ -1503,7 +1503,7 @@ public class FinReport extends SvrProcess
 	 * 	@param line line
 	 * 	@param variable variable, e.g. Account_ID
 	 */
-	private void insertLineTrx (int line, String variable)
+	public void insertLineTrx (int line, String variable)
 	{
 		if (log.isLoggable(Level.INFO)) log.info("Line=" + line + " - Variable=" + variable);
 
@@ -1630,7 +1630,7 @@ public class FinReport extends SvrProcess
 	/**************************************************************************
 	 *	Delete Unprinted Lines
 	 */
-	private void deleteUnprintedLines()
+	public void deleteUnprintedLines()
 	{
 		for (int line = 0; line < m_lines.length; line++)
 		{
@@ -1647,7 +1647,7 @@ public class FinReport extends SvrProcess
 	}	//	deleteUnprintedLines
 
 
-	private void scaleResults() {
+	public void scaleResults() {
 
 		for (int column = 0; column < m_columns.length; column++)
 		{
@@ -1677,7 +1677,7 @@ public class FinReport extends SvrProcess
 	 *	Get/Create PrintFormat
 	 * 	@return print format
 	 */
-	private MPrintFormat getPrintFormat()
+	public MPrintFormat getPrintFormat()
 	{
 		int AD_PrintFormat_ID = m_report.getAD_PrintFormat_ID();
 		if (log.isLoggable(Level.INFO)) log.info("AD_PrintFormat_ID=" + AD_PrintFormat_ID);

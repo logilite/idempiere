@@ -11,6 +11,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.process.DocAction;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
@@ -22,7 +23,7 @@ public class MProductionLine extends X_M_ProductionLine {
 	 */
 	private static final long serialVersionUID = 5939914729719167512L;
 
-	private MProduction productionParent;
+	protected MProduction productionParent;
 
 
 	/**
@@ -56,6 +57,7 @@ public class MProductionLine extends X_M_ProductionLine {
 	 * Parent Constructor
 	 * @param plan
 	 */
+	@Deprecated
 	public MProductionLine( MProduction header ) {
 		super( header.getCtx(), 0, header.get_TrxName() );
 		setM_Production_ID( header.get_ID());
@@ -64,13 +66,31 @@ public class MProductionLine extends X_M_ProductionLine {
 		productionParent = header;
 	}
 	
+	@Deprecated
 	public MProductionLine( MProductionPlan header ) {
 		super( header.getCtx(), 0, header.get_TrxName() );
 		setM_ProductionPlan_ID( header.get_ID());
 		setAD_Client_ID(header.getAD_Client_ID());
 		setAD_Org_ID(header.getAD_Org_ID());
 	}
-	
+
+	public static MProductionLine createFrom(MProduction header)
+	{
+		MProductionLine line = (MProductionLine) MTable.get(header.getCtx(), MProductionLine.Table_ID).getPO(0, header.get_TrxName());
+		line.setM_Production_ID(header.get_ID());
+		line.setClientOrg(header);
+
+		return line;
+	}
+
+	public static MProductionLine createFrom(MProductionPlan header)
+	{
+		MProductionLine line = (MProductionLine) MTable.get(header.getCtx(), MProductionLine.Table_ID).getPO(0,	header.get_TrxName());
+		line.setM_ProductionPlan_ID(header.get_ID());
+		line.setClientOrg(header);
+
+		return line;
+	}
 
 	/**
 	 * 
@@ -189,7 +209,7 @@ public class MProductionLine extends X_M_ProductionLine {
 						}
 						matTrx = new MTransaction (getCtx(), getAD_Org_ID(), 
 								"P-", 
-								getM_Locator_ID(), getM_Product_ID(), lineMA.getM_AttributeSetInstance_ID(), 
+								getM_Locator_ID(), getM_Product_ID(), storages[sl].getM_AttributeSetInstance_ID(), 
 								lineQty.negate(), date, get_TrxName());
 						matTrx.setM_ProductionLine_ID(get_ID());
 						if ( !matTrx.save(get_TrxName()) ) {
@@ -323,7 +343,7 @@ public class MProductionLine extends X_M_ProductionLine {
 		
 	}
 
-	private int getEndProduct_ID() {
+	protected int getEndProduct_ID() {
 		if (productionParent != null) {
 			return productionParent.getM_Product_ID();
 		} else if (getM_Production_ID() > 0) {
@@ -333,7 +353,7 @@ public class MProductionLine extends X_M_ProductionLine {
 		}
 	}
 
-	private int deleteMA() {
+	protected int deleteMA() {
 		String sql = "DELETE FROM M_ProductionLineMA WHERE M_ProductionLine_ID = " + get_ID();
 		int count = DB.executeUpdateEx( sql, get_TrxName() );
 		return count;
@@ -350,7 +370,7 @@ public class MProductionLine extends X_M_ProductionLine {
 	protected boolean beforeSave(boolean newRecord) 
 	{
 		if (productionParent == null && getM_Production_ID() > 0)
-			productionParent = new MProduction(getCtx(), getM_Production_ID(), get_TrxName());
+			productionParent = (MProduction) MTable.get(getCtx(), MProduction.Table_ID).getPO(getM_Production_ID(), get_TrxName());
 
 		if (getM_Production_ID() > 0) 
 		{
@@ -388,7 +408,54 @@ public class MProductionLine extends X_M_ProductionLine {
 		{
 			setMovementQty(getQtyUsed().negate());
 		}
-		
+
+		// Correcting Reservation
+		if (DocAction.STATUS_InProgress.equals(getM_Production().getDocStatus()))
+		{
+			boolean isValueUpdated = false;
+			int oldLocator = getM_Locator_ID();
+			int oldProduct = getM_Product_ID();
+			int oldASI = getM_AttributeSetInstance_ID();
+
+			if (is_ValueChanged(COLUMNNAME_M_AttributeSetInstance_ID))
+			{
+				isValueUpdated = true;
+				oldASI = get_ValueOldAsInt(COLUMNNAME_M_AttributeSetInstance_ID);
+			}
+			if (is_ValueChanged(COLUMNNAME_M_Locator_ID))
+			{
+				isValueUpdated = true;
+				oldLocator = get_ValueOldAsInt(COLUMNNAME_M_Locator_ID);
+			}
+			if (is_ValueChanged(COLUMNNAME_M_Product_ID))
+			{
+				isValueUpdated = true;
+				oldProduct = get_ValueOldAsInt(COLUMNNAME_M_Product_ID);
+			}
+
+			// Move to correct reservation
+			if (isValueUpdated && getQtyReserved().signum() != 0)
+			{
+				if (!stockReservationMove(oldProduct, oldLocator, oldASI, getQtyReserved()))
+					return false;
+			}
+
+			// Check qty modified
+			if (is_ValueChanged(COLUMNNAME_MovementQty) || is_ValueChanged(COLUMNNAME_QtyUsed))
+			{
+				BigDecimal qty = isEndProduct() ? getMovementQty() : getQtyUsed();
+				qty = qty.subtract(getQtyReserved());
+				if (qty.signum() != 0)
+				{
+					String errMsg = stockReservation(qty.signum() == 1, true);
+					if (!Util.isEmpty(errMsg))
+					{
+						log.saveError("Error", "Issue while correcting reservation qty difference in storage, " + errMsg);
+						return false;
+					}
+				}
+			}
+		}
 		return true;
 	}
 	
@@ -396,9 +463,115 @@ public class MProductionLine extends X_M_ProductionLine {
 	protected boolean beforeDelete() {
 		
 		deleteMA();
+
+		String errMsg = stockReservation(false, false);
+		if (!Util.isEmpty(errMsg))
+		{
+			log.saveError("DeleteError", errMsg);
+			return false;
+		}
 		return true;
 	}
 
+	/**
+	 * Move reservation from old to new
+	 * 
+	 * @param oldProductID
+	 * @param oldLocatorID
+	 * @param oldASI
+	 * @param qty
+	 * @return True - if no error
+	 */
+	protected boolean stockReservationMove(int oldProductID, int oldLocatorID, int oldASI, BigDecimal qty)
+	{
+		// Remove reservation from previously reserved
+		MProduct oldProduct = (MProduct) MTable.get(getCtx(), MProduct.Table_ID, get_TrxName()).getPO(oldProductID,
+				get_TrxName());
+		if (oldProduct != null && oldProduct.isStocked())
+		{
+			MLocator oldLocator = MLocator.get(getCtx(), oldLocatorID);
+			if (!MStorageReservation.add(getCtx(), oldLocator.getM_Warehouse_ID(), oldProductID, oldASI, qty.negate(),
+					!isEndProduct(), get_TrxName()))
+			{
+				log.saveError("Error", "Cannot move stock (Release) for Product:" + oldProduct.getValue() + ", Locator:"
+						+ oldLocator.getValue() + ", ASI:" + oldASI);
+				return false;
+			}
+		} // OldProduct
+
+		// Add reservation of new value
+		MProduct product = (MProduct) getM_Product();
+		if (product != null && product.isStocked())
+		{
+			if (!MStorageReservation.add(getCtx(), getM_Locator().getM_Warehouse_ID(), getM_Product_ID(),
+					getM_AttributeSetInstance_ID(), qty, !isEndProduct(), get_TrxName()))
+			{
+				log.saveError("Error", "Cannot move stock (Reserve) for Product:" + product.getValue() + ", Locator:"
+						+ getM_Locator().getValue() + ", ASI:" + getM_AttributeSetInstance_ID());
+				return false;
+			}
+		} // Product
+
+		return true;
+	} // stockReservationMove
+
+	/**
+	 * Stock Reserve and Release
+	 * 
+	 * @param isReserveStock - True if Stock reserving else releasing
+	 * @param isLineUpdated - Line is modified
+	 * @return error message or null
+	 */
+	protected String stockReservation(boolean isReserveStock, boolean isLineUpdated)
+	{
+		BigDecimal target = Env.ZERO;
+		BigDecimal difference = Env.ZERO;
+		BigDecimal qtyReserve = getQtyReserved().signum() == 0 ? Env.ZERO : getQtyReserved();
+
+		if (isEndProduct())
+		{
+			target = getMovementQty();
+		}
+		else
+		{
+			target = getQtyUsed();
+		}
+
+		if (isReserveStock || isLineUpdated)
+		{
+			difference = target.subtract(qtyReserve);
+		}
+		else
+		{
+			difference = qtyReserve.negate();
+		}
+
+		if (difference.signum() == 0)
+		{
+			return null;
+		}
+
+		if (log.isLoggable(Level.FINE))
+			log.fine("Line=" + getLine() + " - Target=" + target + ",Difference=" + difference + ",Reserved="
+					+ qtyReserve);
+
+		// Check Product - Stocked and Item
+		MProduct product = (MProduct) getM_Product();
+		if (product != null && product.isStocked())
+		{
+			// Update Reservation Storage
+			if (!MStorageReservation.add(getCtx(), getM_Locator().getM_Warehouse_ID(), getM_Product_ID(),
+					getM_AttributeSetInstance_ID(), difference, !isEndProduct(), get_TrxName()))
+			{
+				return "Cannot " + (isReserveStock ? "reserve" : "release") + " stock on line #" + getLine();
+			}
+
+			// update reservation qty
+			setQtyReserved(getQtyReserved().add(difference));
+		} // product
+
+		return null;
+	} // stockReservation
 	/**
 	 * 	Get Reversal_ID of parent production
 	 *	@return Reversal_ID
@@ -417,7 +590,7 @@ public class MProductionLine extends X_M_ProductionLine {
 	public MProductionLineMA[] getLineMAs() {
 		ArrayList<MProductionLineMA> list = new ArrayList<MProductionLineMA>();
 		
-		String sql = "SELECT pl.M_ProductionLine_ID, pl,M_AttributeSetInstance_ID , pl.MovementQty, pl.DateMaterialPolicy "
+		String sql = "SELECT pl.M_ProductionLine_ID, pl.M_AttributeSetInstance_ID , pl.MovementQty, pl.DateMaterialPolicy "
 			+ "FROM M_ProductionLineMA pl "
 			+ "WHERE pl.M_ProductionLine_ID = ?";
 		

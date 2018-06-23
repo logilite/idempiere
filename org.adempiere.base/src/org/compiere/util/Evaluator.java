@@ -18,8 +18,13 @@ package org.compiere.util;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -145,16 +150,40 @@ public class Evaluator
 	 */
 	private static boolean evaluateLogicTuple (Evaluatee source, String logic)
 	{
-		StringTokenizer st = new StringTokenizer (logic.trim(), "!=^><", true);
-		if (st.countTokens() != 3)
+		Pattern pattern = Pattern.compile("(={1,2}|!|>|<|\\^[=]?)");
+		Matcher matcher = pattern.matcher(logic.trim());
+		if (!matcher.find())
 		{
 			s_log.log(Level.SEVERE, "Logic tuple does not comply with format "
-				+ "'@context@=value' where operand could be one of '=!^><' => " + logic);
+					+ "'@context@=value' where operand could be one of '=, !, ^, >, <, ==, ^=' --> " + logic);
 			return false;
 		}
-		//	First Part
-		String first = st.nextToken().trim();					//	get '@tag@'
+
+		// Comparator
+		String operand = matcher.group(1);
+		if (operand.isEmpty())
+		{
+			s_log.log(Level.SEVERE, "Operand not found from --> " + logic);
+			return false;
+		}
+
+		String[] myStrings = matcher.replaceAll("\n").split("\n");
+		if (myStrings.length != 2)
+		{
+			s_log.log(Level.SEVERE, "Logic tuple does not comply with format '@context@=value' --> " + logic);
+			return false;
+		}
+
+		String first = myStrings[0];
+		String rightToken = myStrings[1];
+		boolean isArrayItems = false;
+		
+		// First Part
 		String firstEval = first.trim();
+		if (firstEval != null && firstEval.startsWith("{") && firstEval.endsWith("}"))
+		{
+			isArrayItems = true;
+		}
 		if (first.indexOf('@') != -1)		//	variable
 		{			
 			first = first.replace ('@', ' ').trim (); 			//	strip 'tag'
@@ -177,12 +206,18 @@ public class Evaluator
 		
 		firstEval = firstEval.replace('\'', ' ').replace('"', ' ').trim();	//	strip ' and "
 
-		//	Comperator
-		String operand = st.nextToken();
-		
-		//	Second Part
-		String rightToken = st.nextToken();							//	get value
-		String[] list = rightToken.split("[,]");
+		// Second Part
+		String[] list = null;
+		if (rightToken != null && rightToken.trim().startsWith("{") && rightToken.trim().endsWith("}"))
+		{
+			list = new String[1];
+			list[0] = rightToken;
+			isArrayItems = true;
+		}
+		else
+		{
+			list = rightToken.split("[,]");
+		}
 		for(String second : list)
 		{
 			String secondEval = second.trim();
@@ -200,7 +235,7 @@ public class Evaluator
 				secondEval = "0";
 	
 			//	Logical Comparison
-			boolean result = evaluateLogicTuple (firstEval, operand, secondEval);
+			boolean result = evaluateLogicTuple(firstEval, operand, secondEval, isArrayItems);
 			//
 			if (s_log.isLoggable(Level.FINEST)) s_log.finest(logic 
 				+ " => \"" + firstEval + "\" " + operand + " \"" + secondEval + "\" => " + result);
@@ -214,14 +249,55 @@ public class Evaluator
 	/**
 	 * 	Evaluate Logic Tuple
 	 *	@param value1 value
-	 *	@param operand operand = ~ ^ ! > <
+	 *	@param operand operand = ~ ^ ! > < == ^=
 	 *	@param value2
+	 *  @param isArrayItems 
 	 *	@return evaluation
 	 */
-	private static boolean evaluateLogicTuple (String value1, String operand, String value2)
+	private static boolean evaluateLogicTuple (String value1, String operand, String value2, boolean isArrayItems)
 	{
 		if (value1 == null || operand == null || value2 == null)
 			return false;
+		
+		// IDEMPIERE-3413
+		if (isArrayItems)
+		{
+			Set<String> setValue1 = new TreeSet<String>();
+			Set<String> setValue2 = new TreeSet<String>();
+
+			value1 = value1.replaceAll("[{}]", "");
+			value2 = value2.replaceAll("[{}]", "");
+
+			for (String val : Arrays.asList(value1.split(",")))
+			{
+				if (!Util.isEmpty(val, true))
+					setValue1.add(val.trim());
+			}
+			for (String val : Arrays.asList(value2.split(",")))
+			{
+				if (!Util.isEmpty(val, true))
+					setValue2.add(val.trim());
+			}
+
+			// Equals or Not Equals
+			if (operand.equals("=") || operand.equals("^="))
+			{
+				boolean isSame = false;
+				if (setValue1.size() == setValue2.size())
+					isSame = setValue1.equals(setValue2);
+
+				if (operand.equals("^="))
+					return !isSame;
+
+				return isSame;
+			}
+			else if (operand.equals("==")) // Contains
+			{
+				return setValue1.containsAll(setValue2);
+			}
+			
+			return false;
+		}
 		
 		BigDecimal value1bd = null;
 		BigDecimal value2bd = null;

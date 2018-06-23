@@ -19,6 +19,7 @@ package org.compiere.acct;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 
 import org.compiere.model.MAcctSchema;
@@ -26,7 +27,6 @@ import org.compiere.model.MCostDetail;
 import org.compiere.model.MMovement;
 import org.compiere.model.MMovementLine;
 import org.compiere.model.MMovementLineMA;
-import org.compiere.model.MProduct;
 import org.compiere.model.ProductCost;
 import org.compiere.util.Env;
 
@@ -43,9 +43,8 @@ import org.compiere.util.Env;
  */
 public class Doc_Movement extends Doc
 {
-	private int				m_Reversal_ID = 0;
-	@SuppressWarnings("unused")
-	private String			m_DocStatus = "";
+	protected int				m_Reversal_ID = 0;
+	protected String			m_DocStatus = "";
 
 	/**
 	 *  Constructor
@@ -81,19 +80,65 @@ public class Doc_Movement extends Doc
 	 *	@param move move
 	 *  @return document lines (DocLine_Material)
 	 */
-	private DocLine[] loadLines(MMovement move)
+	protected DocLine[] loadLines(MMovement move)
 	{
 		ArrayList<DocLine> list = new ArrayList<DocLine>();
 		MMovementLine[] lines = move.getLines(false);
 		for (int i = 0; i < lines.length; i++)
 		{
 			MMovementLine line = lines[i];
-			DocLine docLine = new DocLine (line, this);
-			docLine.setQty(line.getMovementQty(), false);
-			docLine.setReversalLine_ID(line.getReversalLine_ID());
-			if (log.isLoggable(Level.FINE)) log.fine(docLine.toString());
-			list.add (docLine);
-		}
+			if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(line.getProduct().getCostingLevel(m_as))
+					&& line.getM_AttributeSetInstance_ID() <= 0)
+			{
+				MMovementLineMA[] lineMAs = MMovementLineMA.get(getCtx(), line.get_ID(), getTrxName());
+
+				HashMap<String, DocLine> map = new HashMap<String, DocLine>();
+
+//				int iq = 0;
+				
+				for (MMovementLineMA lineMA : lineMAs)
+				{
+					int iq = lineMA.get_ID();
+					System.out.println(iq);
+					
+					if(lineMA.getMovementQty().signum()==0)
+						continue;
+					String key = lineMA.getM_AttributeSetInstance_ID() + "_" + lineMA.getM_AttributeSetInstanceTo_ID();
+					if (!map.containsKey(key))
+					{
+						DocLine docLine = new DocLine(line, this);
+						docLine.setM_AttributeSetInstance_ID(lineMA.getM_AttributeSetInstance_ID());
+						docLine.setM_AttributeSetInstanceTo_ID(lineMA.getM_AttributeSetInstanceTo_ID());
+						docLine.setQty(lineMA.getMovementQty(), false);
+						docLine.setReversalLine_ID(line.getReversalLine_ID());
+						if (log.isLoggable(Level.FINE))
+							log.fine(docLine.toString());
+						map.put(key, docLine);
+					}
+					else
+					{
+						DocLine docLine = map.get(key);
+						
+						BigDecimal lineQty = docLine.getQty();
+						lineQty = lineQty == null ? Env.ZERO : lineQty;
+						
+						docLine.setQty(lineQty.add(lineMA.getMovementQty()), false);
+					}
+				}
+				
+				list.addAll(map.values());
+			}
+			else
+			{
+				DocLine docLine = new DocLine (line, this);
+				docLine.setQty(line.getMovementQty(), false);
+				docLine.setReversalLine_ID(line.getReversalLine_ID());
+				docLine.setM_AttributeSetInstance_ID(line.getM_AttributeSetInstance_ID());
+				docLine.setM_AttributeSetInstanceTo_ID(line.getM_AttributeSetInstanceTo_ID());
+				if (log.isLoggable(Level.FINE)) log.fine(docLine.toString());
+				list.add (docLine);
+			}
+ 		}
 
 		//	Return Array
 		DocLine[] dls = new DocLine[list.size()];
@@ -139,42 +184,10 @@ public class Doc_Movement extends Doc
 			
 			if (!isReversal(line))
 			{
-				MProduct product = (MProduct) line.getProduct();
-				String costingLevel = product.getCostingLevel(as);
-				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel) )
-				{
-					if (line.getM_AttributeSetInstance_ID() == 0 ) 
-					{
-						MMovementLine mLine = (MMovementLine) line.getPO();
-						MMovementLineMA mas[] = MMovementLineMA.get(getCtx(), mLine.get_ID(), getTrxName());
-						if (mas != null && mas.length > 0 )
-						{
-							costs  = BigDecimal.ZERO;
-							for (int j = 0; j < mas.length; j++)
-							{
-								MMovementLineMA ma = mas[j];
-								BigDecimal QtyMA = ma.getMovementQty();
-								ProductCost pc = line.getProductCost();
-								pc.setQty(QtyMA);
-								pc.setM_M_AttributeSetInstance_ID(ma.getM_AttributeSetInstance_ID());
-								BigDecimal maCosts = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_MovementLine_ID=? AND IsSOTrx='N'");
-							
-								costs = costs.add(maCosts);
-							}						
-						}
-					} 
-					else 
-					{
-						costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_MovementLine_ID=? AND IsSOTrx='N'");
-					}
-				}
-				else
-				{
-					// MZ Goodwill
-					// if Inventory Move CostDetail exist then get Cost from Cost Detail
-					costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_MovementLine_ID=? AND IsSOTrx='N'");
-					// end MZ
-				}
+				// MZ Goodwill
+				// if Inventory Move CostDetail exist then get Cost from Cost Detail
+				costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_MovementLine_ID=? AND IsSOTrx='N'");
+				// end MZ
 			}
 			else
 			{
@@ -220,12 +233,16 @@ public class Doc_Movement extends Doc
 				costs = cr.getAcctBalance(); //get original cost
 			}
 
-			//	Only for between-org movements
-			if (dr.getAD_Org_ID() != cr.getAD_Org_ID())
+			//	Only for between-org movements OR between ASIs
+			String costingLevel = line.getProduct().getCostingLevel(as);
+			if (!MAcctSchema.COSTINGLEVEL_Organization.equals(costingLevel)
+					&& !MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))
+				continue;
+			
+			if ((dr.getAD_Org_ID() != cr.getAD_Org_ID() && MAcctSchema.COSTINGLEVEL_Organization.equals(costingLevel))
+					|| (line.getM_AttributeSetInstance_ID() != line.getM_AttributeSetInstanceTo_ID() && MAcctSchema.COSTINGLEVEL_BatchLot
+							.equals(costingLevel)))
 			{
-				String costingLevel = line.getProduct().getCostingLevel(as);
-				if (!MAcctSchema.COSTINGLEVEL_Organization.equals(costingLevel))
-					continue;
 				//
 				String description = line.getDescription();
 				if (description == null)
@@ -242,7 +259,7 @@ public class Doc_Movement extends Doc
 				}
 				//	Cost Detail To
 				if (!MCostDetail.createMovement(as, cr.getAD_Org_ID(),	//	locator org
-					line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+					line.getM_Product_ID(), line.getM_AttributeSetInstanceTo_ID(),
 					line.get_ID(), 0,
 					costs, line.getQty(), false,
 					description + "(|<-)", getTrxName()))
@@ -259,7 +276,7 @@ public class Doc_Movement extends Doc
 		return facts;
 	}   //  createFact
 
-	private boolean isReversal(DocLine line) {
+	protected boolean isReversal(DocLine line) {
 		return m_Reversal_ID !=0 && line.getReversalLine_ID() != 0;
 	}
 

@@ -93,7 +93,7 @@ public class MCash extends X_C_Cash implements DocAction
 		}
 		
 		//	Create New Journal
-		retValue = new MCash (cb, dateAcct);
+		retValue = MCash.copyFrom(cb, dateAcct);
 		retValue.saveEx(trxName);
 		return retValue;
 	}	//	get
@@ -130,7 +130,7 @@ public class MCash extends X_C_Cash implements DocAction
 		}
 		
 		//	Create New Journal
-		retValue = new MCash (cb, dateAcct);
+		retValue = MCash.copyFrom(cb, dateAcct);
 		retValue.saveEx(trxName);
 		return retValue;
 	}	//	get
@@ -186,6 +186,25 @@ public class MCash extends X_C_Cash implements DocAction
 	 *	@param cb cash book
 	 *	@param today date - if null today
 	 */
+	public static MCash copyFrom(MCashBook cb, Timestamp today)
+	{
+		MCash cash = (MCash) MTable.get(cb.getCtx(), MCash.Table_ID).getPO(0, cb.get_TrxName());
+		cash.setClientOrg(cb);
+		cash.setC_CashBook_ID(cb.getC_CashBook_ID());
+		if (today != null)
+		{
+			cash.setStatementDate(today);
+			cash.setDateAcct(today);
+			StringBuilder name = new StringBuilder(DisplayType.getDateFormat(DisplayType.Date).format(today)).append(
+					" ").append(cb.getName());
+			cash.setName(name.toString());
+		}
+		cash.setM_book(cb);
+
+		return cash;
+	} // MCash
+	
+	@Deprecated
 	public MCash (MCashBook cb, Timestamp today)
 	{
 		this (cb.getCtx(), 0, cb.get_TrxName());
@@ -203,9 +222,9 @@ public class MCash extends X_C_Cash implements DocAction
 	}	//	MCash
 	
 	/**	Lines					*/
-	private MCashLine[]		m_lines = null;
+	protected MCashLine[]		m_lines = null;
 	/** CashBook				*/
-	private MCashBook		m_book = null;
+	protected MCashBook		m_book = null;
 	
 	/**
 	 * 	Get Lines
@@ -241,6 +260,15 @@ public class MCash extends X_C_Cash implements DocAction
 		return m_book;
 	}	//	getCashBook
 	
+	/**
+	 * 	Set Cash Book
+	 *	@param cash book
+	 */
+	public void setM_book(MCashBook m_book)
+	{
+		this.m_book = m_book;
+	}
+
 	/**
 	 * 	Get Document No 
 	 *	@return name
@@ -324,9 +352,9 @@ public class MCash extends X_C_Cash implements DocAction
 	}	//	process
 	
 	/**	Process Message 			*/
-	private String		m_processMsg = null;
+	protected String		m_processMsg = null;
 	/**	Just Prepared Flag			*/
-	private boolean		m_justPrepared = false;
+	protected boolean		m_justPrepared = false;
 
 	/**
 	 * 	Unlock Document.
@@ -509,7 +537,7 @@ public class MCash extends X_C_Cash implements DocAction
 			else if (MCashLine.CASHTYPE_BankAccountTransfer.equals(line.getCashType()))
 			{
 				//	Payment just as intermediate info
-				MPayment pay = new MPayment (getCtx(), 0, get_TrxName());
+				MPayment pay=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(0,get_TrxName());
 				pay.setAD_Org_ID(getAD_Org_ID());
 				String documentNo = getName();
 				pay.setDocumentNo(documentNo);
@@ -593,7 +621,7 @@ public class MCash extends X_C_Cash implements DocAction
 	 * 	Period needs to be open
 	 *	@return true if reversed
 	 */
-	private boolean reverseIt() 
+	protected boolean reverseIt() 
 	{
 		if (DOCSTATUS_Closed.equals(getDocStatus())
 			|| DOCSTATUS_Reversed.equals(getDocStatus())
@@ -635,7 +663,7 @@ public class MCash extends X_C_Cash implements DocAction
 				if (cashline.getC_Payment_ID() == 0)
 					throw new IllegalStateException("Cannot reverse payment");
 					
-				MPayment payment = new MPayment(getCtx(), cashline.getC_Payment_ID(),get_TrxName());
+				MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(cashline.getC_Payment_ID(),get_TrxName());
 				payment.reverseCorrectIt();
 				payment.saveEx();
 			}

@@ -18,7 +18,12 @@ package org.compiere.model;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Properties;
+
+import org.compiere.util.DisplayType;
+import org.compiere.util.Env;
 
 /**
  *  Product Attribute Set
@@ -110,7 +115,90 @@ public class MAttributeInstance extends X_M_AttributeInstance
 		setM_AttributeValue_ID (M_AttributeValue_ID);
 		setValue (Value);
 	}	//	MAttributeInstance
-
+	
+	/**
+	 * 	Selection Value Constructior
+	 *	@param ctx context
+	 *	@param M_Attribute_ID attribute
+	 *	@param M_AttributeSetInstance_ID instance
+	 * 	@param Value String representation for fast display
+	 *	@param trxName transaction
+	 */
+	public MAttributeInstance (Properties ctx, int M_Attribute_ID, 
+		int M_AttributeSetInstance_ID, int Value, String trxName)
+	{
+		super(ctx, 0, trxName);
+		setM_Attribute_ID (M_Attribute_ID);
+		setM_AttributeSetInstance_ID (M_AttributeSetInstance_ID);
+		setValueInt (Value);
+	}	//	MAttributeInstance
+	
+	/**
+	 * 	Selection Value Constructior
+	 *	@param ctx context
+	 *	@param M_Attribute_ID attribute
+	 *	@param M_AttributeSetInstance_ID instance
+	 * 	@param Value String representation for fast display
+	 *	@param trxName transaction
+	 */
+	public MAttributeInstance (Properties ctx, int M_Attribute_ID, 
+		int M_AttributeSetInstance_ID, Timestamp Value, String trxName)
+	{
+		super(ctx, 0, trxName);
+		setM_Attribute_ID (M_Attribute_ID);
+		setM_AttributeSetInstance_ID (M_AttributeSetInstance_ID);
+		setValueTimeStamp (Value);
+	}	//	MAttributeInstance
+	
+	/**
+	 * 	Set ValueInt
+	 * @param valueLable 
+	 *	@param ValueInt Integer
+	 */
+	public void setValueInt(int valueInt, String value)
+	{
+		super.setValueInt(valueInt);
+		if(value == null)
+			setValue(String.valueOf(valueInt));
+		else
+			setValue(value);
+	}
+	
+	/**
+	 * 	Set ValueTimeStamp
+	 * @param value 
+	 *	@param ValueTimeStamp TimeStamp
+	 */
+	public void setValueTimeStamp(Timestamp valueTimestamp)
+	{
+		super.setValueTimeStamp(valueTimestamp);
+		if(valueTimestamp==null){
+			setValue(null);
+			return;
+		}
+		String value = null;
+		MAttribute attribute = MAttribute.get(getCtx(), getM_Attribute_ID());
+		int displayType = attribute.getAD_Reference_ID();
+		
+		//Based on reference type, Format timestamp into string value
+		if (displayType == DisplayType.Date)
+		{
+			SimpleDateFormat sdf = Env.getLanguage(Env.getCtx()).getDateFormat();
+			value = sdf.format(valueTimestamp);
+		}
+		else if (displayType == DisplayType.DateTime)
+		{
+			SimpleDateFormat sdf = Env.getLanguage(Env.getCtx()).getDateTimeFormat();
+			value = sdf.format(valueTimestamp);
+		}
+		else if (displayType == DisplayType.Time)
+		{
+			SimpleDateFormat sdf = Env.getLanguage(Env.getCtx()).getTimeFormat();
+			value = sdf.format(valueTimestamp);
+		}
+		
+		setValue(value);
+	}
 	
 	/**
 	 * 	Set ValueNumber

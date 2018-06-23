@@ -28,6 +28,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
+import org.compiere.model.MTable;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
@@ -139,7 +140,7 @@ public class InvoiceGenerateRMA extends SvrProcess
             throw new IllegalStateException("Could not get invoice document type for Vendor RMA");
         }
         
-        MInvoice invoice = new MInvoice(getCtx(), 0, get_TrxName());
+		MInvoice invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(0, get_TrxName());
         invoice.setRMA(rma);
         
         invoice.setC_DocTypeTarget_ID(docTypeId);
@@ -166,7 +167,7 @@ public class InvoiceGenerateRMA extends SvrProcess
             	throw new IllegalStateException(msgiste.toString());
             }
             
-            MInvoiceLine invLine = new MInvoiceLine(invoice);
+			MInvoiceLine invLine = MInvoiceLine.createFrom(invoice);
             invLine.setRMALine(rmaLine);
             
             if (!invLine.save())

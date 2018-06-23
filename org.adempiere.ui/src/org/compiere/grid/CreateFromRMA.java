@@ -25,6 +25,7 @@ import org.compiere.minigrid.IMiniTable;
 import org.compiere.model.GridTab;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
+import org.compiere.model.MTable;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
@@ -73,7 +74,7 @@ public abstract class CreateFromRMA extends CreateFrom {
         sqlStmt.append("SELECT iol.M_InOutLine_ID, iol.Line, "); 
         sqlStmt.append("COALESCE(p.Name, c.Name) AS ProductName, "); 
         sqlStmt.append("iol.QtyEntered, "); 
-        sqlStmt.append("iol.movementQty-(SELECT COALESCE((SELECT SUM(rmal.qty) FROM M_RMALine rmal JOIN M_RMA rma ON rma.M_RMA_ID=rmal.M_RMA_ID WHERE rmal.M_InOutLine_ID=iol.M_InOutLine_ID AND rma.DocStatus IN ('CO','CL')),0)) AS MovementQty, ");
+        sqlStmt.append("iol.movementQty-(COALESCE((SELECT SUM(rmal.qty) FROM M_RMALine rmal JOIN M_RMA rma ON rma.M_RMA_ID=rmal.M_RMA_ID WHERE rmal.M_InOutLine_ID=iol.M_InOutLine_ID AND rma.DocStatus IN ('CO','CL')),0)) AS MovementQty, ");
         sqlStmt.append("CASE WHEN iol.M_AttributeSetInstance_ID IS NOT NULL THEN (SELECT SerNo FROM M_AttributeSetInstance asi WHERE asi.M_AttributeSetInstance_ID=iol.M_AttributeSetInstance_ID) END as ASI, ");
         sqlStmt.append("iol.Description " );
         sqlStmt.append("FROM M_InOutLine iol ");
@@ -165,7 +166,7 @@ public abstract class CreateFromRMA extends CreateFrom {
                 
                 int inOutLineId = pp.getKey();
                 
-                MRMALine rmaLine = new MRMALine(rma.getCtx(), 0, rma.get_TrxName());
+				MRMALine rmaLine = (MRMALine) MTable.get(rma.getCtx(), MRMALine.Table_ID).getPO(0, rma.get_TrxName());
                 rmaLine.setM_RMA_ID(M_RMA_ID);
                 rmaLine.setM_InOutLine_ID(inOutLineId);
                 rmaLine.setQty(d);

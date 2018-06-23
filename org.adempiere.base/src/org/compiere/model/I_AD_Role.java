@@ -335,6 +335,19 @@ public interface I_AD_Role
 	  */
 	public boolean isActive();
 
+    /** Column name IsAllowDeleteAttachment */
+    public static final String COLUMNNAME_IsAllowDeleteAttachment = "IsAllowDeleteAttachment";
+
+	/** Set Allow Delete Attachment.
+	  * Allow Delete File In Attachment Dialog 
+	  */
+	public void setIsAllowDeleteAttachment (boolean IsAllowDeleteAttachment);
+
+	/** Get Allow Delete Attachment.
+	  * Allow Delete File In Attachment Dialog 
+	  */
+	public boolean isAllowDeleteAttachment();
+
     /** Column name IsCanApproveOwnDoc */
     public static final String COLUMNNAME_IsCanApproveOwnDoc = "IsCanApproveOwnDoc";
 
@@ -373,6 +386,19 @@ public interface I_AD_Role
 	  * Users with this role can create reports
 	  */
 	public boolean isCanReport();
+
+    /** Column name IsCanSaveGridCustPrefEveryone */
+    public static final String COLUMNNAME_IsCanSaveGridCustPrefEveryone = "IsCanSaveGridCustPrefEveryone";
+
+	/** Set Can Save Grid Customize Preference for Everyone.
+	  * On Grid view, Allow to save column width and order preference for everyone
+	  */
+	public void setIsCanSaveGridCustPrefEveryone (boolean IsCanSaveGridCustPrefEveryone);
+
+	/** Get Can Save Grid Customize Preference for Everyone.
+	  * On Grid view, Allow to save column width and order preference for everyone
+	  */
+	public boolean isCanSaveGridCustPrefEveryone();
 
     /** Column name IsChangeLog */
     public static final String COLUMNNAME_IsChangeLog = "IsChangeLog";

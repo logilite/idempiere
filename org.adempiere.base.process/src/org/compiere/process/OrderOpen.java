@@ -19,6 +19,7 @@ package org.compiere.process;
 import java.util.logging.Level;
 
 import org.compiere.model.MOrder;
+import org.compiere.model.MTable;
 import org.compiere.util.AdempiereSystemError;
  
 /**
@@ -61,7 +62,7 @@ public class OrderOpen extends SvrProcess
 		if (p_C_Order_ID == 0)
 			return "";
 		//
-		MOrder order = new MOrder (getCtx(), p_C_Order_ID, get_TrxName());
+		MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(p_C_Order_ID, get_TrxName());
 		String msg = order.reopenIt();
 		if ( msg.length() != 0 )
 		{

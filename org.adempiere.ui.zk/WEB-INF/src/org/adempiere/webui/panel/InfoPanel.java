@@ -17,6 +17,7 @@
 
 package org.adempiere.webui.panel;
 
+import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,8 +27,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -89,7 +92,6 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.KeyEvent;
-import org.zkoss.zk.ui.event.MouseEvent;
 import org.zkoss.zk.ui.event.SelectEvent;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Comboitem;
@@ -119,9 +121,9 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 3761627143274259211L;
-	private final static int DEFAULT_PAGE_SIZE = 100;
-	private final static int DEFAULT_PAGE_PRELOAD = 4;
+	protected static final long serialVersionUID = 3761627143274259211L;
+	protected final static int DEFAULT_PAGE_SIZE = 100;
+	protected final static int DEFAULT_PAGE_PRELOAD = 4;
 	protected List<Button> btProcessList = new ArrayList<Button>();
 	protected Map<String, WEditor> editorMap = new HashMap<String, WEditor>();
 	protected final static String PROCESS_ID_KEY = "processId";
@@ -129,6 +131,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	// attribute key of info process
 	protected final static String ATT_INFO_PROCESS_KEY = "INFO_PROCESS";
 	protected int pageSize;
+	public LinkedHashMap<KeyNamePair,LinkedHashMap<String, Object>> m_values = null;
 	protected MInfoRelated[] relatedInfoList;
 	// for test disable load all record when num of record < 1000
 	protected boolean isIgnoreCacheAll = true;
@@ -350,15 +353,15 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	protected String			p_whereClause = "";
 	protected StatusBarPanel statusBar = new StatusBarPanel();
 	/**                    */
-    private List<Object> line;
+    protected List<Object> line;
 
-	private boolean			    m_ok = false;
+	protected boolean			    m_ok = false;
 	/** Cancel pressed - need to differentiate between OK - Cancel - Exit	*/
-	private boolean			    m_cancel = false;
+	protected boolean			    m_cancel = false;
 	/** Result IDs              */
-	private ArrayList<Integer>	m_results = new ArrayList<Integer>(3);
+	protected ArrayList<Integer>	m_results = new ArrayList<Integer>(3);
 
-    private ListModelTable model;
+    protected ListModelTable model;
 	/** Layout of Grid          */
 	protected ColumnInfo[]     p_layout;
 	/** Main SQL Statement      */
@@ -369,13 +372,13 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	protected String              m_sqlOrder;
 	protected String              m_sqlUserOrder;
 	/**ValueChange listeners       */
-    private ArrayList<ValueChangeListener> listeners = new ArrayList<ValueChangeListener>();
+    protected ArrayList<ValueChangeListener> listeners = new ArrayList<ValueChangeListener>();
 	/** Loading success indicator       */
 	protected boolean	        p_loadedOK = false;
 	/**	SO Zoom Window						*/
-	private int					m_SO_Window_ID = -1;
+	protected int					m_SO_Window_ID = -1;
 	/**	PO Zoom Window						*/
-	private int					m_PO_Window_ID = -1;
+	protected int					m_PO_Window_ID = -1;
 	
 	protected MInfoWindow infoWindow;
 
@@ -386,12 +389,12 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	protected Paging paging;
 	protected int pageNo;
 	protected int m_count;
-	private int cacheStart;
-	private int cacheEnd;
-	private boolean m_useDatabasePaging = false;
-	private BusyDialog progressWindow;
+	protected int cacheStart;
+	protected int cacheEnd;
+	protected boolean m_useDatabasePaging = false;
+	protected BusyDialog progressWindow;
 	// in case double click to item. this store clicked item (maybe it's un-select item)
-	private Listitem m_lastOnSelectItem;
+	protected int m_lastSelectedIndex = -1;
 	protected GridField m_gridfield;
 
 	/**
@@ -409,7 +412,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	protected List<Object> prevParameterValues = null;
 	protected List<String> prevQueryOperators = null;
 	protected List<WEditor> prevRefParmeterEditor = null;
-	private static final String[] lISTENER_EVENTS = {};
+	protected static final String[] lISTENER_EVENTS = {};
 
 	/**
 	* All info process of this infoWindow
@@ -810,7 +813,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
         setStatusDB(no == Integer.MAX_VALUE?"?":Integer.toString(no));
     }
     
-    private List<Object> readLine(int start, int end) {
+    protected List<Object> readLine(int start, int end) {
     	//cacheStart & cacheEnd - 1 based index, start & end - 0 based index
     	if (getCacheStart() >= 1 && cacheEnd > getCacheStart())
     	{
@@ -1353,6 +1356,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		}
 		
 		contentPanel.getModel().setSelection(lsSelectionRecord);
+		updateListSelected();
 	}
 	
 	
@@ -1697,11 +1701,14 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
             else if (event.getTarget() == contentPanel && event.getName().equals(Events.ON_SELECT))
             {
             	setStatusSelected ();
-            	m_lastOnSelectItem = null;
+            	
             	SelectEvent<?, ?> selectEvent = (SelectEvent<?, ?>) event;
             	if (selectEvent.getReference() != null && selectEvent.getReference() instanceof Listitem)
-            		m_lastOnSelectItem = (Listitem) selectEvent.getReference();
-        }else if (event.getTarget() == contentPanel && event.getName().equals("onAfterRender")){        	
+            	{
+            		Listitem m_lastOnSelectItem = (Listitem) selectEvent.getReference();
+            		m_lastSelectedIndex = m_lastOnSelectItem.getIndex();
+            		}
+            }else if (event.getTarget() == contentPanel && event.getName().equals("onAfterRender")){           	
         	//IDEMPIERE-1334 at this event selected item from listBox and model is sync
         	enableButtons();
             }
@@ -1710,18 +1717,33 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
             	if (event.getClass().equals(MouseEvent.class)){
             		return;
             	}
-            	if (contentPanel.isMultiple()) {
-            		//un-select all selected column
-            		if (m_lastOnSelectItem != null){
-            			contentPanel.getModel().clearSelection();
-            			int clickItemIndex = contentPanel.getIndexOfItem(m_lastOnSelectItem);
-            			Object selectedItemModle = contentPanel.getModel().get(clickItemIndex);
-            			contentPanel.getModel().addToSelection(selectedItemModle);
-            		}
-            		// clean selected record in cache
-            		recordSelectedData.clear();
+            	if (contentPanel.isMultiple() && m_lastSelectedIndex >= 0) {
+					
+            		model.clearSelection();
+
+					List<Object> lsSelectedItem = new ArrayList<Object>();
+					lsSelectedItem.add(model.getElementAt(m_lastSelectedIndex));
+					model.setSelection(lsSelectedItem);
+					
+					int m_keyColumnIndex = contentPanel.getKeyColumnIndex();
+					for (int i = 0; i < contentPanel.getRowCount(); i++) {
+						// Find the IDColumn Key
+						Object data = contentPanel.getModel().getValueAt(i, m_keyColumnIndex);
+						if (data instanceof IDColumn) {
+							IDColumn dataColumn = (IDColumn) data;
+	
+							if (i == m_lastSelectedIndex) {
+								dataColumn.setSelected(true);
+							}
+							else {
+								dataColumn.setSelected(false);
+							}
+						}
+					}
             	}
             	onDoubleClick();
+            	contentPanel.repaint();
+            	m_lastSelectedIndex = -1;
             }
             else if (event.getTarget().equals(confirmPanel.getButton(ConfirmPanel.A_REFRESH)))
             {
@@ -1950,8 +1972,10 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 				if (DialogEvents.ON_BEFORE_RUN_PROCESS.equals(event.getName())){
 					updateListSelected();
 					// store in T_Selection table selected rows for Execute Process that retrieves from T_Selection in code.
-					DB.createT_SelectionNew(pInstanceID, getSaveKeys(getInfoColumnIDFromProcess(processModalDialog.getAD_Process_ID())), 
-						null);					
+					DB.createT_SelectionNew(pInstanceID, getSaveKeys(getInfoColumnIDFromProcess(processModalDialog.getAD_Process_ID())),
+						null);	
+					saveResultSelection(getInfoColumnIDFromProcess(processModalDialog.getAD_Process_ID()));
+					createT_Selection_InfoWindow(pInstanceID);
 				}else if (ProcessModalDialog.ON_WINDOW_CLOSE.equals(event.getName())){ 
 					if (processModalDialog.isCancel()){
 						//clear back 
@@ -1975,6 +1999,159 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		});   		
     }
    
+    
+    /**
+	 * save result values
+	 */
+	protected void saveResultSelection(int infoColumnId) {
+		int m_keyColumnIndex = contentPanel.getKeyColumnIndex();
+		if (m_keyColumnIndex == -1) {
+			return;
+		}
+
+		m_values = new LinkedHashMap<KeyNamePair,LinkedHashMap<String,Object>>();
+		
+		if (p_multipleSelection) {
+				
+			Map <Integer, List<Object>> selectedRow = getSelectedRowInfo();
+			
+			// for selected rows
+            for (Entry<Integer, List<Object>> selectedInfo : selectedRow.entrySet())
+            {
+            	// get key and viewID
+                Integer keyData = selectedInfo.getKey();
+                KeyNamePair kp = null;
+                
+                if (infoColumnId > 0){
+                	int dataIndex = columnDataIndex.get(infoColumnId) + p_layout.length;
+                	Object viewIDValue = selectedInfo.getValue().get(dataIndex);
+                	kp = new KeyNamePair(keyData, viewIDValue == null ? null : viewIDValue.toString());
+                }else{
+                	kp = new KeyNamePair(keyData, null);
+                }
+                
+                // get Data
+				LinkedHashMap<String, Object> values = new LinkedHashMap<String, Object>();
+				for(int col  = 0 ; col < p_layout.length; col ++)
+				{
+					// layout has same columns as selectedInfo
+					if (!p_layout[col].isReadOnly())
+						values.put(p_layout[col].getColumnName(), selectedInfo.getValue().get(col));
+				}
+				if(values.size() > 0)
+					m_values.put(kp, values);
+            }
+		}
+	} // saveResultSelection
+	
+	/**
+	 * Insert result values
+	 * @param AD_PInstance_ID
+	 */
+	public void createT_Selection_InfoWindow(int AD_PInstance_ID)
+	{
+		int counter = 0;
+		StringBuilder select = new StringBuilder();
+		String insert = "INSERT INTO T_Selection_InfoWindow (AD_PINSTANCE_ID, T_SELECTION_ID, VIEWID, COLUMNNAME, VALUE_STRING, VALUE_NUMBER, VALUE_DATE) VALUES ( ";
+		for (Entry<KeyNamePair, LinkedHashMap<String, Object>> records : m_values.entrySet())
+		{
+			// set Record ID
+			KeyNamePair knPair = records.getKey();
+			LinkedHashMap<String, Object> fields = records.getValue();
+			for (Entry<String, Object> field : fields.entrySet())
+			{
+				counter++;
+				if (counter > 1)
+					select.append(" , ( ");
+
+				select.append(AD_PInstance_ID).append(","); // AD_PINSTANCE_ID
+				select.append(knPair.getKey()).append(","); // T_SELECTION_ID
+				if (knPair.getName() == null) // VIEWID
+					select.append("NULL,");
+				else
+					select.append("'").append(knPair.getName()).append("',");
+
+				if (field.getKey() == null)// COLUMNNAME
+					select.append("NULL,");
+				else
+					select.append("'").append(field.getKey()).append("',");
+
+				// set Values as Like VALUE_STRING, VALUE_NUMBER, VALUE_DATE
+				Object data = field.getValue();
+				if (data instanceof IDColumn)
+				{
+					IDColumn id = (IDColumn) data;
+					select.append("NULL,");
+					select.append(id.getRecord_ID());
+					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+				}
+				else if (data instanceof String)
+				{
+					select.append("'").append(data).append("'");
+					select.append(",NULL");
+					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+				}
+				else if (data instanceof BigDecimal || data instanceof Integer || data instanceof Double)
+				{
+					select.append("NULL,");
+					if (data instanceof Double)
+					{
+						BigDecimal value = BigDecimal.valueOf((Double) data);
+						select.append(value);
+					}
+					else
+						select.append(data);
+					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+				}
+				else if (data instanceof Integer)
+				{
+					select.append("NULL,");
+					select.append((Integer) data);
+					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+				}
+				else if (data instanceof Timestamp || data instanceof Date)
+				{
+					select.append("NULL,");
+					select.append("NULL,");
+					select.append("'");
+					if (data instanceof Timestamp)
+					{
+						Timestamp value = new Timestamp(((Date) data).getTime());
+						select.append(value);
+					}
+					else
+					{
+						select.append(data);
+					}
+					select.append("'");
+				}
+				else
+				{
+					if (data == null)
+						select.append("NULL");
+					else
+						select.append("'").append(data).append("'");
+					select.append(",NULL");
+					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+				}
+
+				select.append(" ) ");
+			}
+
+			if (counter >= 1000)
+			{
+				DB.executeUpdateEx(insert + select.toString(), null);
+				select = new StringBuilder();
+				counter = 0;
+			}
+		}
+		if (counter > 0)
+		{
+			DB.executeUpdateEx(insert + select.toString(), null);
+		}
+
+	} // createT_Selection_InfoWindow
+	
     /**
      * Get InfoColumnID of infoProcess have processID is processId
      * @param processId
@@ -2028,14 +2205,14 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
         	// just evaluate display logic of process button when requery by use click requery button
         	if (isQueryByUser){
         		bindInfoProcess();
-        		// reset selected list
-                recordSelectedData.clear();
                 isRequeryByRunSuccessProcess = false;
         	}
         	if (isRequeryByRunSuccessProcess){
         		syncSelectedAfterRequery();
         		restoreSelectedInPage();
         	}
+			// reset selected list
+			recordSelectedData.clear();
         	// IDEMPIERE-1334 after refresh, restore prev selected item end
         	updateSubcontent ();
         }
@@ -2238,7 +2415,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	/**
 	 * @param cacheStart the cacheStart to set
 	 */
-	private void setCacheStart(int cacheStart) {
+	protected void setCacheStart(int cacheStart) {
 		this.cacheStart = cacheStart;
 	}
 	

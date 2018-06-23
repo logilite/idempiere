@@ -26,6 +26,7 @@ import org.compiere.model.MOrderTax;
 import org.compiere.model.MPOS;
 import org.compiere.model.MPayment;
 import org.compiere.model.MProduct;
+import org.compiere.model.MTable;
 import org.compiere.process.DocAction;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -160,7 +161,7 @@ public class PosOrderModel extends MOrder {
 		}
 
         //create new line
-		MOrderLine line = new MOrderLine(this);
+		MOrderLine line = MOrderLine.createFrom(this);
 		line.setProduct(product);
 		line.setQty(QtyOrdered);
 			
@@ -373,7 +374,7 @@ public class PosOrderModel extends MOrder {
 
 	private MPayment createPayment(String tenderType)
 	{
-		MPayment payment = new MPayment(getCtx(), 0, trxName);
+		MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(0,trxName);
 		payment.setAD_Org_ID(m_pos.getAD_Org_ID());
 		payment.setTenderType(tenderType);
 		payment.setC_Order_ID(getC_Order_ID());

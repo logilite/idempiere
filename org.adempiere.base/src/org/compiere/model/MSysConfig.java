@@ -106,6 +106,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String LOCATION_MAX_CITY_ROWS = "LOCATION_MAX_CITY_ROWS";
     public static final String LOGIN_HELP_URL = "LOGIN_HELP_URL";
     public static final String LOGIN_SHOW_RESETPASSWORD = "LOGIN_SHOW_RESETPASSWORD";
+    public static final String MATCH_INV_HEADER_ENABLED = "MATCH_INV_HEADER_ENABLED";
     public static final String MAIL_DONT_SEND_TO_ADDRESS = "MAIL_DONT_SEND_TO_ADDRESS";
     public static final String MAIL_SEND_BCC_TO_ADDRESS = "MAIL_SEND_BCC_TO_ADDRESS";
     public static final String MAIL_SEND_BCC_TO_FROM = "MAIL_SEND_BCC_TO_FROM";
@@ -113,6 +114,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String MAX_ACTIVITIES_IN_LIST = "MAX_ACTIVITIES_IN_LIST";
     public static final String MAX_RESULTS_PER_SEARCH_IN_DOCUMENT_CONTROLLER = "MAX_RESULTS_PER_SEARCH_IN_DOCUMENT_CONTROLLER";
     public static final String MAX_TEXT_LENGTH_ON_GRID_VIEW = "MAX_TEXT_LENGTH_ON_GRID_VIEW";
+    public static final String MIN_TOOLTIP_TEXT_LENGTH_ON_GRID_VIEW = "MIN_TOOLTIP_TEXT_LENGTH_ON_GRID_VIEW";
     public static final String MENU_INFOUPDATER_SLEEP_MS = "MENU_INFOUPDATER_SLEEP_MS";
     public static final String MFG_ValidateCostsDifferenceOnCreate = "MFG_ValidateCostsDifferenceOnCreate";
     public static final String MFG_ValidateCostsOnCreate = "MFG_ValidateCostsOnCreate";
@@ -184,7 +186,14 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String ZK_SESSION_TIMEOUT_IN_SECONDS = "ZK_SESSION_TIMEOUT_IN_SECONDS";
     public static final String ZK_THEME = "ZK_THEME";
     public static final String ZOOM_ACROSS_QUERY_TIMEOUT = "ZOOM_ACROSS_QUERY_TIMEOUT";
-
+    public static final String WEBSERVICE_SUPPORT_AUTH_TOKEN = "WEBSERVICE_SUPPORT_AUTH_TOKEN";
+    public static final String WEBSERVICE_Token_Timeout = "WEBSERVICE_Token_Timeout";
+	public static final String WEBSERVICE_LOGIN_RESPONSE_ALL = "WEBSERVICE_LOGIN_RESPONSE_ALL";
+	public static final String LDAP_IS_OPEN_LDAP = "LDAP_IS_OPEN_LDAP";
+	public static final String ZK_ENABLE_CLIENT_URL = "ZK_ENABLE_CLIENT_URL";
+	public static final String QUICKFORM_PAGE_SIZE = "QUICKFORM_PAGE_SIZE";
+	public static final String ATTACHMENT_AUTO_VERSION_ENABLED = "ATTACHMENT_AUTO_VERSION_ENABLED";
+	public static final String DP_COLUMN_WIDTH_PROPORTION = "DP_COLUMN_WIDTH_PROPORTION";
 	/**
 	 * 	Standard Constructor
 	 *	@param ctx context

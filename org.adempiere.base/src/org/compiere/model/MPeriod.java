@@ -73,7 +73,7 @@ public class MPeriod extends X_C_Period
 		if (retValue != null)
 			return retValue;
 		//
-		retValue = new MPeriod (ctx, C_Period_ID, null);
+		retValue = (MPeriod) MTable.get(ctx, MPeriod.Table_ID).getPO(C_Period_ID, null);
 		if (retValue.get_ID () != 0)
 			s_cache.put (key, retValue);
 		return retValue;
@@ -143,6 +143,7 @@ public class MPeriod extends X_C_Period
 		while (it.hasNext())
 		{
 			MPeriod period = (MPeriod)it.next();
+			period.set_TrxName(null);
 			if (period.getC_Calendar_ID() == C_Calendar_ID && period.isStandardPeriod() && period.isInPeriod(DateAcct) 
 					&& period.getAD_Client_ID() == AD_Client_ID)  // globalqss - CarlosRuiz - Fix [ 1820810 ] Wrong Period Assigned to Fact_Acct
 				return period;
@@ -169,7 +170,7 @@ public class MPeriod extends X_C_Period
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{
-				MPeriod period = new MPeriod(ctx, rs, trxName);
+				MPeriod period = (MPeriod) MTable.get(ctx, MPeriod.Table_ID).getPO(rs, trxName);
 				Integer key = new Integer(period.getC_Period_ID());
 				s_cache.put (key, period);
 				if (period.isStandardPeriod())
@@ -419,7 +420,7 @@ public class MPeriod extends X_C_Period
 			pstmt.setString (4, "S");
 			rs = pstmt.executeQuery();
 			if (rs.next())	//	first only
-				retValue = new MPeriod(ctx, rs, null);
+				retValue = (MPeriod) MTable.get(ctx, MPeriod.Table_ID).getPO(rs, null);
 		}
 		catch (SQLException e)
 		{
@@ -434,13 +435,13 @@ public class MPeriod extends X_C_Period
 	}	//	getFirstInYear
 
 	/**	Cache							*/
-	private static CCache<Integer,MPeriod> s_cache = new CCache<Integer,MPeriod>(Table_Name, 10);
+	protected static CCache<Integer,MPeriod> s_cache = new CCache<Integer,MPeriod>(Table_Name, 10);
 	
 	/**	Logger							*/
 	private static CLogger			s_log = CLogger.getCLogger (MPeriod.class); 
 	
 	/** Calendar 					   */
-	private int 					m_C_Calendar_ID = 0;
+	protected int 					m_C_Calendar_ID = 0;
 	
 	
 	/**************************************************************************
@@ -481,6 +482,7 @@ public class MPeriod extends X_C_Period
 	 *	@param name name
 	 *	@param startDate start
 	 *	@param endDate end
+	 *	@deprecated  use {@link #copyFrom(MYear, int, String, Timestamp, Timestamp)} instead
 	 */
 	public MPeriod (MYear year, int PeriodNo, String name, 
 		Timestamp startDate,Timestamp endDate)
@@ -493,10 +495,31 @@ public class MPeriod extends X_C_Period
 		setStartDate(startDate);
 		setEndDate(endDate);
 	}	//	MPeriod
+
+	/**
+	 * @param year
+	 * @param PeriodNo
+	 * @param name
+	 * @param startDate
+	 * @param endDate
+	 * @return MPeriod
+	 */
+	public static MPeriod copyFrom(MYear year, int PeriodNo, String name, Timestamp startDate, Timestamp endDate)
+	{
+		MPeriod mPeriod = (MPeriod) MTable.get(year.getCtx(), MPeriod.Table_ID).getPO(0, year.get_TrxName());
+		mPeriod.setClientOrg(year);
+		mPeriod.setC_Year_ID(year.getC_Year_ID());
+		mPeriod.setPeriodNo(PeriodNo);
+		mPeriod.setName(name);
+		mPeriod.setStartDate(startDate);
+		mPeriod.setEndDate(endDate);
+		return mPeriod;
+	} // copyFrom
+
 	
 	
 	/**	Period Controls			*/
-	private MPeriodControl[] m_controls = null;
+	protected MPeriodControl[] m_controls = null;
 		
 	/**
 	 * 	Get Period Control
@@ -520,6 +543,9 @@ public class MPeriod extends X_C_Period
 			rs = pstmt.executeQuery();
 			while (rs.next())
 				list.add (new MPeriodControl (getCtx(), rs, null));
+			//
+			m_controls = new MPeriodControl[list.size ()];
+			list.toArray (m_controls);
 		}
 		catch (Exception e)
 		{
@@ -530,9 +556,6 @@ public class MPeriod extends X_C_Period
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
 		}
-		//
-		m_controls = new MPeriodControl[list.size ()];
-		list.toArray (m_controls);
 		return m_controls;
 	}	//	getPeriodControls
 	
@@ -546,6 +569,10 @@ public class MPeriod extends X_C_Period
 		if (DocBaseType == null)
 			return null;
 		getPeriodControls(false);
+		
+		if (m_controls == null)
+			return null;
+		
 		for (int i = 0; i < m_controls.length; i++)
 		{
 		//	log.fine("getPeriodControl - " + 1 + " - " + m_controls[i]);
@@ -738,7 +765,7 @@ public class MPeriod extends X_C_Period
 			{
 				MDocType type = types[i];
 				String DocBaseType = type.getDocBaseType();
-				if (baseTypes.contains(DocBaseType))
+				if (baseTypes.contains(DocBaseType) || Util.isEmpty(DocBaseType, true))
 					continue;
 				MPeriodControl pc = new MPeriodControl(this, DocBaseType);
 				pc.saveEx();

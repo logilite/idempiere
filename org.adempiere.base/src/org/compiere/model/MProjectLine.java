@@ -130,7 +130,7 @@ public class MProjectLine extends X_C_ProjectLine
 	{
 		if (m_parent == null && getC_Project_ID() != 0)
 		{
-			m_parent = new MProject (getCtx(), getC_Project_ID(), get_TrxName());
+			m_parent = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(getC_Project_ID(), get_TrxName());
 			if (get_TrxName() != null)
 				m_parent.load(get_TrxName());
 		}

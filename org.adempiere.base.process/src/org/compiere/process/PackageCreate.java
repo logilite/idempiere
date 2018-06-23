@@ -21,6 +21,7 @@ import java.util.logging.Level;
 import org.compiere.model.MInOut;
 import org.compiere.model.MPackage;
 import org.compiere.model.MShipper;
+import org.compiere.model.MTable;
  
 /**
  *	Create Package from Shipment for Shipper
@@ -79,7 +80,7 @@ public class PackageCreate extends SvrProcess
 		if (p_M_Shipper_ID == 0)
 			throw new IllegalArgumentException("No Shipper");
 		
-		MInOut shipment = new MInOut (getCtx(), p_M_InOut_ID, null);
+		MInOut shipment = (MInOut) MTable.get(getCtx(), MInOut.Table_ID).getPO(p_M_InOut_ID, null);
 		if (shipment.get_ID() != p_M_InOut_ID)
 			throw new IllegalArgumentException("Cannot find Shipment ID=" + p_M_InOut_ID);
 		MShipper shipper = new MShipper (getCtx(), p_M_Shipper_ID, get_TrxName());

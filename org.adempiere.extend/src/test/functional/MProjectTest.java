@@ -17,6 +17,7 @@ import org.compiere.model.MProject;
 import org.compiere.model.MProjectIssue;
 import org.compiere.model.MProjectLine;
 import org.compiere.model.MProjectPhase;
+import org.compiere.model.MTable;
 import org.compiere.util.Env;
 
 import test.AdempiereTestCase;
@@ -35,7 +36,7 @@ public class MProjectTest extends AdempiereTestCase
 	
 	public void testQuery() throws Exception
 	{
-		MProject proj = new MProject(getCtx(),101,null); 
+		MProject proj = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(101, null);
 		{
 			//test ProjectLines
 			MProjectLine[] lines = proj.getLines();

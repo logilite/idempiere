@@ -101,7 +101,7 @@ public class MInOutLineConfirm extends X_M_InOutLineConfirm
 	public MInOutLine getLine()
 	{
 		if (m_line == null)
-			m_line = new MInOutLine (getCtx(), getM_InOutLine_ID(), get_TrxName());
+			m_line = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(getM_InOutLine_ID(), get_TrxName());
 		return m_line;
 	}	//	getLine
 	

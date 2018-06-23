@@ -23,6 +23,7 @@ import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MTable;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
  
@@ -74,10 +75,10 @@ public class OrderLineCreateShipment extends SvrProcess
 		if (p_C_OrderLine_ID == 0)
 			throw new IllegalArgumentException("No OrderLine");
 		//
-		MOrderLine line = new MOrderLine (getCtx(), p_C_OrderLine_ID, get_TrxName());
+		MOrderLine line = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(p_C_OrderLine_ID, get_TrxName());
 		if (line.get_ID() == 0)
 			throw new IllegalArgumentException("Order line not found");
-		MOrder order = new MOrder (getCtx(), line.getC_Order_ID(), get_TrxName());
+		MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(line.getC_Order_ID(), get_TrxName());
 		if (!MOrder.DOCSTATUS_Completed.equals(order.getDocStatus()))
 			throw new IllegalArgumentException("Order not completed");
 		
@@ -88,14 +89,14 @@ public class OrderLineCreateShipment extends SvrProcess
 				"SELECT C_DocTypeShipment_ID FROM C_DocType WHERE C_DocType_ID=?", 
 				order.getC_DocType_ID());
 		
-		MInOut shipment = new MInOut (order, C_DocTypeShipment_ID, p_MovementDate);
+		MInOut shipment = MInOut.createFrom(order, C_DocTypeShipment_ID, p_MovementDate);
 		shipment.setM_Warehouse_ID(line.getM_Warehouse_ID());
 		shipment.setMovementDate(line.getDatePromised());
 		if (!shipment.save())
 			throw new IllegalArgumentException("Cannot save shipment header");
 		
 		
-		MInOutLine sline = new MInOutLine( shipment );
+		MInOutLine sline = MInOutLine.createFrom(shipment);
 		sline.setOrderLine(line, 0, line.getQtyReserved());
 		//sline.setDatePromised(line.getDatePromised());
 		sline.setQtyEntered(line.getQtyReserved());

@@ -249,6 +249,8 @@ public class ReportCtl
 			MPrintFormat format = (MPrintFormat)o;
 			String TableName = MTable.getTableName(ctx, format.getAD_Table_ID());
 			MQuery query = MQuery.get (ctx, pi.getAD_PInstance_ID(), TableName);
+			if (query != null && !TableName.startsWith("T_") && pi.getRecord_ID() > 0)
+				query.addRestriction(TableName + "_ID", MQuery.EQUAL, pi.getRecord_ID());
 			PrintInfo info = new PrintInfo(pi);
 			re = new ReportEngine(ctx, format, query, info, pi.isSummary());
 		}

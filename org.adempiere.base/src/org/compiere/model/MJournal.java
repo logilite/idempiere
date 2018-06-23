@@ -372,7 +372,7 @@ public class MJournal extends X_GL_Journal implements DocAction
 	 * 	Update Batch total
 	 *	@return true if ok
 	 */
-	private boolean updateBatch()
+	protected boolean updateBatch()
 	{
 		if (getGL_JournalBatch_ID()!=0) {	// idempiere 344 - nmicoud
 			StringBuilder sql = new StringBuilder("UPDATE GL_JournalBatch jb")
@@ -401,9 +401,9 @@ public class MJournal extends X_GL_Journal implements DocAction
 	}	//	process
 	
 	/**	Process Message 			*/
-	private String		m_processMsg = null;
+	protected String		m_processMsg = null;
 	/**	Just Prepared Flag			*/
-	private boolean		m_justPrepared = false;
+	protected boolean		m_justPrepared = false;
 
 	/**
 	 * 	Unlock Document.
@@ -491,7 +491,7 @@ public class MJournal extends X_GL_Journal implements DocAction
 			}
 			
 			// Michael Judd (mjudd) BUG: [ 2678088 ] Allow posting to system accounts for non-actual postings
-			if (line.isDocControlled() && 
+			if ((line.isDocControlled() && !dt.isOverrideDocControl()) && 
 					( getPostingType().equals(POSTINGTYPE_Actual) ||
 					  getPostingType().equals(POSTINGTYPE_Commitment) ||
 					  getPostingType().equals(POSTINGTYPE_Reservation)
@@ -628,7 +628,7 @@ public class MJournal extends X_GL_Journal implements DocAction
 	/**
 	 * 	Set the definite document number after completed
 	 */
-	private void setDefiniteDocumentNo() {
+	protected void setDefiniteDocumentNo() {
 		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
 		if (dt.isOverwriteDateOnComplete()) {
 			if (this.getProcessedOn().signum() == 0) {

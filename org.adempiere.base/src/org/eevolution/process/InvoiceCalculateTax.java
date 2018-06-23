@@ -22,6 +22,7 @@ import org.compiere.model.MBPartner;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPeriod;
+import org.compiere.model.MTable;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 
@@ -64,7 +65,7 @@ public class InvoiceCalculateTax extends SvrProcess
 	@Override
 	protected String doIt() throws Exception
 	{
-		MInvoice invoice = new MInvoice(getCtx(), p_C_Invoice_ID, get_TrxName());
+		MInvoice invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(p_C_Invoice_ID, get_TrxName());
 		recalculateTax(invoice);
 		//
 		return "@ProcessOK@";
@@ -83,7 +84,8 @@ public class InvoiceCalculateTax extends SvrProcess
 		invoice.saveEx();
 		//
 		// Update balance
-		MBPartner bp = new MBPartner (invoice.getCtx(), invoice.getC_BPartner_ID(), invoice.get_TrxName());
+		MBPartner bp = (MBPartner) MTable.get(invoice.getCtx(), MBPartner.Table_ID).getPO(invoice.getC_BPartner_ID(),
+				invoice.get_TrxName());
 		bp.setTotalOpenBalance();
 		bp.setSOCreditStatus();
 		bp.saveEx();

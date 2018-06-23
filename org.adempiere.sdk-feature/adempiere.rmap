@@ -11,8 +11,9 @@
   <rm:locator pattern="^org\.apache\.poi(\.source)?$" searchPathRef="orbit"/>
   <rm:locator pattern="^org\.eclipse\.jdt\.core\.compiler\.batch(\.source)?$" searchPathRef="bundles.maven"/>
   <rm:locator pattern="^org\.apache\.commons\.collections4(\.source)?$" searchPathRef="bundles.maven"/>
-  <rm:locator pattern="^org\.apache\.commons\.configuration(\.source)?$" searchPathRef="bundles.maven"/>
-  <rm:locator pattern="^org\.apache\.commons\.digester(\.source)?$" searchPathRef="bundles.maven"/>
+  <rm:locator pattern="^org\.apache\.poi\.ooxml$" searchPathRef="orbit"/>
+  <rm:locator pattern="^org\.apache\.poi\.ooxml\.schemas$" searchPathRef="orbit"/>
+  <rm:locator pattern="^org\.dom4j$" searchPathRef="orbit"/>
   <rm:locator pattern="^org\.mortbay\.jasper(\..+)?" searchPathRef="bundles.maven"/>
   <rm:locator pattern="^org\.eclipse\.jetty\.apache\-jsp(\.source)?$" searchPathRef="bundles.maven"/>
   <rm:locator pattern="^org\.eclipse\.jetty\.osgi\-servlet\-api(\.source)?$" searchPathRef="bundles.maven"/>

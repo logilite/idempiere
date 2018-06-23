@@ -41,6 +41,7 @@ import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.factory.InfoManager;
+import org.adempiere.webui.factory.QuickEntryServiceUtil;
 import org.adempiere.webui.grid.WQuickEntry;
 import org.adempiere.webui.panel.IHelpContext;
 import org.adempiere.webui.panel.InfoPanel;
@@ -66,6 +67,7 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.Clients;
+
 
 /**
  * Search Editor for web UI.
@@ -458,7 +460,9 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 			return;
 
 		int zoomWindowId = gridField != null ? lookup.getZoom(Env.isSOTrx(Env.getCtx(), gridField.getWindowNo())) : lookup.getZoom(Env.isSOTrx(Env.getCtx()));
-		final WQuickEntry vqe = new WQuickEntry (lookup.getWindowNo(), zoomWindowId);
+		final WQuickEntry vqe = QuickEntryServiceUtil.getWQuickEntry(lookup.getWindowNo(), zoomWindowId);
+		
+		
 		if (vqe.getQuickFields()<=0)
 			return;
 		int Record_ID = 0;

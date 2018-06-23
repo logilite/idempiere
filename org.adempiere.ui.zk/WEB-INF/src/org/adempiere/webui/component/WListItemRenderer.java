@@ -72,15 +72,15 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
             new ArrayList<TableValueChangeListener>();
 
 	/** A list containing the indices of the currently selected ListItems. */
-	private Set<ListItem> m_selectedItems = new HashSet<ListItem>();
+	protected Set<ListItem> m_selectedItems = new HashSet<ListItem>();
 	/**	Array of table details. */
-	private ArrayList<WTableColumn> m_tableColumns = new ArrayList<WTableColumn>();
+	protected ArrayList<WTableColumn> m_tableColumns = new ArrayList<WTableColumn>();
 	/** Array of {@link ListHeader}s for the list head. */
-    private ArrayList<ListHeader> m_headers = new ArrayList<ListHeader>();
+	protected ArrayList<ListHeader> m_headers = new ArrayList<ListHeader>();
 
-    private Listbox listBox;
+	protected Listbox listBox;
 
-	private EventListener<Event> cellListener;
+	protected EventListener<Event> cellListener;
 
 	/**
 	 * Default constructor.
@@ -115,7 +115,7 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
 	 * @param columnIndex	The index of the column for which details are to be retrieved.
 	 * @return	The details of the column at the specified index.
 	 */
-	private WTableColumn getColumn(int columnIndex)
+	protected WTableColumn getColumn(int columnIndex)
 	{
 		try
 		{
@@ -148,7 +148,7 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
 	 * @throws Exception
 	 * @see {@link #render(Listitem, Object)}
 	 */
-	private void render(ListItem item, Object data, int index)
+	protected void render(ListItem item, Object data, int index)
 	{
 		Listcell listcell = null;
 		int colIndex = 0;
@@ -197,7 +197,7 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
 	 * @param columnIndex	The column in which the cell is to be placed.
 	 * @return	The list cell component.
 	 */
-	private Listcell getCellComponent(WListbox table, Object field,
+	protected Listcell getCellComponent(WListbox table, Object field,
 									  int rowIndex, int columnIndex)
 	{
 		ListCell listcell = new ListCell();
@@ -453,7 +453,7 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
 	 * @return The generated ListHeader
 	 * @see #renderListHead(ListHead)
 	 */
-	private Component getListHeaderComponent(Object headerValue, String tooltipText, int headerIndex, Class<?> classType)
+	protected Component getListHeaderComponent(Object headerValue, String tooltipText, int headerIndex, Class<?> classType)
 	{
         ListHeader header = null;
 
@@ -688,7 +688,7 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
 		return;
 	}
 
-	private boolean isWithinListCell(Component source) {
+	protected boolean isWithinListCell(Component source) {
 		if (source instanceof Listcell)
 			return true;
 		Component c = source.getParent();
@@ -720,7 +720,7 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
 		return row;
 	}
 
-	private Listcell findListcell(Component source) {
+	protected Listcell findListcell(Component source) {
 		if (source instanceof Listcell)
 			return (Listcell) source;
 		Component c = source.getParent();
@@ -798,7 +798,7 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
 	 *
 	 * @param event	The event to pass to the listeners
 	 */
-	private void fireTableValueChange(TableValueChangeEvent event)
+	protected void fireTableValueChange(TableValueChangeEvent event)
 	{
 	    for (TableValueChangeListener listener : m_listeners)
 	    {

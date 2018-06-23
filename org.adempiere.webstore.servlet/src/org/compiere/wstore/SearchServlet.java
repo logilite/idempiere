@@ -35,6 +35,7 @@ import javax.servlet.http.HttpSession;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MClient;
 import org.compiere.model.MOrg;
+import org.compiere.model.MTable;
 import org.compiere.model.MWarehouse;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -444,7 +445,7 @@ public class SearchServlet extends HttpServlet
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
-				MBPartner partner = new MBPartner (ctx, rs, null);
+				MBPartner partner = (MBPartner) MTable.get(ctx, MBPartner.Table_ID).getPO(rs, null);
 				//s_cache.put (new Integer (partner.getAD_Client_ID()), partner);
 				list.add (partner);
 			}

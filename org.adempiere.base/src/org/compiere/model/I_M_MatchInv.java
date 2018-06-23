@@ -210,6 +210,17 @@ public interface I_M_MatchInv
 	/** Get M_MatchInv_UU	  */
 	public String getM_MatchInv_UU();
 
+    /** Column name M_MatchInvHdr_ID */
+    public static final String COLUMNNAME_M_MatchInvHdr_ID = "M_MatchInvHdr_ID";
+
+	/** Set Match Invoice Header	  */
+	public void setM_MatchInvHdr_ID (int M_MatchInvHdr_ID);
+
+	/** Get Match Invoice Header	  */
+	public int getM_MatchInvHdr_ID();
+
+	public org.compiere.model.I_M_MatchInvHdr getM_MatchInvHdr() throws RuntimeException;
+
     /** Column name M_Product_ID */
     public static final String COLUMNNAME_M_Product_ID = "M_Product_ID";
 

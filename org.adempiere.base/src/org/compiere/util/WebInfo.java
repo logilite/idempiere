@@ -38,6 +38,7 @@ import org.compiere.model.MRequest;
 import org.compiere.model.MRequestType;
 import org.compiere.model.MRfQ;
 import org.compiere.model.MRfQResponse;
+import org.compiere.model.MTable;
 import org.compiere.model.MTimeExpense;
 import org.compiere.model.X_AD_UserBPAccess;
 import org.compiere.wf.MWFActivity;
@@ -247,7 +248,7 @@ public class WebInfo
 			pstmt.setInt(1, getC_BPartner_ID());
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add(new MOrder (m_ctx, rs, null));
+				list.add((MOrder) MTable.get(m_ctx, MOrder.Table_ID).getPO(rs, null));
 		}
 		catch (Exception e)
 		{
@@ -288,7 +289,7 @@ public class WebInfo
 			pstmt.setInt(2, m_id);
 			rs = pstmt.executeQuery();
 			if (rs.next())
-				retValue = new MOrder (m_ctx, rs, null);
+				retValue = (MOrder) MTable.get(m_ctx, MOrder.Table_ID).getPO(rs, null);
 		}
 		catch (Exception e)
 		{
@@ -331,7 +332,7 @@ public class WebInfo
 			pstmt.setInt(1, getC_BPartner_ID());
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add(new MInOut (m_ctx, rs, null));
+				list.add((MInOut) MTable.get(m_ctx, MInOut.Table_ID).getPO(rs, null));
 		}
 		catch (Exception e)
 		{
@@ -403,7 +404,7 @@ public class WebInfo
 			}
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add (new MRequest (m_ctx, rs, null));
+				list.add((MRequest) MTable.get(m_ctx, MRequest.Table_ID).getPO(rs, null));
 		}
 		catch (Exception e)
 		{
@@ -441,7 +442,7 @@ public class WebInfo
 			pstmt.setInt(3, getC_BPartner_ID());
 			rs = pstmt.executeQuery();
 			if (rs.next())
-				retValue = new MRequest (m_ctx, rs, null);
+				retValue = (MRequest) MTable.get(m_ctx, MRequest.Table_ID).getPO(rs, null);
  		}
 		catch (Exception e)
 		{
@@ -550,7 +551,7 @@ public class WebInfo
 			pstmt.setInt(1, getC_BPartner_ID());
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add(new MInvoice (m_ctx, rs, null));
+				list.add((MInvoice) MTable.get(m_ctx, MInvoice.Table_ID).getPO(rs, null));
 		}
 		catch (Exception e)
 		{
@@ -592,7 +593,7 @@ public class WebInfo
 			pstmt.setInt(2, m_id);
 			rs = pstmt.executeQuery();
 			if (rs.next())
-				retValue = new MInvoice (m_ctx, rs, null);
+				retValue = (MInvoice) MTable.get(m_ctx, MInvoice.Table_ID).getPO(rs, null);
 		}
 		catch (Exception e)
 		{
@@ -633,7 +634,7 @@ public class WebInfo
 			pstmt.setInt(1, getC_BPartner_ID());
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add(new MPayment (m_ctx, rs, null));
+				list.add((MPayment) MTable.get(m_ctx, MPayment.Table_ID).getPO(rs,null));
 		}
 		catch (Exception e)
 		{
@@ -821,7 +822,7 @@ public class WebInfo
 			pstmt.setInt(3, getAD_User_ID());
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add(new MInvoice (m_ctx, rs, null));
+				list.add((MInvoice) MTable.get(m_ctx, MInvoice.Table_ID).getPO(rs, null));
 		}
 		catch (Exception e)
 		{
@@ -1238,7 +1239,7 @@ public class WebInfo
 				&& rfq.isRfQResponseAccepted() && !rfq.isInvitedVendorsOnly() 
 				&& getC_BPartner_ID() > 0 && getAD_User_ID() > 0)
 			{
-				MBPartner bp = new MBPartner (m_ctx, getC_BPartner_ID(), null);
+				MBPartner bp = (MBPartner) MTable.get(m_ctx, MBPartner.Table_ID).getPO(getC_BPartner_ID(), null);
 				bp.setPrimaryAD_User_ID(getAD_User_ID());				
 				retValue = new MRfQResponse (rfq, bp);	//	may have no lines
 				retValue.saveEx();

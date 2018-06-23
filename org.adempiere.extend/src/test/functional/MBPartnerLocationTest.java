@@ -9,6 +9,7 @@ import org.compiere.model.MBPGroup;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MLocation;
+import org.compiere.model.MTable;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 
@@ -538,7 +539,7 @@ public class MBPartnerLocationTest extends AdempiereTestCase {
 			m_group.setPriorityBase(MBPGroup.PRIORITYBASE_Same);
 			m_group.saveEx();
 	
-			m_partner = new MBPartner (getCtx(), 0, getTrxName());
+			m_partner = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(0, getTrxName());
 			m_partner.setValue ("");
 			m_partner.setName ("Test Business Partner Location");
 			m_partner.setName2 (null);

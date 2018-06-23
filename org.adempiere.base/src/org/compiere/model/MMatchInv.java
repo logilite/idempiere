@@ -22,6 +22,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Properties;
 
+import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 
@@ -215,7 +216,8 @@ public class MMatchInv extends X_M_MatchInv
 		}
 		if (getM_AttributeSetInstance_ID() == 0 && getM_InOutLine_ID() != 0)
 		{
-			MInOutLine iol = new MInOutLine (getCtx(), getM_InOutLine_ID(), get_TrxName());
+			MInOutLine iol = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(getM_InOutLine_ID(),
+					get_TrxName());
 			setM_AttributeSetInstance_ID(iol.getM_AttributeSetInstance_ID());
 		}
 		return true;
@@ -228,7 +230,8 @@ public class MMatchInv extends X_M_MatchInv
 		
 		if (getM_InOutLine_ID() > 0)
 		{
-			MInOutLine line = new MInOutLine(getCtx(), getM_InOutLine_ID(), get_TrxName());
+			MInOutLine line = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(getM_InOutLine_ID(),
+					get_TrxName());
 			BigDecimal matchedQty = DB.getSQLValueBD(get_TrxName(), "SELECT Coalesce(SUM(Qty),0) FROM M_MatchInv WHERE M_InOutLine_ID=?" , getM_InOutLine_ID());
 			if (matchedQty != null && matchedQty.compareTo(line.getMovementQty()) > 0)
 			{
@@ -238,13 +241,41 @@ public class MMatchInv extends X_M_MatchInv
 		
 		if (getC_InvoiceLine_ID() > 0)
 		{
-			MInvoiceLine line = new MInvoiceLine(getCtx(), getC_InvoiceLine_ID(), get_TrxName());
+			MInvoiceLine line = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(getC_InvoiceLine_ID(),
+					get_TrxName());
 			BigDecimal matchedQty = DB.getSQLValueBD(get_TrxName(), "SELECT Coalesce(SUM(Qty),0) FROM M_MatchInv WHERE C_InvoiceLine_ID=?" , getC_InvoiceLine_ID());
 			if (matchedQty != null && matchedQty.compareTo(line.getQtyInvoiced()) > 0)
 			{
 				throw new IllegalStateException("Total matched qty > invoiced qty. MatchedQty="+matchedQty+", InvoicedQty="+line.getQtyInvoiced()+", Line="+line);
 			}
 		}
+		
+		if (newRecord && getReversal_ID() <= 0
+				&& MSysConfig.getBooleanValue(MSysConfig.MATCH_INV_HEADER_ENABLED, false, getAD_Client_ID()))
+		{
+			if(this.getM_MatchInvHdr_ID() <= 0)
+			{
+				MMatchInvHdr matchWB = new MMatchInvHdr(getCtx(), 0, get_TrxName());
+				matchWB.setDateAcct(this.getDateAcct());
+				matchWB.setDateTrx(this.getDateTrx());
+				matchWB.setDescription(this.getDescription());
+				matchWB.saveEx();
+				this.setM_MatchInvHdr_ID(matchWB.get_ID());
+				this.saveEx();
+				
+				try
+				{
+					matchWB.processIt(DocAction.ACTION_Complete);
+					matchWB.saveEx();
+				}
+				catch (Exception e)
+				{
+					log.saveError("Failed to complete match invoice header", e);
+					return false;
+				}
+			}
+		}
+		
 		return true;
 	}
 	
@@ -310,7 +341,7 @@ public class MMatchInv extends X_M_MatchInv
 	
 	//
 	//AZ Goodwill
-	private String deleteMatchInvCostDetail()
+	protected String deleteMatchInvCostDetail()
 	{
 		// Get Account Schemas to delete MCostDetail
 		MAcctSchema[] acctschemas = MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID());

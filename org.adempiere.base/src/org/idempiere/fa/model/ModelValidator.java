@@ -16,6 +16,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MMatchInv;
 import org.compiere.model.MProduct;
+import org.compiere.model.MTable;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.PO;
 import org.compiere.model.SetGetModel;
@@ -74,7 +75,8 @@ implements org.compiere.model.ModelValidator, org.compiere.model.FactsValidator
 			MMatchInv mi = (MMatchInv)po;
 			if (mi.isProcessed())
 			{
-				MInvoiceLine invoiceLine = new MInvoiceLine(mi.getCtx(), mi.getC_InvoiceLine_ID(), mi.get_TrxName());
+				MInvoiceLine invoiceLine = (MInvoiceLine) MTable.get(mi.getCtx(), MInvoiceLine.Table_ID).getPO(
+						mi.getC_InvoiceLine_ID(), mi.get_TrxName());
 				if (invoiceLine.isA_CreateAsset()
 						&& !invoiceLine.isA_Processed()
 						/* commented by @win
@@ -262,7 +264,7 @@ implements org.compiere.model.ModelValidator, org.compiere.model.FactsValidator
 	
 
 	
-	public String factsValidate(MAcctSchema schema, List<Fact> facts, PO po) {
+	public String factsValidate(MAcctSchema schema, List<Fact> facts, PO po,int time) {
 		// TODO: implement it
 		return null;
 	}

@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceTax;
+import org.compiere.model.MTable;
 import org.compiere.model.MTaxDeclaration;
 import org.compiere.model.MTaxDeclarationAcct;
 import org.compiere.model.MTaxDeclarationLine;
@@ -111,7 +112,7 @@ public class TaxDeclarationCreate extends SvrProcess
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
-				create (new MInvoice (getCtx(), rs, null));	//	no lock
+				create((MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(rs, null));  // no lock
 				noInvoices++;
 			}
 		}

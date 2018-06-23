@@ -47,37 +47,38 @@ import org.compiere.util.Env;
  */
 public class PromotionRule {
 
-	public static void applyPromotions(MOrder order) throws Exception {
+public static void applyPromotions(MOrder order, HashMap<Parameter,Integer> promotionLineMap) throws Exception {
+		
 		//key = C_OrderLine, value = Qty to distribution
 		Map<Integer, BigDecimal> orderLineQty = new LinkedHashMap<Integer, BigDecimal>();
 		Map<Integer, MOrderLine> orderLineIndex = new HashMap<Integer, MOrderLine>();
-		MOrderLine[] lines = order.getLines();
+		MOrderLine[] lines = order.getLines(true, MOrderLine.COLUMNNAME_M_Product_ID);
 		boolean hasDeleteLine = false;
 		for (MOrderLine ol : lines) {
-			if (ol.getM_Product_ID() > 0) {
+			if (ol.getM_Product_ID() > 0 && ol.getM_Promotion_ID() <= 0 ) {
 				if (ol.getQtyOrdered().signum() > 0) {
 					orderLineQty.put(ol.getC_OrderLine_ID(), ol.getQtyOrdered());
 					orderLineIndex.put(ol.getC_OrderLine_ID(), ol);
 				}
-			} else if (ol.getC_Charge_ID() > 0) {
-				Number id = (Number) ol.get_Value("M_Promotion_ID");
-				if (id != null && id.intValue() > 0) {
-					ol.delete(false);
-					hasDeleteLine = true;
-				}
 			}
-		}
-		if (orderLineQty.isEmpty()) return;
+			if(ol.getM_Product_ID() <= 0 && ol.getC_Charge_ID() > 0 && ol.getM_Promotion_ID() > 0) {
+				ol.delete(false);
+				hasDeleteLine = true;
+			}
 
+		}
+		
 		//refresh order
 		if (hasDeleteLine) {
 			order.getLines(true, null);
 			order.getTaxes(true);
 			order.setGrandTotal(DB.getSQLValueBD(order.get_TrxName(), "SELECT GrandTotal From C_Order WHERE C_Order_ID = ?", order.getC_Order_ID()));
 		}
+				
 
+		if (orderLineQty.isEmpty()) return;
 		Map<Integer, List<Integer>> promotions = PromotionRule.findM_Promotion_ID(order);
-
+		
 		if (promotions == null || promotions.isEmpty()) return;
 
 		BigDecimal orderAmount = order.getGrandTotal();
@@ -193,10 +194,10 @@ public class PromotionRule {
 						} else if (pr.getRewardType().equals(MPromotionReward.REWARDTYPE_FlatDiscount)) {
 							discount = pr.getAmount();
 						} else if (pr.getRewardType().equals(MPromotionReward.REWARDTYPE_Percentage)) {
-							discount = pr.getAmount().divide(Env.ONEHUNDRED).multiply(totalPrice);
+							discount = pr.getAmount().divide(BigDecimal.valueOf(100.00)).multiply(totalPrice);
 						}
 						if (discount.signum() > 0) {
-							addDiscountLine(order, null, discount, Env.ONE, pr.getC_Charge_ID(), pr.getM_Promotion());
+							addDiscountLine(order, null, discount, BigDecimal.valueOf(1.00), pr.getC_Charge_ID(), pr.getM_Promotion());
 						}
 					} else {
 						int M_PromotionDistribution_ID = pr.getM_PromotionDistribution_ID();
@@ -258,7 +259,10 @@ public class PromotionRule {
 							}
 							for (MOrderLine ol : lines) {
 								if (ol.getC_OrderLine_ID() == C_OrderLine_ID) {
-									if (pr.getRewardType().equals(MPromotionReward.REWARDTYPE_Percentage)) {
+									if (pr.getRewardType().equals(MPromotionReward.REWARDTYPE_FreeProduct)) {
+										addFreeProductLine(order, ol, pr.getQty(), pr.getM_Promotion(), pr.getM_Product_ID(), promotionLineMap);
+									} 
+									else if (pr.getRewardType().equals(MPromotionReward.REWARDTYPE_Percentage)) {
 										BigDecimal priceActual = ol.getPriceActual();
 										BigDecimal discount = priceActual.multiply(pr.getAmount().divide(Env.ONEHUNDRED));
 										addDiscountLine(order, ol, discount, qty, pr.getC_Charge_ID(), pr.getM_Promotion());
@@ -320,6 +324,49 @@ public class PromotionRule {
 			throw new AdempiereException("Failed to add discount line to order");
 	}
 
+	private static void addFreeProductLine(MOrder order, MOrderLine ol,
+			BigDecimal qty, I_M_Promotion promotion, int M_Product_ID, HashMap<Parameter,Integer> promotionLineMap) throws Exception {
+		M_Product_ID = M_Product_ID > 0 ? M_Product_ID : ol.getM_Product_ID();
+		Parameter param = new Parameter(M_Product_ID, promotion.getM_Promotion_ID());
+		MOrderLine nol = null;
+		if(promotionLineMap.get(param) != null) {
+			nol = new MOrderLine(order.getCtx(), promotionLineMap.get(param), order.get_TrxName());
+		}
+		else {
+			nol = new MOrderLine(order.getCtx(), 0, order.get_TrxName());
+			nol.setC_Order_ID(order.getC_Order_ID());
+			nol.setOrder(order);
+			nol.setM_Product_ID(M_Product_ID);
+			nol.setPrice();
+			nol.setPriceActual(BigDecimal.ZERO);
+			nol.setPriceEntered(Env.ZERO);
+			if (ol != null && Integer.toString(ol.getLine()).endsWith("0")) {
+				for(int i = 0; i < 9; i++) {
+					int line = ol.getLine() + i + 1;
+					int r = DB.getSQLValue(order.get_TrxName(), "SELECT C_OrderLine_ID FROM C_OrderLine WHERE C_Order_ID = ? AND Line = ?", order.getC_Order_ID(), line);
+					if (r <= 0) {
+						nol.setLine(line);
+						break;
+					}
+				}
+			}
+			nol.setM_Promotion_ID(promotion.getM_Promotion_ID());
+			if (promotion.getC_Campaign_ID() > 0) {
+				nol.setC_Campaign_ID(promotion.getC_Campaign_ID());
+			}	
+		}
+		nol.setQty(nol.getQtyOrdered().add(qty));
+		String description = promotion.getName();
+		if (ol != null)
+			description += (", " + ol.getName());
+		nol.setDescription(description);
+		if (!nol.save())
+			throw new AdempiereException("Failed to add free product line to order");
+		
+		promotionLineMap.put(param, nol.get_ID());
+	}
+
+
 	/**
 	 *
 	 * @param order
@@ -338,7 +385,7 @@ public class PromotionRule {
 		//optional promotion code filter
 		String promotionCode = (String)order.get_Value("PromotionCode");
 
-		StringBuilder sql = new StringBuilder();
+		StringBuffer sql = new StringBuffer();
 		sql.append(select)
 			.append(" WHERE")
 			.append(" (" + bpFilter + ")")
@@ -415,10 +462,11 @@ public class PromotionRule {
 	private static DistributionSet calculateDistributionQty(MPromotionDistribution distribution,
 			DistributionSet prevSet, List<Integer> validPromotionLineIDs, Map<Integer, BigDecimal> orderLineQty, List<Integer> orderLineIdList, String trxName) throws Exception {
 
-			String sql = "SELECT C_OrderLine.C_OrderLine_ID FROM M_PromotionLine"
+		String sql = "SELECT C_OrderLine.C_OrderLine_ID FROM M_PromotionLine"
 				+ " INNER JOIN M_PromotionGroup ON (M_PromotionLine.M_PromotionGroup_ID = M_PromotionGroup.M_PromotionGroup_ID AND M_PromotionGroup.IsActive = 'Y')"
 				+ " INNER JOIN M_PromotionGroupLine ON (M_PromotionGroup.M_PromotionGroup_ID = M_PromotionGroupLine.M_PromotionGroup_ID AND M_PromotionGroupLine.IsActive = 'Y')"
-				+ " INNER JOIN C_OrderLine ON (M_PromotionGroupLine.M_Product_ID = C_OrderLine.M_Product_ID)"
+				+ " INNER JOIN M_Product p ON (p.M_Product_ID=M_PromotionGroupLine.M_Product_ID OR p.M_Product_Category_ID=M_PromotionGroupLine.M_Product_Category_ID) "
+				+ " INNER JOIN C_OrderLine ON (p.M_Product_ID = C_OrderLine.M_Product_ID)"
 				+ " WHERE M_PromotionLine.M_PromotionLine_ID = ? AND C_OrderLine.C_OrderLine_ID = ?"
 				+ " AND M_PromotionLine.IsActive = 'Y'";
 
@@ -546,16 +594,20 @@ public class PromotionRule {
 		//List<M_PromotionLine_ID>
 		List<Integer>applicable = new ArrayList<Integer>();
 		MOrderLine[] lines = order.getLines();
-		String sql = "SELECT DISTINCT C_OrderLine.C_OrderLine_ID FROM M_PromotionGroup INNER JOIN M_PromotionGroupLine"
-				+ " ON (M_PromotionGroup.M_PromotionGroup_ID = M_PromotionGroupLine.M_PromotionGroup_ID AND M_PromotionGroupLine.IsActive = 'Y')"
-				+ " INNER JOIN C_OrderLine ON (M_PromotionGroupLine.M_Product_ID = C_OrderLine.M_Product_ID)"
-				+ " INNER JOIN M_PromotionLine ON (M_PromotionLine.M_PromotionGroup_ID = M_PromotionGroup.M_PromotionGroup_ID)"
-				+ " WHERE M_PromotionLine.M_PromotionLine_ID = ? AND C_OrderLine.C_Order_ID = ?"
-				+ " AND M_PromotionLine.IsActive = 'Y'"
-				+ " AND M_PromotionGroup.IsActive = 'Y'";
 		for (MPromotionLine pl : plist) {
 			boolean match = false;
 			if (pl.getM_PromotionGroup_ID() > 0) {
+				String sql = "SELECT DISTINCT C_OrderLine.C_OrderLine_ID"
+					+ " FROM M_PromotionGroup "
+					+ " INNER JOIN M_PromotionGroupLine ON (M_PromotionGroup.M_PromotionGroup_ID = M_PromotionGroupLine.M_PromotionGroup_ID"
+					+										" AND M_PromotionGroupLine.IsActive = 'Y')"
+					+ " INNER JOIN M_Product p ON (p.M_Product_ID=M_PromotionGroupLine.M_Product_ID OR p.M_Product_Category_ID=M_PromotionGroupLine.M_Product_Category_ID) "
+					+ " INNER JOIN C_OrderLine ON (p.M_Product_ID = C_OrderLine.M_Product_ID)"
+					+ " INNER JOIN M_PromotionLine ON (M_PromotionLine.M_PromotionGroup_ID = M_PromotionGroup.M_PromotionGroup_ID)"
+					+ " WHERE M_PromotionLine.M_PromotionLine_ID = ? AND C_OrderLine.C_Order_ID = ?"
+					+ " AND M_PromotionLine.IsActive = 'Y'"
+					+ " AND M_PromotionGroup.IsActive = 'Y'";
+
 				
 				PreparedStatement stmt = null;
 				ResultSet rs = null;
@@ -615,4 +667,70 @@ public class PromotionRule {
 			return index.get(ol1).getPriceActual().compareTo(index.get(ol2).getPriceActual());
 		}
 	}
+	
+	static class Parameter
+	{
+		private int	M_Product_ID	= 0;
+		private int	M_Promotion_ID	= 0;
+
+		public Parameter(int M_Product_ID, int M_Promotion_ID)
+		{
+			this.setM_Product_ID(M_Product_ID);
+			this.setM_Promotion_ID(M_Promotion_ID);
+		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			long result = 1;
+			result = prime * result + M_Product_ID;
+			result = prime * result + M_Promotion_ID;
+
+			while (result > Integer.MAX_VALUE)
+			{
+				result -= Integer.MAX_VALUE;
+			}
+
+			return (int) result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Parameter other = (Parameter) obj;
+			if (M_Product_ID != other.M_Product_ID)
+				return false;
+			if (M_Promotion_ID != other.M_Promotion_ID)
+				return false;
+			return true;
+		}
+
+		public int getM_Product_ID()
+		{
+			return M_Product_ID;
+		}
+
+		public int getM_Promotion_ID()
+		{
+			return M_Promotion_ID;
+		}
+
+		public void setM_Promotion_ID(int m_Promotion_ID)
+		{
+			M_Promotion_ID = m_Promotion_ID;
+		}
+
+		public void setM_Product_ID(int m_Product_ID)
+		{
+			M_Product_ID = m_Product_ID;
+		}
+	}
+
 }

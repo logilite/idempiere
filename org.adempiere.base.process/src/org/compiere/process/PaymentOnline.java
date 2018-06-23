@@ -20,6 +20,7 @@ package org.compiere.process;
 import java.util.logging.Level;
 
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 
 
 /**
@@ -55,7 +56,7 @@ public class PaymentOnline extends SvrProcess
 	{
 		if (log.isLoggable(Level.INFO)) log.info("Record_ID=" + getRecord_ID());
 		//	get Payment
-		MPayment pp = new MPayment (getCtx(), getRecord_ID(), get_TrxName());
+		MPayment pp=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(getRecord_ID(),get_TrxName());
 		
 		//  Process it
 		boolean ok = pp.processOnline();

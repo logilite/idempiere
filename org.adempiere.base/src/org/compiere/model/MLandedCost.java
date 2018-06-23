@@ -139,7 +139,8 @@ public class MLandedCost extends X_C_LandedCost
 	 */
 	public String allocateCosts()
 	{
-		MInvoiceLine il = new MInvoiceLine (getCtx(), getC_InvoiceLine_ID(), get_TrxName());
+		MInvoiceLine il = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(getC_InvoiceLine_ID(),
+				get_TrxName());
 		return il.allocateLandedCosts();
 	}	//	allocateCosts
 	

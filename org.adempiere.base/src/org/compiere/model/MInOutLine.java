@@ -135,6 +135,7 @@ public class MInOutLine extends X_M_InOutLine
 	 *  Parent Constructor
 	 *  @param inout parent
 	 */
+	@Deprecated
 	public MInOutLine (MInOut inout)
 	{
 		this (inout.getCtx(), 0, inout.get_TrxName());
@@ -144,6 +145,18 @@ public class MInOutLine extends X_M_InOutLine
 		setC_Project_ID(inout.getC_Project_ID());
 		m_parent = inout;
 	}	//	MInOutLine
+	
+	public static MInOutLine createFrom(MInOut inout)
+	{
+		MInOutLine ioLine = (MInOutLine) MTable.get(inout.getCtx(), MInOutLine.Table_ID).getPO(0, inout.get_TrxName());
+		ioLine.setClientOrg(inout);
+		ioLine.setM_InOut_ID(inout.getM_InOut_ID());
+		ioLine.setM_Warehouse_ID(inout.getM_Warehouse_ID());
+		ioLine.setC_Project_ID(inout.getC_Project_ID());
+		ioLine.m_parent = inout;
+
+		return ioLine;
+	}
 
 	/**	Product					*/
 	private MProduct 		m_product = null;
@@ -159,7 +172,7 @@ public class MInOutLine extends X_M_InOutLine
 	public MInOut getParent()
 	{
 		if (m_parent == null)
-			m_parent = new MInOut (getCtx(), getM_InOut_ID(), get_TrxName());
+			m_parent = (MInOut) MTable.get(getCtx(), MInOut.Table_ID).getPO(getM_InOut_ID(), get_TrxName());
 		return m_parent;
 	}	//	getParent
 
@@ -717,7 +730,8 @@ public class MInOutLine extends X_M_InOutLine
 		if (getC_OrderLine_ID() <= 0)
 			return false;
 
-		MOrderLine oLine = new MOrderLine(getCtx(), getC_OrderLine_ID(), get_TrxName());
+		MOrderLine oLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(getC_OrderLine_ID(),
+				get_TrxName());
 
 		if (oLine.getC_UOM_ID() != getC_UOM_ID())
 			return false;

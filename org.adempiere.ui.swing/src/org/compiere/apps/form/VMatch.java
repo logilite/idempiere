@@ -28,6 +28,7 @@ import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.logging.Level;
+
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JScrollPane;
@@ -36,6 +37,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+
 import org.compiere.apps.StatusBar;
 import org.compiere.grid.ed.VDate;
 import org.compiere.grid.ed.VLookup;
@@ -363,7 +365,7 @@ public class VMatch extends Match
 		else if (e.getSource() == matchTo)
 			cmd_matchTo();
 		else if (e.getSource() == bSearch) {
-			xMatchedTable = (MiniTable) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
+			xMatchedTable = (MiniTable) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED, 0);
 			xMatched.setValue(Env.ZERO);
 			//  Status Info
 			statusBar.setStatusLine(matchFrom.getSelectedItem().toString()
@@ -372,8 +374,8 @@ public class VMatch extends Match
 			statusBar.setStatusDB(0);
 		}
 		else if (e.getSource() == bProcess) {
-			cmd_process(xMatchedTable, xMatchedToTable, matchMode.getSelectedIndex(), matchFrom.getSelectedIndex(), matchTo.getSelectedItem(), m_xMatched);
-			xMatchedTable = (MiniTable) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
+			cmd_process(xMatchedTable, xMatchedToTable, matchMode.getSelectedIndex(), matchFrom.getSelectedIndex(), matchTo.getSelectedItem(), m_xMatched, false);
+			xMatchedTable = (MiniTable) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED, 0);
 			xMatched.setValue(Env.ZERO);
 			//  Status Info
 			statusBar.setStatusLine(matchFrom.getSelectedItem().toString()
@@ -384,7 +386,7 @@ public class VMatch extends Match
 		else if (e.getSource() == sameBPartner
 			|| e.getSource() == sameProduct
 			|| e.getSource() == sameQty)
-			xMatchedTable = (MiniTable) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
+			xMatchedTable = (MiniTable) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED, 0);
 		panel.setCursor(Cursor.getDefaultCursor());
 	}   //  actionPerformed
 

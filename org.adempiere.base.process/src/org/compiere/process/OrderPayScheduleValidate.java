@@ -21,6 +21,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderPaySchedule;
+import org.compiere.model.MTable;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -60,7 +61,7 @@ public class OrderPayScheduleValidate extends SvrProcess
 		if (schedule.length == 0)
 			throw new IllegalArgumentException("OrderPayScheduleValidate - No Schedule");
 		//	Get Order
-		MOrder order = new MOrder (getCtx(), schedule[0].getC_Order_ID(), null);
+		MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(schedule[0].getC_Order_ID(), null);
 		if (order.get_ID() == 0)
 			throw new IllegalArgumentException("OrderPayScheduleValidate - No Order");
 		//

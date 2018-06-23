@@ -23,6 +23,7 @@ import org.compiere.impexp.BankStatementMatchInfo;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MBankStatementLine;
 import org.compiere.model.MBankStatementMatcher;
+import org.compiere.model.MTable;
 import org.compiere.model.X_I_BankStatement;
 
 /**
@@ -71,7 +72,7 @@ public class BankStatementMatcher extends SvrProcess
 		if (Table_ID == X_I_BankStatement.Table_ID)
 			return match (new X_I_BankStatement(getCtx(), Record_ID, get_TrxName()));
 		else if (Table_ID == MBankStatement.Table_ID)
-			return match (new MBankStatement(getCtx(), Record_ID, get_TrxName()));
+			return match((MBankStatement) MTable.get(getCtx(), MBankStatement.Table_ID).getPO(Record_ID, get_TrxName()));
 		else if (Table_ID == MBankStatementLine.Table_ID)
 			return match (new MBankStatementLine(getCtx(), Record_ID, get_TrxName()));
 		

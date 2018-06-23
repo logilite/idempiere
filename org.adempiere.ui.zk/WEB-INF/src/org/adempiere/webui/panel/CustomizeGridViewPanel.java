@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import org.adempiere.exceptions.DBException;
 import org.adempiere.model.MTabCustomization;
 import org.adempiere.webui.ClientInfo;
+import org.adempiere.util.Callback;
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.adwindow.GridView;
 import org.adempiere.webui.component.Button;
@@ -82,7 +83,6 @@ public class CustomizeGridViewPanel extends Panel
 	private Map<Integer, String> m_columnsWidth;
 	ArrayList<Integer> tableSeqs;
 	GridView gridPanel = null;
-	MTabCustomization m_tabcust;
 
 	/**
 	 *	Sort Tab Constructor
@@ -131,7 +131,7 @@ public class CustomizeGridViewPanel extends Panel
 
 	private boolean uiCreated;
 	private boolean m_saved = false;
-	private ConfirmPanel confirmPanel = new ConfirmPanel(true);
+	private ConfirmPanel confirmPanel = new ConfirmPanel(true, false, true, false, false, false);
 	
 /**
 	 * Static Layout
@@ -291,8 +291,28 @@ public class CustomizeGridViewPanel extends Panel
 						confirmPanel.getButton(ConfirmPanel.A_CANCEL))) {
 					getParent().detach();
 				}
-			}
+				else if (event.getTarget().equals(confirmPanel.getButton(ConfirmPanel.A_RESET)))
+				{
+					MTabCustomization tabCust = MTabCustomization.get(Env.getCtx(), m_AD_User_ID, m_AD_Tab_ID, null);
+					if (tabCust != null && tabCust.getAD_Tab_Customization_ID() > 0)
+						tabCust.deleteEx(true);
 
+					MRole currRole = MRole.get(Env.getCtx(), Env.getAD_Role_ID(Env.getCtx()));
+					if (currRole.isCanSaveGridCustPrefEveryone())
+					{
+						FDialog.ask(m_WindowNo, null, "GRIDVIEW_RESET_SUPERUSER_CUSTOM_PREF", new Callback<Boolean>() {
+
+							@Override
+							public void onCallback(Boolean result)
+							{
+								MTabCustomization tabCust = MTabCustomization.get(Env.getCtx(), MTabCustomization.SUPERUSER, m_AD_Tab_ID, null);
+								if (result && tabCust != null && tabCust.getAD_Tab_Customization_ID() > 0)
+									tabCust.deleteEx(true);
+							}
+						});
+					}
+				}
+			}
 		};
 
 		confirmPanel.addActionListener(onClickListener);
@@ -306,7 +326,8 @@ public class CustomizeGridViewPanel extends Panel
 	
 	public void loadData()
 	{
-		m_tabcust = MTabCustomization.get(Env.getCtx(), m_AD_User_ID, m_AD_Tab_ID, null);
+		MTabCustomization tabCust = MTabCustomization.get(Env.getCtx(), m_AD_User_ID, m_AD_Tab_ID,  null);
+		MTabCustomization tabCustAll = MTabCustomization.get(Env.getCtx(), MTabCustomization.SUPERUSER, m_AD_Tab_ID, null);
 
 		yesModel.removeAllElements();
 		noModel.removeAllElements();		
@@ -377,11 +398,13 @@ public class CustomizeGridViewPanel extends Panel
 		ValueNamePair[]  list = MRefList.getList(Env.getCtx(), X_AD_Tab_Customization.ISDISPLAYEDGRID_AD_Reference_ID, false);
 		for (int i = 0;i < list.length; i++ ) { 
 			lstGridMode.addItem(list[i]);
-			if (m_tabcust != null && list[i].getValue().equals(m_tabcust.getIsDisplayedGrid()))
+			if ((tabCust != null && list[i].getValue().equals(tabCust.getIsDisplayedGrid()))
+				|| (tabCust == null && tabCustAll != null && list[i].getValue().equals(tabCustAll.getIsDisplayedGrid())))
 				lstGridMode.setSelectedValueNamePair(list[i]);
 		}
 
-		if (m_tabcust != null && m_tabcust.getCustom().indexOf("px") > 0)
+		if ((tabCust != null && tabCust.getCustom().indexOf("px") > 0)
+			|| (tabCust == null && tabCustAll != null && tabCustAll.getCustom().indexOf("px") > 0))
 			chkSaveWidth.setChecked(true);
 	}	//	loadData
 
@@ -519,8 +542,7 @@ public class CustomizeGridViewPanel extends Panel
 		log.fine("");
 		//	yesList
 		//int index = 0;
-		boolean ok = true;
-		StringBuilder custom = new StringBuilder(); 
+		final StringBuilder custom = new StringBuilder(); 
 		for (int i = 0; i < yesModel.getSize(); i++)
 		{
 			ListElement pp = (ListElement)yesModel.getElementAt(i);
@@ -552,43 +574,46 @@ public class CustomizeGridViewPanel extends Panel
 		String gridview = null;
 		if (lstGridMode.getSelectedItem() != null && lstGridMode.getSelectedItem().toString().length() > 0)
 			gridview = lstGridMode.getSelectedItem().toString();
-		if (m_tabcust != null && m_tabcust.getAD_Tab_Customization_ID() > 0) {
-			m_tabcust.setCustom(custom.toString());	
-			m_tabcust.setIsDisplayedGrid(gridview);
-		} else {
-			m_tabcust = new MTabCustomization(Env.getCtx(), 0, null);
-			m_tabcust.setAD_Tab_ID(m_AD_Tab_ID);
-			m_tabcust.set_ValueOfColumn("AD_User_ID", m_AD_User_ID);
-			m_tabcust.setCustom(custom.toString());
-			m_tabcust.setIsDisplayedGrid(gridview);
-		}
-		if (m_tabcust.getCustom() == null || m_tabcust.getCustom().trim().length() == 0)
+		final String dView = gridview;
+		
+		boolean ok = MTabCustomization.saveData(Env.getCtx(), m_AD_Tab_ID, m_AD_User_ID, custom.toString(), dView, null, false);
+		if (!ok)
 		{
-			if (m_tabcust.is_new())
-			{
-				//no action needed
-				getParent().detach();
-				return;
-			}
-			else
-			{
-				ok = m_tabcust.delete(true);
-			}
+			FDialog.error(m_WindowNo, null, "SaveError", custom.toString());
+			return;
+		}
+
+		MRole currRole = MRole.get(Env.getCtx(), Env.getAD_Role_ID(Env.getCtx()));
+		if (currRole.isCanSaveGridCustPrefEveryone() && MTabCustomization.SUPERUSER != m_AD_User_ID)
+		{
+			// Save default preference for every user.
+			FDialog.ask(m_WindowNo, this, "GRIDVIEW_APPLY_CUSTOM_PREF_EVERYONE", new Callback<Boolean>() {
+
+				@Override
+				public void onCallback(Boolean result)
+				{
+					if (result)
+					{
+						boolean isSave = MTabCustomization.saveData(Env.getCtx(), m_AD_Tab_ID, MTabCustomization.SUPERUSER, custom.toString(), dView, null, false);
+						if (!isSave)
+						{
+							FDialog.error(m_WindowNo, null, "SaveError", custom.toString());
+							return;
+						}
+					}
+					m_saved = true;
+					getParent().detach();
+					if (gridPanel != null)
+						Events.postEvent("onCustomizeGrid", gridPanel, null);
+				}
+			});
 		}
 		else
 		{
-			ok = m_tabcust.save();
-		}
-		//
-		if(ok) {
 			m_saved = true;
-			// FDialog.info(m_WindowNo, null, "Saved");
 			getParent().detach();
-			if(gridPanel!=null){
+			if (gridPanel != null)
 				Events.postEvent("onCustomizeGrid", gridPanel, null);
-			}
-		} else {
-			FDialog.error(m_WindowNo, null, "SaveError", custom.toString());
 		}
 	}	//	saveData
 

@@ -52,11 +52,11 @@ public class Doc_Payment extends Doc
 	}	//	Doc_Payment
 
 	/**	Tender Type				*/
-	private String		m_TenderType = null;
+	protected String		m_TenderType = null;
 	/** Prepayment				*/
-	private boolean		m_Prepayment = false;
+	protected boolean		m_Prepayment = false;
 	/** Bank Account			*/
-	private int			m_C_BankAccount_ID = 0;
+	protected int			m_C_BankAccount_ID = 0;
 
 	/**
 	 *  Load Specific Document Details
@@ -176,7 +176,7 @@ public class Doc_Payment extends Doc
 	 * 	Get AD_Org_ID from Bank Account
 	 * 	@return AD_Org_ID or 0
 	 */
-	private int getBank_Org_ID ()
+	public int getBank_Org_ID ()
 	{
 		if (m_C_BankAccount_ID == 0)
 			return 0;

@@ -42,7 +42,7 @@ Copyright (C) 2007 Ashley G Ramdass (ADempiere WebUI).
 	<javascript src="/js/html2canvas.js" charset="UTF-8"/>
 	<javascript src="/js/jquery.maskedinput.js" charset="UTF-8"/>
 	<javascript src="/js/photobooth_min.js" charset="UTF-8"/>
-
+	<javascript src="/js/drag-drop-attachment.js" charset="UTF-8"/>
 
 	<javascript package="jawwa.atmosphere" merge="false" />
 	

@@ -29,6 +29,7 @@ import org.compiere.grid.ed.VNumber;
 import org.compiere.model.GridTab;
 import org.compiere.model.MConversionRate;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MTable;
 import org.compiere.swing.CComboBox;
 import org.compiere.swing.CLabel;
 import org.compiere.util.DisplayType;
@@ -65,7 +66,7 @@ public class VPaymentFormCash extends PaymentFormCash implements ActionListener 
 		//Bojana&Daniel
 		//If Invoice is Vendor invoice then Cash has to be created by negative amount
 		int C_Invoice_ID = Env.getContextAsInt(Env.getCtx(), windowNo, "C_Invoice_ID");
-		MInvoice invoice_tmp = new MInvoice (Env.getCtx(), C_Invoice_ID, null);
+		MInvoice invoice_tmp=(MInvoice) MTable.get(Env.getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, null);
 		if (! invoice_tmp.isSOTrx())
 		{
 			bAmountField.setValue(m_Amount.negate());

@@ -336,7 +336,9 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 //		if (display != null)
 //			display = XMLs.encodeText(display);
 		label.setValue(display);
-		if (text != null && text.length() > MAX_TEXT_LENGTH)
+		
+		final int MIN_TOOLTIP_TEXT_LENGTH = MSysConfig.getIntValue(MSysConfig.MIN_TOOLTIP_TEXT_LENGTH_ON_GRID_VIEW, MAX_TEXT_LENGTH_DEFAULT, Env.getAD_Client_ID(Env.getCtx()));
+		if (text != null && (text.length() > MAX_TEXT_LENGTH || text.length() > MIN_TOOLTIP_TEXT_LENGTH))
 			label.setTooltiptext(text);
 	}
 

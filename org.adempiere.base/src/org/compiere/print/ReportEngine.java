@@ -62,9 +62,11 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.adempiere.pdf.Document;
 import org.adempiere.print.export.PrintDataExcelExporter;
+import org.adempiere.print.export.PrintDataXLSXExporter;
 import org.apache.ecs.XhtmlDocument;
 import org.apache.ecs.xhtml.a;
 import org.apache.ecs.xhtml.script;
+import org.apache.ecs.xhtml.style;
 import org.apache.ecs.xhtml.table;
 import org.apache.ecs.xhtml.tbody;
 import org.apache.ecs.xhtml.td;
@@ -88,6 +90,7 @@ import org.compiere.model.MRfQResponse;
 import org.compiere.model.MRole;
 import org.compiere.model.MTable;
 import org.compiere.model.PrintInfo;
+import org.compiere.model.MRMA;
 import org.compiere.print.layout.LayoutEngine;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ServerProcessCtl;
@@ -622,8 +625,42 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			String cssPrefix = extension != null ? extension.getClassPrefix() : null;
 			if (cssPrefix != null && cssPrefix.trim().length() == 0)
 				cssPrefix = null;
-			
+
 			table table = new table();
+			String headerCSS = "";
+			if (m_printFormat.getAD_PrintFont_ID() != 0)
+			{
+				MPrintFont pFont = (MPrintFont) m_printFormat.getAD_PrintFont();
+				Font font = pFont.getFont();
+				if (!Util.isEmpty(getCSSFontFamily(font.getName())))
+					headerCSS = "font-family: " + getCSSFontFamily(font.getName()) + ";";
+				if (font.isBold())
+					headerCSS = headerCSS + "font-weight: bold;";
+				if (font.isItalic())
+					headerCSS = headerCSS + "font-style: italic;";
+				headerCSS = headerCSS + "font-size: " + font.getSize() + "pt;";
+			}
+
+			if (m_printFormat.getAD_PrintColor_ID() != 0)
+			{
+				MPrintColor color = (MPrintColor) m_printFormat.getAD_PrintColor();
+				headerCSS = headerCSS + "color: #" + color.getRRGGBB() + ";";
+			}
+			
+			table.setStyle(headerCSS);
+
+			int printColIndex = -1;
+			// for all columns
+			for (int col = 0; col < m_printFormat.getItemCount(); col++)
+			{
+				MPrintFormatItem item = m_printFormat.getItem(col);
+				if (item.isPrinted())
+				{
+					printColIndex++;
+					addCssInfo(item, printColIndex);
+				}
+			}
+
 			if (cssPrefix != null)
 				table.setClass(cssPrefix + "-table");
 			//
@@ -639,28 +676,21 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				doc.getHtml().setNeedClosingTag(false);
 				doc.getBody().setNeedClosingTag(false);
 				doc.appendHead("<meta charset=\"UTF-8\" />");
+				if (!Util.isEmpty(headerCSS))
+					doc.appendHead(new style(style.css).addElement(".floatThead-table {" + headerCSS + "}"));
 				doc.appendBody(table);
-				appendInlineCss (doc);
 				if (extension != null && extension.getStyleURL() != null)
 				{
 					// maybe cache style content with key is path
 					String pathStyleFile = extension.getFullPathStyle(); // creates a temp file - delete below
-					Path path = Paths.get(pathStyleFile);
-				    List<String> styleLines = Files.readAllLines(path, Ini.getCharset());
-				    Files.delete(path); // delete temp file
-				    StringBuilder styleBuild = new StringBuilder();
-				    for (String styleLine : styleLines){
-				    	styleBuild.append(styleLine); //.append("\n");
-				    }
-				    appendInlineCss (doc, styleBuild);
+					appendInlineCss(doc, readResourceFile(pathStyleFile));
 				}
 				if (extension != null && extension.getScriptURL() != null && !isExport)
 				{
-					script jslink = new script();
-					jslink.setLanguage("javascript");
-					jslink.setSrc(extension.getScriptURL());
-					doc.appendHead(jslink);
+					embedExtendScript(doc, extension.getScriptURL());
 				}
+				appendExtraScript(extension, isExport, doc);
+				appendInlineCss(doc);
 				
 				if (extension != null && !isExport){
 					extension.setWebAttribute(doc.getBody());
@@ -675,11 +705,13 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			
 			Boolean [] colSuppressRepeats = m_layout == null || m_layout.colSuppressRepeats == null? LayoutEngine.getColSuppressRepeats(m_printFormat):m_layout.colSuppressRepeats;
 			Object [] preValues = new Object [colSuppressRepeats.length];
-			int printColIndex = -1;
 			//	for all rows (-1 = header row)
 			for (int row = -1; row < m_printData.getRowCount(); row++)
 			{
 				tr tr = new tr();
+				String cssclass = "";
+				if (cssPrefix != null && row % 2 == 0)
+					cssclass = cssPrefix + "-odd";
 				if (row != -1)
 				{
 					m_printData.setRowIndex(row);					
@@ -688,9 +720,9 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 						extension.extendRowElement(tr, m_printData);
 					}
 					if (m_printData.isFunctionRow()) {
-						tr.setClass(cssPrefix + "-functionrow");
+						cssclass = cssclass + " " + cssPrefix + "-functionrow";
 					} else if ( row < m_printData.getRowCount() && m_printData.isFunctionRow(row+1)) {
-						tr.setClass(cssPrefix + "-lastgrouprow");
+						cssclass = cssclass + " " + cssPrefix + "-lastgrouprow";
 					}
 					// add row to table body
 					//tbody.addElement(tr);
@@ -698,6 +730,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 					// add row to table header
 					thead.addElement(tr);
 				}
+				tr.setClass(cssclass);
 				
 				printColIndex = -1;
 				//	for all columns
@@ -729,6 +762,24 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 						{
 							td td = new td();
 							tr.addElement(td);
+							String style = "";
+							if (item.isFixedWidth() && item.getMaxWidth() > 0)
+							{
+								// convert to pixels assuming 96dpi
+								int pxs = (item.getMaxWidth() * 96);
+								pxs = pxs / 72;
+								style = "min-width:" + pxs + ";max-width:" + pxs + "; overflow: hidden";
+							}
+
+							if (item.isHeightOneLine())
+							{
+								if (style.length() > 0)
+									style += ";";
+								style += "white-space: nowrap;";
+							}
+
+							td.setStyle(style);
+
 							Object obj = m_printData.getNode(new Integer(item.getAD_Column_ID()));
 							if (obj == null){
 								td.addElement("&nbsp;");
@@ -795,9 +846,14 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 										a href = new a("javascript:void(0)");									
 										href.setID(pde.getColumnName() + "_" + row + "_a");									
 										td.addElement(href);
-										href.addElement(Util.maskHTML(value));
-										if (cssPrefix != null)
-											href.setClass(cssPrefix + "-href");
+										if (item.getColumnName().equals("Record_ID")) {
+											if (cssPrefix != null)
+												href.setClass(cssPrefix + "-image");
+										} else {
+											href.addElement(Util.maskHTML(value));
+											if (cssPrefix != null)
+												href.setClass(cssPrefix + "-href");
+										}
 										extension.extendIDColumn(row, td, href, pde);
 									} else {
 										td.addElement(Util.maskHTML(value));
@@ -816,11 +872,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 										td.setClass(cssPrefix + "-date");
 									else
 										td.setClass(cssPrefix + "-text");
-								}			
-								//just run with on record
-								if (row == 0)
-									addCssInfo(item, printColIndex);
-								
+								}
 							}
 							else if (obj instanceof PrintData)
 							{
@@ -863,14 +915,25 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	}	//	createHTML
 
 
-	private String getCSSFontFamily(String fontFamily) {
-		if ("Dialog".equals(fontFamily) || "DialogInput".equals(fontFamily) || 	"Monospaced".equals(fontFamily))
+	private String getCSSFontFamily(String fontFamily)
+	{
+		if ("Dialog".equalsIgnoreCase(fontFamily))
+		{
+			return "cursive";
+		}
+		else if ("DialogInput".equalsIgnoreCase(fontFamily))
+		{
+			return "fantasy";
+		}
+		else if ("Monospaced".equalsIgnoreCase(fontFamily))
 		{
 			return "monospace";
-		} else if ("SansSerif".equals(fontFamily))
+		}
+		else if ("SansSerif".equalsIgnoreCase(fontFamily))
 		{
 			return "sans-serif";
-		} else if ("Serif".equals(fontFamily))
+		}
+		else if ("Serif".equalsIgnoreCase(fontFamily))
 		{
 			return "serif";
 		}
@@ -1251,6 +1314,21 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		PrintDataExcelExporter exp = new PrintDataExcelExporter(getPrintData(), getPrintFormat(), colSuppressRepeats);
 		exp.export(outFile, language);
 	}
+	
+	/**
+	 * Create Excel X file
+	 * @param outFile output file
+	 * @param language
+	 * @throws Exception if error
+	 */
+	public void createXLSX(File outFile, Language language)
+	throws Exception
+	{
+		Boolean [] colSuppressRepeats = m_layout == null || m_layout.colSuppressRepeats == null? LayoutEngine.getColSuppressRepeats(m_printFormat):m_layout.colSuppressRepeats;
+		PrintDataXLSXExporter exp = new PrintDataXLSXExporter(getPrintData(), getPrintFormat(), colSuppressRepeats);
+		exp.export(outFile, language);
+	}
+	
 
 	/**************************************************************************
 	 * 	Get Report Engine for process info 
@@ -1417,7 +1495,9 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	/** Physical Inventory = 10  */
 	public static final int		INVENTORY = 10;
 	/** Inventory Move = 11  */
-	public static final int		MOVEMENT = 11;
+	public static final int		MOVEMENT = 11;	
+	/** RMA = 12  */
+	public static final int		RMA = 12;
 	
 
 //	private static final String[]	DOC_TABLES = new String[] {
@@ -1429,17 +1509,18 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		"C_Order", "M_InOut", "C_Invoice", "C_Project",
 		"C_RfQResponse",
 		"C_PaySelectionCheck", "C_PaySelectionCheck", 
-		"C_DunningRunEntry","PP_Order", "DD_Order", "M_Inventory", "M_Movement"};
+		"C_DunningRunEntry","PP_Order", "DD_Order", "M_Inventory", "M_Movement" , "M_RMA"};
 	private static final String[]	DOC_IDS = new String[] {
 		"C_Order_ID", "M_InOut_ID", "C_Invoice_ID", "C_Project_ID",
 		"C_RfQResponse_ID",
 		"C_PaySelectionCheck_ID", "C_PaySelectionCheck_ID", 
-		"C_DunningRunEntry_ID" , "PP_Order_ID" , "DD_Order_ID", "M_Inventory_ID", "M_Movement_ID" };
+		"C_DunningRunEntry_ID" , "PP_Order_ID" , "DD_Order_ID", "M_Inventory_ID", "M_Movement_ID" , "M_RMA_ID" };
 	private static final int[]	DOC_TABLE_ID = new int[] {
 		MOrder.Table_ID, MInOut.Table_ID, MInvoice.Table_ID, MProject.Table_ID,
 		MRfQResponse.Table_ID,
 		MPaySelectionCheck.Table_ID, MPaySelectionCheck.Table_ID, 
-		MDunningRunEntry.Table_ID, X_PP_Order.Table_ID, MDDOrder.Table_ID, MInventory.Table_ID, MMovement.Table_ID };
+		MDunningRunEntry.Table_ID, X_PP_Order.Table_ID, MDDOrder.Table_ID, MInventory.Table_ID, MMovement.Table_ID,
+		MRMA.Table_ID};
 
 	/**************************************************************************
 	 * 	Get Document Print Engine for Document Type.
@@ -1575,7 +1656,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				.append("WHERE d." + DOC_IDS[type] + "=?")			//	info from PrintForm
 				.append(" AND pf.AD_Org_ID IN (0,d.AD_Org_ID) ")
 				.append("ORDER BY pf.AD_Org_ID DESC");
-		else if (type == INVENTORY || type == MOVEMENT)
+		else if (type == INVENTORY || type == MOVEMENT || type == RMA)
 			sql = new StringBuilder("SELECT COALESCE (dt.AD_PrintFormat_ID, 0), 0,") 			// 1..2
 				.append(" NULL, 0 , d.DocumentNo ")				// 3..5
 				.append("FROM " + DOC_BASETABLES[type] + " d")
@@ -1610,7 +1691,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			{
 				if (type == CHECK || type == DUNNING || type == REMITTANCE 
 					|| type == PROJECT || type == RFQ || type == MANUFACTURING_ORDER || type == DISTRIBUTION_ORDER 
-					|| type == INVENTORY || type == MOVEMENT)
+					|| type == INVENTORY || type == MOVEMENT || type == RMA)
 				{
 					AD_PrintFormat_ID = rs.getInt(1);
 					copies = 1;
@@ -1921,6 +2002,8 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		if (buildCssInline.length() > 0){
 			buildCssInline.insert(0, "<style>");
 			buildCssInline.append("</style>");
+			buildCssInline.insert(0, "<style type=\"text/css\" rel=\"stylesheet\">\n");
+			buildCssInline.append("\n</style>");
 			doc.appendHead(buildCssInline.toString());
 		}
 	}
@@ -2103,4 +2186,99 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		}
 	}
 
+	/**
+	 * if isExport, embed script content other embed script url
+	 * 
+	 * @param extension
+	 * @param isExport
+	 * @param doc
+	 * @throws IOException
+	 */
+	protected void appendExtraScript(IHTMLExtension extension, boolean isExport, XhtmlDocument doc) throws IOException
+	{
+		// embed extend script by link
+		if (extension != null && isExport)
+		{
+			for (String extraScriptPath : extension.getFullPathExtraScriptURLs())
+			{
+				appendInlineScriptContent(doc, readResourceFile(extraScriptPath));
+			}
+			// embed extend script by content
+		}
+		else if (extension != null && !isExport)
+		{
+			for (String extraScriptUrl : extension.getExtraScriptURLs())
+			{
+				embedExtendScript(doc, extraScriptUrl);
+			}
+		}
+
+		if (extension != null)
+		{
+			StringBuilder embedJs = new StringBuilder();
+			embedJs.append("<script type=\"text/javascript\">");
+			embedJs.append("\n");
+			embedJs.append("$(window).load(function() {");
+			embedJs.append("\n");
+			embedJs.append("$('.rp-table').floatThead();");
+			embedJs.append("\n");
+			embedJs.append("});");
+			embedJs.append("\n");
+			embedJs.append("</script>");
+
+			doc.appendHead(embedJs.toString());
+		}
+	}
+
+	/**
+	 * read all content from file into StringBuilder
+	 * 
+	 * @param pathStyleFile
+	 * @return
+	 * @throws IOException
+	 */
+	protected StringBuilder readResourceFile(String pathStyleFile) throws IOException
+	{
+		Path path = Paths.get(pathStyleFile);
+		List<String> styleLines = Files.readAllLines(path, Ini.getCharset());
+		StringBuilder styleBuild = new StringBuilder();
+		for (String styleLine : styleLines)
+		{
+			styleBuild.append(styleLine);
+			styleBuild.append("\n");
+		}
+
+		return styleBuild;
+	}
+
+	/**
+	 * embed script url into head tag
+	 * 
+	 * @param doc
+	 * @param scriptUrl
+	 */
+	protected void embedExtendScript(XhtmlDocument doc, String scriptUrl)
+	{
+		script jslink = new script();
+		jslink.setLanguage("javascript");
+		jslink.setSrc(scriptUrl);
+		doc.appendHead(jslink);
+	}
+
+	/**
+	 * embed script content into head tag
+	 * 
+	 * @param doc
+	 * @param buildScriptContent
+	 */
+	public void appendInlineScriptContent(XhtmlDocument doc, StringBuilder buildScriptContent)
+	{
+		if (buildScriptContent.length() > 0)
+		{
+			buildScriptContent.insert(0, "<script type=\"text/javascript\">\n");
+			buildScriptContent.append("\n</script>");
+			doc.appendHead(buildScriptContent.toString());
+		}
+	}
+	
 }	//	ReportEngine

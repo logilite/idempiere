@@ -129,7 +129,7 @@ public class MProjectIssue extends X_C_ProjectIssue
 	public MProject getParent()
 	{
 		if (m_parent == null && getC_Project_ID() != 0)
-			m_parent = new MProject (getCtx(), getC_Project_ID(), get_TrxName());
+			m_parent = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(getC_Project_ID(), get_TrxName());
 		return m_parent;
 	}	//	getParent
 	

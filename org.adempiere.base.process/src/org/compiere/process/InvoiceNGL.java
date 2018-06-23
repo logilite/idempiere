@@ -31,6 +31,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MJournal;
 import org.compiere.model.MJournalLine;
 import org.compiere.model.MOrg;
+import org.compiere.model.MTable;
 import org.compiere.model.Query;
 import org.compiere.model.X_T_InvoiceGL;
 import org.compiere.util.DB;
@@ -259,7 +260,7 @@ public class InvoiceNGL extends SvrProcess
 			X_T_InvoiceGL gl = list.get(i);
 			if (gl.getAmtRevalDrDiff().signum() == 0 && gl.getAmtRevalCrDiff().signum() == 0)
 				continue;
-			MInvoice invoice = new MInvoice(getCtx(), gl.getC_Invoice_ID(), null);
+			MInvoice invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(gl.getC_Invoice_ID(), null);
 			if (invoice.getC_Currency_ID() == as.getC_Currency_ID())
 				continue;
 			//

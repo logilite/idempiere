@@ -23,6 +23,7 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
+import org.compiere.model.MTable;
 import org.compiere.process.SvrProcess;
 
 /**
@@ -61,7 +62,7 @@ public class RMACreateOrder extends SvrProcess
         }
         
         // Create new order and set the different values based on original order/RMA doc
-        MOrder order = new MOrder(getCtx(), 0, get_TrxName());
+		MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
         order.setAD_Org_ID(rma.getAD_Org_ID());
         order.setC_BPartner_ID(originalOrder.getC_BPartner_ID());
         order.setC_BPartner_Location_ID(originalOrder.getC_BPartner_Location_ID());
@@ -91,8 +92,9 @@ public class RMACreateOrder extends SvrProcess
             if (line.getShipLine() != null && line.getShipLine().getC_OrderLine_ID() != 0 && line.getM_Product_ID() != 0)
             {
                 // Create order lines if the RMA Doc line has a shipment line 
-                MOrderLine orderLine = new MOrderLine(order);
-                MOrderLine originalOLine = new MOrderLine(getCtx(), line.getShipLine().getC_OrderLine_ID(), null);
+				MOrderLine orderLine = MOrderLine.createFrom(order);
+				MOrderLine originalOLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(
+						line.getShipLine().getC_OrderLine_ID(), null);
                 orderLine.setAD_Org_ID(line.getAD_Org_ID());
                 orderLine.setM_Product_ID(originalOLine.getM_Product_ID());
                 orderLine.setM_AttributeSetInstance_ID(originalOLine.getM_AttributeSetInstance_ID());
@@ -116,7 +118,7 @@ public class RMACreateOrder extends SvrProcess
             {
             	if (originalInvoice != null)
             	{
-                	MOrderLine orderLine = new MOrderLine(order);
+					MOrderLine orderLine = MOrderLine.createFrom(order);
                 	orderLine.setAD_Org_ID(line.getAD_Org_ID());
                     orderLine.setM_Product_ID(line.getM_Product_ID());
                     orderLine.setM_AttributeSetInstance_ID(line.getM_AttributeSetInstance_ID());
@@ -138,7 +140,7 @@ public class RMACreateOrder extends SvrProcess
             	}
             	else if (originalOrder != null)
             	{
-            		MOrderLine orderLine = new MOrderLine(order);
+					MOrderLine orderLine = MOrderLine.createFrom(order);
                 	orderLine.setAD_Org_ID(line.getAD_Org_ID());
                     orderLine.setM_Product_ID(line.getM_Product_ID());
                     orderLine.setM_AttributeSetInstance_ID(line.getM_AttributeSetInstance_ID());

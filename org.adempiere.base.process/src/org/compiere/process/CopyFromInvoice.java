@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.logging.Level;
 
 import org.compiere.model.MInvoice;
+import org.compiere.model.MTable;
 
 /**
  *  Copy Invoice Lines
@@ -62,8 +63,8 @@ public class CopyFromInvoice extends SvrProcess
 			throw new IllegalArgumentException("Target C_Invoice_ID == 0");
 		if (m_C_Invoice_ID == 0)
 			throw new IllegalArgumentException("Source C_Invoice_ID == 0");
-		MInvoice from = new MInvoice (getCtx(), m_C_Invoice_ID, get_TrxName());
-		MInvoice to = new MInvoice (getCtx(), To_C_Invoice_ID, get_TrxName());
+		MInvoice from = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(m_C_Invoice_ID, get_TrxName());
+		MInvoice to = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(To_C_Invoice_ID, get_TrxName());
 		//
 		int no = to.copyLinesFrom (from, false, false);
 		//

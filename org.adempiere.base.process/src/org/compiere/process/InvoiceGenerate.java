@@ -40,6 +40,7 @@ import org.compiere.model.MLocation;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MOrderPaySchedule;
+import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
@@ -57,36 +58,36 @@ import org.compiere.util.Trx;
 public class InvoiceGenerate extends SvrProcess
 {
 	/**	Manual Selection		*/
-	private boolean 	p_Selection = false;
+	protected boolean 	p_Selection = false;
 	/**	Date Invoiced			*/
-	private Timestamp	p_DateInvoiced = null;
+	protected Timestamp	p_DateInvoiced = null;
 	/**	Org						*/
-	private int			p_AD_Org_ID = 0;
+	protected int			p_AD_Org_ID = 0;
 	/** BPartner				*/
-	private int			p_C_BPartner_ID = 0;
+	protected int			p_C_BPartner_ID = 0;
 	/** Order					*/
-	private int			p_C_Order_ID = 0;
+	protected int			p_C_Order_ID = 0;
 	/** Consolidate				*/
-	private boolean		p_ConsolidateDocument = true;
+	protected boolean		p_ConsolidateDocument = true;
 	/** Invoice Document Action	*/
-	private String		p_docAction = DocAction.ACTION_Complete;
+	protected String		p_docAction = DocAction.ACTION_Complete;
 	
 	/**	The current Invoice	*/
-	private MInvoice 	m_invoice = null;
+	protected MInvoice 	m_invoice = null;
 	/**	The current Shipment	*/
-	private MInOut	 	m_ship = null;
+	protected MInOut	 	m_ship = null;
 	/** Numner of Invoices		*/
-	private int			m_created = 0;
+	protected int			m_created = 0;
 	/**	Line Number				*/
-	private int			m_line = 0;
+	protected int			m_line = 0;
 	/**	Business Partner		*/
-	private MBPartner	m_bp = null;
+	protected MBPartner	m_bp = null;
 	/**	Minimum Amount to Invoice */
-	private BigDecimal p_MinimumAmt = null;
+	protected BigDecimal p_MinimumAmt = null;
 	/**	Minimum Amount to Invoice according to Invoice Schedule */
-	private BigDecimal p_MinimumAmtInvSched = null;
+	protected BigDecimal p_MinimumAmtInvSched = null;
 	/**	Per Invoice Savepoint */
-	private Savepoint m_savepoint = null;
+	protected Savepoint m_savepoint = null;
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -202,7 +203,7 @@ public class InvoiceGenerate extends SvrProcess
 	 * 	@param pstmt order query 
 	 *	@return info
 	 */
-	private String generate (PreparedStatement pstmt)
+	public String generate (PreparedStatement pstmt)
 	{
 		ResultSet rs = null;
 		try
@@ -211,7 +212,7 @@ public class InvoiceGenerate extends SvrProcess
 			while (rs.next ())
 			{
 				p_MinimumAmtInvSched = null;
-				MOrder order = new MOrder (getCtx(), rs, get_TrxName());
+				MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(rs, get_TrxName());
 				StringBuilder msgsup = new StringBuilder(Msg.getMsg(getCtx(), "Processing")).append(" ").append(order.getDocumentInfo());
 				statusUpdate(msgsup.toString());
 				
@@ -226,7 +227,8 @@ public class InvoiceGenerate extends SvrProcess
 				boolean doInvoice = false;
 				if (MOrder.INVOICERULE_CustomerScheduleAfterDelivery.equals(order.getInvoiceRule()))
 				{
-					m_bp = new MBPartner (getCtx(), order.getBill_BPartner_ID(), null);
+					m_bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(order.getBill_BPartner_ID(),
+							null);
 					if (m_bp.getC_InvoiceSchedule_ID() == 0)
 					{
 						log.warning("BPartner has no Schedule - set to After Delivery");
@@ -363,7 +365,7 @@ public class InvoiceGenerate extends SvrProcess
 	 *	@param qtyInvoiced qty
 	 *	@param qtyEntered qty
 	 */
-	private void createLine (MOrder order, MOrderLine orderLine, 
+	public void createLine (MOrder order, MOrderLine orderLine, 
 		BigDecimal qtyInvoiced, BigDecimal qtyEntered)
 	{
 		if (m_invoice == null)
@@ -375,12 +377,12 @@ public class InvoiceGenerate extends SvrProcess
 			} catch (SQLException e) {
 				throw new AdempiereException(e);
 			}
-			m_invoice = new MInvoice (order, 0, p_DateInvoiced);
+			m_invoice = MInvoice.createFrom(order, 0, p_DateInvoiced);
 			if (!m_invoice.save())
 				throw new IllegalStateException("Could not create Invoice (o)");
 		}
 		//	
-		MInvoiceLine line = new MInvoiceLine (m_invoice);
+		MInvoiceLine line = MInvoiceLine.createFrom(m_invoice);
 		line.setOrderLine(orderLine);
 		line.setQtyInvoiced(qtyInvoiced);
 		line.setQtyEntered(qtyEntered);
@@ -396,7 +398,7 @@ public class InvoiceGenerate extends SvrProcess
 	 *	@param ship shipment header
 	 *	@param sLine shipment line
 	 */
-	private void createLine (MOrder order, MInOut ship, MInOutLine sLine)
+	public void createLine (MOrder order, MInOut ship, MInOutLine sLine)
 	{
 		if (m_invoice == null)
 		{
@@ -407,7 +409,7 @@ public class InvoiceGenerate extends SvrProcess
 			} catch (SQLException e) {
 				throw new AdempiereException(e);
 			}
-			m_invoice = new MInvoice (order, 0, p_DateInvoiced);
+			m_invoice = MInvoice.createFrom(order, 0, p_DateInvoiced);
 			if (!m_invoice.save())
 				throw new IllegalStateException("Could not create Invoice (s)");
 		}
@@ -417,7 +419,8 @@ public class InvoiceGenerate extends SvrProcess
 		{
 			MDocType dt = MDocType.get(getCtx(), ship.getC_DocType_ID());
 			if (m_bp == null || m_bp.getC_BPartner_ID() != ship.getC_BPartner_ID())
-				m_bp = new MBPartner (getCtx(), ship.getC_BPartner_ID(), get_TrxName());
+				m_bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(ship.getC_BPartner_ID(),
+						get_TrxName());
 			
 			//	Reference: Delivery: 12345 - 12.12.12
 			MClient client = MClient.get(getCtx(), order.getAD_Client_ID ());
@@ -433,7 +436,7 @@ public class InvoiceGenerate extends SvrProcess
 				.append(" - ").append(format.format(ship.getMovementDate()));
 			m_ship = ship;
 			//
-			MInvoiceLine line = new MInvoiceLine (m_invoice);
+			MInvoiceLine line = MInvoiceLine.createFrom(m_invoice);
 			line.setIsDescription(true);
 			line.setDescription(reference.toString());
 			line.setLine(m_line + sLine.getLine() - 2);
@@ -443,7 +446,7 @@ public class InvoiceGenerate extends SvrProcess
 			if (order.getBill_Location_ID() != ship.getC_BPartner_Location_ID())
 			{
 				MLocation addr = MLocation.getBPLocation(getCtx(), ship.getC_BPartner_Location_ID(), null);
-				line = new MInvoiceLine (m_invoice);
+				line = MInvoiceLine.createFrom(m_invoice);
 				line.setIsDescription(true);
 				line.setDescription(addr.toString());
 				line.setLine(m_line + sLine.getLine() - 1);
@@ -452,7 +455,7 @@ public class InvoiceGenerate extends SvrProcess
 			}
 		}
 		//	
-		MInvoiceLine line = new MInvoiceLine (m_invoice);
+		MInvoiceLine line = MInvoiceLine.createFrom(m_invoice);
 		line.setShipLine(sLine);
 		if (sLine.sameOrderLineUOM())
 			line.setQtyEntered(sLine.getQtyEntered());
@@ -474,11 +477,11 @@ public class InvoiceGenerate extends SvrProcess
 	/**
 	 * 	Complete Invoice
 	 */
-	private void completeInvoice()
+	public void completeInvoice()
 	{
 		if (m_invoice != null)
 		{
-			MOrder order = new MOrder(getCtx(), m_invoice.getC_Order_ID(), get_TrxName());
+			MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(m_invoice.getC_Order_ID(), get_TrxName());
 			if (order != null) {
 				m_invoice.setPaymentRule(order.getPaymentRule());
 				m_invoice.setC_PaymentTerm_ID(order.getC_PaymentTerm_ID());

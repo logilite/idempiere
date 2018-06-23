@@ -27,6 +27,7 @@ import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MRequest;
 import org.compiere.model.MRequestType;
 import org.compiere.model.MRequestUpdate;
+import org.compiere.model.MTable;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.DB;
 import org.compiere.util.Msg;
@@ -132,7 +133,7 @@ public class RequestInvoice extends SvrProcess
 			int oldC_BPartner_ID = 0;
 			while (rs.next ())
 			{
-				MRequest request = new MRequest (getCtx(), rs, get_TrxName());
+				MRequest request = (MRequest) MTable.get(getCtx(), MRequest.Table_ID).getPO(rs, get_TrxName());
 				if (!request.isInvoiced())
 					continue;
 				if (oldC_BPartner_ID != request.getC_BPartner_ID())
@@ -193,10 +194,11 @@ public class RequestInvoice extends SvrProcess
 	 */
 	private void invoiceNew (MRequest request)
 	{
-		m_invoice = new MInvoice (getCtx(), 0, get_TrxName());
+		m_invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(0, get_TrxName());
 		m_invoice.setIsSOTrx(true);
 		
-		MBPartner partner = new MBPartner (getCtx(), request.getC_BPartner_ID(), null);
+		MBPartner partner = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(request.getC_BPartner_ID(),
+				null);
 		m_invoice.setBPartner(partner);
 		
 		m_invoice.saveEx();
@@ -218,7 +220,7 @@ public class RequestInvoice extends SvrProcess
 			// if (updates[i].getC_InvoiceLine_ID() > 0)
 			//	continue;
 			
-			MInvoiceLine il = new MInvoiceLine(m_invoice);
+			MInvoiceLine il = MInvoiceLine.createFrom(m_invoice);
 			m_linecount++;
 			il.setLine(m_linecount*10);
 			//

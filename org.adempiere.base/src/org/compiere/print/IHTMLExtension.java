@@ -13,6 +13,8 @@
  *****************************************************************************/
 package org.compiere.print;
 
+import java.util.List;
+
 import org.apache.ecs.ConcreteElement;
 import org.apache.ecs.xhtml.a;
 import org.apache.ecs.xhtml.body;
@@ -37,4 +39,8 @@ public interface IHTMLExtension {
 	public void setWebAttribute (body reportBody);
 	
 	public String getFullPathStyle ();
+	
+	public List<String> getExtraScriptURLs();
+
+	public List<String> getFullPathExtraScriptURLs();
 }

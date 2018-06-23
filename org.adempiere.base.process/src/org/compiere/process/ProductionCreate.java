@@ -8,6 +8,7 @@ import org.compiere.model.I_M_ProductionPlan;
 import org.compiere.model.MProduction;
 import org.compiere.model.MProductionPlan;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MTable;
 import org.compiere.model.Query;
 import org.compiere.util.AdempiereUserError;
 import org.compiere.util.DB;
@@ -23,11 +24,11 @@ import org.compiere.util.Env;
  */
 public class ProductionCreate extends SvrProcess {
 
-	private int p_M_Production_ID=0;
-	private MProduction m_production = null;
-	private boolean mustBeStocked = false;  //not used
-	private boolean recreate = false;
-	private BigDecimal newQty = null;
+	protected int p_M_Production_ID=0;
+	protected MProduction m_production = null;
+	protected boolean mustBeStocked = false;  //not used
+	protected boolean recreate = false;
+	protected BigDecimal newQty = null;
 	//private int p_M_Locator_ID=0;
 	
 	
@@ -46,7 +47,7 @@ public class ProductionCreate extends SvrProcess {
 		}
 		
 		p_M_Production_ID = getRecord_ID();
-		m_production = new MProduction(getCtx(), p_M_Production_ID, get_TrxName());
+		m_production = (MProduction) MTable.get(getCtx(), MProduction.Table_ID).getPO(p_M_Production_ID, get_TrxName());
 
 	}	//prepare
 
@@ -63,7 +64,7 @@ public class ProductionCreate extends SvrProcess {
 
 	}
 	
-	private boolean costsOK(int M_Product_ID) throws AdempiereUserError {
+	public boolean costsOK(int M_Product_ID) throws AdempiereUserError {
 		// Warning will not work if non-standard costing is used
 		String sql = "SELECT ABS(((cc.currentcostprice-(SELECT SUM(c.currentcostprice*bom.bomqty)"
             + " FROM m_cost c"
@@ -136,7 +137,7 @@ public class ProductionCreate extends SvrProcess {
 		return msgreturn.toString();
 	}
 
-	private void validateEndProduct(int M_Product_ID) throws Exception {
+	public void validateEndProduct(int M_Product_ID) throws Exception {
 		isBom(M_Product_ID);
 		
 		if (!costsOK(M_Product_ID)) {

@@ -23,7 +23,7 @@ public class CalloutPackage extends CalloutEngine
         {
         	String shipperAccount = null;
         	String dutiesShipperAccount = null;
-        	MInOut inout = new MInOut(ctx, inout_id, null);
+			MInOut inout = (MInOut) MTable.get(ctx, MInOut.Table_ID).getPO(inout_id, null);
 
         	if (MInOut.FREIGHTCHARGES_Prepaid.equals(inout.getFreightCharges()) || MInOut.FREIGHTCHARGES_PrepaidAndBill.equals(inout.getFreightCharges())) 
         	{

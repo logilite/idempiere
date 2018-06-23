@@ -49,6 +49,7 @@ import org.adempiere.webui.editor.WebEditorFactory;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
+import org.adempiere.webui.factory.QuickEntryServiceUtil;
 import org.adempiere.webui.grid.WQuickEntry;
 import org.adempiere.webui.panel.InfoPanel;
 import org.adempiere.webui.session.SessionManager;
@@ -99,6 +100,7 @@ import org.zkoss.zul.Separator;
 import org.zkoss.zul.South;
 import org.zkoss.zul.Space;
 import org.zkoss.zul.Vbox;
+
 
 /**
  * AD_InfoWindow implementation
@@ -514,8 +516,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	
 	protected boolean loadInfoDefinition() {
 		if (infoWindow != null) {
-			String tableName = null;
-				tableName = MTable.getTableName(Env.getCtx(), infoWindow.getAD_Table_ID());
+			String tableName = MTable.getTableName(Env.getCtx(), infoWindow.getAD_Table_ID());
 			
 			AccessSqlParser sqlParser = new AccessSqlParser("SELECT * FROM " + infoWindow.getFromClause());
 			tableInfos = sqlParser.getTableInfo(0);
@@ -535,7 +536,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 					keyColumnOfView = infoColumn;
 				String columnName = infoColumn.getColumnName();
 				/*!m_lookup && infoColumn.isMandatory():apply Mandatory only case open as window and only for criteria field*/
-				boolean isMandatory = !m_lookup && infoColumn.isMandatory() && infoColumn.isQueryCriteria();
+				boolean isMandatory = !m_lookup && infoColumn.isMandatory() && (infoColumn.isQueryCriteria() || !infoColumn.isReadOnly());
 				GridFieldVO vo = GridFieldVO.createParameter(infoContext, p_WindowNo, AEnv.getADWindowID(p_WindowNo), infoWindow.getAD_InfoWindow_ID(), 0,
 						columnName, infoColumn.get_Translation("Name"), infoColumn.getAD_Reference_ID(), 
 						infoColumn.getAD_Reference_Value_ID(), isMandatory, false);
@@ -671,7 +672,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				: tableInfos[0].getTableName();
 					
 		String keySelectClause = keyTableAlias+"."+p_keyColumn;
-		list.add(new ColumnInfo(" ", keySelectClause, IDColumn.class));
+		list.add(new ColumnInfo(" ", keySelectClause, IDColumn.class, true, false, null, p_keyColumn));
 		
 		int i = 0;
 		for(MInfoColumn infoColumn : infoColumns) 
@@ -687,7 +688,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 					if (infoColumn.getSelectClause().equalsIgnoreCase(keySelectClause))
 						continue;
 					
-					columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), colSQL, DisplayType.getClass(infoColumn.getAD_Reference_ID(), true));
+					columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), colSQL, DisplayType.getClass(infoColumn.getAD_Reference_ID(), true), infoColumn.isReadOnly());
 				}
 				else if (DisplayType.isLookup(infoColumn.getAD_Reference_ID()))
 				{
@@ -698,7 +699,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				        editor.setMandatory(false);
 				        editor.setReadWrite(false);
 				        editorMap.put(colSQL, editor);
-						columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), colSQL, ValueNamePair.class, (String)null);
+						columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), colSQL, ValueNamePair.class, (String)null, infoColumn.isReadOnly());
 					}
 					else
 					{
@@ -707,10 +708,11 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				}
 				else  
 				{
-					columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), colSQL, DisplayType.getClass(infoColumn.getAD_Reference_ID(), true));
+					columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), colSQL, DisplayType.getClass(infoColumn.getAD_Reference_ID(), true), infoColumn.isReadOnly());
 				}
 				columnInfo.setColDescription(infoColumn.get_Translation("Description"));
 				columnInfo.setGridField(gridFields.get(i));
+				columnInfo.setColumnName(infoColumn.getColumnName());
 				list.add(columnInfo);
 				
 				if (keyColumnOfView == infoColumn){
@@ -749,7 +751,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 					if (tableInfo.getTableName().equalsIgnoreCase(lookupInfo.TableName))
 					{
 						displayColumn = displayColumn.replace(lookupInfo.TableName+".", tableInfo.getSynonym()+".");
-						ColumnInfo columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), displayColumn, KeyNamePair.class, infoColumn.getSelectClause());
+						ColumnInfo columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), displayColumn, KeyNamePair.class, infoColumn.getSelectClause(), infoColumn.isReadOnly());
 						return columnInfo;
 					}
 					break;
@@ -766,7 +768,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		if (! colSQL.toUpperCase().contains(" AS "))
 			colSQL += " AS " + infoColumn.getColumnName();
         editorMap.put(colSQL, editor);
-		ColumnInfo columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), colSQL, KeyNamePair.class, (String)null);
+		ColumnInfo columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), colSQL, KeyNamePair.class, (String)null, infoColumn.isReadOnly());
 		return columnInfo;
 	}
 
@@ -1768,6 +1770,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			countSql = countSql.trim();
 			countSql = countSql.substring(0, countSql.length() - 5);
 		}
+		
 		countSql = MRole.getDefault().addAccessSQL	(countSql, getTableName(),
 													MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO);
 		// IDEMPIERE-3521
@@ -2138,7 +2141,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			GridWindow gridwindow = GridWindow.get(Env.getCtx(), 0, getADWindowID());
 			hasRightQuickEntry = gridwindow != null;
 			if (hasRightQuickEntry)
-				vqe = new WQuickEntry (0, getADWindowID());
+				vqe = QuickEntryServiceUtil.getWQuickEntry(0, getADWindowID());
 		}
 			
 		return hasNew && vqe != null && vqe.isAvailableQuickEdit();
@@ -2165,7 +2168,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		// each time close WQuickEntry dialog, 
 		// window is  un-registry, variable environment of this window as _QUICK_ENTRY_MODE_ is removed
 		// so if reuse WQuickEntry will let some field in child tab init at read only state
-		WQuickEntry vqe = new WQuickEntry (0, getADWindowID());
+		WQuickEntry vqe = QuickEntryServiceUtil.getWQuickEntry(0, getADWindowID());
 		
 		vqe.loadRecord (0);								
 		
@@ -2198,5 +2201,6 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			}
 		}
 	}
+
 
 }

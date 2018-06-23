@@ -88,6 +88,8 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 
 	private static final String SAVED_CONTEXT = "saved.context";
 	
+	public static final String ZK_CLIENT_CONTEXT = "zk_client_context";
+	
 	public static final String APPLICATION_DESKTOP_KEY = "application.desktop";
 
 	public static String APP_NAME = null;
@@ -129,8 +131,6 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 
     public void onCreate()
     {
-        this.getPage().setTitle(ThemeManager.getBrowserTitle());
-        
         SessionManager.setSessionApplication(this);
         Session session = Executions.getCurrent().getDesktop().getSession();
         @SuppressWarnings("unchecked")
@@ -143,6 +143,24 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
         
         Properties ctx = Env.getCtx();
         langSession = Env.getContext(ctx, Env.LANGUAGE);
+
+		if (MSysConfig.getBooleanValue(MSysConfig.ZK_ENABLE_CLIENT_URL, false)
+				&& (ctx.getProperty(ZK_CLIENT_CONTEXT) == null || !SessionManager.isUserLoggedIn(ctx)))
+		{
+			Env.setContext(ctx, ZK_CLIENT_CONTEXT, (String) null);
+			ctx.setProperty("#AD_Client_ID", String.valueOf(0));
+			String value = Executions.getCurrent().getServerName().toLowerCase();
+			int clientID = DB.getSQLValue(null,
+					"SELECT AD_Client_ID FROM AD_ClientInfo WHERE LOWER(ZKHostname) = ? AND IsActive='Y'", value);
+			if (clientID > 0)
+			{
+				ctx.setProperty(ZK_CLIENT_CONTEXT, value);
+				ctx.setProperty("#AD_Client_ID", String.valueOf(clientID));
+			}
+		}
+
+		this.getPage().setTitle(ThemeManager.getBrowserTitle());
+
         if (session.getAttribute(SessionContextListener.SESSION_CTX) == null || !SessionManager.isUserLoggedIn(ctx))
         {
             loginDesktop = new WLogin(this);
@@ -182,6 +200,8 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
     		loginDesktop.detach();
     		loginDesktop = null;
     	}
+    	
+    	this.getPage().setTitle(ThemeManager.getBrowserTitle());
 
         Properties ctx = Env.getCtx();
         String langLogin = Env.getContext(ctx, Env.LANGUAGE);
@@ -250,7 +270,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 
 		keyListener = new Keylistener();
 		keyListener.setPage(this.getPage());
-		keyListener.setCtrlKeys("@a@c@d@e@f@h@n@o@p@r@s@t@z@x@#left@#right@#up@#down@#home@#end#enter^u@u@#pgdn@#pgup");
+		keyListener.setCtrlKeys("@a@c@d@e@f@h@n@o@p@r@s@t@z@x@#left@#right@#up@#down@#home@#end#enter^u@u@#pgdn@#pgup$#f2^#f2@l");
 		keyListener.setAutoBlur(false);
 		
 		//create new desktop

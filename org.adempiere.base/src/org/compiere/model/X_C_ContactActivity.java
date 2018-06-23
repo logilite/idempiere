@@ -20,6 +20,7 @@ package org.compiere.model;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Properties;
+
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_ContactActivity
@@ -28,12 +29,13 @@ import org.compiere.util.KeyNamePair;
 public class X_C_ContactActivity extends PO implements I_C_ContactActivity, I_Persistent 
 {
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 20171031L;
 
-    /** Standard Constructor */
+	/**
+	 * 
+	 */
+	private static final long	serialVersionUID	= 6725817921718648919L;
+	
+	/** Standard Constructor */
     public X_C_ContactActivity (Properties ctx, int C_ContactActivity_ID, String trxName)
     {
       super (ctx, C_ContactActivity_ID, trxName);
@@ -102,6 +104,29 @@ public class X_C_ContactActivity extends PO implements I_C_ContactActivity, I_Pe
 			 return 0;
 		return ii.intValue();
 	}
+	
+	/** Lead = LE */
+	public static final String C_CONTACTACTIVITYRELATEDTO_Lead = "LE";
+	/** Sales Opportunity = SO */
+	public static final String C_CONTACTACTIVITYRELATEDTO_SalesOpportunity = "SO";
+	/** Contact = CO */
+	public static final String C_CONTACTACTIVITYRELATEDTO_Contact = "CO";
+	/** Business Partner = BP */
+	public static final String C_CONTACTACTIVITYRELATEDTO_BusinessPartner = "BP";
+	/** Set Related To.
+		@param C_ContactActivityRelatedTo Related To	  */
+	public void setC_ContactActivityRelatedTo (String C_ContactActivityRelatedTo)
+	{
+
+		set_Value (COLUMNNAME_C_ContactActivityRelatedTo, C_ContactActivityRelatedTo);
+	}
+
+	/** Get Related To.
+		@return Related To	  */
+	public String getC_ContactActivityRelatedTo () 
+	{
+		return (String)get_Value(COLUMNNAME_C_ContactActivityRelatedTo);
+	}
 
 	/** Set Contact Activity.
 		@param C_ContactActivity_ID 
@@ -139,7 +164,35 @@ public class X_C_ContactActivity extends PO implements I_C_ContactActivity, I_Pe
 	{
 		return (String)get_Value(COLUMNNAME_C_ContactActivity_UU);
 	}
+	
+	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_Name)
+			.getPO(getC_Project_ID(), get_TrxName());	}
 
+	/** Set Project.
+		@param C_Project_ID 
+		Financial Project
+	  */
+	public void setC_Project_ID (int C_Project_ID)
+	{
+		if (C_Project_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_C_Project_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
+	}
+
+	/** Get Project.
+		@return Financial Project
+	  */
+	public int getC_Project_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Project_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+	
 	/** Set Comments.
 		@param Comments 
 		Comments or additional information
@@ -319,5 +372,40 @@ public class X_C_ContactActivity extends PO implements I_C_ContactActivity, I_Pe
 	public Timestamp getStartDate () 
 	{
 		return (Timestamp)get_Value(COLUMNNAME_StartDate);
+	}
+
+	/**
+	 * Set Business Partner .
+	 * 
+	 * @param C_BPartner_ID Identifies a Business Partner
+	 */
+	@Override
+	public void setC_BPartner_ID(int C_BPartner_ID)
+	{
+		if (C_BPartner_ID < 1)
+			set_Value(COLUMNNAME_C_BPartner_ID, null);
+		else
+			set_Value(COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
+	}
+
+	/**
+	 * Get Business Partner .
+	 * 
+	 * @return Identifies a Business Partner
+	 */
+	@Override
+	public int getC_BPartner_ID()
+	{
+		Integer ii = (Integer) get_Value(COLUMNNAME_C_BPartner_ID);
+		if (ii == null)
+			return 0;
+		return ii.intValue();
+	}
+
+	@Override
+	public I_C_BPartner getC_BPartner() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_BPartner) MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
+				.getPO(getC_BPartner_ID(), get_TrxName());
 	}
 }

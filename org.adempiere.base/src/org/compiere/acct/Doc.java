@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.model.FactsValidator;
 import org.compiere.model.I_C_AllocationHdr;
 import org.compiere.model.I_C_BankStatement;
 import org.compiere.model.I_C_Cash;
@@ -42,9 +43,11 @@ import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MMatchInv;
+import org.compiere.model.MMatchInvHdr;
 import org.compiere.model.MMatchPO;
 import org.compiere.model.MNote;
 import org.compiere.model.MPeriod;
+import org.compiere.model.MTable;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -180,6 +183,9 @@ public abstract class Doc
 	public static final String	DOCTYPE_ProjectIssue	= "PJI";
 	/** Purchase Requisition    */
 	public static final String	DOCTYPE_PurchaseRequisition	= "POR";
+	/** Match invoice header */
+	public static final String	DOCTYPE_MatchInvHdr	= "MWB";
+	
 
 
 	//  Posting Status - AD_Reference_ID=234     //
@@ -285,15 +291,33 @@ public abstract class Doc
 				if (AD_Table_ID == MInvoice.Table_ID)
 				{
 					MMatchInv[] matchInvs = MMatchInv.getInvoice(Env.getCtx(), Record_ID, trx.getTrxName());
+					HashSet<Integer> macthInvHdrs = new HashSet<Integer>();
 					for (MMatchInv matchInv : matchInvs) 
 					{
-						if (!matchInv.isPosted())
+						if(matchInv.getM_MatchInvHdr_ID() == 0)
 						{
-							error = postImmediate(ass, matchInv.get_Table_ID(), matchInv.get_ID(), force, matchInv.get_TrxName());
-							if (!Util.isEmpty(error))
-								break;
+							if (!matchInv.isPosted())
+							{
+								error = postImmediate(ass, matchInv.get_Table_ID(), matchInv.get_ID(), force, matchInv.get_TrxName());
+								if (!Util.isEmpty(error))
+									break;
+							}
 						}
-					}	
+						else 
+						{
+							macthInvHdrs.add(matchInv.getM_MatchInvHdr_ID());
+						}
+					}
+					
+					for(int M_MatchInvHadr_ID : macthInvHdrs)
+					{
+						MMatchInvHdr matchInvHdr = (MMatchInvHdr) MTable.get(Env.getCtx(), MMatchInvHdr.Table_ID)
+								.getPO(M_MatchInvHadr_ID, trx.getTrxName());
+						error = postImmediate(ass, matchInvHdr.get_Table_ID(), matchInvHdr.get_ID(), force,
+								matchInvHdr.get_TrxName());
+						if (!Util.isEmpty(error))
+							break;
+					}
 				}
 			}
 			if (Util.isEmpty(error))
@@ -381,7 +405,7 @@ public abstract class Doc
 	}   //  Doc
 
 	/** Accounting Schema */
-	private MAcctSchema    		m_as = null;
+	protected MAcctSchema    		m_as = null;
 	/** Properties					*/
 	private Properties			m_ctx = null;
 	/** Transaction Name			*/
@@ -731,7 +755,7 @@ public abstract class Doc
 			return STATUS_Error;
 
 		// call modelValidator
-		String validatorMsg = ModelValidationEngine.get().fireFactsValidate(m_as, facts, getPO());
+		String validatorMsg = ModelValidationEngine.get().fireFactsValidate(m_as, facts, getPO(),FactsValidator.TIME_AFTER_FACTCREATE);
 		if (validatorMsg != null) {
 			p_Error = validatorMsg;
 			return STATUS_Error;
@@ -780,6 +804,12 @@ public abstract class Doc
 
 		}	//	for all facts
 
+		validatorMsg = ModelValidationEngine.get().fireFactsValidate(m_as, facts, getPO(),FactsValidator.TIME_AFTER_FACTBALANCED);
+		if (validatorMsg != null) {
+			p_Error = validatorMsg;
+			return STATUS_Error;
+		}
+		
 		return STATUS_Posted;
 	}   //  postLogic
 

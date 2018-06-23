@@ -27,6 +27,7 @@ import org.compiere.model.MCostDetail;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProject;
 import org.compiere.model.MProjectIssue;
+import org.compiere.model.MTable;
 import org.compiere.model.ProductCost;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -54,9 +55,9 @@ public class Doc_ProjectIssue extends Doc
 	}   //  Doc_ProjectIssue
 
 	/**	Pseudo Line								*/
-	private DocLine				m_line = null;
+	protected DocLine 			m_line = null;
 	/** Issue									*/
-	private MProjectIssue		m_issue = null;
+	protected MProjectIssue		m_issue = null;
 
 	/**
 	 *  Load Document Details
@@ -123,7 +124,8 @@ public class Doc_ProjectIssue extends Doc
 		Fact fact = new Fact(this, as, Fact.POST_Actual);
 		setC_Currency_ID (as.getC_Currency_ID());
 
-		MProject project = new MProject (getCtx(), m_issue.getC_Project_ID(), getTrxName());
+		MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(m_issue.getC_Project_ID(),
+				getTrxName());
 		String ProjectCategory = project.getProjectCategory();
 		MProduct product = MProduct.get(getCtx(), m_issue.getM_Product_ID());
 
@@ -138,8 +140,12 @@ public class Doc_ProjectIssue extends Doc
 		else if (m_issue.getS_TimeExpenseLine_ID() != 0)
 			cost = getLaborCost(as);
 		if (cost == null)	//	standard Product Costs
+		{
 			cost = m_line.getProductCosts(as, getAD_Org_ID(), false);
+		}
 
+		
+		
 		//  Project         DR
 		int acctType = ACCTTYPE_ProjectWIP;
 		if (MProject.PROJECTCATEGORY_AssetProject.equals(ProjectCategory))
@@ -182,7 +188,7 @@ public class Doc_ProjectIssue extends Doc
 	 *	@param as Account Schema
 	 *	@return Unit PO Cost
 	 */
-	private BigDecimal getPOCost(MAcctSchema as)
+	protected BigDecimal getPOCost(MAcctSchema as)
 	{
 		BigDecimal retValue = null;
 		//	Uses PO Date
@@ -229,7 +235,7 @@ public class Doc_ProjectIssue extends Doc
 	 *	@return Unit Labor Cost
 	 */
 
-	private BigDecimal getLaborCost(MAcctSchema as)
+	protected BigDecimal getLaborCost(MAcctSchema as)
 	{
 		// Todor Lulov 30.01.2008
 		BigDecimal retValue = Env.ZERO;

@@ -21,12 +21,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 
 import org.adempiere.util.ContextRunnable;
+import org.apache.commons.collections.CollectionUtils;
 import org.compiere.Adempiere;
 import org.compiere.util.CLogMgt;
 import org.compiere.util.DB;
@@ -256,6 +260,16 @@ public final class MLookup extends Lookup implements Serializable
 	public boolean containsKey (Object key)
 	{
 		//should check direct too
+		if (m_info.DisplayType == DisplayType.MultiSelectTable)
+		{
+			Set<Integer> values = new TreeSet<Integer>(Arrays.asList((Integer[]) key));
+			return CollectionUtils.containsAny(m_lookup.keySet(), values);
+		}
+		else if (m_info.DisplayType == DisplayType.MultiSelectList)
+		{
+			Set<String> values = new TreeSet<String>(Arrays.asList((String[]) key));
+			return CollectionUtils.containsAny(m_lookup.keySet(), values);
+		}
 		if (m_lookup.containsKey(key))
 			return true;
 		else {
@@ -274,6 +288,16 @@ public final class MLookup extends Lookup implements Serializable
 	public boolean containsKeyNoDirect (Object key)
 	{
 		//should check direct too
+		if (m_info.DisplayType == DisplayType.MultiSelectTable)
+		{
+			Set<Integer> values = new TreeSet<Integer>(Arrays.asList((Integer[]) key));
+			return CollectionUtils.containsAny(m_lookup.keySet(), values);
+		}
+		else if (m_info.DisplayType == DisplayType.MultiSelectList)
+		{
+			Set<String> values = new TreeSet<String>(Arrays.asList((String[]) key));
+			return CollectionUtils.containsAny(m_lookup.keySet(), values);
+		}
 		if (m_lookup.containsKey(key))
 			return true;
 		else {

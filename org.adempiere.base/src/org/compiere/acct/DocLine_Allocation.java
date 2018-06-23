@@ -21,6 +21,7 @@ import java.sql.Timestamp;
 
 import org.compiere.model.MAllocationLine;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.util.DB;
 
 /**
@@ -57,7 +58,8 @@ public class DocLine_Allocation extends DocLine
 		//	Get Payment Conversion Rate
 		if (line.getC_Payment_ID() != 0)
 		{
-			MPayment payment = new MPayment (doc.getCtx(), line.getC_Payment_ID(), doc.getTrxName());
+			MPayment payment = (MPayment) MTable.get(doc.getCtx(), MPayment.Table_ID).getPO(line.getC_Payment_ID(),
+					doc.getTrxName());
 			int C_ConversionType_ID = payment.getC_ConversionType_ID();
 			this.setC_ConversionType_ID(C_ConversionType_ID);
 		}
@@ -79,12 +81,22 @@ public class DocLine_Allocation extends DocLine
 	 */
 	public int getInvoiceC_Currency_ID()
 	{
+		return getInvoiceC_Currency_ID(null);
+	}	//	getInvoiceC_Currency_ID
+	
+	/**
+	 * Get Invoice C_Currency_ID
+	 * @param trxName
+	 * @return 0 if no invoice -1 if not found
+	 */
+	public int getInvoiceC_Currency_ID(String trxName)
+	{
 		if (m_C_Invoice_ID == 0)
 			return 0;
 		String sql = "SELECT C_Currency_ID "
 			+ "FROM C_Invoice "
 			+ "WHERE C_Invoice_ID=?";
-		return  DB.getSQLValue(null, sql, m_C_Invoice_ID);
+		return  DB.getSQLValue(trxName, sql, m_C_Invoice_ID);
 
 	}	//	getInvoiceC_Currency_ID
 
@@ -170,7 +182,7 @@ public class DocLine_Allocation extends DocLine
 	{
 		if (getC_Payment_ID() > 0)
 		{
-			MPayment payment = new MPayment(p_po.getCtx(), getC_Payment_ID(), p_po.get_TrxName());
+			MPayment payment=(MPayment) MTable.get(p_po.getCtx(), MPayment.Table_ID).getPO(getC_Payment_ID(),p_po.get_TrxName());
 			return payment.getDateAcct();  // use payment date
 		}
 		return super.getDateConv();

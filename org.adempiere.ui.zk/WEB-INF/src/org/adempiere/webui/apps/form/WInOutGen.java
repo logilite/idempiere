@@ -32,10 +32,13 @@ import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.panel.IFormController;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.apps.form.InOutGen;
+import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MOrder;
+import org.compiere.model.MOrg;
 import org.compiere.model.MRMA;
+import org.compiere.model.MWarehouse;
 import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
@@ -67,6 +70,8 @@ public class WInOutGen extends InOutGen implements IFormController, EventListene
 	private Listbox  cmbDocType = ListboxFactory.newDropdownListbox();
 	private Label   lDocAction = new Label();
 	private WTableDirEditor docAction;
+	private Label	lOrg = new Label();
+	private WTableDirEditor fOrg;
 
 	private int noOfColumn;
 
@@ -109,8 +114,12 @@ public class WInOutGen extends InOutGen implements IFormController, EventListene
 		setupColumns();
 			
 		lBPartner.setText(Msg.translate(Env.getCtx(), "C_BPartner_ID"));
+		lOrg.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));
 
 		Row row = form.getParameterPanel().newRows().newRow();
+		row.appendCellChild(lOrg.rightAlign());
+		ZKUpdateUtil.setHflex(fOrg.getComponent(), "true");
+		row.appendCellChild(fOrg.getComponent());
 		row.appendCellChild(lWarehouse.rightAlign());
 		ZKUpdateUtil.setHflex(fWarehouse.getComponent(), "true");
 		row.appendCellChild(fWarehouse.getComponent());
@@ -161,12 +170,24 @@ public class WInOutGen extends InOutGen implements IFormController, EventListene
 	 */
 	public void dynInit() throws Exception
 	{
+		MLookup orgLookup = MLookupFactory.get(Env.getCtx(), form.getWindowNo(),
+				MColumn.getColumn_ID(MOrg.Table_Name, MOrg.COLUMNNAME_AD_Org_ID), DisplayType.TableDir,
+				Env.getLanguage(Env.getCtx()), MOrg.COLUMNNAME_AD_Org_ID, 0, true,
+				"IsActive = 'Y' AND AD_Client_ID=@AD_Client_ID@");
+		fOrg = new WTableDirEditor(MOrg.COLUMNNAME_AD_Org_ID, true, false, true, orgLookup);
+		fOrg.setValue(Env.getAD_Org_ID(Env.getCtx()));
+		fOrg.addValueChangeListener(this);
+		m_AD_Org_ID = fOrg.getValue();
+		
 		//	C_OrderLine.M_Warehouse_ID
-		MLookup orgL = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, 11474 /* M_Requisition.M_Warehouse_ID */, DisplayType.TableDir);
+		MLookup orgL = MLookupFactory.get(Env.getCtx(), 0,
+				MColumn.getColumn_ID(MWarehouse.Table_Name, MWarehouse.COLUMNNAME_M_Warehouse_ID), DisplayType.TableDir,
+				Env.getLanguage(Env.getCtx()), MWarehouse.COLUMNNAME_M_Warehouse_ID, 0, true,
+				"IsActive = 'Y' AND AD_Client_ID=@AD_Client_ID@ AND AD_Org_ID = " + m_AD_Org_ID);
+		
 		fWarehouse = new WTableDirEditor ("M_Warehouse_ID", true, false, true, orgL);
 		lWarehouse.setText(Msg.translate(Env.getCtx(), "M_Warehouse_ID"));
 		fWarehouse.addValueChangeListener(this);
-		fWarehouse.setValue(Env.getContextAsInt(Env.getCtx(), "#M_Warehouse_ID"));
 		setM_Warehouse_ID(fWarehouse.getValue());
 		//      Document Action Prepared/ Completed
 		lDocAction.setText(Msg.translate(Env.getCtx(), "DocAction"));
@@ -292,6 +313,19 @@ public class WInOutGen extends InOutGen implements IFormController, EventListene
 		{
 			m_C_BPartner_ID = e.getNewValue();
 			fBPartner.setValue(m_C_BPartner_ID);	//	display value
+		}
+		else if(e.getSource().equals(fOrg))
+		{
+			m_AD_Org_ID = fOrg.getValue();
+			fWarehouse.getComponent().removeAllItems();
+			fWarehouse.setValue(null);
+			m_M_Warehouse_ID = null;
+			ArrayList<KeyNamePair> warehouseList = getWarehouse();
+			
+			for(KeyNamePair pp : warehouseList)
+			{
+				fWarehouse.getComponent().appendItem(pp.getName(), new Integer(pp.getKey()));
+			}
 		}
 		form.postQueryEvent();
 	}	//	vetoableChange

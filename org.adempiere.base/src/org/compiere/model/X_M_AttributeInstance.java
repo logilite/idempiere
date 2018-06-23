@@ -19,7 +19,9 @@ package org.compiere.model;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Properties;
+
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
@@ -214,5 +216,45 @@ public class X_M_AttributeInstance extends PO implements I_M_AttributeInstance, 
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+	
+	/** Set Value.
+		@param ValueInt 
+		Int Value
+	  */
+	public void setValueInt (int ValueInt)
+	{
+		if(ValueInt < 1)
+			set_Value(COLUMNNAME_ValueInt, null);
+		else
+			set_Value (COLUMNNAME_ValueInt, Integer.valueOf(ValueInt));
+	}
+	
+	/** Get Value.
+		@return Int Value
+	  */
+	public int getValueInt () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ValueInt);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+	
+	/** Set Value.
+		@param ValueTimeStamp 
+		TimeStamp Value
+	  */
+	public void setValueTimeStamp (Timestamp ValueTimeStamp)
+	{
+		set_Value (COLUMNNAME_ValueTimeStamp, ValueTimeStamp);
+	}
+	
+	/** Get Value.
+		@return TimeStamp Value
+	  */
+	public Timestamp getValueTimeStamp () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_ValueTimeStamp);
 	}
 }

@@ -137,9 +137,9 @@ public class MPaymentTransaction extends X_C_PaymentTransaction implements Proce
 	}
 	
 	/**	Temporary	Bank Account Processors		*/
-	private MBankAccountProcessor[]	m_mBankAccountProcessors = null;
+	protected MBankAccountProcessor[]	m_mBankAccountProcessors = null;
 	/**	Temporary	Bank Account Processor		*/
-	private MBankAccountProcessor	m_mBankAccountProcessor = null;
+	protected MBankAccountProcessor	m_mBankAccountProcessor = null;
 	
 	public boolean setPaymentProcessor (String tender, String CCType, int C_PaymentProcessor_ID)
 	{
@@ -437,7 +437,7 @@ public class MPaymentTransaction extends X_C_PaymentTransaction implements Proce
 	}
 	
 	/** Error Message						*/
-	private String				m_errorMessage = null;
+	protected String				m_errorMessage = null;
 	
 	public void setErrorMessage(String errorMessage)
 	{
@@ -451,7 +451,7 @@ public class MPaymentTransaction extends X_C_PaymentTransaction implements Proce
 	
 	public MPayment createPayment(String trxName)
 	{
-		MPayment payment = new MPayment(getCtx(), 0, trxName);
+		MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(0,trxName);
 		payment.setA_City(getA_City());
 		payment.setA_Country(getA_Country());
 		payment.setA_EMail(getA_EMail());
@@ -544,7 +544,7 @@ public class MPaymentTransaction extends X_C_PaymentTransaction implements Proce
 	}
 
 	@SuppressWarnings("unused")
-	private IProcessUI m_processUI;
+	protected IProcessUI m_processUI;
 	
 	@Override
 	public void setProcessUI(IProcessUI processUI) {
@@ -557,7 +557,7 @@ public class MPaymentTransaction extends X_C_PaymentTransaction implements Proce
 	}
 	
 	public static MPaymentTransaction copyFrom(MPaymentTransaction from, Timestamp dateTrx, String trxType, String orig_TrxID, String trxName) {
-		MPaymentTransaction to = new MPaymentTransaction(from.getCtx(), 0, trxName);
+		MPaymentTransaction to=(MPaymentTransaction) MTable.get(from.getCtx(), MPaymentTransaction.Table_ID).getPO(0,trxName);
 		to.set_TrxName(trxName);
 		PO.copyValues(from, to, from.getAD_Client_ID(), from.getAD_Org_ID());
 		to.set_ValueNoCheck(COLUMNNAME_C_PaymentTransaction_ID, I_ZERO);

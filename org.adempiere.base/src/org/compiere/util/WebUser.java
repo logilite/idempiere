@@ -216,7 +216,7 @@ public class WebUser
 		//	Load BPartner
 		if (m_bpc != null)
 		{
-			m_bp = new MBPartner (m_ctx, m_bpc.getC_BPartner_ID (), null);
+			m_bp = (MBPartner) MTable.get(m_ctx, MBPartner.Table_ID).getPO(m_bpc.getC_BPartner_ID (), null);
 			if (log.isLoggable(Level.FINE)) log.fine("Found BP=" + m_bp);
 		}
 		else
@@ -261,7 +261,7 @@ public class WebUser
 		}
 		if (m_bp == null)
 		{
-			m_bp = new MBPartner (m_ctx); //	template
+			m_bp = MBPartner.createFrom (m_ctx); //	template
 			m_bp.setIsCustomer(true);
 		}
 		if (m_bpl == null)
@@ -315,7 +315,7 @@ public class WebUser
 		//	Load BPartner
 		if (m_bpc != null)
 		{
-			m_bp = new MBPartner (m_ctx, m_bpc.getC_BPartner_ID (), null);
+			m_bp = (MBPartner) MTable.get(m_ctx, MBPartner.Table_ID).getPO(m_bpc.getC_BPartner_ID (), null);
 			if (log.isLoggable(Level.FINE)) log.fine("= Found BP=" + m_bp);
 		}
 		else
@@ -360,7 +360,7 @@ public class WebUser
 		}
 		if (m_bp == null)
 		{
-			m_bp = new MBPartner (m_ctx); //	template
+			m_bp = MBPartner.createFrom (m_ctx); //	template
 			m_bp.setIsCustomer(true);
 		}
 		if (m_bpl == null)
@@ -459,7 +459,7 @@ public class WebUser
 					rs = pstmt.executeQuery();
 					if (rs.next())
 					{
-						m_bp = new MBPartner (m_ctx, m_bpc.getC_BPartner_ID (), null);
+						m_bp = (MBPartner) MTable.get(m_ctx, MBPartner.Table_ID).getPO(m_bpc.getC_BPartner_ID (), null);
 						if (log.isLoggable(Level.FINE)) log.fine("BP loaded =" + m_bp);
 					}
   			}

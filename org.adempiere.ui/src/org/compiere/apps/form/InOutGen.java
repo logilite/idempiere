@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 
 import org.compiere.apps.IStatusBar;
@@ -31,6 +32,8 @@ import org.compiere.model.MPInstance;
 import org.compiere.model.MPInstancePara;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRole;
+import org.compiere.model.MWarehouse;
+import org.compiere.model.Query;
 import org.compiere.print.ReportEngine;
 import org.compiere.process.ProcessInfo;
 import org.compiere.util.CLogger;
@@ -52,6 +55,7 @@ public class InOutGen extends GenForm
 	
 	public Object 			m_M_Warehouse_ID = null;
 	public Object 			m_C_BPartner_ID = null;
+	public Object			m_AD_Org_ID		= null;
 	
 	public void dynInit() throws Exception
 	{
@@ -105,6 +109,8 @@ public class InOutGen extends GenForm
             sql.append(" AND ic.M_Warehouse_ID=").append(m_M_Warehouse_ID);
         if (m_C_BPartner_ID != null)
             sql.append(" AND ic.C_BPartner_ID=").append(m_C_BPartner_ID);
+        if(m_AD_Org_ID != null)
+        	sql.append(" AND ic.OrderLine_OrgID=").append(m_AD_Org_ID);
         sql.append(" ORDER BY o.Name,bp.Name,DateOrdered");
         sql = new StringBuilder(MRole.getDefault().addAccessSQL(sql.toString(), "ic", true, false));
         // Replace C_Order by M_InOut_Candidate_v
@@ -140,6 +146,8 @@ public class InOutGen extends GenForm
             sql.append(" AND io.M_Warehouse_ID=").append(m_M_Warehouse_ID);
         if (m_C_BPartner_ID != null)
             sql.append(" AND bp.C_BPartner_ID=").append(m_C_BPartner_ID);
+        if (m_AD_Org_ID != null)
+        	sql.append(" AND rma.AD_Org_ID=").append(m_AD_Org_ID);
         
 	    sql.append(" ORDER BY org.Name, bp.Name, rma.Created ");
         sql = new StringBuilder(MRole.getDefault().addAccessSQL(sql.toString(), "rma", true, false));
@@ -366,5 +374,20 @@ public class InOutGen extends GenForm
 		if (m_M_Warehouse_ID == null)
 			return -1;
 		return ((Integer)m_M_Warehouse_ID);
+	}
+	
+	public ArrayList<KeyNamePair> getWarehouse()
+	{
+		ArrayList<KeyNamePair> data = new ArrayList<KeyNamePair>();
+
+		List<MWarehouse> warehouses = new Query(Env.getCtx(), MWarehouse.Table_Name, "AD_Org_ID = ?", null)
+				.setClient_ID(true).setOnlyActiveRecords(true).setParameters(m_AD_Org_ID).list();
+
+		for (MWarehouse warehouse : warehouses)
+		{
+			data.add(new KeyNamePair((Integer)warehouse.getM_Warehouse_ID(), warehouse.getName()));
+		}
+
+		return data;
 	}
 }

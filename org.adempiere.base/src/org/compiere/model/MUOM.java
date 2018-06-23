@@ -97,7 +97,7 @@ public class MUOM extends X_C_UOM
 	/*************************************************************************/
 
 	/**	UOM Cache				*/
-	private static CCache<Integer,MUOM>	s_cache = new CCache<Integer,MUOM>(Table_Name, 30);
+	protected static CCache<Integer,MUOM>	s_cache = new CCache<Integer,MUOM>(Table_Name, 30);
 
 	/**
 	 * 	Get UOM from Cache
@@ -150,7 +150,7 @@ public class MUOM extends X_C_UOM
 	 * 	Load All UOMs
 	 * 	@param ctx context
 	 */
-	private static void loadUOMs (Properties ctx)
+	protected static void loadUOMs (Properties ctx)
 	{
 		List<MUOM> list = new Query(ctx, Table_Name, "IsActive='Y'", null)
 								.setApplyAccessFilter(MRole.SQL_NOTQUALIFIED, MRole.SQL_RO)

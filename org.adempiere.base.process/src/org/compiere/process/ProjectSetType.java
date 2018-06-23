@@ -21,6 +21,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.MProject;
 import org.compiere.model.MProjectType;
+import org.compiere.model.MTable;
 
 /**
  *  Set Project Type
@@ -63,7 +64,8 @@ public class ProjectSetType extends SvrProcess
 		m_C_Project_ID = getRecord_ID();
 		if (log.isLoggable(Level.INFO)) log.info("doIt - C_Project_ID=" + m_C_Project_ID + ", C_ProjectType_ID=" + m_C_ProjectType_ID);
 		//
-		MProject project = new MProject (getCtx(), m_C_Project_ID, get_TrxName());
+		MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(m_C_Project_ID, get_TrxName());
+
 		if (project.getC_Project_ID() == 0 || project.getC_Project_ID() != m_C_Project_ID)
 			throw new IllegalArgumentException("Project not found C_Project_ID=" + m_C_Project_ID);
 		if (project.getC_ProjectType_ID_Int() > 0)

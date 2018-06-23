@@ -276,8 +276,10 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 		columnWidthMap = new HashMap<Integer, String>();
 		GridField[] tmpFields = ((GridTable)tableModel).getFields();
 		MTabCustomization tabCustomization = MTabCustomization.get(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()), gridTab.getAD_Tab_ID(), null);
-		isHasCustomizeData = tabCustomization != null && tabCustomization.getAD_Tab_Customization_ID() > 0 
-				&& tabCustomization.getCustom() != null && tabCustomization.getCustom().trim().length() > 0;
+		if (tabCustomization == null || Util.isEmpty(tabCustomization.getCustom(), true))
+			tabCustomization = MTabCustomization.get(Env.getCtx(), MTabCustomization.SUPERUSER, gridTab.getAD_Tab_ID(), null);
+		isHasCustomizeData = tabCustomization != null && tabCustomization.getAD_Tab_Customization_ID() > 0
+				&& !Util.isEmpty(tabCustomization.getCustom(), true);
 		if (isHasCustomizeData) {
 			String custom = tabCustomization.getCustom().trim();
 			String[] customComponent = custom.split(";");
@@ -526,9 +528,10 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 				//IDEMPIERE-2898 - UX: Field only showing title at header on grid
 				if( gridField[i].isFieldOnly() )
 					column.setLabel("");
-				else
+				else {
 					column.setLabel(gridField[i].getHeader());
-
+					column.setTooltiptext(gridField[i].getDescription());
+				}
 				if (columnWidthMap != null && columnWidthMap.get(gridField[i].getAD_Field_ID()) != null && !columnWidthMap.get(gridField[i].getAD_Field_ID()).equals("")) {
 					ZKUpdateUtil.setWidth(column, columnWidthMap.get(gridField[i].getAD_Field_ID()));
 				} else {

@@ -18,11 +18,13 @@ package org.compiere.model;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -136,6 +138,21 @@ public class MAttribute extends X_M_Attribute
 		return m_values;
 	}	//	getValues
 
+	static private CCache<Integer,MAttribute> s_cache = new CCache<Integer,MAttribute>(Table_Name, 30, 60);
+	
+	public static MAttribute get (Properties ctx, int M_Attribute_ID){
+		Integer key = new Integer(M_Attribute_ID);
+		MAttribute retValue = (MAttribute)s_cache.get(key);
+		
+		if(retValue!=null)
+			return retValue;
+		
+		retValue = (MAttribute) MTable.get(ctx, MAttribute.Table_ID).getPO(M_Attribute_ID, null);
+		
+		s_cache.put(key, retValue);
+		
+		return retValue;
+	}
 	
 	/**************************************************************************
 	 * 	Get Attribute Instance
@@ -197,8 +214,8 @@ public class MAttribute extends X_M_Attribute
 		if (instance == null)
 			instance = new MAttributeInstance (getCtx(), getM_Attribute_ID(), 
 				M_AttributeSetInstance_ID, value, get_TrxName());
-		else
-			instance.setValue(value);
+		
+		instance.setValue(value);
 		instance.saveEx();
 	}	//	setAttributeInstance
 
@@ -213,8 +230,46 @@ public class MAttribute extends X_M_Attribute
 		if (instance == null)
 			instance = new MAttributeInstance (getCtx(), getM_Attribute_ID(), 
 				M_AttributeSetInstance_ID, value, get_TrxName());
-		else
-			instance.setValueNumber(value);
+		
+		
+		instance.setValueNumber(value);
+		instance.saveEx();
+	}	//	setAttributeInstance
+	
+	/**
+	 * 	Set Attribute Instance
+	 * 	@param valueInt Integer value
+	 * 	@param M_AttributeSetInstance_ID id
+	 * @param value 
+	 */
+	public void setMAttributeInstance (int M_AttributeSetInstance_ID, int valueInt, String value)
+	{
+		MAttributeInstance instance = getMAttributeInstance(M_AttributeSetInstance_ID);
+		if (instance == null)
+		{
+			instance = new MAttributeInstance(getCtx(), getM_Attribute_ID(),
+					M_AttributeSetInstance_ID, valueInt, get_TrxName());
+		}
+		
+		instance.setValueInt(valueInt, value);
+		instance.saveEx();
+	}	//	setAttributeInstance
+	
+	/**
+	 * 	Set Attribute Instance
+	 * 	@param valueTimeStamp TimeStamp value
+	 * 	@param M_AttributeSetInstance_ID id
+	 */
+	public void setMAttributeInstance (int M_AttributeSetInstance_ID, Timestamp valueTimeStamp)
+	{
+		MAttributeInstance instance = getMAttributeInstance(M_AttributeSetInstance_ID);
+		if (instance == null)
+		{
+			instance = new MAttributeInstance (getCtx(), getM_Attribute_ID(), 
+					M_AttributeSetInstance_ID, valueTimeStamp, get_TrxName());
+		}
+		
+		instance.setValueTimeStamp (valueTimeStamp);
 		instance.saveEx();
 	}	//	setAttributeInstance
 	

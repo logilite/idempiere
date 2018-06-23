@@ -19,6 +19,7 @@ package org.compiere.model;
 
 import java.sql.ResultSet;
 import java.util.Properties;
+
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_Attribute
@@ -83,6 +84,8 @@ public class X_M_Attribute extends PO implements I_M_Attribute, I_Persistent
 	public static final String ATTRIBUTEVALUETYPE_Number = "N";
 	/** List = L */
 	public static final String ATTRIBUTEVALUETYPE_List = "L";
+	/** Reference = R */
+	public static final String ATTRIBUTEVALUETYPE_Reference = "R";
 	/** Set Attribute Value Type.
 		@param AttributeValueType 
 		Type of Attribute Value
@@ -255,4 +258,60 @@ public class X_M_Attribute extends PO implements I_M_Attribute, I_Persistent
     {
         return new KeyNamePair(get_ID(), getName());
     }
+    
+    public org.compiere.model.I_AD_Reference getAD_Reference() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_Reference)MTable.get(getCtx(), org.compiere.model.I_AD_Reference.Table_Name)
+			.getPO(getAD_Reference_ID(), get_TrxName());	}
+
+	/** Set Reference.
+		@param AD_Reference_ID 
+		System Reference and Validation
+	  */
+	public void setAD_Reference_ID (int AD_Reference_ID)
+	{
+		if (AD_Reference_ID < 1) 
+			set_Value (COLUMNNAME_AD_Reference_ID, null);
+		else 
+			set_Value (COLUMNNAME_AD_Reference_ID, Integer.valueOf(AD_Reference_ID));
+	}
+
+	/** Get Reference.
+		@return System Reference and Validation
+	  */
+	public int getAD_Reference_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Reference_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_AD_Reference getAD_Reference_Value() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_Reference)MTable.get(getCtx(), org.compiere.model.I_AD_Reference.Table_Name)
+			.getPO(getAD_Reference_Value_ID(), get_TrxName());	}
+
+	/** Set Reference Key.
+		@param AD_Reference_Value_ID 
+		Required to specify, if data type is Table or List
+	  */
+	public void setAD_Reference_Value_ID (int AD_Reference_Value_ID)
+	{
+		if (AD_Reference_Value_ID < 1) 
+			set_Value (COLUMNNAME_AD_Reference_Value_ID, null);
+		else 
+			set_Value (COLUMNNAME_AD_Reference_Value_ID, Integer.valueOf(AD_Reference_Value_ID));
+	}
+
+	/** Get Reference Key.
+		@return Required to specify, if data type is Table or List
+	  */
+	public int getAD_Reference_Value_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Reference_Value_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
 }

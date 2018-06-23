@@ -90,13 +90,13 @@ public class MCashLine extends X_C_CashLine
 	}	//	MCashLine
 
 	/** Parent					*/
-	private MCash			m_parent = null;
+	protected MCash		m_parent = null;
 	/** Cash Book				*/
-	private MCashBook 		m_cashBook = null;
+	protected MCashBook 	m_cashBook = null;
 	/** Bank Account			*/
-	private MBankAccount 	m_bankAccount = null;
+	protected MBankAccount 	m_bankAccount = null;
 	/** Invoice					*/
-	private MInvoice		m_invoice = null;
+	protected MInvoice		m_invoice = null;
 	
 
 	/**
@@ -231,7 +231,7 @@ public class MCashLine extends X_C_CashLine
 	public MCash getParent()
 	{
 		if (m_parent == null)
-			m_parent = new MCash (getCtx(), getC_Cash_ID(), get_TrxName());
+			m_parent = (MCash) MTable.get(getCtx(), MCash.Table_ID).getPO(getC_Cash_ID(), get_TrxName());
 		return m_parent;
 	}	//	getCash
 	
@@ -395,7 +395,7 @@ public class MCashLine extends X_C_CashLine
 	 * 	Statement Difference, Ending Balance
 	 *	@return true if success
 	 */
-	private boolean updateHeader()
+	protected boolean updateHeader()
 	{
 		String sql = "UPDATE C_Cash c"
 			+ " SET StatementDifference="

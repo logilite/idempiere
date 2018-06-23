@@ -39,9 +39,11 @@ import org.compiere.model.MAttachment;
 import org.compiere.model.MColumn;
 import org.compiere.model.MRequest;
 import org.compiere.model.MRequestType;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.util.DB;
 import org.compiere.util.EmailSrv;
+import org.compiere.util.Env;
 import org.compiere.util.EmailSrv.EmailContent;
 import org.compiere.util.EmailSrv.ProcessEmailHandle;
 import org.compiere.util.Trx;
@@ -347,7 +349,7 @@ public class RequestEMailProcessor extends SvrProcess implements ProcessEmailHan
 			return;
 		}
 		
-		MRequest req = new MRequest(getCtx(), 0, trxName);
+		MRequest req = (MRequest) MTable.get(getCtx(), MRequest.Table_ID).getPO(0, trxName);
 		// Subject as summary
 		StringBuilder msgreq = new StringBuilder("FROM: ").append(fromAddress).append("\n").append(emailContent.subject);
 		req.setSummary(msgreq.toString());
@@ -452,7 +454,7 @@ public class RequestEMailProcessor extends SvrProcess implements ProcessEmailHan
 	}
 	
 	protected void updateRequest(int request_upd, EmailContent emailContent, String trxName) throws MessagingException, SQLException {
-		MRequest requp = new MRequest(getCtx(), request_upd, trxName);
+		MRequest requp = (MRequest) MTable.get(getCtx(), MRequest.Table_ID).getPO(request_upd, trxName);
 		// Body as result
 		
 		StringBuilder msgreq = new StringBuilder("FROM: ").append(emailContent.fromAddress.get(0)).append("\n").append(emailContent.getTextContent());

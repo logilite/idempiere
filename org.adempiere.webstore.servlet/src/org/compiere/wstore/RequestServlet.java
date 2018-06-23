@@ -32,6 +32,7 @@ import javax.servlet.http.HttpSession;
 import org.compiere.model.MAttachment;
 import org.compiere.model.MMailMsg;
 import org.compiere.model.MRequest;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
@@ -177,7 +178,7 @@ public class RequestServlet extends HttpServlet
 
 		//	Get Request
 		Properties ctx = JSPEnv.getCtx(request);
-		MRequest doc = new MRequest (ctx, R_Request_ID, null);
+		MRequest doc = (MRequest) MTable.get(ctx, MRequest.Table_ID).getPO(R_Request_ID, null);
 		if (doc.getR_Request_ID() != R_Request_ID)
 		{
 			if (log.isLoggable(Level.FINE)) log.fine("Request not found - R_Request_ID=" + R_Request_ID);
@@ -285,7 +286,7 @@ public class RequestServlet extends HttpServlet
 		//	New SelfService Request
 		if (R_Request_ID == 0)
 		{
-			req = new MRequest(ctx, SalesRep_ID, R_RequestType_ID, Summary, true, null);
+			req = MRequest.createRequest(ctx, SalesRep_ID, R_RequestType_ID, Summary, true, null);
 			req.setC_BPartner_ID(wu.getC_BPartner_ID());
 			req.setAD_User_ID(wu.getAD_User_ID());
 			if (C_Order_ID > 0)
@@ -314,7 +315,7 @@ public class RequestServlet extends HttpServlet
 		}
 		else	//	existing Request
 		{
-			req = new MRequest (ctx, R_Request_ID, null);
+			req = (MRequest) MTable.get(ctx, MRequest.Table_ID).getPO(R_Request_ID, null);
 			if (req.get_ID() == 0)
 			{
 				log.log(Level.SEVERE, "Request NOT found - R_Request_ID=" + R_Request_ID);
@@ -402,7 +403,7 @@ public class RequestServlet extends HttpServlet
 		int R_Request_ID = upload.getParameterAsInt("R_Request_ID");
 		MRequest req = null;
 		if (R_Request_ID != 0)
-			req = new MRequest (ctx, R_Request_ID, null);
+			req = (MRequest) MTable.get(ctx, MRequest.Table_ID).getPO(R_Request_ID, null);
 		if (R_Request_ID == 0 || req == null || req.get_ID() != R_Request_ID)
 		{
 			WebUtil.createForwardPage(response, "Request not found", "requests.jsp", 10);

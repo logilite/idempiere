@@ -30,6 +30,7 @@ import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
+import org.compiere.model.MTable;
 import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
@@ -147,7 +148,7 @@ public class InOutGenerateRMA extends SvrProcess
         
         MInOut originalReceipt = rma.getShipment();
         
-        MInOut shipment = new MInOut(getCtx(), 0, get_TrxName());
+		MInOut shipment = (MInOut) MTable.get(getCtx(), MInOut.Table_ID).getPO(0, get_TrxName());
         shipment.setM_RMA_ID(rma.get_ID());
         shipment.setAD_Org_ID(rma.getAD_Org_ID());
         shipment.setAD_OrgTrx_ID(originalReceipt.getAD_OrgTrx_ID());
@@ -181,7 +182,7 @@ public class InOutGenerateRMA extends SvrProcess
         {
         	if (rmaLine.getM_InOutLine_ID() != 0 || rmaLine.getC_Charge_ID() != 0 || rmaLine.getM_Product_ID() != 0)
             {
-                MInOutLine shipLine = new MInOutLine(shipment);
+				MInOutLine shipLine = MInOutLine.createFrom(shipment);
                 shipLine.setM_RMALine_ID(rmaLine.get_ID());
                 shipLine.setLine(rmaLine.getLine());
                 shipLine.setDescription(rmaLine.getDescription());
