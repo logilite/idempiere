@@ -356,5 +356,5 @@ public class RequestWindow extends Window implements EventListener<Event> {
 			this.detach();
 	}
 	
-	}	
+
 }

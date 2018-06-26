@@ -114,6 +114,8 @@ public class WLocationDialog extends Window implements EventListener<Event>
 	protected Textbox txtAddress2;
 	protected Textbox txtAddress3;
 	protected Textbox txtAddress4;
+	protected Textbox txtAddress5;
+	protected Textbox txtComments;
 	protected WAutoCompleterCity txtCity;
 	protected Textbox txtPostal;
 	protected Textbox txtPostalAdd;

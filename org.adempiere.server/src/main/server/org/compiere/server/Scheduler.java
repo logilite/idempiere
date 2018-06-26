@@ -124,7 +124,7 @@ public class Scheduler extends AdempiereServer
 		//Create new Session and set #AD_Session_ID to context
 		int AD_Session_ID = getAD_Session_ID(getCtx());
 		Env.setContext(getCtx(), "#AD_Session_ID", AD_Session_ID);
-		MProcess process = new MProcess(getCtx(), get(getCtx(), AD_Scheduler_ID).getAD_Proces
+		MProcess process = new MProcess(getCtx(), get(getCtx(), AD_Scheduler_ID).getAD_Process_ID(), null);
 		try
 		{
 			m_trx = Trx.get(Trx.createTrxName("Scheduler"), true);
@@ -587,8 +587,6 @@ public class Scheduler extends AdempiereServer
 	 */
 	private int getAD_Session_ID(Properties ctx)
 	{
-		int AD_Scheduler_ID = m_model.getAD_Scheduler_ID();
-		
 		// If sessionID is available in cache, use it.
 		if (sessionCache.get(AD_Scheduler_ID) != null && sessionCache.get(AD_Scheduler_ID) > 0)
 		{
@@ -598,9 +596,9 @@ public class Scheduler extends AdempiereServer
 		int AD_Session_ID = 0;
 
 		// Look for session on scheduler record
-		if (m_model.getAD_Session_ID() > 0)
+		if (get(getCtx(), AD_Scheduler_ID).getAD_Session_ID() > 0)
 		{
-			MSession session = (MSession) MTable.get(ctx, MSession.Table_ID).getPO(m_model.getAD_Session_ID(), null);
+			MSession session = (MSession) MTable.get(ctx, MSession.Table_ID).getPO(get(getCtx(), AD_Scheduler_ID).getAD_Session_ID(), null);
 			if (!session.isProcessed())
 			{
 				AD_Session_ID = session.getAD_Session_ID();
@@ -613,7 +611,7 @@ public class Scheduler extends AdempiereServer
 			MSession session = MSession.get(ctx, true);
 			AD_Session_ID = session.getAD_Session_ID();
 
-			m_model.setAD_Session_ID(AD_Session_ID);
+			get(getCtx(), AD_Scheduler_ID).setAD_Session_ID(AD_Session_ID);
 		}
 
 		sessionCache.put(AD_Scheduler_ID, AD_Session_ID);

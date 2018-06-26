@@ -1234,6 +1234,7 @@ class Restriction  implements Serializable
 					sb.append("UPPER(").append(DB.TO_STRING(Code.toString())).append(")");
 				else
 					sb.append(DB.TO_STRING(Code.toString()));
+			}
 			else if (Code instanceof Timestamp)
 				sb.append(DB.TO_DATE((Timestamp)Code, false));
 			else

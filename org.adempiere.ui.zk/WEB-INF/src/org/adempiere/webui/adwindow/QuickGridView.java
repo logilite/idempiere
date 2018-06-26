@@ -25,6 +25,7 @@ import javax.swing.table.AbstractTableModel;
 
 import org.adempiere.base.Core;
 import org.adempiere.model.MTabCustomization;
+import org.adempiere.util.Callback;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.apps.form.WQuickForm;
 import org.adempiere.webui.component.Checkbox;
@@ -1454,5 +1455,11 @@ public class QuickGridView extends Vbox
 		super.onPageDetached(page);
 		keyListener.setCtrlKeys(keyListener.getCtrlKeys().replaceAll(CNTRL_KEYS, ""));
 		keyListener.removeEventListener(Events.ON_CTRL_KEY, this);
+	}
+
+	@Override
+	public void editorTraverse(Callback<WEditor> editorTaverseCallback) {
+		// TODO Auto-generated method stub
+		
 	}
 }
