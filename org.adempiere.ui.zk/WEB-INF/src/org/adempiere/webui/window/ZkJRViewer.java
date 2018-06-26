@@ -95,6 +95,7 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 	public ZkJRViewer(JasperPrint jasperPrint, String title, PrintInfo printInfo)
 	{
 		super();
+		m_printInfo = printInfo;
 		this.setTitle(title);
 		m_title = title;
 		this.jasperPrint = jasperPrint;
@@ -112,7 +113,6 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 		this.isList = true;
 		m_WindowNo = SessionManager.getAppDesktop().registerWindow(this);
 		setAttribute(IDesktop.WINDOWNO_ATTRIBUTE, m_WindowNo);
-		m_printInfo = printInfo;
 		init();
 	}
 	
