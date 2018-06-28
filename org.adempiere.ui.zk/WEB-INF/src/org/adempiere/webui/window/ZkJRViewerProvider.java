@@ -32,13 +32,13 @@ public class ZkJRViewerProvider implements JRViewerProvider, JRViewerProviderLis
 		AEnv.executeAsyncDesktopTask(runnable);
 	}
 
-	public void openViewer(final List<JasperPrint> jasperPrintList, final String title)
+	public void openViewer(final List<JasperPrint> jasperPrintList, final String title , final PrintInfo printInfo)
 			throws JRException {
 		Runnable runnable = new Runnable() {
 
 			@Override
 			public void run() {
-				Window viewer = new ZkJRViewer(jasperPrintList, title);
+				Window viewer = new ZkJRViewer(jasperPrintList, title, printInfo);
 
 				viewer.setAttribute(Window.MODE_KEY, Window.MODE_EMBEDDED);
 				viewer.setAttribute(Window.INSERT_POSITION_KEY, Window.INSERT_NEXT);

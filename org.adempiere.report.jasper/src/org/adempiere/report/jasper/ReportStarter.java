@@ -713,11 +713,10 @@ public class ReportStarter implements ProcessCall, ClientProcess
 	                    	}
 	                    }	
 	                } else {
-	                	if (reportPathList.length == 1) {
+						if (printInfo == null)
+							printInfo = new PrintInfo(pi);
+						if (reportPathList.length == 1) {
 		                    if (log.isLoggable(Level.INFO)) log.info( "ReportStarter.startProcess run report -"+jasperPrint.getName());
-							if (printInfo == null)
-								printInfo = new PrintInfo(pi);
-							
 			                JRViewerProvider viewerLauncher = Service.locator().locate(JRViewerProvider.class).getService();
 		                    viewerLauncher.openViewer(jasperPrint, pi.getTitle(), printInfo);
 	                	} else {
@@ -727,7 +726,7 @@ public class ReportStarter implements ProcessCall, ClientProcess
 			                    if (viewerLauncher == null) {
 			                    	throw new AdempiereException("Can not find a viewer provider for multiple jaspers");
 			                    }
-			                    viewerLauncher.openViewer(jasperPrintList, pi.getTitle());
+			                    viewerLauncher.openViewer(jasperPrintList, pi.getTitle(), printInfo);
 	                		}
 	                	}
 	                }
