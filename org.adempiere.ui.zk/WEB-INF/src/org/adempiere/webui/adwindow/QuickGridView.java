@@ -37,6 +37,7 @@ import org.adempiere.webui.component.Searchbox;
 import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.SortComparator;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.GridTable;
@@ -200,10 +201,10 @@ public class QuickGridView extends Vbox
 		setId("quickGridView");
 		createListbox();
 
-		this.setHflex("1");
+		ZKUpdateUtil.setHflex(this, "1");
 		
 		gridFooter = new Div();
-		gridFooter.setVflex("0");
+		ZKUpdateUtil.setVflex(gridFooter, "0");
 		
 		//default paging size
 		if (AEnv.isTablet())
@@ -224,7 +225,7 @@ public class QuickGridView extends Vbox
 		
 		appendChild(listbox);
 		appendChild(gridFooter);								
-		this.setVflex("true");
+		ZKUpdateUtil.setVflex(this, "true");
 		
 		setStyle(HEADER_GRID_STYLE);
 		gridFooter.setStyle(HEADER_GRID_STYLE);
@@ -248,8 +249,8 @@ public class QuickGridView extends Vbox
 	{
 		listbox = new Grid();
 		listbox.setSizedByContent(false);
-		listbox.setVflex("1");
-		listbox.setHflex("1");
+		ZKUpdateUtil.setVflex(listbox, "1");
+		ZKUpdateUtil.setHflex(listbox, "1");
 		listbox.setSclass("adtab-grid");
 		listbox.setEmptyMessage(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Processing")));
 	}
@@ -498,7 +499,7 @@ public class QuickGridView extends Vbox
 		}
 		
 		org.zkoss.zul.Column selection = new Column();
-		selection.setWidth("22px");
+		ZKUpdateUtil.setWidth(selection, "22px");
 		try{
 			selection.setSort("none");
 		} catch (Exception e) {}
@@ -537,24 +538,24 @@ public class QuickGridView extends Vbox
 					column.setTooltiptext(gridFields[i].getDescription());
 				}
 				if (columnWidthMap != null && columnWidthMap.get(gridFields[i].getAD_Field_ID()) != null && !columnWidthMap.get(gridFields[i].getAD_Field_ID()).equals("")) {
-					column.setWidth(columnWidthMap.get(gridFields[i].getAD_Field_ID()));
+					ZKUpdateUtil.setWidth(column, columnWidthMap.get(gridFields[i].getAD_Field_ID()));
 				} else {
 					if (gridFields[i].getDisplayType()==DisplayType.YesNo) {
 						if (i > 0) {
-							column.setHflex("min");
+							ZKUpdateUtil.setHflex(column, "min");
 						} else {
 							int estimatedWidth=60;
 							int headerWidth = (gridFields[i].getHeader().length()+2) * 8;
 							if (headerWidth > estimatedWidth)
 								estimatedWidth = headerWidth;
-							column.setWidth(estimatedWidth + "px");
+							ZKUpdateUtil.setWidth(column, estimatedWidth + "px");
 						}
 					} else if (DisplayType.isNumeric(gridFields[i].getDisplayType()) && "Line".equals(gridFields[i].getColumnName())) {
 						//special treatment for line
 						if (i > 0)
-							column.setHflex("min");
+							ZKUpdateUtil.setHflex(column, "min");
 						else
-							column.setWidth("60px");
+							ZKUpdateUtil.setWidth(column, "60px");
 					} else {
 						int estimatedWidth = 0;
 						if (DisplayType.isNumeric(gridFields[i].getDisplayType()))
@@ -576,17 +577,17 @@ public class QuickGridView extends Vbox
 							if (DisplayType.isLookup(gridFields[i].getDisplayType()))
 							{
 								if (headerWidth > MIN_COMBOBOX_WIDTH)
-									column.setHflex("min");
+									ZKUpdateUtil.setHflex(column, "min");
 							}
 							else if (DisplayType.isNumeric(gridFields[i].getDisplayType()))
 							{
 								if (headerWidth > MIN_NUMERIC_COL_WIDTH)
-									column.setHflex("min");
+									ZKUpdateUtil.setHflex(column, "min");
 							}
 							else if (!DisplayType.isText(gridFields[i].getDisplayType()))
 							{
 								if (headerWidth > MIN_COLUMN_WIDTH)
-									column.setHflex("min");
+									ZKUpdateUtil.setHflex(column, "min");
 							}
 						}
 						
@@ -596,7 +597,7 @@ public class QuickGridView extends Vbox
 								estimatedWidth = MAX_COLUMN_WIDTH;
 							else if (estimatedWidth < MIN_COLUMN_WIDTH)
 								estimatedWidth = MIN_COLUMN_WIDTH;
-							column.setWidth(Integer.toString(estimatedWidth) + "px");
+							ZKUpdateUtil.setWidth(column, Integer.toString(estimatedWidth) + "px");
 						}
 					}
 				}
@@ -1399,7 +1400,7 @@ public class QuickGridView extends Vbox
 	{
 		if (gridFooter.getParent() != this)
 		{
-			gridFooter.setHflex("1");
+			ZKUpdateUtil.setHflex(gridFooter, "1");
 			gridFooter.setSclass("adtab-grid-south");
 			appendChild(gridFooter);
 		}

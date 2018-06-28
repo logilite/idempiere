@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.util.ValueNamePair;
 import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zk.ui.event.Event;
@@ -36,7 +37,7 @@ public class MultiSelectionBox extends Vbox implements EventListener<Event>
 	public MultiSelectionBox(ArrayList<ValueNamePair> list, boolean editable)
 	{
 		super();
-		setWidth("100%");
+		ZKUpdateUtil.setWidth(this, "100%");
 
 		init();
 		loadData(list);
@@ -54,7 +55,7 @@ public class MultiSelectionBox extends Vbox implements EventListener<Event>
 
 		vbox = new Vbox();
 		vbox.setStyle("background-color: #ffffff; border-color:#ffffff; border:none; background:#ffffff;");
-		vbox.setHflex("1");
+		ZKUpdateUtil.setHflex(vbox, "1");
 		popup.appendChild(vbox);
 
 		textbox = new Textbox(PleaseSelect) {
@@ -69,7 +70,7 @@ public class MultiSelectionBox extends Vbox implements EventListener<Event>
 
 		textbox.setReadonly(true);
 		textbox.setStyle("background-color: white");
-		textbox.setHflex("1");
+		ZKUpdateUtil.setHflex(textbox, "1");
 		textbox.addEventListener(Events.ON_CLICK, this);
 		if (isEditable())
 			textbox.setPopup("uuid(" + popup.getUuid() + "), after_start");

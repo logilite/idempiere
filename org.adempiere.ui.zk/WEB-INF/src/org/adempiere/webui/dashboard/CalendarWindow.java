@@ -163,17 +163,16 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 		Row row = new Row();
 		Cell cell = new Cell();
 		cell.appendChild(new Label("Sales Representative :"));
-		cell.setWidth("10%");
+		ZKUpdateUtil.setWidth(cell, "10%");
 		row.appendChild(cell);
 
 		cell = new Cell();
 		cell.appendChild(lbxUserHeirarchy);
 		lbxUserHeirarchy.addValueChangeListener(this);
-		cell.setWidth("75%");
+		ZKUpdateUtil.setWidth(cell, "75%");
 		row.appendChild(cell);
 
 		rows.appendChild(row);
-
 
 		North north = new North();
 		north.appendChild(grid);

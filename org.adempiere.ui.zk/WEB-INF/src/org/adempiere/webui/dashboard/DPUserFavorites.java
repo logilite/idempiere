@@ -14,6 +14,7 @@ import org.adempiere.webui.component.Checkbox;
 import org.adempiere.webui.component.FavoriteSimpleTreeModel;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.TreeUtils;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.I_AD_Tree_Favorite;
 import org.compiere.model.MTreeFavorite;
@@ -137,12 +138,12 @@ public class DPUserFavorites extends DashboardPanel implements EventListener<Eve
 		tree.setMultiple(false);
 		tree.setSizedByContent(false);
 		tree.setClass("menu-tree");
-		tree.setWidth("100%");
+		ZKUpdateUtil.setWidth(tree, "100%");
 		tree.setStyle("border: none");
 
 		Box box = new Vbox();
-		box.setVflex("1");
-		box.setHflex("1");
+		ZKUpdateUtil.setVflex(box, "1");
+		ZKUpdateUtil.setHflex(box, "1");
 		box.appendChild(tree);
 
 		initTreeModel();

@@ -32,6 +32,7 @@ import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.editor.WTableDirEditor;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
@@ -87,8 +88,8 @@ public class ResourceAssignmentWindow extends Window implements EventListener<Ev
 		Properties ctx = Env.getCtx();
 		setTitle(Msg.getElement(ctx, "S_ResourceAssignment_ID"));
 		setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
-		setWidth("550px");
-		setHeight("300px");
+		ZKUpdateUtil.setWidth(this, "550px");
+		ZKUpdateUtil.setHeight(this, "300px");
 		this.setSclass("popup-dialog");
 		this.setBorder("normal");
 		this.setShadow(true);
@@ -112,13 +113,13 @@ public class ResourceAssignmentWindow extends Window implements EventListener<Ev
 				resourceField.setValue(resourceField.getComponent().getItemAtIndex(0).getValue());
 
 		txtName = new Textbox();
-		txtName.setWidth("95%");
-		txtName.setHeight("100%");
+		ZKUpdateUtil.setWidth(txtName, "95%");
+		ZKUpdateUtil.setHeight(txtName, "100%");
 
 		txtDescription = new Textbox();
 		txtDescription.setMultiline(true);
-		txtDescription.setWidth("95%");
-		txtDescription.setHeight("100%");
+		ZKUpdateUtil.setWidth(txtDescription, "95%");
+		ZKUpdateUtil.setHeight(txtDescription, "100%");
 
 		dbxStartDate = new DatetimeBox();
 		dbxEndDate = new DatetimeBox();
@@ -137,7 +138,7 @@ public class ResourceAssignmentWindow extends Window implements EventListener<Ev
 
 		column = new Column();
 		columns.appendChild(column);
-		column.setWidth("450px");
+		ZKUpdateUtil.setWidth(column, "450px");
 
 		Rows rows = new Rows();
 		grid.appendChild(rows);
@@ -169,8 +170,8 @@ public class ResourceAssignmentWindow extends Window implements EventListener<Ev
 
 		Borderlayout borderlayout = new Borderlayout();
 		this.appendChild(borderlayout);
-		borderlayout.setHflex("1");
-		borderlayout.setVflex("min");
+		ZKUpdateUtil.setHflex(borderlayout, "1");
+		ZKUpdateUtil.setVflex(borderlayout, "min");
 
 		North northPane = new North();
 		northPane.setSclass("dialog-content");
@@ -178,9 +179,8 @@ public class ResourceAssignmentWindow extends Window implements EventListener<Ev
 		borderlayout.appendChild(northPane);
 
 		northPane.appendChild(grid);
-		grid.setVflex("1");
-		grid.setHflex("1");
-		grid.setHeight("200px");
+		ZKUpdateUtil.setHflex(grid, "1");
+		ZKUpdateUtil.setHeight(grid, "200px");
 
 		South southPane = new South();
 		southPane.setSclass("dialog-footer");

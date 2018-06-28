@@ -44,6 +44,7 @@ import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MClientInfo;
 import org.compiere.model.MColumn;
@@ -129,7 +130,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		Properties ctx = Env.getCtx();
 		setTitle(Msg.getMsg(ctx, "ActivityNew"));
 		setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
-		setWidth("825px");
+		ZKUpdateUtil.setWidth(this, "825px");
 
 		this.setSclass("popup-dialog");
 		this.setBorder("normal");
@@ -291,29 +292,29 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		activityRelatedTo.addValueChangeListener(this);
 
 		txtName = new Textbox();
-		txtName.setWidth("100%");
-		txtName.setHeight("100%");
+		ZKUpdateUtil.setWidth(txtName, "100%");
+		ZKUpdateUtil.setHeight(txtName, "100%");
 
 		txtBPname = new Textbox();
-		txtBPname.setWidth("100%");
-		txtBPname.setHeight("100%");
+		ZKUpdateUtil.setWidth(txtBPname, "100%");
+		ZKUpdateUtil.setHeight(txtBPname, "100%");
 
 		txtEMail = new Textbox();
-		txtEMail.setWidth("100%");
-		txtEMail.setHeight("100%");
+		ZKUpdateUtil.setWidth(txtEMail, "100%");
+		ZKUpdateUtil.setHeight(txtEMail, "100%");
 
 		txtPhone = new Textbox();
-		txtPhone.setWidth("100%");
-		txtPhone.setHeight("100%");
+		ZKUpdateUtil.setWidth(txtPhone, "100%");
+		ZKUpdateUtil.setHeight(txtPhone, "100%");
 
 		txtDescription = new Textbox();
-		txtDescription.setWidth("100%");
-		txtDescription.setHeight("100%");
+		ZKUpdateUtil.setWidth(txtDescription, "100%");
+		ZKUpdateUtil.setHeight(txtDescription, "100%");
 
 		txtComments = new Textbox();
 		txtComments.setMultiline(true);
-		txtComments.setWidth("100%");
-		txtComments.setHeight("100%");
+		ZKUpdateUtil.setWidth(txtComments, "100%");
+		ZKUpdateUtil.setHeight(txtComments, "100%");
 
 		dbxStartDate = new DatetimeBox();
 		dbxStartDate.addEventListener(Events.ON_CHANGE, new EventListener<Event>() {
@@ -332,19 +333,19 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 
 		//follow activity
 		txtDescription2 = new Textbox();
-		txtDescription2.setWidth("100%");
-		txtDescription2.setHeight("100%");
+		ZKUpdateUtil.setWidth(txtDescription2, "100%");
+		ZKUpdateUtil.setHeight(txtDescription2, "100%");
 
 		dbxStartDate2 = new DatetimeBox();
 
 		txtComments2 = new Textbox();
 		txtComments2.setMultiline(true);
-		txtComments2.setWidth("100%");
-		txtComments2.setHeight("100%");
+		ZKUpdateUtil.setWidth(txtDescription2, "100%");
+		ZKUpdateUtil.setHeight(txtDescription2, "100%");
 
 		opportunityDesc = new Textbox();
-		opportunityDesc.setWidth("88%");
-		opportunityDesc.setHeight("100%");
+		ZKUpdateUtil.setWidth(opportunityDesc, "88%");
+		ZKUpdateUtil.setHeight(opportunityDesc, "100%");
 
 		nbxDuration = new NumberBox(true);
 		nbxDuration.setValue(60);
@@ -359,15 +360,15 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 
 		column = new Column();
 		columns.appendChild(column);
-		column.setWidth("240px");
+		ZKUpdateUtil.setWidth(column, "240px");
 
 		column = new Column();
 		columns.appendChild(column);
-		column.setWidth("230px");
+		ZKUpdateUtil.setWidth(column, "230px");
 
 		column = new Column();
 		columns.appendChild(column);
-		column.setWidth("230px");
+		ZKUpdateUtil.setWidth(column, "230px");
 
 		Rows rows = new Rows();
 		grid.appendChild(rows);
@@ -376,7 +377,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		Row row = new Row();
 		rows.appendChild(row);
 		row.appendChild(lblActivityType.rightAlign());
-		activityTypeField.getComponent().setWidth("100%");
+		ZKUpdateUtil.setWidth(activityTypeField.getComponent(), "100%");
 		row.appendChild(activityTypeField.getComponent());
 		row.appendChild(lblActivityRelatedTo);
 		row.appendChild(lblEMpty);
@@ -410,7 +411,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		BPNameRow = new Row();
 		rows.appendChild(BPNameRow);
 		BPNameRow.appendChild(lblSalesRep.rightAlign());
-		salesRepField.setWidth("200px");
+		ZKUpdateUtil.setWidth(salesRepField, "200px");
 		BPNameRow.appendChild(salesRepField);
 
 		locationRow = new Row();
@@ -421,7 +422,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		positionRow = new Row();
 		rows.appendChild(positionRow);
 		positionRow.appendChild(lblActivityType2.rightAlign());
-		activityTypeField2.getComponent().setWidth("100%");
+		ZKUpdateUtil.setWidth(activityTypeField2.getComponent(), "100%");
 		positionRow.appendChild(activityTypeField2.getComponent());
 		lblActivityType2.setVisible(false);
 		activityTypeField2.setVisible(false);
@@ -468,8 +469,8 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 
 		Borderlayout borderlayout = new Borderlayout();
 		this.appendChild(borderlayout);
-		borderlayout.setHflex("1");
-		borderlayout.setVflex("min");
+		ZKUpdateUtil.setHflex(borderlayout, "1");
+		ZKUpdateUtil.setVflex(borderlayout, "min");
 
 		North northPane = new North();
 		northPane.setSclass("dialog-content");
@@ -477,9 +478,9 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 		borderlayout.appendChild(northPane);
 
 		northPane.appendChild(grid);
-		grid.setHeight("450px");
-		grid.setVflex("1");
-		grid.setHflex("1");
+//		grid.setHeight("450px");
+		ZKUpdateUtil.setVflex(grid, "1");
+		ZKUpdateUtil.setHflex(grid, "1");
 
 		South southPane = new South();
 		southPane.setSclass("dialog-footer");

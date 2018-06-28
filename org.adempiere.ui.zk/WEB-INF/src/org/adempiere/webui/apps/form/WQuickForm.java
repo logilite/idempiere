@@ -27,6 +27,7 @@ import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.component.ZkCssHelper;
 import org.adempiere.webui.session.SessionManager;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.CustomizeGridViewDialog;
 import org.compiere.model.DataStatusEvent;
 import org.compiere.model.DataStatusListener;
@@ -214,8 +215,8 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 			gridFieldIds.add(fields[i].getAD_Field_ID());
 		}
 
-		quickGridView.setWidth(getWidth());
-		quickGridView.setHeight(getHeight());
+		ZKUpdateUtil.setWidth(quickGridView, getWidth());
+		ZKUpdateUtil.setHeight(quickGridView, getHeight());
 
 		CustomizeGridViewDialog.showCustomize(0, gridTab.getAD_Tab_ID(), columnsWidth, gridFieldIds, null,
 				quickGridView, true);

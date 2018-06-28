@@ -28,6 +28,7 @@ import org.adempiere.webui.component.Row;
 import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Window;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.MResource;
 import org.compiere.model.X_S_Resource;
 import org.compiere.model.X_S_ResourceAssignment;
@@ -63,8 +64,8 @@ public class AssignmentWindow extends Window implements EventListener<Event> {
 		Properties ctx = Env.getCtx();
 		setTitle(Msg.getElement(ctx, "S_ResourceAssignment_ID"));
 		setAttribute(Window.MODE_KEY, Window.MODE_POPUP);
-		setWidth("400px");
-		setHeight("310px");
+		ZKUpdateUtil.setWidth(this, "400px");
+		ZKUpdateUtil.setHeight(this, "310px");
 		this.setBorder("normal");
 		this.setClosable(true);
 
@@ -84,15 +85,15 @@ public class AssignmentWindow extends Window implements EventListener<Event> {
 		dtEndDate.getTimebox().setFormat(DPCalendar.getTimeFormat());
 
 		resourceName = new Textbox();
-		resourceName.setWidth("95%");
+		ZKUpdateUtil.setWidth(resourceName, "95%");
 		resourceName.setReadonly(true);
 
 		txtName = new Textbox();
-		txtName.setWidth("95%");
+		ZKUpdateUtil.setWidth(txtName, "95%");
 		txtName.setReadonly(true);
 
 		txtDescription = new Textbox();
-		txtDescription.setWidth("95%");
+		ZKUpdateUtil.setWidth(txtDescription, "95%");
 		txtDescription.setReadonly(true);
 
 		confirmPanel = new ConfirmPanel(false, false, false, false, false, true);
@@ -109,7 +110,7 @@ public class AssignmentWindow extends Window implements EventListener<Event> {
 
 		column = new Column();
 		columns.appendChild(column);
-		column.setWidth("250px");
+		ZKUpdateUtil.setWidth(column, "250px");
 
 		Rows rows = new Rows();
 		grid.appendChild(rows);
@@ -141,8 +142,8 @@ public class AssignmentWindow extends Window implements EventListener<Event> {
 
 		Borderlayout borderlayout = new Borderlayout();
 		this.appendChild(borderlayout);
-		borderlayout.setHflex("1");
-		borderlayout.setVflex("min");
+		ZKUpdateUtil.setHflex(borderlayout, "1");
+		ZKUpdateUtil.setVflex(borderlayout, "min");
 
 		North northPane = new North();
 		northPane.setSclass("dialog-content");
@@ -150,8 +151,8 @@ public class AssignmentWindow extends Window implements EventListener<Event> {
 		borderlayout.appendChild(northPane);
 
 		northPane.appendChild(grid);
-		grid.setVflex("1");
-		grid.setHflex("1");
+		ZKUpdateUtil.setVflex(grid, "1");
+		ZKUpdateUtil.setHflex(grid, "1");
 
 		South south = new South();
 		borderlayout.appendChild(south);

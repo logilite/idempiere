@@ -13,6 +13,7 @@ import java.util.ArrayList;
 
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.editor.WMultiSelectEditor;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.util.CacheMgt;
 import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.Page;
@@ -53,7 +54,7 @@ public class MultiSelectBox extends Div
 	public MultiSelectBox()
 	{
 		super();
-		this.setWidth("100%");
+		ZKUpdateUtil.setWidth(this, "100%");
 		init();
 	}
 
@@ -66,7 +67,7 @@ public class MultiSelectBox extends Div
 		appendChild(popup);
 
 		vbox = new Vbox();
-		vbox.setHflex("1");
+		ZKUpdateUtil.setHflex(vbox, "1");
 		LayoutUtils.addSclass("multi-select-vbox", vbox);
 		popup.appendChild(vbox);
 
@@ -88,7 +89,7 @@ public class MultiSelectBox extends Div
 			textbox.setPopup("uuid(" + popup.getUuid() + "), after_start");
 
 		textbox.setReadonly(true);
-		textbox.setHflex("1");
+		ZKUpdateUtil.setHflex(textbox, "1");
 		LayoutUtils.addSclass("multi-select-textbox", textbox);
 		appendChild(textbox);
 	} // init

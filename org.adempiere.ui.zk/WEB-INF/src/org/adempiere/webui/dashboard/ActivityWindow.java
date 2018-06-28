@@ -37,6 +37,7 @@ import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WTableDirEditor;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MColumn;
 import org.compiere.model.MContactActivity_Attendees;
@@ -99,7 +100,7 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 		Properties ctx = Env.getCtx();
 		setTitle(Msg.getElement(ctx, "C_Activity_ID"));
 		setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
-		setWidth("400px");
+		ZKUpdateUtil.setWidth(this, "400px");
 		//setHeight("400px");
 
 		this.setSclass("popup-dialog");
@@ -166,16 +167,16 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 		
 		txtComments = new Textbox();
 		txtComments.setRows(5);
-		txtComments.setWidth("95%");
-		txtComments.setHeight("100%");
+		ZKUpdateUtil.setWidth(txtComments, "95%");
+		ZKUpdateUtil.setHeight(txtComments, "100%");
 		txtComments.setReadonly(m_readOnly);
 
 		txtDescription = new Textbox();
-		txtDescription.setWidth("95%");
+		ZKUpdateUtil.setWidth(txtDescription, "95%");
 		txtDescription.setReadonly(m_readOnly);
 
 		txtSalesMan = new Textbox();
-		txtSalesMan.setWidth("95%");
+		ZKUpdateUtil.setWidth(txtSalesMan, "95%");
 		txtSalesMan.setReadonly(!m_readOnly);
 		
 		chbNextStep = new Checkbox();
@@ -197,7 +198,7 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 
 		column = new Column();
 		columns.appendChild(column);
-		column.setWidth("250px");
+		ZKUpdateUtil.setWidth(column, "250px");
 
 		Rows rows = new Rows();
 		grid.appendChild(rows);
@@ -249,8 +250,8 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 
 		Borderlayout borderlayout = new Borderlayout();
 		this.appendChild(borderlayout);
-		borderlayout.setHflex("1");
-		borderlayout.setVflex("min");
+		ZKUpdateUtil.setHflex(borderlayout, "1");
+		ZKUpdateUtil.setVflex(borderlayout, "min");
 
 		North northPane = new North();
 		northPane.setSclass("dialog-content");
@@ -258,9 +259,8 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 		borderlayout.appendChild(northPane);
 
 		northPane.appendChild(grid);
-		//grid.setHeight("400px");
-		grid.setVflex("1");
-		grid.setHflex("1");
+		ZKUpdateUtil.setVflex(grid, "1");
+		ZKUpdateUtil.setHflex(grid, "1");
 
 		South south = new South();
 		south.setSclass("dialog-footer");

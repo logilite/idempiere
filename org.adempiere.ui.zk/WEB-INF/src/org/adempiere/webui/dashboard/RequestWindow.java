@@ -195,15 +195,15 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		
 		Columns columns = new Columns();
 		grid.appendChild(columns);
-		columns.setVflex("1");
+		ZKUpdateUtil.setVflex(columns, "1");
 		
 		Column column = new Column();
-		column.setWidth("35%");
+		ZKUpdateUtil.setWidth(column, "35%");
 		columns.appendChild(column);
 		
 		column = new Column();
 		columns.appendChild(column);
-		column.setWidth("65%");
+		ZKUpdateUtil.setWidth(column, "65%");
 		
 		Rows rows = new Rows();
 		grid.appendChild(rows);
@@ -222,7 +222,6 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		rows.appendChild(row);
 		row.appendChild(lblRequestType.rightAlign());
 		row.appendChild(requestTypeField.getComponent());
-		
 		
 		row = new Row();
 		rows.appendChild(row);
@@ -270,10 +269,9 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		borderlayout.appendChild(centerPane);
 		
 		centerPane.appendChild(grid);
-		ZKUpdateUtil.setVflex(grid, "min");
 		ZKUpdateUtil.setHflex(grid, "1");
 		ZKUpdateUtil.setVflex(centerPane, "min");
-		grid.setHeight("400px");
+		ZKUpdateUtil.setHeight(grid, "400px");
 
 		South southPane = new South();
 		southPane.setSclass("dialog-footer");
@@ -355,6 +353,4 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		else if (e.getTarget() == confirmPanel.getButton(ConfirmPanel.A_CANCEL))
 			this.detach();
 	}
-	
-
 }

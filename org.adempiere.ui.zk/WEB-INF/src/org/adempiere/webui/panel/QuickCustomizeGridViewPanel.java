@@ -38,6 +38,7 @@ import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.SimpleListModel;
 import org.adempiere.webui.factory.ButtonFactory;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.I_AD_Field;
 import org.compiere.model.MField;
@@ -127,8 +128,8 @@ public class QuickCustomizeGridViewPanel extends Panel {
 		layout.setStyle("height: 100%; width: 100%; border: none; margin: none; padding: 2px;");
 
 		yesLabel.setValue(Msg.getMsg(Env.getCtx(), "Selected"));
-		yesList.setVflex(true);
-		yesList.setHeight("300px");
+		ZKUpdateUtil.setVflex(yesList, true);
+		ZKUpdateUtil.setHeight(yesList, "300px");
 		yesList.setSeltype("multiple");
 
 		EventListener<Event> crossListMouseListener = new DragListener();

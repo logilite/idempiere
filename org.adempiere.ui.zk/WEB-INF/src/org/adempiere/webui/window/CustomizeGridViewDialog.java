@@ -68,8 +68,8 @@ public class CustomizeGridViewDialog extends Window {
 		
 		if (isQuickForm)
 		{
-			this.setWidth("500px");
-			this.setHeight("410px");
+			ZKUpdateUtil.setWidth(this, "500px");
+			ZKUpdateUtil.setHeight(this, "410px");
 			quickCustomizePanel.createUI();
 			quickCustomizePanel.loadData();
 			appendChild(quickCustomizePanel);
@@ -77,7 +77,7 @@ public class CustomizeGridViewDialog extends Window {
 		else
 		{
 			ZKUpdateUtil.setWidth(this, "600px");
-		        ZKUpdateUtil.setHeight(this, "500px");
+			ZKUpdateUtil.setHeight(this, "500px");
 
 			appendChild(customizePanel);
 			customizePanel.createUI();

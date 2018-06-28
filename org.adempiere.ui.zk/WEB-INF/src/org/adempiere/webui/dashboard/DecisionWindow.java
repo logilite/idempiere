@@ -11,6 +11,7 @@ import org.adempiere.webui.component.Row;
 import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.session.SessionManager;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.zkoss.calendar.event.CalendarsEvent;
@@ -52,7 +53,7 @@ public class DecisionWindow extends Window implements EventListener<Event>
 		Properties ctx = Env.getCtx();
 		setTitle(Msg.getMsg(ctx, "CreateNew"));
 		setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
-		setWidth("200px");
+		ZKUpdateUtil.setWidth(this, "200px");
 		this.setSclass("popup-dialog");
 		this.setBorder("normal");
 		this.setShadow(true);
@@ -61,15 +62,15 @@ public class DecisionWindow extends Window implements EventListener<Event>
 
 		requestBtn = new Button(Msg.getMsg(ctx, "CreateNew2")); 
 		requestBtn.addEventListener(Events.ON_CLICK, this);
-		requestBtn.setWidth("170px");
+		ZKUpdateUtil.setWidth(requestBtn, "170px");
 
 		activityBtn = new Button(Msg.getMsg(ctx, "ActivityNew"));
 		activityBtn.addEventListener(Events.ON_CLICK, this);
-		activityBtn.setWidth("170px");
+		ZKUpdateUtil.setWidth(activityBtn, "170px");
 
 		resourceBtn = new Button(Msg.getMsg(ctx, "ResourceAssignemntNew"));
 		resourceBtn.addEventListener(Events.ON_CLICK, this);
-		resourceBtn.setWidth("170px");
+		ZKUpdateUtil.setWidth(resourceBtn, "170px");
 
 		Grid grid = GridFactory.newGridLayout();
 
@@ -96,8 +97,8 @@ public class DecisionWindow extends Window implements EventListener<Event>
 
 		Borderlayout borderlayout = new Borderlayout();
 		this.appendChild(borderlayout);
-		borderlayout.setHflex("1");
-		borderlayout.setVflex("min");
+		ZKUpdateUtil.setHflex(borderlayout, "1");
+		ZKUpdateUtil.setVflex(borderlayout, "min");
 
 		North northPane = new North();
 		northPane.setSclass("dialog-content");
