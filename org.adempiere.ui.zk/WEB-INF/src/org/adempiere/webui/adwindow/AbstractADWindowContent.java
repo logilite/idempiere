@@ -63,7 +63,6 @@ import org.adempiere.webui.exception.ApplicationException;
 import org.adempiere.webui.factory.ServiceUtil;
 import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.panel.InfoPanel;
-import org.adempiere.webui.panel.WAttachment;
 import org.adempiere.webui.panel.WDocActionPanel;
 import org.adempiere.webui.panel.action.CSVImportAction;
 import org.adempiere.webui.panel.action.ExportAction;
@@ -995,9 +994,8 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 				focusToActivePanel();				
 			}
 		};
-		//	Attachment va =
-		WAttachment win = new WAttachment (	curWindowNo, adTabbox.getSelectedGridTab().getAD_AttachmentID(),
-							adTabbox.getSelectedGridTab().getAD_Table_ID(), record_ID, null, listener);		
+		Window win = ServiceUtil.getWAttachment(curWindowNo, adTabbox.getSelectedGridTab().getAD_AttachmentID(),
+				adTabbox.getSelectedGridTab().getAD_Table_ID(), record_ID, null, listener);		
 		win.addEventListener(DialogEvents.ON_WINDOW_CLOSE, new EventListener<Event>() {
 			@Override
 			public void onEvent(Event event) throws Exception {

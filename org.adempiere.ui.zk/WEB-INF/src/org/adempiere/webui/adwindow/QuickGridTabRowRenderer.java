@@ -29,7 +29,6 @@ import org.adempiere.webui.component.DatetimeBox;
 import org.adempiere.webui.component.EditorBox;
 import org.adempiere.webui.component.FilenameBox;
 import org.adempiere.webui.component.Locationbox;
-import org.adempiere.webui.component.MultiSelectBox;
 import org.adempiere.webui.component.NumberBox;
 import org.adempiere.webui.component.PAttributebox;
 import org.adempiere.webui.component.Paymentbox;
@@ -61,6 +60,7 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.KeyEvent;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Cell;
+import org.zkoss.zul.Column;
 import org.zkoss.zul.Grid;
 import org.zkoss.zul.Paging;
 import org.zkoss.zul.RendererCtrl;
@@ -78,6 +78,7 @@ import org.zkoss.zul.Timebox;
 public class QuickGridTabRowRenderer
 		implements RowRenderer<Object[]>, RowRendererExt, RendererCtrl, EventListener<Event> {
 
+	public static final String	IS_QUICK_FORM_COMPONENT	= "IS_QUICK_FORM_COMPONENT";
 	public static final String GRID_ROW_INDEX_ATTR = "grid.row.index";
 	private static final String CELL_DIV_STYLE = "height: 100%; cursor: pointer; ";
 	private static final String CELL_DIV_STYLE_ALIGN_CENTER = CELL_DIV_STYLE + "text-align:center; ";
@@ -109,7 +110,11 @@ public class QuickGridTabRowRenderer
 	 * Flag detect this view has customized column or not
 	 * value is set at {@link #render(Row, Object[], int)}
 	 */
-	private boolean isGridViewCustomized = false;
+	private boolean						isGridViewCustomized		= false;
+	// Keep track of shorted column in Quick form.
+	private Column						sortedColumn				= null;
+	// Keep track of sorting order of column in Quick form. for e.g Ascending, Descending and Natural
+	private String						sortOrder;
 
 	/**
 	 *
@@ -287,6 +292,7 @@ public class QuickGridTabRowRenderer
 				editorsList.add(componentEditor);
 				componentEditor.getComponent().addEventListener(Events.ON_FOCUS, gridPanel);
 				Component component = componentEditor.getComponent();
+				component.setAttribute(IS_QUICK_FORM_COMPONENT, true);
 				div.appendChild(component);
 				div.setAttribute("display.component", component);
 				if (componentEditor instanceof WPAttributeEditor) {
@@ -360,6 +366,8 @@ public class QuickGridTabRowRenderer
 		if (isActive != null && !isActive.booleanValue()) {
 			LayoutUtils.addSclass("grid-inactive-row", row);
 		}
+		if (gridTab.isNew())
+			gridPanel.isNewLineSaved = false;
 		// Set focus to first editable cell of the last record if multiple
 		// records inserted
 		if (gridPanel.paging.getTotalSize() != gridTab.getRowCount())
@@ -376,6 +384,17 @@ public class QuickGridTabRowRenderer
 						- (paging.getActivePage() * paging.getPageSize()), 1, KeyEvent.RIGHT);
 			}
 			Events.echoEvent(QuickGridView.EVENT_ON_SET_FOCUS_TO_FIRST_CELL, gridPanel, null);
+		}
+
+		// When shorting is done all rows are rendered and focus is lost.
+		// If record are shorting then set focus to the first row of the current page.
+		Column column = gridPanel.findCurrentSortColumn();
+		if (column != null && gridPanel.isNewLineSaved && (sortedColumn == null || sortedColumn != column
+				|| (sortedColumn == column && sortOrder != column.getSortDirection())))
+		{
+			sortedColumn = column;
+			sortOrder = column.getSortDirection();
+			Events.echoEvent(QuickGridView.EVENT_ON_PAGE_NAVIGATE, gridPanel, null);
 		}
 	}
 
@@ -518,16 +537,6 @@ public class QuickGridTabRowRenderer
 				isReadonly = true;
 			}
 		}
-		else if (component instanceof MultiSelectBox)
-		{
-			MultiSelectBox comp = ((MultiSelectBox) component);
-			if (comp.getTextbox().isReadonly())
-			{
-				comp.getTextbox().setDisabled(isDisable);
-				comp.setZclass(addOrRemoveCssClass(comp.getZclass(), isDisable));
-				isReadonly = true;
-			}
-		}
 		return isReadonly;
 	}
 
@@ -565,7 +574,7 @@ public class QuickGridTabRowRenderer
 	}
 
 	public void setCurrentCell(int row, int col, int code) {
-		if (col < 0)
+		if (col < 0 || row < 0)
 			return;
 		int currentCol = col;
 		boolean isLastCell = false;
@@ -614,7 +623,7 @@ public class QuickGridTabRowRenderer
 		if (isAddRemoveListener(code))
 		{
 			// Remove current row property change listener
-			addRemovePropertyChangeListener(false);
+			addRemovePropertyChangeListener(false, col);
 		}
 
 		int pgIndex = row >= 0 ? row % paging.getPageSize() : 0;
@@ -636,10 +645,7 @@ public class QuickGridTabRowRenderer
 		if (isAddRemoveListener(code))
 		{
 			// Add property change listener to new current row
-			ArrayList<WEditor> editorsList = editorsListMap.get(getCurrentRow());
-			if (editorsList != null)
-				addEditorPropertyChangeListener(editorsList);
-			gridPanel.dynamicDisplay(0);
+			addRemovePropertyChangeListener(true, col);
 		}
 
 		if (grid.getCell(pgIndex, col) instanceof Cell) {
@@ -684,17 +690,18 @@ public class QuickGridTabRowRenderer
 	/**
 	 * If true add Property Change Listener, a false Remove Property Change Listener
 	 * 
-	 * @param isadd
+	 * @param isAddListener
+	 * @param col 
 	 */
-	public void addRemovePropertyChangeListener(boolean isadd)
+	public void addRemovePropertyChangeListener(boolean isAddListener, int col)
 	{
 		ArrayList<WEditor> editorsList = editorsListMap.get(getCurrentRow());
 		if (editorsList != null)
 		{
-			if (isadd)
+			if (isAddListener)
 			{
 				addEditorPropertyChangeListener(editorsList);
-				gridPanel.dynamicDisplay(0);
+				gridPanel.dynamicDisplay(col);
 			}
 			else
 			{
@@ -792,9 +799,6 @@ public class QuickGridTabRowRenderer
 		else if (component instanceof PAttributebox && !((PAttributebox) component).getTextbox().isReadonly()
 				&& (((PAttributebox) component).isEnabled() && ((PAttributebox) component).isVisible()))
 			return true;
-		else if (component instanceof MultiSelectBox && !((MultiSelectBox) component).getTextbox().isReadonly()
-				&& (((MultiSelectBox) component).isEnabled() && ((MultiSelectBox) component).isVisible()))
-			return true;
 		else
 			return false;
 	}
@@ -849,8 +853,6 @@ public class QuickGridTabRowRenderer
 			((Paymentbox) component).focus();
 		else if (component instanceof PAttributebox)
 			((PAttributebox) component).focus();
-		else if (component instanceof MultiSelectBox)
-			((MultiSelectBox) component).focus();
 		else
 			((HtmlBasedComponent) currentCell).focus();
 	} // setFocusOnCurrentCell

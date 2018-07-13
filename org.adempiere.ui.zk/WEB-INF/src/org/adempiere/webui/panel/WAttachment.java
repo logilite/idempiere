@@ -83,44 +83,44 @@ public class WAttachment extends Window implements EventListener<Event>
 	private static CLogger log = CLogger.getCLogger(WAttachment.class);
 
 	/**	Window No				*/
-	private int	m_WindowNo;
+	protected int	m_WindowNo;
 
 	/** Attachment				*/
-	private MAttachment m_attachment = null;
+	protected MAttachment m_attachment = null;
 
 	/** Change					*/
-	private boolean m_change = false;
+	protected boolean m_change = false;
 
-	private Iframe preview = new Iframe();
+	protected Iframe preview = new Iframe();
 
-	private Textbox text = new Textbox();
+	protected Textbox text = new Textbox();
 
-	private Label sizeLabel = new Label();
+	protected Label sizeLabel = new Label();
 
-	private Listbox cbContent = new Listbox();
+	protected Listbox cbContent = new Listbox();
 
-	private Button bDelete = ButtonFactory.createNamedButton(ConfirmPanel.A_DELETE, false, true);
-	private Button bSave = new Button();
-	private Button bDeleteAll = new Button();
-	private Button bLoad = new Button();
-	private Button bCancel = ButtonFactory.createNamedButton(ConfirmPanel.A_CANCEL, false, true);
-	private Button bOk = ButtonFactory.createNamedButton(ConfirmPanel.A_OK, false, true);
-	private Button bRefresh = ButtonFactory.createNamedButton(ConfirmPanel.A_REFRESH, false, true);
+	protected Button bDelete = ButtonFactory.createNamedButton(ConfirmPanel.A_DELETE, false, true);
+	protected Button bSave = new Button();
+	protected Button bDeleteAll = new Button();
+	protected Button bLoad = new Button();
+	protected Button bCancel = ButtonFactory.createNamedButton(ConfirmPanel.A_CANCEL, false, true);
+	protected Button bOk = ButtonFactory.createNamedButton(ConfirmPanel.A_OK, false, true);
+	protected Button bRefresh = ButtonFactory.createNamedButton(ConfirmPanel.A_REFRESH, false, true);
 
-	private Progressmeter progress = new Progressmeter(0);
-	private Panel previewPanel = new Panel();
+	protected Progressmeter progress = new Progressmeter(0);
+	protected Panel previewPanel = new Panel();
 
-	private Borderlayout mainPanel = new Borderlayout();
+	protected Borderlayout mainPanel = new Borderlayout();
 
-	private Hbox toolBar = new Hbox();
+	protected Hbox toolBar = new Hbox();
 
-	private Hlayout confirmPanel = new Hlayout();
+	protected Hlayout confirmPanel = new Hlayout();
 
-	private int displayIndex;
+	protected int displayIndex;
 
-	boolean isAllowDeleteAttachment; 
+	protected boolean isAllowDeleteAttachment; 
 	
-	private static List<String> autoPreviewList;
+	protected static List<String> autoPreviewList;
 
 	static {
 		autoPreviewList = new ArrayList<String>();
@@ -361,7 +361,7 @@ public class WAttachment extends Window implements EventListener<Event>
 	 *	Load Attachments
 	 */
 
-	private void loadAttachments()
+	protected void loadAttachments()
 	{
 		log.config("");
 
@@ -388,7 +388,7 @@ public class WAttachment extends Window implements EventListener<Event>
 
 	} // loadAttachment
 
-	private boolean autoPreview(int index, boolean immediate)
+	protected boolean autoPreview(int index, boolean immediate)
 	{
 		MAttachmentEntry entry = m_attachment.getEntry(index);
 		if (entry != null)
@@ -434,7 +434,7 @@ public class WAttachment extends Window implements EventListener<Event>
 	 * 	@param index index
 	 */
 
-	private void displayData (int index, boolean immediate)
+	protected void displayData (int index, boolean immediate)
 	{
 		//	Reset UI
 		preview.setSrc(null);
@@ -447,7 +447,7 @@ public class WAttachment extends Window implements EventListener<Event>
 			Clients.response(new AuEcho(this, "displaySelected", null));
 	}   //  displayData
 
-	private void clearPreview()
+	protected void clearPreview()
 	{
 		preview.setSrc(null);
 		preview.setVisible(false);
@@ -485,7 +485,7 @@ public class WAttachment extends Window implements EventListener<Event>
 	 *	@return file name or null
 	 */
 
-	private String getFileName (int index)
+	protected String getFileName (int index)
 	{
 		String fileName = null;
 
@@ -563,7 +563,7 @@ public class WAttachment extends Window implements EventListener<Event>
 
 	}	//	onEvent
 
-	private void processUploadMedia(Media media) {
+	protected void processUploadMedia(Media media) {
 		if (media != null && media.getByteData().length>0)
 		{
 //				pdfViewer.setContent(media);
@@ -631,7 +631,7 @@ public class WAttachment extends Window implements EventListener<Event>
 		}
 	}
 
-	private byte[] getMediaData(Media media)  {
+	protected byte[] getMediaData(Media media)  {
 		byte[] bytes = null;
 		
 		try{
@@ -660,7 +660,7 @@ public class WAttachment extends Window implements EventListener<Event>
 	/**
 	 *	Delete entire Attachment
 	 */
-	private void deleteAttachment()
+	protected void deleteAttachment()
 	{
 		log.info("");
 
@@ -684,7 +684,7 @@ public class WAttachment extends Window implements EventListener<Event>
 	 *	Delete Attachment Entry
 	 */
 
-	private void deleteAttachmentEntry()
+	protected void deleteAttachmentEntry()
 	{
 		log.info("");
 
@@ -717,7 +717,7 @@ public class WAttachment extends Window implements EventListener<Event>
 	 *	Save Attachment to File
 	 */
 
-	private void saveAttachmentToFile()
+	protected void saveAttachmentToFile()
 	{
 		int index = cbContent.getSelectedIndex();
 		log.info("index=" + index);
@@ -758,7 +758,7 @@ public class WAttachment extends Window implements EventListener<Event>
 	 * @param fileName
 	 * @return Filename by removing (version)
 	 */
-	private String removeSuffix(String fileName)
+	public String removeSuffix(String fileName)
 	{
 		String[] fileParts = getFileParts(fileName);
 
@@ -771,7 +771,7 @@ public class WAttachment extends Window implements EventListener<Event>
 	 * @param fileName
 	 * @return version of file
 	 */
-	private int getFileVersion(String fileName)
+	protected int getFileVersion(String fileName)
 	{
 		String[] fileParts = getFileParts(fileName);
 
@@ -793,7 +793,7 @@ public class WAttachment extends Window implements EventListener<Event>
 	 * @param fileName
 	 * @return File parts (file, type, version)
 	 */
-	private String[] getFileParts(String fileName)
+	public String[] getFileParts(String fileName)
 	{
 		String[] fileParts = new String[3];
 
