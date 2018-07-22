@@ -168,7 +168,7 @@ public class Doc_MatchInvHdr extends Doc
 				dr.setQty(line.getQty());
 				BigDecimal temp = dr.getAcctBalance();
 				// Set AmtAcctCr/Dr from Receipt (sets also Project)
-				if (m_matchInv.getReversal_ID() > 0)
+				if (m_matchInv.getReversal_ID() > 0 && m_matchInv.isReversal())
 				{
 					if (!dr.updateReverseLine(MMatchInvHdr.Table_ID, // Amt updated
 							m_matchInvHdr.getReversal_ID(), m_matchInv.getReversal_ID(), BigDecimal.ONE))
@@ -223,7 +223,7 @@ public class Doc_MatchInvHdr extends Doc
 					cr.setAmtSourceCr(BigDecimal.ZERO);
 				}
 				BigDecimal temp = cr.getAcctBalance();
-				if (m_matchInv.getReversal_ID() > 0)
+				if (m_matchInv.getReversal_ID() > 0 && m_matchInv.isReversal())
 				{
 					if (!cr.updateReverseLine(MMatchInvHdr.Table_ID, // Amt updated
 							m_matchInvHdr.getReversal_ID(), m_matchInv.getReversal_ID(), BigDecimal.ONE))
@@ -254,7 +254,7 @@ public class Doc_MatchInvHdr extends Doc
 							as.getC_Currency_ID(), invoice.getDateAcct(), invoice.getC_ConversionType_ID(),
 							invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
 				cr = fact.createLine(line, expense, as.getC_Currency_ID(), null, LineNetAmt);
-				if (m_matchInv.getReversal_ID() > 0)
+				if (m_matchInv.getReversal_ID() > 0 && m_matchInv.isReversal())
 				{
 					if (!cr.updateReverseLine(MMatchInvHdr.Table_ID, // Amt updated
 							m_matchInvHdr.getReversal_ID(), m_matchInv.getReversal_ID(), BigDecimal.ONE))
@@ -293,7 +293,7 @@ public class Doc_MatchInvHdr extends Doc
 					return null;
 				}
 				
-				if (m_matchInv.getReversal_ID() > 0)
+				if (m_matchInv.getReversal_ID() > 0 && m_matchInv.isReversal())
 				{
 					dr = fact.createLine(line, writeOffAcct, NO_CURRENCY, Env.ZERO);
 					

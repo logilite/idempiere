@@ -409,6 +409,7 @@ public class MMatchInv extends X_M_MatchInv
 			reversal.set_ValueNoCheck ("DocumentNo", null);
 			reversal.setPosted (false);
 			reversal.setReversal_ID(getM_MatchInv_ID());
+			reversal.setIsReversal(true);
 			reversal.saveEx();
 			this.setDescription("(" + reversal.getDocumentNo() + "<-)");
 			this.setReversal_ID(reversal.getM_MatchInv_ID());

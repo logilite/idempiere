@@ -158,6 +158,19 @@ public interface I_M_MatchInv
 	  */
 	public boolean isActive();
 
+    /** Column name IsReversal */
+    public static final String COLUMNNAME_IsReversal = "IsReversal";
+
+	/** Set Reversal.
+	  * This is a reversing transaction
+	  */
+	public void setIsReversal (boolean IsReversal);
+
+	/** Get Reversal.
+	  * This is a reversing transaction
+	  */
+	public boolean isReversal();
+
     /** Column name M_AttributeSetInstance_ID */
     public static final String COLUMNNAME_M_AttributeSetInstance_ID = "M_AttributeSetInstance_ID";
 

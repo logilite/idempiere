@@ -40,6 +40,8 @@ import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MConversionRate;
 import org.compiere.model.MDocType;
+import org.compiere.model.MMatchInv;
+import org.compiere.model.MMatchPO;
 import org.compiere.model.MNote;
 import org.compiere.model.MPeriod;
 import org.compiere.model.ModelValidationEngine;
@@ -562,6 +564,24 @@ public abstract class Doc
 			if (validatorMsg != null) {
 				p_Status = STATUS_Error;
 				p_Error = validatorMsg;
+			}
+		}
+
+		if (p_Status.equals(STATUS_Posted))
+		{
+			PO po = getPO();
+			if (m_fact != null && !m_fact.isEmpty()
+					&& (MMatchInv.Table_ID == get_Table_ID() || MMatchPO.Table_ID == get_Table_ID())
+					&& !po.get_ValueAsBoolean("IsReversal"))
+			{
+				// Re-post reversal document (MatchPO/MatchInv) immediately
+				String errorMsg = Doc.postImmediate(MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID()),
+						get_Table_ID(), po.get_ValueAsInt("Reversal_ID"), false, po.get_TrxName());
+				if (errorMsg != null)
+				{
+					p_Status = STATUS_Error;
+					p_Error = "Unable to post reversal document : " + errorMsg;
+				}
 			}
 		}
 
