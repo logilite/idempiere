@@ -31,6 +31,7 @@ import org.adempiere.webui.component.Checkbox;
 import org.adempiere.webui.component.Columns;
 import org.adempiere.webui.component.Combobox;
 import org.adempiere.webui.component.Grid;
+import org.adempiere.webui.component.MultiSelectBox;
 import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.component.Searchbox;
 import org.adempiere.webui.editor.WEditor;
@@ -1056,7 +1057,10 @@ public class QuickGridView extends Vbox
 					// remove all pop-up dialog list box
 					String script = "$('.z-combobox-open').remove()";
 					Clients.response(new AuScript(script));
-
+					Component component = source.getChildren().get(0);
+					if (component instanceof MultiSelectBox && ((MultiSelectBox) component).isEnabled() && ((MultiSelectBox) component).getPopupComponent().isVisible())
+						((MultiSelectBox) component).getPopupComponent().close();
+					
 					int rowChangedIndex = gridTab.getTableModel().getRowChanged();
 					if (rowChangedIndex == row)
 					{
