@@ -345,6 +345,7 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 		if (resultPanelLayout == null){
 			resultPanelLayout = new Vlayout();
 			resultPanelLayout.setSclass("result-parameter-layout");
+			resultPanelLayout.setStyle("overflow: auto !important;");
 			resultPanelLayout.setVflex("true");
 			// reference for update late
 			messageResultContent = setHeadMessage(resultPanelLayout, null);
