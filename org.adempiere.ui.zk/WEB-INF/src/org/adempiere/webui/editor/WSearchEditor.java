@@ -52,6 +52,7 @@ import org.compiere.model.GridField;
 import org.compiere.model.Lookup;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
+import org.compiere.model.MLookupInfo;
 import org.compiere.model.MRole;
 import org.compiere.model.X_AD_CtxHelp;
 import org.compiere.util.CLogger;
@@ -860,8 +861,17 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 
 		if (whereClause.indexOf('@') != -1)
 		{
-			String validated = Env.parseContext(Env.getCtx(), lookup.getWindowNo(), whereClause, false);
-
+			String validated = null;
+			if (lookup instanceof MLookup)
+			{
+				MLookupInfo m_info = ((MLookup) lookup).getLookupInfo();
+				validated = Env.parseContext(m_info.ctx, m_info.WindowNo, m_info.tabNo, whereClause, false);
+			}
+			else
+			{
+				validated = Env.parseContext(Env.getCtx(), lookup.getWindowNo(), whereClause, false);
+			}
+			
 			if (validated.length() == 0)
 				log.severe(getColumnName() + " - Cannot Parse=" + whereClause);
 			else
