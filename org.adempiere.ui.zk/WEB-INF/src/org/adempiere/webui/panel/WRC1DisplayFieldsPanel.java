@@ -41,9 +41,9 @@ public class WRC1DisplayFieldsPanel extends WRCTabPanel implements EventListener
 
 	private static final int RENDER_IN_COLUMNS=4;
 	private MPrintFormat m_printFormat;
-	Checkbox m_chkboxes[]=null;
-	Textbox m_textBoxes[]=null;
-	String m_oldLabel[]=null;
+	protected Checkbox m_chkboxes[]=null;
+	protected Textbox m_textBoxes[]=null;
+	protected String m_oldLabel[]=null;
 
 	public WRC1DisplayFieldsPanel() {
 		super();

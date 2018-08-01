@@ -36,10 +36,10 @@ public class WRC4GroupingCriteriaPanel extends WRCTabPanel implements EventListe
 	private static final long serialVersionUID = -3142169077710161360L;
 
 	private static final int RENDER_IN_COLUMNS=2;
-	Checkbox m_chkboxes[]=null;
-	String m_oldLabel[]=null;
-	ArrayList<MPrintFormatItem> orderfield=new ArrayList<MPrintFormatItem>();
-	Grid grid = new Grid();
+	protected Checkbox m_chkboxes[]=null;
+	protected String m_oldLabel[]=null;
+	protected ArrayList<MPrintFormatItem> orderfield=new ArrayList<MPrintFormatItem>();
+	protected Grid grid = new Grid();
 	
 	public WRC4GroupingCriteriaPanel() {
 		super();
