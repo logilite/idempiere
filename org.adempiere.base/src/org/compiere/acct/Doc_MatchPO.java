@@ -288,7 +288,7 @@ public class Doc_MatchPO extends Doc
 
 		if (MAcctSchema.COSTINGMETHOD_StandardCosting.equals(costingMethod))
 		{
-			if (m_matchPO.getReversal_ID() > 0)
+			if (m_matchPO.getReversal_ID() > 0 && m_matchPO.isReversal())
 			{
 				//  Product PPV
 				FactLine cr = fact.createLine(null,
