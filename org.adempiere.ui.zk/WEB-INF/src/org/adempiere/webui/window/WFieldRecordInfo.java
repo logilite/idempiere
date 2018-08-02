@@ -314,8 +314,7 @@ public class WFieldRecordInfo extends Window implements EventListener<Event>
 					column.getAD_Reference_Value_ID(),
 					column.isParent(), null);
 
-				if (DisplayType.MultiSelectTable == column.getAD_Reference_ID()
-						|| DisplayType.MultiSelectList == column.getAD_Reference_ID())
+				if (DisplayType.isMultiSelect(column.getAD_Reference_ID()))
 				{
 					showOldValue = Util.getPrintableNameFromMultiKey(OldValue, column.getAD_Reference_ID(), lookup);
 					showNewValue = Util.getPrintableNameFromMultiKey(NewValue, column.getAD_Reference_ID(), lookup);

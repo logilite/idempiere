@@ -83,7 +83,7 @@ public class GridTabXLSXExporter extends AbstractXLSXExporter implements IGridTa
 
 		if (lookup != null)
 		{
-			if (f.getDisplayType() == DisplayType.MultiSelectTable || f.getDisplayType() == DisplayType.MultiSelectList)
+			if (DisplayType.isMultiSelect(f.getDisplayType()))
 			{
 				StringBuilder sb = new StringBuilder();
 				Object[] array;

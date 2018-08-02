@@ -84,7 +84,7 @@ public class GridTabExcelExporter extends AbstractExcelExporter implements IGrid
 		//
 		if (lookup != null)
 		{
-			if (f.getDisplayType() == DisplayType.MultiSelectTable || f.getDisplayType() == DisplayType.MultiSelectList)
+			if (DisplayType.isMultiSelect(f.getDisplayType()))
 			{
 				StringBuilder sb = new StringBuilder();
 				Object[] array;

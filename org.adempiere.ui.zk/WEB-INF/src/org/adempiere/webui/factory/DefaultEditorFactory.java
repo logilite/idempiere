@@ -183,7 +183,7 @@ public class DefaultEditorFactory implements IEditorFactory {
         {
         	editor = new WAssignmentEditor(gridField);
         }
-		else if (displayType == DisplayType.MultiSelectTable || displayType == DisplayType.MultiSelectList)
+		else if (DisplayType.isMultiSelect(displayType))
 		{
 			editor = new WMultiSelectEditor(gridField);
 		}

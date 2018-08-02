@@ -751,4 +751,12 @@ public final class DisplayType
 		return "UNKNOWN DisplayType=" + displayType;
 	}	//	getDescription
 
+	/**
+	 * @param displayType
+	 * @return true if displayType is equal to MultiSelect.
+	 */
+	public static boolean isMultiSelect(int displayType)
+	{
+		return (MultiSelectTable == displayType || MultiSelectList == displayType);
+	}
 }	//	DisplayType
