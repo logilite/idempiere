@@ -19,6 +19,7 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
 import org.adempiere.webui.ValuePreference;
+import org.adempiere.webui.adwindow.QuickGridTabRowRenderer;
 import org.adempiere.webui.component.MultiSelectBox;
 import org.adempiere.webui.event.ContextMenuEvent;
 import org.adempiere.webui.event.ContextMenuListener;
@@ -91,6 +92,9 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 	{
 		if (event.getName().equals(Events.ON_CLICK))
 		{
+			Object isQuickFormComponent = getComponent().getAttribute(QuickGridTabRowRenderer.IS_QUICK_FORM_COMPONENT);
+			if (isQuickFormComponent != null && (Boolean) isQuickFormComponent)
+				Events.postEvent(Events.ON_FOCUS, event.getTarget(), null);
 			if (event.getTarget() == getComponent().getTextbox() && isReadWrite())
 				getComponent().getPopupComponent().open(getComponent().getTextbox(), "after_start");
 		}

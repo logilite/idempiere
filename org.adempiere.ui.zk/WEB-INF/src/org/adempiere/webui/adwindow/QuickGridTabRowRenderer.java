@@ -29,6 +29,7 @@ import org.adempiere.webui.component.DatetimeBox;
 import org.adempiere.webui.component.EditorBox;
 import org.adempiere.webui.component.FilenameBox;
 import org.adempiere.webui.component.Locationbox;
+import org.adempiere.webui.component.MultiSelectBox;
 import org.adempiere.webui.component.NumberBox;
 import org.adempiere.webui.component.PAttributebox;
 import org.adempiere.webui.component.Paymentbox;
@@ -37,6 +38,7 @@ import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Urlbox;
 import org.adempiere.webui.editor.WButtonEditor;
 import org.adempiere.webui.editor.WEditor;
+import org.adempiere.webui.editor.WMultiSelectEditor;
 import org.adempiere.webui.editor.WNumberEditor;
 import org.adempiere.webui.editor.WPAttributeEditor;
 import org.adempiere.webui.editor.WSearchEditor;
@@ -307,6 +309,11 @@ public class QuickGridTabRowRenderer
 					((WNumberEditor) componentEditor).getComponent().getButton().addEventListener(Events.ON_FOCUS,
 							gridPanel);
 				}
+				else if (componentEditor instanceof WMultiSelectEditor)
+				{
+					((WMultiSelectEditor) componentEditor).getComponent().getTextbox().addEventListener(Events.ON_FOCUS,
+							gridPanel);
+				}
 				if (gridPanelFields[i].isHeading()) {
 					component.setVisible(false);
 				}
@@ -530,6 +537,16 @@ public class QuickGridTabRowRenderer
 		else if (component instanceof PAttributebox)
 		{
 			PAttributebox comp = ((PAttributebox) component);
+			if (comp.getTextbox().isReadonly())
+			{
+				comp.getTextbox().setDisabled(isDisable);
+				comp.setZclass(addOrRemoveCssClass(comp.getZclass(), isDisable));
+				isReadonly = true;
+			}
+		}
+		else if (component instanceof MultiSelectBox)
+		{
+			MultiSelectBox comp = ((MultiSelectBox) component);
 			if (comp.getTextbox().isReadonly())
 			{
 				comp.getTextbox().setDisabled(isDisable);
@@ -799,6 +816,9 @@ public class QuickGridTabRowRenderer
 		else if (component instanceof PAttributebox && !((PAttributebox) component).getTextbox().isReadonly()
 				&& (((PAttributebox) component).isEnabled() && ((PAttributebox) component).isVisible()))
 			return true;
+		else if (component instanceof MultiSelectBox && !((MultiSelectBox) component).getTextbox().isReadonly()
+				&& (((MultiSelectBox) component).isEnabled() && ((MultiSelectBox) component).isVisible()))
+			return true;
 		else
 			return false;
 	}
@@ -853,6 +873,8 @@ public class QuickGridTabRowRenderer
 			((Paymentbox) component).focus();
 		else if (component instanceof PAttributebox)
 			((PAttributebox) component).focus();
+		else if (component instanceof MultiSelectBox)
+			((MultiSelectBox) component).focus();
 		else
 			((HtmlBasedComponent) currentCell).focus();
 	} // setFocusOnCurrentCell
