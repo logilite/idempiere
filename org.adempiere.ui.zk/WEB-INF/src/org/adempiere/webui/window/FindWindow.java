@@ -932,8 +932,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 			if (value.length() > 0)
 			{
 				GridField gfield = getTargetMField(columnName);
-				if (gfield.getDisplayType() == DisplayType.MultiSelectTable
-						|| gfield.getDisplayType() == DisplayType.MultiSelectList)
+				if (DisplayType.isMultiSelect(gfield.getDisplayType()))
 					cellQueryFrom.setAttribute("value", Util.getArrayObjectFromString(gfield.getDisplayType(), value));
 				else
 					cellQueryFrom.setAttribute("value", value); // Elaine 2009/03/16 - set attribute value
@@ -1047,8 +1046,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 			MTable table = MTable.get(Env.getCtx(), m_tableName);
 			MColumn col = table.getColumn(columnName);
 
-			if (DisplayType.MultiSelectList == col.getAD_Reference_ID()
-					|| DisplayType.MultiSelectTable == col.getAD_Reference_ID())
+			if (DisplayType.isMultiSelect(col.getAD_Reference_ID()))
 				op = MQuery.OPERATORS_MULTISELECT;
 
             selected = false;
@@ -1462,7 +1460,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 			}
 			else if (dt == DisplayType.YesNo)
 				editor.setValue(Boolean.valueOf(in));
-			else if (dt == DisplayType.MultiSelectTable || dt == DisplayType.MultiSelectList)
+			else if (DisplayType.isMultiSelect(dt))
 				editor.setValue(Util.getArrayObjectFromString(dt, in));
 			else
 				editor.setValue(in);
@@ -1580,8 +1578,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
             if (parsedValue == null)
                 continue;
             String infoDisplay = value.toString();
-			if (field.isLookup() && field.getDisplayType() != DisplayType.MultiSelectTable
-					&& field.getDisplayType() != DisplayType.MultiSelectList)
+			if (field.isLookup() && !DisplayType.isMultiSelect(field.getDisplayType()))
                 infoDisplay = field.getLookup().getDisplay(value);
             else if (field.getDisplayType() == DisplayType.YesNo)
                 infoDisplay = Msg.getMsg(Env.getCtx(), infoDisplay);
@@ -1920,8 +1917,8 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     		MColumn col = table.getColumn(columnName);
     		referenceType = col.getAD_Reference_ID();
     	}
-    	if (DisplayType.MultiSelectList == referenceType || DisplayType.MultiSelectTable == referenceType)
-        {
+		if (DisplayType.isMultiSelect(referenceType))
+		{
         	addOperators(MQuery.OPERATORS_MULTISELECT, listOperator);
         }
     	else if (DisplayType.isLookup(referenceType)

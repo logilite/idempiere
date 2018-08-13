@@ -780,4 +780,12 @@ public final class DisplayType
 	}   //  getCurrencyFormat
 
 
+	/**
+	 * @param displayType
+	 * @return true if displayType is equal to MultiSelect.
+	 */
+	public static boolean isMultiSelect(int displayType)
+	{
+		return (MultiSelectTable == displayType || MultiSelectList == displayType);
+	}
 }	//	DisplayType

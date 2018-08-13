@@ -52,19 +52,19 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 	private static final long serialVersionUID = -3178046711328450398L;
 
 	//	UI variables
-	private Label noLabel = new Label();
-	private Label yesLabel = new Label();
-	private Button bAdd = new Button();
-	private Button bRemove = new Button();
-	private Button bUp = new Button();
-	private Button bDown = new Button();
+	protected Label noLabel = new Label();
+	protected Label yesLabel = new Label();
+	protected Button bAdd = new Button();
+	protected Button bRemove = new Button();
+	protected Button bUp = new Button();
+	protected Button bDown = new Button();
 	//
-	SimpleListModel noModel = new SimpleListModel();
-	SimpleListModel yesModel = new SimpleListModel();
-	Listbox noList = new Listbox();
-	Listbox yesList = new Listbox();
-	ArrayList<MPrintFormatItem> yesItems =new ArrayList<MPrintFormatItem>();
-	ArrayList<MPrintFormatItem> noItems =new ArrayList<MPrintFormatItem>();
+	protected SimpleListModel noModel = new SimpleListModel();
+	protected SimpleListModel yesModel = new SimpleListModel();
+	protected Listbox noList = new Listbox();
+	protected Listbox yesList = new Listbox();
+	protected ArrayList<MPrintFormatItem> yesItems =new ArrayList<MPrintFormatItem>();
+	protected ArrayList<MPrintFormatItem> noItems =new ArrayList<MPrintFormatItem>();
 
 	public WRC3SortCriteriaPanel() {
 		super();
@@ -230,7 +230,7 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 	/**
 	 * @param event
 	 */
-	void migrateValueAcrossLists (Event event)
+	protected void migrateValueAcrossLists (Event event)
 	{
 		Object source = event.getTarget();
 		if (source instanceof ListItem) {
@@ -247,7 +247,7 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 		migrateLists (listFrom,listTo,endIndex);
 	}	//	migrateValueAcrossLists
 	
-	void migrateLists (Listbox listFrom , Listbox listTo , int endIndex)
+	protected void migrateLists (Listbox listFrom , Listbox listTo , int endIndex)
 	{
 		int index = 0; 
 		SimpleListModel lmFrom = (listFrom == yesList) ? yesModel:noModel;
@@ -312,7 +312,7 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 	 * 	Move within Yes List with Drag Event and Multiple Choice
 	 *	@param event event
 	 */
-	void migrateValueWithinYesList (int endIndex, List<ListElement> selObjects)
+	protected void migrateValueWithinYesList (int endIndex, List<ListElement> selObjects)
 	{
 		int iniIndex =0;
 		Arrays.sort(selObjects.toArray());	
@@ -341,7 +341,7 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 	 * 	Move within Yes List
 	 *	@param event event
 	 */
-	private void migrateValueWithinYesList (Event event)
+	protected void migrateValueWithinYesList (Event event)
 	{
 		Object[] selObjects = yesList.getSelectedItems().toArray();
 		if (selObjects == null)
@@ -433,7 +433,7 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
    /**	
 	*	@param int selIndexPI,int targetIndexPI
 	*/
-	private void updateSortNo(int selIndexPI,int targetIndexPI)
+	protected void updateSortNo(int selIndexPI,int targetIndexPI)
 	{
 		int selSortNo = m_pfi.get(selIndexPI).getSortNo();
 		m_pfi.get(selIndexPI).setSortNo(m_pfi.get(targetIndexPI).getSortNo());		
@@ -525,7 +525,7 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 	 * @author eslatis
 	 *
 	 */
-	private class DragListener implements EventListener<Event>
+	protected class DragListener implements EventListener<Event>
 	{
 
 		/**

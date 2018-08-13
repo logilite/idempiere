@@ -105,8 +105,7 @@ public class GridTabDataBinder implements ValueChangeListener {
 				WEditor editor = (WEditor) source;
 				GridField gridField = editor.getGridField();
 
-				if (gridField != null && (gridField.getDisplayType() == DisplayType.MultiSelectTable
-						|| gridField.getDisplayType() == DisplayType.MultiSelectList))
+				if (gridField != null && DisplayType.isMultiSelect(gridField.getDisplayType()))
 				{
 					isMultiSelect = true;
 				}

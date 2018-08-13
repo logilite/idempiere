@@ -545,7 +545,14 @@ public final class MLookup extends Lookup implements Serializable
 		{
 			//	SELECT Key, Value, Name FROM ...
 			pstmt = DB.prepareStatement(m_info.QueryDirect, null);
-			if (isNumber)
+			if(DisplayType.isMultiSelect(m_info.DisplayType))
+			{
+				Object[] mskey = (Object[]) key;
+				if (mskey == null || (mskey != null && mskey.length <= 0))
+					return null;
+				DB.setParameter(pstmt, 1, mskey[0]);
+			}
+			else if (isNumber)
 				pstmt.setInt(1, Integer.parseInt(key.toString()));
 			else
 				pstmt.setString(1, key.toString());
