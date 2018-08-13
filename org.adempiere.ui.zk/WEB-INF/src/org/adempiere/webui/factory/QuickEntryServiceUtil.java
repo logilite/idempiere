@@ -46,4 +46,17 @@ public class QuickEntryServiceUtil {
 		return null;
 	}
 	
+	public static WQuickEntry getWQuickEntry(int WindowNo, int AD_Window_ID, int TabNo, int AD_Tab_ID) {
+		WQuickEntry Object = null;
+		List<IQuickEntryFactory> factoryList = Service.locator().list(IQuickEntryFactory.class).getServices();
+		if (factoryList == null)
+			return null;
+		for (IQuickEntryFactory factory : factoryList) {
+			Object = factory.getInstance(WindowNo, AD_Window_ID, TabNo, AD_Tab_ID);
+			if (Object != null)
+				return Object;
+		}
+		return null;
+	}
+	
 }

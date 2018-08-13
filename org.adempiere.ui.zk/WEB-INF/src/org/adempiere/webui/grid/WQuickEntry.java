@@ -70,17 +70,20 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 
 	public static final String QUICK_ENTRY_MODE = "_QUICK_ENTRY_MODE_";
 	public static final String QUICK_ENTRY_CALLER_WINDOW = "_QUICK_ENTRY_CALLER_WINDOW_";
+	public static final String QUICK_ENTRY_CALLER_TAB = "_QUICK_ENTRY_CALLER_TAB_";
 
 	private static CLogger log = CLogger.getCLogger(WQuickEntry.class);
 
 	protected int m_WindowNo;
 	protected int parent_WindowNo;
+	protected int parent_tabNo;
+	protected int m_AD_Tab_ID;
 
-	List<GridField> quickFields = new ArrayList<GridField>();
+	protected List<GridField> quickFields = new ArrayList<GridField>();
 	protected List<WEditor> quickEditors = new ArrayList<WEditor>();
-	List<Object> initialValues = new ArrayList<Object>();
-	List<GridTab> quickTabs = new ArrayList<GridTab>();
-	List<PO> quickPOs = new ArrayList<PO>();
+	protected List<Object> initialValues = new ArrayList<Object>();
+	protected List<GridTab> quickTabs = new ArrayList<GridTab>();
+	protected List<PO> quickPOs = new ArrayList<PO>();
 
 	/** Read Only				*/
 	protected boolean m_readOnly = false;
@@ -93,7 +96,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	
 	protected boolean isHasField = false;
 
-	private String orientation;
+	protected String orientation;
 	/**
 	 *	Constructor.
 	 *	Requires call loadRecord
@@ -122,6 +125,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 
 		Env.setContext(Env.getCtx(), m_WindowNo, QUICK_ENTRY_MODE, "Y");
 		Env.setContext(Env.getCtx(), m_WindowNo, QUICK_ENTRY_CALLER_WINDOW, parent_WindowNo);
+		Env.setContext(Env.getCtx(), m_WindowNo, QUICK_ENTRY_CALLER_TAB, parent_tabNo);
 		initPOs();
 
 	}	//	WQuickEntry
@@ -134,6 +138,33 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 		parent_WindowNo = 0;
 		m_WindowNo = 0;
 		log.info("R/O=" + m_readOnly);
+	}	//	WQuickEntry
+	
+	public WQuickEntry(int WindowNo, int AD_Window_ID, int TabNo, int AD_Tab_ID)
+	{
+		super();
+
+		m_AD_Window_ID = AD_Window_ID;
+		parent_WindowNo = WindowNo;
+		parent_tabNo = TabNo;
+		m_AD_Tab_ID = AD_Tab_ID;
+		m_WindowNo = SessionManager.getAppDesktop().registerWindow(this);
+		log.info("R/O=" + m_readOnly);
+
+		try
+		{
+			jbInit();
+		}
+		catch(Exception ex)
+		{
+			log.log(Level.SEVERE, ex.getMessage());
+		}
+
+		Env.setContext(Env.getCtx(), m_WindowNo, QUICK_ENTRY_MODE, "Y");
+		Env.setContext(Env.getCtx(), m_WindowNo, QUICK_ENTRY_CALLER_WINDOW, parent_WindowNo);
+		Env.setContext(Env.getCtx(), m_WindowNo, QUICK_ENTRY_CALLER_TAB, parent_tabNo);
+		initPOs();
+
 	}	//	WQuickEntry
 
 	/**

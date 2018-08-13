@@ -2168,8 +2168,10 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		// each time close WQuickEntry dialog, 
 		// window is  un-registry, variable environment of this window as _QUICK_ENTRY_MODE_ is removed
 		// so if reuse WQuickEntry will let some field in child tab init at read only state
-		WQuickEntry vqe = QuickEntryServiceUtil.getWQuickEntry(0, getADWindowID());
+		int tabNo = this.m_gridfield != null ? this.m_gridfield.getVO().TabNo : 0;
+		int tabId = this.m_gridfield != null ? this.m_gridfield.getVO().AD_Tab_ID : 0;
 		
+		WQuickEntry vqe = QuickEntryServiceUtil.getWQuickEntry(0, getADWindowID(), tabNo, tabId);
 		vqe.loadRecord (0);								
 		
 		final ISupportMask parent = LayoutUtils.showWindowWithMask(vqe, this, LayoutUtils.OVERLAP_SELF);

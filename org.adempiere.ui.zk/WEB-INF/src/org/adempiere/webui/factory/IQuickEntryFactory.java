@@ -21,4 +21,6 @@ public interface IQuickEntryFactory {
 	public WQuickEntry getInstance(int AD_Window_ID);
 	
 	public WQuickEntry getInstance(int WindowNo, int AD_Window_ID);
+	
+	public WQuickEntry getInstance(int WindowNo, int AD_Window_ID, int TabNo, int AD_Tab_ID);
 }

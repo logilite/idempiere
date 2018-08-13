@@ -27,6 +27,12 @@ public class DefaultQuickEntryFactory implements IQuickEntryFactory {
 		return new WQuickEntry(WindowNo, AD_Window_ID);
 	}
 
+	@Override
+	public WQuickEntry getInstance(int WindowNo, int AD_Window_ID, int TabNo, int AD_Tab_ID)
+	{
+		return new WQuickEntry(WindowNo, AD_Window_ID, TabNo, AD_Tab_ID);
+	}
+
 	
 
 }
