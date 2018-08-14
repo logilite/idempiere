@@ -236,8 +236,6 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	
 	private int rowCount;
 	
-	private int rowCount;
-	
 	private static final String ON_POST_VISIBLE_ATTR = "onPostVisible.Event.Posted";
 
 	/** START DEVCOFFEE **/

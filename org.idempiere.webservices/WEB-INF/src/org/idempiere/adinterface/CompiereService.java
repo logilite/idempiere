@@ -20,8 +20,6 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -157,7 +155,6 @@ public class CompiereService {
 	 * cleanup request
 	 */
 	public synchronized void disconnect() 
-		if (this.getCtx().isEmpty())
 	{
 		m_connectCount--;
 		// TODO: create a thread that checks expired connected compiereservices and log them out
