@@ -1097,7 +1097,7 @@ public class GridField
 				return Boolean.valueOf ("Y".equals(value));
 
 			// Multi-Select
-			if (m_vo.displayType == DisplayType.MultiSelectTable || m_vo.displayType == DisplayType.MultiSelectList)
+			if (DisplayType.isMultiSelect(m_vo.displayType))
 				return Util.getArrayObjectFromString(m_vo.displayType, value);
 
 			//	Default
@@ -1145,8 +1145,7 @@ public class GridField
 		} 
 
 		//  cannot be validated
-		if (!isLookup() || m_lookup == null || getDisplayType() == DisplayType.MultiSelectTable
-				|| getDisplayType() == DisplayType.MultiSelectList)
+		if (!isLookup() || m_lookup == null || DisplayType.isMultiSelect(getDisplayType()))
 			return true;
 		if (m_lookup.containsKeyNoDirect(m_value)) {
 			String name = m_lookup.get(m_value).getName();

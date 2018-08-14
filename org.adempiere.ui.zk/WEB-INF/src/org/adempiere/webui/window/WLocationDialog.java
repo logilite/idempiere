@@ -370,7 +370,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		pnlAddress4.appendChild(lblAddress4.rightAlign());
 		pnlAddress4.appendChild(txtAddress4);
 		ZKUpdateUtil.setHflex(txtAddress4, "1");
-
+		
 		Row pnlAddress5 = new Row();
 		pnlAddress5.appendChild(lblAddress5.rightAlign());
 		pnlAddress5.appendChild(txtAddress5);

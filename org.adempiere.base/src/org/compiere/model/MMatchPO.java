@@ -1305,6 +1305,7 @@ public class MMatchPO extends X_M_MatchPO
 			reversal.set_ValueNoCheck ("DocumentNo", null);
 			reversal.setPosted (false);
 			reversal.setReversal_ID(getM_MatchPO_ID());   
+			reversal.setIsReversal(true);
 			reversal.saveEx();
 			this.setDescription("(" + reversal.getDocumentNo() + "<-)");			
 			this.setReversal_ID(reversal.getM_MatchPO_ID());

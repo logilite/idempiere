@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.adempiere.exceptions.AdempiereException;
@@ -65,12 +66,15 @@ public class PoFiller{
 	 */
 	public void setString(String columnName){
 		String value = getStringValue(columnName);
+		POInfo info = POInfo.getPOInfo(po.getCtx(), po.get_Table_ID());
 
 		Object oldValue = po.get_Value(columnName);
 		if (value == null && oldValue == null)
 			return;
 		else if (oldValue != null && oldValue.toString().equals(value))
 			return;
+		else if (info != null && info.getColumnDisplayType(po.get_ColumnIndex(columnName)) == DisplayType.MultiSelectList)
+			po.set_ValueNoCheck(columnName, Util.getArrayObjectFromString(DisplayType.MultiSelectList, value));
 		else {
 			if (po instanceof MColumn && "IsToolbarButton".equals(columnName)) {
 				// IDEMPIERE-2064 - backward compatibility with 2packs generated before IDEMPIERE-2477
@@ -174,30 +178,58 @@ public class PoFiller{
 
 		String value = e.contents.toString();
 		String columnName = qName;
-		if (value != null && value.trim().length() > 0) {
-			int id = ReferenceUtils.resolveReference(ctx.ctx, e, po.get_TrxName());
-			if (columnName.equals("AD_Client_ID") && id > 0) {
-				if (id != Env.getAD_Client_ID(ctx.ctx)) {
-					return -1;
+		if (value != null && value.trim().length() > 0)
+		{
+			int index = po.get_ColumnIndex(columnName);
+			POInfo info = POInfo.getPOInfo(po.getCtx(), po.get_Table_ID());
+			if (info != null && info.getColumnDisplayType(index) == DisplayType.MultiSelectTable)
+			{
+				// Get Array of UUIDs from element.
+				Object[] uuids = (Object[]) Util.getArrayObjectFromString(DisplayType.MultiSelectList,
+						e.contents.toString());
+				Integer ids[] = new Integer[uuids.length];
+				Element elm;
+				for (int i = 0; i < uuids.length; i++)
+				{
+					elm = new Element(e.uri, e.localName, e.qName, e.attributes);
+					elm.contents.append(uuids[i]);
+					ids[i] = ReferenceUtils.resolveReference(ctx.ctx, elm, po.get_TrxName());
 				}
+				if (index >= 0)
+				{
+					if (!Arrays.deepEquals((Object[]) po.get_Value(columnName), ids))
+						po.set_ValueNoCheck(columnName, ids);
+					return 0;
+				}
+				else
+					return -1;
 			}
-			if (po.get_ColumnIndex(columnName) >= 0) {
-				if (id > 0) {
-					if (po.get_ValueAsInt(columnName) != id) {
-						po.set_ValueNoCheck(columnName, id);
+			else
+			{
+				int id = ReferenceUtils.resolveReference(ctx.ctx, e, po.get_TrxName());
+				if (columnName.equals("AD_Client_ID") && id > 0) {
+					if (id != Env.getAD_Client_ID(ctx.ctx)) {
+						return -1;
 					}
-					return id;
-				} else if (id == 0) {
-					MColumn col = MColumn.get(ctx.ctx, po.get_TableName(), columnName);
-					String refTableName = col.getReferenceTableName();
-					if (refTableName != null && MTable.isZeroIDTable(refTableName)) {
-						po.set_ValueNoCheck(columnName, id);
+				}
+				if (po.get_ColumnIndex(columnName) >= 0) {
+					if (id > 0) {
+						if (po.get_ValueAsInt(columnName) != id) {
+							po.set_ValueNoCheck(columnName, id);
+						}
 						return id;
-					}
-				}				
-				return -1;
-			} else {
-				return 0;
+					} else if (id == 0) {
+						MColumn col = MColumn.get(ctx.ctx, po.get_TableName(), columnName);
+						String refTableName = col.getReferenceTableName();
+						if (refTableName != null && MTable.isZeroIDTable(refTableName)) {
+							po.set_ValueNoCheck(columnName, id);
+							return id;
+						}
+					}				
+					return -1;
+				} else {
+					return 0;
+				}
 			}
 		} else {
 			po.set_ValueNoCheck(columnName, null);

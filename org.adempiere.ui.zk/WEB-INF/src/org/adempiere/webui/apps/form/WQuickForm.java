@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.adempiere.util.Callback;
 import org.adempiere.webui.adwindow.AbstractADWindowContent;
 import org.adempiere.webui.adwindow.QuickGridView;
 import org.adempiere.webui.component.Borderlayout;
@@ -29,6 +30,7 @@ import org.adempiere.webui.component.ZkCssHelper;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.CustomizeGridViewDialog;
+import org.adempiere.webui.window.FDialog;
 import org.compiere.model.DataStatusEvent;
 import org.compiere.model.DataStatusListener;
 import org.compiere.model.GridField;
@@ -73,6 +75,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 	private Button					bSave				= confirmPanel.createButton("Save");
 	private Button					bIgnore				= confirmPanel.createButton("Ignore");
 	private Button					bCustomize			= confirmPanel.createButton("Customize");
+	private Button					bUnSort				= confirmPanel.createButton("UnSort");
 
 	private boolean					onlyCurrentRows		= false;
 
@@ -80,10 +83,13 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 
 	QuickGridView					prevQGV				= null;
 
+	private int						windowNo;
 	public WQuickForm(AbstractADWindowContent winContent, boolean m_onlyCurrentRows, int m_onlyCurrentDays)
 	{
 		super();
 
+		this.setMode(Mode.POPUP);
+		windowNo = SessionManager.getAppDesktop().registerWindow(this);
 		adWinContent = winContent;
 		onlyCurrentRows = m_onlyCurrentRows;
 		onlyCurrentDays = m_onlyCurrentDays;
@@ -126,31 +132,37 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		bSave.setEnabled(!gridTab.isReadOnly());
 		bDelete.setEnabled(!gridTab.isReadOnly());
 		bIgnore.setEnabled(!gridTab.isReadOnly());
+		bUnSort.setEnabled(!gridTab.isReadOnly());
 
 		bSave.addEventListener(Events.ON_CLICK, this);
 		bDelete.addEventListener(Events.ON_CLICK, this);
 		bIgnore.addEventListener(Events.ON_CLICK, this);
 		bCustomize.addEventListener(Events.ON_CLICK, this);
+		bUnSort.addEventListener(Events.ON_CLICK, this);
 
 		// Add Shortcut Key info in tool-tip
-		bSave.setTooltiptext(bSave.getTooltiptext() + "	(Alt+S)");
-		bIgnore.setTooltiptext(bIgnore.getTooltiptext() + "	(Alt+Z)");
-		bDelete.setTooltiptext(bDelete.getTooltiptext() + "	(Alt+D)");
-		bCustomize.setTooltiptext(bCustomize.getTooltiptext() + "	(Alt+L)");
-		
+		bSave.setTooltiptext(bSave.getTooltiptext() + " (Alt+S) Save current record if modified");
+		bIgnore.setTooltiptext(bIgnore.getTooltiptext() + " (Alt+Z) Ignore un-save changes of current record");
+		bDelete.setTooltiptext(bDelete.getTooltiptext() + " (Alt+D) Delete selected or current record");
+		bCustomize.setTooltiptext(bCustomize.getTooltiptext() + " (Alt+L) Customize panel as per user");
+
 		Button bRefresh = confirmPanel.getButton(ConfirmPanel.A_REFRESH);
-		bRefresh.setTooltiptext(bRefresh.getTooltiptext() + "	(Alt+E)");
-		
+		bRefresh.setTooltiptext(bRefresh.getTooltiptext() + " (Alt+E) ReQuery all record");
+
 		Button bCancle = confirmPanel.getButton(ConfirmPanel.A_CANCEL);
-		bCancle.setTooltiptext(bCancle.getTooltiptext() + "	(Alt+X)");
-		
+		bCancle.setTooltiptext(bCancle.getTooltiptext() + " (Alt+X) Close quick form");
+
 		Button bok = confirmPanel.getButton(ConfirmPanel.A_OK);
-		bok.setTooltiptext(bok.getTooltiptext() + " (Alt+K)");
+		bok.setTooltiptext(bok.getTooltiptext() + " (Alt+K) Save and Close quick form");
+
+		Button bunSort = confirmPanel.getButton("UnSort");
+		bunSort.setTooltiptext(bunSort.getTooltiptext() + " (Alt + R) Restore sorting to natural if column sorted");
 		
 		confirmPanel.addComponentsLeft(bSave);
 		confirmPanel.addComponentsLeft(bDelete);
 		confirmPanel.addComponentsLeft(bIgnore);
 		confirmPanel.addComponentsLeft(bCustomize);
+		confirmPanel.addComponentsLeft(bUnSort);
 		confirmPanel.addActionListener(this);
 
 		mainLayout.appendCenter(Center);
@@ -164,7 +176,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 	{
 		if (event.getTarget() == confirmPanel.getButton(ConfirmPanel.A_CANCEL))
 		{
-			dispose();
+			onCancle();
 		}
 		else if (event.getTarget() == confirmPanel.getButton(ConfirmPanel.A_REFRESH))
 		{
@@ -195,7 +207,45 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		{
 			onCustomize();
 		}
+		else if (event.getTarget() == confirmPanel.getButton("UnSort"))
+		{
+			onUnSort();
+		}
 		event.stopPropagation();
+	}
+
+	public void onCancle()
+	{
+		if (gridTab.getTableModel().getRowChanged() > -1)
+		{
+			FDialog.ask(windowNo, this, "SaveChanges?", new Callback<Boolean>() {
+
+				@Override
+				public void onCallback(Boolean result)
+				{
+					if (result)
+						onSave();
+					dispose();
+				}
+			});
+		}
+		else
+		{
+			dispose();
+		}
+	}
+
+	public void onUnSort()
+	{
+		adWinContent.getActiveGridTab().getTableModel().resetCacheSortState();
+		Column sortColumn = quickGridView.findCurrentSortColumn();
+
+		onRefresh();
+
+		if (sortColumn != null)
+			sortColumn.setSortDirection("natural");
+
+		adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "UnSort"), false);
 	}
 
 	public void onCustomize()
@@ -228,59 +278,74 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		gridTab.dataRefreshAll();
 		adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "Ignored"), false);
 		quickGridView.isNewLineSaved = true;
+		// Create new record if no record present.
 		if (gridTab.getRowCount() <= 0)
-			quickGridView.createNewLine();
+			createNewRow();
 		quickGridView.updateListIndex();
 		Events.echoEvent(QuickGridView.EVENT_ON_SET_FOCUS_TO_FIRST_CELL, quickGridView, null);
 	}
 
 	public void onDelete()
 	{
-		if (gridTab == null)
+		if (gridTab == null || !quickGridView.isNewLineSaved)
 			return;
-		boolean isAllSelected = quickGridView.isAllSelected();
+
+		// if no any row selected then delete current record
+		if (gridTab.getSelection().length == 0)
+			gridTab.addToSelection(quickGridView.getRenderer().getCurrentRowIndex());
+
 		final int[] indices = gridTab.getSelection();
 		if (indices.length > 0)
 		{
-			quickGridView.isNewLineSaved = true;
-			StringBuilder sb = new StringBuilder();
-			sb.append(Env.getContext(Env.getCtx(), gridTab.getWindowNo(), "_WinInfo_WindowName", false)).append(" - ")
-					.append(indices.length).append(" ").append(Msg.getMsg(Env.getCtx(), "Selected"));
+			FDialog.ask(windowNo, this, "DeleteRecord?", new Callback<Boolean>() {
 
-			gridTab.clearSelection();
-			quickGridView.toggleSelectionForAll(false);
-			Arrays.sort(indices);
-			int offset = 0;
-			int count = 0;
-			for (int i = 0; i < indices.length; i++)
-			{
-				gridTab.navigate(indices[i] - offset);
-				if (gridTab.dataDelete())
+				@Override
+				public void onCallback(Boolean result)
 				{
-					offset++;
-					count++;
-				}
-				else
-				{
-					break;
-				}
-			}
-			if (count == indices.length)
-				adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "Deleted") + ": " + count, false);
+					if (result)
+					{
+						boolean isAllSelected = quickGridView.isAllSelected();
+						quickGridView.isNewLineSaved = true;
+						gridTab.clearSelection();
+						quickGridView.toggleSelectionForAll(false);
+						Arrays.sort(indices);
+						int count = 0;
+						for (int i = 0, offset = 0; i < indices.length; i++)
+						{
+							gridTab.navigate(indices[i] - offset);
+							if (gridTab.dataDelete())
+							{
+								offset++;
+								count++;
+							}
+							else
+							{
+								break;
+							}
+						}
 
-			// if all records is deleted then it will show default with new
-			// record.
-			if (gridTab.getRowCount() <= 0)
-			{
-				quickGridView.createNewLine();
-			}
-			quickGridView.updateListIndex();
+						adWinContent.getStatusBarQF().setStatusLine(
+								Msg.getMsg(Env.getCtx(), "Deleted") + ": " + count + " / " + indices.length, false);
+
+						// if all records is deleted then it will show default
+						// with new record.
+						if (gridTab.getRowCount() <= 0)
+							quickGridView.createNewLine();
+						quickGridView.updateListIndex();
+						// Set focus on the first row if all Row's are selected.
+						if (isAllSelected)
+							Events.echoEvent(QuickGridView.EVENT_ON_PAGE_NAVIGATE, quickGridView, null);
+						else
+							Events.echoEvent(QuickGridView.EVENT_ON_SET_FOCUS_TO_FIRST_CELL, quickGridView, null);
+					}
+					else
+					{
+						gridTab.clearSelection();
+						quickGridView.toggleSelectionForAll(false);
+					}
+				}
+			});
 		}
-		// Set focus on the first row if all Row's are selected.
-		if (isAllSelected)
-			Events.echoEvent(QuickGridView.EVENT_ON_PAGE_NAVIGATE, quickGridView, null);
-		else
-			Events.echoEvent(QuickGridView.EVENT_ON_SET_FOCUS_TO_FIRST_CELL, quickGridView, null);
 	}
 
 	public void onSave()

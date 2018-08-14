@@ -31,6 +31,7 @@ import java.util.logging.Level;
 
 import org.adempiere.base.IModelFactory;
 import org.adempiere.base.Service;
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.model.GenericPO;
 import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
@@ -256,20 +257,21 @@ public class MTable extends X_AD_Table
 				m_columnNameMap.put(column.getColumnName().toUpperCase(), list.size() - 1);
 				m_columnIdMap.put(column.getAD_Column_ID(), list.size() - 1);
 			}
+
+			m_columns = new MColumn[list.size ()];
+			list.toArray (m_columns);
+			return m_columns;
 		}
 		catch (Exception e)
 		{
 			log.log(Level.SEVERE, sql, e);
+			throw new AdempiereException(e);
 		}
 		finally
 		{
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
 		}
-		//
-		m_columns = new MColumn[list.size ()];
-		list.toArray (m_columns);
-		return m_columns;
 	}	//	getColumns
 
 	/**

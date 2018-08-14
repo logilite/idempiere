@@ -493,7 +493,7 @@ public class MColumn extends X_AD_Column
 			.append(table.getTableName())
 			.append(" MODIFY ").append(getColumnName());
 		boolean isMultiSelect = false;
-		if (getAD_Reference_ID() == DisplayType.MultiSelectTable || getAD_Reference_ID() == DisplayType.MultiSelectList)
+		if (DisplayType.isMultiSelect(getAD_Reference_ID()))
 			isMultiSelect = true;
 		// Default
 		StringBuilder sqlDefault = new StringBuilder(sqlBase).append(" ");
@@ -887,7 +887,7 @@ public class MColumn extends X_AD_Column
 		if (!column.isKey() && !column.getColumnName().equals(PO.getUUIDColumnName(table.getTableName())) && !column.isVirtualColumn())
 		{
 			int refid = column.getAD_Reference_ID();
-			if (refid != DisplayType.List && refid != DisplayType.Payment && refid != DisplayType.MultiSelectList && refid != DisplayType.MultiSelectTable)
+			if (refid != DisplayType.List && refid != DisplayType.Payment && !DisplayType.isMultiSelect(refid))
 			{
 				String referenceTableName = column.getReferenceTableName();
 				if (referenceTableName != null)

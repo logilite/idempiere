@@ -50,12 +50,12 @@ public class WRC2FieldOrderPanel extends WRCTabPanel implements EventListener<Ev
 	/**
 	 * 
 	 */
-	private Button bUp = new Button();
-	private Button bDown = new Button();
+	protected Button bUp = new Button();
+	protected Button bDown = new Button();
 	
-	private ArrayList<MPrintFormatItem> listColumns=new ArrayList<MPrintFormatItem>();
-	SimpleListModel sortModel;
-	private Listbox sortList;
+	protected ArrayList<MPrintFormatItem> listColumns=new ArrayList<MPrintFormatItem>();
+	protected SimpleListModel sortModel;
+	protected Listbox sortList;
 	
 	public WRC2FieldOrderPanel() {
 		super();	
@@ -161,7 +161,7 @@ public class WRC2FieldOrderPanel extends WRCTabPanel implements EventListener<Ev
 	 * 	Move within Yes List with Drag Event and Multiple Choice
 	 *	@param event event
 	 */
-	void migrateValueWithinYesList (int endIndex, List<ListElement> selObjects)
+	protected void migrateValueWithinYesList (int endIndex, List<ListElement> selObjects)
 	{
 		int iniIndex =0;
 		Arrays.sort(selObjects.toArray());	
@@ -225,7 +225,7 @@ public class WRC2FieldOrderPanel extends WRCTabPanel implements EventListener<Ev
 	 * 	Move within Yes List
 	 *	@param event event
 	 */
-	void migrateValueWithinSortList (Event event)
+	protected void migrateValueWithinSortList (Event event)
 	{
 		Object[] selObjects = sortList.getSelectedItems().toArray();
 		if (selObjects == null)

@@ -39,15 +39,15 @@ public class WRC5SummaryFieldsPanel extends WRCTabPanel implements EventListener
 	private static final long serialVersionUID = -2231369601903381581L;
 
 	private static final int RENDER_IN_COLUMNS=10;
-	Checkbox m_chkSum[]=null;
-	Checkbox m_chkCount[]=null;
-	Checkbox m_chkMin[]=null;
-	Checkbox m_chkMax[]=null;
-	Checkbox m_chkMean[]=null;
-	Checkbox m_chkVariance[]=null;
-	Checkbox m_chkDesviation[]=null;
-	private ArrayList<MPrintFormatItem> DisplayItems=new ArrayList<MPrintFormatItem>();
-	Grid grid = new Grid();
+	protected Checkbox m_chkSum[]=null;
+	protected Checkbox m_chkCount[]=null;
+	protected Checkbox m_chkMin[]=null;
+	protected Checkbox m_chkMax[]=null;
+	protected Checkbox m_chkMean[]=null;
+	protected Checkbox m_chkVariance[]=null;
+	protected Checkbox m_chkDesviation[]=null;
+	protected ArrayList<MPrintFormatItem> DisplayItems=new ArrayList<MPrintFormatItem>();
+	protected Grid grid = new Grid();
 
 	public WRC5SummaryFieldsPanel() {
 		super();		

@@ -38,6 +38,7 @@ import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Urlbox;
 import org.adempiere.webui.editor.WButtonEditor;
 import org.adempiere.webui.editor.WEditor;
+import org.adempiere.webui.editor.WMultiSelectEditor;
 import org.adempiere.webui.editor.WNumberEditor;
 import org.adempiere.webui.editor.WPAttributeEditor;
 import org.adempiere.webui.editor.WSearchEditor;
@@ -62,6 +63,7 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.KeyEvent;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Cell;
+import org.zkoss.zul.Column;
 import org.zkoss.zul.Grid;
 import org.zkoss.zul.Paging;
 import org.zkoss.zul.RendererCtrl;
@@ -79,6 +81,7 @@ import org.zkoss.zul.Timebox;
 public class QuickGridTabRowRenderer
 		implements RowRenderer<Object[]>, RowRendererExt, RendererCtrl, EventListener<Event> {
 
+	public static final String	IS_QUICK_FORM_COMPONENT	= "IS_QUICK_FORM_COMPONENT";
 	public static final String GRID_ROW_INDEX_ATTR = "grid.row.index";
 	private static final String CELL_DIV_STYLE = "height: 100%; cursor: pointer; ";
 	private static final String CELL_DIV_STYLE_ALIGN_CENTER = CELL_DIV_STYLE + "text-align:center; ";
@@ -110,7 +113,11 @@ public class QuickGridTabRowRenderer
 	 * Flag detect this view has customized column or not
 	 * value is set at {@link #render(Row, Object[], int)}
 	 */
-	private boolean isGridViewCustomized = false;
+	private boolean						isGridViewCustomized		= false;
+	// Keep track of shorted column in Quick form.
+	private Column						sortedColumn				= null;
+	// Keep track of sorting order of column in Quick form. for e.g Ascending, Descending and Natural
+	private String						sortOrder;
 
 	/**
 	 *
@@ -288,6 +295,7 @@ public class QuickGridTabRowRenderer
 				editorsList.add(componentEditor);
 				componentEditor.getComponent().addEventListener(Events.ON_FOCUS, gridPanel);
 				Component component = componentEditor.getComponent();
+				component.setAttribute(IS_QUICK_FORM_COMPONENT, true);
 				div.appendChild(component);
 				div.setAttribute("display.component", component);
 				if (componentEditor instanceof WPAttributeEditor) {
@@ -300,6 +308,11 @@ public class QuickGridTabRowRenderer
 				else if (componentEditor instanceof WNumberEditor)
 				{
 					((WNumberEditor) componentEditor).getComponent().getButton().addEventListener(Events.ON_FOCUS,
+							gridPanel);
+				}
+				else if (componentEditor instanceof WMultiSelectEditor)
+				{
+					((WMultiSelectEditor) componentEditor).getComponent().getTextbox().addEventListener(Events.ON_FOCUS,
 							gridPanel);
 				}
 				if (gridPanelFields[i].isHeading()) {
@@ -361,6 +374,8 @@ public class QuickGridTabRowRenderer
 		if (isActive != null && !isActive.booleanValue()) {
 			LayoutUtils.addSclass("grid-inactive-row", row);
 		}
+		if (gridTab.isNew())
+			gridPanel.isNewLineSaved = false;
 		// Set focus to first editable cell of the last record if multiple
 		// records inserted
 		if (gridPanel.paging.getTotalSize() != gridTab.getRowCount())
@@ -377,6 +392,17 @@ public class QuickGridTabRowRenderer
 						- (paging.getActivePage() * paging.getPageSize()), 1, KeyEvent.RIGHT);
 			}
 			Events.echoEvent(QuickGridView.EVENT_ON_SET_FOCUS_TO_FIRST_CELL, gridPanel, null);
+		}
+
+		// When shorting is done all rows are rendered and focus is lost.
+		// If record are shorting then set focus to the first row of the current page.
+		Column column = gridPanel.findCurrentSortColumn();
+		if (column != null && gridPanel.isNewLineSaved && (sortedColumn == null || sortedColumn != column
+				|| (sortedColumn == column && sortOrder != column.getSortDirection())))
+		{
+			sortedColumn = column;
+			sortOrder = column.getSortDirection();
+			Events.echoEvent(QuickGridView.EVENT_ON_PAGE_NAVIGATE, gridPanel, null);
 		}
 	}
 
@@ -566,7 +592,7 @@ public class QuickGridTabRowRenderer
 	}
 
 	public void setCurrentCell(int row, int col, int code) {
-		if (col < 0)
+		if (col < 0 || row < 0)
 			return;
 		int currentCol = col;
 		boolean isLastCell = false;
@@ -615,7 +641,7 @@ public class QuickGridTabRowRenderer
 		if (isAddRemoveListener(code))
 		{
 			// Remove current row property change listener
-			addRemovePropertyChangeListener(false);
+			addRemovePropertyChangeListener(false, col);
 		}
 
 		int pgIndex = row >= 0 ? row % paging.getPageSize() : 0;
@@ -637,10 +663,7 @@ public class QuickGridTabRowRenderer
 		if (isAddRemoveListener(code))
 		{
 			// Add property change listener to new current row
-			ArrayList<WEditor> editorsList = editorsListMap.get(getCurrentRow());
-			if (editorsList != null)
-				addEditorPropertyChangeListener(editorsList);
-			gridPanel.dynamicDisplay(0);
+			addRemovePropertyChangeListener(true, col);
 		}
 
 		if (grid.getCell(pgIndex, col) instanceof Cell) {
@@ -685,17 +708,18 @@ public class QuickGridTabRowRenderer
 	/**
 	 * If true add Property Change Listener, a false Remove Property Change Listener
 	 * 
-	 * @param isadd
+	 * @param isAddListener
+	 * @param col 
 	 */
-	public void addRemovePropertyChangeListener(boolean isadd)
+	public void addRemovePropertyChangeListener(boolean isAddListener, int col)
 	{
 		ArrayList<WEditor> editorsList = editorsListMap.get(getCurrentRow());
 		if (editorsList != null)
 		{
-			if (isadd)
+			if (isAddListener)
 			{
 				addEditorPropertyChangeListener(editorsList);
-				gridPanel.dynamicDisplay(0);
+				gridPanel.dynamicDisplay(col);
 			}
 			else
 			{

@@ -33,6 +33,7 @@ import org.adempiere.webui.ValuePreference;
 import org.adempiere.webui.adwindow.ADWindow;
 import org.adempiere.webui.adwindow.ADWindowContent;
 import org.adempiere.webui.adwindow.IFieldEditorContainer;
+import org.adempiere.webui.adwindow.QuickGridTabRowRenderer;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Searchbox;
 import org.adempiere.webui.event.ContextMenuEvent;
@@ -53,6 +54,7 @@ import org.compiere.model.GridField;
 import org.compiere.model.Lookup;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
+import org.compiere.model.MLookupInfo;
 import org.compiere.model.MRole;
 import org.compiere.model.X_AD_CtxHelp;
 import org.compiere.util.CLogger;
@@ -79,6 +81,7 @@ import org.zkoss.zk.ui.util.Clients;
 public class WSearchEditor extends WEditor implements ContextMenuListener, ValueChangeListener, IZoomableEditor
 {
 	private static final String[] LISTENER_EVENTS = {Events.ON_CLICK, Events.ON_CHANGE, Events.ON_OK};
+	public static final String		ATTRIBUTE_IS_INFO_PANEL_OPEN	= "ATTRIBUTE_IS_INFO_PANEL_OPEN";
 	private Lookup 				lookup;
 	private String				m_tableName = null;
 	private String				m_keyColumnName = null;
@@ -103,6 +106,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 			columnName = lookup.getColumnName();
 
 		init();
+		getComponent().setAttribute(ATTRIBUTE_IS_INFO_PANEL_OPEN, false);
 	}
 
 
@@ -246,7 +250,13 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 			actionText(getComponent().getText());
 		}
 		else if ((Events.ON_OK.equals(e.getName()))) {
-			if (getComponent().getText() == null || getComponent().getText().length() == 0) {
+			// Not allow to open info panel if the component text is empty and is belongs to quick form.
+			boolean isQuickFormComp = false;
+			if (getComponent().getAttribute(QuickGridTabRowRenderer.IS_QUICK_FORM_COMPONENT) != null)
+				isQuickFormComp = (boolean) getComponent()
+						.getAttribute(QuickGridTabRowRenderer.IS_QUICK_FORM_COMPONENT);
+			if ((getComponent().getText() == null || getComponent().getText().length() == 0) && !isQuickFormComp)
+			{
 				// open Info window similar to swing client
 				if (infoPanel != null)
 			 	{
@@ -557,6 +567,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 		ip.setClosable(true);
 		ip.addValueChangeListener(this);
 		infoPanel = ip;
+		getComponent().setAttribute(ATTRIBUTE_IS_INFO_PANEL_OPEN, true);
 		ip.addEventListener(DialogEvents.ON_WINDOW_CLOSE, new EventListener<Event>() {
 
 			@Override
@@ -599,6 +610,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 					if (log.isLoggable(Level.CONFIG)) log.config(getColumnName() + " - Result = null (not cancelled)");
 				}
 				getComponent().getTextbox().focus();
+				getComponent().setAttribute(ATTRIBUTE_IS_INFO_PANEL_OPEN, false);
 			}
 		});
 		ip.setId(ip.getTitle()+"_"+ip.getWindowNo());
@@ -853,8 +865,17 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 
 		if (whereClause.indexOf('@') != -1)
 		{
-			String validated = Env.parseContext(Env.getCtx(), lookup.getWindowNo(), whereClause, false);
-
+			String validated = null;
+			if (lookup instanceof MLookup)
+			{
+				MLookupInfo m_info = ((MLookup) lookup).getLookupInfo();
+				validated = Env.parseContext(m_info.ctx, m_info.WindowNo, m_info.tabNo, whereClause, false);
+			}
+			else
+			{
+				validated = Env.parseContext(Env.getCtx(), lookup.getWindowNo(), whereClause, false);
+			}
+			
 			if (validated.length() == 0)
 				log.severe(getColumnName() + " - Cannot Parse=" + whereClause);
 			else

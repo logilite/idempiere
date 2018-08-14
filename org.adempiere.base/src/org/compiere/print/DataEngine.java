@@ -1020,7 +1020,7 @@ public class DataEngine
 						{
 							//	DisplayColumn first
 							String display = rs.getString(counter++);
-							if (pdc.getDisplayType() == DisplayType.MultiSelectTable || pdc.getDisplayType() == DisplayType.MultiSelectList)
+							if (DisplayType.isMultiSelect(pdc.getDisplayType()))
 							{
 								if (pdc.getDisplayType() == DisplayType.MultiSelectTable)
 									counter++;

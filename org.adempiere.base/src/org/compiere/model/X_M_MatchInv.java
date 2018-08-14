@@ -468,4 +468,33 @@ public class X_M_MatchInv extends PO implements I_M_MatchInv, I_Persistent
 			 return 0;
 		return ii.intValue();
 	}
+	
+
+	/**
+	 * Set Reversal.
+	 * 
+	 * @param IsReversal This is a reversing transaction
+	 */
+	public void setIsReversal(boolean IsReversal)
+	{
+		set_Value(COLUMNNAME_IsReversal, Boolean.valueOf(IsReversal));
+	}
+
+	/**
+	 * Get Reversal.
+	 * 
+	 * @return This is a reversing transaction
+	 */
+	public boolean isReversal()
+	{
+		Object oo = get_Value(COLUMNNAME_IsReversal);
+		if (oo != null)
+		{
+			if (oo instanceof Boolean)
+				return ((Boolean) oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 }
