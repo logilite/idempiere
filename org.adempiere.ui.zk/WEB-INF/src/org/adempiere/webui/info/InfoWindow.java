@@ -2171,7 +2171,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		int tabNo = this.m_gridfield != null ? this.m_gridfield.getVO().TabNo : 0;
 		int tabId = this.m_gridfield != null ? this.m_gridfield.getVO().AD_Tab_ID : 0;
 		
-		WQuickEntry vqe = QuickEntryServiceUtil.getWQuickEntry(0, getADWindowID(), tabNo, tabId);
+		WQuickEntry vqe = QuickEntryServiceUtil.getWQuickEntry(getWindowNo(), getADWindowID(), tabNo, tabId);
 		vqe.loadRecord (0);								
 		
 		final ISupportMask parent = LayoutUtils.showWindowWithMask(vqe, this, LayoutUtils.OVERLAP_SELF);
