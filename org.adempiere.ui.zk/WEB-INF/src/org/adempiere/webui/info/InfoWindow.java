@@ -711,6 +711,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 					columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), colSQL, DisplayType.getClass(infoColumn.getAD_Reference_ID(), true), infoColumn.isReadOnly());
 				}
 				columnInfo.setColDescription(infoColumn.get_Translation("Description"));
+				columnInfo.setAD_Reference_ID(infoColumn.getAD_Reference_ID());
 				columnInfo.setGridField(gridFields.get(i));
 				columnInfo.setColumnName(infoColumn.getColumnName());
 				list.add(columnInfo);
@@ -988,14 +989,17 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		if (value instanceof Boolean) {					
 			pstmt.setString(parameterIndex, ((Boolean) value).booleanValue() ? "Y" : "N");
 		} else if (value instanceof String) {
+			StringBuilder valueStr = new StringBuilder(value.toString());
 			if (queryOperator.equals(X_AD_InfoColumn.QUERYOPERATOR_Like)) {
-				StringBuilder valueStr = new StringBuilder(value.toString());
 				if (!valueStr.toString().endsWith("%"))
 					valueStr.append("%");
-				pstmt.setString(parameterIndex, valueStr.toString());
-			} else {
-				pstmt.setString(parameterIndex, (String)value);
+			} else if (queryOperator.equals(X_AD_InfoColumn.QUERYOPERATOR_FullLike)) {
+				if (!valueStr.toString().startsWith("%"))
+					valueStr.insert(0, "%");
+				if (!valueStr.toString().endsWith("%"))
+					valueStr.append("%");
 			}
+			pstmt.setString(parameterIndex, valueStr.toString());
 		} else {
 			pstmt.setObject(parameterIndex, value);
 		}

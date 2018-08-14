@@ -106,11 +106,12 @@ public class GridTable extends AbstractTableModel
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -4651516342985623070L;
+	private static final long serialVersionUID = -2741647620577906242L;
 
 	public static final String DATA_REFRESH_MESSAGE = "Refreshed";
 	public static final String DATA_UPDATE_COPIED_MESSAGE = "UpdateCopied";
 	public static final String DATA_INSERTED_MESSAGE = "Inserted";
+	public static final String DATA_IGNORED_MESSAGE = "Ignored";
 
 	/**
 	 *	JDBC Based Buffered Table
@@ -551,7 +552,7 @@ public class GridTable extends AbstractTableModel
 	 *  @param index index
 	 *  @return GridField
 	 */
-	protected GridField getField (int index)
+	public GridField getField (int index)
 	{
 		if (index < 0 || index >= m_fields.size())
 			return null;
@@ -2924,7 +2925,7 @@ public class GridTable extends AbstractTableModel
 		}
 
 		m_newRow = -1;
-		fireDataStatusIEvent("Ignored", "");
+		fireDataStatusIEvent(DATA_IGNORED_MESSAGE, "");
 	}	//	dataIgnore
 
 

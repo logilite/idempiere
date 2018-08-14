@@ -838,7 +838,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 			@Override
 			public void onCallback(Boolean result) {
 				if (result) {
-					adTabbox.getSelectedGridTab().navigate(0);
+					adTabbox.getSelectedGridTab().navigate(-1); // not zero because of IDEMPIERE-3736 
 			        focusToActivePanel();
 				}
 			}
@@ -1480,11 +1480,12 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	        	|| GridTab.DEFAULT_STATUS_MESSAGE.equals(adInfo)
 	        	|| GridTable.DATA_REFRESH_MESSAGE.equals(adInfo)
 	        	|| GridTable.DATA_INSERTED_MESSAGE.equals(adInfo)
+	        	|| GridTable.DATA_IGNORED_MESSAGE.equals(adInfo)
 	        	|| GridTable.DATA_UPDATE_COPIED_MESSAGE.equals(adInfo)
 	           ) {
 
 		        String prefix = null;
-		        if (dbInfo.contains("*"))
+		        if (dbInfo.contains("*") || dbInfo.contains("?")) // ? used when not-autosave
 		        	prefix = "*";
 
 		        String titleLogic = null;

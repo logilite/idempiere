@@ -89,13 +89,13 @@ public class CompiereService {
 		
 	public final String dateFormatOnlyForCtx =  "yyyy-MM-dd";
 
-	private boolean m_connected;
+	private int m_connectCount;
 
 	/**
 	 * 
 	 * @return AD_Client_ID of current request
 	 */
-    public int getAD_Client_ID() {
+	public synchronized int getAD_Client_ID() {
 		return m_AD_Client_ID;
 	}
 
@@ -103,7 +103,7 @@ public class CompiereService {
      * 
      * @return AD_Org_ID of current request
      */
-	public int getAD_Org_ID() {
+	public synchronized int getAD_Org_ID() {
 		return m_AD_Org_ID;
 	}
 
@@ -111,7 +111,7 @@ public class CompiereService {
 	 * 
 	 * @return context of current request
 	 */
-	public Properties getCtx() {
+	public synchronized Properties getCtx() {
 		return Env.getCtx();
 	}
 
@@ -121,7 +121,7 @@ public class CompiereService {
 	public CompiereService()
 	{		
 		m_loggedin = false;
-		m_connected = false;
+		m_connectCount = 0;
 	}
 	
 	/**
@@ -129,71 +129,53 @@ public class CompiereService {
 	 */
 	public void connect()
 	{
-		if (!m_connected)
-		{
-			CompiereUtil.initWeb();
-			
-			m_connected = true;
-			
-			ServerContext.setCurrentInstance(new Properties());
-			Env.setContext(getCtx(), "#AD_Language", "en_US" );
-			m_language = Language.getLanguage("en_US");
-			
-			dateFormat = DisplayType.getDateFormat(DisplayType.Date, m_language);
-			dateTimeFormat = DisplayType.getDateFormat(DisplayType.DateTime, m_language);
-			timeFormat = DisplayType.getDateFormat(DisplayType.Time, m_language);
-			dateFormatJDBC = DisplayType.getDateFormat_JDBC();
-			dateTimeFormatJDBC = DisplayType.getTimestampFormat_Default();
-			timeFormatJDBC = DisplayType.getTimeFormat_Default();
-		}
+		CompiereUtil.initWeb();
+
+		ServerContext.setCurrentInstance(new Properties());
+		Env.setContext(getCtx(), "#AD_Language", "en_US" );
+		m_language = Language.getLanguage("en_US");
+
+		dateFormat = DisplayType.getDateFormat(DisplayType.Date, m_language);
+		dateTimeFormat = DisplayType.getDateFormat(DisplayType.DateTime, m_language);
+		timeFormat = DisplayType.getDateFormat(DisplayType.Time, m_language);
+		dateFormatJDBC = DisplayType.getDateFormat_JDBC();
+		dateTimeFormatJDBC = DisplayType.getTimestampFormat_Default();
+		timeFormatJDBC = DisplayType.getTimeFormat_Default();
+
+		m_connectCount++;
+	}
+	
+	/**
+	 * Increase connect count
+	 */
+	public synchronized void connectCacheInstance()
+	{
+		m_connectCount++;
 	}
 
 	/**
 	 * cleanup request
 	 */
-	public void disconnect() 
-	{
-		// TODO: create a thread that checks expired connected compiereservices and log them out
-		if (! isExpired()) {
-			// do not close, save session in cache
-			if (! csMap.containsValue(this)) {
-				String key = getKey(m_AD_Client_ID,
-						m_AD_Org_ID,
-						m_userName,
-						m_AD_Role_ID,
-						m_M_Warehouse_ID,
-						m_locale,
-						m_password,
-						m_IPAddress);
-				csMap.put(key.toString(), this);
-				Properties savedCache = new Properties();
-				savedCache.putAll(Env.getCtx());
-				ctxMap.put(key.toString(), savedCache);
-			}
-		}
-	}
-	
-	/**
-	 * @return true if started
-	 */
-	public boolean isConnected() {
+	public synchronized void disconnect() 
 		if (this.getCtx().isEmpty())
-			m_connected = false;
-		return m_connected;
+	{
+		m_connectCount--;
+		// TODO: create a thread that checks expired connected compiereservices and log them out
+		expungeIfExpire();		
 	}
 
 
 	/**
 	 * @return Language of current request
 	 */
-	public Language getLanguage() {
+	public synchronized Language getLanguage() {
 		return m_language;
 	}
 
 	/**
 	 * @return true if already logged in
 	 */
-	public boolean isLoggedIn() {
+	public synchronized boolean isLoggedIn() {
 		return m_loggedin;
 	}
 	
@@ -207,21 +189,22 @@ public class CompiereService {
 	 *  @param AD_Org_ID org
 	 *  @param M_Warehouse_ID warehouse
 	 */
-	private String checkLogin (Properties ctx, int AD_User_ID, int AD_Role_ID, int AD_Client_ID, int AD_Org_ID, int M_Warehouse_ID)
+	private synchronized String checkLogin (Properties ctx, int AD_User_ID, int AD_Role_ID, int AD_Client_ID, int AD_Org_ID, int M_Warehouse_ID)
 	{
 		//  Get Login Info
 		String loginInfo = null;
 		//  Verify existence of User/Client/Org/Role and User's acces to Client & Org
 		String sql = "SELECT u.Name || '@' || c.Name || '.' || o.Name AS Text "
-			+ "FROM AD_User u, AD_Client c, AD_Org o, AD_User_Roles ur "
+			+ "FROM AD_User u, AD_Client c, AD_Org o, AD_User_Roles ur, AD_Role r "
 			+ "WHERE u.AD_User_ID=?"    //  #1
 			+ " AND c.AD_Client_ID=?"   //  #2
 			+ " AND o.AD_Org_ID=?"      //  #3
 			+ " AND ur.AD_Role_ID=?"    //  #4
 			+ " AND ur.AD_User_ID=u.AD_User_ID"
+			+ " AND ur.AD_Role_ID=r.AD_Role_ID"
 			+ " AND (o.AD_Client_ID = 0 OR o.AD_Client_ID=c.AD_Client_ID)"
-			+ " AND c.AD_Client_ID IN (SELECT AD_Client_ID FROM AD_Role_OrgAccess ca WHERE ca.AD_Role_ID=ur.AD_Role_ID)"
-			+ " AND o.AD_Org_ID IN (SELECT AD_Org_ID FROM AD_Role_OrgAccess ca WHERE ca.AD_Role_ID=ur.AD_Role_ID)";
+			+ " AND (r.IsAccessAllOrgs='Y' OR (c.AD_Client_ID IN (SELECT AD_Client_ID FROM AD_Role_OrgAccess ca WHERE ca.AD_Role_ID=ur.AD_Role_ID)"
+			+ " AND o.AD_Org_ID IN (SELECT AD_Org_ID FROM AD_Role_OrgAccess ca WHERE ca.AD_Role_ID=ur.AD_Role_ID)))";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
@@ -273,7 +256,7 @@ public class CompiereService {
 	 * @param remoteIP 
 	 * @return true if login is successful
 	 */
-	public boolean login( int AD_User_ID, int AD_Role_ID, int AD_Client_ID, int AD_Org_ID, int M_Warehouse_ID, String Lang,String remoteIP,boolean isValidForSameClient ) {
+	public synchronized boolean login( int AD_User_ID, int AD_Role_ID, int AD_Client_ID, int AD_Org_ID, int M_Warehouse_ID, String Lang,String remoteIP,boolean isValidForSameClient ) {
 		m_loggedin = false;
 		String loginInfo = checkLogin (getCtx(), AD_User_ID, AD_Role_ID, AD_Client_ID, AD_Org_ID, M_Warehouse_ID );				
 		if (loginInfo == null)
@@ -351,6 +334,26 @@ public class CompiereService {
 		session.saveEx();
 				
 		m_loggedin = true;		
+		
+		synchronized (csMap) {
+			//save session in cache
+			String key = getKey(m_AD_Client_ID,
+					m_AD_Org_ID,
+					m_userName,
+					m_AD_Role_ID,
+					m_M_Warehouse_ID,
+					m_locale,
+					m_password,
+					m_IPAddress);
+			if (! csMap.containsKey(key)) {				
+				csMap.put(key.toString(), this);
+				Properties savedCache = new Properties();
+				savedCache.putAll(Env.getCtx());
+				ctxMap.put(key.toString(), savedCache);
+				if (log.isLoggable(Level.INFO)) log.info("Saving " + this + " in cache");
+			}
+		}		
+		
 		return true;
 	}
 
@@ -419,7 +422,7 @@ public class CompiereService {
 	 * 
 	 * @return AD_User_ID of current request
 	 */
-	public int getAD_User_ID() {
+	public synchronized int getAD_User_ID() {
 		return m_AD_User_ID;
 	}
 
@@ -427,7 +430,7 @@ public class CompiereService {
 	 * 
 	 * @return AD_Role_ID of current request
 	 */
-	public int getAD_Role_ID() {
+	public synchronized int getAD_Role_ID() {
 		return m_AD_Role_ID;
 	}
 
@@ -435,7 +438,7 @@ public class CompiereService {
 	 * 
 	 * @return locale code of current request
 	 */
-	public String getLocale() {
+	public synchronized String getLocale() {
 		return m_locale;
 	}
 
@@ -443,7 +446,7 @@ public class CompiereService {
 	 * 
 	 * @return M_Warehouse_ID of current request
 	 */
-	public int getM_Warehouse_ID() {
+	public synchronized int getM_Warehouse_ID() {
 		return m_M_Warehouse_ID;
 	}
 	
@@ -451,7 +454,7 @@ public class CompiereService {
 	 * 
 	 * @return logged in user name of current request
 	 */
-	public String getUserName() {
+	public synchronized String getUserName() {
 		return m_userName;
 	}
 
@@ -485,36 +488,36 @@ public class CompiereService {
 	/*
 	 * @return set password
 	 */
-	public void setPassword(String pass) {
+	public synchronized void setPassword(String pass) {
 		m_password = pass;
 	}
 
 	/**
 	 * @return logged in password of current request
 	 */
-	public String getPassword() {
+	public synchronized String getPassword() {
 		return m_password;
 	}
 
 	/**
 	 * @return set expiry minutes
 	 */
-	public void setExpiryMinutes(int expiryMinutes) {
+	public synchronized void setExpiryMinutes(int expiryMinutes) {
 		m_expiryMinutes = expiryMinutes;
 	}
 
 	/**
 	 * @return logged in expiry minutes of current request
 	 */
-	public int getExpiryMinutes() {
+	public synchronized int getExpiryMinutes() {
 		return m_expiryMinutes;
 	}
 
-	public void refreshLastAuthorizationTime() {
+	public synchronized void refreshLastAuthorizationTime() {
 		m_lastAuthorizationTime = System.currentTimeMillis();
 	}
 
-	public void setIPAddress(String remoteAddr) {
+	public synchronized void setIPAddress(String remoteAddr) {
 		m_IPAddress = remoteAddr;
 	}
 
@@ -528,14 +531,17 @@ public class CompiereService {
 				loginRequest.getPass(),
 				req.getRemoteAddr());
 		CompiereService l_cs = null;
-		if (csMap.containsKey(key)) {
-			l_cs = csMap.get(key);
-			if (l_cs != null) {
-				if (l_cs.isExpired()) {
-					l_cs = null;
-				} else {
-					Properties cachedCtx = ctxMap.get(key);
-					Env.getCtx().putAll(cachedCtx);
+		synchronized (csMap) {
+			if (csMap.containsKey(key)) {
+				l_cs = csMap.get(key);
+				if (l_cs != null) {
+					if (l_cs.expungeIfExpire()) {						
+						l_cs = null;
+					} else {
+						Properties cachedCtx = ctxMap.get(key);
+						Env.getCtx().putAll(cachedCtx);
+						if (log.isLoggable(Level.INFO)) log.info("Reusing " + l_cs);
+					}
 				}
 			}
 		}
@@ -563,18 +569,43 @@ public class CompiereService {
 		return key.toString();
 	}
 	
-	private boolean isExpired() {
+	private synchronized boolean expungeIfExpire() {
 		boolean expired =
 			   (
 				   (getExpiryMinutes() <= 0)
 				|| (m_lastAuthorizationTime + (getExpiryMinutes() * 60000) <= System.currentTimeMillis())
 			   );
-		if (m_connected && expired) 
+		if (m_connectCount==0 && expired) 
 		{
-			Env.logout();
-			ServerContext.dispose();
-			m_loggedin = false;
-			m_connected = false;
+			synchronized (csMap) {
+				String key = getKey(m_AD_Client_ID,
+						m_AD_Org_ID,
+						m_userName,
+						m_AD_Role_ID,
+						m_M_Warehouse_ID,
+						m_locale,
+						m_password,
+						m_IPAddress);
+				if (csMap.containsKey(key)) {
+					csMap.remove(key);
+				}
+				if (ctxMap.containsKey(key)) {
+					Properties cachedCtx = ctxMap.remove(key);
+					Properties currentCtx = ServerContext.getCurrentInstance();
+					try {
+						ServerContext.setCurrentInstance(cachedCtx);
+						if (log.isLoggable(Level.INFO)) log.info("Closing expired/invalid " + this);
+						Env.logout();
+					} finally {
+						if (currentCtx == cachedCtx) {
+							ServerContext.dispose();
+						} else {
+							ServerContext.setCurrentInstance(currentCtx);
+						}
+					}
+				}				
+				m_loggedin = false;
+			}
 		}
 		return expired;
 	}

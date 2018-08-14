@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION adempiere.altercolumn(tablename name, columnname name, datatype name, nullclause character varying, defaultclause character varying, namespace name, usingclause character varying)
+CREATE OR REPLACE FUNCTION adempiere.altercolumn(tablename name, columnname name, datatype name, nullclause character varying, defaultclause character varying, namespace name)
  RETURNS void
  LANGUAGE plpgsql
 AS $function$
@@ -75,11 +75,11 @@ begin
 		if i > 0 then
 		   begin
 		     for j in 1 .. i loop
-			SELECT String_agg('grant ' || privilege_type || ' on ' || viewname[j] || ' to ' || grantee, '; ') 
+			    SELECT String_agg('grant ' || privilege_type || ' on ' || viewname[j] || ' to ' || grantee, '; ') 
 				into privs
 				FROM information_schema.role_table_grants 
 				WHERE table_name=viewname[j];
-			perms[j] := privs;
+				perms[j] := privs;
 		        command := 'drop view ' || viewname[j];
 			raise notice 'executing -> %', command;
 		        execute command;
@@ -99,9 +99,6 @@ begin
                    end;
 		end if;
 		command := 'alter table ' || lower(tablename) || ' alter column ' || lower(columnname) || ' type ' || lower(datatype);
-		if usingclause is not null then
-		   command := command || ' ' || usingclause;
-		end if;
 		raise notice 'executing -> %', command;
 		execute command;
                 i := array_upper(dropviews, 1);
@@ -110,7 +107,7 @@ begin
 		     command := 'create or replace view ' || dropviews[j] || ' as ' || viewtext[j];
 		     raise notice 'executing -> %', 'create view ' || dropviews[j];
 		     execute command;
-		     command := perms[j];
+			 command := perms[j];
 		     raise notice 'executing -> %', 'grant ' || perms[j];
 		     execute command;
 		   end loop;
@@ -145,12 +142,7 @@ begin
    end if;
 end;
 $function$
+;
 
-/*
-create table t_alter_column
-( tablename name, columnname name, datatype name, nullclause varchar(10), defaultclause varchar(200), usingclause  varchar(200));
-
-create rule alter_column_rule as on insert to t_alter_column
-do instead select altercolumn(new.tablename, new.columnname, new.datatype, new.nullclause,
-new.defaultclause, new.usingclause);
-*/
+SELECT register_migration_script('201807111333_Ticket_AP2-357.sql') FROM dual
+;

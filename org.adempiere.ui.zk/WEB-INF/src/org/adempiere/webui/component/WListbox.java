@@ -61,7 +61,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -706774424788688953L;
+	private static final long serialVersionUID = -5501893389366975849L;
 
 	/**	Logger. */
 	private static CLogger logger = CLogger.getCLogger(WListbox.class);
@@ -373,7 +373,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
             }
 
             //  add to model
-            addColumn(layout[columnIndex].getColHeader(), layout[columnIndex].getColDescription());
+            addColumn(layout[columnIndex].getColHeader(), layout[columnIndex].getColDescription(), layout[columnIndex].getAD_Reference_ID());
 
             // set the colour column
             if (layout[columnIndex].isColorColumn())
@@ -440,16 +440,20 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 		addColumn(header, null);
 	}
 	
+	public void addColumn (String header, String description)
+	{
+		addColumn(header, description, 0);
+	}
 	/**
 	 *  Add Table Column and specify the column header.
 	 *
 	 *  @param header	name of column header
 	 *  @param description
 	 */
-	public void addColumn (String header, String description)
+	public void addColumn (String header, String description, int AD_Reference_ID)
 	{
 		WListItemRenderer renderer = (WListItemRenderer)getItemRenderer();
-		renderer.addColumn(Util.cleanAmp(header), description);
+		renderer.addColumn(Util.cleanAmp(header), description, AD_Reference_ID);
 		getModel().addColumn();
 
 		return;
