@@ -110,9 +110,7 @@ public class AbstractService {
 			}
 		}
 
-		if (!m_cs.isConnected()) {
-			m_cs.connect();
-		}
+		m_cs.connect();
 
 		if (m_cs.isLoggedIn()
 				&& ((loginRequest.getToken() != null && loginRequest.getUser().equals(m_cs.getUserName()) && loginRequest
