@@ -82,19 +82,19 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 {
 	private static final String[] LISTENER_EVENTS = {Events.ON_CLICK, Events.ON_CHANGE, Events.ON_OK};
 	public static final String		ATTRIBUTE_IS_INFO_PANEL_OPEN	= "ATTRIBUTE_IS_INFO_PANEL_OPEN";
-	private Lookup 				lookup;
-	private String				m_tableName = null;
-	private String				m_keyColumnName = null;
-	private String 				columnName;
-    private Object              value;
-    private InfoPanel			infoPanel = null;
-	private String imageUrl;
+	protected Lookup				lookup;
+	protected String				m_tableName						= null;
+	protected String				m_keyColumnName					= null;
+	protected String				columnName;
+	protected Object				value;
+	protected InfoPanel				infoPanel						= null;
+	protected String				imageUrl;
 
 	private static CLogger log = CLogger.getCLogger(WSearchEditor.class);
 
 	private static final String IN_PROGRESS_IMAGE = "~./zk/img/progress3.gif";
 	
-	private ADWindow adwindow;
+	protected ADWindow				adwindow;
 
 	public WSearchEditor (GridField gridField)
 	{
@@ -288,7 +288,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 		}
 	}
 
-	private void actionRefresh(Object value)
+	protected void actionRefresh(Object value)
 	{
 //		boolean mandatory = isMandatory();
 //		AEnv.actionRefresh(lookup, value, mandatory);
@@ -420,7 +420,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 	}
 
 
-	private void actionCombo (Object value)
+	protected void actionCombo (Object value)
 	{
 		if (log.isLoggable(Level.FINE))
 			log.fine("Value=" + value);
