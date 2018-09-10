@@ -58,7 +58,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 */
 	private static final long serialVersionUID = -7787519874581251920L;
 	/**	Tolerance Gain and Loss */
-	private static final BigDecimal	TOLERANCE = BigDecimal.valueOf(0.02);
+	protected static final BigDecimal	TOLERANCE = BigDecimal.valueOf(0.02);
 	
 	/**
 	 * 	Get Allocations of Payment
@@ -253,7 +253,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	}	//	MAllocation
 
 	/**	Lines						*/
-	private MAllocationLine[]	m_lines = null;
+	protected MAllocationLine[]	m_lines = null;
 	
 	/**
 	 * 	Get Lines
@@ -388,9 +388,9 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	}	//	processIt
 	
 	/**	Process Message 			*/
-	private String		m_processMsg = null;
+	protected String		m_processMsg = null;
 	/**	Just Prepared Flag			*/
-	private boolean		m_justPrepared = false;
+	protected boolean		m_justPrepared = false;
 
 	/**
 	 * 	Unlock Document.
@@ -838,7 +838,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 	Period needs to be open
 	 *	@return true if reversed
 	 */
-	private boolean reverseIt(boolean accrual) 
+	public boolean reverseIt(boolean accrual) 
 	{
 		if (!isActive()
 			|| getDocStatus().equals(DOCSTATUS_Voided)	// Goodwill.co.id
@@ -944,7 +944,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 		return true;
 	}	//	reverse
 
-	private boolean updateBP(boolean reverse)
+	public boolean updateBP(boolean reverse)
 	{
 		
 		getLines(false);
@@ -1177,7 +1177,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * @param isReverseCorrectIt = true allocation amount will be negate.
 	 */
 
-	private void updateOpenBalForMultipleBP(boolean isReverseCorrectIt)
+	public void updateOpenBalForMultipleBP(boolean isReverseCorrectIt)
 	{
 		HashMap<Integer, BigDecimal> openBPBal = new HashMap<Integer, BigDecimal>();
 		for (MAllocationLine line : m_lines)
@@ -1318,13 +1318,13 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	
 	// Goodwill.co.id
 	/** Reversal Flag		*/
-	private boolean m_reversal = false;
+	protected boolean m_reversal = false;
 	
 	/**
 	 * 	Set Reversal
 	 *	@param reversal reversal
 	 */
-	private void setReversal(boolean reversal)
+	public void setReversal(boolean reversal)
 	{
 		m_reversal = reversal;
 	}	//	setReversal
@@ -1333,7 +1333,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 	Is Reversal
 	 *	@return reversal
 	 */
-	private boolean isReversal()
+	public boolean isReversal()
 	{
 		return m_reversal;
 	}	//	isReversal
