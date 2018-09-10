@@ -813,8 +813,8 @@ public class AllocationAuto extends SvrProcess
 		//	New Allocation
 		if (m_allocation == null)
 		{
-			m_allocation = new MAllocationHdr (getCtx(), false, dateAcct,	//	automatic 
-				C_Currency_ID, "Auto " + description, get_TrxName());
+			m_allocation = (MAllocationHdr) MTable.get(getCtx(), MAllocationHdr.Table_Name).getPO(0, get_TrxName());
+			m_allocation.setAllocationHdrValues(false, dateAcct, C_Currency_ID, "Auto " + description);
 			m_allocation.setAD_Org_ID(AD_Org_ID);
 			if (!m_allocation.save())
 				return false;

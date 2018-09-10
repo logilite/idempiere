@@ -117,7 +117,8 @@ public class MAllocationLine extends X_C_AllocationLine
 	public MAllocationHdr getParent()
 	{
 		if (m_parent == null)
-			m_parent = new MAllocationHdr (getCtx(), getC_AllocationHdr_ID(), get_TrxName());
+			m_parent = (MAllocationHdr) MTable.get(getCtx(), MAllocationHdr.Table_ID).getPO(getC_AllocationHdr_ID(),
+					get_TrxName());
 		return m_parent;
 	}	//	getParent
 	

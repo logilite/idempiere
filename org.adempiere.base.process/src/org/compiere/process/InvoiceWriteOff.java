@@ -233,9 +233,9 @@ public class InvoiceWriteOff extends SvrProcess
 		if (m_alloc == null || C_Currency_ID != m_alloc.getC_Currency_ID())
 		{
 			processAllocation();
-			m_alloc = new MAllocationHdr (getCtx(), true, 
-				p_DateAcct, C_Currency_ID,
-				getProcessInfo().getTitle() + " #" + getAD_PInstance_ID(), get_TrxName());
+			m_alloc = (MAllocationHdr) MTable.get(getCtx(), MAllocationHdr.Table_Name).getPO(0, get_TrxName());
+			m_alloc.setAllocationHdrValues(true, p_DateAcct, C_Currency_ID, getProcessInfo().getTitle() + " #"
+					+ getAD_PInstance_ID());
 			m_alloc.setAD_Org_ID(invoice.getAD_Org_ID());
 			if (!m_alloc.save())
 			{

@@ -82,7 +82,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 			pstmt.setInt(1, C_Payment_ID);
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add (new MAllocationHdr(ctx, rs, trxName));
+				list.add((MAllocationHdr) MTable.get(ctx, MAllocationHdr.Table_ID).getPO(rs, trxName));
 		}
 		catch (Exception e)
 		{
@@ -120,7 +120,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 			pstmt.setInt(1, C_Invoice_ID);
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add (new MAllocationHdr(ctx, rs, trxName));
+				list.add((MAllocationHdr) MTable.get(ctx, MAllocationHdr.Table_Name).getPO(rs, trxName));
 		}
 		catch (Exception e)
 		{
@@ -199,7 +199,9 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 *	@param C_Currency_ID currency
 	 *	@param description description
 	 *	@param trxName transaction
+	 *  @deprecated use setAllocationHdrValues() instead.
 	 */
+	@Deprecated
 	public MAllocationHdr (Properties ctx, boolean IsManual, Timestamp DateTrx, 
 		int C_Currency_ID, String description, String trxName)
 	{
@@ -214,6 +216,29 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 		if (description != null)
 			setDescription(description);
 	}	//  create Allocation
+	
+	/**
+	 * Method is replacement of MAllocationHdr(Properties, boolean, Timestamp, int, String, String)
+	 * constructor 
+	 * @param ctx
+	 * @param IsManual
+	 * @param DateTrx
+	 * @param C_Currency_ID
+	 * @param description
+	 * @param trxName
+	 */
+	public void setAllocationHdrValues(boolean IsManual, Timestamp DateTrx, int C_Currency_ID, String description)
+	{
+		setIsManual(IsManual);
+		if (DateTrx != null)
+		{
+			setDateTrx(DateTrx);
+			setDateAcct(DateTrx);
+		}
+		setC_Currency_ID(C_Currency_ID);
+		if (description != null)
+			setDescription(description);
+	} // setAllocationHdrValues
 
 
 	/** 
@@ -1227,7 +1252,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	public static MAllocationHdr copyFrom (MAllocationHdr from, Timestamp dateAcct, Timestamp dateTrx,
 		String trxName)
 	{
-		MAllocationHdr to = new MAllocationHdr (from.getCtx(), 0, trxName);
+		MAllocationHdr to = (MAllocationHdr) MTable.get(from.getCtx(), MAllocationHdr.Table_Name).getPO(0, trxName);
 		PO.copyValues (from, to, from.getAD_Client_ID(), from.getAD_Org_ID());
 		to.set_ValueNoCheck ("DocumentNo", null);
 		//

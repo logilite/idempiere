@@ -2284,10 +2284,9 @@ public class MPayment extends X_C_Payment
 		if (pAllocs.length == 0)
 			return false;
 		
-		MAllocationHdr alloc = new MAllocationHdr(getCtx(), false, 
-			getDateTrx(), getC_Currency_ID(), 
-				Msg.translate(getCtx(), "C_Payment_ID")	+ ": " + getDocumentNo(), 
-				get_TrxName());
+		MAllocationHdr alloc = (MAllocationHdr) MTable.get(getCtx(), MAllocationHdr.Table_Name).getPO(0, get_TrxName());
+		alloc.setAllocationHdrValues(false, getDateTrx(), getC_Currency_ID(), Msg.translate(getCtx(), "C_Payment_ID")
+				+ ": " + getDocumentNo());
 		alloc.setAD_Org_ID(getAD_Org_ID());
 		alloc.setDateAcct(getDateAcct()); // in case date acct is different from datetrx in payment; IDEMPIERE-1532 tbayen
 		if (!alloc.save())
@@ -2335,9 +2334,9 @@ public class MPayment extends X_C_Payment
 		if (getOverUnderAmt().signum() < 0 && getPayAmt().signum() > 0)
 			allocationAmt = allocationAmt.add(getOverUnderAmt());	//	overpayment (negative)
 
-		MAllocationHdr alloc = new MAllocationHdr(getCtx(), false, 
-			getDateTrx(), getC_Currency_ID(),
-			Msg.translate(getCtx(), "C_Payment_ID") + ": " + getDocumentNo() + " [1]", get_TrxName());
+		MAllocationHdr alloc = (MAllocationHdr) MTable.get(getCtx(), MAllocationHdr.Table_Name).getPO(0, get_TrxName());
+		alloc.setAllocationHdrValues(false, getDateTrx(), getC_Currency_ID(), Msg.translate(getCtx(), "C_Payment_ID")
+				+ ": " + getDocumentNo() + " [1]");
 		alloc.setAD_Org_ID(getAD_Org_ID());
 		alloc.setDateAcct(getDateAcct()); // in case date acct is different from datetrx in payment
 		alloc.saveEx();
@@ -2376,9 +2375,9 @@ public class MPayment extends X_C_Payment
 	 */
 	protected boolean allocatePaySelection()
 	{
-		MAllocationHdr alloc = new MAllocationHdr(getCtx(), false, 
-			getDateTrx(), getC_Currency_ID(),
-			Msg.translate(getCtx(), "C_Payment_ID")	+ ": " + getDocumentNo() + " [n]", get_TrxName());
+		MAllocationHdr alloc = (MAllocationHdr) MTable.get(getCtx(), MAllocationHdr.Table_Name).getPO(0, get_TrxName());
+		alloc.setAllocationHdrValues(false, getDateTrx(), getC_Currency_ID(), Msg.translate(getCtx(), "C_Payment_ID")
+				+ ": " + getDocumentNo() + " [n]");
 		alloc.setAD_Org_ID(getAD_Org_ID());
 		alloc.setDateAcct(getDateAcct()); // in case date acct is different from datetrx in payment
 		
@@ -2713,10 +2712,9 @@ public class MPayment extends X_C_Payment
 		StringBuilder info = new StringBuilder(reversal.getDocumentNo());
 
 		//	Create automatic Allocation
-		MAllocationHdr alloc = new MAllocationHdr (getCtx(), false, 
-			getDateTrx(), 
-			getC_Currency_ID(),
-			Msg.translate(getCtx(), "C_Payment_ID")	+ ": " + reversal.getDocumentNo(), get_TrxName());
+		MAllocationHdr alloc = (MAllocationHdr) MTable.get(getCtx(), MAllocationHdr.Table_Name).getPO(0, get_TrxName());
+		alloc.setAllocationHdrValues(false, getDateTrx(), getC_Currency_ID(), Msg.translate(getCtx(), "C_Payment_ID")
+				+ ": " + reversal.getDocumentNo());
 		alloc.setAD_Org_ID(getAD_Org_ID());
 		alloc.setDateAcct(dateAcct); // dateAcct variable already take into account the accrual parameter
 		alloc.saveEx(get_TrxName());
