@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -339,7 +338,8 @@ public class Doc_MatchInv extends Doc
 
 		//  Invoice Price Variance 	difference
 		BigDecimal ipv = cr.getAcctBalance().add(dr.getAcctBalance()).negate();
-		processInvoicePriceVariance(as, fact, ipv);
+		BigDecimal ipvSource = dr.getAmtSourceDr().subtract(cr.getAmtSourceCr()).negate();
+		processInvoicePriceVariance(as, fact, ipv, ipvSource);
 		if (log.isLoggable(Level.FINE)) log.fine("IPV=" + ipv + "; Balance=" + fact.getSourceBalance());
 
 		String error = createMatchInvCostDetail(as);
@@ -371,7 +371,7 @@ public class Doc_MatchInv extends Doc
 	 * @param ipv
 	 */
 	protected void processInvoicePriceVariance(MAcctSchema as, Fact fact,
-			BigDecimal ipv) {
+			BigDecimal ipv, BigDecimal ipvSource) {
 		if (ipv.signum() == 0) return;
 		
 		FactLine pv = fact.createLine(null,
@@ -421,6 +421,11 @@ public class Doc_MatchInv extends Doc
 			
 			line = fact.createLine(null, account, as.getC_Currency_ID(), ipv);
 			updateFactLine(line);
+			
+			if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
+			{
+				updateFactLineAmtSource(line, ipvSource);
+			}
 		} else if (X_M_Cost.COSTINGMETHOD_AverageInvoice.equals(costingMethod) && !zeroQty) {
 			MAccount account = m_pc.getAccount(ProductCost.ACCTTYPE_P_Asset, as);
 			
@@ -431,6 +436,11 @@ public class Doc_MatchInv extends Doc
 			
 			line = fact.createLine(null, account, as.getC_Currency_ID(), ipv);
 			updateFactLine(line);
+			
+			if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
+			{
+				updateFactLineAmtSource(line, ipvSource);
+			}
 		}
 	}
 
@@ -528,10 +538,9 @@ public class Doc_MatchInv extends Doc
 				if (orderLine.getC_Currency_ID() != as.getC_Currency_ID())
 				{
 					I_C_Order order = orderLine.getC_Order();
-					Timestamp dateAcct = order.getDateAcct();
 					BigDecimal rate = MConversionRate.getRate(
 						order.getC_Currency_ID(), as.getC_Currency_ID(),
-						dateAcct, order.getC_ConversionType_ID(),
+						getDateAcct(), order.getC_ConversionType_ID(),
 						order.getAD_Client_ID(), order.getAD_Org_ID());
 					if (rate == null)
 					{
@@ -586,5 +595,28 @@ public class Doc_MatchInv extends Doc
 		factLine.setUser2_ID(m_invoiceLine.getUser2_ID());
 		factLine.setM_Product_ID(m_invoiceLine.getM_Product_ID());
 		factLine.setQty(getQty());
+	}
+	
+	/**
+	 * Invoice currency & acct schema currency are not same then update AmtSource value
+	 * to avoid source not balanced error/ignore suspense balancing.
+	 * 
+	 * @param factLine
+	 * @param ipvSource
+	 */
+	protected void updateFactLineAmtSource(FactLine factLine, BigDecimal ipvSource)
+	{
+		// When only Rate differ then set Dr & Cr Source amount as zero.
+		factLine.setAmtSourceCr(Env.ZERO);
+		factLine.setAmtSourceDr(Env.ZERO);
+
+		// Price is vary then set Source amount according to source variance
+		if (ipvSource.compareTo(Env.ZERO) != 0)
+		{
+			if (ipvSource.signum() < 0)
+				factLine.setAmtSourceCr(ipvSource);
+			else
+				factLine.setAmtSourceDr(ipvSource);
+		}
 	}
 }   //  Doc_MatchInv

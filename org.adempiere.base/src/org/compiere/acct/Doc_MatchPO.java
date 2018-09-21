@@ -204,7 +204,8 @@ public class Doc_MatchPO extends Doc
 			if (m_oLine.getC_Currency_ID() != as.getC_Currency_ID())
 			{
 				MOrder order = m_oLine.getParent();
-				Timestamp dateAcct = order.getDateAcct();
+				// consider MR DateAcct as Conversion date
+				Timestamp dateAcct = inOut.getDateAcct();
 				BigDecimal rate = MConversionRate.getRate(
 					order.getC_Currency_ID(), as.getC_Currency_ID(),
 					dateAcct, order.getC_ConversionType_ID(),
@@ -238,7 +239,8 @@ public class Doc_MatchPO extends Doc
 		if (m_oLine.getC_Currency_ID() != as.getC_Currency_ID())
 		{
 			MOrder order = m_oLine.getParent();
-			Timestamp dateAcct = order.getDateAcct();
+			// consider MR DateAcct as Conversion date
+			Timestamp dateAcct = inOut.getDateAcct();
 			BigDecimal rate = MConversionRate.getRate(
 				order.getC_Currency_ID(), as.getC_Currency_ID(),
 				dateAcct, order.getC_ConversionType_ID(),
