@@ -505,9 +505,9 @@ public class MCash extends X_C_Cash implements DocAction
 				//
 				StringBuilder name = new StringBuilder().append(Msg.translate(getCtx(), "C_Cash_ID")).append(": ").append(getName())
 										.append(" - ").append(Msg.translate(getCtx(), "Line")).append(" ").append(line.getLine());
-				MAllocationHdr hdr = new MAllocationHdr(getCtx(), false, 
-						getDateAcct(), line.getC_Currency_ID(),
-						name.toString(), get_TrxName());
+				MAllocationHdr hdr = (MAllocationHdr) MTable.get(getCtx(), MAllocationHdr.Table_Name).getPO(0,
+						get_TrxName());
+				hdr.setAllocationHdrValues(false, getDateAcct(), line.getC_Currency_ID(), name.toString());
 				hdr.setAD_Org_ID(getAD_Org_ID());
 				if (!hdr.save())
 				{

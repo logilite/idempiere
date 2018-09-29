@@ -23,6 +23,7 @@ import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MAllocationHdr;
+import org.compiere.model.MTable;
 import org.compiere.util.AdempiereUserError;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -109,7 +110,8 @@ public class AllocationReset extends SvrProcess
 
 		if (p_C_AllocationHdr_ID != 0)
 		{
-			MAllocationHdr hdr = new MAllocationHdr(getCtx(), p_C_AllocationHdr_ID, m_trx.getTrxName());
+			MAllocationHdr hdr = (MAllocationHdr) MTable.get(getCtx(), MAllocationHdr.Table_Name).getPO(
+					p_C_AllocationHdr_ID, m_trx.getTrxName());
 			if (delete(hdr))
 				count++;
 			else
@@ -160,7 +162,8 @@ public class AllocationReset extends SvrProcess
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
-				MAllocationHdr hdr = new MAllocationHdr(getCtx(), rs, m_trx.getTrxName());
+				MAllocationHdr hdr = (MAllocationHdr) MTable.get(getCtx(), MAllocationHdr.Table_Name).getPO(rs,
+						m_trx.getTrxName());
 				if (delete(hdr))
 					count++;
 			}
