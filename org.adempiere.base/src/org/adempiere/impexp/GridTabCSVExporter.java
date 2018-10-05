@@ -478,26 +478,14 @@ public class GridTabCSVExporter implements IGridTabExporter
 
 					if (idO instanceof Integer[])
 					{
-						StringBuilder sb = new StringBuilder();
-						Integer[] arr = (Integer[]) idO;
-						int iMax = arr.length - 1;
-						if (iMax != -1)
+						String s = Util.convertArrayToStingForExport(idO, null);
+						if (!Util.isEmpty(s, true))
 						{
-							for (int j = 0;; j++)
-							{
-								sb.append(String.valueOf(arr[j]));
-								if (j == iMax)
-									break;
-								sb.append(", ");
-							}
-						}
-
-						if (sb != null && sb.length() > 0)
-						{
+							s = s.replaceAll("\"", "");
 							StringBuilder select = new StringBuilder("SELECT '\"' || STRING_AGG(").append(foreignColumn)
 									.append(DB.isPostgreSQL() ? ",', ')" : ")").append(" || '\"' FROM ")
 									.append(foreignTable).append(" WHERE ").append(foreignTable).append("_ID IN (")
-									.append(sb.toString()).append(")");
+									.append(s).append(")");
 							value = DB.getSQLValueStringEx(null, select.toString());
 						}
 					}
@@ -517,7 +505,7 @@ public class GridTabCSVExporter implements IGridTabExporter
 			if (value instanceof String[] || value instanceof Integer[])
 			{
 				String s = Util.convertArrayToStringForDB(value);
-				if (s != null && s.length() > 0)
+				if (!Util.isEmpty(s, true))
 					s = s.replaceAll("([{}])", "\"");
 				value = s;
 			}
