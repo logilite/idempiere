@@ -454,7 +454,7 @@ public class Doc_AllocationHdr extends Doc
 			}
 
 			//	Realized Gain & Loss
-			if (invoice != null
+			if (as.isAccrual() && invoice != null
 				&& (getC_Currency_ID() != as.getC_Currency_ID()			//	payment allocation in foreign currency
 					|| getC_Currency_ID() != line.getInvoiceC_Currency_ID(getTrxName())))	//	allocation <> invoice currency
 			{
@@ -619,7 +619,7 @@ public class Doc_AllocationHdr extends Doc
 		docInvoice.loadDocumentDetails();
 		docInvoice.setDateDoc(getDateDoc());
 		docInvoice.setDateAcct(getDateAcct());
-		allocationAccounted = docInvoice.createFactCash(as, fact, BigDecimal.valueOf(percent));
+		allocationAccounted = docInvoice.createFactCash(as, fact, BigDecimal.valueOf(percent), allocationSource);
 		if (log.isLoggable(Level.CONFIG)) log.config("Allocation Accounted=" + allocationAccounted);
 
 		//	Cash Based Commitment Release
