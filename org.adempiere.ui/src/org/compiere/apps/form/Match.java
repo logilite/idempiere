@@ -574,7 +574,7 @@ public class Match
 			}
 			
 			m_groupBy = " GROUP BY hdr.C_Invoice_ID, dt.C_DocType_ID, hdr.DocumentNo,hdr.DateInvoiced,bp.Name,hdr.C_BPartner_ID,"
-				+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,lin.QtyInvoiced, org.Name, hdr.AD_Org_ID " //JAVIER
+				+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,lin.QtyInvoiced, org.Name, hdr.AD_Org_ID, dt.DocBaseType " //JAVIER
 				+ "HAVING "
 				+ (matched ? "0" : "(Case When dt.DocBaseType = 'API' Then lin.QtyInvoiced Else -lin.QtyInvoiced End)")
 				+ "<>SUM(NVL(mi.Qty,0))";

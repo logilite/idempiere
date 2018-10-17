@@ -545,7 +545,9 @@ public final class MLookup extends Lookup implements Serializable
 		{
 			//	SELECT Key, Value, Name FROM ...
 			pstmt = DB.prepareStatement(m_info.QueryDirect, null);
-			if(DisplayType.isMultiSelect(m_info.DisplayType))
+			// While exporting Multi-select we take value from look up for every single key.
+			// Add check to prevent casting error.
+			if(DisplayType.isMultiSelect(m_info.DisplayType) && key instanceof Object[])
 			{
 				Object[] mskey = (Object[]) key;
 				if (mskey == null || (mskey != null && mskey.length <= 0))

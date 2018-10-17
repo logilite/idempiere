@@ -38,6 +38,7 @@ import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 
+import org.compiere.model.Lookup;
 import org.compiere.model.MLookup;
 
 /**
@@ -815,6 +816,47 @@ public class Util
 
 		return null;
 	} // getArrayObjectFromString
+		
+	/**
+	 * Convert multi-select array value to string format (Get list of display
+	 * values from Keys) ( IDEMPIERE-3413 )
+	 * 
+	 * @param array - Array of object as Integer/String
+	 * @param lookup - Reference Lookup for display value
+	 * @return string - Display values.
+	 */
+	public static String convertArrayToStingForExport(Object array, Lookup lookup)
+	{
+		StringBuilder sb = new StringBuilder();
+		Object[] objStr = null;
+		if (array instanceof Integer[])
+			objStr = (Integer[]) array;
+		else if (array instanceof String[])
+			objStr = (String[]) array;
+
+		if (objStr != null)
+		{
+			int iMax = objStr.length - 1;
+			if (iMax != -1)
+			{
+				for (int j = 0;; j++)
+				{
+					if (lookup == null)
+						sb.append(objStr[j].toString().trim());
+					else
+						sb.append(lookup.getDisplay(objStr[j].toString().trim()));
+					if (j == iMax)
+						break;
+					sb.append(", ");
+				}
+			}
+
+			if (!isEmpty(sb.toString()))
+				sb.insert(0, "\"").append("\"");
+		}
+
+		return sb.toString();
+	} // convertArrayToStingForExport
 
 	/**
 	 * Get the list of printable name from the Keys ( IDEMPIERE-3413 )

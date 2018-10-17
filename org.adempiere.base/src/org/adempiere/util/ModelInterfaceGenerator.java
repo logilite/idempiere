@@ -549,6 +549,10 @@ public class ModelInterfaceGenerator
 			dataType = "int";
 		} else if (displayType == DisplayType.Binary || displayType == DisplayType.Image) {
 			dataType = "byte[]";
+		} else if (displayType == DisplayType.MultiSelectList) {
+			dataType = "String[]";
+		} else if (displayType == DisplayType.MultiSelectTable) {
+			dataType = "Integer[]";
 		}
 		return dataType;
 	}

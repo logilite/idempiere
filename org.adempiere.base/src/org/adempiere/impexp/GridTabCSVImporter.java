@@ -63,6 +63,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Language;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
+import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
 import org.compiere.wf.MWFProcess;
 import org.supercsv.cellprocessor.Optional;
@@ -1189,8 +1190,14 @@ public class GridTabCSVImporter implements IGridTabImporter
 							
 							setValue = idS;
 							isThereRow =true;
-						} else {
-							
+						}
+						else if (DisplayType.isMultiSelect(field.getDisplayType()))
+						{
+							setValue = resolveMultiSelect(foreignTable, foreignColumn, value, trx,
+									(field.getDisplayType() == DisplayType.MultiSelectList));
+						}
+						else
+						{
 							int id = resolveForeign(foreignTable, foreignColumn, value,trx);
 							if (id < 0)
 								return Msg.getMsg(Env.getCtx(),id==-2?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{header.get(i),value});
@@ -1239,6 +1246,11 @@ public class GridTabCSVImporter implements IGridTabImporter
 								 return Msg.getMsg(Env.getCtx(),"Invalid") + " Column ["+column.getColumnName()+"]";   
 							 } 
 						  }  
+						  else if (DisplayType.isMultiSelect(field.getDisplayType()))
+						  {
+								value = resolveMultiSelect(column.getReferenceTableName(), foreignColumn, value, trx,
+										(field.getDisplayType() == DisplayType.MultiSelectList));
+						  }
 						  setValue = value;
 						  isThereRow =true;
 					   }
@@ -1525,6 +1537,40 @@ public class GridTabCSVImporter implements IGridTabImporter
 		}
 		return -3;   // no values found, error ForeignNotResolved
 	}
+	
+	/**
+	 * Resolve import value for multi-select reference type
+	 * 
+	 * @param foreignTable
+	 * @param foreignColumn
+	 * @param value
+	 * @param trx
+	 * @param isMultiSelectList
+	 * @return Array of Keys 
+	 */
+	private Object resolveMultiSelect(String foreignTable, String foreignColumn, Object value, Trx trx,
+			boolean isMultiSelectList)
+	{
+		if (isMultiSelectList)
+		{
+			return Util.getArrayObjectFromString(DisplayType.MultiSelectList, value.toString().replaceAll("\"", ""));
+		}
+		else
+		{
+			String dbData = value.toString().replaceAll("\"", "'").replaceAll(", ", "','");
+			String trxName = (trx != null ? trx.getTrxName() : null);
+			StringBuilder sql = new StringBuilder("SELECT ").append(foreignTable).append("_ID FROM ")
+					.append(foreignTable).append(" WHERE ").append(foreignColumn).append(" IN (").append(dbData)
+					.append(") AND AD_Client_ID = ?");
+			int[] ids = DB.getIDsEx(trxName, sql.toString(), Env.getAD_Client_ID(Env.getCtx()));
+			Integer[] arrIDs = new Integer[ids.length];
+			for (int i = 0; i < ids.length; i++)
+			{
+				arrIDs[i] = Integer.valueOf(ids[i]);
+			}
+			return arrIDs;
+		}
+	} // resolveMultiSelect
 
 	//Copy from GridTable
 	@SuppressWarnings("unchecked")
