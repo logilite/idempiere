@@ -2726,10 +2726,8 @@ public class MInvoice extends X_C_Invoice implements DocAction
 
 		//	Create Allocation
 		StringBuilder msgall = new StringBuilder().append(Msg.translate(getCtx(), "C_Invoice_ID")).append(": ").append(getDocumentNo()).append("/").append(reversal.getDocumentNo());
-		MAllocationHdr alloc = new MAllocationHdr(getCtx(), false, reversalDate,
-			getC_Currency_ID(),
-			msgall.toString(),
-			get_TrxName());
+		MAllocationHdr alloc = (MAllocationHdr) MTable.get(getCtx(), MAllocationHdr.Table_Name).getPO(0, get_TrxName());
+		alloc.setAllocationHdrValues(false, reversalDate, getC_Currency_ID(), msgall.toString());
 		alloc.setAD_Org_ID(getAD_Org_ID());
 		alloc.saveEx();
 		//	Amount

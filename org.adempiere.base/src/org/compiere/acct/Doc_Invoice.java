@@ -754,13 +754,14 @@ public class Doc_Invoice extends Doc
 	 *	@param multiplier source amount multiplier
 	 *	@return accounted amount
 	 */
-	public BigDecimal createFactCash (MAcctSchema as, Fact fact, BigDecimal multiplier)
+	public BigDecimal createFactCash (MAcctSchema as, Fact fact, BigDecimal multiplier, BigDecimal allocationSource)
 	{
 		boolean creditMemo = getDocumentType().equals(DOCTYPE_ARCredit)
 			|| getDocumentType().equals(DOCTYPE_APCredit);
 		boolean payables = getDocumentType().equals(DOCTYPE_APInvoice)
 			|| getDocumentType().equals(DOCTYPE_APCredit);
 		BigDecimal acctAmt = Env.ZERO;
+		BigDecimal allocatedAmt = Env.ZERO;
 		FactLine fl = null;
 		//	Revenue/Cost
 		for (int i = 0; i < p_lines.length; i++)
@@ -795,6 +796,15 @@ public class Doc_Invoice extends Doc
 				}
 				BigDecimal amt = line.getAmtSource().multiply(multiplier);
 				BigDecimal amt2 = null;
+				
+				if (i == p_lines.length - 1)
+				{
+					if (payables)
+						amt = allocationSource.subtract(allocatedAmt);
+					else
+						amt = allocationSource.add(allocatedAmt);
+				}
+				
 				/*if (creditMemo)
 				{
 					amt2 = amt;
@@ -807,7 +817,10 @@ public class Doc_Invoice extends Doc
 					fl = fact.createLine (line, acct,
 						getC_Currency_ID(), amt2, amt);
 				if (fl != null)
+				{
 					acctAmt = acctAmt.add(fl.getAcctBalance());
+					allocatedAmt = allocatedAmt.add(fl.getSourceBalance());
+				}
 			}
 		}
 		//  Tax

@@ -657,8 +657,8 @@ public class Allocation
 		int iRows = invoice.getRowCount();
 		
 		//	Create Allocation
-		MAllocationHdr alloc = new MAllocationHdr (Env.getCtx(), true,	//	manual
-			DateTrx, C_Currency_ID, Env.getContext(Env.getCtx(), "#AD_User_Name"), trxName);
+		MAllocationHdr alloc = (MAllocationHdr) MTable.get(Env.getCtx(), MAllocationHdr.Table_Name).getPO(0, trxName);
+		alloc.setAllocationHdrValues(true, DateTrx, C_Currency_ID, Env.getContext(Env.getCtx(), "#AD_User_Name"));
 		alloc.setAD_Org_ID(AD_Org_ID);
 		alloc.setC_DocType_ID(m_C_DocType_ID);
 		alloc.setDescription(alloc.getDescriptionForManualAllocation(m_C_BPartner_ID, trxName));

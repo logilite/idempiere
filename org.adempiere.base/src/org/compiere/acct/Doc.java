@@ -676,7 +676,7 @@ public abstract class Doc
 			PO po = getPO();
 			if (m_fact != null && !m_fact.isEmpty()
 					&& (MMatchInv.Table_ID == get_Table_ID() || MMatchPO.Table_ID == get_Table_ID())
-					&& !po.get_ValueAsBoolean("IsReversal"))
+					&& (!po.get_ValueAsBoolean("IsReversal") && po.get_ValueAsInt("Reversal_ID") > 0 ))
 			{
 				// Re-post reversal document (MatchPO/MatchInv) immediately
 				String errorMsg = Doc.postImmediate(MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID()),
