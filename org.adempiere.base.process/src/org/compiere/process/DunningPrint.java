@@ -101,7 +101,7 @@ public class DunningPrint extends SvrProcess
 		MMailText mText = null;
 		if (p_EMailPDF)
 		{
-			mText = new MMailText (getCtx(), p_R_MailText_ID, get_TrxName());
+			mText = (MMailText) MTable.get(getCtx(), MMailText.Table_ID).getPO(p_R_MailText_ID, get_TrxName());
 			if (p_EMailPDF && mText.get_ID() == 0)
 				throw new AdempiereUserError ("@NotFound@: @R_MailText_ID@ - " + p_R_MailText_ID);
 //			subject = mText.getMailHeader();

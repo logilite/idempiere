@@ -27,6 +27,7 @@ import org.compiere.model.MAssetDelivery;
 import org.compiere.model.MClient;
 import org.compiere.model.MMailText;
 import org.compiere.model.MProductDownload;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.MUserMail;
 import org.compiere.util.DB;
@@ -201,7 +202,7 @@ public class AssetDelivery extends SvrProcess
 		if (user.getEMail() == null || user.getEMail().length() == 0)
 			return "** No Asset User Email";
 		if (m_MailText == null || m_MailText.getR_MailText_ID() != R_MailText_ID)
-			m_MailText = new MMailText (getCtx(), R_MailText_ID, get_TrxName());
+			m_MailText = (MMailText) MTable.get(getCtx(), MMailText.Table_ID).getPO(R_MailText_ID, get_TrxName());
 		if (m_MailText.getMailHeader() == null || m_MailText.getMailHeader().length() == 0)
 			return "** No Subject";
 
@@ -247,7 +248,7 @@ public class AssetDelivery extends SvrProcess
 		if (asset.getProductR_MailText_ID() == 0)
 			return "** Product Mail Text";
 		if (m_MailText == null || m_MailText.getR_MailText_ID() != asset.getProductR_MailText_ID())
-			m_MailText = new MMailText (getCtx(), asset.getProductR_MailText_ID(), get_TrxName());
+			m_MailText = (MMailText) MTable.get(getCtx(), MMailText.Table_ID).getPO(asset.getProductR_MailText_ID(), get_TrxName());
 		if (m_MailText.getMailHeader() == null || m_MailText.getMailHeader().length() == 0)
 			return "** No Subject";
 
