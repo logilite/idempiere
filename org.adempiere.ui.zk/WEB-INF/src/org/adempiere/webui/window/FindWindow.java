@@ -135,7 +135,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -4461202150492732658L;
+	private static final long serialVersionUID = -2476692172080549315L;
 
 	// values and label for history combo
 	protected static final String HISTORY_DAY_ALL = "All";
@@ -1760,7 +1760,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 						uq = new MUserQuery (Env.getCtx(), 0, null);
 						uq.setName (name);
 						uq.setAD_Tab_ID(m_AD_Tab_ID); //red1 UserQuery [ 1798539 ] taking in new field from Compiere
-						uq.setAD_User_ID(Env.getAD_User_ID(Env.getCtx())); //red1 - [ 1798539 ] missing in Compiere delayed source :-)
+						uq.set_ValueOfColumn("AD_User_ID", Env.getAD_User_ID(Env.getCtx())); // required set_Value for System=0 user
 					}
 					
 				} else	if (code.length() <= 0){ // Delete the query
@@ -2671,7 +2671,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	 */
 	private void setStatusDB (int currentCount)
 	{
-		StringBuilder text = new StringBuilder(" ").append(currentCount).append(" / ").append(m_total).append(" ");
+		StringBuilder text = new StringBuilder(" ").append(Msg.getMsg(Env.getCtx(), "Records")).append(" = ").append(m_total).append(" ");
 		statusBar.setStatusDB(text.toString());
 	}	//	setDtatusDB
 	/** END DEVCOFFEE **/
