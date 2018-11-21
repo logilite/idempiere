@@ -609,9 +609,9 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     private void prepareHistoryCombo()
     {
     	historyCombo.setAutodrop(true);
-    	historyCombo.setAutocomplete(false);
+    	historyCombo.setAutocomplete(true);
     	historyCombo.setButtonVisible(true);
-    	historyCombo.setReadonly(true);
+    	historyCombo.setReadonly(false);
     	historyCombo.setId("historyCombo");
     	historyCombo.appendItem(" ", "");
     	historyCombo.appendItem((Msg.getMsg(Env.getCtx(), HISTORY_DAY_ALL)),HISTORY_DAY_ALL);
