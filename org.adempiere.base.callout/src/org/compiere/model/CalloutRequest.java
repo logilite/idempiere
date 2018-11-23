@@ -51,7 +51,7 @@ public class CalloutRequest extends CalloutEngine
 			return "";
 
 		Integer R_MailText_ID = (Integer)value;
-		MMailText mailtext = new MMailText(ctx, R_MailText_ID.intValue(), null);
+		MMailText mailtext = (MMailText) MTable.get(ctx, MMailText.Table_ID).getPO(R_MailText_ID.intValue(), null);
 
 		Integer userID = (Integer) mTab.getValue("AD_User_ID");
 		if (userID != null)

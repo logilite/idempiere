@@ -1135,7 +1135,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			} else
 			{
 				MClient client = MClient.get(getCtx(), getAD_Client_ID());
-				MMailText mailtext = new MMailText(getCtx(),getNode().getR_MailText_ID(),null);
+				MMailText mailtext = (MMailText) MTable.get(getCtx(), MMailText.Table_ID).getPO(getNode().getR_MailText_ID(), null);
 				mailtext.setPO(m_po);
 
 				String subject = getNode().getDescription()
@@ -1679,7 +1679,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	private void sendEMail()
 	{
 		DocAction doc = (DocAction)m_po;
-		MMailText text = new MMailText (getCtx(), m_node.getR_MailText_ID(), null);
+		MMailText text = (MMailText) MTable.get(getCtx(), MMailText.Table_ID).getPO(m_node.getR_MailText_ID(), null);
 		text.setPO(m_po, true);
 		//
 		String subject = doc.getDocumentInfo()

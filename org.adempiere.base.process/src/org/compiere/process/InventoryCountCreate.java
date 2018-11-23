@@ -157,7 +157,7 @@ public class InventoryCountCreate extends SvrProcess
 		}
 		
 		StringBuilder sql = new StringBuilder("SELECT p.M_Product_ID, l.M_Locator_ID, ");
-							   sql.append(" Sum(s.QtyOnHand) QtyOnHand ");
+							   sql.append(" Sum(s.QtyOnHand) QtyOnHand, l.Value, p.Value ");
 							   sql.append(" FROM M_Product p");
 							   sql.append(" INNER JOIN M_StorageOnHand s ON (s.M_Product_ID=p.M_Product_ID)");
 							   sql.append(" INNER JOIN M_Locator l ON (s.M_Locator_ID=l.M_Locator_ID) ");
@@ -193,7 +193,7 @@ public class InventoryCountCreate extends SvrProcess
 			   .append(" AND COALESCE(il.M_AttributeSetInstance_ID,0)=COALESCE(s.M_AttributeSetInstance_ID,0))");
 		//	+ " AND il.M_AttributeSetInstance_ID=s.M_AttributeSetInstance_ID)");
 		//
-		sql.append(" Group By  p.M_Product_ID, l.M_Locator_ID"
+		sql.append(" Group By  p.M_Product_ID, l.M_Locator_ID, l.Value, p.Value"
 				+ " ORDER BY l.Value, p.Value");	//	Locator/Product
 		//
 		int count = 0;
