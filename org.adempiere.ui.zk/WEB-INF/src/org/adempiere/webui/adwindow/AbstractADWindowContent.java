@@ -1194,6 +1194,11 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     	else if (ADTabpanel.ON_DYNAMIC_DISPLAY_EVENT.equals(event.getName()))
     	{
     		IADTabpanel adtab = (IADTabpanel) event.getTarget();
+		
+    		// Update detail-tab quick info
+    		GridTab gt = adtab.getGridTab();
+    		SessionManager.getAppDesktop().updateHelpDetailQuickInfo(gt);
+				
     		if (adtab == adTabbox.getSelectedTabpanel()) {
     			toolbar.enableProcessButton(adtab.isEnableProcessButton());
     			toolbar.dynamicDisplay();
