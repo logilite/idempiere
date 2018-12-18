@@ -151,9 +151,10 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 	}
 
 	protected void addNode(int nodeId, String label, String description, String imageSrc, boolean addNewBtn) {
-		Layout hbox = new Hlayout();
+		Hlayout hbox = new Hlayout();
 		hbox.setSclass("favourites-item");
 		hbox.setSpacing("0px");
+		hbox.setValign("middle");
 		bxFav.appendChild(hbox);
 		
 		A btnFavItem = new A();
@@ -161,7 +162,9 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 		hbox.appendChild(btnFavItem);
 		btnFavItem.setLabel(label);
 		btnFavItem.setTooltiptext(description);
-		if (imageSrc.startsWith(ITheme.THEME_PATH_PREFIX))
+		if (ThemeManager.isUseFontIconForImage())
+			btnFavItem.setIconSclass(imageSrc);
+		else if (imageSrc.startsWith(ITheme.THEME_PATH_PREFIX))
 			btnFavItem.setImage(imageSrc);
 		else			
 			btnFavItem.setImage(ThemeManager.getThemeResource(imageSrc));
@@ -173,6 +176,11 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 		if (addNewBtn)
 		{
 			Toolbarbutton newBtn = new Toolbarbutton(null, ThemeManager.getThemeResource("images/New16.png"));
+			if (ThemeManager.isUseFontIconForImage())
+			{
+				newBtn.setImage(null);
+				newBtn.setIconSclass("z-icon-New");
+			}
 			newBtn.setAttribute(NODE_ID_ATTR, String.valueOf(nodeId));
 			hbox.appendChild(newBtn);
 			newBtn.addEventListener(Events.ON_CLICK, this);
@@ -207,7 +215,7 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
         			addItem(treeitem);
         		}
         	}
-        	else if(comp instanceof Image)
+        	else if(comp instanceof Image || comp instanceof Label)
         	{
         		if(dragged instanceof A)
         		{
@@ -332,7 +340,10 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 				{
 					A link = (A) treeitem.getTreerow().getFirstChild().getFirstChild();
 					label = link.getLabel();
-					image = link.getImage();
+					if (ThemeManager.isUseFontIconForImage() && link.getIconSclass() != null)
+						image = link.getIconSclass();
+					else
+						image = link.getImage();
 				}
 				
 				addNode(Node_ID, label, treeitem.getTooltiptext(), image, isWindow);								
@@ -344,6 +355,9 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 	}
 	
 	private String getIconFile(MTreeNode mt) {
+		if (ThemeManager.isUseFontIconForImage()) {
+			return getIconSclass(mt);
+		}
 		if (mt.isWindow())
 			return "images/mWindow.png";
 		if (mt.isReport())
@@ -354,6 +368,24 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 			return "images/mWorkFlow.png";
 		if (mt.isForm())
 			return "images/mForm.png";
+		if (mt.isInfo())
+			return "images/mInfo.png";
 		return "images/mWindow.png";
+	}
+
+	private String getIconSclass(MTreeNode mt) {
+		if (mt.isWindow())
+			return "z-icon-Window";
+		if (mt.isReport())
+			return "z-icon-Report";
+		if (mt.isProcess() || mt.isTask())
+			return "z-icon-Task";
+		if (mt.isWorkFlow())
+			return "z-icon-WorkFlow";
+		if (mt.isForm())
+			return "z-icon-Form";
+		if (mt.isInfo())
+			return "z-icon-Info";
+		return "z-icon-Window";
 	}
 }

@@ -129,7 +129,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
     	m_URLParameters = new ConcurrentHashMap<String, String[]>(Executions.getCurrent().getParameterMap());
     }
 
-    public void onCreate()
+	public void onCreate()
     {
         SessionManager.setSessionApplication(this);
         Session session = Executions.getCurrent().getDesktop().getSession();
@@ -507,7 +507,6 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
         loginDesktop.createPart(this.getPage());
         loginDesktop.changeRole(locale, properties);
         loginDesktop.getComponent().getRoot().addEventListener(Events.ON_CLIENT_INFO, this);
-		
 	}
 
 	/**
