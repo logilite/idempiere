@@ -173,7 +173,42 @@ Copyright (C) 2007 Ashley G Ramdass.
 							return '[ ' + (acp * psz + 1) + dash + ' / ' + tsz + ' ]';
 					  });	  
 			});
-		
+
+			/*
+				Issue of file not able to download in mobile iOS devices (iPad, iPhone) 
+				Issue from ZK lower version, In ZK 8.5.2 version it was fixed. [ https://tracker.zkoss.org/browse/ZK-3886 ]
+			*/
+			zk.afterLoad('zk', function() {
+			zAu.cmd0.download = function(url) {
+				if (url) {
+
+					if (zk.mobile && zk.safari) {
+						var newwindow = window.open(url, "Download...", null);
+						if (window.focus) {
+							newwindow.focus();
+						}
+					} else if (zk.ios) {
+						var link = document.createElement('a'),
+							evt = document.createEvent('Event');
+						link.id = 'zk_download';
+						link.href = url;
+						if (zk.ios < 7) //ZK-2245: it's restriction to programmatically open new tab since ios7 
+							link.target = '_blank';
+						evt.initEvent('click', true, false);
+						link.dispatchEvent(evt);
+					} else {
+						var ifr = jq('#zk_download')[0];
+						if (ifr) {
+							ifr.src = url; //It is OK to reuse the same iframe 
+						} else {
+							var html = '<iframe src="' + url + '" id="zk_download" name="zk_download" style="display:none;width:0;height:0;border:0" frameborder="0"></iframe>';
+							jq(document.body).append(html);
+						}
+					}
+				}
+			};
+		}); //zk.afterLoad
+
 	]]>
 	</script>
     <include src="${themePreference}"/>
