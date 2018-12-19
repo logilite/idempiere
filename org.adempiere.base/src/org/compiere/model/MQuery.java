@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import org.compiere.dbPort.Convert_SQL92;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
@@ -87,7 +88,7 @@ public class MQuery implements Serializable
 			SQL = "SELECT ip.ParameterName,ip.P_String,ip.P_String_To,"			//	1..3
 				+ "ip.P_Number,ip.P_Number_To,"									//	4..5
 				+ "ip.P_Date,ip.P_Date_To, ip.Info,ip.Info_To, "				//	6..9
-				+ "pp.Name, pp.IsRange "										//	10..11
+				+ "pp.Name, pp.IsRange, pp.AD_Reference_ID "					//	10..12
 				+ "FROM AD_PInstance_Para ip, AD_PInstance i, AD_Process_Para pp "
 				+ "WHERE i.AD_PInstance_ID=ip.AD_PInstance_ID"
 				+ " AND pp.AD_Process_ID=i.AD_Process_ID"
@@ -98,7 +99,7 @@ public class MQuery implements Serializable
 		else
 			SQL = "SELECT ip.ParameterName,ip.P_String,ip.P_String_To, ip.P_Number,ip.P_Number_To,"
 				+ "ip.P_Date,ip.P_Date_To, ip.Info,ip.Info_To, "
-				+ "ppt.Name, pp.IsRange "
+				+ "ppt.Name, pp.IsRange, pp.AD_Reference_ID "
 				+ "FROM AD_PInstance_Para ip, AD_PInstance i, AD_Process_Para pp, AD_Process_Para_Trl ppt "
 				+ "WHERE i.AD_PInstance_ID=ip.AD_PInstance_ID"
 				+ " AND pp.AD_Process_ID=i.AD_Process_ID"
@@ -146,6 +147,8 @@ public class MQuery implements Serializable
 				//
 				String Name = rs.getString(10);
 				boolean isRange = "Y".equals(rs.getString(11));
+				//
+				int Reference_ID = rs.getInt(12);
 				//
 				if (s_log.isLoggable(Level.FINE)) s_log.fine(ParameterName + " S=" + P_String + "-" + P_String_To
 					+ ", N=" + P_Number + "-" + P_Number_To + ", D=" + P_Date + "-" + P_Date_To
@@ -200,22 +203,24 @@ public class MQuery implements Serializable
 				//	Date
 				else if (P_Date != null || P_Date_To != null)
 				{
+					String trunc = (Reference_ID == DisplayType.DateTime) ? "" : "TRUNC";
+
 					if (P_Date_To == null)
 					{
 						if (isRange)
-							query.addRestriction("TRUNC("+ParameterName+")", MQuery.GREATER_EQUAL, 
+							query.addRestriction(trunc+"("+ParameterName+")", MQuery.GREATER_EQUAL, 
 								P_Date, Name, Info);
 						else
-							query.addRestriction("TRUNC("+ParameterName+")", MQuery.EQUAL, 
+							query.addRestriction(trunc+"("+ParameterName+")", MQuery.EQUAL, 
 								P_Date, Name, Info);
 					}
 					else	//	P_Date_To != null
 					{
 						if (P_Date == null)
-							query.addRestriction("TRUNC("+ParameterName+")", MQuery.LESS_EQUAL, 
+							query.addRestriction(trunc+"("+ParameterName+")", MQuery.LESS_EQUAL, 
 								P_Date_To, Name, Info);
 						else
-							query.addRangeRestriction("TRUNC("+ParameterName+")", 
+							query.addRangeRestriction(trunc+"("+ParameterName+")", 
 								P_Date, P_Date_To, Name, Info, Info_To);
 					}
 				}

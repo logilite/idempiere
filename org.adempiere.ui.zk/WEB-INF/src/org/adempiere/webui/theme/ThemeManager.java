@@ -80,9 +80,12 @@ public final class ThemeManager {
 		if (logoID > 0)
 		{
 			MImage image = MImage.get(Env.getCtx(), logoID);
-			String value = "data:image;base64," + new String(Base64.encodeBase64(image.getData()));
-			logoCache.put(logoID, value);
-			return value;
+			if (image.getData() != null)
+			{
+				String value = "data:image;base64," + new String(Base64.encodeBase64(image.getData()));
+				logoCache.put(logoID, value);
+				return value;
+			}
 		}
 		return null;
 	}

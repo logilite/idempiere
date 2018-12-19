@@ -39,6 +39,7 @@ import org.compiere.model.MClient;
 import org.compiere.model.MMailText;
 import org.compiere.model.MPasswordRule;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.Query;
 import org.compiere.util.CLogger;
@@ -515,7 +516,7 @@ public class ResetPasswordPanel extends Window implements EventListener<Event>
     	if (R_MailText_ID <= 0)
     		return false;
 
-        MMailText mailText = new MMailText(m_ctx, R_MailText_ID, null);    	
+        MMailText mailText = (MMailText) MTable.get(m_ctx, MMailText.Table_ID).getPO(R_MailText_ID, null);    	
 		mailText.setLanguage(Env.getContext(m_ctx, "#AD_Language"));
 		to.set_ValueOfColumn("Password", newPassword); // will be hashed and validate on saveEx
     	mailText.setUser(to);

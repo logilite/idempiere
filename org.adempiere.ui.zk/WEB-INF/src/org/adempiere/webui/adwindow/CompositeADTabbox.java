@@ -26,6 +26,7 @@ import org.adempiere.util.Callback;
 import org.adempiere.webui.component.ADTabListModel;
 import org.adempiere.webui.component.ADTabListModel.ADTabLabel;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.DataStatusEvent;
 import org.compiere.model.DataStatusListener;
@@ -621,9 +622,23 @@ public class CompositeADTabbox extends AbstractADTabbox
 								else
 									selectDetailPanel.getTreePanel().getParent().setVisible(true);
 							}
+							
+							// Update detail-tab quick info
+							GridTab gt = selectDetailPanel.getGridTab();
+							SessionManager.getAppDesktop().updateHelpDetailQuickInfo(gt);
 						}
 					}
-				}				
+				}	
+				else
+				{
+					// Remove detail quick info when no child tab available
+					SessionManager.getAppDesktop().updateHelpDetailQuickInfo(null);
+				}
+			}
+			else
+			{
+				// Remove detail quick info when no child tab available
+				SessionManager.getAppDesktop().updateHelpDetailQuickInfo(null);
 			}
 		}
 		updateBreadCrumb();

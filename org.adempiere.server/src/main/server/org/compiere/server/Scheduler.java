@@ -286,7 +286,7 @@ public class Scheduler extends AdempiereServer
 				
 				if (email)
 				{
-					MMailText mailTemplate = new MMailText(getCtx(), get(getCtx(), AD_Scheduler_ID).getR_MailText_ID(), null);
+					MMailText mailTemplate = (MMailText) MTable.get(getCtx(), MMailText.Table_ID).getPO(get(getCtx(), AD_Scheduler_ID).getR_MailText_ID(), null);
 					String mailContent = "";
 					
 					if (mailTemplate.is_new()){

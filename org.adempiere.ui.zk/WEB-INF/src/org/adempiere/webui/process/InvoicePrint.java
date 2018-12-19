@@ -154,7 +154,7 @@ public class InvoicePrint extends SvrProcess
 		MMailText mText = null;
 		if (p_R_MailText_ID != 0)
 		{
-			mText = new MMailText(getCtx(), p_R_MailText_ID, get_TrxName());
+			mText = (MMailText) MTable.get(getCtx(), MMailText.Table_ID).getPO(p_R_MailText_ID, get_TrxName());
 			if (mText.get_ID() != p_R_MailText_ID)
 				throw new AdempiereUserError ("@NotFound@: @R_MailText_ID@ - " + p_R_MailText_ID);
 		}
