@@ -57,7 +57,7 @@ public class PaySelectionCreateCheck extends SvrProcess
 				;
 			else if (name.equals("PaymentRule"))
 				p_PaymentRule = (String)para[i].getParameter();
-			else if (name.equalsIgnoreCase("OnePaymentPerInvoice"))
+			else if (name.equalsIgnoreCase("IsOnePaymentPerInvoice"))
 				p_onepaymentPerInvoice = para[i].getParameterAsBoolean();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
