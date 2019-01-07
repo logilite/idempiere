@@ -436,7 +436,7 @@ public class PaySelect
 			m_ps.setPayDate (payDate);
 			m_ps.setC_BankAccount_ID(bi.C_BankAccount_ID);
 			m_ps.setIsApproved(true);
-			m_ps.set_ValueOfColumnReturningBoolean("IsOnePaymentPerInvoice", m_isOneToOnePayment);
+			m_ps.setIsOnePaymentPerInvoice(m_isOneToOnePayment);
 			m_ps.saveEx();
 			if (log.isLoggable(Level.CONFIG)) log.config(m_ps.toString());
 

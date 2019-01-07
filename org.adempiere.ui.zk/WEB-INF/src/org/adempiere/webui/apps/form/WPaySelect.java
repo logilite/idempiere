@@ -186,7 +186,7 @@ public class WPaySelect extends PaySelect
 		fieldPayDate.addValueChangeListener(this);
 		ZKUpdateUtil.setHflex(fieldPayDate.getComponent(), "1");
 
-		oneToOnePayment.setText(Msg.translate(Env.getCtx(), "IsOnePaymentPerInvoice"));
+		oneToOnePayment.setText(Msg.translate(Env.getCtx(), MPaySelection.COLUMNNAME_IsOnePaymentPerInvoice));
 		oneToOnePayment.addActionListener(this);
 		
 		//IDEMPIERE-2657, pritesh shah
@@ -517,7 +517,7 @@ public class WPaySelect extends PaySelect
 							dialog.setPage(form.getPage());
 							dialog.doHighlighted();
 							// Create instance parameters. Parameters you want to send to the process.
-							ProcessInfoParameter pi1 = new ProcessInfoParameter("IsOnePaymentPerInvoice", m_isOneToOnePayment, "", "", "");
+							ProcessInfoParameter pi1 = new ProcessInfoParameter(MPaySelection.COLUMNNAME_IsOnePaymentPerInvoice, m_isOneToOnePayment, "", "", "");
 							dialog.getProcessInfo().setParameter(new ProcessInfoParameter[] {pi1});
 						} catch (SuspendNotAllowedException e) {
 							log.log(Level.SEVERE, e.getLocalizedMessage(), e);
