@@ -27,9 +27,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 
-import javax.activation.FileDataSource;
 import javax.servlet.http.HttpServletRequest;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.DBException;
 import org.adempiere.pdf.Document;
 import org.adempiere.util.ContextRunnable;
@@ -60,6 +60,7 @@ import org.adempiere.webui.panel.StatusBarPanel;
 import org.adempiere.webui.report.HTMLExtension;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.EMailDialogUtil;
 import org.adempiere.webui.util.IServerPushCallback;
 import org.adempiere.webui.util.ServerPushTemplate;
 import org.adempiere.webui.util.ZKUpdateUtil;
@@ -74,6 +75,7 @@ import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.MToolBarButtonRestrict;
 import org.compiere.model.MUser;
+import org.compiere.model.PO;
 import org.compiere.model.SystemIDs;
 import org.compiere.model.X_AD_ToolBarButton;
 import org.compiere.print.ArchiveEngine;
@@ -202,7 +204,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 
 	protected Future<?> future;
 	
-	private final static String ON_RENDER_REPORT_EVENT = "onRenderReport";
+	protected final static String ON_RENDER_REPORT_EVENT = "onRenderReport";
 	
 	private Popup toolbarPopup;
 	
@@ -1082,9 +1084,25 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 			log.log(Level.SEVERE, "", e);
 		}
 
-		WEMailDialog dialog = new WEMailDialog (Msg.getMsg(Env.getCtx(), "SendMail"),
-			from, to, subject, message, new FileDataSource(attachment));
-		AEnv.showWindow(dialog);
+		IEmailDialog dialog = EMailDialogUtil.getEmailDialog(); 
+		if (dialog != null)
+		{
+			PO po = null;
+			if (m_reportEngine.getPrintInfo().getAD_Table_ID() > 0 && m_reportEngine.getPrintInfo().getRecord_ID() > 0)
+			{
+				po = MTable.get(m_ctx, m_reportEngine.getPrintInfo().getAD_Table_ID())
+						.getPO(m_reportEngine.getPrintInfo().getRecord_ID(), null);
+				dialog.setPO(po);
+			}
+			dialog.init(Msg.getMsg(Env.getCtx(), "SendMail"), from, to, subject, message, attachment);
+			
+			dialog.show();
+		}
+		else
+		{
+			log.log(Level.SEVERE, this.toString() + "cmd_sendMail()");
+			throw new AdempiereException("Dialog cannot be initiate.");
+		}
 	}	//	cmd_sendMail
 
 	/**

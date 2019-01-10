@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
-import javax.activation.FileDataSource;
-
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.LayoutUtils;
@@ -22,7 +20,9 @@ import org.adempiere.webui.desktop.IDesktop;
 import org.adempiere.webui.panel.ITabOnCloseHandler;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.EMailDialogUtil;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.compiere.model.MArchive;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
@@ -50,7 +50,6 @@ import org.zkoss.zul.Separator;
 import org.zkoss.zul.Tab;
 import org.zkoss.zul.Toolbar;
 import org.zkoss.zul.impl.Utils;
-import org.compiere.model.MArchive;
 import org.zkoss.zul.impl.XulElement;
 
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
@@ -293,9 +292,17 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 		MUser from = MUser.get(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()));
 		String subject = m_title;
 
-		WEMailDialog dialog = new WEMailDialog (Msg.getMsg(Env.getCtx(), "SendMail"),
-			from, to, subject, "", new FileDataSource(attachment));
-		AEnv.showWindow(dialog);
+		IEmailDialog dialog = EMailDialogUtil.getEmailDialog(); 
+		if(dialog!=null){
+			dialog.init(Msg.getMsg(Env.getCtx(), "SendMail"),
+				from, to, subject, "", attachment);
+			dialog.show();
+		}
+		else
+		{
+			log.log(Level.SEVERE, this.toString() + "cmd_sendMail()");
+			throw new AdempiereException("Dialog cannot be initiate.");
+		}
 
 	}	//	cmd_sendMail
 
