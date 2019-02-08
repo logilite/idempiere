@@ -203,24 +203,25 @@ public class MQuery implements Serializable
 				//	Date
 				else if (P_Date != null || P_Date_To != null)
 				{
-					String trunc = (Reference_ID == DisplayType.DateTime) ? "" : "TRUNC";
+					String paramName = (Reference_ID == DisplayType.DateTime) ? ParameterName
+							: "TRUNC(" + ParameterName + ")";
 
 					if (P_Date_To == null)
 					{
 						if (isRange)
-							query.addRestriction(trunc+"("+ParameterName+")", MQuery.GREATER_EQUAL, 
+							query.addRestriction(paramName, MQuery.GREATER_EQUAL, 
 								P_Date, Name, Info);
 						else
-							query.addRestriction(trunc+"("+ParameterName+")", MQuery.EQUAL, 
+							query.addRestriction(paramName, MQuery.EQUAL, 
 								P_Date, Name, Info);
 					}
 					else	//	P_Date_To != null
 					{
 						if (P_Date == null)
-							query.addRestriction(trunc+"("+ParameterName+")", MQuery.LESS_EQUAL, 
+							query.addRestriction(paramName, MQuery.LESS_EQUAL, 
 								P_Date_To, Name, Info);
 						else
-							query.addRangeRestriction(trunc+"("+ParameterName+")", 
+							query.addRangeRestriction(paramName, 
 								P_Date, P_Date_To, Name, Info, Info_To);
 					}
 				}
