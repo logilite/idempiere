@@ -91,6 +91,7 @@ import org.compiere.model.MProjectIssue;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRecentItem;
 import org.compiere.model.MRole;
+import org.compiere.model.MToolBarButtonRestrict;
 import org.compiere.model.MWindow;
 import org.compiere.model.PO;
 import org.compiere.model.X_AD_CtxHelp;
@@ -558,7 +559,11 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 			onNew = true;
 		else if (!curTab.isReadOnly() && curTab.isQueryNewRecord())
 			onNew = true;
-		if (onNew) {
+
+		if (onNew)
+			onNew = !MToolBarButtonRestrict.isNewButtonRestricted(adWindowId);
+
+		if (onNew) {			
 			Executions.schedule(AEnv.getDesktop(), new EventListener<Event>() {
 				@Override
 				public void onEvent(Event event) throws Exception {
@@ -738,9 +743,8 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         	m_findCancelled = false;
         	m_findCreateNew = false;
             GridField[] findFields = mTab.getFields();
-            findWindow = new FindWindow(curWindowNo,
-                    mTab.getName(), mTab.getAD_Table_ID(), mTab.getTableName(),
-                    where.toString(), findFields, 10, mTab.getAD_Tab_ID()); // no query below 10
+            
+			findWindow = new FindWindow(curWindowNo, mTab, where.toString(), findFields, 10); // no query below 10
             setupEmbeddedFindwindow();
             if (findWindow.initialize())
             {
@@ -2065,10 +2069,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         if (findWindow == null || !findWindow.validate(adTabbox.getSelectedGridTab().getWindowNo(), adTabbox.getSelectedGridTab().getName(),
             adTabbox.getSelectedGridTab().getAD_Table_ID(), adTabbox.getSelectedGridTab().getTableName(),
             adTabbox.getSelectedGridTab().getWhereExtended(), findFields, 1, adTabbox.getSelectedGridTab().getAD_Tab_ID())) {
-	        findWindow = new FindWindow (adTabbox.getSelectedGridTab().getWindowNo(), adTabbox.getSelectedGridTab().getName(),
-	            adTabbox.getSelectedGridTab().getAD_Table_ID(), adTabbox.getSelectedGridTab().getTableName(),
-	            adTabbox.getSelectedGridTab().getWhereExtended(), findFields, 1, adTabbox.getSelectedGridTab().getAD_Tab_ID());
-
+			findWindow = new FindWindow(adTabbox.getSelectedGridTab(), findFields, 1);
 	        setupEmbeddedFindwindow();	        
 	        if (!findWindow.initialize()) {
 	        	if (findWindow.getTotalRecords() == 0) {
