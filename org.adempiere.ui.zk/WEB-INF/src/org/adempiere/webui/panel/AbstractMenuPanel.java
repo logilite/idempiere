@@ -30,6 +30,7 @@ import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.MMenu;
 import org.compiere.model.MQuery;
+import org.compiere.model.MToolBarButtonRestrict;
 import org.compiere.model.MTree;
 import org.compiere.model.MTreeNode;
 import org.compiere.util.DB;
@@ -214,9 +215,12 @@ public abstract class AbstractMenuPanel extends Panel implements EventListener<E
                 		link.setImage(ThemeManager.getThemeResource("images/mWindow.png"));
                 	treeitem.setAttribute("menu.type", "window");
 
-                	Toolbarbutton newBtn = createNewButton();
-                	treeCell.appendChild(newBtn);
-                	newBtn.addEventListener(Events.ON_CLICK, this);
+					if (!MToolBarButtonRestrict.isNewButtonRestricted(MMenu.get(mChildNode.getNode_ID()).getAD_Window_ID()))
+					{
+						Toolbarbutton newBtn = createNewButton();
+						treeCell.appendChild(newBtn);
+						newBtn.addEventListener(Events.ON_CLICK, this);
+					}
                 }
                 link.setLabel(mChildNode.getName());
                 

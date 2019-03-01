@@ -80,6 +80,9 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
 
 	private Popup popup;
 
+	protected boolean isFeedbackShowRequestNew = false;
+	protected boolean isFeedbackShowEmailSupport = false;
+
 	private static final String ON_DEFER_CHANGE_ROLE = "onDeferChangeRole";
 	private static final String ON_DEFER_LOGOUT = "onDeferLogout";
 
@@ -91,6 +94,9 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
 
     protected void onCreate()
     {
+		isFeedbackShowRequestNew = MSysConfig.getBooleanValue("FEEDBACK_SHOW_REQUEST_NEW", true, Env.getAD_Client_ID(Env.getCtx()));
+		isFeedbackShowEmailSupport = MSysConfig.getBooleanValue("FEEDBACK_SHOW_EMAIL_SUPPORT", true, Env.getAD_Client_ID(Env.getCtx()));
+
     	String s = Msg.getMsg(Env.getCtx(), "CloseTabFromBrowser?").replace("\n", "<br>");
     	Clients.confirmClose(s);
     	lblUserNameValue = (Label) component.getFellowIfAny("loginUserAndRole", true);
@@ -108,6 +114,7 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
     	feedback = (LabelImageElement) component.getFellowIfAny("feedback", true);
     	feedback.setLabel(Msg.getMsg(Env.getCtx(), "Feedback"));
     	feedback.addEventListener(Events.ON_CLICK, this);
+		feedback.setVisible(isFeedbackShowRequestNew || isFeedbackShowEmailSupport);
 
     	preference = (LabelImageElement) component.getFellowIfAny("preference", true);
     	preference.setLabel(Msg.getMsg(Env.getCtx(), "Preference"));
@@ -123,14 +130,14 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
     	
     	feedbackMenu = new Menupopup();
     	Menuitem mi = null;
-		if (MSysConfig.getBooleanValue("FEEDBACK_SHOW_REQUEST_NEW", true, Env.getAD_Client_ID(Env.getCtx())))
+		if (isFeedbackShowRequestNew)
 		{
 			mi = new Menuitem(Msg.getMsg(Env.getCtx(), "RequestNew"));
 			mi.setId("CreateRequest");
 			feedbackMenu.appendChild(mi);
 			mi.addEventListener(Events.ON_CLICK, this);
 		}
-		if (MSysConfig.getBooleanValue("FEEDBACK_SHOW_EMAIL_SUPPORT", true, Env.getAD_Client_ID(Env.getCtx())))
+		if (isFeedbackShowEmailSupport)
 		{
 			mi = new Menuitem(Msg.getMsg(Env.getCtx(), "EMailSupport"));
 			mi.setId("EmailSupport");
@@ -275,11 +282,11 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
 			KeyEvent ke = (KeyEvent) event;
 			if (ke.getKeyCode() == 0x55)
 			{
-				if (ke.isAltKey() && MSysConfig.getBooleanValue("FEEDBACK_SHOW_EMAIL_SUPPORT", true, Env.getAD_Client_ID(Env.getCtx())))
+				if (ke.isAltKey() && isFeedbackShowEmailSupport)
 				{
 					FeedbackManager.emailSupport(false);
 				}
-				else if (ke.isCtrlKey() && MSysConfig.getBooleanValue("FEEDBACK_SHOW_REQUEST_NEW", true, Env.getAD_Client_ID(Env.getCtx())))
+				else if (ke.isCtrlKey() && isFeedbackShowRequestNew)
 				{
 					FeedbackManager.createNewRequest();
 				}

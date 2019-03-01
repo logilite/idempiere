@@ -27,6 +27,8 @@ import org.adempiere.webui.util.TreeItemAction;
 import org.adempiere.webui.util.TreeNodeAction;
 import org.adempiere.webui.util.TreeUtils;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.compiere.model.MMenu;
+import org.compiere.model.MToolBarButtonRestrict;
 import org.compiere.model.MTreeNode;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -526,16 +528,23 @@ public class MenuSearchController implements EventListener<Event>{
 			item.appendChild(cell);
 			boolean isWindow = data.getType() != null && data.getType().equals("window");
 			if (isWindow) {
-				ToolBarButton newBtn = new ToolBarButton();
-				if (ThemeManager.isUseFontIconForImage())
-					newBtn.setIconSclass("z-icon-New");
-				else
-					newBtn.setImage(ThemeManager.getThemeResource("images/New16.png"));
-				newBtn.addEventListener(Events.ON_CLICK, MenuSearchController.this);
-				newBtn.setSclass("fav-new-btn");
-				newBtn.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), NEW_BUTTON_NAME)));
-				newBtn.setName(NEW_BUTTON_NAME);
-				cell.appendChild(newBtn);
+				if (data.getData() != null && data.getData() instanceof Treeitem)
+				{
+					int menuId = Integer.parseInt((String) ((Treeitem) data.getData()).getValue());
+
+					// Check Window access for ReadWrite & New Toolbar button
+					if (!MToolBarButtonRestrict.isNewButtonRestricted(MMenu.get(menuId).getAD_Window_ID()))
+					{
+						ToolBarButton newBtn = new ToolBarButton();
+						if (ThemeManager.isUseFontIconForImage())
+							newBtn.setIconSclass("z-icon-New");
+						else
+							newBtn.setImage(ThemeManager.getThemeResource("images/New16.png"));
+					newBtn.addEventListener(Events.ON_CLICK, MenuSearchController.this);
+					newBtn.setSclass("fav-new-btn");
+					newBtn.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), NEW_BUTTON_NAME)));
+					newBtn.setName(NEW_BUTTON_NAME);
+				}
 			}
 		
 			cell = new Listcell();
