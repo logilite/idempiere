@@ -544,6 +544,7 @@ public class MenuSearchController implements EventListener<Event>{
 					newBtn.setSclass("fav-new-btn");
 					newBtn.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), NEW_BUTTON_NAME)));
 					newBtn.setName(NEW_BUTTON_NAME);
+					cell.appendChild(newBtn);
 				}
 			}
 		
