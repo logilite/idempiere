@@ -25,12 +25,14 @@ import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.window.WTextEditorDialog;
 import org.compiere.model.MMenu;
 import org.compiere.model.MQuery;
+import org.compiere.model.MToolBarButtonRestrict;
 import org.compiere.model.MTreeFavorite;
 import org.compiere.model.MTreeFavoriteNode;
 import org.compiere.model.MTreeNode;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -217,10 +219,15 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 
 				if (mNode.isWindow())
 				{
-					Toolbarbutton newBtn = new Toolbarbutton(null, ThemeManager.getThemeResource("images/New10.png"));
-					newBtn.setSclass("menu-href-newbtn");
-					newBtn.addEventListener(Events.ON_CLICK, this);
-					tc.appendChild(newBtn);
+					// Check Window access for ReadWrite & New Toolbar button
+					if (!MToolBarButtonRestrict.isNewButtonRestricted(MMenu.get(mNode.getMenu_ID()).getAD_Window_ID()))
+					{
+						Toolbarbutton newBtn = new Toolbarbutton(null, ThemeManager.getThemeResource("images/New10.png"));
+						newBtn.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "New")));
+						newBtn.setSclass("menu-href-newbtn");
+						newBtn.addEventListener(Events.ON_CLICK, this);
+						tc.appendChild(newBtn);
+					}
 				}
 			}
 		}

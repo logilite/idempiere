@@ -86,6 +86,7 @@ import org.compiere.model.MProduct;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRole;
 import org.compiere.model.MTable;
+import org.compiere.model.MToolBarButtonRestrict;
 import org.compiere.model.MUserQuery;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.CLogger;
@@ -172,6 +173,8 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     protected String          m_whereExtended;
     /** Search Fields               */
     protected GridField[]     m_findFields;
+    /** Grid Tab					*/
+    private GridTab			m_gridTab;
     /** Resulting query             */
     protected MQuery          m_query = null;
     /** Is cancel ?                 */
@@ -235,6 +238,33 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	private int rowCount;
 	
 	private static final String ON_POST_VISIBLE_ATTR = "onPostVisible.Event.Posted";
+
+	/**
+	 * FindPanel Constructor
+	 * 
+	 * @param gridTab
+	 * @param findFields
+	 * @param minRecords
+	 */
+	public FindWindow(GridTab gridTab, GridField[] findFields, int minRecords)
+	{
+		this(gridTab.getWindowNo(), gridTab, gridTab.getWhereExtended(), findFields, minRecords);
+	}
+
+	/**
+	 * FindPanel Constructor
+	 * 
+	 * @param windowNo
+	 * @param mTab
+	 * @param whereClause
+	 * @param findFields
+	 * @param minRecords
+	 */
+	public FindWindow(int windowNo, GridTab gridTab, String whereClause, GridField[] findFields, int minRecords)
+	{
+		this(windowNo, gridTab.getName(), gridTab.getAD_Table_ID(), gridTab.getTableName(), whereClause, findFields, minRecords, gridTab.getAD_Tab_ID());
+		m_gridTab = gridTab;
+	}
 
     /**
      * FindPanel Constructor
@@ -345,6 +375,8 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         Button btnNew = ButtonFactory.createNamedButton(ConfirmPanel.A_NEW);
         btnNew.setId("btnNew");
         btnNew.addEventListener(Events.ON_CLICK,this);
+		if (m_gridTab != null && m_gridTab.getAD_Window_ID() > 0)
+			btnNew.setDisabled(MToolBarButtonRestrict.isNewButtonRestricted(m_gridTab.getAD_Window_ID(), m_AD_Tab_ID));
 
         Button btnOk = ButtonFactory.createNamedButton(ConfirmPanel.A_OK);
         btnOk.setName("btnOkSimple");
@@ -430,6 +462,8 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         btnNew.setImage(ThemeManager.getThemeResource("images/New24.png"));
         btnNew.setAttribute("name", "btnNewAdv");
         btnNew.addEventListener(Events.ON_CLICK, this);
+		if (m_gridTab != null && m_gridTab.getAD_Window_ID() > 0)
+			btnNew.setDisabled(MToolBarButtonRestrict.isNewButtonRestricted(m_gridTab.getAD_Window_ID(), m_AD_Tab_ID));
 
         ToolBarButton btnDelete = new ToolBarButton();
         btnDelete.setAttribute("name","btnDeleteAdv");
