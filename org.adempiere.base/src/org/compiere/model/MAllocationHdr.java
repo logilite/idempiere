@@ -1220,10 +1220,11 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 				if (Env.ZERO.compareTo(allocAmt) != 0)
 				{
 					MBPartner bPartner = MBPartner.get(getCtx(), bPartnerID);
+					bPartner.set_TrxName(get_TrxName());
 					DB.getDatabase().forUpdate(bPartner, 0);
 					BigDecimal bpOpenBal = bPartner.getTotalOpenBalance().add(allocAmt);
 					bPartner.setTotalOpenBalance(bpOpenBal);
-					bPartner.saveEx();
+					bPartner.saveEx(get_TrxName());
 				}
 			}
 		}
