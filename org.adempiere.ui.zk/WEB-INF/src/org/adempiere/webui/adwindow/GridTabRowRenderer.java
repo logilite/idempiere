@@ -382,9 +382,7 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 				if (row == null)
 					row = ((Row)div.getParent());
 
-				entry.getValue().getComponent().detach();
-				entry.getKey().removePropertyChangeListener(entry.getValue());
-				entry.getValue().removeValuechangeListener(dataBinder);
+				disposeComponent(entry);
 				
 				if (component.getParent() == null || component.getParent() != div)
 					div.appendChild(component);
@@ -900,5 +898,30 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 			Checkbox checkBox = (Checkbox) event.getTarget();
 			Events.sendEvent(gridPanel, new Event("onSelectRow", gridPanel, checkBox));
 		}
+	}
+	
+	/**
+	 * For editor, detach component and remove Value Change listener. And for
+	 * gridField remove Property Change listener.
+	 */
+	public void removeListener()
+	{
+		for (Entry<GridField, WEditor> entry : editors.entrySet())
+		{
+			disposeComponent(entry);
+		}
+	}
+
+	/**
+	 * Detach editor component, remove property change listener & remove
+	 * GridField value change listener.
+	 * 
+	 * @param entry - <GridField, WEditor>
+	 */
+	private void disposeComponent(Entry<GridField, WEditor> entry)
+	{
+		entry.getValue().getComponent().detach();
+		entry.getKey().removePropertyChangeListener(entry.getValue());
+		entry.getValue().removeValuechangeListener(dataBinder);
 	}
 }

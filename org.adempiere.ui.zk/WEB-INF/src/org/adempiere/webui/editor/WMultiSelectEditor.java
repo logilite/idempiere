@@ -75,6 +75,7 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 
 		if (lookup != null)
 		{
+			lookup.addListDataListener(this);
 			refreshList();
 		}
 		popupMenu = new WEditorPopupMenu(false, true, isShowPreference());
