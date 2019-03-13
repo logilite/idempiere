@@ -649,8 +649,19 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 			((GridTable)tableModel).removeTableModelListener(listModel);
 		listModel = new GridTableListModel((GridTable)tableModel, windowNo);
 		listModel.setPageSize(pageSize);
-		if (renderer != null && renderer.isEditing())
-			renderer.stopEditing(false);
+		if (renderer != null)
+		{
+			if (renderer.isEditing())
+			{
+				renderer.stopEditing(false);
+			}
+			else
+			{
+				// remove current Row Renderer component Listener before
+				// creating new one.
+				renderer.removeListener();
+			}
+		}
 		renderer = new GridTabRowRenderer(gridTab, windowNo);
 		renderer.setGridPanel(this);
 		renderer.setADWindowPanel(windowPanel);
