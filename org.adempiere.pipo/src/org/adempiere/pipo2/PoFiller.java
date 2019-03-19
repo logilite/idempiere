@@ -164,10 +164,10 @@ public class PoFiller{
 
 		String value = e.contents.toString();
 		String columnName = qName;
+		POInfo info = POInfo.getPOInfo(po.getCtx(), po.get_Table_ID());
 		if (value != null && value.trim().length() > 0)
 		{
 			int index = po.get_ColumnIndex(columnName);
-			POInfo info = POInfo.getPOInfo(po.getCtx(), po.get_Table_ID());
 			if (info != null && info.getColumnDisplayType(index) == DisplayType.MultiSelectTable)
 			{
 				// Get Array of UUIDs from element.
@@ -218,6 +218,8 @@ public class PoFiller{
 				}
 			}
 		} else {
+			if (info != null && !info.isColumnMandatory(po.get_ColumnIndex(columnName)))
+				po.set_ValueNoCheck(columnName, null);
 			return 0;
 		}
 	}
