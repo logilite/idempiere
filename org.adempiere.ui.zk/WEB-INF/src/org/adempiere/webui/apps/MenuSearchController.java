@@ -540,11 +540,12 @@ public class MenuSearchController implements EventListener<Event>{
 							newBtn.setIconSclass("z-icon-New");
 						else
 							newBtn.setImage(ThemeManager.getThemeResource("images/New16.png"));
-					newBtn.addEventListener(Events.ON_CLICK, MenuSearchController.this);
-					newBtn.setSclass("fav-new-btn");
-					newBtn.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), NEW_BUTTON_NAME)));
-					newBtn.setName(NEW_BUTTON_NAME);
-					cell.appendChild(newBtn);
+						newBtn.addEventListener(Events.ON_CLICK, MenuSearchController.this);
+						newBtn.setSclass("fav-new-btn");
+						newBtn.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), NEW_BUTTON_NAME)));
+						newBtn.setName(NEW_BUTTON_NAME);
+						cell.appendChild(newBtn);
+					}
 				}
 			}
 		
