@@ -598,11 +598,13 @@ public class MWFNode extends X_AD_WF_Node
 		}
 		else if (action.equals(ACTION_SetVariable)) 
 		{
+			/* null is valid value for SetVariable
 			if (getAttributeValue() == null)
 			{
 				log.saveError("FillMandatory", Msg.getElement(getCtx(), "AttributeValue"));
 				return false;
 			}
+			*/
 		}
 		else if (action.equals(ACTION_SubWorkflow))
 		{
