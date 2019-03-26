@@ -1491,6 +1491,36 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			dbValue = new Boolean("Y".equals(value));
 		else if (DisplayType.isNumeric(displayType))
 			dbValue = new BigDecimal (value);
+		else if (DisplayType.isDate(displayType))
+		{
+			// parse Date copied from GridField
+			// try timestamp format - then date format -- [ 1950305 ]
+			java.util.Date date = null;
+			SimpleDateFormat dateTimeFormat = DisplayType.getTimestampFormat_Default();
+			SimpleDateFormat dateFormat = DisplayType.getDateFormat_JDBC();
+			SimpleDateFormat timeFormat = DisplayType.getTimeFormat_Default();
+			try
+			{
+				if (displayType == DisplayType.Date)
+				{
+					date = dateFormat.parse(value);
+				}
+				else if (displayType == DisplayType.Time)
+				{
+					date = timeFormat.parse(value);
+				}
+				else
+				{
+					date = dateTimeFormat.parse(value);
+				}
+			}
+			catch (java.text.ParseException e)
+			{
+				date = DisplayType.getDateFormat_JDBC().parse(value);
+			}
+			if (date != null)
+				dbValue = new Timestamp(date.getTime());
+		}
 		else
 			dbValue = value;
 		m_po.set_ValueOfColumn(getNode().getAD_Column_ID(), dbValue);
