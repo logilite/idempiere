@@ -1299,6 +1299,97 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	private boolean setVariable(String value, int displayType, String textMsg, Trx trx) throws Exception
 	{
 		m_newValue = null;
+
+		if (log.isLoggable(Level.FINE)) log.fine(m_node.getAttributeName()
+				+ " = " + value);
+
+		// from GridField.defaultFromSQLExpression()
+		String defStr = null;
+		if (value != null && value.startsWith("@SQL="))
+		{
+			String sql = value.substring(5); // w/o tag
+			// sql = Env.parseContext(m_vo.ctx, m_vo.WindowNo, sql, false,  true); // replace variables
+			// hengsin, capture unparseable error to avoid subsequent sql  exception
+			sql = Env.parseContext(m_po.getCtx(), 0, sql, false, false); // replace variables
+			if (sql.equals(""))
+			{
+				log.log(Level.WARNING, "(" + m_node.getAttributeName() + ") - SQL variable parse failed: " + value);
+			}
+			else
+			{
+				PreparedStatement stmt = null;
+				ResultSet rs = null;
+				try
+				{
+					stmt = DB.prepareStatement(sql, null);
+					rs = stmt.executeQuery();
+					if (rs.next())
+						defStr = rs.getString(1);
+					else
+					{
+						if (log.isLoggable(Level.INFO))
+							log.log(Level.INFO, "(" + m_node.getAttributeName() + ") - no Result: " + sql);
+					}
+				}
+				catch (SQLException e)
+				{
+					log.log(Level.WARNING, "(" + m_node.getAttributeName() + ") " + sql, e);
+				}
+				finally
+				{
+					DB.close(rs, stmt);
+					rs = null;
+					stmt = null;
+				}
+			}
+			if (defStr != null && defStr.length() > 0)
+			{
+				if (log.isLoggable(Level.FINE))
+					log.fine("[SQL] " + m_node.getAttributeName() + "=" + defStr);
+				value = defStr;
+			}
+		}
+
+		// from this.fillParameter()
+
+		// Value - Constant/Variable
+		String val = value;
+
+		if (value == null || (value != null && value.length() == 0))
+			val = null;
+		else if (value.indexOf('@') != -1 && m_po != null) // we have a variable
+		{
+			// Strip
+			int index = value.indexOf('@');
+			String columnName = value.substring(index + 1);
+			index = columnName.indexOf('@');
+			if (index == -1)
+			{
+				log.warning(m_node.getAttributeName() + " - cannot evaluate=" + value);
+			}
+			columnName = columnName.substring(0, index);
+			index = m_po.get_ColumnIndex(columnName);
+			if (index != -1)
+			{
+				val = m_po.get_ValueAsString(columnName);
+			}
+			else // not a column
+			{
+				// try Env
+				String env = Env.getContext(getCtx(), columnName);
+				if (env.length() == 0)
+				{
+					log.warning(m_node.getAttributeName() + " - not column nor environment =" + columnName + "(" + value
+							+ ")");
+				}
+				else
+					val = env;
+			}
+		} // @variable@
+
+		if (val != null)
+			value = val.toString();
+
 		getPO(trx);
 		if (m_po == null)
 			throw new Exception("Persistent Object not found - AD_Table_ID="
