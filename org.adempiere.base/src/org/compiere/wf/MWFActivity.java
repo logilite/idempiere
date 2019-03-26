@@ -1140,7 +1140,46 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				+ "\n-----\n" + getNodeHelp();
 				String to = getNode().getEMail();
 
-				client.sendEMail(to, subject, message, null);
+				// Recipient Type
+				String recipient = getNode().getEMailRecipient();
+
+				if (recipient.equals(MWFNode.EMAILRECIPIENT_WFResponsible))
+				{
+					MWFResponsible resp = getResponsible();
+					if (resp.isHuman())
+						sendEMail(client, resp.getAD_User_ID(), null, subject, message, null, mailtext.isHtml());
+					else if (resp.isRole())
+					{
+						MRole role = resp.getRole();
+						if (role != null)
+						{
+							MUser[] users = MUser.getWithRole(role);
+							for (int i = 0; i < users.length; i++)
+								sendEMail(client, users[i].getAD_User_ID(), null, subject, message, null,
+										mailtext.isHtml());
+						}
+					}
+					else if (resp.isOrganization())
+					{
+						MOrgInfo org = MOrgInfo.get(getCtx(), m_po.getAD_Org_ID(), get_TrxName());
+						if (org.getSupervisor_ID() == 0)
+						{
+							if (log.isLoggable(Level.FINE))
+								log.fine("No Supervisor for AD_Org_ID=" + m_po.getAD_Org_ID());
+						}
+						else
+						{
+							sendEMail(client, org.getSupervisor_ID(), null, subject, message, null, mailtext.isHtml());
+						}
+					}
+				}
+				else
+				{
+					client.sendEMail(to, subject, message, null);
+					m_emails.add(to);
+				}
+
+				setTextMsg(m_emails.toString());
 			}
 			return true;	//	done
 		}	//	EMail
