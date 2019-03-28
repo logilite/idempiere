@@ -1365,6 +1365,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 							+ " - Value=" + value + " is not valid for a foreign key");
 				}
 			}
+		}
 		else if (DisplayType.isDate(displayType))
 		{
 			// parse Date copied from GridField
