@@ -231,8 +231,12 @@ public class MMailText extends X_R_MailText
 		if (col != null && col.isSecure()) {
 			value = "********";
 		} else if (col.getAD_Reference_ID() == DisplayType.Date || col.getAD_Reference_ID() == DisplayType.DateTime || col.getAD_Reference_ID() == DisplayType.Time) {
-			SimpleDateFormat sdf = DisplayType.getDateFormat(col.getAD_Reference_ID());
-			value = sdf.format (po.get_Value(index));	
+			if (po.get_Value(index) != null ) {
+				SimpleDateFormat sdf = DisplayType.getDateFormat(col.getAD_Reference_ID());
+				value = sdf.format (po.get_Value(index));
+			} else {
+				value = "";
+			}
 		} else if (col.getAD_Reference_ID() == DisplayType.YesNo) {
 			if (po.get_ValueAsBoolean(variable))
 				value = Msg.getMsg(Env.getCtx(), "Yes");

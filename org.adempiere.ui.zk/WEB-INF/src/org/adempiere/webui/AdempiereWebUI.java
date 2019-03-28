@@ -323,8 +323,11 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
     				}
     			}
     		}
+    		int AD_Window_ID = getPrmInt("AD_Window_ID");
     		int recordID = getPrmInt("Record_ID");
-    		if (tableID > 0) {
+    		if ( AD_Window_ID > 0 ) {
+    			AEnv.zoom(AD_Window_ID, tableID, recordID);
+    		} else if (tableID > 0) {
     			AEnv.zoom(tableID, recordID);
     		}
     	}

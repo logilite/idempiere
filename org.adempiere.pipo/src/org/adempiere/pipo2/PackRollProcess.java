@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
@@ -203,8 +204,8 @@ public class PackRollProcess extends SvrProcess {
 											// be treated as String
 											|| (v_AD_Reference_ID == 18 && columnName
 													.equalsIgnoreCase("EntityType"))) {
-										if (backup.getColValue().toString().equals("null")) {
-											;// Ignore null values
+										if (backup.getColValue() == null || backup.getColValue().toString().equals("null")) {
+											sqlC = null;// Ignore null values
 										} else {
 											sqlC = new StringBuffer("UPDATE "
 													+ tableName
@@ -232,8 +233,6 @@ public class PackRollProcess extends SvrProcess {
 									// Update columns that are Strings adjusting
 									// for single quotes
 									else if (v_AD_Reference_ID == 13
-											|| v_AD_Reference_ID == 18
-											|| v_AD_Reference_ID == 19
 											|| v_AD_Reference_ID == 21
 											|| v_AD_Reference_ID == 25
 											|| v_AD_Reference_ID == 27
@@ -253,6 +252,8 @@ public class PackRollProcess extends SvrProcess {
 									}
 									// Update columns that are numbers
 									else if (v_AD_Reference_ID == 11
+											|| v_AD_Reference_ID == 18
+											|| v_AD_Reference_ID == 19
 											|| v_AD_Reference_ID == 12
 											|| v_AD_Reference_ID == 22
 											|| v_AD_Reference_ID == 29)
@@ -264,7 +265,7 @@ public class PackRollProcess extends SvrProcess {
 												+ " = ?"
 												+ " WHERE " + columnIDName
 												+ " = " + recordID);
-										parameters = new Object[]{backup.getColValue()};
+										parameters = new Object[]{new BigDecimal(backup.getColValue())};
 									}
 									// Update columns that are dates
 									else if (v_AD_Reference_ID == 15

@@ -1145,7 +1145,46 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				+ "\n-----\n" + getNodeHelp();
 				String to = getNode().getEMail();
 
-				client.sendEMail(to, subject, message, null);
+				// Recipient Type
+				String recipient = getNode().getEMailRecipient();
+
+				if (recipient != null && recipient.equals(MWFNode.EMAILRECIPIENT_WFResponsible))
+				{
+					MWFResponsible resp = getResponsible();
+					if (resp.isHuman())
+						sendEMail(client, resp.getAD_User_ID(), null, subject, message, null, mailtext.isHtml());
+					else if (resp.isRole())
+					{
+						MRole role = resp.getRole();
+						if (role != null)
+						{
+							MUser[] users = MUser.getWithRole(role);
+							for (int i = 0; i < users.length; i++)
+								sendEMail(client, users[i].getAD_User_ID(), null, subject, message, null,
+										mailtext.isHtml());
+						}
+					}
+					else if (resp.isOrganization())
+					{
+						MOrgInfo org = MOrgInfo.get(getCtx(), m_po.getAD_Org_ID(), get_TrxName());
+						if (org.getSupervisor_ID() == 0)
+						{
+							if (log.isLoggable(Level.FINE))
+								log.fine("No Supervisor for AD_Org_ID=" + m_po.getAD_Org_ID());
+						}
+						else
+						{
+							sendEMail(client, org.getSupervisor_ID(), null, subject, message, null, mailtext.isHtml());
+						}
+					}
+				}
+				else
+				{
+					client.sendEMail(parseVariables(to), subject, message, null);
+					m_emails.add(to);
+				}
+
+				setTextMsg(m_emails.toString());
 			}
 			return true;	//	done
 		}	//	EMail
@@ -1282,6 +1321,9 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	private boolean setVariable(String value, int displayType, String textMsg, Trx trx) throws Exception
 	{
 		m_newValue = null;
+
+		value = parseVariables(value);
+
 		getPO(trx);
 		if (m_po == null)
 			throw new Exception("Persistent Object not found - AD_Table_ID="
@@ -1323,6 +1365,35 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 							+ " - Value=" + value + " is not valid for a foreign key");
 				}
 			}
+		else if (DisplayType.isDate(displayType))
+		{
+			// parse Date copied from GridField
+			// try timestamp format - then date format -- [ 1950305 ]
+			java.util.Date date = null;
+			SimpleDateFormat dateTimeFormat = DisplayType.getTimestampFormat_Default();
+			SimpleDateFormat dateFormat = DisplayType.getDateFormat_JDBC();
+			SimpleDateFormat timeFormat = DisplayType.getTimeFormat_Default();
+			try
+			{
+				if (displayType == DisplayType.Date)
+				{
+					date = dateFormat.parse(value);
+				}
+				else if (displayType == DisplayType.Time)
+				{
+					date = timeFormat.parse(value);
+				}
+				else
+				{
+					date = dateTimeFormat.parse(value);
+				}
+			}
+			catch (java.text.ParseException e)
+			{
+				date = DisplayType.getDateFormat_JDBC().parse(value);
+			}
+			if (date != null)
+				dbValue = new Timestamp(date.getTime());
 		}
 		else
 			dbValue = value;
@@ -1964,5 +2035,109 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		}
 		return sb.toString();
 	}	//	getSummary
+	
+
+	/**
+	 * Parse Values replaces global or Window context @tag@ with actual value.
+	 * 
+	 * @param value String that has to be parse
+	 * @return
+	 */
+	private String parseVariables(String value)
+	{
+		if (log.isLoggable(Level.FINE))
+			log.fine(m_node.getAttributeName() + " = " + value);
+
+		// from GridField.defaultFromSQLExpression()
+		String defStr = null;
+		if (value != null && value.startsWith("@SQL="))
+		{
+			// w/o tag
+			String sql = value.substring(5);
+
+			// sql = Env.parseContext(m_vo.ctx, m_vo.WindowNo, sql, false, true); // replace variables
+			// hengsin, capture unparseable error to avoid subsequent sql exception
+
+			// replace variables
+			sql = Env.parseContext(m_po.getCtx(), 0, sql, false, false);
+			if (sql.equals(""))
+			{
+				log.log(Level.WARNING, "(" + m_node.getAttributeName() + ") - SQL variable parse failed: " + value);
+			}
+			else
+			{
+				PreparedStatement stmt = null;
+				ResultSet rs = null;
+				try
+				{
+					stmt = DB.prepareStatement(sql, null);
+					rs = stmt.executeQuery();
+					if (rs.next())
+						defStr = rs.getString(1);
+					else
+					{
+						if (log.isLoggable(Level.INFO))
+							log.log(Level.INFO, "(" + m_node.getAttributeName() + ") - no Result: " + sql);
+					}
+				}
+				catch (SQLException e)
+				{
+					log.log(Level.WARNING, "(" + m_node.getAttributeName() + ") " + sql, e);
+				}
+				finally
+				{
+					DB.close(rs, stmt);
+					rs = null;
+					stmt = null;
+				}
+			}
+			if (defStr != null && defStr.length() > 0)
+			{
+				if (log.isLoggable(Level.FINE))
+					log.fine("[SQL] " + m_node.getAttributeName() + "=" + defStr);
+				value = defStr;
+			}
+		}
+
+		// from this.fillParameter()
+
+		// Value - Constant/Variable
+		String val = value;
+
+		if (value == null || (value != null && value.length() == 0))
+			val = null;
+		else if (value.indexOf('@') != -1 && !value.startsWith("@SQL=") && m_po != null) // we have a variable
+		{
+			// Strip
+			int index = value.indexOf('@');
+			String columnName = value.substring(index + 1);
+			index = columnName.indexOf('@');
+			if (index == -1)
+			{
+				log.warning(m_node.getAttributeName() + " - cannot evaluate=" + value);
+			}
+			columnName = columnName.substring(0, index);
+			index = m_po.get_ColumnIndex(columnName);
+			if (index != -1)
+			{
+				val = m_po.get_ValueAsString(columnName);
+			}
+			else // not a column
+			{
+				// try Env
+				String env = Env.getContext(Env.getCtx(), columnName);
+				if (env.length() == 0)
+				{
+					log.warning(m_node.getAttributeName() + " - not column nor environment =" + columnName + "(" + value + ")");
+				}
+				else
+					val = env;
+			}
+		} // @variable@
+
+		if (val != null)
+			value = val.toString();
+		return value;
+	} // parseVariables
 
 }	//	MWFActivity
