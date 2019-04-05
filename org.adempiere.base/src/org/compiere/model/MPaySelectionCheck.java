@@ -103,7 +103,7 @@ public class MPaySelectionCheck extends X_C_PaySelectionCheck
 	{
 		if (C_Payment_ID == 0)
 			return null;
-		MPayment payment=(MPayment) MTable.get(ctx, MPayment.Table_ID).getPO(C_Payment_ID,null);
+		MPayment payment=(MPayment) MTable.get(ctx, MPayment.Table_ID).getPO(C_Payment_ID,trxName);
 		//	Map Payment Rule <- Tender Type
 		String PaymentRule = PAYMENTRULE_Check;
 		if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_CreditCard))
