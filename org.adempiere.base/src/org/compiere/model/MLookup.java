@@ -21,12 +21,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 
 import org.adempiere.util.ContextRunnable;
+import org.apache.commons.collections.CollectionUtils;
 import org.compiere.Adempiere;
 import org.compiere.util.CLogMgt;
 import org.compiere.util.DB;
@@ -256,6 +260,16 @@ public final class MLookup extends Lookup implements Serializable
 	public boolean containsKey (Object key)
 	{
 		//should check direct too
+		if (m_info.DisplayType == DisplayType.MultiSelectTable)
+		{
+			Set<Integer> values = new TreeSet<Integer>(Arrays.asList((Integer[]) key));
+			return CollectionUtils.containsAny(m_lookup.keySet(), values);
+		}
+		else if (m_info.DisplayType == DisplayType.MultiSelectList)
+		{
+			Set<String> values = new TreeSet<String>(Arrays.asList((String[]) key));
+			return CollectionUtils.containsAny(m_lookup.keySet(), values);
+		}
 		if (m_lookup.containsKey(key))
 			return true;
 		else {
@@ -274,6 +288,16 @@ public final class MLookup extends Lookup implements Serializable
 	public boolean containsKeyNoDirect (Object key)
 	{
 		//should check direct too
+		if (m_info.DisplayType == DisplayType.MultiSelectTable)
+		{
+			Set<Integer> values = new TreeSet<Integer>(Arrays.asList((Integer[]) key));
+			return CollectionUtils.containsAny(m_lookup.keySet(), values);
+		}
+		else if (m_info.DisplayType == DisplayType.MultiSelectList)
+		{
+			Set<String> values = new TreeSet<String>(Arrays.asList((String[]) key));
+			return CollectionUtils.containsAny(m_lookup.keySet(), values);
+		}
 		if (m_lookup.containsKey(key))
 			return true;
 		else {
@@ -521,7 +545,16 @@ public final class MLookup extends Lookup implements Serializable
 		{
 			//	SELECT Key, Value, Name FROM ...
 			pstmt = DB.prepareStatement(m_info.QueryDirect, null);
-			if (isNumber)
+			// While exporting Multi-select we take value from look up for every single key.
+			// Add check to prevent casting error.
+			if(DisplayType.isMultiSelect(m_info.DisplayType) && key instanceof Object[])
+			{
+				Object[] mskey = (Object[]) key;
+				if (mskey == null || (mskey != null && mskey.length <= 0))
+					return null;
+				DB.setParameter(pstmt, 1, mskey[0]);
+			}
+			else if (isNumber)
 				pstmt.setInt(1, Integer.parseInt(key.toString()));
 			else
 				pstmt.setString(1, key.toString());

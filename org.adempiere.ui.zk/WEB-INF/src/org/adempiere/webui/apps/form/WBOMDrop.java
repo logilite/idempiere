@@ -52,6 +52,7 @@ import org.compiere.model.MProductBOM;
 import org.compiere.model.MProject;
 import org.compiere.model.MProjectLine;
 import org.compiere.model.MRole;
+import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -919,7 +920,8 @@ public class WBOMDrop extends ADForm implements EventListener<Event>
 	private boolean cmd_saveOrder (int C_Order_ID, Trx trx)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_Order_ID=" + C_Order_ID);
-		MOrder order = new MOrder (Env.getCtx(), C_Order_ID, trx != null ? trx.getTrxName() : null);
+		MOrder order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(C_Order_ID,
+				trx != null ? trx.getTrxName() : null);
 		
 		if (order.get_ID() == 0)
 		{
@@ -940,7 +942,7 @@ public class WBOMDrop extends ADForm implements EventListener<Event>
 					BigDecimal qty = m_qtyList.get(i).getValue();
 					int M_Product_ID = m_productList.get(i).intValue();
 					// Create Line
-					MOrderLine ol = new MOrderLine(order);
+					MOrderLine ol = MOrderLine.createFrom(order);
 					ol.setM_Product_ID(M_Product_ID, true);
 					ol.setQty(qty);
 					ol.setPrice();
@@ -975,7 +977,8 @@ public class WBOMDrop extends ADForm implements EventListener<Event>
 	private boolean cmd_saveInvoice (int C_Invoice_ID, Trx trx)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_Invoice_ID=" + C_Invoice_ID);
-		MInvoice invoice = new MInvoice (Env.getCtx(), C_Invoice_ID, trx != null ? trx.getTrxName() : null);
+		MInvoice invoice = (MInvoice) MTable.get(Env.getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID,
+				trx != null ? trx.getTrxName() : null);
 		if (invoice.get_ID() == 0)
 		{
 			log.log(Level.SEVERE, "Not found - C_Invoice_ID=" + C_Invoice_ID);
@@ -995,7 +998,7 @@ public class WBOMDrop extends ADForm implements EventListener<Event>
 					BigDecimal qty = m_qtyList.get(i).getValue();
 					int M_Product_ID = m_productList.get(i).intValue();
 					//	Create Line
-					MInvoiceLine il = new MInvoiceLine (invoice);
+					MInvoiceLine il = MInvoiceLine.createFrom(invoice);
 					il.setM_Product_ID(M_Product_ID, true);
 					il.setQty(qty);
 					il.setPrice();
@@ -1028,7 +1031,8 @@ public class WBOMDrop extends ADForm implements EventListener<Event>
 	private boolean cmd_saveProject (int C_Project_ID, Trx trx)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_Project_ID=" + C_Project_ID);
-		MProject project = new MProject (Env.getCtx(), C_Project_ID, trx != null ? trx.getTrxName() : null);
+		MProject project = (MProject) MTable.get(Env.getCtx(), MProject.Table_ID).getPO(C_Project_ID,
+				trx != null ? trx.getTrxName() : null);
 		if (project.get_ID() == 0)
 		{
 			log.log(Level.SEVERE, "Not found - C_Project_ID=" + C_Project_ID);

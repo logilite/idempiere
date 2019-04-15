@@ -103,7 +103,7 @@ public class MPaySelectionCheck extends X_C_PaySelectionCheck
 	{
 		if (C_Payment_ID == 0)
 			return null;
-		MPayment payment = new MPayment (ctx, C_Payment_ID, null);
+		MPayment payment=(MPayment) MTable.get(ctx, MPayment.Table_ID).getPO(C_Payment_ID,trxName);
 		//	Map Payment Rule <- Tender Type
 		String PaymentRule = PAYMENTRULE_Check;
 		if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_CreditCard))
@@ -286,7 +286,7 @@ public class MPaySelectionCheck extends X_C_PaySelectionCheck
 			check.set_TrxName(trxName);
 		}
 		try {
-			MPayment payment = new MPayment(check.getCtx(), check.getC_Payment_ID(), trxName);
+			MPayment payment=(MPayment) MTable.get(check.getCtx(), MPayment.Table_ID).getPO(check.getC_Payment_ID(),trxName);
 			//	Existing Payment
 			if (check.getC_Payment_ID() != 0)
 			{
@@ -299,7 +299,7 @@ public class MPaySelectionCheck extends X_C_PaySelectionCheck
 			}
 			else	//	New Payment
 			{
-				payment = new MPayment(check.getCtx(), 0, trxName);
+				payment=(MPayment) MTable.get(check.getCtx(), MPayment.Table_ID).getPO(0,trxName);
 				payment.setAD_Org_ID(check.getAD_Org_ID());
 				//
 				if (check.getPaymentRule().equals(PAYMENTRULE_Check))

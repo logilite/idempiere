@@ -29,6 +29,7 @@ import org.compiere.model.MInOutLine;
 import org.compiere.model.MPackage;
 import org.compiere.model.MPackageLine;
 import org.compiere.model.MPackageMPS;
+import org.compiere.model.MTable;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
@@ -123,7 +124,7 @@ public abstract class CreateFromPackageShipment extends CreateFrom
 		MPackageMPS packageMPS = new MPackageMPS(Env.getCtx(), M_PackageMPS_ID, null);
 		
 		MPackage mPackage = new MPackage(Env.getCtx(), packageMPS.getM_Package_ID(), null);
-        MInOut shipment = new MInOut(Env.getCtx(), mPackage.getM_InOut_ID(), null);
+		MInOut shipment = (MInOut) MTable.get(Env.getCtx(), MInOut.Table_ID).getPO(mPackage.getM_InOut_ID(), null);
         MInOutLine[] shipmentLines = shipment.getLines(false);
         
         HashMap<Integer, MInOutLine> lineMap = new HashMap<Integer, MInOutLine>();

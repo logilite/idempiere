@@ -26,6 +26,7 @@ import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MAllocationLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.util.AdempiereUserError;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -224,7 +225,7 @@ public class InvoiceWriteOff extends SvrProcess
 		}
 		
 		//	Invoice
-		MInvoice invoice = new MInvoice(getCtx(), C_Invoice_ID, get_TrxName());
+		MInvoice invoice=(MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, get_TrxName());
 		if (!invoice.isSOTrx())
 			OpenAmt = OpenAmt.negate();
 		
@@ -232,9 +233,9 @@ public class InvoiceWriteOff extends SvrProcess
 		if (m_alloc == null || C_Currency_ID != m_alloc.getC_Currency_ID())
 		{
 			processAllocation();
-			m_alloc = new MAllocationHdr (getCtx(), true, 
-				p_DateAcct, C_Currency_ID,
-				getProcessInfo().getTitle() + " #" + getAD_PInstance_ID(), get_TrxName());
+			m_alloc = (MAllocationHdr) MTable.get(getCtx(), MAllocationHdr.Table_Name).getPO(0, get_TrxName());
+			m_alloc.setAllocationHdrValues(true, p_DateAcct, C_Currency_ID, getProcessInfo().getTitle() + " #"
+					+ getAD_PInstance_ID());
 			m_alloc.setAD_Org_ID(invoice.getAD_Org_ID());
 			if (!m_alloc.save())
 			{
@@ -249,7 +250,7 @@ public class InvoiceWriteOff extends SvrProcess
 				|| C_Currency_ID != m_payment.getC_Currency_ID()))
 		{
 			processPayment();
-			m_payment = new MPayment(getCtx(), 0, get_TrxName());
+			m_payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(0,get_TrxName());
 			m_payment.setAD_Org_ID(invoice.getAD_Org_ID());
 			m_payment.setC_BankAccount_ID(p_C_BankAccount_ID);
 			m_payment.setTenderType(MPayment.TENDERTYPE_Check);

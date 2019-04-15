@@ -93,69 +93,69 @@ public class WLocationDialog extends Window implements EventListener<Event>
 	 * 
 	 */
 	private static final long serialVersionUID = -9116270523919373406L;
-	private static final String LABEL_STYLE = "white-space: nowrap;";
+	public static final String LABEL_STYLE = "white-space: nowrap;";
 	/** Logger          */
 	private static CLogger log = CLogger.getCLogger(WLocationDialog.class);
-	private Label lblAddress1;
-	private Label lblAddress2;
-	private Label lblAddress3;
-	private Label lblAddress4;
+	protected Label lblAddress1;
+	protected Label lblAddress2;
+	protected Label lblAddress3;
+	protected Label lblAddress4;
 	private Label lblAddress5;
 	private Label lblComments;
-	private Label lblCity;
-	private Label lblZip;
-	private Label lblRegion;
-	private Label lblPostal;
-	private Label lblPostalAdd;
-	private Label lblCountry;
+	protected Label lblCity;
+	protected Label lblZip;
+	protected Label lblRegion;
+	protected Label lblPostal;
+	protected Label lblPostalAdd;
+	protected Label lblCountry;
 
-	private Textbox txtAddress1;
-	private Textbox txtAddress2;
-	private Textbox txtAddress3;
-	private Textbox txtAddress4;
-	private Textbox txtAddress5;
-	private Textbox txtComments;
-	private WAutoCompleterCity txtCity;
-	private Textbox txtPostal;
-	private Textbox txtPostalAdd;
-	private Listbox lstRegion;
-	private Listbox lstCountry;
+	protected Textbox txtAddress1;
+	protected Textbox txtAddress2;
+	protected Textbox txtAddress3;
+	protected Textbox txtAddress4;
+	protected Textbox txtAddress5;
+	protected Textbox txtComments;
+	protected WAutoCompleterCity txtCity;
+	protected Textbox txtPostal;
+	protected Textbox txtPostalAdd;
+	protected Listbox lstRegion;
+	protected Listbox lstCountry;
 
-	private ConfirmPanel confirmPanel;
-	private Grid mainPanel;
+	protected ConfirmPanel confirmPanel;
+	protected Grid mainPanel;
 
-	private boolean     m_change = false;
-	private MLocation   m_location;
-	private int         m_origCountry_ID;
-	private int         s_oldCountry_ID = 0;
+	protected boolean     m_change = false;
+	protected MLocation   m_location;
+	protected int         m_origCountry_ID;
+	protected int         s_oldCountry_ID = 0;
 
-	private int m_WindowNo = 0;
+	protected int m_WindowNo = 0;
 
-	private boolean isCityMandatory = false;
-	private boolean isRegionMandatory = false;
-	private boolean isAddress1Mandatory = false;
-	private boolean isAddress2Mandatory = false;
-	private boolean isAddress3Mandatory = false;
-	private boolean isAddress4Mandatory = false;
+	protected boolean isCityMandatory = false;
+	protected boolean isRegionMandatory = false;
+	protected boolean isAddress1Mandatory = false;
+	protected boolean isAddress2Mandatory = false;
+	protected boolean isAddress3Mandatory = false;
+	protected boolean isAddress4Mandatory = false;
 	private boolean isAddress5Mandatory = false;
 	private boolean isCommentsMandatory = false;
-	private boolean isPostalMandatory = false;
-	private boolean isPostalAddMandatory = false;
+	protected boolean isPostalMandatory = false;
+	protected boolean isPostalAddMandatory = false;
 
-	private boolean inCountryAction;
-	private boolean inOKAction;
+	protected boolean inCountryAction;
+	protected boolean inOKAction;
 
-	private Button toLink;
-	private Button toRoute;
+	protected Button toLink;
+	protected Button toRoute;
 	
-	private Listbox lstAddressValidation;
-	private Button btnOnline;
-	private Textbox txtResult;
-	private Checkbox cbxValid;
-	private ArrayList<String> enabledCountryList = new ArrayList<String>();
+	protected Listbox lstAddressValidation;
+	protected Button btnOnline;
+	protected Textbox txtResult;
+	protected Checkbox cbxValid;
+	protected ArrayList<String> enabledCountryList = new ArrayList<String>();
 	
-	private GridField m_GridField = null;
-	private boolean onSaveError = false;
+	protected GridField m_GridField = null;
+	protected boolean onSaveError = false;
 	//END
 
 	public WLocationDialog(String title, MLocation location)
@@ -225,7 +225,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		this.setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
 	}
 
-	private void initComponents()
+	public void initComponents()
 	{
 		lblAddress1     = new Label(Msg.getElement(Env.getCtx(), "Address1"));
 		lblAddress1.setStyle(LABEL_STYLE);
@@ -337,7 +337,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		}
 	}
 
-	private void init()
+	public void init()
 	{
 		Columns columns = new Columns();
 		mainPanel.appendChild(columns);
@@ -369,7 +369,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		pnlAddress4.appendChild(lblAddress4.rightAlign());
 		pnlAddress4.appendChild(txtAddress4);
 		ZKUpdateUtil.setHflex(txtAddress4, "1");
-
+		
 		Row pnlAddress5 = new Row();
 		pnlAddress5.appendChild(lblAddress5.rightAlign());
 		pnlAddress5.appendChild(txtAddress5);
@@ -520,7 +520,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 	 * @param panel panel to add
 	 *
 	 */
-	private void addComponents(Row row)
+	public void addComponents(Row row)
 	{
 		if (mainPanel.getRows() != null)
 			mainPanel.getRows().appendChild(row);
@@ -528,7 +528,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 			mainPanel.newRows().appendChild(row);
 	}
 
-	private void initLocation()
+	public void initLocation()
 	{
 		if (mainPanel.getRows() != null)
 			mainPanel.getRows().getChildren().clear();
@@ -659,7 +659,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 			setCountry();
 		}
 	}
-	private void setCountry()
+	public void setCountry()
 	{
 		List<?> listCountry = lstCountry.getChildren();
 		Iterator<?> iter = listCountry.iterator();
@@ -673,7 +673,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		}
 	}
 
-	private void setRegion()
+	public void setRegion()
 	{
 		if (m_location.getRegion() != null) 
 		{
@@ -934,7 +934,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 
 	
 	// LCO - address 1, region and city required
-	private String validate_OK() {
+	public String validate_OK() {
 		String fields = "";
 		if (isAddress1Mandatory && txtAddress1.getText().trim().length() == 0) {
 			fields = fields + " " + "@Address1@, ";
@@ -976,7 +976,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 	/**
 	 *  OK - check for changes (save them) & Exit
 	 */
-	private boolean action_OK()
+	public boolean action_OK()
 	{
 		Trx trx = Trx.get(Trx.createTrxName("WLocationDialog"), true);
 		trx.setDisplayName(getClass().getName()+"_action_Ok");
@@ -1075,7 +1075,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 	}
 	
 	/** returns a string that contains all fields of current form */
-	String getFullAdress()
+	public String getFullAdress()
 	{
 		MRegion region = null;
 
@@ -1095,6 +1095,451 @@ public class WLocationDialog extends Window implements EventListener<Event>
 
 		address = address + (c.getName() != null ? c.getName() : "");
 		return address.replace(" ", "+");
+	}
+
+	public Label getLblAddress1()
+	{
+		return lblAddress1;
+	}
+
+	public void setLblAddress1(Label lblAddress1)
+	{
+		this.lblAddress1 = lblAddress1;
+	}
+
+	public Label getLblAddress2()
+	{
+		return lblAddress2;
+	}
+
+	public void setLblAddress2(Label lblAddress2)
+	{
+		this.lblAddress2 = lblAddress2;
+	}
+
+	public Label getLblAddress3()
+	{
+		return lblAddress3;
+	}
+
+	public void setLblAddress3(Label lblAddress3)
+	{
+		this.lblAddress3 = lblAddress3;
+	}
+
+	public Label getLblAddress4()
+	{
+		return lblAddress4;
+	}
+
+	public void setLblAddress4(Label lblAddress4)
+	{
+		this.lblAddress4 = lblAddress4;
+	}
+
+	public Label getLblCity()
+	{
+		return lblCity;
+	}
+
+	public void setLblCity(Label lblCity)
+	{
+		this.lblCity = lblCity;
+	}
+
+	public Label getLblZip()
+	{
+		return lblZip;
+	}
+
+	public void setLblZip(Label lblZip)
+	{
+		this.lblZip = lblZip;
+	}
+
+	public Label getLblRegion()
+	{
+		return lblRegion;
+	}
+
+	public void setLblRegion(Label lblRegion)
+	{
+		this.lblRegion = lblRegion;
+	}
+
+	public Label getLblPostal()
+	{
+		return lblPostal;
+	}
+
+	public void setLblPostal(Label lblPostal)
+	{
+		this.lblPostal = lblPostal;
+	}
+
+	public Label getLblPostalAdd()
+	{
+		return lblPostalAdd;
+	}
+
+	public void setLblPostalAdd(Label lblPostalAdd)
+	{
+		this.lblPostalAdd = lblPostalAdd;
+	}
+
+	public Label getLblCountry()
+	{
+		return lblCountry;
+	}
+
+	public void setLblCountry(Label lblCountry)
+	{
+		this.lblCountry = lblCountry;
+	}
+
+	public Textbox getTxtAddress1()
+	{
+		return txtAddress1;
+	}
+
+	public void setTxtAddress1(Textbox txtAddress1)
+	{
+		this.txtAddress1 = txtAddress1;
+	}
+
+	public Textbox getTxtAddress2()
+	{
+		return txtAddress2;
+	}
+
+	public void setTxtAddress2(Textbox txtAddress2)
+	{
+		this.txtAddress2 = txtAddress2;
+	}
+
+	public Textbox getTxtAddress3()
+	{
+		return txtAddress3;
+	}
+
+	public void setTxtAddress3(Textbox txtAddress3)
+	{
+		this.txtAddress3 = txtAddress3;
+	}
+
+	public Textbox getTxtAddress4()
+	{
+		return txtAddress4;
+	}
+
+	public void setTxtAddress4(Textbox txtAddress4)
+	{
+		this.txtAddress4 = txtAddress4;
+	}
+
+	public WAutoCompleterCity getTxtCity()
+	{
+		return txtCity;
+	}
+
+	public void setTxtCity(WAutoCompleterCity txtCity)
+	{
+		this.txtCity = txtCity;
+	}
+
+	public Textbox getTxtPostal()
+	{
+		return txtPostal;
+	}
+
+	public void setTxtPostal(Textbox txtPostal)
+	{
+		this.txtPostal = txtPostal;
+	}
+
+	public Textbox getTxtPostalAdd()
+	{
+		return txtPostalAdd;
+	}
+
+	public void setTxtPostalAdd(Textbox txtPostalAdd)
+	{
+		this.txtPostalAdd = txtPostalAdd;
+	}
+
+	public Listbox getLstRegion()
+	{
+		return lstRegion;
+	}
+
+	public void setLstRegion(Listbox lstRegion)
+	{
+		this.lstRegion = lstRegion;
+	}
+
+	public Listbox getLstCountry()
+	{
+		return lstCountry;
+	}
+
+	public void setLstCountry(Listbox lstCountry)
+	{
+		this.lstCountry = lstCountry;
+	}
+
+	public ConfirmPanel getConfirmPanel()
+	{
+		return confirmPanel;
+	}
+
+	public void setConfirmPanel(ConfirmPanel confirmPanel)
+	{
+		this.confirmPanel = confirmPanel;
+	}
+
+	public Grid getMainPanel()
+	{
+		return mainPanel;
+	}
+
+	public void setMainPanel(Grid mainPanel)
+	{
+		this.mainPanel = mainPanel;
+	}
+
+	public boolean isM_change()
+	{
+		return m_change;
+	}
+
+	public void setM_change(boolean m_change)
+	{
+		this.m_change = m_change;
+	}
+
+	public MLocation getM_location()
+	{
+		return m_location;
+	}
+
+	public void setM_location(MLocation m_location)
+	{
+		this.m_location = m_location;
+	}
+
+	public int getM_origCountry_ID()
+	{
+		return m_origCountry_ID;
+	}
+
+	public void setM_origCountry_ID(int m_origCountry_ID)
+	{
+		this.m_origCountry_ID = m_origCountry_ID;
+	}
+
+	public int getS_oldCountry_ID()
+	{
+		return s_oldCountry_ID;
+	}
+
+	public void setS_oldCountry_ID(int s_oldCountry_ID)
+	{
+		this.s_oldCountry_ID = s_oldCountry_ID;
+	}
+
+	public int getM_WindowNo()
+	{
+		return m_WindowNo;
+	}
+
+	public void setM_WindowNo(int m_WindowNo)
+	{
+		this.m_WindowNo = m_WindowNo;
+	}
+
+	public boolean isCityMandatory()
+	{
+		return isCityMandatory;
+	}
+
+	public void setCityMandatory(boolean isCityMandatory)
+	{
+		this.isCityMandatory = isCityMandatory;
+	}
+
+	public boolean isRegionMandatory()
+	{
+		return isRegionMandatory;
+	}
+
+	public void setRegionMandatory(boolean isRegionMandatory)
+	{
+		this.isRegionMandatory = isRegionMandatory;
+	}
+
+	public boolean isAddress1Mandatory()
+	{
+		return isAddress1Mandatory;
+	}
+
+	public void setAddress1Mandatory(boolean isAddress1Mandatory)
+	{
+		this.isAddress1Mandatory = isAddress1Mandatory;
+	}
+
+	public boolean isAddress2Mandatory()
+	{
+		return isAddress2Mandatory;
+	}
+
+	public void setAddress2Mandatory(boolean isAddress2Mandatory)
+	{
+		this.isAddress2Mandatory = isAddress2Mandatory;
+	}
+
+	public boolean isAddress3Mandatory()
+	{
+		return isAddress3Mandatory;
+	}
+
+	public void setAddress3Mandatory(boolean isAddress3Mandatory)
+	{
+		this.isAddress3Mandatory = isAddress3Mandatory;
+	}
+
+	public boolean isAddress4Mandatory()
+	{
+		return isAddress4Mandatory;
+	}
+
+	public void setAddress4Mandatory(boolean isAddress4Mandatory)
+	{
+		this.isAddress4Mandatory = isAddress4Mandatory;
+	}
+
+	public boolean isPostalMandatory()
+	{
+		return isPostalMandatory;
+	}
+
+	public void setPostalMandatory(boolean isPostalMandatory)
+	{
+		this.isPostalMandatory = isPostalMandatory;
+	}
+
+	public boolean isPostalAddMandatory()
+	{
+		return isPostalAddMandatory;
+	}
+
+	public void setPostalAddMandatory(boolean isPostalAddMandatory)
+	{
+		this.isPostalAddMandatory = isPostalAddMandatory;
+	}
+
+	public boolean isInCountryAction()
+	{
+		return inCountryAction;
+	}
+
+	public void setInCountryAction(boolean inCountryAction)
+	{
+		this.inCountryAction = inCountryAction;
+	}
+
+	public boolean isInOKAction()
+	{
+		return inOKAction;
+	}
+
+	public void setInOKAction(boolean inOKAction)
+	{
+		this.inOKAction = inOKAction;
+	}
+
+	public Button getToLink()
+	{
+		return toLink;
+	}
+
+	public void setToLink(Button toLink)
+	{
+		this.toLink = toLink;
+	}
+
+	public Button getToRoute()
+	{
+		return toRoute;
+	}
+
+	public void setToRoute(Button toRoute)
+	{
+		this.toRoute = toRoute;
+	}
+
+	public Listbox getLstAddressValidation()
+	{
+		return lstAddressValidation;
+	}
+
+	public void setLstAddressValidation(Listbox lstAddressValidation)
+	{
+		this.lstAddressValidation = lstAddressValidation;
+	}
+
+	public Button getBtnOnline()
+	{
+		return btnOnline;
+	}
+
+	public void setBtnOnline(Button btnOnline)
+	{
+		this.btnOnline = btnOnline;
+	}
+
+	public Textbox getTxtResult()
+	{
+		return txtResult;
+	}
+
+	public void setTxtResult(Textbox txtResult)
+	{
+		this.txtResult = txtResult;
+	}
+
+	public Checkbox getCbxValid()
+	{
+		return cbxValid;
+	}
+
+	public void setCbxValid(Checkbox cbxValid)
+	{
+		this.cbxValid = cbxValid;
+	}
+
+	public ArrayList<String> getEnabledCountryList()
+	{
+		return enabledCountryList;
+	}
+
+	public void setEnabledCountryList(ArrayList<String> enabledCountryList)
+	{
+		this.enabledCountryList = enabledCountryList;
+	}
+
+	public GridField getM_GridField()
+	{
+		return m_GridField;
+	}
+
+	public void setM_GridField(GridField m_GridField)
+	{
+		this.m_GridField = m_GridField;
+	}
+
+	public void setOnSaveError(boolean onSaveError)
+	{
+		this.onSaveError = onSaveError;
 	}	
 
 	void setPlaceholders() {

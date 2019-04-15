@@ -16,15 +16,20 @@
  *****************************************************************************/
 package org.compiere.model;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.model.IInfoColumn;
 import org.compiere.model.AccessSqlParser.TableInfo;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Evaluatee;
 import org.compiere.util.Evaluator;
+import org.compiere.util.Util;
 
 /**
  * 	Info Window Column Model
@@ -162,7 +167,56 @@ public class MInfoColumn extends X_AD_InfoColumn implements IInfoColumn
 			getParent().validate();
 			getParent().saveEx(get_TrxName());
 		}
-				
+
+		if (newRecord || (is_ValueChanged(MInfoColumn.COLUMNNAME_ColumnName) && !Util.isEmpty(getColumnName()))
+				|| (is_ValueChanged(MInfoColumn.COLUMNNAME_IsDisplayed) && isDisplayed())
+				|| (is_ValueChanged(MInfoColumn.COLUMNNAME_IsReadOnly) && !isReadOnly()))
+		{
+
+			StringBuilder result = new StringBuilder();
+			StringBuilder sql = new StringBuilder("SELECT ColumnName, COUNT(AD_InfoColumn_ID), ");
+			if (DB.isOracle())
+				sql.append("STRING_AGG(SeqNo::VARCHAR) AS SeqNo ");
+			else
+				sql.append("STRING_AGG(SeqNo::VARCHAR, ',') AS SeqNo ");
+
+			sql.append(" FROM AD_InfoColumn ");
+			sql.append(" WHERE IsActive = 'Y' AND IsDisplayed = 'Y' AND IsReadOnly = 'N' AND AD_InfoWindow_ID= ? ");
+			sql.append(" GROUP BY AD_InfoWindow_ID, ColumnName, IsActive, IsDisplayed, IsReadOnly");
+			sql.append(" HAVING  COUNT(AD_InfoColumn_ID) > 1");
+
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			try
+			{
+				pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
+				pstmt.setInt(1, getAD_InfoWindow_ID());
+				rs = pstmt.executeQuery();
+
+				while (rs.next())
+				{
+					result.append("ColumnName=").append(rs.getString(1)).append(", No of Columns Count=")
+							.append(rs.getInt(2)).append(", SeqNo=").append(rs.getString(3)).append("\n");
+				}
+			}
+			catch (SQLException e)
+			{
+				log.log(Level.SEVERE, e.toString());
+				return false;
+			}
+			finally
+			{
+				DB.close(rs, pstmt);
+				rs = null;
+				pstmt = null;
+			}
+
+			if (!Util.isEmpty(result.toString(), true))
+			{
+				throw new AdempiereException("Founded same info column's are editable more than one's. \n " + result);
+			}
+		}
+
 		return super.afterSave(newRecord, success);
 	}
 	

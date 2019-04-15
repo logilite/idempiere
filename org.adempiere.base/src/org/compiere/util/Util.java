@@ -19,6 +19,7 @@ package org.compiere.util;
 import java.awt.Color;
 import java.awt.font.TextAttribute;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
@@ -36,6 +37,9 @@ import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
+
+import org.compiere.model.Lookup;
+import org.compiere.model.MLookup;
 
 /**
  *  General Utilities
@@ -707,4 +711,180 @@ public class Util
         cal.set(Calendar.MILLISECOND, 0);
         return new Timestamp(cal.getTimeInMillis());
     }
+
+	/**
+	 * Convert BigDecimal array to Integer array ( IDEMPIERE-3413 )
+	 * 
+	 * @param arrayBD - BigDecimal Array
+	 * @return Convert to integer array
+	 */
+	public static Integer[] convertBigDecimalToInteger(BigDecimal[] arrayBD)
+	{
+		Integer[] arrayInt = null;
+		if (arrayBD != null)
+		{
+			arrayInt = new Integer[arrayBD.length];
+			for (int i = 0; i < arrayBD.length; i++)
+			{
+				arrayInt[i] = new Integer(arrayBD[i].intValue());
+			}
+		}
+		return arrayInt;
+	} // convertBigDecimalToInteger
+
+	/**
+	 * Convert array argument to String for insert/update directly into DB.
+	 * ( IDEMPIERE-3413 )
+	 * 
+	 * @param array - Array items of Integer/String
+	 * @return string - to build query value
+	 */
+	public static String convertArrayToStringForDB(Object array)
+	{
+		if (array == null)
+			return "NULL";
+
+		StringBuilder sb = new StringBuilder("{");
+		if (array instanceof String[])
+		{
+			String[] objStr = (String[]) array;
+			int iMax = objStr.length - 1;
+			if (iMax == -1)
+				return "{}";
+
+			for (int i = 0;; i++)
+			{
+				sb.append(String.valueOf(objStr[i]));
+				if (i == iMax)
+					return sb.append('}').toString();
+				sb.append(", ");
+			}
+		}
+		else if (array instanceof Integer[])
+		{
+			Integer[] objStr = (Integer[]) array;
+			int iMax = objStr.length - 1;
+			if (iMax == -1)
+				return "{}";
+
+			for (int i = 0;; i++)
+			{
+				sb.append(String.valueOf(objStr[i]));
+				if (i == iMax)
+					return sb.append('}').toString();
+				sb.append(", ");
+			}
+		}
+		else
+		{
+			log.warning("Invalid array object.");
+		}
+		return array.toString();
+	} // convertArrayToStringForDB
+
+	/**
+	 * From value string to array object ( IDEMPIERE-3413 )
+	 * 
+	 * @param dt - Display Type
+	 * @param strValue - Key values
+	 * @return Array of object as Integer/String
+	 */
+	public static Object getArrayObjectFromString(int dt, String strValue)
+	{
+		if (dt <= 0 || strValue == null || strValue.length() <= 0 || strValue.trim().equals("{}"))
+			return null;
+
+		strValue = strValue.replaceAll("([{}])", "");
+		String[] values = strValue.split(",");
+
+		if (dt == DisplayType.MultiSelectTable)
+		{
+			Integer[] arr = new Integer[values.length];
+			for (int i = 0; i < values.length; i++)
+				arr[i] = Integer.parseInt(values[i].trim());
+			return arr;
+		}
+		else if (dt == DisplayType.MultiSelectList)
+		{
+			String[] arr = new String[values.length];
+			for (int i = 0; i < values.length; i++)
+				arr[i] = values[i].trim();
+			return arr;
+		}
+		else
+			;
+
+		return null;
+	} // getArrayObjectFromString
+		
+	/**
+	 * Convert multi-select array value to string format (Get list of display
+	 * values from Keys) ( IDEMPIERE-3413 )
+	 * 
+	 * @param array - Array of object as Integer/String
+	 * @param lookup - Reference Lookup for display value
+	 * @return string - Display values.
+	 */
+	public static String convertArrayToStingForExport(Object array, Lookup lookup)
+	{
+		StringBuilder sb = new StringBuilder();
+		Object[] objStr = null;
+		if (array instanceof Integer[])
+			objStr = (Integer[]) array;
+		else if (array instanceof String[])
+			objStr = (String[]) array;
+
+		if (objStr != null)
+		{
+			int iMax = objStr.length - 1;
+			if (iMax != -1)
+			{
+				for (int j = 0;; j++)
+				{
+					if (lookup == null)
+						sb.append(objStr[j].toString().trim());
+					else
+						sb.append(lookup.getDisplay(objStr[j].toString().trim()));
+					if (j == iMax)
+						break;
+					sb.append(", ");
+				}
+			}
+
+			if (!isEmpty(sb.toString()))
+				sb.insert(0, "\"").append("\"");
+		}
+
+		return sb.toString();
+	} // convertArrayToStingForExport
+
+	/**
+	 * Get the list of printable name from the Keys ( IDEMPIERE-3413 )
+	 * 
+	 * @param value - comma separated keys in string
+	 * @param dt - DisplayType
+	 * @param lookup - reference Lookup
+	 * @return String of the Printable Names. It may contains Key only when
+	 *         referenced lookup item is removed.
+	 */
+	public static String getPrintableNameFromMultiKey(String value, int dt, MLookup lookup)
+	{
+		StringBuilder sb = new StringBuilder();
+		if (value != null)
+		{
+			Object[] keys = (Object[]) Util.getArrayObjectFromString(dt, value);
+			if (keys == null)
+				return null;
+			for (int i = 0; i < keys.length; i++)
+			{
+				NamePair pp = lookup.get(keys[i]);
+				if (pp != null)
+					sb.append(pp.getName()).append("; ");
+				else
+					sb.append(keys[i]).append("; ");
+			}
+		}
+		return sb.toString();
+	} // getPrintableNameFromMultiKey
+
 }   //  Util

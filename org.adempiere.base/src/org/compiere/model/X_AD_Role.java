@@ -32,7 +32,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20190106L;
+	private static final long serialVersionUID = 20180227L;
 
     /** Standard Constructor */
     public X_AD_Role (Properties ctx, int AD_Role_ID, String trxName)
@@ -70,6 +70,8 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 // Y
 			setIsCanReport (true);
 // Y
+			setIsCanSaveGridCustPrefEveryone (false);
+// N 
 			setIsChangeLog (false);
 // N
 			setIsDiscountAllowedOnTotal (false);
@@ -600,6 +602,30 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 		return false;
 	}
 
+	/** Set Allow Delete Attachment.
+		@param IsAllowDeleteAttachment 
+		Allow Delete File In Attachment Dialog 
+	  */
+	public void setIsAllowDeleteAttachment (boolean IsAllowDeleteAttachment)
+	{
+		set_Value (COLUMNNAME_IsAllowDeleteAttachment, Boolean.valueOf(IsAllowDeleteAttachment));
+	}
+
+	/** Get Allow Delete Attachment.
+		@return Allow Delete File In Attachment Dialog 
+	  */
+	public boolean isAllowDeleteAttachment () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsAllowDeleteAttachment);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Approve own Documents.
 		@param IsCanApproveOwnDoc 
 		Users with this role can approve their own documents
@@ -663,6 +689,30 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isCanReport () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsCanReport);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Can Save Grid Customize Preference for Everyone.
+		@param IsCanSaveGridCustPrefEveryone 
+		On Grid view, Allow to save column width and order preference for everyone
+	  */
+	public void setIsCanSaveGridCustPrefEveryone (boolean IsCanSaveGridCustPrefEveryone)
+	{
+		set_Value (COLUMNNAME_IsCanSaveGridCustPrefEveryone, Boolean.valueOf(IsCanSaveGridCustPrefEveryone));
+	}
+
+	/** Get Can Save Grid Customize Preference for Everyone.
+		@return On Grid view, Allow to save column width and order preference for everyone
+	  */
+	public boolean isCanSaveGridCustPrefEveryone () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsCanSaveGridCustPrefEveryone);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 

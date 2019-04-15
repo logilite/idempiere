@@ -38,6 +38,7 @@ import org.compiere.model.MOrderPaySchedule;
 import org.compiere.model.MProduct;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
+import org.compiere.model.MTable;
 import org.compiere.model.MUOMConversion;
 import org.compiere.model.PO;
 import org.compiere.util.DB;
@@ -96,21 +97,22 @@ public abstract class CreateFromInvoice extends CreateFrom
 		StringBuffer sql = new StringBuffer("SELECT s.M_InOut_ID,").append(display)
 			.append(" FROM M_InOut s "
 			+ "WHERE s.C_BPartner_ID=? AND s.IsSOTrx=? AND s.DocStatus IN ('CL','CO')"
-			+ " AND s.M_InOut_ID IN "
-				+ "(SELECT sl.M_InOut_ID FROM M_InOutLine sl");
+			+ " AND s.M_InOut_ID IN ( ");
+
 			if(!isSOTrx)
-				sql.append(" LEFT OUTER JOIN M_MatchInv mi ON (sl.M_InOutLine_ID=mi.M_InOutLine_ID) "
+				sql.append(" SELECT sl.M_InOut_ID FROM M_InOutLine sl LEFT OUTER JOIN M_MatchInv mi ON (sl.M_InOutLine_ID=mi.M_InOutLine_ID) "
 					+ " JOIN M_InOut s2 ON (sl.M_InOut_ID=s2.M_InOut_ID) "
 					+ " WHERE s2.C_BPartner_ID=? AND s2.IsSOTrx=? AND s2.DocStatus IN ('CL','CO') "
 					+ " GROUP BY sl.M_InOut_ID,sl.MovementQty,mi.M_InOutLine_ID"
 					+ " HAVING (sl.MovementQty<>SUM(mi.Qty) AND mi.M_InOutLine_ID IS NOT NULL)"
 					+ " OR mi.M_InOutLine_ID IS NULL ");
 			else
-				sql.append(" INNER JOIN M_InOut s2 ON (sl.M_InOut_ID=s2.M_InOut_ID)"
+				sql.append(" SELECT M_InOut_ID FROM (SELECT sl.M_InOut_ID, sl.M_InOutLine_ID, sl.MovementQty, SUM(COALESCE(il.QtyInvoiced,0)) AS QtyInvoiced FROM M_InOutLine sl "
+					+ " INNER JOIN M_InOut s2 ON (sl.M_InOut_ID=s2.M_InOut_ID)"
 					+ " LEFT JOIN C_InvoiceLine il ON sl.M_InOutLine_ID = il.M_InOutLine_ID"
 					+ " WHERE s2.C_BPartner_ID=? AND s2.IsSOTrx=? AND s2.DocStatus IN ('CL','CO')"
-					+ " GROUP BY sl.M_InOutLine_ID"
-					+ " HAVING sl.MovementQty - sum(COALESCE(il.QtyInvoiced,0)) > 0");
+					+ " GROUP BY sl.M_InOut_ID, sl.M_InOutLine_ID, sl.MovementQty) InOutData "
+					+ " WHERE MovementQty - QtyInvoiced > 0 ");
 			sql.append(") ORDER BY s.MovementDate");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -181,10 +183,10 @@ public abstract class CreateFromInvoice extends CreateFrom
 	protected Vector<Vector<Object>> getShipmentData(int M_InOut_ID)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("M_InOut_ID=" + M_InOut_ID);
-		MInOut inout = new MInOut(Env.getCtx(), M_InOut_ID, null);
+		MInOut inout = (MInOut) MTable.get(Env.getCtx(), MInOut.Table_ID).getPO(M_InOut_ID, null);
 		p_order = null;
 		if (inout.getC_Order_ID() != 0)
-			p_order = new MOrder (Env.getCtx(), inout.getC_Order_ID(), null);
+			p_order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(inout.getC_Order_ID(), null);
 
 		m_rma = null;
 		if (inout.getM_RMA_ID() != 0)
@@ -384,7 +386,7 @@ public abstract class CreateFromInvoice extends CreateFrom
 	{
 		//  Invoice
 		int C_Invoice_ID = ((Integer)getGridTab().getValue("C_Invoice_ID")).intValue();
-		MInvoice invoice = new MInvoice (Env.getCtx(), C_Invoice_ID, trxName);
+		MInvoice invoice=(MInvoice)MTable.get(Env.getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, trxName);
 		if (log.isLoggable(Level.CONFIG)) log.config(invoice.toString());
 
 		if (p_order != null)
@@ -456,7 +458,7 @@ public abstract class CreateFromInvoice extends CreateFrom
 					+ ", OrderLine_ID=" + C_OrderLine_ID + ", InOutLine_ID=" + M_InOutLine_ID);
 
 				//	Create new Invoice Line
-				MInvoiceLine invoiceLine = new MInvoiceLine (invoice);
+				MInvoiceLine invoiceLine = MInvoiceLine.createFrom(invoice);
 				invoiceLine.setM_Product_ID(M_Product_ID, C_UOM_ID);	//	Line UOM
 				invoiceLine.setQty(QtyEntered);							//	Invoiced/Entered
 				BigDecimal QtyInvoiced = null;
@@ -470,20 +472,23 @@ public abstract class CreateFromInvoice extends CreateFrom
 				//  Info
 				MOrderLine orderLine = null;
 				if (C_OrderLine_ID != 0)
-					orderLine = new MOrderLine (Env.getCtx(), C_OrderLine_ID, trxName);
+					orderLine = (MOrderLine) MTable.get(Env.getCtx(), MOrderLine.Table_ID).getPO(C_OrderLine_ID,
+							trxName);
 				//
 				MRMALine rmaLine = null;
 				if (M_RMALine_ID > 0)
-					rmaLine = new MRMALine (Env.getCtx(), M_RMALine_ID, null);
+					rmaLine = (MRMALine) MTable.get(Env.getCtx(), MRMALine.Table_ID).getPO(M_RMALine_ID, null);
 				//
 				MInOutLine inoutLine = null;
 				if (M_InOutLine_ID != 0)
 				{
-					inoutLine = new MInOutLine (Env.getCtx(), M_InOutLine_ID, trxName);
+					inoutLine = (MInOutLine) MTable.get(Env.getCtx(), MInOutLine.Table_ID).getPO(M_InOutLine_ID,
+							trxName);
 					if (orderLine == null && inoutLine.getC_OrderLine_ID() != 0)
 					{
 						C_OrderLine_ID = inoutLine.getC_OrderLine_ID();
-						orderLine = new MOrderLine (Env.getCtx(), C_OrderLine_ID, trxName);
+						orderLine = (MOrderLine) MTable.get(Env.getCtx(), MOrderLine.Table_ID).getPO(C_OrderLine_ID,
+								trxName);
 					}
 				}
 				else if (C_OrderLine_ID > 0)

@@ -33,7 +33,7 @@ public class X_M_InOutLineMA extends PO implements I_M_InOutLineMA, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20190106L;
+	private static final long serialVersionUID = 20150206L;
 
     /** Standard Constructor */
     public X_M_InOutLineMA (Properties ctx, int M_InOutLineMA_ID, String trxName)
@@ -82,7 +82,7 @@ public class X_M_InOutLineMA extends PO implements I_M_InOutLineMA, I_Persistent
 	  */
 	public void setDateMaterialPolicy (Timestamp DateMaterialPolicy)
 	{
-		set_ValueNoCheck (COLUMNNAME_DateMaterialPolicy, DateMaterialPolicy);
+		set_Value (COLUMNNAME_DateMaterialPolicy, DateMaterialPolicy);
 	}
 
 	/** Get Date  Material Policy.
@@ -177,6 +177,29 @@ public class X_M_InOutLineMA extends PO implements I_M_InOutLineMA, I_Persistent
     {
         return new KeyNamePair(get_ID(), String.valueOf(getM_InOutLine_ID()));
     }
+
+	/** Set M_InOutLineMA_ID.
+		@param M_InOutLineMA_ID 
+		Attributes
+	  */
+	public void setM_InOutLineMA_ID (int M_InOutLineMA_ID)
+	{
+		if (M_InOutLineMA_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_M_InOutLineMA_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_M_InOutLineMA_ID, Integer.valueOf(M_InOutLineMA_ID));
+	}
+
+	/** Get M_InOutLineMA_ID.
+		@return Attributes
+	  */
+	public int getM_InOutLineMA_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_InOutLineMA_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
 
 	/** Set M_InOutLineMA_UU.
 		@param M_InOutLineMA_UU M_InOutLineMA_UU	  */

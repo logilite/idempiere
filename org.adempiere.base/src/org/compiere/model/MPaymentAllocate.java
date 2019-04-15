@@ -73,7 +73,7 @@ public class MPaymentAllocate extends X_C_PaymentAllocate
 	}	//	MPaymentAllocate
 
 	/**	The Invoice				*/
-	private MInvoice	m_invoice = null;
+	protected MInvoice	m_invoice = null;
 	
 	/**
 	 * 	Load Cosntructor
@@ -103,7 +103,7 @@ public class MPaymentAllocate extends X_C_PaymentAllocate
 	public MInvoice getInvoice()
 	{
 		if (m_invoice == null && getC_Invoice_ID() != 0)
-			m_invoice = new MInvoice(getCtx(), getC_Invoice_ID(), get_TrxName());
+			m_invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(getC_Invoice_ID(), get_TrxName());
 		return m_invoice;
 	}	//	getInvoice
 	
@@ -128,7 +128,7 @@ public class MPaymentAllocate extends X_C_PaymentAllocate
 	 */
 	protected boolean beforeSave (boolean newRecord)
 	{
-		MPayment payment = new MPayment (getCtx(), getC_Payment_ID(), get_TrxName());
+		MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(getC_Payment_ID(),get_TrxName());
 		if ((newRecord || is_ValueChanged("C_Invoice_ID"))
 			&& (payment.getC_Charge_ID() != 0 
 				|| payment.getC_Invoice_ID() != 0 

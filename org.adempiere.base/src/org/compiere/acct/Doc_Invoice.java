@@ -40,6 +40,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MLandedCostAllocation;
 import org.compiere.model.MOrderLandedCostAllocation;
+import org.compiere.model.MTable;
 import org.compiere.model.MTax;
 import org.compiere.model.ProductCost;
 import org.compiere.model.X_M_Cost;
@@ -106,7 +107,7 @@ public class Doc_Invoice extends Doc
 	 *	Load Invoice Taxes
 	 *  @return DocTax Array
 	 */
-	private DocTax[] loadTaxes()
+	protected DocTax[] loadTaxes()
 	{
 		ArrayList<DocTax> list = new ArrayList<DocTax>();
 		String sql = "SELECT it.C_Tax_ID, t.Name, t.Rate, it.TaxBaseAmt, it.TaxAmt, t.IsSalesTax "
@@ -156,7 +157,7 @@ public class Doc_Invoice extends Doc
 	 *	@param invoice invoice
 	 *  @return DocLine Array
 	 */
-	private DocLine[] loadLines (MInvoice invoice)
+	protected DocLine[] loadLines (MInvoice invoice)
 	{
 		ArrayList<DocLine> list = new ArrayList<DocLine>();
 		//
@@ -283,7 +284,7 @@ public class Doc_Invoice extends Doc
 	 * 	Get Currency Precision
 	 *	@return precision
 	 */
-	private int getStdPrecision()
+	protected int getStdPrecision()
 	{
 		if (m_precision == -1)
 			m_precision = MCurrency.getStdPrecision(getCtx(), getC_Currency_ID());
@@ -761,13 +762,14 @@ public class Doc_Invoice extends Doc
 	 *	@param multiplier source amount multiplier
 	 *	@return accounted amount
 	 */
-	public BigDecimal createFactCash (MAcctSchema as, Fact fact, BigDecimal multiplier)
+	public BigDecimal createFactCash (MAcctSchema as, Fact fact, BigDecimal multiplier, BigDecimal allocationSource)
 	{
 		boolean creditMemo = getDocumentType().equals(DOCTYPE_ARCredit)
 			|| getDocumentType().equals(DOCTYPE_APCredit);
 		boolean payables = getDocumentType().equals(DOCTYPE_APInvoice)
 			|| getDocumentType().equals(DOCTYPE_APCredit);
 		BigDecimal acctAmt = Env.ZERO;
+		BigDecimal allocatedAmt = Env.ZERO;
 		FactLine fl = null;
 		//	Revenue/Cost
 		for (int i = 0; i < p_lines.length; i++)
@@ -802,11 +804,20 @@ public class Doc_Invoice extends Doc
 				}
 				BigDecimal amt = line.getAmtSource().multiply(multiplier);
 				BigDecimal amt2 = null;
-				if (creditMemo)
+				
+				if (i == p_lines.length - 1)
+				{
+					if (payables)
+						amt = allocationSource.subtract(allocatedAmt);
+					else
+						amt = allocationSource.add(allocatedAmt);
+				}
+				
+				/*if (creditMemo)
 				{
 					amt2 = amt;
 					amt = null;
-				}
+				}*/
 				if (payables)	//	Vendor = DR
 					fl = fact.createLine (line, acct,
 						getC_Currency_ID(), amt, amt2);
@@ -814,7 +825,10 @@ public class Doc_Invoice extends Doc
 					fl = fact.createLine (line, acct,
 						getC_Currency_ID(), amt2, amt);
 				if (fl != null)
+				{
 					acctAmt = acctAmt.add(fl.getAcctBalance());
+					allocatedAmt = allocatedAmt.add(fl.getSourceBalance());
+				}
 			}
 		}
 		//  Tax
@@ -822,11 +836,11 @@ public class Doc_Invoice extends Doc
 		{
 			BigDecimal amt = m_taxes[i].getAmount();
 			BigDecimal amt2 = null;
-			if (creditMemo)
+			/*if (creditMemo)
 			{
 				amt2 = amt;
 				amt = null;
-			}
+			}*/
 			FactLine tl = null;
 			if (payables)
 				tl = fact.createLine (null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as),
@@ -882,8 +896,9 @@ public class Doc_Invoice extends Doc
 
 		Map<String, BigDecimal> costDetailAmtMap = new HashMap<String, BigDecimal>();
 		
-		//	Create New
-		MInvoiceLine il = new MInvoiceLine (getCtx(), C_InvoiceLine_ID, getTrxName());
+		//	Create New		
+		MInvoiceLine il = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(C_InvoiceLine_ID,
+				getTrxName());
 		for (int i = 0; i < lcas.length; i++)
 		{
 			MLandedCostAllocation lca = lcas[i];

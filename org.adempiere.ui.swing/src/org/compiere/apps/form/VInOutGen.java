@@ -24,9 +24,11 @@ import org.adempiere.exceptions.FillMandatoryException;
 import org.compiere.apps.ADialog;
 import org.compiere.grid.ed.VComboBox;
 import org.compiere.grid.ed.VLookup;
+import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MOrder;
+import org.compiere.model.MOrg;
 import org.compiere.model.MRMA;
 import org.compiere.swing.CLabel;
 import org.compiere.util.CLogger;
@@ -60,6 +62,8 @@ public class VInOutGen extends InOutGen implements FormPanel, ActionListener, Ve
 	private VComboBox  cmbDocType = new VComboBox();
 	private CLabel     lDocAction = new CLabel();
 	private VLookup    docAction;
+	private CLabel	   lOrg  = new CLabel();
+	private VLookup	   fOrg;
 	
 	/**
 	 *	Initialize Panel
@@ -110,6 +114,8 @@ public class VInOutGen extends InOutGen implements FormPanel, ActionListener, Ve
 	 */
 	void jbInit() throws Exception
 	{		
+		lOrg.setLabelFor(fOrg);
+		lOrg.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));
 		lWarehouse.setLabelFor(fWarehouse);
 		lBPartner.setLabelFor(fBPartner);
 		lBPartner.setText(Msg.translate(Env.getCtx(), "C_BPartner_ID"));
@@ -117,6 +123,8 @@ public class VInOutGen extends InOutGen implements FormPanel, ActionListener, Ve
 		lDocAction.setText(Msg.translate(Env.getCtx(), "DocAction"));
 		lDocType.setLabelFor(cmbDocType);
 		
+		panel.getParameterPanel().add(lOrg,null);
+		panel.getParameterPanel().add(fOrg, null);
 		panel.getParameterPanel().add(lWarehouse, null);
 		panel.getParameterPanel().add(fWarehouse, null);
 		panel.getParameterPanel().add(lBPartner, null);
@@ -135,6 +143,13 @@ public class VInOutGen extends InOutGen implements FormPanel, ActionListener, Ve
 	public void dynInit() throws Exception
 	{
 		//	C_OrderLine.M_Warehouse_ID
+		MLookup orgs = MLookupFactory.get(Env.getCtx(), m_WindowNo,
+				MColumn.getColumn_ID(MOrg.Table_Name, MOrg.COLUMNNAME_AD_Org_ID), DisplayType.TableDir,
+				Env.getLanguage(Env.getCtx()), MOrg.COLUMNNAME_AD_Org_ID, 0, true,
+				"IsActive = 'Y' AND AD_Client_ID = " + Env.getAD_Client_ID(Env.getCtx()));
+		fOrg = new VLookup(MOrg.COLUMNNAME_AD_Org_ID, true, false, true, orgs);
+		fOrg.addVetoableChangeListener(this);
+		
 		MLookup orgL = MLookupFactory.get (Env.getCtx(), m_WindowNo, 0, 2223, DisplayType.TableDir);
 		fWarehouse = new VLookup ("M_Warehouse_ID", true, false, true, orgL);
 		lWarehouse.setText(Msg.translate(Env.getCtx(), "M_Warehouse_ID"));
@@ -223,6 +238,13 @@ public class VInOutGen extends InOutGen implements FormPanel, ActionListener, Ve
 		{
 			m_C_BPartner_ID = e.getNewValue();
 			fBPartner.setValue(m_C_BPartner_ID);	//	display value
+		}
+		if(e.getSource().equals(fOrg))
+		{
+			m_AD_Org_ID = fOrg.getValue();
+			Env.setContext(Env.getCtx(), m_WindowNo, "AD_Org_ID", (int) m_AD_Org_ID);
+			fWarehouse.setValue(null);
+			setM_Warehouse_ID(fWarehouse.getValue());
 		}
 		executeQuery();
 	}	//	vetoableChange

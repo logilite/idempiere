@@ -137,16 +137,16 @@ public class MInvoiceTax extends X_C_InvoiceTax
 	}	//	MInvoiceTax
 	
 	/** Tax							*/
-	private MTax 		m_tax = null;
+	protected MTax 		m_tax = null;
 	/** Cached Precision			*/
-	private Integer		m_precision = null;
+	protected Integer		m_precision = null;
 	
 	
 	/**
 	 * 	Get Precision
 	 * 	@return Returns the precision or 2
 	 */
-	private int getPrecision ()
+	public int getPrecision ()
 	{
 		if (m_precision == null)
 			return 2;
@@ -157,7 +157,7 @@ public class MInvoiceTax extends X_C_InvoiceTax
 	 * 	Set Precision
 	 *	@param precision The precision to set.
 	 */
-	protected void setPrecision (int precision)
+	public void setPrecision (int precision)
 	{
 		m_precision = Integer.valueOf(precision);
 	}	//	setPrecision
@@ -166,7 +166,7 @@ public class MInvoiceTax extends X_C_InvoiceTax
 	 * 	Get Tax
 	 *	@return tax
 	 */
-	protected MTax getTax()
+	public MTax getTax()
 	{
 		if (m_tax == null)
 			m_tax = MTax.get(getCtx(), getC_Tax_ID());

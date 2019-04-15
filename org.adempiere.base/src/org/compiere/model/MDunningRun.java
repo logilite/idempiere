@@ -200,7 +200,7 @@ public class MDunningRun extends X_C_DunningRun
 		}
 		//	New Entry
 		MDunningRunEntry entry = new MDunningRunEntry (this);
-		MBPartner bp = new MBPartner (getCtx(), C_BPartnerRelated_ID, get_TrxName());
+		MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(C_BPartnerRelated_ID, get_TrxName());
 		entry.setBPartner(bp, true);	//	AR hardcoded
 		//
 		if (entry.getSalesRep_ID() == 0)

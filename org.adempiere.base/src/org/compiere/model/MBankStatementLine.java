@@ -195,14 +195,15 @@ import org.compiere.util.Msg;
 		//	Set References
 		if (getC_Payment_ID() != 0 && getC_BPartner_ID() == 0)
 		{
-			MPayment payment = new MPayment (getCtx(), getC_Payment_ID(), get_TrxName());
+			MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(getC_Payment_ID(),get_TrxName());
 			setC_BPartner_ID(payment.getC_BPartner_ID());
 			if (payment.getC_Invoice_ID() != 0)
 				setC_Invoice_ID(payment.getC_Invoice_ID());
 		}
 		if (getC_Invoice_ID() != 0 && getC_BPartner_ID() == 0)
 		{
-			MInvoice invoice = new MInvoice (getCtx(), getC_Invoice_ID(), get_TrxName());
+			MInvoice invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(getC_Invoice_ID(),
+					get_TrxName());
 			setC_BPartner_ID(invoice.getC_BPartner_ID());
 		}
 		
@@ -219,7 +220,8 @@ import org.compiere.util.Msg;
 	public MBankStatement getParent()
 	{
 		if (m_parent == null)
-			m_parent = new MBankStatement (getCtx(), getC_BankStatement_ID(), get_TrxName());
+			m_parent = (MBankStatement) MTable.get(getCtx(), MBankStatement.Table_ID).getPO(getC_BankStatement_ID(),
+					get_TrxName());
 		return m_parent;
 	}	//	getParent
 	

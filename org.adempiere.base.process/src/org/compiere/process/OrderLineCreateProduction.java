@@ -24,6 +24,7 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProduction;
+import org.compiere.model.MTable;
 import org.compiere.model.MWarehouse;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -80,10 +81,10 @@ public class OrderLineCreateProduction extends SvrProcess
 		if (p_C_OrderLine_ID == 0)
 			throw new IllegalArgumentException("No OrderLine");
 		//
-		MOrderLine line = new MOrderLine (getCtx(), p_C_OrderLine_ID, get_TrxName());
+		MOrderLine line = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(p_C_OrderLine_ID, get_TrxName());
 		if (line.get_ID() == 0)
 			throw new IllegalArgumentException("Order line not found");
-		MOrder order = new MOrder (getCtx(), line.getC_Order_ID(), get_TrxName());
+		MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(line.getC_Order_ID(), get_TrxName());
 		if (!MOrder.DOCSTATUS_Completed.equals(order.getDocStatus()))
 			throw new IllegalArgumentException("Order not completed");
 		
@@ -112,7 +113,7 @@ public class OrderLineCreateProduction extends SvrProcess
 			}
 		}
 		
-		MProduction production = new MProduction( line );
+		MProduction production = MProduction.createFrom( line );
 		MProduct product = new MProduct (getCtx(), line.getM_Product_ID(), get_TrxName());
 		
 		production.setM_Product_ID(line.getM_Product_ID());

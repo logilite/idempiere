@@ -34,6 +34,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MMailText;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRole;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.MUserMail;
 import org.compiere.model.PrintInfo;
@@ -153,7 +154,7 @@ public class InvoicePrint extends SvrProcess
 		MMailText mText = null;
 		if (p_R_MailText_ID != 0)
 		{
-			mText = new MMailText(getCtx(), p_R_MailText_ID, get_TrxName());
+			mText = (MMailText) MTable.get(getCtx(), MMailText.Table_ID).getPO(p_R_MailText_ID, get_TrxName());
 			if (mText.get_ID() != p_R_MailText_ID)
 				throw new AdempiereUserError ("@NotFound@: @R_MailText_ID@ - " + p_R_MailText_ID);
 		}
@@ -265,7 +266,7 @@ public class InvoicePrint extends SvrProcess
 					}
 					mText.setUser(to);					//	Context
 					mText.setBPartner(C_BPartner_ID);	//	Context
-					mText.setPO(new MInvoice(getCtx(), C_Invoice_ID, get_TrxName()));
+					mText.setPO((MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID,get_TrxName()));
 					String message = mText.getMailText(true);
 					if (mText.isHtml())
 						email.setMessageHTML(subject, message);

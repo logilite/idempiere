@@ -398,7 +398,7 @@ public class MInOutConfirm extends X_M_InOutConfirm implements DocAction
 			approveIt();
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 		//
-		MInOut inout = new MInOut (getCtx(), getM_InOut_ID(), get_TrxName());
+		MInOut inout = (MInOut) MTable.get(getCtx(), MInOut.Table_ID).getPO(getM_InOut_ID(), get_TrxName());
 		MInOutLineConfirm[] lines = getLines(false);
 		
 		//	Check if we need to split Shipment
@@ -494,7 +494,7 @@ public class MInOutConfirm extends X_M_InOutConfirm implements DocAction
 			// Create Header
 			if (split == null)
 			{
-				split = new MInOut (original, C_DocType_ID, original.getMovementDate());
+				split = MInOut.copyFrom(original, C_DocType_ID, original.getMovementDate());
 				StringBuilder msgd = new StringBuilder("Splitted from ").append(original.getDocumentNo());
 				split.addDescription(msgd.toString());
 				split.setIsInDispute(true);
@@ -504,7 +504,7 @@ public class MInOutConfirm extends X_M_InOutConfirm implements DocAction
 				original.saveEx();
 			}
 			//
-			MInOutLine splitLine = new MInOutLine (split);
+			MInOutLine splitLine = MInOutLine.createFrom(split);
 			splitLine.setC_OrderLine_ID(oldLine.getC_OrderLine_ID());
 			splitLine.setC_UOM_ID(oldLine.getC_UOM_ID());
 			splitLine.setDescription(oldLine.getDescription());
@@ -603,14 +603,14 @@ public class MInOutConfirm extends X_M_InOutConfirm implements DocAction
 			if (log.isLoggable(Level.INFO)) log.info("Difference=" + confirm.getDifferenceQty());
 			if (m_creditMemo == null)
 			{
-				m_creditMemo = new MInvoice (inout, null);
+				m_creditMemo = MInvoice.createFrom(inout, null);
 				StringBuilder msgd = new StringBuilder().append(Msg.translate(getCtx(), "M_InOutConfirm_ID")).append(" ").append(getDocumentNo());
 				m_creditMemo.setDescription(msgd.toString());
 				m_creditMemo.setC_DocTypeTarget_ID(MDocType.DOCBASETYPE_APCreditMemo);
 				m_creditMemo.saveEx();
 				setC_Invoice_ID(m_creditMemo.getC_Invoice_ID());
 			}
-			MInvoiceLine line = new MInvoiceLine (m_creditMemo);
+			MInvoiceLine line = MInvoiceLine.createFrom(m_creditMemo);
 			line.setShipLine(confirm.getLine());
 			if (confirm.getLine().getProduct() != null) {
 				// use product UOM in case the shipment hasn't the same uom than the order

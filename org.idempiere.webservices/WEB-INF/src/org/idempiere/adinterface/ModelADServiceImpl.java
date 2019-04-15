@@ -67,6 +67,7 @@ import org.compiere.util.Trx;
 import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
 import org.idempiere.adInterface.x10.ADLoginRequest;
+import org.idempiere.adInterface.x10.ADLoginResponse;
 import org.idempiere.adInterface.x10.DataField;
 import org.idempiere.adInterface.x10.DataRow;
 import org.idempiere.adInterface.x10.DataSet;
@@ -79,8 +80,6 @@ import org.idempiere.adInterface.x10.ModelRunProcess;
 import org.idempiere.adInterface.x10.ModelRunProcessRequestDocument;
 import org.idempiere.adInterface.x10.ModelSetDocAction;
 import org.idempiere.adInterface.x10.ModelSetDocActionRequestDocument;
-import org.idempiere.adInterface.x10.RunProcess;
-import org.idempiere.adInterface.x10.RunProcessDocument;
 import org.idempiere.adInterface.x10.RunProcessResponse;
 import org.idempiere.adInterface.x10.RunProcessResponseDocument;
 import org.idempiere.adInterface.x10.StandardResponse;
@@ -112,9 +111,8 @@ import org.idempiere.webservices.fault.IdempiereServiceFault;
 
 
 /**
- *
  * @author kolec
- *
+ * @author Deepak Pansheriya
  */
 @WebService(endpointInterface="org.idempiere.adinterface.ModelADService", serviceName="ModelADService",targetNamespace="http://idempiere.org/ADInterface/1_0")
 public class ModelADServiceImpl extends AbstractService implements ModelADService {
@@ -291,7 +289,7 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 			POInfo poinfo = POInfo.getPOInfo(ctx, table.getAD_Table_ID());
 			setOuputFields(resp, m_webservicetype, po, poinfo);
 			
-			
+			addLoginResponse(m_cs, resp);
 			
 			return ret;
 		} finally {
@@ -381,12 +379,9 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 
 	
 
-	public RunProcessResponseDocument runProcess(ModelRunProcessRequestDocument req) {
+	public StandardResponseDocument runProcessTrx(ModelRunProcessRequestDocument req) {
 		try {
 			getCompiereService().connect();
-			
-			RunProcessResponseDocument resbadlogin = RunProcessResponseDocument.Factory.newInstance();
-			RunProcessResponse rbadlogin = resbadlogin.addNewRunProcessResponse();
 			ModelRunProcess modelRunProcess = req.getModelRunProcessRequest().getModelRunProcess();
 			String serviceType = modelRunProcess.getServiceType();
 	
@@ -394,33 +389,62 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 	
 			String err = login(reqlogin, webServiceName, "runProcess", serviceType);
 			if (err != null && err.length() > 0) {
-				rbadlogin.setError(err);
-				rbadlogin.setIsError(true);
-				return resbadlogin;
+				StandardResponseDocument respDoc = StandardResponseDocument.Factory.newInstance();
+				StandardResponse resp = respDoc.addNewStandardResponse();
+				
+				resp.setError(err);
+				resp.setIsError(true);
+				return respDoc;
 			}
-	
+			
+			MWebServiceType m_webservicetype = getWebServiceType();
 			// Validate parameters
 			modelRunProcess.setADMenuID(validateParameter("AD_Menu_ID", modelRunProcess.getADMenuID()));
 			modelRunProcess.setADProcessID(validateParameter("AD_Process_ID", modelRunProcess.getADProcessID()));
 			modelRunProcess.setADRecordID(validateParameter("AD_Record_ID", modelRunProcess.getADRecordID()));
 			modelRunProcess.setDocAction(validateParameter("DocAction", modelRunProcess.getDocAction()));
 	
-			RunProcessDocument docprocess = RunProcessDocument.Factory.newInstance();
-			RunProcess reqprocess = docprocess.addNewRunProcess();
-			reqprocess.setParamValues(modelRunProcess.getParamValues());
-			reqprocess.setADProcessID(modelRunProcess.getADProcessID());
-			reqprocess.setADMenuID(modelRunProcess.getADMenuID());
-			reqprocess.setADRecordID(modelRunProcess.getADRecordID());
-			reqprocess.setDocAction(modelRunProcess.getDocAction());
-			RunProcessResponseDocument response = Process.runProcess(getCompiereService(), docprocess, getRequestCtx(), localTrxName);
-			if (response != null && response.getRunProcessResponse() != null && response.getRunProcessResponse().getIsError())
-				log.warning("Error running webservice " + serviceType + " -> " + response.getRunProcessResponse().getError());
-			Map<String, Object> requestCtx = getRequestCtx();
-			requestCtx.put(serviceType+"_Summary", response.getRunProcessResponse().getSummary());
+			
+			StandardResponseDocument response = Process.runProcess(getCompiereService(),m_webservicetype, modelRunProcess, getRequestCtx(), localTrxName);
+			StandardResponse stndResp =response.getStandardResponse();
+			RunProcessResponse rResp = stndResp.getRunProcessResponse();
+			CompiereService m_cs = getCompiereService();
+			addLoginResponse(m_cs,rResp);
+
+			if (response != null && response.getStandardResponse() != null && response.getStandardResponse().getIsError())
+				log.warning("Error running webservice " + serviceType + " -> " + response.getStandardResponse().getError());
 			return response;
 		} finally {
 			getCompiereService().disconnect();
 		}
+	}
+	
+	public RunProcessResponseDocument runProcess(ModelRunProcessRequestDocument req) {
+		
+		StandardResponseDocument stndRespDoc = runProcessTrx(req);
+		StandardResponse stndResp =stndRespDoc.getStandardResponse();
+		
+		RunProcessResponseDocument retDocument = RunProcessResponseDocument.Factory.newInstance();
+		RunProcessResponse rResp = stndResp.getRunProcessResponse();
+		
+		if(rResp==null){
+			rResp=retDocument.addNewRunProcessResponse();
+		}else{
+			retDocument.setRunProcessResponse(rResp);
+		}
+		
+		if(rResp!=null && rResp.getADLoginResponse()==null)
+		{
+			CompiereService m_cs = getCompiereService();
+			addLoginResponse(m_cs,rResp);
+		}
+
+		if(stndResp.isSetError())
+			rResp.setError(stndResp.getError());
+		if(stndResp.isSetIsError())
+			rResp.setIsError(stndResp.getIsError());
+		
+		return retDocument;
 	}
 
 	public WindowTabDataDocument getList(ModelGetListRequestDocument req) {
@@ -443,7 +467,11 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 	    		res.setSuccess(false);
 	        	return resdoc;
 	    	}
-			int roleid = reqlogin.getRoleID();
+	    	
+	    	CompiereService m_cs = getCompiereService();
+	    	Properties ctx = m_cs.getCtx();
+			int roleid = m_cs.getAD_Role_ID();
+
 	
 	    	// Validate parameters
 			modelGetList.setADReferenceID(validateParameter("AD_Reference_ID", modelGetList.getADReferenceID()));
@@ -456,10 +484,7 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 	    	else
 	    		filter = " AND " + filter;
 	
-	    	CompiereService m_cs = getCompiereService();
 	    	
-	    	Properties ctx = m_cs.getCtx();
-	
 	    	X_AD_Reference ref = new X_AD_Reference(ctx, ref_id, null);
 	    	
 	    	String sql = null;
@@ -631,7 +656,9 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 	    	res.setNumRows(cnt);
 	    	res.setTotalRows(cnt);
 	    	res.setStartRow(1);
-	
+	    	
+	    	addLoginResponse(m_cs,resdoc.getWindowTabData());
+
 			return resdoc;
 		} finally {
 			getCompiereService().disconnect();
@@ -700,7 +727,9 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 			if (manageTrx && !trx.commit())
 				return rollbackAndSetError(trx, resp, ret, true, "Cannot commit transaction after delete record " + recordID + " in "
 						+ tableName);
-	
+			
+			addLoginResponse(m_cs,resp);
+
 			return ret;
 		} finally {
 			if (manageTrx && trx != null)
@@ -815,7 +844,7 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 	    		return rollbackAndSetError(trx, resp, ret, true, "Cannot commit transaction after create record " + recordID + " in " + tableName);
 	
 			setOuputFields(resp, m_webservicetype,po,poinfo);
-			
+			addLoginResponse(m_cs,resp);
 			return ret;
 		} finally {
 			if (manageTrx && trx != null)
@@ -1018,7 +1047,8 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 						+ tableName);
 	
 			setOuputFields(resp, m_webservicetype, po, poinfo);
-	
+			addLoginResponse(m_cs,resp);
+
 			return ret;
 		} finally {
 			if (manageTrx && trx != null)
@@ -1277,7 +1307,8 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 						+ tableName);
 				
 			setOuputFields(resp, m_webservicetype, po, poinfo);
-	
+			addLoginResponse(m_cs,resp);
+
 			return ret;
 		} finally {
 			if (manageTrx && trx != null)
@@ -1376,10 +1407,38 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 	    	resp.setNumRows(cnt);
 	    	resp.setTotalRows(cnt);
 	    	resp.setStartRow(1);
-	
+	    	addLoginResponse(m_cs,resp);
+
 			return ret;
 		} finally {
 			getCompiereService().disconnect();
+		}
+	}
+
+	private void addLoginResponse(CompiereService m_cs, StandardResponse resp)
+	{
+		if (this.manageTrx == true && isTokenSupported)
+		{
+			ADLoginResponse loginRes = resp.addNewADLoginResponse();
+			setLoginResponseParam(loginRes);
+		}
+	}
+	
+	private void addLoginResponse(CompiereService m_cs, RunProcessResponse resp)
+	{
+		if (this.manageTrx == true && isTokenSupported)
+		{
+			ADLoginResponse loginRes = resp.addNewADLoginResponse();
+			setLoginResponseParam(loginRes);
+		}
+	}
+	
+	private void addLoginResponse(CompiereService m_cs, WindowTabData resp)
+	{
+		if (this.manageTrx == true && isTokenSupported)
+		{
+			ADLoginResponse loginRes = resp.addNewADLoginResponse();
+			setLoginResponseParam(loginRes);
 		}
 	}
 
@@ -1388,7 +1447,6 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 		try {
 			getCompiereService().connect();
 			
-			CompiereService m_cs = getCompiereService();
 			WindowTabDataDocument ret = WindowTabDataDocument.Factory.newInstance();
 			WindowTabData resp = ret.addNewWindowTabData();
 	    	ModelCRUD modelCRUD = req.getModelCRUDRequest().getModelCRUD();
@@ -1403,7 +1461,7 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 	
 	    	// Validate parameters vs service type
 			validateCRUD(modelCRUD);
-			
+			CompiereService m_cs = getCompiereService();
 	    	Properties ctx = m_cs.getCtx();
 	    	String tableName = modelCRUD.getTableName();
 	    	Map<String, Object> reqCtx = getRequestCtx();
@@ -1416,7 +1474,8 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 						+ tableName + " not found",
 						new QName("queryData"));
 	
-			int roleid = reqlogin.getRoleID();
+	    	int roleid = m_cs.getAD_Role_ID();
+
 			MRole role = new MRole(ctx, roleid, null);
 			
 			// start a trx
@@ -1534,7 +1593,8 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 	    	resp.setNumRows(rowCnt);
 	    	resp.setTotalRows(cnt);
 	    	resp.setStartRow(offset);
-	
+	    	addLoginResponse(m_cs,resp);
+
 			return ret;
 		} finally {
 			if (manageTrx && trx != null)

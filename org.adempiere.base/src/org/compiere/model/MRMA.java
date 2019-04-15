@@ -28,8 +28,12 @@ import java.util.logging.Level;
 import org.adempiere.base.Core;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.model.ITaxProvider;
+import org.compiere.print.MPrintFormat;
+import org.compiere.print.ReportEngine;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
+import org.compiere.process.ProcessInfo;
+import org.compiere.process.ServerProcessCtl;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -135,7 +139,7 @@ public class MRMA extends X_M_RMA implements DocAction
 	public MInOut getShipment()
 	{
 		if (m_inout == null && getInOut_ID() != 0)
-			m_inout = new MInOut (getCtx(), getInOut_ID(), get_TrxName());
+			m_inout = (MInOut) MTable.get(getCtx(), MInOut.Table_ID).getPO(getInOut_ID(), get_TrxName());
 		return m_inout;
 	}	//	getShipment
 
@@ -150,7 +154,8 @@ public class MRMA extends X_M_RMA implements DocAction
        {
            return null;
        }
-       return new MOrder(getCtx(), shipment.getC_Order_ID(), get_TrxName());
+       return (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(shipment.getC_Order_ID(), get_TrxName());
+
     }
 
     /**
@@ -182,7 +187,7 @@ public class MRMA extends X_M_RMA implements DocAction
            return null;
        }
 
-       return new MInvoice(getCtx(), invId, get_TrxName());
+		return (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(invId, get_TrxName());
     }
 
 	/**
@@ -234,10 +239,27 @@ public class MRMA extends X_M_RMA implements DocAction
 	 */
 	public File createPDF (File file)
 	{
-	//	ReportEngine re = ReportEngine.get (getCtx(), ReportEngine.INVOICE, getC_Invoice_ID());
-	//	if (re == null)
+		ReportEngine re = ReportEngine.get (getCtx(), ReportEngine.RMA, getM_RMA_ID(), get_TrxName());
+		
+		if (re == null)
 			return null;
-	//	return re.getPDF(file);
+		MPrintFormat format = re.getPrintFormat();
+		// We have a Jasper Print Format
+		// ==============================
+		if(format.getJasperProcess_ID() > 0)	
+		{
+			ProcessInfo pi = new ProcessInfo ("", format.getJasperProcess_ID());
+			pi.setRecord_ID ( getM_RMA_ID() );
+			pi.setIsBatch(true);
+			
+			ServerProcessCtl.process(pi, null);
+			
+			return pi.getPDFReport();
+		}
+		// Standard Print Format (Non-Jasper)
+		// ==================================
+		return re.getPDF(file);
+			
 	}	//	createPDF
 
 
@@ -265,12 +287,13 @@ public class MRMA extends X_M_RMA implements DocAction
 			{
 				if (m_inout.getC_Order_ID() != 0)
 				{
-					MOrder order = new MOrder (getCtx(), m_inout.getC_Order_ID(), get_TrxName());
+					MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(m_inout.getC_Order_ID(), get_TrxName());
 					setC_Currency_ID(order.getC_Currency_ID());
 				}
 				else if (m_inout.getC_Invoice_ID() != 0)
 				{
-					MInvoice invoice = new MInvoice (getCtx(), m_inout.getC_Invoice_ID(), get_TrxName());
+					MInvoice invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(
+							m_inout.getC_Invoice_ID(), get_TrxName());
 					setC_Currency_ID(invoice.getC_Currency_ID());
 				}
 			}
@@ -504,7 +527,7 @@ public class MRMA extends X_M_RMA implements DocAction
 		if (counterC_BPartner_ID == 0)
 			return null;
 		//	Business Partner needs to be linked to Org
-		MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
+		MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(getC_BPartner_ID(), get_TrxName());
 		int counterAD_Org_ID = bp.getAD_OrgBP_ID_Int();
 		if (counterAD_Org_ID == 0)
 			return null;
@@ -598,13 +621,14 @@ public class MRMA extends X_M_RMA implements DocAction
 		//	Try to find Order/Shipment/Receipt link
 		if (from.getC_Order_ID() != 0)
 		{
-			MOrder peer = new MOrder (from.getCtx(), from.getC_Order_ID(), from.get_TrxName());
+			MOrder peer = (MOrder) MTable.get(from.getCtx(), MOrder.Table_ID).getPO(from.getC_Order_ID(), from.get_TrxName());
 			if (peer.getRef_Order_ID() != 0)
 				to.setC_Order_ID(peer.getRef_Order_ID());
 		}
 		if (from.getInOut_ID() != 0)
 		{
-			MInOut peer = new MInOut (from.getCtx(), from.getInOut_ID(), from.get_TrxName());
+			MInOut peer = (MInOut) MTable.get(from.getCtx(), MInOut.Table_ID).getPO(from.getInOut_ID(),
+					from.get_TrxName());
 			if (peer.getRef_InOut_ID() != 0)
 				to.setInOut_ID(peer.getRef_InOut_ID());
 		}
@@ -635,7 +659,7 @@ public class MRMA extends X_M_RMA implements DocAction
 		int count = 0;
 		for (int i = 0; i < fromLines.length; i++)
 		{
-			MRMALine line = new MRMALine(getCtx(), 0, null);
+			MRMALine line = (MRMALine) MTable.get(getCtx(), MRMALine.Table_ID).getPO(0, null);
 			MRMALine fromLine = fromLines[i];
 			line.set_TrxName(get_TrxName());
 			if (counter)	//	header
@@ -649,7 +673,8 @@ public class MRMA extends X_M_RMA implements DocAction
 				line.setRef_RMALine_ID(fromLine.getM_RMALine_ID());
 				if (fromLine.getM_InOutLine_ID() != 0)
 				{
-					MInOutLine peer = new MInOutLine (getCtx(), fromLine.getM_InOutLine_ID(), get_TrxName());
+					MInOutLine peer = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(
+							fromLine.getM_InOutLine_ID(), get_TrxName());
 					if (peer.getRef_InOutLine_ID() != 0)
 						line.setM_InOutLine_ID(peer.getRef_InOutLine_ID());
 				}
@@ -881,7 +906,7 @@ public class MRMA extends X_M_RMA implements DocAction
 
         for (int i = 0; i < rmaLineIds.length; i++)
         {
-            MRMALine rmaLine = new MRMALine(getCtx(), rmaLineIds[i], get_TrxName());
+			MRMALine rmaLine = (MRMALine) MTable.get(getCtx(), MRMALine.Table_ID).getPO(rmaLineIds[i], get_TrxName());
             chargeLineList.add(rmaLine);
         }
 

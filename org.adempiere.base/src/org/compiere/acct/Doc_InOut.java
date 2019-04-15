@@ -20,22 +20,24 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 
 import org.compiere.model.I_M_InOutLine;
 import org.compiere.model.I_M_RMALine;
-import org.compiere.model.MConversionRate;
-import org.compiere.model.MOrderLandedCostAllocation;
-import org.compiere.model.MTax;
-import org.compiere.model.MCurrency;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
+import org.compiere.model.MConversionRate;
 import org.compiere.model.MCostDetail;
+import org.compiere.model.MCurrency;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInOutLineMA;
+import org.compiere.model.MOrderLandedCostAllocation;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
+import org.compiere.model.MTable;
+import org.compiere.model.MTax;
 import org.compiere.model.ProductCost;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -66,9 +68,9 @@ public class Doc_InOut extends Doc
 		super (as, MInOut.class, rs, null, trxName);
 	}   //  DocInOut
 
-	private int				m_Reversal_ID = 0;
+	protected int				m_Reversal_ID = 0;
 	@SuppressWarnings("unused")
-	private String			m_DocStatus = "";
+	protected String			m_DocStatus = "";
 
 	/**
 	 *  Load Document Details
@@ -92,7 +94,7 @@ public class Doc_InOut extends Doc
 	 *	@param inout shipment/receipt
 	 *  @return DocLine Array
 	 */
-	private DocLine[] loadLines(MInOut inout)
+	protected DocLine[] loadLines(MInOut inout)
 	{
 		ArrayList<DocLine> list = new ArrayList<DocLine>();
 		MInOutLine[] lines = inout.getLines(false);
@@ -107,18 +109,62 @@ public class Doc_InOut extends Doc
 				continue;
 			}
 
-			DocLine docLine = new DocLine (line, this);
-			BigDecimal Qty = line.getMovementQty();
-			docLine.setReversalLine_ID(line.getReversalLine_ID());
-			docLine.setQty (Qty, getDocumentType().equals(DOCTYPE_MatShipment));    //  sets Trx and Storage Qty
-
 			//Define if Outside Processing
 			String sql = "SELECT PP_Cost_Collector_ID  FROM C_OrderLine WHERE C_OrderLine_ID=? AND PP_Cost_Collector_ID IS NOT NULL";
 			int PP_Cost_Collector_ID = DB.getSQLValueEx(getTrxName(), sql, new Object[]{line.getC_OrderLine_ID()});
-			docLine.setPP_Cost_Collector_ID(PP_Cost_Collector_ID);
-			//
-			if (log.isLoggable(Level.FINE)) log.fine(docLine.toString());
-			list.add (docLine);
+			
+			if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(line.getProduct().getCostingLevel(m_as))
+					&& line.getM_AttributeSetInstance_ID() <= 0)
+			{
+				MInOutLineMA[] lineMAs = MInOutLineMA.get(getCtx(), line.get_ID(), getTrxName());
+
+				HashMap<Integer, DocLine> map = new HashMap<Integer, DocLine>();
+
+				for (MInOutLineMA lineMA : lineMAs)
+				{
+					if(lineMA.getMovementQty().signum()==0)
+						continue;
+					
+					if (!map.containsKey(lineMA.getM_AttributeSetInstance_ID()))
+					{
+						DocLine docLine = new DocLine(line, this);
+						docLine.setM_AttributeSetInstance_ID(lineMA.getM_AttributeSetInstance_ID());
+						docLine.setQty(lineMA.getMovementQty(), getDocumentType().equals(DOCTYPE_MatShipment));
+						docLine.setReversalLine_ID(line.getReversalLine_ID());
+						docLine.setPP_Cost_Collector_ID(PP_Cost_Collector_ID);
+						if (log.isLoggable(Level.FINE))
+							log.fine(docLine.toString());
+						map.put(lineMA.getM_AttributeSetInstance_ID(), docLine);
+					}
+					else
+					{
+						DocLine docLine = map.get(lineMA.getM_AttributeSetInstance_ID());
+						
+						BigDecimal lineQty = docLine.getQty();
+						lineQty = lineQty == null ? Env.ZERO : lineQty;
+						
+						// If SO trx then merge Qty with positive sign
+						if(getDocumentType().equals(DOCTYPE_MatShipment))
+						{
+							lineQty = lineQty.negate();
+						}
+						
+						docLine.setQty(lineQty.add(lineMA.getMovementQty()), getDocumentType().equals(DOCTYPE_MatShipment));
+					}
+				}
+				list.addAll(map.values());
+			}
+			else
+			{
+				DocLine docLine = new DocLine(line, this);
+				BigDecimal Qty = line.getMovementQty();
+				docLine.setQty(Qty, getDocumentType().equals(DOCTYPE_MatShipment));
+				docLine.setReversalLine_ID(line.getReversalLine_ID());
+				docLine.setPP_Cost_Collector_ID(PP_Cost_Collector_ID);
+				if (log.isLoggable(Level.FINE))
+					log.fine(docLine.toString());
+				list.add(docLine);
+			}
 		}
 
 		//	Return Array
@@ -176,55 +222,38 @@ public class Doc_InOut extends Doc
 				BigDecimal costs = null;
 				if (!isReversal(line))
 				{
-					if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
-					{	
-						if (line.getM_AttributeSetInstance_ID() == 0 ) 
-						{
-							MInOutLine ioLine = (MInOutLine) line.getPO();
-							MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), ioLine.get_ID(), getTrxName());
-							if (mas != null && mas.length > 0 )
-							{
-								costs  = BigDecimal.ZERO;
-								for (int j = 0; j < mas.length; j++)
-								{
-									MInOutLineMA ma = mas[j];
-									BigDecimal QtyMA = ma.getMovementQty();
-									ProductCost pc = line.getProductCost();
-									pc.setQty(QtyMA);
-									pc.setM_M_AttributeSetInstance_ID(ma.getM_AttributeSetInstance_ID());
-									BigDecimal maCosts = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
-								
-									costs = costs.add(maCosts);
-								}						
-							}
-						} 
-						else 
-						{							
-							costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");				
-						}
-					} 
-					else
-					{
-						// MZ Goodwill
-						// if Shipment CostDetail exist then get Cost from Cost Detail
-						costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");			
-					}
-			
+					// MZ Goodwill
+					// if Shipment CostDetail exist then get Cost from Cost Detail
+					costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
+				
 					// end MZ
 					if (costs == null || costs.signum() == 0)	//	zero costs OK
 					{
 						if (product.isStocked())
 						{
 							//ok if we have purchased zero cost item from vendor before
-							int count = DB.getSQLValue(null, "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)", 
-									product.getM_Product_ID());
+							String sql="SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)"
+									+ " AND AD_Client_ID = ? ";
+							ArrayList<Integer> list = new ArrayList<Integer>();
+							list.add(product.getM_Product_ID());
+							list.add(getAD_Client_ID());
+							
+							String costingLevel = product.getCostingLevel(as);
+							if(MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))
+							{
+								sql = "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)"
+									+ " AND AD_Client_ID = ?  AND M_AttributeSetInstance_ID=?";
+								list.add(line.getM_AttributeSetInstance_ID());
+							}
+							
+							int count = DB.getSQLValue(null,sql,list.toArray());
 							if (count > 0)
 							{
 								costs = BigDecimal.ZERO;
 							}
 							else
 							{
-								p_Error = "No Costs for " + line.getProduct().getName();
+								p_Error = "No Costs for line " + line.getLine() +"-"+ line.getProduct().getName() ;
 								log.log(Level.WARNING, p_Error);
 								return null;
 							}
@@ -295,60 +324,17 @@ public class Doc_InOut extends Doc
 					}
 					costs = cr.getAcctBalance(); //get original cost
 				}
-				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
-				{	
-					if (line.getM_AttributeSetInstance_ID() == 0 ) 
-					{
-						MInOutLine ioLine = (MInOutLine) line.getPO();
-						MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), ioLine.get_ID(), getTrxName());
-						if (mas != null && mas.length > 0 )
-						{
-							for (int j = 0; j < mas.length; j++)
-							{
-								MInOutLineMA ma = mas[j];
-								if (!MCostDetail.createShipment(as, line.getAD_Org_ID(),
-										line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
-										line.get_ID(), 0,
-										costs, ma.getMovementQty().negate(),
-										line.getDescription(), true, getTrxName()))
-								{
-									p_Error = "Failed to create cost detail record";
-									return null;
-								}							
-							}						
-						}
-					} 
-					else
-					{
-						//
-						if (line.getM_Product_ID() != 0)
-						{
-							if (!MCostDetail.createShipment(as, line.getAD_Org_ID(),
-								line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
-								line.get_ID(), 0,
-								costs, line.getQty(),
-								line.getDescription(), true, getTrxName()))
-							{
-								p_Error = "Failed to create cost detail record";
-								return null;
-							}
-						}
-					}
-				} 
-				else
+				//
+				if (line.getM_Product_ID() != 0)
 				{
-					//
-					if (line.getM_Product_ID() != 0)
+					if (!MCostDetail.createShipment(as, line.getAD_Org_ID(),
+						line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+						line.get_ID(), 0,
+						costs, line.getQty(),
+						line.getDescription(), true, getTrxName()))
 					{
-						if (!MCostDetail.createShipment(as, line.getAD_Org_ID(),
-							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
-							line.get_ID(), 0,
-							costs, line.getQty(),
-							line.getDescription(), true, getTrxName()))
-						{
-							p_Error = "Failed to create cost detail record";
-							return null;
-						}
+						p_Error = "Failed to create cost detail record";
+						return null;
 					}
 				}
 			}	//	for all lines
@@ -377,47 +363,41 @@ public class Doc_InOut extends Doc
 				BigDecimal costs = null;
 				if (!isReversal(line)) 
 				{
-					if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
-					{	
-						if (line.getM_AttributeSetInstance_ID() == 0 ) 
-						{
-							MInOutLine ioLine = (MInOutLine) line.getPO();
-							MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), ioLine.get_ID(), getTrxName());
-							costs = BigDecimal.ZERO;
-							if (mas != null && mas.length > 0 )
-							{
-								for (int j = 0; j < mas.length; j++)
-								{
-									MInOutLineMA ma = mas[j];
-									BigDecimal QtyMA = ma.getMovementQty();
-									ProductCost pc = line.getProductCost();
-									pc.setQty(QtyMA);
-									pc.setM_M_AttributeSetInstance_ID(ma.getM_AttributeSetInstance_ID());
-									BigDecimal maCosts = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
-								
-									costs = costs.add(maCosts);
-								}
-							}
-						} 
-						else
-						{
-							costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
-						}
-					}
-					else
-					{
-						// MZ Goodwill
-						// if Shipment CostDetail exist then get Cost from Cost Detail
-						costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
-						// end MZ
-					}
+					// MZ Goodwill
+					// if Shipment CostDetail exist then get Cost from Cost Detail
+					costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
+					// end MZ
+	
 					if (costs == null || costs.signum() == 0)	//	zero costs OK
 					{
 						if (product.isStocked())
 						{
-							p_Error = "No Costs for " + line.getProduct().getName();
-							log.log(Level.WARNING, p_Error);
-							return null;
+							//ok if we have purchased zero cost item from vendor before
+							String sql="SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)"
+									+ " AND AD_Client_ID = ? ";
+							ArrayList<Integer> list = new ArrayList<Integer>();
+							list.add(product.getM_Product_ID());
+							list.add(getAD_Client_ID());
+							
+							String costingLevel = product.getCostingLevel(as);
+							if(MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))
+							{
+								sql += "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)"
+									+ " AND AD_Client_ID = ?  AND M_AttributeSetInstance_ID=?";
+								list.add(line.getM_AttributeSetInstance_ID());
+							}
+							
+							int count = DB.getSQLValue(null,sql,list.toArray());
+							if (count > 0)
+							{
+								costs = BigDecimal.ZERO;
+							}
+							else
+							{
+								p_Error = "No Costs for line " + line.getLine() +"-"+ line.getProduct().getName() ;
+								log.log(Level.WARNING, p_Error);
+								return null;
+							}
 						}
 						else	//	ignore service
 							continue;
@@ -456,57 +436,16 @@ public class Doc_InOut extends Doc
 					costs = dr.getAcctBalance(); //get original cost
 				}
 				//
-				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
-				{	
-					if (line.getM_AttributeSetInstance_ID() == 0 ) 
-					{
-						MInOutLine ioLine = (MInOutLine) line.getPO();
-						MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), ioLine.get_ID(), getTrxName());
-						if (mas != null && mas.length > 0 )
-						{
-							for (int j = 0; j < mas.length; j++)
-							{
-								MInOutLineMA ma = mas[j];
-								if (!MCostDetail.createShipment(as, line.getAD_Org_ID(),
-										line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
-										line.get_ID(), 0,
-										costs, ma.getMovementQty(),
-										line.getDescription(), true, getTrxName()))
-								{
-									p_Error = "Failed to create cost detail record";
-									return null;
-								}
-							}
-						}
-					} else
-					{
-						if (line.getM_Product_ID() != 0)
-						{
-							if (!MCostDetail.createShipment(as, line.getAD_Org_ID(),
-								line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
-								line.get_ID(), 0,
-								costs, line.getQty(),
-								line.getDescription(), true, getTrxName()))
-							{
-								p_Error = "Failed to create cost detail record";
-								return null;
-							}
-						}
-					}
-				} else
+				if (line.getM_Product_ID() != 0)
 				{
-					//
-					if (line.getM_Product_ID() != 0)
+					if (!MCostDetail.createShipment(as, line.getAD_Org_ID(),
+						line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+						line.get_ID(), 0,
+						costs, line.getQty(),
+						line.getDescription(), true, getTrxName()))
 					{
-						if (!MCostDetail.createShipment(as, line.getAD_Org_ID(),
-							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
-							line.get_ID(), 0,
-							costs, line.getQty(),
-							line.getDescription(), true, getTrxName()))
-						{
-							p_Error = "Failed to create cost detail record";
-							return null;
-						}
+						p_Error = "Failed to create cost detail record";
+						return null;
 					}
 				}
 
@@ -557,7 +496,8 @@ public class Doc_InOut extends Doc
 					int C_OrderLine_ID = line.getC_OrderLine_ID();
 					if (C_OrderLine_ID > 0)
 					{
-						orderLine = new MOrderLine (getCtx(), C_OrderLine_ID, getTrxName());
+						orderLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(C_OrderLine_ID,
+								getTrxName());
 						MOrderLandedCostAllocation[] allocations = MOrderLandedCostAllocation.getOfOrderLine(C_OrderLine_ID, getTrxName());
 						for(MOrderLandedCostAllocation allocation : allocations) 
 						{														
@@ -784,43 +724,13 @@ public class Doc_InOut extends Doc
 					}
 					else
 					{
-						if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
-						{	
-							if (line.getM_AttributeSetInstance_ID() == 0 ) 
-							{								
-								MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), ioLine.get_ID(), getTrxName());
-								costs = BigDecimal.ZERO;
-								if (mas != null && mas.length > 0 )
-								{
-									for (int j = 0; j < mas.length; j++)
-									{
-										MInOutLineMA ma = mas[j];
-										BigDecimal QtyMA = ma.getMovementQty();
-										ProductCost pc = line.getProductCost();
-										pc.setQty(QtyMA);
-										pc.setM_M_AttributeSetInstance_ID(ma.getM_AttributeSetInstance_ID());
-										BigDecimal maCosts = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
-									
-										costs = costs.add(maCosts);
-									}						
-								}
-							} 
-							else
-							{
-								costs = line.getProductCosts(as, line.getAD_Org_ID(), false);	//	current costs
-							}						
-						} 
-						else
-						{
-							costs = line.getProductCosts(as, line.getAD_Org_ID(), false);	//	current costs
-						}
-						
-						if (costs == null || costs.signum() == 0)
-						{
-							p_Error = "Resubmit - No Costs for " + product.getName();
-							log.log(Level.WARNING, p_Error);
-							return null;
-						}
+						costs = line.getProductCosts(as, line.getAD_Org_ID(), false);	//	current costs
+					}
+					if (costs == null || costs.signum() == 0)
+					{
+						p_Error = "Resubmit - No Costs for " + product.getName();
+						log.log(Level.WARNING, p_Error);
+						return null;
 					}
 				}
 				else
@@ -912,11 +822,11 @@ public class Doc_InOut extends Doc
 		return facts;
 	}   //  createFact
 
-	private boolean isReversal(DocLine line) {
+	protected boolean isReversal(DocLine line) {
 		return m_Reversal_ID !=0 && line.getReversalLine_ID() != 0;
 	}
 
-	private String createVendorRMACostDetail(MAcctSchema as, DocLine line, BigDecimal costs)
+	protected String createVendorRMACostDetail(MAcctSchema as, DocLine line, BigDecimal costs)
 	{		
 		BigDecimal tQty = line.getQty();
 		BigDecimal tAmt = costs;
@@ -924,38 +834,11 @@ public class Doc_InOut extends Doc
 		{
 			tAmt = tAmt.negate();
 		}
-		MProduct product = line.getProduct();
-		if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
-		{	
-			if (line.getM_AttributeSetInstance_ID() == 0 ) 
-			{								
-				MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), line.get_ID(), getTrxName());
-				if (mas != null && mas.length > 0 )
-				{
-					for (int j = 0; j < mas.length; j++)
-					{
-						MInOutLineMA ma = mas[j];
-						if (!MCostDetail.createShipment(as, line.getAD_Org_ID(), line.getM_Product_ID(), 
-								ma.getM_AttributeSetInstance_ID(), line.get_ID(), 0, tAmt, ma.getMovementQty().negate(), 
-								line.getDescription(), false, getTrxName()))
-							return "SaveError";
-					}
-				}
-			} 
-			else
-			{
-				if (!MCostDetail.createShipment(as, line.getAD_Org_ID(), line.getM_Product_ID(), 
-						line.getM_AttributeSetInstance_ID(), line.get_ID(), 0, tAmt, tQty, 
-						line.getDescription(), false, getTrxName()))
-					return "SaveError";
-			}
-		} 
-		else
+		if (!MCostDetail.createShipment(as, line.getAD_Org_ID(), line.getM_Product_ID(), 
+				line.getM_AttributeSetInstance_ID(), line.get_ID(), 0, tAmt, tQty, 
+				line.getDescription(), false, getTrxName()))
 		{
-			if (!MCostDetail.createShipment(as, line.getAD_Org_ID(), line.getM_Product_ID(), 
-					line.getM_AttributeSetInstance_ID(), line.get_ID(), 0, tAmt, tQty, 
-					line.getDescription(), false, getTrxName()))
-				return "SaveError";
+			return "SaveError";
 		}
 		return "";
 	}

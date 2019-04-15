@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.logging.Level;
 
 import org.compiere.model.MBPartner;
+import org.compiere.model.MTable;
 
 /**
  *	UnLink Business Partner from Organization 
@@ -60,7 +61,7 @@ public class BPartnerOrgUnLink extends SvrProcess
 		if (log.isLoggable(Level.INFO)) log.info("doIt - C_BPartner_ID=" + p_C_BPartner_ID); 
 		if (p_C_BPartner_ID == 0)
 			throw new IllegalArgumentException ("No Business Partner ID");
-		MBPartner bp = new MBPartner (getCtx(), p_C_BPartner_ID, get_TrxName());
+		MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(p_C_BPartner_ID, get_TrxName());
 		if (bp.get_ID() == 0)
 			throw new IllegalArgumentException ("Business Partner not found - C_BPartner_ID=" + p_C_BPartner_ID);
 		//

@@ -89,7 +89,7 @@ public abstract class CreateFromBatch extends CreateFrom
 		return sql.toString();
 	}
 	
-	void setParameters(PreparedStatement pstmt, Object BankAccount, Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
+	protected void setParameters(PreparedStatement pstmt, Object BankAccount, Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
 			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode)
 	throws SQLException
 	{
@@ -151,7 +151,7 @@ public abstract class CreateFromBatch extends CreateFrom
 		}
 	}
 	
-	private String getSQLText(String text)
+	protected String getSQLText(String text)
 	{
 		String s = text.toUpperCase();
 		if(!s.endsWith("%"))

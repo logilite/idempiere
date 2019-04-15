@@ -22,11 +22,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-
 import org.adempiere.util.Callback;
 import org.adempiere.webui.component.ADTabListModel;
 import org.adempiere.webui.component.ADTabListModel.ADTabLabel;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.DataStatusEvent;
 import org.compiere.model.DataStatusListener;
@@ -151,9 +151,30 @@ public class CompositeADTabbox extends AbstractADTabbox
 						showLastError();
 					} 
 					tabPanel.getGridTab().dataRefreshAll(true, true);
+					tabPanel.getGridTab().refreshParentTabs();
 				}
 				else if (DetailPane.ON_DELETE_EVENT.equals(event.getName())) {
 					onDelete();
+				}
+				else if (DetailPane.ON_QUICK_FORM_EVENT.equals(event.getName()))
+				{
+					if (headerTab.getGridTab().isNew() && !headerTab.needSave(true, false))
+						return;
+
+					final int row = getSelectedDetailADTabpanel() != null
+							? getSelectedDetailADTabpanel().getGridTab().getCurrentRow() : 0;
+					final boolean formView = event.getData() != null ? (Boolean) event.getData() : true;
+					adWindowPanel.saveAndNavigate(new Callback<Boolean>() {
+						@Override
+						public void onCallback(Boolean result)
+						{
+							if (result)
+							{
+								onEditDetail(row, formView);
+								adWindowPanel.onQuickForm();
+							}
+						}
+					});
 				}
 			}
 
@@ -240,7 +261,7 @@ public class CompositeADTabbox extends AbstractADTabbox
 			headerTab.switchRowPresentation();
 		}
 		
-		if (!headerTab.getGridTab().isSortTab())
+		if (!headerTab.getGridTab().isSortTab() && headerTab instanceof ADTabpanel)
 			headerTab.getGridTab().setCurrentRow(row, true);
 		
 		if (headerTab.isGridView()) {
@@ -601,9 +622,23 @@ public class CompositeADTabbox extends AbstractADTabbox
 								else
 									selectDetailPanel.getTreePanel().getParent().setVisible(true);
 							}
+							
+							// Update detail-tab quick info
+							GridTab gt = selectDetailPanel.getGridTab();
+							SessionManager.getAppDesktop().updateHelpDetailQuickInfo(gt);
 						}
 					}
-				}				
+				}	
+				else
+				{
+					// Remove detail quick info when no child tab available
+					SessionManager.getAppDesktop().updateHelpDetailQuickInfo(null);
+				}
+			}
+			else
+			{
+				// Remove detail quick info when no child tab available
+				SessionManager.getAppDesktop().updateHelpDetailQuickInfo(null);
 			}
 		}
 		updateBreadCrumb();
@@ -905,7 +940,7 @@ public class CompositeADTabbox extends AbstractADTabbox
 		}
 		tabPanel.setDetailPaneMode(true);
 		headerTab.getDetailPane().setVflex("true");
-		if (tabPanel instanceof ADSortTab) {
+		if (!(tabPanel instanceof ADTabpanel)) {
 			headerTab.getDetailPane().updateToolbar(false, true);
 		} else {
 			tabPanel.dynamicDisplay(0);

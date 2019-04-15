@@ -27,6 +27,7 @@ import org.compiere.model.MConversionRate;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProject;
+import org.compiere.model.MTable;
 import org.compiere.model.MTimeExpense;
 import org.compiere.model.MTimeExpenseLine;
 import org.compiere.util.DB;
@@ -134,7 +135,8 @@ public class ExpenseSOrder extends SvrProcess
 					|| oldBPartner.getC_BPartner_ID() != tel.getC_BPartner_ID())
 				{
 					completeOrder ();
-					oldBPartner = new MBPartner (getCtx(), tel.getC_BPartner_ID(), get_TrxName());
+					oldBPartner = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(tel.getC_BPartner_ID(),
+							get_TrxName());
 				}
 				//	New Project - New Order
 				if (old_Project_ID != tel.getC_Project_ID())
@@ -173,7 +175,7 @@ public class ExpenseSOrder extends SvrProcess
 		if (m_order == null)
 		{
 			if (log.isLoggable(Level.INFO)) log.info("New Order for " + bp + ", Project=" + tel.getC_Project_ID());
-			m_order = new MOrder (getCtx(), 0, get_TrxName());
+			m_order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 			m_order.setAD_Org_ID(tel.getAD_Org_ID());
 			m_order.setC_DocTypeTarget_ID(MOrder.DocSubTypeSO_OnCredit);
 			//
@@ -197,7 +199,8 @@ public class ExpenseSOrder extends SvrProcess
 			{
 				m_order.setC_Project_ID(tel.getC_Project_ID());
 				//	Optionally Overwrite BP Price list from Project
-				MProject project = new MProject (getCtx(), tel.getC_Project_ID(), get_TrxName());
+				MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(tel.getC_Project_ID(),
+						get_TrxName());
 				if (project.getM_PriceList_ID() != 0)
 					m_order.setM_PriceList_ID(project.getM_PriceList_ID());
 			}
@@ -220,7 +223,7 @@ public class ExpenseSOrder extends SvrProcess
 		}
 		
 		//	OrderLine
-		MOrderLine ol = new MOrderLine (m_order);
+		MOrderLine ol = MOrderLine.createFrom(m_order);
 		//
 		if (tel.getM_Product_ID() != 0)
 			ol.setM_Product_ID(tel.getM_Product_ID(), 

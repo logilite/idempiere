@@ -19,6 +19,7 @@ package org.adempiere.webui.window;
 
 import java.beans.PropertyVetoException;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -31,10 +32,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 
 import org.adempiere.webui.AdempiereWebUI;
-import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.LayoutUtils;
+import org.adempiere.webui.ClientInfo;
+import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.AttachmentItem;
 import org.adempiere.webui.component.Button;
 import org.adempiere.webui.component.Checkbox;
@@ -60,6 +63,7 @@ import org.compiere.model.MLookupFactory;
 import org.compiere.model.MMailText;
 import org.compiere.model.MUser;
 import org.compiere.model.MUserMail;
+import org.compiere.model.PO;
 import org.compiere.util.ByteArrayDataSource;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
@@ -70,6 +74,7 @@ import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.zkforge.ckez.CKeditor;
 import org.zkoss.util.media.Media;
+import org.zkoss.zk.ui.Components;
 import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -96,7 +101,7 @@ import org.zkoss.zul.South;
  *  globalqss - Carlos Ruiz - implement CC - FR [ 1754879 ] Enhancements on sending e-mail
  *
  */
-public class WEMailDialog extends Window implements EventListener<Event>, ValueChangeListener
+public class WEMailDialog extends Window implements EventListener<Event>, ValueChangeListener, IEmailDialog
 {
 	/**
 	 * 
@@ -112,34 +117,10 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	 *	@param message message
 	 *	@param attachment optional attachment
 	 */
-	public WEMailDialog (String title, MUser from, String to, 
-		String subject, String message, DataSource attachment)
+	public WEMailDialog ()
 	{
 		super();
-        this.setTitle(title);
-        this.setSclass("popup-dialog email-dialog");
-		this.setClosable(true);
-		this.setBorder("normal");
-		if (!ThemeManager.isUseCSSForWindowSize())
-		{
-			ZKUpdateUtil.setWidth(this, "80%");
-			ZKUpdateUtil.setHeight(this, "80%");
-		}
-		this.setShadow(true);
-		this.setMaximizable(true);
-		this.setSizable(true);
-		        
-		fMessage = new CKeditor();
-		if (ClientInfo.isMobile())
-			fMessage.setCustomConfigurationsPath("/js/ckeditor/config-min.js");
-		else
-			fMessage.setCustomConfigurationsPath("/js/ckeditor/config.js");
-		fMessage.setToolbar("MyToolbar");
-		Map<String,Object> lang = new HashMap<String,Object>();
-		lang.put("language", Language.getLoginLanguage().getAD_Language());
-		fMessage.setConfig(lang);
-
-		commonInit(from, to, subject, message, attachment);				
+		
 	}	//	EmailDialog
 
 	/**
@@ -150,7 +131,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	 *	@param message message
 	 *	@param attachment optional attachment
 	 */
-	private void commonInit (MUser from, String to, 
+	protected void commonInit (MUser from, String to, 
 		String subject, String message, DataSource attachment)
 	{
 		m_client = MClient.get(Env.getCtx());
@@ -179,46 +160,47 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 
 
 	/**	Client				*/
-	private MClient	m_client = null;
+	protected MClient	m_client = null;
 	/** Sender				*/
-	private MUser	m_from = null;
+	protected MUser	m_from = null;
 	/** Primary Recipient	*/
-	private MUser	m_user = null;
+	protected MUser	m_user = null;
 	/** Cc Recipient	*/
-	private MUser	m_ccuser = null;
+	protected MUser	m_ccuser = null;
 	//
-	private String  m_to;
-	private String  m_cc;
-	private String  m_subject;
-	private String  m_message;
+	protected String  m_to;
+	protected String  m_cc;
+	protected String  m_subject;
+	protected String  m_message;
 	/**	File to be optionally attached	*/
-	private DataSource	m_attachment;
+	protected DataSource	m_attachment;
 	
-	private List<DataSource> attachments = new ArrayList<DataSource>();
+	protected List<DataSource> attachments = new ArrayList<DataSource>();
 	
 	/**	Logger			*/
-	private static CLogger log = CLogger.getCLogger(WEMailDialog.class);
+	protected static CLogger log = CLogger.getCLogger(WEMailDialog.class);
 
-	private Textbox fFrom = new Textbox();//20);
-	private Textbox fTo = new Textbox();//20);
-	private Textbox fCc = new Textbox();//20);
-	private WSearchEditor fUser = null;
-	private WSearchEditor fCcUser = null;
-	private Textbox fSubject = new Textbox();//40);
-	private	Label lFrom = new Label();
-	private Label lTo = new Label();
-	private Label lCc = new Label();
-	private Label lSubject = new Label();
-	private Label lAttachment = new Label();
-	private CKeditor fMessage;
-	private ConfirmPanel confirmPanel = new ConfirmPanel(true);
-	private Button bAddDefaultMailText;
-	private Div attachmentBox;
-	private Checkbox isAcknowledgmentReceipt = new Checkbox();
+	protected Textbox fFrom = new Textbox();//20);
+	protected Textbox fTo = new Textbox();//20);
+	protected Textbox fCc = new Textbox();//20);
+	protected WSearchEditor fUser = null;
+	protected WSearchEditor fCcUser = null;
+	protected Textbox fSubject = new Textbox();//40);
+	protected Label lFrom = new Label();
+	protected Label lTo = new Label();
+	protected Label lCc = new Label();
+	protected Label lSubject = new Label();
+	protected Label lAttachment = new Label();
+	protected CKeditor fMessage;
+	protected ConfirmPanel confirmPanel = null;
+	protected Button bAddDefaultMailText;
+	protected Div attachmentBox;
+	protected Checkbox isAcknowledgmentReceipt = new Checkbox();
+	protected PO m_po = null;
 	
 	@Override
 	public void onPageAttached(Page newpage, Page oldpage) {
-		super.onPageAttached(newpage, oldpage);
+//		super.onPageAttached(newpage, oldpage);
 		try {
 			render();
 		} catch (Exception e) {
@@ -506,6 +488,11 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 			attachments.add(attachment);
 	}	//	setAttachment
 
+	public List<DataSource> getAttachments()
+	{
+		return attachments;
+	}
+	
 	/**
 	 *  Get Attachment
 	 */
@@ -593,12 +580,18 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	 */
 	public void addAttachment(DataSource dataSource, boolean removeable) {
 		attachments.add(dataSource);
-		AttachmentItem item = new AttachmentItem(dataSource, attachments, removeable);
-		attachmentBox.appendChild(item);
-		getFirstChild().invalidate();
+		
+		if(attachmentBox != null)
+		{
+			AttachmentItem item = new AttachmentItem(dataSource, attachments, removeable);
+			attachmentBox.appendChild(item);
+		}
+		
+		if(getFirstChild() != null)
+			getFirstChild().invalidate();
 	}
 
-	private byte[] getMediaData(Media media) {
+	protected byte[] getMediaData(Media media) {
 		byte[] bytes = null;
 		
 		try {			
@@ -624,7 +617,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		return bytes;
 	}
 	
-	private String getCharset(String contentType) {
+	protected String getCharset(String contentType) {
 		if (contentType != null) {
 			int j = contentType.indexOf("charset=");
 			if (j >= 0) {
@@ -832,7 +825,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	}
 	
 	
-	private void addMailText()
+	protected void addMailText()
 	{
 		MMailText mt = (MMailText) MUser.get(Env.getCtx()).getR_DefaultMailText();
 		if (mt.get_ID() > 0) {
@@ -857,5 +850,53 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 			fMessage.setValue(getMessage() + "\n" + embedImgToEmail(mt, attachment));
 			
 		}
+	}
+	
+	@Override
+	public void init(String title, MUser from, String to, String subject, String message, File attachment)
+	{
+		Components.removeAllChildren(this);
+		
+		this.setTitle(title);
+		this.setSclass("popup-dialog");
+		this.setClosable(true);
+		this.setBorder("normal");
+		this.setWidth("80%");
+		this.setHeight("80%");
+		this.setShadow(true);
+		this.setMaximizable(true);
+		this.setSizable(true);
+		
+		if (fCc.getValue() != null)
+			fCc.setValue(null);
+		
+		confirmPanel = new ConfirmPanel(true);
+		attachments.clear();
+
+		fMessage = new CKeditor();
+		fMessage.setCustomConfigurationsPath("/js/ckeditor/config.js");
+		fMessage.setToolbar("MyToolbar");
+		Map<String, Object> lang = new HashMap<String, Object>();
+		lang.put("language", Language.getLoginLanguage().getAD_Language());
+		fMessage.setConfig(lang);
+		
+		commonInit(from, to, subject, message, new FileDataSource(attachment));
+	}
+
+	public void setPO(PO m_po)
+	{
+		this.m_po = m_po;
+	}
+	
+	@Override
+	public void show() {
+		AEnv.showWindow(this);
+		this.focus();
+	}
+	
+	@Override
+	public IEmailDialog createInstance()
+	{
+		return new WEMailDialog();
 	}
 }	//	WEMailDialog

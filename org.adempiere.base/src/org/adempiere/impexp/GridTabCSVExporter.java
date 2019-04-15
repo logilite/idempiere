@@ -445,22 +445,71 @@ public class GridTabCSVExporter implements IGridTabExporter
 			Object idO = gridTab.getValue(i, column.getColumnName());
 			if (idO != null) {
 				if (foreignTable.equals("AD_Ref_List")) {
-					String ref = (String) idO;
-					value = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), ref);
+					if (idO instanceof String[])
+					{
+						StringBuilder sb = new StringBuilder();
+						String[] arr = (String[]) idO;
+						int iMax = arr.length - 1;
+						if (iMax != -1)
+						{
+							for (int j = 0;; j++)
+							{
+								sb.append(MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(),
+										arr[j].trim()));
+								if (j == iMax)
+									break;
+								sb.append(", ");
+							}
+						}
+
+						if (sb != null && sb.length() > 0)
+						{
+							value = sb.insert(0, "\"").append("\"").toString();
+						}
+					}
+					else
+					{
+						String ref = (String) idO;
+						value = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), ref);
+					}
 				} else {
-					int id = (Integer) idO;
-					int start = headName.indexOf("[")+1;
-					int end = headName.length()-1;
+					int start = headName.indexOf("[") + 1;
+					int end = headName.length() - 1;
 					String foreignColumn = headName.substring(start, end);
-					StringBuilder select = new StringBuilder("SELECT ")
-							.append(foreignColumn).append(" FROM ")
-							.append(foreignTable).append(" WHERE ")
-							.append(foreignTable).append("_ID=?");
-					value = DB.getSQLValueStringEx(null, select.toString(), id);
+
+					if (idO instanceof Integer[])
+					{
+						String s = Util.convertArrayToStingForExport(idO, null);
+						if (!Util.isEmpty(s, true))
+						{
+							s = s.replaceAll("\"", "");
+							StringBuilder select = new StringBuilder("SELECT '\"' || STRING_AGG(").append(foreignColumn)
+									.append(DB.isPostgreSQL() ? ",', ')" : ")").append(" || '\"' FROM ")
+									.append(foreignTable).append(" WHERE ").append(foreignTable).append("_ID IN (")
+									.append(s).append(")");
+							value = DB.getSQLValueStringEx(null, select.toString());
+						}
+					}
+					else
+					{
+						int id = (Integer) idO;
+						StringBuilder select = new StringBuilder("SELECT ")
+								.append(foreignColumn).append(" FROM ")
+								.append(foreignTable).append(" WHERE ")
+								.append(foreignTable).append("_ID=?");
+						value = DB.getSQLValueStringEx(null, select.toString(), id);
+					}
 				}
 			}
 		} else {
 			value = gridTab.getValue(i, headName);
+			if (value instanceof String[] || value instanceof Integer[])
+			{
+				String s = Util.convertArrayToStringForDB(value);
+				if (!Util.isEmpty(s, true))
+					s = s.replaceAll("([{}])", "\"");
+				value = s;
+			}
 		}
 		return value;
 	}

@@ -52,11 +52,11 @@ import org.zkoss.zk.ui.event.OpenEvent;
  **/
 public class WLocationEditor extends WEditor implements EventListener<Event>, PropertyChangeListener, ContextMenuListener
 {
-    private static final String[] LISTENER_EVENTS = {Events.ON_CLICK};
+    public static final String[] LISTENER_EVENTS = {Events.ON_CLICK};
     
     private static CLogger log = CLogger.getCLogger(WLocationEditor.class);
-    private MLocationLookup     m_Location;
-    private MLocation           m_value;
+    protected MLocationLookup     m_Location;
+    protected MLocation           m_value;
 
     /**
      * Constructor without GridField
@@ -86,7 +86,7 @@ public class WLocationEditor extends WEditor implements EventListener<Event>, Pr
         init();
 	}
 
-    private void init()
+    public void init()
     {
     	if (ThemeManager.isUseFontIconForImage())
     		getComponent().getButton().setIconSclass("z-icon-Location");
@@ -261,6 +261,26 @@ public class WLocationEditor extends WEditor implements EventListener<Event>, Pr
 	public void setTableEditor(boolean b) {
 		super.setTableEditor(b);
 		getComponent().setTableEditorMode(b);
+	}
+
+	public MLocationLookup getM_Location()
+	{
+		return m_Location;
+	}
+
+	public void setM_Location(MLocationLookup m_Location)
+	{
+		this.m_Location = m_Location;
+	}
+
+	public MLocation getM_value()
+	{
+		return m_value;
+	}
+
+	public void setM_value(MLocation m_value)
+	{
+		this.m_value = m_value;
 	}
     
     

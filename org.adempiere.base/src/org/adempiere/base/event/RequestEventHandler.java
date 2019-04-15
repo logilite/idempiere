@@ -146,8 +146,8 @@ public class RequestEventHandler extends AbstractEventHandler implements Managed
 				sendInfo.add("SalesRep_ID");
 			}
 		}
-		checkChange(r, ra, "AD_Role_ID");
-		//
+		if(checkChange(r, ra, "AD_Role_ID"))
+			sendInfo.add("AD_Role_ID");
 		checkChange(r, ra, "Priority");
 		if (checkChange(r, ra, "PriorityUser"))
 			sendInfo.add("PriorityUser");
@@ -311,7 +311,12 @@ public class RequestEventHandler extends AbstractEventHandler implements Managed
 			+ " INNER JOIN AD_User u ON (ru.AD_User_ID=u.AD_User_ID OR u.AD_User_ID=?)"
 			+ " LEFT OUTER JOIN AD_User_Roles r ON (u.AD_User_ID=r.AD_User_ID) "
 			+ "WHERE ru.R_Request_ID=? "
-			+ "GROUP BY u.AD_User_ID, u.NotificationType, u.EMail, u.Name";
+			+ "GROUP BY u.AD_User_ID, u.NotificationType, u.EMail, u.Name"
+			+ " UNION "
+			+ " SELECT U.AD_User_ID, u.NotificationType, u.EMail, u.Name, r.AD_Role_ID "
+			+ " FROM ad_user_roles r "
+			+ " JOIN AD_User u ON (r.AD_User_ID = u.AD_User_ID) "
+			+ " WHERE r.AD_Role_ID=? AND u.IsActive='Y' AND r.IsActive='Y'";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
@@ -319,6 +324,7 @@ public class RequestEventHandler extends AbstractEventHandler implements Managed
 			pstmt = DB.prepareStatement (sql, r.get_TrxName());
 			pstmt.setInt (1, r.getSalesRep_ID());
 			pstmt.setInt (2, r.getR_Request_ID());
+			pstmt.setInt (3, r.getAD_Role_ID());
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{

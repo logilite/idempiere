@@ -76,54 +76,54 @@ import org.zkoss.zul.Vbox;
 
 public class WReportCustomization  implements IFormController,EventListener<Event> {
 	
-	private CustomForm form = new CustomForm();	
+	protected CustomForm form = new CustomForm();	
 	
 	
 	/** Window No					*/
-	private int                 m_WindowNo = -1;
+	protected int                 m_WindowNo = -1;
 	
-	int curStep = 0;
+	protected int curStep = 0;
 	/**	Print Context				*/
-	private Properties			m_ctx;
+	protected Properties			m_ctx;
 	
-	private boolean				m_isCanExport;
+	protected boolean				m_isCanExport;
 	
-	private ReportEngine m_reportEngine=null;
+	protected ReportEngine m_reportEngine=null;
 	public ArrayList<MPrintFormatItem> pfi ; 
 	
-	private Auxheader headerPanel=new Auxheader();
-	private WStringEditor name = new WStringEditor();
-	private String tempName = "";
-	private Button newPrintFormat;
-	private Label selectAll;
-	private Label deselectAll;
-	private Label pipeSeparator;
-	private Button bExport = new Button();
-	private Button bnext ;
-	private Button btnSave;
-	private Tabbox tabbox = new Tabbox();
-	private Tabs tabs = new Tabs();
-	private Tabpanels tabpanels = new Tabpanels(); 
-	private Window winExportFile = null;
-	private Listbox cboType = new Listbox();
-	private ConfirmPanel confirmPanel = new ConfirmPanel(true);
-	private ConfirmPanel confirmPanelMain = new ConfirmPanel(true);
+	protected Auxheader headerPanel=new Auxheader();
+	protected WStringEditor name = new WStringEditor();
+	protected String tempName = "";
+	protected Button newPrintFormat;
+	protected Label selectAll;
+	protected Label deselectAll;
+	protected Label pipeSeparator;
+	protected Button bExport = new Button();
+	protected Button bnext ;
+	protected Button btnSave;
+	protected Tabbox tabbox = new Tabbox();
+	protected Tabs tabs = new Tabs();
+	protected Tabpanels tabpanels = new Tabpanels(); 
+	protected Window winExportFile = null;
+	protected Listbox cboType = new Listbox();
+	protected ConfirmPanel confirmPanel = new ConfirmPanel(true);
+	protected ConfirmPanel confirmPanelMain = new ConfirmPanel(true);
 	public boolean isChange=false;
 	public ZkReportViewer viewer;
-	MPrintFormat fm;
+	protected MPrintFormat fm;
 	
 
-	Tab tabdf1=new Tab(Msg.getMsg(Env.getCtx(), "DisplayFields"));
-	Tab tabfo2=new Tab(Msg.getMsg(Env.getCtx(), "FieldOrder"));
-	Tab tabsc3=new Tab(Msg.getMsg(Env.getCtx(), "SortCriteria"));
-	Tab tabgc4=new Tab(Msg.getMsg(Env.getCtx(), "GroupingCriteria"));
-	Tab tabsf5=new Tab(Msg.getMsg(Env.getCtx(), "SummaryFields"));
+	protected Tab tabdf1=new Tab(Msg.getMsg(Env.getCtx(), "DisplayFields"));
+	protected Tab tabfo2=new Tab(Msg.getMsg(Env.getCtx(), "FieldOrder"));
+	protected Tab tabsc3=new Tab(Msg.getMsg(Env.getCtx(), "SortCriteria"));
+	protected Tab tabgc4=new Tab(Msg.getMsg(Env.getCtx(), "GroupingCriteria"));
+	protected Tab tabsf5=new Tab(Msg.getMsg(Env.getCtx(), "SummaryFields"));
 
-	WRC1DisplayFieldsPanel tpdf1 = new WRC1DisplayFieldsPanel();
-	WRC2FieldOrderPanel tpfo2 =new WRC2FieldOrderPanel();
-	WRC3SortCriteriaPanel tpsc3=new WRC3SortCriteriaPanel();
-	WRC4GroupingCriteriaPanel tpgc4=new WRC4GroupingCriteriaPanel();
-	WRC5SummaryFieldsPanel tpsf5=new WRC5SummaryFieldsPanel();
+	protected WRC1DisplayFieldsPanel tpdf1 = new WRC1DisplayFieldsPanel();
+	protected WRC2FieldOrderPanel tpfo2 =new WRC2FieldOrderPanel();
+	protected WRC3SortCriteriaPanel tpsc3=new WRC3SortCriteriaPanel();
+	protected WRC4GroupingCriteriaPanel tpgc4=new WRC4GroupingCriteriaPanel();
+	protected WRC5SummaryFieldsPanel tpsf5=new WRC5SummaryFieldsPanel();
 
 	private int oldtabidx = 0;
 	
@@ -165,7 +165,7 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 		}
 	}
 	
-	private void init() 
+	protected void init() 
 	{
 
 		form.setStyle("width: 90%; height: 90%; position: absolute; border:none; padding:none; margin:none;");
@@ -385,7 +385,7 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 		pipeSeparator.setVisible(oldtabidx == 0);
 	}
 
-	private void onSave() {
+	protected void onSave() {
 
 		if (name.getValue() == null || Util.isEmpty((String) name.getValue()))
 			throw new WrongValueException(name.getComponent(), Msg.getMsg(m_ctx, "FillMandatory"));
@@ -419,7 +419,7 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 		setIsChanged(false);
 	}
 
-	private void updateTrl()
+	protected void updateTrl()
 	{
 		List<GenericPO> list = new Query(m_ctx, "AD_PrintFormat_Trl", "AD_PrintFormat_ID = ?", null)
 		.setParameters(fm.getAD_PrintFormat_ID())
@@ -440,7 +440,7 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 	/**
 	 * 	Export
 	 */
-	private void cmd_export()
+	protected void cmd_export()
 	{		
 		log.config("");
 		if (!m_isCanExport)
@@ -470,6 +470,7 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 			cboType.appendItem("ssv" + " - " + Msg.getMsg(Env.getCtx(), "FileSSV"), "ssv");
 			cboType.appendItem("csv" + " - " + Msg.getMsg(Env.getCtx(), "FileCSV"), "csv");
 			cboType.appendItem("xls" + " - " + Msg.getMsg(Env.getCtx(), "FileXLS"), "xls");
+			cboType.appendItem("xlsx" + " - " + Msg.getMsg(Env.getCtx(), "FileXLSX"), "xlsx");
 			cboType.setSelectedItem(li);
 			
 			Hbox hb = new Hbox();
@@ -504,7 +505,7 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 		AEnv.showWindow(winExportFile);
 	}	//	cmd_export
 
-	private void exportFile()
+	protected void exportFile()
 	{
 		try
 		{
@@ -564,6 +565,11 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 			{
 				inputFile = File.createTempFile("Export", ".xls");							
 				m_reportEngine.createXLS(inputFile, m_reportEngine.getPrintFormat().getLanguage());
+			}
+			else if (ext.equals("xlsx"))
+			{
+				inputFile = File.createTempFile("Export", ".xlsx");							
+				m_reportEngine.createXLSX(inputFile, m_reportEngine.getPrintFormat().getLanguage());
 			}
 			else
 			{

@@ -28,6 +28,7 @@ import org.adempiere.webui.editor.WHtmlEditor;
 import org.adempiere.webui.editor.WImageEditor;
 import org.adempiere.webui.editor.WLocationEditor;
 import org.adempiere.webui.editor.WLocatorEditor;
+import org.adempiere.webui.editor.WMultiSelectEditor;
 import org.adempiere.webui.editor.WNumberEditor;
 import org.adempiere.webui.editor.WPAttributeEditor;
 import org.adempiere.webui.editor.WPasswordEditor;
@@ -209,6 +210,10 @@ public class DefaultEditorFactory implements IEditorFactory {
         {
         	editor = new WGridTabMultiSelectionEditor(gridField, tableEditor);
         }
+		else if (DisplayType.isMultiSelect(displayType))
+		{
+			editor = new WMultiSelectEditor(gridField);
+		}
         else
         {
             editor = new WUnknownEditor(gridField);

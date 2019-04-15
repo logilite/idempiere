@@ -38,6 +38,7 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLandedCostAllocation;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
+import org.compiere.model.MTable;
 import org.compiere.model.MTax;
 import org.compiere.model.ProductCost;
 import org.compiere.model.X_M_InOut;
@@ -67,17 +68,17 @@ public class Doc_MatchPO extends Doc
 		super(as, MMatchPO.class, rs, DOCTYPE_MatMatchPO, trxName);
 	}   //  Doc_MatchPO
 
-	private int         m_C_OrderLine_ID = 0;
-	private MOrderLine	m_oLine = null;
+	protected int         m_C_OrderLine_ID = 0;
+	protected MOrderLine	m_oLine = null;
 	//
-	private int         m_M_InOutLine_ID = 0;
-	private MInOutLine		m_ioLine = null;
+	protected int         m_M_InOutLine_ID = 0;
+	protected MInOutLine		m_ioLine = null;
 	@SuppressWarnings("unused")
-	private int         m_C_InvoiceLine_ID = 0;
+	protected int         m_C_InvoiceLine_ID = 0;
 
-	private ProductCost m_pc;
-	private int			m_M_AttributeSetInstance_ID = 0;
-	private MMatchPO m_matchPO;
+	protected ProductCost m_pc;
+	protected int			m_M_AttributeSetInstance_ID = 0;
+	protected MMatchPO m_matchPO;
 	private boolean 			m_deferPosting = false;
 
 	/**
@@ -94,10 +95,10 @@ public class Doc_MatchPO extends Doc
 		setQty (m_matchPO.getQty());
 		//
 		m_C_OrderLine_ID = m_matchPO.getC_OrderLine_ID();
-		m_oLine = new MOrderLine (getCtx(), m_C_OrderLine_ID, getTrxName());
+		m_oLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(m_C_OrderLine_ID, getTrxName());
 		//
 		m_M_InOutLine_ID = m_matchPO.getM_InOutLine_ID();
-		m_ioLine = new MInOutLine (getCtx(), m_M_InOutLine_ID, getTrxName());
+		m_ioLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(m_M_InOutLine_ID, getTrxName());
 
 		m_C_InvoiceLine_ID = m_matchPO.getC_InvoiceLine_ID();
 
@@ -221,7 +222,8 @@ public class Doc_MatchPO extends Doc
 			}	//	correct included Tax
 		}
 
-		MInOutLine receiptLine = new MInOutLine (getCtx(), m_M_InOutLine_ID, getTrxName());
+		MInOutLine receiptLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(m_M_InOutLine_ID,
+				getTrxName());
 		MInOut inOut = receiptLine.getParent();
 		boolean isReturnTrx = inOut.getMovementType().equals(X_M_InOut.MOVEMENTTYPE_VendorReturns);
 
@@ -237,6 +239,7 @@ public class Doc_MatchPO extends Doc
 			if (m_oLine.getC_Currency_ID() != as.getC_Currency_ID())
 			{
 				MOrder order = m_oLine.getParent();
+				// consider MR DateAcct as Conversion date
 				Timestamp dateAcct = inOut.getDateAcct();
 				BigDecimal rate = MConversionRate.getRate(
 					order.getC_Currency_ID(), as.getC_Currency_ID(),
@@ -270,6 +273,7 @@ public class Doc_MatchPO extends Doc
 		if (m_oLine.getC_Currency_ID() != as.getC_Currency_ID())
 		{
 			MOrder order = m_oLine.getParent();
+			// consider MR DateAcct as Conversion date
 			Timestamp dateAcct = inOut.getDateAcct();
 			BigDecimal rate = MConversionRate.getRate(
 				order.getC_Currency_ID(), as.getC_Currency_ID(),
@@ -305,7 +309,7 @@ public class Doc_MatchPO extends Doc
 
 		if (MAcctSchema.COSTINGMETHOD_StandardCosting.equals(costingMethod))
 		{
-			if (m_matchPO.getReversal_ID() > 0)
+			if (m_matchPO.getReversal_ID() > 0 && m_matchPO.isReversal())
 			{
 				//  Product PPV
 				FactLine cr = fact.createLine(null,
@@ -426,7 +430,7 @@ public class Doc_MatchPO extends Doc
 	/** Verify if the posting involves two or more organizations
 	@return true if there are more than one org involved on the posting
 	 */
-	private boolean isInterOrg(MAcctSchema as) {
+	public boolean isInterOrg(MAcctSchema as) {
 		MAcctSchemaElement elementorg = as.getAcctSchemaElement(MAcctSchemaElement.ELEMENTTYPE_Organization);
 		if (elementorg == null || !elementorg.isBalanced()) {
 			// no org element or not need to be balanced
@@ -443,7 +447,7 @@ public class Doc_MatchPO extends Doc
 	}
 
 	// Elaine 2008/6/20	
-	private String createMatchPOCostDetail(MAcctSchema as, BigDecimal poCost, Map<Integer, BigDecimal> landedCostMap)
+	public String createMatchPOCostDetail(MAcctSchema as, BigDecimal poCost, Map<Integer, BigDecimal> landedCostMap)
 	{
 		if (m_ioLine != null && m_ioLine.getM_InOutLine_ID() > 0 &&
 			m_oLine != null && m_oLine.getC_OrderLine_ID() > 0)
@@ -534,7 +538,7 @@ public class Doc_MatchPO extends Doc
 	}
 
 
-	private String createLandedCostAdjustments(MAcctSchema as,
+	public String createLandedCostAdjustments(MAcctSchema as,
 			Map<Integer, BigDecimal> landedCostMap, MMatchPO mMatchPO,
 			BigDecimal tQty) {
 		for(Integer elementId : landedCostMap.keySet())

@@ -36,6 +36,7 @@ import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
+import org.compiere.model.MTable;
 import org.compiere.model.MWarehouse;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
@@ -189,7 +190,7 @@ public abstract class CreateFromShipment extends CreateFrom
 		 *  InvoiceLine     - 8
 		 */
 		if (log.isLoggable(Level.CONFIG)) log.config("C_Order_ID=" + C_Order_ID);
-		p_order = new MOrder (Env.getCtx(), C_Order_ID, null);      //  save
+		p_order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(C_Order_ID, null);    //  save
 
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 		StringBuilder sql = new StringBuilder("SELECT "
@@ -375,7 +376,7 @@ public abstract class CreateFromShipment extends CreateFrom
 	 */
 	protected Vector<Vector<Object>> getInvoiceData(int C_Invoice_ID)
 	{
-		m_invoice = new MInvoice(Env.getCtx(), C_Invoice_ID, null); // save
+		m_invoice = (MInvoice) MTable.get(Env.getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, null); // save
 		p_order = null;
 		m_rma = null;
 		
@@ -555,7 +556,7 @@ public abstract class CreateFromShipment extends CreateFrom
 		}
 		// Get Shipment
 		int M_InOut_ID = ((Integer) getGridTab().getValue("M_InOut_ID")).intValue();
-		MInOut inout = new MInOut(Env.getCtx(), M_InOut_ID, trxName);
+		MInOut inout = (MInOut) MTable.get(Env.getCtx(), MInOut.Table_ID).getPO(M_InOut_ID, trxName);
 		if (log.isLoggable(Level.CONFIG)) log.config(inout + ", C_Locator_ID=" + M_Locator_ID);
 
 		// Lines
@@ -587,7 +588,8 @@ public abstract class CreateFromShipment extends CreateFrom
 				if (pp != null)
 					C_InvoiceLine_ID = pp.getKey();
 				if (C_InvoiceLine_ID != 0)
-					il = new MInvoiceLine (Env.getCtx(), C_InvoiceLine_ID, trxName);
+					il = (MInvoiceLine) MTable.get(Env.getCtx(), MInvoiceLine.Table_ID)
+							.getPO(C_InvoiceLine_ID, trxName);
 				//boolean isInvoiced = (C_InvoiceLine_ID != 0);
 				//	Precision of Qty UOM
 				int precision = 2;
@@ -607,7 +609,7 @@ public abstract class CreateFromShipment extends CreateFrom
 					QtyEntered = QtyEntered.negate();
 
 				//	Create new InOut Line
-				MInOutLine iol = new MInOutLine (inout);
+				MInOutLine iol = MInOutLine.createFrom(inout);
 				iol.setM_Product_ID(M_Product_ID, C_UOM_ID);	//	Line UOM
 				iol.setQty(QtyEntered);							//	Movement/Entered
 				//
@@ -616,7 +618,7 @@ public abstract class CreateFromShipment extends CreateFrom
 				if (C_OrderLine_ID != 0)
 				{
 					iol.setC_OrderLine_ID(C_OrderLine_ID);
-					ol = new MOrderLine (Env.getCtx(), C_OrderLine_ID, trxName);
+					ol = (MOrderLine) MTable.get(Env.getCtx(), MOrderLine.Table_ID).getPO(C_OrderLine_ID, trxName);
 					if (ol.getQtyEntered().compareTo(ol.getQtyOrdered()) != 0)
 					{
 						iol.setMovementQty(QtyEntered
@@ -657,7 +659,7 @@ public abstract class CreateFromShipment extends CreateFrom
 				}
 				else if (M_RMALine_ID != 0)
 				{
-					rmal = new MRMALine(Env.getCtx(), M_RMALine_ID, trxName);
+					rmal = (MRMALine) MTable.get(Env.getCtx(), MRMALine.Table_ID).getPO(M_RMALine_ID, trxName);
 					iol.setM_RMALine_ID(M_RMALine_ID);
 					iol.setQtyEntered(QtyEntered);
 					iol.setDescription(rmal.getDescription());

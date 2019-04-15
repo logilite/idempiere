@@ -28,6 +28,7 @@ import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MLocation;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.X_I_Invoice;
 import org.compiere.util.DB;
@@ -528,7 +529,7 @@ public class ImportInvoice extends SvrProcess
 				MBPartner bp = MBPartner.get (getCtx(), imp.getBPartnerValue(), get_TrxName());
 				if (bp == null)
 				{
-					bp = new MBPartner (getCtx (), -1, get_TrxName());
+					bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO( -1, get_TrxName());
 					bp.setClientOrg (imp.getAD_Client_ID (), imp.getAD_Org_ID ());
 					bp.setValue (imp.getBPartnerValue ());
 					bp.setName (imp.getName ());
@@ -680,7 +681,7 @@ public class ImportInvoice extends SvrProcess
 					if (oldDocumentNo == null)
 						oldDocumentNo = "";
 					//
-					invoice = new MInvoice (getCtx(), 0, get_TrxName());
+					invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(0, null);
 					invoice.setClientOrg (imp.getAD_Client_ID(), imp.getAD_Org_ID());
 					invoice.setC_DocTypeTarget_ID(imp.getC_DocType_ID());
 					invoice.setIsSOTrx(imp.isSOTrx());
@@ -722,7 +723,7 @@ public class ImportInvoice extends SvrProcess
 				}
 				imp.setC_Invoice_ID (invoice.getC_Invoice_ID());
 				//	New InvoiceLine
-				MInvoiceLine line = new MInvoiceLine (invoice);
+				MInvoiceLine line = MInvoiceLine.createFrom(invoice);
 				if (imp.getLineDescription() != null)
 					line.setDescription(imp.getLineDescription());
 				line.setLine(lineNo);

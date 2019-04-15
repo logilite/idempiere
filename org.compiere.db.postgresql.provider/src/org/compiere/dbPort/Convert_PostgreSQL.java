@@ -200,6 +200,10 @@ public class Convert_PostgreSQL extends Convert_SQL92 {
 		// Convert datatypes from CAST(.. as datatypes):
 		retValue = convertCast(retValue);
 		
+		// Replace HAVE/IN expression for array data types
+		retValue = retValue.replaceAll(PG_ARRAY_HAVE_ALIAS_EXP, PG_ARRAY_HAVE_EXP);
+		retValue = retValue.replaceAll(PG_ARRAY_IN_ALIAS_EXP, PG_ARRAY_IN_EXP);
+
 		return retValue;
 	} // convertComplexStatement
 	
@@ -1012,6 +1016,7 @@ public class Convert_PostgreSQL extends Convert_SQL92 {
 			String type = null;
 			String defaultvalue = null;
 			String nullclause = null;
+			String usingclause = null;
 			String DDL = null;
 
 			if (begin_col != -1) {
@@ -1119,6 +1124,9 @@ public class Convert_PostgreSQL extends Convert_SQL92 {
 						nullclause = "NULL";
 						
 					}
+					if (rest != null && rest.toUpperCase().indexOf("USING") >= 0) {
+						usingclause = rest;
+					}
 
 					DDL = "INSERT INTO t_alter_column values('";
 					String tableName = sqlStatement.substring(0, begin_col - action.length());
@@ -1134,7 +1142,11 @@ public class Convert_PostgreSQL extends Convert_SQL92 {
 					else
 						DDL = DDL + "null,";
 					if (defaultvalue != null)
-						DDL = DDL + "'" + defaultvalue + "'";
+						DDL = DDL + "'" + defaultvalue + "',";
+					else
+						DDL = DDL + "null,";
+					if (usingclause != null)
+						DDL = DDL + "'" + usingclause + "'";
 					else
 						DDL = DDL + "null";
 					DDL = DDL + ")";					

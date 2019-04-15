@@ -35,6 +35,7 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
+import org.compiere.model.MTable;
 import org.compiere.model.Query;
 import org.compiere.model.Tax;
 import org.compiere.util.DB;
@@ -76,7 +77,7 @@ public class CalloutRMA extends CalloutEngine {
 		if (M_InOutLine_ID == null || M_InOutLine_ID.intValue() == 0)
 			return "";
 
-		MInOutLine iol = new MInOutLine(ctx, M_InOutLine_ID, null);
+		MInOutLine iol = (MInOutLine) MTable.get(ctx, MInOutLine.Table_ID).getPO(M_InOutLine_ID, null);
 
 		int invoiceLine_ID = new Query(ctx, I_C_InvoiceLine.Table_Name,
 				"M_InOutLine_ID=?", null).setParameters(M_InOutLine_ID)
@@ -86,7 +87,8 @@ public class CalloutRMA extends CalloutEngine {
 
 		if (invoiceLine_ID != 0) 
 		{
-			MInvoiceLine invoiceLine = new MInvoiceLine(ctx, invoiceLine_ID, null);
+			MInvoiceLine invoiceLine = (MInvoiceLine) MTable.get(ctx, MInvoiceLine.Table_ID)
+					.getPO(invoiceLine_ID, null);
 			if (invoiceLine.getM_Product_ID() != 0) {
 				mTab.setValue(MRMALine.COLUMNNAME_M_Product_ID, invoiceLine.getM_Product_ID());
 				mTab.setValue(MRMALine.COLUMNNAME_C_Charge_ID, null);
@@ -107,7 +109,8 @@ public class CalloutRMA extends CalloutEngine {
 		} 
 		else if (iol.getC_OrderLine_ID() != 0) 
 		{
-			MOrderLine orderLine = new MOrderLine(ctx, iol.getC_OrderLine_ID(), null);
+			MOrderLine orderLine = (MOrderLine) MTable.get(ctx, MOrderLine.Table_ID).getPO(iol.getC_OrderLine_ID(),
+					null);
 			if (orderLine.getM_Product_ID() != 0) {
 				mTab.setValue(MRMALine.COLUMNNAME_M_Product_ID, orderLine.getM_Product_ID());
 			    mTab.setValue(MRMALine.COLUMNNAME_C_Charge_ID, null);

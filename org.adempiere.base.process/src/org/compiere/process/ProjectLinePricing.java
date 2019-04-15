@@ -23,6 +23,7 @@ import org.adempiere.base.Core;
 import org.adempiere.base.IProductPricing;
 import org.compiere.model.MProject;
 import org.compiere.model.MProjectLine;
+import org.compiere.model.MTable;
 import org.compiere.util.Msg;
 
 /**
@@ -67,7 +68,9 @@ public class ProjectLinePricing extends SvrProcess
 		if (projectLine.getM_Product_ID() == 0)
 			throw new IllegalArgumentException("No Product");
 		//
-		MProject project = new MProject (getCtx(), projectLine.getC_Project_ID(), get_TrxName());
+		MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(projectLine.getC_Project_ID(),
+				get_TrxName());
+
 		if (project.getM_PriceList_ID() == 0)
 			throw new IllegalArgumentException("No PriceList");
 		//

@@ -279,6 +279,31 @@ public class X_M_MatchInv extends PO implements I_M_MatchInv, I_Persistent
 		return (String)get_Value(COLUMNNAME_M_MatchInv_UU);
 	}
 
+	public org.compiere.model.I_M_MatchInvHdr getM_MatchInvHdr() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_MatchInvHdr)MTable.get(getCtx(), org.compiere.model.I_M_MatchInvHdr.Table_Name)
+			.getPO(getM_MatchInvHdr_ID(), get_TrxName());	}
+
+	/** Set Match Invoice Header.
+		@param M_MatchInvHdr_ID Match Invoice Header	  */
+	public void setM_MatchInvHdr_ID (int M_MatchInvHdr_ID)
+	{
+		if (M_MatchInvHdr_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_M_MatchInvHdr_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_M_MatchInvHdr_ID, Integer.valueOf(M_MatchInvHdr_ID));
+	}
+
+	/** Get Match Invoice Header.
+		@return Match Invoice Header	  */
+	public int getM_MatchInvHdr_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_MatchInvHdr_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException
     {
 		return (org.compiere.model.I_M_Product)MTable.get(getCtx(), org.compiere.model.I_M_Product.Table_Name)
@@ -443,4 +468,33 @@ public class X_M_MatchInv extends PO implements I_M_MatchInv, I_Persistent
 			 return 0;
 		return ii.intValue();
 	}
+	
+
+	/**
+	 * Set Reversal.
+	 * 
+	 * @param IsReversal This is a reversing transaction
+	 */
+	public void setIsReversal(boolean IsReversal)
+	{
+		set_Value(COLUMNNAME_IsReversal, Boolean.valueOf(IsReversal));
+	}
+
+	/**
+	 * Get Reversal.
+	 * 
+	 * @return This is a reversing transaction
+	 */
+	public boolean isReversal()
+	{
+		Object oo = get_Value(COLUMNNAME_IsReversal);
+		if (oo != null)
+		{
+			if (oo instanceof Boolean)
+				return ((Boolean) oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 }

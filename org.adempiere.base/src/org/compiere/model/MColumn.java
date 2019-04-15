@@ -532,59 +532,84 @@ public class MColumn extends X_AD_Column
 		StringBuilder sqlBase = new StringBuilder ("ALTER TABLE ")
 			.append(table.getTableName())
 			.append(" MODIFY ").append(getColumnName());
-		
-		//	Default
-		StringBuilder sqlDefault = new StringBuilder(sqlBase)
-			.append(" ").append(getSQLDataType());
-		String defaultValue = getDefaultValue();
-		if (defaultValue != null 
-			&& defaultValue.length() > 0
-			&& defaultValue.indexOf('@') == -1		//	no variables
-			&& ( ! (DisplayType.isID(getAD_Reference_ID()) && defaultValue.equals("-1") ) ) )  // not for ID's with default -1
+		boolean isMultiSelect = false;
+		if (DisplayType.isMultiSelect(getAD_Reference_ID()))
+			isMultiSelect = true;
+		// Default
+		StringBuilder sqlDefault = new StringBuilder(sqlBase).append(" ");
+		if (isMultiSelect && DB.isPostgreSQL())
 		{
-			if (DisplayType.isText(getAD_Reference_ID()) 
-				|| getAD_Reference_ID() == DisplayType.List
-				|| getAD_Reference_ID() == DisplayType.YesNo
-				// Two special columns: Defined as Table but DB Type is String 
-				|| getColumnName().equals("EntityType") || getColumnName().equals("AD_Language")
-				|| (getAD_Reference_ID() == DisplayType.Button &&
-						!(getColumnName().endsWith("_ID"))))
+			DB.getSQLValueString(get_TrxName(), "SELECT columndropdefault(?,?)", table.getTableName(), getColumnName());
+
+			// Drop foreign key constraint
+			if (!Util.isEmpty(getFKConstraintName(), true))
 			{
-				if (!defaultValue.startsWith("'") && !defaultValue.endsWith("'"))
-					defaultValue = DB.TO_STRING(defaultValue);
+				sql.append("ALTER TABLE ").append(table.getTableName()).append(" DROP CONSTRAINT IF EXISTS ")
+						.append(getFKConstraintName()).append(DB.SQLSTATEMENT_SEPARATOR);
 			}
-			sqlDefault.append(" DEFAULT ").append(defaultValue);
+
+			// Set Array data type & Convert existing data into Array structure
+			String dt = getSQLDataType();
+			sql.append(sqlDefault).append(dt);
+			sql.append(" USING string_to_array(array_to_string((ARRAY[]::").append(dt.substring(0, dt.indexOf("(")))
+					.append("[] || ").append(getColumnName()).append(")::").append(dt).append(",'','') ,'','')::")
+					.append(dt);
 		}
 		else
-		{
-			if (! isMandatory())
-				sqlDefault.append(" DEFAULT NULL ");
-			defaultValue = null;
-		}
-		sql.append(sqlDefault);
-		
-		//	Constraint
+			sqlDefault.append(getSQLDataType());
 
-		//	Null Values
-		if (isMandatory() && defaultValue != null && defaultValue.length() > 0)
+		if (!isMultiSelect)
 		{
-			StringBuilder sqlSet = new StringBuilder("UPDATE ")
-				.append(table.getTableName())
-				.append(" SET ").append(getColumnName())
-				.append("=").append(defaultValue)
-				.append(" WHERE ").append(getColumnName()).append(" IS NULL");
-			sql.append(DB.SQLSTATEMENT_SEPARATOR).append(sqlSet);
-		}
-		
-		//	Null
-		if (setNullOption)
-		{
-			StringBuilder sqlNull = new StringBuilder(sqlBase);
-			if (isMandatory())
-				sqlNull.append(" NOT NULL");
+			String defaultValue = getDefaultValue();
+			if (defaultValue != null 
+				&& defaultValue.length() > 0
+				&& defaultValue.indexOf('@') == -1		//	no variables
+				&& ( ! (DisplayType.isID(getAD_Reference_ID()) && defaultValue.equals("-1") ) ) )  // not for ID's with default -1
+			{
+				if (DisplayType.isText(getAD_Reference_ID()) 
+					|| getAD_Reference_ID() == DisplayType.List
+					|| getAD_Reference_ID() == DisplayType.YesNo
+					// Two special columns: Defined as Table but DB Type is String 
+					|| getColumnName().equals("EntityType") || getColumnName().equals("AD_Language")
+					|| (getAD_Reference_ID() == DisplayType.Button &&
+							!(getColumnName().endsWith("_ID"))))
+				{
+					if (!defaultValue.startsWith("'") && !defaultValue.endsWith("'"))
+						defaultValue = DB.TO_STRING(defaultValue);
+				}
+				sqlDefault.append(" DEFAULT ").append(defaultValue);
+			}
 			else
-				sqlNull.append(" NULL");
-			sql.append(DB.SQLSTATEMENT_SEPARATOR).append(sqlNull);
+			{
+				if (! isMandatory())
+					sqlDefault.append(" DEFAULT NULL ");
+				defaultValue = null;
+			}
+			sql.append(sqlDefault);
+			
+			//	Constraint
+	
+			//	Null Values
+			if (isMandatory() && defaultValue != null && defaultValue.length() > 0)
+			{
+				StringBuilder sqlSet = new StringBuilder("UPDATE ")
+					.append(table.getTableName())
+					.append(" SET ").append(getColumnName())
+					.append("=").append(defaultValue)
+					.append(" WHERE ").append(getColumnName()).append(" IS NULL");
+				sql.append(DB.SQLSTATEMENT_SEPARATOR).append(sqlSet);
+			}
+			
+			//	Null
+			if (setNullOption)
+			{
+				StringBuilder sqlNull = new StringBuilder(sqlBase);
+				if (isMandatory())
+					sqlNull.append(" NOT NULL");
+				else
+					sqlNull.append(" NULL");
+				sql.append(DB.SQLSTATEMENT_SEPARATOR).append(sqlNull);
+			}
 		}
 		//
 		return sql.toString();
@@ -759,7 +784,7 @@ public class MColumn extends X_AD_Column
 		int refid = getAD_Reference_ID();
 		if (DisplayType.TableDir == refid || (DisplayType.Search == refid && getAD_Reference_Value_ID() == 0)) {
 			foreignTable = getColumnName().substring(0, getColumnName().length()-3);
-		} else 	if (DisplayType.Table == refid || DisplayType.Search == refid) {
+		} else 	if (DisplayType.Table == refid || DisplayType.Search == refid || DisplayType.MultiSelectTable == refid) {
 			X_AD_Reference ref = new X_AD_Reference(getCtx(), getAD_Reference_Value_ID(), get_TrxName());
 			if (X_AD_Reference.VALIDATIONTYPE_TableValidation.equals(ref.getValidationType())) {
 				int cnt = DB.getSQLValueEx(get_TrxName(), "SELECT COUNT(*) FROM AD_Ref_Table WHERE AD_Reference_ID=?", getAD_Reference_Value_ID());
@@ -769,7 +794,7 @@ public class MColumn extends X_AD_Column
 						foreignTable = rt.getAD_Table().getTableName();
 				}
 			}
-		} else 	if (DisplayType.List == refid || DisplayType.Payment == refid) {
+		} else 	if (DisplayType.List == refid || DisplayType.Payment == refid || DisplayType.MultiSelectList == refid) {
 			foreignTable = "AD_Ref_List";
 		} else if (DisplayType.Location == refid) {
 			foreignTable = "C_Location";
@@ -900,7 +925,7 @@ public class MColumn extends X_AD_Column
 		if (!column.isKey() && !column.getColumnName().equals(PO.getUUIDColumnName(table.getTableName())) && !column.isVirtualColumn())
 		{
 			int refid = column.getAD_Reference_ID();
-			if (refid != DisplayType.List && refid != DisplayType.Payment)
+			if (refid != DisplayType.List && refid != DisplayType.Payment && !DisplayType.isMultiSelect(refid))
 			{
 				String referenceTableName = column.getReferenceTableName();
 				if (referenceTableName != null)

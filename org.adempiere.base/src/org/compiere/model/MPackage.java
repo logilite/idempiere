@@ -157,16 +157,17 @@ public class MPackage extends X_M_Package
 		
 		MOrder order = null;
 		if (shipment.getC_Order_ID() > 0)
-			order = new MOrder(getCtx(), shipment.getC_Order_ID(), get_TrxName());
+			order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(shipment.getC_Order_ID(), get_TrxName());
 		else
 		{
 			MMatchPO[] mos = MMatchPO.getInOut(getCtx(), shipment.getM_InOut_ID(), get_TrxName());
 			for (MMatchPO mo : mos)
 			{
-				MOrderLine ol = new MOrderLine(getCtx(), mo.getC_OrderLine_ID(), get_TrxName());
+				MOrderLine ol = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(mo.getC_OrderLine_ID(),
+						get_TrxName());
 				if (ol.getC_Order_ID() > 0)
 				{
-					order = new MOrder(getCtx(), ol.getC_Order_ID(), get_TrxName());
+					order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(ol.getC_Order_ID(), get_TrxName());
 					break;
 				}
 			}
@@ -396,18 +397,21 @@ public class MPackage extends X_M_Package
 		
 		if (getM_InOut_ID() > 0)
 		{
-			ioOut = new MInOut(getCtx(), getM_InOut_ID(), get_TrxName());
+			ioOut = (MInOut) MTable.get(getCtx(), MInOut.Table_ID).getPO(getM_InOut_ID(), get_TrxName());
 			if (ioOut.getC_Invoice_ID() > 0)
-				invoice = new MInvoice(getCtx(), ioOut.getC_Invoice_ID(), get_TrxName());
+				invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(ioOut.getC_Invoice_ID(),
+						get_TrxName());
 			else
 			{
 				MMatchInv[] mis = MMatchInv.getInOut(getCtx(), ioOut.getM_InOut_ID(), get_TrxName());
 				for (MMatchInv mi : mis)
 				{
-					MInvoiceLine iol = new MInvoiceLine(getCtx(), mi.getC_InvoiceLine_ID(), get_TrxName());
+					MInvoiceLine iol = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(
+							mi.getC_InvoiceLine_ID(), get_TrxName());
 					if (iol.getC_Invoice_ID() > 0)
 					{
-						invoice = new MInvoice(getCtx(), iol.getC_Invoice_ID(), get_TrxName());
+						invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(iol.getC_Invoice_ID(),
+								get_TrxName());
 						break;
 					}
 				}
@@ -424,21 +428,22 @@ public class MPackage extends X_M_Package
 					sb.append("ORDER BY C_InvoiceLine_ID DESC");
 					int C_Invoice_ID = DB.getSQLValue(get_TrxName(), sb.toString(), getM_InOut_ID());
 					if (C_Invoice_ID > 0)
-						invoice = new MInvoice(getCtx(), C_Invoice_ID, get_TrxName());
+						invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, get_TrxName());
 				}
 			}
 
 			if (ioOut.getC_Order_ID() > 0)
-				order = new MOrder(getCtx(), ioOut.getC_Order_ID(), get_TrxName());
+				order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(ioOut.getC_Order_ID(), get_TrxName());
 			else
 			{
 				MMatchPO[] mos = MMatchPO.getInOut(getCtx(), ioOut.getM_InOut_ID(), get_TrxName());
 				for (MMatchPO mo : mos)
 				{
-					MOrderLine ol = new MOrderLine(getCtx(), mo.getC_OrderLine_ID(), get_TrxName());
+					MOrderLine ol = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(
+							mo.getC_OrderLine_ID(), get_TrxName());
 					if (ol.getC_Order_ID() > 0)
 					{
-						order = new MOrder(getCtx(), ol.getC_Order_ID(), get_TrxName());
+						order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(ol.getC_Order_ID(), get_TrxName());
 						break;
 					}
 				}
@@ -455,7 +460,7 @@ public class MPackage extends X_M_Package
 					sb.append("ORDER BY C_OrderLine_ID DESC");
 					int C_Order_ID = DB.getSQLValue(get_TrxName(), sb.toString(), getM_InOut_ID());
 					if (C_Order_ID > 0)
-						order = new MOrder(getCtx(), C_Order_ID, get_TrxName());
+						order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(C_Order_ID, get_TrxName());
 				}
 			}
 			
@@ -468,7 +473,7 @@ public class MPackage extends X_M_Package
 				sb.append("ORDER BY C_Invoice_ID DESC");
 				int C_Invoice_ID = DB.getSQLValue(get_TrxName(), sb.toString(), order.getC_Order_ID());
 				if (C_Invoice_ID > 0)
-					invoice = new MInvoice(getCtx(), C_Invoice_ID, get_TrxName());
+					invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, get_TrxName());
 			}
 		}
 		
@@ -500,7 +505,7 @@ public class MPackage extends X_M_Package
 			CustomsValue = CODAmount.subtract(FreightAmt);			
 		}
 		
-		MShippingTransaction st = new MShippingTransaction(getCtx(), 0, trxName);
+		MShippingTransaction st =(MShippingTransaction) MTable.get(getCtx(), MShippingTransaction.Table_ID).getPO(0,trxName);
 		st.setAction(action);
 		st.setAD_Client_ID(getAD_Client_ID());
 		st.setAD_Org_ID(getAD_Org_ID());

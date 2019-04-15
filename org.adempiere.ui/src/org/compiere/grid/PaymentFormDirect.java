@@ -26,6 +26,7 @@ import org.compiere.model.MBankAccountProcessor;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.process.DocAction;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -58,14 +59,14 @@ public abstract class PaymentFormDirect extends PaymentForm {
 			m_C_Payment_ID = ((Integer)getGridTab().getValue("C_Payment_ID")).intValue();
 			if (m_C_Payment_ID != 0)
 			{
-				m_mPayment = new MPayment(Env.getCtx(), m_C_Payment_ID, null);
-				m_mPaymentOriginal = new MPayment(Env.getCtx(), m_C_Payment_ID, null);	//	full copy
+				m_mPayment=(MPayment) MTable.get(Env.getCtx(), MPayment.Table_ID).getPO(m_C_Payment_ID,null);
+				m_mPaymentOriginal=(MPayment) MTable.get(Env.getCtx(), MPayment.Table_ID).getPO(m_C_Payment_ID,null); // full copy
 			}
 		}
 		
 		if (m_mPayment == null)
 		{
-			m_mPayment = new MPayment (Env.getCtx (), 0, null);
+			m_mPayment=(MPayment) MTable.get(Env.getCtx(), MPayment.Table_ID).getPO(0,null);
 			m_mPayment.setAD_Org_ID(m_AD_Org_ID);
 			m_mPayment.setAmount (m_C_Currency_ID, m_Amount);
 		}
@@ -191,12 +192,12 @@ public abstract class PaymentFormDirect extends PaymentForm {
 		MInvoice invoice = null;
 		if (C_Invoice_ID != 0)
 		{
-			invoice = new MInvoice (Env.getCtx(), C_Invoice_ID, null);
+			invoice=(MInvoice) MTable.get(Env.getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, null);
 			negateAmt = invoice.isCreditMemo();
 		}
 		MOrder order = null;
 		if (invoice == null && C_Order_ID != 0)
-			order = new MOrder (Env.getCtx(), C_Order_ID, null);
+			order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(C_Order_ID, null);
 		
 		BigDecimal payAmount = m_Amount;
 		

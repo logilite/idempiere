@@ -21,6 +21,7 @@ import javax.jws.WebService;
 import org.compiere.util.CLogger;
 import org.compiere.util.Trx;
 import org.idempiere.adInterface.x10.ADLoginRequest;
+import org.idempiere.adInterface.x10.ADLoginResponse;
 import org.idempiere.adInterface.x10.CompositeRequest;
 import org.idempiere.adInterface.x10.CompositeRequestDocument;
 import org.idempiere.adInterface.x10.CompositeResponse;
@@ -118,7 +119,12 @@ public class CompositeServiceImpl extends AbstractService implements CompositeSe
 			} finally {
 				trx.close();
 			}
-	
+			
+			if (isTokenSupported) {
+				ADLoginResponse loginRes = resps.addNewADLoginResponse();
+				setLoginResponseParam(loginRes);
+			}
+
 			return ret;
 		} finally {
 			getCompiereService().disconnect();
@@ -203,13 +209,8 @@ public class CompositeServiceImpl extends AbstractService implements CompositeSe
 				runProcessReq.setADLoginRequest(reqlogin);
 				runProcessReq.setModelRunProcess(operation.getModelRunProcess());
 
-				RunProcessResponseDocument runResponse = modelADService.runProcess(wrapperDoc);
-				if (runResponse != null) {
-					respDoc = StandardResponseDocument.Factory.newInstance();
-					StandardResponse resp = respDoc.addNewStandardResponse();
-					resp.setIsError(runResponse.getRunProcessResponse().getIsError());
-					resp.setRunProcessResponse(runResponse.getRunProcessResponse());
-				}
+				respDoc = modelADService.runProcessTrx(wrapperDoc);
+				
 			} else if (portEnum == TargetPort.SET_DOC_ACTION) {
 				if (operation.getModelSetDocAction() == null) {
 					rollbackAndSetError(trx, compResp, respAggregator, "Operation updateData must required ModelSetDocAction");

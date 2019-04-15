@@ -59,7 +59,7 @@ public class MBPartner extends X_C_BPartner
 	{
 		MBPartner template = getBPartnerCashTrx (ctx, AD_Client_ID);
 		if (template == null)
-			template = new MBPartner (ctx, 0, null);
+			template = (MBPartner) MTable.get(ctx, MBPartner.Table_ID).getPO(0, null);
 		//	Reset
 		if (template != null)
 		{
@@ -209,11 +209,24 @@ public class MBPartner extends X_C_BPartner
 	 * 	Constructor for new BPartner from Template
 	 * 	@param ctx context
 	 */
+	@Deprecated
 	public MBPartner (Properties ctx)
 	{
 		this (ctx, -1, null);
 	}	//	MBPartner
+	
 
+	/**
+	 * For new BPartner from Template
+	 * @param ctx context
+	 * @return
+	 */
+	public static MBPartner createFrom (Properties ctx)
+	{
+		MBPartner bPartner = (MBPartner) MTable.get(ctx, MBPartner.Table_ID).getPO(-1, null);
+		return bPartner;
+	}	//	MBPartner
+	
 	/**
 	 * 	Default Constructor
 	 * 	@param ctx context
@@ -278,7 +291,9 @@ public class MBPartner extends X_C_BPartner
 	/**
 	 * 	Import Constructor
 	 *	@param impBP import
+	 *  Deprecated - Use createFrom method instead
 	 */
+	@Deprecated
 	public MBPartner (X_I_BPartner impBP)
 	{
 		this (impBP.getCtx(), 0, impBP.get_TrxName());
@@ -305,6 +320,42 @@ public class MBPartner extends X_C_BPartner
 		setNAICS(impBP.getNAICS());
 		setC_BP_Group_ID(impBP.getC_BP_Group_ID());
 	}	//	MBPartner
+	
+	/**
+	 * Import createFrom
+	 * @param impBP import
+	 * @return bPartner
+	 */
+	public static MBPartner createFrom (X_I_BPartner impBP)
+	{
+		MBPartner bPartner = (MBPartner) MTable.get(impBP.getCtx(), MBPartner.Table_ID).getPO(0, impBP.get_TrxName());
+		bPartner.setClientOrg(impBP);
+		bPartner.setUpdatedBy(impBP.getUpdatedBy());
+		//
+		String value = impBP.getValue();
+		if (value == null || value.length() == 0)
+			value = impBP.getEMail();
+		if (value == null || value.length() == 0)
+			value = impBP.getContactName();
+		bPartner.setValue(value);
+		String name = impBP.getName();
+		if (name == null || name.length() == 0)
+			name = impBP.getContactName();
+		if (name == null || name.length() == 0)
+			name = impBP.getEMail();
+		bPartner.setName(name);
+		bPartner.setName2(impBP.getName2());
+		bPartner.setDescription(impBP.getDescription());
+	//	bPartner.setHelp(impBP.getHelp());
+		bPartner.setDUNS(impBP.getDUNS());
+		bPartner.setTaxID(impBP.getTaxID());
+		bPartner.setNAICS(impBP.getNAICS());
+		bPartner.setC_BP_Group_ID(impBP.getC_BP_Group_ID());
+		
+		return bPartner;
+	}	//	MBPartner
+	
+	
 	
 	
 	/** Users							*/

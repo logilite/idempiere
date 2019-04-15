@@ -42,11 +42,11 @@ public class MPaymentLookup extends Lookup implements Serializable {
 	private static final long serialVersionUID = 2876345457828980720L;
 
 	/**	Context					*/
-	private Properties 		m_ctx;
+	protected Properties 		m_ctx;
 	/** IsSOTrx					*/
-	private boolean			m_isSOTrx = false;
+	protected boolean			m_isSOTrx = false;
 	/** Validation Code			*/
-	private String			m_validationCode;
+	protected String			m_validationCode;
 	
 	public MPaymentLookup(Properties ctx, int windowNo, String validationCode) {
 		super(DisplayType.TableDir, windowNo);
@@ -107,7 +107,7 @@ public class MPaymentLookup extends Lookup implements Serializable {
 		return "PaymentRule";
 	}
 	
-	private ValueNamePair[] getData()
+	protected ValueNamePair[] getData()
 	{
 		String ad_language = Env.getAD_Language(m_ctx);
 		boolean isBaseLanguage = Env.isBaseLanguage(ad_language, "AD_Ref_List");
@@ -169,7 +169,7 @@ public class MPaymentLookup extends Lookup implements Serializable {
 		return m_validationCode.trim();
 	}
 	
-	private String getWhereClause()
+	protected String getWhereClause()
 	{
 		String whereClause = "";
 		String validation = getValidation();

@@ -28,6 +28,7 @@ import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MLocation;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.X_I_Order;
 import org.compiere.util.DB;
@@ -528,7 +529,7 @@ public class ImportOrder extends SvrProcess
 				MBPartner bp = MBPartner.get (getCtx(), imp.getBPartnerValue(), get_TrxName());
 				if (bp == null)
 				{
-					bp = new MBPartner (getCtx (), -1, get_TrxName());
+					bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(-1, get_TrxName());
 					bp.setClientOrg (imp.getAD_Client_ID (), imp.getAD_Org_ID ());
 					bp.setValue (imp.getBPartnerValue ());
 					bp.setName (imp.getName ());
@@ -687,7 +688,7 @@ public class ImportOrder extends SvrProcess
 					if (oldDocumentNo == null)
 						oldDocumentNo = "";
 					//
-					order = new MOrder (getCtx(), 0, get_TrxName());
+				    order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 					order.setClientOrg (imp.getAD_Client_ID(), imp.getAD_Org_ID());
 					order.setC_DocTypeTarget_ID(imp.getC_DocType_ID());
 					order.setIsSOTrx(imp.isSOTrx());
@@ -742,7 +743,7 @@ public class ImportOrder extends SvrProcess
 				}
 				imp.setC_Order_ID(order.getC_Order_ID());
 				//	New OrderLine
-				MOrderLine line = new MOrderLine (order);
+				MOrderLine line = MOrderLine.createFrom(order);
 				line.setLine(lineNo);
 				lineNo += 10;
 				if (imp.getM_Product_ID() != 0)

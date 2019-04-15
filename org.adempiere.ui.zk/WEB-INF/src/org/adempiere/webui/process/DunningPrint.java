@@ -33,6 +33,7 @@ import org.compiere.model.MDunningRun;
 import org.compiere.model.MDunningRunEntry;
 import org.compiere.model.MMailText;
 import org.compiere.model.MQuery;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.MUserMail;
 import org.compiere.model.PrintInfo;
@@ -109,7 +110,7 @@ public class DunningPrint extends SvrProcess
 		MMailText mText = null;
 		if (p_EMailPDF)
 		{
-			mText = new MMailText (getCtx(), p_R_MailText_ID, get_TrxName());
+			mText = (MMailText) MTable.get(getCtx(), MMailText.Table_ID).getPO(p_R_MailText_ID, get_TrxName());
 			if (p_EMailPDF && mText.get_ID() == 0)
 				throw new AdempiereUserError ("@NotFound@: @R_MailText_ID@ - " + p_R_MailText_ID);
 //			subject = mText.getMailHeader();
@@ -139,7 +140,7 @@ public class DunningPrint extends SvrProcess
 			if (p_PrintUnprocessedOnly && entry.isProcessed())
 				continue;
 			//	To BPartner
-			MBPartner bp = new MBPartner (getCtx(), entry.getC_BPartner_ID(), get_TrxName());
+			MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(entry.getC_BPartner_ID(), get_TrxName());
 			if (bp.get_ID() == 0)
 			{
 				StringBuilder msglog = new StringBuilder("@NotFound@: @C_BPartner_ID@ ").append(entry.getC_BPartner_ID());

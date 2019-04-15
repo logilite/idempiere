@@ -22,6 +22,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.MDocType;
 import org.compiere.model.MOrder;
+import org.compiere.model.MTable;
 
 /**
  *	Copy Order and optionally close
@@ -82,7 +83,7 @@ public class CopyOrder extends SvrProcess
 		if (p_DateDoc == null)
 			p_DateDoc = new Timestamp (System.currentTimeMillis());
 		//
-		MOrder from = new MOrder (getCtx(), p_C_Order_ID, get_TrxName());
+		MOrder from = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(p_C_Order_ID, get_TrxName());
 		MOrder newOrder = MOrder.copyFrom (from, p_DateDoc, 
 			dt.getC_DocType_ID(), dt.isSOTrx(), false, true, get_TrxName());		//	copy ASI
 		newOrder.setC_DocTypeTarget_ID(p_C_DocType_ID);
@@ -93,7 +94,7 @@ public class CopyOrder extends SvrProcess
 		//
 		if (p_IsCloseDocument)
 		{
-			MOrder original = new MOrder (getCtx(), p_C_Order_ID, get_TrxName());
+			MOrder original = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(p_C_Order_ID, get_TrxName());
 			original.setDocAction(MOrder.DOCACTION_Complete);
 			if (!original.processIt(MOrder.DOCACTION_Complete)) {
 				log.warning("Order Process Failed: " + original.getDocumentNo() + " " + original.getProcessMsg());

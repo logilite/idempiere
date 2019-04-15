@@ -26,6 +26,7 @@ import org.compiere.model.MClient;
 import org.compiere.model.MInterestArea;
 import org.compiere.model.MMailText;
 import org.compiere.model.MStore;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.MUserMail;
 import org.compiere.util.DB;
@@ -100,7 +101,7 @@ public class SendMailText extends SvrProcess
 	{
 		if (log.isLoggable(Level.INFO)) log.info("R_MailText_ID=" + m_R_MailText_ID);
 		//	Mail Test
-		m_MailText = new MMailText (getCtx(), m_R_MailText_ID, get_TrxName());
+		m_MailText = (MMailText) MTable.get(getCtx(), MMailText.Table_ID).getPO(m_R_MailText_ID, get_TrxName());
 		if (m_MailText.getR_MailText_ID() == 0)
 			throw new Exception ("Not found @R_MailText_ID@=" + m_R_MailText_ID);
 		//	Client Info

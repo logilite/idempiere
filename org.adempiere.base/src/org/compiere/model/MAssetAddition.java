@@ -1015,7 +1015,8 @@ public class MAssetAddition extends X_A_Asset_Addition
 		if (A_SOURCETYPE_Invoice.equals(sourceType) && isProcessed())
 		{
 			int C_InvoiceLine_ID = getC_InvoiceLine_ID();
-			MInvoiceLine invoiceLine = new MInvoiceLine(getCtx(), C_InvoiceLine_ID, get_TrxName());
+			MInvoiceLine invoiceLine = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(
+					C_InvoiceLine_ID, get_TrxName());
 			invoiceLine.setA_Processed(!isReversal);
 			invoiceLine.setA_Asset_ID(isReversal ? 0 : getA_Asset_ID());
 			invoiceLine.saveEx();

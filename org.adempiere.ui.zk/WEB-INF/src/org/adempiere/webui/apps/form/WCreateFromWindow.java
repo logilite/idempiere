@@ -47,18 +47,18 @@ public class WCreateFromWindow extends Window implements EventListener<Event>, W
 	 */
 	private static final long serialVersionUID = 6750121735083748182L;
 
-	private CreateFrom createFrom;
-	private int windowNo;
+	protected CreateFrom createFrom;
+	protected int windowNo;
 	
-	private Panel parameterPanel = new Panel();
-	private ConfirmPanel confirmPanel = new ConfirmPanel(true);
-	private StatusBarPanel statusBar = new StatusBarPanel();
-	private WListbox dataTable = ListboxFactory.newDataTable();
+	protected Panel parameterPanel = new Panel();
+	protected ConfirmPanel confirmPanel = new ConfirmPanel(true);
+	protected StatusBarPanel statusBar = new StatusBarPanel();
+	protected WListbox dataTable = ListboxFactory.newDataTable();
 
-	private boolean isCancel;
+	protected boolean isCancel;
 	
 	public static final String SELECT_DESELECT_ALL = "SelectAll";
-	private boolean checkAllSelected = true;
+	protected boolean checkAllSelected = true;
 
 	public WCreateFromWindow(CreateFrom createFrom, int windowNo)
 	{
@@ -264,5 +264,15 @@ public class WCreateFromWindow extends Window implements EventListener<Event>, W
 	public boolean isCancel() 
 	{
 		return isCancel;
+	}
+	
+	public StatusBarPanel getStatusBar()
+	{
+		return statusBar;
+	}
+
+	public void setStatusBar(StatusBarPanel statusBar)
+	{
+		this.statusBar = statusBar;
 	}	
 }

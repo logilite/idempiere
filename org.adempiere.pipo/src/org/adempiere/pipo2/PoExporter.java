@@ -17,6 +17,7 @@ import org.compiere.model.X_C_Location;
 import org.compiere.model.X_M_Locator;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
+import org.compiere.util.Util;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
@@ -126,6 +127,8 @@ public class PoExporter {
 			addTextElement(columnName, value.toString(), atts);
 		} else if(value instanceof BigDecimal) {
 			addTextElement(columnName, value.toString(), atts);
+		} else if(value instanceof String[]) {
+			addTextElement(columnName, Util.convertArrayToStringForDB(value), atts);
 		} else{
 			addTextElement(columnName, value.toString(), atts);
 		}
@@ -162,7 +165,20 @@ public class PoExporter {
 	}
 
 	public void addTableReference(String columnName, String tableName, AttributesImpl atts) {
-		int id = po.get_Value(columnName) != null ? (Integer)po.get_Value(columnName) : -1;
+		int id = -1;
+		if (po.get_Value(columnName) != null)
+		{
+			if (po.get_Value(columnName) instanceof Integer[])
+			{
+				String value = ReferenceUtils.getTableReferenceMultiSelect(tableName, (Integer[])po.get_Value(columnName), atts);
+				addString(columnName, value, atts);	
+				return;
+			}
+			else
+			{
+				id = (Integer) po.get_Value(columnName);
+			}
+		}	
 		addTableReference(columnName, tableName, id, atts);
 	}
 
@@ -254,6 +270,8 @@ public class PoExporter {
 				}
 				addTableReference(columnName, tableName, new AttributesImpl());
 			} else if (DisplayType.List == displayType) {
+				add(columnName, "", new AttributesImpl());
+			} else if (DisplayType.MultiSelectList == displayType) {
 				add(columnName, "", new AttributesImpl());
 			} else if (DisplayType.isLookup(displayType)) {
 				String tableName = null;

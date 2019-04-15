@@ -57,7 +57,7 @@ public class CalloutInOut extends CalloutEngine
 			return "";
 
 		//	Get Details
-		MOrder order = new MOrder (ctx, C_Order_ID.intValue(), null);
+		MOrder order = (MOrder) MTable.get(ctx, MOrder.Table_ID).getPO(C_Order_ID.intValue(), null);
 		if (order.get_ID() != 0)
 		{
 			mTab.setValue("DateOrdered", order.getDateOrdered());
@@ -413,7 +413,7 @@ public class CalloutInOut extends CalloutEngine
 			return "";
 
 		//	Get Details
-		MOrderLine ol = new MOrderLine (ctx, C_OrderLine_ID.intValue(), null);
+		MOrderLine ol = (MOrderLine) MTable.get(ctx, MOrderLine.Table_ID).getPO(C_OrderLine_ID.intValue(), null);
 		if (ol.get_ID() != 0)
 		{
 			if (ol.getC_Charge_ID() > 0 && ol.getM_Product_ID() <= 0) {
@@ -471,7 +471,7 @@ public class CalloutInOut extends CalloutEngine
 			return "";
 
 		//	Get Details
-		MRMALine rl = new MRMALine (ctx, M_RMALine_id.intValue(), null);
+		MRMALine rl = (MRMALine) MTable.get(ctx, MRMALine.Table_ID).getPO(M_RMALine_id.intValue(), null);
 		if (rl.get_ID() != 0)
 		{
 			if (rl.getC_Charge_ID() > 0 && rl.getM_Product_ID() <= 0) {

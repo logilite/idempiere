@@ -24,6 +24,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.MBankAccount;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.model.X_I_Payment;
 import org.compiere.util.AdempiereUserError;
 import org.compiere.util.DB;
@@ -431,7 +432,7 @@ public class ImportPayment extends SvrProcess
 				}
 				
 				//	New Payment
-				MPayment payment = new MPayment (m_ctx, 0, get_TrxName());
+				MPayment payment=(MPayment) MTable.get(m_ctx, MPayment.Table_ID).getPO(0,get_TrxName());
 				payment.setAD_Org_ID(imp.getAD_Org_ID());
 				payment.setDocumentNo(imp.getDocumentNo());
 				payment.setPONum(imp.getPONum());

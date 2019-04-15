@@ -28,6 +28,7 @@ import org.compiere.model.MProduct;
 import org.compiere.model.MProduction;
 import org.compiere.model.MProject;
 import org.compiere.model.MProjectLine;
+import org.compiere.model.MTable;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -78,12 +79,13 @@ public class ProjectGenProduction extends SvrProcess
 		if (m_C_ProjectLine_ID != 0)
 		{
 			MProjectLine projectLine = new MProjectLine(getCtx(), m_C_ProjectLine_ID, get_TrxName());
-			MProject project = new MProject (getCtx(), projectLine.getC_Project_ID(), get_TrxName());
+			MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(projectLine.getC_Project_ID(),
+					get_TrxName());
 			createProduction (project, projectLine);
 		}
 		else if (m_C_ProjectPhase_ID != 0)
 		{
-			MProject project = new MProject (getCtx(), m_C_Project_ID, get_TrxName());
+			MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(m_C_Project_ID, get_TrxName());
 			for (MProjectLine line : project.getPhaseLines(m_C_ProjectPhase_ID)) {
 				if (line.isActive()) {
 					createProduction (project, line);
@@ -92,7 +94,7 @@ public class ProjectGenProduction extends SvrProcess
 		}
 		else
 		{
-			MProject project = new MProject (getCtx(), m_C_Project_ID, get_TrxName());
+			MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(m_C_Project_ID, get_TrxName());
 			for (MProjectLine line : project.getLines()) {
 				if (line.isActive()) {
 					createProduction (project, line);
@@ -141,7 +143,7 @@ public class ProjectGenProduction extends SvrProcess
 		MProduction production = null;
 
 		//	New Production Header
-		production = new MProduction (projectLine);
+		production = MProduction.createFrom(projectLine);
 		int AD_Org_ID = projectLine.getAD_Org_ID();
 		if (AD_Org_ID == 0)
 		{

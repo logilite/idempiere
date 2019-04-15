@@ -152,7 +152,7 @@ public class DefaultWebAppInit implements WebAppInit {
 				// when delete ZK_BROWSER_TITLE, set web config to default value "Idempiere"
 				// user old value of name for correct meaning of record delete, change
 				if (MSysConfig.ZK_BROWSER_TITLE.equals(getOldValueOfName(po))){					
-					webApp.setAppName(AdempiereWebUI.APP_NAME);									
+					webApp.setAppName(MSysConfig.getValue(MSysConfig.ZK_BROWSER_TITLE, AdempiereWebUI.APP_NAME));									
 				}
 			}
 		}

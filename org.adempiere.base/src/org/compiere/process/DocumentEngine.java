@@ -43,6 +43,7 @@ import org.compiere.model.MInventory;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MJournal;
 import org.compiere.model.MJournalBatch;
+import org.compiere.model.MMatchInvHdr;
 import org.compiere.model.MMovement;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
@@ -1095,6 +1096,7 @@ public class DocumentEngine implements DocAction
 			{
 				if (periodOpen) {
 					options[index++] = DocumentEngine.ACTION_Void;
+					options[index++] = DocumentEngine.ACTION_ReActivate;
 				}
 			}
 		}
@@ -1222,6 +1224,21 @@ public class DocumentEngine implements DocAction
 				options[index++] = DocumentEngine.ACTION_Void;
 			}
 		}
+		/********************
+		 *  Match Invoice Header
+		 */
+		else if (AD_Table_ID == MMatchInvHdr.Table_ID)
+		{
+			//	Complete                    ..  CO
+			if (docStatus.equals(DocumentEngine.STATUS_Completed))
+			{
+				if (periodOpen) {
+					options[index++] = DocumentEngine.ACTION_Reverse_Correct;
+				}
+				options[index++] = DocumentEngine.ACTION_Reverse_Accrual;
+			}
+		}
+
 
 		if (po instanceof DocOptions)
 			index = ((DocOptions) po).customizeValidActions(docStatus, processing, orderType, isSOTrx,

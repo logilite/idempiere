@@ -27,6 +27,7 @@ import org.compiere.model.MPayment;
 import org.compiere.model.MPaymentProcessor;
 import org.compiere.model.MPaymentTransaction;
 import org.compiere.model.MPaymentValidate;
+import org.compiere.model.MTable;
 import org.compiere.process.DocAction;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -60,8 +61,8 @@ public abstract class PaymentFormCreditCard extends PaymentForm {
 			m_C_Payment_ID = ((Integer)getGridTab().getValue("C_Payment_ID")).intValue();
 			if (m_C_Payment_ID != 0)
 			{
-				m_mPayment = new MPayment(Env.getCtx(), m_C_Payment_ID, null);
-				m_mPaymentOriginal = new MPayment(Env.getCtx(), m_C_Payment_ID, null);	//	full copy
+				m_mPayment=(MPayment) MTable.get(Env.getCtx(), MPayment.Table_ID).getPO(m_C_Payment_ID,null);
+				m_mPaymentOriginal=(MPayment) MTable.get(Env.getCtx(), MPayment.Table_ID).getPO(m_C_Payment_ID,null); // full copy
 			}
 		}
 		
@@ -83,10 +84,12 @@ public abstract class PaymentFormCreditCard extends PaymentForm {
 					{
 						for (int id : ids)
 						{
-							MPaymentTransaction pt = new MPaymentTransaction(Env.getCtx(), id, null);
+							MPaymentTransaction pt = (MPaymentTransaction) MTable.get(Env.getCtx(),
+									MPaymentTransaction.Table_ID).getPO(id, null);
 							if (pt.getC_Invoice_ID() == C_Invoice_ID)
 							{
-								m_mPaymentTransaction = new MPaymentTransaction(Env.getCtx(), id, null);
+								m_mPaymentTransaction = (MPaymentTransaction) MTable.get(Env.getCtx(),
+										MPaymentTransaction.Table_ID).getPO(id, null);
 								found = true;
 								break;
 							}
@@ -97,10 +100,12 @@ public abstract class PaymentFormCreditCard extends PaymentForm {
 					{
 						for (int id : ids)
 						{
-							MPaymentTransaction pt = new MPaymentTransaction(Env.getCtx(), id, null);
+							MPaymentTransaction pt = (MPaymentTransaction) MTable.get(Env.getCtx(),
+									MPaymentTransaction.Table_ID).getPO(id, null);
 							if (pt.getC_Order_ID() == C_Order_ID)
 							{
-								m_mPaymentTransaction = new MPaymentTransaction(Env.getCtx(), id, null);
+								m_mPaymentTransaction = (MPaymentTransaction) MTable.get(Env.getCtx(),
+										MPaymentTransaction.Table_ID).getPO(id, null);
 								break;
 							}
 						}
@@ -137,7 +142,7 @@ public abstract class PaymentFormCreditCard extends PaymentForm {
 					{
 						for (int id : ids)
 						{
-							MPayment p = new MPayment(Env.getCtx(), id, null);
+							MPayment p=(MPayment) MTable.get(Env.getCtx(), MPayment.Table_ID).getPO(id,null);
 							BigDecimal payAmt = p.getPayAmt();
 							if (isCreditMemo)
 								payAmt = payAmt.negate();
@@ -145,7 +150,7 @@ public abstract class PaymentFormCreditCard extends PaymentForm {
 							{
 								m_C_Payment_ID = id;
 								m_mPayment = p;
-								m_mPaymentOriginal = new MPayment(Env.getCtx(), id, null);
+								m_mPaymentOriginal=(MPayment) MTable.get(Env.getCtx(), MPayment.Table_ID).getPO(id,null);
 								found = true;
 								break;
 							}
@@ -156,7 +161,7 @@ public abstract class PaymentFormCreditCard extends PaymentForm {
 					{
 						for (int id : ids)
 						{
-							MPayment p = new MPayment(Env.getCtx(), id, null);
+							MPayment p=(MPayment) MTable.get(Env.getCtx(), MPayment.Table_ID).getPO(id,null);
 							BigDecimal payAmt = p.getPayAmt();
 							if (isCreditMemo)
 								payAmt = payAmt.negate();
@@ -164,7 +169,7 @@ public abstract class PaymentFormCreditCard extends PaymentForm {
 							{
 								m_C_Payment_ID = id;
 								m_mPayment = p;
-								m_mPaymentOriginal = new MPayment(Env.getCtx(), id, null);
+								m_mPaymentOriginal=(MPayment) MTable.get(Env.getCtx(), MPayment.Table_ID).getPO(id,null);
 								break;
 							}
 						}
@@ -175,7 +180,7 @@ public abstract class PaymentFormCreditCard extends PaymentForm {
 
 		if (m_mPayment == null)
 		{
-			m_mPayment = new MPayment (Env.getCtx (), 0, null);
+			m_mPayment=(MPayment) MTable.get(Env.getCtx(), MPayment.Table_ID).getPO(0,null);
 			m_mPayment.setAD_Org_ID(m_AD_Org_ID);
 			m_mPayment.setAmount (m_C_Currency_ID, m_Amount);
 		}
@@ -319,7 +324,7 @@ public abstract class PaymentFormCreditCard extends PaymentForm {
 		}
 		else if (C_Invoice_ID != 0)
 		{
-			MInvoice invoice = new MInvoice (Env.getCtx(), C_Invoice_ID, null);
+			MInvoice invoice = (MInvoice) MTable.get(Env.getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, null);
 			if (invoice.isComplete())
 				m_mPayment.setTrxType(MPayment.TRXTYPE_Sales);
 		}
@@ -335,10 +340,10 @@ public abstract class PaymentFormCreditCard extends PaymentForm {
 		
 		MInvoice invoice = null;
 		if (C_Invoice_ID != 0)
-			invoice = new MInvoice (Env.getCtx(), C_Invoice_ID, null);
+			invoice = (MInvoice) MTable.get(Env.getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, null);
 		MOrder order = null;
 		if (invoice == null && C_Order_ID != 0)
-			order = new MOrder (Env.getCtx(), C_Order_ID, null);
+			order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(C_Order_ID, null);
 		if (order != null)
 		{
 			m_mPayment.setC_Order_ID(C_Order_ID);
@@ -429,7 +434,7 @@ public abstract class PaymentFormCreditCard extends PaymentForm {
 		if (isCreditMemo)
 			payAmount = m_Amount.negate();
 		
-		MPaymentTransaction mpt = new MPaymentTransaction(Env.getCtx(), 0, null);
+		MPaymentTransaction mpt=(MPaymentTransaction) MTable.get(Env.getCtx(), MPaymentTransaction.Table_ID).getPO(0,null);
 		mpt.setAD_Org_ID(m_AD_Org_ID);
 		mpt.setCreditCard(MPayment.TRXTYPE_Sales, CCType, CCNumber, CCVV != null ? CCVV : "", CCExp);
 		mpt.setAmount(m_C_Currency_ID, payAmount);
@@ -445,7 +450,7 @@ public abstract class PaymentFormCreditCard extends PaymentForm {
 		}
 		else if (C_Invoice_ID != 0)
 		{
-			MInvoice invoice = new MInvoice (Env.getCtx(), C_Invoice_ID, null);
+			MInvoice invoice = (MInvoice) MTable.get(Env.getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, null);
 			if (invoice.isComplete())
 				mpt.setTrxType(MPayment.TRXTYPE_Sales);
 		}
@@ -484,7 +489,7 @@ public abstract class PaymentFormCreditCard extends PaymentForm {
 				m_needSave = true;
 				if (mpt.getC_Payment_ID() > 0)
 				{
-					m_mPayment = new MPayment(mpt.getCtx(), mpt.getC_Payment_ID(), null);
+					m_mPayment=(MPayment) MTable.get(mpt.getCtx(), MPayment.Table_ID).getPO(mpt.getC_Payment_ID(),null);
 					String info = m_mPayment.getR_RespMsg() + " (" + m_mPayment.getR_AuthCode() + ") ID=" + m_mPayment.getR_PnRef();
 					processMsg = info + "\n" + m_mPayment.getDocumentNo();
 					saveChanges();

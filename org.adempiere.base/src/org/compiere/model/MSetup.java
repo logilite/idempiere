@@ -1135,7 +1135,7 @@ public final class MSetup
 			log.log(Level.SEVERE, "BP Group NOT inserted");
 
 		//	Create BPartner
-		MBPartner bp = new MBPartner (m_ctx, 0, m_trx.getTrxName());
+		MBPartner bp = (MBPartner) MTable.get(m_ctx, MBPartner.Table_ID).getPO(0, m_trx.getTrxName());
 		bp.setValue(defaultName);
 		bp.setName(defaultName);
 		bp.setBPGroup(bpg);
@@ -1310,7 +1310,7 @@ public final class MSetup
 
 
 		//	Create Sales Rep for Client-User
-		MBPartner bpCU = new MBPartner (m_ctx, 0, m_trx.getTrxName());
+		MBPartner bpCU = (MBPartner) MTable.get(m_ctx, MBPartner.Table_ID).getPO(0, m_trx.getTrxName());
 		bpCU.setValue(AD_User_U_Name);
 		bpCU.setName(AD_User_U_Name);
 		bpCU.setBPGroup(bpg);
@@ -1336,7 +1336,7 @@ public final class MSetup
 
 
 		//	Create Sales Rep for Client-Admin
-		MBPartner bpCA = new MBPartner (m_ctx, 0, m_trx.getTrxName());
+		MBPartner bpCA = (MBPartner) MTable.get(m_ctx, MBPartner.Table_ID).getPO(0, m_trx.getTrxName());
 		bpCA.setValue(AD_User_Name);
 		bpCA.setName(AD_User_Name);
 		bpCA.setBPGroup(bpg);

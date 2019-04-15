@@ -13,10 +13,12 @@ import static org.compiere.model.SystemIDs.PROCESS_RPT_M_INVENTORY;
 import static org.compiere.model.SystemIDs.PROCESS_RPT_M_MOVEMENT;
 
 import java.io.CharArrayWriter;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -33,6 +35,7 @@ import org.compiere.model.MProcess;
 import org.compiere.model.MProcessPara;
 import org.compiere.model.MQuery;
 import org.compiere.model.MTable;
+import org.compiere.model.MWebServiceType;
 import org.compiere.model.PO;
 import org.compiere.model.PrintInfo;
 import org.compiere.print.MPrintFormat;
@@ -47,20 +50,24 @@ import org.compiere.util.Env;
 import org.compiere.util.NamePair;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
+import org.compiere.util.ValueNamePair;
 import org.compiere.wf.MWFProcess;
 import org.compiere.wf.MWorkflow;
 import org.idempiere.adInterface.x10.DataField;
 import org.idempiere.adInterface.x10.DataRow;
 import org.idempiere.adInterface.x10.GetProcessParamsDocument;
 import org.idempiere.adInterface.x10.LookupValues;
+import org.idempiere.adInterface.x10.ModelRunProcess;
+import org.idempiere.adInterface.x10.ModelRunProcessDocument;
+import org.idempiere.adInterface.x10.OutputField;
+import org.idempiere.adInterface.x10.OutputFields;
 import org.idempiere.adInterface.x10.ProcessParam;
 import org.idempiere.adInterface.x10.ProcessParamList;
 import org.idempiere.adInterface.x10.ProcessParams;
 import org.idempiere.adInterface.x10.ProcessParamsDocument;
-import org.idempiere.adInterface.x10.RunProcess;
-import org.idempiere.adInterface.x10.RunProcessDocument;
 import org.idempiere.adInterface.x10.RunProcessResponse;
-import org.idempiere.adInterface.x10.RunProcessResponseDocument;
+import org.idempiere.adInterface.x10.StandardResponse;
+import org.idempiere.adInterface.x10.StandardResponseDocument;
 import org.idempiere.webservices.fault.IdempiereServiceFault;
 
 /*
@@ -174,9 +181,9 @@ public class Process {
 	 *  @param req
 	 *	@return {@link RunProcessResponseDocument}
 	 */
-	public static RunProcessResponseDocument runProcess (CompiereService m_cs, RunProcessDocument req )
+	public static StandardResponseDocument runProcess (CompiereService m_cs,MWebServiceType m_webservicetype, ModelRunProcessDocument req )
 	{
-		return runProcess(m_cs, req, null, null);
+		return runProcess(m_cs,m_webservicetype,req.getModelRunProcess(), null, null);
 	}
 	
 	/**************************************************************************
@@ -187,12 +194,11 @@ public class Process {
 	 *  @param trxName
 	 *	@return {@link RunProcessResponseDocument}
 	 */
-	public static RunProcessResponseDocument runProcess (CompiereService m_cs, RunProcessDocument req, Map<String, Object> requestCtx, String trxName )
+	public static StandardResponseDocument runProcess (CompiereService m_cs,MWebServiceType m_webservicetype, ModelRunProcess rp, Map<String, Object> requestCtx, String trxName )
 	{
-		RunProcessResponseDocument res = RunProcessResponseDocument.Factory.newInstance();
-		RunProcessResponse r= res.addNewRunProcessResponse();
-
-		RunProcess rp = req.getRunProcess();
+		StandardResponseDocument resDoc = StandardResponseDocument.Factory.newInstance();
+		StandardResponse standardRes= resDoc.addNewStandardResponse();
+		RunProcessResponse rpResp = standardRes.addNewRunProcessResponse();
 		int AD_Process_ID = rp.getADProcessID();
 		int m_record_id = rp.getADRecordID();
 	  	
@@ -200,9 +206,9 @@ public class Process {
 		//	need to check if Role can access
 		if (process == null)
 		{
-			r.setError("Process not found");
-			r.setIsError( true );
-			return res;
+			standardRes.setError("Process not found");
+			standardRes.setIsError( true );
+			return resDoc;
 		}
 		
 		// Evaluate DocAction, if call have DocAction parameter, then try to set DocAction before calling workflow process
@@ -223,6 +229,7 @@ public class Process {
 				    	if (po != null) {
 				    		po.set_ValueOfColumn("DocAction", docAction);
 							po.saveEx();
+							requestCtx.put(table.get_TableName(), po);
 				    	}
 			    	}
 				}
@@ -237,9 +244,9 @@ public class Process {
 		}
 		catch (Exception ex)
 		{
-			r.setError(ex.getMessage());
-			r.setIsError( true );
-			return res;
+			standardRes.setError(ex.getMessage());
+			standardRes.setIsError( true );
+			return resDoc;
 		}
 		
 		DataField[] fields = rp.getParamValues().getFieldArray();
@@ -322,18 +329,19 @@ public class Process {
 				if(wfProcess != null)
 				{
 					//wynik
-					r.setSummary(pi.getSummary());
-					r.setLogInfo(pi.getLogInfo(true));
-					r.setIsError( false );
-					return res;					
+					rpResp.setSummary(pi.getSummary());
+					requestCtx.put(m_webservicetype.getValue() + "_Summary", pi.getSummary());
+					rpResp.setLogInfo(pi.getLogInfo(true));
+					standardRes.setIsError( false );
+					return resDoc;					
 				}
 			}
 			catch(Exception ex)
 			{
-				r.setError(ex.getMessage());
-				r.setLogInfo(pi.getLogInfo(true) );
-				r.setIsError( true );
-				return res;				
+				standardRes.setError(ex.getMessage());
+				rpResp.setLogInfo(pi.getLogInfo(true) );
+				standardRes.setIsError( true );
+				return resDoc;				
 			}
 		}
 	
@@ -359,31 +367,33 @@ public class Process {
 			}
 			if (!processOK || pi.isError())
 			{
-				r.setSummary(pi.getSummary());
-				r.setError(pi.getSummary());
-				r.setLogInfo(pi.getLogInfo(true));
-				r.setIsError( true );				
+				rpResp.setSummary(pi.getSummary());
+				requestCtx.put(m_webservicetype.getValue() + "_Summary", pi.getSummary());
+				standardRes.setError(pi.getSummary());
+				rpResp.setLogInfo(pi.getLogInfo(true));
+				standardRes.setIsError( true );				
 				processOK = false;
 			} 
 			else
 			{
-				try{
-					if( pi.getExportFile() != null ){
-						r.setData(java.nio.file.Files.readAllBytes(pi.getExportFile().toPath()));
-						r.setReportFormat(pi.getExportFileExtension());
+				Serializable serializable = pi.getSerializableObject();
+				if (serializable != null && serializable instanceof List)
+		        {
+		            List<?> outputValues = (List<?>)pi.getSerializableObject();
+		            setOuputFields(standardRes, outputValues);
+		            for (Object obj : outputValues) {
+						if (obj instanceof ValueNamePair) {
+							ValueNamePair pair = (ValueNamePair) obj;
+							requestCtx.put(m_webservicetype.getValue() +"-"+pair.getName(),pair.getValue());
+						}
 					}
-					r.setSummary(pi.getSummary());
-					r.setError(pi.getSummary());
-					r.setLogInfo(pi.getLogInfo(true));
-					r.setIsError( false );
-				}
-				catch (Exception e)
-				{
-					r.setError("Cannot get the export file:" + e.getMessage());
-					r.setLogInfo(pi.getLogInfo(true) );
-					r.setIsError( true );
-					return res;
-				}
+		        }
+				
+				rpResp.setSummary(pi.getSummary());
+				requestCtx.put(m_webservicetype.getValue() + "_Summary", pi.getSummary());
+				standardRes.setError(pi.getSummary());
+				rpResp.setLogInfo(pi.getLogInfo(true));
+				standardRes.setIsError( false );
 			}
 		}
 		
@@ -391,7 +401,7 @@ public class Process {
 		if ((process.isReport() || jasperreport))
 		{
 			pi.setReportingProcess(true);
-			r.setIsReport(true);
+			rpResp.setIsReport(true);
 			ReportEngine re=null;
 			if (!jasperreport) 
 				re = start(pi);
@@ -416,14 +426,14 @@ public class Process {
 							file_type ="xls";
 							String data = wr.toString();
 							if (data!=null)
-								r.setData(data.getBytes());
-							r.setReportFormat(file_type);
+								rpResp.setData(data.getBytes());
+							rpResp.setReportFormat(file_type);
 						} else
 						{
 							byte dat[] = re.createPDFData();
 							file_type ="pdf";
-							r.setData(dat);		
-							r.setReportFormat(file_type);
+							rpResp.setData(dat);		
+							rpResp.setReportFormat(file_type);
 						}
 						
 						ok = true;
@@ -435,8 +445,8 @@ public class Process {
 						pi.setIsBatch(true);
 						ProcessUtil.startJavaProcess(Env.getCtx(), pi, trx, true, null);
 						file_type ="pdf";				
-						r.setData(java.nio.file.Files.readAllBytes(pi.getPDFReport().toPath()));
-						r.setReportFormat(file_type);
+						rpResp.setData(java.nio.file.Files.readAllBytes(pi.getPDFReport().toPath()));
+						rpResp.setReportFormat(file_type);
 						ok = true;
 					}
 											
@@ -447,25 +457,39 @@ public class Process {
 					}
 					else
 					{
-						r.setError("Cannot create report");
-						r.setLogInfo(pi.getLogInfo(true) );
-						r.setIsError( true );
-						return res;								
+						standardRes.setError("Cannot create report");
+						rpResp.setLogInfo(pi.getLogInfo(true) );
+						standardRes.setIsError( true );
+						return resDoc;								
 					}
 				}
 				catch (Exception e)
 				{
-					r.setError("Cannot create report:" + e.getMessage());
-					r.setLogInfo(pi.getLogInfo(true) );
-					r.setIsError( true );
-					return res;								
+					standardRes.setError("Cannot create report:" + e.getMessage());
+					rpResp.setLogInfo(pi.getLogInfo(true) );
+					standardRes.setIsError( true );
+					return resDoc;								
 					// , 
 				}  
 			}
 		}
-		return res;
+		return resDoc;
 	}	//	createProcessPage
 
+	public static void setOuputFields(StandardResponse resp, List<?> outPara) {
+		if (outPara.size() > 0) {
+			OutputFields outputFields = resp.addNewOutputFields();
+
+			for (Object obj : outPara) {
+				if (obj instanceof ValueNamePair) {
+					ValueNamePair pair = (ValueNamePair) obj;
+					OutputField outField = outputFields.addNewOutputField();
+					outField.setColumn(pair.getName());
+					outField.setValue(pair.getValue());
+				}
+			}
+		}
+	}
 	
 	
 	private static MPInstance fillParameter(CompiereService m_cs, DataRow dr, MProcess process, Map<String, Object> requestCtx) throws Exception

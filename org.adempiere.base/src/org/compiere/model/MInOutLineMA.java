@@ -105,8 +105,6 @@ public class MInOutLineMA extends X_M_InOutLineMA
 	public MInOutLineMA (Properties ctx, int M_InOutLineMA_ID, String trxName)
 	{
 		super (ctx, M_InOutLineMA_ID, trxName);
-		if (M_InOutLineMA_ID != 0)
-			throw new IllegalArgumentException("Multi-Key");
 	}	//	MInOutLineMA
 
 	/**

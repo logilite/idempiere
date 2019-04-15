@@ -22,7 +22,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
 import org.adempiere.webui.event.TableValueChangeEvent;
@@ -1142,7 +1144,15 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
         		model.updateComponent(event.getFirstRow());
         	if (indices != null && indices.length > 0)
         	{
-        		this.setSelectedIndices(indices);
+				this.setSelectedIndices(indices);
+
+				// Fixed issue of Selected records are not found on T_Selection table, 
+				// while running process on editable info window, 
+				// when editable field value are updated after record selected.
+				Set<Object> selectionSet = new HashSet<Object>();
+				for (int index : indices)
+					selectionSet.add(model.getElementAt(index));
+				model.setSelection(selectionSet);
         	}
         }
 

@@ -73,9 +73,9 @@ public class MRequest extends X_R_Request
 	/**	Static Logger					*/
 	private static CLogger	s_log	= CLogger.getCLogger (MRequest.class);
 	/** Request Tag Start				*/
-	private static final String		TAG_START = "[Req#";
+	protected static final String		TAG_START = "[Req#";
 	/** Request Tag End					*/
-	private static final String		TAG_END = "#ID]";
+	protected static final String		TAG_END = "#ID]";
 
 	
 	
@@ -107,33 +107,33 @@ public class MRequest extends X_R_Request
 	}	//	MRequest
 
 	/**
-	 * 	SelfService Constructor
 	 * 	@param ctx context
 	 * 	@param SalesRep_ID SalesRep
 	 * 	@param R_RequestType_ID request type
 	 * 	@param Summary summary
 	 * 	@param isSelfService self service
 	 *	@param trxName transaction
+	 *	@return MRequest
 	 */
-	public MRequest (Properties ctx, int SalesRep_ID,
-		int R_RequestType_ID, String Summary, boolean isSelfService, String trxName)
+	public static MRequest createRequest(Properties ctx, int SalesRep_ID, int R_RequestType_ID, String Summary,
+			boolean isSelfService, String trxName)
 	{
-		this(ctx, 0, trxName);
-		set_Value ("SalesRep_ID", Integer.valueOf(SalesRep_ID));	//	could be 0
-		set_Value ("R_RequestType_ID", Integer.valueOf(R_RequestType_ID));
-		setSummary (Summary);
-		setIsSelfService(isSelfService);
-		getRequestType();
-		if (m_requestType != null)
+		MRequest request = (MRequest) MTable.get(ctx, MRequest.Table_ID).getPO(0, trxName);
+		request.set_Value("SalesRep_ID", Integer.valueOf(SalesRep_ID));
+		request.set_Value("R_RequestType_ID", Integer.valueOf(R_RequestType_ID));
+		request.setSummary(Summary);
+		request.setIsSelfService(isSelfService);
+		if (request.getRequestType() != null)
 		{
-			String ct = m_requestType.getConfidentialType();
+			String ct = request.getRequestType().getConfidentialType();
 			if (ct != null)
 			{
-				setConfidentialType (ct);
-				setConfidentialTypeEntry (ct);
+				request.setConfidentialType(ct);
+				request.setConfidentialTypeEntry(ct);
 			}
 		}
-	}	//	MRequest
+		return request;
+	} // MRequest
 
 	/**
 	 * 	Load Constructor
@@ -147,13 +147,13 @@ public class MRequest extends X_R_Request
 	}	//	MRequest
 
 	/** Request Type				*/
-	private MRequestType	m_requestType = null;
+	protected MRequestType	m_requestType = null;
 	/**	Changed						*/
-	private boolean			m_changed = false;
+	protected boolean			m_changed = false;
 	/**	BPartner					*/
-	private MBPartner		m_partner = null;
+	protected MBPartner		m_partner = null;
 	/** User/Contact				*/
-	private MUser			m_user = null;
+	protected MUser			m_user = null;
 
 	/** Separator line				*/
 	public static final String	SEPARATOR = 
@@ -558,7 +558,7 @@ public class MRequest extends X_R_Request
 		if (m_partner != null && m_partner.getC_BPartner_ID() != getC_BPartner_ID())
 			m_partner = null;
 		if (m_partner == null)
-			m_partner = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
+			m_partner = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(getC_BPartner_ID(), get_TrxName());
 		return m_partner;
 	}	//	getBPartner
 
@@ -584,7 +584,7 @@ public class MRequest extends X_R_Request
 	/**
 	 * 	Set Priority
 	 */
-	private void setPriority()
+	public void setPriority()
 	{
 		if (getPriorityUser() == null)
 			setPriorityUser(PRIORITYUSER_Low);

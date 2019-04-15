@@ -46,7 +46,7 @@ Copyright (C) 2007 Ashley G Ramdass.
 			id.zk.Extend = zk.$extends(zk.Object, {}, {
 				fakeOnchange: function (wgt) {
 					// just sent fake event when control is textfield and value is not yet sync to server
-					if (wgt.$instanceof(zul.inp.Textbox) && wgt.$n().value != wgt.getText())
+					if ((wgt.$instanceof(zul.inp.Textbox) || wgt.$instanceof(zul.inp.Decimalbox))  && wgt.$n().value != wgt.getText())
 						zAu.send(new zk.Event(zk.Widget.$(wgt), 'onChange',{"value":wgt.$n().value}));
 
 					else if (zk.$import("ckez.CKeditor") != undefined && wgt.$instanceof(ckez.CKeditor)){//https://www.zkoss.org/javadoc/latest/jsdoc/_global_/zk.html#$import(_global_.String)
@@ -288,6 +288,41 @@ Copyright (C) 2007 Ashley G Ramdass.
 			
 			wgt.$syncScroll ()
 		}
+		
+		/*
+				Issue of file not able to download in mobile iOS devices (iPad, iPhone) 
+				Issue from ZK lower version, In ZK 8.5.2 version it was fixed. [ https://tracker.zkoss.org/browse/ZK-3886 ]
+			*/
+			zk.afterLoad('zk', function() {
+			zAu.cmd0.download = function(url) {
+				if (url) {
+
+					if (zk.mobile && zk.safari) {
+						var newwindow = window.open(url, "Download...", null);
+						if (window.focus) {
+							newwindow.focus();
+						}
+					} else if (zk.ios) {
+						var link = document.createElement('a'),
+							evt = document.createEvent('Event');
+						link.id = 'zk_download';
+						link.href = url;
+						if (zk.ios < 7) //ZK-2245: it's restriction to programmatically open new tab since ios7 
+							link.target = '_blank';
+						evt.initEvent('click', true, false);
+						link.dispatchEvent(evt);
+					} else {
+						var ifr = jq('#zk_download')[0];
+						if (ifr) {
+							ifr.src = url; //It is OK to reuse the same iframe 
+						} else {
+							var html = '<iframe src="' + url + '" id="zk_download" name="zk_download" style="display:none;width:0;height:0;border:0" frameborder="0"></iframe>';
+							jq(document.body).append(html);
+						}
+					}
+				}
+			};
+		}); //zk.afterLoad
 	]]>
 	</script>
     <include src="${themePreference}"/>

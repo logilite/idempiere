@@ -26,6 +26,7 @@ import org.compiere.model.GridTab;
 import org.compiere.model.MDepositBatch;
 import org.compiere.model.MDepositBatchLine;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
@@ -145,7 +146,7 @@ public abstract class CreateFromDepositBatch extends CreateFromBatch
 				//	
 				MDepositBatchLine dbl = new MDepositBatchLine(db);
 				//	dbl.setStatementLineDate(trxDate);
-				dbl.setPayment(new MPayment(Env.getCtx(), C_Payment_ID, trxName));
+				dbl.setPayment((MPayment) MTable.get(Env.getCtx(), MPayment.Table_ID).getPO(C_Payment_ID,trxName));
 				if(!dbl.save())
 					log.log(Level.SEVERE, "Line not created #" + i);
 			}   //   if selected

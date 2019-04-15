@@ -427,6 +427,15 @@ public interface I_AD_ClientInfo
 	/** Get Logo Web	  */
 	public int getLogoWeb_ID();
 
+    /** Column name LogoWebHeader_ID */
+    public static final String COLUMNNAME_LogoWebHeader_ID = "LogoWebHeader_ID";
+
+	/** Set Logo Web Header	  */
+	public void setLogoWebHeader_ID (int LogoWebHeader_ID);
+
+	/** Get Logo Web Header	  */
+	public int getLogoWebHeader_ID();
+
     /** Column name M_ProductFreight_ID */
     public static final String COLUMNNAME_M_ProductFreight_ID = "M_ProductFreight_ID";
 
@@ -464,4 +473,17 @@ public interface I_AD_ClientInfo
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name ZKHostname */
+    public static final String COLUMNNAME_ZKHostname = "ZKHostname";
+
+	/** Set ZK Hostname.
+	  * Hostname of the ZK webui server
+	  */
+	public void setZKHostname (String ZKHostname);
+
+	/** Get ZK Hostname.
+	  * Hostname of the ZK webui server
+	  */
+	public String getZKHostname();
 }

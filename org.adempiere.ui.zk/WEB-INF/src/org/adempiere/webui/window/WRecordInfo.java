@@ -115,6 +115,7 @@ public class WRecordInfo extends Window implements EventListener<Event>
 		this.setMaximizable(true);
 		this.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "recordInfo");
 		this.setSclass("popup-dialog record-info-dialog");
+		this.setMaximizable(true);
 		
 		try
 		{
@@ -455,19 +456,28 @@ public class WRecordInfo extends Window implements EventListener<Event>
 					Env.getLanguage(Env.getCtx()), column.getColumnName(),
 					column.getAD_Reference_Value_ID(),
 					column.isParent(), null);
-				if (OldValue != null)
+				
+				if (DisplayType.isMultiSelect(column.getAD_Reference_ID()))
 				{
-					Object key = OldValue; 
-					NamePair pp = lookup.get(key);
-					if (pp != null)
-						showOldValue = pp.getName();
+					showOldValue = Util.getPrintableNameFromMultiKey(OldValue, column.getAD_Reference_ID(), lookup);
+					showNewValue = Util.getPrintableNameFromMultiKey(NewValue, column.getAD_Reference_ID(), lookup);
 				}
-				if (NewValue != null)
+				else
 				{
-					Object key = NewValue; 
-					NamePair pp = lookup.get(key);
-					if (pp != null)
-						showNewValue = pp.getName();
+					if (OldValue != null)
+					{
+						Object key = OldValue;
+						NamePair pp = lookup.get(key);
+						if (pp != null)
+							showOldValue = pp.getName();
+					}
+					if (NewValue != null)
+					{
+						Object key = NewValue;
+						NamePair pp = lookup.get(key);
+						if (pp != null)
+							showNewValue = pp.getName();
+					}
 				}
 			}
 			else if (DisplayType.isLOB (column.getAD_Reference_ID ()))

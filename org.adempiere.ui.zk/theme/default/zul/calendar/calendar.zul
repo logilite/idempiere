@@ -16,6 +16,9 @@
 	var EventsAnalysis = Msg.getMsg(Env.getCtx(),"EventsAnalysis");
 	var FirstDayofWeek = Msg.getMsg(Env.getCtx(),"FirstDayofWeek");
 	var RequestType = Msg.getElement(Env.getCtx(),"RequestType");
+	var ContactActivityType = Msg.getElement(Env.getCtx(),"ContactActivityType");
+	var Resource = Msg.getElement(Env.getCtx(),"S_Resource_ID");
+	var showResource= Msg.getElement(Env.getCtx(),"ShowResource");
 	
 ]]></zscript>
 <style src="/theme/default/zul/calendar/calendar.css"/>
@@ -37,6 +40,18 @@
 					<span>
 						${RequestType}:
 						<listbox id="lbxRequestTypes" mold="select"/>
+					</span>
+					<span>
+						${ContactActivityType}:
+						<listbox id="lbxContactActivityTypes" mold="select"/>
+					</span>
+					<span>
+						${showResource}
+						<checkbox id="showRes" label="Show Resource"/>
+					</span>
+					<span>
+						<label id="Resourcelbl"/> 
+						<listbox id="lbxResources" mold="select"/>
 					</span>
 				    <separator orient="vertical"/>
 					<label id="lblDate"/>

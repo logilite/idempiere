@@ -34,6 +34,7 @@ import org.compiere.model.MMailMsg;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -223,7 +224,7 @@ public class OrderServlet extends HttpServlet
 		WebUser wu,	WebOrder wo)
 	{
 		//	See PaymentServlet.doGet
-		MPayment p = new MPayment(ctx, 0, null);
+		MPayment p=(MPayment) MTable.get(ctx, MPayment.Table_ID).getPO(0,null);
 		p.setAD_Org_ID(wo.getAD_Org_ID());
 		p.setIsSelfService(true);
 		p.setAmount (wo.getC_Currency_ID(), wo.getGrandTotal ()); //	for CC selection
@@ -264,7 +265,7 @@ public class OrderServlet extends HttpServlet
 			return null;
 
 		if (log.isLoggable(Level.FINE)) log.fine("C_Order_ID=" + C_Order_ID);
-		return new MOrder (ctx, C_Order_ID, null);
+		return (MOrder) MTable.get(ctx, MOrder.Table_ID).getPO(C_Order_ID, null);
 	}	//	getOrder
 	
 	

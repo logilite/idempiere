@@ -33,6 +33,7 @@ public class MProductionLineMA extends X_M_ProductionLineMA {
 	 * @param qty
 	 * @param dateMaterialPolicy
 	 */
+	@Deprecated
 	public MProductionLineMA( MProductionLine parent, int asi, BigDecimal qty,Timestamp dateMaterialPolicy)	{		
 		super(parent.getCtx(),0,parent.get_TrxName());
 		setM_AttributeSetInstance_ID(asi);
@@ -52,7 +53,35 @@ public class MProductionLineMA extends X_M_ProductionLineMA {
 		}
 		setDateMaterialPolicy(dateMaterialPolicy);
 	}
-	
+
+	public static MProductionLineMA createFrom(MProductionLine parent, int asi, BigDecimal qty,
+			Timestamp dateMaterialPolicy)
+	{
+		MProductionLineMA lineMA = (MProductionLineMA) MTable.get(parent.getCtx(), MProductionLineMA.Table_ID).getPO(0,
+				parent.get_TrxName());
+
+		lineMA.setM_AttributeSetInstance_ID(asi);
+		lineMA.setM_ProductionLine_ID(parent.get_ID());
+		lineMA.setMovementQty(qty);
+		lineMA.setClientOrg(parent);
+
+		if (dateMaterialPolicy == null)
+		{
+			if (asi > 0)
+			{
+				MAttributeSetInstance masi = new MAttributeSetInstance(parent.getCtx(), asi, parent.get_TrxName());
+				dateMaterialPolicy = masi.getCreated();
+			}
+			else
+			{
+				dateMaterialPolicy = parent.getM_Production().getMovementDate();
+			}
+		}
+		lineMA.setDateMaterialPolicy(dateMaterialPolicy);
+
+		return lineMA;
+	}
+
 	@Override
 	public void setDateMaterialPolicy(Timestamp DateMaterialPolicy) {
 		if (DateMaterialPolicy != null)
@@ -73,9 +102,7 @@ public class MProductionLineMA extends X_M_ProductionLineMA {
 		if (lineMA != null)
 			return lineMA;
 		else
-			return new MProductionLineMA( parent,
-				asi,
-				Env.ZERO,dateMPolicy);
+			return createFrom(parent, asi, Env.ZERO, dateMPolicy);
 	}
 
 	/**

@@ -69,6 +69,8 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 	private static final String BTN_NEW_ID = "BtnNew";
 	
 	private static final String BTN_SAVE_ID = "BtnSave";
+	
+	private static final String BTN_QUICK_FORM_ID = "BtnQuickForm";
 
 	private static final String TABBOX_ONSELECT_ATTRIBUTE = "detailpane.tabbox.onselect";
 
@@ -83,9 +85,10 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 	private static final String NEW_IMAGE = "images/New16.png";
 	private static final String PROCESS_IMAGE = "images/Process16.png";
 	private static final String SAVE_IMAGE = "images/Save16.png";
+	private static final String QUICK_FORM_IMAGE = "images/QuickForm16.png";
 
 
-	private ToolBarButton btnNew;
+	private ToolBarButton btnNew, btnSave;
 	private long prevKeyEventTime = 0;
 	private KeyEvent prevKeyEvent;
 
@@ -110,6 +113,8 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 	public static final String ON_EDIT_EVENT = "onEdit";
 	
 	public static final String ON_SAVE_EVENT = "onSave";
+	
+	public static final String ON_QUICK_FORM_EVENT = "onQuickForm";
 	
     private HashMap<String, ToolBarButton> buttons = new HashMap<String, ToolBarButton>();
     private List<ToolbarCustomButton> toolbarCustomButtons = new ArrayList<ToolbarCustomButton>();
@@ -321,21 +326,21 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 		button.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Delete")));
         buttons.put(BTN_DELETE_ID.substring(3, BTN_DELETE_ID.length()), button);
 
-		button = new ToolBarButton();
+		btnSave = new ToolBarButton();
 		if (ThemeManager.isUseFontIconForImage())
-			button.setIconSclass("z-icon-Save");
+			btnSave.setIconSclass("z-icon-Save");
 		else
-			button.setImage(ThemeManager.getThemeResource(SAVE_IMAGE));
-		button.setId(BTN_SAVE_ID);
-		button.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
+			btnSave.setImage(ThemeManager.getThemeResource(SAVE_IMAGE));
+		btnSave.setId(BTN_SAVE_ID);
+		btnSave.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
 			@Override
 			public void onEvent(Event event) throws Exception {
 				Event openEvent = new Event(ON_SAVE_EVENT, DetailPane.this);
 				eventListener.onEvent(openEvent);
 			}
 		});
-		button.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Save")));
-        buttons.put(BTN_SAVE_ID.substring(3, BTN_SAVE_ID.length()), button);
+		btnSave.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Save")));
+        buttons.put(BTN_SAVE_ID.substring(3, BTN_SAVE_ID.length()), btnSave);
 
 		
 		if (!tabPanel.getGridTab().isSortTab()) {
@@ -354,6 +359,21 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 			button.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Process")));
 	        buttons.put(BTN_PROCESS_ID.substring(3, BTN_PROCESS_ID.length()), button);
 		}
+		
+		// ADD Quick Form Button
+		button = new ToolBarButton();
+		button.setImage(ThemeManager.getThemeResource(QUICK_FORM_IMAGE));
+		button.setId(BTN_QUICK_FORM_ID);
+		button.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
+			@Override
+			public void onEvent(Event event) throws Exception
+			{
+				Event openEvent = new Event(ON_QUICK_FORM_EVENT, DetailPane.this);
+				eventListener.onEvent(openEvent);
+			}
+		});
+		button.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "QuickForm")));
+		buttons.put(BTN_QUICK_FORM_ID.substring(3, BTN_QUICK_FORM_ID.length()), button);
 		
 		MToolBarButton[] officialButtons = MToolBarButton.getToolbarButtons("D", null);
 		for (MToolBarButton toolbarButton : officialButtons) {
@@ -432,8 +452,9 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 	
 	protected void onProcess(Component button) {
 		ProcessButtonPopup popup = new ProcessButtonPopup();
-		ADTabpanel adtab = (ADTabpanel) getSelectedADTabpanel();
-		popup.render(adtab.getToolbarButtons());
+		IADTabpanel adtab = getSelectedADTabpanel();
+		if(adtab.getToolbarButtons()!=null && adtab.getToolbarButtons().size()>0)
+			popup.render(adtab.getToolbarButtons());
 		if (popup.getChildren().size() > 0) {
 			popup.setPage(button.getPage());
 			popup.open(button, "after_start");
@@ -710,8 +731,12 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
         		} else if (BTN_EDIT_ID.equals(btn.getId())) {
         			btn.setDisabled(false);
         		} else if (BTN_SAVE_ID.equals(btn.getId())) {
-         			btn.setDisabled(false);
-         		}
+        			btn.setDisabled(!adtab.needSave(true, false));
+				}
+				else if (BTN_QUICK_FORM_ID.equals(btn.getId()))
+				{
+					btn.setDisabled(!(adtab.isEnableQuickFormButton() && !adtab.getGridTab().isReadOnly()));
+				}
         		if (windowRestrictList.contains(btn.getId())) {
         			btn.setVisible(false);
         		} else if (tabRestrictList.contains(btn.getId())) {
@@ -741,7 +766,8 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
         			if (adtab.getGridTab().isSortTab()) {
         				btn.setDisabled(true);
         			} else {
-        				btn.setDisabled(((ADTabpanel)adtab).getToolbarButtons().isEmpty());
+        				boolean isToolbarDisabled = (adtab.getToolbarButtons()==null || adtab.getToolbarButtons().isEmpty());
+        				btn.setDisabled(isToolbarDisabled);
         			}
         			break;
         		}
@@ -858,11 +884,15 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 	}
 
     public static final int VK_N              = 0x4E;
+    public static final int VK_S              = 0x53;
 	private void onCtrlKeyEvent(KeyEvent keyEvent) {
 		ToolBarButton btn = null;
 		if (keyEvent.isAltKey() && !keyEvent.isCtrlKey() && keyEvent.isShiftKey()) { // Shift+Alt key
 			if (keyEvent.getKeyCode() == VK_N) { // Shift+Alt+N
 				btn = btnNew;
+			}
+			if (keyEvent.getKeyCode() == VK_S) { // Shift+Alt+S
+				btn = btnSave;
 			}
 		}
 		if (btn != null) {

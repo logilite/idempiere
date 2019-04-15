@@ -15,6 +15,7 @@
    		<xsd:element name="ErrorInfo" type="xsd:string" minOccurs="0" maxOccurs="1"/>
    		<xsd:element name="Status" type="xsd:string" minOccurs="0" maxOccurs="1"/>
    		<xsd:element name="StatusError" type="xsd:boolean" minOccurs="0" maxOccurs="1"/>
+   		<xsd:element name="ADLoginResponse" type="tns:ADLoginResponse" minOccurs="0"/>
    	</xsd:sequence>
    	<xsd:attribute name="NumRows" type="xsd:int" />
    	<xsd:attribute name="TotalRows" type="xsd:int" />   	
@@ -100,6 +101,7 @@
    	<xsd:element name="Summary" type="xsd:string"/>
    	<xsd:element name="LogInfo" type="xsd:string"/>
    	<xsd:element name="Data" type="xsd:hexBinary"/>
+   	<xsd:element name="ADLoginResponse" type="tns:ADLoginResponse" minOccurs="0"/>
    </xsd:sequence>
    <xsd:attribute name="IsError" type="xsd:boolean"/>
    <xsd:attribute name="IsReport" type="xsd:boolean"/>
@@ -136,24 +138,26 @@
 <xsd:complexType name="ADLoginRequest">
 <xsd:sequence>
   <xsd:element name="user" type="xsd:string"/>
-  <xsd:element name="pass" type="xsd:string"/>
-  <xsd:element name="lang" type="xsd:string"/>
-  <xsd:element name="ClientID" type="xsd:int"/>
-  <xsd:element name="RoleID" type="xsd:int"/>
-  <xsd:element name="OrgID" type="xsd:int"/>
-  <xsd:element name="WarehouseID" type="xsd:int"/>
-  <xsd:element name="stage" type="xsd:int" />
+  <xsd:element name="Token" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+  <xsd:element name="pass" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+  <xsd:element name="lang" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+  <xsd:element name="ClientID" type="xsd:int" minOccurs="0" maxOccurs="1"/>
+  <xsd:element name="RoleID" type="xsd:int" minOccurs="0" maxOccurs="1"/>
+  <xsd:element name="OrgID" type="xsd:int" minOccurs="0" maxOccurs="1"/>
+  <xsd:element name="WarehouseID" type="xsd:int" minOccurs="0" maxOccurs="1"/>
+  <xsd:element name="stage" type="xsd:int" minOccurs="0" maxOccurs="1"/>
 </xsd:sequence>
 </xsd:complexType>
 
 <xsd:complexType name="ADLoginResponse">
 <xsd:sequence>
-  <xsd:element name="status" type="xsd:int"/>
-  <xsd:element name="roles" type="tns:LookupValues"/>
-  <xsd:element name="langs" type="tns:LookupValues"/>
-  <xsd:element name="orgs" type="tns:LookupValues"/>
-  <xsd:element name="clients" type="tns:LookupValues"/>
-  <xsd:element name="warehouses" type="tns:LookupValues"/>
+  <xsd:element name="Token" type="xsd:string" minOccurs="0"/>
+  <xsd:element name="status" type="xsd:int" minOccurs="0"/>
+  <xsd:element name="roles" type="xsd:int" minOccurs="0"/>
+  <xsd:element name="langs" type="xsd:string" minOccurs="0"/>
+  <xsd:element name="orgs" type="xsd:int" minOccurs="0"/>
+  <xsd:element name="clients" type="xsd:int" minOccurs="0"/>
+  <xsd:element name="warehouses" type="xsd:int" minOccurs="0"/>
 </xsd:sequence>
 </xsd:complexType>
 
@@ -163,6 +167,7 @@
 			<xsd:element name="outputFields" type="tns:outputFields" minOccurs="0" maxOccurs="unbounded"/>
 			<xsd:element name="RunProcessResponse" type="tns:RunProcessResponse"  minOccurs="0"/>
 			<xsd:element name="WindowTabData" type="tns:WindowTabData"   minOccurs="0"/>
+			<xsd:element name="ADLoginResponse" type="tns:ADLoginResponse" minOccurs="0"/>
 		</xsd:sequence>
 		<xsd:attribute name="IsError" type="xsd:boolean" />
 		<xsd:attribute name="IsRolledBack" type="xsd:boolean" />
@@ -320,6 +325,7 @@
 <xsd:complexType name="CompositeResponses">
 	<xsd:sequence>
 		<xsd:element name="CompositeResponse" type="tns:CompositeResponse" minOccurs="0" maxOccurs="unbounded"></xsd:element>
+		<xsd:element name="ADLoginResponse" type="tns:ADLoginResponse" minOccurs="0"/>
 	</xsd:sequence>
 </xsd:complexType>
 

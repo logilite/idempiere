@@ -21,7 +21,6 @@ import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -41,6 +40,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MMatchInv;
 import org.compiere.model.MOrderLandedCostAllocation;
+import org.compiere.model.MTable;
 import org.compiere.model.ProductCost;
 import org.compiere.model.X_M_Cost;
 import org.compiere.util.Env;
@@ -74,12 +74,12 @@ public class Doc_MatchInv extends Doc
 	}   //  Doc_MatchInv
 
 	/** Invoice Line			*/
-	private MInvoiceLine	m_invoiceLine = null;
+	protected MInvoiceLine	m_invoiceLine = null;
 	/** Material Receipt		*/
-	private MInOutLine		m_receiptLine = null;
+	protected MInOutLine		m_receiptLine = null;
 
-	private ProductCost		m_pc = null;
-	private MMatchInv m_matchInv;
+	protected ProductCost		m_pc = null;
+	protected MMatchInv m_matchInv;
 
 	/** Commitments			*/
 //	private DocLine[]		m_commitments = null;
@@ -96,13 +96,14 @@ public class Doc_MatchInv extends Doc
 		setQty (m_matchInv.getQty());
 		//	Invoice Info
 		int C_InvoiceLine_ID = m_matchInv.getC_InvoiceLine_ID();
-		m_invoiceLine = new MInvoiceLine (getCtx(), C_InvoiceLine_ID, getTrxName());
+		m_invoiceLine = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID)
+				.getPO(C_InvoiceLine_ID, getTrxName());
 		//		BP for NotInvoicedReceipts
 		int C_BPartner_ID = m_invoiceLine.getParent().getC_BPartner_ID();
 		setC_BPartner_ID(C_BPartner_ID);
 		//
 		int M_InOutLine_ID = m_matchInv.getM_InOutLine_ID();
-		m_receiptLine = new MInOutLine (getCtx(), M_InOutLine_ID, getTrxName());
+		m_receiptLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(M_InOutLine_ID, getTrxName());
 		//
 		m_pc = new ProductCost (Env.getCtx(),
 			getM_Product_ID(), m_matchInv.getM_AttributeSetInstance_ID(), getTrxName());
@@ -140,6 +141,13 @@ public class Doc_MatchInv extends Doc
 	public ArrayList<Fact> createFacts (MAcctSchema as)
 	{
 		ArrayList<Fact> facts = new ArrayList<Fact>();
+		
+		// Do not post if Match invoice header is set.
+		if(m_matchInv.getM_MatchInvHdr_ID() > 0)
+		{
+			return facts;
+		}
+		
 		//  Nothing to do
 		if (getM_Product_ID() == 0								//	no Product
 			|| getQty().signum() == 0
@@ -180,7 +188,7 @@ public class Doc_MatchInv extends Doc
 		dr.setQty(getQty());
 		BigDecimal temp = dr.getAcctBalance();
 		//	Set AmtAcctCr/Dr from Receipt (sets also Project)
-		if (m_matchInv.getReversal_ID() > 0) 
+		if (m_matchInv.getReversal_ID() > 0 && m_matchInv.isReversal()) 
 		{
 			if (!dr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
 					m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
@@ -229,7 +237,7 @@ public class Doc_MatchInv extends Doc
 				cr.setAmtSourceCr(BigDecimal.ZERO);
 			}
 			temp = cr.getAcctBalance();
-			if (m_matchInv.getReversal_ID() > 0)
+			if (m_matchInv.getReversal_ID() > 0 && m_matchInv.isReversal())
 			{
 				if (!cr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
 						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
@@ -263,7 +271,7 @@ public class Doc_MatchInv extends Doc
 					invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
 			cr = fact.createLine (null, expense,
 				as.getC_Currency_ID(), null, LineNetAmt);
-			if (m_matchInv.getReversal_ID() > 0)
+			if (m_matchInv.getReversal_ID() > 0 && m_matchInv.isReversal())
 			{
 				if (!cr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
 						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
@@ -323,7 +331,8 @@ public class Doc_MatchInv extends Doc
 
 		//  Invoice Price Variance 	difference
 		BigDecimal ipv = cr.getAcctBalance().add(dr.getAcctBalance()).negate();
-		processInvoicePriceVariance(as, fact, ipv);
+		BigDecimal ipvSource = dr.getAmtSourceDr().subtract(cr.getAmtSourceCr()).negate();
+		processInvoicePriceVariance(as, fact, ipv, ipvSource);
 		if (log.isLoggable(Level.FINE)) log.fine("IPV=" + ipv + "; Balance=" + fact.getSourceBalance());
 
 		String error = createMatchInvCostDetail(as);
@@ -355,7 +364,7 @@ public class Doc_MatchInv extends Doc
 	 * @param ipv
 	 */
 	protected void processInvoicePriceVariance(MAcctSchema as, Fact fact,
-			BigDecimal ipv) {
+			BigDecimal ipv, BigDecimal ipvSource) {
 		if (ipv.signum() == 0) return;
 		
 		FactLine pv = fact.createLine(null,
@@ -408,6 +417,11 @@ public class Doc_MatchInv extends Doc
 			
 			line = fact.createLine(null, account, as.getC_Currency_ID(), ipv);
 			updateFactLine(line);
+			
+			if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
+			{
+				updateFactLineAmtSource(line, ipvSource);
+			}
 		} else if (X_M_Cost.COSTINGMETHOD_AverageInvoice.equals(costingMethod) && !zeroQty) {
 			FactLine line = fact.createLine(null,
 					m_pc.getAccount(ProductCost.ACCTTYPE_P_IPV, as),
@@ -416,13 +430,18 @@ public class Doc_MatchInv extends Doc
 			
 			line = fact.createLine(null, account, as.getC_Currency_ID(), ipv);
 			updateFactLine(line);
+			
+			if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
+			{
+				updateFactLineAmtSource(line, ipvSource);
+			}
 		}
 	}
 
 	/** Verify if the posting involves two or more organizations
 	@return true if there are more than one org involved on the posting
 	 */
-	private boolean isInterOrg(MAcctSchema as) {
+	public boolean isInterOrg(MAcctSchema as) {
 		MAcctSchemaElement elementorg = as.getAcctSchemaElement(MAcctSchemaElement.ELEMENTTYPE_Organization);
 		if (elementorg == null || !elementorg.isBalanced()) {
 			// no org element or not need to be balanced
@@ -437,7 +456,7 @@ public class Doc_MatchInv extends Doc
 	}
 
 	// Elaine 2008/6/20	
-	private String createMatchInvCostDetail(MAcctSchema as)
+	public String createMatchInvCostDetail(MAcctSchema as)
 	{
 		if (m_invoiceLine != null && m_invoiceLine.get_ID() > 0 
 			&& m_receiptLine != null && m_receiptLine.get_ID() > 0)
@@ -512,10 +531,9 @@ public class Doc_MatchInv extends Doc
 				if (orderLine.getC_Currency_ID() != as.getC_Currency_ID())
 				{
 					I_C_Order order = orderLine.getC_Order();
-					Timestamp dateAcct = order.getDateAcct();
 					BigDecimal rate = MConversionRate.getRate(
 						order.getC_Currency_ID(), as.getC_Currency_ID(),
-						dateAcct, order.getC_ConversionType_ID(),
+						getDateAcct(), order.getC_ConversionType_ID(),
 						order.getAD_Client_ID(), order.getAD_Org_ID());
 					if (rate == null)
 					{
@@ -570,5 +588,28 @@ public class Doc_MatchInv extends Doc
 		factLine.setUser2_ID(m_invoiceLine.getUser2_ID());
 		factLine.setM_Product_ID(m_invoiceLine.getM_Product_ID());
 		factLine.setQty(getQty());
+	}
+	
+	/**
+	 * Invoice currency & acct schema currency are not same then update AmtSource value
+	 * to avoid source not balanced error/ignore suspense balancing.
+	 * 
+	 * @param factLine
+	 * @param ipvSource
+	 */
+	protected void updateFactLineAmtSource(FactLine factLine, BigDecimal ipvSource)
+	{
+		// When only Rate differ then set Dr & Cr Source amount as zero.
+		factLine.setAmtSourceCr(Env.ZERO);
+		factLine.setAmtSourceDr(Env.ZERO);
+
+		// Price is vary then set Source amount according to source variance
+		if (ipvSource.compareTo(Env.ZERO) != 0)
+		{
+			if (ipvSource.signum() < 0)
+				factLine.setAmtSourceCr(ipvSource);
+			else
+				factLine.setAmtSourceDr(ipvSource);
+		}
 	}
 }   //  Doc_MatchInv

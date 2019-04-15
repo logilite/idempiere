@@ -67,7 +67,7 @@ public class ProjectPhaseGenOrder  extends SvrProcess
 			throw new IllegalArgumentException("C_ProjectPhase_ID == 0");
 		MProjectPhase fromPhase = new MProjectPhase (getCtx(), m_C_ProjectPhase_ID, get_TrxName());
 		MProject fromProject = ProjectGenOrder.getProject (getCtx(), fromPhase.getC_Project_ID(), get_TrxName());
-		MOrder order = new MOrder (fromProject, true, MOrder.DocSubTypeSO_OnCredit);
+		MOrder order = MOrder.createFrom(fromProject, true, MOrder.DocSubTypeSO_OnCredit);
 		order.setDescription(order.getDescription() + " - " + fromPhase.getName());
 		if (!order.save())
 			throw new Exception("Could not create Order");
@@ -75,7 +75,7 @@ public class ProjectPhaseGenOrder  extends SvrProcess
 		//	Create an order on Phase Level
 		if (fromPhase.getM_Product_ID() != 0)
 		{
-			MOrderLine ol = new MOrderLine(order);
+			MOrderLine ol = MOrderLine.createFrom(order);
 			ol.setLine(fromPhase.getSeqNo());
 			StringBuilder sb = new StringBuilder ().append(fromPhase.getName());
 			if (fromPhase.getDescription() != null && fromPhase.getDescription().length() > 0)
@@ -99,7 +99,7 @@ public class ProjectPhaseGenOrder  extends SvrProcess
 		MProjectLine[] lines = fromPhase.getLines();
 		for (int i = 0; i < lines.length; i++)
 		{
-			MOrderLine ol = new MOrderLine(order);
+			MOrderLine ol = MOrderLine.createFrom(order);
 			ol.setLine(lines[i].getLine());
 			ol.setDescription(lines[i].getDescription());
 			//
@@ -120,7 +120,7 @@ public class ProjectPhaseGenOrder  extends SvrProcess
 		MProjectTask[] tasks = fromPhase.getTasks ();
 		for (int i = 0; i < tasks.length; i++)
 		{
-			MOrderLine ol = new MOrderLine(order);
+			MOrderLine ol = MOrderLine.createFrom(order);
 			ol.setLine(tasks[i].getSeqNo());
 			StringBuilder sb = new StringBuilder ().append(tasks[i].getName());
 			if (tasks[i].getDescription() != null && tasks[i].getDescription().length() > 0)

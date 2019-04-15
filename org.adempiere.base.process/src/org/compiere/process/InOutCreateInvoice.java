@@ -28,6 +28,7 @@ import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MInvoicePaySchedule;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderPaySchedule;
+import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.util.Env;
  
@@ -40,11 +41,11 @@ import org.compiere.util.Env;
 public class InOutCreateInvoice extends SvrProcess
 {
 	/**	Shipment					*/
-	private int 	p_M_InOut_ID = 0;
+	protected int 	p_M_InOut_ID = 0;
 	/**	Price List Version			*/
-	private int		p_M_PriceList_ID = 0;
+	protected int		p_M_PriceList_ID = 0;
 	/* Document No					*/
-	private String	p_InvoiceDocumentNo = null;
+	protected String	p_InvoiceDocumentNo = null;
 	
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -80,13 +81,13 @@ public class InOutCreateInvoice extends SvrProcess
 		if (p_M_InOut_ID == 0)
 			throw new IllegalArgumentException("No Shipment");
 		//
-		MInOut ship = new MInOut (getCtx(), p_M_InOut_ID, get_TrxName());
+		MInOut ship = (MInOut) MTable.get(getCtx(), MInOut.Table_ID).getPO(p_M_InOut_ID, get_TrxName());
 		if (ship.get_ID() == 0)
 			throw new IllegalArgumentException("Shipment not found");
 		if (!MInOut.DOCSTATUS_Completed.equals(ship.getDocStatus()))
 			throw new IllegalArgumentException("Shipment not completed");
 		
-		MInvoice invoice = new MInvoice (ship, null);
+		MInvoice invoice = MInvoice.createFrom(ship, null);
 		// Should not override pricelist for RMA
 		if (p_M_PriceList_ID != 0 && ship.getM_RMA_ID() == 0)
 			invoice.setM_PriceList_ID(p_M_PriceList_ID);
@@ -98,7 +99,7 @@ public class InOutCreateInvoice extends SvrProcess
 		for (int i = 0; i < shipLines.length; i++)
 		{
 			MInOutLine sLine = shipLines[i];
-			MInvoiceLine line = new MInvoiceLine(invoice);
+			MInvoiceLine line = MInvoiceLine.createFrom(invoice);
 			line.setShipLine(sLine);
 			if (sLine.sameOrderLineUOM())
 				line.setQtyEntered(sLine.getQtyEntered());
@@ -110,7 +111,7 @@ public class InOutCreateInvoice extends SvrProcess
 		}
 				
 		if (invoice.getC_Order_ID() > 0) {
-			MOrder order = new MOrder(getCtx(), invoice.getC_Order_ID(), get_TrxName());
+			MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(invoice.getC_Order_ID(),get_TrxName());
 			invoice.setPaymentRule(order.getPaymentRule());
 			invoice.setC_PaymentTerm_ID(order.getC_PaymentTerm_ID());
 			invoice.saveEx();

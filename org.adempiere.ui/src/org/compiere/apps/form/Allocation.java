@@ -33,6 +33,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MPayment;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MTable;
 import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -656,8 +657,8 @@ public class Allocation
 		int iRows = invoice.getRowCount();
 		
 		//	Create Allocation
-		MAllocationHdr alloc = new MAllocationHdr (Env.getCtx(), true,	//	manual
-			DateTrx, C_Currency_ID, Env.getContext(Env.getCtx(), "#AD_User_Name"), trxName);
+		MAllocationHdr alloc = (MAllocationHdr) MTable.get(Env.getCtx(), MAllocationHdr.Table_Name).getPO(0, trxName);
+		alloc.setAllocationHdrValues(true, DateTrx, C_Currency_ID, Env.getContext(Env.getCtx(), "#AD_User_Name"));
 		alloc.setAD_Org_ID(AD_Org_ID);
 		alloc.setC_DocType_ID(m_C_DocType_ID);
 		alloc.setDescription(alloc.getDescriptionForManualAllocation(m_C_BPartner_ID, trxName));
@@ -802,13 +803,13 @@ public class Allocation
 		for (int i = 0; i < paymentList.size(); i++)
 		{
 			int C_Payment_ID = ((Integer)paymentList.get(i)).intValue();
-			MPayment pay = new MPayment (Env.getCtx(), C_Payment_ID, trxName);
+			MPayment pay=(MPayment) MTable.get(Env.getCtx(), MPayment.Table_ID).getPO(C_Payment_ID,trxName);
 			if (pay.testAllocation())
 				pay.saveEx();
 			if (log.isLoggable(Level.CONFIG)) log.config("Payment #" + i + (pay.isAllocated() ? " not" : " is") 
 					+ " fully allocated");
 		}
-		MBPartner bpartner = new MBPartner(Env.getCtx(), m_C_BPartner_ID, trxName);
+		MBPartner bpartner = (MBPartner) MTable.get(Env.getCtx(), MBPartner.Table_ID).getPO(m_C_BPartner_ID, trxName);
 		bpartner.setTotalOpenBalance();
 		bpartner.saveEx();
 		paymentList.clear();

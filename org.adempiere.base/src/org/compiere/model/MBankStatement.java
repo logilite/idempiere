@@ -95,6 +95,22 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 	 *	@param account Bank Account
  	 * 	@param isManual Manual statement
  	 **/
+	public static MBankStatement createFrom(MBankAccount account, boolean isManual)
+	{
+		MBankStatement bankStatement = (MBankStatement) MTable.get(account.getCtx(), MBankStatement.Table_ID).getPO(0,
+				account.get_TrxName());
+		bankStatement.setClientOrg(account);
+		bankStatement.setC_BankAccount_ID(account.getC_BankAccount_ID());
+		bankStatement.setStatementDate(new Timestamp(System.currentTimeMillis()));
+		bankStatement.setDateAcct(new Timestamp(System.currentTimeMillis()));
+		bankStatement.setBeginningBalance(account.getCurrentBalance());
+		bankStatement.setName(bankStatement.getStatementDate().toString());
+		bankStatement.setIsManual(isManual);
+
+		return bankStatement;
+	} // MBankStatement
+	
+	@Deprecated
 	public MBankStatement (MBankAccount account, boolean isManual)
 	{
 		this (account.getCtx(), 0, account.get_TrxName());
@@ -111,6 +127,12 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 	 * 	Create a new Bank Statement
 	 *	@param account Bank Account
 	 */
+	public static MBankStatement createFrom (MBankAccount account)
+	{
+		return createFrom(account, false);
+	}	//	MBankStatement
+	
+	@Deprecated
 	public MBankStatement(MBankAccount account)
 	{
 		this(account, false);
@@ -396,7 +418,7 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 			MBankStatementLine line = lines[i];
 			if (line.getC_Payment_ID() != 0)
 			{
-				MPayment payment = new MPayment (getCtx(), line.getC_Payment_ID(), get_TrxName());
+				MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(line.getC_Payment_ID(),get_TrxName());
 				payment.setIsReconciled(true);
 				payment.saveEx(get_TrxName());
 			}
@@ -490,7 +512,7 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 				line.setInterestAmt(Env.ZERO);
 				if (line.getC_Payment_ID() != 0)
 				{
-					MPayment payment = new MPayment (getCtx(), line.getC_Payment_ID(), get_TrxName());
+					MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(line.getC_Payment_ID(),get_TrxName());
 					payment.setIsReconciled(false);
 					payment.saveEx();
 					line.setC_Payment_ID(0);
@@ -583,12 +605,41 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REACTIVATE);
 		if (m_processMsg != null)
 			return false;		
+
+		if (isApproved())
+			setIsApproved(false);
+		
+		if (log.isLoggable(Level.INFO)) log.info("ReactivateIt - " + toString());
+		
+		//	Set Payment reconciled false
+		MBankStatementLine[] lines = getLines(false);
+		for (int i = 0; i < lines.length; i++)
+		{
+			MBankStatementLine line = lines[i];
+			if (line.getC_Payment_ID() != 0)
+			{
+				MPayment payment = (MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(line.getC_Payment_ID(),
+						get_TrxName());
+				payment.setIsReconciled(false);
+				payment.saveEx(get_TrxName());
+			}
+		}
+		//	Update Bank Account
+		MBankAccount ba = getBankAccount();
+		ba.load(get_TrxName());
+
+		ba.setCurrentBalance(ba.getCurrentBalance().subtract(getStatementDifference()));
+		ba.saveEx(get_TrxName());
+		
+		MFactAcct.deleteEx(MBankStatement.Table_ID, getC_BankStatement_ID(), get_TrxName());
+		setPosted(false);
+		
 		
 		// After reActivate
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REACTIVATE);
 		if (m_processMsg != null)
 			return false;		
-		return false;
+		return true;
 	}	//	reActivateIt
 	
 	

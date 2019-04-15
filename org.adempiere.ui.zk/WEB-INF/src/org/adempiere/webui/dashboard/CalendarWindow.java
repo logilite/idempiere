@@ -22,26 +22,35 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
+import java.util.logging.Level;
 
 import org.adempiere.webui.ClientInfo;
+import org.adempiere.webui.component.MultiSelectionBox;
 import org.adempiere.webui.component.Tabpanel;
 import org.adempiere.webui.component.Window;
+import org.adempiere.webui.event.ValueChangeEvent;
+import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.panel.ITabOnCloseHandler;
 import org.adempiere.webui.part.WindowContainer;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.UserPreference;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.compiere.model.MRefList;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.X_AD_User;
 import org.compiere.model.X_R_RequestType;
+import org.compiere.model.X_S_Resource;
+import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
+import org.compiere.util.ValueNamePair;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.encoders.EncoderUtil;
@@ -61,11 +70,17 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Cell;
+import org.zkoss.zul.Checkbox;
+import org.zkoss.zul.Grid;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listitem;
+import org.zkoss.zul.North;
 import org.zkoss.zul.Popup;
+import org.zkoss.zul.Row;
+import org.zkoss.zul.Rows;
 import org.zkoss.zul.Span;
 import org.zkoss.zul.Tab;
 import org.zkoss.zul.Timer;
@@ -76,20 +91,25 @@ import org.zkoss.zul.Toolbarbutton;
  * @author Elaine
  *
  */
-public class CalendarWindow extends Window implements EventListener<Event>, ITabOnCloseHandler {
+public class CalendarWindow extends Window implements EventListener<Event>, ITabOnCloseHandler, ValueChangeListener {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1576992746053720647L;
 	private static final String ON_MOBILE_SET_SELECTED_TAB_ECHO = "onMobileSetSelectedTabEcho";
+	private static CLogger log = CLogger.getCLogger(CalendarWindow.class);
 
+	private UserPreference userPreference;
 	private Calendars calendars;
 	private SimpleCalendarModel scm;
 	private Toolbarbutton btnRefresh;
 	private Listbox lbxRequestTypes;
+	private Listbox lbxContactActivityTypes;
+	private Listbox lbxResources;
 	private Image myChart;
 	private Button btnCurrentDate, btnSwitchTimeZone;
 	private Label lblDate;
+	private Label lblRes;
 	private Component divArrowLeft, divArrowRight;
 	private Span FDOW;
 	private Listbox lbxFDOW;
@@ -97,6 +117,17 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 	private Popup updateMsg;
 	private	Label popupLabel;
 	private Timer timer;
+	private Checkbox showRes;
+	int R_RequestType_ID = 0;
+	String ContactActivityType = "";
+	int S_Resource_ID = 0;
+	int old_Request_ID=0;
+	int old_Resource_ID=0;
+	String old_ContactActivityType="";
+
+	private MultiSelectionBox lbxUserHeirarchy;
+	private ActivityWindow activityWin;
+	private AssignmentWindow assignmentWin;
 	
 	private EventWindow eventWin;
 	
@@ -115,6 +146,37 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 		borderlayout.setStyle("position: absolute");
 		ZKUpdateUtil.setWidth(borderlayout, "100%");
 		ZKUpdateUtil.setHeight(borderlayout, "100%");
+		
+		Grid grid = new Grid();
+		Rows rows = new Rows();
+		grid.appendChild(rows);
+		
+		ArrayList<X_AD_User> usersList = DPCalendar.getUserList(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()));
+		ArrayList<ValueNamePair> supervisors = new ArrayList<ValueNamePair>();
+		supervisors.add(DPCalendar.SALES_REPRESENTATIVE_ALL);
+		for (X_AD_User uType : usersList)
+			supervisors.add(new ValueNamePair(uType.getAD_User_ID() + "", uType.getName()));
+
+		lbxUserHeirarchy = new MultiSelectionBox(supervisors, true);
+		
+
+		Row row = new Row();
+		Cell cell = new Cell();
+		cell.appendChild(new Label("Sales Representative :"));
+		ZKUpdateUtil.setWidth(cell, "10%");
+		row.appendChild(cell);
+
+		cell = new Cell();
+		cell.appendChild(lbxUserHeirarchy);
+		lbxUserHeirarchy.addValueChangeListener(this);
+		ZKUpdateUtil.setWidth(cell, "75%");
+		row.appendChild(cell);
+
+		rows.appendChild(row);
+
+		North north = new North();
+		north.appendChild(grid);
+		borderlayout.appendChild(north);
 
 		calendars = (Calendars) component.getFellow("cal");
 		calendars.setModel(scm);
@@ -133,6 +195,48 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 		for(X_R_RequestType type : types)
 			lbxRequestTypes.appendItem(type.getName(), type.getR_RequestType_ID() + "");
 		lbxRequestTypes.setSelectedIndex(0);
+		
+		lbxContactActivityTypes = (Listbox) component.getFellow("lbxContactActivityTypes");
+		lbxContactActivityTypes.addEventListener(Events.ON_SELECT, this);
+
+		lbxContactActivityTypes.appendItem(Msg.getMsg(ctx, "ShowAll"), "");
+		ArrayList<MRefList> ActivityTypes = DPCalendar.getContactActivityTypes(Env.getCtx());
+		for (MRefList type : ActivityTypes)
+		{
+			String name = MRefList.getListName(Env.getCtx(), type.getAD_Reference_ID(), type.getValue());
+			lbxContactActivityTypes.appendItem(name, type.getValue() + "");
+		}
+		lblRes=(Label)component.getFellow("Resourcelbl");
+		lblRes.setValue("Resource:");
+		lbxContactActivityTypes.setSelectedIndex(0);
+
+		lbxResources = (Listbox) component.getFellow("lbxResources");
+		lbxResources.addEventListener(Events.ON_SELECT, this);
+
+		lbxResources.appendItem(Msg.getMsg(ctx, "ShowAll"), "0");
+		ArrayList<X_S_Resource> resources = DPCalendar.getResources(Env.getCtx());
+		for (X_S_Resource r : resources)
+			lbxResources.appendItem(r.getName(), r.getS_Resource_ID() + "");
+		lbxResources.setSelectedIndex(0);
+		
+		showRes=(Checkbox) component.getFellow("showRes");
+		showRes.addEventListener(Events.ON_CHECK, this);
+		
+		userPreference=new UserPreference();
+		userPreference.loadPreference(Env.getAD_User_ID(Env.getCtx()));
+		
+		if(userPreference.getProperty(UserPreference.P_SHOWRESOURCES).equalsIgnoreCase("Y"))
+		{
+			lblRes.setVisible(true);
+			lbxResources.setVisible(true);
+			showRes.setChecked(true);
+		}
+		else
+		{
+			lblRes.setVisible(false);
+			lbxResources.setVisible(false);
+			showRes.setChecked(false);
+		}
 		
 		myChart = (Image) component.getFellow("mychart");
 		myChart.addEventListener(Events.ON_CREATE, this);
@@ -201,8 +305,9 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 		if (parentTab != null && parentTab.getClass().equals(Tabpanel.class)) {
 			((Tabpanel)parentTab).setOnCloseHandler(this);
 		}				
-	}
-
+		renderCalenderEvent();
+		divTabClicked(7);
+		}
 	private void afterPageAttached() {
 		Component p = getParent();
 		while (p != null) {
@@ -230,11 +335,32 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 
 		if (type.equals(Events.ON_CLICK)) {
 			if (e.getTarget() == btnRefresh)
-				btnRefreshClicked();
+				renderCalenderEvent();
 			else if (e.getTarget() == btnCurrentDate)
 				btnCurrentDateClicked();
 			else if (e.getTarget() == btnSwitchTimeZone)
 				btnSwitchTimeZoneClicked();
+		}
+		else if (type.equals(Events.ON_CHECK)) 
+		{
+			if(e.getTarget()==showRes)
+			{
+					if(showRes.isChecked())
+					{
+						lblRes.setVisible(true);
+						lbxResources.setVisible(true);
+						userPreference.setProperty(UserPreference.P_SHOWRESOURCES, "Y");
+					}
+					else
+					{
+						lblRes.setVisible(false);
+						lbxResources.setVisible(false);
+						userPreference.setProperty(UserPreference.P_SHOWRESOURCES, "N");
+					}
+					
+					userPreference.savePreference();
+					renderCalenderEvent();
+			}
 		}
 		else if (type.equals(Events.ON_CREATE)) {
 			if (e.getTarget() == lblDate)
@@ -257,33 +383,30 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 			int days = Msg.getMsg(Env.getCtx(),"Day").equals(text) ? 1: Msg.getMsg(Env.getCtx(),"5Days").equals(text) ? 5: Msg.getMsg(Env.getCtx(),"Week").equals(text) ? 7: 0;
 			divTabClicked(days);
 		}
-		else if (type.equals(Events.ON_SELECT)) {
-			if (e.getTarget() == lbxRequestTypes) {
-				Listitem li = lbxRequestTypes.getSelectedItem();
-				if(li == null) return;
-				
-				if(li.getValue() == null) return;
-				int R_RequestType_ID = Integer.parseInt(li.getValue().toString());
-				
-				scm.clear();
-				ArrayList<ADCalendarEvent> events = DPCalendar.getEvents(R_RequestType_ID, Env.getCtx());
-				for (ADCalendarEvent event : events)
-					scm.add(event);
-
-				calendars.invalidate();
-				syncModel();
+		else if (type.equals(Events.ON_SELECT))
+		{
+			if (e.getTarget() == lbxRequestTypes)
+			{
+				renderCalenderEvent();
 			}
-			else if (e.getTarget() == lbxFDOW) {
+			else if (e.getTarget() == lbxFDOW)
+			{
 				calendars.setFirstDayOfWeek(lbxFDOW.getSelectedItem().getValue().toString());
 				syncModel();
 			}
+			else if (e.getTarget() == lbxContactActivityTypes)
+			{
+				renderCalenderEvent();
+			}
+			else if (e.getTarget() == lbxResources)
+			{
+				renderCalenderEvent();
+			}
 		}
 		else if (type.equals("onEventCreate")) {
-			if (e instanceof CalendarsEvent) {
-				CalendarsEvent calendarsEvent = (CalendarsEvent) e;
-				RequestWindow requestWin = new RequestWindow(calendarsEvent, this);
-				SessionManager.getAppDesktop().showWindow(requestWin);
-			}
+			CalendarsEvent calendarsEvent = (CalendarsEvent) e;
+			DecisionWindow decisionWin = new DecisionWindow(calendarsEvent, this);
+			SessionManager.getAppDesktop().showWindow(decisionWin);
 		}	
 		else if (type.equals("onEventEdit")) {
 			if (e instanceof CalendarsEvent) {
@@ -297,6 +420,24 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 						eventWin = new EventWindow();
 					eventWin.setData(ce);
 					SessionManager.getAppDesktop().showWindow(eventWin);
+				}
+				else if (calendarEvent instanceof ADCalendarContactActivity)
+				{
+					ADCalendarContactActivity ce = (ADCalendarContactActivity) calendarEvent;
+
+					if (activityWin == null)
+						activityWin = new ActivityWindow(this);
+					activityWin.setData(ce);
+					SessionManager.getAppDesktop().showWindow(activityWin);
+				}
+				else if (calendarEvent instanceof ADCalendarResourceAssignment)
+				{
+					ADCalendarResourceAssignment ce = (ADCalendarResourceAssignment) calendarEvent;
+
+					if (assignmentWin == null)
+						assignmentWin = new AssignmentWindow();
+					assignmentWin.setData(ce);
+					SessionManager.getAppDesktop().showWindow(assignmentWin);
 				}
 			}
 		}
@@ -334,8 +475,19 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 		
 		List<?> list = calendars.getModel().get(calendars.getBeginDate(), calendars.getEndDate(), null);
 		int size = list.size();
-		for (Iterator<?> it = list.iterator(); it.hasNext();) {
-			String key = ((ADCalendarEvent)it.next()).getR_RequestType_ID() + "";
+		for (int i = 0; i < size ; i++) {
+			String key;
+
+			if (list.get(i).getClass().equals(ADCalendarEvent.class))
+				key = ((ADCalendarEvent) list.get(i)).getR_RequestType_ID() + "";
+			else if (list.get(i).getClass().equals(ADCalendarContactActivity.class))
+				key = ((ADCalendarContactActivity) list.get(i)).getContactActivityType() + "";
+			else if (list.get(i).getClass().equals(ADCalendarResourceAssignment.class))
+				key = ((ADCalendarResourceAssignment) list.get(i)).getS_Resource_ID() + "";
+
+			else
+				continue;
+
 					
 			if (!ht.containsKey(key))
 				ht.put(key, BigDecimal.ONE);
@@ -371,44 +523,15 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 			AImage image = new AImage("Pie Chart", bytes);
 			myChart.setContent(image);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.log(Level.SEVERE,"Chart is not rendered-"+e.getLocalizedMessage());
 		}		
 		htTypes = null;
 		ht = null;
 	}
 	
-	public void onRefresh() {
-		btnRefreshClicked();
-	}
-	
-	private void btnRefreshClicked() {
-		int R_RequestType_ID = 0;
-		Listitem li = lbxRequestTypes.getSelectedItem();
-		if(li != null && li.getValue() != null)
-			R_RequestType_ID = Integer.parseInt(li.getValue().toString());
-		
-		int cnt = lbxRequestTypes.getItemCount();
-		for (int i = cnt - 1; i >=0; i--)
-			lbxRequestTypes.removeItemAt(i);
-		
-		lbxRequestTypes.appendItem(Msg.getMsg(Env.getCtx(),"ShowAll"), "0");
-		ArrayList<X_R_RequestType> types = DPCalendar.getRequestTypes(Env.getCtx());
-		for(X_R_RequestType requestType : types)
-		{
-			Listitem item = lbxRequestTypes.appendItem(requestType.getName(), requestType.getR_RequestType_ID() + "");
-			if(R_RequestType_ID == requestType.getR_RequestType_ID())
-				lbxRequestTypes.setSelectedItem(item);
-		}
-		if(lbxRequestTypes.getSelectedIndex() < 0)
-			lbxRequestTypes.setSelectedIndex(0);
-		
-		scm.clear();
-		ArrayList<ADCalendarEvent> events = DPCalendar.getEvents(R_RequestType_ID, Env.getCtx());
-		for (ADCalendarEvent event : events)
-			scm.add(event);
-
-		calendars.invalidate();
-		syncModel();
+	public void onRefresh()
+	{
+		renderCalenderEvent();
 	}
 	
 	private void setTimeZone()
@@ -465,5 +588,102 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 		} else calendars.setMold("month");
 		updateDateLabel();
 		FDOW.setVisible("month".equals(calendars.getMold()) || calendars.getDays() == 7);
+	}
+
+	@Override
+	public void valueChange(ValueChangeEvent e)
+	{
+		if (e.getSource() == lbxUserHeirarchy)
+		{
+			Listitem li = lbxRequestTypes.getSelectedItem();
+			if (li == null)
+				return;
+			if (li.getValue() == null)
+				return;
+			int R_RequestType_ID = Integer.parseInt(li.getValue().toString());
+
+			scm.clear();
+			ArrayList<ADCalendarEvent> events = DPCalendar.getEvents(R_RequestType_ID, Env.getCtx(),
+					lbxUserHeirarchy.getValues());
+			for (ADCalendarEvent event : events)
+			{
+				scm.add(event);
+			}
+			ArrayList<ADCalendarContactActivity> activities = DPCalendar.getContactActivities(ContactActivityType,
+					Env.getCtx(),lbxUserHeirarchy.getValues());
+			for (ADCalendarContactActivity activity : activities)
+				scm.add(activity);
+
+			userPreference.loadPreference(Env.getAD_User_ID(Env.getCtx()));
+			String showres=userPreference.getProperty(UserPreference.P_SHOWRESOURCES);
+			if(showres.equalsIgnoreCase("Y"))
+			{
+				ArrayList<ADCalendarResourceAssignment> resourceAssignments = DPCalendar.getResourceAssignments(
+						S_Resource_ID, Env.getCtx());
+				for (ADCalendarResourceAssignment resource : resourceAssignments)
+					scm.add(resource);
+			}
+			calendars.invalidate();
+			syncModel();
+		}
+	}
+	
+	public void renderCalenderEvent()
+	{
+		scm.clear();
+
+		// Fetch Requests
+		Listitem li = lbxRequestTypes.getSelectedItem();
+		if (li == null)
+			return;
+
+		if (li.getValue() == null)
+			return;
+		int R_RequestType_ID = Integer.parseInt(li.getValue().toString());
+
+		ArrayList<ADCalendarEvent> events = DPCalendar.getEvents(R_RequestType_ID, Env.getCtx(),
+				lbxUserHeirarchy.getValues());
+		for (ADCalendarEvent event : events)
+			scm.add(event);
+
+		// Fetch Contact Activities
+		li = lbxContactActivityTypes.getSelectedItem();
+		if (li == null)
+			return;
+
+		if (li.getValue() == null)
+			return;
+		ContactActivityType = li.getValue();
+
+		ArrayList<ADCalendarContactActivity> activities = DPCalendar.getContactActivities(ContactActivityType,
+				Env.getCtx(), lbxUserHeirarchy.getValues());
+		for (ADCalendarContactActivity activity : activities)
+			scm.add(activity);
+
+		// Fetch Resources
+
+		userPreference.loadPreference(Env.getAD_User_ID(Env.getCtx()));
+		String showres = userPreference.getProperty(UserPreference.P_SHOWRESOURCES);
+
+		if (showres.equals("Y"))
+		{
+			lblRes.setVisible(true);
+			lbxResources.setVisible(true);
+			li = lbxResources.getSelectedItem();
+			if (li == null)
+				return;
+
+			if (li.getValue() == null)
+				return;
+			S_Resource_ID = Integer.parseInt(li.getValue().toString());
+
+			ArrayList<ADCalendarResourceAssignment> resourceAssignments = DPCalendar.getResourceAssignments(
+					S_Resource_ID, Env.getCtx());
+			for (ADCalendarResourceAssignment resource : resourceAssignments)
+				scm.add(resource);
+		}
+
+		calendars.invalidate();
+		syncModel();
 	}
 }

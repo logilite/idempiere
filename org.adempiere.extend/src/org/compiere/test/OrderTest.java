@@ -24,6 +24,7 @@ import org.compiere.Adempiere;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MTable;
 import org.compiere.process.DocAction;
 import org.compiere.util.CLogMgt;
 import org.compiere.util.CLogger;
@@ -69,7 +70,7 @@ public class OrderTest implements Runnable
 	{
 		long time = System.currentTimeMillis();
 		int count = 0;
-		MBPartner bp = new MBPartner(Env.getCtx(), 117, null);
+		MBPartner bp = (MBPartner) MTable.get(Env.getCtx(), MBPartner.Table_ID).getPO(117, null);
 		bp.setSOCreditStatus(MBPartner.SOCREDITSTATUS_NoCreditCheck);
 		bp.saveEx();
 		
@@ -80,7 +81,7 @@ public class OrderTest implements Runnable
 			trx.setDisplayName(getClass().getName()+"_run");
 			trx.start();
 			//
-			MOrder order = new MOrder(Env.getCtx(),0,trx.getTrxName());
+			MOrder order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(0,trx.getTrxName());
 			order.setDescription("#" + m_no + "_" + i);
 			order.setC_DocTypeTarget_ID(135); 	//	POS
 			order.setC_BPartner_ID(117);		//	C&W
@@ -96,7 +97,7 @@ public class OrderTest implements Runnable
 			int linesNumber = r.nextInt(m_maxLines) + 1;
 			for (int j = 0; j < linesNumber; j++)
 			{
-				MOrderLine line = new MOrderLine(order);
+				MOrderLine line = MOrderLine.createFrom(order);
 				line.setM_Product_ID(123);		//	Oak Tree
 				line.setQty(new BigDecimal(5));
 				if (!line.save())

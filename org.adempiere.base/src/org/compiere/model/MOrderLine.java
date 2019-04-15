@@ -170,6 +170,19 @@ public class MOrderLine extends X_C_OrderLine
 			ol.saveEx();
 	 *  @param  order parent order
 	 */
+	public static MOrderLine createFrom(MOrder order)
+	{
+		MOrderLine orderLine = (MOrderLine) MTable.get(order.getCtx(), MOrderLine.Table_ID).getPO(0,
+				order.get_TrxName());
+		if (order.get_ID() == 0)
+			throw new IllegalArgumentException("Header not saved");
+		orderLine.setC_Order_ID(order.getC_Order_ID()); // parent
+		orderLine.setOrder(order);
+
+		return orderLine;
+	} // MOrderLine
+	
+	@Deprecated
 	public MOrderLine (MOrder order)
 	{
 		this (order.getCtx(), 0, order.get_TrxName());
@@ -246,7 +259,7 @@ public class MOrderLine extends X_C_OrderLine
 	public MOrder getParent()
 	{
 		if (m_parent == null)
-			m_parent = new MOrder(getCtx(), getC_Order_ID(), get_TrxName());
+			m_parent = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(getC_Order_ID(), get_TrxName());
 		return m_parent;
 	}	//	getParent
 	
@@ -825,14 +838,14 @@ public class MOrderLine extends X_C_OrderLine
 				getProductPricing(m_M_PriceList_ID);
 			// IDEMPIERE-1574 Sales Order Line lets Price under the Price Limit when updating
 			//	Check PriceLimit
-			boolean enforce = m_IsSOTrx && getParent().getM_PriceList().isEnforcePriceLimit();
+			boolean enforce = m_IsSOTrx && getParent().getM_PriceList().isEnforcePriceLimit() && getM_Promotion_ID() <= 0;
 			if (enforce && MRole.getDefault().isOverwritePriceLimit())
 				enforce = false;
 			//	Check Price Limit?
 			if (enforce && getPriceLimit() != Env.ZERO
 			  && getPriceActual().compareTo(getPriceLimit()) < 0)
 			{
-				log.saveError("UnderLimitPrice", "PriceEntered=" + getPriceEntered() + ", PriceLimit=" + getPriceLimit()); 
+				log.saveError("UnderLimitPrice", "PriceEntered=" + getPriceEntered() + ", PriceLimit=" + getPriceLimit() + ", Product = " + getProduct().getValue()); 
 				return false;
 			}
 			//

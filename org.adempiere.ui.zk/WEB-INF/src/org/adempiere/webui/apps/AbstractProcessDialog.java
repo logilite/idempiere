@@ -706,6 +706,7 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 			}
 			querySaved();
 			fSavedName.setSelectedItem(getComboItem(saveName));
+			getProcessInfo().setAD_PInstance_ID(0);
 	}
 	
 	protected void saveReportOptionToInstance (MPInstance instance){

@@ -69,4 +69,10 @@ public interface IGridTabImporter {
 	 * @return suggested file name
 	 */
 	public String getSuggestedFileName(GridTab gridTab);
+	
+	/**
+	 * @return error message
+	 */
+	public String getErrorMessage();
+	
 }

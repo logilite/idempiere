@@ -604,11 +604,13 @@ public class MWFNode extends X_AD_WF_Node
 		}
 		else if (action.equals(ACTION_SetVariable)) 
 		{
+			/* null is valid value for SetVariable
 			if (getAttributeValue() == null)
 			{
 				log.saveError("FillMandatory", Msg.getElement(getCtx(), "AttributeValue"));
 				return false;
 			}
+			*/
 			if (getAD_Column_ID() > 0) {
 				// validate that just advanced roles can manipulate secure content via workflows
 				MColumn column = MColumn.get(getCtx(), getAD_Column_ID(), get_TrxName ());

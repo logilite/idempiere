@@ -111,7 +111,7 @@ public class MDunningRunLine extends X_C_DunningRunLine
 		if (getC_Invoice_ID() == 0)
 			m_invoice = null;
 		else if (m_invoice == null)
-			m_invoice = new MInvoice (getCtx(), getC_Invoice_ID(), get_TrxName());
+			m_invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(getC_Invoice_ID(), get_TrxName());
 		return m_invoice;
 	}	//	getInvoice
 	
@@ -195,7 +195,7 @@ public class MDunningRunLine extends X_C_DunningRunLine
 		if (getC_Payment_ID() == 0)
 			m_payment = null;
 		else if (m_payment == null)
-			m_payment = new MPayment (getCtx(), getC_Payment_ID(), get_TrxName());
+			m_payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(getC_Payment_ID(),get_TrxName());
 		return m_payment;
 	}	//	getPayment
 	

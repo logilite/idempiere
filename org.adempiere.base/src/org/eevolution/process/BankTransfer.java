@@ -22,6 +22,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.MBankAccount;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.AdempiereUserError;
@@ -39,20 +40,20 @@ import org.compiere.util.Util;
  **/
 public class BankTransfer extends SvrProcess
 {
-	private String 		p_DocumentNo= "";				// Document No
-	private String 		p_Description= "";				// Description
-	private int 		p_C_BPartner_ID = 0;   			// Business Partner to be used as bridge
-	private int			p_C_Currency_ID = 0;			// Payment Currency
-	private int 		p_C_ConversionType_ID = 0;		// Payment Conversion Type
-	private int			p_C_Charge_ID = 0;				// Charge to be used as bridge
+	protected String 		p_DocumentNo= "";				// Document No
+	protected String 		p_Description= "";				// Description
+	protected int 		p_C_BPartner_ID = 0;   			// Business Partner to be used as bridge
+	protected int			p_C_Currency_ID = 0;			// Payment Currency
+	protected int 		p_C_ConversionType_ID = 0;		// Payment Conversion Type
+	protected int			p_C_Charge_ID = 0;				// Charge to be used as bridge
 
-	private BigDecimal 	p_Amount = Env.ZERO;  			// Amount to be transfered between the accounts
-	private int 		p_From_C_BankAccount_ID = 0;	// Bank Account From
-	private int 		p_To_C_BankAccount_ID= 0;		// Bank Account To
-	private Timestamp	p_StatementDate = null;  		// Date Statement
-	private Timestamp	p_DateAcct = null;  			// Date Account
-	private int         p_AD_Org_ID = 0;
-	private int         m_created = 0;
+	protected BigDecimal 	p_Amount = Env.ZERO;  			// Amount to be transfered between the accounts
+	protected int 		p_From_C_BankAccount_ID = 0;	// Bank Account From
+	protected int 		p_To_C_BankAccount_ID= 0;		// Bank Account To
+	protected Timestamp	p_StatementDate = null;  		// Date Statement
+	protected Timestamp	p_DateAcct = null;  			// Date Account
+	protected int         p_AD_Org_ID = 0;
+	protected int         m_created = 0;
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -143,13 +144,13 @@ public class BankTransfer extends SvrProcess
 	 * Generate BankTransfer()
 	 *
 	 */
-	private void generateBankTransfer()
+	public void generateBankTransfer()
 	{
 
 		MBankAccount mBankFrom = new MBankAccount(getCtx(),p_From_C_BankAccount_ID, get_TrxName());
 		MBankAccount mBankTo = new MBankAccount(getCtx(),p_To_C_BankAccount_ID, get_TrxName());
 		
-		MPayment paymentBankFrom = new MPayment(getCtx(), 0 ,  get_TrxName());
+		MPayment paymentBankFrom=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(0,get_TrxName());
 		paymentBankFrom.setC_BankAccount_ID(mBankFrom.getC_BankAccount_ID());
 		paymentBankFrom.setAD_Org_ID(p_AD_Org_ID);
 		if (!Util.isEmpty(p_DocumentNo, true))
@@ -177,7 +178,7 @@ public class BankTransfer extends SvrProcess
 				MPayment.Table_ID, paymentBankFrom.getC_Payment_ID());
 		m_created++;
 
-		MPayment paymentBankTo = new MPayment(getCtx(), 0 ,  get_TrxName());
+		MPayment paymentBankTo=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(0,get_TrxName());
 		paymentBankTo.setC_BankAccount_ID(mBankTo.getC_BankAccount_ID());
 		paymentBankTo.setAD_Org_ID(p_AD_Org_ID);
 		if (!Util.isEmpty(p_DocumentNo, true))

@@ -21,6 +21,7 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.PreparedStatement;
@@ -253,7 +254,7 @@ public abstract class PO
 	/**	Deleted ID					*/
 	private int					m_idOld = 0;
 	/** Custom Columns 				*/
-	private HashMap<String,String>	m_custom = null;
+	private HashMap<String,Object>	m_custom = null;
 	/** Attributes	 				*/
 	private HashMap<String,Object>	m_attributes = null;
 
@@ -1038,7 +1039,7 @@ public abstract class PO
 			return set_Value(columnName, value);
 		}
 		if (m_custom == null)
-			m_custom = new HashMap<String,String>();
+			m_custom = new HashMap<String,Object>();
 		String valueString = "NULL";
 		if (value == null)
 			;
@@ -1048,6 +1049,11 @@ public abstract class PO
 			valueString = ((Boolean)value).booleanValue() ? "'Y'" : "'N'";
 		else if (value instanceof Timestamp)
 			valueString = DB.TO_DATE((Timestamp)value, false);
+		else if (value instanceof Integer[] || value instanceof String[])
+		{
+			m_custom.put(columnName, value);
+			return true;
+		}
 		else //	if (value instanceof String)
 			valueString = DB.TO_STRING(value.toString());
 		//	Save it
@@ -1410,6 +1416,22 @@ public abstract class PO
 					m_oldValues[index] = decrypt(index, rs.getTimestamp(columnName));
 				else if (DisplayType.isLOB(dt))
 					m_oldValues[index] = get_LOB (rs.getObject(columnName));
+				else if (clazz == Integer[].class)
+				{
+					Array arr = rs.getArray(columnName);
+					Object javaArray = null;
+					if (arr != null)
+						javaArray = (Object) Util.convertBigDecimalToInteger((BigDecimal[]) arr.getArray());
+					m_oldValues[index] = decrypt(index, javaArray);
+				}
+				else if (clazz == String[].class)
+				{
+					Array arr = rs.getArray(columnName);
+					Object javaArray = null;
+					if (arr != null)
+						javaArray = (String[]) arr.getArray();
+					m_oldValues[index] = decrypt(index, javaArray);
+				}
 				else if (clazz == String.class)
 				{
 					String value = (String)decrypt(index, rs.getString(columnName));
@@ -1487,6 +1509,10 @@ public abstract class PO
 				else if (DisplayType.isLOB(dt))
 					m_oldValues[index] = null;	//	get_LOB (rs.getObject(columnName));
 				else if (clazz == String.class)
+					m_oldValues[index] = value;
+				else if (clazz == Integer[].class)
+					m_oldValues[index] = value;
+				else if (clazz == String[].class)
 					m_oldValues[index] = value;
 				else
 					m_oldValues[index] = null;	// loadSpecial(rs, index);
@@ -2554,6 +2580,14 @@ public abstract class PO
 				}
 				else if (value instanceof Timestamp)
 					sql.append(DB.TO_DATE((Timestamp)encrypt(i,value),p_info.getColumnDisplayType(i) == DisplayType.Date));
+				else if (value instanceof Integer[] || value instanceof String[])
+				{
+					String val = Util.convertArrayToStringForDB(value);
+					if (val == null || val.equalsIgnoreCase("NULL"))
+						sql.append("null");
+					else
+						sql.append("'").append(val).append("'");
+				}
 				else {
 					if (value.toString().length() == 0) {
 						// [ 1722057 ] Encrypted columns throw error if saved as null
@@ -2636,11 +2670,21 @@ public abstract class PO
 				changes = true;
 				//
 				String column = (String)it.next();
-				String value = (String)m_custom.get(column);
+				Object value = m_custom.get(column);
 				int index = p_info.getColumnIndex(column);
 				if (withValues)
 				{
-					sql.append(column).append("=").append(encrypt(index,value));
+					sql.append(column).append("=");
+					if (value instanceof Integer[] || value instanceof String[])
+					{
+						String val = Util.convertArrayToStringForDB(value);
+						if (val == null || val.equalsIgnoreCase("NULL"))
+							sql.append("null");
+						else
+							sql.append("'").append(val).append("'");
+					}
+					else
+						sql.append(encrypt(index, value));
 				}
 				else
 				{
@@ -4730,7 +4774,7 @@ public abstract class PO
 		clone.m_trxName = null;
 		if (m_custom != null)
 		{
-			clone.m_custom = new HashMap<String, String>();
+			clone.m_custom = new HashMap<String, Object>();
 			clone.m_custom.putAll(m_custom);
 		}
 		if (m_newValues != null)

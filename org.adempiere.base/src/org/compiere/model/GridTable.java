@@ -25,8 +25,10 @@ import java.beans.VetoableChangeListener;
 import java.beans.VetoableChangeSupport;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -905,6 +907,11 @@ public class GridTable extends AbstractTableModel
 		if (getRowCount() == 0)
 			return;
 		
+		GridField field = getField(col);
+		// Ignoring new record while sorting
+		if (field.getGridTab().isQuickForm())
+			dataIgnore();
+
 		boolean isSameSortEntries = (col == m_lastSortColumnIndex && ascending == m_lastSortedAscending);
 		if (!isSameSortEntries)
 		{
@@ -915,7 +922,6 @@ public class GridTable extends AbstractTableModel
 		//cache changed row
 		Object[] changedRow = m_rowChanged >= 0 ? getDataAtRow(m_rowChanged) : null;
 
-		GridField field = getField (col);
 		//	RowIDs are not sorted
 		if (field.getDisplayType() == DisplayType.RowID)
 			return;
@@ -1288,7 +1294,6 @@ public class GridTable extends AbstractTableModel
 			if (log.isLoggable(Level.FINEST)) log.finest("r=" + row + " c=" + col + " - R/O=" + m_readOnly + ", Rows=" + m_rowCount + " - Ignored");
 			return;
 		}
-
 		dataSave(row, false);
 
 		//	Has anything changed?
@@ -1328,7 +1333,7 @@ public class GridTable extends AbstractTableModel
 			for (int i = 0; i < size; i++)
 				m_rowData[i] = rowData[i];
 		}
-
+		
 		//	save & update
 		rowData[col] = value;
 		setDataAtRow(row, rowData);
@@ -1961,6 +1966,62 @@ public class GridTable extends AbstractTableModel
 							else
 								rs.updateString (colRs, yn); 					//	***
 						}
+						else if (field.getDisplayType() == DisplayType.MultiSelectTable)
+						{
+							Integer[] ids = (Integer[]) rowData[col];
+							if (manualUpdate)
+								createUpdateSql(columnName, Util.convertArrayToStringForDB(ids));
+							else
+							{
+								Connection conn = null;
+								
+								try {
+									conn = DB.getConnectionRW();
+									if ( conn != null )
+									{
+										Array array = conn.createArrayOf("numeric", (Integer[]) ids);
+										rs.updateArray(colRs, array);
+									}
+									else
+										throw new AdempiereException("Unable to create multi-select table array, no DB connection");
+								} catch (SQLException e) {
+									throw new AdempiereException("Error updating multi-select table array", e);
+								}
+								finally {
+									if ( conn != null )
+										conn.close();
+								}
+							}
+							type = "NUMBER[]";
+						}
+						else if (field.getDisplayType() == DisplayType.MultiSelectList)
+						{
+							String[] ids = (String[]) rowData[col];
+							if (manualUpdate)
+								createUpdateSql(columnName, Util.convertArrayToStringForDB(ids));
+							else
+							{
+								Connection conn = null;
+
+								try {
+									conn = DB.getConnectionRW();
+									if ( conn != null )
+									{
+										Array array = DB.getConnectionRW().createArrayOf("text", (String[]) ids);
+										rs.updateArray(colRs, array);
+									}
+									else
+										throw new AdempiereException("Unable to create multi-select list array, no DB connection");
+								} catch (SQLException e) {
+									throw new AdempiereException("Error updating multi-select list array", e);
+								}
+								finally {
+									if ( conn != null )
+										conn.close();
+								}
+							}
+							type = "String[]";
+						}
 						//	String and others
 						else	
 						{
@@ -2200,8 +2261,12 @@ public class GridTable extends AbstractTableModel
 					|| (value == null && dbValue == null)
 					|| (value != null && value.equals (dbValue)) 
 					|| ((oldValue != null && dbValue != null && oldValue.getClass().equals(byte[].class) && dbValue.getClass().equals(byte[].class)) && Arrays.equals((byte[])oldValue, (byte[])dbValue))
-					|| ((value != null && dbValue != null && value.getClass().equals(byte[].class) && dbValue.getClass().equals(byte[].class)) && Arrays.equals((byte[])oldValue, (byte[])dbValue)) 
-						)
+					|| ((value != null && dbValue != null && value.getClass().equals(byte[].class) && dbValue.getClass().equals(byte[].class)) && Arrays.equals((byte[])oldValue, (byte[])dbValue))
+					|| (oldValue != null && dbValue != null && field.getDisplayType() == DisplayType.MultiSelectTable
+						&& oldValue instanceof Integer[] && dbValue instanceof Integer[] && Arrays.equals((Integer[]) oldValue, (Integer[]) dbValue))
+					|| (oldValue != null && dbValue != null && field.getDisplayType() == DisplayType.MultiSelectList
+						&& oldValue instanceof String[] && dbValue instanceof String[] && Arrays.equals((String[]) oldValue, (String[]) dbValue))
+					)
 				{
 					if (!po.set_ValueNoCheck (columnName, value))
 					{
@@ -2647,7 +2712,7 @@ public class GridTable extends AbstractTableModel
 				rowData[i] = field.getValue();
 			}
 		}
-		
+
 		m_rowChanged = -1;  //  only changed in setValueAt
 
 		//	inform
@@ -2858,6 +2923,7 @@ public class GridTable extends AbstractTableModel
 			//	inform
 		//	fireTableRowsUpdated(m_rowChanged, m_rowChanged); >> messes up display?? (clearSelection)
 		}
+
 		m_newRow = -1;
 		fireDataStatusIEvent(DATA_IGNORED_MESSAGE, "");
 	}	//	dataIgnore
@@ -2905,7 +2971,7 @@ public class GridTable extends AbstractTableModel
 
 		Object[] rowData = getDataAtRow(row);
 
-		//  ignore
+		// ignore
 		dataIgnore();
 
 		//	Create SQL
@@ -3285,6 +3351,22 @@ public class GridTable extends AbstractTableModel
 						rowData[j] = value;
 					else if (value instanceof byte[])
 						rowData[j] = value;
+				}
+				else if (displayType == DisplayType.MultiSelectTable)
+				{
+					Array arr = rs.getArray(j + 1);
+					Object javaArray = null;
+					if (arr != null)
+						javaArray = (Object) Util.convertBigDecimalToInteger((BigDecimal[]) arr.getArray());
+					rowData[j] = javaArray;
+				}
+				else if (displayType == DisplayType.MultiSelectList)
+				{
+					Array arr = rs.getArray(j + 1);
+					Object javaArray = null;
+					if (arr != null)
+						javaArray = (String[]) arr.getArray();
+					rowData[j] = javaArray;
 				}
 				//	String
 				else
@@ -3930,7 +4012,12 @@ public class GridTable extends AbstractTableModel
 				}
 				else
 				{
-					bChanged = !oldValue.equals(value);
+					if (oldValue instanceof Integer[])
+						bChanged = !Arrays.equals((Integer[]) oldValue, (Integer[]) value);
+					else if (oldValue instanceof String[])
+						bChanged = !Arrays.equals((String[]) oldValue, (String[]) value);
+					else
+						bChanged = !oldValue.equals(value);
 				}
 			}
 			else if(value != null)
@@ -3975,5 +4062,12 @@ public class GridTable extends AbstractTableModel
 
 	public int getKeyColumnIndex() {
 		return m_indexKeyColumn;
+	}
+	/**
+	 * Index of updated row's
+	 */
+	public int getRowChanged()
+	{
+		return m_rowChanged;
 	}
 }

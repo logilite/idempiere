@@ -26,6 +26,7 @@ import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.ldap.InitialLdapContext;
 
+import org.compiere.model.MSysConfig;
 import org.compiere.util.CLogger;
 
 
@@ -52,10 +53,13 @@ public class LDAP
 		//	ldap://dc.compiere.org
 		env.put(Context.PROVIDER_URL, ldapURL);
 		env.put(Context.SECURITY_AUTHENTICATION, "simple");
-		//	jjanke@compiere.org
-		// For OpenLDAP uncomment the next line  
-		// StringBuffer principal = new StringBuffer("uid=").append(userName).append(",").append(domain);
-		StringBuffer principal = new StringBuffer(userName).append("@").append(domain);
+		
+		StringBuffer principal = null;
+		boolean isOpenLDAP = MSysConfig.getBooleanValue(MSysConfig.LDAP_IS_OPEN_LDAP, false);
+		if (isOpenLDAP)
+			principal = new StringBuffer("uid=").append(userName).append(",").append(domain);
+		else
+			principal = new StringBuffer(userName).append("@").append(domain);
 		env.put(Context.SECURITY_PRINCIPAL, principal.toString());
 		env.put(Context.SECURITY_CREDENTIALS, password);
 		//

@@ -48,7 +48,7 @@ public class FinReportJasper extends FinReport
 	 *  @return Message to be translated
 	 *  @throws Exception
 	 */
-	protected String doIt() throws Exception
+	public String doIt() throws Exception
 	{
 		// Call the normal FinReport to fill the T_Report table
 		String finReportMsg = super.doIt();

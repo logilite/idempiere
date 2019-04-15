@@ -21,6 +21,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoicePaySchedule;
+import org.compiere.model.MTable;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -61,7 +62,8 @@ public class InvoicePayScheduleValidate extends SvrProcess
 		if (schedule.length == 0)
 			throw new IllegalArgumentException("InvoicePayScheduleValidate - No Schedule");
 		//	Get Invoice
-		MInvoice invoice = new MInvoice (getCtx(), schedule[0].getC_Invoice_ID(), null);
+		MInvoice invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID)
+				.getPO(schedule[0].getC_Invoice_ID(), null);
 		if (invoice.get_ID() == 0)
 			throw new IllegalArgumentException("InvoicePayScheduleValidate - No Invoice");
 		//

@@ -25,6 +25,7 @@ import org.compiere.model.MCommissionRun;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MTable;
 import org.compiere.util.Env;
 
 /**
@@ -70,12 +71,13 @@ public class CommissionAPInvoice extends SvrProcess
 			throw new IllegalArgumentException("CommissionAPInvoice - No Commission");
 		if (com.getC_Charge_ID() == 0)
 			throw new IllegalArgumentException("CommissionAPInvoice - No Charge on Commission");
-		MBPartner bp = new MBPartner (getCtx(), com.getC_BPartner_ID(), get_TrxName());
+		MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(com.getC_BPartner_ID(),
+				get_TrxName());
 		if (bp.get_ID() == 0)
 			throw new IllegalArgumentException("CommissionAPInvoice - No BPartner");
 			
 		//	Create Invoice
-		MInvoice invoice = new MInvoice (getCtx(), 0, null);
+		MInvoice invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(0, null);
 		invoice.setClientOrg(com.getAD_Client_ID(), com.getAD_Org_ID());
 		invoice.setC_DocTypeTarget_ID(MDocType.DOCBASETYPE_APInvoice);	//	API
 		invoice.setBPartner(bp);
@@ -89,7 +91,7 @@ public class CommissionAPInvoice extends SvrProcess
 			throw new IllegalStateException("CommissionAPInvoice - cannot save Invoice");
 			
  		//	Create Invoice Line
- 		MInvoiceLine iLine = new MInvoiceLine(invoice);
+		MInvoiceLine iLine = MInvoiceLine.createFrom(invoice);
 		iLine.setC_Charge_ID(com.getC_Charge_ID());
  		iLine.setQty(1);
  		iLine.setPrice(comRun.getGrandTotal());

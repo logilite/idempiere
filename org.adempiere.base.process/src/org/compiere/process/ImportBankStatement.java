@@ -430,7 +430,7 @@ public class ImportBankStatement extends SvrProcess
 				//	New Statement
 				if (statement == null)
 				{
-					statement = new MBankStatement(account);
+					statement = MBankStatement.createFrom(account);
 					statement.setEndingBalance(Env.ZERO);
 					
 					//	Copy statement data

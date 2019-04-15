@@ -259,6 +259,7 @@ public class GridTabVO implements Evaluatee, Serializable
 				vo.AD_ColumnSortOrder_ID = rs.getInt("AD_ColumnSortOrder_ID");
 				vo.AD_ColumnSortYesNo_ID = rs.getInt("AD_ColumnSortYesNo_ID");
 			}
+			vo.AD_TabType = rs.getString("AD_TabType");
 			//
 			//	Replication Type - set R/O if Reference
 			try
@@ -490,11 +491,15 @@ public class GridTabVO implements Evaluatee, Serializable
 	public  boolean     onlyCurrentRows = true;
 	/**	Only Current Days - derived	*/
 	public int			onlyCurrentDays = 0;
+	
+	public String AD_TabType = null;
 
 	/** Fields contain MFieldVO entities    */
 	private ArrayList<GridFieldVO>	Fields = null;
 
 	private boolean initFields = false;
+	
+	
 	
 	public ArrayList<GridFieldVO> getFields()
 	{
@@ -582,7 +587,7 @@ public class GridTabVO implements Evaluatee, Serializable
 		//  Derived
 		clone.onlyCurrentRows = true;
 		clone.onlyCurrentDays = 0;
-
+		clone.AD_TabType = AD_TabType;
 		clone.Fields = new ArrayList<GridFieldVO>();
 		for (int i = 0; i < Fields.size(); i++)
 		{

@@ -252,7 +252,7 @@ public class MRequestType extends X_R_RequestType
 			pstmt.setInt (1, getR_RequestType_ID());
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
-				list.add (new MRequest (getCtx(), rs, null));
+				list.add((MRequest) MTable.get(getCtx(), MRequest.Table_ID).getPO(rs, null));
 		}
 		catch (Exception e)
 		{

@@ -181,7 +181,7 @@ public class MPaymentTerm extends X_C_PaymentTerm
 	 */
 	public boolean apply (int C_Invoice_ID)
 	{
-		MInvoice invoice = new MInvoice (getCtx(), C_Invoice_ID, get_TrxName());
+		MInvoice invoice=(MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, get_TrxName());
 		if (invoice == null || invoice.get_ID() == 0)
 		{
 			log.log(Level.SEVERE, "apply - Not valid C_Invoice_ID=" + C_Invoice_ID);
@@ -290,7 +290,7 @@ public class MPaymentTerm extends X_C_PaymentTerm
 	 */
 	public boolean applyOrder (int C_Order_ID)
 	{
-		MOrder order = new MOrder (getCtx(), C_Order_ID, get_TrxName());
+		MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(C_Order_ID, get_TrxName());
 		if (order == null || order.get_ID() == 0)
 		{
 			log.log(Level.SEVERE, "apply - Not valid C_Order_ID=" + C_Order_ID);

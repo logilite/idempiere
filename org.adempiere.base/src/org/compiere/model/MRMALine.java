@@ -102,7 +102,8 @@ public class MRMALine extends X_M_RMALine
             //   --> m_ioLine.isInvoiced just work for sales orders - so it doesn't work for purchases
             if (getInvoiceLineId() != 0)
             {
-                MInvoiceLine invoiceLine = new MInvoiceLine(getCtx(), getInvoiceLineId(), get_TrxName());
+				MInvoiceLine invoiceLine = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(
+						getInvoiceLineId(), get_TrxName());
                 precision = invoiceLine.getPrecision();
                 unitAmount = invoiceLine.getPriceEntered();
                 originalQty = invoiceLine.getQtyInvoiced();
@@ -110,7 +111,8 @@ public class MRMALine extends X_M_RMALine
             }
             else if (m_ioLine.getC_OrderLine_ID() != 0)
             {
-                MOrderLine orderLine = new MOrderLine (getCtx(), m_ioLine.getC_OrderLine_ID(), get_TrxName());
+				MOrderLine orderLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(
+						m_ioLine.getC_OrderLine_ID(), get_TrxName());
                 precision = orderLine.getPrecision();
                 unitAmount = orderLine.getPriceEntered();
                 originalQty = orderLine.getQtyDelivered();
@@ -216,7 +218,7 @@ public class MRMALine extends X_M_RMALine
 	public MInOutLine getShipLine()
 	{
 		if ((m_ioLine == null || is_ValueChanged(COLUMNNAME_M_InOutLine_ID)) && getM_InOutLine_ID() != 0)
-			m_ioLine = new MInOutLine (getCtx(), getM_InOutLine_ID(), get_TrxName());
+			m_ioLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(getM_InOutLine_ID(), get_TrxName());
 		return m_ioLine;
 	}	//	getShipLine
 	
@@ -370,7 +372,7 @@ public class MRMALine extends X_M_RMALine
 		return true;
 	}
     
-    protected boolean updateOrderTax(boolean oldTax) 
+    public boolean updateOrderTax(boolean oldTax) 
     {
 		MRMATax tax = MRMATax.get (this, getPrecision(), oldTax, get_TrxName());
 		if (tax != null) 

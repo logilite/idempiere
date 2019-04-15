@@ -30,6 +30,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MPaySelectionCheck;
 import org.compiere.model.MPaySelectionLine;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -277,7 +278,7 @@ public class AllocationAuto extends SvrProcess
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
-				MPayment payment = new MPayment (getCtx(), rs, get_TrxName());
+				MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(rs,get_TrxName());
 				BigDecimal allocated = payment.getAllocatedAmt(); 
 				if (allocated != null && allocated.compareTo(payment.getPayAmt()) == 0)
 				{
@@ -326,7 +327,7 @@ public class AllocationAuto extends SvrProcess
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
-				MInvoice invoice = new MInvoice (getCtx(), rs, get_TrxName());
+				MInvoice invoice=(MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(rs, get_TrxName());
 				if (invoice.getOpenAmt(false, null).signum() == 0)
 				{
 					invoice.setIsPaid(true);
@@ -649,6 +650,8 @@ public class AllocationAuto extends SvrProcess
 			if (payment.getC_Currency_ID() != C_Currency_ID)
 				continue;
 			BigDecimal allocatedAmt = payment.getAllocatedAmt();
+			if (allocatedAmt == null)
+				allocatedAmt = Env.ZERO;
 			if (log.isLoggable(Level.INFO)) log.info(payment + ", Allocated=" + allocatedAmt);
 			BigDecimal availableAmt = payment.getPayAmt()
 				.add(payment.getDiscountAmt())
@@ -712,6 +715,8 @@ public class AllocationAuto extends SvrProcess
 			// comment following lines to allow partial allocation
 			// if (allocatedAmt != null && allocatedAmt.signum() != 0)
 			// 	continue;
+			if (allocatedAmt == null)
+				allocatedAmt = Env.ZERO;
 			BigDecimal availableAmt = payment.getPayAmt()
 				.add(payment.getDiscountAmt())
 				.add(payment.getWriteOffAmt())
@@ -808,8 +813,8 @@ public class AllocationAuto extends SvrProcess
 		//	New Allocation
 		if (m_allocation == null)
 		{
-			m_allocation = new MAllocationHdr (getCtx(), false, dateAcct,	//	automatic 
-				C_Currency_ID, "Auto " + description, get_TrxName());
+			m_allocation = (MAllocationHdr) MTable.get(getCtx(), MAllocationHdr.Table_Name).getPO(0, get_TrxName());
+			m_allocation.setAllocationHdrValues(false, dateAcct, C_Currency_ID, "Auto " + description);
 			m_allocation.setAD_Org_ID(AD_Org_ID);
 			if (!m_allocation.save())
 				return false;

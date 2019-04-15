@@ -31,6 +31,7 @@ import org.compiere.model.MBPartner;
 import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MContactInterest;
 import org.compiere.model.MLocation;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.X_I_BPartner;
@@ -52,14 +53,14 @@ public class ImportBPartner extends SvrProcess
 implements ImportProcess
 {
 	/**	Client to be imported to		*/
-	private int				m_AD_Client_ID = 0;
+	protected int				m_AD_Client_ID = 0;
 	/**	Delete old Imported				*/
-	private boolean			m_deleteOldImported = false;
+	protected boolean			m_deleteOldImported = false;
 	/**	Only validate, don't import		*/
-	private boolean			p_IsValidateOnly = false;
+	protected boolean			p_IsValidateOnly = false;
 
 	/** Effective						*/
-	private Timestamp		m_DateValue = null;
+	protected Timestamp		m_DateValue = null;
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -327,7 +328,7 @@ implements ImportProcess
 
 					if (impBP.getC_BPartner_ID() == 0)	//	Insert new BPartner
 					{
-						bp = new MBPartner(impBP);
+						bp = MBPartner.createFrom(impBP);
 						ModelValidationEngine.get().fireImportValidate(this, impBP, bp, ImportValidator.TIMING_AFTER_IMPORT);
 						
 						setTypeOfBPartner(impBP,bp);
@@ -351,7 +352,7 @@ implements ImportProcess
 					}
 					else				//	Update existing BPartner
 					{
-						bp = new MBPartner(getCtx(), impBP.getC_BPartner_ID(), get_TrxName());
+						bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(impBP.getC_BPartner_ID(), get_TrxName());
 						//	if (impBP.getValue() != null)			//	not to overwite
 						//		bp.setValue(impBP.getValue());
 						if (impBP.getName() != null)
@@ -632,7 +633,7 @@ implements ImportProcess
 	 * @param X_I_BPartner impBP
 	 * @param MBPartner bp
 	 */
-	private void setTypeOfBPartner(X_I_BPartner impBP, MBPartner bp){
+	public void setTypeOfBPartner(X_I_BPartner impBP, MBPartner bp){
 		if (impBP.isVendor()){		
 			bp.setIsVendor(true);
 			bp.setIsCustomer(false); // It is put to false since by default in C_BPartner is true

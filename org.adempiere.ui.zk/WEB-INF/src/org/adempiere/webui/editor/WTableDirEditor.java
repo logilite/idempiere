@@ -25,7 +25,10 @@ import java.util.Properties;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
+import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.ValuePreference;
+import org.adempiere.webui.adwindow.ADWindow;
+import org.adempiere.webui.adwindow.ADWindowContent;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.AutoComplete;
 import org.adempiere.webui.component.Combobox;
@@ -33,7 +36,9 @@ import org.adempiere.webui.event.ContextMenuEvent;
 import org.adempiere.webui.event.ContextMenuListener;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.event.ValueChangeEvent;
+import org.adempiere.webui.factory.QuickEntryServiceUtil;
 import org.adempiere.webui.grid.WQuickEntry;
+import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.WFieldRecordInfo;
@@ -88,6 +93,7 @@ ContextMenuListener, IZoomableEditor
     
     private Lookup  lookup;
     private Object oldValue;
+    private ADWindow adwindow;
 
     public static final String SHORT_LIST_EVENT = "SHORT_LIST";	// IDEMPIERE 90
     protected boolean onlyShortListItems;	// IDEMPIERE 90
@@ -589,7 +595,9 @@ ContextMenuListener, IZoomableEditor
 		if(!getComponent().isEnabled())
 			return;
 
-		final WQuickEntry vqe = new WQuickEntry (lookup.getWindowNo(), lookup.getZoom());
+		int tabNo = this.getGridField().getVO().TabNo;
+		int tabId = this.getGridField().getVO().AD_Tab_ID;
+		final WQuickEntry vqe = QuickEntryServiceUtil.getWQuickEntry(lookup.getWindowNo(), lookup.getZoom(), tabNo, tabId);
 		int Record_ID = 0;
 
 		Object value = getValue();
@@ -608,6 +616,12 @@ ContextMenuListener, IZoomableEditor
 		vqe.addEventListener(DialogEvents.ON_WINDOW_CLOSE, new EventListener<Event>() {
 			@Override
 			public void onEvent(Event event) throws Exception {
+				if (adwindow != null)
+				{
+					adwindow.getADWindowContent().hideBusyMask();
+					adwindow = null;
+				}
+				
 				// get result
 				int result = vqe.getRecord_ID();
 
@@ -626,7 +640,15 @@ ContextMenuListener, IZoomableEditor
 		});
 
 		vqe.setVisible(true);
-		AEnv.showWindow(vqe);		
+		adwindow = ADWindow.findADWindow(getComponent());
+		if (adwindow != null) {
+			ADWindowContent content = adwindow.getADWindowContent();				
+			content.getComponent().getParent().appendChild(vqe);
+			content.showBusyMask(vqe);
+			LayoutUtils.openOverlappedWindow(content.getComponent().getParent(), vqe, "middle_center");
+		} else {
+			AEnv.showWindow(vqe);
+		}		
 	}	//	actionQuickEntry
 
 	private void actionLocation() {

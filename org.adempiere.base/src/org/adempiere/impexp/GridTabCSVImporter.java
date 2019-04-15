@@ -95,6 +95,9 @@ public class GridTabCSVImporter implements IGridTabImporter
 	private static final String IMPORT_MODE_INSERT = "I";
 	
 	private boolean m_isError = false;
+	private boolean m_isDataError = false;
+	private int dataErrorCount = 0;
+	private String errorMessage = null;
 	private String m_import_mode = null;
 	private List<String> header;  
     private List<CellProcessor> readProcArray;
@@ -115,6 +118,7 @@ public class GridTabCSVImporter implements IGridTabImporter
     //Files management
 	private File errFile;
 	private File logFile;
+	
 	private PrintWriter errFileW;
 	private PrintWriter logFileW;
 	
@@ -228,10 +232,12 @@ public class GridTabCSVImporter implements IGridTabImporter
 					if (!isMasterok && isDetail){
 						rawLine = rawLine + delimiter + quoteChar + Msg.getMsg(Env.getCtx(),"NotProcessed") + quoteChar + "\n";
 						rowsTmpResult.add(rawLine);
+						m_isDataError = true;
 						continue;		 
 					}else if(isMasterok && isDetail && !isDetailok){
 						rawLine = rawLine + delimiter + quoteChar + "Record not proccesed due to detail record failure" + quoteChar + "\n";
 						rowsTmpResult.add(rawLine);
+						m_isDataError = true;
 						continue;	 
 					}
 					
@@ -242,8 +248,11 @@ public class GridTabCSVImporter implements IGridTabImporter
 						manageMasterTrx(gridTab, null);
 						createTrx(gridTab);
 					}
-
+					
+					m_isDataError = false;
 					String recordResult = processRecord(importMode, gridTab, indxDetail, isDetail, idx, rowResult, childs);
+					if (m_isDataError)
+						dataErrorCount++;
 					rowResult.append(recordResult);
 
 					// write
@@ -284,7 +293,16 @@ public class GridTabCSVImporter implements IGridTabImporter
 			}
 			gridTab.dataRefreshAll();
 
-		}		
+		}	
+		
+		if (dataErrorCount > 0)
+		{
+			String msg = Msg.getMsg(Env.getCtx(), "DataImportErrorMessage");
+			msg = msg.replace("ERROR_COUNT", String.valueOf(dataErrorCount));
+			msg = msg.replace("TOTAL_COUNT", String.valueOf(data.size()));
+			errorMessage = "Error : " + msg;
+		}
+		
 		if (logFile != null)
 			return logFile;
 		else
@@ -671,11 +689,14 @@ public class GridTabCSVImporter implements IGridTabImporter
 						if("NO_DATA_TO_IMPORT".equals(logMsg)){
 							logMsg = "";
 							continue;
-						}else 
+						}else {
+							m_isDataError = true;
 							setError(true);
+						}
 					}
 
 				}else {
+					m_isDataError = true;
 					setError(true);
 					currentColumn = j + 1;
 				}
@@ -695,6 +716,7 @@ public class GridTabCSVImporter implements IGridTabImporter
 								currentGridTab.dataRefresh(true); 
 						}
 					} else {
+						m_isDataError = true;
 						ValueNamePair ppE = CLogger.retrieveWarning();
 						if (ppE==null)   
 							ppE = CLogger.retrieveError();
@@ -759,7 +781,7 @@ public class GridTabCSVImporter implements IGridTabImporter
 			rowResult.append(Msg.getMsg(Env.getCtx(), "Error") + " " + e);
 			rowResult.append(" / ");
 			currentGridTab.dataIgnore();
-
+			m_isDataError = true;
 			setError(true);
 
 			//Master Failed, thus details cannot be imported 
@@ -1178,8 +1200,14 @@ public class GridTabCSVImporter implements IGridTabImporter
 							
 							setValue = idS;
 							isThereRow =true;
-						} else {
-							
+						}
+						else if (DisplayType.isMultiSelect(field.getDisplayType()))
+						{
+							setValue = resolveMultiSelect(foreignTable, foreignColumn, value, trx,
+									(field.getDisplayType() == DisplayType.MultiSelectList));
+						}
+						else
+						{
 							int id = resolveForeign(foreignTable, foreignColumn, value,field,trx);
 							if(id < 0)	
 								return Msg.getMsg(Env.getCtx(),id==-2?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{header.get(i),value});
@@ -1237,6 +1265,11 @@ public class GridTabCSVImporter implements IGridTabImporter
 								  BigDecimal decValue = new BigDecimal(value.toString());
 								  value = decValue;
 							  }
+						  }
+						  else if (DisplayType.isMultiSelect(field.getDisplayType()))
+						  {
+								value = resolveMultiSelect(column.getReferenceTableName(), foreignColumn, value, trx,
+										(field.getDisplayType() == DisplayType.MultiSelectList));
 						  }
 						  setValue = value;
 						  isThereRow =true;
@@ -1549,6 +1582,40 @@ public class GridTabCSVImporter implements IGridTabImporter
 		}
 		return -3;   // no values found, error ForeignNotResolved
 	}
+	
+	/**
+	 * Resolve import value for multi-select reference type
+	 * 
+	 * @param foreignTable
+	 * @param foreignColumn
+	 * @param value
+	 * @param trx
+	 * @param isMultiSelectList
+	 * @return Array of Keys 
+	 */
+	private Object resolveMultiSelect(String foreignTable, String foreignColumn, Object value, Trx trx,
+			boolean isMultiSelectList)
+	{
+		if (isMultiSelectList)
+		{
+			return Util.getArrayObjectFromString(DisplayType.MultiSelectList, value.toString().replaceAll("\"", ""));
+		}
+		else
+		{
+			String dbData = value.toString().replaceAll("\"", "'").replaceAll(", ", "','");
+			String trxName = (trx != null ? trx.getTrxName() : null);
+			StringBuilder sql = new StringBuilder("SELECT ").append(foreignTable).append("_ID FROM ")
+					.append(foreignTable).append(" WHERE ").append(foreignColumn).append(" IN (").append(dbData)
+					.append(") AND AD_Client_ID = ?");
+			int[] ids = DB.getIDsEx(trxName, sql.toString(), Env.getAD_Client_ID(Env.getCtx()));
+			Integer[] arrIDs = new Integer[ids.length];
+			for (int i = 0; i < ids.length; i++)
+			{
+				arrIDs[i] = Integer.valueOf(ids[i]);
+			}
+			return arrIDs;
+		}
+	} // resolveMultiSelect
 
 	//Copy from GridTable
 	@SuppressWarnings("unchecked")
@@ -1620,9 +1687,13 @@ public class GridTabCSVImporter implements IGridTabImporter
 		Calendar cal = Calendar.getInstance();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		String dt = sdf.format(cal.getTime());
-		String localFile = "Import_" + gridTab.getTableName() + "_" + dt
-				+ (m_isError ? "_err" : "_log")
-				+ "." + getFileExtension();
+		String localFile = "";
+		if (m_isError)
+			localFile = "Import_" + gridTab.getTableName() + "_" + dt + ("_err") + "." + getFileExtension();
+		else if (m_isDataError)
+			localFile = "Error_Import_" + gridTab.getTableName() + "_" + dt + "." + getFileExtension();
+		else
+			localFile = "Import_" + gridTab.getTableName() + "_" + dt + ("_log") + "." + getFileExtension();
 		return localFile;
 	}
 	
@@ -1655,4 +1726,9 @@ public class GridTabCSVImporter implements IGridTabImporter
 		       return -1;
 		}
     }
+
+	@Override
+	public String getErrorMessage()	{
+		return errorMessage;
+	}
 }

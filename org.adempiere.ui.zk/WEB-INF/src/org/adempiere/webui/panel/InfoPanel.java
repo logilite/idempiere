@@ -121,9 +121,9 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 3761627143274259211L;
-	private final static int DEFAULT_PAGE_SIZE = 100;
-	private final static int DEFAULT_PAGE_PRELOAD = 4;
+	protected static final long serialVersionUID = 3761627143274259211L;
+	protected final static int DEFAULT_PAGE_SIZE = 100;
+	protected final static int DEFAULT_PAGE_PRELOAD = 4;
 	protected List<Button> btProcessList = new ArrayList<Button>();
 	protected Map<String, WEditor> editorMap = new HashMap<String, WEditor>();
 	protected final static String PROCESS_ID_KEY = "processId";
@@ -353,15 +353,15 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	protected String			p_whereClause = "";
 	protected StatusBarPanel statusBar = new StatusBarPanel();
 	/**                    */
-    private List<Object> line;
+    protected List<Object> line;
 
-	private boolean			    m_ok = false;
+	protected boolean			    m_ok = false;
 	/** Cancel pressed - need to differentiate between OK - Cancel - Exit	*/
-	private boolean			    m_cancel = false;
+	protected boolean			    m_cancel = false;
 	/** Result IDs              */
-	private ArrayList<Integer>	m_results = new ArrayList<Integer>(3);
+	protected ArrayList<Integer>	m_results = new ArrayList<Integer>(3);
 
-    private ListModelTable model;
+    protected ListModelTable model;
 	/** Layout of Grid          */
 	protected ColumnInfo[]     p_layout;
 	/** Main SQL Statement      */
@@ -372,13 +372,13 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	protected String              m_sqlOrder;
 	protected String              m_sqlUserOrder;
 	/**ValueChange listeners       */
-    private ArrayList<ValueChangeListener> listeners = new ArrayList<ValueChangeListener>();
+    protected ArrayList<ValueChangeListener> listeners = new ArrayList<ValueChangeListener>();
 	/** Loading success indicator       */
 	protected boolean	        p_loadedOK = false;
 	/**	SO Zoom Window						*/
-	private int					m_SO_Window_ID = -1;
+	protected int					m_SO_Window_ID = -1;
 	/**	PO Zoom Window						*/
-	private int					m_PO_Window_ID = -1;
+	protected int					m_PO_Window_ID = -1;
 	
 	protected MInfoWindow infoWindow;
 
@@ -389,12 +389,12 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	protected Paging paging;
 	protected int pageNo;
 	protected int m_count;
-	private int cacheStart;
-	private int cacheEnd;
-	private boolean m_useDatabasePaging = false;
-	private BusyDialog progressWindow;
+	protected int cacheStart;
+	protected int cacheEnd;
+	protected boolean m_useDatabasePaging = false;
+	protected BusyDialog progressWindow;
 	// in case double click to item. this store clicked item (maybe it's un-select item)
-	private int m_lastSelectedIndex = -1;
+	protected int m_lastSelectedIndex = -1;
 	protected GridField m_gridfield;
 
 	/**
@@ -412,7 +412,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	protected List<Object> prevParameterValues = null;
 	protected List<String> prevQueryOperators = null;
 	protected List<WEditor> prevRefParmeterEditor = null;
-	private static final String[] lISTENER_EVENTS = {};
+	protected static final String[] lISTENER_EVENTS = {};
 
 	/**
 	* All info process of this infoWindow
@@ -813,7 +813,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
         setStatusDB(no == Integer.MAX_VALUE?"?":Integer.toString(no));
     }
     
-    private List<Object> readLine(int start, int end) {
+    protected List<Object> readLine(int start, int end) {
     	//cacheStart & cacheEnd - 1 based index, start & end - 0 based index
     	if (getCacheStart() >= 1 && cacheEnd > getCacheStart())
     	{
@@ -1359,6 +1359,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		}
 		
 		contentPanel.getModel().setSelection(lsSelectionRecord);
+		updateListSelected();
 	}
 	
 	/** Hook to intercept 'restore selection' actions 
@@ -2070,94 +2071,106 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	 */
 	public void createT_Selection_InfoWindow(int AD_PInstance_ID)
 	{
-		StringBuilder insert = new StringBuilder();
-		insert.append("INSERT INTO T_Selection_InfoWindow (AD_PINSTANCE_ID, T_SELECTION_ID, COLUMNNAME , VALUE_STRING, VALUE_NUMBER , VALUE_DATE ) VALUES(?,?,?,?,?,?) ");
-		for (Entry<KeyNamePair,LinkedHashMap<String, Object>> records : m_values.entrySet()) {
-			//set Record ID
-			
-				LinkedHashMap<String, Object> fields = records.getValue();
-				for(Entry<String, Object> field : fields.entrySet())
-				{
-					List<Object> parameters = new ArrayList<Object>();
-					parameters.add(AD_PInstance_ID);
-					
-					Object key = records.getKey();
-					
-					if(key instanceof KeyNamePair)
-					{
-						KeyNamePair knp = (KeyNamePair)key;
-						parameters.add(knp.getKey());
-					}
-					else
-					{
-						parameters.add(key);
-					}
+		int counter = 0;
+		StringBuilder select = new StringBuilder();
+		String insert = "INSERT INTO T_Selection_InfoWindow (AD_PINSTANCE_ID, T_SELECTION_ID, VIEWID, COLUMNNAME, VALUE_STRING, VALUE_NUMBER, VALUE_DATE) VALUES ( ";
+		for (Entry<KeyNamePair, LinkedHashMap<String, Object>> records : m_values.entrySet())
+		{
+			// set Record ID
+			KeyNamePair knPair = records.getKey();
+			LinkedHashMap<String, Object> fields = records.getValue();
+			for (Entry<String, Object> field : fields.entrySet())
+			{
+				counter++;
+				if (counter > 1)
+					select.append(" , ( ");
 
-					parameters.add(field.getKey());
-					
-					Object data = field.getValue();
-					// set Values					
-					if (data instanceof IDColumn)
+				select.append(AD_PInstance_ID).append(","); // AD_PINSTANCE_ID
+				select.append(knPair.getKey()).append(","); // T_SELECTION_ID
+				if (knPair.getName() == null) // VIEWID
+					select.append("NULL,");
+				else
+					select.append("'").append(knPair.getName()).append("',");
+
+				if (field.getKey() == null)// COLUMNNAME
+					select.append("NULL,");
+				else
+					select.append("'").append(field.getKey()).append("',");
+
+				// set Values as Like VALUE_STRING, VALUE_NUMBER, VALUE_DATE
+				Object data = field.getValue();
+				if (data instanceof IDColumn)
+				{
+					IDColumn id = (IDColumn) data;
+					select.append("NULL,");
+					select.append(id.getRecord_ID());
+					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+				}
+				else if (data instanceof String)
+				{
+					select.append("'").append(data).append("'");
+					select.append(",NULL");
+					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+				}
+				else if (data instanceof BigDecimal || data instanceof Integer || data instanceof Double)
+				{
+					select.append("NULL,");
+					if (data instanceof Double)
 					{
-						IDColumn id = (IDColumn) data;
-						parameters.add(null);
-						parameters.add(id.getRecord_ID());
-						parameters.add(null);
-					}					
-					else if (data instanceof String)
-					{
-						parameters.add(data);
-						parameters.add(null);
-						parameters.add(null);
+						BigDecimal value = BigDecimal.valueOf((Double) data);
+						select.append(value);
 					}
-					else if (data instanceof BigDecimal || data instanceof Integer || data instanceof Double)
+					else
+						select.append(data);
+					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+				}
+				else if (data instanceof Integer)
+				{
+					select.append("NULL,");
+					select.append((Integer) data);
+					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+				}
+				else if (data instanceof Timestamp || data instanceof Date)
+				{
+					select.append("NULL,");
+					select.append("NULL,");
+					select.append("'");
+					if (data instanceof Timestamp)
 					{
-						parameters.add(null);
-						if(data instanceof Double)
-						{	
-							BigDecimal value = BigDecimal.valueOf((Double)data);
-							parameters.add(value);
-						}	
-						else	
-							parameters.add(data);
-						parameters.add(null);
-					}
-					else if (data instanceof Integer)
-					{
-						parameters.add(null);
-						parameters.add((Integer)data);
-						parameters.add(null);
-					}
-					else if (data instanceof Timestamp || data instanceof Date)
-					{
-						parameters.add(null);
-						parameters.add(null);
-						if(data instanceof Date)
-						{
-							Timestamp value = new Timestamp(((Date)data).getTime());
-							parameters.add(value);
-						}
-						else 
-						parameters.add(data);
-					}
-					else if(data instanceof KeyNamePair)
-					{
-						KeyNamePair knpData = (KeyNamePair)data;
-						
-						parameters.add(null);
-						parameters.add(knpData.getKey());
-						parameters.add(null);						
+						Timestamp value = new Timestamp(((Date) data).getTime());
+						select.append(value);
 					}
 					else
 					{
-						parameters.add(data);
-						parameters.add(null);
-						parameters.add(null);
+						select.append(data);
 					}
-					DB.executeUpdateEx(insert.toString(),parameters.toArray() , null);
-						
+					select.append("'");
 				}
+				else
+				{
+					if (data == null)
+						select.append("NULL");
+					else
+						select.append("'").append(data).append("'");
+					select.append(",NULL");
+					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+				}
+
+				select.append(" ) ");
+			}
+
+			if (counter >= 1000)
+			{
+				DB.executeUpdateEx(insert + select.toString(), null);
+				select = new StringBuilder();
+				counter = 0;
+			}
 		}
+		if (counter > 0)
+		{
+			DB.executeUpdateEx(insert + select.toString(), null);
+		}
+
 	} // createT_Selection_InfoWindow
 	
     /**
@@ -2213,14 +2226,14 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
         	// just evaluate display logic of process button when requery by use click requery button
         	if (isQueryByUser){
         		bindInfoProcess();
-        		// reset selected list
-                recordSelectedData.clear();
                 isRequeryByRunSuccessProcess = false;
         	}
         	if (isRequeryByRunSuccessProcess){
         		syncSelectedAfterRequery();
         		restoreSelectedInPage();
         	}
+			// reset selected list
+			recordSelectedData.clear();
         	// IDEMPIERE-1334 after refresh, restore prev selected item end
         	updateSubcontent ();
         }
@@ -2423,7 +2436,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	/**
 	 * @param cacheStart the cacheStart to set
 	 */
-	private void setCacheStart(int cacheStart) {
+	protected void setCacheStart(int cacheStart) {
 		this.cacheStart = cacheStart;
 	}
 	

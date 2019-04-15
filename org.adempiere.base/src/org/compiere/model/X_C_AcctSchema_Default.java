@@ -19,6 +19,7 @@ package org.compiere.model;
 
 import java.sql.ResultSet;
 import java.util.Properties;
+
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_AcctSchema_Default
@@ -305,6 +306,28 @@ public class X_C_AcctSchema_Default extends PO implements I_C_AcctSchema_Default
     {
         return new KeyNamePair(get_ID(), String.valueOf(getC_AcctSchema_ID()));
     }
+    
+    public I_C_ValidCombination getC_MatchInv_WriteOff_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getC_MatchInv_WriteOff_Acct(), get_TrxName());	}
+
+	/** Set Match Invoice WriteOff Account.
+		@param C_MatchInv_WriteOff_Acct Match Invoice WriteOff Account	  */
+	public void setC_MatchInv_WriteOff_Acct (int C_MatchInv_WriteOff_Acct)
+	{
+		set_Value (COLUMNNAME_C_MatchInv_WriteOff_Acct, Integer.valueOf(C_MatchInv_WriteOff_Acct));
+	}
+
+	/** Get Match Invoice WriteOff Account.
+		@return Match Invoice WriteOff Account	  */
+	public int getC_MatchInv_WriteOff_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_MatchInv_WriteOff_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
 
 	public I_C_ValidCombination getCB_Asset_A() throws RuntimeException
     {

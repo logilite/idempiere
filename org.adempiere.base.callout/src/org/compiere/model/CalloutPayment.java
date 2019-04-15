@@ -256,7 +256,7 @@ public class CalloutPayment extends CalloutEngine
 		// Invoice
 		if (C_Invoice_ID != 0)
 		{
-			MInvoice inv = new MInvoice (ctx, C_Invoice_ID, null);
+			MInvoice inv = (MInvoice) MTable.get(ctx, MInvoice.Table_ID).getPO(C_Invoice_ID, null);
 			if (dt != null)
 			{
 				if (inv.isSOTrx () != dt.isSOTrx ())
@@ -270,7 +270,7 @@ public class CalloutPayment extends CalloutEngine
 		// Order
 		if (C_Order_ID != 0)
 		{
-			MOrder ord = new MOrder (ctx, C_Order_ID, null);
+			MOrder ord = (MOrder) MTable.get(ctx, MOrder.Table_ID).getPO(C_Order_ID, null);
 			if (dt != null)
 			{
 				if (ord.isSOTrx () != dt.isSOTrx ())

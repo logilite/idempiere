@@ -584,4 +584,21 @@ public class X_AD_PrintFormat extends PO implements I_AD_PrintFormat, I_Persiste
 	{
 		return (String)get_Value(COLUMNNAME_PrinterName);
 	}
+
+	/** Set Record Limit.
+		@param RecordLimit Record Limit	  */
+	public void setRecordLimit (int RecordLimit)
+	{
+		set_Value (COLUMNNAME_RecordLimit, Integer.valueOf(RecordLimit));
+	}
+
+	/** Get Record Limit.
+		@return Record Limit	  */
+	public int getRecordLimit () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_RecordLimit);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
 }

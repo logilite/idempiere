@@ -42,6 +42,7 @@ import org.compiere.model.MPriceListVersion;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProductCategory;
 import org.compiere.model.MProductPrice;
+import org.compiere.model.MTable;
 import org.compiere.model.MTaxCategory;
 import org.compiere.model.MWarehouse;
 import org.compiere.model.PO;
@@ -147,7 +148,7 @@ public final class InventoryUtil
 						.firstOnly();
 		if (bp == null)
 		{
-			bp = new MBPartner(ctx, 0, null);
+			bp = (MBPartner) MTable.get(ctx, MBPartner.Table_ID).getPO(0, null);
 		}
 		bp.setValue(value);
 		bp.setName(value);
@@ -192,7 +193,7 @@ public final class InventoryUtil
 		int AD_Org_ID = getFirst_Org_ID();
 		MLocator locator = getCreateLocator(AD_Org_ID, doc.LocatorValue, doc.LocatorValue);
 		//
-		MOrder order = new MOrder(ctx, 0, trxName);
+		MOrder order = (MOrder) MTable.get(ctx, MOrder.Table_ID).getPO(0, trxName);
 		order.setAD_Org_ID(AD_Org_ID);
 		order.setIsSOTrx(isSOTrx);
 		order.setC_DocTypeTarget_ID();
@@ -206,7 +207,7 @@ public final class InventoryUtil
 		order.saveEx();
 		// 
 		MProduct product = getCreateProduct(doc.ProductValue, null);
-		MOrderLine line = new MOrderLine(order);
+		MOrderLine line = MOrderLine.createFrom(order);
 		line.setProduct(product);
 		line.setQty(doc.Qty);
 		line.saveEx();
@@ -235,14 +236,14 @@ public final class InventoryUtil
 //		if (trxName != null && trxName.equals(order.get_TrxName()))
 //			throw new AdempiereException("Internal exception - not same trxName");
 		
-		MInOut io = new MInOut(order, 0, doc.Date);
+		MInOut io = MInOut.createFrom(order, 0, doc.Date);
 		setGeneratedTag(io);
 		io.saveEx();
 		//
 		MInOutLine iol = null;
 		for (MOrderLine oline : order.getLines(true, null))
 		{
-			iol = new MInOutLine(io);
+			iol = MInOutLine.createFrom(io);
 			iol.setOrderLine(oline, 0, doc.Qty);
 			iol.setQty(doc.Qty);
 			iol.saveEx();

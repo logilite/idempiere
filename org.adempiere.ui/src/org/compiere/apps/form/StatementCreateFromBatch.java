@@ -28,6 +28,7 @@ import org.compiere.model.GridTab;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MBankStatementLine;
 import org.compiere.model.MPayment;
+import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
@@ -240,7 +241,8 @@ public abstract class StatementCreateFromBatch extends CreateFromForm
 	{
 		//  fixed values
 		int C_BankStatement_ID = ((Integer) gridTab.getValue("C_BankStatement_ID")).intValue();
-		MBankStatement bs = new MBankStatement (Env.getCtx(), C_BankStatement_ID, trxName);
+		MBankStatement bs = (MBankStatement) MTable.get(Env.getCtx(), MBankStatement.Table_ID).getPO(
+				C_BankStatement_ID, trxName);
 		if (log.isLoggable(Level.CONFIG)) log.config(bs.toString());
 
 		StringBuilder sql = new StringBuilder();
@@ -292,7 +294,7 @@ public abstract class StatementCreateFromBatch extends CreateFromForm
 						//	
 						MBankStatementLine bsl = new MBankStatementLine (bs);
 						bsl.setStatementLineDate(DateTrx);
-						bsl.setPayment(new MPayment(Env.getCtx(), C_Payment_ID, trxName));
+						bsl.setPayment((MPayment) MTable.get(Env.getCtx(), MPayment.Table_ID).getPO(C_Payment_ID,trxName));
 						bsl.setTrxAmt(TrxAmt);
 						bsl.setStmtAmt(TrxAmt);
 						bsl.setC_Currency_ID(bs.getBankAccount().getC_Currency_ID()); 

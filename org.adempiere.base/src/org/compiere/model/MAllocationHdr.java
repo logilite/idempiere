@@ -23,7 +23,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -57,7 +59,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 */
 	private static final long serialVersionUID = -7787519874581251920L;
 	/**	Tolerance Gain and Loss */
-	private static final BigDecimal	TOLERANCE = BigDecimal.valueOf(0.02);
+	protected static final BigDecimal	TOLERANCE = BigDecimal.valueOf(0.02);
 	
 	/**
 	 * 	Get Allocations of Payment
@@ -81,7 +83,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 			pstmt.setInt(1, C_Payment_ID);
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add (new MAllocationHdr(ctx, rs, trxName));
+				list.add((MAllocationHdr) MTable.get(ctx, MAllocationHdr.Table_ID).getPO(rs, trxName));
 		}
 		catch (Exception e)
 		{
@@ -119,7 +121,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 			pstmt.setInt(1, C_Invoice_ID);
 			rs = pstmt.executeQuery();
 			while (rs.next())
-				list.add (new MAllocationHdr(ctx, rs, trxName));
+				list.add((MAllocationHdr) MTable.get(ctx, MAllocationHdr.Table_Name).getPO(rs, trxName));
 		}
 		catch (Exception e)
 		{
@@ -198,7 +200,9 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 *	@param C_Currency_ID currency
 	 *	@param description description
 	 *	@param trxName transaction
+	 *  @deprecated use setAllocationHdrValues() instead.
 	 */
+	@Deprecated
 	public MAllocationHdr (Properties ctx, boolean IsManual, Timestamp DateTrx, 
 		int C_Currency_ID, String description, String trxName)
 	{
@@ -213,6 +217,29 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 		if (description != null)
 			setDescription(description);
 	}	//  create Allocation
+	
+	/**
+	 * Method is replacement of MAllocationHdr(Properties, boolean, Timestamp, int, String, String)
+	 * constructor 
+	 * @param ctx
+	 * @param IsManual
+	 * @param DateTrx
+	 * @param C_Currency_ID
+	 * @param description
+	 * @param trxName
+	 */
+	public void setAllocationHdrValues(boolean IsManual, Timestamp DateTrx, int C_Currency_ID, String description)
+	{
+		setIsManual(IsManual);
+		if (DateTrx != null)
+		{
+			setDateTrx(DateTrx);
+			setDateAcct(DateTrx);
+		}
+		setC_Currency_ID(C_Currency_ID);
+		if (description != null)
+			setDescription(description);
+	} // setAllocationHdrValues
 
 
 	/** 
@@ -227,7 +254,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	}	//	MAllocation
 
 	/**	Lines						*/
-	private MAllocationLine[]	m_lines = null;
+	protected MAllocationLine[]	m_lines = null;
 	
 	/**
 	 * 	Get Lines
@@ -362,9 +389,9 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	}	//	processIt
 	
 	/**	Process Message 			*/
-	private String		m_processMsg = null;
+	protected String		m_processMsg = null;
 	/**	Just Prepared Flag			*/
-	private boolean		m_justPrepared = false;
+	protected boolean		m_justPrepared = false;
 
 	/**
 	 * 	Unlock Document.
@@ -443,14 +470,12 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 			// IDEMPIERE-1850 - validate date against related docs
 			if (line.getC_Invoice_ID() > 0) {
 				if (line.getC_Invoice().getDateAcct().after(getDateAcct())) {
-					m_processMsg = "Wrong allocation date";
-					return DocAction.STATUS_Invalid;
+					setDateAcct(line.getC_Invoice().getDateAcct());
 				}
 			}
 			if (line.getC_Payment_ID() > 0) {
 				if (line.getC_Payment().getDateAcct().after(getDateAcct())) {
-					m_processMsg = "Wrong allocation date";
-					return DocAction.STATUS_Invalid;
+					setDateAcct(line.getC_Payment().getDateAcct());
 				}
 			}
 		}
@@ -515,6 +540,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 
 		//	Link
 		getLines(false);
+		updateOpenBalForMultipleBP(false);
 		if(!updateBP(isReversal()))
 			return DocAction.STATUS_Invalid;
 		
@@ -813,7 +839,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 	Period needs to be open
 	 *	@return true if reversed
 	 */
-	private boolean reverseIt(boolean accrual) 
+	public boolean reverseIt(boolean accrual) 
 	{
 		if (!isActive()
 			|| getDocStatus().equals(DOCSTATUS_Voided)	// Goodwill.co.id
@@ -894,6 +920,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 			
 			//	Unlink Invoices
 			getLines(true);
+			updateOpenBalForMultipleBP(true);
 			if(!updateBP(true))
 				return false;
 			
@@ -918,7 +945,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 		return true;
 	}	//	reverse
 
-	private boolean updateBP(boolean reverse)
+	public boolean updateBP(boolean reverse)
 	{
 		
 		getLines(false);
@@ -931,11 +958,13 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 				continue;
 
 			boolean isSOTrxInvoice = false;
-			MInvoice invoice = M_Invoice_ID > 0 ? new MInvoice (getCtx(), M_Invoice_ID, get_TrxName()) : null;
+			MInvoice invoice = M_Invoice_ID > 0 ? (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(
+					M_Invoice_ID, get_TrxName()) : null;
 			if (M_Invoice_ID > 0)
 				isSOTrxInvoice = invoice.isSOTrx();
 			
-			MBPartner bpartner = new MBPartner (getCtx(), line.getC_BPartner_ID(), get_TrxName());
+			MBPartner bpartner = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(line.getC_BPartner_ID(),
+					get_TrxName());
 			DB.getDatabase().forUpdate(bpartner, 0);
 
 			BigDecimal allocAmt = line.getAmount().add(line.getDiscountAmt()).add(line.getWriteOffAmt());
@@ -952,7 +981,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 				int convTypeID = 0;
 				Timestamp paymentDate = null;
 				
-				payment = new MPayment (getCtx(), C_Payment_ID, get_TrxName());
+				payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(C_Payment_ID,get_TrxName());
 				convTypeID = payment.getC_ConversionType_ID();
 				paymentDate = payment.getDateAcct();
 				paymentProcessed = payment.isProcessed();
@@ -1141,7 +1170,67 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 
 		return true;
 	}	//	updateBP
-	
+
+	/**
+	 * Update open balance of BP
+	 * when multiple business partner
+	 * 
+	 * @param isReverseCorrectIt = true allocation amount will be negate.
+	 */
+
+	public void updateOpenBalForMultipleBP(boolean isReverseCorrectIt)
+	{
+		HashMap<Integer, BigDecimal> openBPBal = new HashMap<Integer, BigDecimal>();
+		for (MAllocationLine line : m_lines)
+		{
+			int C_Payment_ID = line.getC_Payment_ID();
+			int M_Invoice_ID = line.getC_Invoice_ID();
+
+			MInvoice invoice = M_Invoice_ID > 0
+					? (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(M_Invoice_ID, get_TrxName()) : null;
+
+			MPayment payment = C_Payment_ID > 0
+					? (MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(C_Payment_ID, get_TrxName()) : null;
+
+			BigDecimal allocationAmt = isReverseCorrectIt ? line.getAmount().negate() : line.getAmount();
+			BigDecimal bpOpenBal = Env.ZERO;
+
+			if (invoice != null)
+			{
+				int bPartnerID = invoice.getC_BPartner_ID();
+				bpOpenBal = openBPBal.get(bPartnerID) == null ? Env.ZERO : openBPBal.get(bPartnerID);
+				bpOpenBal = bpOpenBal.subtract(allocationAmt);
+				openBPBal.put(bPartnerID, bpOpenBal);
+			} 
+		   if (payment != null)
+			{
+			    int bPartnerID = payment.getC_BPartner_ID();
+			    bpOpenBal = openBPBal.get(bPartnerID) == null ? Env.ZERO : openBPBal.get(bPartnerID);
+			    bpOpenBal = bpOpenBal.add(allocationAmt);
+				openBPBal.put(bPartnerID, bpOpenBal);
+			} 
+		}
+		
+		/* Update open balance for invoice BP */
+		if (!openBPBal.isEmpty())
+		{
+			for (Map.Entry<Integer, BigDecimal> entry : openBPBal.entrySet())
+			{
+				int bPartnerID = entry.getKey();
+				BigDecimal allocAmt = entry.getValue();
+				if (Env.ZERO.compareTo(allocAmt) != 0)
+				{
+					MBPartner bPartner = MBPartner.get(getCtx(), bPartnerID);
+					bPartner.set_TrxName(get_TrxName());
+					DB.getDatabase().forUpdate(bPartner, 0);
+					BigDecimal bpOpenBal = bPartner.getTotalOpenBalance().add(allocAmt);
+					bPartner.setTotalOpenBalance(bpOpenBal);
+					bPartner.saveEx(get_TrxName());
+				}
+			}
+		}
+	}
+
 	/**
 	 * 	Document Status is Complete or Closed
 	 *	@return true if CO, CL or RE
@@ -1165,7 +1254,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	public static MAllocationHdr copyFrom (MAllocationHdr from, Timestamp dateAcct, Timestamp dateTrx,
 		String trxName)
 	{
-		MAllocationHdr to = new MAllocationHdr (from.getCtx(), 0, trxName);
+		MAllocationHdr to = (MAllocationHdr) MTable.get(from.getCtx(), MAllocationHdr.Table_Name).getPO(0, trxName);
 		PO.copyValues (from, to, from.getAD_Client_ID(), from.getAD_Org_ID());
 		to.set_ValueNoCheck ("DocumentNo", null);
 		//
@@ -1210,7 +1299,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 
 			if (line.getC_Payment_ID() != 0)
 			{
-				MPayment payment = new MPayment(getCtx(), line.getC_Payment_ID(), get_TrxName());
+				MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(line.getC_Payment_ID(),get_TrxName());
 				if (DOCSTATUS_Reversed.equals(payment.getDocStatus()))
 				{
 					MPayment reversal = (MPayment) payment.getReversal();
@@ -1231,13 +1320,13 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	
 	// Goodwill.co.id
 	/** Reversal Flag		*/
-	private boolean m_reversal = false;
+	protected boolean m_reversal = false;
 	
 	/**
 	 * 	Set Reversal
 	 *	@param reversal reversal
 	 */
-	private void setReversal(boolean reversal)
+	public void setReversal(boolean reversal)
 	{
 		m_reversal = reversal;
 	}	//	setReversal
@@ -1246,7 +1335,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 	Is Reversal
 	 *	@return reversal
 	 */
-	private boolean isReversal()
+	public boolean isReversal()
 	{
 		return m_reversal;
 	}	//	isReversal
@@ -1257,7 +1346,8 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 		String sysconfig_desc = MSysConfig.getValue(MSysConfig.ALLOCATION_DESCRIPTION, "@#AD_User_Name@", getAD_Client_ID());
 		String description = "";
 		if (sysconfig_desc.contains("@")) {
-			description = Env.parseVariable(sysconfig_desc, new MBPartner(getCtx(), bpartnerID, null), trxName, true);
+			description = Env.parseVariable(sysconfig_desc,
+					(MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(bpartnerID, trxName), trxName, true);
 			description = Env.parseVariable(description, this, trxName, true);
 			description = Msg.parseTranslation(getCtx(), description);
 		} else

@@ -30,6 +30,7 @@ import org.compiere.model.MFactAcct;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderPaySchedule;
+import org.compiere.model.MTable;
 import org.compiere.model.X_T_CashFlow;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
@@ -215,7 +216,7 @@ public class CashFlow  extends SvrProcess {
 				int order_id = rsOpenOrders.getInt("C_Order_ID");
 				boolean isPaySchedule = ("Y".equals(rsOpenOrders.getString("IsPayScheduleValid")));
 				BigDecimal pending = rsOpenOrders.getBigDecimal("Pending");
-				MOrder order = new MOrder(getCtx(), order_id, get_TrxName());
+				MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(order_id, get_TrxName());
 				MCurrency curr = MCurrency.get(getCtx(), order.getC_Currency_ID());
 				BigDecimal open = order.getGrandTotal().multiply(pending);
 				// subtract payments done directly to order still not allocated to an invoice
@@ -336,7 +337,8 @@ public class CashFlow  extends SvrProcess {
 				BigDecimal openamt = rsActual.getBigDecimal("OpenAmt");
 				if (!issotrx)
 					openamt = openamt.negate();
-				MInvoice invoice = new MInvoice(getCtx(), rsActual.getInt("C_Invoice_ID"), get_TrxName());
+				MInvoice invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(
+						rsActual.getInt("C_Invoice_ID"), get_TrxName());
 				noInv++;
 				X_T_CashFlow cfactual = new X_T_CashFlow(getCtx(), 0, get_TrxName());
 				cfactual.setAD_Org_ID(rsActual.getInt("AD_Org_ID"));

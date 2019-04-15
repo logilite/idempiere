@@ -25,6 +25,7 @@ import org.compiere.model.MOrg;
 import org.compiere.model.MOrgInfo;
 import org.compiere.model.MRole;
 import org.compiere.model.MRoleOrgAccess;
+import org.compiere.model.MTable;
 import org.compiere.model.MWarehouse;
 import org.compiere.util.AdempiereUserError;
 
@@ -83,7 +84,7 @@ public class BPartnerOrgLink extends SvrProcess
 			+ ", AD_Role_ID=" + p_AD_Role_ID);
 		if (p_C_BPartner_ID == 0)
 			throw new AdempiereUserError ("No Business Partner ID");
-		MBPartner bp = new MBPartner (getCtx(), p_C_BPartner_ID, get_TrxName());
+		MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(p_C_BPartner_ID, get_TrxName());
 		if (bp.get_ID() == 0)
 			throw new AdempiereUserError ("Business Partner not found - C_BPartner_ID=" + p_C_BPartner_ID);
 		//	BP Location

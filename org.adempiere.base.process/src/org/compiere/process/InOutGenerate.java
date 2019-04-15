@@ -36,6 +36,7 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
 import org.compiere.model.MStorageOnHand;
+import org.compiere.model.MTable;
 import org.compiere.util.AdempiereUserError;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -217,7 +218,7 @@ public class InOutGenerate extends SvrProcess
 			rs = pstmt.executeQuery ();
 			while (rs.next ())		//	Order
 			{
-				MOrder order = new MOrder (getCtx(), rs, get_TrxName());
+				MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(rs, get_TrxName());
 				statusUpdate(Msg.getMsg(getCtx(), "Processing") + " " + order.getDocumentInfo());
 				
 				//	New Header different Shipper, Shipment Location
@@ -431,7 +432,7 @@ public class InOutGenerate extends SvrProcess
 		//	Create New Shipment
 		if (m_shipment == null)
 		{
-			m_shipment = new MInOut (order, 0, m_movementDate);
+			m_shipment = MInOut.createFrom(order, 0, m_movementDate);
 			m_shipment.setM_Warehouse_ID(orderLine.getM_Warehouse_ID());	//	sets Org too
 			if (order.getC_BPartner_ID() != orderLine.getC_BPartner_ID())
 				m_shipment.setC_BPartner_ID(orderLine.getC_BPartner_ID());
@@ -443,7 +444,7 @@ public class InOutGenerate extends SvrProcess
 		//	Non Inventory Lines
 		if (storages == null)
 		{
-			MInOutLine line = new MInOutLine (m_shipment);
+			MInOutLine line = MInOutLine.createFrom(m_shipment);
 			line.setOrderLine(orderLine, 0, Env.ZERO);
 			line.setQty(qty);	//	Correct UOM
 			if (orderLine.getQtyEntered().compareTo(orderLine.getQtyOrdered()) != 0)
@@ -496,7 +497,7 @@ public class InOutGenerate extends SvrProcess
 			}
 			if (line == null)	//	new line
 			{
-				line = new MInOutLine (m_shipment);
+				line = MInOutLine.createFrom(m_shipment);
 				line.setOrderLine(orderLine, M_Locator_ID, order.isSOTrx() ? deliver : Env.ZERO);
 				line.setQty(deliver);
 				list.add(line);
@@ -526,7 +527,7 @@ public class InOutGenerate extends SvrProcess
 			else 
 			{
 				
-				 MInOutLine line = new MInOutLine (m_shipment);
+				MInOutLine line = MInOutLine.createFrom(m_shipment);
 				 line.setOrderLine(orderLine, 0, order.isSOTrx() ? toDeliver : Env.ZERO);
 				 line.setQty(toDeliver);
 				 if (orderLine.getQtyEntered().compareTo(orderLine.getQtyOrdered()) != 0)

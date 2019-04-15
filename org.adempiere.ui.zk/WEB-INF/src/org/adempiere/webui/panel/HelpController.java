@@ -67,8 +67,8 @@ import org.zkoss.zul.Vlayout;
 public class HelpController
 {	
 	private Anchorlayout dashboardLayout;
-	private Panel pnlToolTip, pnlContextHelp, pnlQuickInfo;
-	private Html htmlToolTip, htmlContextHelp, htmlQuickInfo;
+	private Panel pnlToolTip, pnlContextHelp, pnlQuickInfo, pnlDetailTabQuickInfo;
+	private Html htmlToolTip, htmlContextHelp, htmlQuickInfo, htmlDetailQuickInfo;
 	
 	public HelpController()
     {
@@ -120,6 +120,20 @@ public class HelpController
 				
 			}
 		});
+        
+        // Detail-tab quick info
+        pnlDetailTabQuickInfo = new Panel();
+        content.appendChild(htmlDetailQuickInfo = new Html());
+        pnlDetailTabQuickInfo.setSclass("dashboard-widget");
+        pnlDetailTabQuickInfo.setTitle("DetailTab Quick Info");
+        pnlDetailTabQuickInfo.setMaximizable(false);
+        pnlDetailTabQuickInfo.setCollapsible(true);
+        pnlDetailTabQuickInfo.setOpen(true);
+        pnlDetailTabQuickInfo.setBorder("normal");
+    	dashboardColumnLayout.appendChild(pnlDetailTabQuickInfo);
+    	content = new Panelchildren();
+    	pnlDetailTabQuickInfo.appendChild(content);
+        content.appendChild(htmlDetailQuickInfo = new Html());
 
         pnlToolTip = new Panel();
         pnlToolTip.setSclass("dashboard-widget");
@@ -157,6 +171,7 @@ public class HelpController
         renderToolTip(null);
         renderCtxHelp(X_AD_CtxHelp.CTXTYPE_Home, 0);
         renderQuickInfo(null);
+        renderDetailQuickInfo(null);
     }
 
 	public void setupFieldTooltip() {
@@ -656,6 +671,24 @@ public class HelpController
        			sb.append(widget);
             	sb.append("</div>\n</body>\n</html>");
             	htmlQuickInfo.setContent(sb.toString());
+    		}
+    	}
+	}
+    
+    public void renderDetailQuickInfo(GridTab gridTab) {
+    	if (gridTab == null) {
+    		pnlDetailTabQuickInfo.setVisible(false);
+    	} else {
+    		String widget = gridTab.getStatusLinesWidget();
+    		if (widget == null) {
+    			pnlDetailTabQuickInfo.setVisible(false);
+    		} else {
+    			pnlDetailTabQuickInfo.setVisible(true);
+            	StringBuilder sb = new StringBuilder();
+            	sb.append("<html>\n<body>\n<div class=\"help-content\">\n");
+       			sb.append(widget);
+            	sb.append("</div>\n</body>\n</html>");
+            	htmlDetailQuickInfo.setContent(sb.toString());
     		}
     	}
 	}

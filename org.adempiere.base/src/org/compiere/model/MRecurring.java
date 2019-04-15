@@ -98,7 +98,7 @@ public class MRecurring extends X_C_Recurring
 		//	Copy
 		if (getRecurringType().equals(MRecurring.RECURRINGTYPE_Order))
 		{
-			MOrder from = new MOrder (getCtx(), getC_Order_ID(), get_TrxName());
+			MOrder from = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(getC_Order_ID(), get_TrxName());
 			MOrder order = MOrder.copyFrom (from, dateDoc, 
 				from.getC_DocType_ID(), from.isSOTrx(), false, false, get_TrxName());
 			run.setC_Order_ID(order.getC_Order_ID());
@@ -107,7 +107,7 @@ public class MRecurring extends X_C_Recurring
 		}
 		else if (getRecurringType().equals(MRecurring.RECURRINGTYPE_Invoice))
 		{
-			MInvoice from = new MInvoice (getCtx(), getC_Invoice_ID(), get_TrxName());
+			MInvoice from = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(getC_Invoice_ID(), get_TrxName());
 			MInvoice invoice = MInvoice.copyFrom (from, dateDoc, dateDoc,
 				from.getC_DocType_ID(), from.isSOTrx(), false, get_TrxName(), false);
 			run.setC_Invoice_ID(invoice.getC_Invoice_ID());
@@ -130,8 +130,8 @@ public class MRecurring extends X_C_Recurring
 		}
 		else if (getRecurringType().equals(MRecurring.RECURRINGTYPE_Payment))
 		{
-			MPayment from = new MPayment(getCtx(), getC_Payment_ID(), get_TrxName());
-			MPayment to = new MPayment(getCtx(), 0, get_TrxName());
+			MPayment from=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(getC_Payment_ID(), get_TrxName());
+			MPayment to=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(0, get_TrxName());
 			copyValues(from, to);
 			to.setAD_Org_ID(from.getAD_Org_ID());
 			to.setIsReconciled(false); // can't be already on a bank statement
@@ -164,7 +164,7 @@ public class MRecurring extends X_C_Recurring
 	 *	Calculate & set remaining Runs
 	 *	@return true if runs left
 	 */
-	private boolean calculateRuns()
+	protected boolean calculateRuns()
 	{
 		String sql = "SELECT COUNT(*) FROM C_Recurring_Run WHERE C_Recurring_ID=?";
 		int current = DB.getSQLValue(get_TrxName(), sql, getC_Recurring_ID());
@@ -177,7 +177,7 @@ public class MRecurring extends X_C_Recurring
 	/**
 	 *	Calculate next run date
 	 */
-	private void setDateNextRun()
+	protected void setDateNextRun()
 	{
 		if (getFrequency() < 1)
 			setFrequency(1);

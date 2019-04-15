@@ -25,6 +25,7 @@ import org.compiere.model.MBPartner;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MTable;
 import org.compiere.model.MPriceList;
 import org.compiere.model.MTimeExpense;
 import org.compiere.model.MTimeExpenseLine;
@@ -118,10 +119,11 @@ public class ExpenseAPInvoice extends SvrProcess
 				if (te.getC_BPartner_ID() != old_BPartner_ID)
 				{
 					completeInvoice (invoice);
-					MBPartner bp = new MBPartner (getCtx(), te.getC_BPartner_ID(), get_TrxName());
+					MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(te.getC_BPartner_ID(),
+							get_TrxName());
 					//
 					if (log.isLoggable(Level.INFO)) log.info("New Invoice for " + bp);
-					invoice = new MInvoice (getCtx(), 0, get_TrxName());
+					invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(0, get_TrxName());
 					invoice.setClientOrg(te.getAD_Client_ID(), te.getAD_Org_ID());
 					invoice.setC_DocTypeTarget_ID(MDocType.DOCBASETYPE_APInvoice);	//	API
 					invoice.setDocumentNo (te.getDocumentNo());
@@ -172,7 +174,7 @@ public class ExpenseAPInvoice extends SvrProcess
 						throw new IllegalStateException("Cannot save Invoice");
 					
 					//	Create OrderLine
-					MInvoiceLine il = new MInvoiceLine (invoice);
+					MInvoiceLine il = MInvoiceLine.createFrom(invoice);
 					//
 					if (line.getM_Product_ID() != 0)
 						il.setM_Product_ID(line.getM_Product_ID(), true);

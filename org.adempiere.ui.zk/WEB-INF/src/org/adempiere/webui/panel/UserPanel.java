@@ -32,6 +32,7 @@ import org.adempiere.webui.window.WPreference;
 import org.compiere.model.MClient;
 import org.compiere.model.MOrg;
 import org.compiere.model.MRole;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.model.MWarehouse;
 import org.compiere.util.Env;
@@ -79,6 +80,9 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
 
 	private Popup popup;
 
+	protected boolean isFeedbackShowRequestNew = false;
+	protected boolean isFeedbackShowEmailSupport = false;
+
 	private static final String ON_DEFER_CHANGE_ROLE = "onDeferChangeRole";
 	private static final String ON_DEFER_LOGOUT = "onDeferLogout";
 
@@ -90,6 +94,9 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
 
     protected void onCreate()
     {
+		isFeedbackShowRequestNew = MSysConfig.getBooleanValue("FEEDBACK_SHOW_REQUEST_NEW", true, Env.getAD_Client_ID(Env.getCtx()));
+		isFeedbackShowEmailSupport = MSysConfig.getBooleanValue("FEEDBACK_SHOW_EMAIL_SUPPORT", true, Env.getAD_Client_ID(Env.getCtx()));
+
     	String s = Msg.getMsg(Env.getCtx(), "CloseTabFromBrowser?").replace("\n", "<br>");
     	Clients.confirmClose(s);
     	lblUserNameValue = (Label) component.getFellowIfAny("loginUserAndRole", true);
@@ -107,6 +114,7 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
     	feedback = (LabelImageElement) component.getFellowIfAny("feedback", true);
     	feedback.setLabel(Msg.getMsg(Env.getCtx(), "Feedback"));
     	feedback.addEventListener(Events.ON_CLICK, this);
+		feedback.setVisible(isFeedbackShowRequestNew || isFeedbackShowEmailSupport);
 
     	preference = (LabelImageElement) component.getFellowIfAny("preference", true);
     	preference.setLabel(Msg.getMsg(Env.getCtx(), "Preference"));
@@ -121,15 +129,21 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
     	logout.addEventListener(Events.ON_CLICK, this);
     	
     	feedbackMenu = new Menupopup();
-    	Menuitem mi = new Menuitem(Msg.getMsg(Env.getCtx(), "RequestNew"));
-    	mi.setId("CreateRequest");
-    	feedbackMenu.appendChild(mi);
-    	mi.addEventListener(Events.ON_CLICK, this);
-    	mi = new Menuitem(Msg.getMsg(Env.getCtx(), "EMailSupport"));
-    	mi.setId("EmailSupport");
-    	mi.addEventListener(Events.ON_CLICK, this);
-    	feedbackMenu.appendChild(mi);
-    	
+    	Menuitem mi = null;
+		if (isFeedbackShowRequestNew)
+		{
+			mi = new Menuitem(Msg.getMsg(Env.getCtx(), "RequestNew"));
+			mi.setId("CreateRequest");
+			feedbackMenu.appendChild(mi);
+			mi.addEventListener(Events.ON_CLICK, this);
+		}
+		if (isFeedbackShowEmailSupport)
+		{
+			mi = new Menuitem(Msg.getMsg(Env.getCtx(), "EMailSupport"));
+			mi.setId("EmailSupport");
+			mi.addEventListener(Events.ON_CLICK, this);
+			feedbackMenu.appendChild(mi);
+		}
     	SessionManager.getSessionApplication().getKeylistener().addEventListener(Events.ON_CTRL_KEY, this);
     	component.addEventListener("onEmailSupport", this);
 
@@ -268,11 +282,11 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
 			KeyEvent ke = (KeyEvent) event;
 			if (ke.getKeyCode() == 0x55)
 			{
-				if (ke.isAltKey())
+				if (ke.isAltKey() && isFeedbackShowEmailSupport)
 				{
 					FeedbackManager.emailSupport(false);
 				}
-				else if (ke.isCtrlKey())
+				else if (ke.isCtrlKey() && isFeedbackShowRequestNew)
 				{
 					FeedbackManager.createNewRequest();
 				}

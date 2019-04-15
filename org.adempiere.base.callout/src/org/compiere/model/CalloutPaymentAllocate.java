@@ -59,7 +59,7 @@ public class CalloutPaymentAllocate extends CalloutEngine
 
 		//	Check Payment
 		int C_Payment_ID = Env.getContextAsInt(ctx, WindowNo, "C_Payment_ID");
-		MPayment payment = new MPayment (ctx, C_Payment_ID, null);
+		MPayment payment=(MPayment) MTable.get(ctx, MPayment.Table_ID).getPO(C_Payment_ID,null);
 		if (payment.getC_Charge_ID() != 0 || payment.getC_Invoice_ID() != 0 
 			|| payment.getC_Order_ID() != 0)
 			return Msg.getMsg(ctx, "PaymentIsAllocated");

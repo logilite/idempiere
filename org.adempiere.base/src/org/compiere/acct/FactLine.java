@@ -183,6 +183,11 @@ public final class FactLine extends X_Fact_Acct
 					if (m_doc == null)
 						throw new IllegalArgumentException("Document not set yet");
 					ID1 = m_doc.getValue(ColumnName1);
+					
+					if (ID1 == 0 && m_docLine != null)
+						ID1 = m_docLine.getValue("UserElement1_ID");
+					if (ID1 == 0 && m_doc != null)
+						ID1 = m_doc.getValue("UserElement1_ID");
 				}
 				if (ID1 != 0)
 					setUserElement1_ID(ID1);
@@ -203,6 +208,11 @@ public final class FactLine extends X_Fact_Acct
 					if (m_doc == null)
 						throw new IllegalArgumentException("Document not set yet");
 					ID2 = m_doc.getValue(ColumnName2);
+					
+					if (ID2 == 0 && m_docLine != null)
+						ID2 = m_docLine.getValue("UserElement2_ID");
+					if (ID2 == 0 && m_doc != null)
+						ID2 = m_doc.getValue("UserElement2_ID");
 				}
 				if (ID2 != 0)
 					setUserElement2_ID(ID2);
@@ -469,6 +479,23 @@ public final class FactLine extends X_Fact_Acct
 	{
 		return m_docLine;
 	}	//	getDocLine
+	
+	
+	/**
+	 * get Document Header
+	 * @return Doc
+	 */
+	public Doc getM_doc() {
+		return m_doc;
+	}
+	
+	/**
+	 * set Document Header
+	 * @param m_doc
+	 */
+	public void setM_doc(Doc m_doc) {
+		this.m_doc = m_doc;
+	}
 	
 	/**
 	 * 	Set Description
@@ -996,7 +1023,7 @@ public final class FactLine extends X_Fact_Acct
 	 *  @param UserElement2_ID user element 2
 	 *  @return Account_ID for Unearned Revenue or Revenue Account if not found
 	 */
-	private int createRevenueRecognition (
+	public int createRevenueRecognition (
 		int C_RevenueRecognition_ID, int C_InvoiceLine_ID,
 		int AD_Client_ID, int AD_Org_ID, int AD_User_ID, 
 		int Account_ID, int C_SubAcct_ID,

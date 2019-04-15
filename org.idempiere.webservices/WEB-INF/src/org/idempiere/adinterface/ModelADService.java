@@ -62,6 +62,10 @@ public interface ModelADService {
     public StandardResponseDocument setDocAction(ModelSetDocActionRequestDocument req);
 
     @POST
+	@Path("/run_processTrx") 
+    public StandardResponseDocument runProcessTrx(ModelRunProcessRequestDocument req);
+    
+    @POST
 	@Path("/run_process") 
     public RunProcessResponseDocument runProcess(ModelRunProcessRequestDocument req);
     

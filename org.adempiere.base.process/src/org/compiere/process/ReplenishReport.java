@@ -39,6 +39,7 @@ import org.compiere.model.MProduct;
 import org.compiere.model.MRequisition;
 import org.compiere.model.MRequisitionLine;
 import org.compiere.model.MStorageOnHand;
+import org.compiere.model.MTable;
 import org.compiere.model.MWarehouse;
 import org.compiere.model.X_T_Replenish;
 import org.compiere.util.AdempiereSystemError;
@@ -419,10 +420,11 @@ public class ReplenishReport extends SvrProcess
 				|| order.getC_BPartner_ID() != replenish.getC_BPartner_ID()
 				|| order.getM_Warehouse_ID() != replenish.getM_Warehouse_ID())
 			{
-				order = new MOrder(getCtx(), 0, get_TrxName());
+				order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 				order.setIsSOTrx(false);
 				order.setC_DocTypeTarget_ID(p_C_DocType_ID);
-				MBPartner bp = new MBPartner(getCtx(), replenish.getC_BPartner_ID(), get_TrxName());
+				MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(replenish.getC_BPartner_ID(),
+						get_TrxName());
 				order.setBPartner(bp);
 				order.setSalesRep_ID(getAD_User_ID());
 				order.setDescription(Msg.getMsg(getCtx(), "Replenishment"));
@@ -439,7 +441,7 @@ public class ReplenishReport extends SvrProcess
 				info.append(" - "); 
 				info.append(order.getDocumentNo());
 			}
-			MOrderLine line = new MOrderLine (order);
+			MOrderLine line = MOrderLine.createFrom(order);
 			line.setM_Product_ID(replenish.getM_Product_ID());
 			line.setQty(replenish.getQtyToOrder());
 			line.setPrice();
@@ -645,7 +647,7 @@ public class ReplenishReport extends SvrProcess
 				int C_BPartner_ID = orgTrx.getLinkedC_BPartner_ID(get_TrxName()); 
 				if (C_BPartner_ID==0)
 					throw new AdempiereUserError(Msg.translate(getCtx(), "C_BPartner_ID")+ " @FillMandatory@ ");
-				MBPartner bp = new MBPartner(getCtx(),C_BPartner_ID,get_TrxName());
+				MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(C_BPartner_ID, get_TrxName());
 				// Set BPartner Link to Org
 				order.setBPartner(bp);
 				order.setDateOrdered(new Timestamp(System.currentTimeMillis()));

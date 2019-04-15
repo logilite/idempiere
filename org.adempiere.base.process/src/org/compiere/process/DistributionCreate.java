@@ -26,6 +26,7 @@ import org.compiere.model.MDistributionListLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
+import org.compiere.model.MTable;
 import org.compiere.util.Env;
 
 /**
@@ -127,11 +128,11 @@ public class DistributionCreate extends SvrProcess
 		//	Create Single Order
 		if (!p_IsTest && p_IsCreateSingleOrder) 
 		{
-			MBPartner bp = new MBPartner (getCtx(), p_Bill_BPartner_ID, get_TrxName());
+			MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(p_Bill_BPartner_ID, get_TrxName());
 			if (bp.get_ID() == 0)
 				throw new IllegalArgumentException("Single Business Partner not found - C_BPartner_ID=" + p_Bill_BPartner_ID);
 			//
-			m_singleOrder = new MOrder (getCtx(), 0, get_TrxName());
+			m_singleOrder =  (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 			m_singleOrder.setIsSOTrx(true);
 			m_singleOrder.setC_DocTypeTarget_ID(MOrder.DocSubTypeSO_Standard);
 			m_singleOrder.setBPartner(bp);
@@ -168,7 +169,8 @@ public class DistributionCreate extends SvrProcess
 	 */
 	private boolean createOrder (MDistributionListLine dll)
 	{
-		MBPartner bp = new MBPartner (getCtx(), dll.getC_BPartner_ID(), get_TrxName());
+		MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(dll.getC_BPartner_ID(),
+				get_TrxName());
 		if (bp.get_ID() == 0)
 			throw new IllegalArgumentException("Business Partner not found - C_BPartner_ID=" + dll.getC_BPartner_ID());
 
@@ -176,7 +178,7 @@ public class DistributionCreate extends SvrProcess
 		MOrder order = m_singleOrder;
 		if (!p_IsTest && order == null)
 		{
-			order = new MOrder (getCtx(), 0, get_TrxName());
+			order =  (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 			order.setIsSOTrx(true);
 			order.setC_DocTypeTarget_ID(MOrder.DocSubTypeSO_Standard);
 			order.setBPartner(bp);
@@ -205,7 +207,7 @@ public class DistributionCreate extends SvrProcess
 		}
 
 		//	Create Order Line
-		MOrderLine line = new MOrderLine(order);
+		MOrderLine line = MOrderLine.createFrom(order);
 		line.setC_BPartner_ID(dll.getC_BPartner_ID());
 		if (dll.getC_BPartner_Location_ID() != 0)
 			line.setC_BPartner_Location_ID(dll.getC_BPartner_Location_ID());

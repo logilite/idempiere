@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.dbPort.Convert_SQL92;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
@@ -412,6 +413,8 @@ public class MQuery implements Serializable
 	public static final int		NOT_EQUAL_INDEX = 1;
 	/** Like			*/
 	public static final String	LIKE = " LIKE ";
+	/** Like Index - 2	*/
+	public static final int 	LIKE_INDEX = 2;
 	/** Not Like		*/
 	public static final String	NOT_LIKE = " NOT LIKE ";
 	/** Greater			*/
@@ -430,12 +433,16 @@ public class MQuery implements Serializable
 	public static final String 	NOT_NULL = " IS NOT NULL ";
 	/** For IDEMPIERE-377	*/
 	public static final String 	NULL = " IS NULL ";
-
+	/** For IDEMPIERE-3413 */
+	public static final String	HAVE = "HAVE";
+	/** For IDEMPIERE-3413 */
+	public static final String	IN = "IN";
+	
 	/**	Operators for Strings				*/
 	public static final ValueNamePair[]	OPERATORS = new ValueNamePair[] {
 		new ValueNamePair (EQUAL,			" = "),		//	0 - EQUAL_INDEX
 		new ValueNamePair (NOT_EQUAL,		" != "),	//  1 - NOT_EQUAL_INDEX
-		new ValueNamePair (LIKE,			" ~ "),
+		new ValueNamePair (LIKE,			" ~ "),		//  2 - LIKE_INDEX
 		new ValueNamePair (NOT_LIKE,		" !~ "),
 		new ValueNamePair (GREATER,			" > "),
 		new ValueNamePair (GREATER_EQUAL,	" >= "),
@@ -471,6 +478,13 @@ public class MQuery implements Serializable
 		new ValueNamePair (NOT_NULL,		" !NULL ")
 	};
 	
+	/** Operators for Multi Select items */
+	public static final ValueNamePair[]	OPERATORS_MULTISELECT	= new ValueNamePair[] { 
+		new ValueNamePair(EQUAL, " = "),
+		new ValueNamePair("<>", " != "), 
+		new ValueNamePair(Convert_SQL92.PG_ARRAY_IN_ALIAS_EXP, IN),
+		new ValueNamePair(Convert_SQL92.PG_ARRAY_HAVE_ALIAS_EXP, HAVE) 
+	};
 	/*************************************************************************
 	 * 	Add Restriction
 	 * 	@param ColumnName ColumnName
@@ -619,6 +633,43 @@ public class MQuery implements Serializable
 		m_newRecord = whereClause.equals(NEWRECORD);
 	}	//	addRestriction
 
+	/*************************************************************************
+	 * Add Restriction
+	 * 
+	 * @param ColumnName ColumnName
+	 * @param Operator Operator, e.g. = != ..
+	 * @param Code Code, e.g 0, All%
+	 * @param InfoName Display Name
+	 * @param InfoDisplay Display of Code (Lookup)
+	 * @param andCondition
+	 * @param depth
+	 * @param IsAdvanceSearch filter case in-sensitive
+	 */
+	public void addRestriction(String ColumnName, String Operator, Object Code, String InfoName, String InfoDisplay,
+			boolean andCondition, int depth, boolean IsAdvanceSearch)
+	{
+		Restriction r = new Restriction(ColumnName, Operator, Code, InfoName, InfoDisplay, andCondition, depth,
+				IsAdvanceSearch);
+		m_list.add(r);
+	} // addRestriction
+
+	/*************************************************************************
+	 * Add Restriction
+	 * 
+	 * @param ColumnName ColumnName
+	 * @param Operator Operator, e.g. = != ..
+	 * @param Code Code, e.g 0, All%
+	 * @param InfoName Display Name
+	 * @param InfoDisplay Display of Code (Lookup)
+	 * @param IsAdvanceSearch filter case in-sensitive
+	 */
+	public void addRestriction(String ColumnName, String Operator, Object Code, String InfoName, String InfoDisplay,
+			boolean IsAdvanceSearch)
+	{
+		Restriction r = new Restriction(ColumnName, Operator, Code, InfoName, InfoDisplay, true, 0, IsAdvanceSearch);
+		m_list.add(r);
+	} // addRestriction
+	
 	/**
 	 * 	New Record Query
 	 *	@return true if new record query
@@ -1087,6 +1138,25 @@ class Restriction  implements Serializable
 		this.joinDepth = depth;
 	}	//	Restriction
 
+	/**
+	 * Restriction
+	 * 
+	 * @param columnName ColumnName
+	 * @param operator Operator, e.g. = != ..
+	 * @param code Code, e.g 0, All%
+	 * @param infoName Display Name
+	 * @param infoDisplay Display of Code (Lookup)
+	 * @param andCondition
+	 * @param depth
+	 * @param isAdvanceSearch filter case insensitive
+	 */
+	public Restriction(String columnName, String operator, Object code, String infoName, String infoDisplay,
+			boolean andCondition, int depth, boolean isAdvanceSearch)
+	{
+		this(columnName, operator, code, infoName, infoDisplay, andCondition, depth);
+		IsAdvanceSearch = isAdvanceSearch;
+	}
+
 	/**	Direct Where Clause	*/
 	protected String	DirectWhereClause = null;
 	/**	Column Name			*/
@@ -1108,6 +1178,7 @@ class Restriction  implements Serializable
 	/** And/Or condition nesting depth ( = number of open brackets at and/or) */
 	protected int		joinDepth = 0;
 
+	protected boolean IsAdvanceSearch = false;
 	/**
 	 * 	Return SQL construct for this restriction
 	 *  @param tableName optional table name
@@ -1162,15 +1233,16 @@ class Restriction  implements Serializable
 		else
 			sb.append(ColumnName);
 		
+		if(IsAdvanceSearch && Operator.equals(MQuery.LIKE))
+				sb = new StringBuilder(" UPPER(").append(sb.toString()).append(")");	
 		sb.append(Operator);
 		if ( ! (Operator.equals(MQuery.NULL) || Operator.equals(MQuery.NOT_NULL)))
 		{
 			if (Code instanceof String) {
-				if (ColumnName.toUpperCase().startsWith("UPPER(")) {
-					sb.append("UPPER("+DB.TO_STRING(Code.toString())+")");
-				} else {
+				if ((IsAdvanceSearch && Operator.equals(MQuery.LIKE)) || ColumnName.toUpperCase().startsWith("UPPER("))
+					sb.append("UPPER(").append(DB.TO_STRING(Code.toString())).append(")");
+				else
 					sb.append(DB.TO_STRING(Code.toString()));
-				}
 			}
 			else if (Code instanceof Timestamp)
 				sb.append(DB.TO_DATE((Timestamp)Code, false));

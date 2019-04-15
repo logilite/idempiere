@@ -11,6 +11,7 @@
  *****************************************************************************/
 package org.idempiere.adinterface;
 
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,14 +20,17 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.adempiere.util.ServerContext;
+import org.compiere.model.MAuthorizationToken;
 import org.compiere.model.MSession;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
+import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
@@ -34,7 +38,9 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Language;
 import org.compiere.util.Login;
+import org.compiere.util.Util;
 import org.idempiere.adInterface.x10.ADLoginRequest;
+
 
 /**
  * @author deepak
@@ -44,7 +50,8 @@ import org.idempiere.adInterface.x10.ADLoginRequest;
 public class CompiereService {
 
 	private static CLogger	log = CLogger.getCLogger(CompiereService.class);
-
+	
+	public static CCache<String, AuthTokenContext> authContexts = new CCache<String, AuthTokenContext>("AuthToken", 10, 30);
 	private int m_AD_Client_ID;
 	private int m_AD_Org_ID;
 	private int m_AD_User_ID;
@@ -52,6 +59,7 @@ public class CompiereService {
 	private int m_M_Warehouse_ID;
 	private String m_locale;
 	private String m_userName;
+	private String m_Token;
 	private String m_password;
 	private int m_expiryMinutes;
 	private long m_lastAuthorizationTime;
@@ -153,6 +161,7 @@ public class CompiereService {
 		expungeIfExpire();		
 	}
 
+
 	/**
 	 * @return Language of current request
 	 */
@@ -241,9 +250,10 @@ public class CompiereService {
 	 * @param AD_Org_ID
 	 * @param M_Warehouse_ID
 	 * @param Lang
+	 * @param remoteIP 
 	 * @return true if login is successful
 	 */
-	public synchronized boolean login( int AD_User_ID, int AD_Role_ID, int AD_Client_ID, int AD_Org_ID, int M_Warehouse_ID, String Lang ) {
+	public synchronized boolean login( int AD_User_ID, int AD_Role_ID, int AD_Client_ID, int AD_Org_ID, int M_Warehouse_ID, String Lang,String remoteIP,boolean isValidForSameClient ) {
 		m_loggedin = false;
 		String loginInfo = checkLogin (getCtx(), AD_User_ID, AD_Role_ID, AD_Client_ID, AD_Org_ID, M_Warehouse_ID );				
 		if (loginInfo == null)
@@ -283,6 +293,31 @@ public class CompiereService {
 		Env.setContext( getCtx(), "#M_Warehouse_ID", M_Warehouse_ID );
 		Env.setContext(getCtx(), Env.LANGUAGE, m_language.getAD_Language());
 		
+		if (remoteIP != null) {
+			// Create Token
+			MAuthorizationToken token = new MAuthorizationToken(getCtx(), 0,
+					null);
+			token.setAD_Language(Lang);
+			token.setAD_Org_ID(AD_Org_ID);
+			token.setAD_Role_ID(AD_Role_ID);
+			token.setAD_User_ID(AD_User_ID);
+			token.setM_Warehouse_ID(M_Warehouse_ID);
+			token.setIsManual(false);
+			token.setisWebservice(true);
+			token.setValidForSameClient(isValidForSameClient);
+			token.setRemoteIP(remoteIP);
+			token.setLastAccessTime(ts);
+			token.setToken(UUID.randomUUID().toString());
+			token.saveEx();
+			m_Token = token.getToken();
+
+			AuthTokenContext authTokenCtx = new AuthTokenContext();
+			authTokenCtx.setAuthToken(token);
+			authTokenCtx.setPropertie((Properties) getCtx().clone());
+			authContexts.put(token.getToken(), authTokenCtx);
+		}
+		
+
 		// Create session
 		MSession session = MSession.get (getCtx(), false);
 		if (session == null){
@@ -316,6 +351,67 @@ public class CompiereService {
 			}
 		}		
 		
+		return true;
+	}
+
+	public void run() {
+		   System.out.println("timer working");      
+	}
+	
+	/**
+	 * 
+	 * @param token
+	 * @return true if login is successful
+	 */
+	public boolean login(MAuthorizationToken token) {
+		m_loggedin = false;
+		m_AD_Client_ID = token.getAD_Client_ID();
+		m_AD_Org_ID = token.getAD_Org_ID();
+		m_AD_User_ID = token.getAD_User_ID();
+		m_AD_Role_ID = token.getAD_Role_ID();
+		m_M_Warehouse_ID = token.getM_Warehouse_ID();
+		m_locale = token.getAD_Language();
+		m_userName = MUser.getNameOfUser(m_AD_User_ID);
+		
+		Env.setContext( getCtx(), "#AD_Language", token.getAD_Language());
+		m_language = Language.getLanguage(token.getAD_Language());
+		Env.verifyLanguage( getCtx(), m_language );
+
+		dateFormat = DisplayType.getDateFormat(DisplayType.Date, m_language);
+		dateTimeFormat = DisplayType.getDateFormat(DisplayType.DateTime, m_language);
+		timeFormat = DisplayType.getDateFormat(DisplayType.Time, m_language);
+		dateFormatJDBC = DisplayType.getDateFormat_JDBC();
+		dateTimeFormatJDBC = DisplayType.getTimestampFormat_Default();
+		timeFormatJDBC = DisplayType.getTimeFormat_Default();
+
+		//  Set Date
+		Timestamp ts = new Timestamp(System.currentTimeMillis());
+		
+		SimpleDateFormat dateFormat4Timestamp = new SimpleDateFormat( dateFormatOnlyForCtx ); 
+		Env.setContext( getCtx(), "#Date", dateFormat4Timestamp.format(ts)+" 00:00:00" );    //  JDBC format
+		if (log.isLoggable(Level.INFO)) log.info(" #Date = "+ Env.getContextAsDate( getCtx(), "#Date"));
+
+		Env.setContext( getCtx(), "#M_Warehouse_ID", token.getM_Warehouse_ID() );
+		Env.setContext( getCtx(), Env.LANGUAGE, m_language.getAD_Language());
+		
+		AuthTokenContext authTokenCtx = new AuthTokenContext();
+		authTokenCtx.setAuthToken(token);
+		authTokenCtx.setPropertie((Properties) getCtx().clone());
+		authContexts.put(token.getToken(), authTokenCtx);
+		
+		// Create session
+		MSession session = MSession.get (getCtx(), false);
+		if (session == null){
+			log.fine("No Session found");
+			session = MSession.get (getCtx(), true);    	
+		}
+		session.setWebSession("WebService");
+		session.saveEx();
+		
+		token.setLastAccessTime(new Timestamp(System.currentTimeMillis()));
+		token.saveEx();
+				
+		m_loggedin = true;		
 		return true;
 	}
 
@@ -360,6 +456,33 @@ public class CompiereService {
 	}
 
 	/**
+	 * 
+	 * @return logged in Token of current request
+	 */
+	public String getToken() {
+		return m_Token;
+	}
+	
+	public static AuthTokenContext getTokenContext(String token)
+	{
+		if (!Util.isEmpty(token, true))
+		{
+			AuthTokenContext context =  authContexts.get(token);
+			if(context == null)
+				return null;
+			else{
+				context.setLastUsageTime(new Timestamp(System.currentTimeMillis()));
+				return context;
+			}
+		}
+		return null;
+	}
+	
+	public static void removeToken(String token){
+		authContexts.remove(token);
+	}
+	
+	/*
 	 * @return set password
 	 */
 	public synchronized void setPassword(String pass) {

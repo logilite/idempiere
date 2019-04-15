@@ -26,6 +26,7 @@ import org.compiere.model.MBPartner;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MOrgInfo;
+import org.compiere.model.MTable;
 import org.compiere.util.AdempiereUserError;
 import org.compiere.util.DB;
 import org.compiere.util.Msg;
@@ -153,7 +154,7 @@ public class OrderPOCreate extends SvrProcess
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
-				counter += createPOFromSO (new MOrder (getCtx(), rs, get_TrxName()));
+				counter += createPOFromSO((MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(rs, get_TrxName()));
 			}
  		}
 		finally
@@ -221,7 +222,7 @@ public class OrderPOCreate extends SvrProcess
 				{
 					if (soLines[i].getM_Product_ID() == M_Product_ID)
 					{
-						MOrderLine poLine = new MOrderLine (po);
+						MOrderLine poLine = MOrderLine.createFrom(po);
 						poLine.setLink_OrderLine_ID(soLines[i].getC_OrderLine_ID());
 						poLine.setM_Product_ID(soLines[i].getM_Product_ID());
 						poLine.setC_Charge_ID(soLines[i].getC_Charge_ID());
@@ -266,7 +267,7 @@ public class OrderPOCreate extends SvrProcess
 	 */
 	public MOrder createPOForVendor(int C_BPartner_ID, MOrder so)
 	{
-		MOrder po = new MOrder (getCtx(), 0, get_TrxName());
+		MOrder po = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 		po.setClientOrg(so.getAD_Client_ID(), so.getAD_Org_ID());
 		po.setLink_Order_ID(so.getC_Order_ID());
 		po.setIsSOTrx(false);
@@ -278,7 +279,7 @@ public class OrderPOCreate extends SvrProcess
 		po.setSalesRep_ID(so.getSalesRep_ID());
 		po.setM_Warehouse_ID(so.getM_Warehouse_ID());
 		//	Set Vendor
-		MBPartner vendor = new MBPartner (getCtx(), C_BPartner_ID, get_TrxName());
+		MBPartner vendor = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(C_BPartner_ID, get_TrxName());
 		po.setBPartner(vendor);
 		//	Drop Ship
 		if ( p_IsDropShip )

@@ -13,6 +13,9 @@
  *****************************************************************************/
 package org.adempiere.webui.factory;
 
+import java.io.File;
+import java.io.IOException;
+
 import javax.activation.DataSource;
 import javax.xml.bind.DatatypeConverter;
 
@@ -20,8 +23,10 @@ import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.apps.FeedbackRequestWindow;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.session.SessionManager;
+import org.adempiere.webui.util.EMailDialogUtil;
 import org.adempiere.webui.util.FeedbackManager;
-import org.adempiere.webui.window.WEMailDialog;
+import org.adempiere.webui.window.IEmailDialog;
+import org.apache.commons.io.FileUtils;
 import org.compiere.model.MSystem;
 import org.compiere.model.MUser;
 import org.compiere.util.ByteArrayDataSource;
@@ -101,29 +106,41 @@ public class DefaultFeedbackService implements IFeedbackService {
 			return Env.parseContext(Env.getCtx(), 0, feedBackHeader, false, false);
 		}
 		
-		protected void showEmailDialog(byte[] imageBytes) {
+		protected void showEmailDialog(byte[] imageBytes) throws IOException {
 			DataSource ds = FeedbackManager.getLogAttachment(errorOnly);
 			
-			WEMailDialog dialog = new WEMailDialog(
-				Msg.getMsg(Env.getCtx(), "EMailSupport"),
-				MUser.get(Env.getCtx()),
-				"",			//	to
-				getFeedbackSubject(),
-				"", ds);
-			dialog.setAttribute(Window.MODE_KEY, Mode.OVERLAPPED);			
-			
-			MSystem system = MSystem.get(Env.getCtx());
-			if (!Util.isEmpty(system.getSupportEMail())) 
+			File file = File.createTempFile("idmepiere-log", ".txt");
+			if(ds instanceof ByteArrayDataSource)
 			{
-				dialog.addTo(system.getSupportEMail(), true);
+				ByteArrayDataSource arrayBytes = (ByteArrayDataSource)ds;
+				FileUtils.copyInputStreamToFile(arrayBytes.getInputStream(), file);
+			}	
+			IEmailDialog dialog = EMailDialogUtil.getEmailDialog();
+			if(dialog != null)
+			{
+				dialog.init(
+					Msg.getMsg(Env.getCtx(), "EMailSupport"),
+					MUser.get(Env.getCtx()),"",
+					MSystem.get(Env.getCtx()).getName() + " " + Msg.getMsg(Env.getCtx(), "TraceInfo"),
+					"", file);
+				if(dialog instanceof Window)
+					((Window)dialog).setAttribute(Window.MODE_KEY, Mode.OVERLAPPED);			
+				
+				MSystem system = MSystem.get(Env.getCtx());
+				if (!Util.isEmpty(system.getSupportEMail())) 
+				{
+					dialog.addTo(system.getSupportEMail(), true);
+				}
+				ByteArrayDataSource screenShot = null;
+				if (imageBytes != null && imageBytes.length > 0) {
+					 screenShot = new ByteArrayDataSource(imageBytes, "image/png");
+					screenShot.setName("screenshot.png");
+				}
+				if(screenShot != null)
+					dialog.addAttachment(screenShot, true);
+				
+				dialog.show();
 			}
-			AEnv.showWindow(dialog);
-			if (imageBytes != null && imageBytes.length > 0) {
-				ByteArrayDataSource screenShot = new ByteArrayDataSource(imageBytes, "image/png");
-				screenShot.setName("screenshot.png");
-				dialog.addAttachment(screenShot, true);
-			}
-			dialog.focus();
 		}
 	}
 	

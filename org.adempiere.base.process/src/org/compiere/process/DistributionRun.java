@@ -443,7 +443,8 @@ public class DistributionRun extends SvrProcess
 		boolean counter = !m_run.isCreateSingleOrder()	//	no single Order 
 			&& runC_BPartner_ID > 0						//	Org linked to BP
 			&& !m_docType.isSOTrx();					//	PO
-		MBPartner runBPartner = counter ? new MBPartner(getCtx(), runC_BPartner_ID, get_TrxName()) : null;
+		MBPartner runBPartner = counter
+				? (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(runC_BPartner_ID, get_TrxName()) : null;
 		if (!counter || runBPartner == null || runBPartner.get_ID() != runC_BPartner_ID)
 			counter = false;
 		if (counter)
@@ -460,13 +461,13 @@ public class DistributionRun extends SvrProcess
 		//	Consolidated Order
 		if (m_run.isCreateSingleOrder())
 		{
-			bp = new MBPartner (getCtx(), m_run.getC_BPartner_ID(), get_TrxName());
+			bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(m_run.getC_BPartner_ID(), get_TrxName());
 			if (bp.get_ID() == 0)
 				throw new IllegalArgumentException("Business Partner not found - C_BPartner_ID=" + m_run.getC_BPartner_ID());
 			//
 			if (!p_IsTest)
 			{
-				singleOrder = new MOrder (getCtx(), 0, get_TrxName());
+				singleOrder =  (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 				singleOrder.setC_DocTypeTarget_ID(m_docType.getC_DocType_ID());
 				singleOrder.setC_DocType_ID(m_docType.getC_DocType_ID());
 				singleOrder.setIsSOTrx(m_docType.isSOTrx());
@@ -508,10 +509,11 @@ public class DistributionRun extends SvrProcess
 			//	New Order
 			if (order == null)
 			{
-				bp = new MBPartner (getCtx(), detail.getC_BPartner_ID(), get_TrxName());
+				bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(detail.getC_BPartner_ID(),
+						get_TrxName());
 				if (!p_IsTest)
 				{
-					order = new MOrder (getCtx(), 0, get_TrxName());
+				    order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(0, get_TrxName());
 					order.setC_DocTypeTarget_ID(m_docType.getC_DocType_ID());
 					order.setC_DocType_ID(m_docType.getC_DocType_ID());
 					order.setIsSOTrx(m_docType.isSOTrx());
@@ -556,7 +558,7 @@ public class DistributionRun extends SvrProcess
 			}
 
 			//	Create Order Line
-			MOrderLine line = new MOrderLine(order);
+			MOrderLine line = MOrderLine.createFrom(order);
 			if (counter && bp.getAD_OrgBP_ID_Int() > 0)
 				;	//	don't overwrite counter doc
 			else	//	normal - optionally overwrite
@@ -843,7 +845,8 @@ public class DistributionRun extends SvrProcess
 		boolean counter = !m_run.isCreateSingleOrder()	//	no single Order 
 			&& runC_BPartner_ID > 0						//	Org linked to BP
 			&& !m_docType.isSOTrx();					//	PO
-		MBPartner runBPartner = counter ? new MBPartner(getCtx(), runC_BPartner_ID, get_TrxName()) : null;
+		MBPartner runBPartner = counter
+				? (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(runC_BPartner_ID, get_TrxName()) : null;
 		if (!counter || runBPartner == null || runBPartner.get_ID() != runC_BPartner_ID)
 			counter = false;
 		if (counter)
@@ -881,7 +884,7 @@ public class DistributionRun extends SvrProcess
 		//	Consolidated Single Order 
 		if (m_run.isCreateSingleOrder())
 		{
-			bp = new MBPartner (getCtx(), m_run.getC_BPartner_ID(), get_TrxName());
+			bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(m_run.getC_BPartner_ID(), get_TrxName());
 			if (bp.get_ID() == 0)
 				throw new IllegalArgumentException("Business Partner not found - C_BPartner_ID=" + m_run.getC_BPartner_ID());
 			//
@@ -928,7 +931,7 @@ public class DistributionRun extends SvrProcess
 			lastC_BPartner_ID = detail.getC_BPartner_ID();
 			lastC_BPartner_Location_ID = detail.getC_BPartner_Location_ID();
 			
-			bp = new MBPartner (getCtx(), detail.getC_BPartner_ID(), get_TrxName());
+			bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(detail.getC_BPartner_ID(), get_TrxName());
 			MOrgInfo oi_target = MOrgInfo.get(getCtx(), bp.getAD_OrgBP_ID_Int(), get_TrxName());
 			m_target = MWarehouse.get(getCtx(), oi_target.getM_Warehouse_ID());
 			if(m_target==null)

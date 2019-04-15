@@ -16,6 +16,8 @@
  *****************************************************************************/
 package org.compiere.apps;
 
+import static org.compiere.model.SystemIDs.WINDOW_REQUESTS_ALL;
+
 import java.awt.GraphicsConfiguration;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -40,8 +42,8 @@ import org.compiere.model.MProject;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRequest;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
-import static org.compiere.model.SystemIDs.*;
 import org.compiere.swing.CMenuItem;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -258,7 +260,7 @@ public class ARequest implements ActionListener
 				tab.setValue(MRequest.COLUMNNAME_R_RequestRelated_ID, Integer.valueOf(m_Record_ID));
 			// FR [2842165] - Order Ref link from SO line creating new request
 			else if (m_AD_Table_ID == MOrderLine.Table_ID) {
-				MOrderLine oLine = new MOrderLine(Env.getCtx(), m_Record_ID, null);
+				MOrderLine oLine = (MOrderLine) MTable.get(Env.getCtx(), MOrderLine.Table_ID).getPO(m_Record_ID, null);
 				if (oLine != null) {
 					tab.setValue(MOrderLine.COLUMNNAME_C_Order_ID, Integer.valueOf(oLine.getC_Order_ID()));
 				}

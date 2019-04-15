@@ -34,7 +34,7 @@ import org.compiere.util.Env;
  *  @author 	Jorg Janke
  *  @version 	$Id: DocTax.java,v 1.3 2006/07/30 00:53:33 jjanke Exp $
  */
-public final class DocTax
+public class DocTax
 {
 	/**
 	 *	Create Tax

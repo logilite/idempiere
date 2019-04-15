@@ -36,11 +36,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import org.compiere.model.MQuery;
+import org.compiere.model.MultiMap;
 import org.compiere.print.MPrintFormatItem;
 import org.compiere.print.MPrintTableFormat;
 import org.compiere.print.util.SerializableMatrix;
@@ -255,6 +257,9 @@ public class TableElement extends PrintElement
 
 	/**	Key: Integer (original Column) - Value: Integer (below column)	*/
 	private HashMap<Integer,Integer>	m_additionalLines;
+	
+	/** Key: Integer (below column) - Value: Integer (original Column) */
+	private MultiMap<Integer, Integer> belowColumnMultiMap	= null;
 
 	/*************************************************************************/
 
@@ -344,6 +349,11 @@ public class TableElement extends PrintElement
 					}
 					else
 					{
+						// set null data for below columns
+						if (col != dataCol)
+						{
+							addPrintLines(row, col, dataItem);
+						}
 						dimensions.set(dataCol, new Dimension2DImpl());
 						continue;
 					}										
@@ -1242,7 +1252,7 @@ public class TableElement extends PrintElement
 			int colWidth = ((Float)m_columnWidths.get(col)).intValue();		//	includes 2*Gaps+Line
 			if (colWidth != 0)
 			{
-				printColumn (g2D, col, startX, startY, firstColumnPrint, firstRow, nextPageRow, isView);
+				printColumn (g2D, col, startX, startY, firstColumnPrint, firstRow, nextPageRow, isView, getBelowColumns(col));
 				startX += colWidth;
 				firstColumnPrint = false;
 			}
@@ -1256,7 +1266,7 @@ public class TableElement extends PrintElement
 			int colWidth = ((Float)m_columnWidths.get(col)).intValue();		//	includes 2*Gaps+Line
 			if (colWidth != 0)
 			{
-				printColumn (g2D, col, startX, startY, firstColumnPrint, firstRow, nextPageRow, isView);
+				printColumn (g2D, col, startX, startY, firstColumnPrint, firstRow, nextPageRow, isView, getBelowColumns(col));
 				startX += colWidth;
 				firstColumnPrint = false;
 			}
@@ -1264,7 +1274,34 @@ public class TableElement extends PrintElement
 
 	}	//	paint
 
-	
+	/**
+	 * List the below columns for the current column
+	 * 
+	 * @param col - Header column no
+	 * @return - list of columns as a below column
+	 */
+	private ArrayList<Integer> getBelowColumns(Integer col)
+	{
+		if (belowColumnMultiMap == null)
+		{
+			belowColumnMultiMap = new MultiMap<Integer, Integer>();
+			for (Entry<Integer, Integer> entry : m_additionalLines.entrySet())
+			{
+				belowColumnMultiMap.put(entry.getValue(), entry.getKey());
+			}
+		}
+
+		ArrayList<Integer> belowCols = null;
+		if (belowColumnMultiMap.containsKey(col))
+		{
+			belowCols = new ArrayList<Integer>();
+			belowCols.add(col);
+			belowCols.addAll(belowColumnMultiMap.getValues(col));
+		}
+
+		return belowCols;
+	}
+
 	/**
 	 * 	Print non zero width Column
 	 * 	@param g2D graphics
@@ -1275,10 +1312,11 @@ public class TableElement extends PrintElement
 	 * 	@param firstRow first row index
 	 * 	@param nextPageRow row index of next page
 	 *  @param isView true if online view (IDs are links)
+	 *  @param belowCols 
 	 */
 	private void printColumn (Graphics2D g2D, int col,
 		final int origX, final int origY, boolean leftVline,
-		final int firstRow, final int nextPageRow, boolean isView)
+		final int firstRow, final int nextPageRow, boolean isView, ArrayList<Integer> belowCols)
 	{
 		int curX = origX;
 		int curY = origY;	//	start from top
@@ -1509,18 +1547,21 @@ public class TableElement extends PrintElement
 							String[] lines = Pattern.compile("\n", Pattern.MULTILINE).split(str);
 							for (int lineNo = 0; lineNo < lines.length; lineNo++)
 							{
+								int fcColumn = col;
+								if (belowCols != null)
+									fcColumn = belowCols.get(index);
 								String thisLine = lines[lineNo];
 								if (thisLine.length() == 0)
 									thisLine = " ";
 								aString = new AttributedString(thisLine);
-								aString.addAttribute(TextAttribute.FONT, getFont(row, col));
+								aString.addAttribute(TextAttribute.FONT, getFont(row, fcColumn));
 								if (isView && printItems[index] instanceof NamePair)	//	ID
 								{
 									aString.addAttribute(TextAttribute.FOREGROUND, LINK_COLOR);
 									aString.addAttribute(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_LOW_ONE_PIXEL, 0, str.length());
 								}
 								else
-									aString.addAttribute(TextAttribute.FOREGROUND, getColor(row, col));
+									aString.addAttribute(TextAttribute.FOREGROUND, getColor(row, fcColumn));
 								//
 								iter = aString.getIterator();
 								boolean fastDraw = LayoutEngine.s_FASTDRAW;
@@ -1552,14 +1593,14 @@ public class TableElement extends PrintElement
 										//
 										if (fastDraw)
 										{	//	Bug - set Font/Color explicitly
-											g2D.setFont(getFont(row, col));
+											g2D.setFont(getFont(row, fcColumn));
 											if (isView && printItems[index] instanceof NamePair)	//	ID
 											{
 												g2D.setColor(LINK_COLOR);
 												//	TextAttribute.UNDERLINE
 											}
 											else
-												g2D.setColor(getColor(row, col));
+												g2D.setColor(getColor(row, fcColumn));
 											g2D.drawString(iter, penX, penY);
 										}
 										else
@@ -1611,7 +1652,7 @@ public class TableElement extends PrintElement
             }
             else
             {
-                //  next line is a funcion column -> underline this
+                //  next line is a function column -> underline this
                 boolean nextIsFunction = m_functionRows.contains(Integer.valueOf(row+1));
                 if (nextIsFunction && m_functionRows.contains(Integer.valueOf(row)))
                     nextIsFunction = false;     //  this is a function line too

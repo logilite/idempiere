@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
+import java.sql.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -42,6 +43,7 @@ import javax.sql.RowSet;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.DBException;
 import org.adempiere.util.ProcessUtil;
 import org.compiere.Adempiere;
@@ -857,6 +859,48 @@ public final class DB
 			pstmt.setString(index, ((Boolean)param).booleanValue() ? "Y" : "N");
 		else if (param instanceof byte[])
 			pstmt.setBytes(index, (byte[]) param);
+		else if (param instanceof Integer[])
+		{
+			Connection conn = null;
+			
+			try {
+				conn = DB.getConnectionRW();
+				if ( conn != null )
+				{
+					Array array = conn.createArrayOf("numeric", (Integer[]) param);
+					pstmt.setArray(index, array);
+				}
+				else
+					throw new AdempiereException("Unable to create multi-select table array, no DB connection");
+			} catch (SQLException e) {
+				throw new AdempiereException("Error setting multi-select table array parameter", e);
+			}
+			finally {
+				if ( conn != null )
+					conn.close();
+			}
+		}
+		else if (param instanceof String[])
+		{
+			Connection conn = null;
+			
+			try {
+				conn = DB.getConnectionRW();
+				if ( conn != null )
+				{
+					Array array = conn.createArrayOf("text", (String[]) param);
+					pstmt.setArray(index, array);
+				}
+				else
+					throw new AdempiereException("Unable to create multi-select list array, no DB connection");
+			} catch (SQLException e) {
+				throw new AdempiereException("Error setting multi-select list array parameter", e);
+			}
+			finally {
+				if ( conn != null )
+					conn.close();
+			}
+		}
 		else
 			throw new DBException("Unknown parameter type "+index+" - "+param);
 	}
@@ -2348,15 +2392,14 @@ public final class DB
 	public static void createT_SelectionNew (int AD_PInstance_ID, Collection<KeyNamePair> saveKeys, String trxName)
 	{
 		StringBuilder insert = new StringBuilder();
-		insert.append("INSERT INTO T_SELECTION(AD_PINSTANCE_ID, T_SELECTION_ID, ViewID) ");
+		insert.append("INSERT INTO T_SELECTION(AD_PINSTANCE_ID, T_SELECTION_ID, ViewID) VALUES ( ");
 		int counter = 0;
 		for(KeyNamePair saveKey : saveKeys)
 		{
 			Integer selectedId = saveKey.getKey();
 			counter++;
 			if (counter > 1)
-				insert.append(" UNION ");
-			insert.append("SELECT ");
+				insert.append(", (");
 			insert.append(AD_PInstance_ID);
 			insert.append(", ");
 			insert.append(selectedId);
@@ -2372,13 +2415,13 @@ public final class DB
 				insert.append("'");
 			}
 			
-			insert.append(" FROM DUAL ");
+			insert.append(" ) ");
 
 			if (counter >= 1000)
 			{
 				DB.executeUpdateEx(insert.toString(), trxName);
 				insert = new StringBuilder();
-				insert.append("INSERT INTO T_SELECTION(AD_PINSTANCE_ID, T_SELECTION_ID, ViewID) ");
+				insert.append("INSERT INTO T_SELECTION(AD_PINSTANCE_ID, T_SELECTION_ID, ViewID) VALUES ( ");
 				counter = 0;
 			}
 		}
@@ -2445,6 +2488,13 @@ public final class DB
 			} catch (SQLException e) {}
 		}
 		return false;
+	}
+
+	public static String isReadOnly(String sql) {
+		sql = sql.trim().toLowerCase();
+		if (sql.startsWith("insert") || sql.startsWith("update") || sql.startsWith("delete"))
+			return "SQL must not update or insert record.";
+		return null;
 	}
 
     /**
@@ -2577,5 +2627,79 @@ public final class DB
 		//
 		return ProxyFactory.newCPreparedStatement(resultSetType, resultSetConcurrency, sql, trxName);
 	}
+
+	/**
+	 * Get Array Value from SQL ( IDEMPIERE-3413 )
+	 * 
+	 * @param trxName - Transaction
+	 * @param sql - Selection Query
+	 * @param params - Array of parameters
+	 * @return first value or null if not found
+	 * @throws DBException - if there is any SQLException
+	 */
+	public static Array getSQLArrayValueEx(String trxName, String sql, Object... params) throws DBException
+	{
+		Array retArray = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = prepareStatement(sql, trxName);
+			setParameters(pstmt, params);
+			rs = pstmt.executeQuery();
+			if (rs.next())
+				retArray = rs.getArray(1);
+			else if (log.isLoggable(Level.FINE))
+				log.fine("No Value " + sql);
+		}
+		catch (SQLException e)
+		{
+			throw new DBException(e, sql);
+		}
+		finally
+		{
+			close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		return retArray;
+	} // getSQLArrayValueEx
+	
+	/**
+	 * Get Boolean Value from SQL
+	 * 
+	 * @param trxName trx
+	 * @param sql sql
+	 * @param params array of parameters
+	 * @return first value or false
+	 * @throws DBException if there is any SQLException
+	 */
+	public static boolean getSQLValueBooleanEx(String trxName, String sql, Object... params)
+	{
+		boolean retValue = false;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = prepareStatement(sql, trxName);
+			setParameters(pstmt, params);
+			rs = pstmt.executeQuery();
+			if (rs.next())
+				retValue = rs.getBoolean(1);
+			else if (log.isLoggable(Level.FINE))
+				log.fine("No Value " + sql);
+		}
+		catch (SQLException e)
+		{
+			throw new DBException(e, sql);
+		}
+		finally
+		{
+			close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		return retValue;
+	} // getSQLValueBooleanEx
 
 }	//	DB
