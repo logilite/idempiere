@@ -590,7 +590,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         ZKUpdateUtil.setVflex(south, "min");
 
         ZKUpdateUtil.setHeight(winAdvanced, "100%");
-        ZKUpdateUtil.setWidth(winAdvanced, "99%");
+        ZKUpdateUtil.setWidth(winAdvanced, "100%");
         winAdvanced.addEventListener(Events.ON_OK,this);
         LayoutUtils.addSclass("find-window-advanced", winAdvanced);
 
@@ -670,7 +670,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         winAdvanced = new Window();
         winLookupRecord = new Window();
         Tabpanel tabPanel = new Tabpanel();
-        tabPanel.setStyle("height: 100%; width: 100%; padding-right: 2px; margin: auto;");
+        tabPanel.setStyle("height: 100%; width: 100%;");
         tabPanel.appendChild(winLookupRecord);
         tabPanel.setId("simpleSearch");
         winMain.addTab(tabPanel, Msg.getMsg(Env.getCtx(), "Find").replaceAll("&", ""),false, true);

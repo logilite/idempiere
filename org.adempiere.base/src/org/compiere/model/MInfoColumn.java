@@ -148,6 +148,14 @@ public class MInfoColumn extends X_AD_InfoColumn implements IInfoColumn
 			M_Element element = new M_Element (getCtx(), getAD_Element_ID (), get_TrxName());
 			setName (element.getName());
 		}
+
+		if (isQueryCriteria() && getSeqNoSelection() <= 0) {
+			int next = DB.getSQLValueEx(get_TrxName(),
+					"SELECT ROUND((COALESCE(MAX(SeqNoSelection),0)+10)/10,0)*10 FROM AD_InfoColumn WHERE AD_InfoWindow_ID=? AND IsQueryCriteria='Y' AND IsActive='Y'",
+					getAD_InfoWindow_ID());
+			setSeqNoSelection(next);
+		}
+
 		return true;
 	}
 	

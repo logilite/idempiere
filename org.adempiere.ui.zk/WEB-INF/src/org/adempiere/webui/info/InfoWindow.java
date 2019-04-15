@@ -380,7 +380,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
    			
    			confirmPanel.addComponentsCenter(cbbProcess);
 
-   			btCbbProcess = confirmPanel.addProcessButton(Msg.getMsg(Env.getCtx(), ConfirmPanel.A_PROCESS), null);
+   			btCbbProcess = confirmPanel.addButton(Msg.getMsg(Env.getCtx(), ConfirmPanel.A_PROCESS), null);
    			
    			btCbbProcess.addEventListener(Events.ON_CLICK, this);
    		}
@@ -404,7 +404,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
    				confirmPanel.appendChild(ipMenu);
    				
    				// init button to show menu
-   				btMenuProcess = confirmPanel.addProcessButton("ProcessMenu", null);
+   				btMenuProcess = confirmPanel.addButton("ProcessMenu", null);
    				btMenuProcess.setPopup("ipMenu, before_start");   				
    			}
    		}
@@ -1634,8 +1634,8 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
         	dataSql = dataSql + " " + otherClause;
         }
         
-        if (m_sqlUserOrder != null && m_sqlUserOrder.trim().length() > 0)
-        	dataSql = dataSql + m_sqlUserOrder;
+        if (indexOrderColumn > -1)
+        	dataSql = dataSql + getUserOrderClause();
         else
         	dataSql = dataSql + m_sqlOrder;
         

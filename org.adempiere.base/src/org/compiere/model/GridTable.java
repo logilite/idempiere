@@ -1032,7 +1032,7 @@ public class GridTable extends AbstractTableModel
 			}
 		}
 		return null;
-	}	//	getKeyID
+	}	//	getUUID
 
 	/**
 	 *	Get Key ColumnName

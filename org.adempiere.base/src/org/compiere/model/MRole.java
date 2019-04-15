@@ -44,6 +44,8 @@ import org.compiere.util.Ini;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.compiere.util.Trace;
+import org.compiere.util.Util;
+import org.compiere.wf.MWorkflow;
 
 /**
  *	Role Model.
@@ -61,7 +63,7 @@ public final class MRole extends X_AD_Role
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 8952907008982481439L;
+	private static final long serialVersionUID = -4649095180532036099L;
 
 	/**
 	 * 	Get Default (Client) Role
@@ -1649,6 +1651,14 @@ public final class MRole extends X_AD_Role
 			setAccessMap("m_processAccess", mergeAccess(getAccessMap("m_processAccess"), directAccess, true));
 		}	//	reload
 		Boolean retValue = m_processAccess.get(AD_Process_ID);
+		if (retValue != null && retValue.booleanValue()) {
+			MProcess process = MProcess.get(getCtx(), AD_Process_ID);
+			if (! isAccessLevelCompatible(process.getAccessLevel())) {
+				log.warning("Role " + getName() + " has assigned access incompatible process " + process.getName());
+				m_processAccess.remove(AD_Process_ID);
+				retValue = null;
+			}
+		}
 		return retValue;
 	}	//	getProcessAccess
 
@@ -1729,6 +1739,14 @@ public final class MRole extends X_AD_Role
 			setAccessMap("m_taskAccess", mergeAccess(getAccessMap("m_taskAccess"), directAccess, true));
 		}	//	reload
 		Boolean retValue = m_taskAccess.get(AD_Task_ID);
+		if (retValue != null && retValue.booleanValue()) {
+			MTask task = new MTask(getCtx(), AD_Task_ID, get_TrxName());
+			if (! isAccessLevelCompatible(task.getAccessLevel())) {
+				log.warning("Role " + getName() + " has assigned access incompatible task " + task.getName());
+				m_taskAccess.remove(AD_Task_ID);
+				retValue = null;
+			}
+		}
 		return retValue;
 	}	//	getTaskAccess
 
@@ -1809,6 +1827,14 @@ public final class MRole extends X_AD_Role
 			setAccessMap("m_formAccess", mergeAccess(getAccessMap("m_formAccess"), directAccess, true));
 		}	//	reload
 		Boolean retValue = m_formAccess.get(AD_Form_ID);
+		if (retValue != null && retValue.booleanValue()) {
+			MForm form = new MForm(getCtx(), AD_Form_ID, get_TrxName());
+			if (! isAccessLevelCompatible(form.getAccessLevel())) {
+				log.warning("Role " + getName() + " has assigned access incompatible form " + form.getName());
+				m_formAccess.remove(AD_Form_ID);
+				retValue = null;
+			}
+		}
 		return retValue;
 	}	//	getFormAccess
 
@@ -1889,8 +1915,16 @@ public final class MRole extends X_AD_Role
 			setAccessMap("m_workflowAccess", mergeAccess(getAccessMap("m_workflowAccess"), directAccess, true));
 		}	//	reload
 		Boolean retValue = m_workflowAccess.get(AD_Workflow_ID);
+		if (retValue != null && retValue.booleanValue()) {
+			MWorkflow workflow = MWorkflow.get(getCtx(), AD_Workflow_ID);
+			if (! isAccessLevelCompatible(workflow.getAccessLevel())) {
+				log.warning("Role " + getName() + " has assigned access incompatible workflow " + workflow.getName());
+				m_workflowAccess.remove(AD_Workflow_ID);
+				retValue = null;
+			}
+		}
 		return retValue;
-	}	//	getTaskAccess
+	}	//	getWorkflowAccess
 
 	
 	/*************************************************************************
@@ -3159,6 +3193,16 @@ public final class MRole extends X_AD_Role
 			setAccessMap("m_infoAccess", mergeAccess(getAccessMap("m_infoAccess"), directAccess, true));
 		}	//	reload
 		Boolean retValue = m_infoAccess.get(AD_InfoWindow_ID);
+		/* Info Window doesn't have AccessLevel
+		if (retValue != null && retValue.booleanValue()) {
+			MInfoWindow infoWindow = new MInfoWindow(getCtx(), AD_InfoWindow_ID, get_TrxName());
+			if (! isAccessLevelCompatible(infoWindow.getAccessLevel())) {
+				log.warning("Role " + getName() + " has assigned access incompatible info window " + infoWindow.getName());
+				m_infoAccess.remove(AD_InfoWindow_ID);
+				retValue = null;
+			}
+		}
+		*/
 		return retValue;
 	}
 
@@ -3196,6 +3240,95 @@ public final class MRole extends X_AD_Role
 			}
 		}
 		return m_canAccess_Info_Product.booleanValue();
+	}
+
+	/**
+	 * 	Get where clause for a role types list
+	 * 	@param roleType - comma separated list of role types, NULL can be used
+	 * 	@param tableName - if table needs to be qualified
+	 *	@return whereClause - return null if roleType is null or empty
+	 */
+	public static String getWhereRoleType(String roleType, String tableName) {
+		if (Util.isEmpty(roleType, true)) {
+			return null;
+		}
+		boolean includeNull = false;
+		String types[] = roleType.split(",");
+		StringBuilder whereClause = new StringBuilder("(");
+		boolean start = true;
+		for (String type : types) {
+			if ("null".equalsIgnoreCase(type)) {
+				includeNull = true;
+			} else {
+				if (start) {
+					if (! Util.isEmpty(tableName)) {
+						whereClause.append(tableName).append(".");
+					}
+					whereClause.append(COLUMNNAME_RoleType).append(" IN (");
+					start = false;
+				} else {
+					whereClause.append(",");
+				}
+				whereClause.append(DB.TO_STRING(type));
+			}
+		}
+		if (! start) {
+			whereClause.append(")");
+		}
+		if (includeNull) {
+			if (! start) {
+				whereClause.append(" OR ");
+			}
+			if (! Util.isEmpty(tableName)) {
+				whereClause.append(tableName).append(".");
+			}
+			whereClause.append(COLUMNNAME_RoleType).append(" IS NULL");
+		}
+		whereClause.append(")");
+		return whereClause.toString();
+	}
+
+	/*
+	 * Verify compatibility of AD_Role.UserLevel vs Access Level
+	 * @param accessLevel the access level of the dictionary object
+	 * @return true if access and user level are compatible
+	 */
+	private boolean isAccessLevelCompatible(String accessLevel) {
+		boolean access = false;
+		switch (getUserLevel()) {
+		case USERLEVEL_System:
+			switch (accessLevel) {
+			case MProcess.ACCESSLEVEL_SystemOnly:
+			case MProcess.ACCESSLEVEL_SystemPlusClient:
+			case MProcess.ACCESSLEVEL_All:
+				access = true;
+			}
+		case USERLEVEL_Client:
+			switch (accessLevel) {
+			case MProcess.ACCESSLEVEL_ClientOnly:
+			case MProcess.ACCESSLEVEL_ClientPlusOrganization:
+			case MProcess.ACCESSLEVEL_SystemPlusClient:
+			case MProcess.ACCESSLEVEL_All:
+				access = true;
+			}
+		case USERLEVEL_Organization:
+			switch (accessLevel) {
+			case MProcess.ACCESSLEVEL_Organization:
+			case MProcess.ACCESSLEVEL_ClientPlusOrganization:
+			case MProcess.ACCESSLEVEL_All:
+				access = true;
+			}
+		case USERLEVEL_ClientPlusOrganization:
+			switch (accessLevel) {
+			case MProcess.ACCESSLEVEL_Organization:
+			case MProcess.ACCESSLEVEL_ClientOnly:
+			case MProcess.ACCESSLEVEL_ClientPlusOrganization:
+			case MProcess.ACCESSLEVEL_SystemPlusClient:
+			case MProcess.ACCESSLEVEL_All:
+				access = true;
+			}
+		}
+		return access;
 	}
 
 }	//	MRole

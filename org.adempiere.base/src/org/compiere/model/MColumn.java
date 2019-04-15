@@ -275,6 +275,9 @@ public class MColumn extends X_AD_Column
 			}
 		}
 
+		/* IDEMPIERE-3509, IDEMPIERE-3902
+		 * removing this validation
+		 * it affects adversely PackIn process that can create the table later
 		if ( displayType == DisplayType.TableDir ||
 			(displayType == DisplayType.Search && getAD_Reference_Value_ID() <= 0))
 		{
@@ -286,6 +289,7 @@ public class MColumn extends X_AD_Column
 				return false;
 			}
 		}
+		*/
 
 		if (displayType == DisplayType.Table && getAD_Reference_Value_ID() <= 0)
 		{
@@ -411,6 +415,24 @@ public class MColumn extends X_AD_Column
 			} else {
 				setFormatPattern(null);
 			}
+		}
+
+		// IDEMPIERE-1615 Multiple key columns lead to data corruption or data loss
+		if ((is_ValueChanged(COLUMNNAME_IsKey) || is_ValueChanged(COLUMNNAME_IsActive)) && isKey() && isActive()) {
+			int cnt = DB.getSQLValueEx(get_TrxName(),
+					"SELECT COUNT(*) FROM AD_Column WHERE AD_Table_ID=? AND IsActive='Y' AND AD_Column_ID!=? AND IsKey='Y'",
+					getAD_Table_ID(), getAD_Column_ID());
+			if (cnt > 0) {
+				log.saveError("Error", Msg.getMsg(getCtx(), "KeyColumnAlreadyDefined"));
+				return false;
+			}
+		}
+
+		if (isSelectionColumn() && getSeqNoSelection() <= 0) {
+			int next = DB.getSQLValueEx(get_TrxName(),
+					"SELECT ROUND((COALESCE(MAX(SeqNoSelection),0)+10)/10,0)*10 FROM AD_Column WHERE AD_Table_ID=? AND IsSelectionColumn='Y' AND IsActive='Y'",
+					getAD_Table_ID());
+			setSeqNoSelection(next);
 		}
 
 		return true;
