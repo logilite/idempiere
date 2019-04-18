@@ -205,7 +205,7 @@ public class StatusBarPanel extends Panel implements EventListener<Event>, IStat
     	if (error)
     		statusLine.setStyle("color: red");
     	else
-    		statusLine.setStyle("color: black");
+			LayoutUtils.addSclass("status-info", statusLine);
     	statusLine.setTooltiptext(text);
 
     	if (showPopup && AEnv.isBrowserSupported())
