@@ -152,11 +152,11 @@ public class Messagebox extends Window implements EventListener<Event>
 		btnNo.addEventListener(Events.ON_CLICK, this);
 		btnNo.setId("btnNo");
 		
-		btnAbort = ButtonFactory.createButton("Abort", null, null);
+		btnAbort = ButtonFactory.createNamedButton("Abort");
 		btnAbort.addEventListener(Events.ON_CLICK, this);
 		btnAbort.setId("btnAbort");
 
-		btnRetry = ButtonFactory.createButton("Retry", null, null);
+		btnRetry = ButtonFactory.createNamedButton("Retry");
 		btnRetry.addEventListener(Events.ON_CLICK, this);
 		btnRetry.setId("btnRetry");
 

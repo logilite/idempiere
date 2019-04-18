@@ -152,13 +152,23 @@ public class WRecordAccessDialog extends Window implements EventListener<Event>
 	 */
 	private void jbInit() throws Exception
 	{
-		bDelete.setImage(ThemeManager.getThemeResource("images/Delete16.png"));
+		if (ThemeManager.isUseFontIconForImage())
+		{
+			bDelete.setIconSclass("z-icon-Delete");
+			bNew.setIconSclass("z-icon-New");
+			bUp.setIconSclass("z-icon-Previous");
+			bDown.setIconSclass("z-icon-Next");
+		}
+		else
+		{
+			bDelete.setImage(ThemeManager.getThemeResource("images/Delete16.png"));
+			bNew.setImage(ThemeManager.getThemeResource("images/New16.png"));
+			bUp.setImage(ThemeManager.getThemeResource("images/Previous16.png"));
+			bDown.setImage(ThemeManager.getThemeResource("images/Next16.png"));
+		}
 		bDelete.setTooltiptext(Msg.getMsg(Env.getCtx(), "Delete"));
-		bNew.setImage(ThemeManager.getThemeResource("images/New16.png"));
 		bNew.setTooltiptext(Msg.getMsg(Env.getCtx(), "New"));
-		bUp.setImage(ThemeManager.getThemeResource("images/Previous16.png"));
 		bUp.setTooltiptext(Msg.getMsg(Env.getCtx(), "Previous"));
-		bDown.setImage(ThemeManager.getThemeResource("images/Next16.png"));
 		bDown.setTooltiptext(Msg.getMsg(Env.getCtx(), "Next"));
 		
 		cbActive.setText(Msg.translate(Env.getCtx(), "IsActive"));

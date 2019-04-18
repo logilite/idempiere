@@ -209,7 +209,10 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 		
 		toolbar.appendChild(new Separator("vertical"));
 		bArchive.setName("Archive");
-		bArchive.setImage(ThemeManager.getThemeResource("images/Archive24.png"));
+		if (ThemeManager.isUseFontIconForImage())
+			bArchive.setIconSclass("z-icon-Archive");
+		else
+			bArchive.setImage(ThemeManager.getThemeResource("images/Archive24.png"));
 		bArchive.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Archive")));
 		toolbar.appendChild(bArchive);
 		bArchive.addEventListener(Events.ON_CLICK, this);

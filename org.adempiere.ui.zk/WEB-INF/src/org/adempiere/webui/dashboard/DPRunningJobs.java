@@ -219,7 +219,10 @@ public class DPRunningJobs extends DashboardPanel implements EventListener<Event
 		
 	private String getIconFile() 
 	{
-		return "images/mWindow.png";
+		if (ThemeManager.isUseFontIconForImage())
+			return "z-icon-Window";
+		else
+			return "images/mWindow.png";
 	}
 
 	@Override

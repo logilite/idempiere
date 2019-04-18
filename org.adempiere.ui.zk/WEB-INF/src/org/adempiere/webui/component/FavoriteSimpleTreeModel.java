@@ -222,11 +222,23 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 					// Check Window access for ReadWrite & New Toolbar button
 					if (!MToolBarButtonRestrict.isNewButtonRestricted(MMenu.get(mNode.getMenu_ID()).getAD_Window_ID()))
 					{
-						Toolbarbutton newBtn = new Toolbarbutton(null, ThemeManager.getThemeResource("images/New10.png"));
-						newBtn.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "New")));
-						newBtn.setSclass("menu-href-newbtn");
-						newBtn.addEventListener(Events.ON_CLICK, this);
-						tc.appendChild(newBtn);
+						if (ThemeManager.isUseFontIconForImage())
+						{
+							ToolBarButton newBtn = new ToolBarButton();
+							newBtn.setIconSclass("z-icon-New");
+							newBtn.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "New")));
+							newBtn.setSclass("trash-toolbarbutton");
+							newBtn.addEventListener(Events.ON_CLICK, this);
+							tc.appendChild(newBtn);
+						}
+						else
+						{
+							Toolbarbutton newBtn = new Toolbarbutton(null, ThemeManager.getThemeResource("images/New10.png"));
+							newBtn.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "New")));
+							newBtn.setSclass("menu-href-newbtn");
+							newBtn.addEventListener(Events.ON_CLICK, this);
+							tc.appendChild(newBtn);
+						}
 					}
 				}
 			}

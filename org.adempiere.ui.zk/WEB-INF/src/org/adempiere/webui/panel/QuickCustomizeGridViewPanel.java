@@ -106,8 +106,8 @@ public class QuickCustomizeGridViewPanel extends Panel {
 	// UI variables
 	private Label yesLabel = new Label();
 
-	private Button bDown = ButtonFactory.createButton(null, ThemeManager.getThemeResource("images/MoveDown16.png"),	null);
-	private Button bUp = ButtonFactory.createButton(null, ThemeManager.getThemeResource("images/MoveUp16.png"), null);
+	private Button			bDown			= ButtonFactory.createNamedButton("MoveDown");
+	private Button			bUp				= ButtonFactory.createNamedButton("MoveUp");
 
 	private Checkbox chkSaveWidth = new Checkbox();
 

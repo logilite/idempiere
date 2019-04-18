@@ -357,7 +357,10 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 			cbNewEdit.addEventListener(Events.ON_CHECK, this);
 			row.appendChild(cbNewEdit);
 			bSelect.setLabel(Msg.getMsg(Env.getCtx(), "SelectExisting"));
-			bSelect.setImage(ThemeManager.getThemeResource("images/PAttribute16.png"));
+			if (ThemeManager.isUseFontIconForImage())
+				bSelect.setIconSclass("z-icon-PAttribute");
+			else
+				bSelect.setImage(ThemeManager.getThemeResource("images/PAttribute16.png"));
 			bSelect.addEventListener(Events.ON_CLICK, this);
 			row.appendChild(bSelect);
 			ZKUpdateUtil.setHflex(bSelect, "1");

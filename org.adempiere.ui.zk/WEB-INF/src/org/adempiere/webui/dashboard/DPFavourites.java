@@ -96,12 +96,24 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 		this.appendChild(favToolbar);
 		
 		// Elaine 2008/07/24
-		Image img = new Image(ThemeManager.getThemeResource("images/Delete24.png"));
-		favToolbar.appendChild(img);
-		img.setStyle("text-align: right; width:24px; height:24px;");
-		img.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Delete")));
-		img.setDroppable(DELETE_FAV_DROPPABLE);		
-		img.addEventListener(Events.ON_DROP, this);		
+		if (ThemeManager.isUseFontIconForImage())
+		{
+			Label deleteLabel = new Label();
+			deleteLabel.setSclass("z-icon-Trash trash-font-icon");
+			favToolbar.appendChild(deleteLabel);
+			deleteLabel.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Delete")));
+			deleteLabel.setDroppable(DELETE_FAV_DROPPABLE);
+			deleteLabel.addEventListener(Events.ON_DROP, this);
+		}
+		else
+		{
+			Image img = new Image(ThemeManager.getThemeResource("images/Delete24.png"));
+			favToolbar.appendChild(img);
+			img.setStyle("text-align: right; width:24px; height:24px;");
+			img.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Delete")));
+			img.setDroppable(DELETE_FAV_DROPPABLE);
+			img.addEventListener(Events.ON_DROP, this);
+		}
 		//
         
         favContent.setDroppable(FAVOURITE_DROPPABLE); 

@@ -88,7 +88,10 @@ public class DPActivities extends DashboardPanel implements EventListener<Event>
         labelR = Util.cleanAmp(Msg.translate(Env.getCtx(), "R_Request_ID"));
         btnRequest.setLabel(labelR + " : 0");
         btnRequest.setTooltiptext(labelR);
-        btnRequest.setImage(ThemeManager.getThemeResource("images/Request16.png"));
+		if (ThemeManager.isUseFontIconForImage())
+			btnRequest.setIconSclass("z-icon-Request");
+		else
+			btnRequest.setImage(ThemeManager.getThemeResource("images/Request16.png"));
         AD_Menu_ID = DB.getSQLValue(null, "SELECT AD_Menu_ID FROM AD_Menu WHERE Name = 'Request' AND IsSummary = 'N'");
         btnRequest.setName(String.valueOf(AD_Menu_ID));
         btnRequest.addEventListener(Events.ON_CLICK, this);
@@ -98,7 +101,10 @@ public class DPActivities extends DashboardPanel implements EventListener<Event>
         labelW = Util.cleanAmp(Msg.translate(Env.getCtx(), "WorkflowActivities"));
         btnWorkflow.setLabel(labelW + " : 0");
         btnWorkflow.setTooltiptext(labelW);
-        btnWorkflow.setImage(ThemeManager.getThemeResource("images/Assignment16.png"));
+		if (ThemeManager.isUseFontIconForImage())
+			btnWorkflow.setIconSclass("z-icon-Assignment");
+		else
+			btnWorkflow.setImage(ThemeManager.getThemeResource("images/Assignment16.png"));
         AD_Menu_ID = DB.getSQLValue(null, "SELECT AD_Menu_ID FROM AD_Menu WHERE Name = 'Workflow Activities' AND IsSummary = 'N'");
         btnWorkflow.setName(String.valueOf(AD_Menu_ID));
         btnWorkflow.addEventListener(Events.ON_CLICK, this);
@@ -109,7 +115,10 @@ public class DPActivities extends DashboardPanel implements EventListener<Event>
             labelU = Util.cleanAmp(Msg.translate(Env.getCtx(), "UnprocessedDocs"));
             btnUnprocessed.setLabel(labelU + " : 0");
             btnUnprocessed.setTooltiptext(labelU);
-            btnUnprocessed.setImage(ThemeManager.getThemeResource("images/Open16.png"));
+			if (ThemeManager.isUseFontIconForImage())
+				btnUnprocessed.setIconSclass("z-icon-Open");
+			else
+				btnUnprocessed.setImage(ThemeManager.getThemeResource("images/Open16.png"));
             AD_Menu_ID = DB.getSQLValue(null, "SELECT AD_Menu_ID FROM AD_Menu WHERE Name = 'My Unprocessed Documents' AND IsSummary = 'N'");
             btnUnprocessed.setName(String.valueOf(AD_Menu_ID));
             btnUnprocessed.addEventListener(Events.ON_CLICK, this);
