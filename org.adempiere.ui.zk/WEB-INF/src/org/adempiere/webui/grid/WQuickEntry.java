@@ -111,12 +111,13 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	 */
 	
 
-	public WQuickEntry(int WindowNo, int AD_Window_ID)
+	public WQuickEntry(int WindowNo, int TabNo, int AD_Window_ID)
 	{
 		super();
 
 		m_AD_Window_ID = AD_Window_ID;
 		parent_WindowNo = WindowNo;
+		parent_tabNo = TabNo;
 		m_WindowNo = SessionManager.getAppDesktop().registerWindow(this);
 		log.info("R/O=" + m_readOnly);
 

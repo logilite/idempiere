@@ -122,7 +122,7 @@ public class MAttributeInstance extends X_M_AttributeInstance
 		super(ctx, 0, trxName);
 		setM_Attribute_ID(m_Attribute_ID);
 		setM_AttributeSetInstance_ID(m_AttributeSetInstance_ID);
-		setValueDate(value);
+		setValueTimeStamp(value);
 	}
 
 	/**
@@ -142,22 +142,6 @@ public class MAttributeInstance extends X_M_AttributeInstance
 		setValueInt (Value);
 	}	//	MAttributeInstance
 	
-	/**
-	 * 	Selection Value Constructior
-	 *	@param ctx context
-	 *	@param M_Attribute_ID attribute
-	 *	@param M_AttributeSetInstance_ID instance
-	 * 	@param Value String representation for fast display
-	 *	@param trxName transaction
-	 */
-	public MAttributeInstance (Properties ctx, int M_Attribute_ID, 
-		int M_AttributeSetInstance_ID, Timestamp Value, String trxName)
-	{
-		super(ctx, 0, trxName);
-		setM_Attribute_ID (M_Attribute_ID);
-		setM_AttributeSetInstance_ID (M_AttributeSetInstance_ID);
-		setValueTimeStamp (Value);
-	}	//	MAttributeInstance
 	
 	/**
 	 * 	Set ValueInt

@@ -203,7 +203,6 @@ public class MSysConfig extends X_AD_SysConfig
 	public static final String QUICKFORM_PAGE_SIZE = "QUICKFORM_PAGE_SIZE";
 	public static final String ATTACHMENT_AUTO_VERSION_ENABLED = "ATTACHMENT_AUTO_VERSION_ENABLED";
 	public static final String DP_COLUMN_WIDTH_PROPORTION = "DP_COLUMN_WIDTH_PROPORTION";
-	public static final String ZK_THEME_USE_FONT_ICON_FOR_IMAGE = "ZK_THEME_USE_FONT_ICON_FOR_IMAGE";
 	/**
 	 * 	Standard Constructor
 	 *	@param ctx context

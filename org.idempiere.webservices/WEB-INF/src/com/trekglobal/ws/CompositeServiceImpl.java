@@ -36,7 +36,6 @@ import org.idempiere.adInterface.x10.ModelSetDocActionRequestDocument;
 import org.idempiere.adInterface.x10.Operation;
 import org.idempiere.adInterface.x10.Operation.TargetPort;
 import org.idempiere.adInterface.x10.Operations;
-import org.idempiere.adInterface.x10.RunProcessResponseDocument;
 import org.idempiere.adInterface.x10.StandardResponse;
 import org.idempiere.adInterface.x10.StandardResponseDocument;
 import org.idempiere.adInterface.x10.WindowTabDataDocument;

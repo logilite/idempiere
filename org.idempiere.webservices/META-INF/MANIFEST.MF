@@ -102,8 +102,8 @@ Require-Bundle: org.adempiere.base;bundle-version="0.0.0",
  jakarta.xml.soap-api;bundle-version="1.4.1"
 Bundle-ClassPath: .,
  WEB-INF/lib/idempiere-xmlbeans.jar
-Export-Package: org.compiere.model,
  WEB-INF/lib/idempiere-xmlbeans-1.1.jar
+Export-Package: org.compiere.model,
  org.idempiere.adInterface.x10,
  org.idempiere.adInterface.x10.impl,
  org.idempiere.adinterface,

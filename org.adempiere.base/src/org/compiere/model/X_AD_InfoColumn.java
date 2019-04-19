@@ -558,30 +558,6 @@ public class X_AD_InfoColumn extends PO implements I_AD_InfoColumn, I_Persistent
 		return false;
 	}
 
-	/** Set Read Only.
-		@param IsReadOnly 
-		Field is read only
-	  */
-	public void setIsReadOnly (boolean IsReadOnly)
-	{
-		set_Value (COLUMNNAME_IsReadOnly, Boolean.valueOf(IsReadOnly));
-	}
-
-	/** Get Read Only.
-		@return Field is read only
-	  */
-	public boolean isReadOnly () 
-	{
-		Object oo = get_Value(COLUMNNAME_IsReadOnly);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
 	/** Set Name.
 		@param Name 
 		Alphanumeric identifier of the entity

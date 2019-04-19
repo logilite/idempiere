@@ -42,7 +42,6 @@ import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.factory.InfoManager;
-import org.adempiere.webui.factory.QuickEntryServiceUtil;
 import org.adempiere.webui.grid.WQuickEntry;
 import org.adempiere.webui.panel.IHelpContext;
 import org.adempiere.webui.panel.InfoPanel;

@@ -588,7 +588,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	{
 		GridFieldVO vo = GridFieldVO.createParameter(Env.getCtx(), m_WindowNo, AEnv.getADWindowID(m_WindowNo), 0, 0,
 				attribute.getName(), Msg.translate(Env.getCtx(), attribute.get_Translation("Name")),
-				attribute.getAD_Reference_ID(), attribute.getAD_Reference_Value_ID(), false, false);
+				attribute.getAD_Reference_ID(), attribute.getAD_Reference_Value_ID(), false, false, null);
 		String desc = attribute.get_Translation("Description");
 		vo.Description = desc != null ? desc : "";
 		GridField gridField = new GridField(vo);
@@ -599,7 +599,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	{
 		GridFieldVO vo = GridFieldVO.createParameter(Env.getCtx(), m_WindowNo, AEnv.getADWindowID(m_WindowNo), 0, 0,
 				attribute.getName(), Msg.translate(Env.getCtx(), attribute.get_Translation("Name")),
-				DisplayType.String, 0, false, false);
+				DisplayType.String, 0, false, false, null);
 		String desc = attribute.get_Translation("Description");
 		vo.Description = desc != null ? desc : "";
 		GridField gridField = new GridField(vo);
@@ -610,7 +610,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	{
 		GridFieldVO vo = GridFieldVO.createParameter(Env.getCtx(), m_WindowNo, AEnv.getADWindowID(m_WindowNo), 0, 0,
 				attribute.getName(), Msg.translate(Env.getCtx(), attribute.get_Translation("Name")),
-				DisplayType.Number, 0, false, false);
+				DisplayType.Number, 0, false, false, null);
 		String desc = attribute.get_Translation("Description");
 		vo.Description = desc != null ? desc : "";
 		GridField gridField = new GridField(vo);
@@ -621,7 +621,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	{
 		GridFieldVO vo = GridFieldVO.createParameter(Env.getCtx(), m_WindowNo, AEnv.getADWindowID(m_WindowNo), 0, 0,
 				"M_AttributeValue_ID", attribute.getName(), DisplayType.TableDir, 0,
-				false, false);
+				false, false, null);
 		vo.ValidationCode = "M_AttributeValue.M_Attribute_ID=" + attribute.get_ID();
 		vo.lookupInfo.ValidationCode = vo.ValidationCode;
 		vo.lookupInfo.IsValidated = true;
