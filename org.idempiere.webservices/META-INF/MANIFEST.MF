@@ -103,7 +103,7 @@ Require-Bundle: org.adempiere.base;bundle-version="0.0.0",
 Bundle-ClassPath: .,
  WEB-INF/lib/idempiere-xmlbeans.jar
 Export-Package: org.compiere.model,
- WEB-INF/lib/idempiere-xmlbeans-1.1.jar
+ WEB-INF/lib/idempiere-xmlbeans.jar
  org.idempiere.adInterface.x10,
  org.idempiere.adInterface.x10.impl,
  org.idempiere.adinterface,
