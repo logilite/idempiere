@@ -431,12 +431,6 @@
 		<unit id="org.apache.openwebbeans.web.source" version="1.1.7.v201304201405"/>
 		<unit id="org.apache.oro" version="2.0.8.v201005080400"/>
 		<unit id="org.apache.oro.source" version="2.0.8.v201005080400"/>
-		<unit id="org.apache.poi" version="3.9.0.v201405241750"/>
-		<unit id="org.apache.poi.ooxml" version="3.9.0.v201405241905"/>
-		<unit id="org.apache.poi.ooxml.schemas" version="3.9.0.v201405241750"/>
-		<unit id="org.apache.poi.ooxml.schemas.source" version="3.9.0.v201405241750"/>
-		<unit id="org.apache.poi.ooxml.source" version="3.9.0.v201405241905"/>
-		<unit id="org.apache.poi.source" version="3.9.0.v201405241750"/>
 		<unit id="org.apache.solr.client.solrj" version="3.5.0.v20150506-0844"/>
 		<unit id="org.apache.solr.client.solrj.source" version="3.5.0.v20150506-0844"/>
 		<unit id="org.apache.solr.core" version="3.5.0.v20150506-0844"/>
