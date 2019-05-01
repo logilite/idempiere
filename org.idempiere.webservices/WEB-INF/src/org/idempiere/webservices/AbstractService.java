@@ -43,6 +43,7 @@ import org.compiere.model.MWebService;
 import org.compiere.model.MWebServiceType;
 import org.compiere.model.PO;
 import org.compiere.model.POInfo;
+import org.compiere.model.Query;
 import org.compiere.model.X_WS_WebServiceMethod;
 import org.compiere.model.X_WS_WebServiceTypeAccess;
 import org.compiere.util.CCache;
@@ -379,28 +380,15 @@ public class AbstractService {
 		synchronized (s_WebServiceTypeCache) {
 			m_webservicetype = s_WebServiceTypeCache.get(key);
 			if (m_webservicetype == null) {
-				final String sql = "SELECT * FROM WS_WebServiceType " + "WHERE AD_Client_ID=? " + "AND WS_WebService_ID=? "
-						+ "AND WS_WebServiceMethod_ID=? " + "AND Value=? " + "AND IsActive='Y'";
-				PreparedStatement pstmt = null;
-				ResultSet rs = null;
-				try {
-					pstmt = DB.prepareStatement(sql, null);
-					pstmt.setInt(1, m_cs.getAD_Client_ID());
-					pstmt.setInt(2, m_webservice.getWS_WebService_ID());
-					pstmt.setInt(3, m_webservicemethod.getWS_WebServiceMethod_ID());
-					pstmt.setString(4, serviceTypeValue);
-					rs = pstmt.executeQuery();
-					if (rs.next()) {
-						m_webservicetype = new MWebServiceType(m_cs.getCtx(), rs, null);
-						s_WebServiceTypeCache.put(key, m_webservicetype);
-					}
-				} catch (Exception e) {
-					throw new IdempiereServiceFault(e.getClass().toString() + " " + e.getMessage() + " sql=" + sql, e.getCause(), new QName(
-							"authenticate"));
-				} finally {
-					DB.close(rs, pstmt);
-					rs = null;
-					pstmt = null;
+				m_webservicetype = new Query(m_cs.getCtx(), MWebServiceType.Table_Name,
+												"AD_Client_ID IN (0,?) AND WS_WebService_ID=? AND WS_WebServiceMethod_ID=? AND Value=?",
+												null)
+												.setOnlyActiveRecords(true)
+												.setParameters(m_cs.getAD_Client_ID(), m_webservice.getWS_WebService_ID(), m_webservicemethod.getWS_WebServiceMethod_ID(), serviceTypeValue)
+												.setOrderBy("AD_Client_ID DESC") // IDEMPIERE-3394 give precedence to tenant defined if there are system+tenant
+												.first();
+				if(m_webservicetype!=null && m_webservicetype.get_ID()>0){
+					s_WebServiceTypeCache.put(key,m_webservicetype);
 				}
 			}
 		}
