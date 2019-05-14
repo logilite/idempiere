@@ -1201,7 +1201,7 @@ class Restriction  implements Serializable
 					String colSQL = col.getColumnSQL();
 					if (colSQL != null && colSQL.contains("@"))
 						colSQL = Env.parseContext(Env.getCtx(), -1, colSQL, false, true);
-					if (ColumnName.equals(colSQL)) {
+					if (colSQL != null && ColumnName.equals(colSQL.trim())) {
 						virtualColumn = true;
 						break;
 					}
