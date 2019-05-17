@@ -1624,7 +1624,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
                 if (!(parsedValue instanceof Integer)) {
                     continue;
                 }
-                m_query.addRestriction(getSubCategoryWhereClause(((Integer) parsedValue).intValue()), and, openBrackets);
+                m_query.addRestriction(getSubCategoryWhereClause(field, ((Integer) parsedValue).intValue()), and, openBrackets);
             }
 			else if (MQuery.OPERATORS[MQuery.LIKE_INDEX].getValue().equals(Operator))
 				m_query.addRestriction(ColumnSQL, Operator, parsedValue, infoName, infoDisplay, and, openBrackets, true);
@@ -1781,7 +1781,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
                         m_query.addRestriction(ColumnSQL.toString(), MQuery.LIKE, value, ColumnName, wed.getDisplay(), true);
                         appendCode(code, ColumnName, MQuery.LIKE, value.toString(), "", "AND", "", "");
                     } else if (isProductCategoryField && value instanceof Integer) {
-                        m_query.addRestriction(getSubCategoryWhereClause(((Integer) value).intValue()));
+                        m_query.addRestriction(getSubCategoryWhereClause(field, ((Integer) value).intValue()));
                         appendCode(code, ColumnName, MQuery.EQUAL, value.toString(), "", "AND", "", "");
                     }
                     else if (value instanceof Integer[] || value instanceof String[])
@@ -2243,13 +2243,14 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     /**
      * Returns a sql where string with the given category id and all of its subcategory ids.
      * It is used as restriction in MQuery.
+     * @param field 
      * @param productCategoryId
      * @return
     **/
-    private String getSubCategoryWhereClause(int productCategoryId) {
+    private String getSubCategoryWhereClause(GridField field, int productCategoryId) {
         //if a node with this id is found later in the search we have a loop in the tree
         int subTreeRootParentId = 0;
-        StringBuilder retString = new StringBuilder(" M_Product_Category_ID IN (");
+        StringBuilder retString = new StringBuilder(field.getColumnSQL(false)).append(" IN (");
         String sql = "SELECT M_Product_Category_ID, M_Product_Category_Parent_ID FROM M_Product_Category WHERE AD_Client_ID=? AND IsActive='Y'";
         final Vector<SimpleTreeNode> categories = new Vector<SimpleTreeNode>(100);
         PreparedStatement pstmt = null;
