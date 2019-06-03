@@ -259,14 +259,16 @@ public class DocumentEngine implements DocAction
 		m_action = null;
 		//	Std User Workflows - see MWFNodeNext.isValidFor
 
-		if (isValidAction(processAction))	//	WF Selection first
+		// Logilite: If process action is not empty then check if it is a valid action 
+		if (!Util.isEmpty(processAction, true) && isValidAction(processAction))	//	WF Selection first
 			m_action = processAction;
 		//
-		else if (isValidAction(docAction))	//	User Selection second
+		// Logilite: If process action is not provided then check for Next Action set on document is valid or not.
+		else if (Util.isEmpty(processAction, true) && isValidAction(docAction))	//	User Selection second 
 			m_action = docAction;
 		//	Nothing to do
-		else if (processAction.equals(ACTION_None)
-			|| docAction.equals(ACTION_None))
+		else if (ACTION_None.equals(processAction)
+			|| ACTION_None.equals(docAction))
 		{
 			if (m_document != null)
 				m_document.get_Logger().info ("**** No Action (Prc=" + processAction + "/Doc=" + docAction + ") " + m_document);
