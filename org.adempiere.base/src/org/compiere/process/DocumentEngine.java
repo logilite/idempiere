@@ -263,8 +263,8 @@ public class DocumentEngine implements DocAction
 		if (!Util.isEmpty(processAction, true) && isValidAction(processAction))	//	WF Selection first
 			m_action = processAction;
 		//
-		// Logilite: If process action is not provided then check for Next Action set on document is valid or not.
-		else if (Util.isEmpty(processAction, true) && isValidAction(docAction))	//	User Selection second 
+		// Logilite: If process Action is not provided then check for Next Action set on document is valid or not.
+		else if ((Util.isEmpty(processAction, true) || ACTION_None.equals(processAction))  && isValidAction(docAction))	//	User Selection second 
 			m_action = docAction;
 		//	Nothing to do
 		else if (ACTION_None.equals(processAction)
