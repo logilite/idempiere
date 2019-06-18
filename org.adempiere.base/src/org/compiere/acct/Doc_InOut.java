@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 
+import org.compiere.model.I_C_OrderLine;
 import org.compiere.model.I_M_InOutLine;
 import org.compiere.model.I_M_RMALine;
 import org.compiere.model.MAccount;
@@ -71,6 +72,7 @@ public class Doc_InOut extends Doc
 	protected int				m_Reversal_ID = 0;
 	@SuppressWarnings("unused")
 	protected String			m_DocStatus = "";
+	private boolean 			m_deferPosting = false;
 
 	/**
 	 *  Load Document Details
@@ -86,6 +88,25 @@ public class Doc_InOut extends Doc
 		//	Contained Objects
 		p_lines = loadLines(inout);
 		if (log.isLoggable(Level.FINE)) log.fine("Lines=" + p_lines.length);
+
+		if (inout.isSOTrx()) {
+			MInOutLine[] lines = inout.getLines();
+			for (MInOutLine line : lines) {
+				I_C_OrderLine orderLine = line.getC_OrderLine();
+				if (orderLine != null) {
+					if (orderLine.getLink_OrderLine_ID() > 0) {
+						//	Defer posting if found the linked MR is not posted
+						String sql = "SELECT COUNT(*) FROM M_InOutLine iol WHERE iol.C_OrderLine_ID=? AND EXISTS (SELECT * FROM M_InOut io WHERE io.M_InOut_ID=iol.M_InOut_ID AND io.IsSOTrx='N' AND io.Posted<>'Y')";
+						int count = DB.getSQLValueEx(getTrxName(), sql, orderLine.getLink_OrderLine_ID());
+						if (count > 0) {
+							m_deferPosting = true;
+							break;
+						}
+					}
+				}
+			}
+		}
+		
 		return null;
 	}   //  loadDocumentDetails
 
@@ -841,5 +862,10 @@ public class Doc_InOut extends Doc
 			return "SaveError";
 		}
 		return "";
+	}
+	
+	@Override
+	public boolean isDeferPosting() {
+		return m_deferPosting;
 	}
 }   //  Doc_InOut

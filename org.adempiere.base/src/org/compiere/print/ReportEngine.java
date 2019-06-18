@@ -60,6 +60,7 @@ import javax.print.event.PrintServiceAttributeEvent;
 import javax.print.event.PrintServiceAttributeListener;
 import javax.xml.transform.stream.StreamResult;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.pdf.Document;
 import org.adempiere.print.export.PrintDataExcelExporter;
 import org.adempiere.print.export.PrintDataXLSXExporter;
@@ -581,6 +582,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		catch (Exception e)
 		{
 			log.log(Level.SEVERE, "(f)", e);
+			throw new AdempiereException(e);
 		}
 		return false;
 	}	//	createHTML
@@ -704,7 +706,11 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			tbody.setNeedClosingTag(false);
 			
 			Boolean [] colSuppressRepeats = m_layout == null || m_layout.colSuppressRepeats == null? LayoutEngine.getColSuppressRepeats(m_printFormat):m_layout.colSuppressRepeats;
-			Object [] preValues = new Object [colSuppressRepeats.length];
+			Object [] preValues = null;
+			if (colSuppressRepeats != null){
+				preValues = new Object [colSuppressRepeats.length];
+			}
+
 			//	for all rows (-1 = header row)
 			for (int row = -1; row < m_printData.getRowCount(); row++)
 			{
@@ -783,7 +789,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 							Object obj = m_printData.getNode(new Integer(item.getAD_Column_ID()));
 							if (obj == null){
 								td.addElement("&nbsp;");
-								if (colSuppressRepeats[printColIndex]){
+								if (colSuppressRepeats != null && colSuppressRepeats[printColIndex]){
 									preValues[printColIndex] = null;
 								}
 							}
@@ -792,7 +798,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 								PrintDataElement pde = (PrintDataElement) obj;
 								String value = pde.getValueDisplay(language);	//	formatted
 
-								if (colSuppressRepeats[printColIndex]){
+								if (colSuppressRepeats != null && colSuppressRepeats[printColIndex]){
 									if (value.equals(preValues[printColIndex])){
 										td.addElement("&nbsp;");
 										continue;
@@ -910,8 +916,9 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		catch (Exception e)
 		{
 			log.log(Level.SEVERE, "(w)", e);
+			throw new AdempiereException(e);
 		}
-		return false;
+		return true;
 	}	//	createHTML
 
 
@@ -979,7 +986,10 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		try
 		{
 			Boolean [] colSuppressRepeats = m_layout == null || m_layout.colSuppressRepeats == null? LayoutEngine.getColSuppressRepeats(m_printFormat):m_layout.colSuppressRepeats;
-			Object [] preValues = new Object [colSuppressRepeats.length];
+			Object [] preValues = null;
+			if (colSuppressRepeats != null){
+				preValues = new Object [colSuppressRepeats.length];
+			}
 			int printColIndex = -1;
 			//	for all rows (-1 = header row)
 			for (int row = -1; row < m_printData.getRowCount(); row++)
@@ -1011,7 +1021,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 							Object obj = m_printData.getNode(Integer.valueOf(item.getAD_Column_ID()));
 							String data = "";
 							if (obj == null){
-								if (colSuppressRepeats[printColIndex]){
+								if (colSuppressRepeats != null && colSuppressRepeats[printColIndex]){
 									preValues[printColIndex] = null;
 								}
 							}
@@ -1023,7 +1033,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 								else
 									data = pde.getValueDisplay(language);	//	formatted
 								
-								if (colSuppressRepeats[printColIndex]){
+								if (colSuppressRepeats != null && colSuppressRepeats[printColIndex]){
 									if (data.equals(preValues[printColIndex])){
 										continue;
 									}else{
@@ -1050,8 +1060,9 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		catch (Exception e)
 		{
 			log.log(Level.SEVERE, "(w)", e);
+			return false;
 		}
-		return false;
+		return true;
 	}	//	createCSV
 
 	/**
@@ -1156,7 +1167,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		try
 		{
 			if (file == null)
-				file = File.createTempFile ("ReportEngine", ".pdf");
+				file = File.createTempFile (makePrefix(getName()), ".pdf");
 		}
 		catch (IOException e)
 		{
@@ -1167,6 +1178,106 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return null;
 	}	//	getPDF
 
+	/**************************************************************************
+	 * 	Create HTML file.
+	 * 	(created in temporary storage)
+	 *	@return HTML file
+	 */
+	public File getHTML()
+	{
+		return getHTML(null);
+	}	//	getHTML
+
+	/**
+	 * 	Create HTML file.
+	 * 	@param file file
+	 *	@return HTML file
+	 */
+	public File getHTML(File file)
+	{
+		try
+		{
+			if (file == null)
+				file = File.createTempFile (makePrefix(getName()), ".html");
+		}
+		catch (IOException e)
+		{
+			log.log(Level.SEVERE, "", e);
+		}
+		if (createHTML(file, false, Env.getLanguage(getCtx())))
+			return file;
+		return null;
+	}	//	getHTML
+	
+	/**************************************************************************
+	 * 	Create CSV file.
+	 * 	(created in temporary storage)
+	 *	@return CSV file
+	 */
+	public File getCSV()
+	{
+		return getCSV(null);
+	}	//	getCSV
+
+	/**
+	 * 	Create CSV file.
+	 * 	@param file file
+	 *	@return CSV file
+	 */
+	public File getCSV(File file)
+	{
+		try
+		{
+			if (file == null)
+				file = File.createTempFile (makePrefix(getName()), ".csv");
+		}
+		catch (IOException e)
+		{
+			log.log(Level.SEVERE, "", e);
+		}
+		if (createCSV(file, ',', Env.getLanguage(getCtx())))
+			return file;
+		return null;
+	}	//	getCSV
+	
+	/**************************************************************************
+	 * 	Create XLS file.
+	 * 	(created in temporary storage)
+	 *	@return XLS file
+	 */
+	public File getXLS()
+	{
+		return getXLS(null);
+	}	//	getXLS
+
+	/**
+	 * 	Create XLS file.
+	 * 	@param file file
+	 *	@return XLS file
+	 */
+	public File getXLS(File file)
+	{
+		try
+		{
+			if (file == null)
+				file = File.createTempFile (makePrefix(getName()), ".xls");
+		}
+		catch (IOException e)
+		{
+			log.log(Level.SEVERE, "", e);
+		}
+		try 
+		{
+			createXLS(file, Env.getLanguage(getCtx()));
+			return file;
+		} 
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, "", e);
+			return null;
+		}
+	}	//	getXLS
+	
 	/**
 	 * 	Create PDF File
 	 * 	@param file file
@@ -1212,7 +1323,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		catch (Exception e)
 		{
 			log.log(Level.SEVERE, "PDF", e);
-			return false;
+			throw new AdempiereException(e);
 		}
 
 		File file2 = new File(fileName);
@@ -1220,6 +1331,19 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return file2.exists();
 	}	//	createPDF
 
+	private String makePrefix(String name) {
+		StringBuilder prefix = new StringBuilder();
+		char[] nameArray = name.toCharArray();
+		for (char ch : nameArray) {
+			if (Character.isLetterOrDigit(ch)) {
+				prefix.append(ch);
+			} else {
+				prefix.append("_");
+			}
+		}
+		return prefix.toString();
+	}
+	
 	/**
 	 * 	Create PDF as Data array
 	 *	@return pdf data

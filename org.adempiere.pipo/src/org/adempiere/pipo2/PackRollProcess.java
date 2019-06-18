@@ -35,6 +35,7 @@ import org.compiere.model.X_AD_Package_Imp_Backup;
 import org.compiere.model.X_AD_Package_Imp_Detail;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 
 /**
@@ -194,15 +195,15 @@ public class PackRollProcess extends SvrProcess {
 									int v_AD_Reference_ID = backup.getAD_Reference_ID();
 									// Update columns that are Strings adjusting
 									// for single quotes
-									if (v_AD_Reference_ID == 10
-											|| v_AD_Reference_ID == 14
-											|| v_AD_Reference_ID == 34
-											|| v_AD_Reference_ID == 17
+									if (v_AD_Reference_ID == DisplayType.String
+											|| v_AD_Reference_ID == DisplayType.Text
+											|| v_AD_Reference_ID == DisplayType.Memo
+											|| v_AD_Reference_ID == DisplayType.List
 											// Carlos Ruiz globalqss, special
 											// treatment for EntityType
 											// it's a Table reference but must
 											// be treated as String
-											|| (v_AD_Reference_ID == 18 && columnName
+											|| (v_AD_Reference_ID == DisplayType.Table && columnName
 													.equalsIgnoreCase("EntityType"))) {
 										if (backup.getColValue() == null || backup.getColValue().toString().equals("null")) {
 											sqlC = null;// Ignore null values
@@ -217,8 +218,8 @@ public class PackRollProcess extends SvrProcess {
 											parameters = new Object[]{backup.getColValue()};
 										}
 									// Update true/false columns
-									} else if (v_AD_Reference_ID == 20
-											|| v_AD_Reference_ID == 28) {
+									} else if (v_AD_Reference_ID == DisplayType.YesNo
+											|| v_AD_Reference_ID == DisplayType.Button) {
 
 										sqlC = new StringBuffer("UPDATE "
 												+ tableName
@@ -232,13 +233,15 @@ public class PackRollProcess extends SvrProcess {
 									}
 									// Update columns that are Strings adjusting
 									// for single quotes
-									else if (v_AD_Reference_ID == 13
-											|| v_AD_Reference_ID == 21
-											|| v_AD_Reference_ID == 25
-											|| v_AD_Reference_ID == 27
-											|| v_AD_Reference_ID == 30
-											|| v_AD_Reference_ID == 31
-											|| v_AD_Reference_ID == 35)
+									else if (v_AD_Reference_ID == DisplayType.ID
+											|| v_AD_Reference_ID == DisplayType.Table
+											|| v_AD_Reference_ID == DisplayType.TableDir
+											|| v_AD_Reference_ID == DisplayType.Location
+											|| v_AD_Reference_ID == DisplayType.Account
+											|| v_AD_Reference_ID == DisplayType.Color
+											|| v_AD_Reference_ID == DisplayType.Search
+											|| v_AD_Reference_ID == DisplayType.Locator
+											|| v_AD_Reference_ID == DisplayType.PAttribute)
 									{
 
 										sqlC = new StringBuffer("UPDATE "
@@ -251,12 +254,10 @@ public class PackRollProcess extends SvrProcess {
 										parameters = new Object[]{backup.getColValue()};
 									}
 									// Update columns that are numbers
-									else if (v_AD_Reference_ID == 11
-											|| v_AD_Reference_ID == 18
-											|| v_AD_Reference_ID == 19
-											|| v_AD_Reference_ID == 12
-											|| v_AD_Reference_ID == 22
-											|| v_AD_Reference_ID == 29)
+									else if (v_AD_Reference_ID == DisplayType.Integer
+											|| v_AD_Reference_ID == DisplayType.Amount
+											|| v_AD_Reference_ID == DisplayType.Number
+											|| v_AD_Reference_ID == DisplayType.Quantity)
 									{
 										sqlC = new StringBuffer("UPDATE "
 												+ tableName
@@ -268,8 +269,8 @@ public class PackRollProcess extends SvrProcess {
 										parameters = new Object[]{new BigDecimal(backup.getColValue())};
 									}
 									// Update columns that are dates
-									else if (v_AD_Reference_ID == 15
-											|| v_AD_Reference_ID == 16)
+									else if (v_AD_Reference_ID == DisplayType.Date
+											|| v_AD_Reference_ID == DisplayType.DateTime)
 									{
 										Timestamp ts = null;
 										try {
