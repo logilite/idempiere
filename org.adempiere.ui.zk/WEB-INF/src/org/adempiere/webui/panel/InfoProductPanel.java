@@ -266,7 +266,10 @@ public class InfoProductPanel extends InfoPanel implements EventListener<Event>
 		lblVendor = new Label();
 		lblVendor.setValue(Msg.translate(Env.getCtx(), "Vendor"));
 
-		m_InfoPAttributeButton.setImage(ThemeManager.getThemeResource("images/PAttribute16.png"));
+		if (ThemeManager.isUseFontIconForImage())
+			m_InfoPAttributeButton.setIconSclass("z-icon-PAttribute");
+		else
+			m_InfoPAttributeButton.setImage(ThemeManager.getThemeResource("images/PAttribute16.png"));
 		m_InfoPAttributeButton.setTooltiptext(Msg.getMsg(Env.getCtx(), "PAttribute"));
 		m_InfoPAttributeButton.addEventListener(Events.ON_CLICK,this);
 

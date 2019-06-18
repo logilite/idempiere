@@ -278,3 +278,31 @@
 .z-icon-ZoomAcross:before {	
 	content: "\f00e";
 }
+
+.z-icon-Abort:before {
+	content: "\f05e";
+}
+.z-icon-Retry:before {
+	content: "\f021";
+}
+.z-icon-FastBack:before {
+	content: "\f04a";
+}
+.z-icon-StepBack:before {
+	content: "\f049";
+}
+.z-icon-StepForward:before {
+	content: "\f050";
+}
+.z-icon-FastForward:before {
+	content: "\f04e";
+}
+.z-icon-DoubleArrowUp:before {
+	content: "\f102";
+}
+.z-icon-DoubleArrowDown:before {
+	content: "\f103";
+}
+.z-icon-Bars:before {
+	content: "\f0c9";
+}

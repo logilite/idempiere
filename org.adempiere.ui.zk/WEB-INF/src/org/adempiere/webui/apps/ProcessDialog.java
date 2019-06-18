@@ -341,11 +341,17 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 		appendRecordLogInfo(pi.getLogs(), infoResultContent);
 		
 		bOK.setLabel(Msg.getMsg(Env.getCtx(), "Parameter"));
-		bOK.setImage(ThemeManager.getThemeResource("images/Reset16.png"));
+		if (ThemeManager.isUseFontIconForImage())
+			bOK.setIconSclass("z-icon-Reset");
+		else
+			bOK.setImage(ThemeManager.getThemeResource("images/Reset16.png"));
 		bOK.setDisabled(false);
 
 		bCancel.setLabel(Msg.getMsg(Env.getCtx(), "Close"));
-		bCancel.setImage(ThemeManager.getThemeResource("images/Cancel16.png"));
+		if (ThemeManager.isUseFontIconForImage())
+			bCancel.setIconSclass("z-icon-Cancel");
+		else
+			bCancel.setImage(ThemeManager.getThemeResource("images/Cancel16.png"));
 		bCancel.setDisabled(false);
 
 		isParameterPage = false;
@@ -459,10 +465,16 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 		isParameterPage = true;
 
 		bOK.setLabel(Msg.getMsg(Env.getCtx(), "Start"));
-		bOK.setImage(ThemeManager.getThemeResource("images/Ok16.png"));
+		if (ThemeManager.isUseFontIconForImage())
+			bOK.setIconSclass("z-icon-Ok");
+		else
+			bOK.setImage(ThemeManager.getThemeResource("images/Ok16.png"));
 		
 		bCancel.setLabel(Util.cleanAmp(Msg.translate(Env.getCtx(), ConfirmPanel.A_CANCEL)));
-		bCancel.setImage(ThemeManager.getThemeResource("images/Cancel16.png"));
+		if (ThemeManager.isUseFontIconForImage())
+			bCancel.setIconSclass("z-icon-Cancel");
+		else
+			bCancel.setImage(ThemeManager.getThemeResource("images/Cancel16.png"));
 
 		//recreate process info
 		ProcessInfo m_pi = new WProcessInfo(getName(), getAD_Process_ID());

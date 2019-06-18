@@ -111,14 +111,10 @@ public class CustomizeGridViewPanel extends Panel
 	//	UI variables
 	private Label noLabel = new Label();
 	private Label yesLabel = new Label();
-	private Button bAdd = ButtonFactory.createButton(null,
-			ThemeManager.getThemeResource("images/MoveRight16.png"), null);
-	private Button bRemove = ButtonFactory.createButton(null,
-			ThemeManager.getThemeResource("images/MoveLeft16.png"), null);
-	private Button bUp = ButtonFactory.createButton(null,
-			ThemeManager.getThemeResource("images/MoveUp16.png"), null);
-	private Button bDown = ButtonFactory.createButton(null,
-			ThemeManager.getThemeResource("images/MoveDown16.png"), null);
+	private Button			bAdd			= ButtonFactory.createNamedButton("MoveRight");
+	private Button			bRemove			= ButtonFactory.createNamedButton("MoveLeft");
+	private Button			bUp				= ButtonFactory.createNamedButton("MoveUp");
+	private Button			bDown			= ButtonFactory.createNamedButton("MoveDown");
 	private Checkbox chkSaveWidth = new Checkbox();
 	private Label lblGridMode = new Label();
 	private Listbox lstGridMode = new Listbox();

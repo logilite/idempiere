@@ -181,7 +181,10 @@ public class InfoAssignmentPanel extends InfoPanel implements EventListener<Even
 			return false;
 		}
 
-		bNew.setImage(ThemeManager.getThemeResource("images/New16.png"));
+		if (ThemeManager.isUseFontIconForImage())
+			bNew.setIconSclass("z-icon-New");
+		else
+			bNew.setImage(ThemeManager.getThemeResource("images/New16.png"));
 		
 		return true;
 	} // initLookups

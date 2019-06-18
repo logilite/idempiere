@@ -382,14 +382,14 @@ public class AbstractService {
 			m_webservicetype = s_WebServiceTypeCache.get(key);
 			if (m_webservicetype == null) {
 				m_webservicetype = new Query(m_cs.getCtx(), MWebServiceType.Table_Name,
-						"AD_Client_ID IN (0,?) AND WS_WebService_ID=? AND WS_WebServiceMethod_ID=? AND Value=?",
-						null)
-						.setOnlyActiveRecords(true)
-						.setParameters(m_cs.getAD_Client_ID(), m_webservice.getWS_WebService_ID(), m_webservicemethod.getWS_WebServiceMethod_ID(), serviceTypeValue)
-						.setOrderBy("AD_Client_ID DESC") // IDEMPIERE-3394 give precedence to tenant defined if there are system+tenant
-						.first();
-				if (m_webservicetype != null) {
-					s_WebServiceTypeCache.put(key, m_webservicetype);
+												"AD_Client_ID IN (0,?) AND WS_WebService_ID=? AND WS_WebServiceMethod_ID=? AND Value=?",
+												null)
+												.setOnlyActiveRecords(true)
+												.setParameters(m_cs.getAD_Client_ID(), m_webservice.getWS_WebService_ID(), m_webservicemethod.getWS_WebServiceMethod_ID(), serviceTypeValue)
+												.setOrderBy("AD_Client_ID DESC") // IDEMPIERE-3394 give precedence to tenant defined if there are system+tenant
+												.first();
+				if(m_webservicetype!=null && m_webservicetype.get_ID()>0){
+					s_WebServiceTypeCache.put(key,m_webservicetype);
 				}
 			}
 		}

@@ -98,10 +98,10 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 		if (ThemeManager.isUseFontIconForImage())
 		{
 			Label deleteLabel = new Label();
-			favToolbar.appendChild(deleteLabel);
 			deleteLabel.setSclass("z-icon-Trash trash-font-icon");
+			favToolbar.appendChild(deleteLabel);
 			deleteLabel.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Delete")));
-			deleteLabel.setDroppable(DELETE_FAV_DROPPABLE);		
+			deleteLabel.setDroppable(DELETE_FAV_DROPPABLE);
 			deleteLabel.addEventListener(Events.ON_DROP, this);
 		}
 		else
@@ -110,8 +110,8 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 			favToolbar.appendChild(img);
 			img.setStyle("text-align: right; width:24px; height:24px;");
 			img.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Delete")));
-			img.setDroppable(DELETE_FAV_DROPPABLE);		
-			img.addEventListener(Events.ON_DROP, this);		
+			img.setDroppable(DELETE_FAV_DROPPABLE);
+			img.addEventListener(Events.ON_DROP, this);
 		}
 		//
         
