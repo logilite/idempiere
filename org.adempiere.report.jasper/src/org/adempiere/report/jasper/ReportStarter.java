@@ -730,7 +730,7 @@ public class ReportStarter implements ProcessCall, ClientProcess
 		                    if (!Util.isEmpty(processInfo.getReportType())) {
 		                    	jasperPrint.setProperty("IDEMPIERE_REPORT_TYPE", processInfo.getReportType());
 		                    }
-		                    viewerLauncher.openViewer(jasperPrint, pi.getTitle());
+		                    viewerLauncher.openViewer(jasperPrint, pi.getTitle(), printInfo);
 	                	} else {
 	                		jasperPrintList.add(jasperPrint);
 	                		if (idx+1 == reportPathList.length) {
