@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.compiere.model.PO;
 import org.compiere.util.DisplayType;
@@ -129,7 +130,7 @@ public class ProcessInfo implements Serializable
 	private File 			    m_pdf_report = null;
 	
 	/**	Record IDs				*/
-	private int[]				m_Record_IDs;
+	private List <Integer>		m_Record_IDs = null;
 
 	/** Export					*/
 	private boolean				m_export = false;
@@ -812,12 +813,12 @@ public class ProcessInfo implements Serializable
 		m_exportFile = exportFile;
 	}
 	
-	public int[] getRecord_IDs()
+	public List<Integer> getRecord_IDs()
 	{
 		return m_Record_IDs;
 	}
 	
-	public void setRecord_IDs(int[] Record_IDs)
+	public void setRecord_IDs(List<Integer> Record_IDs)
 	{
 		m_Record_IDs = Record_IDs;
 	}
