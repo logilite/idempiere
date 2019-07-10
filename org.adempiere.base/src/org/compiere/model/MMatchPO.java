@@ -530,7 +530,7 @@ public class MMatchPO extends X_M_MatchPO
 									if (!matchPO.isPosted() && matchPO.getQty().compareTo(retValue.getQty()) >=0 )  // greater than or equal quantity
 									{
 										otherMatchPO = matchPO;
-										iLine = new MInvoiceLine(retValue.getCtx(), matchPO.getC_InvoiceLine_ID(), retValue.get_TrxName());
+										iLine = (MInvoiceLine) MTable.get(retValue.getCtx(), MInvoiceLine.Table_ID).getPO(matchPO.getC_InvoiceLine_ID(), retValue.get_TrxName());
 										matchPO.setQty(matchPO.getQty().subtract(retValue.getQty()));										
 										matchPO.saveEx();
 										break;

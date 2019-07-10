@@ -2532,7 +2532,7 @@ public class MInOut extends X_M_InOut implements DocAction
 				{
 					int invoiceLineId = rs.getInt(1);
 					if (invoiceLineId > 0 ){
-						MInvoiceLine iLine = new MInvoiceLine(getCtx(),invoiceLineId , get_TrxName());
+						MInvoiceLine iLine = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(invoiceLineId, get_TrxName());
 						iLine.setM_InOutLine_ID(0);
 						iLine.saveEx();
 					}

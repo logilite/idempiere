@@ -1327,7 +1327,7 @@ public class MCostDetail extends X_M_CostDetail
 				}
 				else if (addition)
 				{
-					MProductionLine productionLine = getM_ProductionLine_ID() > 0 ? new MProductionLine(getCtx(), getM_ProductionLine_ID(), get_TrxName()) : null;
+					MProductionLine productionLine = getM_ProductionLine_ID() > 0 ? (MProductionLine) MTable.get(getCtx(), MProductionLine.Table_ID).getPO(getM_ProductionLine_ID(), get_TrxName()) : null;						
 					if (productionLine != null && productionLine.getProductionReversalId() > 0)
 						cost.setCurrentQty(cost.getCurrentQty().add(qty));						
 					else
