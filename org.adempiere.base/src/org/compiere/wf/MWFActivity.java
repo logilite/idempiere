@@ -1180,7 +1180,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				}
 				else
 				{
-					client.sendEMail(parseVariables(to), subject, message, null);
+					client.sendEMail(parseVariables(to, true), subject, message, null);
 					m_emails.add(to);
 				}
 
@@ -1322,7 +1322,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	{
 		m_newValue = null;
 
-		value = parseVariables(value);
+		value = parseVariables(value, false);
 
 		getPO(trx);
 		if (m_po == null)
@@ -2041,10 +2041,11 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	/**
 	 * Parse Values replaces global or Window context @tag@ with actual value.
 	 * 
-	 * @param value String that has to be parse
+	 * @param value - String that has to be parse
+	 * @param isEmailAction - Is Email action
 	 * @return
 	 */
-	private String parseVariables(String value)
+	private String parseVariables(String value, boolean isEmailAction)
 	{
 		if (log.isLoggable(Level.FINE))
 			log.fine(m_node.getAttributeName() + " = " + value);
@@ -2107,7 +2108,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 
 		if (value == null || (value != null && value.length() == 0))
 			val = null;
-		else if (value.indexOf('@') != -1 && !value.startsWith("@SQL=") && m_po != null) // we have a variable
+		else if (!value.startsWith("@SQL=") && m_po != null && (value.indexOf('@') != -1 && !isEmailAction) || (isEmailAction && value.startsWith("@"))) // we have a variable
 		{
 			// Strip
 			int index = value.indexOf('@');
