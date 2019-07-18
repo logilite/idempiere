@@ -263,7 +263,7 @@ public class AbstractService {
 					MSysConfig.WEBSERVICE_Token_Timeout, 30, AD_Client_ID);
 			if (mAuthorizationToken.isValidForSameClient()) {
 				if (!mAuthorizationToken.getRemoteIP().equals(
-						getHttpServletRequest().getRemoteAddr())) {
+						getClientIPAddressFromRequest(getHttpServletRequest()))) {
 					return "Error logging in - Remote IP Invalid";
 				}
 			}
@@ -884,7 +884,7 @@ public class AbstractService {
 		}
 	}
 	
-	private String getClientIPAddressFromRequest(HttpServletRequest request)
+	public static String getClientIPAddressFromRequest(HttpServletRequest request)
 	{
 		String remoteIP = request.getHeader("X-Forwarded-For");
 		if (remoteIP != null && remoteIP.trim() != "")
@@ -901,7 +901,7 @@ public class AbstractService {
 		return request.getRemoteAddr();
 	}
 
-	private String getFirstIP(String remoteIP)
+	public static String getFirstIP(String remoteIP)
 	{
 		if (remoteIP.contains(","))
 		{
