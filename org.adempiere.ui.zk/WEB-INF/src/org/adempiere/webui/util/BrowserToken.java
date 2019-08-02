@@ -40,6 +40,7 @@ public final class BrowserToken {
 
 	private BrowserToken() {}
 
+	public final static String REMEMBER_ME = "Login.RememberMe";
 	/**
 	 * save session and user as client side token for future auto login
 	 * @param session
