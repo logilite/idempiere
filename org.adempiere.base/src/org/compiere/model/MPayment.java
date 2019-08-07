@@ -866,7 +866,16 @@ public class MPayment extends X_C_Payment
 	{
 		BigDecimal retValue = null;
 		if (getC_Charge_ID() != 0)
-			return getPayAmt();
+		{
+			if (isProcessed())
+			{
+				return isReceipt() ? getPayAmt() : getPayAmt().negate();
+			}
+			else
+			{
+				return null;
+			}
+		}
 		//
 		String sql = "SELECT SUM(currencyConvert(al.Amount,"
 				+ "ah.C_Currency_ID, p.C_Currency_ID,ah.DateTrx,p.C_ConversionType_ID, al.AD_Client_ID,al.AD_Org_ID)) "
