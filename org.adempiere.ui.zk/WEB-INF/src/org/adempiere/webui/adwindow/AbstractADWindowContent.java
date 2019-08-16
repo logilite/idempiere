@@ -3227,16 +3227,22 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		}
 		else
 		{
+			IADTabpanel adtabPanel = null;
+			if (adTabbox.getSelectedGridTab().isQuickForm())
+				adtabPanel = this.getADTab().getSelectedTabpanel();
+			else
+				adtabPanel = findADTabpanel(wButton);
+
 			ProcessInfo pi = new ProcessInfo("", wButton.getProcess_ID(), table_ID, record_ID);
-			if (adTabbox.getSelectedTabpanel().isGridView())
+			if (adtabPanel != null && adtabPanel.isGridView() && adtabPanel.getGridTab() != null)
 			{
-				int[] indices = adTabbox.getSelectedGridTab().getSelection();
+				int[] indices = adtabPanel.getGridTab().getSelection();
 				if (indices.length > 0)
 				{
-					List <Integer> records = new ArrayList <Integer>();
+					List<Integer> records = new ArrayList<Integer>();
 					for (int i = 0; i < indices.length; i++)
 					{
-						int keyID = adTabbox.getSelectedGridTab().getKeyID(indices[i]);
+						int keyID = adtabPanel.getGridTab().getKeyID(indices[i]);
 						if (keyID > 0)
 							records.add(keyID);
 					}
