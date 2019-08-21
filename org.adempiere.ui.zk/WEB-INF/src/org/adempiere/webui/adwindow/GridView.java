@@ -716,7 +716,8 @@ public class GridView extends Vbox implements EventListener<Event>, IdSpace, IFi
 			{
 				listModel.setPage(pgNo);
 				onSelectedRowChange(0);
-				gridTab.clearSelection();
+				if (!MSysConfig.getBooleanValue(MSysConfig.ZK_ALLOW_ROW_SELECTION_IN_MULTIPLE_GRID_PAGES, false, Env.getAD_Client_ID(Env.getCtx())))
+					gridTab.clearSelection();
 				Clients.resize(listbox);
 			}
 		}
