@@ -737,7 +737,8 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 			{
 				listModel.setPage(pgNo);
 				onSelectedRowChange(0);
-				gridTab.clearSelection();
+				if (!MSysConfig.getBooleanValue(MSysConfig.ZK_ALLOW_ROW_SELECTION_IN_MULTIPLE_GRID_PAGES, false, Env.getAD_Client_ID(Env.getCtx())))
+					gridTab.clearSelection();
 				Clients.resize(listbox);
 			}
 		}

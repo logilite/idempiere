@@ -195,6 +195,7 @@ public class MSysConfig extends X_AD_SysConfig
 	public static final String ATTACHMENT_AUTO_VERSION_ENABLED = "ATTACHMENT_AUTO_VERSION_ENABLED";
 	public static final String DP_COLUMN_WIDTH_PROPORTION = "DP_COLUMN_WIDTH_PROPORTION";
 	public static final String ZK_THEME_USE_FONT_ICON_FOR_IMAGE = "ZK_THEME_USE_FONT_ICON_FOR_IMAGE";
+	public static final String ZK_ALLOW_ROW_SELECTION_IN_MULTIPLE_GRID_PAGES = "ZK_ALLOW_ROW_SELECTION_IN_MULTIPLE_GRID_PAGES";
 	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
