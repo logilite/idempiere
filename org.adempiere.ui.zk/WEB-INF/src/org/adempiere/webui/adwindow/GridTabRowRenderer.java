@@ -574,7 +574,7 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 				}
 				
 				GridRowCtx ctx = new GridRowCtx(Env.getCtx(), gridTab, rowIndex);
-				if (! (gridPanelFields[i].isDisplayed(ctx, true) || gridPanelFields[i].isDisplayedGrid())){
+				if (! (gridPanelFields[i].isDisplayed(ctx, true) || gridPanelFields[i].isDisplayedGrid(ctx, true))){
 					// IDEMPIERE-2253 
 					component.setVisible(false);
 				}
@@ -724,11 +724,14 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 		            Properties ctx = isDetailPane() ? new GridRowCtx(Env.getCtx(), gridTab) 
 		            	: gridPanelFields[i].getVO().ctx;
 		            //check context
-					if (!gridPanelFields[i].isDisplayed(ctx, true)){
+					if (!(gridPanelFields[i].isDisplayed(ctx, true) || gridPanelFields[i].isDisplayedGrid(ctx, true))){
 						// IDEMPIERE-2253 
 						editor.getComponent().setVisible(false);
 					}
-					
+					else {
+						editor.getComponent().setVisible(true);
+					}
+
 					editor.setReadWrite(gridPanelFields[i].isEditableGrid(true));
 				}
 			}
