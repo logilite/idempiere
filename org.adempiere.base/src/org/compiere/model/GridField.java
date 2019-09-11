@@ -823,7 +823,8 @@ public class GridField
 				ResultSet rs = null;
 				try
 				{
-					stmt = DB.prepareStatement(sql, null);
+					String trxName = m_gridTab != null ? m_gridTab.getTableModel().get_TrxName() : null;
+					stmt = DB.prepareStatement(sql, trxName);
 					rs = stmt.executeQuery();
 					if (rs.next())
 						defStr = rs.getString(1);
