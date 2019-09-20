@@ -613,8 +613,7 @@ public class Doc_AllocationHdr extends Doc
 		
 		//	Multiplier
 		double percent = allocationSource.doubleValue() / invoice.getGrandTotal().doubleValue();
-		if (percent > 0.99 && percent < 1.01)
-			percent = 1.0;
+		
 		if (log.isLoggable(Level.CONFIG)) log.config("Multiplier=" + percent + " - GrandTotal=" + invoice.getGrandTotal()
 			+ " - Allocation Source=" + allocationSource);
 
@@ -624,7 +623,7 @@ public class Doc_AllocationHdr extends Doc
 		docInvoice.loadDocumentDetails();
 		docInvoice.setDateDoc(getDateDoc());
 		docInvoice.setDateAcct(getDateAcct());
-		allocationAccounted = docInvoice.createFactCash(as, fact, BigDecimal.valueOf(percent), allocationSource);
+		allocationAccounted = docInvoice.createFactCash(as, fact, BigDecimal.valueOf(percent));
 		if (log.isLoggable(Level.CONFIG)) log.config("Allocation Accounted=" + allocationAccounted);
 
 		//	Cash Based Commitment Release
