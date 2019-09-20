@@ -139,7 +139,7 @@ public class AbstractService {
 			return "Error login - User invalid";
 		m_cs.setPassword(loginRequest.getPass());
 		m_cs.setExpiryMinutes(loginRequest.getStage());
-		m_cs.setIPAddress(getHttpServletRequest().getRemoteAddr());
+		m_cs.setIPAddress(getClientIPAddressFromRequest(getHttpServletRequest()));
 
 		boolean okclient = false;
 		KeyNamePair selectedClient = null;
@@ -217,7 +217,7 @@ public class AbstractService {
 			String remoteIP = null;
 			
 			if(isTokenSupported)
-				remoteIP = getHttpServletRequest().getRemoteAddr();
+				remoteIP = getClientIPAddressFromRequest(getHttpServletRequest());
 			boolean validForSameClient = isValidForSameClient(webService, method, serviceType, m_cs,
 					loginRequest.getClientID(), loginRequest.getRoleID());
 			
@@ -264,7 +264,7 @@ public class AbstractService {
 					MSysConfig.WEBSERVICE_Token_Timeout, 30, AD_Client_ID);
 			if (mAuthorizationToken.isValidForSameClient()) {
 				if (!mAuthorizationToken.getRemoteIP().equals(
-						getHttpServletRequest().getRemoteAddr())) {
+						getClientIPAddressFromRequest(getHttpServletRequest()))) {
 					return "Error logging in - Remote IP Invalid";
 				}
 			}
@@ -883,6 +883,32 @@ public class AbstractService {
 			HttpServletRequest req = getHttpServletRequest();
 			req.setAttribute(COMPIERE_SERVICE, m_sc);
 		}
+	}
+	
+	public static String getClientIPAddressFromRequest(HttpServletRequest request)
+	{
+		String remoteIP = request.getHeader("X-Forwarded-For");
+		if (remoteIP != null && remoteIP.trim() != "")
+		{
+			return getFirstIP(remoteIP);
+		}
+		
+		remoteIP = request.getHeader("X-Client-IP");
+		if (remoteIP != null && remoteIP.trim() != "")
+		{
+			return getFirstIP(remoteIP);
+		}
+		
+		return request.getRemoteAddr();
+	}
+
+	public static String getFirstIP(String remoteIP)
+	{
+		if (remoteIP.contains(","))
+		{
+			return remoteIP.split(",")[0];
+		}
+		return remoteIP;
 	}
 
 }

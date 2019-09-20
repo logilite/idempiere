@@ -2311,7 +2311,11 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		//  when sorted set current row to 0
 		String msg = m_DataStatusEvent.getAD_Message();
 		if (msg != null && msg.equals("Sorted"))
+		{
+			if (MSysConfig.getBooleanValue(MSysConfig.ZK_ALLOW_ROW_SELECTION_IN_MULTIPLE_GRID_PAGES, false, Env.getAD_Client_ID(m_vo.ctx)))
+				selection.clear();
 			setCurrentRow(0, true);
+		}
 		//  set current row
 		m_DataStatusEvent = e;          //  setCurrentRow clear it, need to save again
 		m_DataStatusEvent.setCurrentRow(m_currentRow);

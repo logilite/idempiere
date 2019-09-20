@@ -12,7 +12,14 @@
 			classpath:/META-INF/cxf/rest-context.xml
 		</param-value>
 	</context-param>
-
+	<filter>
+		<filter-name>cross-origin</filter-name>
+		<filter-class>org.eclipse.jetty.servlets.CrossOriginFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>cross-origin</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
 	<listener>
 		<listener-class>
 			com.trekglobal.ws.ContextLoaderListener
@@ -43,6 +50,8 @@
 	<session-config>
 		<session-timeout>15</session-timeout>
 	</session-config>
+
+
 
 </web-app>
 <!-- END SNIPPET: webxml -->

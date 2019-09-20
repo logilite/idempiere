@@ -40,6 +40,7 @@ import org.compiere.util.Language;
 import org.compiere.util.Login;
 import org.compiere.util.Util;
 import org.idempiere.adInterface.x10.ADLoginRequest;
+import org.idempiere.webservices.AbstractService;
 
 
 /**
@@ -526,7 +527,7 @@ public class CompiereService {
 				loginRequest.getWarehouseID(),
 				loginRequest.getLang(),
 				loginRequest.getPass(),
-				req.getRemoteAddr());
+				AbstractService.getClientIPAddressFromRequest(req));
 		CompiereService l_cs = null;
 		synchronized (csMap) {
 			if (csMap.containsKey(key)) {

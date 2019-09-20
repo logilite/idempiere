@@ -30,6 +30,7 @@ import org.compiere.apps.IProcessParameter;
 import org.compiere.model.MPInstance;
 import org.compiere.process.ProcessInfo;
 import org.compiere.util.CLogger;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
@@ -190,6 +191,11 @@ public class WProcessCtl extends AbstractProcessCtl {
 				pi.setError (true);
 				return;
 			}
+		}
+
+		if (pi.getRecord_IDs() != null && pi.getRecord_IDs().size() > 0)
+		{
+			DB.createT_Selection(pi.getAD_PInstance_ID(), pi.getRecord_IDs(), null);
 		}
 
 		//	execute

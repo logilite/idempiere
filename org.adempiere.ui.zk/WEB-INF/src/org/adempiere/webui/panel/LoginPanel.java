@@ -167,7 +167,6 @@ public class LoginPanel extends Window implements EventListener<Event>
 							    String token = data[1];
 							    if (BrowserToken.validateToken(session, user, token))
 							    {
-							    	onUserIdChange(AD_User_ID);
 							    	if (MSystem.isZKRememberUserAllowed()) {
 							    		if (email_login) {
 							    			txtUserId.setValue(user.getEMail());
@@ -178,6 +177,7 @@ public class LoginPanel extends Window implements EventListener<Event>
 							    				txtUserId.setValue(user.getName());
 							    			}
 							    		}
+								    	onUserIdChange(AD_User_ID);
 								    	chkRememberMe.setChecked(true);
 							    	}
 							    	if (MSystem.isZKRememberPasswordAllowed()) {
@@ -574,6 +574,8 @@ public class LoginPanel extends Window implements EventListener<Event>
         		}
         	}
         }
+
+        Env.setContext(ctx, BrowserToken.REMEMBER_ME, chkRememberMe.isChecked());
 
         Session currSess = Executions.getCurrent().getDesktop().getSession();
         
