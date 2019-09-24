@@ -25,12 +25,16 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.apps.AEnv;
@@ -49,6 +53,7 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.event.SelectEvent;
 import org.zkoss.zul.Decimalbox;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.ListModel;
@@ -57,6 +62,8 @@ import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.ListitemRendererExt;
+import org.zkoss.zul.event.ZulEvents;
+import org.zkoss.zul.ext.SelectionControl;
 
 /**
  * Renderer for {@link org.adempiere.webui.component.ListItems}
@@ -81,6 +88,11 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
 	protected Listbox listBox;
 
 	protected EventListener<Event> cellListener;
+
+	/**
+	 * store selected record info
+	 */
+	protected Map <Integer, List <Object>>			recordSelectedData	= new HashMap <Integer, List <Object>>();
 
 	/**
 	 * Default constructor.
@@ -491,6 +503,7 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
 	            header.setSort("auto");
 	            header.setSortAscending(ascComparator);
 	            header.setSortDescending(dscComparator);
+	            header.addEventListener(Events.ON_SORT, this);
 
 	            int width = headerText.trim().length() * 9;
 	            if (width > 300)
@@ -666,37 +679,263 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
 				fireTableValueChange(vcEvent);
 			}
 		}
+		else if (Events.ON_SORT.equals(event.getName()))
+		{
+			Component parent = event.getTarget();
+			while (parent != null && !(parent instanceof WListbox))
+			{
+				parent = parent.getParent();
+			}
+
+			WListbox table = (WListbox) parent;
+
+			if ("paging".equals(table.getMold()))
+			{
+				// Mark any selected rows as unselected while sorting the grid column
+				for (int rowIdx = 0; rowIdx < table.getModel().getRowCount(); rowIdx++)
+				{
+					if (((IDColumn) table.getValueAt(rowIdx, 0)).isSelected())
+					{
+						IDColumn idColumn = (IDColumn) table.getValueAt(rowIdx, 0);
+						idColumn.setSelected(false);
+					}
+				}
+
+				clearSelection();
+				SelectionControl <?> selectionCtrl = table.getModel().getSelectionControl();
+				selectionCtrl.setSelectAll(false);
+			}
+		}
 		else if (event.getTarget() instanceof WListbox && Events.ON_SELECT.equals(event.getName()))
 		{
 			WListbox table = (WListbox) event.getTarget();
-			if (table.isCheckmark()) {
+			if (table.isCheckmark())
+			{
 				int cnt = table.getRowCount();
 				if (cnt == 0 || !(table.getValueAt(0, 0) instanceof IDColumn))
 					return;
 
-				//update IDColumn
+				// update IDColumn
 				tableColumn = m_tableColumns.get(0);
-				for (int i = 0; i < cnt; i++) {
-					IDColumn idcolumn = (IDColumn) table.getValueAt(i, 0);
-					Listitem item = table.getItemAtIndex(i);
 
-					value = item.isSelected();
-					Boolean old = idcolumn.isSelected();
+				if (!"paging".equals(table.getMold()))
+				{
+					for (int i = 0; i < cnt; i++)
+					{
+						IDColumn idcolumn = (IDColumn) table.getValueAt(i, 0);
+						Listitem item = table.getItemAtIndex(i);
 
-					if (!old.equals(value)) {
-						vcEvent = new TableValueChangeEvent(source,
-								tableColumn.getHeaderValue().toString(),
-								i, 0,
-								old, value);
+						value = item.isSelected();
+						Boolean old = idcolumn.isSelected();
 
-						fireTableValueChange(vcEvent);
+						if (!old.equals(value))
+						{
+							vcEvent = new TableValueChangeEvent(source, tableColumn.getHeaderValue().toString(), i, 0, old, value);
+							fireTableValueChange(vcEvent);
+						}
+					}
+				}
+				else
+				{
+					int activePageNo = table.getModel().getActivePage();
+					int pageSize = table.getModel().getPageSize();
+					int modelSize = table.getModel().getSize();
+
+					int pgStartIdx = activePageNo * pageSize;
+					int pgEndIdx = ((pgStartIdx + pageSize) > modelSize ? modelSize : pgStartIdx + pageSize) - 1;
+
+					SelectEvent <?, ?> selectEvent = (SelectEvent <?, ?>) event;
+					Set <?> selectedObj = selectEvent.getSelectedObjects();
+					Set <?> unSelectedObj = selectEvent.getUnselectedObjects();
+
+					Collection <Object> listSelectionRecord = new ArrayList <Object>();
+
+					for (int rowIdx = pgStartIdx; rowIdx <= pgEndIdx; rowIdx++)
+					{
+						Integer keyValue = getColumnValue(rowIdx, table);
+
+						IDColumn idcolumn = (IDColumn) table.getValueAt(rowIdx, 0);
+						Listitem item = table.getItemAtIndex(rowIdx);
+
+						value = item.isSelected();
+						Boolean old = idcolumn.isSelected();
+
+						boolean isSelectedMatch = isMatchSameRecordID(selectedObj, keyValue);
+						boolean isUnSelectedMatch = isMatchSameRecordID(unSelectedObj, keyValue);
+
+						if (isSelectedMatch || recordSelectedData.containsKey(keyValue))
+						{
+							listSelectionRecord.add(table.getModel().get(rowIdx));
+						}
+
+						if (isUnSelectedMatch && item.getIndex() >= pgStartIdx && item.getIndex() <= pgEndIdx)
+						{
+							listSelectionRecord.remove(table.getModel().get(rowIdx));
+						}
+
+						if (isUnSelectedMatch || isSelectedMatch)
+						{
+							if (!old.equals(value))
+							{
+								vcEvent = new TableValueChangeEvent(source, tableColumn.getHeaderValue().toString(), rowIdx, 0, old, value);
+								fireTableValueChange(vcEvent);
+							}
+						}
+					}
+
+					table.getModel().setSelection(listSelectionRecord);
+					updateListSelected(table);
+					table.setActivePage(activePageNo);
+				}
+			}
+		}
+		else if (event.getTarget() instanceof WListbox && event.getName().equals(ZulEvents.ON_PAGING))
+		{
+			WListbox table = (WListbox) event.getTarget();
+			restoreSelectedInPage(table);
+		}
+		return;
+	} // onEvent
+
+	/**
+	 * Is check recordID exists in Set
+	 * 
+	 * @param objSet
+	 * @param record_ID
+	 * @return True if recordID exists in Set
+	 */
+	protected boolean isMatchSameRecordID(Set <?> objSet, Integer record_ID)
+	{
+		for (Object obj : objSet)
+		{
+			if (obj instanceof ArrayList)
+			{
+				ArrayList <?> aList = (ArrayList <?>) obj;
+				if (aList.get(0) instanceof IDColumn)
+				{
+					IDColumn idColumn = (IDColumn) aList.get(0);
+					if (record_ID == idColumn.getRecord_ID())
+						return true;
+				}
+			}
+		}
+		return false;
+	} // isMatchSameRecordID
+
+	/**
+	 * go through all data record, in case key value is in {@link #recordSelectedData}, mark it as
+	 * selected record
+	 * 
+	 * @param miniTable
+	 */
+	protected void restoreSelectedInPage(WListbox miniTable)
+	{
+		if (!miniTable.isMultiSelection())
+			return;
+
+		Collection <Object> listSelectionRecord = new ArrayList <Object>();
+		for (int rowIndex = 0; rowIndex < miniTable.getModel().getRowCount(); rowIndex++)
+		{
+			Integer keyViewValue = getColumnValue(rowIndex, miniTable);
+			if (recordSelectedData.containsKey(keyViewValue))
+			{
+				listSelectionRecord.add(miniTable.getModel().get(rowIndex));
+			}
+		}
+
+		miniTable.getModel().setSelection(listSelectionRecord);
+		updateListSelected(miniTable);
+	} // restoreSelectedInPage
+
+	/**
+	 * get all selected record and update to {@link #recordSelectedData} remove unselected record
+	 * and add new selected record we maintain value of key
+	 * 
+	 * @param miniTable
+	 */
+	protected void updateListSelected(WListbox miniTable)
+	{
+		for (int rowIndex = 0; rowIndex < miniTable.getModel().getRowCount(); rowIndex++)
+		{
+			Integer keyCandidate = getColumnValue(rowIndex, miniTable);
+
+			@SuppressWarnings("unchecked")
+			List <Object> candidateRecord = (List <Object>) miniTable.getModel().get(rowIndex);
+
+			if (((IDColumn) miniTable.getValueAt(rowIndex, 0)).isSelected())
+			{
+				// add or update selected record info
+				recordSelectedData.put(keyCandidate, candidateRecord);
+			}
+			else
+			{
+				if (recordSelectedData.containsKey(keyCandidate))
+				{
+					List <Object> recordSelected = recordSelectedData.get(keyCandidate);
+
+					IDColumn idcSel = null;
+					if (recordSelected.get(0) instanceof IDColumn)
+					{
+						idcSel = (IDColumn) recordSelected.get(0);
+					}
+
+					IDColumn idcCan = null;
+					if (candidateRecord.get(0) instanceof IDColumn)
+					{
+						idcCan = (IDColumn) candidateRecord.get(0);
+					}
+
+					if (idcSel != null && idcCan != null && idcSel.getRecord_ID().equals(idcCan.getRecord_ID()))
+					{
+						recordSelected.set(0, candidateRecord.get(0));
+					}
+
+					if (recordSelected.equals(candidateRecord))
+					{
+						recordSelectedData.remove(keyCandidate);
 					}
 				}
 			}
 		}
+	} // updateListSelected
 
-		return;
-	}
+	/**
+	 * get keyColumn value at rowIndex also check in case value is null will rise a exception
+	 * 
+	 * @param rowIndex
+	 * @param miniTable
+	 * @return {@link Integer} - keyColumn value
+	 */
+	protected Integer getColumnValue(int rowIndex, WListbox miniTable)
+	{
+		int keyIndex = miniTable.getKeyColumnIndex();
+		Integer keyValue = null;
+		// get row data from model
+		Object keyColumValue = miniTable.getModel().getDataAt(rowIndex, keyIndex);
+		// throw exception when value is null
+		if (keyColumValue == null)
+		{
+			throw new AdempiereException("has null value at keyColumn");
+		}
+
+		// IDColumn is recreate after change page, because use value of IDColumn
+		if (keyColumValue != null && keyColumValue instanceof IDColumn)
+		{
+			keyColumValue = ((IDColumn) keyColumValue).getRecord_ID();
+		}
+
+		if (keyColumValue instanceof Integer)
+		{
+			keyValue = (Integer) keyColumValue;
+		}
+		else
+		{
+			String msg = "column should be integer";
+			throw new AdempiereException(msg);
+		}
+
+		return (Integer) keyValue;
+	} // getColumnValue
 
 	protected boolean isWithinListCell(Component source) {
 		if (source instanceof Listcell)
@@ -776,6 +1015,7 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
 	public void clearSelection()
 	{
 		m_selectedItems.clear();
+		recordSelectedData.clear();
 	}
 
 	/**
