@@ -727,6 +727,20 @@ public class DataEngine
 					finalSQL.append (q);
 			}	//	for all restrictions
 		}
+		else if (tableName.startsWith("AD_PInstance"))
+		{
+			finalSQL.append(" WHERE ");
+			for (int i = 0; i < query.getRestrictionCount(); i++)
+			{
+				String q = query.getWhereClause(i);
+				// ignore all other Parameters
+				if (q.indexOf("AD_PInstance_ID") != -1)
+				{
+					q = q.substring(9); // Remove 'T_Report.'
+					finalSQL.append(q);
+				}
+			} // for all restrictions
+		}
 		else
 		{
 			//	User supplied Where Clause

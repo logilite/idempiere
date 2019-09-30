@@ -29,6 +29,11 @@ import java.util.logging.Level;
 import org.compiere.model.I_C_ValidCombination;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchemaElement;
+import org.compiere.model.MBPartner;
+import org.compiere.model.MClient;
+import org.compiere.model.MLocation;
+import org.compiere.model.MOrg;
+import org.compiere.model.MOrgInfo;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MReportCube;
 import org.compiere.print.MPrintFormat;
@@ -2015,12 +2020,7 @@ public class FinReport extends SvrProcess
 			{
 				if (pfi.getSeqNo() != 20)
 					pfi.setSeqNo(20);
-				if (!pfi.isPrinted())
-					pfi.setIsPrinted(true);
-				if (pfi.isOrderBy())
-					pfi.setIsOrderBy(false);
-				if (pfi.getSortNo() != 0)
-					pfi.setSortNo(0);
+				setPFItemOptions(pfi);
 			}
 			else	//	Not Printed, No Sort
 			{
@@ -2036,11 +2036,126 @@ public class FinReport extends SvrProcess
 		}
 		//	set translated to original
 		pf.setTranslation();
-		
+
+		if (m_report.getAD_PrintFormatHeader_ID() <= 0)
+			return pf;
+
 		// Reload to pick up changed pfi
-		pf = MPrintFormat.get (getCtx(), AD_PrintFormat_ID, true);	//	no cache
-		return pf;
+		pf = MPrintFormat.get(getCtx(), AD_PrintFormat_ID, true); // no cache
+
+		MPrintFormat header = MPrintFormat.get(getCtx(), m_report.getAD_PrintFormatHeader_ID(), true);
+
+		for (int j = 0; j < header.getItemCount(); j++)
+		{
+			MPrintFormatItem pfi = header.getItem(j);
+
+			String name = pfi.getName();
+			if (!name.startsWith("Page") || name.startsWith("@"))
+				pfi.setPrintName(null);
+
+			if (name.contains("@Name@"))
+			{
+				setPFItemOptions(pfi);
+				pfi.setPrintName(name.replaceFirst("@Name@", m_report.getName()));
+			}
+
+			if (name.contains("@Client@"))
+			{
+				setPFItemOptions(pfi);
+				MClient client = new MClient(getCtx(), Env.getAD_Client_ID(getCtx()), get_TrxName());
+				pfi.setPrintName(name.replaceFirst("@Client@", client.getName()));
+			}
+
+			if (name.equalsIgnoreCase("Report"))
+			{
+				setPFItemOptions(pfi);
+				pfi.setAD_PrintFormatChild_ID(pf.get_ID());
+			}
+
+			if (name.contains("@Organization@"))
+			{
+				if (p_Org_ID != 0)
+				{
+					setPFItemOptions(pfi);
+					MOrg org = new MOrg(getCtx(), p_Org_ID, get_TrxName());
+					pfi.setPrintName(name.replaceFirst("@Organization@", org.getName()));
+				}
+				else
+					pfi.setIsPrinted(false);
+			}
+
+			if (name.contains("@Currency@"))
+			{
+				setPFItemOptions(pfi);
+				pfi.setPrintName(name.replaceFirst("@Currency@", m_report.getC_AcctSchema().getC_Currency().getDescription()));
+			}
+
+			if (name.contains("@Period@"))
+			{
+				if (p_C_Period_ID != 0)
+				{
+					setPFItemOptions(pfi);
+					MPeriod period = MPeriod.get(getCtx(), p_C_Period_ID);
+					pfi.setPrintName(name.replaceFirst("@Period@", period.getName()));
+				}
+				else
+					pfi.setIsPrinted(false);
+			}
+
+			if (name.contains("@Business Partner@"))
+			{
+				if (p_C_BPartner_ID != 0)
+				{
+					setPFItemOptions(pfi);
+					MBPartner bpartner = MBPartner.get(getCtx(), p_C_BPartner_ID);
+					pfi.setPrintName(name.replaceFirst("@Business Partner@", bpartner.getName()));
+				}
+				else
+				{
+					pfi.setIsPrinted(false);
+				}
+			}
+
+			if (name.equalsIgnoreCase("@Logo@"))
+			{
+				setPFItemOptions(pfi);
+			}
+
+			if (name.contains("@City@"))
+			{
+				if (p_Org_ID != 0)
+				{
+					setPFItemOptions(pfi);
+					int ord_ID = 0;
+					if (p_Org_ID != 0)
+						ord_ID = p_Org_ID;
+					else
+						ord_ID = Env.getAD_Org_ID(Env.getCtx());
+					MOrgInfo oi = MOrgInfo.get(Env.getCtx(), ord_ID, null);
+					MLocation loc = new MLocation(getCtx(), oi.getC_Location_ID(), get_TrxName());
+					pfi.setPrintName(name.replaceFirst("@City@", loc.getCity()));
+				}
+				else
+				{
+					pfi.setIsPrinted(false);
+				}
+			}
+
+			pfi.saveEx();
+		}
+
+		return header;
 	}	//	getPrintFormat
+
+	private void setPFItemOptions(MPrintFormatItem pfi)
+	{
+		if (!pfi.isPrinted())
+			pfi.setIsPrinted(true);
+		if (pfi.isOrderBy())
+			pfi.setIsOrderBy(false);
+		if (pfi.getSortNo() != 0)
+			pfi.setSortNo(0);
+	} // setPFItemOptions
 
 	/****************************************************************************
 	 * Get Financial Reporting Period To based on reporting Period and offset to.

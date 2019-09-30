@@ -30,7 +30,7 @@ public class X_PA_Report extends PO implements I_PA_Report, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20171031L;
+	private static final long serialVersionUID = 20190930L;
 
     /** Standard Constructor */
     public X_PA_Report (Properties ctx, int PA_Report_ID, String trxName)
@@ -101,6 +101,34 @@ public class X_PA_Report extends PO implements I_PA_Report, I_Persistent
 	public int getAD_PrintFormat_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_PrintFormat_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_AD_PrintFormat getAD_PrintFormatHeader() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_PrintFormat)MTable.get(getCtx(), org.compiere.model.I_AD_PrintFormat.Table_Name)
+			.getPO(getAD_PrintFormatHeader_ID(), get_TrxName());	}
+
+	/** Set Header Print Format.
+		@param AD_PrintFormatHeader_ID 
+		Header data print format
+	  */
+	public void setAD_PrintFormatHeader_ID (int AD_PrintFormatHeader_ID)
+	{
+		if (AD_PrintFormatHeader_ID < 1) 
+			set_Value (COLUMNNAME_AD_PrintFormatHeader_ID, null);
+		else 
+			set_Value (COLUMNNAME_AD_PrintFormatHeader_ID, Integer.valueOf(AD_PrintFormatHeader_ID));
+	}
+
+	/** Get Header Print Format.
+		@return Header data print format
+	  */
+	public int getAD_PrintFormatHeader_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_PrintFormatHeader_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
