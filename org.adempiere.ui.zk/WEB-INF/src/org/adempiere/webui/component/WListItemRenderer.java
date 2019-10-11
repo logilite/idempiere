@@ -718,24 +718,7 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
 				// update IDColumn
 				tableColumn = m_tableColumns.get(0);
 
-				if (!"paging".equals(table.getMold()))
-				{
-					for (int i = 0; i < cnt; i++)
-					{
-						IDColumn idcolumn = (IDColumn) table.getValueAt(i, 0);
-						Listitem item = table.getItemAtIndex(i);
-
-						value = item.isSelected();
-						Boolean old = idcolumn.isSelected();
-
-						if (!old.equals(value))
-						{
-							vcEvent = new TableValueChangeEvent(source, tableColumn.getHeaderValue().toString(), i, 0, old, value);
-							fireTableValueChange(vcEvent);
-						}
-					}
-				}
-				else
+				if ("paging".equals(table.getMold()) && table.isMultiSelection())
 				{
 					int activePageNo = table.getModel().getActivePage();
 					int pageSize = table.getModel().getPageSize();
@@ -786,6 +769,23 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
 					table.getModel().setSelection(listSelectionRecord);
 					updateListSelected(table);
 					table.setActivePage(activePageNo);
+				}
+				else
+				{
+					for (int i = 0; i < cnt; i++)
+					{
+						IDColumn idcolumn = (IDColumn) table.getValueAt(i, 0);
+						Listitem item = table.getItemAtIndex(i);
+
+						value = item.isSelected();
+						Boolean old = idcolumn.isSelected();
+
+						if (!old.equals(value))
+						{
+							vcEvent = new TableValueChangeEvent(source, tableColumn.getHeaderValue().toString(), i, 0, old, value);
+							fireTableValueChange(vcEvent);
+						}
+					}
 				}
 			}
 		}
