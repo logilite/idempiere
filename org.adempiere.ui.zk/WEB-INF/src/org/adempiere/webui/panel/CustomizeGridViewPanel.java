@@ -52,6 +52,7 @@ import org.compiere.model.MTab;
 import org.compiere.model.Query;
 import org.compiere.model.X_AD_Tab_Customization;
 import org.compiere.util.CLogger;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.NamePair;
@@ -286,6 +287,9 @@ public class CustomizeGridViewPanel extends Panel
 				} else if (event.getTarget().equals(
 						confirmPanel.getButton(ConfirmPanel.A_CANCEL))) {
 					getParent().detach();
+				} else if (event.getTarget().equals(confirmPanel.getButton(ConfirmPanel.A_RESET))) {
+					tableSeqs.clear();
+					loadData();
 				}
 				else if (event.getTarget().equals(confirmPanel.getButton(ConfirmPanel.A_RESET)))
 				{

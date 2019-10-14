@@ -33,10 +33,13 @@ import org.adempiere.base.IModelFactory;
 import org.adempiere.base.Service;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.model.GenericPO;
+import org.compiere.db.Database;
 import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.KeyNamePair;
+import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 /**
  *	Persistent Table Model
@@ -527,6 +530,11 @@ public class MTable extends X_AD_Table
 		if (isView() && isDeleteable())
 			setIsDeleteable(false);
 		//
+		String error = Database.isValidIdentifier(getTableName());
+		if (!Util.isEmpty(error)) {
+			log.saveError("Error", Msg.getMsg(getCtx(), error) + " [TableName]");
+			return false;
+		}
 		return true;
 	}	//	beforeSave
 

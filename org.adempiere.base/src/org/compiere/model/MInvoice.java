@@ -1241,6 +1241,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 			int no = DB.executeUpdate(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine("Lines -> #" + no);
 		}
+		
 		return true;
 	}	//	afterSave
 
@@ -1930,16 +1931,19 @@ public class MInvoice extends X_C_Invoice implements DocAction
 				MInOutLine receiptLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(
 						line.getM_InOutLine_ID(), get_TrxName());
 				
+				BigDecimal movementQty = receiptLine.getM_InOut().getMovementType().charAt(1) == '-' ? receiptLine.getMovementQty().negate() : receiptLine.getMovementQty();
+				BigDecimal matchQty = isCreditMemo() ? line.getQtyInvoiced().negate() : line.getQtyInvoiced();
 				String sql = "Select sum(Qty) From M_MatchInv Where Reversal_ID is Null AND M_InoutLine_ID = ?";
 				BigDecimal matchedMRQty = DB.getSQLValueBD(get_TrxName(), sql, receiptLine.get_ID());
 				matchedMRQty = matchedMRQty == null ? Env.ZERO : matchedMRQty;
 				
 				BigDecimal mrQtyMatchable = receiptLine.getMovementQty().subtract(matchedMRQty);
 				
-				BigDecimal matchQty = line.getQtyInvoiced();
 				
 				if (mrQtyMatchable.compareTo(matchQty) < 0)
 					matchQty = mrQtyMatchable;
+				if (movementQty.compareTo(matchQty) < 0)
+					matchQty = movementQty;
 				
 				if(matchQty.signum() == 0)
 				{
@@ -1998,8 +2002,9 @@ public class MInvoice extends X_C_Invoice implements DocAction
 				{
 					ol = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(line.getC_OrderLine_ID(),
 							get_TrxName());
-					if (line.getQtyInvoiced() != null)
-						ol.setQtyInvoiced(ol.getQtyInvoiced().add(line.getQtyInvoiced()));
+					if (line.getQtyInvoiced() != null) {
+						ol.setQtyInvoiced(ol.getQtyInvoiced().add(isCreditMemo() ? line.getQtyInvoiced().negate() : line.getQtyInvoiced()));
+					}
 					if (!ol.save(get_TrxName()))
 					{
 						m_processMsg = "Could not update Order Line";
@@ -2012,7 +2017,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 					&& !isReversal())
 				{
 					//	MatchPO is created also from MInOut when Invoice exists before Shipment
-					BigDecimal matchQty = line.getQtyInvoiced();
+					BigDecimal matchQty = isCreditMemo() ? line.getQtyInvoiced().negate() : line.getQtyInvoiced();					
 					MMatchPO po = MMatchPO.create (line, null,
 						getDateInvoiced(), matchQty);
 					if (po != null) 
@@ -2044,12 +2049,19 @@ public class MInvoice extends X_C_Invoice implements DocAction
 								{
 									addDocsPostProcess(matchInvoice);
 								}
+								
+								if (matchInvoice.getRef_MatchInv_ID() > 0)
+								{
+									MMatchInv refMatchInv = new MMatchInv(getCtx(), matchInvoice.getRef_MatchInv_ID(), get_TrxName());
+									if (!refMatchInv.isPosted())
+										addDocsPostProcess(refMatchInv);
+								}
 							}
 						}
 					}
 				}
 			}
-
+			
 			//Update QtyInvoiced RMA Line
 			if (line.getM_RMALine_ID() != 0)
 			{
@@ -2577,6 +2589,8 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		//	Reverse/Delete Matching
 		if (!isSOTrx())
 		{
+			MatchPOAutoMatch.unmatch(getCtx(), getC_Invoice_ID(), get_TrxName());
+			
 			MMatchInv[] mInv = MMatchInv.getInvoice(getCtx(), getC_Invoice_ID(), get_TrxName());
 			HashSet<Integer> matchInvHdrList = new HashSet<Integer>();
 			for (int i = 0; i < mInv.length; i++)
@@ -2596,7 +2610,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 					return null;
 				}
 				addDocsPostProcess(new MMatchInv(Env.getCtx(), mInv[i].getReversal_ID(), get_TrxName()));
-			}
+			}			
 			
 			for(int M_MatchInvHdr : matchInvHdrList)
 			{
