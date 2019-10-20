@@ -762,6 +762,8 @@ public class Doc_Invoice extends Doc
 			|| getDocumentType().equals(DOCTYPE_APCredit);
 		BigDecimal acctAmt = Env.ZERO;
 		FactLine fl = null;
+		 
+		BigDecimal roundingErr = Env.ZERO;
 		//	Revenue/Cost
 		for (int i = 0; i < p_lines.length; i++)
 		{
@@ -793,7 +795,7 @@ public class Doc_Invoice extends Doc
 					if (line.isItem())
 						acct = line.getAccount (ProductCost.ACCTTYPE_P_InventoryClearing, as);
 				}
-				BigDecimal amt = line.getAmtSource().multiply(multiplier);
+				BigDecimal amt = line.getAmtSource().multiply(multiplier).add(roundingErr);
 				BigDecimal amt2 = null;
 				
 				
@@ -803,11 +805,17 @@ public class Doc_Invoice extends Doc
 					amt = null;
 				}*/
 				if (payables)	//	Vendor = DR
+				{
 					fl = fact.createLine (line, acct,
-						getC_Currency_ID(), amt, amt2);
+							getC_Currency_ID(), amt, amt2);
+					roundingErr=amt.subtract(fl.getAcctBalance());
+				}
 				else			//	Customer = CR
+				{	
 					fl = fact.createLine (line, acct,
 						getC_Currency_ID(), amt2, amt);
+					roundingErr=amt.subtract(fl.getAcctBalance().negate());
+				}
 				if (fl != null)
 				{
 					acctAmt = acctAmt.add(fl.getAcctBalance());
@@ -817,7 +825,7 @@ public class Doc_Invoice extends Doc
 		//  Tax
 		for (int i = 0; i < m_taxes.length; i++)
 		{
-			BigDecimal amt = m_taxes[i].getAmount().multiply(multiplier);
+			BigDecimal amt = m_taxes[i].getAmount().multiply(multiplier).add(roundingErr);
 			BigDecimal amt2 = null;
 			/*if (creditMemo)
 			{
@@ -826,11 +834,17 @@ public class Doc_Invoice extends Doc
 			}*/
 			FactLine tl = null;
 			if (payables)
+			{
 				tl = fact.createLine (null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as),
 					getC_Currency_ID(), amt, amt2);
+				roundingErr=amt.subtract(tl.getAcctBalance());
+			}
 			else
+			{	
 				tl = fact.createLine (null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),
 					getC_Currency_ID(), amt2, amt);
+				roundingErr=amt.subtract(tl.getAcctBalance().negate());
+			}
 			if (tl != null)
 				tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
 			
