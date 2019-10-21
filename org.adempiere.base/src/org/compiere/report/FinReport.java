@@ -407,9 +407,14 @@ public class FinReport extends SvrProcess
 			}
 
 			BigDecimal relativeOffset = null;	//	current
+			BigDecimal relativeOffsetTo = null;
 			if (m_columns[col].isColumnTypeRelativePeriod())
+			{
 				relativeOffset = m_columns[col].getRelativePeriod();
+				relativeOffsetTo = m_columns[col].getRelativePeriodTo();
+			}
 			FinReportPeriod frp = getPeriod (relativeOffset);
+			FinReportPeriod frpTo = getPeriodTo(relativeOffsetTo);
 			if (m_lines[line].getPAPeriodType() != null)			//	line amount type overwrites column
 			{
 				info.append(" - LineDateAcct=");
@@ -446,25 +451,39 @@ public class FinReport extends SvrProcess
 				info.append(" - ColumnDateAcct=");
 				if (m_columns[col].isPeriod())
 				{
-					String sql = frp.getPeriodWhere();
+					if (frpTo == null)
+						select.append(frp.getPeriodWhere());
+					else
+						select.append(" BETWEEN " + DB.TO_DATE(frp.getStartDate()) + " AND " + DB.TO_DATE(frpTo.getEndDate()));
 					info.append("Period");
-					select.append(sql);
 				}
 				else if (m_columns[col].isYear())
 				{
-					String sql = frp.getYearWhere();
+					if (frpTo == null)
+						select.append(frp.getYearWhere());
+					else
+						select.append(" BETWEEN " + DB.TO_DATE(frp.getYearStartDate()) + " AND " + DB.TO_DATE(frpTo.getEndDate()));
 					info.append("Year");
-					select.append(sql);
 				}
 				else if (m_columns[col].isTotal())
 				{
-					String sql = frp.getTotalWhere();
+					if (frpTo == null)
+						select.append(frp.getTotalWhere());
+					else
+						select.append(frpTo.getTotalWhere());
 					info.append("Total");
-					select.append(sql);
 				}
 				else if (m_columns[col].isNatural())
 				{
-					select.append( frp.getNaturalWhere("fa"));
+					if (frpTo == null)
+						select.append(frp.getNaturalWhere("fa"));
+					else
+					{
+						String yearWhere = " BETWEEN " + DB.TO_DATE(frp.getYearStartDate()) + " AND " + DB.TO_DATE(frpTo.getEndDate());
+						String totalWhere = frpTo.getTotalWhere();
+						String bs = " EXISTS (SELECT C_ElementValue_ID FROM C_ElementValue WHERE C_ElementValue_ID = fa.Account_ID AND AccountType NOT IN ('R', 'E'))";
+						select.append(totalWhere + " AND ( " + bs + " OR TRUNC(fa.DateAcct) " + yearWhere + " ) ");
+					}
 				}
 				else
 				{
@@ -1385,6 +1404,7 @@ public class FinReport extends SvrProcess
 				select.append(" FROM Fact_Acct fb WHERE ").append(p_AdjPeriodToExclude).append("TRUNC(DateAcct) ");
 			}
 			FinReportPeriod frp = getPeriod (m_columns[col].getRelativePeriod());
+			FinReportPeriod frpTo = getPeriodTo(m_columns[col].getRelativePeriodTo());
 			if (m_lines[line].getPAPeriodType() != null)			//	line amount type overwrites column
 			{
 				if (m_lines[line].isPeriod())
@@ -1399,13 +1419,39 @@ public class FinReport extends SvrProcess
 			else if (m_columns[col].getPAPeriodType() != null)
 			{
 				if (m_columns[col].isPeriod())
-					select.append(frp.getPeriodWhere());
+				{
+					if (frpTo == null)
+						select.append(frp.getPeriodWhere());
+					else
+						select.append(" BETWEEN " + DB.TO_DATE(frp.getStartDate()) + " AND " + DB.TO_DATE(frpTo.getEndDate()));
+				}
 				else if (m_columns[col].isYear())
-					select.append(frp.getYearWhere());
+				{
+					if (frpTo == null)
+						select.append(frp.getYearWhere());
+					else
+						select.append(" BETWEEN " + DB.TO_DATE(frp.getYearStartDate()) + " AND " + DB.TO_DATE(frpTo.getEndDate()));
+				}
 				else if (m_columns[col].isNatural())
-					select.append(frp.getNaturalWhere("fb"));
+				{
+					if (frpTo == null)
+						select.append(frp.getNaturalWhere("fb"));
+					else
+					{
+						String yearWhere = " BETWEEN " + DB.TO_DATE(frp.getYearStartDate()) + " AND " + DB.TO_DATE(frpTo.getEndDate());
+						String totalWhere = frpTo.getTotalWhere();
+						String bs = " EXISTS (SELECT C_ElementValue_ID FROM C_ElementValue WHERE C_ElementValue_ID = fa.Account_ID AND AccountType NOT IN ('R', 'E'))";
+						String full = totalWhere + " AND ( " + bs + " OR TRUNC(fa.DateAcct) " + yearWhere + " ) ";
+						select.append(full);
+					}
+				}
 				else
-					select.append(frp.getTotalWhere());
+				{
+					if (frpTo == null)
+						select.append(frp.getTotalWhere());
+					else
+						select.append(frpTo.getTotalWhere());
+				}
 			}
 			//	Link
 			select.append(" AND fb.").append(variable).append("=x.").append(variable);
@@ -1587,6 +1633,7 @@ public class FinReport extends SvrProcess
 				select.append(" FROM Fact_Acct fb WHERE ").append(p_AdjPeriodToExclude).append("TRUNC(DateAcct) ");
 			}
 			FinReportPeriod frp = getPeriod (m_columns[col].getRelativePeriod());
+			FinReportPeriod frpTo = getPeriodTo(m_columns[col].getRelativePeriodTo());
 			if (m_lines[line].getPAPeriodType() != null)			//	line amount type overwrites column
 			{
 				if (m_lines[line].isPeriod())
@@ -1601,13 +1648,39 @@ public class FinReport extends SvrProcess
 			else if (m_columns[col].getPAPeriodType() != null)
 			{
 				if (m_columns[col].isPeriod())
-					select.append(frp.getPeriodWhere());
+				{
+					if (frpTo == null)
+						select.append(frp.getPeriodWhere());
+					else
+						select.append(" BETWEEN " + DB.TO_DATE(frp.getStartDate()) + " AND " + DB.TO_DATE(frpTo.getEndDate()));
+				}
 				else if (m_columns[col].isYear())
-					select.append(frp.getYearWhere());
+				{
+					if (frpTo == null)
+						select.append(frp.getYearWhere());
+					else
+						select.append(" BETWEEN " + DB.TO_DATE(frp.getYearStartDate()) + " AND " + DB.TO_DATE(frpTo.getEndDate()));
+				}
 				else if (m_columns[col].isNatural())
-					select.append(frp.getNaturalWhere("fb"));
+				{
+					if (frpTo == null)
+						select.append(frp.getNaturalWhere("fb"));
+					else
+					{
+						String yearWhere = " BETWEEN " + DB.TO_DATE(frp.getYearStartDate()) + " AND " + DB.TO_DATE(frpTo.getEndDate());
+						String totalWhere = frpTo.getTotalWhere();
+						String bs = " EXISTS (SELECT C_ElementValue_ID FROM C_ElementValue WHERE C_ElementValue_ID = fa.Account_ID AND AccountType NOT IN ('R', 'E'))";
+						String full = totalWhere + " AND ( " + bs + " OR TRUNC(fa.DateAcct) " + yearWhere + " ) ";
+						select.append(full);
+					}
+				}
 				else
-					select.append(frp.getTotalWhere());
+				{
+					if (frpTo == null)
+						select.append(frp.getTotalWhere());
+					else
+						select.append(frpTo.getTotalWhere());
+				}
 			}
 			//	Link
 			select.append(" AND fb.Fact_Acct_ID=x.Fact_Acct_ID");
@@ -1773,10 +1846,22 @@ public class FinReport extends SvrProcess
 					if (m_columns[index].isColumnTypeRelativePeriod())
 					{
 						BigDecimal relativeOffset = m_columns[index].getRelativePeriod();
+						BigDecimal relativeOffsetTo = m_columns[index].getRelativePeriodTo();
+
 						FinReportPeriod frp = getPeriod (relativeOffset);
-					
-						if ( s.contains("@Period@") )
-							s = s.replace("@Period@", frp.getName() );
+						FinReportPeriod frpTo = getPeriodTo(relativeOffsetTo);
+
+						if (s.contains("@Period@"))
+						{
+							if (frpTo != null)
+							{
+								s = s.replace("@Period@", frp.getName() + " - " + frpTo.getName());
+							}
+							else
+							{
+								s = s.replace("@Period@", frp.getName());
+							}
+						}
 					}
 					
 					if (!pfi.getName().equals(s))
@@ -1861,5 +1946,18 @@ public class FinReport extends SvrProcess
 		pf = MPrintFormat.get (getCtx(), AD_PrintFormat_ID, true);	//	no cache
 		return pf;
 	}	//	getPrintFormat
+
+	/****************************************************************************
+	 * Get Financial Reporting Period To based on reporting Period and offset to.
+	 * 
+	 * @param relativeOffsetTo - offset TO
+	 * @return reporting period
+	 */
+	private FinReportPeriod getPeriodTo(BigDecimal relativeOffsetTo)
+	{
+		if (relativeOffsetTo != null && !relativeOffsetTo.equals(BigDecimal.ZERO))
+			return getPeriod(relativeOffsetTo);
+		return null;
+	} // getPeriodTo
 
 }	//	FinReport
