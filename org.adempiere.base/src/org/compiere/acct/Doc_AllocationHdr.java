@@ -258,8 +258,7 @@ public class Doc_AllocationHdr extends Doc
 					// if not using clearing accounts, then don't post amtsource
 					// change the allocationsource to be writeoff + discount
 					allocationSource = line.getDiscountAmt().add(line.getWriteOffAmt());
-
-
+					payAcct = getPaymentAcct(as, line.getC_Payment_ID());
 				} else {
 
 					// Normal behavior -- unchanged if using clearing accounts
@@ -465,7 +464,7 @@ public class Doc_AllocationHdr extends Doc
 					|| getC_Currency_ID() != line.getInvoiceC_Currency_ID(getTrxName())))	//	allocation <> invoice currency
 			{
 				p_Error = createRealizedGainLoss (line, as, fact, bpAcct, invoice,  payAcct, payment,
-					allocationSource, allocationAccounted);
+					allocationSourceForRGL, allocationAccounted);
 				if (p_Error != null)
 					return null;
 			}
