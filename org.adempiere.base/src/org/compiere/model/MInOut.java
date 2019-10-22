@@ -2647,7 +2647,8 @@ public class MInOut extends X_M_InOut implements DocAction
 					log.log(Level.SEVERE, "Failed to create reversal for match purchase order " + mMatchPO.getDocumentNo());
 					return false;
 				}
-				addDocsPostProcess(new MMatchPO(Env.getCtx(), mMatchPO.getReversal_ID(), get_TrxName()));
+				addDocsPostProcess((MMatchPO) MTable.get(Env.getCtx(), MMatchPO.Table_ID)
+						.getPO(mMatchPO.getReversal_ID(), get_TrxName()));
 			}
 		}
 		return true;

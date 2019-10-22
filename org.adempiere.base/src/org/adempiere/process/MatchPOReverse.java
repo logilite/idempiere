@@ -18,6 +18,7 @@ import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MMatchPO;
+import org.compiere.model.MTable;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
 
@@ -43,7 +44,7 @@ public class MatchPOReverse extends SvrProcess {
 		if (log.isLoggable(Level.INFO))
 			log.info ("M_MatchPO_ID=" + p_M_MatchPO_ID);
 	
-		MMatchPO po = new MMatchPO (getCtx(), p_M_MatchPO_ID, get_TrxName());
+		MMatchPO po = (MMatchPO) MTable.get(getCtx(), MMatchPO.Table_ID).getPO(p_M_MatchPO_ID, get_TrxName());
 		if (po.get_ID() != p_M_MatchPO_ID)
 			throw new AdempiereException("@NotFound@ @M_MatchPO_ID@ " + p_M_MatchPO_ID);
 		if (po.isProcessed())

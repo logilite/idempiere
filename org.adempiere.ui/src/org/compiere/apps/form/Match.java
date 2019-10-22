@@ -777,7 +777,7 @@ public class Match
 			//	Create PO - Shipment Link
 			if (sLine.getM_Product_ID() != 0)
 			{
-				MMatchPO match = new MMatchPO (sLine, null, qty);
+				MMatchPO match = MMatchPO.createFrom(sLine, null, qty);
 				match.setC_OrderLine_ID(Line_ID);
 				if (!match.save())
 				{

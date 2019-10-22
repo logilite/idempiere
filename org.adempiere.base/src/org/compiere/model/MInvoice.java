@@ -2624,7 +2624,8 @@ public class MInvoice extends X_C_Invoice implements DocAction
 							m_processMsg = "Could not Reverse MatchPO";
 							return null;
 						}
-						addDocsPostProcess(new MMatchPO(Env.getCtx(), mPO[i].getReversal_ID(), get_TrxName()));
+						addDocsPostProcess((MMatchPO) MTable.get(Env.getCtx(), MMatchPO.Table_ID)
+								.getPO(mPO[i].getReversal_ID(), get_TrxName()));
 					} 
 					else
 					{
