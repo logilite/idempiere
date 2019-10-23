@@ -182,14 +182,14 @@ public abstract class AbstractXLSXExporter
 			if (m_fontHeader == null)
 			{
 				m_fontHeader = m_workbook.createFont();
-				//m_fontHeader.setBoldweight(XSSFFont.BOLDWEIGHT_BOLD);
+				m_fontHeader.setBoldweight(XSSFFont.BOLDWEIGHT_BOLD);
 			}
 			font = m_fontHeader;
 		}
 		else if (isFunctionRow())
 		{
 			font = m_workbook.createFont();
-			//font.setBoldweight(XSSFFont.BOLDWEIGHT_BOLD);
+			font.setBoldweight(XSSFFont.BOLDWEIGHT_BOLD);
 			font.setItalic(true);
 		}
 		else
@@ -262,10 +262,10 @@ public abstract class AbstractXLSXExporter
 			XSSFFont font = getFont(false);
 			cs.setFont(font);
 			// Border
-			//cs.setBorderLeft((short) 1);
-			//cs.setBorderTop((short) 1);
-			//cs.setBorderRight((short) 1);
-			//cs.setBorderBottom((short) 1);
+			cs.setBorderLeft((short) 1);
+			cs.setBorderTop((short) 1);
+			cs.setBorderRight((short) 1);
+			cs.setBorderBottom((short) 1);
 			//
 			if (DisplayType.isDate(displayType))
 			{
@@ -291,12 +291,12 @@ public abstract class AbstractXLSXExporter
 			XSSFFont font_header = getFont(true);
 			cs_header = m_workbook.createCellStyle();
 			cs_header.setFont(font_header);
-			//cs_header.setBorderLeft((short) 2);
-			//cs_header.setBorderTop((short) 2);
-			//cs_header.setBorderRight((short) 2);
-			//cs_header.setBorderBottom((short) 2);
-			//cs_header.setDataFormat(HSSFDataFormat.getBuiltinFormat("text"));
-			//cs_header.setWrapText(true);
+			cs_header.setBorderLeft((short) 2);
+			cs_header.setBorderTop((short) 2);
+			cs_header.setBorderRight((short) 2);
+			cs_header.setBorderBottom((short) 2);
+			cs_header.setDataFormat(HSSFDataFormat.getBuiltinFormat("text"));
+			cs_header.setWrapText(true);
 			m_styles.put(key, cs_header);
 		}
 		return cs_header;
