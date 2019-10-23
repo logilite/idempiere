@@ -70,6 +70,7 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
+import org.compiere.util.Evaluator;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.compiere.util.NamePair;
@@ -1094,7 +1095,11 @@ public class LayoutEngine implements Pageable, Printable, Doc
 				
 				//	Type
 				PrintElement element = null;
-				if (item.isTypePrintFormat())		//** included PrintFormat
+				if ( !PrintDataEvaluatee.hasPageLogic(item.getDisplayLogic()) && !isDisplayed(m_data, item) )
+				{
+					;
+				}
+				else if (item.isTypePrintFormat())		//** included PrintFormat
 				{
 					element = includeFormat (item, m_data);
 				}
@@ -1203,6 +1208,14 @@ public class LayoutEngine implements Pageable, Printable, Doc
 					m_currPage.addElement (element);
 				else
 					m_headerFooter.addElement (element);
+				
+				if (PrintDataEvaluatee.hasPageLogic(item.getDisplayLogic()))
+				{
+					element.setPrintData(m_data);
+					element.setRowIndex(row);
+					element.setPageLogic(item.getDisplayLogic());
+				}
+				
 				//
 				if (m_lastHeight[m_area] > m_maxHeightSinceNewLine[m_area])
 					m_maxHeightSinceNewLine[m_area] = m_lastHeight[m_area];
@@ -1611,6 +1624,8 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		Boolean [] colSuppressRepeats = new Boolean[columnCount];
 		String[] columnJustification = new String[columnCount];
 		HashMap<Integer,Integer> additionalLines = new HashMap<Integer,Integer>();
+		ArrayList<String> pageLogics = new ArrayList<String>();
+		boolean hasPageLogic = false;
 
 		int col = 0;
 		for (int c = 0; c < format.getItemCount(); c++)
@@ -1655,6 +1670,16 @@ public class LayoutEngine implements Pageable, Printable, Doc
 				{
 					MPrintColor color = MPrintColor.get (getCtx(), item.getAD_PrintColor_ID());
 					rowColColor.put(new Point(TableElement.ALL, col), color.getColor());
+				}
+				//
+				if (PrintDataEvaluatee.hasPageLogic(item.getDisplayLogic()))
+				{
+					pageLogics.add(item.getDisplayLogic());
+					hasPageLogic = true;
+				}
+				else
+				{
+					pageLogics.add(null);
 				}
 				//
 				col++;
@@ -1712,7 +1737,11 @@ public class LayoutEngine implements Pageable, Printable, Doc
 				Serializable dataElement = null;
 				if (item.isPrinted())	//	Text Columns
 				{
-					if (item.isTypeImage())
+					if ( !PrintDataEvaluatee.hasPageLogic(item.getDisplayLogic()) && !isDisplayed(printData, item) )
+					{
+						;
+					}
+					else if (item.isTypeImage())
 					{
 						if (item.isImageField())
 							columnElement = createImageElement (item, printData);
@@ -1786,6 +1815,13 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		
 		if (format == m_format)
 			this.colSuppressRepeats = colSuppressRepeats;
+		
+		if (hasPageLogic)
+		{
+			table.setPageLogics(pageLogics);
+			table.setTablePrintData(printData);
+		}
+		
 		return table;
 	}	//	layoutTable
 
@@ -1875,7 +1911,9 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		//
 	//	log.fine("#" + m_id, "PageIndex=" + pageIndex + ", Copy=" + m_isCopy);
 		page.paint((Graphics2D)graphics, r, false, m_isCopy);	//	sets context
+		getHeaderFooter().setCurrentPage(page);
 		getHeaderFooter().paint((Graphics2D)graphics, r, false);
+		getHeaderFooter().setCurrentPage(null);
 		//
 		return Printable.PAGE_EXISTS;
 	}	//	print
@@ -1979,6 +2017,14 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		return  m_PrintInfo;
 	}
 
+	private boolean isDisplayed(PrintData data, MPrintFormatItem item) {
+		if ( Util.isEmpty(item.getDisplayLogic() ))
+			return true;
+		boolean display = Evaluator.evaluateLogic(new PrintDataEvaluatee(getPage(getPageNo()), data), item.getDisplayLogic());
+		
+		return display;
+	}
+	
 	public static Boolean [] getColSuppressRepeats (MPrintFormat format){
 		List<Boolean> colSuppressRepeats = new ArrayList<>();
 		for (int c = 0; c < format.getItemCount(); c++)
