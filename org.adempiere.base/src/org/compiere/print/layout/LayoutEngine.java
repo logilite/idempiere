@@ -1727,6 +1727,12 @@ public class LayoutEngine implements Pageable, Printable, Doc
 			else
 			{
 				levelNo = printData.getLineLevelNo();
+				if (levelNo < 0)
+					levelNo = -levelNo;
+
+				if (levelNo < lastLevelNo)
+					finReportSumRows.add(row);
+
 				if (levelNo != 0)
 				{
 					if (levelNo < 0)
@@ -1738,44 +1744,6 @@ public class LayoutEngine implements Pageable, Printable, Doc
 					else if (levelNo == 2)
 						rowColFont.put(new Point(row, TableElement.ALL), new Font (base.getName(),
 							Font.PLAIN, base.getSize()-levelNo));
-				}
-
-				levelNo = printData.getLineLevelNo();
-				if (levelNo < 0)
-					levelNo = -levelNo;
-
-				if (levelNo < lastLevelNo)
-					finReportSumRows.add(row);
-
-				if (levelNo != 0)
-				{
-					if (levelNo < 0)
-						levelNo = -levelNo;
-					Font base = printFont.getFont();
-					if (levelNo == 1)
-						rowColFont.put(new Point(row, TableElement.ALL), new Font(base.getName(), Font.ITALIC, base.getSize() - levelNo));
-					else if (levelNo == 2)
-						rowColFont.put(new Point(row, TableElement.ALL), new Font(base.getName(), Font.PLAIN, base.getSize() - levelNo));
-				}
-
-				lastLevelNo = levelNo;
-
-				levelNo = printData.getLineLevelNo();
-				if (levelNo < 0)
-					levelNo = -levelNo;
-
-				if (levelNo < lastLevelNo)
-					finReportSumRows.add(row);
-
-				if (levelNo != 0)
-				{
-					if (levelNo < 0)
-						levelNo = -levelNo;
-					Font base = printFont.getFont();
-					if (levelNo == 1)
-						rowColFont.put(new Point(row, TableElement.ALL), new Font(base.getName(), Font.ITALIC, base.getSize() - levelNo));
-					else if (levelNo == 2)
-						rowColFont.put(new Point(row, TableElement.ALL), new Font(base.getName(), Font.PLAIN, base.getSize() - levelNo));
 				}
 
 				lastLevelNo = levelNo;
