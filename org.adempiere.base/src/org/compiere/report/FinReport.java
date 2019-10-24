@@ -676,6 +676,8 @@ public class FinReport extends SvrProcess
 					.append(" AND r2.PA_ReportLine_ID IN (");
 				if (m_lines[line].isCalculationTypeAdd())
 					sb.append(oper_1).append(",").append(oper_2);
+				else if (m_lines[line].isCalculationTypeRange() && oper_1 == oper_2)
+					sb.append(oper_1);
 				else
 					sb.append(getLineIDs (oper_1, oper_2));		//	list of columns to add up
 				sb.append(") AND ABS(r2.LevelNo)<1) ");		//	0=Line 1=Acct
