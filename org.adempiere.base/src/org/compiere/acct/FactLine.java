@@ -217,6 +217,19 @@ public final class FactLine extends X_Fact_Acct
 					setUserElement2_ID(ID2);
 			}
 		}
+
+		// User Defined Account Element References
+		MAcctSchemaElement ul1 = m_acctSchema.getAcctSchemaElement(X_C_AcctSchema_Element.ELEMENTTYPE_UserElementList1);
+		if (ul1 != null && getUser1_ID() == 0 && ul1.isMandatory())
+		{
+			setUser1_ID(ul1.getC_ElementValue_ID());
+		}
+
+		MAcctSchemaElement ul2 = m_acctSchema.getAcctSchemaElement(X_C_AcctSchema_Element.ELEMENTTYPE_UserElementList2);
+		if (ul2 != null && getUser2_ID() == 0 && ul2.isMandatory())
+		{
+			setUser2_ID(ul2.getC_ElementValue_ID());
+		}
 	}   //  setAccount
 
 	/**

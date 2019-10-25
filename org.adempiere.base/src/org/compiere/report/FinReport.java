@@ -522,7 +522,7 @@ public class FinReport extends SvrProcess
 			// end globalqss
 		}
 
-			if (m_columns[col].isColumnTypeSegmentValue())
+			if (m_columns[col].isColumnTypeSegmentValue() || m_columns[col].isWithSources())
 				select.append(m_columns[col].getWhereClause(p_PA_Hierarchy_ID));
 			
 			//	Parameter Where
@@ -1800,7 +1800,7 @@ public class FinReport extends SvrProcess
 			if (s != null && s.length() > 0)
 				select.append(" AND ").append(s);
 			//	Limited Segment Values
-			if (m_columns[col].isColumnTypeSegmentValue())
+			if (m_columns[col].isColumnTypeSegmentValue() || m_columns[col].isWithSources())
 				select.append(m_columns[col].getWhereClause(p_PA_Hierarchy_ID));
 			
 			//	Parameter Where
