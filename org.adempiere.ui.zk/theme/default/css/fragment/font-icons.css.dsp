@@ -310,3 +310,12 @@
 .z-icon-Bars:before {
 	content: "\f0c9";
 }
+.z-icon-QuickForm:before {
+	content: "\f0ae";
+}
+.z-icon-UnSort:before {
+	content: "\f074";
+}
+.z-icon-CSVImport:before {
+	content: "\f01b";
+}
