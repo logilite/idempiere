@@ -167,4 +167,9 @@ public class HTMLExtension implements IHTMLExtension {
 		return fullPathExtraScriptUrls;
 	}
 
+	@Override
+	public String getComponentId( )
+	{
+		return componentId;
+	}
 }
