@@ -22,6 +22,7 @@ import java.sql.Array;
 import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -914,13 +915,29 @@ public class DataEngine
 		{
 			pstmt = DB.prepareStatement(pd.getSQL(), m_trxName);
 			rs = pstmt.executeQuery();
+
+			boolean isExistsT_Report_PA_ReportLine_ID = false;
+			if (pd.getTableName().equals("T_Report"))
+			{
+				ResultSetMetaData rsmd = rs.getMetaData();
+				for (int i = 1; i <= rsmd.getColumnCount(); i++)
+				{
+					if (rsmd.getColumnLabel(i).equalsIgnoreCase("PA_ReportLine_ID"))
+					{
+						isExistsT_Report_PA_ReportLine_ID = true;
+						break;
+					}
+				}
+			}
+
 			//	Row Loop
 			while (rs.next())
 			{
 				if (hasLevelNo)
 				{
 					levelNo = rs.getInt("LevelNo");
-					reportLineID = rs.getInt("PA_ReportLine_ID");
+					if (isExistsT_Report_PA_ReportLine_ID)
+						reportLineID = rs.getInt("PA_ReportLine_ID");
 				}
 				else
 					levelNo = 0;
