@@ -24,6 +24,7 @@ import java.util.logging.Level;
 
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFHeader;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Footer;
 import org.apache.poi.ss.usermodel.Header;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -182,14 +183,14 @@ public abstract class AbstractXLSXExporter
 			if (m_fontHeader == null)
 			{
 				m_fontHeader = m_workbook.createFont();
-				m_fontHeader.setBoldweight(XSSFFont.BOLDWEIGHT_BOLD);
+				m_fontHeader.setBold(true);
 			}
 			font = m_fontHeader;
 		}
 		else if (isFunctionRow())
 		{
 			font = m_workbook.createFont();
-			font.setBoldweight(XSSFFont.BOLDWEIGHT_BOLD);
+			font.setBold(true);
 			font.setItalic(true);
 		}
 		else
@@ -262,10 +263,10 @@ public abstract class AbstractXLSXExporter
 			XSSFFont font = getFont(false);
 			cs.setFont(font);
 			// Border
-			cs.setBorderLeft((short) 1);
-			cs.setBorderTop((short) 1);
-			cs.setBorderRight((short) 1);
-			cs.setBorderBottom((short) 1);
+			cs.setBorderLeft(BorderStyle.THIN);
+			cs.setBorderTop(BorderStyle.THIN);
+			cs.setBorderRight(BorderStyle.THIN);
+			cs.setBorderBottom(BorderStyle.THIN);
 			//
 			if (DisplayType.isDate(displayType))
 			{
@@ -291,10 +292,10 @@ public abstract class AbstractXLSXExporter
 			XSSFFont font_header = getFont(true);
 			cs_header = m_workbook.createCellStyle();
 			cs_header.setFont(font_header);
-			cs_header.setBorderLeft((short) 2);
-			cs_header.setBorderTop((short) 2);
-			cs_header.setBorderRight((short) 2);
-			cs_header.setBorderBottom((short) 2);
+			cs_header.setBorderLeft(BorderStyle.MEDIUM);
+			cs_header.setBorderTop(BorderStyle.MEDIUM);
+			cs_header.setBorderRight(BorderStyle.MEDIUM);
+			cs_header.setBorderBottom(BorderStyle.MEDIUM);
 			cs_header.setDataFormat(HSSFDataFormat.getBuiltinFormat("text"));
 			cs_header.setWrapText(true);
 			m_styles.put(key, cs_header);
