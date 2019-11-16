@@ -77,6 +77,7 @@
 							<goal>wget</goal>
 						</goals>
 						<configuration>
+							<id>poi</id>
 							<url>${lt.file.srv}/extra.jar/poi-4.1.0.jar</url>
 							<unpack>false</unpack>
 							<outputDirectory>lib</outputDirectory>
@@ -90,6 +91,7 @@
 							<goal>wget</goal>
 						</goals>
 						<configuration>
+							<id>poi-ooxml</id>
 							<url>${lt.file.srv}/extra.jar/poi-ooxml-4.1.0.jar</url>
 							<unpack>false</unpack>
 							<outputDirectory>lib</outputDirectory>
@@ -103,6 +105,7 @@
 							<goal>wget</goal>
 						</goals>
 						<configuration>
+							<id>poi-ooxml-schemas</id>
 							<url>${lt.file.srv}/extra.jar/poi-ooxml-schemas-4.1.0.jar</url>
 							<unpack>false</unpack>
 							<outputDirectory>lib</outputDirectory>
@@ -116,6 +119,7 @@
 							<goal>wget</goal>
 						</goals>
 						<configuration>
+							<id>xmlbeans</id>
 							<url>${lt.file.srv}/extra.jar/xmlbeans-3.1.0.jar</url>
 							<unpack>false</unpack>
 							<outputDirectory>lib</outputDirectory>
@@ -129,6 +133,7 @@
 							<goal>wget</goal>
 						</goals>
 						<configuration>
+							<id>commons-collection</id>
 							<url>${lt.file.srv}/extra.jar/commons-collections4-4.3.jar</url>
 							<unpack>false</unpack>
 							<outputDirectory>lib</outputDirectory>
@@ -142,6 +147,7 @@
 							<goal>wget</goal>
 						</goals>
 						<configuration>
+							<id>commons-compress</id>
 							<url>${lt.file.srv}/extra.jar/commons-compress-1.19.jar</url>
 							<unpack>false</unpack>
 							<outputDirectory>lib</outputDirectory>
