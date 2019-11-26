@@ -287,17 +287,21 @@ public class MReportSource extends X_PA_ReportSource
 	 * 	@param ctx context
 	 * 	@param AD_Client_ID parent
 	 * 	@param AD_Org_ID parent
-	 * 	@param PA_ReportLine_ID parent
+	 * 	@param parent_ID parent
 	 * 	@param source copy source
 	 * 	@param trxName transaction
+	 *  @param isReportLineSet
 	 * 	@return Report Source
 	 */
-	public static MReportSource copy (Properties ctx, int AD_Client_ID, int AD_Org_ID, 
-		int PA_ReportLine_ID, MReportSource source, String trxName)
+	public static MReportSource copy(Properties ctx, int AD_Client_ID, int AD_Org_ID, int parent_ID,
+			MReportSource source, String trxName, boolean isReportLineSet)
 	{
-		MReportSource retValue = new MReportSource (ctx, 0, trxName);
+		MReportSource retValue = new MReportSource(ctx, 0, trxName);
 		MReportSource.copyValues(source, retValue, AD_Client_ID, AD_Org_ID);
-		retValue.setPA_ReportLine_ID(PA_ReportLine_ID);
+		if (isReportLineSet)
+			retValue.setPA_ReportLine_ID(parent_ID);
+		else
+			retValue.setPA_ReportColumn_ID(parent_ID);
 		return retValue;
 	}	//	copy
 	
