@@ -2167,7 +2167,7 @@ public class FinReport extends SvrProcess
 	 */
 	private FinReportPeriod getPeriodTo(BigDecimal relativeOffsetTo)
 	{
-		if (relativeOffsetTo != null && !relativeOffsetTo.equals(BigDecimal.ZERO))
+		if (relativeOffsetTo != null)
 			return getPeriod(relativeOffsetTo);
 		return null;
 	} // getPeriodTo
