@@ -1611,10 +1611,10 @@ public class MInOut extends X_M_InOut implements DocAction
 					}
 					BigDecimal orderedQtyToUpdate = sLine.getMovementQty().subtract(overReceipt);
 					//
-					if (sLine.getM_AttributeSetInstance_ID() == 0)
+					MInOutLineMA mas[] = MInOutLineMA.get(getCtx(), sLine.getM_InOutLine_ID(), get_TrxName());
+					//If LineMA present then we use ASI from there instead of Line
+					if (sLine.getM_AttributeSetInstance_ID() == 0 || mas.length > 0)
 					{
-						MInOutLineMA mas[] = MInOutLineMA.get(getCtx(),
-							sLine.getM_InOutLine_ID(), get_TrxName());
 						for (int j = 0; j < mas.length; j++)
 						{
 							MInOutLineMA ma = mas[j];
