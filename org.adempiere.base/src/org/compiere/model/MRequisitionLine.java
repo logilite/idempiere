@@ -164,18 +164,6 @@ public class MRequisitionLine extends X_M_RequisitionLine
 	private int 	m_M_PriceList_ID = 0;
 	
 	/**
-	 * Get Ordered Qty
-	 * @return Ordered Qty
-	 */
-	public BigDecimal getQtyOrdered()
-	{
-		if (getC_OrderLine_ID() > 0)
-			return getQty();
-		else
-			return Env.ZERO;
-	}
-	
-	/**
 	 * 	Get Parent
 	 *	@return parent
 	 */
@@ -281,7 +269,6 @@ public class MRequisitionLine extends X_M_RequisitionLine
 		//
 		if (getPriceActual().signum() == 0)
 			setPrice();
-		setLineNetAmt();
 
 		/* Carlos Ruiz - globalqss
 		 * IDEMPIERE-178 Orders and Invoices must disallow amount lines without product/charge
@@ -292,6 +279,27 @@ public class MRequisitionLine extends X_M_RequisitionLine
 				return false;
 			}
 		}
+		
+		int M_Product_ID = getM_Product_ID();
+		int C_UOM_ID = getC_UOM_ID();
+		BigDecimal qty = getQty();
+		BigDecimal priceActual = getPriceActual();
+
+		BigDecimal qtyOrdered = MUOMConversion.convertProductFrom(getCtx(),
+				M_Product_ID, C_UOM_ID, qty);
+
+		if (qtyOrdered == null)
+			qtyOrdered = qty;
+
+		BigDecimal priceEntered = MUOMConversion.convertProductFrom(getCtx(),
+				M_Product_ID, C_UOM_ID, priceActual);
+
+		if (priceEntered == null)
+			priceEntered = priceActual;
+
+		setQtyOrdered(qtyOrdered);
+		setPriceEntered(priceEntered);
+		setLineNetAmt(qtyOrdered.multiply(getPriceActual()));
 		
 		return true;
 	}	//	beforeSave
