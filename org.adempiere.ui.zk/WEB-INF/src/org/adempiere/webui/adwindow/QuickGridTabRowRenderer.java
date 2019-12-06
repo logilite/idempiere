@@ -315,10 +315,7 @@ public class QuickGridTabRowRenderer
 				{
 					((WMultiSelectEditor) componentEditor).getComponent().addEventListener(Events.ON_FOCUS, gridPanel);
 				}
-				else if (componentEditor instanceof WMultiSelectEditor)
-				{
-					((WMultiSelectEditor) componentEditor).getComponent().addEventListener(Events.ON_FOCUS, gridPanel);
-				}
+				
 
 				if (gridPanelFields[i].isHeading()) {
 					component.setVisible(false);
