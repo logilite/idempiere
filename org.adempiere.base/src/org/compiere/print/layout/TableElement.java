@@ -1511,20 +1511,20 @@ public class TableElement extends PrintElement
 			MReportLine rLine = getReportLine(row, col);
 			if (rLine != null)
 			{
+				if (rLine.getOverline() > 1)
+				{
+					curY -= V_GAP + m_tFormat.getVLineStroke().floatValue();
+					g2D.setPaint(m_tFormat.getHeaderLine_Color());
+					g2D.setStroke(rLine.getOverlineStroke(m_tFormat.getVLineStroke()));
+					g2D.drawLine(curX, (int) (curY + m_tFormat.getVLineStroke().floatValue()),
+					             (int) (curX + colWidth - m_tFormat.getVLineStroke().floatValue()), (int) (curY + m_tFormat.getVLineStroke().floatValue()));
+					curY += V_GAP + m_tFormat.getVLineStroke().floatValue();
+				}
 				if (rLine.getOverline() > 0)
 				{
 					g2D.setPaint(m_tFormat.getHeaderLine_Color());
 					g2D.setStroke(rLine.getOverlineStroke(m_tFormat.getVLineStroke()));
 					g2D.drawLine(curX, curY, (int) (curX + colWidth - m_tFormat.getVLineStroke().floatValue()), curY);
-					curY += m_tFormat.getVLineStroke().floatValue();
-				}
-				if (rLine.getOverline() > 1)
-				{
-					curY += V_GAP;
-					g2D.setPaint(m_tFormat.getHeaderLine_Color());
-					g2D.setStroke(rLine.getOverlineStroke(m_tFormat.getVLineStroke()));
-					g2D.drawLine(curX, (int) (curY + m_tFormat.getVLineStroke().floatValue()),
-							(int) (curX + colWidth - m_tFormat.getVLineStroke().floatValue()), (int) (curY + m_tFormat.getVLineStroke().floatValue()));
 					curY += m_tFormat.getVLineStroke().floatValue();
 				}
 			}
@@ -1724,9 +1724,18 @@ public class TableElement extends PrintElement
 				}
 			}
 
+			// Maintain financial report detail and column section Y position 
+			if ((int) (rowYstart + rowHeight) > curY)
+			{
+				curY = (int) (rowYstart + rowHeight);
+			}
+
             //  X end line
             if (row == m_data.getRowCount()-1)         //  last Line
             {
+				// left some space between underline and last line
+				curY += 2 * V_GAP;
+
                 /**
                  * Bug fix - Bottom line was always displayed whether or not header lines was set to be visible
                  * @author ashley
@@ -1750,13 +1759,16 @@ public class TableElement extends PrintElement
                 boolean nextIsFunction = m_functionRows.contains(new Integer(row+1));
                 if (nextIsFunction && m_functionRows.contains(new Integer(row)))
                     nextIsFunction = false;     //  this is a function line too
-                if (nextIsFunction || (m_finReportSumRows.contains(new Integer(row + 1)) && getReportLine(row + 1,col) != null))
-                {
-                    g2D.setPaint(m_tFormat.getFunctFG_Color());
-                    g2D.setStroke(m_tFormat.getHLine_Stroke());
-                    g2D.drawLine(origX, curY,               //   -> - (bottom)
-                        (int)(origX+colWidth-m_tFormat.getVLineStroke().floatValue()), curY);
-                }
+                
+				MReportLine nextLine = getReportLine(row + 1, col);
+				if (nextIsFunction || (m_finReportSumRows.contains(Integer.valueOf(row + 1)) && nextLine != null
+				                       && nextLine.getOverline() == 0))
+				{
+					g2D.setPaint(m_tFormat.getFunctFG_Color());
+					g2D.setStroke(m_tFormat.getHLine_Stroke());
+					// -> - (bottom)
+					g2D.drawLine(origX, curY, (int) (origX + colWidth - m_tFormat.getVLineStroke().floatValue()), curY);
+				}
                 else if (m_tFormat.isPaintHLines())
                 {
                     g2D.setPaint(m_tFormat.getHLine_Color());
