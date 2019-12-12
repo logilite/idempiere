@@ -112,8 +112,8 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	 */
 	private static final long serialVersionUID = 8358292103127594383L;
 	protected Grid parameterGrid;
-	private Borderlayout layout;
-	private Vbox southBody;
+	protected Borderlayout layout;
+	protected Vbox southBody;
 	/** List of WEditors            */
     protected List<WEditor> editors;
     protected List<WEditor> identifiers;
@@ -132,8 +132,8 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	protected String queryValue;
 	protected WQuickEntry vqe;
 	
-	private List<GridField> gridFields;
-	private Checkbox checkAND;
+	protected List<GridField> gridFields;
+	protected Checkbox checkAND;
 	
 	/**
 	 * Menu contail process menu item
