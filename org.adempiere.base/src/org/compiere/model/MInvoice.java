@@ -549,7 +549,11 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		if (ii != 0)
 			setM_PriceList_ID(ii);
 		//
-		String ss = bp.getPaymentRule();
+		String ss = null;
+		if (isSOTrx())
+			ss = bp.getPaymentRule();
+		else
+			ss = bp.getPaymentRulePO();
 		if (ss != null)
 			setPaymentRule(ss);
 
