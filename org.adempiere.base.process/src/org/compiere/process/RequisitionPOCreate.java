@@ -16,12 +16,10 @@
  *****************************************************************************/
 package org.compiere.process;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.NoVendorForProductException;
@@ -82,13 +80,7 @@ public class RequisitionPOCreate extends SvrProcess
 	private int			p_C_BP_Group_ID = 0;
 	/** Requisition			*/
 	private int 		p_M_Requisition_ID = 0;
-	/** Project				*/
-	private int 		p_C_Project_ID = 0;
-	/** Campaign			*/
-	private int 		p_C_Campaign_ID = 0;
-	/** Charge 			*/
-	private int 		p_C_Charge_ID = 0;
-	
+
 	/** Consolidate			*/
 	private boolean		p_ConsolidateDocument = false;
 
@@ -138,12 +130,6 @@ public class RequisitionPOCreate extends SvrProcess
 				p_M_Requisition_ID = para[i].getParameterAsInt();
 			else if (name.equals("ConsolidateDocument"))
 				p_ConsolidateDocument = "Y".equals(para[i].getParameter());
-			else if (name.equals("C_Project_ID"))
-				p_C_Project_ID = para[i].getParameterAsInt();
-			else if (name.equals("C_Campaign_ID"))
-				p_C_Campaign_ID = para[i].getParameterAsInt();
-			else if (name.equals("C_Charge_ID"))
-				p_C_Charge_ID = para[i].getParameterAsInt();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -174,7 +160,6 @@ public class RequisitionPOCreate extends SvrProcess
 				}
 			}
 			closeOrder();
-			updateLogStatus();
 			return "";
 		}	//	single Requisition
 		
@@ -186,9 +171,6 @@ public class RequisitionPOCreate extends SvrProcess
 			+ ", PriorityRule=" + p_PriorityRule
 			+ ", AD_User_ID=" + p_AD_User_ID
 			+ ", M_Product_ID=" + p_M_Product_ID
-			+ ", C_Project_ID=" + p_C_Project_ID
-			+ ", C_Campaign_ID=" + p_C_Campaign_ID
-			+ ", C_Charge_ID=" + p_C_Charge_ID
 			+ ", ConsolidateDocument" + p_ConsolidateDocument);
 		
 		ArrayList<Object> params = new ArrayList<Object>();
@@ -260,28 +242,6 @@ public class RequisitionPOCreate extends SvrProcess
 			params.add(p_AD_User_ID);
 		}
 		whereClause.append(")"); // End Requisition Header
-		
-		// Project check on Requisition line
-		if (p_C_Project_ID > 0)
-		{
-			whereClause.append(" AND COALESCE (M_RequisitionLine.C_Project_ID, r.C_Project_ID) = ?");
-			params.add(p_C_Project_ID);
-		}
-		
-		// Campaign check on Requisition line
-		if (p_C_Campaign_ID > 0)
-		{
-			whereClause.append(" AND COALESCE (M_RequisitionLine.C_Campaign_ID, r.C_Campaign_ID) = ?");
-			params.add(p_C_Campaign_ID);
-		}
-	
-		// Charge check on Requisition line
-		if (p_C_Charge_ID > 0)
-		{
-			whereClause.append(" AND C_Charge_ID=?");
-			params.add(p_C_Charge_ID);
-		}
-		
 		//
 		// ORDER BY clause
 		StringBuilder orderClause = new StringBuilder();
@@ -290,12 +250,9 @@ public class RequisitionPOCreate extends SvrProcess
 			orderClause.append("M_Requisition_ID, ");
 		}
 		orderClause.append("(SELECT DateRequired FROM M_Requisition r WHERE M_RequisitionLine.M_Requisition_ID=r.M_Requisition_ID),");
-		orderClause.append("C_Project_ID, C_Campaign_ID, M_Product_ID, C_Charge_ID, M_AttributeSetInstance_ID ");
-		
-		String joinClause = "LEFT JOIN M_Requisition r ON r.M_Requisition_ID = M_RequisitionLine.M_Requisition_ID";
+		orderClause.append("M_Product_ID, C_Charge_ID, M_AttributeSetInstance_ID");
 		
 		POResultSet<MRequisitionLine> rs = new Query(getCtx(), MRequisitionLine.Table_Name, whereClause.toString(), get_TrxName())
-											.addJoinClause(joinClause)
 											.setParameters(params)
 											.setOrderBy(orderClause.toString())
 											.setClient_ID()
@@ -312,7 +269,6 @@ public class RequisitionPOCreate extends SvrProcess
 			DB.close(rs); rs = null;
 		}
 		closeOrder();
-		updateLogStatus();
 		return "";
 	}	//	doit
 	
@@ -347,8 +303,6 @@ public class RequisitionPOCreate extends SvrProcess
 			|| rLine.getC_Charge_ID() != 0		//	single line per charge
 			|| m_order == null
 			|| m_order.getDatePromised().compareTo(rLine.getDateRequired()) != 0
-			|| m_orderLine.getC_Project_ID() != rLine.getC_Project_ID()
-			|| m_orderLine.getC_Campaign_ID() != rLine.getC_Campaign_ID()
 			)
 		{
 			newLine(rLine);
@@ -357,6 +311,8 @@ public class RequisitionPOCreate extends SvrProcess
 				return;
 		}
 
+		//	Update Order Line
+		m_orderLine.setQty(m_orderLine.getQtyOrdered().add(rLine.getQty()));
 		//	Update Requisition Line
 		rLine.setC_OrderLine_ID(m_orderLine.getC_OrderLine_ID());
 		rLine.saveEx();
@@ -397,20 +353,6 @@ public class RequisitionPOCreate extends SvrProcess
 			m_order.setC_DocTypeTarget_ID();
 			m_order.setBPartner(m_bpartner);
 			m_order.setM_PriceList_ID(M_PriceList_ID);
-			
-			int C_Project_ID = rLine.getC_Project_ID();
-			if (C_Project_ID <= 0)
-				C_Project_ID = rLine.getParent().getC_Project_ID();
-			
-			m_order.setC_Project_ID(C_Project_ID);
-			
-			int C_Campaign_ID = rLine.getC_Campaign_ID();
-			if (C_Campaign_ID <= 0)
-				C_Campaign_ID = rLine.getParent().getC_Campaign_ID();
-			
-			m_order.setC_Campaign_ID(C_Campaign_ID);
-			m_order.setUser1_ID(rLine.getUser1_ID());
-			m_order.setUser2_ID(rLine.getUser2_ID());
 			//	default po document type
 			if (!p_ConsolidateDocument)
 			{
@@ -441,7 +383,7 @@ public class RequisitionPOCreate extends SvrProcess
 		{
 			m_order.load(get_TrxName());
 			String message = Msg.parseTranslation(getCtx(), "@GeneratedPO@ " + m_order.getDocumentNo());
-			if(log.isLoggable(Level.INFO)) log.info(message);
+			addBufferLog(0, null, m_order.getGrandTotal(), message, m_order.get_Table_ID(), m_order.getC_Order_ID());
 		}
 		m_order = null;
 		m_orderLine = null;
@@ -534,28 +476,6 @@ public class RequisitionPOCreate extends SvrProcess
 		//	Prepare Save
 		m_M_Product_ID = rLine.getM_Product_ID();
 		m_M_AttributeSetInstance_ID = rLine.getM_AttributeSetInstance_ID();
-
-		int C_Project_ID = rLine.getC_Project_ID();
-		if (C_Project_ID <= 0)
-			C_Project_ID = rLine.getParent().getC_Project_ID();
-		
-		m_orderLine.setC_Project_ID(C_Project_ID);
-		
-		int C_Campaign_ID = rLine.getC_Campaign_ID();
-		if (C_Campaign_ID <= 0)
-			C_Campaign_ID = rLine.getParent().getC_Campaign_ID();
-		
-		m_orderLine.setC_Campaign_ID(C_Campaign_ID);
-		m_orderLine.setDescription(rLine.getDescription());
-		m_orderLine.setC_UOM_ID(rLine.getC_UOM_ID());
-		m_orderLine.setQty((BigDecimal) rLine.getQty());
-		m_orderLine.setQtyOrdered((BigDecimal) rLine.getQtyOrdered());
-
-		m_orderLine.setPrice((BigDecimal) rLine.getPriceEntered());
-		m_orderLine.setPriceActual(rLine.getPriceActual());
-		m_orderLine.setLineNetAmt();
-		m_orderLine.setUser1_ID(rLine.getUser1_ID());
-		m_orderLine.setUser2_ID(rLine.getUser2_ID());
 		m_orderLine.saveEx();
 	}	//	newLine
 
@@ -583,17 +503,5 @@ public class RequisitionPOCreate extends SvrProcess
 		return match;
 	}
 	private List<Integer> m_excludedVendors = new ArrayList<Integer>();
-	
-	private void updateLogStatus()
-	{
-		String message = Msg.parseTranslation(getCtx(), "@GeneratedPO@ ");
-
-		for (Map.Entry<MultiKey, MOrder> entry : m_cacheOrders.entrySet())
-		{
-			m_order = entry.getValue();
-			addBufferLog(0, null, m_order.getGrandTotal(), message + m_order.getDocumentNo(), m_order.get_Table_ID(),
-					m_order.getC_Order_ID());
-		}
-	}
 	
 }	//	RequisitionPOCreate
