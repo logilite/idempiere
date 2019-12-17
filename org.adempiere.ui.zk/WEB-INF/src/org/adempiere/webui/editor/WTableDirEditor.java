@@ -225,6 +225,8 @@ ContextMenuListener, IZoomableEditor
         	}
         	//	IDEMPIERE 90
         }
+        if (gridField != null)
+        	getComponent().setPlaceholder(gridField.getPlaceholder());
     }
 
 	private void createCacheListener() {

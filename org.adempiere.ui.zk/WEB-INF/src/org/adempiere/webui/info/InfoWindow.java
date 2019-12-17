@@ -109,10 +109,11 @@ import org.zkoss.zul.Vbox;
  * @contributor xolali 	IDEMPIERE-1045 Sub-Info Tabs  (reviewed by red1)
  */
 public class InfoWindow extends InfoPanel implements ValueChangeListener, EventListener<Event> {
+
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 5041961608373943362L;
+	private static final long serialVersionUID = 3063157632586650122L;
 
 	protected Grid parameterGrid;
 	protected Borderlayout layout;
@@ -539,7 +540,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				boolean isMandatory = !m_lookup && infoColumn.isMandatory() && (infoColumn.isQueryCriteria() || !infoColumn.isReadOnly());
 				GridFieldVO vo = GridFieldVO.createParameter(infoContext, p_WindowNo, AEnv.getADWindowID(p_WindowNo), infoWindow.getAD_InfoWindow_ID(), 0,
 						columnName, infoColumn.get_Translation("Name"), infoColumn.getAD_Reference_ID(), 
-						infoColumn.getAD_Reference_Value_ID(), isMandatory, false);
+						infoColumn.getAD_Reference_Value_ID(), isMandatory, false, infoColumn.get_Translation("Placeholder"));
 				if (infoColumn.getAD_Val_Rule_ID() > 0) {
 					vo.ValidationCode = infoColumn.getAD_Val_Rule().getCode();
 					if (vo.lookupInfo != null) {
@@ -1999,7 +2000,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		String columnName = infoColumn.getColumnName();
 		GridFieldVO vo = GridFieldVO.createParameter(infoContext, p_WindowNo, AEnv.getADWindowID(p_WindowNo), m_infoWindowID, 0,
 				columnName, infoColumn.get_Translation("Name"), infoColumn.getAD_Reference_ID(),
-				infoColumn.getAD_Reference_Value_ID(), false, false);
+				infoColumn.getAD_Reference_Value_ID(), false, false, infoColumn.get_Translation("Placeholder"));
 		if (infoColumn.getAD_Val_Rule_ID() > 0) {
 			vo.ValidationCode = infoColumn.getAD_Val_Rule().getCode();
 			if (vo.lookupInfo != null) {
