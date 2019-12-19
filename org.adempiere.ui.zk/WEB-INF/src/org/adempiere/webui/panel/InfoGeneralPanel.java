@@ -513,7 +513,7 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 					list.add(new ColumnInfo(Msg.translate(Env.getCtx(), columnName), colSql.toString(), colClass));
 					if (log.isLoggable(Level.FINEST)) log.finest("Added Column=" + columnName);
 				}
-				else if (DisplayType.isLookup(displayType))
+				else if (isDisplayed && DisplayType.isLookup(displayType))
 				{
 					ColumnInfo colInfo = createLookupColumnInfo(Msg.translate(Env.getCtx(), columnName), columnName, displayType, AD_Reference_Value_ID, AD_Column_ID);
 					if (colInfo != null)
