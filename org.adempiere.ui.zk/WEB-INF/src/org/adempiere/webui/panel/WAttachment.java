@@ -326,7 +326,7 @@ public class WAttachment extends Window implements EventListener<Event>
 		previewPanel.setStyle("border: 3px solid #cfcfcf; background: #efefef;");
 		ZKUpdateUtil.setVflex(preview, "1");
 		ZKUpdateUtil.setHflex(preview, "1");
-		preview.setWidth("99%");
+		ZKUpdateUtil.setHeight(preview, "99%");
 		
 		Center centerPane = new Center();
 		centerPane.setSclass("dialog-content");
