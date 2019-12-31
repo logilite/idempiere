@@ -42,6 +42,7 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Util;
 import org.zkoss.zul.ListModel;
+import org.zkoss.zul.event.ZulEvents;
 
 /**
  * Replacement for the Swing client minigrid component
@@ -585,6 +586,15 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 
 		clearTable();
 
+		if ("paging".equals(getMold()))
+		{
+			if (getItemRenderer() instanceof WListItemRenderer)
+			{
+				this.removeEventListener(ZulEvents.ON_PAGING, (WListItemRenderer) getItemRenderer());
+				this.addEventListener(ZulEvents.ON_PAGING, (WListItemRenderer) getItemRenderer());
+			}
+		}
+
 		try
 		{
 			while (rs.next())
@@ -704,6 +714,15 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 
 		//  Clear Table
 		clearTable();
+
+		if ("paging".equals(getMold()))
+		{
+			if (getItemRenderer() instanceof WListItemRenderer)
+			{
+				this.removeEventListener(ZulEvents.ON_PAGING, (WListItemRenderer) getItemRenderer());
+				this.addEventListener(ZulEvents.ON_PAGING, (WListItemRenderer) getItemRenderer());
+			}
+		}
 
 		for (poIndex = 0; poIndex < pos.length; poIndex++)
 		{

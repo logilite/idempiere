@@ -125,14 +125,15 @@ import org.zkoss.zul.Vlayout;
  * @contributor xolali 	IDEMPIERE-1045 Sub-Info Tabs  (reviewed by red1)
  */
 public class InfoWindow extends InfoPanel implements ValueChangeListener, EventListener<Event> {
+
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 5041961608373943362L;
+	private static final long serialVersionUID = 3063157632586650122L;
 
 	protected Grid parameterGrid;
-	private Borderlayout layout;
-	private Vbox southBody;
+	protected Borderlayout layout;
+	protected Vbox southBody;
 	/** List of WEditors            */
     protected List<WEditor> editors;
     protected List<WEditor> identifiers;
@@ -152,8 +153,8 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	protected String queryValue;
 	protected WQuickEntry vqe;
 	
-	private List<GridField> gridFields;
-	private Checkbox checkAND;
+	protected List<GridField> gridFields;
+	protected Checkbox checkAND;
 		
 	// F3P: Keep original values: when a row is unselected, restore original values
 		
@@ -170,7 +171,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	 * Menu contail process menu item
 	 */
 	protected Menupopup ipMenu;
-	private int noOfParameterColumn;
+	protected int noOfParameterColumn;
 	/**
 	 * @param WindowNo
 	 * @param tableName
@@ -1643,7 +1644,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		return dataSql;
 	}
 
-    private String getOtherClauseParsed() {
+    protected String getOtherClauseParsed() {
     	String otherClause = "";
         if (infoWindow != null && infoWindow.getOtherClause() != null && infoWindow.getOtherClause().trim().length() > 0) {
         	otherClause = infoWindow.getOtherClause();
@@ -1932,7 +1933,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	}	//	testCount
 
 	/** Return true if there is an 'IsActive' criteria */
-	boolean hasIsActiveEditor() {
+	protected boolean hasIsActiveEditor() {
 		for (WEditor editor : editors) {
 			if (editor.getGridField() != null && "IsActive".equals(editor.getGridField().getColumnName())) {
 				return true;

@@ -77,6 +77,21 @@ public interface I_PA_Report
 
 	public org.compiere.model.I_AD_PrintFormat getAD_PrintFormat() throws RuntimeException;
 
+    /** Column name AD_PrintFormatHeader_ID */
+    public static final String COLUMNNAME_AD_PrintFormatHeader_ID = "AD_PrintFormatHeader_ID";
+
+	/** Set Header Print Format.
+	  * Header data print format
+	  */
+	public void setAD_PrintFormatHeader_ID (int AD_PrintFormatHeader_ID);
+
+	/** Get Header Print Format.
+	  * Header data print format
+	  */
+	public int getAD_PrintFormatHeader_ID();
+
+	public org.compiere.model.I_AD_PrintFormat getAD_PrintFormatHeader() throws RuntimeException;
+
     /** Column name C_AcctSchema_ID */
     public static final String COLUMNNAME_C_AcctSchema_ID = "C_AcctSchema_ID";
 

@@ -204,4 +204,10 @@ public class GridTabXLSXExporter extends AbstractXLSXExporter implements IGridTa
 	{
 		return false;
 	}
+
+	@Override
+	public boolean isDisplayed(int row, int col)
+	{
+		return true;
+	}
 }

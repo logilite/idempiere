@@ -20,6 +20,9 @@ function drillDown(cmpid, column, value){
 }
 
 function showColumnMenu(e, columnName, row) {
+	if(e && e.currentTarget)
+		e.currentTarget.style.color='red';
+
 	var d = getMenu (e.target.getAttribute ("componentId"), e.target.getAttribute ("foreignColumnName"), e.target.getAttribute ("value"));
 	
 	var posx = 0;

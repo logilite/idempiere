@@ -43,4 +43,6 @@ public interface IHTMLExtension {
 	public List<String> getExtraScriptURLs();
 
 	public List<String> getFullPathExtraScriptURLs();
+
+	public String getComponentId();
 }

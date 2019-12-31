@@ -16,9 +16,13 @@
  *****************************************************************************/
 package org.compiere.report;
 
+import java.awt.BasicStroke;
+import java.awt.Stroke;
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -39,6 +43,11 @@ public class MReportLine extends X_PA_ReportLine
 	 * 
 	 */
 	private static final long serialVersionUID = -3957315092529097396L;
+
+	private BasicStroke			overline_Stroke;
+	private Stroke				underline_Stroke;
+	private String				m_selectClauseCombination	= null;
+	List<String>				combinationGroupBy			= new ArrayList<String>();
 
 	/**
 	 * 	Constructor
@@ -141,7 +150,15 @@ public class MReportLine extends X_PA_ReportLine
 		String ColumnName = null;
 		for (int i = 0; i < m_sources.length; i++)
 		{
-			String col = MAcctSchemaElement.getColumnName (m_sources[i].getElementType());
+			String col = null;
+			if (m_sources[i].getElementType().equals(MReportSource.ELEMENTTYPE_Combination))
+			{
+				col = m_sources[i].getCombinationKey();
+			}
+			else
+			{
+				col = MAcctSchemaElement.getColumnName(m_sources[i].getElementType());
+			}
 			if (ColumnName == null || ColumnName.length() == 0)
 				ColumnName = col;
 			else if (!ColumnName.equals(col))
@@ -422,5 +439,204 @@ public class MReportLine extends X_PA_ReportLine
 		return retValue;
 	}	//	copy
 
+	/**
+	 * Get overline style 0 - none, 1 - single, 2 - double
+	 * 
+	 * @return int - Style No
+	 */
+	public int getOverline( )
+	{
+		if (OVERLINESTROKETYPE_Dotted.equals(getOverlineStrokeType())	|| OVERLINESTROKETYPE_Solid.equals(getOverlineStrokeType())
+			|| OVERLINESTROKETYPE_Dashed.equals(getOverlineStrokeType()))
+			return 1;
+		else if (OVERLINESTROKETYPE_DoubleDotted.equals(getOverlineStrokeType())	|| OVERLINESTROKETYPE_DoubleSolid.equals(getOverlineStrokeType())
+					|| OVERLINESTROKETYPE_DoubleDashed.equals(getOverlineStrokeType()))
+			return 2;
+		return 0;
+	} // getOverline
+
+	/**
+	 * Get OverLine Stroke
+	 * 
+	 * @return line based on line (1/2 of) width and stroke (default dotted 1/2p
+	 */
+	public Stroke getOverlineStroke(BigDecimal stroke)
+	{
+		if (overline_Stroke == null)
+		{
+			float width = stroke.floatValue() / 2;
+			// . . .
+			if (UNDERLINESTROKETYPE_Dotted.equals(getOverlineStrokeType()) || UNDERLINESTROKETYPE_DoubleDotted.equals(getOverlineStrokeType()))
+				overline_Stroke = new BasicStroke(width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 1.0f, getPatternDotted(width), 0.0f);
+			// -
+			else if (UNDERLINESTROKETYPE_Solid.equals(getOverlineStrokeType()) || UNDERLINESTROKETYPE_DoubleSolid.equals(getOverlineStrokeType()))
+				overline_Stroke = new BasicStroke(width);
+			// - -
+			else if (UNDERLINESTROKETYPE_Dashed.equals(getOverlineStrokeType()) || UNDERLINESTROKETYPE_DoubleDashed.equals(getOverlineStrokeType()))
+				overline_Stroke = new BasicStroke(width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 1.0f, getPatternDashed(width), 0.0f);
+		}
+		return overline_Stroke;
+	} // getUnderine_Stroke
+
+	/**
+	 * Get underline style 0 - none 1 - single 2 - double
+	 * 
+	 * @return int - Style No
+	 */
+	public int getUnderline( )
+	{
+		if (UNDERLINESTROKETYPE_Dotted.equals(getUnderlineStrokeType())	|| UNDERLINESTROKETYPE_Solid.equals(getUnderlineStrokeType())
+			|| UNDERLINESTROKETYPE_Dashed.equals(getUnderlineStrokeType()))
+			return 1;
+		else if (UNDERLINESTROKETYPE_DoubleDotted.equals(getUnderlineStrokeType())	|| UNDERLINESTROKETYPE_DoubleSolid.equals(getUnderlineStrokeType())
+					|| UNDERLINESTROKETYPE_DoubleDashed.equals(getUnderlineStrokeType()))
+			return 2;
+		return 0;
+	} // getUnderline
+
+	/**
+	 * Get UnderLine Stroke
+	 * 
+	 * @return line based on line (1/2 of) width and stroke (default dotted 1/2p
+	 */
+	public Stroke getUnderlineStroke(BigDecimal stroke)
+	{
+		if (underline_Stroke == null)
+		{
+			float width = stroke.floatValue() / 2;
+			// . . .
+			if (UNDERLINESTROKETYPE_Dotted.equals(getUnderlineStrokeType()) || UNDERLINESTROKETYPE_DoubleDotted.equals(getUnderlineStrokeType()))
+				underline_Stroke = new BasicStroke(width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 1.0f, getPatternDotted(width), 0.0f);
+			// -
+			else if (UNDERLINESTROKETYPE_Solid.equals(getUnderlineStrokeType()) || UNDERLINESTROKETYPE_DoubleSolid.equals(getUnderlineStrokeType()))
+				underline_Stroke = new BasicStroke(width);
+			// - -
+			else if (UNDERLINESTROKETYPE_Dashed.equals(getUnderlineStrokeType()) || UNDERLINESTROKETYPE_DoubleDashed.equals(getUnderlineStrokeType()))
+				underline_Stroke = new BasicStroke(width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 1.0f, getPatternDashed(width), 0.0f);
+		}
+		return underline_Stroke;
+	} // getUnderine_Stroke
+
+	/**
+	 * Get Pattern Dotted . . . .
+	 * 
+	 * @param width - Width of line
+	 * @return pattern
+	 */
+	private float[] getPatternDotted(float width)
+	{
+		return new float[] { 2 * width, 2 * width };
+	} // getPatternDotted
+
+	/**
+	 * Get Pattern Dashed - - - -
+	 * 
+	 * @param width - Width of line
+	 * @return pattern
+	 */
+	private float[] getPatternDashed(float width)
+	{
+		return new float[] { 10 * width, 4 * width };
+	} // getPatternDashed
+
+	/**
+	 * Get Select Clause for Combination
+	 * 
+	 * @return selectClause
+	 */
+	public String getSelectClauseCombination( )
+	{
+		if (m_sources == null)
+			return "";
+		if (m_selectClauseCombination == null)
+		{
+			if (m_sources.length == 0)
+				m_selectClauseCombination = "";
+			else
+			{
+				MReportSource source = m_sources[0];
+				StringBuffer select = new StringBuffer("");
+				if (source.getOrg_ID() != 0 || source.isIncludeNullsOrg())
+				{
+					select.append(" AND fb.").append(MReportSource.COLUMNNAME_AD_Org_ID).append("=x.").append(MReportSource.COLUMNNAME_AD_Org_ID);
+					combinationGroupBy.add(MReportSource.COLUMNNAME_AD_Org_ID);
+				}
+				if (source.getAD_OrgTrx_ID() != 0 || source.isIncludeNullsOrgTrx())
+				{
+					select.append(" AND fb.").append(MReportSource.COLUMNNAME_AD_OrgTrx_ID).append("=x.").append(MReportSource.COLUMNNAME_AD_OrgTrx_ID);
+					combinationGroupBy.add(MReportSource.COLUMNNAME_AD_OrgTrx_ID);
+				}
+				if (source.getC_ElementValue_ID() != 0 || source.isIncludeNullsElementValue())
+				{
+					select.append(" AND fb.").append("Account_ID").append("=x.").append("Account_ID");
+					combinationGroupBy.add("Account_ID");
+				}
+				if (source.getC_BPartner_ID() != 0 || source.isIncludeNullsBPartner())
+				{
+					select.append(" AND fb.").append(MReportSource.COLUMNNAME_C_BPartner_ID).append("=x.").append(MReportSource.COLUMNNAME_C_BPartner_ID);
+					combinationGroupBy.add(MReportSource.COLUMNNAME_C_BPartner_ID);
+				}
+				if (source.getM_Product_ID() != 0 || source.isIncludeNullsProduct())
+				{
+					select.append(" AND fb.").append(MReportSource.COLUMNNAME_M_Product_ID).append("=x.").append(MReportSource.COLUMNNAME_M_Product_ID);
+					combinationGroupBy.add(MReportSource.COLUMNNAME_M_Product_ID);
+				}
+				if (source.getC_Location_ID() != 0 || source.isIncludeNullsLocation())
+				{
+					select.append(" AND fb.").append("C_LocFrom_ID").append("=x.").append("C_LocFrom_ID");
+					combinationGroupBy.add("C_LocFrom_ID");
+				}
+				if (source.getC_Project_ID() != 0 || source.isIncludeNullsProject())
+				{
+					select.append(" AND fb.").append(MReportSource.COLUMNNAME_C_Project_ID).append("=x.").append(MReportSource.COLUMNNAME_C_Project_ID);
+					combinationGroupBy.add(MReportSource.COLUMNNAME_C_Project_ID);
+				}
+				if (source.getC_SalesRegion_ID() != 0 || source.isIncludeNullsSalesRegion())
+				{
+					select.append(" AND fb.").append(MReportSource.COLUMNNAME_C_SalesRegion_ID).append("=x.").append(MReportSource.COLUMNNAME_C_SalesRegion_ID);
+					combinationGroupBy.add(MReportSource.COLUMNNAME_C_SalesRegion_ID);
+				}
+				if (source.getC_Activity_ID() != 0 || source.isIncludeNullsActivity())
+				{
+					select.append(" AND fb.").append(MReportSource.COLUMNNAME_C_Activity_ID).append("=x.").append(MReportSource.COLUMNNAME_C_Activity_ID);
+					combinationGroupBy.add(MReportSource.COLUMNNAME_C_Activity_ID);
+				}
+				if (source.getC_Campaign_ID() != 0 || source.isIncludeNullsCampaign())
+				{
+					select.append(" AND fb.").append(MReportSource.COLUMNNAME_C_Campaign_ID).append("=x.").append(MReportSource.COLUMNNAME_C_Campaign_ID);
+					combinationGroupBy.add(MReportSource.COLUMNNAME_C_Campaign_ID);
+				}
+				if (source.getUserElement1_ID() != 0 || source.isIncludeNullsUserElement1())
+				{
+					select.append(" AND fb.").append(MReportSource.COLUMNNAME_UserElement1_ID).append("=x.").append(MReportSource.COLUMNNAME_UserElement1_ID);
+					combinationGroupBy.add(MReportSource.COLUMNNAME_UserElement1_ID);
+				}
+				if (source.getUser1_ID() != 0 || source.isIncludeNullsUserList1())
+				{
+					select.append(" AND fb.").append(MReportSource.COLUMNNAME_User1_ID).append("=x.").append(MReportSource.COLUMNNAME_User1_ID);
+					combinationGroupBy.add(MReportSource.COLUMNNAME_User1_ID);
+				}
+				if (source.getUser2_ID() != 0 || source.isIncludeNullsUserList2())
+				{
+					select.append(" AND fb.").append(MReportSource.COLUMNNAME_User2_ID).append("=x.").append(MReportSource.COLUMNNAME_User2_ID);
+					combinationGroupBy.add(MReportSource.COLUMNNAME_User2_ID);
+				}
+				m_selectClauseCombination = select.toString();
+			}
+
+			log.fine(m_selectClauseCombination);
+		}
+		return m_selectClauseCombination;
+	} // getSelectClauseCombination
+
+	/**
+	 * Get Combination Group By Clause
+	 * 
+	 * @return combinationGroupBy
+	 */
+	public List <String> getCombinationGroupByColumns( )
+	{
+		return combinationGroupBy;
+	} // getCombinationGroupByColumns
 
 }	//	MReportLine

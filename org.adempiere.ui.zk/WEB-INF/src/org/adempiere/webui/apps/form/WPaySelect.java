@@ -464,7 +464,7 @@ public class WPaySelect extends PaySelect
 	 */
 	public void tableChanged(WTableModelEvent e)
 	{
-		if (e.getColumn() == 0)
+		if (e.getColumn() <= 0)
 			calculateSelection();
 	}   //  valueChanged
 

@@ -181,6 +181,9 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element
 				   || elementType.equals(ELEMENTTYPE_UserColumn2)) {
 			return null;
 		}
+		else if (elementType.equals("CO"))
+			return "SELECT Combination, Description FROM C_ValidCombination WHERE C_ValidCombination_ID=";
+
 		//
 		return "";
 	}   //  getColumnName
@@ -425,9 +428,7 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element
 		if (getAD_Org_ID() != 0)
 			setAD_Org_ID(0);
 		String et = getElementType();
-		if (isMandatory() &&
-			(ELEMENTTYPE_UserElementList1.equals(et) || ELEMENTTYPE_UserElementList2.equals(et)
-			|| ELEMENTTYPE_UserColumn1.equals(et) || ELEMENTTYPE_UserColumn2.equals(et)))
+		if (isMandatory() && (ELEMENTTYPE_UserColumn1.equals(et) || ELEMENTTYPE_UserColumn2.equals(et)))
 			setIsMandatory(false);
 		// Acct Schema Elements "Account" and "Org" should be mandatory - teo_sarca BF [ 1795817 ]
 		if (ELEMENTTYPE_Account.equals(et) || ELEMENTTYPE_Organization.equals(et)) {

@@ -154,6 +154,19 @@ public interface I_PA_ReportLine
 	  */
 	public boolean isPrinted();
 
+    /** Column name IsShowOppositeSign */
+    public static final String COLUMNNAME_IsShowOppositeSign = "IsShowOppositeSign";
+
+	/** Set Show Opposite Sign.
+	  * Display values with the opposite sign
+	  */
+	public void setIsShowOppositeSign (boolean IsShowOppositeSign);
+
+	/** Get Show Opposite Sign.
+	  * Display values with the opposite sign
+	  */
+	public boolean isShowOppositeSign();
+
     /** Column name LineType */
     public static final String COLUMNNAME_LineType = "LineType";
 
@@ -288,6 +301,24 @@ public interface I_PA_ReportLine
  lowest number comes first
 	  */
 	public int getSeqNo();
+ 
+   /** Column name OverlineStrokeType */
+    public static final String COLUMNNAME_OverlineStrokeType = "OverlineStrokeType";
+
+	/** Set Overline Stroke Type	  */
+	public void setOverlineStrokeType (String OverlineStrokeType);
+
+	/** Get Overline Stroke Type	  */
+	public String getOverlineStrokeType();
+
+    /** Column name UnderlineStrokeType */
+    public static final String COLUMNNAME_UnderlineStrokeType = "UnderlineStrokeType";
+
+	/** Set Underline Stroke Type	  */
+	public void setUnderlineStrokeType (String UnderlineStrokeType);
+
+	/** Get Underline Stroke Type	  */
+	public String getUnderlineStrokeType();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

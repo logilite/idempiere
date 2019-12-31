@@ -57,7 +57,7 @@ public class Match
 	private static CLogger log = CLogger.getCLogger(Match.class);
 
 	/** Match Options           */
-	private String[] m_matchOptions = new String[] {
+	protected String[] m_matchOptions = new String[] {
 		Msg.getElement(Env.getCtx(), "C_Invoice_ID", false),
 		Msg.getElement(Env.getCtx(), "M_InOut_ID", false),
 		Msg.getElement(Env.getCtx(), "C_Order_ID", false) };
@@ -78,17 +78,17 @@ public class Match
 	
 
 	
-	private StringBuffer    m_sql = null;
-	private String          m_dateColumn = "";
-	private String          m_qtyColumn = "";
-	private String          m_groupBy = "";
-	private StringBuffer	m_linetype = null;
+	protected StringBuffer    m_sql = null;
+	protected String          m_dateColumn = "";
+	protected String          m_qtyColumn = "";
+	protected String          m_groupBy = "";
+	protected StringBuffer	m_linetype = null;
 	protected boolean		isMatchInvHdrEnabled = false;
 	
 	//private BigDecimal      m_xMatched = Env.ZERO;
 	//private BigDecimal      m_xMatchedTo = Env.ZERO;
 	
-	private MMatchInvHdr		matchInvHdr			= null;
+	protected MMatchInvHdr		matchInvHdr			= null;
 	
 	/**
 	 * 
@@ -777,7 +777,7 @@ public class Match
 			//	Create PO - Shipment Link
 			if (sLine.getM_Product_ID() != 0)
 			{
-				MMatchPO match = new MMatchPO (sLine, null, qty);
+				MMatchPO match = MMatchPO.createFrom(sLine, null, qty);
 				match.setC_OrderLine_ID(Line_ID);
 				if (!match.save())
 				{

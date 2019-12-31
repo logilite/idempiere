@@ -586,6 +586,30 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 		return false;
 	}
 
+	/** Set Allow Opposite Sign.
+		@param IsAllowOppositeSign 
+		Allow column values to be displayed with the opposite sign
+	  */
+	public void setIsAllowOppositeSign (boolean IsAllowOppositeSign)
+	{
+		set_Value (COLUMNNAME_IsAllowOppositeSign, Boolean.valueOf(IsAllowOppositeSign));
+	}
+
+	/** Get Allow Opposite Sign.
+		@return Allow column values to be displayed with the opposite sign
+	  */
+	public boolean isAllowOppositeSign () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsAllowOppositeSign);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Include Nulls in Activity.
 		@param IsIncludeNullsActivity 
 		Include nulls in the selection of the activity
@@ -1217,6 +1241,26 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public BigDecimal getRelativePeriod () 
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_RelativePeriod);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Relative Period To.
+		@param RelativePeriodTo 
+		Period offset (0 is current)
+	  */
+	public void setRelativePeriodTo (BigDecimal RelativePeriodTo)
+	{
+		set_Value (COLUMNNAME_RelativePeriodTo, RelativePeriodTo);
+	}
+
+	/** Get Relative Period To.
+		@return Period offset (0 is current)
+	  */
+	public BigDecimal getRelativePeriodTo () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_RelativePeriodTo);
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;

@@ -47,7 +47,7 @@ public class GridFieldVO implements Serializable
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -1752172363171842152L;
+	private static final long serialVersionUID = -3894697577296104861L;
 
 	/**
 	 *  Return the SQL statement used for the MFieldVO.create
@@ -446,8 +446,11 @@ public class GridFieldVO implements Serializable
 
 	/**
 	 * Create parameter for infoWindow
+	 * 
 	 * @param ctx
 	 * @param WindowNo
+	 * @param WindowIDOfPanel
+	 * @param infoWindowID
 	 * @param AD_Column_ID
 	 * @param ColumnName
 	 * @param Name
@@ -455,6 +458,30 @@ public class GridFieldVO implements Serializable
 	 * @param AD_Reference_Value_ID
 	 * @param IsMandatory
 	 * @param IsEncrypted
+	 * @return
+	 */
+	public static GridFieldVO createParameter(Properties ctx, int WindowNo, int WindowIDOfPanel, int infoWindowID,
+	    int AD_Column_ID, String ColumnName, String Name, int AD_Reference_ID, int AD_Reference_Value_ID,
+	    boolean IsMandatory, boolean IsEncrypted)
+	{
+		return GridFieldVO.createParameter(ctx, WindowNo, WindowIDOfPanel, infoWindowID, AD_Column_ID, ColumnName, Name, AD_Reference_ID, AD_Reference_Value_ID, IsMandatory, IsEncrypted, null);
+	}
+
+	/**
+	 * Create parameter for infoWindow
+	 * 
+	 * @param ctx
+	 * @param WindowNo
+	 * @param WindowIDOfPanel
+	 * @param infoWindowID
+	 * @param AD_Column_ID
+	 * @param ColumnName
+	 * @param Name
+	 * @param AD_Reference_ID
+	 * @param AD_Reference_Value_ID
+	 * @param IsMandatory
+	 * @param IsEncrypted
+	 * @param Placeholder
 	 * @return
 	 */
 	public static GridFieldVO createParameter (Properties ctx, int WindowNo, int WindowIDOfPanel, int infoWindowID,
@@ -848,6 +875,7 @@ public class GridFieldVO implements Serializable
 		//  Process Parameter
 		clone.isRange = isRange;
 		clone.DefaultValue2 = DefaultValue2;
+		clone.Placeholder = Placeholder;
 		clone.Placeholder2 = Placeholder2;
 		clone.AD_Process_ID_Of_Panel = AD_Process_ID_Of_Panel;
 		clone.AD_Window_ID_Of_Panel = AD_Window_ID_Of_Panel;

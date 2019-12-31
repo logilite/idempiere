@@ -331,6 +331,19 @@ public interface I_PA_ReportColumn
 	  */
 	public boolean isAdhocConversion();
 
+    /** Column name IsAllowOppositeSign */
+    public static final String COLUMNNAME_IsAllowOppositeSign = "IsAllowOppositeSign";
+
+	/** Set Allow Opposite Sign.
+	  * Allow column values to be displayed with the opposite sign
+	  */
+	public void setIsAllowOppositeSign (boolean IsAllowOppositeSign);
+
+	/** Get Allow Opposite Sign.
+	  * Allow column values to be displayed with the opposite sign
+	  */
+	public boolean isAllowOppositeSign();
+
     /** Column name IsIncludeNullsActivity */
     public static final String COLUMNNAME_IsIncludeNullsActivity = "IsIncludeNullsActivity";
 
@@ -672,6 +685,19 @@ public interface I_PA_ReportColumn
 	  * Period offset (0 is current)
 	  */
 	public BigDecimal getRelativePeriod();
+
+    /** Column name RelativePeriodTo */
+    public static final String COLUMNNAME_RelativePeriodTo = "RelativePeriodTo";
+
+	/** Set Relative Period To.
+	  * Period offset (0 is current)
+	  */
+	public void setRelativePeriodTo (BigDecimal RelativePeriodTo);
+
+	/** Get Relative Period To.
+	  * Period offset (0 is current)
+	  */
+	public BigDecimal getRelativePeriodTo();
 
     /** Column name SeqNo */
     public static final String COLUMNNAME_SeqNo = "SeqNo";

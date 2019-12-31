@@ -75,9 +75,12 @@ import org.apache.ecs.xhtml.th;
 import org.apache.ecs.xhtml.thead;
 import org.apache.ecs.xhtml.tr;
 import org.compiere.model.I_AD_PrintFormat;
+import org.compiere.model.MAllocationHdr;
+import org.compiere.model.MAllocationLine;
 import org.compiere.model.MClient;
 import org.compiere.model.MColumn;
 import org.compiere.model.MDunningRunEntry;
+import org.compiere.model.MFactAcct;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInventory;
 import org.compiere.model.MInvoice;
@@ -93,12 +96,15 @@ import org.compiere.model.MTable;
 import org.compiere.model.PrintInfo;
 import org.compiere.model.MRMA;
 import org.compiere.print.layout.LayoutEngine;
+import org.compiere.print.layout.PrintDataEvaluatee;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ServerProcessCtl;
+import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
+import org.compiere.util.Evaluator;
 import org.compiere.util.Ini;
 import org.compiere.util.Language;
 import org.compiere.util.Trx;
@@ -197,6 +203,9 @@ public class ReportEngine implements PrintServiceAttributeListener
 	/**	Static Logger	*/
 	private static CLogger	log	= CLogger.getCLogger (ReportEngine.class);
 
+	/** Cache TableName, Child table Line_ID reference */
+	private static CCache <String, String>		cacheLineIDTableRef	= new CCache <String, String>("LINE_ID_COLUMN_TABLE_REF", 10);
+	
 	/**	Context					*/
 	private Properties		m_ctx;
 
@@ -787,7 +796,8 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 							td.setStyle(style);
 
 							Object obj = m_printData.getNode(new Integer(item.getAD_Column_ID()));
-							if (obj == null){
+							if (obj == null || !isDisplayPFItem(item))
+							{
 								td.addElement("&nbsp;");
 								if (colSuppressRepeats != null && colSuppressRepeats[printColIndex]){
 									preValues[printColIndex] = null;
@@ -807,11 +817,14 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 									}
 								}
 
-								if (pde.getColumnName().endsWith("_ID") && extension != null && !isExport)
+								if (pde.getColumnName().endsWith("_ID") && extension != null && !isExport && !DisplayType.isMultiSelect(pde.getDisplayType()))
 								{
 									boolean isZoom = false;
-									if (item.getColumnName().equals("Record_ID")) {
-										Object tablePDE = m_printData.getNode("AD_Table_ID");
+									boolean isDirectZoom = false;
+
+									if (item.getColumnName().equals(MFactAcct.COLUMNNAME_Record_ID) || item.getColumnName().equals(MFactAcct.COLUMNNAME_Line_ID))
+									{
+										Object tablePDE = m_printData.getNode(MFactAcct.COLUMNNAME_AD_Table_ID);
 										if (tablePDE != null && tablePDE instanceof PrintDataElement) {
 											int tableID = -1;
 											try {
@@ -821,15 +834,36 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 											}
 											if (tableID > 0) {
 												MTable mTable = MTable.get(getCtx(), tableID);
-												String foreignColumnName = mTable.getTableName() + "_ID";
-												pde.setForeignColumnName(foreignColumnName);
-												isZoom = true;
+												String foreignColumnName;
+												if (item.getColumnName().equals(MFactAcct.COLUMNNAME_Record_ID)) {
+													foreignColumnName = mTable.getTableName() + "_ID";
+												} else { // for Line_ID
+													if (mTable.getTableName().equals(MAllocationHdr.Table_Name)) {
+														foreignColumnName = MAllocationLine.COLUMNNAME_C_AllocationLine_ID;
+													} else {
+														if (cacheLineIDTableRef.containsKey(mTable.getTableName())) {
+															foreignColumnName = cacheLineIDTableRef.get(mTable.getTableName());
+														} else {
+															foreignColumnName = mTable.getTableName() + "Line_ID";
+															if (!DB.getSQLValueBooleanEx(null, "SELECT COUNT(1)>0 FROM AD_Column WHERE ColumnName=?", foreignColumnName))
+																foreignColumnName = "";
+															cacheLineIDTableRef.put(mTable.getTableName(), foreignColumnName);
+														}
+													}
+												}
+
+												if (!Util.isEmpty(foreignColumnName, true))
+												{
+													pde.setForeignColumnName(foreignColumnName);
+													isDirectZoom = true;
+													isZoom = true;
+												}
 											}
 										}
 									} else {
 										isZoom = true;
 									}
-									if (isZoom) {
+									if (isZoom || isDirectZoom) {
 										// check permission on the zoomed window
 										MTable mTable = MTable.get(getCtx(), pde.getForeignColumnName().substring(0, pde.getForeignColumnName().length()-3));
 										int Record_ID = -1;
@@ -845,14 +879,16 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 										}
 							    		if (canAccess == null) {
 							    			isZoom = false;
+							    			isDirectZoom = false;
 							    		}
 									}
-									if (isZoom) {
-										//link for column
-										a href = new a("javascript:void(0)");									
-										href.setID(pde.getColumnName() + "_" + row + "_a");									
+
+									if (isDirectZoom || isZoom) {
+										// link for column
+										a href = new a("javascript:void(0)");
+										href.setID(pde.getColumnName() + "_" + row + "_a");
 										td.addElement(href);
-										if (item.getColumnName().equals("Record_ID")) {
+										if (item.getColumnName().equals(MFactAcct.COLUMNNAME_Record_ID) || isDirectZoom) {
 											if (cssPrefix != null)
 												href.setClass(cssPrefix + "-image");
 										} else {
@@ -860,7 +896,11 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 											if (cssPrefix != null)
 												href.setClass(cssPrefix + "-href");
 										}
-										extension.extendIDColumn(row, td, href, pde);
+
+										if (isDirectZoom)
+											href.addAttribute("onclick", "parent.zoom('" + extension.getComponentId() + "','" + pde.getForeignColumnName() + "','" + pde.getValueAsString() + "')");
+										else
+											extension.extendIDColumn(row, td, href, pde);
 									} else {
 										td.addElement(Util.maskHTML(value));
 									}
@@ -1020,7 +1060,8 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 							printColIndex++;
 							Object obj = m_printData.getNode(Integer.valueOf(item.getAD_Column_ID()));
 							String data = "";
-							if (obj == null){
+							if (obj == null || !isDisplayPFItem(item))
+							{
 								if (colSuppressRepeats != null && colSuppressRepeats[printColIndex]){
 									preValues[printColIndex] = null;
 								}
@@ -2405,4 +2446,12 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		}
 	}
 	
+	private boolean isDisplayPFItem(MPrintFormatItem item)
+	{
+		if(Util.isEmpty(item.getDisplayLogic()))
+			return true;
+		
+		return Evaluator.evaluateLogic(new PrintDataEvaluatee(null, m_printData), item.getDisplayLogic());
+	}
+
 }	//	ReportEngine

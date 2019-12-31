@@ -32,10 +32,10 @@ import org.adempiere.webui.component.Checkbox;
 import org.adempiere.webui.component.Columns;
 import org.adempiere.webui.component.Combobox;
 import org.adempiere.webui.component.Grid;
-import org.adempiere.webui.component.MultiSelectBox;
 import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.component.Searchbox;
 import org.adempiere.webui.editor.WEditor;
+import org.adempiere.webui.editor.WMultiSelectEditor.ChosenboxEditor;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.SortComparator;
@@ -53,7 +53,6 @@ import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.zkforge.keylistener.Keylistener;
 import org.zkoss.lang.Library;
-import org.zkoss.zk.au.out.AuScript;
 import org.zkoss.zk.ui.AbstractComponent;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.IdSpace;
@@ -788,7 +787,7 @@ public class QuickGridView extends Vbox
 
 			// Navigate in item selection popup then no action
 			if ((code == KeyEvent.DOWN || code == KeyEvent.UP) && renderer.getCurrentCell() != null
-					&& renderer.getCurrentCell().getChildren().get(0) instanceof Combobox)
+			    && (renderer.getCurrentCell().getChildren().get(0) instanceof Combobox || renderer.getCurrentCell().getChildren().get(0) instanceof ChosenboxEditor))
 			{
 				return;
 			}
@@ -797,9 +796,10 @@ public class QuickGridView extends Vbox
 			{
 				// If Search text is empty on ENTER key event then as default behavior to open Search Dialog otherwise move to down.
 				Cell cell = renderer.getCurrentCell();
-				if (cell != null && cell.getChildren().get(0) instanceof Searchbox
-						&& !((Searchbox) cell.getChildren().get(0)).getText().isEmpty()
-						&& (Boolean) ((Searchbox) cell.getChildren().get(0)).getAttribute(WSearchEditor.ATTRIBUTE_IS_INFO_PANEL_OPEN))
+				if (cell != null && (cell.getChildren().get(0) instanceof Searchbox
+				                     && !((Searchbox) cell.getChildren().get(0)).getText().isEmpty()
+				                     && (Boolean) ((Searchbox) cell.getChildren().get(0)).getAttribute(WSearchEditor.ATTRIBUTE_IS_INFO_PANEL_OPEN))
+				    || (cell.getChildren().get(0) instanceof ChosenboxEditor && ((ChosenboxEditor) cell.getChildren().get(0)).isOpen()))
 				{
 					event.stopPropagation();
 					return;
@@ -1056,12 +1056,10 @@ public class QuickGridView extends Vbox
 
 				if (focusedRowIndex != row % pageSize)
 				{
-					// remove all pop-up dialog list box
-					String script = "$('.z-combobox-open').remove()";
-					Clients.response(new AuScript(script));
+					// hide all pop-up dialog list box
 					Component component = source.getChildren().get(0);
-					if (component instanceof MultiSelectBox && ((MultiSelectBox) component).isEnabled() && ((MultiSelectBox) component).getPopupComponent().isVisible())
-						((MultiSelectBox) component).getPopupComponent().close();
+					if (component instanceof ChosenboxEditor && ((ChosenboxEditor) component).isEnabled() && ((ChosenboxEditor) component).isOpen())
+						((ChosenboxEditor) component).setOpen(false);
 					
 					int rowChangedIndex = gridTab.getTableModel().getRowChanged();
 					if (rowChangedIndex == row)

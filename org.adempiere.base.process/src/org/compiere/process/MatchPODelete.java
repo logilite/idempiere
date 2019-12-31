@@ -61,7 +61,6 @@ public class MatchPODelete extends SvrProcess
 
 		String msg = "";
 
-		MMatchPO po = new MMatchPO (getCtx(), p_M_MatchPO_ID, get_TrxName());
 		if (po.get_ID() == 0)
 			throw new AdempiereUserError("@NotFound@ @M_MatchPO_ID@ " + p_M_MatchPO_ID);
 		int reversalId = po.getReversal_ID();

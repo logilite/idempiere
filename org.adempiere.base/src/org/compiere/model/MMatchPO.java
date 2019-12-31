@@ -93,7 +93,7 @@ public class MMatchPO extends X_M_MatchPO
 			pstmt.setInt (2, C_InvoiceLine_ID);
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
-				list.add (new MMatchPO (ctx, rs, trxName));
+				list.add((MMatchPO) MTable.get(ctx, MMatchPO.Table_ID).getPO(rs, trxName));
 		}
 		catch (Exception e)
 		{
@@ -132,7 +132,7 @@ public class MMatchPO extends X_M_MatchPO
 			pstmt.setInt (1, M_InOutLine_ID);
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
-				list.add (new MMatchPO (ctx, rs, trxName));
+				list.add((MMatchPO) MTable.get(ctx, MMatchPO.Table_ID).getPO(rs, trxName));
 		}
 		catch (Exception e)
 		{
@@ -181,7 +181,7 @@ public class MMatchPO extends X_M_MatchPO
 			pstmt.setInt (1, M_InOut_ID);
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
-				list.add (new MMatchPO (ctx, rs, trxName));
+				list.add((MMatchPO) MTable.get(ctx, MMatchPO.Table_ID).getPO(rs, trxName));
 		}
 		catch (Exception e)
 		{
@@ -222,7 +222,7 @@ public class MMatchPO extends X_M_MatchPO
 			pstmt.setInt (1, C_Invoice_ID);
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
-				list.add (new MMatchPO (ctx, rs, trxName));
+				list.add((MMatchPO) MTable.get(ctx, MMatchPO.Table_ID).getPO(rs, trxName));
 		}
 		catch (Exception e)
 		{
@@ -261,7 +261,7 @@ public class MMatchPO extends X_M_MatchPO
 			pstmt.setInt (1, C_OrderLine_ID);
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
-				list.add (new MMatchPO (ctx, rs, trxName));
+				list.add((MMatchPO) MTable.get(ctx, MMatchPO.Table_ID).getPO(rs, trxName));
 		}
 		catch (Exception e)
 		{
@@ -473,7 +473,7 @@ public class MMatchPO extends X_M_MatchPO
 			{				
 				if (qty.signum() != 0)
 				{
-					retValue = new MMatchPO (sLine, dateTrx, qty);
+					retValue = MMatchPO.createFrom(sLine, dateTrx, qty);
 					retValue.setC_OrderLine_ID(C_OrderLine_ID);
 					MMatchPO otherMatchPO = null;
 					if (iLine == null) {
@@ -536,7 +536,7 @@ public class MMatchPO extends X_M_MatchPO
 					
 					if(qty.signum() > 0)
 					{
-						retValue = new MMatchPO (iLine, dateTrx, qty);
+						retValue = MMatchPO.createFrom(iLine, dateTrx, qty);
 						retValue.setC_OrderLine_ID(C_OrderLine_ID);
 						if (!retValue.save())
 						{
@@ -785,6 +785,7 @@ public class MMatchPO extends X_M_MatchPO
 	 *	@param dateTrx optional date
 	 *	@param qty matched quantity
 	 */
+	@Deprecated
 	public MMatchPO (MInOutLine sLine, Timestamp dateTrx, BigDecimal qty)
 	{
 		this (sLine.getCtx(), 0, sLine.get_TrxName());
@@ -798,6 +799,28 @@ public class MMatchPO extends X_M_MatchPO
 		setQty (qty);
 		setProcessed(true);		//	auto
 	}	//	MMatchPO
+	
+	/**
+	 * 	Create MatchPO from Shipment Line
+	 *	@param sLine shipment line
+	 *	@param dateTrx optional date
+	 *	@param qty matched quantity
+	 */
+	public static MMatchPO createFrom(MInOutLine sLine, Timestamp dateTrx, BigDecimal qty)
+	{
+		MMatchPO mPO = (MMatchPO) MTable.get(sLine.getCtx(), MMatchPO.Table_ID).getPO(0, sLine.get_TrxName());
+		mPO.setClientOrg(sLine);
+		mPO.setM_InOutLine_ID(sLine.getM_InOutLine_ID());
+		mPO.setC_OrderLine_ID(sLine.getC_OrderLine_ID());
+		if (dateTrx != null)
+			mPO.setDateTrx(dateTrx);
+		mPO.setM_Product_ID(sLine.getM_Product_ID());
+		mPO.setM_AttributeSetInstance_ID(sLine.getM_AttributeSetInstance_ID());
+		mPO.setQty(qty);
+		mPO.setProcessed(true); // auto
+
+		return mPO;
+	} // MMatchPO
 
 	/**
 	 * 	Invoice Line Constructor
@@ -805,6 +828,7 @@ public class MMatchPO extends X_M_MatchPO
 	 *	@param dateTrx optional date
 	 *	@param qty matched quantity
 	 */
+	@Deprecated
 	public MMatchPO (MInvoiceLine iLine, Timestamp dateTrx, BigDecimal qty)
 	{
 		this (iLine.getCtx(), 0, iLine.get_TrxName());
@@ -819,6 +843,29 @@ public class MMatchPO extends X_M_MatchPO
 		setQty (qty);
 		setProcessed(true);		//	auto
 	}	//	MMatchPO
+	
+	/**
+	 * 	Create MatchPO from Invoice Line
+	 *	@param iLine invoice line
+	 *	@param dateTrx optional date
+	 *	@param qty matched quantity
+	 */
+	public static MMatchPO createFrom(MInvoiceLine iLine, Timestamp dateTrx, BigDecimal qty)
+	{
+		MMatchPO mPO = (MMatchPO) MTable.get(iLine.getCtx(), MMatchPO.Table_ID).getPO(0, iLine.get_TrxName());
+		mPO.setClientOrg(iLine);
+		mPO.setC_InvoiceLine_ID(iLine);
+		if (iLine.getC_OrderLine_ID() != 0)
+			mPO.setC_OrderLine_ID(iLine.getC_OrderLine_ID());
+		if (dateTrx != null)
+			mPO.setDateTrx(dateTrx);
+		mPO.setM_Product_ID(iLine.getM_Product_ID());
+		mPO.setM_AttributeSetInstance_ID(iLine.getM_AttributeSetInstance_ID());
+		mPO.setQty(qty);
+		mPO.setProcessed(true); // auto
+
+		return mPO;
+	} // MMatchPO
 	
 	/** Invoice Changed			*/
 	protected boolean m_isInvoiceLineChange = false;
@@ -989,7 +1036,7 @@ public class MMatchPO extends X_M_MatchPO
 					{
 						MInvoiceLine il = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(
 								mpi[i].getC_InvoiceLine_ID(), get_TrxName());
-						MMatchPO match = new MMatchPO(il, getDateTrx(), availableQty);
+						MMatchPO match = MMatchPO.createFrom(il, getDateTrx(), availableQty);
 						match.setC_OrderLine_ID(getC_OrderLine_ID());
 						if (!match.save())
 						{
@@ -1322,10 +1369,10 @@ public class MMatchPO extends X_M_MatchPO
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
-				MMatchPO po1 = new MMatchPO (ctx, rs, null);
+				MMatchPO po1 = (MMatchPO) MTable.get(ctx, MMatchPO.Table_ID).getPO(rs, null);
 				if (rs.next())
 				{
-					MMatchPO po2 = new MMatchPO (ctx, rs, null);
+					MMatchPO po2 = (MMatchPO) MTable.get(ctx, MMatchPO.Table_ID).getPO(rs, null);
 					if (po1.getM_InOutLine_ID() != 0 && po1.getC_InvoiceLine_ID() == 0 
 						&& po2.getM_InOutLine_ID() == 0 && po2.getC_InvoiceLine_ID() != 0)
 					{
@@ -1382,7 +1429,7 @@ public class MMatchPO extends X_M_MatchPO
 	{
 		if (this.isProcessed() && this.getReversal_ID() == 0)
 		{		
-			MMatchPO reversal = new MMatchPO (getCtx(), 0, get_TrxName());
+			MMatchPO reversal = (MMatchPO) MTable.get(getCtx(), MMatchPO.Table_ID).getPO(0, get_TrxName());
 			reversal.setC_InvoiceLine_ID(getC_InvoiceLine_ID()); 
 			reversal.setM_InOutLine_ID(getM_InOutLine_ID());
 			if (getC_OrderLine_ID() != 0)			
@@ -1429,7 +1476,7 @@ public class MMatchPO extends X_M_MatchPO
 				
 				if (matchQty.signum() != 0)
 				{
-					MMatchPO matchPO = new MMatchPO (getCtx(), 0, get_TrxName());		
+					MMatchPO matchPO = (MMatchPO) MTable.get(getCtx(), MMatchPO.Table_ID).getPO(0, get_TrxName());
 					matchPO.setC_OrderLine_ID(getC_OrderLine_ID());
 					matchPO.setC_InvoiceLine_ID(getC_InvoiceLine_ID()); 
 					matchPO.setM_InOutLine_ID(0);
