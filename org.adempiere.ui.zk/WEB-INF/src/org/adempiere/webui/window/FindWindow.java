@@ -54,6 +54,7 @@ import org.adempiere.webui.component.ListHead;
 import org.adempiere.webui.component.ListHeader;
 import org.adempiere.webui.component.ListItem;
 import org.adempiere.webui.component.Listbox;
+import org.adempiere.webui.component.MultiSelectBox;
 import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.Row;
 import org.adempiere.webui.component.Rows;
@@ -62,7 +63,6 @@ import org.adempiere.webui.component.ToolBar;
 import org.adempiere.webui.component.ToolBarButton;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.editor.WEditor;
-import org.adempiere.webui.editor.WMultiSelectEditor.ChosenboxEditor;
 import org.adempiere.webui.editor.WNumberEditor;
 import org.adempiere.webui.editor.WPaymentEditor;
 import org.adempiere.webui.editor.WStringEditor;
@@ -1682,7 +1682,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
             	  if(dtbox.getValue() != null)
             		 value = new Timestamp(((Date)dtbox.getValue()).getTime());
             }
-            else if(compo instanceof ChosenboxEditor) {
+            else if(compo instanceof MultiSelectBox) {
 				value = Util.convertArrayToStringForDB(cellQueryFrom.getAttribute("value"));
 			}
             else {

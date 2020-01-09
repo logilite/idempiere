@@ -10,34 +10,36 @@
 package org.adempiere.webui.editor;
 
 import java.beans.PropertyChangeEvent;
-import java.util.LinkedHashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 
 import org.adempiere.webui.ValuePreference;
 import org.adempiere.webui.adwindow.QuickGridTabRowRenderer;
+import org.adempiere.webui.component.MultiSelectBox;
 import org.adempiere.webui.event.ContextMenuEvent;
 import org.adempiere.webui.event.ContextMenuListener;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.window.WFieldRecordInfo;
 import org.compiere.model.GridField;
 import org.compiere.model.Lookup;
-import org.compiere.model.MLookup;
 import org.compiere.util.CCache;
-import org.compiere.util.CacheMgt;
 import org.compiere.util.DisplayType;
+import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
-import org.zkoss.addon.chosenbox.Chosenbox;
-import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.Executions;
-import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zk.ui.util.DesktopCleanup;
-import org.zkoss.zul.ListModelList;
+import org.zkoss.zk.ui.event.OpenEvent;
+import org.zkoss.zul.Checkbox;
 
 /**
  * Multiple Selection items from the List ( IDEMPIERE-3413 )
@@ -45,27 +47,21 @@ import org.zkoss.zul.ListModelList;
  * @author Logilite Technologies
  * @since Aug 07, 2017
  */
-public class WMultiSelectEditor extends WEditor implements ContextMenuListener
+public class WMultiSelectEditor extends WEditor implements EventListener<Event>, ContextMenuListener, ListDataListener
 {
 
-	public final static String[]	LISTENER_EVENTS	= { Events.ON_SELECT };
+	private static final String[]	LISTENER_EVENTS	= { Events.ON_CLICK, Events.ON_OK };
+
+	public CCacheListener			tableCacheListener;
 
 	private Lookup					lookup;
 	private Object					oldValue;
 
-	public CCacheListener			tableCacheListener;
-
-	private boolean					onselecting		= false;
-
-	private ListModelList<Object>	model			= new ListModelList<>();
-
 	public WMultiSelectEditor(GridField gridField)
 	{
-		super(new ChosenboxEditor(), gridField);
+		super(new MultiSelectBox(), gridField);
+		((MultiSelectBox) getComponent()).editor = this;
 		lookup = gridField.getLookup();
-		if (lookup == null)
-			throw new IllegalArgumentException("Lookup cannot be null");
-
 		init();
 	}
 
@@ -74,173 +70,50 @@ public class WMultiSelectEditor extends WEditor implements ContextMenuListener
 	 */
 	private void init()
 	{
-		getComponent().setHflex("true");
-		getComponent().editor = this;
-		getComponent().setModel(model);
+		getComponent().getPopupComponent().addEventListener(Events.ON_OPEN, this);
+		getComponent().getTextbox().addEventListener(Events.ON_CLICK, this);
 
 		if (lookup != null)
 		{
-			lookup.setMandatory(true);
-
-			//no need to refresh readonly lookup
-			if (isReadWrite())
-			{
-				refreshLookup();
-			}
-			else
-			{
-				updateModel();
-			}
+			lookup.addListDataListener(this);
+			refreshList();
 		}
-
-		if (gridField != null)
-		{
-			popupMenu = new WEditorPopupMenu(false, true, isShowPreference(), false, false, false, lookup);
-			addChangeLogMenu(popupMenu);
-		}
+		popupMenu = new WEditorPopupMenu(false, true, isShowPreference());
+		addChangeLogMenu(popupMenu);
 	} // init
 
-	protected void refreshLookup()
-	{
-		lookup.refresh();
-		updateModel();
-	} // refreshLookup
-
 	@Override
-	public String getDisplay()
+	public MultiSelectBox getComponent()
 	{
-		StringBuilder display = new StringBuilder();
-		LinkedHashSet<Object> selected = getComponent().getSelectedObjects();
-		if (selected != null && selected.size() > 0)
-		{
-			for (Object pair : selected)
-			{
-				if (display.length() > 0)
-					display.append(", ");
-
-				if (lookup.getDisplayType() == DisplayType.MultiSelectTable)
-					display.append(((KeyNamePair) pair).getName());
-				else
-					display.append(((ValueNamePair) pair).getName());
-			}
-		}
-
-		return display.toString();
-	} // getDisplay
-
-	@Override
-	public Object getValue()
-	{
-		return oldValue;
+		return (MultiSelectBox) super.getComponent();
 	}
 
-	/**
-	 * @return Array of data
-	 */
-	private Object getValueFromComponent()
+	@Override
+	public void onEvent(Event event) throws Exception
 	{
-		LinkedHashSet<Object> selected = getComponent().getSelectedObjects();
-		if (selected != null && selected.size() > 0)
+		if (event.getName().equals(Events.ON_CLICK))
 		{
-			int i = 0;
-			if (DisplayType.MultiSelectTable == lookup.getDisplayType())
+			Object isQuickFormComponent = getComponent().getAttribute(QuickGridTabRowRenderer.IS_QUICK_FORM_COMPONENT);
+			if (isQuickFormComponent != null && (Boolean) isQuickFormComponent)
+				Events.postEvent(Events.ON_FOCUS, event.getTarget(), null);
+			if (event.getTarget() == getComponent().getTextbox() && isReadWrite())
+				getComponent().getPopupComponent().open(getComponent().getTextbox(), "after_start");
+		}
+		else if (event.getName().equals(Events.ON_OPEN) && event.getTarget() == getComponent().getPopupComponent())
+		{
+			OpenEvent oe = (OpenEvent) event;
+			if (!oe.isOpen())
 			{
-				Integer keys[] = new Integer[selected.size()];
-				for (Object obj : selected)
-				{
-					KeyNamePair pair = (KeyNamePair) obj;
-					keys[i] = pair.getKey();
-					i++;
-				}
-				return keys;
-			}
-			else
-			{
-				String keys[] = new String[selected.size()];
-				for (Object obj : selected)
-				{
-					ValueNamePair pair = (ValueNamePair) obj;
-					keys[i] = pair.getValue();
-					i++;
-				}
-				return keys;
+				isValueChange(getValue(), true);
+				setComponentTextValue(getPrintableValue(oldValue));
 			}
 		}
-		return null;
-	} // getValueFromComponent
+	} // onEvent
 
 	@Override
-	public void setValue(Object value)
+	public void setReadWrite(boolean readWrite)
 	{
-		if (onselecting)
-		{
-			return;
-		}
-
-		if (value == null
-		    || (DisplayType.MultiSelectTable == lookup.getDisplayType() && value instanceof Integer[] && ((Integer[]) value).length == 0)
-		    || (DisplayType.MultiSelectList == lookup.getDisplayType() && value instanceof String[] && ((String[]) value).length == 0))
-		{
-			getComponent().setSelectedObjects(new LinkedHashSet<Object>());
-			oldValue = value;
-		}
-		else
-		{
-			Set<Object> selected = createNamePairSetFromValue(value);
-
-			getComponent().setSelectedObjects(selected);
-
-			boolean isQuickFormComp = false;
-			if (getComponent().getAttribute(QuickGridTabRowRenderer.IS_QUICK_FORM_COMPONENT) != null)
-				isQuickFormComp = (boolean) getComponent().getAttribute(QuickGridTabRowRenderer.IS_QUICK_FORM_COMPONENT);
-			if (getComponent().getSelectedObjects().size() != selected.size() || isQuickFormComp)
-			{
-				Object newValue = getValueFromComponent();
-				ValueChangeEvent changeEvent = new ValueChangeEvent(this, this.getColumnName(), value, newValue);
-				super.fireValueChange(changeEvent);
-				oldValue = value;
-			}
-			else
-			{
-				oldValue = value;
-			}
-		}
-
-	} // setValue
-
-	public Set<Object> createNamePairSetFromValue(Object value)
-	{
-		Set<Object> selected = new LinkedHashSet<>();
-		if (value != null)
-		{
-			if (DisplayType.MultiSelectTable == lookup.getDisplayType())
-			{
-				Integer keys[] = (Integer[]) value;
-				for (Integer key : keys)
-				{
-					String name = lookup.getDisplay(key);
-					KeyNamePair pair = new KeyNamePair(key, name);
-					selected.add(pair);
-				}
-			}
-			else
-			{
-				String keys[] = (String[]) value;
-				for (String key : keys)
-				{
-					String name = lookup.getDisplay(key);
-					ValueNamePair pair = new ValueNamePair(key, name);
-					selected.add(pair);
-				}
-			}
-		}
-		return selected;
-	} // createNamePairSetFromValue
-
-	@Override
-	public ChosenboxEditor getComponent()
-	{
-		return (ChosenboxEditor) component;
+		getComponent().setEditable(readWrite);
 	}
 
 	@Override
@@ -250,84 +123,119 @@ public class WMultiSelectEditor extends WEditor implements ContextMenuListener
 	}
 
 	@Override
-	public void setReadWrite(boolean readWrite)
+	public void setValue(Object newValue)
 	{
-		getComponent().setEnabled(readWrite);
-	}
-
-	/**
-	 * Update selection list items
-	 */
-	private void updateModel()
-	{
-		Set<Object> list = new LinkedHashSet<>();
-
-		if (isReadWrite())
+		if (newValue == null
+				|| (DisplayType.MultiSelectTable == lookup.getDisplayType() && newValue instanceof Integer[]
+						&& ((Integer[]) newValue).length == 0)
+				|| (DisplayType.MultiSelectList == lookup.getDisplayType() && newValue instanceof String[]
+						&& ((String[]) newValue).length == 0))
 		{
-			for (int i = 0; i < lookup.getSize(); i++)
+			for (Checkbox cbx : getComponent().getCheckboxList())
 			{
-				Object pair = lookup.getElementAt(i);
-				if (pair instanceof KeyNamePair)
-				{
-					KeyNamePair lookupKNPair = (KeyNamePair) pair;
-					list.add(lookupKNPair);
-				}
-				else if (pair instanceof ValueNamePair)
-				{
-					ValueNamePair lookupKNPair = (ValueNamePair) pair;
-					list.add(lookupKNPair);
-				}
+				if (cbx.isChecked())
+					cbx.setChecked(false);
 			}
+			oldValue = null;
+			setComponentTextValue(Msg.getMsg(Env.getCtx(), "PleaseSelect"));
+			return;
+		}
+
+		boolean isValueSame = isValueChange(newValue, false);
+
+		setComponentTextValue(getPrintableValue(oldValue));
+
+		/**
+		 * Fire value change event. For Example, Item X is selected and Deleting
+		 * X item from the referenced table then fires value change event for
+		 * the field that containing window is opened.
+		 */
+		if (isValueSame)
+			isValueChange(getValue(), true);
+
+	} // setValue
+
+	public boolean isValueChange(Object newValue, boolean isFireChangeEvent)
+	{
+		if (DisplayType.MultiSelectTable == lookup.getDisplayType())
+		{
+			Integer values[] = (Integer[]) newValue;
+			if (Arrays.equals(getSortedSelectedItems(false), values))
+				return true;
+			if (isFireChangeEvent)
+			{
+				ValueChangeEvent changeValue = new ValueChangeEvent(this, getColumnName(), oldValue, values);
+				super.fireValueChange(changeValue);
+			}
+			oldValue = values;
 		}
 		else
 		{
-			if (oldValue != null)
+			String values[] = (String[]) newValue;
+			if (Arrays.equals(getSortedSelectedItems(false), values))
+				return true;
+			if (isFireChangeEvent)
 			{
-
-				list = createNamePairSetFromValue(oldValue);
+				ValueChangeEvent changeValue = new ValueChangeEvent(this, getColumnName(), oldValue, values);
+				super.fireValueChange(changeValue);
 			}
+			oldValue = values;
 		}
 
-		model.clear();
-		model.addAll(list);
-	} // updateModel
+		return false;
+	} // isValueChange
 
-	@Override
-	public void onEvent(Event event)
+	public String getPrintableValue(Object values)
 	{
-		if (Events.ON_SELECT.equalsIgnoreCase(event.getName()))
+		StringBuffer sb = new StringBuffer();
+
+		if (values == null)
+			return Msg.getMsg(Env.getCtx(), "PleaseSelect");
+
+		for (Checkbox cbx : getComponent().getCheckboxList())
 		{
-			try
+			String val = cbx.getAttribute(MultiSelectBox.ATTRIBUTE_MULTI_SELECT).toString();
+			if (DisplayType.MultiSelectTable == lookup.getDisplayType())
 			{
-				onselecting = true;
-				Object newValue = getValueFromComponent();
-				if (isValueChange(newValue))
+				for (Integer value : (Integer[]) values)
 				{
-					try
+					if (value.compareTo(new Integer(val)) == 0)
 					{
-						if (gridField != null)
-							gridField.setLookupEditorSettingValue(true);
-						ValueChangeEvent changeEvent = new ValueChangeEvent(this, this.getColumnName(), oldValue, newValue);
-						super.fireValueChange(changeEvent);
-						oldValue = newValue;
+						cbx.setChecked(true);
+						sb.append(cbx.getLabel()).append("; ");
+						break;
 					}
-					finally
-					{
-						if (gridField != null)
-							gridField.setLookupEditorSettingValue(false);
-					}
+					cbx.setChecked(false);
 				}
 			}
-			finally
+			else
 			{
-				onselecting = false;
+				for (String value : (String[]) values)
+				{
+					if (value.equals(val))
+					{
+						cbx.setChecked(true);
+						sb.append(cbx.getLabel()).append("; ");
+						break;
+					}
+					cbx.setChecked(false);
+				}
 			}
 		}
-	} // onEvent
 
-	private boolean isValueChange(Object newValue)
+		return sb.toString();
+	} // getPrintableValue
+
+	@Override
+	public Object getValue()
 	{
-		return (oldValue == null && newValue != null) || (oldValue != null && newValue == null) || ((oldValue != null && newValue != null) && !oldValue.equals(newValue));
+		return getSortedSelectedItems(true);
+	}
+
+	@Override
+	public String getDisplay()
+	{
+		return getComponent().getTextbox().getText();
 	}
 
 	@Override
@@ -336,20 +244,102 @@ public class WMultiSelectEditor extends WEditor implements ContextMenuListener
 		return LISTENER_EVENTS;
 	}
 
-	public void actionRefresh()
+	/**
+	 * The sorted array items for new/old value
+	 * 
+	 * @param isNewValue - If true then return to new value list else old value
+	 *            list
+	 * @return return the sorted array items
+	 */
+	private Object[] getSortedSelectedItems(boolean isNewValue)
 	{
-		Object curValue = getValue();
-
-		if (isReadWrite())
-			refreshLookup();
-		else
-			updateModel();
-
-		if (curValue != null)
+		Object obj[] = null;
+		List<String> itemsStr = new ArrayList<String>();
+		List<Integer> itemsInt = new ArrayList<Integer>();
+		if (isNewValue)
 		{
-			setValue(curValue);
+			for (Checkbox cbx : getComponent().getCheckboxList())
+			{
+				if (cbx.isChecked())
+				{
+					String val = cbx.getAttribute(MultiSelectBox.ATTRIBUTE_MULTI_SELECT).toString();
+					if (DisplayType.MultiSelectTable == lookup.getDisplayType())
+						itemsInt.add(new Integer(val));
+					else
+						itemsStr.add(val);
+				}
+			}
 		}
-	} // actionRefresh
+		else if (oldValue != null)
+		{
+			if (DisplayType.MultiSelectTable == lookup.getDisplayType() && oldValue instanceof Integer[])
+			{
+				Integer values[] = (Integer[]) oldValue;
+				for (Integer value : values)
+					itemsInt.add(value);
+			}
+			else
+			{
+				String values[] = (String[]) oldValue;
+				for (String value : values)
+					itemsStr.add(value);
+			}
+		}
+
+		if (itemsInt != null && itemsInt.size() > 0)
+		{
+			Collections.sort(itemsInt);
+			obj = itemsInt.toArray(new Integer[itemsInt.size()]);
+		}
+		else if (itemsStr != null && itemsStr.size() > 0)
+		{
+			Collections.sort(itemsStr);
+			obj = itemsStr.toArray(new String[itemsStr.size()]);
+		}
+		return obj;
+	} // getSortedSelectedItems
+
+	/**
+	 * Re-Generate selection list items
+	 */
+	private void refreshList()
+	{
+		if (lookup != null)
+		{
+			lookup.setMandatory(true);
+			lookup.refresh();
+
+			setComponentTextValue(Msg.getMsg(Env.getCtx(), "PleaseSelect"));
+
+			// Clear the component
+			for (Checkbox cbx : getComponent().getCheckboxList())
+			{
+				cbx.detach();
+			}
+			getComponent().getCheckboxList().clear();
+
+			// fill the component
+			for (int i = 0; i < lookup.getSize(); i++)
+			{
+				Checkbox cbx = null;
+				Object pair = lookup.getElementAt(i);
+				if (pair instanceof KeyNamePair)
+				{
+					KeyNamePair knp = (KeyNamePair) pair;
+					cbx = new Checkbox(knp.getName());
+					cbx.setAttribute(MultiSelectBox.ATTRIBUTE_MULTI_SELECT, knp.getKey());
+				}
+				else if (pair instanceof ValueNamePair)
+				{
+					ValueNamePair vnp = (ValueNamePair) pair;
+					cbx = new Checkbox(vnp.getName());
+					cbx.setAttribute(MultiSelectBox.ATTRIBUTE_MULTI_SELECT, vnp.getValue());
+				}
+				getComponent().getCheckboxList().add(cbx);
+				getComponent().getVBox().appendChild(cbx);
+			}
+		}
+	} // refreshList
 
 	@Override
 	public void onMenu(ContextMenuEvent evt)
@@ -361,11 +351,65 @@ public class WMultiSelectEditor extends WEditor implements ContextMenuListener
 		else if (WEditorPopupMenu.PREFERENCE_EVENT.equals(evt.getContextEvent()))
 		{
 			if (isShowPreference())
-				ValuePreference.start(getComponent(), this.getGridField(), Util.convertArrayToStringForDB(getValue()), null);
+				ValuePreference.start(getComponent(), this.getGridField(), Util.convertArrayToStringForDB(getValue()),
+						null);
 		}
 		else if (WEditorPopupMenu.CHANGE_LOG_EVENT.equals(evt.getContextEvent()))
 		{
 			WFieldRecordInfo.start(gridField);
+		}
+	}
+
+	private void setComponentTextValue(String textValue)
+	{
+		getComponent().getTextbox().setValue(textValue.trim());
+	} // setComponentTextValue
+
+	public void actionRefresh()
+	{
+		refreshList();
+
+		if (oldValue != null)
+			setValue(oldValue);
+	} // actionRefresh
+
+	public void createCacheListener()
+	{
+		if (lookup != null)
+		{
+			String columnName = lookup.getColumnName();
+			int dotIndex = columnName.indexOf(".");
+			if (dotIndex > 0)
+			{
+				String tableName = columnName.substring(0, dotIndex);
+				tableCacheListener = new CCacheListener(tableName, this);
+			}
+		}
+	} // createCacheListener
+
+	@Override
+	public void contentsChanged(ListDataEvent e)
+	{
+		actionRefresh();
+	}
+
+	@Override
+	public void intervalAdded(ListDataEvent e)
+	{
+	}
+
+	@Override
+	public void intervalRemoved(ListDataEvent e)
+	{
+	}
+
+	@Override
+	public void dynamicDisplay()
+	{
+		if ((lookup != null) && (!lookup.isValidated() || !lookup.isLoaded()
+				|| (isReadWrite() && lookup.getSize() != getComponent().getCheckboxList().size())))
+		{
+			this.actionRefresh();
 		}
 	}
 
@@ -378,111 +422,6 @@ public class WMultiSelectEditor extends WEditor implements ContextMenuListener
 		}
 	}
 
-	@Override
-	public void dynamicDisplay(Properties ctx)
-	{
-		if (lookup instanceof MLookup)
-			((MLookup) lookup).getLookupInfo().ctx = ctx;
-
-		if ((!lookup.isValidated() || !lookup.isLoaded() || (isReadWrite() && lookup.getSize() != getComponent().getModel().getSize())))
-			this.actionRefresh();
-
-		super.dynamicDisplay(ctx);
-	}
-
-	public void createCacheListener()
-	{
-		String columnName = lookup.getColumnName();
-		int dotIndex = columnName.indexOf(".");
-		if (dotIndex > 0)
-		{
-			String tableName = columnName.substring(0, dotIndex);
-			tableCacheListener = new CCacheListener(tableName, this);
-		}
-	} // createCacheListener
-
-	/**
-	 * Chosebox Editor Component
-	 * 
-	 * @since December 05, 2019
-	 */
-	public final static class ChosenboxEditor extends Chosenbox<Object>
-	{
-
-		/**
-		 * generated serial id
-		 */
-		private static final long	serialVersionUID	= 7777300782255405327L;
-		private DesktopCleanup		listener			= null;
-		private WMultiSelectEditor	editor				= null;
-
-		protected ChosenboxEditor()
-		{
-		}
-
-		public void setEnabled(boolean readWrite)
-		{
-			setDisabled(readWrite == false);
-		}
-
-		public boolean isEnabled()
-		{
-			return isDisabled() == false;
-		}
-
-		@Override
-		public void setPage(Page page)
-		{
-			super.setPage(page);
-		}
-
-		@Override
-		public void onPageAttached(Page newpage, Page oldpage)
-		{
-			super.onPageAttached(newpage, oldpage);
-			if (editor != null && editor.tableCacheListener == null)
-			{
-				editor.createCacheListener();
-				if (listener == null)
-				{
-					listener = new DesktopCleanup() {
-
-						@Override
-						public void cleanup(Desktop desktop) throws Exception
-						{
-							ChosenboxEditor.this.cleanup();
-						}
-					};
-					newpage.getDesktop().addListener(listener);
-				}
-			}
-		} // onPageAttached
-
-		@Override
-		public void onPageDetached(Page page)
-		{
-			super.onPageDetached(page);
-			if (listener != null && page.getDesktop() != null)
-				page.getDesktop().removeListener(listener);
-			cleanup();
-		} // onPageDetached
-
-		/**
-		 * 
-		 */
-		protected void cleanup()
-		{
-			if (editor != null && editor.tableCacheListener != null)
-			{
-				CacheMgt.get().unregister(editor.tableCacheListener);
-				editor.tableCacheListener = null;
-			}
-		} // cleanup
-	}
-
-	/**
-	 * Cache Listener
-	 */
 	private static class CCacheListener extends CCache<String, Object>
 	{
 
@@ -524,7 +463,8 @@ public class WMultiSelectEditor extends WEditor implements ContextMenuListener
 						}
 					}
 					catch (Exception e)
-					{}
+					{
+					}
 				}
 
 			}, new Event("onResetLookupList"));
@@ -541,4 +481,5 @@ public class WMultiSelectEditor extends WEditor implements ContextMenuListener
 		} // newRecord
 
 	} // CCacheListener class
+
 }
