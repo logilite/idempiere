@@ -166,18 +166,6 @@ public class MRequisitionLine extends X_M_RequisitionLine
 	private int 	m_M_PriceList_ID = 0;
 	
 	/**
-	 * Get Ordered Qty
-	 * @return Ordered Qty
-	 */
-	public BigDecimal getQtyOrdered()
-	{
-		if (getC_OrderLine_ID() > 0)
-			return getQty();
-		else
-			return Env.ZERO;
-	}
-	
-	/**
 	 * 	Get Parent
 	 *	@return parent
 	 */
@@ -247,7 +235,7 @@ public class MRequisitionLine extends X_M_RequisitionLine
 	 */
 	public void setLineNetAmt ()
 	{
-		BigDecimal lineNetAmt = getQty().multiply(getPriceActual());
+		BigDecimal lineNetAmt = getQtyOrdered().multiply(getPriceActual());
 		super.setLineNetAmt (lineNetAmt);
 	}	//	setLineNetAmt
 	

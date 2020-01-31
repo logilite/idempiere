@@ -29,6 +29,7 @@ import org.adempiere.webui.component.DatetimeBox;
 import org.adempiere.webui.component.EditorBox;
 import org.adempiere.webui.component.FilenameBox;
 import org.adempiere.webui.component.Locationbox;
+import org.adempiere.webui.component.MultiSelectBox;
 import org.adempiere.webui.component.NumberBox;
 import org.adempiere.webui.component.PAttributebox;
 import org.adempiere.webui.component.Paymentbox;
@@ -38,7 +39,6 @@ import org.adempiere.webui.component.Urlbox;
 import org.adempiere.webui.editor.WButtonEditor;
 import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.editor.WMultiSelectEditor;
-import org.adempiere.webui.editor.WMultiSelectEditor.ChosenboxEditor;
 import org.adempiere.webui.editor.WNumberEditor;
 import org.adempiere.webui.editor.WPAttributeEditor;
 import org.adempiere.webui.editor.WSearchEditor;
@@ -61,7 +61,6 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.KeyEvent;
-import org.zkoss.zk.ui.event.OpenEvent;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Cell;
 import org.zkoss.zul.Column;
@@ -313,10 +312,9 @@ public class QuickGridTabRowRenderer
 				}
 				else if (componentEditor instanceof WMultiSelectEditor)
 				{
-					((WMultiSelectEditor) componentEditor).getComponent().addEventListener(Events.ON_FOCUS, gridPanel);
+					((WMultiSelectEditor) componentEditor).getComponent().getTextbox().addEventListener(Events.ON_FOCUS,
+							gridPanel);
 				}
-				
-
 				if (gridPanelFields[i].isHeading()) {
 					component.setVisible(false);
 				}
@@ -547,12 +545,12 @@ public class QuickGridTabRowRenderer
 				isReadonly = true;
 			}
 		}
-		else if (component instanceof ChosenboxEditor)
+		else if (component instanceof MultiSelectBox)
 		{
-			ChosenboxEditor comp = ((ChosenboxEditor) component);
-			if (comp.isDisabled())
+			MultiSelectBox comp = ((MultiSelectBox) component);
+			if (comp.getTextbox().isReadonly())
 			{
-				comp.setDisabled(isDisable);
+				comp.getTextbox().setDisabled(isDisable);
 				comp.setZclass(addOrRemoveCssClass(comp.getZclass(), isDisable));
 				isReadonly = true;
 			}
@@ -819,8 +817,8 @@ public class QuickGridTabRowRenderer
 		else if (component instanceof PAttributebox && !((PAttributebox) component).getTextbox().isReadonly()
 				&& (((PAttributebox) component).isEnabled() && ((PAttributebox) component).isVisible()))
 			return true;
-		else if (component instanceof ChosenboxEditor && !((ChosenboxEditor) component).isDisabled()
-		        && (((ChosenboxEditor) component).isEnabled() && ((ChosenboxEditor) component).isVisible()))
+		else if (component instanceof MultiSelectBox && !((MultiSelectBox) component).getTextbox().isReadonly()
+				&& (((MultiSelectBox) component).isEnabled() && ((MultiSelectBox) component).isVisible()))
 			return true;
 		else
 			return false;
@@ -876,13 +874,8 @@ public class QuickGridTabRowRenderer
 			((Paymentbox) component).focus();
 		else if (component instanceof PAttributebox)
 			((PAttributebox) component).focus();
-		else if (component instanceof ChosenboxEditor)
-		{
-			// TODO Didn't found input component from the children and not works focus.
-			((ChosenboxEditor) component).focus();
-			((ChosenboxEditor) component).setOpen(true);
-			Events.postEvent(new OpenEvent(Events.ON_OPEN, component, true));
-		}
+		else if (component instanceof MultiSelectBox)
+			((MultiSelectBox) component).focus();
 		else
 			((HtmlBasedComponent) currentCell).focus();
 	} // setFocusOnCurrentCell
