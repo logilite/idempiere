@@ -980,17 +980,16 @@ public class FinReport extends SvrProcess
 					hasOpposites = true;
 
 				// Column to set
-				sb.append("Col_").append(col).append("=");
-				sb.append("( CASE WHEN l.IsShowOppositeSign = 'Y'  THEN -1 ELSE 1 END ) * Col_").append(col);
+				sb.append("Col_").append(col).append("= -1 * Col_").append(col);
 			}
 		}
 
 		if (hasOpposites)
 		{
-			sb.append(" FROM	PA_ReportLine l ");
 			sb.append(" WHERE 	AD_PInstance_ID = ").append(getAD_PInstance_ID());
-			 // 0=Line  1=Acct
-			sb.append(" AND ABS(LevelNo) < 2 AND l.PA_ReportLine_ID=T_Report.PA_ReportLine_ID ");
+			// 0=Line 1=Acct
+			sb.append(" AND ABS(LevelNo) < 2 ");
+			sb.append(" AND EXISTS (SELECT 1 FROM PA_ReportLine rl WHERE rl.PA_ReportLine_ID=T_Report.PA_ReportLine_ID AND rl.IsShowOppositeSign='Y' AND rl.IsActive='Y') ");
 			int no = DB.executeUpdate(sb.toString(), get_TrxName());
 			if (no < 1)
 				log.severe("#=" + no + " for setting opposite sign" + " - " + sb.toString());
@@ -1477,8 +1476,8 @@ public class FinReport extends SvrProcess
 						{
 							String yearWhere = " BETWEEN " + DB.TO_DATE(frp.getYearStartDate()) + " AND " + DB.TO_DATE(frpTo.getEndDate());
 							String totalWhere = frpTo.getTotalWhere();
-							String bs = " EXISTS (SELECT C_ElementValue_ID FROM C_ElementValue WHERE C_ElementValue_ID = fa.Account_ID AND AccountType NOT IN ('R', 'E'))";
-							String full = totalWhere + " AND ( " + bs + " OR TRUNC(fa.DateAcct) " + yearWhere + " ) ";
+							String bs = " EXISTS (SELECT C_ElementValue_ID FROM C_ElementValue WHERE C_ElementValue_ID = fb.Account_ID AND AccountType NOT IN ('R', 'E'))";
+							String full = totalWhere + " AND ( " + bs + " OR TRUNC(fb.DateAcct) " + yearWhere + " ) ";
 							select.append(full);
 						}
 					}
@@ -1773,8 +1772,8 @@ public class FinReport extends SvrProcess
 					{
 						String yearWhere = " BETWEEN " + DB.TO_DATE(frp.getYearStartDate()) + " AND " + DB.TO_DATE(frpTo.getEndDate());
 						String totalWhere = frpTo.getTotalWhere();
-						String bs = " EXISTS (SELECT C_ElementValue_ID FROM C_ElementValue WHERE C_ElementValue_ID = fa.Account_ID AND AccountType NOT IN ('R', 'E'))";
-						String full = totalWhere + " AND ( " + bs + " OR TRUNC(fa.DateAcct) " + yearWhere + " ) ";
+						String bs = " EXISTS (SELECT C_ElementValue_ID FROM C_ElementValue WHERE C_ElementValue_ID = fb.Account_ID AND AccountType NOT IN ('R', 'E'))";
+						String full = totalWhere + " AND ( " + bs + " OR TRUNC(fb.DateAcct) " + yearWhere + " ) ";
 						select.append(full);
 					}
 				}
