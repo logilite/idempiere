@@ -399,6 +399,10 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 	 */
     public void logout()
     {
+	    Desktop desktop = Executions.getCurrent().getDesktop();
+	    if (desktop.isServerPushEnabled())
+			desktop.enableServerPush(false);
+    	
     	Session session = logout0();
     	DesktopCache desktopCache = ((SessionCtrl)session).getDesktopCache();
     	
@@ -413,6 +417,10 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 			desktopCache.removeDesktop(Executions.getCurrent().getDesktop());
     }
     public void logoutAfterTabDestroyed(){
+    	Desktop desktop = Executions.getCurrent().getDesktop();
+	    if (desktop.isServerPushEnabled())
+			desktop.enableServerPush(false);
+	    
        	Session session = logout0();
 
     	//clear context, invalidate session
@@ -422,7 +430,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
     
 
 	protected Session logout0() {
-		Session session = Executions.getCurrent().getDesktop().getSession();
+		Session session = Executions.getCurrent() != null ? Executions.getCurrent().getDesktop().getSession() : null;
 		
 		if (keyListener != null) {
 			keyListener.detach();
@@ -439,7 +447,8 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
     	getPage().removeComponents();
         
     	//clear session attributes
-		session.getAttributes().clear();
+    	if (session != null)
+    		session.getAttributes().clear();
 
     	//logout ad_session
     	AEnv.logout();
