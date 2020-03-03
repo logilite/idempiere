@@ -717,7 +717,7 @@ public class QuickGridView extends Vbox
 				gridTab.clearSelection();
 				// Clear Map on page change.
 				renderer.clearMaps();
-				Clients.resize(listbox);
+				listbox.invalidate();
 				Events.postEvent(new Event(EVENT_ON_PAGE_NAVIGATE, this, null));
 			}
 		}
@@ -1405,7 +1405,7 @@ public class QuickGridView extends Vbox
 		
 		refresh(gridTab);
 		scrollToCurrentRow();
-		Clients.resize(listbox);
+		listbox.invalidate();
 	}
 
 	/**

@@ -793,7 +793,7 @@ public class Login
 	 *  @param  warehouse   optional warehouse information
 	 *  @param  timestamp   optional date
 	 *  @param  printerName optional printer info
-	 *  @return AD_Message of error (NoValidAcctInfo) or ""
+	 *  @return AD_Message of error (NoValidAcctInfo) or "" or error from model validator
 	 */
 	public String loadPreferences (KeyNamePair org, 
 		KeyNamePair warehouse, java.sql.Timestamp timestamp, String printerName)
@@ -1001,7 +1001,8 @@ public class Login
 		//	Country
 		Env.setContext(m_ctx, "#C_Country_ID", MCountry.getDefault(m_ctx).getC_Country_ID());
 		// Call ModelValidators afterLoadPreferences - teo_sarca FR [ 1670025 ]
-		ModelValidationEngine.get().afterLoadPreferences(m_ctx);
+		if (Util.isEmpty(retValue, true))
+			return ModelValidationEngine.get().afterLoadPreferences(m_ctx);
 		return retValue;
 	}	//	loadPreferences
 	
