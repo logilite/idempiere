@@ -353,7 +353,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 			showRecordsCount();
 		}
 		if (this.isVisible())
-			Clients.resize(listbox);
+			listbox.invalidate();
 	}
 
 	/**
@@ -739,7 +739,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 				onSelectedRowChange(0);
 				if (!MSysConfig.getBooleanValue(MSysConfig.ZK_ALLOW_ROW_SELECTION_IN_MULTIPLE_GRID_PAGES, false, Env.getAD_Client_ID(Env.getCtx())))
 					gridTab.clearSelection();
-				Clients.resize(listbox);
+				listbox.invalidate();
 			}
 		}
 		else if (event.getTarget() == selectAll)
@@ -1131,7 +1131,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 		
 		refresh(gridTab);
 		scrollToCurrentRow();
-		Clients.resize(listbox);
+		listbox.invalidate();
 	}
 
 	/**

@@ -404,6 +404,13 @@ public class QuickGridTabRowRenderer
 			sortOrder = column.getSortDirection();
 			Events.echoEvent(QuickGridView.EVENT_ON_PAGE_NAVIGATE, gridPanel, null);
 		}
+
+		// IDEMPIERE-4165 After adding a new row to the list (New or copy)
+		// repaint the grid when rendering the last row
+		if (gridTab.isNew() && rowIndex == grid.getRows().getChildren().size() - 1)
+		{
+			grid.invalidate();
+		}
 	}
 
 	/**

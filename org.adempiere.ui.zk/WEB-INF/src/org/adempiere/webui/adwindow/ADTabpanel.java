@@ -1460,7 +1460,7 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
         	listPanel.dynamicDisplay(col);
         	if (GridTable.DATA_REFRESH_MESSAGE.equals(e.getAD_Message()) || 
         		"Sorted".equals(e.getAD_Message())) {
-        		Clients.resize(listPanel.getListbox());
+        		listPanel.getListbox().invalidate();
         	}
         }
     }
@@ -1611,7 +1611,7 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
 		if (listPanel.isVisible()) {
 			listPanel.refresh(gridTab);
 			listPanel.scrollToCurrentRow();
-			Clients.resize(listPanel.getListbox());
+			listPanel.getListbox().invalidate();
 		} else {
 			listPanel.deactivate();
 		}
