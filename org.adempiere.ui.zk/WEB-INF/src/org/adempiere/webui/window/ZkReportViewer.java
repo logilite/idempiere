@@ -280,8 +280,8 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 		
 		if ( m_isCanExport )
 		{
-			previewType.appendItem("PDF", "PDF");
 			previewType.appendItem("Excel", "XLS");
+                        previewType.appendItem("CSV", "CSV");
 			previewType.appendItem("Excel X", "XLSX");
 		}
 		
