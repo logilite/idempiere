@@ -43,6 +43,11 @@ public final class ServerContext implements Serializable
         	Properties ctx = new Properties();
             return ctx;
         }
+
+		protected Properties childValue(Properties parentValue)
+		{
+			return new Properties(parentValue);
+		}
     };
 
     /**
