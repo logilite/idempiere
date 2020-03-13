@@ -28,6 +28,8 @@ package org.idempiere.fitnesse.fixture;
 
 import java.util.Properties;
 
+import org.adempiere.base.Core;
+import org.adempiere.base.ILogin;
 import org.compiere.model.MSession;
 import org.compiere.model.MUser;
 import org.compiere.util.Env;
@@ -162,7 +164,7 @@ public class Login extends TableFixture {
 			)
 			return null; // already logged with same data
 		
-		org.compiere.util.Login login = new org.compiere.util.Login(m_ads!=null ? m_ads.getCtx() : null);
+		ILogin login = Core.getLogin(m_ads!=null ? m_ads.getCtx() : null);
 		
 		KeyNamePair[] clients = login.getClients(m_user, m_password);
 		boolean okclient = false;

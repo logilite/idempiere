@@ -30,6 +30,8 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 
+import org.adempiere.base.Core;
+import org.adempiere.base.ILogin;
 import org.adempiere.base.ServiceQuery;
 import org.adempiere.base.equinox.EquinoxExtensionLocator;
 import org.adempiere.exceptions.AdempiereException;
@@ -50,7 +52,6 @@ import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
-import org.compiere.util.Login;
 import org.compiere.util.NamePair;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
@@ -132,7 +133,7 @@ public class AbstractService {
 		if(ret!=null && ret.length()>0)
 			return ret;
 		
-		Login login = new Login(m_cs.getCtx());
+		ILogin login = Core.getLogin(m_cs.getCtx());
 		KeyNamePair[] clients = login.getClients(loginRequest.getUser(), loginRequest.getPass());
 		if (clients == null)
 			return "Error login - User invalid";

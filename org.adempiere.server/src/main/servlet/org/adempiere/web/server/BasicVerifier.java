@@ -15,11 +15,12 @@ package org.adempiere.web.server;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.base.Core;
+import org.adempiere.base.ILogin;
 import org.compiere.model.MSession;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
-import org.compiere.util.Login;
 import org.restlet.security.SecretVerifier;
 
 /**
@@ -75,7 +76,7 @@ public class BasicVerifier extends SecretVerifier {
 		}
 		
 		//authenticate with userid+password
-		Login login = new Login(new Properties());
+		ILogin login = Core.getLogin(new Properties());
 		KeyNamePair[] roles = login.getRoles(identity, new String(password));
 		return (roles != null && roles.length > 0) ? RESULT_VALID : RESULT_INVALID;
 	}

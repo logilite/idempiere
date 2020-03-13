@@ -18,13 +18,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 
+import org.adempiere.base.Core;
+import org.adempiere.base.ILogin;
 import org.compiere.Adempiere;
 import org.compiere.util.CLogMgt;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Ini;
-import org.compiere.util.Login;
 
 
 /**
@@ -62,7 +63,7 @@ public class PostgresConvertTest
 		Ini.setProperty(Ini.P_ORG,"HQ");
 		Ini.setProperty(Ini.P_WAREHOUSE,"HQ Warehouse");
 		Ini.setProperty(Ini.P_LANGUAGE,"English");
-		Login login = new Login(Env.getCtx());
+		ILogin login = Core.getLogin(Env.getCtx());
 		if (!login.batchLogin(null))
 			System.exit(1);
 		

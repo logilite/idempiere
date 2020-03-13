@@ -25,6 +25,8 @@ import java.util.logging.Level;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.adempiere.base.Core;
+import org.adempiere.base.ILogin;
 import org.adempiere.util.ServerContext;
 import org.compiere.model.MAuthorizationToken;
 import org.compiere.model.MSession;
@@ -37,7 +39,6 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Language;
-import org.compiere.util.Login;
 import org.compiere.util.Util;
 import org.idempiere.adInterface.x10.ADLoginRequest;
 import org.idempiere.webservices.AbstractService;
@@ -237,7 +238,7 @@ public class CompiereService {
 		//
 		Timestamp date = null;
 		String printer = null;
-		Login login = new Login(ctx);
+		ILogin login = Core.getLogin(ctx);
 		login.loadPreferences(org, wh, date, printer);
 		//
 		return loginInfo;

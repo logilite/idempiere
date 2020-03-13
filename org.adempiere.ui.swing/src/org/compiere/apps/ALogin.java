@@ -39,6 +39,8 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.adempiere.base.Core;
+import org.adempiere.base.ILogin;
 import org.adempiere.plaf.AdempierePLAF;
 import org.compiere.Adempiere;
 import org.compiere.db.CConnection;
@@ -62,7 +64,6 @@ import org.compiere.util.Env;
 import org.compiere.util.Ini;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Language;
-import org.compiere.util.Login;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
@@ -194,7 +195,7 @@ public final class ALogin extends CDialog
 	/** Context					*/
 	private Properties      m_ctx = Env.getCtx();
 	
-	private Login			m_login = null;
+	private ILogin			m_login = null;
 
 	
 	/**************************************************************************
@@ -867,7 +868,7 @@ public final class ALogin extends CDialog
 		Ini.setProperty(Ini.P_LOGMIGRATIONSCRIPT, "Reference".equalsIgnoreCase(CConnection.get().getDbUid()));
 
 		//  Get Clients
-		m_login = new Login(m_ctx);
+		m_login = Core.getLogin(m_ctx);
 		KeyNamePair[] clients = null;
 		try 
 		{

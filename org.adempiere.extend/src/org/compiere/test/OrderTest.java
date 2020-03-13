@@ -20,7 +20,9 @@ import java.math.BigDecimal;
 import java.util.Random;
 import java.util.logging.Level;
 
+import org.adempiere.base.Core;
 import org.compiere.Adempiere;
+import org.adempiere.base.ILogin;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
@@ -30,7 +32,6 @@ import org.compiere.util.CLogMgt;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Ini;
-import org.compiere.util.Login;
 import org.compiere.util.Trx;
 
 
@@ -152,7 +153,7 @@ public class OrderTest implements Runnable
 		Ini.setProperty(Ini.P_ORG,"HQ");
 		Ini.setProperty(Ini.P_WAREHOUSE,"HQ Warehouse");
 		Ini.setProperty(Ini.P_LANGUAGE,"English");
-		Login login = new Login(Env.getCtx());
+		ILogin login = Core.getLogin(Env.getCtx());
 		if (!login.batchLogin(null))
 			System.exit(1);
 		//
