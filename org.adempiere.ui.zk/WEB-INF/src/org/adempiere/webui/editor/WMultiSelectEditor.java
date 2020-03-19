@@ -223,6 +223,37 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 			}
 		}
 
+		// check Check-box List has all Printable value for parameter values
+		boolean found = false;
+		if (DisplayType.MultiSelectTable == lookup.getDisplayType())
+			found = ((Integer[]) values).length == (sb.toString().split("; ").length);
+		else
+			found = ((String[]) values).length == (sb.toString().split("; ").length);
+
+		// If Printable Value is missing or not found, use look-up to get the display text for passed parameter values
+		if (Util.isEmpty(sb.toString()) || !found)
+		{
+			sb = new StringBuffer();
+			if (DisplayType.MultiSelectTable == lookup.getDisplayType())
+			{
+				for (Integer value : (Integer[]) values)
+				{
+					String name = lookup.getDisplay(value);
+					if (!Util.isEmpty(name))
+						sb.append(name).append("; ");
+				}
+			}
+			else
+			{
+				for (String value : (String[]) values)
+				{
+					String name = lookup.getDisplay(value);
+					if (!Util.isEmpty(name))
+						sb.append(name).append("; ");
+				}
+			}
+		}
+
 		return sb.toString();
 	} // getPrintableValue
 
