@@ -208,7 +208,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 	public void setDetailPaneMode(boolean detailPaneMode) {
 		if (this.detailPaneMode != detailPaneMode) {
 			this.detailPaneMode = detailPaneMode;
-			pageSize =  detailPaneMode ? DEFAULT_DETAIL_PAGE_SIZE : MSysConfig.getIntValue(MSysConfig.ZK_PAGING_SIZE, 20, Env.getAD_Client_ID(Env.getCtx()));
+			initPageSize(detailPaneMode);
 			updatePaging();
 		}
 	}
@@ -242,6 +242,8 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 		
 		setupFields(gridTab);
 
+		initPageSize(isDetailPane());
+		
 		setupColumns();
 		render();
 		if (listbox.getFrozen() != null){
@@ -254,6 +256,21 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 		
 		showRecordsCount();
 	}
+
+	/**
+	 * @param detaiPanelMode
+	 */
+	public void initPageSize(boolean detaiPanelMode)
+	{
+		pageSize = detailPaneMode ? DEFAULT_DETAIL_PAGE_SIZE : MSysConfig.getIntValue(MSysConfig.ZK_PAGING_SIZE, 20, Env.getAD_Client_ID(Env.getCtx()));
+		if (gridTab != null)
+		{
+			if (!detailPaneMode && gridTab.getPageSize() > 0)
+				pageSize = gridTab.getPageSize();
+			else if (detailPaneMode && gridTab.getDetailPageSize() > 0)
+				pageSize = gridTab.getDetailPageSize();
+		}
+	} // initPageSize
 
 	private void showRecordsCount() {
 		Component parent = this.getParent();

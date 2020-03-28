@@ -1728,7 +1728,26 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	{
 		return m_vo.AD_ColumnSortYesNo_ID;
 	}	//	getAD_ColumnSortYesNo_ID
-
+	
+	/**
+	 * get tab page size in grid view.
+	 * 
+	 * @return Page Size
+	 */
+	public int getPageSize()
+	{
+		return m_vo.PageSize;
+	}// getPageSize
+	
+	/**
+	 * get tab page size in detail view.
+	 * 
+	 * @return Page Size
+	 */
+	public int getDetailPageSize()
+	{
+		return m_vo.DetailPageSize;
+	}// getDetailPageSize
 
 	/**************************************************************************
 	 *	Get extended Where Clause (parent link)
