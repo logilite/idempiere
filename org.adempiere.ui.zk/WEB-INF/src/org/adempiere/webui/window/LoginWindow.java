@@ -26,6 +26,7 @@ package org.adempiere.webui.window;
 import java.util.Locale;
 import java.util.Properties;
 
+import org.adempiere.base.Core;
 import org.adempiere.webui.IWebClient;
 import org.adempiere.webui.component.FWindow;
 import org.adempiere.webui.panel.ChangePasswordPanel;
@@ -33,11 +34,11 @@ import org.adempiere.webui.panel.LoginPanel;
 import org.adempiere.webui.panel.ResetPasswordPanel;
 import org.adempiere.webui.panel.RolePanel;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.base.ILogin;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
-import org.compiere.util.Login;
 import org.zkoss.util.Locales;
 import org.zkoss.web.Attributes;
 import org.zkoss.zk.ui.Executions;
@@ -190,7 +191,7 @@ public class LoginWindow extends FWindow implements EventListener<Event>
         
     	getDesktop().getSession().setAttribute(Attributes.PREFERRED_LOCALE, locale);
     	Locales.setThreadLocal(locale);    	
-    	Login login = new Login(Env.getCtx());
+    	ILogin login = Core.getLogin(Env.getCtx());
     	MUser user = MUser.get(ctx, Env.getAD_User_ID(ctx));
     	String loginName;
 		boolean email_login = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);

@@ -272,6 +272,9 @@ public class GridTabVO implements Evaluatee, Serializable
 			catch (Exception e)
 			{
 			}
+			
+			vo.PageSize = rs.getInt("PageSize");
+			vo.DetailPageSize = rs.getInt("DetailPageSize");
 		}
 		catch (SQLException ex)
 		{
@@ -491,6 +494,10 @@ public class GridTabVO implements Evaluatee, Serializable
 	public  boolean     onlyCurrentRows = true;
 	/**	Only Current Days - derived	*/
 	public int			onlyCurrentDays = 0;
+	/**	Grid View Page Size	*/
+	public int			PageSize = 0;
+	/**	Detail View Page Size	*/
+	public int			DetailPageSize = 0;	
 	
 	public String AD_TabType = null;
 
@@ -588,6 +595,8 @@ public class GridTabVO implements Evaluatee, Serializable
 		clone.onlyCurrentRows = true;
 		clone.onlyCurrentDays = 0;
 		clone.AD_TabType = AD_TabType;
+		clone.PageSize = PageSize;
+		clone.DetailPageSize = DetailPageSize;
 		clone.Fields = new ArrayList<GridFieldVO>();
 		for (int i = 0; i < Fields.size(); i++)
 		{

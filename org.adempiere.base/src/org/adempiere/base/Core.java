@@ -23,6 +23,7 @@ package org.adempiere.base;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Level;
 
 import javax.script.ScriptEngine;
@@ -514,6 +515,27 @@ public class Core {
 			}
 		}
 
+		return null;
+	}
+
+	/**
+	 * Get Login instance
+	 * 
+	 * @param ctx context
+	 * @return Login instance or null
+	 */
+	public static ILogin getLogin(Properties ctx)
+	{
+		List <ILoginFactory> factories = Service.locator().list(ILoginFactory.class).getServices();
+		if (factories != null && !factories.isEmpty())
+		{
+			for (ILoginFactory factory : factories)
+			{
+				ILogin login = factory.newLoginInstance(ctx);
+				if (login != null)
+					return login;
+			}
+		}
 		return null;
 	}
 

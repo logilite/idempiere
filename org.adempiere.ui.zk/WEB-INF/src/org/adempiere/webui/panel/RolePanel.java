@@ -28,6 +28,7 @@ import java.util.Properties;
 
 import javax.servlet.http.HttpSession;
 
+import org.adempiere.base.Core;
 import org.adempiere.util.Callback;
 import org.adempiere.webui.AdempiereIdGenerator;
 import org.adempiere.webui.LayoutUtils;
@@ -44,13 +45,13 @@ import org.adempiere.webui.util.UserPreference;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.adempiere.webui.window.LoginWindow;
+import org.adempiere.base.ILogin;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Language;
-import org.compiere.util.Login;
 import org.compiere.util.Msg;
 import org.compiere.util.TimeUtil;
 import org.compiere.util.Util;
@@ -89,7 +90,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 
 	private static final String ALOGIN_SHOWDATE = "ALogin_ShowDate";
 	protected LoginWindow wndLogin;
-	protected Login login;
+	protected ILogin login;
 
 	protected Combobox lstRole, lstClient, lstOrganisation, lstWarehouse;
 	protected Label lblRole, lblClient, lblDef, lblOrganisation, lblWarehouse, lblDate;
@@ -128,7 +129,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     	this.wndLogin = loginWindow;
     	m_ctx = ctx;
     	m_userName = userName;    	
-    	login = new Login(ctx);
+    	login = Core.getLogin(ctx);
     	m_show = show;
         m_clientKNPairs = clientsKNPairs;
         
@@ -139,7 +140,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
         	m_userpreference.loadPreference(user.get_ID());        	
         }
     	
-
+        
         initComponents();
         init();
         this.setId("rolePanel");

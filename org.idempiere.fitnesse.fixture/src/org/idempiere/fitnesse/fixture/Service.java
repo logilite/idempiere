@@ -35,6 +35,8 @@ import java.text.SimpleDateFormat;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.base.Core;
+import org.adempiere.base.ILogin;
 import org.compiere.model.MUser;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -42,7 +44,6 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Language;
-import org.compiere.util.Login;
 
 /**
  *	iDempiere Service to control login for use with fitnesse framework testing
@@ -278,7 +279,7 @@ public class Service {
 		//
 		Timestamp date = null;
 		String printer = null;
-		Login login = new Login(ctx);
+		ILogin login = Core.getLogin(ctx);
 		login.loadPreferences(org, wh, date, printer);
 		//	Don't Show Acct/Trl Tabs on HTML UI
 		Env.setContext(ctx, "#ShowAcct", "N");

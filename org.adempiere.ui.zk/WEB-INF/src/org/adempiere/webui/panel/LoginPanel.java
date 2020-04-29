@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.base.Core;
 import org.adempiere.util.LogAuthFailure;
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.apps.AEnv;
@@ -51,6 +52,7 @@ import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.adempiere.webui.window.LoginWindow;
 import org.compiere.Adempiere;
+import org.adempiere.base.ILogin;
 import org.compiere.model.MClient;
 import org.compiere.model.MSession;
 import org.compiere.model.MSysConfig;
@@ -62,7 +64,6 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Language;
-import org.compiere.util.Login;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.zkoss.lang.Strings;
@@ -554,7 +555,7 @@ public class LoginPanel extends Window implements EventListener<Event>
     **/
     public void validateLogin()
     {
-        Login login = new Login(ctx);
+        ILogin login = Core.getLogin(ctx);
         String userId = txtUserId.getValue();
         String userPassword = txtPassword.getValue();
 

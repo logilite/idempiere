@@ -31,6 +31,8 @@ import java.util.logging.Level;
 
 import javax.swing.JOptionPane;
 
+import org.adempiere.base.Core;
+import org.adempiere.base.ILogin;
 import org.compiere.Adempiere;
 import org.compiere.db.CConnection;
 import org.compiere.model.I_M_Warehouse;
@@ -60,10 +62,10 @@ import org.compiere.model.Query;
  *  		https://sourceforge.net/tracker/?func=detail&aid=2867246&group_id=176962&atid=879332
  *  @version $Id: Login.java,v 1.6 2006/10/02 05:19:06 jjanke Exp $
  */
-public class Login
+public class Login implements ILogin
 {
-	private String loginErrMsg;
-	private boolean isPasswordExpired;
+	protected String loginErrMsg;
+	protected boolean isPasswordExpired;
 
 	public String getLoginErrMsg() {
 		return loginErrMsg;
@@ -85,7 +87,7 @@ public class Login
 			System.exit (1);
 		//  Test Context
 		Properties ctx = Env.getCtx();
-		Login login = new Login(ctx);
+		ILogin login = Core.getLogin(ctx);
 		KeyNamePair[] roles = login.getRoles(CConnection.get(),
 			"System", "System", true);
 		//  load role
@@ -153,7 +155,7 @@ public class Login
 	/**	Logger				*/
 	private static CLogger log = CLogger.getCLogger(Login.class);
 	/** Context				*/
-	private Properties 		m_ctx = null;
+	protected Properties 		m_ctx = null;
 	
 	/**
 	 *	(Test) Client Login.
@@ -170,7 +172,7 @@ public class Login
 	 * The error (NoDatabase, UserPwdError, DBLogin) is saved in the log
 	 * @deprecated
 	 */
-	protected KeyNamePair[] getRoles (CConnection cc,
+	public KeyNamePair[] getRoles (CConnection cc,
 		String app_user, String app_pwd, boolean force)
 	{
 		//	Establish connection
@@ -240,7 +242,7 @@ public class Login
 	 *  The error (NoDatabase, UserPwdError, DBLogin) is saved in the log
 	 *  @deprecated use public KeyNamePair[] getRoles(String app_user, KeyNamePair client)
 	 */
-	private KeyNamePair[] getRoles (String app_user, String app_pwd, boolean force)
+	protected KeyNamePair[] getRoles (String app_user, String app_pwd, boolean force)
 	{
 		if (log.isLoggable(Level.INFO)) log.info("User=" + app_user);
 
@@ -630,7 +632,7 @@ public class Login
 	 *	@param role role
 	 *	@see org.compiere.model.MRole#loadOrgAccessAdd
 	 */
-	private void getOrgsAddSummary (ArrayList<KeyNamePair> list, int Summary_Org_ID, 
+	protected void getOrgsAddSummary (ArrayList<KeyNamePair> list, int Summary_Org_ID, 
 		String Summary_Name, MRole role)
 	{
 		if (role == null)
@@ -1019,7 +1021,7 @@ public class Login
 	 *  @param TableName table name
 	 *  @param ColumnName column name
 	 */
-	private void loadDefault (String TableName, String ColumnName)
+	protected void loadDefault (String TableName, String ColumnName)
 	{
 		if (TableName.startsWith("AD_Window")
 			|| TableName.startsWith("AD_PrintFormat")

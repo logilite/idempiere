@@ -1234,11 +1234,16 @@ public class MMatchPO extends X_M_MatchPO
 			}
 			
 			//	Update Order ASI if full match
-			if (orderLine.getM_AttributeSetInstance_ID() == 0
-				&& getM_InOutLine_ID() != 0)
+			if (orderLine.getM_AttributeSetInstance_ID() == 0 && getM_InOutLine_ID() != 0 && getC_InvoiceLine_ID() != 0)
 			{
-				MInOutLine iol = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(getM_InOutLine_ID(),
-						get_TrxName());
+				MInOutLine iol = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(getM_InOutLine_ID(), get_TrxName());
+				MInvoiceLine il = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(getC_InvoiceLine_ID(), get_TrxName());
+				if (iol.getMovementQty().compareTo(orderLine.getQtyOrdered()) == 0 && iol.getMovementQty().compareTo(il.getQtyInvoiced()) == 0)
+					orderLine.setM_AttributeSetInstance_ID(iol.getM_AttributeSetInstance_ID());
+			}
+			else if (orderLine.getM_AttributeSetInstance_ID() == 0 && getM_InOutLine_ID() != 0)
+			{
+				MInOutLine iol = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(getM_InOutLine_ID(), get_TrxName());
 				if (iol.getMovementQty().compareTo(orderLine.getQtyOrdered()) == 0)
 					orderLine.setM_AttributeSetInstance_ID(iol.getM_AttributeSetInstance_ID());
 			}
