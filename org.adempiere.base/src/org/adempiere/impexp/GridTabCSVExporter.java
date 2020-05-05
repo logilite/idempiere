@@ -612,11 +612,9 @@ public class GridTabCSVExporter implements IGridTabExporter
 				for (GridField gridField : tmpFields) 
 				{
 					if (gridField.getAD_Field_ID() == AD_Field_ID) {
-						if (   gridField.isVirtualColumn()
-							|| gridField.isEncrypted()
+						if (   gridField.isEncrypted()
 							|| gridField.isEncryptedColumn()
 							|| !(gridField.isDisplayed() || gridField.isDisplayedGrid())
-							|| gridField.isReadOnly()
 							|| (DisplayType.Button == MColumn.get(Env.getCtx(),gridField.getAD_Column_ID()).getAD_Reference_ID())
 						   )
 							continue;
