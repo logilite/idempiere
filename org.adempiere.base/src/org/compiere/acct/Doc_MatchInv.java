@@ -32,9 +32,7 @@ import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MAcctSchemaElement;
 import org.compiere.model.MConversionRate;
-import org.compiere.model.MCost;
 import org.compiere.model.MCostDetail;
-import org.compiere.model.MCostElement;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
@@ -376,69 +374,9 @@ public class Doc_MatchInv extends Doc
 			BigDecimal ipv, BigDecimal ipvSource) {
 		if (ipv.signum() == 0) return;
 		
-		String costingMethod = m_pc.getProduct().getCostingMethod(as);
-		BigDecimal amtVariance = Env.ZERO;
-		BigDecimal amtAsset = Env.ZERO;
-		boolean isCurrencyConvert = m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID();
-
-		if (X_M_Cost.COSTINGMETHOD_AveragePO.equals(costingMethod))
-		{
-			BigDecimal qty = m_invoiceLine.getQtyInvoiced();
-			BigDecimal price = Env.ZERO;
-			BigDecimal poPrice  = Env.ZERO;
-			
-			if(isCurrencyConvert)
-			{
-				poPrice = MConversionRate.convert(getCtx(), m_receiptLine.getC_OrderLine().getPriceActual(),
-						m_invoiceLine.getParent().getC_Currency_ID(), as.getC_Currency_ID(),
-						m_receiptLine.getParent().getDateAcct(), getC_ConversionType_ID(), getAD_Client_ID(),
-						getAD_Org_ID());
-				price = MConversionRate.convert(getCtx(), m_invoiceLine.getPriceActual(),
-						m_invoiceLine.getParent().getC_Currency_ID(), as.getC_Currency_ID(), getDateAcct(),
-						getC_ConversionType_ID(), getAD_Client_ID(), getAD_Org_ID());
-
-			}
-			else
-			{
-				price=m_invoiceLine.getPriceActual();
-				poPrice = m_receiptLine.getC_OrderLine().getPriceActual();
-			}
-			
-			if (m_invoiceLine.getM_Product_ID() > 0)
-			{
-				int AD_Org_ID = m_invoiceLine.getAD_Org_ID();
-				int M_AttributeSetInstance_ID = m_invoiceLine.getM_AttributeSetInstance_ID();
-
-				if (MAcctSchema.COSTINGLEVEL_Client.equals(as.getCostingLevel()))
-				{
-					AD_Org_ID = 0;
-					M_AttributeSetInstance_ID = 0;
-				}
-				else if (MAcctSchema.COSTINGLEVEL_Organization.equals(as.getCostingLevel()))
-					M_AttributeSetInstance_ID = 0;
-				else if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(as.getCostingLevel()))
-					AD_Org_ID = 0;
-
-				MCostElement ce = MCostElement.getMaterialCostElement(getCtx(), as.getCostingMethod(), AD_Org_ID);
-				MCost c = MCost.get(getCtx(), getAD_Client_ID(), AD_Org_ID, m_invoiceLine.getM_Product_ID(),
-						as.getM_CostType_ID(), as.getC_AcctSchema_ID(), ce.getM_CostElement_ID(),
-						M_AttributeSetInstance_ID, null);
-				if (c != null && c.getCurrentQty().compareTo(qty) < 0)
-				{
-					amtAsset = c.getCurrentQty().multiply(price.subtract(poPrice));
-					amtVariance = (qty.subtract(c.getCurrentQty())).multiply(price.subtract(poPrice));
-					if (m_matchInv.getReversal_ID() > 0)
-					{
-						amtAsset = amtAsset.negate();
-						amtVariance = amtVariance.negate();
-					}
-				}
-			}
-		}
-		
 		FactLine pv = fact.createLine(null,
 			m_pc.getAccount(ProductCost.ACCTTYPE_P_IPV, as),
-				as.getC_Currency_ID(), amtVariance.compareTo(Env.ZERO) == 0 ? ipv : amtVariance);
+			as.getC_Currency_ID(), ipv);
 		updateFactLine(pv);
 		
 		MMatchInv matchInv = (MMatchInv)getPO();
@@ -451,7 +389,7 @@ public class Doc_MatchInv extends Doc
 			if (!MCostDetail.createMatchInvoice(as, m_invoiceLine.getAD_Org_ID(),
 					m_invoiceLine.getM_Product_ID(), m_invoiceLine.getM_AttributeSetInstance_ID(),
 					matchInv.getM_MatchInv_ID(), 0,
-					amtAsset.compareTo(Env.ZERO) == 0 ? ipv : amtAsset, BigDecimal.ZERO, "Invoice Price Variance", getTrxName())) {
+					ipv, BigDecimal.ZERO, "Invoice Price Variance", getTrxName())) {
 				throw new RuntimeException("Failed to create cost detail record.");
 			}				
 		} catch (SQLException e) {
@@ -472,31 +410,24 @@ public class Doc_MatchInv extends Doc
 			}
 		}
 		
+		String costingMethod = m_pc.getProduct().getCostingMethod(as);
 		MAccount account = m_pc.getAccount(ProductCost.ACCTTYPE_P_Asset, as);
 		if (m_pc.isService())
 			account = m_pc.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
 		if (X_M_Cost.COSTINGMETHOD_AveragePO.equals(costingMethod)) {
-			if (zeroQty || amtVariance.compareTo(Env.ZERO) != 0)
+			if (zeroQty)
 				account = m_pc.getAccount(ProductCost.ACCTTYPE_P_AverageCostVariance, as);
+			FactLine line = fact.createLine(null,
+					m_pc.getAccount(ProductCost.ACCTTYPE_P_IPV, as),
+					as.getC_Currency_ID(), ipv.negate());
+			updateFactLine(line);
 			
-			if (amtVariance.compareTo(Env.ZERO) == 0 || zeroQty)
+			line = fact.createLine(null, account, as.getC_Currency_ID(), ipv);
+			updateFactLine(line);
+			
+			if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
 			{
-				FactLine line = fact.createLine(null, m_pc.getAccount(ProductCost.ACCTTYPE_P_IPV, as),
-						as.getC_Currency_ID(), ipv.negate());
-				updateFactLine(line);
-
-				line = fact.createLine(null, account, as.getC_Currency_ID(), ipv);
-				updateFactLine(line);
-
-				if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
-				{
-					updateFactLineAmtSource(line, ipvSource);
-				}
-			}
-			else
-			{
-				FactLine line = fact.createLine(null, account, as.getC_Currency_ID(), amtAsset);
-				updateFactLine(line);				
+				updateFactLineAmtSource(line, ipvSource);
 			}
 		} else if (X_M_Cost.COSTINGMETHOD_AverageInvoice.equals(costingMethod) && !zeroQty) {
 			FactLine line = fact.createLine(null,
