@@ -22,12 +22,16 @@ public interface ILogin
 {
 
 	KeyNamePair[] getClients(String userId, String userPassword);
+	
+	KeyNamePair[] getClients(String userId, String userPassword, String roleTypes);
 
 	String getLoginErrMsg();
 
 	boolean isPasswordExpired();
 
 	KeyNamePair[] getRoles(String m_userName, KeyNamePair clientKNPair);
+	
+	KeyNamePair[] getRoles(String m_userName, KeyNamePair clientKNPair, String roleTypes);
 
 	KeyNamePair[] getOrgs(KeyNamePair roleKNPair);
 
