@@ -152,16 +152,19 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 	
 	private int prevWidth;
 
+	private AbstractADWindowContent adWinContent;
+
 	/**	Last Modifier of Action Event					*/
 //	public int 				lastModifiers;
 	//
 
     public ADWindowToolbar()
     {
-    	this(0);
+    	this(null, 0);
     }
 
-    public ADWindowToolbar(int windowNo) {
+    public ADWindowToolbar(AbstractADWindowContent adWinContent, int windowNo) {
+    	this.adWinContent = adWinContent;
     	setWindowNo(windowNo);
         init();
         if (ClientInfo.isMobile()) {
@@ -418,9 +421,12 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
             }
         } else if (eventName.equals(Events.ON_CTRL_KEY))
         {
-        	KeyEvent keyEvent = (KeyEvent) event;
-        	if (SessionManager.getOpenQuickFormTabs().size() > 0  && !(keyEvent.getKeyCode() == KeyEvent.F2))
-        		return;
+			KeyEvent keyEvent = (KeyEvent) event;
+
+			// If Quick form is opened then prevent toolbar shortcut key events.
+			if (!(keyEvent.getKeyCode() == KeyEvent.F2) && adWinContent != null && adWinContent.getOpenQuickFormTabs().size() > 0)
+				return;
+
         	if (LayoutUtils.isReallyVisible(this)) {
 	        	//filter same key event that is too close
 	        	//firefox fire key event twice when grid is visible

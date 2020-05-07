@@ -1,13 +1,14 @@
 /******************************************************************************
- * Copyright (C) 2016 Logilite Technologies LLP * This program is free software;
- * you can redistribute it and/or modify it * under the terms version 2 of the
- * GNU General Public License as published * by the Free Software Foundation.
- * This program is distributed in the hope * that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied * warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. * See the GNU General Public License for
- * more details. * You should have received a copy of the GNU General Public
- * License along * with this program; if not, write to the Free Software
- * Foundation, Inc., * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA. *
+ * Copyright (C) 2016 Logilite Technologies LLP								  *
+ * This program is free software; you can redistribute it and/or modify it    *
+ * under the terms version 2 of the GNU General Public License as published   *
+ * by the Free Software Foundation. This program is distributed in the hope   *
+ * that it will be useful, but WITHOUT ANY WARRANTY; without even the implied *
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.           *
+ * See the GNU General Public License for more details.                       *
+ * You should have received a copy of the GNU General Public License along    *
+ * with this program; if not, write to the Free Software Foundation, Inc.,    *
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.                     *
  *****************************************************************************/
 
 package org.adempiere.webui.apps.form;
@@ -140,24 +141,20 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		bCustomize.addEventListener(Events.ON_CLICK, this);
 		bUnSort.addEventListener(Events.ON_CLICK, this);
 
-		// Add Shortcut Key info in tool-tip
-		bSave.setTooltiptext(bSave.getTooltiptext() + " (Alt+S) Save current record if modified");
-		bIgnore.setTooltiptext(bIgnore.getTooltiptext() + " (Alt+Z) Ignore un-save changes of current record");
-		bDelete.setTooltiptext(bDelete.getTooltiptext() + " (Alt+D) Delete selected or current record");
-		bCustomize.setTooltiptext(bCustomize.getTooltiptext() + " (Alt+L) Customize panel as per user");
-
 		Button bRefresh = confirmPanel.getButton(ConfirmPanel.A_REFRESH);
-		bRefresh.setTooltiptext(bRefresh.getTooltiptext() + " (Alt+E) ReQuery all record");
+		Button bCancel = confirmPanel.getButton(ConfirmPanel.A_CANCEL);
+		Button bOk = confirmPanel.getButton(ConfirmPanel.A_OK);
 
-		Button bCancle = confirmPanel.getButton(ConfirmPanel.A_CANCEL);
-		bCancle.setTooltiptext(bCancle.getTooltiptext() + " (Alt+X) Close quick form");
+		// Set tool-tip information
+		bSave.setTooltiptext(Msg.translate(Env.getCtx(), "QuickFormSave")); // 'Alt + S'
+		bDelete.setTooltiptext(Msg.translate(Env.getCtx(), "QuickFormDelete")); // 'Alt + D'
+		bIgnore.setTooltiptext(Msg.translate(Env.getCtx(), "QuickFormIgnore")); // 'Alt + Z'
+		bUnSort.setTooltiptext(Msg.translate(Env.getCtx(), "QuickFormUnSort")); // 'Alt + R'
+		bCustomize.setTooltiptext(Msg.translate(Env.getCtx(), "QuickFormCustomize")); // 'Alt + L'
+		bOk.setTooltiptext(Msg.translate(Env.getCtx(), "QuickFormOk")); // 'Alt + K' - Save_Close
+		bCancel.setTooltiptext(Msg.translate(Env.getCtx(), "QuickFormCancel")); // 'Alt + X'
+		bRefresh.setTooltiptext(Msg.translate(Env.getCtx(), "QuickFormRefresh")); // 'Alt + E'
 
-		Button bok = confirmPanel.getButton(ConfirmPanel.A_OK);
-		bok.setTooltiptext(bok.getTooltiptext() + " (Alt+K) Save and Close quick form");
-
-		Button bunSort = confirmPanel.getButton("UnSort");
-		bunSort.setTooltiptext(bunSort.getTooltiptext() + " (Alt + R) Restore sorting to natural if column sorted");
-		
 		confirmPanel.addComponentsLeft(bSave);
 		confirmPanel.addComponentsLeft(bDelete);
 		confirmPanel.addComponentsLeft(bIgnore);
@@ -169,14 +166,14 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		mainLayout.appendSouth(south);
 
 		this.appendChild(mainLayout);
-	}
+	} // initZk
 
 	@Override
 	public void onEvent(Event event) throws Exception
 	{
 		if (event.getTarget() == confirmPanel.getButton(ConfirmPanel.A_CANCEL))
 		{
-			onCancle();
+			onCancel();
 		}
 		else if (event.getTarget() == confirmPanel.getButton(ConfirmPanel.A_REFRESH))
 		{
@@ -212,9 +209,9 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 			onUnSort();
 		}
 		event.stopPropagation();
-	}
+	} // onEvent
 
-	public void onCancle()
+	public void onCancel( )
 	{
 		if (gridTab.getTableModel().getRowChanged() > -1)
 		{
@@ -233,7 +230,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		{
 			dispose();
 		}
-	}
+	} // onCancel
 
 	public void onUnSort()
 	{
@@ -246,7 +243,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 			sortColumn.setSortDirection("natural");
 
 		adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "UnSort"), false);
-	}
+	} // onUnSort
 
 	public void onCustomize()
 	{
@@ -268,9 +265,8 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		ZKUpdateUtil.setWidth(quickGridView, getWidth());
 		ZKUpdateUtil.setHeight(quickGridView, getHeight());
 
-		CustomizeGridViewDialog.showCustomize(0, gridTab.getAD_Tab_ID(), columnsWidth, gridFieldIds, null,
-				quickGridView, true);
-	}
+		CustomizeGridViewDialog.showCustomize(0, gridTab.getAD_Tab_ID(), columnsWidth, gridFieldIds, null, quickGridView, true);
+	} // onCustomize
 
 	public void onIgnore()
 	{
@@ -283,7 +279,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 			createNewRow();
 		quickGridView.updateListIndex();
 		Events.echoEvent(QuickGridView.EVENT_ON_SET_FOCUS_TO_FIRST_CELL, quickGridView, null);
-	}
+	} // onIgnore
 
 	public void onDelete()
 	{
@@ -324,14 +320,13 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 							}
 						}
 
-						adWinContent.getStatusBarQF().setStatusLine(
-								Msg.getMsg(Env.getCtx(), "Deleted") + ": " + count + " / " + indices.length, false);
+						adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "Deleted") + ": " + count + " / " + indices.length, false);
 
-						// if all records is deleted then it will show default
-						// with new record.
+						// if all records is deleted then it will show default with new record.
 						if (gridTab.getRowCount() <= 0)
 							quickGridView.createNewLine();
 						quickGridView.updateListIndex();
+
 						// Set focus on the first row if all Row's are selected.
 						if (isAllSelected)
 							Events.echoEvent(QuickGridView.EVENT_ON_PAGE_NAVIGATE, quickGridView, null);
@@ -346,7 +341,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 				}
 			});
 		}
-	}
+	} // onDelete
 
 	public void onSave()
 	{
@@ -363,7 +358,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		{
 			onIgnore();
 		}
-	}
+	} // onSave
 
 	public void onRefresh()
 	{
@@ -375,7 +370,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		// Create new record if no record present.
 		if (gridTab.getRowCount() <= 0)
 			createNewRow();
-	}
+	} // onRefresh
 
 	@Override
 	public void dispose()
@@ -385,7 +380,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		gridTab.setQuickForm(false);
 		onIgnore();
 		gridTab.removeDataStatusListener(this);
-		SessionManager.closeQuickFormTab(gridTab.getAD_Tab_ID());
+		adWinContent.closeQuickFormTab(gridTab.getAD_Tab_ID());
 		quickGridView.getRenderer().clearMaps();
 		int tabLevel = adWinContent.getToolbar().getQuickFormTabHrchyLevel();
 		if (tabLevel > 0)
@@ -399,7 +394,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 			{
 				adWinContent.onParentRecord();
 				SessionManager.getSessionApplication().getKeylistener().addEventListener(Events.ON_CTRL_KEY, prevQGV);
-				// TODO need to set focus on last focused row of parent Form.
+				// need to set focus on last focused row of parent Form.
 				Events.echoEvent(QuickGridView.EVENT_ON_PAGE_NAVIGATE, prevQGV, null);
 			}
 			adWinContent.setCurrQGV(prevQGV);
@@ -408,9 +403,8 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		{
 			adWinContent.setCurrQGV(null);
 		}
-		adWinContent.getADTab().getSelectedTabpanel().query(onlyCurrentRows, onlyCurrentDays,
-				MRole.getDefault().getMaxQueryRecords()); // autoSize
-	}
+		adWinContent.getADTab().getSelectedTabpanel().query(onlyCurrentRows, onlyCurrentDays, MRole.getDefault().getMaxQueryRecords()); // autoSize
+	} // dispose
 
 	private void createNewRow()
 	{
@@ -429,7 +423,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 				adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "NewError"), true);
 			}
 		}
-	}
+	} // createNewRow
 
 	@Override
 	public void dataStatusChanged(DataStatusEvent e)
@@ -441,5 +435,5 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		// update Dynamic display on data Status change.
 		int col = e.getChangedColumn();
 		quickGridView.dynamicDisplay(col);
-	}
+	} // dataStatusChanged
 }

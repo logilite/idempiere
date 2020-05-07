@@ -88,10 +88,14 @@ public class BreadCrumb extends Div implements EventListener<Event> {
 
 	protected Menupopup linkPopup;
 
+	private AbstractADWindowContent adWinContent;
+
 	/**
-	 * 
+	 * @param adWindowContent 
+	 * @param windowNo
 	 */
-	public BreadCrumb(int windowNo) {
+	public BreadCrumb(AbstractADWindowContent adWinContent, int windowNo) {
+		this.adWinContent = adWinContent;
 		this.windowNo = windowNo;
 		layout = new Hbox();
 		layout.setPack("start");
@@ -321,7 +325,11 @@ public class BreadCrumb extends Div implements EventListener<Event> {
 			}
 		} else if (event.getName().equals(Events.ON_CTRL_KEY)) {
 			if (!LayoutUtils.isReallyVisible(this)) return;
-			
+
+			// If Quick form is opened then prevent navigation keyEvent
+			if (adWinContent != null && adWinContent.getOpenQuickFormTabs().size() > 0)
+				return;
+
 			KeyEvent keyEvent = (KeyEvent) event;
 			if (keyEvent.isAltKey()) {
 				if (keyEvent.getKeyCode() == KeyEvent.LEFT) {
