@@ -205,6 +205,11 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	protected StatusBar statusBarQF;
 
 	/**
+	 * Maintain no of quick form tabs open
+	 */
+	ArrayList <Integer>			quickFormOpenTabs	= new ArrayList <Integer>();
+
+	/**
 	 * Constructor
 	 * @param ctx
 	 * @param windowNo
@@ -256,7 +261,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     public void initComponents()
     {
         /** Initalise toolbar */
-        toolbar = new ADWindowToolbar(getWindowNo());
+        toolbar = new ADWindowToolbar(this, getWindowNo());
         toolbar.setId("windowToolbar");
         toolbar.addListener(this);
 
@@ -1137,23 +1142,22 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	public void onQuickForm()
 	{
 		logger.log(Level.FINE, "Invoke Quick Form");
-		// Not open Quick Form if already open.
-		if (!SessionManager.registerQuickFormTab(getADTab().getSelectedGridTab().getAD_Tab_ID()))
+		// Prevent to open Quick Form if already opened.
+		if (!this.registerQuickFormTab(getADTab().getSelectedGridTab().getAD_Tab_ID()))
 		{
-			logger.fine("TabID=" + getActiveGridTab().getAD_Tab_ID() + "  is already opened.");
+			logger.fine("TabID=" + getActiveGridTab().getAD_Tab_ID() + "  is already open.");
 			return;
 		}
 		int table_ID = adTabbox.getSelectedGridTab().getAD_Table_ID();
 		if (table_ID == -1)
 			return;
-		
+
 		statusBarQF = new StatusBar();
 		// Remove Key-listener of parent Quick Form
 		int tabLevel = getToolbar().getQuickFormTabHrchyLevel();
 		if (tabLevel > 0 && getCurrQGV() != null)
 		{
-			SessionManager.getSessionApplication().getKeylistener().removeEventListener(Events.ON_CTRL_KEY,
-					getCurrQGV());
+			SessionManager.getSessionApplication().getKeylistener().removeEventListener(Events.ON_CTRL_KEY, getCurrQGV());
 		}
 
 		WQuickForm form = new WQuickForm(this, m_onlyCurrentRows, m_onlyCurrentDays);
@@ -1163,10 +1167,10 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		form.setMaximizable(true);
 		form.setMaximized(true);
 		form.setPosition("center");
-		ZkCssHelper.appendStyle(form, "min-width: 500px; min-height: 400px; width: 900px; height:550px;");
+		ZkCssHelper.appendStyle(form, "min-width: 500px; min-height: 400px; width: 900px; height:550px; z-index: 900;");
 
 		AEnv.showWindow(form);
-	}
+	} // onQuickForm
 
     /**
      * @param event
@@ -3594,7 +3598,45 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	{
 		this.currQGV = currQGV;
 	}
-	
+
+	/**
+	 * Close Quick form to remove tabID from the list
+	 * 
+	 * @param AD_Tab_ID
+	 */
+	public void closeQuickFormTab(Integer AD_Tab_ID)
+	{
+		quickFormOpenTabs.remove(AD_Tab_ID);
+	} // closeQuickFormTab
+
+	/**
+	 * Get list of open quick form tabs
+	 * 
+	 * @return list of tabIDs
+	 */
+	public ArrayList <Integer> getOpenQuickFormTabs( )
+	{
+		return quickFormOpenTabs;
+	} // getOpenQuickFormTabs
+
+	/**
+	 * Register Quick form against tabID
+	 * 
+	 * @param AD_Tab_ID
+	 * @return False when already quick form opens for same tab
+	 */
+	public boolean registerQuickFormTab(Integer AD_Tab_ID)
+	{
+		if (quickFormOpenTabs.contains(AD_Tab_ID))
+		{
+			return false;
+		}
+
+		quickFormOpenTabs.add(AD_Tab_ID);
+
+		return true;
+	} // registerQuickFormTab
+
 	public FindWindow getFindWindow()
 	{
 		return findWindow;
@@ -3619,5 +3661,4 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	{
 		return m_onlyCurrentDays;
 	}
-	
 }
