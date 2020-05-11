@@ -31,10 +31,6 @@ package org.idempiere.adinterface;
 
 
 import javax.jws.WebService;
-import javax.jws.soap.SOAPBinding;
-import javax.jws.soap.SOAPBinding.ParameterStyle;
-import javax.jws.soap.SOAPBinding.Style;
-import javax.jws.soap.SOAPBinding.Use;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -49,10 +45,9 @@ import org.idempiere.adInterface.x10.StandardResponseDocument;
 import org.idempiere.adInterface.x10.WindowTabDataDocument;
 
 @Path("/model_adservice/")
-@Consumes("application/xml") 
-@Produces("application/xml")
+@Consumes({"application/xml", "application/json"}) 
+@Produces({"application/xml", "application/json"})
 @WebService(targetNamespace="http://idempiere.org/ADInterface/1_0")
-@SOAPBinding(style=Style.RPC,use=Use.LITERAL,parameterStyle=ParameterStyle.WRAPPED)
 public interface ModelADService {
 
     /* Model oriented web services */ 

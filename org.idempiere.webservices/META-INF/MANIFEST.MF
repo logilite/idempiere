@@ -82,7 +82,8 @@ Bundle-ClassPath: .,
  WEB-INF/lib/axis.jar,
  WEB-INF/lib/commons-discovery-0.5.jar,
  WEB-INF/lib/jsr311-api-1.1.jar,
- WEB-INF/lib/idempiere-xmlbeans-1.1.jar
+ WEB-INF/lib/idempiere-xmlbeans-1.1.jar,
+ WEB-INF/lib/jettison-1.3.8.jar
 Export-Package: javax.ws.rs,
  javax.ws.rs.core,
  javax.ws.rs.ext,
