@@ -63,6 +63,7 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>jettisson</id>
 						<phase>validate</phase>
 						<goals>
 							<goal>wget</goal>
