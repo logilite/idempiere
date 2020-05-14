@@ -165,7 +165,7 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
 
     private int               windowNo;
 
-    private Grid              form;
+    protected Grid              form;
 
     private ArrayList<WEditor> editors = new ArrayList<WEditor>();
     
