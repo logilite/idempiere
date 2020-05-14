@@ -33,20 +33,20 @@ import org.compiere.util.*;
 public class BOMVerify extends SvrProcess
 {
 	/**	The Product			*/
-	private int		p_M_Product_ID = 0;
+	protected int		p_M_Product_ID = 0;
 	/** Product Category	*/
-	private int		p_M_Product_Category_ID = 0;
+	protected int		p_M_Product_Category_ID = 0;
 	/** Re-Validate			*/
-	private boolean	p_IsReValidate = false;
+	protected boolean	p_IsReValidate = false;
 
-	private boolean	p_fromButton = false;
+	protected boolean	p_fromButton = false;
 	
 	/**	List of Products	*/
-	private ArrayList<MProduct>	 foundproducts = new ArrayList<MProduct>();
-	private ArrayList<MProduct> validproducts = new ArrayList<MProduct>();
-	private ArrayList<MProduct>	 invalidproducts = new ArrayList<MProduct>();
-	private ArrayList<MProduct> containinvalidproducts = new ArrayList<MProduct>();
-	private ArrayList<MProduct> checkedproducts = new ArrayList<MProduct>();
+	protected ArrayList<MProduct>	 foundproducts = new ArrayList<MProduct>();
+	protected ArrayList<MProduct> validproducts = new ArrayList<MProduct>();
+	protected ArrayList<MProduct>	 invalidproducts = new ArrayList<MProduct>();
+	protected ArrayList<MProduct> containinvalidproducts = new ArrayList<MProduct>();
+	protected ArrayList<MProduct> checkedproducts = new ArrayList<MProduct>();
 	
 	/**
 	 * 	Prepare
@@ -130,7 +130,7 @@ public class BOMVerify extends SvrProcess
 		return "#" + counter;
 	}	//	doIt
 
-	private void checkProduct(MProduct product)
+	protected void checkProduct(MProduct product)
 	{
 		if (product.isBOM() && !checkedproducts.contains(product))
 		{
@@ -144,7 +144,7 @@ public class BOMVerify extends SvrProcess
 	 *	@param product product
 	 *	@return Info
 	 */
-	private boolean validateProduct (MProduct product)
+	protected boolean validateProduct (MProduct product)
 	{
 		if (!product.isBOM())
 			return false;
