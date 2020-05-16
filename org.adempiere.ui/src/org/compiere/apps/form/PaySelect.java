@@ -68,10 +68,10 @@ public class PaySelect
 	public boolean         m_isLocked = false;
 	/** Payment Selection		*/
 	public MPaySelection	m_ps = null;
-	/** one-To-one payment */
-	public boolean			m_isOneToOnePayment = false;
+	/** one-To-one payment per invoice */
+	public boolean			m_isOnePaymentPerInvoice	= false;
 	/**	Logger			*/
-	public static CLogger log = CLogger.getCLogger(PaySelect.class);
+	public static final CLogger log = CLogger.getCLogger(PaySelect.class);
 
 	public ArrayList<BankInfo> getBankAccountData()
 	{
@@ -468,7 +468,7 @@ public class PaySelect
 			m_ps.setPayDate (payDate);
 			m_ps.setC_BankAccount_ID(bi.C_BankAccount_ID);
 			m_ps.setIsApproved(true);
-			m_ps.setIsOnePaymentPerInvoice(m_isOneToOnePayment);
+			m_ps.setIsOnePaymentPerInvoice(m_isOnePaymentPerInvoice);
 			m_ps.saveEx();
 			if (log.isLoggable(Level.CONFIG)) log.config(m_ps.toString());
 

@@ -106,7 +106,7 @@ public class GridTable extends AbstractTableModel
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -2741647620577906242L;
+	private static final long serialVersionUID = 817894725729408648L;
 
 	public static final String DATA_REFRESH_MESSAGE = "Refreshed";
 	public static final String DATA_UPDATE_COPIED_MESSAGE = "UpdateCopied";
@@ -2447,7 +2447,10 @@ public class GridTable extends AbstractTableModel
 				if (columnName.endsWith ("_ID"))
 					multiRowWHERE.append (tableName).append(".").append(columnName)
 						.append ("=").append (value);
-				else
+				else if (value instanceof Timestamp) {
+					multiRowWHERE.append (tableName).append(".").append(columnName)
+					.append ("=").append (DB.TO_DATE((Timestamp)value, false));
+				}else
 					multiRowWHERE.append (tableName).append(".").append(columnName)
 						.append ("=").append (DB.TO_STRING(value.toString()));
 			}
@@ -3581,7 +3584,7 @@ public class GridTable extends AbstractTableModel
 		/**
 		 * 
 		 */
-		private static final long serialVersionUID = -8735217685095696892L;
+		private static final long serialVersionUID = -6866671239509705988L;
 
 		/**
 		 *  Construct Loader

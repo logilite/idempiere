@@ -124,7 +124,7 @@ public class WPaySelect extends PaySelect
 	private Label labelDtype = new Label();
 	private Listbox fieldDtype = ListboxFactory.newDropdownListbox();
 	private Panel southPanel;
-	private Checkbox oneToOnePayment = new Checkbox();
+	private Checkbox chkOnePaymentPerInv = new Checkbox();
 	@SuppressWarnings("unused")
 	private ProcessInfo m_pi;
 	private boolean m_isLock;
@@ -187,9 +187,9 @@ public class WPaySelect extends PaySelect
 		fieldPayDate.addValueChangeListener(this);
 		ZKUpdateUtil.setHflex(fieldPayDate.getComponent(), "1");
 		
-		oneToOnePayment.setText(Msg.translate(Env.getCtx(), MPaySelection.COLUMNNAME_IsOnePaymentPerInvoice));
-		oneToOnePayment.addActionListener(this);
-		
+		chkOnePaymentPerInv.setText(Msg.translate(Env.getCtx(), MPaySelection.COLUMNNAME_IsOnePaymentPerInvoice));
+		chkOnePaymentPerInv.addActionListener(this);
+
 		onlyPositiveBalance.setText(Msg.getMsg(Env.getCtx(), "PositiveBalance"));
 		onlyPositiveBalance.addActionListener(this);
 		onlyPositiveBalance.setChecked(true);
@@ -261,13 +261,13 @@ public class WPaySelect extends PaySelect
 		row.appendChild(labelDtype.rightAlign());
 		row.appendChild(fieldDtype);
 		if (ClientInfo.maxWidth(ClientInfo.MEDIUM_WIDTH-1))
-		row.appendCellChild(oneToOnePayment);
 		{
 			row.appendChild(new Space());
 			row = rows.newRow();
 		}
 		row.appendChild(new Space());
 		row.appendChild(onlyPositiveBalance);
+		row.appendCellChild(chkOnePaymentPerInv);
 		row.appendChild(new Space());
 		
 		row = rows.newRow();
@@ -446,9 +446,9 @@ public class WPaySelect extends PaySelect
 				}
 			});
 		}
-		else if (e.getTarget().equals(oneToOnePayment))
+		else if (e.getTarget().equals(chkOnePaymentPerInv))
 		{
-			m_isOneToOnePayment = oneToOnePayment.isChecked();
+			m_isOnePaymentPerInvoice = chkOnePaymentPerInv.isChecked();
 		}
 	}   //  actionPerformed
 
@@ -524,8 +524,8 @@ public class WPaySelect extends PaySelect
 							dialog.setPage(form.getPage());
 							dialog.doHighlighted();
 							// Create instance parameters. Parameters you want to send to the process.
-							ProcessInfoParameter pi1 = new ProcessInfoParameter(MPaySelection.COLUMNNAME_IsOnePaymentPerInvoice, m_isOneToOnePayment, "", "", "");
-							dialog.getProcessInfo().setParameter(new ProcessInfoParameter[] {pi1});
+							ProcessInfoParameter piParam = new ProcessInfoParameter(MPaySelection.COLUMNNAME_IsOnePaymentPerInvoice, m_isOnePaymentPerInvoice, "", "", "");
+							dialog.getProcessInfo().setParameter(new ProcessInfoParameter[] {piParam});
 						} catch (SuspendNotAllowedException e) {
 							log.log(Level.SEVERE, e.getLocalizedMessage(), e);
 						}

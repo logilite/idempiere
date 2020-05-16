@@ -186,14 +186,14 @@ public class MLookupFactory
 		MLookupInfo info = null;
 		boolean needToAddSecurity = true;
 		//	List or MultiSelectList
-		if (AD_Reference_ID == DisplayType.List || AD_Reference_ID == DisplayType.MultiSelectList)	//	17, 200139
+		if (AD_Reference_ID == DisplayType.List || AD_Reference_ID == DisplayType.ChosenMultipleSelectionList || AD_Reference_ID == DisplayType.MultiSelectList)	//	17
 		{
 			info = getLookup_List(language, AD_Reference_Value_ID);
 			needToAddSecurity = false;
 		}
 		//	Table or Search or MultiSelectTable with Reference_Value
-		else if ((AD_Reference_ID == DisplayType.Table || AD_Reference_ID == DisplayType.Search 
-				|| AD_Reference_ID == DisplayType.MultiSelectTable)
+		else if ((AD_Reference_ID == DisplayType.Table || AD_Reference_ID == DisplayType.Search
+			|| AD_Reference_ID == DisplayType.ChosenMultipleSelectionTable || AD_Reference_ID == DisplayType.ChosenMultipleSelectionSearch || AD_Reference_ID == DisplayType.MultiSelectTable)
 			&& AD_Reference_Value_ID != 0)
 		{
 			info = getLookup_Table (ctx, language, WindowNo, AD_Reference_Value_ID);
@@ -437,7 +437,7 @@ public class MLookupFactory
 				ZoomWindowPO = rs.getInt(9);
 				//AD_Table_ID = rs.getInt(10);
 				displayColumnSQL = rs.getString(11);
-				if (displayColumnSQL != null && displayColumnSQL.length() > 0 && displayColumnSQL.startsWith("@SQL="))
+				if (displayColumnSQL != null && displayColumnSQL.length() > 0 && (displayColumnSQL.startsWith("@SQL=") || displayColumnSQL.startsWith("@SQLFIND=")))
 					displayColumnSQL = "NULL";
 				if (displayColumnSQL != null && displayColumnSQL.contains("@") && displayColumnSQL.startsWith("@SQL="))
 					displayColumnSQL = Env.parseContext(Env.getCtx(), -1, displayColumnSQL, false, true);
@@ -702,7 +702,7 @@ public class MLookupFactory
 			embedSQL.append(TableNameAlias).append(".Value||'-'||");
 
 		MColumn columnDisplay = new MColumn(Env.getCtx(), columnDisplay_ID, null);
-		if (columnDisplay.isVirtualUIColumn())
+		if (columnDisplay.isVirtualUIColumn() || columnDisplay.isVirtualSearchColumn())
 		{
 			s_log.warning("Virtual UI Column must not be used as display");
 			return null;

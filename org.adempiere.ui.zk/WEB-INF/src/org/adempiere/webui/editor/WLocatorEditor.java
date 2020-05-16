@@ -68,7 +68,7 @@ public class WLocatorEditor extends WEditor implements EventListener<Event>, Pro
 	protected Object m_value;
 	protected int m_WindowNo;
 	
-	private static CLogger log = CLogger.getCLogger(WLocatorEditor.class);
+	private static final CLogger log = CLogger.getCLogger(WLocatorEditor.class);
 	/**
 	 *  IDE Constructor
 	 */

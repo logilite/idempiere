@@ -70,6 +70,7 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.InputEvent;
+import org.zkoss.zk.ui.sys.SessionCtrl;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zk.ui.util.DesktopCleanup;
 import org.zkoss.zul.Comboitem;
@@ -516,6 +517,8 @@ ContextMenuListener, IZoomableEditor
 		        			gridField.setLookupEditorSettingValue(false);
 		        	}
 		        }
+		        if (newValue != null)
+		        	focusNext();
     		} finally {
     			onselecting = false;
     		}
@@ -926,7 +929,7 @@ ContextMenuListener, IZoomableEditor
 		private WTableDirEditor editor;
 		
 		protected CCacheListener(String tableName, WTableDirEditor editor) {
-			super(tableName, tableName, 0, true);
+			super(tableName, tableName+"|CCacheListener", 0, 0, true);
 			this.editor = editor;
 		}
 
@@ -939,11 +942,16 @@ ContextMenuListener, IZoomableEditor
 		}
 
 		private void refreshLookupList() {
-			int failures = 0;
 			Desktop desktop = editor.getComponent().getDesktop();
-			Object attr = desktop.getAttribute(AdempiereWebUI.SERVERPUSH_SCHEDULE_FAILURES);
-			if (attr != null && attr instanceof Integer)
-				failures = ((Integer)attr).intValue();
+			boolean alive = false;
+			if (desktop.isAlive() && desktop.getSession() != null) {
+				SessionCtrl ctrl = (SessionCtrl) desktop.getSession();
+				alive = !ctrl.isInvalidated();
+			}
+			if (!alive) {
+				((ITableDirEditor)editor.getComponent()).cleanup();
+				return;
+			}
 			Executions.schedule(desktop, new EventListener<Event>() {
 				@Override
 				public void onEvent(Event event) {
@@ -953,13 +961,6 @@ ContextMenuListener, IZoomableEditor
 					} catch (Exception e) {}
 				}
 			}, new Event("onResetLookupList"));
-			attr = desktop.getAttribute(AdempiereWebUI.SERVERPUSH_SCHEDULE_FAILURES);
-			if (attr != null && attr instanceof Integer) {
-				int f = ((Integer)attr).intValue();
-				if (f > failures) {
-					((ITableDirEditor)editor.getComponent()).cleanup();
-				}
-			}
 		}
 				
 		@Override

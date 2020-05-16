@@ -99,7 +99,7 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 	private static final String ON_OK_ECHO = "onOkEcho";
 	
 	/**	Logger			*/
-	private static CLogger log = CLogger.getCLogger(ProcessDialog.class);
+	private static final CLogger log = CLogger.getCLogger(ProcessDialog.class);
 	//
 
 	private Table logMessageTable;	
@@ -341,18 +341,19 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 		appendRecordLogInfo(pi.getLogs(), infoResultContent);
 		
 		bOK.setLabel(Msg.getMsg(Env.getCtx(), "Parameter"));
-		if (ThemeManager.isUseFontIconForImage())
-			bOK.setIconSclass("z-icon-Reset");
-		else
-			bOK.setImage(ThemeManager.getThemeResource("images/Reset16.png"));
 		bOK.setDisabled(false);
 
 		bCancel.setLabel(Msg.getMsg(Env.getCtx(), "Close"));
-		if (ThemeManager.isUseFontIconForImage())
-			bCancel.setIconSclass("z-icon-Cancel");
-		else
-			bCancel.setImage(ThemeManager.getThemeResource("images/Cancel16.png"));
 		bCancel.setDisabled(false);
+
+    	if (ThemeManager.isUseFontIconForImage()) {
+    		String iconSclass = "z-icon-Reset";
+    		bOK.setIconSclass(iconSclass);
+    		LayoutUtils.addSclass("font-icon-toolbar-button", bOK);
+    	} else {
+			bOK.setImage(ThemeManager.getThemeResource("images/Reset16.png"));
+			bCancel.setImage(ThemeManager.getThemeResource("images/Cancel16.png"));
+		}
 
 		isParameterPage = false;
 
@@ -369,7 +370,7 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 			resultPanelLayout = new Vlayout();
 			resultPanelLayout.setSclass("result-parameter-layout");
 			resultPanelLayout.setStyle("overflow: auto !important;");
-			resultPanelLayout.setVflex("true");
+			ZKUpdateUtil.setVflex(resultPanelLayout, "true");
 			// reference for update late
 			messageResultContent = setHeadMessage(resultPanelLayout, null);
 			
@@ -465,16 +466,17 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 		isParameterPage = true;
 
 		bOK.setLabel(Msg.getMsg(Env.getCtx(), "Start"));
-		if (ThemeManager.isUseFontIconForImage())
-			bOK.setIconSclass("z-icon-Ok");
-		else
-			bOK.setImage(ThemeManager.getThemeResource("images/Ok16.png"));
 		
 		bCancel.setLabel(Util.cleanAmp(Msg.translate(Env.getCtx(), ConfirmPanel.A_CANCEL)));
-		if (ThemeManager.isUseFontIconForImage())
-			bCancel.setIconSclass("z-icon-Cancel");
-		else
+
+    	if (ThemeManager.isUseFontIconForImage()) {
+    		String iconSclass = "z-icon-Ok";
+    		bOK.setIconSclass(iconSclass);
+    		LayoutUtils.addSclass("font-icon-toolbar-button", bOK);
+    	} else {
+			bOK.setImage(ThemeManager.getThemeResource("images/Ok16.png"));
 			bCancel.setImage(ThemeManager.getThemeResource("images/Cancel16.png"));
+		}
 
 		//recreate process info
 		ProcessInfo m_pi = new WProcessInfo(getName(), getAD_Process_ID());

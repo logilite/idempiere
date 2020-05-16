@@ -59,7 +59,6 @@ import org.adempiere.webui.window.FDialog;
 import org.compiere.model.GridTab;
 import org.compiere.model.MImportTemplate;
 import org.compiere.model.MQuery;
-import org.compiere.model.MRole;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -349,14 +348,14 @@ public class CSVImportAction implements EventListener<Event>
 			if (query != null) {
 	        	query.addRestriction("1=1");
 	        	panel.getActiveGridTab().setQuery(query);
-	        	panel.getADTab().getSelectedTabpanel().query(false, 0, MRole.getDefault().getMaxQueryRecords());
+	        	panel.getADTab().getSelectedTabpanel().query(false, 0, panel.getActiveGridTab().getMaxQueryRecords());
 	        }
 	        panel.getActiveGridTab().dataRefresh(false);
 	        
 	        if (detailQuery != null){
 	        	detailQuery.addRestriction("1=1");
 	        	panel.getADTab().getSelectedDetailADTabpanel().getGridTab().setQuery(detailQuery);	        	
-	        	panel.getADTab().getSelectedDetailADTabpanel().query(false, 0, MRole.getDefault().getMaxQueryRecords());
+	        	panel.getADTab().getSelectedDetailADTabpanel().query(false, 0, panel.getActiveGridTab().getMaxQueryRecords());
 		        panel.getADTab().getSelectedDetailADTabpanel().getGridTab().dataRefresh(false);
 	        }
 		} catch (Exception e) {

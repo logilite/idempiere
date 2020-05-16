@@ -103,7 +103,7 @@ Copyright (C) 2007 Ashley G Ramdass.
 			}
 		});								
 		
-		zk.afterLoad('zul.wgt', function () {
+		zk.afterLoad('zul.inp', function () {
 			
 			// should filter out for only component inside standard window or component wish fire this event, 
 			// or ever rise other event like start editting to distinguish with true onChange event
@@ -145,7 +145,8 @@ Copyright (C) 2007 Ashley G Ramdass.
 					
 				this.$bind_(dt, skipper, after);
 				
-				if (this.getType () != "password"){
+				var txtid = this.getId()
+				if (txtid != "txtUserId" && txtid != "txtPassword" ){
 					return;
 				}
 				
@@ -159,7 +160,8 @@ Copyright (C) 2007 Ashley G Ramdass.
 				
 				this.$unbind_(dt, skipper);
 				
-				if (this.getType () != "password"){
+				var txtid = this.getId()
+				if (txtid != "txtUserId" && txtid != "txtPassword" ){
 					return;
 				}
 				
@@ -289,40 +291,34 @@ Copyright (C) 2007 Ashley G Ramdass.
 			wgt.$syncScroll ()
 		}
 		
-		/*
-				Issue of file not able to download in mobile iOS devices (iPad, iPhone) 
-				Issue from ZK lower version, In ZK 8.5.2 version it was fixed. [ https://tracker.zkoss.org/browse/ZK-3886 ]
-			*/
-			zk.afterLoad('zk', function() {
-			zAu.cmd0.download = function(url) {
-				if (url) {
-
-					if (zk.mobile && zk.safari) {
-						var newwindow = window.open(url, "Download...", null);
-						if (window.focus) {
-							newwindow.focus();
-						}
-					} else if (zk.ios) {
-						var link = document.createElement('a'),
-							evt = document.createEvent('Event');
-						link.id = 'zk_download';
-						link.href = url;
-						if (zk.ios < 7) //ZK-2245: it's restriction to programmatically open new tab since ios7 
-							link.target = '_blank';
-						evt.initEvent('click', true, false);
-						link.dispatchEvent(evt);
-					} else {
-						var ifr = jq('#zk_download')[0];
-						if (ifr) {
-							ifr.src = url; //It is OK to reuse the same iframe 
-						} else {
-							var html = '<iframe src="' + url + '" id="zk_download" name="zk_download" style="display:none;width:0;height:0;border:0" frameborder="0"></iframe>';
-							jq(document.body).append(html);
-						}
+		//Incorporate fix from https://tracker.zkoss.org/browse/ZK-4204
+		//Probably can be removed after the upgrade to zk9
+		zk.afterLoad('zk', function () {
+			if (navigator.sendBeacon && window.URLSearchParams) {
+				zAu._rmDesktop = function(dt, dummy) {
+					var url = zk.ajaxURI(null, {desktop: dt, au: true}),
+					data = jq.param({dtid: dt.id, cmd_0: dummy ? 'dummy' : 'rmDesktop', opt_0: 'i'}),
+					headers = {};
+					if (zk.pfmeter) {
+						var fakeReq = {
+							setRequestHeader: function (name, value) {
+								headers[name] = value;
+							}
+						};
+						zAu._pfsend(dt, fakeReq, true, false);
 					}
+					var params = new URLSearchParams(data);
+					for (var key in headers) {
+						if (headers.hasOwnProperty(key))
+							params.append(key, headers[key]);
+					}
+					navigator.sendBeacon(url, zk.chrome // https://crbug.com/747787
+						? new Blob([params.toString()], {type: 'application/x-www-form-urlencoded'})
+						: params
+					);
 				}
-			};
-		}); //zk.afterLoad
+			}
+		});
 	]]>
 	</script>
     <include src="${themePreference}"/>

@@ -37,7 +37,7 @@ import org.compiere.util.KeyNamePair;
 public abstract class CreateFrom implements ICreateFrom
 {
 	/**	Logger			*/
-	protected CLogger log = CLogger.getCLogger(getClass());
+	protected transient CLogger log = CLogger.getCLogger(getClass());
 
 	/** Loaded Order            */
 	protected MOrder p_order = null;

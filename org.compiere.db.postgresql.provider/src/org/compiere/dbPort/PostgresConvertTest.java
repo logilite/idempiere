@@ -44,7 +44,7 @@ public class PostgresConvertTest
 	}	//	PostgresConvertTest
 	
 	/**	Logger	*/
-	private static CLogger	log	= CLogger.getCLogger (PostgresConvertTest.class);
+	private static final CLogger	log	= CLogger.getCLogger (PostgresConvertTest.class);
 	
 	/**
 	 * 	Test

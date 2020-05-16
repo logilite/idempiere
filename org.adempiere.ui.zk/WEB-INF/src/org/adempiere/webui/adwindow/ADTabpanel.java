@@ -34,6 +34,7 @@ import org.adempiere.webui.AdempiereIdGenerator;
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.LayoutUtils;
+import org.adempiere.webui.apps.CalloutDialog;
 import org.adempiere.webui.component.Borderlayout;
 import org.adempiere.webui.component.Column;
 import org.adempiere.webui.component.Columns;
@@ -56,6 +57,7 @@ import org.adempiere.webui.editor.WebEditorFactory;
 import org.adempiere.webui.event.ContextMenuListener;
 import org.adempiere.webui.panel.HelpController;
 import org.adempiere.webui.session.SessionManager;
+import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.GridTabDataBinder;
 import org.adempiere.webui.util.TreeUtils;
 import org.adempiere.webui.util.ZKUpdateUtil;
@@ -70,6 +72,7 @@ import org.compiere.model.I_AD_Preference;
 import org.compiere.model.MColumn;
 import org.compiere.model.MPreference;
 import org.compiere.model.MRole;
+import org.compiere.model.MStyle;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTab;
 import org.compiere.model.MTable;
@@ -337,6 +340,8 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
         this.windowNo = windowNo;
         this.gridWindow = gridWindow;
         this.gridTab = gridTab;
+        // callout dialog ask for input - devCoffee #3390
+        gridTab.setCalloutUI(new CalloutDialog(Executions.getCurrent().getDesktop(), windowNo));
         this.windowPanel = winPanel;
         gridTab.addDataStatusListener(this);
         this.dataBinder = new GridTabDataBinder(gridTab);
@@ -736,6 +741,25 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
         		Label label = new Label(field.getHeader());
         		Div div = new Div();
         		div.setSclass("form-label-heading");
+        		if (field.getAD_LabelStyle_ID() > 0) {
+            		MStyle style = MStyle.get(Env.getCtx(), field.getAD_LabelStyle_ID());
+            		String cssStyle = style.buildStyle(ThemeManager.getTheme(), new Evaluatee() {
+    					@Override
+    					public String get_ValueAsString(String variableName) {
+    						return field.get_ValueAsString(variableName);
+    					}
+    				});
+            		if (cssStyle != null && cssStyle.startsWith(MStyle.SCLASS_PREFIX)) {
+    					String sclass = cssStyle.substring(MStyle.SCLASS_PREFIX.length());
+    					div.setSclass(sclass);
+    				} else if (style != null && cssStyle.startsWith(MStyle.ZCLASS_PREFIX)) {
+    					String zclass = cssStyle.substring(MStyle.ZCLASS_PREFIX.length());
+    					div.setZclass(zclass);
+    				} else {
+    					div.setStyle(cssStyle);
+    				}
+        		}
+
         		row.appendCellChild(createSpacer());
         		div.appendChild(label);
         		row.appendCellChild(div);
@@ -1859,7 +1883,11 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
 				continue;
 			}
 			if (found) {
-				if (editor.isVisible() && editor.isReadWrite()) {
+				if (editor.isVisible() && editor.isReadWrite()
+					// note, no auto focus on next button - if interested in
+					// focusing next button must implement to check if the button
+					// is just showin in toolbar, just focus on window fields must be auto focused
+					&& ! (editor instanceof WButtonEditor)) {
 					focusToEditor(editor, false);
 					break;
 				}

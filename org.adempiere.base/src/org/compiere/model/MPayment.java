@@ -88,7 +88,7 @@ public class MPayment extends X_C_Payment
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -6268462097642919346L;
+	private static final long serialVersionUID = 3236788845265387613L;
 
 	/**
 	 * 	Get Payments Of BPartner
@@ -773,10 +773,20 @@ public class MPayment extends X_C_Payment
 		if (newRecord 
 			|| is_ValueChanged("C_Charge_ID") || is_ValueChanged("C_Invoice_ID")
 			|| is_ValueChanged("C_Order_ID") || is_ValueChanged("C_Project_ID"))
-			setIsPrepayment (getC_Charge_ID() == 0 
-				&& getC_BPartner_ID() != 0
-				&& (getC_Order_ID() != 0 
-					|| (getC_Project_ID() != 0 && getC_Invoice_ID() == 0)));
+		{
+			if (getReversal_ID() > 0)
+			{
+				setIsPrepayment(getReversal().isPrepayment());
+			}
+			else
+			{
+				setIsPrepayment (getC_Charge_ID() == 0 
+					&& getC_BPartner_ID() != 0
+					&& (getC_Order_ID() != 0 
+						|| (getC_Project_ID() != 0 && getC_Invoice_ID() == 0)));
+			}
+		}
+		
 		if (isPrepayment())
 		{
 			if (newRecord 
@@ -2220,7 +2230,7 @@ public class MPayment extends X_C_Payment
 			return null;
 		//	Business Partner needs to be linked to Org
 		MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(getC_BPartner_ID(), get_TrxName());
-		int counterAD_Org_ID = bp.getAD_OrgBP_ID_Int(); 
+		int counterAD_Org_ID = bp.getAD_OrgBP_ID(); 
 		if (counterAD_Org_ID == 0)
 			return null;
 		
@@ -2388,6 +2398,10 @@ public class MPayment extends X_C_Payment
 				+ ": " + getDocumentNo() + " [1]");
 		alloc.setAD_Org_ID(getAD_Org_ID());
 		alloc.setDateAcct(getDateAcct()); // in case date acct is different from datetrx in payment
+		MInvoice invoice = new MInvoice(getCtx(), getC_Invoice_ID(), get_TrxName());
+		if (invoice.getDateAcct().after(alloc.getDateAcct())) {
+			alloc.setDateAcct(invoice.getDateAcct());
+		}
 		alloc.saveEx();
 		MAllocationLine aLine = null;
 		if (isReceipt())

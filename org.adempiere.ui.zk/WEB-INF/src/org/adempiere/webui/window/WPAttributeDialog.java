@@ -171,7 +171,7 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	/** Change */
 	protected boolean				m_changed			= false;
 
-	public CLogger					log					= CLogger.getCLogger(getClass());
+	private static final CLogger	log = CLogger.getCLogger(WPAttributeDialog.class);
 	/** Row Counter */
 	protected int					m_row				= 0;
 	/** List of Editors */

@@ -29,7 +29,6 @@ import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.ValuePreference;
 import org.adempiere.webui.adwindow.ADWindow;
 import org.adempiere.webui.adwindow.ADWindowContent;
-import org.adempiere.webui.adwindow.IFieldEditorContainer;
 import org.adempiere.webui.adwindow.QuickGridTabRowRenderer;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Searchbox;
@@ -86,7 +85,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 	protected InfoPanel				infoPanel						= null;
 	protected String				imageUrl;
 
-	private static CLogger log = CLogger.getCLogger(WSearchEditor.class);
+	private static final CLogger log = CLogger.getCLogger(WSearchEditor.class);
 
 	private static final String IN_PROGRESS_IMAGE = "~./zk/img/progress3.gif";
 	
@@ -356,7 +355,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 		//
 	}
 
-	private void actionText(String text)
+	protected void actionText(String text)
 	{
 		//	Nothing entered
 		if (text == null || text.length() == 0 || text.equals("%"))
@@ -401,17 +400,8 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 			log.fine(getColumnName() + " - Unique ID=" + id);
 
 		actionCombo(Integer.valueOf(id));          //  data binding
-		
-		Searchbox comp = getComponent();
-		Component parent = comp.getParent();
-		while (parent != null) {
-			if (parent instanceof IFieldEditorContainer) {
-				((IFieldEditorContainer) parent).focusToNextEditor(this);
-				break;
-			}
-			parent = parent.getParent();
-		}
-		
+		focusNext();
+
 		//safety check: if focus is going no where, focus back to self
 		String uid = getComponent().getTextbox().getUuid();
 		String script = "setTimeout(function(){try{var e = zk.Widget.$('#" + uid +
@@ -422,7 +412,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 	}	//	actionText
 
 
-	private void resetButtonState() {
+	protected void resetButtonState() {
 		getComponent().getButton().setEnabled(true);
 		if (ThemeManager.isUseFontIconForImage())
 			getComponent().getButton().setIconSclass(imageUrl);
@@ -476,7 +466,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 	 *	Action - Special Quick Entry Screen
 	 *  @param newRecord true if new record should be created
 	 */
-	private void actionQuickEntry (boolean newRecord)
+	protected void actionQuickEntry (boolean newRecord)
 	{
 		if(!getComponent().isEnabled())
 			return;
@@ -549,7 +539,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 		}
 	}	//	actionQuickEntry
 
-	private void actionButton(String queryValue)
+	protected  void actionButton(String queryValue)
 	{
 		if (lookup == null)
 			return;		//	leave button disabled
@@ -611,6 +601,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 						actionCombo (result);
 					else
 						actionCombo (result[0]);
+					focusNext();
 				}
 				else if (cancelled)
 				{
@@ -624,13 +615,14 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 					}else{
 						getComponent().setText("");
 						actionCombo(null);
-					}						
+					}
+					getComponent().getTextbox().focus();
 				}
 				else
 				{
 					if (log.isLoggable(Level.CONFIG)) log.config(getColumnName() + " - Result = null (not cancelled)");
+					getComponent().getTextbox().focus();
 				}
-				getComponent().getTextbox().focus();
 				getComponent().setAttribute(ATTRIBUTE_IS_INFO_PANEL_OPEN, false);
 			}
 		});

@@ -69,7 +69,7 @@ import org.zkoss.zul.Vbox;
  */
 public class ReportAction implements EventListener<Event>
 {
-	private static CLogger log = CLogger.getCLogger(ReportAction.class);
+	private static final CLogger log = CLogger.getCLogger(ReportAction.class);
 	
 	private AbstractADWindowContent panel;
 	
@@ -202,7 +202,7 @@ public class ReportAction implements EventListener<Event>
 			confirmPanel.addActionListener(this);
 		}
 
-		LayoutUtils.openPopupWindow(panel.getToolbar().getButton("Report"), winReport, "after_start");
+		LayoutUtils.openPopupWindow(panel.getToolbar().getToolbarItem("Report"), winReport, "after_start");
 	}
 	
 	@Override
@@ -285,7 +285,7 @@ public class ReportAction implements EventListener<Event>
 		else
 		{
 			whereClause.append(gridTab.getTableModel().getSelectWhereClause());
-			RecordIDs = new ArrayList <Integer>();
+			RecordIDs = new ArrayList<Integer>();
 			for(int i = 0; i < gridTab.getRowCount(); i++)
 			{
 				RecordIDs.add(gridTab.getKeyID(i));

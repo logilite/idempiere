@@ -136,7 +136,7 @@ public class ReportStarter implements ProcessCall, ClientProcess
 {
 	private static final int DEFAULT_SWAP_MAX_PAGES = 100;
 	/** Logger */
-	private static CLogger log = CLogger.getCLogger(ReportStarter.class);
+	private static final CLogger log = CLogger.getCLogger(ReportStarter.class);
 	private static File REPORT_HOME = null;
     public static final JasperReportsContext jasperReportStartContext;
 	
@@ -340,7 +340,7 @@ public class ReportStarter implements ProcessCall, ClientProcess
      */
     protected Connection getConnection()
     {
-    	return DB.getConnectionRW();
+    	return DB.getReportingConnectionRO();
     }
 
     /**
@@ -645,7 +645,10 @@ public class ReportStarter implements ProcessCall, ClientProcess
             JRSwapFileVirtualizer virtualizer = null;
             int maxPages = MSysConfig.getIntValue(MSysConfig.JASPER_SWAP_MAX_PAGES, DEFAULT_SWAP_MAX_PAGES);
             try {
-            	conn = getConnection();
+            	if (trx != null)
+            		conn = trx.getConnection();
+            	else
+            		conn = getConnection();
 
             	String swapPath = System.getProperty("java.io.tmpdir");
 				JRSwapFile swapFile = new JRSwapFile(swapPath, 1024, 1024);

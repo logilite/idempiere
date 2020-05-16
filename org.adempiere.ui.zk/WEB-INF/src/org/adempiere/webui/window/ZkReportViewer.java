@@ -167,7 +167,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 	protected Menuitem 	m_daM = null;
 
 	/**	Logger			*/
-	private static CLogger log = CLogger.getCLogger(ZkReportViewer.class);
+	private static final CLogger log = CLogger.getCLogger(ZkReportViewer.class);
 
 	//
 	protected StatusBarPanel statusBar = new StatusBarPanel();

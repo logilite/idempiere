@@ -25,7 +25,7 @@ public class JasperViewer extends javax.swing.JFrame {
 	private static final long serialVersionUID = 1192807883081180999L;
 	
 	private String m_title;
-	private  PrintInfo m_printInfo;
+	private PrintInfo m_printInfo;
 	
     /** Creates new form JasperViewer */
     /**

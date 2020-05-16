@@ -41,6 +41,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -228,6 +229,8 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	/** Image Size				*/
 	public static Dimension		IMAGE_SIZE = new Dimension(10,10);
 
+	private Map<MPrintFormatItem,PrintData> childPrintFormatDetails = new HashMap<MPrintFormatItem,PrintData>();
+	
 	public Boolean[] colSuppressRepeats;
 	
 	static {
@@ -1017,7 +1020,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		{
 			if (log.isLoggable(Level.INFO)) log.info("Row=" + row);
 			m_data.setRowIndex(row);
-			if (row > 0)
+			if (row > 0 && m_format.isBreakPagePerRecord())
 				newPage(true, false); // break page per record when the report is a form
 
 			boolean somethingPrinted = true;	//	prevent NL of nothing printed and supress null
@@ -1293,6 +1296,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 			return null;
 		if (log.isLoggable(Level.FINE))
 			log.fine(includedData.toString());
+		setChildPrintFormatDetails(item, includedData); //map printdata and printformat item
 		//
 		element = layoutTable (format, includedData, item.getXSpace());
 		//	handle multi page tables
@@ -1700,7 +1704,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		KeyNamePair[] pk = new KeyNamePair[rows];
 		String pkColumnName = null;
 		ArrayList<Integer> functionRows = new ArrayList<Integer>();
-		ArrayList<Integer> pageBreak = new ArrayList<Integer>();
+		ArrayList<Integer> pageBreak = new ArrayList<Integer>();		
 		ArrayList<Integer> finReportSumRows = new ArrayList<Integer>();
 		ArrayList<Integer> blankRows = new ArrayList<Integer>();
 		int lastLevelNo = 0;
@@ -2046,6 +2050,16 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		return  m_PrintInfo;
 	}
 
+	public void setChildPrintFormatDetails(MPrintFormatItem printFormatItem, PrintData printData)
+	{
+		childPrintFormatDetails.put(printFormatItem, printData);
+	}
+	
+	public Map<MPrintFormatItem, PrintData> getChildPrintFormatDetails()
+	{
+		return childPrintFormatDetails;
+	}
+	
 	private boolean isDisplayed(PrintData data, MPrintFormatItem item) {
 		if ( Util.isEmpty(item.getDisplayLogic() ))
 			return true;

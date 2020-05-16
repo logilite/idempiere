@@ -26,6 +26,7 @@ import org.compiere.model.MOrderLine;
 import org.compiere.model.MTable;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
  
 /**
  *	Create (Generate) Invoice from Shipment
@@ -73,17 +74,17 @@ public class OrderLineCreateShipment extends SvrProcess
 	{
 		if (log.isLoggable(Level.INFO)) log.info("C_OrderLine_ID=" + p_C_OrderLine_ID );
 		if (p_C_OrderLine_ID == 0)
-			throw new IllegalArgumentException("No OrderLine");
+			throw new IllegalArgumentException(Msg.getMsg(getCtx(), "No OrderLine"));
 		//
 		MOrderLine line = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(p_C_OrderLine_ID, get_TrxName());
 		if (line.get_ID() == 0)
-			throw new IllegalArgumentException("Order line not found");
+			throw new IllegalArgumentException(Msg.getMsg(getCtx(), "Order line not found"));
 		MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(line.getC_Order_ID(), get_TrxName());
 		if (!MOrder.DOCSTATUS_Completed.equals(order.getDocStatus()))
-			throw new IllegalArgumentException("Order not completed");
+			throw new IllegalArgumentException(Msg.getMsg(getCtx(), "Order not completed"));
 		
 		if ( (line.getQtyOrdered().subtract(line.getQtyDelivered())).compareTo(Env.ZERO) <= 0 )
-			return "Ordered quantity already shipped";
+			return Msg.getMsg(getCtx(), "Ordered quantity already shipped");
 		
 		int C_DocTypeShipment_ID = DB.getSQLValue(get_TrxName(),
 				"SELECT C_DocTypeShipment_ID FROM C_DocType WHERE C_DocType_ID=?", 
@@ -93,7 +94,7 @@ public class OrderLineCreateShipment extends SvrProcess
 		shipment.setM_Warehouse_ID(line.getM_Warehouse_ID());
 		shipment.setMovementDate(line.getDatePromised());
 		if (!shipment.save())
-			throw new IllegalArgumentException("Cannot save shipment header");
+			throw new IllegalArgumentException(Msg.getMsg(getCtx(), "Cannot save shipment header"));
 		
 		
 		MInOutLine sline = MInOutLine.createFrom(shipment);
@@ -104,7 +105,7 @@ public class OrderLineCreateShipment extends SvrProcess
 		sline.setQty(line.getQtyReserved());
 		sline.setM_Warehouse_ID(line.getM_Warehouse_ID());
 		if (!sline.save())
-			throw new IllegalArgumentException("Cannot save Shipment Line");
+			throw new IllegalArgumentException(Msg.getMsg(getCtx(), "Cannot save Shipment Line"));
 	
 		return shipment.getDocumentNo();
 	}	//	OrderLineCreateShipment

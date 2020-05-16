@@ -103,7 +103,7 @@ public final class UserPreference implements Serializable {
 
 	/** Logger */
 	@SuppressWarnings("unused")
-	private static CLogger log = CLogger.getCLogger(UserPreference.class.getName());
+	private static final CLogger log = CLogger.getCLogger(UserPreference.class.getName());
 
 	/**
 	 * save user preference

@@ -455,10 +455,13 @@ public class MInOut extends X_M_InOut implements DocAction
 		//
 		setM_Warehouse_ID (order.getM_Warehouse_ID());
 		setIsSOTrx (order.isSOTrx());
-		if (C_DocTypeShipment_ID == 0)
-			C_DocTypeShipment_ID = DB.getSQLValue(null,
-				"SELECT C_DocTypeShipment_ID FROM C_DocType WHERE C_DocType_ID=?",
-				order.getC_DocType_ID());
+		if (C_DocTypeShipment_ID == 0) {
+			MDocType dto = MDocType.get(getCtx(), order.getC_DocType_ID());
+			C_DocTypeShipment_ID = dto.getC_DocTypeShipment_ID();
+			if (C_DocTypeShipment_ID <= 0) 
+				throw new AdempiereException("@NotFound@ @C_DocTypeShipment_ID@ - @C_DocType_ID@:"
+					 +dto.get_Translation(MDocType.COLUMNNAME_Name));
+		}
 		setC_DocType_ID (C_DocTypeShipment_ID);
 
 		// patch suggested by Armen
@@ -1878,16 +1881,17 @@ public class MInOut extends X_M_InOut implements DocAction
 							}
 							if (!po.isPosted())
 								addDocsPostProcess(po);
-							MMatchInv matchInvCreated = po.getMatchInvCreated();
-							if (matchInvCreated != null) {
-								if(matchInvCreated.getM_MatchInvHdr_ID() > 0)
-								{
-									addDocsPostProcess((PO) matchInvCreated.getM_MatchInvHdr());
-								}
-								else
-								{
+							
+							MMatchInv[] matchInvList = MMatchInv.getInOut(getCtx(), getM_InOut_ID(), get_TrxName());
+							if(matchInvCreated.getM_MatchInvHdr_ID() > 0)
+							{
+								addDocsPostProcess((PO) matchInvCreated.getM_MatchInvHdr());
+							}
+							else
+							{
+								MMatchInv[] matchInvList = MMatchInv.getInOut(getCtx(), getM_InOut_ID(), get_TrxName());
+								for (MMatchInv matchInvCreated : matchInvList)
 									addDocsPostProcess(matchInvCreated);
-								}
 							}
 						}
 						//	Update PO with ASI
@@ -2248,7 +2252,7 @@ public class MInOut extends X_M_InOut implements DocAction
 			return null;
 		//	Business Partner needs to be linked to Org
 		MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(getC_BPartner_ID(), get_TrxName());
-		int counterAD_Org_ID = bp.getAD_OrgBP_ID_Int();
+		int counterAD_Org_ID = bp.getAD_OrgBP_ID();
 		if (counterAD_Org_ID == 0)
 			return null;
 
