@@ -1752,9 +1752,9 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            	  if(dtbox.getValue() != null)
 	            		 value = new Timestamp(((Date)dtbox.getValue()).getTime());
 	            }
-            else if(compo instanceof MultiSelectBox) {
-				value = Util.convertArrayToStringForDB(cellQueryFrom.getAttribute("value"));
-			}
+	            else if(compo instanceof MultiSelectBox) {
+					value = Util.convertArrayToStringForDB(cellQueryFrom.getAttribute("value"));
+				}
 	            else {
 	            	value = cellQueryFrom.getAttribute("value");
 	            }
@@ -1773,7 +1773,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            if (parsedValue == null)
 	                continue;
 	            String infoDisplay = value.toString();
-			if (field.isLookup() && !DisplayType.isMultiSelect(field.getDisplayType()))
+	            if (field.isLookup() && !DisplayType.isMultiSelect(field.getDisplayType()))
 	                infoDisplay = field.getLookup().getDisplay(value);
 	            else if (field.getDisplayType() == DisplayType.YesNo)
 	                infoDisplay = Msg.getMsg(Env.getCtx(), infoDisplay);
@@ -1861,7 +1861,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 			.append(rBrackets);
 	}
 
-	public void saveQuery(boolean saveQuery, StringBuilder code) {
+	public void saveQuery(boolean saveQuery, StringBuilder code, boolean shareAllUsers) {
         
         String selected = fQueryName.getValue();
 		if (selected != null) {

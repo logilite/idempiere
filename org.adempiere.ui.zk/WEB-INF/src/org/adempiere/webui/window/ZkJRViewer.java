@@ -11,7 +11,6 @@ import java.util.logging.Level;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.LayoutUtils;
-import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Listbox;
 import org.adempiere.webui.component.Tabpanel;
 import org.adempiere.webui.component.ToolBarButton;
@@ -612,62 +611,4 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 		}
 		return fileContent;
 	}
-  	
-	/**
-	 * Create archive for jasper report
-	 */
-	protected void cmd_archive()
-	{
-		boolean success = false;
-		try
-		{
-			byte[] data = getFileByteData(getPDF());
-			if (data != null && m_printInfo != null)
-			{
-				MArchive archive = new MArchive(Env.getCtx(), m_printInfo, null);
-				archive.setBinaryData(data);
-				success = archive.save();
-			}
-
-			if (success)
-				FDialog.info(m_WindowNo, this, "Archived");
-			else
-				FDialog.error(m_WindowNo, this, "ArchiveError");
-		}
-		catch (IOException e)
-		{
-			log.log(Level.SEVERE, "Exception while reading file " + e);
-		}
-		catch (JRException e)
-		{
-			log.log(Level.SEVERE, "Error loading object from InputStream" + e);
-		}
-	} // cmd_archive
-
-	/** 
-	 * convert File data into Byte Data
-	 * @param tempFile
-	 * @return file in ByteData 
-	 */
-	private byte[] getFileByteData(File tempFile)
-	{
-		byte fileContent[] = new byte[(int) tempFile.length()];
-
-		try
-		{
-			FileInputStream fis = new FileInputStream(tempFile);
-			fis.read(fileContent);
-			fis.close();
-		}
-		catch (FileNotFoundException e)
-		{
-			log.log(Level.SEVERE, "File not found  " + e);
-		}
-		catch (IOException ioe)
-		{
-			log.log(Level.SEVERE, "Exception while reading file " + ioe);
-		}
-		return fileContent;
-	} // getFileByteData
-
 }

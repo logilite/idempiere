@@ -1882,10 +1882,11 @@ public class MInOut extends X_M_InOut implements DocAction
 							if (!po.isPosted())
 								addDocsPostProcess(po);
 							
-							MMatchInv[] matchInvList = MMatchInv.getInOut(getCtx(), getM_InOut_ID(), get_TrxName());
-							if(matchInvCreated.getM_MatchInvHdr_ID() > 0)
+							//TODO Needs to check IDEMPIERE-4127 related enhancement for matchInvHdr
+							MMatchInv matchInv = po.getMatchInvCreated();
+							if(matchInv != null && matchInv.getM_MatchInvHdr_ID() > 0)
 							{
-								addDocsPostProcess((PO) matchInvCreated.getM_MatchInvHdr());
+								addDocsPostProcess((PO) matchInv.getM_MatchInvHdr());
 							}
 							else
 							{

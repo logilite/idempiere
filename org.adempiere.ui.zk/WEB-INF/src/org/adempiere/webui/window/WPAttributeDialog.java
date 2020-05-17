@@ -1301,16 +1301,6 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 		this.m_changed = m_changed;
 	}
 
-	public CLogger getLog()
-	{
-		return log;
-	}
-
-	public void setLog(CLogger log)
-	{
-		this.log = log;
-	}
-
 	public int getM_row()
 	{
 		return m_row;

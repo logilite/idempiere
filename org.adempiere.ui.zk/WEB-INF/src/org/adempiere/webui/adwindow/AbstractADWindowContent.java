@@ -90,14 +90,13 @@ import org.compiere.model.GridWindow;
 import org.compiere.model.GridWindowVO;
 import org.compiere.model.I_M_Product;
 import org.compiere.model.MImage;
-import org.compiere.model.MPInstance;
 import org.compiere.model.MProcess;
 import org.compiere.model.MProjectIssue;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRecentItem;
 import org.compiere.model.MRole;
-import org.compiere.model.MToolBarButtonRestrict;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MToolBarButtonRestrict;
 import org.compiere.model.MUserPreference;
 import org.compiere.model.MWindow;
 import org.compiere.model.PO;
@@ -1461,6 +1460,18 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		toolbar.enableCustomize(adTabbox.getSelectedTabpanel().isEnableCustomizeButton());
 
 		toolbar.enableQuickForm(adTabbox.getSelectedTabpanel().isEnableQuickFormButton() && !adTabbox.getSelectedGridTab().isReadOnly());
+		
+		boolean isNewRow = adTabbox.getSelectedGridTab().getRowCount() == 0 || adTabbox.getSelectedGridTab().isNew();
+        //Deepak-Enabling customize button IDEMPIERE-364
+        if(adTabbox.getSelectedTabpanel() instanceof ADSortTab){//consistent with dataStatusChanged
+        	toolbar.enableProcessButton (false);
+        	toolbar.enableCustomize(false);
+        }else{
+        	ADTabpanel adtab = (ADTabpanel) adTabbox.getSelectedTabpanel();
+            toolbar.enableProcessButton(!isNewRow && adtab != null && adtab.getToolbarButtons().size() > 0);
+            toolbar.enableCustomize(adtab.isGridView());
+        }
+        
         
 		toolbar.setPressed("Find",adTabbox.getSelectedGridTab().isQueryActive() || 
 				(!isNewRow && (m_onlyCurrentRows || m_onlyCurrentDays > 0)));

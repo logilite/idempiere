@@ -90,11 +90,11 @@ import org.compiere.model.MPaySelectionCheck;
 import org.compiere.model.MProcess;
 import org.compiere.model.MProject;
 import org.compiere.model.MQuery;
+import org.compiere.model.MRMA;
 import org.compiere.model.MRfQResponse;
 import org.compiere.model.MRole;
 import org.compiere.model.MTable;
 import org.compiere.model.PrintInfo;
-import org.compiere.model.MRMA;
 import org.compiere.print.layout.LayoutEngine;
 import org.compiere.print.layout.PrintDataEvaluatee;
 import org.compiere.process.ProcessInfo;
@@ -676,17 +676,6 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			
 			table.setStyle(headerCSS);
 
-			int printColIndex = -1;
-			// for all columns
-			for (int col = 0; col < m_printFormat.getItemCount(); col++)
-			{
-				MPrintFormatItem item = m_printFormat.getItem(col);
-				if (item.isPrinted())
-				{
-					printColIndex++;
-					addCssInfo(item, printColIndex);
-				}
-			}
 
 			if (cssPrefix != null)
 				table.setClass(cssPrefix + "-table");
@@ -830,6 +819,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				preValues = new Object [colSuppressRepeats.length];
 			}
 
+			int printColIndex = -1;
 			//	for all rows (-1 = header row)
 			for (int row = -1; row < m_printData.getRowCount(); row++)
 			{

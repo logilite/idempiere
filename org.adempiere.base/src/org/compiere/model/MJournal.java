@@ -497,6 +497,7 @@ public class MJournal extends X_GL_Journal implements DocAction
 				return DocAction.STATUS_Invalid;
 			}
 			
+			MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
 			// Michael Judd (mjudd) BUG: [ 2678088 ] Allow posting to system accounts for non-actual postings
 			if ((line.isDocControlled() && !dt.isOverrideDocControl()) && 
 					( getPostingType().equals(POSTINGTYPE_Actual) ||
