@@ -319,3 +319,6 @@
 .z-icon-CSVImport:before {
 	content: "\f01b";
 }
+.z-icon-Share:before {
+	content: "\f0ac";
+}
