@@ -69,14 +69,14 @@ public class MProductionLineMA extends X_M_ProductionLineMA {
 		{
 			if (asi > 0)
 			{
-				MAttributeSetInstance masi = new MAttributeSetInstance(parent.getCtx(), asi, parent.get_TrxName());
-				dateMaterialPolicy = masi.getCreated();
+				dateMaterialPolicy = MStorageOnHand.getDateMaterialPolicy(parent.getM_Product_ID(), asi, parent.get_TrxName());
 			}
-			else
+			if (dateMaterialPolicy == null)
 			{
 				dateMaterialPolicy = parent.getM_Production().getMovementDate();
 			}
 		}
+
 		lineMA.setDateMaterialPolicy(dateMaterialPolicy);
 
 		return lineMA;

@@ -679,18 +679,17 @@ public class MInventory extends X_M_Inventory implements DocAction
 							qtyDiff = QtyNew;						
 						}	
 					}
-					else
+
+					if (mtrx == null)
 					{
-						if(qtyDiff.signum() == 0)
+						Timestamp dateMPolicy= qtyDiff.signum() > 0 ? getMovementDate() : null;
+						if (line.getM_AttributeSetInstance_ID() > 0)
 						{
-							continue;
+							Timestamp t = MStorageOnHand.getDateMaterialPolicy(line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(), line.get_TrxName());
+							if (t != null)
+								dateMPolicy = t;
 						}
-						
-						Timestamp dateMPolicy= getMovementDate();
-						I_M_AttributeSetInstance asi = line.getM_AttributeSetInstance();
-						if (asi != null)
-							dateMPolicy =asi.getCreated();
-					
+
 						//Fallback: Update Storage - see also VMatch.createMatchRecord
 						if (!MStorageOnHand.add(getCtx(), getM_Warehouse_ID(),
 								line.getM_Locator_ID(),

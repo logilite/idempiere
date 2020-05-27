@@ -185,15 +185,21 @@ public class MMovementLineMA extends X_M_MovementLineMA
 		setM_AttributeSetInstanceTo_ID(M_AttributeSetInstanceTo_ID);
 
 		setMovementQty(MovementQty);
-		if (DateMaterialPolicy == null) {
-			if (M_AttributeSetInstance_ID > 0) {
-				MAttributeSetInstance asi = new MAttributeSetInstance(
-						parent.getCtx(), M_AttributeSetInstance_ID,
-						parent.get_TrxName());
-				DateMaterialPolicy = asi.getCreated();
-			} else {
+		if (DateMaterialPolicy == null)
+		{
+			if (M_AttributeSetInstance_ID > 0)
+			{
+				DateMaterialPolicy = MStorageOnHand.getDateMaterialPolicy(parent.getM_Product_ID(), M_AttributeSetInstance_ID, parent.get_TrxName());
+			}
+			if (DateMaterialPolicy == null)
+			{
 				DateMaterialPolicy = parent.getParent().getMovementDate();
 			}
+		}
+
+		if (DateMaterialPolicyTo == null)
+		{
+			DateMaterialPolicyTo = DateMaterialPolicy;
 		}
 
 		setDateMaterialPolicy(DateMaterialPolicy);
