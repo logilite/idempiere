@@ -560,6 +560,8 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 		{
 			freportType.appendItem("PDF", "PDF");
 			freportType.appendItem("Excel", "XLS");
+			freportType.appendItem("Excel X", "XLSX");
+			freportType.appendItem("CSV", "CSV");
 		}
 		freportType.setSelectedIndex(0);
 		
