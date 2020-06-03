@@ -1728,49 +1728,6 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 		}
 		
 	}
-
-	static class CSVRendererRunnable extends ContextRunnable  implements IServerPushCallback {
-
-		private ZkReportViewer viewer;
-
-		public CSVRendererRunnable(ZkReportViewer viewer) {
-			super();
-			this.viewer = viewer;
-		}
-
-		@Override
-		protected void doRun() {
-			try {
-				String path = System.getProperty("java.io.tmpdir");
-				String prefix = viewer.makePrefix(viewer.m_reportEngine.getName());
-				if (log.isLoggable(Level.FINE))
-				{
-					log.log(Level.FINE, "Path="+path + " Prefix="+prefix);
-				}
-				File file = File.createTempFile(prefix, ".csv", new File(path));
-				viewer.m_reportEngine.createCSV(file, ',', AEnv.getLanguage(Env.getCtx()));
-				viewer.media = new AMedia(file.getName(), "csv", "text/csv", file, true);
-			} catch (Exception e) {
-				if (e instanceof RuntimeException)
-					throw (RuntimeException)e;
-				else
-					throw new RuntimeException(e);
-			} finally {			
-				Desktop desktop = AEnv.getDesktop();
-				if (desktop != null && desktop.isAlive()) {
-					new ServerPushTemplate(desktop).executeAsync(this);
-				}
-			}
-		}
-
-		@Override
-		public void updateUI() {
-			viewer.labelDrill.setVisible(false);
-			viewer.comboDrill.setVisible(false);
-			viewer.onPreviewReport();
-		}
-		
-	}
 	
 	protected static class XLSXRendererRunnable extends ContextRunnable implements IServerPushCallback
 	{

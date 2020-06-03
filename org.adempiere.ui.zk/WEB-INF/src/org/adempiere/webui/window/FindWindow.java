@@ -91,7 +91,6 @@ import org.compiere.model.MRole;
 import org.compiere.model.MTable;
 import org.compiere.model.MToolBarButtonRestrict;
 import org.compiere.model.MUserQuery;
-import org.compiere.model.MWindow;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
