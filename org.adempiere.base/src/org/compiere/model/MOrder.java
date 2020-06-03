@@ -1331,7 +1331,7 @@ public class MOrder extends X_C_Order implements DocAction
 		}
 				
 		// Bug 1564431
-		if (getDeliveryRule() != null && getDeliveryRule().equals(MOrder.DELIVERYRULE_CompleteOrder)) 
+		if (MOrder.DELIVERYRULE_CompleteOrder.equals(getDeliveryRule()) )
 		{
 			for (int i = 0; i < lines.length; i++) 
 			{
@@ -1340,6 +1340,11 @@ public class MOrder extends X_C_Order implements DocAction
 				if (product != null && product.isExcludeAutoDelivery())
 				{
 					m_processMsg = "@M_Product_ID@ "+product.getValue()+" @IsExcludeAutoDelivery@";
+					return DocAction.STATUS_Invalid;
+				}
+				if (line.getDatePromised() != null && !line.getDatePromised().equals(getDatePromised()))
+				{
+					m_processMsg = "@Line@ " + line.getLine() + " - @Invalid@ @DatePromised@";
 					return DocAction.STATUS_Invalid;
 				}
 			}
