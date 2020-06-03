@@ -275,7 +275,7 @@ public class MUserQuery extends X_AD_UserQuery
 	{
 		super (ctx, rs, trxName);
 	}	//	MUserQuery
-
+	
 	@Override
 	protected boolean beforeSave(boolean newRecord) {
 		if (getAD_Tab_ID() > 0) {
@@ -289,5 +289,4 @@ public class MUserQuery extends X_AD_UserQuery
 		}
 		return true;
 	}
-
 }	//	MUserQuery

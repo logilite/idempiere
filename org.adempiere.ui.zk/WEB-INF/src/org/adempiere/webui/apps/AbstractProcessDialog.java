@@ -612,9 +612,17 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 		if (m_isCanExport)
 		{
 			freportType.appendItem("Excel", "XLS");
+			freportType.appendItem("Excel X", "XLSX");
 			freportType.appendItem("CSV", "CSV");
 		}
 		freportType.setSelectedIndex(-1);
+		
+		String where = "AD_Process_ID = ? AND AD_User_ID = ? AND Name IS NULL ";
+		
+		MPInstance lastrun = MTable.get(Env.getCtx(), MPInstance.Table_Name).createQuery(where, null).setOnlyActiveRecords(true).setClient_ID()
+			.setParameters(m_AD_Process_ID, Env.getContextAsInt(Env.getCtx(), "#AD_User_ID")).setOrderBy("Created DESC").first();
+		
+		setReportTypeAndPrintFormat(lastrun);
 	}
 
 	private void setReportTypeAndPrintFormat(MPInstance instance)

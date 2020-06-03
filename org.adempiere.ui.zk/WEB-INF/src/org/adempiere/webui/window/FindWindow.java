@@ -91,6 +91,7 @@ import org.compiere.model.MRole;
 import org.compiere.model.MTable;
 import org.compiere.model.MToolBarButtonRestrict;
 import org.compiere.model.MUserQuery;
+import org.compiere.model.MWindow;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -198,7 +199,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     public static final int     FIELDLENGTH = 20;
 
     protected int m_AD_Tab_ID = 0;
-	protected MUserQuery[] userQueries;
+    protected MUserQuery[] userQueries;
 	protected Rows contentSimpleRows;
 	protected boolean m_createNew = false;
 	protected boolean isvalid = true;
@@ -635,7 +636,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         btnSave.setStyle("vertical-align: middle;");
         if (ThemeManager.isUseFontIconForImage())
         	LayoutUtils.addSclass("large-toolbarbutton", btnSave);
-
+        
         btnShare = new ToolBarButton();
         btnShare.setAttribute("name","btnShareAdv");
         btnShare.setTooltiptext(Msg.getMsg(Env.getCtx(), "ShareFilter"));

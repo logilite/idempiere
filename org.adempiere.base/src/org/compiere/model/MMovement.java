@@ -537,11 +537,14 @@ public class MMovement extends X_M_Movement implements DocAction
 						
 						MLocator locator = new MLocator (getCtx(), line.getM_Locator_ID(), get_TrxName());
 						//Update Storage 
+						Timestamp effDateMPolicy = dateMPolicy;
+						if (dateMPolicy == null && qtyToAllocate.negate().signum() > 0)
+							effDateMPolicy = getMovementDate();
 						if (!MStorageOnHand.add(getCtx(),locator.getM_Warehouse_ID(),
 								line.getM_Locator_ID(),
 								line.getM_Product_ID(), 
 								line.getM_AttributeSetInstance_ID(),
-							qtyToAllocate.negate(),dateMPolicy, get_TrxName()))
+							qtyToAllocate.negate(),effDateMPolicy, get_TrxName()))
 						{
 							String lastError = CLogger.retrieveErrorString("");
 							m_processMsg = "Cannot correct Inventory OnHand (MA) [" + product.getValue() + "] - " + lastError;
@@ -549,12 +552,15 @@ public class MMovement extends X_M_Movement implements DocAction
 						}
 	
 						//Update Storage
+						effDateMPolicy = dateMPolicy;
+						if (dateMPolicy == null && qtyToAllocate.signum() > 0)
+							effDateMPolicy = getMovementDate();
 						MLocator locatorTo = new MLocator (getCtx(), line.getM_LocatorTo_ID(), get_TrxName());
 						if (!MStorageOnHand.add(getCtx(),locatorTo.getM_Warehouse_ID(),
 								line.getM_LocatorTo_ID(),
 								line.getM_Product_ID(), 
 								line.getM_AttributeSetInstanceTo_ID(),
-							qtyToAllocate,dateMPolicy, get_TrxName()))
+							qtyToAllocate,effDateMPolicy, get_TrxName()))
 						{
 							String lastError = CLogger.retrieveErrorString("");
 							m_processMsg = "Cannot correct Inventory OnHand (MA) [" + product.getValue() + "] - " + lastError;
