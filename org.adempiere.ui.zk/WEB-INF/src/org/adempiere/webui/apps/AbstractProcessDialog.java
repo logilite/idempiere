@@ -66,6 +66,7 @@ import org.compiere.model.MPInstancePara;
 import org.compiere.model.MProcess;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.Query;
 import org.compiere.model.SystemIDs;
