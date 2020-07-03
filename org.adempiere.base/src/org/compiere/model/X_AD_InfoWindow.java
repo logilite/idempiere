@@ -30,7 +30,7 @@ public class X_AD_InfoWindow extends PO implements I_AD_InfoWindow, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20171031L;
+	private static final long serialVersionUID = 20200420L;
 
     /** Standard Constructor */
     public X_AD_InfoWindow (Properties ctx, int AD_InfoWindow_ID, String trxName)
@@ -263,6 +263,26 @@ public class X_AD_InfoWindow extends PO implements I_AD_InfoWindow, I_Persistent
 		return (String)get_Value(COLUMNNAME_ImageURL);
 	}
 
+	/** Set Page Size Records.
+		@param PageSize 
+		Default number's of record per page
+	  */
+	public void setPageSize (int PageSize)
+	{
+		set_Value (COLUMNNAME_PageSize, Integer.valueOf(PageSize));
+	}
+	
+	/** Get Page Size Records.
+		@return Default number's of record per page
+	  */
+	public int getPageSize () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_PageSize);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+	
 	/** Set Default.
 		@param IsDefault 
 		Default value

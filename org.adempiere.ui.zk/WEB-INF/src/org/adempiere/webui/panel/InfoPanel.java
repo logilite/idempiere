@@ -121,7 +121,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	/**
 	 * 
 	 */
-	protected static final long serialVersionUID = 3761627143274259211L;
+	protected static final long serialVersionUID = 8764168407329626762L;
 	protected final static int DEFAULT_PAGE_SIZE = 100;
 	protected final static int DEFAULT_PAGE_PRELOAD = 4;
 	protected List<Button> btProcessList = new ArrayList<Button>();
@@ -253,7 +253,13 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 				log.log(Level.SEVERE, "Cannot parse context= " + whereClause);
 		}
 		
-		pageSize = MSysConfig.getIntValue(MSysConfig.ZK_PAGING_SIZE, DEFAULT_PAGE_SIZE, Env.getAD_Client_ID(Env.getCtx()));
+		//Get info window specific page size if configured.
+		pageSize = getInfoWinPageSize();
+
+		//Default page size is 25.
+		if (pageSize == 0)
+			pageSize = MSysConfig.getIntValue(MSysConfig.ZK_PAGING_SIZE, DEFAULT_PAGE_SIZE,
+					Env.getAD_Client_ID(Env.getCtx()));		
 		
 		init();
 
@@ -2461,6 +2467,15 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 
 	public void setGridfield(GridField m_gridfield) {
 		this.m_gridfield = m_gridfield;
+	}
+
+	/**
+	 * How many records wants to display per page. 
+	 * @return
+	 */
+	public int getInfoWinPageSize()
+	{
+		return this.infoWindow.getPageSize();
 	}
 }	//	Info
 
