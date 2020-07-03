@@ -2235,11 +2235,14 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		{
 			focusToTabpanel(dirtyTabpanel);
 			// ensure row indicator is not lost
-			RowRenderer<Object[]> renderer = dirtyTabpanel.getGridView().getListbox().getRowRenderer();
-			GridTabRowRenderer gtr = (GridTabRowRenderer) renderer;
-			org.zkoss.zul.Row row = gtr.getCurrentRow();
-			if (row != null)
-				gtr.setCurrentRow(row);
+			if (dirtyTabpanel.getGridView() != null && dirtyTabpanel.getGridView().getListbox() != null && dirtyTabpanel.getGridView().getListbox().getRowRenderer() != null)
+			{
+				RowRenderer <Object[]> renderer = dirtyTabpanel.getGridView().getListbox().getRowRenderer();
+				GridTabRowRenderer gtr = (GridTabRowRenderer) renderer;
+				org.zkoss.zul.Row row = gtr.getCurrentRow();
+				if (row != null)
+					gtr.setCurrentRow(row);
+			}
 		}
     	else
     		focusToActivePanel();

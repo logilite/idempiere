@@ -205,6 +205,19 @@ public interface I_AD_InfoWindow
 	  * The record is active in the system
 	  */
 	public boolean isActive();
+	
+	/** Column name pagerSize */
+    public static final String COLUMNNAME_PageSize = "pageSize";
+
+	/** Set Page Size Records.
+	  * Default number's of record per page
+	  */
+	public void setPageSize (int PageSize);
+
+	/** Get Page Size Records.
+	  *  Default number's of record per page
+	  */
+	public int getPageSize();
 
     /** Column name IsDefault */
     public static final String COLUMNNAME_IsDefault = "IsDefault";
