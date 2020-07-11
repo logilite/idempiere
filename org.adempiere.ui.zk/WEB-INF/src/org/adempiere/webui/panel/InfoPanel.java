@@ -772,7 +772,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
     			model.setSorter(this);
 	            model.addTableModelListener(this);
 	            model.setMultiple(p_multipleSelection);
-	            contentPanel.setData(model, null);
+	            defaultFirstRowSelect();
 
 	            pageNo = 0;
         	}
@@ -788,7 +788,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	            model.setSorter(this);
 	            model.addTableModelListener(this);
 	            model.setMultiple(p_multipleSelection);
-	            contentPanel.setData(model, null);
+	            defaultFirstRowSelect();
         	}
         }
         else
@@ -803,7 +803,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
         	model.setSorter(this);
             model.addTableModelListener(this);
             model.setMultiple(p_multipleSelection);
-            contentPanel.setData(model, null);
+			defaultFirstRowSelect();
         }
         restoreSelectedInPage();
         updateStatusBar (m_count);
@@ -1897,6 +1897,38 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 			}
 		} else if (keyEvent.getKeyCode() == VK_ENTER) { // Enter
 			// do nothing, let on_ok at infoWindo do, at this is too soon to get value from control, it's not bind
+		}
+	}
+
+	/**
+	 * Grid data selection defaulting. -If the grid has only one record set and
+	 * multi-selection true then make default selected. 
+	 * -If the grid has only
+	 * Multiple record set and multi-selection false then make default to first one
+	 */
+	private void defaultFirstRowSelect() {
+		boolean isSetDefaultFirstRow = false;
+		if (model.getNoRows() > 0) {
+			if (model.getNoRows() == 1 || !p_multipleSelection) {
+				@SuppressWarnings("unchecked")
+				List<Object> firstRowElements = (List<Object>) model.getElementAt(0);
+				if (firstRowElements != null && firstRowElements.get(0) instanceof IDColumn) {
+					IDColumn idColumn = (IDColumn) firstRowElements.get(0);
+					idColumn.setSelected(true);
+					firstRowElements.set(0, idColumn);
+					model.set(0, firstRowElements);
+					isSetDefaultFirstRow = true;
+				}
+			}
+		}
+		contentPanel.setData(model, null);
+		// Set selection and adding keycandidate for Okey event
+		if (isSetDefaultFirstRow) {
+			contentPanel.setSelectedIndex(0);
+			Integer keyCandidate = getColumnValue(0);
+			@SuppressWarnings("unchecked")
+			List<Object> candidateRecord = (List<Object>) contentPanel.getModel().get(0);
+			recordSelectedData.put(keyCandidate, candidateRecord);
 		}
 	}
 
