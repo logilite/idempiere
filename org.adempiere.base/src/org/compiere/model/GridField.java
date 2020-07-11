@@ -85,6 +85,8 @@ public class GridField
 	 */
 	private static final long serialVersionUID = -5923967271000455417L;
 
+	private static final int	PA_REPORTCOLUMN_RelativePeriodTo_COLUMN_ID	= 214087;
+
 	/**
 	 *  Field Constructor.
 	 *  requires initField for complete instantiation
@@ -682,7 +684,8 @@ public class GridField
 		return (m_vo.IsKey || m_vo.displayType == DisplayType.RowID 
 				|| DisplayType.isLOB(m_vo.displayType)
 				|| "Created".equals(m_vo.ColumnName) // for Created/Updated default is managed on PO, and direct inserts on DB
-				|| "Updated".equals(m_vo.ColumnName));
+				|| "Updated".equals(m_vo.ColumnName)
+				|| (m_vo.AD_Column_ID == PA_REPORTCOLUMN_RelativePeriodTo_COLUMN_ID && Util.isEmpty(m_vo.DefaultValue, true)));
 	}
 
 	/**
