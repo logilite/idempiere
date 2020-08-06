@@ -47,10 +47,9 @@ import org.adempiere.webui.window.FDialog;
 import org.adempiere.webui.window.WTextEditorDialog;
 import org.compiere.model.MAttachment;
 import org.compiere.model.MAttachmentEntry;
-import org.compiere.model.MSysConfig;
-import org.compiere.model.MTable;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -112,7 +111,6 @@ public class WAttachment extends Window implements EventListener<Event>
 	protected Button bLoad = new Button();
 	protected Button bCancel = ButtonFactory.createNamedButton(ConfirmPanel.A_CANCEL, false, true);
 	protected Button bOk = ButtonFactory.createNamedButton(ConfirmPanel.A_OK, false, true);
-	protected Button bRefresh = ButtonFactory.createNamedButton(ConfirmPanel.A_REFRESH, false, true);
 	private Button bPreview = new Button();
 
 	protected Progressmeter progress = new Progressmeter(0);
@@ -383,7 +381,6 @@ public class WAttachment extends Window implements EventListener<Event>
 
 		confirmPanel.appendChild(bDeleteAll);
 		confirmPanel.appendChild(bPreview);
-		confirmPanel.appendChild(bRefresh);
 		ZKUpdateUtil.setHflex(confirmPanel, "1");
 		Hbox hbox = new Hbox();
 		hbox.setPack("end");
