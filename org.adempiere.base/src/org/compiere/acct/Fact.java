@@ -365,7 +365,7 @@ public final class Fact
 		if (segmentType.equals(MAcctSchemaElement.ELEMENTTYPE_Organization))
 		{
 			HashMap<Integer,BigDecimal> map = new HashMap<Integer,BigDecimal>();
-			//  Add up values by organization
+			//  Add up values by key organization
 			for (int i = 0; i < m_lines.size(); i++)
 			{
 				FactLine line = (FactLine)m_lines.get(i);
@@ -377,7 +377,7 @@ public final class Fact
 				map.put(key, bal);
 			}
 			
-			//  check if there are not balance entries involving multiple organizations
+		   // check if there are not balance entries involving multiple organizations
 			Map<Integer, BigDecimal> notBalance = new HashMap<>();			
 			for(Map.Entry<Integer, BigDecimal> entry : map.entrySet())
 			{

@@ -2008,7 +2008,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 								|| (value instanceof String[] && ((String[]) value).length > 0))
 						{
 							String sValue = Util.convertArrayToStringForDB(value);
-							String oper = MQuery.EQUAL;
+							String oper = MQuery.OVERLAP_OP;
 							m_query.addRestriction(ColumnSQL.toString(), oper, sValue, ColumnName, wed.getDisplay());
 							appendCode(code, ColumnName, oper, sValue, "", "AND", "", "");
 						}

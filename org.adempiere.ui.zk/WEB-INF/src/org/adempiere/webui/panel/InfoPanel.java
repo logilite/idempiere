@@ -255,10 +255,14 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 				log.log(Level.SEVERE, "Cannot parse context= " + whereClause);
 		}
 
-		pageSize = MSysConfig.getIntValue(MSysConfig.ZK_PAGING_SIZE, DEFAULT_PAGE_SIZE, Env.getAD_Client_ID(Env.getCtx()));
-		if (infoWindow != null && infoWindow.getPagingSize() > 0)
-			pageSize = infoWindow.getPagingSize();
+		//Get info window specific page size if configured.
+		pageSize = getInfoWinPageSize();
 
+		//Default page size is 25.
+		if (pageSize == 0)
+			pageSize = MSysConfig.getIntValue(MSysConfig.ZK_PAGING_SIZE, DEFAULT_PAGE_SIZE,
+					Env.getAD_Client_ID(Env.getCtx()));		
+		
 		init();
 
 		this.setAttribute(ITabOnSelectHandler.ATTRIBUTE_KEY, new ITabOnSelectHandler() {
@@ -789,7 +793,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
     			model.setSorter(this);
 	            model.addTableModelListener(this);
 	            model.setMultiple(p_multipleSelection);
-	            contentPanel.setData(model, null);
+	            defaultFirstRowSelect();
 
 	            pageNo = 0;
         	}
@@ -805,7 +809,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	            model.setSorter(this);
 	            model.addTableModelListener(this);
 	            model.setMultiple(p_multipleSelection);
-	            contentPanel.setData(model, null);
+	            defaultFirstRowSelect();
         	}
         }
         else
@@ -820,7 +824,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
         	model.setSorter(this);
             model.addTableModelListener(this);
             model.setMultiple(p_multipleSelection);
-            contentPanel.setData(model, null);
+			defaultFirstRowSelect();
         }
         restoreSelectedInPage();
         updateStatusBar (m_count);
@@ -2017,6 +2021,42 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		}
 	}
 
+	/**
+	 * Grid data selection defaulting. -If the grid has only one record set and
+	 * multi-selection true then make default selected. 
+	 * -If the grid has only
+	 * Multiple record set and multi-selection false then make default to first one
+	 */
+	private void defaultFirstRowSelect() {
+		boolean isSetDefaultFirstRow = false;
+		if (model.getNoRows() > 0) {
+			if (model.getNoRows() == 1 || !p_multipleSelection) {
+				@SuppressWarnings("unchecked")
+				List<Object> firstRowElements = (List<Object>) model.getElementAt(0);
+				if (firstRowElements != null && firstRowElements.get(0) instanceof IDColumn) {
+					IDColumn idColumn = (IDColumn) firstRowElements.get(0);
+					idColumn.setSelected(true);
+					firstRowElements.set(0, idColumn);
+					model.set(0, firstRowElements);
+					model.isSelected(true);
+					isSetDefaultFirstRow = true;
+				}
+			}
+		}
+		contentPanel.setData(model, null);
+		// Set selection and adding keycandidate for Okey event
+		if (isSetDefaultFirstRow) {
+			contentPanel.setSelectedIndex(0);
+			contentPanel.getModel().addToSelection(contentPanel.getModel().get(0));
+			if (p_multipleSelection) {
+				Integer keyCandidate = getColumnValue(0);
+				@SuppressWarnings("unchecked")
+				List<Object> candidateRecord = (List<Object>) contentPanel.getModel().get(0);
+				recordSelectedData.put(keyCandidate, candidateRecord);
+			}
+		}
+	}
+
     /**
      * Call query when user click to query button enter in parameter field
      */
@@ -2626,6 +2666,17 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 
 	public int getPageSize() {
 		return pageSize;
+	}	
+	/**
+	 * Page records customized per window. 
+	 * @return
+	 */
+	public int getInfoWinPageSize()
+	{
+		if(infoWindow==null)
+			return 0;
+		
+		return this.infoWindow.getPageSize();
 	}
 }	//	Info
 
