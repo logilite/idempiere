@@ -44,8 +44,10 @@ import org.adempiere.webui.factory.ButtonFactory;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.WTextEditorDialog;
 import org.compiere.model.MAttachment;
 import org.compiere.model.MAttachmentEntry;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
@@ -111,6 +113,7 @@ public class WAttachment extends Window implements EventListener<Event>
 	protected Button bCancel = ButtonFactory.createNamedButton(ConfirmPanel.A_CANCEL, false, true);
 	protected Button bOk = ButtonFactory.createNamedButton(ConfirmPanel.A_OK, false, true);
 	protected Button bRefresh = ButtonFactory.createNamedButton(ConfirmPanel.A_REFRESH, false, true);
+	private Button bPreview = new Button();
 
 	protected Progressmeter progress = new Progressmeter(0);
 	protected Panel previewPanel = new Panel();
@@ -126,8 +129,9 @@ public class WAttachment extends Window implements EventListener<Event>
 	private String orientation;
 	protected boolean isAllowDeleteAttachment; 
 
-	
-	protected static List<String> autoPreviewList;
+	private int maxPreviewSize;
+
+	private static List<String> autoPreviewList;
 
 	static {
 		autoPreviewList = new ArrayList<String>();
@@ -169,6 +173,7 @@ public class WAttachment extends Window implements EventListener<Event>
 						int AD_Table_ID, int Record_ID, String trxName, EventListener<Event> eventListener)
 	{
 		super();
+		maxPreviewSize = MSysConfig.getIntValue(MSysConfig.ZK_MAX_ATTACHMENT_PREVIEW_SIZE, 1048576, Env.getAD_Client_ID(Env.getCtx()));
 		
 		MRole role = MRole.get(Env.getCtx(), Env.getAD_Role_ID(Env.getCtx()));
 		isAllowDeleteAttachment = role.isAllowDeleteAttachment();
@@ -368,9 +373,16 @@ public class WAttachment extends Window implements EventListener<Event>
 		bDeleteAll.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "DeleteAll")));
 		bDeleteAll.setEnabled(isAllowDeleteAttachment);
 
-		bRefresh.addEventListener(Events.ON_CLICK, this);
+		if (ThemeManager.isUseFontIconForImage())
+			bPreview.setIconSclass("z-icon-Find");
+		else
+			bPreview.setImage(ThemeManager.getThemeResource("images/Find24.png"));
+		bPreview.setSclass("img-btn");
+		bPreview.addEventListener(Events.ON_CLICK, this);
+		bPreview.setTooltiptext(Msg.getMsg(Env.getCtx(), "Preview"));
 
 		confirmPanel.appendChild(bDeleteAll);
+		confirmPanel.appendChild(bPreview);
 		confirmPanel.appendChild(bRefresh);
 		ZKUpdateUtil.setHflex(confirmPanel, "1");
 		Hbox hbox = new Hbox();
@@ -470,7 +482,17 @@ public class WAttachment extends Window implements EventListener<Event>
 
 			if (autoPreviewList.contains(mimeType))
 			{
-				displayData(index, immediate);
+				if (data.length <= maxPreviewSize) {
+					displayData(index, immediate);
+				} else {
+					clearPreview();
+					String msg = WTextEditorDialog.sanitize(Msg.getMsg(Env.getCtx(), "FileTooBigForPreview"));
+					Media media = new AMedia(null, null, "text/html", msg.getBytes());
+					preview.setContent(media);
+					preview.setVisible(true);
+					bPreview.setEnabled(true);
+					return false;
+				}
 				return true;
 			}
 			else
@@ -505,6 +527,7 @@ public class WAttachment extends Window implements EventListener<Event>
 			displaySelected();
 		else
 			Clients.response(new AuEcho(this, "displaySelected", null));
+		bPreview.setEnabled(false);
 	}   //  displayData
 
 	protected void clearPreview()
@@ -616,7 +639,7 @@ public class WAttachment extends Window implements EventListener<Event>
 		} else if (e.getTarget() == bSave) {
 			//	Open Attachment
 			saveAttachmentToFile();
-		} else if (e.getTarget() == bRefresh) {
+		} else if (e.getTarget() == bPreview) {
 			displayData(cbContent.getSelectedIndex(), true);
 		} else if (e.getTarget() == bSaveAllAsZip) {
 			saveAllAsZip();

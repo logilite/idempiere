@@ -1135,7 +1135,15 @@ public class MOrder extends X_C_Order implements DocAction
 			}
 		}
 
-		if (! recursiveCall && (newRecord || is_ValueChanged(COLUMNNAME_C_PaymentTerm_ID))) {
+		// IDEMPIERE-4318 Validation - Prepay Order must not allow Cash payment rule
+		MDocType dt = MDocType.get(getCtx(), getC_DocTypeTarget_ID());
+		if (   MDocType.DOCSUBTYPESO_PrepayOrder.equals(dt.getDocSubTypeSO())
+			&& PAYMENTRULE_Cash.equals(getPaymentRule())) {
+			log.saveError("Error", Msg.parseTranslation(getCtx(), "@Invalid@ @PaymentRule@"));
+			return false;
+		}
+
+		if (! recursiveCall && (!newRecord && is_ValueChanged(COLUMNNAME_C_PaymentTerm_ID))) {
 			recursiveCall = true;
 			try {
 				MPaymentTerm pt = new MPaymentTerm (getCtx(), getC_PaymentTerm_ID(), get_TrxName());
