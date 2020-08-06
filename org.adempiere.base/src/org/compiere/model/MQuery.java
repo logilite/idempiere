@@ -437,7 +437,16 @@ public class MQuery implements Serializable
 	public static final String	HAVE = "HAVE";
 	/** For IDEMPIERE-3413 */
 	public static final String	IN = "IN";
-	
+	/** For IDEMPIERE-3413 */
+	public static final String	OVERLAP = "OVERLAP";
+	public static final String	EXCLUDE = " EXCLUDE ";
+
+	public static final String	IN_OP		= Convert_SQL92.PG_ARRAY_IN_ALIAS_EXP;
+	public static final String	HAVE_OP		= Convert_SQL92.PG_ARRAY_HAVE_ALIAS_EXP;
+	public static final String	OVERLAP_OP	= Convert_SQL92.PG_ARRAY_OVERLAP_EXP;
+	public static final String	EXCLUDE_OP	= Convert_SQL92.PG_ARRAY_EXCLUDE_ALIAS_EXP;
+	public static final String	EXCLUDE_OP2 = " IS NOT TRUE ";
+
 	/**	Operators for Strings				*/
 	public static final ValueNamePair[]	OPERATORS = new ValueNamePair[] {
 		new ValueNamePair (EQUAL,			" = "),		//	0 - EQUAL_INDEX
@@ -481,9 +490,11 @@ public class MQuery implements Serializable
 	/** Operators for Multi Select items */
 	public static final ValueNamePair[]	OPERATORS_MULTISELECT	= new ValueNamePair[] { 
 		new ValueNamePair(EQUAL, " = "),
-		new ValueNamePair("<>", " != "), 
-		new ValueNamePair(Convert_SQL92.PG_ARRAY_IN_ALIAS_EXP, IN),
-		new ValueNamePair(Convert_SQL92.PG_ARRAY_HAVE_ALIAS_EXP, HAVE) 
+		new ValueNamePair("<>", " != "),
+		new ValueNamePair(IN_OP, IN),
+		new ValueNamePair(HAVE_OP, HAVE),
+		new ValueNamePair(OVERLAP_OP, OVERLAP),	//  4 - OVERLAP_INDEX
+		new ValueNamePair(EXCLUDE_OP, EXCLUDE)	//  5 - EXCLUDE_INDEX
 	};
 	/*************************************************************************
 	 * 	Add Restriction
@@ -1206,6 +1217,8 @@ class Restriction  implements Serializable
 		}
 		//
 		StringBuilder sb = new StringBuilder();
+		if (MQuery.EXCLUDE_OP == Operator)
+			sb.append("(");
 		if (!virtualColumn && tableName != null && tableName.length() > 0)
 		{
 			//	Assumes - REPLACE(INITCAP(variable),'s','X') or UPPER(variable)
@@ -1260,6 +1273,10 @@ class Restriction  implements Serializable
 					sb.append(DB.TO_DATE((Timestamp)Code_to, false));
 				else
 					sb.append(Code_to);
+			}
+			else if (MQuery.EXCLUDE_OP == Operator)
+			{
+				sb.append(")").append(MQuery.EXCLUDE_OP2);
 			}
 		}
 		return sb.toString();

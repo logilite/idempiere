@@ -203,6 +203,7 @@ public class Convert_PostgreSQL extends Convert_SQL92 {
 		// Replace HAVE/IN expression for array data types
 		retValue = retValue.replaceAll(PG_ARRAY_HAVE_ALIAS_EXP, PG_ARRAY_HAVE_EXP);
 		retValue = retValue.replaceAll(PG_ARRAY_IN_ALIAS_EXP, PG_ARRAY_IN_EXP);
+		retValue = retValue.replaceAll(PG_ARRAY_EXCLUDE_ALIAS_EXP, PG_ARRAY_OVERLAP_EXP);
 
 		return retValue;
 	} // convertComplexStatement

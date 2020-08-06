@@ -2027,6 +2027,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 					idColumn.setSelected(true);
 					firstRowElements.set(0, idColumn);
 					model.set(0, firstRowElements);
+					model.isSelected(true);
 					isSetDefaultFirstRow = true;
 				}
 			}
@@ -2035,10 +2036,13 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		// Set selection and adding keycandidate for Okey event
 		if (isSetDefaultFirstRow) {
 			contentPanel.setSelectedIndex(0);
-			Integer keyCandidate = getColumnValue(0);
-			@SuppressWarnings("unchecked")
-			List<Object> candidateRecord = (List<Object>) contentPanel.getModel().get(0);
-			recordSelectedData.put(keyCandidate, candidateRecord);
+			contentPanel.getModel().addToSelection(contentPanel.getModel().get(0));
+			if (p_multipleSelection) {
+				Integer keyCandidate = getColumnValue(0);
+				@SuppressWarnings("unchecked")
+				List<Object> candidateRecord = (List<Object>) contentPanel.getModel().get(0);
+				recordSelectedData.put(keyCandidate, candidateRecord);
+			}
 		}
 	}
 
