@@ -35,6 +35,8 @@ public abstract class Convert_SQL92 extends Convert {
 	public static final String	PG_ARRAY_HAVE_EXP		= "@>";
 	public static final String	PG_ARRAY_IN_ALIAS_EXP	= "<<<";
 	public static final String	PG_ARRAY_IN_EXP			= "<@";
+	public static final String	PG_ARRAY_OVERLAP_EXP	= " && ";
+	public static final String	PG_ARRAY_EXCLUDE_ALIAS_EXP	= " -&& ";
 	
 	/**************************************************************************
 	 *  Convert Outer Join.
