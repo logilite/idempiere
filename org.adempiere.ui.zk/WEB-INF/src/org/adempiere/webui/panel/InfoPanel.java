@@ -2676,7 +2676,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		if(infoWindow==null)
 			return 0;
 		
-		return this.infoWindow.getPageSize();
+		return this.infoWindow.getPagingSize();
 	}
 }	//	Info
 
