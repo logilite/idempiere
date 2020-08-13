@@ -87,10 +87,10 @@ import org.compiere.model.MLookupInfo;
 import org.compiere.model.MProduct;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRole;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.MToolBarButtonRestrict;
 import org.compiere.model.MUserQuery;
-import org.compiere.model.MWindow;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -1955,7 +1955,31 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 								|| (value instanceof String[] && ((String[]) value).length > 0))
 						{
 							String sValue = Util.convertArrayToStringForDB(value);
-							String oper = MQuery.OVERLAP_OP;
+
+							String oper = MSysConfig.getValue(MSysConfig.MULTISELECT_DEFAULT_LOOKUP_OPERATOR, Env.getAD_Client_ID(Env.getCtx()));
+							if (!Util.isEmpty(oper, true))
+							{
+								boolean isOperatorExists = false;
+								for (ValueNamePair vnp : MQuery.OPERATORS_MULTISELECT)
+								{
+									if (vnp.getValue().equals(oper.trim()))
+									{
+										oper = vnp.getValue();
+										isOperatorExists = true;
+										break;
+									}
+								}
+
+								if (!isOperatorExists)
+								{
+									oper = MQuery.EQUAL;
+									log.log(Level.SEVERE, "Please correct wrong operator specified in System Configurator for 'MULTISELECT_DEFAULT_LOOKUP_OPERATOR'");
+								}
+							}
+							else
+							{
+								oper = MQuery.EQUAL;
+							}
 							m_query.addRestriction(ColumnSQL.toString(), oper, sValue, ColumnName, wed.getDisplay());
 							appendCode(code, ColumnName, oper, sValue, "", "AND", "", "");
 						}
