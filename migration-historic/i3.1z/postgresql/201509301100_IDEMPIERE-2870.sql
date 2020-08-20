@@ -20,8 +20,8 @@ INSERT INTO AD_Field (AD_Field_ID,Name,Description,AD_Tab_ID,AD_Column_ID,IsDisp
 ;
 
 -- Sep 26, 2015 7:19:29 PM IST
-INSERT INTO AD_Field (AD_Field_ID,Name,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLength,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,ColumnSpan) VALUES (203870,'S_TimeType_UU',495,61042,'N',36,'N','N','N','N',0,0,'Y',TO_TIMESTAMP('2015-09-26 19:19:28','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2015-09-26 19:19:28','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','0267ac70-6570-4b02-8182-95a90fbf4a17','N',2)
-;
+--INSERT INTO AD_Field (AD_Field_ID,Name,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLength,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,ColumnSpan) VALUES (203870,'S_TimeType_UU',495,61042,'N',36,'N','N','N','N',0,0,'Y',TO_TIMESTAMP('2015-09-26 19:19:28','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2015-09-26 19:19:28','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','0267ac70-6570-4b02-8182-95a90fbf4a17','N',2)
+--;
 
 -- Sep 26, 2015 7:20:39 PM IST
 ALTER TABLE S_TimeType ADD COLUMN HeaderColor VARCHAR(7) DEFAULT NULL 
