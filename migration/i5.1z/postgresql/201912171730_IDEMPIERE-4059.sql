@@ -8,7 +8,7 @@ INSERT INTO AD_Process (AD_Process_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,Cr
 ;
 
 -- Dec 17, 2019 5:35:08 PM IST
-INSERT INTO AD_ToolBarButton (AD_Client_ID,AD_Org_ID,Created,CreatedBy,ComponentName,IsActive,AD_ToolBarButton_ID,Name,Updated,UpdatedBy,IsCustomization,AD_ToolBarButton_UU,"action",AD_Tab_ID,AD_Process_ID,DisplayLogic,SeqNo) VALUES (0,0,TO_TIMESTAMP('2019-12-17 17:35:07','YYYY-MM-DD HH24:MI:SS'),100,'Print Format Editor','Y',200100,'Print Format Editor',TO_TIMESTAMP('2019-12-17 17:35:07','YYYY-MM-DD HH24:MI:SS'),100,'N','9e6e87d2-9f22-440d-8a54-1da2899ca8b5','W',425,200116,'@IsForm@=Y',10)
+INSERT INTO AD_ToolBarButton (AD_Client_ID,AD_Org_ID,Created,CreatedBy,ComponentName,IsActive,AD_ToolBarButton_ID,Name,Updated,UpdatedBy,IsCustomization,AD_ToolBarButton_UU,"action",AD_Tab_ID,AD_Process_ID,DisplayLogic,SeqNo,entitytype) VALUES (0,0,TO_TIMESTAMP('2019-12-17 17:35:07','YYYY-MM-DD HH24:MI:SS'),100,'Print Format Editor','Y',200100,'Print Format Editor',TO_TIMESTAMP('2019-12-17 17:35:07','YYYY-MM-DD HH24:MI:SS'),100,'N','9e6e87d2-9f22-440d-8a54-1da2899ca8b5','W',425,200116,'@IsForm@=Y',10,'D')
 ;
 
 SELECT register_migration_script('201912171730_IDEMPIERE-4059.sql') FROM dual

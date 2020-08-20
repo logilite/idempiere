@@ -5,7 +5,7 @@ INSERT INTO AD_SysConfig (AD_SysConfig_ID,AD_Client_ID,AD_Org_ID,Created,Updated
 
 -- Quick Form enhancement
 -- Nov 22, 2017 12:48:12 PM IST
-INSERT INTO AD_ToolBarButton (AD_Client_ID,AD_Org_ID,Created,CreatedBy,ComponentName,IsActive,AD_ToolBarButton_ID,Name,Updated,UpdatedBy,IsCustomization,KeyStroke_KeyCode,KeyStroke_Modifiers,AD_ToolBarButton_UU,"action",SeqNo,IsAdvancedButton,IsAddSeparator) VALUES (0,0,TO_TIMESTAMP('2017-11-22 12:48:11','YYYY-MM-DD HH24:MI:SS'),100,'QuickForm','Y',200095,'Detail - QuickForm',TO_TIMESTAMP('2017-11-22 12:48:11','YYYY-MM-DD HH24:MI:SS'),100,'N',0,0,'93a9a483-ea2f-49b7-8737-a4113b2aa8de','D',50,'N','N')
+INSERT INTO AD_ToolBarButton (AD_Client_ID,AD_Org_ID,Created,CreatedBy,ComponentName,IsActive,AD_ToolBarButton_ID,Name,Updated,UpdatedBy,IsCustomization,KeyStroke_KeyCode,KeyStroke_Modifiers,AD_ToolBarButton_UU,"action",SeqNo,IsAdvancedButton,IsAddSeparator,entitytype) VALUES (0,0,TO_TIMESTAMP('2017-11-22 12:48:11','YYYY-MM-DD HH24:MI:SS'),100,'QuickForm','Y',200095,'Detail - QuickForm',TO_TIMESTAMP('2017-11-22 12:48:11','YYYY-MM-DD HH24:MI:SS'),100,'N',0,0,'93a9a483-ea2f-49b7-8737-a4113b2aa8de','D',50,'N','N','D')
 ;
 
 SELECT register_migration_script('201711211139_QUICK_FORM_ADD_BUTTON_IN_DETAIL_PANEL.sql') FROM dual

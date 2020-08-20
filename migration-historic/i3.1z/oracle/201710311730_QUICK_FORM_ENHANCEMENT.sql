@@ -146,7 +146,7 @@ UPDATE AD_Field SET SeqNo=440, AD_Reference_Value_ID=NULL, AD_Val_Rule_ID=NULL, 
 UPDATE AD_Field SET SeqNo=450, AD_Reference_Value_ID=NULL, AD_Val_Rule_ID=NULL, IsToolbarButton=NULL,Updated=TO_DATE('2017-10-31 17:29:06','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=139
 ;
 
-INSERT INTO AD_ToolBarButton (AD_Client_ID,AD_Org_ID,Created,CreatedBy,ComponentName,IsActive,AD_ToolBarButton_ID,Name,Updated,UpdatedBy,IsCustomization,KeyStroke_KeyCode,KeyStroke_Modifiers,AD_ToolBarButton_UU,Action,SeqNo,IsAdvancedButton,IsAddSeparator) VALUES (0,0,TO_DATE('2017-11-01 09:47:25','YYYY-MM-DD HH24:MI:SS'),100,'QuickForm','Y',200094,'Window -QuickForm',TO_DATE('2017-11-01 09:47:25','YYYY-MM-DD HH24:MI:SS'),100,'N',0,0,'73c01d0e-ff1b-4bbb-b3c7-e6c650adbed8','W',280,'N','Y')
+INSERT INTO AD_ToolBarButton (AD_Client_ID,AD_Org_ID,Created,CreatedBy,ComponentName,IsActive,AD_ToolBarButton_ID,Name,Updated,UpdatedBy,IsCustomization,KeyStroke_KeyCode,KeyStroke_Modifiers,AD_ToolBarButton_UU,Action,SeqNo,IsAdvancedButton,IsAddSeparator,entitytype) VALUES (0,0,TO_DATE('2017-11-01 09:47:25','YYYY-MM-DD HH24:MI:SS'),100,'QuickForm','Y',200094,'Window -QuickForm',TO_DATE('2017-11-01 09:47:25','YYYY-MM-DD HH24:MI:SS'),100,'N',0,0,'73c01d0e-ff1b-4bbb-b3c7-e6c650adbed8','W',280,'N','Y','D')
 ;
 
 DROP VIEW IF EXISTS ad_field_v;
