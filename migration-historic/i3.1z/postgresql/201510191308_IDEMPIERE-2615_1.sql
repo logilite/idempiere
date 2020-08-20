@@ -4,7 +4,7 @@ UPDATE AD_Column SET FKConstraintName='MMovementLine_MASITo',Updated=TO_TIMESTAM
 ;
 
 -- Aug 20, 2020 2:13:15 PM IST
-INSERT INTO t_alter_column values('m_movementline','M_AttributeSetInstanceTo_ID','NUMERIC(10)',null,'NULL',null)
+INSERT INTO t_alter_column values('m_movementline','M_AttributeSetInstanceTo_ID','NUMERIC(10)',null,'NULL')
 ;
 
 -- Aug 20, 2020 2:13:15 PM IST
@@ -20,7 +20,7 @@ UPDATE AD_Column SET FKConstraintName='MMovementLineMA_MASITo',Updated=TO_TIMEST
 ;
 
 -- Aug 20, 2020 2:15:40 PM IST
-INSERT INTO t_alter_column values('m_movementlinema','M_AttributeSetInstanceTo_ID','NUMERIC(10)',null,'NULL',null)
+INSERT INTO t_alter_column values('m_movementlinema','M_AttributeSetInstanceTo_ID','NUMERIC(10)',null,'NULL')
 ;
 
 -- Aug 20, 2020 2:15:40 PM IST
