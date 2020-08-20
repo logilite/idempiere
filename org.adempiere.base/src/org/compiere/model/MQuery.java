@@ -439,7 +439,7 @@ public class MQuery implements Serializable
 	public static final String	IN = "IN";
 	/** For IDEMPIERE-3413 */
 	public static final String	OVERLAP = "OVERLAP";
-	public static final String	EXCLUDE = " EXCLUDE ";
+	public static final String	EXCLUDE = "EXCLUDE";
 
 	public static final String	IN_OP		= Convert_SQL92.PG_ARRAY_IN_ALIAS_EXP;
 	public static final String	HAVE_OP		= Convert_SQL92.PG_ARRAY_HAVE_ALIAS_EXP;
@@ -1217,7 +1217,7 @@ class Restriction  implements Serializable
 		}
 		//
 		StringBuilder sb = new StringBuilder();
-		if (MQuery.EXCLUDE_OP == Operator)
+		if (MQuery.EXCLUDE_OP.equals(Operator))
 			sb.append("(");
 		if (!virtualColumn && tableName != null && tableName.length() > 0)
 		{
@@ -1274,7 +1274,7 @@ class Restriction  implements Serializable
 				else
 					sb.append(Code_to);
 			}
-			else if (MQuery.EXCLUDE_OP == Operator)
+			else if (MQuery.EXCLUDE_OP.equals(Operator))
 			{
 				sb.append(")").append(MQuery.EXCLUDE_OP2);
 			}

@@ -7,8 +7,8 @@ INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,AD_Table_ID,ColumnN
 ;
 
 -- Sep 18, 2015 6:31:27 PM IST
-UPDATE AD_Column SET FKConstraintName='MAttributeSetInstanceTo_MMovem', FKConstraintType='N',Updated=TO_DATE('2015-09-18 18:31:27','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID=212226
-;
+--UPDATE AD_Column SET FKConstraintName='MAttributeSetInstanceTo_MMovem', FKConstraintType='N',Updated=TO_DATE('2015-09-18 18:31:27','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID=212226
+--;
 
 -- Sep 18, 2015 6:31:27 PM IST
 ALTER TABLE M_MovementLineMA ADD M_AttributeSetInstanceTo_ID NUMBER(10) DEFAULT NULL 
