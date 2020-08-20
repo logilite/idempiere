@@ -51,5 +51,5 @@ FROM AD_Tab t
 WHERE t.IsActive='Y'
   AND tbl.IsActive='Y';
 
-SELECT register_migration_script('202005262200_AD_Tab_Views.sql') FROM dual
+SELECT register_migration_script('202008201819_AD_Tab_Views.sql') FROM dual
 ;
