@@ -807,13 +807,15 @@ public class Doc_Invoice extends Doc
 				{
 					fl = fact.createLine (line, acct,
 							getC_Currency_ID(), amt, amt2);
-					roundingErr=amt.subtract(fl.getAcctBalance());
+					if (fl != null)
+						roundingErr=amt.subtract(fl.getAcctBalance());
 				}
 				else			//	Customer = CR
 				{	
 					fl = fact.createLine (line, acct,
 						getC_Currency_ID(), amt2, amt);
-					roundingErr=amt.subtract(fl.getAcctBalance().negate());
+					if (fl != null)
+						roundingErr=amt.subtract(fl.getAcctBalance().negate());
 				}
 				if (fl != null)
 				{
@@ -836,13 +838,15 @@ public class Doc_Invoice extends Doc
 			{
 				tl = fact.createLine (null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as),
 					getC_Currency_ID(), amt, amt2);
-				roundingErr=amt.subtract(tl.getAcctBalance());
+				if (tl != null)
+					roundingErr=amt.subtract(tl.getAcctBalance());
 			}
 			else
 			{	
 				tl = fact.createLine (null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),
 					getC_Currency_ID(), amt2, amt);
-				roundingErr=amt.subtract(tl.getAcctBalance().negate());
+				if (tl != null)
+					roundingErr=amt.subtract(tl.getAcctBalance().negate());
 			}
 			if (tl != null)
 				tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
