@@ -16,7 +16,6 @@ import org.adempiere.webui.util.TreeUtils;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.I_AD_Tree_Favorite_Node;
 import org.compiere.model.MMenu;
-import org.compiere.model.MTreeFavorite;
 import org.compiere.model.MTreeFavoriteNode;
 import org.compiere.model.MTreeNode;
 import org.compiere.util.CLogger;
@@ -41,12 +40,11 @@ import org.zkoss.zul.Treerow;
  * Collapse/Expand Operation
  * 
  * @author Logilite Technologies
- * @since June 20, 2017
+ * @since  June 20, 2017
  */
 public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 {
-	private static final CLogger	log							= CLogger
-			.getCLogger(ADTreeFavoriteOnDropListener.class);
+	private static final CLogger	log							= CLogger.getCLogger(ADTreeFavoriteOnDropListener.class);
 
 	public static final String		SQL_UPDATE_NODE_POSITION	= "UPDATE AD_Tree_Favorite_Node SET Parent_ID=?, SeqNo=?, Updated=SysDate WHERE AD_Tree_Favorite_Node_ID=?";
 
@@ -55,11 +53,6 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 	public static final String		MENU_ITEM_COLLAPSE			= "StartWithCollapsed";
 	public static final String		NODE_MOVEINTO				= "MoveInto";
 	public static final String		NODE_INSERTAFTER			= "InsertAfter";
-
-	private int						AD_Role_ID					= Env.getAD_Role_ID(Env.getCtx());
-	private int						AD_Client_ID				= Env.getAD_Client_ID(Env.getCtx());
-	private int						AD_Org_ID					= Env.getContextAsInt(Env.getCtx(), "#AD_Org_ID");
-	private int						AD_User_ID					= Env.getContextAsInt(Env.getCtx(), "#AD_User_ID");
 
 	private FavoriteSimpleTreeModel	treeModel;
 	private Tree					tree;
@@ -71,7 +64,8 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 		this.tree = tree;
 		this.treeModel = treeModel;
 		this.windowNo = windowNo;
-		mTreeFavID = MTreeFavorite.getTreeID(AD_Client_ID, AD_Role_ID, AD_User_ID);
+
+		mTreeFavID = treeModel.AD_Tree_Favorite_ID;
 	}
 
 	/**
@@ -135,12 +129,10 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 
 						if (!nd_target.isSummary())
 						{
-							menuAvailable = MTreeFavoriteNode.isMenuExists(menuID, nd_target.getParent_ID(),
-									mTreeFavID);
+							menuAvailable = MTreeFavoriteNode.isMenuExists(menuID, nd_target.getParent_ID(), mTreeFavID);
 							if (nd_src.getParent_ID() == nd_target.getParent_ID())
 							{
-								moveNode((DefaultTreeNode<Object>) src.getValue(),
-										(DefaultTreeNode<Object>) target.getValue());
+								moveNode((DefaultTreeNode<Object>) src.getValue(), (DefaultTreeNode<Object>) target.getValue());
 							}
 							else if (menuAvailable)
 							{
@@ -148,8 +140,7 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 							}
 							else
 							{
-								moveNode((DefaultTreeNode<Object>) src.getValue(),
-										(DefaultTreeNode<Object>) target.getValue());
+								moveNode((DefaultTreeNode<Object>) src.getValue(), (DefaultTreeNode<Object>) target.getValue());
 							}
 						}
 						else
@@ -161,8 +152,7 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 							}
 							else
 							{
-								moveNode((DefaultTreeNode<Object>) src.getValue(),
-										(DefaultTreeNode<Object>) target.getValue());
+								moveNode((DefaultTreeNode<Object>) src.getValue(), (DefaultTreeNode<Object>) target.getValue());
 							}
 						}
 					}
@@ -215,7 +205,7 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 	 */
 	private void showWarningDialog()
 	{
-		FDialog.warn(0, Msg.getMsg(Env.getCtx(), "AlreadyExists"));
+		FDialog.warn(0, "AlreadyExists");
 	}
 
 	/**
@@ -232,8 +222,11 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 		Events.sendEvent(tree, new Event(Events.ON_RIGHT_CLICK, tree));
 
 		Menupopup popup = new Menupopup();
-		Menuitem menuItem = new Menuitem(Msg.getMsg(Env.getCtx(), "delete"),
-				"/theme/" + ThemeManager.getTheme() + "/images/Delete24.png");
+		Menuitem menuItem = new Menuitem(Msg.getMsg(Env.getCtx(), "delete"));
+		if (ThemeManager.isUseFontIconForImage())
+			menuItem.setIconSclass("z-icon-Delete");
+		else
+			menuItem.setImage(ThemeManager.getThemeResource("images/Delete24.png"));
 		menuItem.setValue(MENU_ITEM_DELETE);
 		menuItem.setParent(popup);
 		menuItem.addEventListener(Events.ON_CLICK, new DeleteListener(toNode));
@@ -244,14 +237,20 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 			MTreeFavoriteNode favNode = new MTreeFavoriteNode(Env.getCtx(), mtn.getNode_ID(), null);
 			if (favNode.isCollapsible())
 			{
-				menuItem = new Menuitem(Msg.getMsg(Env.getCtx(), MENU_ITEM_EXPAND),
-						"/theme/" + ThemeManager.getTheme() + "/images/expand-header.png");
+				menuItem = new Menuitem(Msg.getMsg(Env.getCtx(), MENU_ITEM_EXPAND));
+				if (ThemeManager.isUseFontIconForImage())
+					menuItem.setIconSclass("z-icon-Expand");
+				else
+					menuItem.setImage(ThemeManager.getThemeResource("images/expand-header.png"));
 				menuItem.setValue(MENU_ITEM_EXPAND);
 			}
 			else
 			{
-				menuItem = new Menuitem(Msg.getMsg(Env.getCtx(), MENU_ITEM_COLLAPSE),
-						"/theme/" + ThemeManager.getTheme() + "/images/collapse-header.png");
+				menuItem = new Menuitem(Msg.getMsg(Env.getCtx(), MENU_ITEM_COLLAPSE));
+				if (ThemeManager.isUseFontIconForImage())
+					menuItem.setIconSclass("z-icon-Parent");
+				else
+					menuItem.setImage(ThemeManager.getThemeResource("images/collapse-header.png"));
 				menuItem.setValue(MENU_ITEM_COLLAPSE);
 			}
 			menuItem.setParent(popup);
@@ -345,8 +344,8 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 	public void insertNodeMenu(int menuID, int parentNodeID, DefaultTreeNode<Object> stn)
 	{
 		MTreeFavoriteNode mtFavNode = new MTreeFavoriteNode(Env.getCtx(), 0, null);
-		mtFavNode.set_ValueOfColumn(I_AD_Tree_Favorite_Node.COLUMNNAME_AD_Client_ID, AD_Client_ID);
-		mtFavNode.setAD_Org_ID(AD_Org_ID);
+		mtFavNode.set_ValueOfColumn(I_AD_Tree_Favorite_Node.COLUMNNAME_AD_Client_ID, Env.getAD_Client_ID(Env.getCtx()));
+		mtFavNode.setAD_Org_ID(Env.getContextAsInt(Env.getCtx(), "#AD_Org_ID"));
 		mtFavNode.setAD_Tree_Favorite_ID(mTreeFavID);
 		mtFavNode.setSeqNo(0);
 		mtFavNode.setParent_ID(parentNodeID);
@@ -358,8 +357,8 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 		}
 		MMenu menu = new MMenu(Env.getCtx(), menuID, null);
 		MTreeNode mNode = new MTreeNode(mtFavNode.getAD_Tree_Favorite_Node_ID(), mtFavNode.getSeqNo(), menu.get_Translation(MMenu.COLUMNNAME_Name),
-				menu.get_Translation(MMenu.COLUMNNAME_Name), mtFavNode.getParent_ID(), mtFavNode.isSummary(), mtFavNode.getAD_Menu_ID(),
-				menu.getAction(), false);
+						menu.get_Translation(MMenu.COLUMNNAME_Name), mtFavNode.getParent_ID(), mtFavNode.isSummary(), mtFavNode.getAD_Menu_ID(),
+						menu.getAction(), false);
 
 		DefaultTreeNode<Object> node = new DefaultTreeNode<Object>(mNode);
 		int index = 0;
@@ -474,8 +473,7 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 				DefaultTreeNode<Object> nd = (DefaultTreeNode<Object>) oldParent.getChildAt(i);
 				MTreeNode md = (MTreeNode) nd.getData();
 
-				Object objParam[] = new Object[] { (oldMParent.getNode_ID() == 0 ? null : oldMParent.getNode_ID()), i,
-						md.getNode_ID() };
+				Object objParam[] = new Object[] { (oldMParent.getNode_ID() == 0 ? null : oldMParent.getNode_ID()), i, md.getNode_ID() };
 				DB.executeUpdateEx(SQL_UPDATE_NODE_POSITION, objParam, trx.getTrxName());
 
 				md.setParent_ID(oldMParent.getNode_ID());
@@ -488,8 +486,7 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 					DefaultTreeNode<Object> nd = (DefaultTreeNode<Object>) newParent.getChildAt(i);
 					MTreeNode md = (MTreeNode) nd.getData();
 
-					Object objParam[] = new Object[] { (newMParent.getNode_ID() == 0 ? null : newMParent.getNode_ID()),
-							i, md.getNode_ID() };
+					Object objParam[] = new Object[] { (newMParent.getNode_ID() == 0 ? null : newMParent.getNode_ID()), i, md.getNode_ID() };
 					DB.executeUpdateEx(SQL_UPDATE_NODE_POSITION, objParam, trx.getTrxName());
 
 					md.setParent_ID(newMParent.getNode_ID());

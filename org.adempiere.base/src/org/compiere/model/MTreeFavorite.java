@@ -9,24 +9,21 @@
 
 package org.compiere.model;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
 
-import org.adempiere.exceptions.AdempiereException;
-import org.compiere.model.MMenu;
-import org.compiere.model.MTreeNode;
+import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 /**
  * Favorite Tree Model
  * 
  * @author Logilite Technologies
- * @since June 20, 2017
+ * @since  June 20, 2017
  */
 public class MTreeFavorite extends X_AD_Tree_Favorite
 {
@@ -34,15 +31,15 @@ public class MTreeFavorite extends X_AD_Tree_Favorite
 	/**
 	 * 
 	 */
-	private static final long		serialVersionUID			= -1781192037651191816L;
+	private static final long				serialVersionUID			= -1781192037651191816L;
 
-	private ArrayList<MTreeNode>	m_buffer					= new ArrayList<MTreeNode>();
-	private MTreeNode				root						= null;
+	/** Cache of Client, User & Role wise Tree Favorite ID */
+	private static CCache<String, Integer>	s_treeCache					= new CCache<String, Integer>(Table_Name, 30);
 
-	public static final String		SQL_GET_TREE_FAVORITE_ID	= "SELECT AD_Tree_Favorite_ID FROM AD_Tree_Favorite	WHERE AD_Client_ID = ? AND AD_Role_ID = ? AND AD_User_ID = ?";
+	public static final String				SQL_GET_TREE_FAVORITE_ID	= "SELECT AD_Tree_Favorite_ID FROM AD_Tree_Favorite	WHERE AD_Client_ID = ? AND AD_Role_ID = ? AND COALESCE(AD_User_ID, 0) = ?";
 
-	public static final String		SQL_GET_TREE_FAVORITE_NODE	= "SELECT AD_Tree_Favorite_Node_ID, Parent_ID, SeqNo, Name, IsSummary, AD_Menu_ID, IsCollapsible "
-			+ " FROM AD_Tree_Favorite_Node WHERE AD_Tree_Favorite_ID=? ORDER BY COALESCE(Parent_ID, -1), SeqNo, Name";
+	private ArrayList<MTreeNode>			m_buffer					= new ArrayList<MTreeNode>();
+	private MTreeNode						root						= null;
 
 	/**
 	 * Construct Tree Favorite Model
@@ -78,52 +75,52 @@ public class MTreeFavorite extends X_AD_Tree_Favorite
 	 */
 	public void loadNode(int AD_Tree_Favorite_ID)
 	{
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			root = new MTreeNode(0, 0, "User Favourite Root", "User Favourite Root", 0, true, 0, null, false);
+		root = new MTreeNode(0, 0, "User Favourite Root", "User Favourite Root", 0, true, 0, null, false);
 
-			pstmt = DB.prepareStatement(SQL_GET_TREE_FAVORITE_NODE, get_TrxName());
-			pstmt.setInt(1, AD_Tree_Favorite_ID);
-			rs = pstmt.executeQuery();
-			while (rs.next())
+		List<MTreeFavoriteNode> nodes = getNode(AD_Tree_Favorite_ID, get_TrxName());
+
+		for (MTreeFavoriteNode node : nodes)
+		{
+			int nodeID = node.getAD_Tree_Favorite_Node_ID();
+			int parentID = node.getParent_ID();
+			int seqNo = node.getSeqNo();
+			String name = node.getName();
+			boolean isSummary = node.isSummary();
+			boolean isCollapsible = node.isCollapsible();
+
+			String img = null;
+			int menuID = 0;
+			if (!isSummary)
 			{
-				int nodeID = rs.getInt(1);
-				int parentID = rs.getInt(2);
-				int seqNo = rs.getInt(3);
-				String name = rs.getString(4);
-				boolean isSummary = (rs.getString(5).equals("Y"));
-				boolean isCollapsible = rs.getString(7).equals("Y");
-
-				String img = null;
-				int menuID = 0;
-				if (!isSummary)
-				{
-					menuID = rs.getInt(6);
-					MMenu mMenu = new MMenu(Env.getCtx(), menuID, null);
-					name = mMenu.get_Translation(MMenu.COLUMNNAME_Name);
-					img = mMenu.getAction();
-				}
-
-				if (AD_Tree_Favorite_ID == 0 && (parentID == 0 || nodeID == 0))
-					;
-				else
-					addToTree(nodeID, parentID, seqNo, name, isSummary, menuID, img, isCollapsible);
+				menuID = node.getAD_Menu_ID();
+				MMenu mMenu = new MMenu(Env.getCtx(), menuID, null);
+				name = mMenu.get_Translation(MMenu.COLUMNNAME_Name);
+				img = mMenu.getAction();
 			}
-		}
-		catch (SQLException e)
-		{
-			log.log(Level.SEVERE, SQL_GET_TREE_FAVORITE_NODE, e);
-			throw new AdempiereException(e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
+
+			if (AD_Tree_Favorite_ID == 0 && (parentID == 0 || nodeID == 0))
+				;
+			else
+				addToTree(nodeID, parentID, seqNo, name, isSummary, menuID, img, isCollapsible);
 		}
 	} // loadNode
+
+	/**
+	 * Get tree favorite node list
+	 * 
+	 * @param  AD_Tree_Favorite_ID
+	 * @param  trxName
+	 * @return                     list of nodes
+	 */
+	private static List<MTreeFavoriteNode> getNode(int AD_Tree_Favorite_ID, String trxName)
+	{
+		List<MTreeFavoriteNode> retValue = new Query(Env.getCtx(), MTreeFavoriteNode.Table_Name, MTreeFavoriteNode.COLUMNNAME_AD_Tree_Favorite_ID + "=? ", trxName)
+						.setParameters(AD_Tree_Favorite_ID)
+						.setOnlyActiveRecords(true)
+						.setOrderBy("COALESCE(Parent_ID, -1), SeqNo, Name")
+						.list();
+		return retValue;
+	} // getNode
 
 	/**
 	 * Adding Node Into Tree
@@ -137,8 +134,7 @@ public class MTreeFavorite extends X_AD_Tree_Favorite
 	 * @param img
 	 * @param isCollapsible
 	 */
-	private void addToTree(int favNodeID, int parentID, int seqNo, String name, boolean isSummary, int menuID,
-			String img, boolean isCollapsible)
+	private void addToTree(int favNodeID, int parentID, int seqNo, String name, boolean isSummary, int menuID, String img, boolean isCollapsible)
 	{
 		MTreeNode child = new MTreeNode(favNodeID, seqNo, name, name, parentID, isSummary, menuID, img, isCollapsible);
 
@@ -201,15 +197,141 @@ public class MTreeFavorite extends X_AD_Tree_Favorite
 	/**
 	 * Getting Tree ID for a specific User & Role Wise
 	 * 
-	 * @param roleID
-	 * @param userID
-	 * @param clientID
-	 * @return Favorite Tree_ID
+	 * @param  clientID
+	 * @param  roleID
+	 * @param  userID
+	 * @return          Tree Favorite ID
 	 */
 	public static int getTreeID(int clientID, int roleID, int userID)
 	{
+		String key = clientID + "_" + roleID + "_" + userID;
+		if (s_treeCache.containsKey(key))
+			return s_treeCache.get(key);
+
 		Object[] params = { clientID, roleID, userID };
-		return DB.getSQLValue(null, SQL_GET_TREE_FAVORITE_ID, params);
+		int id = DB.getSQLValue(null, SQL_GET_TREE_FAVORITE_ID, params);
+		if (id > 0)
+			s_treeCache.put(key, id);
+
+		return id;
 	} // getTreeID
+
+	/**
+	 * Get Default Favorite Tree ID for a specific Client & Role Wise
+	 * 
+	 * @param  clientID
+	 * @param  roleID
+	 * @return          Default Tree Favorite ID
+	 */
+	public static int getDefaultUserFavTreeID(int clientID, int roleID)
+	{
+		return getTreeID(clientID, roleID, 0);
+	} // getDefaultUserFavTreeID
+
+	/**
+	 * Copy From
+	 * 
+	 * @param  from       - MTreeFavorite
+	 * @param  AD_User_ID
+	 * @param  trxName
+	 * @return            MTreeFavorite
+	 */
+	public static MTreeFavorite copyFrom(MTreeFavorite from, int AD_User_ID, String trxName)
+	{
+		MTreeFavorite to = (MTreeFavorite) MTable.get(from.getCtx(), MTreeFavorite.Table_ID).getPO(0, trxName);
+		to.set_TrxName(trxName);
+		PO.copyValues(from, to, from.getAD_Client_ID(), from.getAD_Org_ID());
+		to.setAD_User_ID(AD_User_ID);
+		if (!to.save(trxName))
+			throw new IllegalStateException(Msg.getMsg(Env.getCtx(), "FavTreeNotCreate"));
+
+		return to;
+	} // copyFrom
+
+	/**
+	 * Clone tree structure from reference tree
+	 * 
+	 * @param fromTreeFav_ID - AD_Tree_Favorite_ID
+	 * @param clientID       - AD_Client_ID
+	 * @param roleID         - AD_Role_ID
+	 * @param userID         - AD_User_ID
+	 * @param trxName        - Trx Name
+	 */
+	public static void cloneTreeStructure(int fromTreeFav_ID, int clientID, int roleID, int userID, String trxName)
+	{
+		int toFavTree_ID = getTreeID(clientID, roleID, userID);
+		if (toFavTree_ID > 0)
+		{
+			/***
+			 * Delete user tree favorite nodes
+			 */
+			List<MTreeFavoriteNode> toNodeList = getTreeFavoriteNodeLevelWise(toFavTree_ID, 0, trxName);
+
+			for (MTreeFavoriteNode tfn : toNodeList)
+			{
+				tfn.delete(true);
+			}
+		}
+		else
+		{
+			MTreeFavorite fromTreeFav = (MTreeFavorite) MTable.get(Env.getCtx(), MTreeFavorite.Table_ID).getPO(fromTreeFav_ID, trxName);
+			MTreeFavorite toTreeFav = copyFrom(fromTreeFav, userID, trxName);
+			toFavTree_ID = toTreeFav.getAD_Tree_Favorite_ID();
+		}
+
+		// Get root level nodes
+		List<MTreeFavoriteNode> fromNodeList = getTreeFavoriteNodeLevelWise(fromTreeFav_ID, 0, trxName);
+
+		for (MTreeFavoriteNode fromTFN : fromNodeList)
+		{
+			cloneNode(toFavTree_ID, fromTFN, null, trxName);
+		}
+	} // cloneTreeStructure
+
+	/**
+	 * Recursive call for cloning hierarchy of the nodes
+	 * 
+	 * @param toFavTree_ID - New tree favorite ID
+	 * @param fromTFN      - Old tree favorite node
+	 * @param parentTFN    - New parent tree favorite node
+	 * @param trxName      - Trx name
+	 */
+	public static void cloneNode(int toFavTree_ID, MTreeFavoriteNode fromTFN, MTreeFavoriteNode parentTFN, String trxName)
+	{
+		int parentNodeID = 0;
+		if (parentTFN != null && fromTFN.getParent_ID() > 0)
+			parentNodeID = parentTFN.getAD_Tree_Favorite_Node_ID();
+
+		MTreeFavoriteNode newTFN = MTreeFavoriteNode.copyFrom(fromTFN, toFavTree_ID, parentNodeID, trxName);
+
+		if (fromTFN.isSummary())
+		{
+			// Get level wise nodes
+			List<MTreeFavoriteNode> fromChildNodeList = getTreeFavoriteNodeLevelWise(fromTFN.getAD_Tree_Favorite_ID(), fromTFN.getAD_Tree_Favorite_Node_ID(), trxName);
+
+			for (MTreeFavoriteNode fromChildTFN : fromChildNodeList)
+			{
+				cloneNode(toFavTree_ID, fromChildTFN, newTFN, trxName);
+			}
+		}
+	} // cloneNode
+
+	/**
+	 * Get tree favorite node level wise
+	 * 
+	 * @param  AD_Tree_Favorite_ID
+	 * @param  parentNodeID
+	 * @param  trxName
+	 * @return                     list of node
+	 */
+	public static List<MTreeFavoriteNode> getTreeFavoriteNodeLevelWise(int AD_Tree_Favorite_ID, int parentNodeID, String trxName)
+	{
+		List<MTreeFavoriteNode> childNodeList = new Query(Env.getCtx(), MTreeFavoriteNode.Table_Name, MTreeFavoriteNode.COLUMNNAME_AD_Tree_Favorite_ID + "=? AND COALESCE(Parent_ID, 0) = ?", trxName)
+						.setParameters(AD_Tree_Favorite_ID, parentNodeID)
+						.setOnlyActiveRecords(true)
+						.setOrderBy(MTreeFavoriteNode.COLUMNNAME_AD_Tree_Favorite_Node_ID)
+						.list();
+		return childNodeList;
+	} // getTreeFavoriteNodeLevelWise
 
 }

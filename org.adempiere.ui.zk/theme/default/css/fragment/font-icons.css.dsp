@@ -322,3 +322,12 @@
 .z-icon-Share:before {
 	content: "\f0ac";
 }
+.z-icon-TreeFavNodeAdd:before {
+	content: "\f07b";
+}
+.z-icon-CopyTree:before {
+	content: "\f0c5";
+}
+.z-icon-ChangeTree:before {
+	content: "\f079";
+}
