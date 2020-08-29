@@ -7,11 +7,11 @@ INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,Cr
 ;
 
 -- Oct 14, 2019 4:06:50 PM IST
-INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,AD_Table_ID,ColumnName,DefaultValue,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure) VALUES (214087,0,'Relative Period To','Period offset (0 is current)',446,'RelativePeriodTo','0',22,'N','N','N','N','N',0,'N',22,0,0,'Y',TO_DATE('2019-10-14 16:06:50','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2019-10-14 16:06:50','YYYY-MM-DD HH24:MI:SS'),100,203370,'Y','N','D','N','N','N','Y','48d4dd26-197e-4a9a-add3-f2e1d5ed0e22','Y',0,'N','N')
+INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,AD_Table_ID,ColumnName,DefaultValue,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure) VALUES (214087,0,'Relative Period To','Period offset (0 is current)',446,'RelativePeriodTo','NULL',22,'N','N','N','N','N',0,'N',22,0,0,'Y',TO_DATE('2019-10-14 16:06:50','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2019-10-14 16:06:50','YYYY-MM-DD HH24:MI:SS'),100,203370,'Y','N','D','N','N','N','Y','48d4dd26-197e-4a9a-add3-f2e1d5ed0e22','Y',0,'N','N')
 ;
 
 -- Oct 14, 2019 4:44:49 PM IST
-ALTER TABLE PA_ReportColumn ADD RelativePeriodTo NUMBER DEFAULT 0
+ALTER TABLE PA_ReportColumn ADD RelativePeriodTo NUMBER DEFAULT NULL
 ;
 
 -- Oct 14, 2019 4:09:10 PM IST
