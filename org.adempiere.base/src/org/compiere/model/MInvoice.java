@@ -1218,7 +1218,12 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	 */
 	public String getDocumentInfo()
 	{
-		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
+		MDocType dt;
+		if (getC_DocType_ID() == 0) {
+			dt = MDocType.get(getCtx(), getC_DocTypeTarget_ID());
+		} else {
+			dt = MDocType.get(getCtx(), getC_DocType_ID());
+		}
 		StringBuilder msgreturn = new StringBuilder().append(dt.getNameTrl()).append(" ").append(getDocumentNo());
 		return msgreturn.toString();
 	}	//	getDocumentInfo
@@ -1934,63 +1939,67 @@ public class MInvoice extends X_C_Invoice implements DocAction
 			{
 				MInOutLine receiptLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(
 						line.getM_InOutLine_ID(), get_TrxName());
+				MInOut receipt = receiptLine.getParent();
+
+				if (receipt.isProcessed()){
+
+					BigDecimal movementQty = receiptLine.getM_InOut().getMovementType().charAt(1) == '-' ? receiptLine.getMovementQty().negate() : receiptLine.getMovementQty();
+					BigDecimal matchQty = isCreditMemo() ? line.getQtyInvoiced().negate() : line.getQtyInvoiced();
+					String sql = "Select sum(Qty) From M_MatchInv Where Reversal_ID is Null AND M_InoutLine_ID = ?";
+					BigDecimal matchedMRQty = DB.getSQLValueBD(get_TrxName(), sql, receiptLine.get_ID());
+					matchedMRQty = matchedMRQty == null ? Env.ZERO : matchedMRQty;
 				
-				BigDecimal movementQty = receiptLine.getM_InOut().getMovementType().charAt(1) == '-' ? receiptLine.getMovementQty().negate() : receiptLine.getMovementQty();
-				BigDecimal matchQty = isCreditMemo() ? line.getQtyInvoiced().negate() : line.getQtyInvoiced();
-				String sql = "Select sum(Qty) From M_MatchInv Where Reversal_ID is Null AND M_InoutLine_ID = ?";
-				BigDecimal matchedMRQty = DB.getSQLValueBD(get_TrxName(), sql, receiptLine.get_ID());
-				matchedMRQty = matchedMRQty == null ? Env.ZERO : matchedMRQty;
-				
-				BigDecimal mrQtyMatchable = receiptLine.getMovementQty().subtract(matchedMRQty);
+					BigDecimal mrQtyMatchable = receiptLine.getMovementQty().subtract(matchedMRQty);
 				
 				
-				if (mrQtyMatchable.compareTo(matchQty) < 0)
-					matchQty = mrQtyMatchable;
-				if (movementQty.compareTo(matchQty) < 0)
-					matchQty = movementQty;
+					if (mrQtyMatchable.compareTo(matchQty) < 0)
+						matchQty = mrQtyMatchable;
+						if (movementQty.compareTo(matchQty) < 0)
+							matchQty = movementQty;
 				
-				if(matchQty.signum() == 0)
-				{
-					line.set_ValueNoCheck("M_InoutLine_ID", null);
-					line.saveEx();
-				}
-				else
-				{
-					MMatchInvHdr matchInvHdr = null;
-					MMatchInv inv = new MMatchInv(line, getDateInvoiced(), matchQty);
-					
-					if (MSysConfig.getBooleanValue(MSysConfig.MATCH_INV_HEADER_ENABLED, false, getAD_Client_ID()))
+					if(matchQty.signum() == 0)
 					{
-						matchInvHdr = new MMatchInvHdr(getCtx(), 0, get_TrxName());
-						matchInvHdr.setDateAcct(this.getDateAcct());
-						matchInvHdr.setDateTrx(this.getDateInvoiced());
-						matchInvHdr.setDescription(this.getDescription());
-						matchInvHdr.saveEx();
-						inv.setM_MatchInvHdr_ID(matchInvHdr.get_ID());
-					}
-					
-					if (!inv.save(get_TrxName()))
-					{
-						m_processMsg = CLogger.retrieveErrorString("Could not create Invoice Matching");
-						return DocAction.STATUS_Invalid;
-					}
-	
-					if (matchInvHdr != null)
-					{
-						try
-						{
-							matchInvHdr.processIt(DocAction.ACTION_Complete);
-						}
-						catch (Exception e)
-						{
-							log.log(Level.SEVERE, "Failed to complete match invoice header", e);
-						}
-						matchInvHdr.saveEx();
-						addDocsPostProcess(matchInvHdr);
+						line.set_ValueNoCheck("M_InoutLine_ID", null);
+						line.saveEx();
 					}
 					else
 					{
-						addDocsPostProcess(inv);
+						MMatchInvHdr matchInvHdr = null;
+						MMatchInv inv = new MMatchInv(line, getDateInvoiced(), matchQty);
+					
+						if (MSysConfig.getBooleanValue(MSysConfig.MATCH_INV_HEADER_ENABLED, false, getAD_Client_ID()))
+						{
+							matchInvHdr = new MMatchInvHdr(getCtx(), 0, get_TrxName());
+							matchInvHdr.setDateAcct(this.getDateAcct());
+							matchInvHdr.setDateTrx(this.getDateInvoiced());
+							matchInvHdr.setDescription(this.getDescription());
+							matchInvHdr.saveEx();
+							inv.setM_MatchInvHdr_ID(matchInvHdr.get_ID());
+						}
+						
+						if (!inv.save(get_TrxName()))
+						{
+							m_processMsg = CLogger.retrieveErrorString("Could not create Invoice Matching");
+							return DocAction.STATUS_Invalid;
+						}
+	
+						if (matchInvHdr != null)
+						{
+							try
+							{
+								matchInvHdr.processIt(DocAction.ACTION_Complete);
+							}
+							catch (Exception e)
+							{
+								log.log(Level.SEVERE, "Failed to complete match invoice header", e);
+							}
+							matchInvHdr.saveEx();
+							addDocsPostProcess(matchInvHdr);
+						}
+						else
+						{
+							addDocsPostProcess(inv);
+						}
 					}
 					
 					matchInv++;

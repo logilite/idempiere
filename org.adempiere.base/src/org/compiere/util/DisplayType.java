@@ -624,7 +624,7 @@ public final class DisplayType
 	{
 		if (columnName.equals("EntityType")
 			|| columnName.equals ("AD_Language"))
-			return "VARCHAR2(" + fieldLength + ")";
+			return "VARCHAR2(" + fieldLength + " CHAR)";
 		//	ID
 		if (DisplayType.isID(displayType))
 		{
@@ -639,7 +639,7 @@ public final class DisplayType
 			else if (fieldLength < 4)
 				return "CHAR(" + fieldLength + ")";
 			else	//	EntityType, AD_Language	fallback
-				return "VARCHAR2(" + fieldLength + ")";
+				return "VARCHAR2(" + fieldLength + " CHAR)";
 		}
 		//
 		if (displayType == DisplayType.Integer)
@@ -659,10 +659,10 @@ public final class DisplayType
 			if (fieldLength == 1)
 				return "CHAR(" + fieldLength + ")";
 			else
-				return "VARCHAR2(" + fieldLength + ")";
+				return "VARCHAR2(" + fieldLength + " CHAR)";
 		}
 		if (displayType == DisplayType.Color)
-			return "VARCHAR2(" + fieldLength + ")";
+			return "VARCHAR2(" + fieldLength + " CHAR)";
 		if (displayType == DisplayType.Button)
 		{
 			if (columnName.endsWith("_ID"))
@@ -695,7 +695,7 @@ public final class DisplayType
 		if (columnName.endsWith("_ID"))
 			return "NUMBER(10)";
 
-		return "VARCHAR2(" + fieldLength + ")";
+		return "VARCHAR2(" + fieldLength + " CHAR)";
 	}	//	getSQLDataType
 
 	/**
