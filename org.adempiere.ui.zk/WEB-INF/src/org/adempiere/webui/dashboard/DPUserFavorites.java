@@ -17,9 +17,12 @@ import org.adempiere.webui.util.TreeUtils;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.I_AD_Tree_Favorite;
+import org.compiere.model.MTable;
 import org.compiere.model.MTreeFavorite;
 import org.compiere.model.MTreeFavoriteNode;
 import org.compiere.model.MTreeNode;
+import org.compiere.model.MUser;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
@@ -29,10 +32,10 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Box;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.DefaultTreeNode;
+import org.zkoss.zul.Div;
 import org.zkoss.zul.Panel;
 import org.zkoss.zul.Panelchildren;
 import org.zkoss.zul.Textbox;
-import org.zkoss.zul.Toolbar;
 import org.zkoss.zul.Tree;
 import org.zkoss.zul.Treeitem;
 import org.zkoss.zul.Vbox;
@@ -41,7 +44,7 @@ import org.zkoss.zul.Vbox;
  * Dashboard item: User's Favorite Dashboard Panel
  * 
  * @author Logilite Technologies
- * @since June 20, 2017
+ * @since  June 20, 2017
  */
 public class DPUserFavorites extends DashboardPanel implements EventListener<Event>
 {
@@ -49,19 +52,36 @@ public class DPUserFavorites extends DashboardPanel implements EventListener<Eve
 	/**
 	 * 
 	 */
-	private static final long		serialVersionUID	= 4341658324859506048L;
+	private static final long		serialVersionUID				= 4341658324859506048L;
+
+	private static String			SQL_COUNT_TREE_FAVORITE_NODE	= "SELECT COUNT(1) FROM AD_Tree_Favorite_Node WHERE AD_Tree_Favorite_ID=?";
 
 	private FavoriteSimpleTreeModel	treeModel;
 	private Checkbox				chkExpand;
 	private Checkbox				addAsRoot;
 	private Textbox					textbox;
 	private Tree					tree;
+	private Panel					panel;
+	private Panelchildren			favContent;
+
+	private Button					btnAdd;
+	private Button					btnCopyTree;
+	private Button					btnShowMyTree;
+	private Button					btnShowDefaultTree;
+
+	private Div						favToolbarRow1;
+	private Div						favToolbarRow2;
+
+	private MUser					user;
 
 	private int						m_AD_FavTree_ID;
 	private int						AD_Role_ID;
 	private int						AD_Client_ID;
 	private int						AD_Org_ID;
 	private int						AD_User_ID;
+
+	private boolean					isDefaultTree					= false;
+	private boolean					isUserUseOwnTree				= false;
 
 	public DPUserFavorites()
 	{
@@ -72,15 +92,11 @@ public class DPUserFavorites extends DashboardPanel implements EventListener<Eve
 		AD_User_ID = Env.getAD_User_ID(Env.getCtx());
 		AD_Org_ID = Env.getAD_Org_ID(Env.getCtx());
 
-		Panel panel = new Panel();
+		user = (MUser) MTable.get(Env.getCtx(), MUser.Table_ID).getPO(AD_User_ID, null);
+
+		panel = new Panel();
 		panel.setClass("fav-tree-panel");
 		this.appendChild(panel);
-
-		Panelchildren favContent = new Panelchildren();
-		favContent.appendChild(createFavoritePanel());
-		favContent.setDroppable(DPFavourites.FAVOURITE_DROPPABLE);
-		favContent.addEventListener(Events.ON_DROP, this);
-		panel.appendChild(favContent);
 
 		chkExpand = new Checkbox();
 		chkExpand.setClass("fav-chkbox");
@@ -99,40 +115,123 @@ public class DPUserFavorites extends DashboardPanel implements EventListener<Eve
 		textbox.setTooltiptext("Specify new node name");
 		textbox.addEventListener(Events.ON_OK, this);
 
-		Button btnAdd = new Button();
-		btnAdd.setClass("fav-button-add");
-		btnAdd.setImage("/theme/" + ThemeManager.getTheme() + "/images/FolderAdd24.png");
+		btnAdd = new Button();
+		btnAdd.setClass("fav-tree-btn");
 		btnAdd.setTooltiptext(Msg.getMsg(Env.getCtx(), "AddFolderFavTree"));
 		btnAdd.addEventListener(Events.ON_CLICK, this);
+		if (ThemeManager.isUseFontIconForImage())
+			btnAdd.setIconSclass("z-icon-TreeFavNodeAdd");
+		else
+			btnAdd.setImage(ThemeManager.getThemeResource("images/FolderAdd16.png"));
 
-		Toolbar favToolbar = new Toolbar();
+		btnCopyTree = new Button();
+		btnCopyTree.setClass("fav-tree-btn");
+		btnCopyTree.setTooltiptext(Msg.getMsg(Env.getCtx(), "CopyTree"));
+		btnCopyTree.addEventListener(Events.ON_CLICK, this);
+		if (ThemeManager.isUseFontIconForImage())
+			btnCopyTree.setIconSclass("z-icon-CopyTree");
+		else
+			btnCopyTree.setImage(ThemeManager.getThemeResource("images/CopyTree16.png"));
+
+		btnShowMyTree = new Button();
+		btnShowMyTree.setClass("fav-tree-btn");
+		btnShowMyTree.setTooltiptext(Msg.getMsg(Env.getCtx(), "ShowMyTree"));
+		btnShowMyTree.addEventListener(Events.ON_CLICK, this);
+		if (ThemeManager.isUseFontIconForImage())
+			btnShowMyTree.setIconSclass("z-icon-ChangeTree");
+		else
+			btnShowMyTree.setImage(ThemeManager.getThemeResource("images/ShowMyTree16.png"));
+
+		btnShowDefaultTree = new Button();
+		btnShowDefaultTree.setClass("fav-tree-btn");
+		btnShowDefaultTree.setTooltiptext(Msg.getMsg(Env.getCtx(), "ShowDefaultTree"));
+		btnShowDefaultTree.addEventListener(Events.ON_CLICK, this);
+		if (ThemeManager.isUseFontIconForImage())
+			btnShowDefaultTree.setIconSclass("z-icon-ChangeTree");
+		else
+			btnShowDefaultTree.setImage(ThemeManager.getThemeResource("images/ShowDefaultTree16.png"));
+
+		favToolbarRow1 = new Div();
+		favToolbarRow1.setClass("fav-toolbar-div favToolbarRow1");
+		favToolbarRow1.appendChild(addAsRoot);
+		favToolbarRow1.appendChild(textbox);
+		favToolbarRow1.appendChild(btnAdd);
+
+		favToolbarRow2 = new Div();
+		favToolbarRow2.setClass("fav-toolbar-div favToolbarRow2");
+		favToolbarRow2.appendChild(chkExpand);
+		favToolbarRow2.appendChild(btnCopyTree);
+		favToolbarRow2.appendChild(btnShowMyTree);
+		favToolbarRow2.appendChild(btnShowDefaultTree);
+
+		Div favToolbar = new Div();
 		favToolbar.setClass("fav-toolbar");
-		favToolbar.appendChild(chkExpand);
-		favToolbar.appendChild(addAsRoot);
-		favToolbar.appendChild(textbox);
-		favToolbar.appendChild(btnAdd);
+		favToolbar.appendChild(favToolbarRow1);
+		favToolbar.appendChild(favToolbarRow2);
 		this.appendChild(favToolbar);
-	}
+
+		//
+		updateUI();
+	} // DPUserFavorites
 
 	private Box createFavoritePanel()
 	{
-		int AD_FavTree_ID = MTreeFavorite.getTreeID(AD_Client_ID, AD_Role_ID, AD_User_ID);
-		if (AD_FavTree_ID == -1)
+		int myTreeFavoriteID = 0;
+		if (!isDefaultTree)
 		{
-			MTreeFavorite mtFav = new MTreeFavorite(Env.getCtx(), 0, null);
-			mtFav.set_ValueOfColumn(I_AD_Tree_Favorite.COLUMNNAME_AD_Client_ID, AD_Client_ID);
-			mtFav.setAD_Org_ID(AD_Org_ID);
-			mtFav.setAD_Role_ID(AD_Role_ID);
-			mtFav.setAD_User_ID(AD_User_ID);
-			if (!mtFav.save())
-				throw new AdempiereException(Msg.getMsg(Env.getCtx(), "FavTreeNotCreate"));
+			myTreeFavoriteID = MTreeFavorite.getTreeID(AD_Client_ID, AD_Role_ID, AD_User_ID);
+			if (myTreeFavoriteID > 0)
+			{
+				int nodeCount = DB.getSQLValue(null, SQL_COUNT_TREE_FAVORITE_NODE, myTreeFavoriteID);
+				if (nodeCount <= 0 && !isUserUseOwnTree)
+					myTreeFavoriteID = 0;
+			}
+		}
 
-			m_AD_FavTree_ID = mtFav.getAD_Tree_Favorite_ID();
+		int defaultTreeFavoriteID = MTreeFavorite.getDefaultUserFavTreeID(AD_Client_ID, AD_Role_ID);
+		if (myTreeFavoriteID <= 0)
+		{
+			if (defaultTreeFavoriteID > 0)
+			{
+				m_AD_FavTree_ID = defaultTreeFavoriteID;
+				isDefaultTree = true;
+				isUserUseOwnTree = false;
+			}
+			else
+			{
+				myTreeFavoriteID = MTreeFavorite.getTreeID(AD_Client_ID, AD_Role_ID, AD_User_ID);
+				if (myTreeFavoriteID <= 0)
+				{
+					MTreeFavorite treeFav = createTreeFavorite(AD_User_ID);
+					myTreeFavoriteID = treeFav.getAD_Tree_Favorite_ID();
+				}
+				m_AD_FavTree_ID = myTreeFavoriteID;
+				isDefaultTree = false;
+				isUserUseOwnTree = true;
+			}
 		}
 		else
 		{
-			m_AD_FavTree_ID = AD_FavTree_ID;
+			m_AD_FavTree_ID = myTreeFavoriteID;
 		}
+
+		int dtNodeCount = 1;
+		if (isDefaultTree)
+			dtNodeCount = DB.getSQLValue(null, SQL_COUNT_TREE_FAVORITE_NODE, defaultTreeFavoriteID);
+
+		boolean isDisabledShowMyTree = m_AD_FavTree_ID == myTreeFavoriteID;
+		boolean isDisabledShowDefaultTree = m_AD_FavTree_ID == defaultTreeFavoriteID;
+		boolean isDisabledCopyTree = isDisabledShowMyTree || dtNodeCount <= 0;
+
+		btnCopyTree.setDisabled(isDisabledCopyTree);
+		btnShowMyTree.setDisabled(isDisabledShowMyTree);
+		btnShowDefaultTree.setDisabled(isDisabledShowDefaultTree);
+
+		btnCopyTree.setVisible(!isDisabledCopyTree);
+		btnShowMyTree.setVisible(!isDisabledShowMyTree);
+		btnShowDefaultTree.setVisible(!isDisabledShowDefaultTree);
+
+		favToolbarRow1.setVisible(isDefaultTree ? user.isAllowAccessDefaultFavTree() : true);
 
 		tree = new Tree();
 		tree.setMultiple(false);
@@ -146,18 +245,19 @@ public class DPUserFavorites extends DashboardPanel implements EventListener<Eve
 		ZKUpdateUtil.setHflex(box, "1");
 		box.appendChild(tree);
 
+		//
 		initTreeModel();
 
 		return box;
 	} // createFavoritePanel
 
 	/**
-	 * Creating Tree structure
+	 * Initiate tree model structure
 	 */
 	public void initTreeModel()
 	{
-		treeModel = FavoriteSimpleTreeModel.initADTree(tree, m_AD_FavTree_ID, 0, true, null);
-	}
+		treeModel = FavoriteSimpleTreeModel.initADTree(tree, m_AD_FavTree_ID, 0, !isDefaultTree || user.isAllowAccessDefaultFavTree(), null);
+	} // initTreeModel
 
 	/**
 	 * Event Like open Menu Window, Expand/Collapse Node, Add node into Tree
@@ -165,10 +265,38 @@ public class DPUserFavorites extends DashboardPanel implements EventListener<Eve
 	public void onEvent(Event event)
 	{
 		String eventName = event.getName();
-		if (eventName.equals(Events.ON_CLICK))
+		if (eventName.equals(Events.ON_CLICK) && event.getTarget() instanceof Button)
 		{
-			if (event.getTarget() instanceof Button)
+			if (event.getTarget() == btnAdd)
+			{
 				addNodeBtnPressed();
+			}
+			else if (event.getTarget() == btnCopyTree)
+			{
+				MTreeFavorite.cloneTreeStructure(m_AD_FavTree_ID, AD_Client_ID, AD_Role_ID, AD_User_ID, null);
+				isDefaultTree = false;
+				//
+				updateUI();
+			}
+			else if (event.getTarget() == btnShowMyTree)
+			{
+				if (MTreeFavorite.getTreeID(AD_Client_ID, AD_Role_ID, AD_User_ID) <= 0)
+					createTreeFavorite(AD_User_ID);
+
+				isDefaultTree = false;
+				isUserUseOwnTree = true;
+				//
+				updateUI();
+			}
+			else if (event.getTarget() == btnShowDefaultTree)
+			{
+				if (MTreeFavorite.getDefaultUserFavTreeID(AD_Client_ID, AD_Role_ID) <= 0)
+					createTreeFavorite(0);
+
+				isDefaultTree = true;
+				//
+				updateUI();
+			}
 		}
 		else if (eventName.equals(Events.ON_OK))
 		{
@@ -194,6 +322,8 @@ public class DPUserFavorites extends DashboardPanel implements EventListener<Eve
 
 	/**
 	 * Insert Folder as Node to Tree.
+	 * 
+	 * @param nodeName
 	 */
 	private void insertNode(String nodeName)
 	{
@@ -214,7 +344,7 @@ public class DPUserFavorites extends DashboardPanel implements EventListener<Eve
 		else
 		{
 			MTreeNode mtnNew = new MTreeNode(tfNode.getAD_Tree_Favorite_Node_ID(), tfNode.getSeqNo(), tfNode.getName(),
-					"", tfNode.getParent_ID(), tfNode.isSummary(), tfNode.getAD_Menu_ID(), null, false);
+							"", tfNode.getParent_ID(), tfNode.isSummary(), tfNode.getAD_Menu_ID(), null, false);
 
 			DefaultTreeNode<Object> newNode = new DefaultTreeNode<Object>(mtnNew);
 			DefaultTreeNode<Object> parentNode = treeModel.find(null, mtnNew.getParent_ID());
@@ -268,4 +398,46 @@ public class DPUserFavorites extends DashboardPanel implements EventListener<Eve
 		else
 			collapseAll();
 	} // expandOnCheck
+
+	/**
+	 * Reload UI
+	 */
+	public void updateUI()
+	{
+		treeModel = null;
+		tree = null;
+
+		if (favContent != null)
+		{
+			favContent.removeEventListener(Events.ON_DROP, this);
+			favContent.detach();
+			panel.removeChild(favContent);
+		}
+
+		//
+		favContent = new Panelchildren();
+		favContent.appendChild(createFavoritePanel());
+		favContent.setDroppable(DPFavourites.FAVOURITE_DROPPABLE);
+		favContent.addEventListener(Events.ON_DROP, this);
+		panel.appendChild(favContent);
+	} // updateUI
+
+	/**
+	 * Create Tree favorite
+	 * 
+	 * @param  userID - AD_User_ID
+	 * @return        {@link MTreeFavorite}
+	 */
+	private MTreeFavorite createTreeFavorite(int userID)
+	{
+		MTreeFavorite mtFav = (MTreeFavorite) MTable.get(Env.getCtx(), MTreeFavorite.Table_ID).getPO(0, null);
+		mtFav.set_ValueOfColumn(MTreeFavorite.COLUMNNAME_AD_Client_ID, AD_Client_ID);
+		mtFav.setAD_Org_ID(AD_Org_ID);
+		mtFav.setAD_Role_ID(AD_Role_ID);
+		mtFav.set_ValueNoCheck(MTreeFavorite.COLUMNNAME_AD_User_ID, Integer.valueOf(userID));
+		if (!mtFav.save())
+			throw new AdempiereException(Msg.getMsg(Env.getCtx(), "FavTreeNotCreate"));
+		return mtFav;
+	} // createTreeFavorite
+
 }

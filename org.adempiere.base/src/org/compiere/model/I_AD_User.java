@@ -428,6 +428,19 @@ public interface I_AD_User
 	  */
 	public boolean isAddMailTextAutomatically();
 
+    /** Column name IsAllowAccessDefaultFavTree */
+    public static final String COLUMNNAME_IsAllowAccessDefaultFavTree = "IsAllowAccessDefaultFavTree";
+
+	/** Set Allow access in default favorite tree.
+	  * Allow access for changes & configuration for Default Favorite Tree structure
+	  */
+	public void setIsAllowAccessDefaultFavTree (boolean IsAllowAccessDefaultFavTree);
+
+	/** Get Allow access in default favorite tree.
+	  * Allow access for changes & configuration for Default Favorite Tree structure
+	  */
+	public boolean isAllowAccessDefaultFavTree();
+
     /** Column name IsExpired */
     public static final String COLUMNNAME_IsExpired = "IsExpired";
 

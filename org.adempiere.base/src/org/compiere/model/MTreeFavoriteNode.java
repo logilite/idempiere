@@ -9,19 +9,16 @@
 
 package org.compiere.model;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Properties;
 
-import org.adempiere.exceptions.AdempiereException;
 import org.compiere.util.DB;
 
 /**
  * Favorite Tree Node Model
  * 
  * @author Logilite Technologies
- * @since June 20, 2017
+ * @since  June 20, 2017
  */
 public class MTreeFavoriteNode extends X_AD_Tree_Favorite_Node
 {
@@ -29,10 +26,9 @@ public class MTreeFavoriteNode extends X_AD_Tree_Favorite_Node
 	/**
 	 * 
 	 */
-	private static final long	serialVersionUID	= -1085269880909860587L;
+	private static final long	serialVersionUID		= -1085269880909860587L;
 
-	public static final String	SQL_GET_MENU_ID		= "SELECT AD_Menu_ID FROM AD_Tree_Favorite_Node "
-			+ " WHERE AD_Tree_Favorite_ID=? AND Parent_ID=? AND AD_Menu_ID IS NOT NULL";
+	public static final String	SQL_CHECK_MENU_EXISTS	= "SELECT COUNT(AD_Menu_ID) > 0 FROM AD_Tree_Favorite_Node WHERE AD_Tree_Favorite_ID=? AND Parent_ID=? AND AD_Menu_ID=?";
 
 	/**
 	 * @param ctx
@@ -57,41 +53,37 @@ public class MTreeFavoriteNode extends X_AD_Tree_Favorite_Node
 	/**
 	 * Check the Menu ID is Present on specified Parent id or not
 	 * 
-	 * @param menuID
-	 * @param nodeID
-	 * @param favTreeID
-	 * @return True if same menu exits
+	 * @param  menuID    - AD_Menu_ID
+	 * @param  nodeID    - Parent Node_ID
+	 * @param  treeFavID - AD_ Tree_Favorite_ID
+	 * @return           True if same menu exits
 	 */
-	public static boolean isMenuExists(int menuID, int nodeID, int favTreeID)
+	public static boolean isMenuExists(int menuID, int nodeID, int treeFavID)
 	{
-		boolean isSameMenu = false;
-
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(SQL_GET_MENU_ID, null);
-			pstmt.setInt(1, favTreeID);
-			pstmt.setInt(2, nodeID);
-			rs = pstmt.executeQuery();
-			while (rs.next())
-			{
-				if (rs.getInt(1) == menuID)
-					isSameMenu = true;
-			}
-		}
-		catch (SQLException e)
-		{
-			throw new AdempiereException(e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
-
-		return isSameMenu;
+		return DB.getSQLValueBooleanEx(null, SQL_CHECK_MENU_EXISTS, treeFavID, nodeID, menuID);
 	} // isMenuExists
 
+	/**
+	 * Copy From
+	 * 
+	 * @param  from
+	 * @param  AD_Tree_Favorite_ID
+	 * @param  parentNodeID
+	 * @param  trxName
+	 * @return                     MTreeFavoriteNode
+	 */
+	public static MTreeFavoriteNode copyFrom(MTreeFavoriteNode from, int AD_Tree_Favorite_ID, int parentNodeID, String trxName)
+	{
+		MTreeFavoriteNode to = (MTreeFavoriteNode) MTable.get(from.getCtx(), MTreeFavoriteNode.Table_ID).getPO(0, trxName);
+		to.set_TrxName(trxName);
+		PO.copyValues(from, to, from.getAD_Client_ID(), from.getAD_Org_ID());
+		to.setAD_Tree_Favorite_ID(AD_Tree_Favorite_ID);
+		if (parentNodeID > 0)
+			to.setParent_ID(parentNodeID);
+
+		if (!to.save(trxName))
+			throw new IllegalStateException("Could not create Tree Favorite Node: " + (from.isSummary() ? from.getName() : from.getAD_Menu().getName()));
+
+		return to;
+	} // copyFrom
 }
