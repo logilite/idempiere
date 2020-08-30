@@ -25,6 +25,7 @@ import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.window.WTextEditorDialog;
 import org.compiere.model.MMenu;
 import org.compiere.model.MQuery;
+import org.compiere.model.MTable;
 import org.compiere.model.MToolBarButtonRestrict;
 import org.compiere.model.MTreeFavorite;
 import org.compiere.model.MTreeFavoriteNode;
@@ -53,7 +54,7 @@ import org.zkoss.zul.event.TreeDataEvent;
  * User Favorite Tree Model
  * 
  * @author Logilite Technologies
- * @since June 20, 2017
+ * @since  June 20, 2017
  */
 public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventListener<Event>, TreeitemRenderer<Object>
 {
@@ -68,6 +69,9 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 	private List<EventListener<Event>>	onDropListners		= new ArrayList<EventListener<Event>>();
 
 	private boolean						itemDraggable;
+	public boolean						isWriteAccess		= false;
+
+	public int							AD_Tree_Favorite_ID;
 	private int							currFolderID		= 0;
 
 	public FavoriteSimpleTreeModel(DefaultTreeNode<Object> root)
@@ -78,22 +82,25 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 	/**
 	 * Tree Initialization
 	 * 
-	 * @param Tree
-	 * @param AD_Tree_Favorite_ID
-	 * @param windowNo
-	 * @param editable
-	 * @param trxName
+	 * @param  Tree
+	 * @param  AD_Tree_Favorite_ID
+	 * @param  windowNo
+	 * @param  isWriteAccess
+	 * @param  trxName
 	 * @return
 	 */
-	public static FavoriteSimpleTreeModel initADTree(Tree tree, int AD_Tree_Favorite_ID, int windowNo, boolean editable,
-			String trxName)
+	public static FavoriteSimpleTreeModel initADTree(Tree tree, int AD_Tree_Favorite_ID, int windowNo, boolean isWriteAccess, String trxName)
 	{
-		MTreeFavorite mTreeFavorite = new MTreeFavorite(Env.getCtx(), AD_Tree_Favorite_ID, trxName);
+		MTreeFavorite mTreeFavorite = (MTreeFavorite) MTable.get(Env.getCtx(), MTreeFavorite.Table_ID).getPO(AD_Tree_Favorite_ID, trxName);
 		MTreeNode root = mTreeFavorite.getRoot();
+		//
 		FavoriteSimpleTreeModel treeModel = FavoriteSimpleTreeModel.createFrom(root);
 		treeModel.currFolderID = root.getNode_ID();
-		treeModel.setItemDraggable(true);
+		treeModel.isWriteAccess = isWriteAccess;
+		treeModel.AD_Tree_Favorite_ID = AD_Tree_Favorite_ID;
 		treeModel.addOnDropEventListener(new ADTreeFavoriteOnDropListener(tree, treeModel, windowNo));
+		if (isWriteAccess)
+			treeModel.setItemDraggable(true);
 
 		if (tree.getTreecols() == null)
 		{
@@ -121,24 +128,21 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 	/**
 	 * Creating Tree hierarchy
 	 * 
-	 * @param RootNode
-	 * @return model
+	 * @param  RootNode
+	 * @return          model
 	 */
 	public static FavoriteSimpleTreeModel createFrom(MTreeNode root)
 	{
 		FavoriteSimpleTreeModel model = null;
 		Enumeration<?> nodeEnum = root.children();
 
-		DefaultTreeNode<Object> stRoot = new DefaultTreeNode<Object>(root,
-				nodeEnum.hasMoreElements() ? new ArrayList<TreeNode<Object>>() : null);
+		DefaultTreeNode<Object> stRoot = new DefaultTreeNode<Object>(root, nodeEnum.hasMoreElements() ? new ArrayList<TreeNode<Object>>() : null);
 
 		while (nodeEnum.hasMoreElements())
 		{
 			MTreeNode childNode = (MTreeNode) nodeEnum.nextElement();
 
-			DefaultTreeNode<Object> stNode = childNode.getChildCount() > 0
-					? new DefaultTreeNode<Object>(childNode, new ArrayList<TreeNode<Object>>())
-					: new DefaultTreeNode<Object>(childNode);
+			DefaultTreeNode<Object> stNode = childNode.getChildCount() > 0 ? new DefaultTreeNode<Object>(childNode, new ArrayList<TreeNode<Object>>()) : new DefaultTreeNode<Object>(childNode);
 
 			stRoot.getChildren().add(stNode);
 			if (childNode.getChildCount() > 0)
@@ -164,9 +168,7 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 		{
 			MTreeNode childNode = (MTreeNode) nodeEnum.nextElement();
 
-			DefaultTreeNode<Object> stChildNode = childNode.getChildCount() > 0
-					? new DefaultTreeNode<Object>(childNode, new ArrayList<TreeNode<Object>>())
-					: new DefaultTreeNode<Object>(childNode);
+			DefaultTreeNode<Object> stChildNode = childNode.getChildCount() > 0 ? new DefaultTreeNode<Object>(childNode, new ArrayList<TreeNode<Object>>()) : new DefaultTreeNode<Object>(childNode);
 
 			stNode.getChildren().add(stChildNode);
 			if (childNode.getChildCount() > 0)
@@ -181,7 +183,7 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 	{
 		DefaultTreeNode<?> stn = (DefaultTreeNode<?>) node;
 		MTreeNode mtn = (MTreeNode) stn.getData();
-		Treecell tc = new Treecell(Objects.toString(node), "/theme/" + ThemeManager.getTheme() + mtn.getImagePath());
+		Treecell tc = new Treecell(Objects.toString(node), ThemeManager.getThemeResource(mtn.getImagePath().substring(1)));
 		Treerow tr = null;
 		if (ti.getTreerow() == null)
 		{
@@ -194,12 +196,16 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 			if (!onDropListners.isEmpty())
 			{
 				ti.getTreerow().addEventListener(Events.ON_CLICK, this);
-				ti.getTreerow().addEventListener(Events.ON_DOUBLE_CLICK, this);
 
-				tr.setDroppable("true");
-				tr.addEventListener(Events.ON_SELECT, this);
-				tr.addEventListener(Events.ON_RIGHT_CLICK, this);
-				tr.addEventListener(Events.ON_DROP, this);
+				if (isWriteAccess)
+				{
+					ti.getTreerow().addEventListener(Events.ON_DOUBLE_CLICK, this);
+
+					tr.setDroppable("true");
+					tr.addEventListener(Events.ON_SELECT, this);
+					tr.addEventListener(Events.ON_RIGHT_CLICK, this);
+					tr.addEventListener(Events.ON_DROP, this);
+				}
 			}
 
 			Object data = ((DefaultTreeNode<?>) node).getData();
@@ -297,7 +303,7 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 				comp = comp.getParent().getParent();
 				newRecord = true;
 			}
-			
+
 			if (comp instanceof Treerow)
 			{
 				Treerow treerow = (Treerow) comp;
@@ -338,9 +344,7 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 				if (mtn.isSummary())
 				{
 					final FavoriteSimpleTreeModel sftModel = this;
-					final WTextEditorDialog editorDialog = new WTextEditorDialog(
-							Msg.getMsg(Env.getCtx(), "EditFolderName"), mtn.getName() == null ? "" : mtn.getName(),
-							true, 100, false, false);
+					final WTextEditorDialog editorDialog = new WTextEditorDialog(Msg.getMsg(Env.getCtx(), "EditFolderName"), mtn.getName() == null ? "" : mtn.getName(), true, 100, false, false);
 
 					editorDialog.setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
 					editorDialog.addEventListener(DialogEvents.ON_WINDOW_CLOSE, new EventListener<Event>() {
@@ -366,8 +370,7 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 										parentNode = (DefaultTreeNode<Object>) getChild(parentNode, path[i]);
 									}
 
-									fireEvent(TreeDataEvent.CONTENTS_CHANGED, getPath(parentNode), path[index],
-											path[index]);
+									fireEvent(TreeDataEvent.CONTENTS_CHANGED, getPath(parentNode), path[index], path[index]);
 								}
 							}
 						} // onEvent
@@ -406,7 +409,7 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 	{
 		return (DefaultTreeNode<Object>) (parent).getChildAt(index);
 	} // getChild
-	
+
 	private void onNewRecord(int menuID)
 	{
 		try

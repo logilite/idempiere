@@ -97,28 +97,36 @@ table.z-vbox > tbody > tr > td > table {
 
 .fav-tree-panel {
   padding: 2px;
-  background-color: #eee;
+  background-color: #99b4d233;
   border-radius: 5px;
 }
 
 .fav-toolbar {
-  padding: 10px;
   background-color: #eee;
+  background-image: linear-gradient(#f4f4f4, #cecece, #bfbfbf);
   border: 1px solid #d8d8d8;
   border-radius: 5px;
 }
 
-.fav-button-add {
-  margin-left: 10px !important;
+.fav-toolbar-div {
+  position: relative;
+  width: 100%;
+}
+
+.fav-tree-btn {
+  margin-left: 5px !important;
+  padding: 3px 15px;
+  border: 1px solid #6d6d6d;
 }
 
 .fav-folder-textbox {
-  margin-left: 10px;
-  width: 60%;
+  margin-left: 5px;
+  width: 50%;
+  min-width: 100px;
 }
 
 .fav-chkbox {
-  margin-left: 10px;
+  margin-left: 5px;
 }
 
 <%-- User Favorite Dashboard Panel End --%>
