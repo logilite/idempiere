@@ -39,6 +39,7 @@ import org.compiere.model.MBPartner;
 import org.compiere.model.MClient;
 import org.compiere.model.MColumn;
 import org.compiere.model.MConversionRate;
+import org.compiere.model.MDocType;
 import org.compiere.model.MMailText;
 import org.compiere.model.MNote;
 import org.compiere.model.MOrg;
@@ -1026,6 +1027,18 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 					if (m_process != null)
 						m_process.setProcessMsg(e.getLocalizedMessage());
 					throw e;
+				}
+				finally
+				{
+					if (DocAction.ACTION_Reverse_Accrual.equals(m_po.get_ValueAsString("DocAction")))
+					{
+						int C_DocType_ID = m_po.get_ValueAsInt("C_DocType_ID");
+						if (C_DocType_ID > 0 && MDocType.get(m_po.getCtx(), C_DocType_ID).isRADateSelectable())
+						{
+							// User selectable accounting date based on DocType remove from context
+							m_po.getCtx().remove("#RA_DateAcct_" + m_po.get_Table_ID() + "_" + m_po.get_ID());
+						}
+					}
 				}
 				if (m_process != null)
 					m_process.setProcessMsg(processMsg);

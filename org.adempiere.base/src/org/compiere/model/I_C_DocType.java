@@ -464,6 +464,19 @@ public interface I_C_DocType
 	  */
 	public boolean isPrepareSplitDocument();
 
+    /** Column name IsRADateSelectable */
+    public static final String COLUMNNAME_IsRADateSelectable = "IsRADateSelectable";
+
+	/** Set Reverse Accrual Date Selectable.
+	  * DocAction Reverse-Accrual allow to user selectable accounting date based on DocType
+	  */
+	public void setIsRADateSelectable (boolean IsRADateSelectable);
+
+	/** Get Reverse Accrual Date Selectable.
+	  * DocAction Reverse-Accrual allow to user selectable accounting date based on DocType
+	  */
+	public boolean isRADateSelectable();
+
     /** Column name IsShipConfirm */
     public static final String COLUMNNAME_IsShipConfirm = "IsShipConfirm";
 
