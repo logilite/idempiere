@@ -170,6 +170,7 @@
 						<configuration>
 							<url>${lt.db.srv}/database/7.1/Adempiere_pg.jar</url>
 							<unpack>false</unpack>
+							<skipCache>true</skipCache>
 							<outputDirectory>data/seed</outputDirectory>
 							<retries>5</retries>
 						</configuration>
@@ -183,6 +184,7 @@
 						<configuration>
 							<url>${url.file.srv}/database/7.1/Adempiere.jar</url>
 							<unpack>false</unpack>
+							<skipCache>true</skipCache>
 							<outputDirectory>data/seed</outputDirectory>
 							<retries>5</retries>
 						</configuration>
