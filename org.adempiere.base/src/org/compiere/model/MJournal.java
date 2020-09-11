@@ -842,7 +842,7 @@ public class MJournal extends X_GL_Journal implements DocAction
 			reversalDate = Env.getContextAsDate(getCtx(), "#RA_DateAcct_" + Table_ID + "_" + get_ID());
 		}
 		
-		if (reversalDate == null) {
+		if (reversalDate == null) 
 		{
 			reversalDate = Env.getContextAsDate(getCtx(), "#Date");
 		}
