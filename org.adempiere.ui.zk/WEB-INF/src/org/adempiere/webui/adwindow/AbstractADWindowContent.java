@@ -1231,6 +1231,8 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     		hideBusyMask();
     		ProcessModalDialog dialog = (ProcessModalDialog) event.getTarget();
     		ProcessInfo pi = dialog.getProcessInfo();
+
+    		onModalClose(pi);
 			String s = null;
 			boolean b = false;
 			ProcessInfoLog[] logs = null;
