@@ -856,7 +856,18 @@ public class MJournal extends X_GL_Journal implements DocAction
 		//	Journal
 		MJournal reverse = new MJournal (this);
 		reverse.setGL_JournalBatch_ID(GL_JournalBatch_ID);
-		Timestamp reversalDate = Env.getContextAsDate(getCtx(), "#Date");
+		Timestamp reversalDate = null;
+		if (MDocType.get(getCtx(), getC_DocType_ID()).isRADateSelectable())
+		{
+			// User selectable accounting date based on DocType get from context
+			reversalDate = Env.getContextAsDate(getCtx(), "#RA_DateAcct_" + Table_ID + "_" + get_ID());
+		}
+		
+		if (reversalDate == null) 
+		{
+			reversalDate = Env.getContextAsDate(getCtx(), "#Date");
+		}
+
 		if (reversalDate == null) {
 			reversalDate = new Timestamp(System.currentTimeMillis());
 		}
