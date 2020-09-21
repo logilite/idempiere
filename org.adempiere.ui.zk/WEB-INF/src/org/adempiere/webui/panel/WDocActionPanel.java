@@ -17,6 +17,7 @@
 
 package org.adempiere.webui.panel;
 
+import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ import org.adempiere.util.Callback;
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.component.ConfirmPanel;
+import org.adempiere.webui.component.Datebox;
 import org.adempiere.webui.component.Grid;
 import org.adempiere.webui.component.GridFactory;
 import org.adempiere.webui.component.Panel;
@@ -73,7 +75,11 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 	private Label lblDocAction;
 	private Label label;
+	private Label lblDateAcct;
+
 	private Listbox lstDocAction;
+	private Datebox dbDateAcct;
+	private Row rowDateAcct = new Row();
 
 	private GridTab gridTab;
 	private String[]		s_value = null;
@@ -83,6 +89,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	private String DocAction;
 	private int m_AD_Table_ID;
 	private boolean m_OKpressed;
+	private boolean isAllowSetDateAcct;
     private ConfirmPanel confirmPanel;
 
 	private static final CLogger logger;
@@ -234,6 +241,13 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		//	setDefault
 		if (DocAction.equals("--"))		//	If None, suggest closing
 			DocAction = DocumentEngine.ACTION_Close;
+
+		int C_DocType_ID = po.get_ValueAsInt("C_DocType_ID");
+		if (C_DocType_ID > 0)
+			isAllowSetDateAcct = MDocType.get(po.getCtx(), C_DocType_ID).isRADateSelectable();
+
+		//
+		setDateAcctVisible(DocAction.equals(DocumentEngine.ACTION_Reverse_Accrual) && isAllowSetDateAcct);
 	}
 
 	public List<Listitem> getDocActionItems() {
@@ -254,6 +268,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		lblDocAction = new Label();
 		lblDocAction.setValue(Msg.translate(Env.getCtx(), "DocAction"));
 
+		lblDateAcct = new Label();
+		lblDateAcct.setValue(Msg.translate(Env.getCtx(), "DateAcct"));
+
 		label = new Label();
 
 		lstDocAction  = new Listbox();
@@ -262,6 +279,10 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		lstDocAction.setMold("select");
 		ZKUpdateUtil.setWidth(lstDocAction, "200px");
 		lstDocAction.addEventListener(Events.ON_SELECT, this);
+
+		dbDateAcct = new Datebox();
+		dbDateAcct.setId("dbDateAcct");
+		dbDateAcct.setValue(Env.getContextAsDate(Env.getCtx(), "#Date"));
 
         confirmPanel = new ConfirmPanel(true);
         confirmPanel.addActionListener(Events.ON_CLICK, this);
@@ -294,10 +315,22 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		pnlDocAction.appendChild(lstDocAction);
 
 		rowDocAction.appendChild(pnlDocAction);
+
+		Space space = new Space();
+		space.setSpacing("30px");
+
+		Panel pnlDateAcct = new Panel();
+		pnlDateAcct.appendChild(lblDateAcct);
+		pnlDateAcct.appendChild(space);
+		pnlDateAcct.appendChild(dbDateAcct);
+
+		rowDateAcct.appendChild(pnlDateAcct);
+
 		rowLabel.appendChild(label);
-		
 		rowSpacer.appendChild(new Space());
-	    rows.appendChild(rowDocAction);
+
+		rows.appendChild(rowDocAction);
+		rows.appendChild(rowDateAcct);
 	    rows.appendChild(rowLabel);
 	    rows.appendChild(rowSpacer);
 	    
@@ -344,6 +377,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			if (lstDocAction.equals(event.getTarget()))
 			{
 				label.setValue(s_description[getSelectedIndex()]);
+				setDateAcctVisible(s_value[getSelectedIndex()].equals(DocumentEngine.ACTION_Reverse_Accrual) && isAllowSetDateAcct);
 			}
 		}
 	}
@@ -423,6 +457,12 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		//	Save Selection
 		if (logger.isLoggable(Level.CONFIG)) logger.config("DocAction=" + s_value[index]);
 		gridTab.setValue("DocAction", s_value[index]);
+
+		if (s_value[index].equals(DocumentEngine.ACTION_Reverse_Accrual) && isAllowSetDateAcct)
+		{
+			// User selectable accounting date based on DocType set to global context
+			Env.setContext(Env.getCtx(), "#RA_DateAcct_" + gridTab.getAD_Table_ID() + "_" + gridTab.getRecord_ID(), new Timestamp(dbDateAcct.getValue().getTime()));
+		}
 	}	//	save
 
 	 private void readReference()
@@ -469,4 +509,10 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		return lstDocAction != null ? lstDocAction.getItemCount() : 0;
 	}
 
+	private void setDateAcctVisible(boolean isVisible)
+	{
+		rowDateAcct.setVisible(isVisible);
+		dbDateAcct.setVisible(isVisible);
+		lblDateAcct.setVisible(isVisible);
+	} // setDateAcctVisibile
 }

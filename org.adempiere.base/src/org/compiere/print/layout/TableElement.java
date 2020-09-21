@@ -122,7 +122,6 @@ public class TableElement extends PrintElement
 	 *  @param colSuppressRepeats
 	 *  @param rowColReportLine
 	 *  @param finReportSumRows
-	 *  @param blankRows
 	 */
 	public TableElement (ValueNamePair[] columnHeader,
 		int[] columnMaxWidth, int[] columnMaxHeight, String[] columnJustification,
@@ -130,7 +129,7 @@ public class TableElement extends PrintElement
 		SerializableMatrix<Serializable> data, KeyNamePair[] pk, String pkColumnName,
 		int pageNoStart, Rectangle firstPage, Rectangle nextPages, int repeatedColumns, HashMap<Integer,Integer> additionalLines,
 		HashMap<Point,Font> rowColFont, HashMap<Point,Color> rowColColor, HashMap<Point,Color> rowColBackground,
-		MPrintTableFormat tFormat, ArrayList<Integer> pageBreak, Boolean[] colSuppressRepeats, HashMap<Point, MReportLine> rowColReportLine, ArrayList<Integer> finReportSumRows, ArrayList<Integer> blankRows)
+		MPrintTableFormat tFormat, ArrayList<Integer> pageBreak, Boolean[] colSuppressRepeats, HashMap<Point, MReportLine> rowColReportLine, ArrayList<Integer> finReportSumRows)
 	{
 		super();
 		if (log.isLoggable(Level.FINE))
@@ -172,7 +171,6 @@ public class TableElement extends PrintElement
 		m_tFormat = tFormat;
 		m_finReportSumRows = finReportSumRows;
 		m_rowColReportLine = rowColReportLine;
-		m_blankRows = blankRows;
 
 		//	Page Break - not two after each other
 		m_pageBreak = pageBreak;
@@ -278,9 +276,6 @@ public class TableElement extends PrintElement
 	/** HashMap with Point as key with report line */
 	private HashMap<Point, MReportLine>			m_rowColReportLine;
 
-	/** List of Fin Report blank rows */
-	private ArrayList<Integer>					m_blankRows;
-
 	/*************************************************************************/
 
 	/**	Header Row Indicator			*/
@@ -357,6 +352,9 @@ public class TableElement extends PrintElement
 				{
 					dimensions.add(null);
 				}
+				
+				Font font = getFont(row, dataCol);
+
 				Serializable dataItem = m_data.getRowData().get(dataCol);
 				if (dataItem == null)
 				{
@@ -374,7 +372,20 @@ public class TableElement extends PrintElement
 						{
 							addPrintLines(row, col, dataItem);
 						}
-						dimensions.set(dataCol, new Dimension2DImpl());
+
+						// Set Blank line height
+						if (getReportLine(row, dataCol) != null && getReportLine(row, dataCol).isLineTypeBlankLine())
+						{
+							dimensions.set(dataCol, new Dimension2DImpl());
+							TextLayout layout = new TextLayout(" ", font, frc);
+							float height = layout.getAscent() + layout.getDescent() + layout.getLeading();
+							dimensions.get(dataCol).height = height;
+							dimensions.get(dataCol).roundUp();
+						}
+						else
+						{
+							dimensions.set(dataCol, new Dimension2DImpl());
+						}
 						continue;
 					}										
 				}									
@@ -384,7 +395,6 @@ public class TableElement extends PrintElement
 					dimensions.set(dataCol, new Dimension2DImpl());
 					continue;
 				}
-				Font font = getFont(row, dataCol);
 
 				//	Print below existing column = (col != dataCol)
 				addPrintLines(row, col, dataItem);
@@ -906,9 +916,6 @@ public class TableElement extends PrintElement
 	 */
 	private Color getColor (int row, int col)
 	{
-		if (m_blankRows.contains(row))
-			return getBackground(row, col);
-
 		//	First specific position
 		Color color = (Color)m_rowColColor.get(new Point(row, col));
 		if (color != null)
@@ -1869,7 +1876,7 @@ public class TableElement extends PrintElement
 			return rLine;
 
 		return null;
-	} // getFont
+	} // getReportLine
 
 	public void setPageLogics(ArrayList<String> pageLogics) 
 	{

@@ -19,7 +19,6 @@ package org.compiere.model;
 
 import java.sql.ResultSet;
 import java.util.Properties;
-
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_DocType
@@ -31,7 +30,7 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20200910L;
 
     /** Standard Constructor */
     public X_C_DocType (Properties ctx, int C_DocType_ID, String trxName)
@@ -56,6 +55,8 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 			setIsPickQAConfirm (false);
 			setIsPrepareSplitDocument (true);
 // Y
+			setIsRADateSelectable (false);
+// N
 			setIsShipConfirm (false);
 			setIsSOTrx (false);
 			setIsSplitWhenDifference (false);
@@ -848,6 +849,30 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 	public boolean isPrepareSplitDocument () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsPrepareSplitDocument);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Reverse Accrual Date Selectable.
+		@param IsRADateSelectable 
+		DocAction Reverse-Accrual allow to user selectable accounting date based on DocType
+	  */
+	public void setIsRADateSelectable (boolean IsRADateSelectable)
+	{
+		set_Value (COLUMNNAME_IsRADateSelectable, Boolean.valueOf(IsRADateSelectable));
+	}
+
+	/** Get Reverse Accrual Date Selectable.
+		@return DocAction Reverse-Accrual allow to user selectable accounting date based on DocType
+	  */
+	public boolean isRADateSelectable () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsRADateSelectable);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 

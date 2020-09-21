@@ -1706,7 +1706,6 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		ArrayList<Integer> functionRows = new ArrayList<Integer>();
 		ArrayList<Integer> pageBreak = new ArrayList<Integer>();		
 		ArrayList<Integer> finReportSumRows = new ArrayList<Integer>();
-		ArrayList<Integer> blankRows = new ArrayList<Integer>();
 		int lastLevelNo = 0;
 
 		//	for all rows
@@ -1755,9 +1754,6 @@ public class LayoutEngine implements Pageable, Printable, Doc
 			}
 
 			MReportLine rLine = printData.getMReportLine();
-
-			if (rLine != null && MReportLine.LINETYPE_BlankLine.equals(rLine.getLineType()))
-				blankRows.add(new Integer(row));
 
 			//	for all columns
 			for (int c = 0; c < format.getItemCount(); c++)
@@ -1841,7 +1837,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 			elements, pk, pkColumnName,
 			pageNoStart, firstPage, nextPages, repeatedColumns, additionalLines,
 			rowColFont, rowColColor, rowColBackground,
-			tf, pageBreak, colSuppressRepeats, rowColReportLine, finReportSumRows, blankRows);
+			tf, pageBreak, colSuppressRepeats, rowColReportLine, finReportSumRows);
 		table.layout(0,0,false, MPrintFormatItem.FIELDALIGNMENTTYPE_LeadingLeft);
 		if (m_tableElement == null)
 			m_tableElement = table;
