@@ -323,6 +323,83 @@ Copyright (C) 2007 Ashley G Ramdass.
 				}
 			};
 		}); //zk.afterLoad
+
+		// Only support for 5.1 version after 7.1 its already fixed from ZK side
+		// override zul.tab function to fix tab navigation/scrolling issue in chrome, edge, opera
+
+		zk.afterLoad('zul.tab', function () {
+
+			zk.override(zul.tab.Tabbox.prototype, "_doClick", function (evt, direction) {
+
+				if (!this.tabs || !this.tabs.nChildren) return; 
+
+				var cave = this.tabs.$n('cave'),
+					allTab = jq(cave).children(),
+					move = 0,
+					tabbox = this,
+					head = this.tabs.$n(),
+					isVert = tabbox.isVertical(),
+					scrollLength = isVert ? head.scrollTop : Math.ceil(head.scrollLeft),
+					offsetLength = isVert ? head.offsetHeight : head.offsetWidth,
+					plus = scrollLength + offsetLength;
+
+				switch (direction) {
+				case 'right':
+					for (var i = 0, count = allTab.length; i < count; i++) {
+						if (allTab[i].offsetLeft + allTab[i].offsetWidth > plus) {
+							move = allTab[i].offsetLeft + allTab[i].offsetWidth - scrollLength - offsetLength;
+							if (!move || isNaN(move))
+								return;
+							this.tabs._doScroll('right', move);
+							return;
+						}
+					}
+					break;
+				case 'left':
+					for (var i = 0, count = allTab.length; i < count; i++) {
+						if (allTab[i].offsetLeft >= scrollLength) {
+							
+							var tabli = jq(allTab[i]).prev('li')[0];
+							if (!tabli) return;
+							move = scrollLength - tabli.offsetLeft;
+							if (isNaN(move)) return;
+							this.tabs._doScroll('left', move);
+							return;
+						};
+					};
+					move = scrollLength - allTab[allTab.length - 1].offsetLeft;
+					if (isNaN(move)) return;
+					this.tabs._doScroll('left', move);
+					break;
+				case 'up':
+					for (var i = 0, count = allTab.length; i < count; i++) {
+						if (allTab[i].offsetTop >= scrollLength) {
+							var preli = jq(allTab[i]).prev('li')[0];
+							if (!preli) return;
+							move = scrollLength - preli.offsetTop;
+							this.tabs._doScroll('up', move);
+							return;
+						};
+					};
+					var preli = allTab[allTab.length - 1];
+					if (!preli) return;
+					move = scrollLength - preli.offsetTop;
+					this.tabs._doScroll('up', move);
+					break;
+				case 'down':
+					for (var i = 0, count = allTab.length; i < count; i++) {
+						if (allTab[i].offsetTop + allTab[i].offsetHeight > plus) {
+							move = allTab[i].offsetTop + allTab[i].offsetHeight - scrollLength - offsetLength;
+							if (!move || isNaN(move)) return;
+							this.tabs._doScroll('down', move);
+							return;
+						};
+					}
+					break;
+				}
+			});
+		}); // zk.afterLoad('zul.tab')
+
 	]]>
 	</script>
     <include src="${themePreference}"/>
