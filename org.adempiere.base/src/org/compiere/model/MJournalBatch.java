@@ -65,7 +65,7 @@ public class MJournalBatch extends X_GL_JournalBatch implements DocAction
 	public static MJournalBatch copyFrom (Properties ctx, int GL_JournalBatch_ID, 
 		Timestamp dateDoc, String trxName)
 	{
-		MJournalBatch from = new MJournalBatch (ctx, GL_JournalBatch_ID, trxName);
+		MJournalBatch from = (MJournalBatch) MTable.get(ctx, MJournalBatch.Table_ID).getPO(GL_JournalBatch_ID, trxName);
 		if (from.getGL_JournalBatch_ID() == 0)
 			throw new IllegalArgumentException ("From Journal Batch not found GL_JournalBatch_ID=" + GL_JournalBatch_ID);
 		//

@@ -149,7 +149,7 @@ public class CalloutRMA extends CalloutEngine {
 		if (AD_Org_ID == null || AD_Org_ID.intValue() == 0)
 			return "";
 
-		MRMA rma = new MRMA(ctx, M_RMA_ID, null);
+		MRMA rma = (MRMA) MTable.get(ctx, MRMA.Table_ID).getPO(M_RMA_ID, null); 
 		IProductPricing pp = Core.getProductPricing();
 		pp.setInitialValues(M_Product_ID, rma.getC_BPartner_ID(), Env.ONE, rma.isSOTrx(), null);
 		int taxId = 0;

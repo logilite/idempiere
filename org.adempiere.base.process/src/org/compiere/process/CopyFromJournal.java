@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.logging.Level;
 
 import org.compiere.model.MJournalBatch;
+import org.compiere.model.MTable;
 
 /**
  *  Copy GL Batch Journal/Lines
@@ -63,8 +64,10 @@ public class CopyFromJournal extends SvrProcess
 			throw new IllegalArgumentException("Target GL_JournalBatch_ID == 0");
 		if (m_GL_JournalBatch_ID == 0)
 			throw new IllegalArgumentException("Source GL_JournalBatch_ID == 0");
-		MJournalBatch from = new MJournalBatch (getCtx(), m_GL_JournalBatch_ID, get_TrxName());
-		MJournalBatch to = new MJournalBatch (getCtx(), To_GL_JournalBatch_ID, get_TrxName());
+		MJournalBatch from = (MJournalBatch) MTable.get(getCtx(), MJournalBatch.Table_ID).getPO(m_GL_JournalBatch_ID,
+				get_TrxName());
+		MJournalBatch to = (MJournalBatch) MTable.get(getCtx(), MJournalBatch.Table_ID).getPO(To_GL_JournalBatch_ID,
+				get_TrxName());
 		//
 		int no = to.copyDetailsFrom (from);
 		//

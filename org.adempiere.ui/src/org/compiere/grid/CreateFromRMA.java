@@ -153,7 +153,7 @@ public abstract class CreateFromRMA extends CreateFrom {
 		int M_RMA_ID = Env.getContextAsInt(Env.getCtx(), getGridTab().getWindowNo(), "M_RMA_ID");
         
 //        Integer bpId = (Integer)bPartnerField.getValue();
-        MRMA rma = new MRMA(Env.getCtx(), M_RMA_ID, trxName);
+		MRMA rma = (MRMA) MTable.get(Env.getCtx(), MRMA.Table_ID).getPO(M_RMA_ID, trxName); 
         //update BP
 //        rma.setC_BPartner_ID(bpId);
         

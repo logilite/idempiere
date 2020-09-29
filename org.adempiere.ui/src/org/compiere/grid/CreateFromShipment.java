@@ -274,7 +274,7 @@ public abstract class CreateFromShipment extends CreateFrom
 	{
 		m_invoice = null;
 		p_order = null;
-		m_rma = new MRMA(Env.getCtx(), M_RMA_ID, null);
+		m_rma = (MRMA) MTable.get(Env.getCtx(), MRMA.Table_ID).getPO(M_RMA_ID, null);
 			
 	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 	    StringBuilder sqlStmt = new StringBuilder();

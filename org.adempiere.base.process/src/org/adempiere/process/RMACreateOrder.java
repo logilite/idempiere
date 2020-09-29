@@ -46,7 +46,7 @@ public class RMACreateOrder extends SvrProcess
     protected String doIt() throws Exception
     {
         // Load RMA
-        MRMA rma = new MRMA(getCtx(), rmaId, get_TrxName());
+        MRMA rma =  (MRMA) MTable.get(getCtx(), MRMA.Table_ID).getPO(rmaId, get_TrxName()); 
         
         // Load Original Order
         MOrder originalOrder = rma.getOriginalOrder();

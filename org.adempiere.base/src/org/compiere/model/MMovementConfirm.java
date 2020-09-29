@@ -380,7 +380,7 @@ public class MMovementConfirm extends X_M_MovementConfirm implements DocAction
 		if (log.isLoggable(Level.INFO)) log.info("completeIt - " + toString());
 		//
 		m_inventoryDoc = new ArrayList<MInventory>();
-		MMovement move = new MMovement (getCtx(), getM_Movement_ID(), get_TrxName());
+		MMovement move = (MMovement) MTable.get(getCtx(), MMovement.Table_ID).getPO(getM_Movement_ID(), get_TrxName()); 
 		MMovementLineConfirm[] lines = getLines(false);
 		for (int i = 0; i < lines.length; i++)
 		{

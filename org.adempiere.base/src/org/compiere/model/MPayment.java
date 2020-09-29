@@ -281,7 +281,8 @@ public class MPayment extends X_C_Payment
 		setC_BankAccount_ID(preparedPayment.getParent().getC_BankAccount_ID());
 		//	Target Bank
 		int C_BP_BankAccount_ID = preparedPayment.getC_BP_BankAccount_ID();
-		MBPBankAccount ba = new MBPBankAccount (preparedPayment.getCtx(), C_BP_BankAccount_ID, null);
+		MBPBankAccount ba = (MBPBankAccount) MTable.get(preparedPayment.getCtx(), MBPBankAccount.Table_ID)
+				.getPO(C_BP_BankAccount_ID, null);
 		setRoutingNo(ba.getRoutingNo());
 		setAccountNo(ba.getAccountNo());
 		setIBAN(ba.getIBAN());

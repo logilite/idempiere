@@ -229,7 +229,7 @@ public class MInventoryLine extends X_M_InventoryLine
 	public MInventory getParent()
 	{
 		if (m_parent == null)
-			m_parent = new MInventory (getCtx(), getM_Inventory_ID(), get_TrxName());
+			m_parent = (MInventory) MTable.get(getCtx(), MInventory.Table_ID).getPO(getM_Inventory_ID(), get_TrxName()); 
 		return m_parent;
 	}	//	getParent
 	

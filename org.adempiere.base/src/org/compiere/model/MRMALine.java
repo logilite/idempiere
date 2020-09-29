@@ -196,7 +196,7 @@ public class MRMALine extends X_M_RMALine
     public MRMA getParent()
     {
         if (m_parent == null)
-            m_parent = new MRMA(getCtx(), getM_RMA_ID(), get_TrxName());
+			m_parent = (MRMA) MTable.get(getCtx(), MRMA.Table_ID).getPO(getM_RMA_ID(), get_TrxName()); 
         return m_parent;
     }   //  getParent
 	

@@ -122,7 +122,7 @@ public class CalloutInOut extends CalloutEngine
 			return "";
 
 		//	Get Details
-		MRMA rma = new MRMA (ctx, M_RMA_ID.intValue(), null);
+		MRMA rma = (MRMA) MTable.get(ctx, MRMA.Table_ID).getPO(M_RMA_ID.intValue(), null);
         MInOut originalReceipt = rma.getShipment();
 		if (rma.get_ID() != 0)
 		{
