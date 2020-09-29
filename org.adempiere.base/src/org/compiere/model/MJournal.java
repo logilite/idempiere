@@ -860,7 +860,10 @@ public class MJournal extends X_GL_Journal implements DocAction
 		if (MDocType.get(getCtx(), getC_DocType_ID()).isRADateSelectable())
 		{
 			// User selectable accounting date based on DocType get from context
-			reversalDate = Env.getContextAsDate(getCtx(), "#RA_DateAcct_" + Table_ID + "_" + get_ID());
+			if (GL_JournalBatch_ID > 0)
+				reversalDate = reverse.getGL_JournalBatch().getDateAcct();
+			else
+				reversalDate = Env.getContextAsDate(getCtx(), "#RA_DateAcct_" + Table_ID + "_" + get_ID());
 		}
 		
 		if (reversalDate == null) 

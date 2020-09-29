@@ -187,7 +187,7 @@ public class InvoiceGenerateRMA extends SvrProcess
     
     private void generateInvoice(int M_RMA_ID)
     {
-        MRMA rma = new MRMA(getCtx(), M_RMA_ID, get_TrxName());
+        MRMA rma = (MRMA) MTable.get(getCtx(), MRMA.Table_ID).getPO(M_RMA_ID, get_TrxName());
         statusUpdate(Msg.getMsg(getCtx(), "Processing") + " " + rma.getDocumentInfo());
         
         MInvoice invoice = createInvoice(rma);

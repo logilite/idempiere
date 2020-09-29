@@ -154,7 +154,7 @@ public class MMovementLine extends X_M_MovementLine
 	public MMovement getParent() 
 	{
 		if (m_parent == null)
-			m_parent = new MMovement (getCtx(), getM_Movement_ID(), get_TrxName());
+			m_parent = (MMovement) MTable.get(getCtx(), MMovement.Table_ID).getPO(getM_Movement_ID(), get_TrxName()); 
 		return m_parent;
 	}	//	getParent
 

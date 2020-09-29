@@ -190,7 +190,7 @@ public abstract class CreateFromInvoice extends CreateFrom
 
 		m_rma = null;
 		if (inout.getM_RMA_ID() != 0)
-			m_rma = new MRMA (Env.getCtx(), inout.getM_RMA_ID(), null);
+			m_rma = (MRMA) MTable.get(Env.getCtx(), MRMA.Table_ID).getPO(inout.getM_RMA_ID(), null);
 
 		//
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();

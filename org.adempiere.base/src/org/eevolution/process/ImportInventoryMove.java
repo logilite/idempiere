@@ -188,7 +188,7 @@ public class ImportInventoryMove extends SvrProcess
 		for(String idx : idsPr)
 		{
 			int id = Integer.parseInt(idx);
-			MMovement move = new MMovement(Env.getCtx(), id, get_TrxName());
+			MMovement move = (MMovement) MTable.get(Env.getCtx(), MMovement.Table_ID).getPO(id, get_TrxName()); 
 			move.processIt(m_docAction);
 			move.saveEx();
 		}
@@ -306,7 +306,7 @@ public class ImportInventoryMove extends SvrProcess
 			oldID = 0;
 		}
 		
-		move = new MMovement(Env.getCtx(), oldID, get_TrxName());
+		move = (MMovement) MTable.get(Env.getCtx(), MMovement.Table_ID).getPO(oldID, get_TrxName());
 		
 		try{
 			move.setDocumentNo(imove.getDocumentNo());
