@@ -237,7 +237,7 @@ public class InOutGenerateRMA extends SvrProcess
     
     private void generateShipment(int M_RMA_ID)
     {
-        MRMA rma = new MRMA(getCtx(), M_RMA_ID, get_TrxName());
+        MRMA rma = (MRMA) MTable.get(getCtx(), MRMA.Table_ID).getPO(M_RMA_ID, get_TrxName());
         statusUpdate(Msg.getMsg(getCtx(), "Processing") + " " + rma.getDocumentInfo());
         
         MInOut shipment = createShipment(rma);

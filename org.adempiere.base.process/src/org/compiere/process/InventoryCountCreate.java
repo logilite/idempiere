@@ -27,6 +27,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.MInventory;
 import org.compiere.model.MInventoryLine;
+import org.compiere.model.MTable;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -107,7 +108,7 @@ public class InventoryCountCreate extends SvrProcess
 			+ ", ProductValue=" + p_ProductValue 
 			+ ", M_Product_Category_ID=" + p_M_Product_Category_ID
 			+ ", QtyRange=" + p_QtyRange + ", DeleteOld=" + p_DeleteOld);
-		m_inventory = new MInventory (getCtx(), p_M_Inventory_ID, get_TrxName());
+		m_inventory = (MInventory) MTable.get(getCtx(), MInventory.Table_ID).getPO(p_M_Inventory_ID, get_TrxName());
 		if (m_inventory.get_ID() == 0)
 			throw new AdempiereSystemError ("Not found: M_Inventory_ID=" + p_M_Inventory_ID);
 		if (m_inventory.isProcessed())

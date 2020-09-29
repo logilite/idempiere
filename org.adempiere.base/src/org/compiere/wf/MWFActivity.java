@@ -1046,6 +1046,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			if (m_po instanceof DocAction)
 			{
 				doc = (DocAction)m_po;
+				String docAction = m_po.get_ValueAsString("DocAction");
 				//
 				try {
 					success = doc.processIt (m_node.getDocAction());	//	** Do the work
@@ -1066,7 +1067,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				}
 				finally
 				{
-					if (DocAction.ACTION_Reverse_Accrual.equals(m_po.get_ValueAsString("DocAction")))
+					if (DocAction.ACTION_Reverse_Accrual.equals(docAction))
 					{
 						int C_DocType_ID = m_po.get_ValueAsInt("C_DocType_ID");
 						if (C_DocType_ID > 0 && MDocType.get(m_po.getCtx(), C_DocType_ID).isRADateSelectable())

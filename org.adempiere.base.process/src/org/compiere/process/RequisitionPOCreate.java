@@ -161,7 +161,8 @@ public class RequisitionPOCreate extends SvrProcess
 		if (p_M_Requisition_ID != 0)
 		{
 			if (log.isLoggable(Level.INFO)) log.info("M_Requisition_ID=" + p_M_Requisition_ID);
-			MRequisition req = new MRequisition(getCtx(), p_M_Requisition_ID, get_TrxName());
+			MRequisition req =  (MRequisition) MTable.get(getCtx(), MRequisition.Table_ID).getPO(p_M_Requisition_ID,
+					get_TrxName());
 			if (!MRequisition.DOCSTATUS_Completed.equals(req.getDocStatus()))
 			{
 				throw new AdempiereUserError("@DocStatus@ = " + req.getDocStatus());

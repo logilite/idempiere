@@ -20,6 +20,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.MInventory;
 import org.compiere.model.MInventoryLineMA;
+import org.compiere.model.MTable;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.DB;
 
@@ -64,7 +65,8 @@ public class InventoryCountUpdate extends SvrProcess
 	protected String doIt () throws Exception
 	{
 		if (log.isLoggable(Level.INFO)) log.info("M_Inventory_ID=" + p_M_Inventory_ID);
-		MInventory inventory = new MInventory (getCtx(), p_M_Inventory_ID, get_TrxName());
+		MInventory inventory = (MInventory) MTable.get(getCtx(), MInventory.Table_ID).getPO(p_M_Inventory_ID,
+				get_TrxName());
 		if (inventory.get_ID() == 0)
 			throw new AdempiereSystemError ("Not found: M_Inventory_ID=" + p_M_Inventory_ID);
 
