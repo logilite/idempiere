@@ -31,7 +31,7 @@ public class MAuthorizationToken extends X_AD_AuthorizationToken
 		if (MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false))
 			m_sql.append(" AD_User_ID IN (SELECT AD_User_ID FROM AD_User WHERE EMail ILIKE ? AND AD_User.AD_Client_ID=AD_AuthorizationToken.AD_Client_ID)");
 		else
-			m_sql.append(" AD_User_ID IN (SELECT AD_User_ID FROM AD_User WHERE Name LIKE ? AND AD_User.AD_Client_ID=AD_AuthorizationToken.AD_Client_ID)");
+			m_sql.append(" AD_User_ID IN (SELECT AD_User_ID FROM AD_User WHERE COALESCE(LDAPUser,Name) LIKE ? AND AD_User.AD_Client_ID=AD_AuthorizationToken.AD_Client_ID)");
 		
 		m_sql.append(" AND Token LIKE ? AND (ValidTo IS NULL OR ValidTo > now())");
 		m_sql.append(" AND IsActive = 'Y'");
