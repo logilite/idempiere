@@ -608,7 +608,8 @@ public class Doc_MatchInv extends Doc
 		setC_Currency_ID (as.getC_Currency_ID());
 		
 		MMatchInv refMatchInv = new MMatchInv(getCtx(), m_matchInv.getRef_MatchInv_ID(), getTrxName());
-		MInvoiceLine refInvLine = new MInvoiceLine(getCtx(), refMatchInv.getC_InvoiceLine_ID(), getTrxName());
+		MInvoiceLine refInvLine = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID)
+				.getPO(refMatchInv.getC_InvoiceLine_ID(), getTrxName());
 
 		boolean isInterOrg = false;		
 		MAcctSchemaElement elementorg = as.getAcctSchemaElement(MAcctSchemaElement.ELEMENTTYPE_Organization);

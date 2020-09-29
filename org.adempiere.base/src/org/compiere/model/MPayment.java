@@ -2398,7 +2398,7 @@ public class MPayment extends X_C_Payment
 				+ ": " + getDocumentNo() + " [1]");
 		alloc.setAD_Org_ID(getAD_Org_ID());
 		alloc.setDateAcct(getDateAcct()); // in case date acct is different from datetrx in payment
-		MInvoice invoice = new MInvoice(getCtx(), getC_Invoice_ID(), get_TrxName());
+		MInvoice invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(getC_Invoice_ID(), get_TrxName()); 
 		if (invoice.getDateAcct().after(alloc.getDateAcct())) {
 			alloc.setDateAcct(invoice.getDateAcct());
 		}

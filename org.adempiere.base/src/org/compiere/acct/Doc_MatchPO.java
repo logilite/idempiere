@@ -199,7 +199,7 @@ public class Doc_MatchPO extends Doc
 			if (STATUS_Deferred.equals(posted))
 			{
 				int M_InOut_ID = DB.getSQLValueEx(getTrxName(), "SELECT M_InOut_ID FROM M_InOutLine WHERE M_InOutLine_ID=?", m_M_InOutLine_ID);
-				MInOut inout = new MInOut(getCtx(), M_InOut_ID, getTrxName());
+				MInOut inout = (MInOut) MTable.get(getCtx(), MInOut.Table_ID).getPO(M_InOut_ID, getTrxName());
 				if (inout.getDateAcct().after(m_matchPO.getDateAcct()))
 				{
 					m_matchPO.setDateAcct(inout.getDateAcct());

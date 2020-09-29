@@ -202,7 +202,8 @@ public class MatchPOAutoMatch {
 								matchPO.setQty(matchPO.getQty().subtract(creditMemoQty));
 								matchPO.saveEx(trxName);
 
-								MInvoiceLine iLine = new MInvoiceLine(ctx, matchPO.getC_InvoiceLine_ID(), trxName);
+								MInvoiceLine iLine = (MInvoiceLine) MTable.get(ctx, MInvoiceLine.Table_ID)
+										.getPO(matchPO.getC_InvoiceLine_ID(), trxName);
 								MMatchPO po = new MMatchPO(iLine, iLine.getC_Invoice().getDateInvoiced(), creditMemoQty);
 								po.setC_OrderLine_ID(C_OrderLine_ID);
 								po.setRef_MatchPO_ID(matchPOCreditMemo.getM_MatchPO_ID());
@@ -260,7 +261,8 @@ public class MatchPOAutoMatch {
 								matchPOCreditMemo.setQty(matchPOCreditMemo.getQty().add(matchPO.getQty()));
 								matchPOCreditMemo.saveEx(trxName);
 
-								MInvoiceLine iLine = new MInvoiceLine(ctx, matchPOCreditMemo.getC_InvoiceLine_ID(), trxName);
+								MInvoiceLine iLine = (MInvoiceLine) MTable.get(ctx, MInvoiceLine.Table_ID)
+										.getPO(matchPOCreditMemo.getC_InvoiceLine_ID(), trxName);
 								MMatchPO po = new MMatchPO(iLine, iLine.getC_Invoice().getDateInvoiced(), matchPO.getQty().negate());
 								po.setC_OrderLine_ID(C_OrderLine_ID);
 								po.setRef_MatchPO_ID(matchPO.getM_MatchPO_ID());
@@ -309,7 +311,8 @@ public class MatchPOAutoMatch {
 							matchPO.setQty(matchPO.getQty().subtract(creditMemoQty));
 							matchPO.saveEx(trxName);
 
-							MInvoiceLine iLine = new MInvoiceLine(ctx, matchPO.getC_InvoiceLine_ID(), trxName);
+							MInvoiceLine iLine = (MInvoiceLine) MTable.get(ctx, MInvoiceLine.Table_ID)
+									.getPO(matchPO.getC_InvoiceLine_ID(), trxName);
 							MMatchPO po = new MMatchPO(iLine, iLine.getC_Invoice().getDateInvoiced(), creditMemoQty);
 							po.setC_OrderLine_ID(C_OrderLine_ID);
 							po.setRef_MatchPO_ID(matchPOCreditMemo.getM_MatchPO_ID());
@@ -367,7 +370,8 @@ public class MatchPOAutoMatch {
 							matchPOCreditMemo.setQty(matchPOCreditMemo.getQty().add(matchPO.getQty()));
 							matchPOCreditMemo.saveEx(trxName);
 
-							MInvoiceLine iLine = new MInvoiceLine(ctx, matchPOCreditMemo.getC_InvoiceLine_ID(), trxName);
+							MInvoiceLine iLine = (MInvoiceLine) MTable.get(ctx, MInvoiceLine.Table_ID)
+									.getPO(matchPOCreditMemo.getC_InvoiceLine_ID(), trxName);
 							MMatchPO po = new MMatchPO(iLine, iLine.getC_Invoice().getDateInvoiced(), matchPO.getQty().negate());
 							po.setC_OrderLine_ID(C_OrderLine_ID);
 							po.setRef_MatchPO_ID(matchPO.getM_MatchPO_ID());

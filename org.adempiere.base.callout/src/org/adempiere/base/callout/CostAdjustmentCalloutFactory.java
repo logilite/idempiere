@@ -29,6 +29,7 @@ import org.compiere.model.MCostElement;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInventory;
 import org.compiere.model.MProduct;
+import org.compiere.model.MTable;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -75,7 +76,8 @@ public class CostAdjustmentCalloutFactory implements IColumnCalloutFactory {
 					trxName = gt.get_TrxName();
 				}
 			}
-			MInventory inventory = new MInventory(ctx, (Integer) mTab.getValue("M_Inventory_ID"), trxName);
+			MInventory inventory = (MInventory) MTable.get(ctx, MInventory.Table_ID)
+					.getPO((Integer) mTab.getValue("M_Inventory_ID"), trxName);
 			if (MDocType.DOCSUBTYPEINV_CostAdjustment.equals(inventory.getC_DocType().getDocSubTypeInv())) {
 				String costingMethod = inventory.getCostingMethod();
 				if (value == null) {
@@ -138,7 +140,8 @@ public class CostAdjustmentCalloutFactory implements IColumnCalloutFactory {
 					trxName = gt.get_TrxName();
 				}
 			}
-			MInventory inventory = new MInventory(ctx, (Integer) mTab.getValue("M_Inventory_ID"), trxName);
+			MInventory inventory = (MInventory) MTable.get(ctx, MInventory.Table_ID)
+					.getPO((Integer) mTab.getValue("M_Inventory_ID"), trxName);
 			if (MDocType.DOCSUBTYPEINV_CostAdjustment.equals(inventory.getC_DocType().getDocSubTypeInv())) {
 				String costingMethod = inventory.getCostingMethod();
 				Object productValue = mTab.getValue(I_M_InventoryLine.COLUMNNAME_M_Product_ID);

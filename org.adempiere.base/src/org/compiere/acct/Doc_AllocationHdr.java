@@ -1093,7 +1093,8 @@ public class Doc_AllocationHdr extends Doc
 			DocLine_Allocation line = (DocLine_Allocation)p_lines[i];			
 			if (line.getC_Invoice_ID() != 0)
 			{
-				invoice = new MInvoice (getCtx(), line.getC_Invoice_ID(), getTrxName());
+				invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(line.getC_Invoice_ID(),
+						getTrxName());
 				if (!invList.contains(invoice))
 					invList.add(invoice);
 				htInvAllocLine.put(invoice.getC_Invoice_ID(), line.get_ID());
@@ -1441,7 +1442,8 @@ public class Doc_AllocationHdr extends Doc
 			DocLine_Allocation line = (DocLine_Allocation) p_lines[i];			
 			if (line.getC_Payment_ID() != 0)
 			{
-				payment = new MPayment (getCtx(), line.getC_Payment_ID(), getTrxName());
+				payment = (MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(line.getC_Payment_ID(),
+						getTrxName());
 				if (!payList.contains(payment))
 					payList.add(payment);
 				htPayAllocLine.put(payment.getC_Payment_ID(), line.get_ID());
