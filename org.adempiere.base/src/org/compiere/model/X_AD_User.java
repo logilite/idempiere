@@ -31,7 +31,7 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20200819L;
+	private static final long serialVersionUID = 20201007L;
 
     /** Standard Constructor */
     public X_AD_User (Properties ctx, int AD_User_ID, String trxName)
@@ -44,6 +44,8 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 // 0
 			setIsAddMailTextAutomatically (false);
 // N
+			setIsBillTo (false);
+			
 			setIsAllowAccessDefaultFavTree (false);
 // N
 			setIsExpired (false);
@@ -59,6 +61,8 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 			setIsNoPasswordReset (false);
 // 'N'
 			setIsSalesLead (false);
+// N
+			setIsShipTo (false);
 // N
 			setIsSupportUser (false);
 // N
@@ -663,6 +667,30 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 		return false;
 	}
 
+	/** Set Invoice Address.
+		@param IsBillTo 
+		Business Partner Invoice/Bill Address
+	  */
+	public void setIsBillTo (boolean IsBillTo)
+	{
+		set_Value (COLUMNNAME_IsBillTo, Boolean.valueOf(IsBillTo));
+	}
+
+	/** Get Invoice Address.
+		@return Business Partner Invoice/Bill Address
+	  */
+	public boolean isBillTo () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsBillTo);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Expired.
 		@param IsExpired Expired	  */
 	public void setIsExpired (boolean IsExpired)
@@ -834,6 +862,30 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 	public boolean isSalesLead () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsSalesLead);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Ship Address.
+		@param IsShipTo 
+		Business Partner Shipment Address
+	  */
+	public void setIsShipTo (boolean IsShipTo)
+	{
+		set_Value (COLUMNNAME_IsShipTo, Boolean.valueOf(IsShipTo));
+	}
+
+	/** Get Ship Address.
+		@return Business Partner Shipment Address
+	  */
+	public boolean isShipTo () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsShipTo);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 
