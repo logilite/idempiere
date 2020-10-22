@@ -105,7 +105,6 @@ public class WindowContainer extends AbstractUIPart implements EventListener<Eve
         	if (isMobile()) {
 	        	updateMobileTabState(tabbox.getSelectedTab());
 	        	updateTabListButton();
-	        	tabbox.getTabs().invalidate();
         	}
         });
         
@@ -503,8 +502,6 @@ public class WindowContainer extends AbstractUIPart implements EventListener<Eve
     	if (isMobile())
     		updateMobileTabState(tab);
     	tabbox.setSelectedTab(tab); 
-    	if (isMobile())
-    		tabbox.getTabs().invalidate();
     }
 
 	private void updateMobileTabState(org.zkoss.zul.Tab tab) {

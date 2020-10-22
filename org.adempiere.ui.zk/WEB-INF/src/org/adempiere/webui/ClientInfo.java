@@ -157,4 +157,11 @@ public class ClientInfo implements Serializable {
 		root.addEventListener(Events.ON_CLIENT_INFO, eventListener);
 		ctrl.addCallback(AFTER_PAGE_DETACHED, t -> root.removeEventListener(Events.ON_CLIENT_INFO, eventListener));
 	}
+	
+	/**
+	 * @return true if screen orientation is portrait, false otherwise
+	 */
+	public boolean isPortrait() {
+		return "portrait".equalsIgnoreCase(orientation);
+	}
 }

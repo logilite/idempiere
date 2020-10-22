@@ -45,6 +45,7 @@ public final class ConfirmPanel extends Div
 	 */
 	private static final long serialVersionUID = 3257542169107223645L;
 
+	private static final String SMALL_SCREEN_BUTTON_CLASS = "btn-small small-img-btn";
 	/** Action String OK.        */
     public static final String A_OK = "Ok";
     /** Action String Cancel.    */
@@ -74,11 +75,13 @@ public final class ConfirmPanel extends Div
     public static final String A_PATTRIBUTE = "PAttribute";
     /** Action String New.   */
     public static final String A_NEW = "New";
-
+    
     private boolean  m_withText = false;
 
     private Map<String, Button> buttonMap = new HashMap<String, Button>();
 	private boolean m_withImage = true;
+	
+	private boolean useSmallButtonClassForSmallScreen;
 
     /**
      * Creates a button of the specified id
@@ -281,6 +284,8 @@ public final class ConfirmPanel extends Div
     	if (!buttonMap.containsKey(button.getId()))
     		buttonMap.put(button.getId(), button);
         pnlBtnLeft.appendChild(button);
+        if (useSmallButtonClassForSmallScreen)
+        	LayoutUtils.addSclass(SMALL_SCREEN_BUTTON_CLASS, button);
     }
 
     /**
@@ -292,6 +297,8 @@ public final class ConfirmPanel extends Div
     	if (!buttonMap.containsKey(button.getId()))
     		buttonMap.put(button.getId(), button);
         pnlBtnRight.appendChild(button);
+        if (useSmallButtonClassForSmallScreen)
+        	LayoutUtils.addSclass(SMALL_SCREEN_BUTTON_CLASS, button);
     }
 
     /**
@@ -304,6 +311,8 @@ public final class ConfirmPanel extends Div
     	if (!buttonMap.containsKey(button.getId()))
     		buttonMap.put(button.getId(), button);
         pnlBtnCenter.appendChild(button);
+        if (useSmallButtonClassForSmallScreen)
+        	LayoutUtils.addSclass(SMALL_SCREEN_BUTTON_CLASS, button);
     }
 
     /**
@@ -540,5 +549,10 @@ public final class ConfirmPanel extends Div
 		for(Button btn : buttonMap.values()) {
 			LayoutUtils.removeSclass(cls, btn);
 		}
+	}
+	
+	public void useSmallButtonClassForSmallScreen() {
+		useSmallButtonClassForSmallScreen = true;
+		addButtonSclass(SMALL_SCREEN_BUTTON_CLASS);
 	}
 }   //  ConfirmPanel

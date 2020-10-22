@@ -1,5 +1,6 @@
 .z-toolbar.z-toolbar-tabs {
 	padding-top: 0px;
+	padding-bottom: 0px;
 }
 
 .toolbar {
@@ -44,7 +45,6 @@
 }
 
 .z-toolbarbutton [class^="z-icon-"] {
-	font-size: larger;
 	color: inherit;
 }
 .z-toolbarbutton.toolbarbutton-with-text [class^="z-icon-"] {

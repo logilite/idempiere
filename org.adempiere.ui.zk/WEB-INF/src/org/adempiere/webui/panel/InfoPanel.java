@@ -317,7 +317,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
         {
         	if (ClientInfo.maxWidth(ClientInfo.SMALL_WIDTH) || ClientInfo.maxHeight(ClientInfo.SMALL_HEIGHT))
         	{
-        		confirmPanel.addButtonSclass("btn-small small-img-btn");
+        		confirmPanel.useSmallButtonClassForSmallScreen();
         	}
         }
 

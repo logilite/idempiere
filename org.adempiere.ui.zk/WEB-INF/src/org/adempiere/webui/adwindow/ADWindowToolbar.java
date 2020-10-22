@@ -914,12 +914,13 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 				"		return;\n" + 
 				"	}\n" + 
 				"	for (; w; w = w.nextSibling) {\n" + 
-				"		total -= jq(w.$n()).outerWidth(true);\n" + 
+				"		var ow = jq(w.$n()).outerWidth(true);\n" +
+				"		if (typeof ow != 'undefined') {total -= ow;}\n" + 
 				"		if (total < 0 && w.className == 'zul.wgt.Toolbarbutton') {\n" + 
 				"			break;\n" + 
 				"		}\n" + 
 				"	}\n" + 
-				"	if (w) {\n" + 
+				"	if (w && total < 0) {\n" + 
 				"       var event = new zk.Event(wgt, 'onOverflowButton', w.uuid, {toServer: true}); \n" +
 				"       zAu.send(event); \n" +
 				"	}\n" + 
@@ -975,7 +976,7 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 		if (overflows.size() > 0) {
 			overflowButton = new A();
 			overflowButton.setIconSclass("z-icon-angle-double-down");
-			overflowButton.setStyle("position: absolute; right: 2px; bottom: 6px; font-size: 12px; font-weight: 500;");
+			overflowButton.setSclass("font-icon-toolbar-button toolbar-button mobile-overflow-link");
 			appendChild(overflowButton);
 			overflowPopup = new Popup();
 			overflowPopup.addEventListener(Events.ON_OPEN, (OpenEvent oe) -> {
