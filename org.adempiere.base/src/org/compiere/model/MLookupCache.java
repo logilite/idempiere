@@ -44,7 +44,7 @@ public class MLookupCache
 	 *
 	 *  @param info MLookupInfo
 	 */
-	protected static void loadStart (MLookupInfo info)
+	public static void loadStart (MLookupInfo info)
 	{
 	}   //  loadStart
 
@@ -54,7 +54,7 @@ public class MLookupCache
 	 *  @param info
 	 *  @param lookup
 	 */
-	protected static void loadEnd (MLookupInfo info, HashMap<Object,Object> lookup)
+	public static void loadEnd (MLookupInfo info, HashMap<Object,Object> lookup)
 	{
 		if (info.IsValidated && lookup.size() > 0)
 			s_loadedLookups.put(getKey(info), lookup);
@@ -90,7 +90,7 @@ public class MLookupCache
 	 * @param lookupTarget Target HashMap
 	 * @return true, if lookup found
 	 */
-	protected static boolean loadFromCache (MLookupInfo info, HashMap<Object,Object> lookupTarget)
+	public static boolean loadFromCache (MLookupInfo info, HashMap<Object,Object> lookupTarget)
 	{
 		String key = getKey(info);
 		HashMap<Object,Object> cache = (HashMap<Object,Object>)s_loadedLookups.get(key);
