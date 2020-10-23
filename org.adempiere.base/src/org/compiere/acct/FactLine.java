@@ -167,6 +167,11 @@ public final class FactLine extends X_Fact_Acct
 		setAccount_ID (m_acct.getAccount_ID());
 		setC_SubAcct_ID(m_acct.getC_SubAcct_ID());
 
+		if (getUser1_ID() == 0)
+			setUser1_ID(m_acct.getUser1_ID());
+		if (getUser2_ID() == 0)
+			setUser2_ID(m_acct.getUser2_ID());
+
 		//	User Defined References
 		MAcctSchemaElement ud1 = m_acctSchema.getAcctSchemaElement(
 				X_C_AcctSchema_Element.ELEMENTTYPE_UserColumn1);

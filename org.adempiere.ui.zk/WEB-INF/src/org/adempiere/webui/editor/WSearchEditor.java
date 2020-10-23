@@ -53,10 +53,12 @@ import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MLookupInfo;
 import org.compiere.model.MTable;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.X_AD_CtxHelp;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 import org.zkoss.zk.au.out.AuScript;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
@@ -796,6 +798,18 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 			((MLookup) lookup).getLookupInfo().ctx = ctx;
 		}
 		super.dynamicDisplay(ctx);
+	}
+	
+	@Override
+	public String getDisplayTextForGridView(Object value) {
+		String s = super.getDisplayTextForGridView(value);
+		if (ClientInfo.isMobile() && MSysConfig.getBooleanValue(MSysConfig.ZK_GRID_MOBILE_LINE_BREAK_AS_IDENTIFIER_SEPARATOR, true)) {
+			String separator = MSysConfig.getValue(MSysConfig.IDENTIFIER_SEPARATOR, null, Env.getAD_Client_ID(Env.getCtx()));
+			if (!Util.isEmpty(separator, true) && s.indexOf(separator) >= 0) {
+				s = s.replace(separator, "\n");
+			}
+		}
+		return s;
 	}
 
 

@@ -330,3 +330,7 @@
 .z-icon-ChangeTree:before {
 	content: "\f079";
 }
+
+.z-icon-Calendar:before {
+	content: "\f073";
+}

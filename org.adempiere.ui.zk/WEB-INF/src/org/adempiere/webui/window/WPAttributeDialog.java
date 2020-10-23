@@ -441,6 +441,11 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 			//	Popup 
 //			fieldLot.addMouseListener(new VPAttributeDialog_mouseAdapter(this));    //  popup
 			mZoom = new Menuitem(Msg.getMsg(Env.getCtx(), "Zoom"), ThemeManager.getThemeResource("images/Zoom16.png"));
+			if(ThemeManager.isUseFontIconForImage()) {
+				mZoom.setIconSclass("z-icon-Zoom");
+				mZoom.setImage("");
+			}
+
 			mZoom.addEventListener(Events.ON_CLICK, this);
 			popupMenu.appendChild(mZoom);
 			this.appendChild(popupMenu);
