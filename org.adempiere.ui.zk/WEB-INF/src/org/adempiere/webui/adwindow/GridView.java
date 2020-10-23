@@ -100,30 +100,30 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 
 	private static final String ATTR_ON_POST_SELECTED_ROW_CHANGED = "org.adempiere.webui.adwindow.GridView.onPostSelectedRowChanged";
 
-	private Grid listbox = null;
+	protected Grid listbox = null;
 
-	private int pageSize = DEFAULT_PAGE_SIZE;
+	protected int pageSize = DEFAULT_PAGE_SIZE;
 
 	/**
 	 * list field display in grid mode, in case user customize grid
 	 * this list container only customize list.
 	 */
 	private GridField[] gridField;
-	private AbstractTableModel tableModel;
+	protected AbstractTableModel tableModel;
 
 	private int numColumns = 5;
 
-	private int windowNo;
+	protected int windowNo;
 
-	private GridTab gridTab;
+	protected GridTab gridTab;
 
 	private boolean init;
 
-	private GridTableListModel listModel;
+	protected GridTableListModel listModel;
 
-	private Paging paging;
+	protected Paging paging;
 
-	private GridTabRowRenderer renderer;
+	protected GridTabRowRenderer renderer;
 
 	private Div gridFooter;
 
@@ -131,7 +131,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 
 	private String columnOnClick;
 
-	private AbstractADWindowContent windowPanel;
+	protected AbstractADWindowContent windowPanel;
 
 	private boolean refreshing;
 
@@ -690,7 +690,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 		}
 	}
 
-	private void updateModel() {
+	protected void updateModel() {
 		if (listModel != null)
 			((GridTable)tableModel).removeTableModelListener(listModel);
 		listModel = new GridTableListModel((GridTable)tableModel, windowNo);
@@ -1279,5 +1279,9 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 	
 	public boolean isShowCurrentRowIndicatorColumn() {
 		return showCurrentRowIndicatorColumn;
+	}
+
+	public GridTabRowRenderer getGridTabRowRenderer() {
+		return renderer;
 	}
 }

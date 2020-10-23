@@ -187,7 +187,7 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
 
     private boolean			  uiCreated = false;
 
-    private GridView		  listPanel;
+    protected GridView		  listPanel;
 
     private Map<String, List<Row>> fieldGroupContents;
 
@@ -237,7 +237,7 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
         init();
     }
 
-    private void init()
+	protected void init()
     {
         initComponents();
         addEventListener(ON_DEFER_SET_SELECTED_NODE, this);
@@ -255,7 +255,7 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
         	ClientInfo.onClientInfo(this, this::onClientInfo);
     }
 
-    private void initComponents()
+	protected void initComponents()
     {
     	LayoutUtils.addSclass("adtab-content", this);
 

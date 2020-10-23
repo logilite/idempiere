@@ -84,10 +84,10 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 	private static final String CELL_DIV_STYLE_ALIGN_RIGHT = CELL_DIV_STYLE + "text-align:right; ";
 	
 	private static final int MAX_TEXT_LENGTH_DEFAULT = 60;
-	private GridTab gridTab;
+	protected GridTab gridTab;
 	private int windowNo;
 	private GridTabDataBinder dataBinder;
-	private Map<GridField, WEditor> editors = new LinkedHashMap<GridField, WEditor>();
+	protected Map<GridField, WEditor> editors = new LinkedHashMap<GridField, WEditor>();
 	private Map<GridField, WEditor> readOnlyEditors = new LinkedHashMap<GridField, WEditor>();
 	private Paging paging;
 
@@ -236,7 +236,7 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 	 * @param isForceGetValue
 	 * @return
 	 */
-	private Component getDisplayComponent(int rowIndex, Object value, GridField gridField, boolean isForceGetValue) {
+	protected Component getDisplayComponent(int rowIndex, Object value, GridField gridField, boolean isForceGetValue) {
 		Component component;
 		if (gridField.getDisplayType() == DisplayType.YesNo) {
 			component = createReadonlyCheckbox(value);
