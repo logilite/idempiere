@@ -113,3 +113,9 @@ div.z-listbox-body .z-listcell {
 	height: 20px;
 }
 
+@media only screen and (max-device-width: 700px) {
+	.z-listcell > div.z-listcell-content {
+		white-space: pre-line;
+	}	
+}
+

@@ -26,7 +26,7 @@ import javax.swing.table.AbstractTableModel;
 import org.adempiere.base.Core;
 import org.adempiere.model.MTabCustomization;
 import org.adempiere.util.Callback;
-import org.adempiere.webui.apps.AEnv;
+import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.apps.form.WQuickForm;
 import org.adempiere.webui.component.Checkbox;
 import org.adempiere.webui.component.Columns;
@@ -199,7 +199,7 @@ public class QuickGridView extends Vbox
 		ZKUpdateUtil.setVflex(gridFooter, "0");
 		
 		//default paging size
-		if (AEnv.isTablet())
+		if ( ClientInfo.isMobile())
 		{
 			//anything more than 20 is very slow on a tablet
 			pageSize = 10;
@@ -213,8 +213,10 @@ public class QuickGridView extends Vbox
 			}
 		}
 		//default true for better UI experience
-		modeless = MSysConfig.getBooleanValue(MSysConfig.ZK_GRID_EDIT_MODELESS, true);
-		
+		if (ClientInfo.isMobile())
+			modeless = MSysConfig.getBooleanValue(MSysConfig.ZK_GRID_MOBILE_EDIT_MODELESS, false) && MSysConfig.getBooleanValue(MSysConfig.ZK_GRID_MOBILE_EDITABLE, false);
+		else
+			modeless = MSysConfig.getBooleanValue(MSysConfig.ZK_GRID_EDIT_MODELESS, true);		
 		appendChild(listbox);
 		appendChild(gridFooter);								
 		ZKUpdateUtil.setVflex(this, "true");
@@ -484,7 +486,7 @@ public class QuickGridView extends Vbox
 		Columns columns = new Columns();
 		
 		//frozen not working well on tablet devices yet
-		if (!AEnv.isTablet())
+		if (! ClientInfo.isMobile())
 		{
 			Frozen frozen = new Frozen();
 			//freeze selection and indicator column

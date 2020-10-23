@@ -98,7 +98,6 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.SelectEvent;
-import org.zkoss.zk.ui.event.SwipeEvent;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Center;
 import org.zkoss.zul.Checkbox;
@@ -1348,15 +1347,6 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			south.setTitle(Msg.translate(Env.getCtx(), "Related Information"));
 			south.setTooltiptext(Msg.translate(Env.getCtx(), "Related Information"));
 
-			south.addEventListener(Events.ON_SWIPE, new EventListener<SwipeEvent>() {
-				@Override
-				public void onEvent(SwipeEvent event) throws Exception {
-					South south = (South) event.getTarget();
-					if ("down".equals(event.getSwipeDirection())) {
-						south.setOpen(false);
-					}
-				}
-			});
 			south.setSclass("south-collapsible-with-title");
 			south.setAutoscroll(true);
 			//south.sets
