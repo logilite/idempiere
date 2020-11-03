@@ -19,7 +19,7 @@ function DropToAttachFiles() {
     this.init = init;
     this.findAndReplace = findAndReplace;
 
-    function init(formID, dropBtnID, desktopID, progBarID, progLabelID, maxUploadSize) {
+    function init(formID, dropBtnID, desktopID, progBarID, progLabelID, maxUploadSize, sessionid) {
 
         var seqID = 0;
         var highlightdragging;
@@ -88,7 +88,7 @@ function DropToAttachFiles() {
 
             var xhr = new XMLHttpRequest();
             var url =
-                "/webui/zkau/upload?uuid=" + formID + "&dtid=" + desktopID + "&sid= " + sid + "&native=true";
+                "/webui/zkau/upload;jsessionid=" + sessionid + "?uuid=" + formID + "&dtid=" + desktopID + "&sid=" + sid + "&native=true";
             if (maxUploadSize)
                 url = url + "&maxsize=" + maxUploadSize;
 

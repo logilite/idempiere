@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import javax.servlet.http.HttpSession;
+
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.Callback;
 import org.adempiere.webui.AdempiereWebUI;
@@ -57,6 +59,7 @@ import org.compiere.util.Util;
 import org.zkoss.util.media.AMedia;
 import org.zkoss.util.media.Media;
 import org.zkoss.zk.au.out.AuEcho;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -224,9 +227,11 @@ public class WAttachment extends Window implements EventListener<Event>
 		if (size > 0)
 			maxUploadSize = "" + size;
 
+		String sessionID = ((HttpSession) Executions.getCurrent().getSession().getNativeSession()).getId();
+
 		Clients.evalJavaScript("dropToAttachFiles.init('" + this.getUuid() + "','" + mainPanel.getUuid() + "','"
 				+ this.getDesktop().getId() + "','" + progress.getUuid() + "','" + sizeLabel.getUuid() + "','"
-				+ maxUploadSize + "');");
+				+ maxUploadSize + "','" + sessionID + "');");
 
 	} // WAttachment
 
