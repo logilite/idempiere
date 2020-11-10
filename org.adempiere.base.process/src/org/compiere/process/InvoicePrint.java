@@ -289,6 +289,7 @@ public class InvoicePrint extends SvrProcess
 				boolean printed = false;
 				if (p_EMailPDF)
 				{
+					mText.setBPartner(C_BPartner_ID);	//	Context - Translation
 					StringBuilder subject =new StringBuilder(mText.getMailHeader()).append(" - ").append(DocumentNo);
 					EMail email = client.createEMail(to.getEMail(), subject.toString(), null);
 					if (!email.isValid())
@@ -299,7 +300,6 @@ public class InvoicePrint extends SvrProcess
 						continue;
 					}
 					mText.setUser(to);					//	Context
-					mText.setBPartner(C_BPartner_ID);	//	Context
 					mText.setPO((MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, get_TrxName()));
 					String message = mText.getMailText(true);
 					if (mText.isHtml())
