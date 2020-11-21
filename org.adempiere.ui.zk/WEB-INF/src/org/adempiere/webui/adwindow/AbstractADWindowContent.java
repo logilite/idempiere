@@ -3283,6 +3283,11 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		} else {
 			script.append("w.busy=true;");
 		}
+		/**
+		 * Issue in 7.1 for focus not set as current pop-up window opened
+		 * Note: Remove below one line when moving to 8.1 version
+		 */
+		script.append("w.focus();");
 		Clients.response(new AuScript(script.toString()));
 	}
 
