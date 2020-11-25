@@ -335,3 +335,6 @@
 .z-icon-Calendar:before {
 	content: "\f073";
 }
+.z-icon-SelectAll:before {
+	content: "\f008";
+}
