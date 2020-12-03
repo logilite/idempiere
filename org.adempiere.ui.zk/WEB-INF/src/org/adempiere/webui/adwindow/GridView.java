@@ -57,6 +57,7 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Cell;
+import org.zkoss.zul.Center;
 import org.zkoss.zul.Column;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Frozen;
@@ -780,7 +781,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 				onSelectedRowChange(0);
 				if (!MSysConfig.getBooleanValue(MSysConfig.ZK_ALLOW_ROW_SELECTION_IN_MULTIPLE_GRID_PAGES, false, Env.getAD_Client_ID(Env.getCtx())))
 					gridTab.clearSelection();
-				listbox.invalidate();
+				invalidateGridView();
 			}
 		}
 		else if (event.getTarget() == selectAll)
@@ -810,6 +811,18 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 		{
 			reInit();
 		}
+	}
+	
+	private Center findCenter(GridView gridView) {
+		if (gridView == null)
+			return null;
+		Component p = gridView.getParent();
+		while (p != null) {
+			if (p instanceof Center)
+				return (Center) p;
+			p = p.getParent();
+		}
+		return null;
 	}
 
 	private boolean isAllSelected() {
@@ -1172,7 +1185,18 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 		
 		refresh(gridTab);
 		scrollToCurrentRow();
-		listbox.invalidate();
+		invalidateGridView();
+	}
+	
+	/**
+	 * redraw grid view
+	 */
+	public void invalidateGridView() {
+		Center center = findCenter(this);
+		if (center != null)
+			center.invalidate();
+		else
+			this.invalidate();
 	}
 
 	/**

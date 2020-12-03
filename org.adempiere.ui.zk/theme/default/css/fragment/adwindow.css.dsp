@@ -139,6 +139,8 @@
 
 .adwindow-detailpane-toolbar {
 	border: none;
+	height: 2em;
+	background: none;
 }
 
 .adwindow-detailpane-toolbar .z-toolbar-body {
@@ -189,6 +191,8 @@
 
 .adwindow-detailpane-adtab-grid-south .z-paging {
 	padding: 0px !important;
+	height: 2em;
+	border: none;
 }
 
 .adwindow-detailpane-adtab-grid-south .z-paging .z-paging-inp {
@@ -282,8 +286,13 @@
 }
 
 .adtab-grid > .z-grid-header > table > tbody > tr.z-columns > th.z-column > .z-column-content {
-	white-space: pre-wrap;
 	text-overflow: ellipsis;
+}
+
+@media only screen and (max-device-width: 700px) {
+	.mobile .adtab-grid > .z-grid-header > table > tbody > tr.z-columns > th.z-column > .z-column-content {
+		white-space: pre-line;
+	}
 }
 
 .mobile-overflow-link {
