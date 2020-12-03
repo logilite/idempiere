@@ -24,6 +24,7 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -36,7 +37,7 @@ import org.compiere.util.Env;
 import static org.compiere.model.SystemIDs.*;
 
 /**
- *	Localtion Region Model (Value Object)
+ *	Location Region Model (Value Object)
  *
  *  @author 	Jorg Janke
  *  @version 	$Id: MRegion.java,v 1.3 2006/07/30 00:58:36 jjanke Exp $
@@ -47,7 +48,7 @@ public class MRegion extends X_C_Region
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1124865777747582617L;
+	private static final long serialVersionUID = -752467671346696325L;
 
 
 	/**
@@ -56,31 +57,28 @@ public class MRegion extends X_C_Region
 	 */
 	private static void loadAllRegions (Properties ctx)
 	{
-		s_regions = new CCache<String,MRegion>(Table_Name, 100);
-		String sql = "SELECT * FROM C_Region WHERE IsActive='Y'";
-		Statement stmt = null;
-		ResultSet rs = null;
-		try
-		{
-			stmt = DB.createStatement();
-			rs = stmt.executeQuery(sql);
-			while(rs.next())
-			{
-				MRegion r = new MRegion (ctx, rs, null);
-				s_regions.put(String.valueOf(r.getC_Region_ID()), r);
-				if (r.isDefault())
-					s_default = r;
+		s_regions = new CCache<Integer,MRegion>(Table_Name, 100);
+		List<MRegion> regions;
+		int cid = Env.getAD_Client_ID(Env.getCtx());
+		try {
+			if (cid > 0) {
+				// forced potential cross tenant read - requires System client in context
+				Env.setContext(Env.getCtx(), Env.AD_CLIENT_ID, 0);
+			}
+			regions = new Query(Env.getCtx(), Table_Name, "", null)
+					.setOnlyActiveRecords(true)
+					.list();
+		} finally {
+			if (cid > 0) {
+				Env.setContext(Env.getCtx(), Env.AD_CLIENT_ID, cid);
 			}
 		}
-		catch (SQLException e)
-		{
-			s_log.log(Level.SEVERE, sql, e);
-		}
-		finally
-		{
-			DB.close(rs, stmt);
-			rs = null;
-			stmt = null;
+		for (MRegion r : regions) {
+			//TODO uncomments once Mutable implemented
+			//r.markImmutable();
+			s_regions.put(r.getC_Region_ID(), r);
+			if (r.isDefault())
+				s_default = r;
 		}
 		if (s_log.isLoggable(Level.FINE)) s_log.fine(s_regions.size() + " - default=" + s_default);
 	}	//	loadAllRegions
@@ -95,14 +93,14 @@ public class MRegion extends X_C_Region
 	{
 		if (s_regions == null || s_regions.size() == 0)
 			loadAllRegions(ctx);
-		String key = String.valueOf(C_Region_ID);
-		MRegion r = (MRegion)s_regions.get(key);
+		
+		MRegion r = (MRegion)s_regions.get(C_Region_ID);
 		if (r != null)
 			return r;
 		r = new MRegion (ctx, C_Region_ID, null);
 		if (r.getC_Region_ID() == C_Region_ID)
 		{
-			s_regions.put(key, r);
+			s_regions.put(C_Region_ID, r);
 			return r;
 		}
 		return null;
@@ -161,7 +159,7 @@ public class MRegion extends X_C_Region
 	}	//	getRegions
 
 	/**	Region Cache				*/
-	private static CCache<String,MRegion> s_regions = null;
+	private static CCache<Integer,MRegion> s_regions = null;
 	/** Default Region				*/
 	private static MRegion		s_default = null;
 	/**	Static Logger				*/

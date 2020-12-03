@@ -85,7 +85,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 4068073033610726196L;
+	private static final long serialVersionUID = -4763398859555693370L;
 
 	private static final String ALOGIN_SHOWDATE = "ALogin_ShowDate";
 	protected LoginWindow wndLogin;
@@ -411,7 +411,8 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 			{
 				initDefault=m_userpreference.getProperty( UserPreference.P_ROLE );
 			}
-            KeyNamePair clientKNPair = new KeyNamePair(new Integer((String)lstItemClient.getValue()), lstItemClient.getLabel());
+			int clientId = Integer.valueOf((String)lstItemClient.getValue());
+            KeyNamePair clientKNPair = new KeyNamePair(clientId, lstItemClient.getLabel());
             KeyNamePair roleKNPairs[] = login.getRoles(m_userName, clientKNPair);
             if (roleKNPairs != null && roleKNPairs.length > 0)
             {
@@ -432,8 +433,6 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
             }
             //
 
-            //force reload of default role
-            MRole.getDefault(m_ctx, true);
             
     		// If we have only one role, we can hide the combobox - metas-2009_0021_AP1_G94
     		if (m_clientKNPairs.length == 1 && lstRole.getItemCount() == 1 && ! MSysConfig.getBooleanValue(MSysConfig.ALogin_ShowOneRole, true))
@@ -707,6 +706,10 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
         userPreference.setProperty(UserPreference.P_ORG, (String) lstItemOrg.getValue());
         userPreference.setProperty(UserPreference.P_WAREHOUSE, lstItemWarehouse != null ? (String) lstItemWarehouse.getValue() : "0");
         userPreference.savePreference();
+        
+        //force reload of default role
+        MRole.getDefault(m_ctx, true);
+        
         //
     }
 
