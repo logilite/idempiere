@@ -307,11 +307,16 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
         				btn.setId(button.getName());
         				btn.setDisabled(false);
 
-        				AImage aImage = Actions.getActionImage(actionId);
-        				if (aImage != null) {
-        					btn.setImageContent(aImage);
+        				if (ThemeManager.isUseFontIconForImage()) {
+							btn.setIconSclass("z-icon-" + actionId.replace(".", "_"));
+							LayoutUtils.addSclass("font-icon-toolbar-button", btn);
         				} else {
-        					btn.setLabel(label);
+	        				AImage aImage = Actions.getActionImage(actionId);
+	        				if (aImage != null) {
+	        					btn.setImageContent(aImage);
+	        				} else {
+	        					btn.setLabel(label);
+	        				}
         				}
 
         				ToolbarCustomButton toolbarCustomBtn = new ToolbarCustomButton(button, btn, actionId, windowNo);

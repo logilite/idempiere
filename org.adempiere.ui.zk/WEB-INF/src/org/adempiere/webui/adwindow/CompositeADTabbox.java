@@ -22,11 +22,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+
 import org.adempiere.util.Callback;
 import org.adempiere.webui.component.ADTabListModel;
 import org.adempiere.webui.component.ADTabListModel.ADTabLabel;
-import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.session.SessionManager;
+import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.DataStatusEvent;
 import org.compiere.model.DataStatusListener;
@@ -46,6 +47,7 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.Clients;
+import org.zkoss.zul.Center;
 import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.Row;
 import org.zkoss.zul.RowRenderer;
@@ -492,8 +494,9 @@ public class CompositeADTabbox extends AbstractADTabbox
     			}
     			hasChanges = true;
     		}
-    		if (hasChanges)
-    			headerTab.getDetailPane().invalidate();
+    		if (hasChanges) {
+    			headerTab.getDetailPane().getParent().invalidate();
+    		}
     	}
 	}
 
@@ -933,6 +936,15 @@ public class CompositeADTabbox extends AbstractADTabbox
 		}
 		if (!tabPanel.isVisible()) {
 			tabPanel.setVisible(true);
+			if (tabPanel.getDesktop() != null) {
+				Executions.schedule(tabPanel.getDesktop(), e -> {
+					invalidateTabPanel(tabPanel);
+				}, new Event("onPostActivateDetail", tabPanel));
+			} else {
+				invalidateTabPanel(tabPanel);
+			}	
+		} else {
+			invalidateTabPanel(tabPanel);
 		}
 		boolean wasForm = false;
 		if (!tabPanel.isGridView()) {
@@ -953,6 +965,26 @@ public class CompositeADTabbox extends AbstractADTabbox
 		}
 		if (wasForm && tabPanel.getTabLevel() == 0 && headerTab.getTabLevel() != 0) // maintain form on header when zooming to a detail tab
 			tabPanel.switchRowPresentation();
+	}
+	
+	private void invalidateTabPanel(IADTabpanel tabPanel) {
+		Center center = findCenter(tabPanel.getGridView());
+		if (center != null)
+			center.invalidate();
+		else
+			tabPanel.invalidate();
+	}
+
+	private Center findCenter(GridView gridView) {
+		if (gridView == null)
+			return null;
+		Component p = gridView.getParent();
+		while (p != null) {
+			if (p instanceof Center)
+				return (Center) p;
+			p = p.getParent();
+		}
+		return null;
 	}
 	
 	private void showLastError() {

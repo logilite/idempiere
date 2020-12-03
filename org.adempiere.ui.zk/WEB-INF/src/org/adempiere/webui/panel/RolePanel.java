@@ -86,7 +86,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 4486118071892173802L;
+	private static final long serialVersionUID = -4763398859555693370L;
 
 	private static final String ALOGIN_SHOWDATE = "ALogin_ShowDate";
 	protected LoginWindow wndLogin;
@@ -413,8 +413,9 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 			{
 				initDefault=m_userpreference.getProperty( UserPreference.P_ROLE );
 			}
-            KeyNamePair clientKNPair = new KeyNamePair(Integer.valueOf((String)lstItemClient.getValue()), lstItemClient.getLabel());
-            KeyNamePair roleKNPairs[] = login.getRoles(m_userName, clientKNPair, LoginPanel.ROLE_TYPES_WEBUI);
+			int clientId = Integer.valueOf((String)lstItemClient.getValue());
+            KeyNamePair clientKNPair = new KeyNamePair(clientId, lstItemClient.getLabel());
+            KeyNamePair roleKNPairs[] = login.getRoles(m_userName, clientKNPair);
             if (roleKNPairs != null && roleKNPairs.length > 0)
             {
                 for (int i = 0; i < roleKNPairs.length; i++)
@@ -434,8 +435,6 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
             }
             //
 
-            //force reload of default role
-            MRole.getDefault(m_ctx, true);
 
     		// If we have only one role, we can make readonly the combobox
     		if (lstRole.getItemCount() == 1)
@@ -733,6 +732,10 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
         userPreference.setProperty(UserPreference.P_ORG, (String) lstItemOrg.getValue());
         userPreference.setProperty(UserPreference.P_WAREHOUSE, lstItemWarehouse != null ? (String) lstItemWarehouse.getValue() : "0");
         userPreference.savePreference();
+        
+        //force reload of default role
+        MRole.getDefault(m_ctx, true);
+        
         //
     }
 

@@ -263,22 +263,22 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 		north.setSplittable(true);
 		ZKUpdateUtil.setVflex(listbox, "1");
 		ZKUpdateUtil.setHflex(listbox, "1");
-		ZKUpdateUtil.setHeight(north, "50%");
+		ZKUpdateUtil.setHeight(north, "49%");
 		layout.appendChild(north);
-		north.setStyle("background-color: transparent");
+		north.setStyle("background-color: transparent; ");
 		listbox.addEventListener(Events.ON_SELECT, this);
 
 		Center center = new Center();
 		center.appendChild(grid);
 		layout.appendChild(center);
-		center.setStyle("background-color: transparent");
+		center.setStyle("background-color: transparent; overflow:auto;");
 		ZKUpdateUtil.setVflex(grid, "1");
 		ZKUpdateUtil.setHflex(grid, "1");
 
 		South south = new South();
 		south.appendChild(statusBar);
 		layout.appendChild(south);
-		south.setStyle("background-color: transparent");
+		south.setStyle("background-color: transparent;");
 
 		this.appendChild(layout);
 		this.setStyle("height: 100%; width: 100%; position: absolute;");
@@ -502,7 +502,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 			fDescription.setText ("");
 			fHelp.setText ("");
 			fHistory.setContent(HISTORY_DIV_START_TAG + "&nbsp;</div>");
-			statusBar.setStatusDB("0/0");
+			statusBar.setStatusDB("0/" + m_activities.length);
 			statusBar.setStatusLine(Msg.getMsg(Env.getCtx(), "WFNoActivities"));
 		}
 		return m_activity;
