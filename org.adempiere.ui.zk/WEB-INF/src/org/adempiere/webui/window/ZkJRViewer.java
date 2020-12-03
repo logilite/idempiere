@@ -502,16 +502,20 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 			Listitem selected = previewType.getSelectedItem();
 			String reportType=selected.getValue();
 			if ( "PDF".equals( reportType ) ) {
-				mediaVersion++;
-				String url = Utils.getDynamicMediaURI(this, mediaVersion, media.getName(), media.getFormat());
-				String pdfJsUrl = "pdf.js/web/viewer.html?file="+url;
-				iframe.setContent(null);
-				iframe.setSrc(pdfJsUrl);				
+				openWithPdfJsViewer();				
 				return;
 			}
+		} else {
+			Listitem selected = previewType.getSelectedItem();
+			String reportType = selected.getValue();
+			if (MSysConfig.getBooleanValue(MSysConfig.ZK_USE_PDF_JS_VIEWER, false, Env.getAD_Client_ID(Env.getCtx()))
+					&& "PDF".equals(reportType)) {
+				openWithPdfJsViewer();
+			} else {
+				iframe.setSrc(null);
+				iframe.setContent(media);
+			}
 		}
-		iframe.setSrc(null);
-		iframe.setContent(media);
 	}
 
 	@Override
@@ -611,6 +615,14 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 			log.log(Level.SEVERE, "Exception while reading file " + ioe);
 		}
 		return fileContent;
+	}
+	
+	protected void openWithPdfJsViewer() {
+		mediaVersion++;
+		String url = Utils.getDynamicMediaURI(this, mediaVersion, media.getName(), media.getFormat());
+		String pdfJsUrl = "pdf.js/web/viewer.html?file="+url;
+		iframe.setContent(null);
+		iframe.setSrc(pdfJsUrl);
 	}
 
 }
