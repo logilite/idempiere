@@ -120,13 +120,13 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.sys.ExecutionCtrl;
 import org.zkoss.zk.ui.util.Clients;
-import org.zkoss.zul.Column;
-import org.zkoss.zul.Columns;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.Menupopup;
+import org.zkoss.zul.Popup;
 import org.zkoss.zul.RowRenderer;
 import org.zkoss.zul.Window.Mode;
+import org.zkoss.zul.impl.LabelImageElement;
 
 
 /**
@@ -985,8 +985,19 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 				}
 			});
 
-			m_popup.setPage(toolbar.getToolbarItem("Lock").getPage());
+            LayoutUtils.autoDetachOnClose(m_popup);
 		}
+
+		if (m_popup.getPage() == null) {
+			LabelImageElement btn = toolbar.getToolbarItem("Lock");
+			Popup popup = LayoutUtils.findPopup(btn.getParent());
+			if (popup != null) {
+				popup.appendChild(m_popup);
+			} else {
+				m_popup.setPage(toolbar.getToolbarItem("Lock").getPage());
+			}
+		}
+
 		m_popup.open(toolbar.getToolbarItem("Lock"), "after_start");
 	}	//	lock
 	//
@@ -1991,9 +2002,10 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
      * @see ToolbarListener#onHelp()
      */
     public void onHelp()
-    {
-    	SessionManager.getAppDesktop().showWindow(new HelpWindow(gridWindow), "center");
-    }
+	{
+		closeToolbarPopup("Help");
+		SessionManager.getAppDesktop().showWindow(new HelpWindow(gridWindow), "center");
+	}
 
     @Override
     public void onNew()
@@ -2719,6 +2731,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 
     @Override
     public void onPrint() {
+        closeToolbarPopup("Print");
     	final Callback<Boolean> postCallback = new Callback<Boolean>() {
 			@Override
 			public void onCallback(Boolean result) {
@@ -2853,18 +2866,28 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	public void onActiveWorkflows() {
 		if (toolbar.getEvent() != null)
 		{
-			if (adTabbox.getSelectedGridTab().getRecord_ID() <= 0)
-				return;
-			else
+            if (adTabbox.getSelectedGridTab().getRecord_ID() <= 0) {
+            	return;
+            } else {
+                closeToolbarPopup("ActiveWorkflows");
 				try {
 					AEnv.startWorkflowProcess(adTabbox.getSelectedGridTab().getAD_Table_ID(), adTabbox.getSelectedGridTab().getRecord_ID());
 				} catch (Exception e) {
 					CLogger.get().saveError("Error", e);
 					throw new ApplicationException(e.getMessage(), e);
 				}
+			}
 		}
 	}
 	//
+	
+    private void closeToolbarPopup(String btnName) {
+        LabelImageElement btn = toolbar.getToolbarItem(btnName);
+        Popup popup = LayoutUtils.findPopup(btn.getParent());
+        if (popup != null) {
+            popup.close();
+        }
+    }
 
 	// Elaine 2008/07/22
 	/**
@@ -2893,6 +2916,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
      */
 	public void onProductInfo()
 	{
+        closeToolbarPopup("ProductInfo");
 		InfoPanel.showPanel(I_M_Product.Table_Name);
 	}
 	//

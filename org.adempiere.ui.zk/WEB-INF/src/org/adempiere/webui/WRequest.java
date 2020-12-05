@@ -50,6 +50,7 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.Menupopup;
+import org.zkoss.zul.Popup;
 
 /**
  *	Request Button Action.
@@ -183,7 +184,13 @@ public class WRequest implements EventListener<Event>
 			m_popup.appendChild(m_all);
 		}
 		
-		m_popup.setPage(invoker.getPage());
+		Popup popup = LayoutUtils.findPopup(invoker);
+		if (popup != null) {
+			popup.appendChild(m_popup);
+		} else {
+			m_popup.setPage(invoker.getPage());
+			LayoutUtils.autoDetachOnClose(m_popup);
+		}
 		m_popup.open(invoker, "after_start");
 	}	//	getZoomTargets
 	
@@ -213,6 +220,9 @@ public class WRequest implements EventListener<Event>
 			}
 			
 			int AD_Window_ID = WINDOW_REQUESTS_ALL;		//	232=all - 201=my
+            if (m_popup.getParent() instanceof Popup) {
+                ((Popup)m_popup.getParent()).close();
+            }
 			SessionManager.getAppDesktop().openWindow(AD_Window_ID, query, new Callback<ADWindow>() {
 				
 				@Override

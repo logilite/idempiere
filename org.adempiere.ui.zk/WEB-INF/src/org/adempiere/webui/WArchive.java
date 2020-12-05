@@ -1,5 +1,7 @@
 package org.adempiere.webui;
 
+import static org.compiere.model.SystemIDs.FORM_ARCHIVEVIEWER;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Level;
@@ -9,7 +11,6 @@ import org.adempiere.webui.component.Window;
 import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.session.SessionManager;
 import org.compiere.model.MBPartner;
-import static org.compiere.model.SystemIDs.*;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -20,6 +21,7 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.Menupopup;
+import org.zkoss.zul.Popup;
 
 /**
  *	Archive Button Consequences.
@@ -142,7 +144,13 @@ public class WArchive implements EventListener<Event>
 			m_popup.appendChild(new Menuitem(Msg.getMsg(Env.getCtx(), "ArchivedNone")));
 		//
 			
-		m_popup.setPage(invoker.getPage());
+		Popup popup = LayoutUtils.findPopup(invoker);
+		if (popup != null) {
+			popup.appendChild(m_popup);
+		} else {
+			m_popup.setPage(invoker.getPage());
+			LayoutUtils.autoDetachOnClose(m_popup);
+		}
 		m_popup.open(invoker, "after_start");
 	}	//	getZoomTargets
 	
