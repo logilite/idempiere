@@ -1337,6 +1337,7 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
     			int userId = Env.getAD_User_ID(Env.getCtx());
     			MPreference preference = query.setOnlyActiveRecords(true)
     										  .setApplyAccessFilter(true)
+    										  .setClient_ID()
     										  .setParameters(windowId, adTabId+"|DetailPane.IsOpen", userId)
     										  .first();
     			if (preference == null || preference.getAD_Preference_ID() <= 0) {
@@ -2036,6 +2037,7 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
 			int userId = Env.getAD_User_ID(Env.getCtx());
 			MPreference preference = query.setOnlyActiveRecords(true)
 					.setApplyAccessFilter(true)
+					.setClient_ID()
 					.setParameters(windowId, adTabId+"|"+attribute, userId)
 					.first();
 			if (preference == null || preference.getAD_Preference_ID() <= 0) {
