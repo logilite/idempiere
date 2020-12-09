@@ -59,19 +59,13 @@ public class MRegion extends X_C_Region
 	{
 		s_regions = new CCache<Integer,MRegion>(Table_Name, 100);
 		List<MRegion> regions;
-		int cid = Env.getAD_Client_ID(Env.getCtx());
 		try {
-			if (cid > 0) {
-				// forced potential cross tenant read - requires System client in context
-				Env.setContext(Env.getCtx(), Env.AD_CLIENT_ID, 0);
-			}
+			PO.setCrossTenantSafe();
 			regions = new Query(Env.getCtx(), Table_Name, "", null)
 					.setOnlyActiveRecords(true)
 					.list();
 		} finally {
-			if (cid > 0) {
-				Env.setContext(Env.getCtx(), Env.AD_CLIENT_ID, cid);
-			}
+			PO.clearCrossTenantSafe();
 		}
 		for (MRegion r : regions) {
 			//TODO uncomments once Mutable implemented
