@@ -1484,7 +1484,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         	toolbar.enableProcessButton (false);
         	toolbar.enableCustomize(false);
         }else{
-        	ADTabpanel adtab = (ADTabpanel) adTabbox.getSelectedTabpanel();
+        	IADTabpanel adtab = adTabbox.getSelectedTabpanel();
             toolbar.enableProcessButton(!isNewRow && adtab != null && adtab.getToolbarButtons().size() > 0);
             toolbar.enableCustomize(adtab.isGridView());
         }
