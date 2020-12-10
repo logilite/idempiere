@@ -196,6 +196,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	protected Div attachmentBox;
 	protected Checkbox isAcknowledgmentReceipt = new Checkbox();
 	protected PO m_po = null;
+	protected int pInstance_ID = 0;
 	
 	@Override
 	public void onPageAttached(Page newpage, Page oldpage) {
@@ -575,14 +576,14 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 
 	/**
 	 * @param dataSource
-	 * @param removeable
+	 * @param isRemoveable
 	 */
-	public void addAttachment(DataSource dataSource, boolean removeable) {
+	public void addAttachment(DataSource dataSource, boolean isRemoveable) {
 		attachments.add(dataSource);
 		
 		if(attachmentBox != null)
 		{
-			AttachmentItem item = new AttachmentItem(dataSource, attachments, removeable);
+			AttachmentItem item = new AttachmentItem(dataSource, attachments, isRemoveable);
 			attachmentBox.appendChild(item);
 		}
 		
@@ -886,7 +887,13 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	{
 		this.m_po = m_po;
 	}
-	
+
+	@Override
+	public void setAD_PInstance_ID(int pInstance_ID)
+	{
+		this.pInstance_ID = pInstance_ID;
+	}
+
 	@Override
 	public void show() {
 		AEnv.showWindow(this);
