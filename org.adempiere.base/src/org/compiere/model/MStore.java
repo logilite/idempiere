@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -80,52 +81,26 @@ public class MStore extends X_W_Store
 		}
 
 		//	Search by context
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String sql = "SELECT * FROM W_Store WHERE WebContext=?";
-		try
-		{
-			pstmt = DB.prepareStatement (sql, null);
-			pstmt.setString(1, contextPath);
-			rs = pstmt.executeQuery ();
-			if (rs.next ())
-				wstore = new MStore (ctx, rs, null);
-		}
-		catch (Exception e)
-		{
-			s_log.log (Level.SEVERE, sql, e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
+		try {
+			PO.setCrossTenantSafe();
+			wstore = new Query(Env.getCtx(), Table_Name, "WebContext=?", null)
+					.setOnlyActiveRecords(true)
+					.setParameters(contextPath)
+					.first();
+		} finally {
+			PO.clearCrossTenantSafe();
 		}
 		//	Try client
 		if (wstore == null)
 		{
-			sql = "SELECT * FROM W_Store WHERE AD_Client_ID=? AND IsActive='Y' ORDER BY W_Store_ID";
-			try
-			{
-				pstmt = DB.prepareStatement (sql, null);
-				pstmt.setInt (1, Env.getAD_Client_ID(ctx));
-				rs = pstmt.executeQuery ();
-				if (rs.next ())
-				{
-					wstore = new MStore (ctx, rs, null);
-					s_log.warning("Context " + contextPath 
+			wstore = new Query(Env.getCtx(), Table_Name, "WebContext=?", null)
+					.setOnlyActiveRecords(true)
+					.setClient_ID()
+					.setOrderBy(COLUMNNAME_W_Store_ID)
+					.first();
+			if (wstore != null) {
+				s_log.warning("Context " + contextPath 
 						+ " Not found - Found via AD_Client_ID=" + Env.getAD_Client_ID(ctx));
-				}
-			}
-			catch (Exception e)
-			{
-				s_log.log (Level.SEVERE, sql, e);
-			}
-			finally
-			{
-				DB.close(rs, pstmt);
-				rs = null;
-				pstmt = null;
 			}
 		}
 		//	Nothing
@@ -139,34 +114,16 @@ public class MStore extends X_W_Store
 	}	//	get
 	
 	/**
-	 * 	Get active Web Stores of Clieny
+	 * 	Get active Web Stores of Client
 	 *	@param client client
 	 *	@return array of web stores
 	 */
 	public static MStore[] getOfClient (MClient client)
 	{
-		ArrayList<MStore> list = new ArrayList<MStore>();
-		String sql = "SELECT * FROM W_Store WHERE AD_Client_ID=? AND IsActive='Y'";
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement (sql, client.get_TrxName());
-			pstmt.setInt (1, client.getAD_Client_ID());
-			rs = pstmt.executeQuery ();
-			while (rs.next ())
-				list.add (new MStore (client.getCtx(), rs, client.get_TrxName()));
-		}
-		catch (Exception e)
-		{
-			s_log.log (Level.SEVERE, sql, e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
+		List<MStore> list = new Query(Env.getCtx(), Table_Name, "AD_Client_ID=?", client.get_TrxName())
+				.setOnlyActiveRecords(true)
+				.setParameters(client.getAD_Client_ID())
+				.list();
 		//
 		MStore[] retValue = new MStore[list.size ()];
 		list.toArray (retValue);
@@ -446,29 +403,10 @@ public class MStore extends X_W_Store
 	{
 		if (m_msgs != null && !reload)
 			return m_msgs;
-		ArrayList<MMailMsg> list = new ArrayList<MMailMsg>();
-		//
-		String sql = "SELECT * FROM W_MailMsg WHERE W_Store_ID=? ORDER BY MailMsgType";
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement (sql, get_TrxName());
-			pstmt.setInt (1, getW_Store_ID());
-			rs = pstmt.executeQuery ();
-			while (rs.next ())
-				list.add (new MMailMsg (getCtx(), rs, get_TrxName()));
-		}
-		catch (Exception e)
-		{
-			log.log (Level.SEVERE, sql, e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
+		List<MMailMsg> list = new Query(Env.getCtx(), MMailMsg.Table_Name, "W_Store_ID=?", get_TrxName())
+				.setParameters(getW_Store_ID())
+				.setOrderBy(MMailMsg.COLUMNNAME_MailMsgType)
+				.list();
 		//
 		m_msgs = new MMailMsg[list.size ()];
 		list.toArray (m_msgs);

@@ -1168,7 +1168,7 @@ public class WebInfo
 		ArrayList<MRfQ> list = new ArrayList<MRfQ>();
 		String sql = "SELECT * "
 			+ "FROM C_RfQ r "
-			+ "WHERE r.IsRfQResponseAccepted='Y'"
+			+ "WHERE AD_Client_ID=? AND r.IsRfQResponseAccepted='Y'"
 			+ " AND r.IsSelfService='Y' AND r.IsActive='Y' AND r.Processed='N'"
 			+ " AND (r.IsInvitedVendorsOnly='N'"
 			+	" OR EXISTS (SELECT * FROM C_RfQResponse rr "
@@ -1180,7 +1180,8 @@ public class WebInfo
 		try
 		{
 			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, getC_BPartner_ID());
+			pstmt.setInt(1, Env.getAD_Client_ID(m_ctx));
+			pstmt.setInt(2, getC_BPartner_ID());
 			rs = pstmt.executeQuery();
 			while (rs.next())
 				list.add(new MRfQ (m_ctx, rs, null));

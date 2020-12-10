@@ -30,12 +30,13 @@ public interface IEmailDialog
 	public void init(String title, MUser from, String to, String subject, String message,
 			File attachment);
 
-	public void addTo(String supportEMail, boolean isRemoveable);
+	public void addTo(String supportEMail, boolean isShowEmailFirst);
 
-	public void addAttachment(DataSource screenShot, boolean b);
+	public void addAttachment(DataSource screenShot, boolean isRemoveable);
 	public void setPO(PO m_po);
 	
 	public void show();
 	public IEmailDialog createInstance();
 
+	public void setAD_PInstance_ID(int pInstance_ID);
 }
