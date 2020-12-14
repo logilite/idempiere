@@ -28,6 +28,8 @@ import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.KeyNamePair;
+import org.compiere.util.Msg;
 
 /**
  *  Product Attribute
@@ -42,6 +44,13 @@ public class MAttribute extends X_M_Attribute
 	 */
 	private static final long serialVersionUID = 7869800574413317999L;
 
+	/**	Logger	*/
+	private static CLogger s_log = CLogger.getCLogger (MAttribute.class);
+
+	private static CCache<Integer, MAttribute>	s_cache				= new CCache<Integer, MAttribute>(Table_Name, 30, 60);
+	
+	/**	Values						*/
+	private MAttributeValue[]		m_values = null;
 
 	/**
 	 * 	Get Attributes Of Client
@@ -58,15 +67,15 @@ public class MAttribute extends X_M_Attribute
 		ArrayList<Object> params = new ArrayList<Object>();
 		params.add(AD_Client_ID);
 		if (onlyProductAttributes)
-			{
-				sql += " AND IsInstanceAttribute=?";
-				params.add(false);
-			}
+		{
+			sql += " AND IsInstanceAttribute=?";
+			params.add(false);
+		}
 		if (onlyListAttributes)
-			{
-				sql += " AND AttributeValueType=?";
-				params.add(MAttribute.ATTRIBUTEVALUETYPE_List);
-			}
+		{
+			sql += " AND AttributeValueType=?";
+			params.add(MAttribute.ATTRIBUTEVALUETYPE_List);
+		}
 		StringBuilder whereClause = new StringBuilder("AD_Client_ID=?").append(sql);
 		
 		List<MAttribute>list = new Query(ctx,I_M_Attribute.Table_Name,whereClause.toString(),null)
@@ -80,11 +89,7 @@ public class MAttribute extends X_M_Attribute
 		if (s_log.isLoggable(Level.FINE)) s_log.fine("AD_Client_ID=" + AD_Client_ID + " - #" + list.size());
 		return retValue;
 	}	//	getOfClient
-	
-	/**	Logger	*/
-	private static CLogger s_log = CLogger.getCLogger (MAttribute.class);
 
-	
 	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
@@ -113,8 +118,6 @@ public class MAttribute extends X_M_Attribute
 		super(ctx, rs, trxName);
 	}	//	MAttribute
 
-	/**	Values						*/
-	private MAttributeValue[]		m_values = null;
 
 	/**
 	 *	Get Values if List
@@ -138,21 +141,20 @@ public class MAttribute extends X_M_Attribute
 		return m_values;
 	}	//	getValues
 
-	static private CCache<Integer,MAttribute> s_cache = new CCache<Integer,MAttribute>(Table_Name, 30, 60);
-	
-	public static MAttribute get (Properties ctx, int M_Attribute_ID){
-		Integer key = new Integer(M_Attribute_ID);
-		MAttribute retValue = (MAttribute)s_cache.get(key);
-		
-		if(retValue!=null)
+	public static MAttribute get(Properties ctx, int M_Attribute_ID)
+	{
+		Integer key = Integer.valueOf(M_Attribute_ID);
+		MAttribute retValue = (MAttribute) s_cache.get(key);
+
+		if (retValue != null)
 			return retValue;
-		
+
 		retValue = (MAttribute) MTable.get(ctx, MAttribute.Table_ID).getPO(M_Attribute_ID, null);
-		
+
 		s_cache.put(key, retValue);
-		
+
 		return retValue;
-	}
+	} // get
 	
 	/**************************************************************************
 	 * 	Get Attribute Instance
@@ -171,8 +173,8 @@ public class MAttribute extends X_M_Attribute
 
 	/**
 	 * 	Set Attribute Instance
-	 * 	@param value value
 	 * 	@param M_AttributeSetInstance_ID id
+	 * 	@param value value
 	 */
 	public void setMAttributeInstance (int M_AttributeSetInstance_ID, MAttributeValue value)
 	{
@@ -205,8 +207,8 @@ public class MAttribute extends X_M_Attribute
 
 	/**
 	 * 	Set Attribute Instance
-	 * 	@param value string value
 	 * 	@param M_AttributeSetInstance_ID id
+	 * 	@param value string value
 	 */
 	public void setMAttributeInstance (int M_AttributeSetInstance_ID, String value)
 	{
@@ -214,15 +216,15 @@ public class MAttribute extends X_M_Attribute
 		if (instance == null)
 			instance = new MAttributeInstance (getCtx(), getM_Attribute_ID(), 
 				M_AttributeSetInstance_ID, value, get_TrxName());
-		
-		instance.setValue(value);
+		else
+			instance.setValue(value);
 		instance.saveEx();
 	}	//	setAttributeInstance
 
 	/**
 	 * 	Set Attribute Instance
-	 * 	@param value number value
 	 * 	@param M_AttributeSetInstance_ID id
+	 * 	@param value number value
 	 */
 	public void setMAttributeInstance (int M_AttributeSetInstance_ID, BigDecimal value)
 	{
@@ -230,49 +232,60 @@ public class MAttribute extends X_M_Attribute
 		if (instance == null)
 			instance = new MAttributeInstance (getCtx(), getM_Attribute_ID(), 
 				M_AttributeSetInstance_ID, value, get_TrxName());
-		
-		
-		instance.setValueNumber(value);
+		else
+			instance.setValueNumber(value);
 		instance.saveEx();
 	}	//	setAttributeInstance
 	
 	/**
 	 * 	Set Attribute Instance
-	 * 	@param valueInt Integer value
 	 * 	@param M_AttributeSetInstance_ID id
-	 * @param value 
+	 * 	@param value int
 	 */
-	public void setMAttributeInstance (int M_AttributeSetInstance_ID, int valueInt, String value)
+	public void setMAttributeInstance (int M_AttributeSetInstance_ID, int value)
 	{
 		MAttributeInstance instance = getMAttributeInstance(M_AttributeSetInstance_ID);
 		if (instance == null)
-		{
-			instance = new MAttributeInstance(getCtx(), getM_Attribute_ID(),
-					M_AttributeSetInstance_ID, valueInt, get_TrxName());
-		}
-		
-		instance.setValueInt(valueInt, value);
-		instance.saveEx();
-	}	//	setAttributeInstance
-	
-	/**
-	 * 	Set Attribute Instance
-	 * 	@param valueTimeStamp TimeStamp value
-	 * 	@param M_AttributeSetInstance_ID id
-	 */
-	public void setMAttributeInstance (int M_AttributeSetInstance_ID, Timestamp valueTimeStamp)
-	{
-		MAttributeInstance instance = getMAttributeInstance(M_AttributeSetInstance_ID);
-		if (instance == null)
-		{
 			instance = new MAttributeInstance (getCtx(), getM_Attribute_ID(), 
-					M_AttributeSetInstance_ID, valueTimeStamp, get_TrxName());
-		}
-		
-		instance.setValueTimeStamp (valueTimeStamp);
+				M_AttributeSetInstance_ID, value, get_TrxName());
+		else
+			instance.setValueInt(value);
 		instance.saveEx();
 	}	//	setAttributeInstance
 	
+	/**
+	 * Set Attribute Instance
+	 * 
+	 * @param M_AttributeSetInstance_ID id
+	 * @param value                     KeyNamePair
+	 */
+	public void setMAttributeInstance(int M_AttributeSetInstance_ID, KeyNamePair value)
+	{
+		MAttributeInstance instance = getMAttributeInstance(M_AttributeSetInstance_ID);
+		if (instance == null)
+			instance = new MAttributeInstance(getCtx(), getM_Attribute_ID(), M_AttributeSetInstance_ID, value, get_TrxName());
+		else
+			instance.setValueKeyNamePair(value);
+		instance.saveEx();
+	} // setAttributeInstance
+
+	/**
+	 * Set Attribute Instance
+	 * 
+	 * @param M_AttributeSetInstance_ID id
+	 * @param value                     Timestamp
+	 */
+	public void setMAttributeInstance(int M_AttributeSetInstance_ID, Timestamp value)
+	{
+		MAttributeInstance instance = getMAttributeInstance(M_AttributeSetInstance_ID);
+		if (instance == null)
+			instance = new MAttributeInstance(getCtx(), getM_Attribute_ID(), M_AttributeSetInstance_ID, value,
+					get_TrxName());
+		else
+			instance.setValueDate(value);
+		instance.saveEx();
+	}// setAttributeInstance
+
 	/**
 	 * 	String Representation
 	 *	@return info
@@ -286,6 +299,22 @@ public class MAttribute extends X_M_Attribute
 			.append ("]");
 		return sb.toString ();
 	}	//	toString
+
+	/**
+	 * 	Before Save
+	 *	@param newRecord new
+	 *	@return true if can be saved
+	 */
+	@Override
+	protected boolean beforeSave(boolean newRecord) {
+		// not advanced roles cannot add or modify reference types
+		if ((newRecord || MAttribute.ATTRIBUTEVALUETYPE_Reference.equals(getAttributeValueType()))
+				&& ! MRole.getDefault().isAccessAdvanced()) {
+			log.saveError("Error", Msg.getMsg(getCtx(), "ActionNotAllowedHere"));
+			return false;
+		}
+		return true;
+	}
 	
 	/**
 	 * 	AfterSave
@@ -311,5 +340,10 @@ public class MAttribute extends X_M_Attribute
 		}
 		return success;
 	}	//	afterSave
-	
+
+	public boolean isAttributeValueTypeReference()
+	{
+		return ATTRIBUTEVALUETYPE_Reference.equals(getAttributeValueType());
+	} // isAttributeValueTypeReference
+
 }	//	MAttribute
