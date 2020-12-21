@@ -16,7 +16,9 @@ package org.compiere.model;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.compiere.util.CCache;
@@ -35,7 +37,7 @@ public class MUserDefWin extends X_AD_UserDef_Win
 	 */
 	private static final long serialVersionUID = -5775251886672840324L;
 
-	private volatile static List<MUserDefWin> m_fullList = null;
+	private static final Map<Integer, List<MUserDefWin>> m_fullMap = new HashMap<Integer, List<MUserDefWin>>();
 
 	/**
 	 * 	Standard constructor.
@@ -72,24 +74,24 @@ public class MUserDefWin extends X_AD_UserDef_Win
 	 */
 	private static MUserDefWin[] getAll (Properties ctx, int window_ID )
 	{
-		if (m_fullList == null) {
-			try {
-				PO.setCrossTenantSafe();
-				m_fullList = new Query(ctx, MUserDefWin.Table_Name, null, null)
+		List<MUserDefWin> fullList = null;
+		synchronized (m_fullMap) {
+			fullList = m_fullMap.get(Env.getAD_Client_ID(ctx));
+			if (fullList == null) {
+				fullList = new Query(ctx, MUserDefWin.Table_Name, null, null)
 						.setOnlyActiveRecords(true)
+						.setClient_ID()
 						.list();
-			} finally {
-				PO.clearCrossTenantSafe();
+				m_fullMap.put(Env.getAD_Client_ID(ctx), fullList);
 			}
 		}
-		
-		if (m_fullList.size() == 0) {
+		if (fullList.size() == 0) {
 			return null;
 		}
 
 		List<MUserDefWin> list = new ArrayList<MUserDefWin>();
 		
-		for (MUserDefWin udw : m_fullList) {
+		for (MUserDefWin udw : fullList) {
 			if (udw.getAD_Window_ID() == window_ID
 				&& udw.getAD_Client_ID() == Env.getAD_Client_ID(ctx)
 				&& (udw.getAD_Language() == null || udw.getAD_Language().equals(Env.getAD_Language(ctx)))
@@ -206,13 +208,17 @@ public class MUserDefWin extends X_AD_UserDef_Win
 
 	@Override
 	protected boolean beforeSave(boolean newRecord) {
-		m_fullList = null;
+		synchronized (m_fullMap) {
+			m_fullMap.remove(getAD_Client_ID());
+		}
 		return true;
 	}
 	
 	@Override
 	protected boolean beforeDelete() {
-		m_fullList = null;
+		synchronized (m_fullMap) {
+			m_fullMap.remove(getAD_Client_ID());
+		}
 		return true;
 	}
 	
