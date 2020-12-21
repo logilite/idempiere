@@ -208,7 +208,7 @@ public abstract class PO
 		else
 			load(ID, trxName);
 		
-		checkValidClient(false);
+		checkCrossTenant(false);
 	}   //  PO
 
 	/**
@@ -2056,7 +2056,7 @@ public abstract class PO
 	public boolean save()
 	{
 		checkValidContext();
-		checkValidClient(true);
+		checkCrossTenant(true);
 		CLogger.resetLast();
 		boolean newRecord = is_new();	//	save locally as load resets
 		if (!newRecord && !is_Changed())
@@ -3258,7 +3258,7 @@ public abstract class PO
 	public boolean delete (boolean force)
 	{
 		checkValidContext();
-		checkValidClient(true);
+		checkCrossTenant(true);
 		CLogger.resetLast();
 		if (is_new())
 			return true;
@@ -4948,7 +4948,7 @@ public abstract class PO
 		isSafeCrossTenant.set(Boolean.FALSE);
 	}
 
-	private void checkValidClient(boolean writing) {
+	private void checkCrossTenant(boolean writing) {
 		if (isSafeCrossTenant.get())
 			return;	
 		int envClientID = Env.getAD_Client_ID(getCtx());

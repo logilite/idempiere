@@ -315,6 +315,8 @@ public class MUser extends X_AD_User
 	private MRole[] 			m_roles = null;
 	/**	Roles of User with Org	*/
 	private int		 			m_rolesAD_Org_ID = -1;
+	/**	AD_Client_ID for m_roles above	*/
+	private int					m_rolesAD_Client_ID = -1;
 	/** Is Administrator		*/
 	private Boolean				m_isAdministrator = null;
 	/** User Access Rights				*/
@@ -719,7 +721,7 @@ public class MUser extends X_AD_User
 	 */
 	public MRole[] getRoles (int AD_Org_ID)
 	{
-		if (m_roles != null && m_rolesAD_Org_ID == AD_Org_ID)
+		if (m_roles != null && m_rolesAD_Org_ID == AD_Org_ID && m_rolesAD_Client_ID == Env.getAD_Client_ID(Env.getCtx()))
 			return m_roles;
 		
 		ArrayList<MRole> list = new ArrayList<MRole>();
@@ -728,7 +730,7 @@ public class MUser extends X_AD_User
 		// are found but also roles which delegate org access to the user level where
 		// this user has access to the org in question
 		String sql = "SELECT * FROM AD_Role r " 
-			+ "WHERE r.IsActive='Y'" 
+			+ "WHERE r.IsActive='Y' AND r.AD_Client_ID IN (0, ?) " 
 			+ " AND EXISTS (SELECT * FROM AD_User_Roles ur" 
 			+ " WHERE r.AD_Role_ID=ur.AD_Role_ID AND ur.IsActive='Y' AND ur.AD_User_ID=?) "
 			+ " AND ( ( r.isaccessallorgs = 'Y' ) OR "
@@ -749,10 +751,11 @@ public class MUser extends X_AD_User
 		try
 		{
 			pstmt = DB.prepareStatement (sql, get_TrxName());
-			pstmt.setInt (1, getAD_User_ID());
-			pstmt.setInt (2, AD_Org_ID);
-			pstmt.setInt (3, getAD_User_ID());
-			pstmt.setInt (4, AD_Org_ID);
+			pstmt.setInt (1, Env.getAD_Client_ID(Env.getCtx()));
+			pstmt.setInt (2, getAD_User_ID());
+			pstmt.setInt (3, AD_Org_ID);
+			pstmt.setInt (4, getAD_User_ID());
+			pstmt.setInt (5, AD_Org_ID);
 			rs = pstmt.executeQuery ();
 			try {
 				PO.setCrossTenantSafe();
@@ -773,6 +776,7 @@ public class MUser extends X_AD_User
 		}
 		//
 		m_rolesAD_Org_ID = AD_Org_ID;
+		m_rolesAD_Client_ID = Env.getAD_Client_ID(Env.getCtx());
 		m_roles = new MRole[list.size()];
 		list.toArray (m_roles);
 		return m_roles;
