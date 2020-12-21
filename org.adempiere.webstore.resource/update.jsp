@@ -110,16 +110,16 @@
                     </script>
 
                     <label id="LBL_Password" for="Password"><cws:message txt="Existing Password"/></label>
-                    <input class="mandatory" size="20" type="password" id="ID_Password" value="" name="Password" maxlength="40"/>
+                    <input class="mandatory" size="20" type="password" id="ID_Password" value="" name="Password" maxlength="40" autocomplete="off"/>
                     <font color="#FF0000">&nbsp;<c:out value="${webUser.passwordMessage}"/></font>
                     <br/>
 
                     <label id="LBL_PasswordNew" for="PasswordNew"><cws:message txt="New Password"/></label>
-                    <input class="mandatory" size="20" id="ID_PasswordNew" value="" name="PasswordNew" maxlength="40" type="password"/>
+                    <input class="mandatory" size="20" id="ID_PasswordNew" value="" name="PasswordNew" maxlength="40" type="password" autocomplete="off"/>
                     <br/>
 
                     <label id="LBL_PasswordConfirm" for="PasswordConfirm"><cws:message txt="Confirm New Password"/></label>
-                    <input class="mandatory" size="20" id="ID_PasswordConfirm" value="" name="PasswordConfirm" maxlength="40" type="password"/>
+                    <input class="mandatory" size="20" id="ID_PasswordConfirm" value="" name="PasswordConfirm" maxlength="40" type="password" autocomplete="off"/>
                     <br/>
 
                     <c:if test="${not empty webUser.saveErrorMessage}">

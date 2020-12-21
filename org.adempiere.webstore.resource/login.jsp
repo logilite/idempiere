@@ -81,7 +81,7 @@
             <br/>
 
             <label id="LBL_Password" for="Password"><cws:message txt="Password"/></label>
-            <input class="mandatory" size="20" type="password" id="ID_Password" value="" name="Password" maxlength="40"/>
+            <input class="mandatory" size="20" type="password" id="ID_Password" value="" name="Password" maxlength="40" autocomplete="off"/>
             <c:if test="${not empty webUser.passwordMessage}">
                 <font color="#FF0000">&nbsp;<c:out value="${webUser.passwordMessage}"/></font>
             </c:if>
