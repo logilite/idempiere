@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 import org.compiere.util.CCache;
+import org.compiere.util.Env;
 
 /**
  * 	Currency Model.
@@ -91,6 +92,16 @@ public class MCurrency extends X_C_Currency
 	/** Cache System Currencies by using ISO code as key **/
 	private static CCache<String,MCurrency> s_currenciesISO = new CCache<String,MCurrency>(Table_Name, "C_CurrencyISO", 50);
 
+	/**
+	 * 	Get Currency using ISO code from cache (immutable)
+	 *	@param ISOcode	Iso code
+	 *	@return MCurrency
+	 */
+	public static MCurrency get (String ISOcode)
+	{
+		return get(Env.getCtx(), ISOcode);
+	}
+	
 	/**
 	 * 	Get Currency using ISO code
 	 *	@param ctx Context

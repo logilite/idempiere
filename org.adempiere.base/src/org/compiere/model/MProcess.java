@@ -25,6 +25,7 @@ import org.adempiere.util.ProcessUtil;
 import org.compiere.process.ProcessInfo;
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
 import org.compiere.wf.MWFNode;
@@ -46,6 +47,16 @@ public class MProcess extends X_AD_Process
 	 */
 	private static final long serialVersionUID = -7234986583327689692L;
 
+	/**
+	 * 	Get MProcess from Cache (immutable)
+	 *	@param AD_Process_ID id
+	 *	@return MProcess
+	 */
+	public static MProcess get (int AD_Process_ID)
+	{
+		return get(Env.getCtx(), AD_Process_ID);
+	}
+	
 	/**
 	 * 	Get MProcess from Cache
 	 *	@param ctx context
