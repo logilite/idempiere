@@ -172,6 +172,7 @@ public class MTax extends X_C_Tax
 		List<MTax> list = new Query(getCtx(), I_C_Tax.Table_Name, whereClause,  get_TrxName())
 			.setParameters(getC_Tax_ID())
 			.setOnlyActiveRecords(true)
+			.setClient_ID()
 			.list();	
 		//red1 - end -
 	 
