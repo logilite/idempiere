@@ -266,8 +266,8 @@ public class MWorkflow extends X_AD_Workflow
 	 */
 	private void loadNodes()
 	{
-		m_nodes = new Query(getCtx(), MWFNode.Table_Name, "AD_WorkFlow_ID=?", get_TrxName())
-			.setParameters(get_ID(), Env.getAD_Client_ID(Env.getCtx()))
+		m_nodes = new Query(getCtx(), MWFNode.Table_Name, "AD_WorkFlow_ID=? AND AD_Client_ID IN (0, ?)", get_TrxName())
+				.setParameters(get_ID(), Env.getAD_Client_ID(Env.getCtx()))
 			.setOnlyActiveRecords(true)
 			.list();
 		if (log.isLoggable(Level.FINE)) log.fine("#" + m_nodes.size());
