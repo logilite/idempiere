@@ -55,8 +55,6 @@ public class StandardTaxProvider implements ITaxProvider {
 				oTax.setIsTaxIncluded(order.isTaxIncluded());
 				if (!oTax.calculateTaxFromLines())
 					return false;
-				if (!oTax.save(order.get_TrxName()))
-					return false;
 				taxList.add(taxID);
 			}
 		}
@@ -353,8 +351,6 @@ public class StandardTaxProvider implements ITaxProvider {
 						grandTotal = grandTotal.add(taxAmt);
 				}
 				if (!oTax.delete(true, rma.get_TrxName()))
-					return false;
-				if (!oTax.save(rma.get_TrxName()))
 					return false;
 			}
 			else
