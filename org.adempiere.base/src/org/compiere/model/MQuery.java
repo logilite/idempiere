@@ -475,6 +475,12 @@ public class MQuery implements Serializable
 	public static final String	HAVE = "HAVE";
 	/** For IDEMPIERE-3413 */
 	public static final String	IN = "IN";
+	/** For IDEMPIERE-4446 */
+	public static final String	NOT_IN = "NOT IN";
+	/** In - 0		*/
+	public static final int		IN_INDEX = 0;
+	/** Not In - 1		*/
+	public static final int		NOT_IN_INDEX = 1;
 	/** For IDEMPIERE-3413 */
 	public static final String	OVERLAP = "OVERLAP";
 	public static final String	EXCLUDE = "EXCLUDE";
@@ -534,6 +540,13 @@ public class MQuery implements Serializable
 		new ValueNamePair(OVERLAP_OP, OVERLAP),	//  4 - OVERLAP_INDEX
 		new ValueNamePair(EXCLUDE_OP, EXCLUDE)	//  5 - EXCLUDE_INDEX
 	};
+	
+	/**	Multiple value search, Operators for Lookups Text and Numbers */
+	public static final ValueNamePair[]	OPERATORS_IN = new ValueNamePair[] {
+		new ValueNamePair(IN,				" IN "),
+		new ValueNamePair(NOT_IN,			" !IN ")
+	};
+
 	/*************************************************************************
 	 * 	Add Restriction
 	 * 	@param ColumnName ColumnName

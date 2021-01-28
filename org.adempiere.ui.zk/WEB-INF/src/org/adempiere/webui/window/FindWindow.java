@@ -37,6 +37,7 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.LayoutUtils;
@@ -63,6 +64,7 @@ import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.ToolBar;
 import org.adempiere.webui.component.ToolBarButton;
 import org.adempiere.webui.component.Window;
+import org.adempiere.webui.editor.WChosenboxListEditor;
 import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.editor.WNumberEditor;
 import org.adempiere.webui.editor.WPaymentEditor;
@@ -1401,6 +1403,16 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
                 	row.getFellow("cellQueryFrom"+row.getId()).getChildren().clear();
                 	row.getFellow("cellQueryTo"+row.getId()).getChildren().clear();
                 }
+				else if (betweenValue.equals(MQuery.NOT_IN) || betweenValue.equals(MQuery.IN))
+				{
+					Component compChosenMultiSelect = getEditorComponent(row, false, true);
+					compChosenMultiSelect.setId("chosen-multi-select-field" + row.getId());
+
+					row.getFellow("cellQueryFrom" + row.getId()).getChildren().clear();
+					row.getFellow("cellQueryTo" + row.getId()).getChildren().clear();
+
+					addRowEditor(compChosenMultiSelect, (ListCell) row.getFellow("cellQueryFrom" + row.getId()));
+				}
                 else if (listbox.getId().equals(listColumn.getId()) || listbox.getId().equals(listOperator.getId())) 
                 {
                 	addRowEditor(componentFrom, (ListCell)row.getFellow("cellQueryFrom"+row.getId()));
@@ -1803,14 +1815,24 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            	}
 	            	continue;
 	            }
-	            Object parsedValue = parseValue(field, value);
+
+				Object parsedValue = null;
+				if (isInOperator(Operator))
+					parsedValue = parseValueForIn(field, value);
+				else
+					parsedValue = parseValue(field, value);
+
 	            if (parsedValue == null)
 	                continue;
-	            String infoDisplay = value.toString();
-	            if (field.isLookup() && !DisplayType.isMultiSelect(field.getDisplayType()))
-	                infoDisplay = field.getLookup().getDisplay(value);
-	            else if (field.getDisplayType() == DisplayType.YesNo)
-	                infoDisplay = Msg.getMsg(Env.getCtx(), infoDisplay);
+
+				String infoDisplay = value.toString();
+				if (isInOperator(Operator))
+					infoDisplay = (String) parsedValue;
+				else if (field.isLookup() && !DisplayType.isMultiSelect(field.getDisplayType()))
+					infoDisplay = field.getLookup().getDisplay(value);
+				else if (field.getDisplayType() == DisplayType.YesNo)
+					infoDisplay = Msg.getMsg(Env.getCtx(), infoDisplay);
+
 	            //  Value2  ******
 	            Object value2 = null;
 	            if (MQuery.OPERATORS[MQuery.BETWEEN_INDEX].getValue().equals(Operator))
@@ -1849,10 +1871,37 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	                    continue;
 	                }
 	                m_query.addRestriction(getSubCategoryWhereClause(field, ((Integer) parsedValue).intValue()), and, openBrackets);
-	            }
-	            else if ((field.getDisplayType()==DisplayType.ChosenMultipleSelectionList||field.getDisplayType()==DisplayType.ChosenMultipleSelectionSearch||field.getDisplayType()==DisplayType.ChosenMultipleSelectionTable) &&
-	            		(MQuery.OPERATORS[MQuery.EQUAL_INDEX].getValue().equals(Operator) || MQuery.OPERATORS[MQuery.NOT_EQUAL_INDEX].getValue().equals(Operator)))
-	            {
+				}
+				else if (isInOperator(Operator))
+				{
+					String whereClause = "";
+					String notInOperator = MQuery.OPERATORS_IN[MQuery.NOT_IN_INDEX].getValue().equals(Operator) ? " NOT" : "";
+
+					if (DisplayType.isLookup(field.getDisplayType())
+						|| DisplayType.isNumeric(field.getDisplayType())
+						|| DisplayType.ID == field.getDisplayType())
+					{
+						whereClause = ColumnSQL + notInOperator + " IN (" + parsedValue + ")";
+					}
+					else if (DisplayType.isText(field.getDisplayType()))
+					{
+						if (DB.isPostgreSQL())
+						{
+							whereClause = "LOWER(" + ColumnSQL + ") " + notInOperator + " SIMILAR TO LOWER('%(" + parsedValue + ")%')";
+						}
+						else if (DB.isOracle())
+						{
+							whereClause = notInOperator + " REGEXP_LIKE (" + ColumnSQL + ",'(" + parsedValue + ")', 'i')";
+						}
+					}
+					m_query.addRestriction(whereClause, and, openBrackets);
+				}
+				else if ((field.getDisplayType() == DisplayType.ChosenMultipleSelectionList
+							|| field.getDisplayType() == DisplayType.ChosenMultipleSelectionSearch
+							|| field.getDisplayType() == DisplayType.ChosenMultipleSelectionTable)
+							&& (MQuery.OPERATORS[MQuery.EQUAL_INDEX].getValue().equals(Operator)
+								|| MQuery.OPERATORS[MQuery.NOT_EQUAL_INDEX].getValue().equals(Operator)))
+				{
 	            	String clause = DB.intersectClauseForCSV(ColumnSQL, parsedValue.toString());
 	            	if (MQuery.OPERATORS[MQuery.EQUAL_INDEX].getValue().equals(Operator))
 	            		m_query.addRestriction(clause, and, openBrackets);
@@ -1860,7 +1909,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            		m_query.addRestriction("NOT (" + clause + ")", and, openBrackets);
 	            }
 	            else if (MQuery.OPERATORS[MQuery.LIKE_INDEX].getValue().equals(Operator))
-				m_query.addRestriction(ColumnSQL, Operator, parsedValue, infoName, infoDisplay, and, openBrackets, true);
+	            	m_query.addRestriction(ColumnSQL, Operator, parsedValue, infoName, infoDisplay, and, openBrackets, true);
 	            else
 	            	m_query.addRestriction(ColumnSQL, Operator, parsedValue,
 	            			infoName, infoDisplay, and, openBrackets);
@@ -2162,7 +2211,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     **/
     public Component getEditorCompQueryFrom(ListItem row)
     {
-        return getEditorComponent(row, false);
+        return getEditorComponent(row, false, false);
     }
 
     /**
@@ -2172,7 +2221,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     **/
     public Component getEditorCompQueryTo(ListItem row)
     {
-        return getEditorComponent(row, true);
+        return getEditorComponent(row, true, false);
     }
 
     /**
@@ -2230,6 +2279,12 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         {
         	addOperators(MQuery.OPERATORS, listOperator);
         }
+
+		// Operator for Multiple value search from the field
+		if (isAddInOperator(referenceType))
+		{
+			appendOperators(MQuery.OPERATORS_IN, listOperator);
+		}
     } //    addOperators
 
     /**
@@ -2238,21 +2293,34 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     **/
     public void addOperators(ValueNamePair[] op, Listbox listOperator)
     {
-        List<?> itemList = listOperator.getChildren();
-        itemList.clear();
-        for (ValueNamePair item: op)
-        {
-            listOperator.appendItem(item.getName(), item.getValue());
-        }
-        listOperator.setSelectedIndex(0);
+		List <?> itemList = listOperator.getChildren();
+		itemList.clear();
+		
+		appendOperators(op, listOperator);
     }   //  addOperators
+    
+	/**
+	 * append Operators
+	 * 
+	 * @param op array of operators
+	 **/
+	public void appendOperators(ValueNamePair[] op, Listbox listOperator)
+	{
+		for (ValueNamePair item : op)
+		{
+			listOperator.appendItem(item.getName(), item.getValue());
+		}
+		listOperator.setSelectedIndex(0);
+	} // appendOperators
 
     /**
      *  Get Editor
      *  @param row row
+     * 	@param to
+     * 	@param isMultiSelect
      *  @return Editor component
-    **/
-    public Component getEditorComponent(ListItem row, boolean to)
+     */
+    public Component getEditorComponent(ListItem row, boolean to, boolean isMultiSelect)
     {
         String columnName = getColumnName(row);
         boolean between = false;
@@ -2272,7 +2340,39 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         GridField findField = (GridField) field.clone(m_advanceCtx);        
         findField.setGridTab(null);
         WEditor editor = null;
-        if (findField.isKey() 
+        
+		if (isMultiSelect)
+		{
+			if (DisplayType.isLookup(findField.getDisplayType()))
+			{
+				Lookup lookup = findField.getLookup();
+				if (lookup != null && lookup instanceof MLookup)
+				{
+					MLookup mLookup = (MLookup) lookup;
+					MLookupInfo mInfo = mLookup.getLookupInfo();
+					mInfo.tabNo = TABNO;
+					if (mInfo.DisplayType == DisplayType.Table
+						|| mInfo.DisplayType == DisplayType.TableDir
+						|| mInfo.DisplayType == DisplayType.Search)
+					{
+						mInfo.DisplayType = DisplayType.ChosenMultipleSelectionTable;
+					}
+					else if (mInfo.DisplayType == DisplayType.List)
+					{
+						mInfo.DisplayType = DisplayType.ChosenMultipleSelectionList;
+					}
+					editor = new WChosenboxListEditor(findField);
+				}
+				findField.getLookup().refresh();
+			}
+
+			if (editor == null)
+			{
+				editor = new WStringEditor(findField);
+				findField.addPropertyChangeListener(editor);
+			}
+		}
+		else if (findField.isKey() 
         		|| (!DisplayType.isLookup(findField.getDisplayType()) && DisplayType.isID(findField.getDisplayType())))
         {
             editor = new WNumberEditor(findField);
@@ -2913,4 +3013,109 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 			}
 		}
 	}
+
+	/**
+	 * Parse value for IN or NOT IN operators
+	 * 
+	 * @param  field - GridField
+	 * @param  value
+	 * @return       Parsed value
+	 */
+	private Object parseValueForIn(GridField field, Object value)
+	{
+		try
+		{
+			Object[] arrValue = null;
+			boolean isAddApostrophe = false;
+			if (DisplayType.isText(field.getDisplayType()))
+			{
+				String strValue = value.toString().replaceAll("([{}])", "");
+				boolean isValidValue = Pattern.compile("([A-Za-z0-9\\s]*[\\|]?)*").matcher(strValue).matches();
+				if (!isValidValue)
+				{
+					throw new AdempiereException("Invalid Value, Only accept the A-Z, 0-9 character and '|' as a separator.");
+				}
+				return value;
+			}
+			else if (DisplayType.isNumeric(field.getDisplayType())
+						|| DisplayType.ID == field.getDisplayType())
+			{
+				String strValue = value.toString().replaceAll("([{}])", "");
+				boolean isValidValue = Pattern.compile("(([0-9]*[\\.]?[0-9]*)+[\\,]?)*").matcher(strValue).matches();
+				if (!isValidValue)
+				{
+					throw new AdempiereException("Invalid Value, Only accept the number value and ',' as a separator.");
+				}
+
+				String[] values = strValue.split(",");
+				arrValue = new BigDecimal[values.length];
+				for (int i = 0; i < values.length; i++)
+				{
+					arrValue[i] = new BigDecimal(values[i].trim());
+				}
+			}
+			else
+			{
+				if (field.getDisplayType() == DisplayType.List)
+					isAddApostrophe = true;
+
+				arrValue = value.toString().split(",");
+			}
+
+			String finalValue = "";
+			for (Object val : arrValue)
+			{
+				if (!Util.isEmpty(finalValue, true))
+					finalValue += ", ";
+
+				if (isAddApostrophe)
+					finalValue += "'";
+
+				finalValue += val.toString().trim();
+
+				if (isAddApostrophe)
+					finalValue += "'";
+			}
+			if (Util.isEmpty(finalValue, true))
+				return null;
+			return finalValue;
+		}
+		catch (Exception e)
+		{
+			throw new AdempiereException("Fail while parse value for IN or Not IN, Error:" + e.getLocalizedMessage(), e);
+		}
+	} // parseValueForInOpr
+
+	/**
+	 * Check is IN or NOT IN operator selected
+	 * 
+	 * @param  Operator
+	 * @return
+	 */
+	private boolean isInOperator(String Operator)
+	{
+		return MQuery.OPERATORS_IN[MQuery.IN_INDEX].getValue().equals(Operator)
+				|| MQuery.OPERATORS_IN[MQuery.NOT_IN_INDEX].getValue().equals(Operator);
+	} // isInOperator
+
+	/**
+	 * Allow to add IN or NOT IN operator
+	 * 
+	 * @param  displayType
+	 * @return
+	 */
+	private boolean isAddInOperator(int displayType)
+	{
+		return DisplayType.String == displayType
+				|| DisplayType.Text == displayType
+				|| DisplayType.TextLong == displayType
+				|| DisplayType.Memo == displayType
+				|| DisplayType.List == displayType
+				|| DisplayType.Table == displayType
+				|| DisplayType.TableDir == displayType
+				|| DisplayType.Search == displayType
+				|| DisplayType.ID == displayType
+				|| DisplayType.isNumeric(displayType);
+	} // isAddInOperator
+
 }   //  FindPanel
