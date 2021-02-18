@@ -132,6 +132,7 @@ public class MRecentItem extends X_AD_RecentItem
 			if (retValue.getAD_Table_ID() == AD_Table_ID
 					&& retValue.getRecord_ID() == Record_ID
 					&& retValue.getAD_User_ID() == AD_User_ID
+					&& retValue.getAD_Client_ID() == Env.getAD_Client_ID(ctx)
 					&& Env.getAD_Language(ctx).equals(Env.getAD_Language(retValue.getCtx()))
 					)
 			{
@@ -140,7 +141,7 @@ public class MRecentItem extends X_AD_RecentItem
 		}
 		//
 		MRecentItem retValue = null;
-		String sql = "SELECT * FROM AD_RecentItem WHERE AD_Table_ID=? AND Record_ID=? AND NVL(AD_User_ID,0)=?";
+		String sql = "SELECT * FROM AD_RecentItem WHERE AD_Table_ID=? AND Record_ID=? AND NVL(AD_User_ID,0)=? AND AD_Client_ID=?";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
@@ -149,6 +150,7 @@ public class MRecentItem extends X_AD_RecentItem
 			pstmt.setInt(1, AD_Table_ID);
 			pstmt.setInt(2, Record_ID);
 			pstmt.setInt(3, AD_User_ID);
+			pstmt.setInt(4, Env.getAD_Client_ID(ctx));
 			rs = pstmt.executeQuery ();
 			if (rs.next ())
 				retValue = new MRecentItem (ctx, rs, null);

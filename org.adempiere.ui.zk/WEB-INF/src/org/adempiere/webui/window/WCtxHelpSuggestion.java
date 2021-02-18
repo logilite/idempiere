@@ -201,6 +201,8 @@ public class WCtxHelpSuggestion extends Window implements EventListener<Event> {
 			Object[] params = new Object[]{helpTextbox.getValue(), ctxHelpMsg.get_ID(), ctxHelpMsg.getAD_Client_ID(), Env.getAD_Language(Env.getCtx())};
 			DB.executeUpdateEx(update.toString(), params, trx.getTrxName());			
 		} else {
+		  try {
+			PO.setCrossTenantSafe();
 			MCtxHelpSuggestion suggestion = new MCtxHelpSuggestion(Env.getCtx(), 0, trx.getTrxName());
 			suggestion.setClientOrg(0, 0);
 			if (ctxHelpMsg != null) {
@@ -261,6 +263,9 @@ public class WCtxHelpSuggestion extends Window implements EventListener<Event> {
 			suggestion.setIsSaveAsTenantCustomization(false);
 			
 			suggestion.saveEx();			
+		  }finally {
+			PO.clearCrossTenantSafe();
+		}
 		} 
 		this.detach();
 	}
