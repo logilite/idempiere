@@ -627,7 +627,7 @@ public class Doc_MatchInv extends Doc
 		dr.setQty(getQty());
 		BigDecimal temp = dr.getAcctBalance();
 		//	Set AmtAcctCr/Dr from Receipt (sets also Project)
-		if (m_matchInv.getReversal_ID() > 0) 
+		if (m_matchInv.getReversal_ID() > 0 && m_matchInv.isReversal()) 
 		{
 			if (!dr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
 					m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
@@ -677,7 +677,7 @@ public class Doc_MatchInv extends Doc
 				cr.setAmtSourceCr(BigDecimal.ZERO);
 			}
 			temp = cr.getAcctBalance();
-			if (m_matchInv.getReversal_ID() > 0)
+			if (m_matchInv.getReversal_ID() > 0 && m_matchInv.isReversal())
 			{
 				if (!cr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
 						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
@@ -711,7 +711,7 @@ public class Doc_MatchInv extends Doc
 					invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
 			cr = fact.createLine (null, expense,
 				as.getC_Currency_ID(), LineNetAmt, null);
-			if (m_matchInv.getReversal_ID() > 0)
+			if (m_matchInv.getReversal_ID() > 0 && m_matchInv.isReversal())
 			{
 				if (!cr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
 						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
