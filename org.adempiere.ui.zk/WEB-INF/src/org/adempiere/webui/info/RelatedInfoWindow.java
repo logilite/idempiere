@@ -54,32 +54,32 @@ import org.zkoss.zul.ext.Sortable;
  */
 public class RelatedInfoWindow implements EventListener<Event>, Sortable<Object>{
 
-	private final static int DEFAULT_PAGE_PRELOAD = 4;
+	protected final static int DEFAULT_PAGE_PRELOAD = 4;
 
-	private EmbedWinInfo info;
+	protected EmbedWinInfo info;
 
-	private int m_count;
-	private int pageNo;
-	private List<Object> cache;
-	private int cacheStart;
-	private int cacheEnd;
-	private Object parentId;
+	protected int m_count;
+	protected int pageNo;
+	protected List<Object> cache;
+	protected int cacheStart;
+	protected int cacheEnd;
+	protected Object parentId;
 	protected Paging paging;
 	protected Map<String, WEditor> editorMap = new HashMap<String, WEditor>();
-	private InfoWindow parentInfoWindow;
+	protected InfoWindow parentInfoWindow;
 
 	protected transient CLogger log = CLogger.getCLogger(getClass());
 
-	private ListModelTable model;
+	protected ListModelTable model;
 
-	private String m_sqlUserOrder;
-	private boolean m_useDatabasePaging = false;
+	protected String m_sqlUserOrder;
+	protected boolean m_useDatabasePaging = false;
 
-	private String m_infoSqlCount;
+	protected String m_infoSqlCount;
 	protected int numPagePreLoad = MSysConfig.getIntValue(MSysConfig.ZK_INFO_NUM_PAGE_PRELOAD, DEFAULT_PAGE_PRELOAD);
 	protected boolean isHasNextPage = false;
 
-	private ColumnInfo[] columnsLayout;
+	protected ColumnInfo[] columnsLayout;
 
 	/**
 	 * @param infoWindow
@@ -114,7 +114,7 @@ public class RelatedInfoWindow implements EventListener<Event>, Sortable<Object>
 		renderItems();
 	}
 
-	private void testCount() {
+	protected void testCount() {
 		m_count = 0;
 		Object linkPara = null;
 		if (parentId != null && parentId instanceof IDColumn){
@@ -134,7 +134,7 @@ public class RelatedInfoWindow implements EventListener<Event>, Sortable<Object>
 		}
 	}
 
-	private void renderItems() {
+	protected void renderItems() {
 		int pageSize = parentInfoWindow.getPageSize();
 		WListbox contentPanel = (WListbox) info.getInfoTbl();
 		if (m_count > 0)
@@ -230,7 +230,7 @@ public class RelatedInfoWindow implements EventListener<Event>, Sortable<Object>
 	/**
 	 * @param cacheStart the cacheStart to set
 	 */
-	private void setCacheStart(int cacheStart) {
+	protected void setCacheStart(int cacheStart) {
 		this.cacheStart = cacheStart;
 	}
 
@@ -241,7 +241,7 @@ public class RelatedInfoWindow implements EventListener<Event>, Sortable<Object>
 		return cacheEnd;
 	}
 
-	private List<Object> getSubList (int fromIndex, int toIndex, List<Object> line){
+	protected List<Object> getSubList (int fromIndex, int toIndex, List<Object> line){
     	if (toIndex > line.size())
     		toIndex = line.size();
 
@@ -261,7 +261,7 @@ public class RelatedInfoWindow implements EventListener<Event>, Sortable<Object>
      * @param overValue
      * @return
      */
-    private int getOverIntValue (long overValue){
+    protected int getOverIntValue (long overValue){
     	return getOverIntValue (overValue, 0);
     }
 
@@ -271,14 +271,14 @@ public class RelatedInfoWindow implements EventListener<Event>, Sortable<Object>
      * @param extra
      * @return
      */
-    private int getOverIntValue (long overValue, int extra){
+    protected int getOverIntValue (long overValue, int extra){
     	if (overValue >= Integer.MAX_VALUE)
     		overValue = Integer.MAX_VALUE - extra;
 
     	return (int)overValue;
     }
 
-	private List<Object> readLine(int start, int end) {
+    protected List<Object> readLine(int start, int end) {
 		int pageSize = parentInfoWindow.getPageSize();
 
     	//cacheStart & cacheEnd - 1 based index, start & end - 0 based index
@@ -413,7 +413,7 @@ public class RelatedInfoWindow implements EventListener<Event>, Sortable<Object>
 		}
 	}
 
-	private  ArrayList<Object> readData(ResultSet rs) throws SQLException {
+    protected  ArrayList<Object> readData(ResultSet rs) throws SQLException {
 
 		int colOffset = 1;  //  columns start with 1
 		ArrayList<Object> data = new ArrayList<Object>();

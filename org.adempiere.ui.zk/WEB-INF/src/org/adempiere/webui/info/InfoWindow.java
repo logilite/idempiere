@@ -134,14 +134,14 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	protected Borderlayout layout;
 	protected Vbox southBody;
 	/** List of WEditors            */
-    protected List<WEditor> editors;
+    public List<WEditor> editors;
     protected List<WEditor> identifiers;
     protected Properties infoContext;
 
     /** embedded Panel **/
-    Tabbox embeddedPane = new Tabbox();
-    ArrayList <EmbedWinInfo> embeddedWinList = new ArrayList <EmbedWinInfo>();
-    Map<Integer, RelatedInfoWindow> relatedMap = new HashMap<>();
+    protected Tabbox embeddedPane = new Tabbox();
+    protected ArrayList <EmbedWinInfo> embeddedWinList = new ArrayList <EmbedWinInfo>();
+    protected Map<Integer, RelatedInfoWindow> relatedMap = new HashMap<>();
 
 	/** Max Length of Fields */
     public static final int FIELDLENGTH = 20;
@@ -157,14 +157,14 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		
 	// F3P: Keep original values: when a row is unselected, restore original values
 		
-	private boolean hasEditable = false;
-	private Map<Integer, List<Object>> cacheOriginalValues = new HashMap<>();
-	private Map<Integer, List<Object>> temporarySelectedData = new HashMap<>(); 	
-	private WInfoWindowListItemRenderer infoWindowListItemRenderer = null;
+	protected boolean hasEditable = false;
+	protected Map<Integer, List<Object>> cacheOriginalValues = new HashMap<>();
+	protected Map<Integer, List<Object>> temporarySelectedData = new HashMap<>(); 	
+	protected WInfoWindowListItemRenderer infoWindowListItemRenderer = null;
 	
 	// F3P: export 
 	
-	private Button exportButton = null;
+	protected Button exportButton = null;
 	
 	/**
 	 * Menu contail process menu item
@@ -1021,7 +1021,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		return sql;
 	}
 
-	protected MInfoColumn findInfoColumn(GridField gridField) {
+	public MInfoColumn findInfoColumn(GridField gridField) {
 		for(int i = 0; i < gridFields.size(); i++) {
 			if (gridFields.get(i) == gridField) {
 				return infoColumns[i];
