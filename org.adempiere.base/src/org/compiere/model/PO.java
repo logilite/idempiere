@@ -1315,13 +1315,46 @@ public abstract class PO
 		}
 	}	//	load
 
+	
+    /**
+     * Load record with UUID
+     * 
+     * @param uuID    UUID
+     * @param trxName transaction name
+     */
+    public void loadByUU(String uuID, String trxName)
+    {
+        if (Util.isEmpty(uuID, true))
+        {
+            throw new IllegalArgumentException("Invalid null or blank UU - Must pass valid UU");
+        }
+        
+        // reset new values
+        m_newValues = new Object[get_ColumnCount()];
+
+        if (log.isLoggable(Level.FINEST))
+            log.finest("uuID=" + uuID);
+            
+        load(uuID,trxName);
+    } // loadByUU
+    
 
 	/**
 	 *  (re)Load record with m_ID[*]
 	 *  @param trxName transaction
 	 *  @return true if loaded
 	 */
-	public boolean load (String trxName)
+	public boolean load (String trxName) {
+		return load(null, trxName);
+	}
+	
+	/**
+	 *  (re)Load record with uuID
+	 *  @param uuID RecrodUU
+	 *  @param trxName transaction
+	 *  @return true if loaded
+	 */
+	protected boolean load (String uuID,String trxName)
 	{
 		m_trxName = trxName;
 		boolean success = true;
@@ -1335,27 +1368,34 @@ public abstract class PO
 		}
 		sql.append(" FROM ").append(p_info.getTableName())
 			.append(" WHERE ")
-			.append(get_WhereClause(false));
+			.append(get_WhereClause(false,uuID));
 
 		//
 	//	int index = -1;
-		if (log.isLoggable(Level.FINEST)) log.finest(get_WhereClause(true));
+		if (log.isLoggable(Level.FINEST)) log.finest(get_WhereClause(true,uuID));
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
 		{
 			pstmt = DB.prepareStatement(sql.toString(), m_trxName);	//	local trx only
-			for (int i = 0; i < m_IDs.length; i++)
+			if (!Util.isEmpty(uuID, true))
 			{
-				Object oo = m_IDs[i];
-				if (oo instanceof Integer)
-					pstmt.setInt(i+1, ((Integer)m_IDs[i]).intValue());
-				else if (oo instanceof Boolean)
-					pstmt.setString(i+1, ((Boolean) m_IDs[i] ? "Y" : "N"));
-				else if (oo instanceof Timestamp)
-					pstmt.setTimestamp(i+1, (Timestamp)m_IDs[i]);
-				else
-					pstmt.setString(i+1, m_IDs[i].toString());
+				pstmt.setString(1, uuID);
+			}
+			else
+			{
+				for (int i = 0; i < m_IDs.length; i++)
+				{
+					Object oo = m_IDs[i];
+					if (oo instanceof Integer)
+						pstmt.setInt(i+1, ((Integer)m_IDs[i]).intValue());
+					else if (oo instanceof Boolean)
+						pstmt.setString(i+1, ((Boolean) m_IDs[i] ? "Y" : "N"));
+					else if (oo instanceof Timestamp)
+						pstmt.setTimestamp(i+1, (Timestamp)m_IDs[i]);
+					else
+						pstmt.setString(i+1, m_IDs[i].toString());
+				}
 			}
 			rs = pstmt.executeQuery();
 			if (rs.next())
@@ -1364,7 +1404,7 @@ public abstract class PO
 			}
 			else
 			{
-				log.log(Level.SEVERE, "NO Data found for " + get_WhereClause(true), new Exception());
+				log.log(Level.SEVERE, "NO Data found for " + get_WhereClause(true,uuID), new Exception());
 				m_IDs = new Object[] {I_ZERO};
 				success = false;
 			//	throw new DBException("NO Data found for " + get_WhereClause(true));
@@ -1378,7 +1418,7 @@ public abstract class PO
 			String msg = "";
 			if (m_trxName != null)
 				msg = "[" + m_trxName + "] - ";
-			msg += get_WhereClause(true)
+			msg += get_WhereClause(true,uuID)
 			//	+ ", Index=" + index
 			//	+ ", Column=" + get_ColumnName(index)
 			//	+ ", " + p_info.toString(index)
@@ -1389,9 +1429,12 @@ public abstract class PO
 		//	throw new DBException(e);
 		}
 		//	Finish
-		finally {
+		finally
+		{
 			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
+			rs = null;
+			pstmt = null;
+			m_trxName = null;
 		}
 		loadComplete(success);
 		return success;
@@ -3154,15 +3197,37 @@ public abstract class PO
 	{
 		
 	}
+	
+    /**
+     *     Create Single/Multi Key Where Clause
+     *     @param withValues if true uses actual values otherwise ?
+     *     @return where clause
+     */
+    public String get_WhereClause (boolean withValues) {
+        return get_WhereClause(withValues,null);
+    }
 
 	/**
 	 * 	Create Single/Multi Key Where Clause
 	 * 	@param withValues if true uses actual values otherwise ?
+	 *  @param uuID 
 	 * 	@return where clause
 	 */
-	public String get_WhereClause (boolean withValues)
+	public String get_WhereClause (boolean withValues, String uuID)
 	{
 		StringBuilder sb = new StringBuilder();
+		
+        if (!Util.isEmpty(uuID, true))
+        {
+            sb.append(getUUIDColumnName()).append("=");
+            if (withValues)
+                sb.append(DB.TO_STRING(uuID));
+            else
+                sb.append("?");
+
+            return sb.toString();
+        }
+
 		for (int i = 0; i < m_IDs.length; i++)
 		{
 			if (i != 0)

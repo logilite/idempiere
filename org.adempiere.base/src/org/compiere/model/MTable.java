@@ -470,6 +470,21 @@ public class MTable extends X_AD_Table
 
 		return po;
 	}	//	getPO
+	
+    /**
+     * Get PO Class Instance
+     * 
+     * @param  uuID    UUID
+     * @param  trxName transaction
+     * @return         PO for Record
+     */
+    public PO getPOByUU (String uuID, String trxName)
+    {
+        PO po = getPO(0, trxName);
+        po.loadByUU(uuID, trxName);
+
+        return po;
+    } // getPOByUU
 
 	/**
 	 * 	Get PO Class Instance
