@@ -1434,7 +1434,6 @@ public abstract class PO
 			DB.close(rs, pstmt);
 			rs = null;
 			pstmt = null;
-			m_trxName = null;
 		}
 		loadComplete(success);
 		return success;
