@@ -211,7 +211,7 @@ public class MOrder extends X_C_Order implements DocAction
 	 */
 	public static MOrder createFrom (MProject project, boolean IsSOTrx, String DocSubTypeSO)
 	{
-		MOrder order = (MOrder) MTable.get(project.getCtx(), MTable.Table_ID).getPO(0, project.get_TrxName());
+		MOrder order = (MOrder) MTable.get(project.getCtx(), MOrder.Table_ID).getPO(0, project.get_TrxName());
 		order.setAD_Client_ID(project.getAD_Client_ID());
 		order.setAD_Org_ID(project.getAD_Org_ID());
 		order.setC_Campaign_ID(project.getC_Campaign_ID());
