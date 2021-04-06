@@ -52,43 +52,43 @@ import org.compiere.util.Msg;
 public class InOutGenerate extends SvrProcess
 {
 	/**	Manual Selection		*/
-	private boolean 	p_Selection = false;
+	protected boolean 	p_Selection = false;
 	/** Warehouse				*/
-	private int			p_M_Warehouse_ID = 0;
+	protected int			p_M_Warehouse_ID = 0;
 	/** BPartner				*/
-	private int			p_C_BPartner_ID = 0;
+	protected int			p_C_BPartner_ID = 0;
 	/** Promise Date			*/
-	private Timestamp	p_DatePromised = null;
+	protected Timestamp	p_DatePromised = null;
 	/** Include Orders w. unconfirmed Shipments	*/
-	private boolean		p_IsUnconfirmedInOut = false;
+	protected boolean		p_IsUnconfirmedInOut = false;
 	/** DocAction				*/
-	private String		p_docAction = DocAction.ACTION_None;
+	protected String		p_docAction = DocAction.ACTION_None;
 	/** Consolidate				*/
-	private boolean		p_ConsolidateDocument = true;
+	protected boolean		p_ConsolidateDocument = true;
     /** Shipment Date                       */
-	private Timestamp       p_DateShipped = null;
+	protected Timestamp       p_DateShipped = null;
 	
 	/**	The current Shipment	*/
-	private MInOut 		m_shipment = null;
+	protected MInOut 		m_shipment = null;
 	/** Number of Shipments	being created	*/
-	private int			m_created = 0;
+	protected int			m_created = 0;
 	/**	Line Number				*/
-	private int			m_line = 0;
+	protected int			m_line = 0;
 	/** Movement Date			*/
-	private Timestamp	m_movementDate = null;
+	protected Timestamp	m_movementDate = null;
 	/**	Last BP Location		*/
-	private int			m_lastC_BPartner_Location_ID = -1;
+	protected int			m_lastC_BPartner_Location_ID = -1;
 
 	/** The Query sql			*/
-	private StringBuffer 		m_sql = null;
+	protected StringBuffer 		m_sql = null;
 
 	
 	/** Storages temp space				*/
-	private HashMap<SParameter,MStorageOnHand[]> m_map = new HashMap<SParameter,MStorageOnHand[]>();
+	protected HashMap<SParameter,MStorageOnHand[]> m_map = new HashMap<SParameter,MStorageOnHand[]>();
 	/** Last Parameter					*/
-	private SParameter		m_lastPP = null;
+	protected SParameter		m_lastPP = null;
 	/** Last Storage					*/
-	private MStorageOnHand[]		m_lastStorages = null;
+	protected MStorageOnHand[]		m_lastStorages = null;
 
 	
 	/**
@@ -209,7 +209,7 @@ public class InOutGenerate extends SvrProcess
 	 * 	@param pstmt Order Query
 	 *	@return info
 	 */
-	private String generate (PreparedStatement pstmt)
+	protected String generate (PreparedStatement pstmt)
 	{
 
 		ResultSet rs = null;
@@ -426,7 +426,7 @@ public class InOutGenerate extends SvrProcess
 	 *	@param storages storage info
 	 *	@param force force delivery
 	 */
-	private void createLine (MOrder order, MOrderLine orderLine, BigDecimal qty, 
+	protected void createLine (MOrder order, MOrderLine orderLine, BigDecimal qty, 
 		MStorageOnHand[] storages, boolean force)
 	{
 		//	Complete last Shipment - can have multiple shipments
@@ -556,7 +556,7 @@ public class InOutGenerate extends SvrProcess
 	 *	@param FiFo
 	 *	@return storages
 	 */
-	private MStorageOnHand[] getStorages(int M_Warehouse_ID, 
+	protected MStorageOnHand[] getStorages(int M_Warehouse_ID, 
 			 int M_Product_ID, int M_AttributeSetInstance_ID,
 			  Timestamp minGuaranteeDate, boolean FiFo)
 	{
@@ -594,7 +594,7 @@ public class InOutGenerate extends SvrProcess
 	/**
 	 * 	Complete Shipment
 	 */
-	private void completeShipment()
+	protected void completeShipment()
 	{
 		if (m_shipment != null)
 		{
