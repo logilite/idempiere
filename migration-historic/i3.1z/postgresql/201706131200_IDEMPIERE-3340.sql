@@ -217,9 +217,6 @@ INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,
 INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('E','Please drag an item from a menu.',0,0,'Y',TO_TIMESTAMP('2017-06-12 13:22:03','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2017-06-12 13:22:03','YYYY-MM-DD HH24:MI:SS'),100,200424,'DragItemMenu','D','8b3ed4ca-6cee-4b8c-a0b3-1664ce31dedc')
 ;
 
-ALTER TABLE AD_Tree_Favorite_Node DROP COLUMN parent_id
-;
-
 -- Jun 12, 2017 6:31:02 PM IST
 INSERT INTO AD_Reference (AD_Reference_ID,Name,ValidationType,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,EntityType,IsOrderByValue,AD_Reference_UU) VALUES (200137,'AD_Tree_Favorite_Node list','T',0,0,'Y',TO_TIMESTAMP('2017-06-12 18:31:00','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2017-06-12 18:31:00','YYYY-MM-DD HH24:MI:SS'),100,'D','N','47f185a4-37d5-426e-b386-8fabc0f0f49d')
 ;
@@ -234,10 +231,6 @@ UPDATE AD_Column SET AD_Reference_ID=18, AD_Reference_Value_ID=200137, FKConstra
 
 -- Jun 12, 2017 6:38:26 PM IST
 UPDATE AD_Column SET FKConstraintName='Parent_ADTreeFavoriteNode', FKConstraintType='C',Updated=TO_TIMESTAMP('2017-06-12 18:38:26','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID=213070
-;
-
--- Jun 12, 2017 6:38:26 PM IST
-ALTER TABLE AD_Tree_Favorite_Node ADD COLUMN Parent_ID NUMERIC(10) DEFAULT NULL 
 ;
 
 -- Jun 12, 2017 6:38:26 PM IST

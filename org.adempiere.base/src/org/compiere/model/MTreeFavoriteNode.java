@@ -12,7 +12,10 @@ package org.compiere.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 /**
  * Favorite Tree Node Model
@@ -62,6 +65,60 @@ public class MTreeFavoriteNode extends X_AD_Tree_Favorite_Node
 	{
 		return DB.getSQLValueBooleanEx(null, SQL_CHECK_MENU_EXISTS, treeFavID, nodeID, menuID);
 	} // isMenuExists
+
+	/**
+	 * Get Favourite node for the menu
+	 * 
+	 * @param  AD_Tree_Favorite_ID
+	 * @param  Menu_ID
+	 * @return                     {@link MTreeFavoriteNode}
+	 */
+	public static MTreeFavoriteNode getFavouriteTreeNodeFromMenuID(int AD_Tree_Favorite_ID, int Menu_ID)
+	{
+		Query query = new Query(Env.getCtx(), MTreeFavoriteNode.Table_Name, "AD_Tree_Favorite_ID=? AND AD_Menu_ID=? AND IsFavourite='Y'", null);
+		query.setOnlyActiveRecords(true);
+		query.setParameters(new Object[] { AD_Tree_Favorite_ID, Menu_ID });
+		return query.first();
+	} // getFavouriteTreeNodeFromMenuID
+
+	/**
+	 * Create tree favorite node
+	 * 
+	 * @param  AD_Client_ID
+	 * @param  AD_Org_ID
+	 * @param  AD_Tree_Favorite_ID
+	 * @param  AD_Menu_ID
+	 * @param  Parent_ID
+	 * @param  SeqNo
+	 * @param  folderName
+	 * @param  isSummary
+	 * @param  isCollapsible
+	 * @param  isFavourite
+	 * @return                     {@link MTreeFavoriteNode}
+	 */
+	public static MTreeFavoriteNode create(	int AD_Client_ID, int AD_Org_ID, int AD_Tree_Favorite_ID, int AD_Menu_ID, int Parent_ID, int SeqNo,
+											String folderName, boolean isSummary, boolean isCollapsible, boolean isFavourite)
+	{
+		MTreeFavoriteNode favNode = (MTreeFavoriteNode) MTable.get(Env.getCtx(), MTreeFavoriteNode.Table_ID).getPO(0, null);
+		favNode.set_ValueOfColumn(I_AD_Tree_Favorite_Node.COLUMNNAME_AD_Client_ID, AD_Client_ID);
+		favNode.setAD_Org_ID(AD_Org_ID);
+		favNode.setAD_Tree_Favorite_ID(AD_Tree_Favorite_ID);
+		favNode.setAD_Menu_ID(AD_Menu_ID);
+		favNode.setParent_ID(Parent_ID);
+		favNode.setSeqNo(SeqNo);
+		if (isSummary)
+			favNode.setName(folderName);
+		favNode.setIsSummary(isSummary);
+		favNode.setIsCollapsible(isCollapsible);
+		favNode.setIsFavourite(isFavourite);
+		if (!favNode.save())
+		{
+			throw new AdempiereException(Msg.getMsg(Env.getCtx(), "NodeNotCreate"));
+		}
+
+		return favNode;
+	} // create
+
 
 	/**
 	 * Copy From

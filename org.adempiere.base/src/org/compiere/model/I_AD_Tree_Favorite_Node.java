@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_Tree_Favorite_Node
  *  @author iDempiere (generated) 
- *  @version Release 3.1
+ *  @version Release 7.1
  */
 public interface I_AD_Tree_Favorite_Node 
 {
@@ -35,9 +35,9 @@ public interface I_AD_Tree_Favorite_Node
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
 
-    /** AccessLevel = 3 - Client - Org 
+    /** AccessLevel = 7 - System - Client - Org 
      */
-    BigDecimal accessLevel = BigDecimal.valueOf(3);
+    BigDecimal accessLevel = BigDecimal.valueOf(7);
 
     /** Load Meta Data */
 
@@ -148,6 +148,19 @@ public interface I_AD_Tree_Favorite_Node
 	  */
 	public boolean isCollapsible();
 
+    /** Column name IsFavourite */
+    public static final String COLUMNNAME_IsFavourite = "IsFavourite";
+
+	/** Set Favourite.
+	  * This record is a favourite
+	  */
+	public void setIsFavourite (boolean IsFavourite);
+
+	/** Get Favourite.
+	  * This record is a favourite
+	  */
+	public boolean isFavourite();
+
     /** Column name IsSummary */
     public static final String COLUMNNAME_IsSummary = "IsSummary";
 
@@ -160,6 +173,19 @@ public interface I_AD_Tree_Favorite_Node
 	  * This is a summary entity
 	  */
 	public boolean isSummary();
+
+    /** Column name LoginOpenSeqNo */
+    public static final String COLUMNNAME_LoginOpenSeqNo = "LoginOpenSeqNo";
+
+	/** Set Login automatic open sequence.
+	  * Determine the order items will be automatically opened when user logs in
+	  */
+	public void setLoginOpenSeqNo (int LoginOpenSeqNo);
+
+	/** Get Login automatic open sequence.
+	  * Determine the order items will be automatically opened when user logs in
+	  */
+	public int getLoginOpenSeqNo();
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";

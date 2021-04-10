@@ -10,19 +10,20 @@
 package org.adempiere.webui.component;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.dashboard.DPFavourites;
+import org.adempiere.webui.desktop.FavouriteController;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.TreeUtils;
 import org.adempiere.webui.window.FDialog;
-import org.compiere.model.I_AD_Tree_Favorite_Node;
-import org.compiere.model.MMenu;
+import org.compiere.model.MTable;
 import org.compiere.model.MTreeFavoriteNode;
 import org.compiere.model.MTreeNode;
+import org.compiere.model.PO;
 import org.compiere.util.CLogger;
-import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
-import org.compiere.util.Trx;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.DropEvent;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -31,42 +32,40 @@ import org.zkoss.zk.ui.event.MouseEvent;
 import org.zkoss.zul.DefaultTreeNode;
 import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.Menupopup;
+import org.zkoss.zul.Toolbarbutton;
 import org.zkoss.zul.Tree;
 import org.zkoss.zul.Treeitem;
 import org.zkoss.zul.Treerow;
 
 /**
- * Register listener for Drag&Drop item, Context Menu, Delete Item, User Default
- * Collapse/Expand Operation
+ * Register listener for Drag&Drop item, Context Menu, Delete Item, Summary folder default
+ * Collapsed/Expanded Operation
  * 
  * @author Logilite Technologies
  * @since  June 20, 2017
  */
 public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 {
-	private static final CLogger	log							= CLogger.getCLogger(ADTreeFavoriteOnDropListener.class);
-
-	public static final String		SQL_UPDATE_NODE_POSITION	= "UPDATE AD_Tree_Favorite_Node SET Parent_ID=?, SeqNo=?, Updated=SysDate WHERE AD_Tree_Favorite_Node_ID=?";
-
 	public static final String		MENU_ITEM_DELETE			= "DELETE";
-	public static final String		MENU_ITEM_EXPAND			= "StartWithExpanded";
-	public static final String		MENU_ITEM_COLLAPSE			= "StartWithCollapsed";
 	public static final String		NODE_MOVEINTO				= "MoveInto";
 	public static final String		NODE_INSERTAFTER			= "InsertAfter";
+	public static final String		MENU_ITEM_DEFAULT_EXPANDED	= "DefaultExpanded";
+	public static final String		MENU_ITEM_DEFAULT_COLLAPSED	= "DefaultCollapsed";
 
 	private FavoriteSimpleTreeModel	treeModel;
 	private Tree					tree;
-	private int						windowNo;
+
 	private int						mTreeFavID;
 
-	public ADTreeFavoriteOnDropListener(Tree tree, FavoriteSimpleTreeModel treeModel, int windowNo)
+	//
+	public ADTreeFavoriteOnDropListener(Tree tree, FavoriteSimpleTreeModel treeModel)
 	{
 		this.tree = tree;
 		this.treeModel = treeModel;
-		this.windowNo = windowNo;
 
-		mTreeFavID = treeModel.AD_Tree_Favorite_ID;
-	}
+		FavouriteController controller = FavouriteController.getInstance(Executions.getCurrent().getDesktop().getSession());
+		mTreeFavID = controller.getAD_Tree_Favorite_ID();
+	} // ADTreeFavoriteOnDropListener
 
 	/**
 	 * Events For Right Click And Menu Item Dragged Source to Target Folder
@@ -75,18 +74,18 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 	@Override
 	public void onEvent(Event event) throws Exception
 	{
-		if (Events.ON_RIGHT_CLICK.equals(event.getName()))
+		if (Events.ON_RIGHT_CLICK.equals(event.getName())
+			|| (Events.ON_CLICK.equals(event.getName()) && event.getTarget() instanceof Toolbarbutton
+				&& (boolean) ((Toolbarbutton) event.getTarget()).getAttribute(FavoriteSimpleTreeModel.MOBILE_TOOLBAR_CTX_MENU)))
 		{
 			MouseEvent me = (MouseEvent) event;
-			Treeitem target = (Treeitem) ((Treerow) me.getTarget()).getParent();
-			DefaultTreeNode<Object> toNode = (DefaultTreeNode<Object>) target.getValue();
-			menuItemList(toNode);
+			Treeitem target = (event.getTarget() instanceof Toolbarbutton)	? (Treeitem) ((Treerow) me.getTarget().getParent().getParent()).getParent()
+																			: (Treeitem) ((Treerow) me.getTarget()).getParent();
+			menuItemList(target);
 		}
 		else if (event instanceof DropEvent)
 		{
 			DropEvent de = (DropEvent) event;
-			log.fine("Source=" + de.getDragged() + " Target=" + de.getTarget());
-
 			if (de.getDragged() != de.getTarget())
 			{
 				Treeitem src;
@@ -106,12 +105,6 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 				Treerow tr = (Treerow) de.getDragged();
 				String strDraggable = tr.getDraggable();
 
-				/*
-				 * Here Condition True when Node Moving Internally, False when
-				 * Node Drag from Menu Bar to User Favorite Panel dashboard...
-				 * For more reference @see on AbstractMenuPanel.generateMenu(),
-				 * set Draggable = 'favourite'
-				 */
 				if (!strDraggable.equals(DPFavourites.FAVOURITE_DROPPABLE))
 				{
 					DefaultTreeNode<?> stn_src = (DefaultTreeNode<?>) src.getValue();
@@ -178,7 +171,7 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 						}
 						else
 						{
-							insertNodeMenu(mID, nd.getNode_ID(), stn_target);
+							insertMenuInTree(mID, nd.getNode_ID(), stn_target);
 						}
 					}
 					else
@@ -192,185 +185,90 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 						}
 						else
 						{
-							insertNodeMenu(mID, pID, dtn_target_parent);
+							insertMenuInTree(mID, pID, dtn_target_parent);
 						}
 					}
 				}
 			}
 		}
-	}
+	} // onEvent
 
 	/**
 	 * Show Dialog for Warning
 	 */
 	private void showWarningDialog()
 	{
-		FDialog.warn(0, "AlreadyExists");
-	}
+		FDialog.warn(0, Msg.getMsg(Env.getCtx(), "AlreadyExists"));
+	} // showWarningDialog
 
 	/**
 	 * When Right click on Item show Delete Menu popup for Delete a node.
 	 * 
-	 * @param toNode
+	 * @param toItem
 	 */
-	private void menuItemList(DefaultTreeNode<Object> toNode)
+	private void menuItemList(Treeitem toItem)
 	{
-		int path[] = treeModel.getPath(toNode);
-		Treeitem toItem = tree.renderItemByPath(path);
-
-		tree.setSelectedItem(toItem);
-		Events.sendEvent(tree, new Event(Events.ON_RIGHT_CLICK, tree));
+		@SuppressWarnings("unchecked")
+		DefaultTreeNode<Object> toNode = (DefaultTreeNode<Object>) toItem.getValue();
 
 		Menupopup popup = new Menupopup();
 		Menuitem menuItem = new Menuitem(Msg.getMsg(Env.getCtx(), "delete"));
+		menuItem.setParent(popup);
+		menuItem.setValue(MENU_ITEM_DELETE);
+		menuItem.addEventListener(Events.ON_CLICK, new DeleteListener(toNode));
 		if (ThemeManager.isUseFontIconForImage())
 			menuItem.setIconSclass("z-icon-Delete");
 		else
 			menuItem.setImage(ThemeManager.getThemeResource("images/Delete24.png"));
-		menuItem.setValue(MENU_ITEM_DELETE);
-		menuItem.setParent(popup);
-		menuItem.addEventListener(Events.ON_CLICK, new DeleteListener(toNode));
 
 		MTreeNode mtn = (MTreeNode) toNode.getData();
 		if (mtn.isSummary())
 		{
-			MTreeFavoriteNode favNode = new MTreeFavoriteNode(Env.getCtx(), mtn.getNode_ID(), null);
+			MTreeFavoriteNode favNode = (MTreeFavoriteNode) MTable.get(Env.getCtx(), MTreeFavoriteNode.Table_ID).getPO(mtn.getNode_ID(), null);
 			if (favNode.isCollapsible())
 			{
-				menuItem = new Menuitem(Msg.getMsg(Env.getCtx(), MENU_ITEM_EXPAND));
+				menuItem = new Menuitem(Msg.getMsg(Env.getCtx(), MENU_ITEM_DEFAULT_EXPANDED));
+				menuItem.setValue(MENU_ITEM_DEFAULT_EXPANDED);
 				if (ThemeManager.isUseFontIconForImage())
 					menuItem.setIconSclass("z-icon-Expand");
 				else
 					menuItem.setImage(ThemeManager.getThemeResource("images/expand-header.png"));
-				menuItem.setValue(MENU_ITEM_EXPAND);
 			}
 			else
 			{
-				menuItem = new Menuitem(Msg.getMsg(Env.getCtx(), MENU_ITEM_COLLAPSE));
+				menuItem = new Menuitem(Msg.getMsg(Env.getCtx(), MENU_ITEM_DEFAULT_COLLAPSED));
+				menuItem.setValue(MENU_ITEM_DEFAULT_COLLAPSED);
 				if (ThemeManager.isUseFontIconForImage())
 					menuItem.setIconSclass("z-icon-Parent");
 				else
 					menuItem.setImage(ThemeManager.getThemeResource("images/collapse-header.png"));
-				menuItem.setValue(MENU_ITEM_COLLAPSE);
 			}
 			menuItem.setParent(popup);
 			menuItem.addEventListener(Events.ON_CLICK, new CollExpdListener(favNode));
 		}
 
 		popup.setPage(tree.getPage());
-		popup.open(toItem.getTreerow(), "after_pointer");
-	}
+
+		if (ClientInfo.isMobile())
+			popup.open(toItem, "after_start");
+		else
+			popup.open(toItem, "after_pointer");
+	} // menuItemList
 
 	/**
-	 * Listener for Delete Node on Right click on MouseEvent
-	 */
-	class DeleteListener implements EventListener<Event>
-	{
-		private DefaultTreeNode<Object> toNode;
-
-		DeleteListener(DefaultTreeNode<Object> toNode)
-		{
-			this.toNode = toNode;
-		}
-
-		public void onEvent(Event event) throws Exception
-		{
-			if (Events.ON_CLICK.equals(event.getName()) && event.getTarget() instanceof Menuitem)
-			{
-				Menuitem menuItem = (Menuitem) event.getTarget();
-				if (MENU_ITEM_DELETE.equals(menuItem.getValue()))
-				{
-					deleteNodeItem(toNode);
-				}
-			}
-		}
-
-		/**
-		 * Deleting a Node and its hierarchy
-		 * 
-		 * @param toNode
-		 */
-		private void deleteNodeItem(DefaultTreeNode<Object> toNode)
-		{
-			int nodeID = ((MTreeNode) toNode.getData()).getNode_ID();
-			MTreeFavoriteNode mtfNode = new MTreeFavoriteNode(Env.getCtx(), nodeID, null);
-			if (mtfNode.delete(true))
-			{
-				treeModel.removeNode(toNode);
-			}
-		}
-	}
-
-	/**
-	 * Listener for set default start Collapse/Expand Node by Right click on
-	 * MouseEvent.
-	 */
-	class CollExpdListener implements EventListener<Event>
-	{
-		private MTreeFavoriteNode favNode;
-
-		CollExpdListener(MTreeFavoriteNode favNode)
-		{
-			this.favNode = favNode;
-		}
-
-		public void onEvent(Event event) throws Exception
-		{
-			if (Events.ON_CLICK.equals(event.getName()) && event.getTarget() instanceof Menuitem)
-			{
-				Menuitem menuItem = (Menuitem) event.getTarget();
-				if (MENU_ITEM_EXPAND.equals(menuItem.getValue()))
-				{
-					favNode.setIsCollapsible(false);
-				}
-				else if (MENU_ITEM_COLLAPSE.equals(menuItem.getValue()))
-				{
-					favNode.setIsCollapsible(true);
-				}
-				favNode.saveEx();
-			}
-		} // onEvent
-
-	} // ColExpListener
-
-	/**
-	 * Insert Node into Tree it's contains only Menu type node, Dragged from
-	 * Menu Tab.
+	 * Insert Node into Tree it's contains only Menu type node, Dragged from Menu Tab.
 	 * 
 	 * @param menuID
 	 * @param parentNodeID
 	 * @param stn
 	 */
-	public void insertNodeMenu(int menuID, int parentNodeID, DefaultTreeNode<Object> stn)
+	public void insertMenuInTree(int menuID, int parentNodeID, DefaultTreeNode<Object> stn)
 	{
-		MTreeFavoriteNode mtFavNode = new MTreeFavoriteNode(Env.getCtx(), 0, null);
-		mtFavNode.set_ValueOfColumn(I_AD_Tree_Favorite_Node.COLUMNNAME_AD_Client_ID, Env.getAD_Client_ID(Env.getCtx()));
-		mtFavNode.setAD_Org_ID(Env.getContextAsInt(Env.getCtx(), "#AD_Org_ID"));
-		mtFavNode.setAD_Tree_Favorite_ID(mTreeFavID);
-		mtFavNode.setSeqNo(0);
-		mtFavNode.setParent_ID(parentNodeID);
-		mtFavNode.setIsSummary(false);
-		mtFavNode.setAD_Menu_ID(menuID);
-		if (!mtFavNode.save())
-		{
-			throw new AdempiereException(Msg.getMsg(Env.getCtx(), "NodeNotCreate"));
-		}
-		MMenu menu = new MMenu(Env.getCtx(), menuID, null);
-		MTreeNode mNode = new MTreeNode(mtFavNode.getAD_Tree_Favorite_Node_ID(), mtFavNode.getSeqNo(), menu.get_Translation(MMenu.COLUMNNAME_Name),
-						menu.get_Translation(MMenu.COLUMNNAME_Name), mtFavNode.getParent_ID(), mtFavNode.isSummary(), mtFavNode.getAD_Menu_ID(),
-						menu.getAction(), false);
+		MTreeFavoriteNode favNode = MTreeFavoriteNode.create(	Env.getAD_Client_ID(Env.getCtx()), Env.getContextAsInt(Env.getCtx(), Env.AD_ORG_ID), mTreeFavID,
+																menuID, parentNodeID, 0, null, false, true, false);
 
-		DefaultTreeNode<Object> node = new DefaultTreeNode<Object>(mNode);
-		int index = 0;
-		if (mNode.isSummary())
-			index = stn.getChildren().indexOf(node) + 1;
-
-		treeModel.addNode(stn, node, index);
-		int[] path = treeModel.getPath(node);
-		Treeitem ti = tree.renderItemByPath(path);
-		tree.setSelectedItem(ti);
-		Events.sendEvent(tree, new Event(Events.ON_SELECT, tree));
-	}
+		DPFavourites.addNodeInTree(treeModel, tree, stn, favNode);
+	} // insertMenuInTree
 
 	/**
 	 * Internally movement of Tree node
@@ -380,8 +278,6 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 	 */
 	private void moveNode(DefaultTreeNode<Object> movingNode, DefaultTreeNode<Object> toNode)
 	{
-		log.info(movingNode.toString() + " to " + toNode.toString());
-
 		if (movingNode == toNode)
 			return;
 
@@ -419,24 +315,23 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 	} // moveNode
 
 	/**
-	 * It's specify the Moving node where to inserted... Like Insert After or
-	 * Move Into.
+	 * It's specify the Moving node where to inserted... Like Insert After or Move Into.
 	 * 
 	 * @param movingNode
 	 * @param toNode
-	 * @param moveInto
+	 * @param isMoveInto
 	 */
-	private void moveNode(DefaultTreeNode<Object> movingNode, DefaultTreeNode<Object> toNode, boolean moveInto)
+	private void moveNode(DefaultTreeNode<Object> movingNode, DefaultTreeNode<Object> toNode, boolean isMoveInto)
 	{
-		DefaultTreeNode<Object> newParent;
 		int index;
+		DefaultTreeNode<Object> newParent;
 
-		// remove
+		// Remove moving node from its old parent
 		DefaultTreeNode<Object> oldParent = treeModel.getParent(movingNode);
 		treeModel.removeNode(movingNode);
 
 		// get new index
-		if (!moveInto)
+		if (!isMoveInto)
 		{
 			newParent = treeModel.getParent(toNode);
 			// the next node
@@ -449,7 +344,7 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 			index = 0; // the first node
 		}
 
-		// insert
+		// insert in to tree
 		treeModel.addNode(newParent, movingNode, index);
 
 		int path[] = treeModel.getPath(movingNode);
@@ -458,53 +353,149 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 			tree.onInitRender();
 		}
 		Treeitem movingItem = tree.renderItemByPath(path);
-		tree.setSelectedItem(movingItem);
+
+		if (((MTreeNode) movingNode.getData()).isSummary())
+			tree.setSelectedItem(movingItem);
+		else
+			tree.setSelectedItem(movingItem.getParentItem());
 		Events.sendEvent(tree, new Event(Events.ON_SELECT, tree));
-		DefaultTreeNode<?> dtNode = movingItem.getValue();
-		treeModel.setSelectedFolderID(((MTreeNode) dtNode.getData()).getNode_ID());
 
-		// *** Save changes to disk
-		Trx trx = Trx.get(Trx.createTrxName("ADTreeFavoriteNode"), true);
-		try
+		// Save move node info
+		MTreeNode newParentTNode = (MTreeNode) newParent.getData();
+		MTreeNode moveTNode = (MTreeNode) movingNode.getData();
+		updateTFNParentAndSeqNo(newParentTNode, moveTNode, index);
+		moveTNode.setParent_ID(newParentTNode.getNode_ID());
+
+		// Old parent child node sequence altering
+		MTreeNode oldMParent = (MTreeNode) oldParent.getData();
+		for (int i = 0; i < oldParent.getChildCount(); i++)
 		{
-			MTreeNode oldMParent = (MTreeNode) oldParent.getData();
-			for (int i = 0; i < oldParent.getChildCount(); i++)
+			DefaultTreeNode<Object> oldChildNode = (DefaultTreeNode<Object>) oldParent.getChildAt(i);
+			MTreeNode oldTNode = (MTreeNode) oldChildNode.getData();
+
+			updateTFNParentAndSeqNo(oldMParent, oldTNode, i);
+		}
+
+		// New parent child node sequence altering
+		if (oldParent != newParent)
+		{
+			MTreeNode newMParent = (MTreeNode) newParent.getData();
+			for (int i = 0; i < newParent.getChildCount(); i++)
 			{
-				DefaultTreeNode<Object> nd = (DefaultTreeNode<Object>) oldParent.getChildAt(i);
-				MTreeNode md = (MTreeNode) nd.getData();
+				DefaultTreeNode<Object> newChildNode = (DefaultTreeNode<Object>) newParent.getChildAt(i);
+				MTreeNode newTNode = (MTreeNode) newChildNode.getData();
 
-				Object objParam[] = new Object[] { (oldMParent.getNode_ID() == 0 ? null : oldMParent.getNode_ID()), i, md.getNode_ID() };
-				DB.executeUpdateEx(SQL_UPDATE_NODE_POSITION, objParam, trx.getTrxName());
-
-				md.setParent_ID(oldMParent.getNode_ID());
+				updateTFNParentAndSeqNo(newMParent, newTNode, i);
 			}
-			if (oldParent != newParent)
+		}
+	} // moveNode
+
+	/**
+	 * Update reference of Parent and Seqno
+	 * 
+	 * @param parentTNode
+	 * @param moveTNode
+	 * @param seqNo
+	 */
+	private void updateTFNParentAndSeqNo(MTreeNode parentTNode, MTreeNode moveTNode, int seqNo)
+	{
+		MTreeFavoriteNode favNode = (MTreeFavoriteNode) MTable.get(Env.getCtx(), MTreeFavoriteNode.Table_ID).getPO(moveTNode.getNode_ID(), null);
+		if (favNode.getParent_ID() != parentTNode.getNode_ID() || favNode.getSeqNo() != seqNo)
+		{
+			favNode.setParent_ID(parentTNode.getNode_ID());
+			favNode.setSeqNo(seqNo);
+			try {
+				//For service users, needs to persist data in system tenant
+				PO.setCrossTenantSafe();
+				favNode.save();
+			}finally {
+				PO.clearCrossTenantSafe();
+			}
+		}
+	} // updateTFNParentAndSeqNo
+
+	/**
+	 * Listener for Delete Node on Right click on MouseEvent
+	 */
+	class DeleteListener implements EventListener<Event>
+	{
+		private DefaultTreeNode<Object> toNode;
+
+		DeleteListener(DefaultTreeNode<Object> toNode)
+		{
+			this.toNode = toNode;
+		}
+
+		public void onEvent(Event event) throws Exception
+		{
+			if (Events.ON_CLICK.equals(event.getName()) && event.getTarget() instanceof Menuitem)
 			{
-				MTreeNode newMParent = (MTreeNode) newParent.getData();
-				for (int i = 0; i < newParent.getChildCount(); i++)
+				Menuitem menuItem = (Menuitem) event.getTarget();
+				if (MENU_ITEM_DELETE.equals(menuItem.getValue()))
 				{
-					DefaultTreeNode<Object> nd = (DefaultTreeNode<Object>) newParent.getChildAt(i);
-					MTreeNode md = (MTreeNode) nd.getData();
-
-					Object objParam[] = new Object[] { (newMParent.getNode_ID() == 0 ? null : newMParent.getNode_ID()), i, md.getNode_ID() };
-					DB.executeUpdateEx(SQL_UPDATE_NODE_POSITION, objParam, trx.getTrxName());
-
-					md.setParent_ID(newMParent.getNode_ID());
+					deleteNodeItem(toNode);
 				}
 			}
-			trx.commit(true);
-		}
-		catch (Exception e)
+		} // onEvent
+
+		/**
+		 * Deleting a Node and its hierarchy
+		 * 
+		 * @param toNode
+		 */
+		private void deleteNodeItem(DefaultTreeNode<Object> toNode)
 		{
-			trx.rollback();
-			FDialog.error(windowNo, tree, "Tree Update Error", e.getLocalizedMessage());
-		}
-		finally
+			int nodeID = ((MTreeNode) toNode.getData()).getNode_ID();
+			MTreeFavoriteNode favNode = (MTreeFavoriteNode) MTable.get(Env.getCtx(), MTreeFavoriteNode.Table_ID).getPO(nodeID, null);
+			if (favNode.getAD_Menu_ID() > 0 && favNode.isFavourite())
+			{
+				FavouriteController controller = FavouriteController.getInstance(Executions.getCurrent().getDesktop().getSession());
+				if (!controller.removeNode(favNode.getAD_Menu_ID()))
+				{
+					throw new AdempiereException(Msg.getMsg(favNode.getCtx(), CLogger.retrieveError().getValue()));
+				}
+			}
+			else
+			{
+				if (favNode.delete(true))
+					treeModel.removeNode(toNode);
+				else
+					throw new AdempiereException(Msg.getMsg(favNode.getCtx(), CLogger.retrieveError().getValue()));
+			}
+		} // deleteNodeItem
+
+	} // DeleteListener
+
+	/**
+	 * Listener for set default start Collapse/Expand Node by Right click on MouseEvent.
+	 */
+	class CollExpdListener implements EventListener<Event>
+	{
+		private MTreeFavoriteNode favNode;
+
+		CollExpdListener(MTreeFavoriteNode favNode)
 		{
-			trx.close();
-			trx = null;
+			this.favNode = favNode;
 		}
-	}
+
+		public void onEvent(Event event) throws Exception
+		{
+			if (Events.ON_CLICK.equals(event.getName()) && event.getTarget() instanceof Menuitem)
+			{
+				Menuitem menuItem = (Menuitem) event.getTarget();
+				if (MENU_ITEM_DEFAULT_EXPANDED.equals(menuItem.getValue()))
+				{
+					favNode.setIsCollapsible(false);
+				}
+				else if (MENU_ITEM_DEFAULT_COLLAPSED.equals(menuItem.getValue()))
+				{
+					favNode.setIsCollapsible(true);
+				}
+				favNode.saveEx();
+			}
+		} // onEvent
+
+	} // CollExpdListener
 
 	/**
 	 * Listener for Movement of Node
@@ -534,7 +525,8 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 					moveNode(movingNode, toNode, true);
 				}
 			}
-		}
-	}
+		} // onEvent
+
+	} // MenuListener
 
 }

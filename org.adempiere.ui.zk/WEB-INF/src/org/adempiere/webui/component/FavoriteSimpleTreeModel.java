@@ -16,8 +16,10 @@ import java.util.Objects;
 import java.util.logging.Level;
 
 import org.adempiere.util.Callback;
+import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.adwindow.ADTabpanel;
 import org.adempiere.webui.adwindow.ADWindow;
+import org.adempiere.webui.desktop.FavouriteController;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.exception.ApplicationException;
 import org.adempiere.webui.session.SessionManager;
@@ -27,14 +29,15 @@ import org.compiere.model.MMenu;
 import org.compiere.model.MQuery;
 import org.compiere.model.MTable;
 import org.compiere.model.MToolBarButtonRestrict;
-import org.compiere.model.MTreeFavorite;
 import org.compiere.model.MTreeFavoriteNode;
 import org.compiere.model.MTreeNode;
+import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -62,45 +65,47 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 	/**
 	 * 
 	 */
-	private static final long			serialVersionUID	= 6950349031548896628L;
+	private static final long			serialVersionUID		= 6950349031548896628L;
+	private static final CLogger		LOG						= CLogger.getCLogger(FavoriteSimpleTreeModel.class);
 
-	private static final CLogger		log					= CLogger.getCLogger(FavoriteSimpleTreeModel.class);
+	public static final String			MOBILE_TOOLBAR_CTX_MENU	= "MobileFavCtxMenu";
 
-	private List<EventListener<Event>>	onDropListners		= new ArrayList<EventListener<Event>>();
+	private List<EventListener<Event>>	onDropListners			= new ArrayList<EventListener<Event>>();
 
 	private boolean						itemDraggable;
-	public boolean						isWriteAccess		= false;
 
-	public int							AD_Tree_Favorite_ID;
-	private int							currFolderID		= 0;
+	private FavouriteController			controller;
 
+	//
 	public FavoriteSimpleTreeModel(DefaultTreeNode<Object> root)
 	{
 		super(root);
 	}
 
+	public FavouriteController getFavouriteController()
+	{
+		return controller;
+	}
+
 	/**
 	 * Tree Initialization
 	 * 
-	 * @param  Tree
-	 * @param  AD_Tree_Favorite_ID
-	 * @param  windowNo
-	 * @param  isWriteAccess
+	 * @param  tree
+	 * @param  isReload
 	 * @param  trxName
-	 * @return
+	 * @return          {@link FavoriteSimpleTreeModel}
 	 */
-	public static FavoriteSimpleTreeModel initADTree(Tree tree, int AD_Tree_Favorite_ID, int windowNo, boolean isWriteAccess, String trxName)
+	public static FavoriteSimpleTreeModel initADTree(Tree tree, int AD_User_ID, boolean isReload)
 	{
-		MTreeFavorite mTreeFavorite = (MTreeFavorite) MTable.get(Env.getCtx(), MTreeFavorite.Table_ID).getPO(AD_Tree_Favorite_ID, trxName);
-		MTreeNode root = mTreeFavorite.getRoot();
+		FavouriteController controller = FavouriteController.getInstance(Executions.getCurrent().getDesktop().getSession());
+		if (isReload)
+			controller.reinit(AD_User_ID);
+		MTreeNode root = controller.getRootNode();
 		//
 		FavoriteSimpleTreeModel treeModel = FavoriteSimpleTreeModel.createFrom(root);
-		treeModel.currFolderID = root.getNode_ID();
-		treeModel.isWriteAccess = isWriteAccess;
-		treeModel.AD_Tree_Favorite_ID = AD_Tree_Favorite_ID;
-		treeModel.addOnDropEventListener(new ADTreeFavoriteOnDropListener(tree, treeModel, windowNo));
-		if (isWriteAccess)
-			treeModel.setItemDraggable(true);
+		treeModel.addOnDropEventListener(new ADTreeFavoriteOnDropListener(tree, treeModel));
+		treeModel.setItemDraggable(true);
+		treeModel.controller = controller;
 
 		if (tree.getTreecols() == null)
 		{
@@ -119,8 +124,10 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 		}
 		catch (Exception e)
 		{
-			log.log(Level.SEVERE, "Failed to setup tree");
+			LOG.log(Level.SEVERE, "Failed to setup favourite tree");
 		}
+
+		controller.setTreeAndModel(treeModel, tree);
 
 		return treeModel;
 	} // initADTree
@@ -128,31 +135,15 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 	/**
 	 * Creating Tree hierarchy
 	 * 
-	 * @param  RootNode
-	 * @return          model
+	 * @param  root
+	 * @return      {@link FavoriteSimpleTreeModel}
 	 */
 	public static FavoriteSimpleTreeModel createFrom(MTreeNode root)
 	{
-		FavoriteSimpleTreeModel model = null;
 		Enumeration<?> nodeEnum = root.children();
-
 		DefaultTreeNode<Object> stRoot = new DefaultTreeNode<Object>(root, nodeEnum.hasMoreElements() ? new ArrayList<TreeNode<Object>>() : null);
-
-		while (nodeEnum.hasMoreElements())
-		{
-			MTreeNode childNode = (MTreeNode) nodeEnum.nextElement();
-
-			DefaultTreeNode<Object> stNode = childNode.getChildCount() > 0 ? new DefaultTreeNode<Object>(childNode, new ArrayList<TreeNode<Object>>()) : new DefaultTreeNode<Object>(childNode);
-
-			stRoot.getChildren().add(stNode);
-			if (childNode.getChildCount() > 0)
-			{
-				populate(stNode, childNode);
-			}
-		}
-
-		model = new FavoriteSimpleTreeModel(stRoot);
-		return model;
+		populate(stRoot, root);
+		return new FavoriteSimpleTreeModel(stRoot);
 	}// createFrom
 
 	/**
@@ -167,8 +158,8 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 		while (nodeEnum.hasMoreElements())
 		{
 			MTreeNode childNode = (MTreeNode) nodeEnum.nextElement();
-
-			DefaultTreeNode<Object> stChildNode = childNode.getChildCount() > 0 ? new DefaultTreeNode<Object>(childNode, new ArrayList<TreeNode<Object>>()) : new DefaultTreeNode<Object>(childNode);
+			DefaultTreeNode<Object> stChildNode = childNode.getChildCount() > 0 ? new DefaultTreeNode<Object>(childNode, new ArrayList<TreeNode<Object>>())
+																				: new DefaultTreeNode<Object>(childNode);
 
 			stNode.getChildren().add(stChildNode);
 			if (childNode.getChildCount() > 0)
@@ -182,8 +173,9 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 	public void render(Treeitem ti, Object node, int index)
 	{
 		DefaultTreeNode<?> stn = (DefaultTreeNode<?>) node;
-		MTreeNode mtn = (MTreeNode) stn.getData();
-		Treecell tc = new Treecell(Objects.toString(node), ThemeManager.getThemeResource(mtn.getImagePath().substring(1)));
+		MTreeNode mNode = (MTreeNode) stn.getData();
+		Treecell tc = new Treecell(Objects.toString(node));
+
 		Treerow tr = null;
 		if (ti.getTreerow() == null)
 		{
@@ -196,57 +188,72 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 			if (!onDropListners.isEmpty())
 			{
 				ti.getTreerow().addEventListener(Events.ON_CLICK, this);
+				ti.getTreerow().addEventListener(Events.ON_DOUBLE_CLICK, this);
 
-				if (isWriteAccess)
+				tr.setDroppable("true");
+				tr.addEventListener(Events.ON_SELECT, this);
+				tr.addEventListener(Events.ON_DROP, this);
+				if (!ClientInfo.isMobile())
 				{
-					ti.getTreerow().addEventListener(Events.ON_DOUBLE_CLICK, this);
-
-					tr.setDroppable("true");
-					tr.addEventListener(Events.ON_SELECT, this);
 					tr.addEventListener(Events.ON_RIGHT_CLICK, this);
-					tr.addEventListener(Events.ON_DROP, this);
 				}
 			}
 
-			Object data = ((DefaultTreeNode<?>) node).getData();
-			if (data instanceof MTreeNode)
-			{
-				MTreeNode mNode = (MTreeNode) data;
-				if (mNode.getColor() != null)
-				{
-					String hex = ZkCssHelper.createHexColorString(mNode.getColor());
-					ZkCssHelper.appendStyle(tc, "color: #" + hex);
-				}
-				// default user action for Collapse/Expand
-				ti.setOpen(!mNode.isCollapsible());
-				ti.setTooltiptext(mNode.getDescription());
-				if (mNode.isSummary())
-					ZkCssHelper.appendStyle(tc, "font-weight: bold");
+			// default user action for Collapsed/Expanded folder tree
+			ti.setOpen(!mNode.isCollapsible());
+			ti.setTooltiptext(mNode.getDescription());
 
-				if (mNode.isWindow())
+			//
+			if (mNode.getColor() != null)
+			{
+				String hex = ZkCssHelper.createHexColorString(mNode.getColor());
+				ZkCssHelper.appendStyle(tc, "color: #" + hex);
+			}
+
+			// Set Icon
+			if (ThemeManager.isUseFontIconForImage())
+				tc.setIconSclass(getIconSclass(mNode));
+			else
+				tc.setImage(ThemeManager.getThemeResource(getIconFile(mNode)));
+
+			//
+			if (mNode.isSummary())
+			{
+				tc.setSclass("fav-summary-folder");
+			}
+
+			//
+			if (mNode.isWindow())
+			{
+				// Check Window access for ReadWrite & New Toolbar button
+				if (!MToolBarButtonRestrict.isNewButtonRestricted(MMenu.get(mNode.getMenu_ID()).getAD_Window_ID()))
 				{
-					// Check Window access for ReadWrite & New Toolbar button
-					if (!MToolBarButtonRestrict.isNewButtonRestricted(MMenu.get(mNode.getMenu_ID()).getAD_Window_ID()))
+					Toolbarbutton newBtn = new Toolbarbutton();
+					newBtn.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "New")));
+					newBtn.addEventListener(Events.ON_CLICK, this);
+					tc.appendChild(newBtn);
+
+					if (ThemeManager.isUseFontIconForImage())
 					{
-						if (ThemeManager.isUseFontIconForImage())
-						{
-							ToolBarButton newBtn = new ToolBarButton();
-							newBtn.setIconSclass("z-icon-New");
-							newBtn.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "New")));
-							newBtn.setSclass("trash-toolbarbutton");
-							newBtn.addEventListener(Events.ON_CLICK, this);
-							tc.appendChild(newBtn);
-						}
-						else
-						{
-							Toolbarbutton newBtn = new Toolbarbutton(null, ThemeManager.getThemeResource("images/New10.png"));
-							newBtn.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "New")));
-							newBtn.setSclass("menu-href-newbtn");
-							newBtn.addEventListener(Events.ON_CLICK, this);
-							tc.appendChild(newBtn);
-						}
+						newBtn.setIconSclass("z-icon-New");
+						newBtn.setSclass("new-toolbarbutton");
+					}
+					else
+					{
+						newBtn.setSclass("menu-href-newbtn");
+						newBtn.setImage(ThemeManager.getThemeResource("images/New10.png"));
 					}
 				}
+			}
+
+			if (ClientInfo.isMobile())
+			{
+				Toolbarbutton btnContextMenu = new Toolbarbutton();
+				btnContextMenu.setClass("fav-mobile-ctx-menu");
+				btnContextMenu.setIconSclass("z-icon-More");
+				btnContextMenu.setAttribute(MOBILE_TOOLBAR_CTX_MENU, true);
+				btnContextMenu.addEventListener(Events.ON_CLICK, this);
+				tc.appendChild(btnContextMenu);
 			}
 		}
 		else
@@ -258,44 +265,23 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 		ti.setValue(node);
 	} // render
 
-	/**
-	 * Get value of Current Selected Folder in Tree.
-	 * 
-	 * @return
-	 */
-	public int getSelectedFolderID()
-	{
-		return currFolderID;
-	}
-
-	/**
-	 * Set the current selected Menu folder in Tree.
-	 * 
-	 * @param mtnID
-	 */
-	public void setSelectedFolderID(int mtnID)
-	{
-		currFolderID = mtnID;
-	}
-
 	@Override
 	public void onEvent(Event event) throws Exception
 	{
 		Component comp = event.getTarget();
 		String eventName = event.getName();
 
-		if (Events.ON_DROP.equals(eventName) || Events.ON_RIGHT_CLICK.equals(eventName))
+		if (Events.ON_DROP.equals(eventName)	|| Events.ON_RIGHT_CLICK.equals(eventName)
+			|| (Events.ON_CLICK.equals(eventName)	&& comp instanceof Toolbarbutton
+				&& (boolean) ((Toolbarbutton) event.getTarget()).getAttribute(FavoriteSimpleTreeModel.MOBILE_TOOLBAR_CTX_MENU)))
 		{
 			for (EventListener<Event> listener : onDropListners)
 			{
 				listener.onEvent(event);
 			}
 		}
-
-		/**
-		 * On click of menu to open that window
-		 */
-		if (Events.ON_CLICK.equals(eventName) || Events.ON_SELECT.equals(eventName))
+		// On click of menu to open that window
+		else if (Events.ON_CLICK.equals(eventName) || Events.ON_SELECT.equals(eventName))
 		{
 			boolean newRecord = false;
 			if (comp instanceof Toolbarbutton)
@@ -319,19 +305,14 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 				}
 				else if (!mtn.isSummary())
 				{
-					int menuId = mtn.getMenu_ID();
-					SessionManager.getAppDesktop().onMenuSelected(menuId);
-					setSelectedFolderID(mtn.getParent_ID());
-				}
-				else
-				{
-					setSelectedFolderID(mtn.getNode_ID());
+					int menuID = mtn.getMenu_ID();
+					SessionManager.getAppDesktop().onMenuSelected(menuID);
 				}
 			}
 		}
 		else if (Events.ON_DOUBLE_CLICK.equals(eventName))
 		{
-			// Rename the folder.
+			// Rename the folder
 			if (comp instanceof Treerow)
 			{
 				Treerow treerow = (Treerow) comp;
@@ -344,7 +325,8 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 				if (mtn.isSummary())
 				{
 					final FavoriteSimpleTreeModel sftModel = this;
-					final WTextEditorDialog editorDialog = new WTextEditorDialog(Msg.getMsg(Env.getCtx(), "EditFolderName"), mtn.getName() == null ? "" : mtn.getName(), true, 100, false, false);
+					final WTextEditorDialog editorDialog = new WTextEditorDialog(	Msg.getMsg(Env.getCtx(), "EditFolderName"),
+																					mtn.getName() == null ? "" : mtn.getName(), true, 100, false, false);
 
 					editorDialog.setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
 					editorDialog.addEventListener(DialogEvents.ON_WINDOW_CLOSE, new EventListener<Event>() {
@@ -355,9 +337,16 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 							{
 								mtn.setName(editorDialog.getText());
 
-								MTreeFavoriteNode mtfNode = new MTreeFavoriteNode(Env.getCtx(), mtn.getNode_ID(), null);
-								mtfNode.setName(editorDialog.getText());
-								mtfNode.saveEx();
+								MTreeFavoriteNode favNode = (MTreeFavoriteNode) MTable	.get(Env.getCtx(), MTreeFavoriteNode.Table_ID)
+																						.getPO(mtn.getNode_ID(), null);
+								favNode.setName(editorDialog.getText());
+								try {
+									//For service users, needs to persist data in system tenant
+									PO.setCrossTenantSafe();
+									favNode.saveEx();
+								}finally {
+									PO.clearCrossTenantSafe();
+								}
 
 								@SuppressWarnings("unchecked")
 								int path[] = sftModel.getPath((TreeNode<Object>) dtNode);
@@ -380,7 +369,7 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 				}
 			}
 		}
-	}
+	} // onEvent
 
 	public void addNode(DefaultTreeNode<Object> newNode)
 	{
@@ -389,21 +378,6 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 
 		fireEvent(TreeDataEvent.INTERVAL_ADDED, getPath(root), root.getChildCount() - 1, root.getChildCount() - 1);
 	} // addNode
-
-	public void addOnDropEventListener(EventListener<Event> listener)
-	{
-		onDropListners.add(listener);
-	}
-
-	public void setItemDraggable(boolean isDraggable)
-	{
-		itemDraggable = isDraggable;
-	}
-
-	public boolean isItemDraggable()
-	{
-		return itemDraggable;
-	}
 
 	public DefaultTreeNode<Object> getChild(DefaultTreeNode<Object> parent, int index)
 	{
@@ -414,7 +388,7 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 	{
 		try
 		{
-			MMenu menu = new MMenu(Env.getCtx(), menuID, null);
+			MMenu menu = (MMenu) MTable.get(Env.getCtx(), MMenu.Table_ID).getPO(menuID, null);
 
 			MQuery query = new MQuery("");
 			query.addRestriction("1=2");
@@ -438,5 +412,60 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 			throw new ApplicationException(e.getMessage(), e);
 		}
 	} // onNewRecord
+
+	public void addOnDropEventListener(EventListener<Event> listener)
+	{
+		onDropListners.add(listener);
+	}
+
+	public void setItemDraggable(boolean isDraggable)
+	{
+		itemDraggable = isDraggable;
+	}
+
+	public boolean isItemDraggable()
+	{
+		return itemDraggable;
+	}
+
+	private static String getIconFile(MTreeNode mt)
+	{
+		if (mt.isSummary())
+			return "images/Folder16.png";
+		if (mt.isWindow())
+			return "images/mWindow.png";
+		if (mt.isReport())
+			return "images/mReport.png";
+		if (mt.isTask() || mt.isProcess())
+			return "images/mProcess.png";
+		if (mt.isWorkFlow())
+			return "images/mWorkFlow.png";
+		if (mt.isForm())
+			return "images/mForm.png";
+		if (mt.isInfo())
+			return "images/mInfo.png";
+		return "images/mWindow.png";
+	}
+
+	private static String getIconSclass(MTreeNode mt)
+	{
+		if (mt.isSummary())
+			return "z-icon-Folder";
+		if (mt.isWindow())
+			return "z-icon-Window";
+		if (mt.isReport())
+			return "z-icon-Report";
+		if (mt.isProcess())
+			return "z-icon-Process";
+		if (mt.isTask())
+			return "z-icon-Task";
+		if (mt.isWorkFlow())
+			return "z-icon-WorkFlow";
+		if (mt.isForm())
+			return "z-icon-Form";
+		if (mt.isInfo())
+			return "z-icon-Info";
+		return "z-icon-Window";
+	} // getIconSclass
 
 }

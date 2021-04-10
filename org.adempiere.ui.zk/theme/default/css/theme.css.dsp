@@ -106,44 +106,6 @@ table.z-vbox > tbody > tr > td > table {
     <c:include page="fragment/custom.css.dsp" />
 </c:if>
 
-<%-- User Favorite Dashboard Panel Start --%>
-
-.fav-tree-panel {
-  padding: 2px;
-  background-color: #99b4d233;
-  border-radius: 5px;
-}
-
-.fav-toolbar {
-  background-color: #eee;
-  background-image: linear-gradient(#f4f4f4, #cecece, #bfbfbf);
-  border: 1px solid #d8d8d8;
-  border-radius: 5px;
-}
-
-.fav-toolbar-div {
-  position: relative;
-  width: 100%;
-}
-
-.fav-tree-btn {
-  margin-left: 5px !important;
-  padding: 3px 15px;
-  border: 1px solid #6d6d6d;
-}
-
-.fav-folder-textbox {
-  margin-left: 5px;
-  width: 50%;
-  min-width: 100px;
-}
-
-.fav-chkbox {
-  margin-left: 5px;
-}
-
-<%-- User Favorite Dashboard Panel End --%>
-
 <%-- Multi Select List & Table Editor Start --%>
 
 .multi-select-box {

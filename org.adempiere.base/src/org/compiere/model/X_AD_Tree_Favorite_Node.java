@@ -29,7 +29,7 @@ public class X_AD_Tree_Favorite_Node extends PO implements I_AD_Tree_Favorite_No
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170613L;
+	private static final long serialVersionUID = 20201109L;
 
     /** Standard Constructor */
     public X_AD_Tree_Favorite_Node (Properties ctx, int AD_Tree_Favorite_Node_ID, String trxName)
@@ -41,6 +41,8 @@ public class X_AD_Tree_Favorite_Node extends PO implements I_AD_Tree_Favorite_No
 			setAD_Tree_Favorite_Node_ID (0);
 			setIsCollapsible (true);
 // Y
+			setIsFavourite (false);
+// N
 			setIsSummary (false);
 // N
 			setSeqNo (0);
@@ -54,7 +56,7 @@ public class X_AD_Tree_Favorite_Node extends PO implements I_AD_Tree_Favorite_No
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 7 - System - Client - Org 
       */
     protected int get_AccessLevel()
     {
@@ -70,8 +72,8 @@ public class X_AD_Tree_Favorite_Node extends PO implements I_AD_Tree_Favorite_No
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_AD_Tree_Favorite_Node[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_AD_Tree_Favorite_Node[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
@@ -186,6 +188,30 @@ public class X_AD_Tree_Favorite_Node extends PO implements I_AD_Tree_Favorite_No
 		return false;
 	}
 
+	/** Set Favourite.
+		@param IsFavourite 
+		This record is a favourite
+	  */
+	public void setIsFavourite (boolean IsFavourite)
+	{
+		set_Value (COLUMNNAME_IsFavourite, Boolean.valueOf(IsFavourite));
+	}
+
+	/** Get Favourite.
+		@return This record is a favourite
+	  */
+	public boolean isFavourite () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsFavourite);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Summary Level.
 		@param IsSummary 
 		This is a summary entity
@@ -208,6 +234,26 @@ public class X_AD_Tree_Favorite_Node extends PO implements I_AD_Tree_Favorite_No
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	/** Set Login automatic open sequence.
+		@param LoginOpenSeqNo 
+		Determine the order items will be automatically opened when user logs in
+	  */
+	public void setLoginOpenSeqNo (int LoginOpenSeqNo)
+	{
+		set_Value (COLUMNNAME_LoginOpenSeqNo, Integer.valueOf(LoginOpenSeqNo));
+	}
+
+	/** Get Login automatic open sequence.
+		@return Determine the order items will be automatically opened when user logs in
+	  */
+	public int getLoginOpenSeqNo () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_LoginOpenSeqNo);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Name.

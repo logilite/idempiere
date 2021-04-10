@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_Tree_Favorite
  *  @author iDempiere (generated) 
- *  @version Release 3.1
+ *  @version Release 7.1
  */
 public interface I_AD_Tree_Favorite 
 {
@@ -35,9 +35,9 @@ public interface I_AD_Tree_Favorite
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
 
-    /** AccessLevel = 3 - Client - Org 
+    /** AccessLevel = 7 - System - Client - Org 
      */
-    BigDecimal accessLevel = BigDecimal.valueOf(3);
+    BigDecimal accessLevel = BigDecimal.valueOf(7);
 
     /** Load Meta Data */
 

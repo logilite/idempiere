@@ -78,15 +78,16 @@ public class MTreeNode extends DefaultMutableTreeNode
 	 * @param name
 	 * @param description
 	 * @param parent_ID
-	 * @param isSummary
 	 * @param menu_ID
 	 * @param img
+	 * @param isSummary
 	 * @param isCollapsible
+	 * @param isFavourite
 	 */
-	public MTreeNode(int node_ID, int seqNo, String name, String description, int parent_ID, boolean isSummary,
-			int menu_ID, String img, boolean isCollapsible)
+	public MTreeNode(int node_ID, int seqNo, String name, String description, int parent_ID, int menu_ID,
+			String img, boolean isSummary, boolean isCollapsible, boolean isFavourite)
 	{
-		this(node_ID, seqNo, name, description, parent_ID, isSummary, img, false, null);
+		this(node_ID, seqNo, name, description, parent_ID, isSummary, img, isFavourite, null);
 		setMenu_ID(menu_ID);
 		setCollapsible(isCollapsible);
 	}
@@ -100,7 +101,7 @@ public class MTreeNode extends DefaultMutableTreeNode
 	/** Description		*/
 	private String  	m_description;
 	/**	Parent ID		*/
-	protected int     	m_parent_ID;
+	private int     	m_parent_ID;
 	/**	Summary			*/
 	private boolean 	m_isSummary;
 	/** Image Indicator				*/
@@ -524,6 +525,5 @@ public class MTreeNode extends DefaultMutableTreeNode
 		}
 		return null;
 	}   //  findNode
-
 
 }   //  MTreeNode

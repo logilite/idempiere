@@ -320,15 +320,19 @@
 .z-icon-UnSort:before {
 	content: "\f074";
 }
-.z-icon-CSVImport:before {
-	content: "\f01b";
-}
-.z-icon-Share:before {
-	content: "\f0ac";
+.z-icon-Calendar:before {
+	content: "\f073";
 }
 .z-icon-TreeFavNodeAdd:before {
 	content: "\f07b";
 }
+.z-icon-Expanding:before {
+	content: "\f103";
+}
+.z-icon-SequenceChange:before {
+	content: "\f14d";
+}
+
 .z-icon-CopyTree:before {
 	content: "\f0c5";
 }
@@ -336,9 +340,6 @@
 	content: "\f079";
 }
 
-.z-icon-Calendar:before {
-	content: "\f073";
-}
 .z-icon-SelectAll:before {
 	content: "\f008";
 }
