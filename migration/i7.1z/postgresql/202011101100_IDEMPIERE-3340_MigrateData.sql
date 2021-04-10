@@ -10,12 +10,56 @@ GROUP BY AD_Client_ID, AD_User_ID
 -- Insert TreeBar data to Tree Favorite Node
 INSERT INTO AD_Tree_Favorite_Node (AD_Client_ID, AD_Menu_ID, AD_Org_ID, AD_Tree_Favorite_ID, AD_Tree_Favorite_Node_ID, 
 	 	AD_Tree_Favorite_Node_UU, Created, CreatedBy, IsSummary, SeqNo, Updated, UpdatedBy, IsFavourite, LoginOpenSeqNo)
-SELECT 	AD_Client_ID, Node_ID, AD_Org_ID, (SELECT AD_Tree_Favorite_ID FROM AD_Tree_Favorite WHERE AD_Client_ID = tb.AD_Client_ID AND AD_User_ID=tb.AD_User_ID) AS AD_Tree_Favorite_ID,
-		(row_number() OVER (ORDER BY AD_Client_ID, AD_User_ID))	+ 999999 AD_Tree_Favorite_Node_ID,
+SELECT 	AD_Client_ID, Node_ID, AD_Org_ID, (SELECT MIN(AD_Tree_Favorite_ID) FROM AD_Tree_Favorite WHERE AD_Client_ID = tb.AD_Client_ID AND AD_User_ID=tb.AD_User_ID) AS AD_Tree_Favorite_ID,
+		CASE WHEN (SELECT MAX(AD_Tree_Favorite_Node_ID) FROM AD_Tree_Favorite_Node) > 999999	THEN
+			(SELECT MAX(AD_Tree_Favorite_Node_ID) FROM AD_Tree_Favorite_Node)
+		ELSE
+			 999999
+		END	+ (row_number() OVER (ORDER BY AD_Client_ID, AD_User_ID)) AS AD_Tree_Favorite_Node_ID,
 		Generate_UUID(), NOW(), 100, 'N', 0, NOW(), 100, 'Y', LoginOpenSeqNo
 FROM AD_TreeBar tb
 WHERE (AD_Client_ID, AD_User_ID, Node_ID) NOT IN (SELECT DISTINCT tf.AD_Client_ID, tf.AD_User_ID, tfn.AD_Menu_ID FROM  AD_Tree_Favorite tf INNER JOIN AD_Tree_Favorite_Node tfn ON (tfn.AD_Tree_Favorite_ID = tf.AD_Tree_Favorite_ID) AND tfn.AD_Menu_ID>0)
 ORDER BY AD_Client_ID, AD_User_ID
+;
+
+
+-- Set the sequence value based on latest ID created/inserted through above SQL for AD_Tree_Favorite_Node TABLE
+DO
+$$
+DECLARE
+	isNativeSeq boolean;
+	isSeqExists boolean;
+	newSeqNo int;
+BEGIN
+	SELECT Value='Y' FROM AD_SysConfig WHERE Name = 'SYSTEM_NATIVE_SEQUENCE'
+	INTO isNativeSeq;
+
+	SELECT COUNT(1) > 0 FROM pg_class WHERE relname ILIKE 'AD_Tree_Favorite_Node_SQ'
+	INTO isSeqExists;
+
+	IF isNativeSeq IS TRUE THEN
+		SELECT MAX(AD_Tree_Favorite_Node_ID)+1 FROM AD_Tree_Favorite_Node 
+		INTO newSeqNo;
+
+		IF isSeqExists IS NOT TRUE THEN
+			CREATE SEQUENCE AD_Tree_Favorite_Node_SQ
+			INCREMENT BY 1 
+			MINVALUE 1000000 
+			MAXVALUE 2147483647 
+			START WITH 1000000;
+
+			Raise Notice 'Creating new sequence in DB... %', (SELECT setval('AD_Tree_Favorite_Node_SQ', newSeqNo));
+		ELSE
+			Raise Notice 'Altering sequence in DB... %', (SELECT setval('AD_Tree_Favorite_Node_SQ', newSeqNo));
+		END IF;
+	ELSE
+		UPDATE AD_Sequence SET CurrentNext=(SELECT MAX(AD_Tree_Favorite_Node_ID)+1 FROM AD_Tree_Favorite_Node) 
+		WHERE AD_Sequence_ID=(SELECT AD_Sequence_ID FROM AD_Sequence WHERE Name='AD_Tree_Favorite_Node' AND IsActive='Y' AND IsTableID='Y' AND IsAutoSequence='Y');
+
+		Raise Notice 'Altering AD_Sequence in DB... %', (SELECT MAX(AD_Tree_Favorite_Node_ID)+1 FROM AD_Tree_Favorite_Node);
+	END IF;
+END
+$$
 ;
 
 SELECT register_migration_script('202011101100_IDEMPIERE-3340_MigrateData.sql') FROM dual

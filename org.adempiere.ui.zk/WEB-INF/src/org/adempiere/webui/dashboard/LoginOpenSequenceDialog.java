@@ -34,7 +34,6 @@ import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.SimpleListModel;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.factory.ButtonFactory;
-import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.MMenu;
 import org.compiere.model.MRole;
@@ -73,11 +72,11 @@ public class LoginOpenSequenceDialog extends Window
 	/** Logger */
 	protected static final CLogger	log					= CLogger.getCLogger(LoginOpenSequenceDialog.class);
 
-	private Button					bAdd				= ButtonFactory.createButton(null, ThemeManager.getThemeResource("images/MoveRight16.png"), null);
-	private Button					bRemove				= ButtonFactory.createButton(null, ThemeManager.getThemeResource("images/MoveLeft16.png"), null);
-	private Button					bUp					= ButtonFactory.createButton(null, ThemeManager.getThemeResource("images/MoveUp16.png"), null);
-	private Button					bDown				= ButtonFactory.createButton(null, ThemeManager.getThemeResource("images/MoveDown16.png"), null);
-	
+	private Button					bAdd				= ButtonFactory.createNamedButton("Next", false, true);
+	private Button					bRemove				= ButtonFactory.createNamedButton("Previous", false, true);
+	private Button					bUp					= ButtonFactory.createNamedButton("Parent", false, true);
+	private Button					bDown				= ButtonFactory.createNamedButton("Detail", false, true);
+
 	private ConfirmPanel			confirmPanel		= new ConfirmPanel(true, false, true, false, false, false);
 
 	private SimpleListModel			noModel				= new SimpleListModel();
@@ -95,7 +94,7 @@ public class LoginOpenSequenceDialog extends Window
 	/**
 	 * Favorite node arrange login open sequence constructor
 	 * 
-	 * @param treeModel
+	 * @param AD_Tree_Favorite_ID
 	 */
 	public LoginOpenSequenceDialog(int AD_Tree_Favorite_ID)
 	{
@@ -110,7 +109,7 @@ public class LoginOpenSequenceDialog extends Window
 		this.setMaximizable(true);
 		this.setSclass("popup-dialog fav-login-open-seq-dialog");
 		this.setStyle("position: relative; margin: none; border: none; padding: none;");
-		ZKUpdateUtil.setWindowWidthX(this, 600);
+		ZKUpdateUtil.setWindowWidthX(this, 650);
 		ZKUpdateUtil.setWindowHeightX(this, 450);
 
 		//
@@ -300,7 +299,13 @@ public class LoginOpenSequenceDialog extends Window
 		query.setOrderBy(MTreeFavoriteNode.COLUMNNAME_LoginOpenSeqNo);
 		query.setOnlyActiveRecords(true);
 		query.setParameters(new Object[] { AD_Tree_Favorite_ID });
-		List<MTreeFavoriteNode> lsFavNode = query.list();
+		List<MTreeFavoriteNode> lsFavNode = null;
+		try {
+			PO.setCrossTenantSafe();
+			lsFavNode = query.list();
+		}finally {
+			PO.clearCrossTenantSafe();
+		}
 
 		try
 		{

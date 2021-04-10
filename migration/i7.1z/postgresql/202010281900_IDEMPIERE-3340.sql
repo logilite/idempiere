@@ -581,6 +581,10 @@ SET	AccessLevel = '7'
 WHERE TableName = 'AD_Tree_Favorite_Node'
 ;
 
+DELETE FROM PA_DashboardPreference
+WHERE PA_DashboardContent_ID = 200004
+;
+
 DELETE FROM PA_DashboardContent_Trl
 WHERE PA_DashboardContent_ID = 200004
 ;
