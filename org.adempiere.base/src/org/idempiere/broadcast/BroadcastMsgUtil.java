@@ -70,12 +70,12 @@ public class BroadcastMsgUtil
 				} else if (mbMessage.getTarget().equals(MBroadcastMessage.TARGET_Client)) {
 					sql += " AND AD_Client_ID = " + Env.getAD_Client_ID(Env.getCtx());
 				} // else Everybody doesn't need additional filtering
-
+				
 				int[] userIDs = DB.getIDsEx(null, sql);
 
 				for (int userID : userIDs) {
 					MUser user = MUser.get(Env.getCtx(), userID);
-					if (! user.isActive())
+					if (! user.isActive() || (Env.getAD_Client_ID(Env.getCtx()) !=0 && Env.getAD_Client_ID(Env.getCtx()) != user.getAD_Client_ID()))
 							continue;
 					MNote note = new MNote(Env.getCtx(), 0, trxName);
 					note.setClientOrg(user.getAD_Client_ID(), 0);
