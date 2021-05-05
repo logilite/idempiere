@@ -199,11 +199,6 @@ public class WProcessCtl extends AbstractProcessCtl {
 		if (pi.getRecord_IDs() != null && pi.getRecord_IDs().size() > 0)
 		{
 			DB.createT_Selection(pi.getAD_PInstance_ID(), pi.getRecord_IDs(), null);
-		}
-
-		if (pi.getRecord_IDs() != null && pi.getRecord_IDs().size() > 0)
-		{
-			DB.createT_Selection(pi.getAD_PInstance_ID(), pi.getRecord_IDs(), null);
 			MPInstancePara ip = instance.createParameter(-1, "*RecordIDs*", pi.getRecord_IDs().toString());
 			ip.saveEx();
 		}
