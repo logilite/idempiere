@@ -472,7 +472,12 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	 * when read a column store id of infoColumn to list to check duplicate
 	 */
 	protected List <Integer> lsReadedColumn = new ArrayList <Integer> ();
-	
+
+	/**
+	 * Map of AD_InfoColumn_ID and its ColumnInfo index
+	 */
+	protected Map<Integer, Integer> mapInfoColumnID_layoutColumnIdx	= new HashMap<Integer, Integer>();
+
 	/**
 	 * IDEMPIERE-1334
 	 * button and combobox when layout process button as dropdow list

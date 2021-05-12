@@ -823,7 +823,9 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 						isIDColumnKeyOfView = true;
 					indexKeyOfView = list.size() - 1;
 				}
-			}		
+
+				mapInfoColumnID_layoutColumnIdx.put(infoColumn.getAD_InfoColumn_ID(), list.size() - 1);
+			}
 			i++;
 		}
 		
@@ -2460,29 +2462,29 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	@Override
 	public boolean onRestoreSelectedItemIndexInPage(Integer keyViewValue, int rowIndex, Object oRow)
 	{
-		if(hasEditable && temporarySelectedData != null)
+		if(hasEditable && temporarySelectedData != null && temporarySelectedData.size() > 0)
 		{
-			
 			cacheOriginalValues(rowIndex);
-			
-			int gridFieldsOffset = 1; // First column is the id, and its not on the infoColumns
-			
+
 			@SuppressWarnings("unchecked")
 			List<Object> row = (List<Object>)oRow;
 			List<Object> originalSelectedRow = temporarySelectedData.get(keyViewValue);
 			ListModelTable model = contentPanel.getModel();
-			
-			// While restoring values we dong want to trigger listeners
+
+			// While restoring values we want to trigger listeners
 			model.removeTableModelListener(this);
-						
+
 			for(int i=0; i < infoColumns.length; i++)
 			{
 				if(infoColumns[i].isReadOnly() == false) // Only replace editable column, in case some other data changed on db
 				{
-					int colIndex = i + gridFieldsOffset;
-					Object obj = originalSelectedRow.get(colIndex);
-					model.setValueAt( obj, rowIndex, colIndex);
-				}				
+					if (mapInfoColumnID_layoutColumnIdx.containsKey(infoColumns[i].getAD_InfoColumn_ID()))
+					{
+						int colIndex = mapInfoColumnID_layoutColumnIdx.get(infoColumns[i].getAD_InfoColumn_ID());
+						Object obj = originalSelectedRow.get(colIndex);
+						model.setValueAt(obj, rowIndex, colIndex);
+					}
+				}
 			}
 			
 			// Restore isSelected status on IDColumn
@@ -2494,7 +2496,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				idc.setSelected(true);
 			}
 			
-			// Restore listners
+			// Restore listeners
 			model.addTableModelListener(this);
 		}
 
