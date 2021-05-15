@@ -37,7 +37,9 @@ public class MTreeFavorite extends X_AD_Tree_Favorite
 	 */
 	private static final long				serialVersionUID			= -1781192037651191816L;
 
-	public static final String				SQL_GET_TREE_FAVORITE_ID	= "SELECT AD_Tree_Favorite_ID FROM AD_Tree_Favorite	WHERE IsActive='Y' AND AD_User_ID=? AND AD_Role_ID=?";
+	public static final String				SQL_GET_TREE_FAVORITE_ID	= "SELECT AD_Tree_Favorite_ID FROM AD_Tree_Favorite	WHERE IsActive='Y' ";
+
+	public static final String				SQL_COUNT_TREE_FAVORITENODE	= "SELECT COUNT(1) FROM AD_Tree_Favorite_Node WHERE IsActive='Y' AND AD_Tree_Favorite_ID=? ";
 
 	public static final String				SQL_GET_TREE_FAVORITE_NODE	= "SELECT AD_Tree_Favorite_Node_ID, Parent_ID, SeqNo, Name, IsSummary, AD_Menu_ID, IsCollapsible, IsFavourite "
 																			+ " FROM AD_Tree_Favorite_Node WHERE IsActive='Y' AND AD_Tree_Favorite_ID=? "
@@ -212,7 +214,7 @@ public class MTreeFavorite extends X_AD_Tree_Favorite
 	} // checkBuffer
 
 	/**
-	 * Get Favorite Tree ID for a specific User & Role Wise
+	 * Get Favorite Tree ID for a specific User wise or Role wise tree reference
 	 * 
 	 * @param  userID
 	 * @param  roleID
@@ -224,7 +226,10 @@ public class MTreeFavorite extends X_AD_Tree_Favorite
 		if (cache_TreeFavID.containsKey(key))
 			return cache_TreeFavID.get(key);
 
-		int id = DB.getSQLValue(null, SQL_GET_TREE_FAVORITE_ID, userID, roleID);
+		String sql = SQL_GET_TREE_FAVORITE_ID
+						+ (userID > 0 ? " AND AD_User_ID=? " : " AND COALESCE(AD_User_ID, 0)=0 AND AD_Role_ID=? ")
+						+ "ORDER BY AD_Tree_Favorite_ID ";
+		int id = DB.getSQLValue(null, sql, (userID > 0 ? userID : roleID));
 		if (id > 0)
 			cache_TreeFavID.put(key, id);
 		return id;

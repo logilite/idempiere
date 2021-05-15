@@ -20,12 +20,14 @@ import org.adempiere.webui.component.ZkCssHelper;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.TreeUtils;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MMenu;
 import org.compiere.model.MTable;
 import org.compiere.model.MTreeFavorite;
 import org.compiere.model.MTreeFavoriteNode;
 import org.compiere.model.MTreeNode;
 import org.compiere.model.MUser;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.zkoss.zk.ui.event.DropEvent;
@@ -183,12 +185,38 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 		toolbar.appendChild(btnShowDefaultTree);
 		this.appendChild(toolbar);
 
-		favContent.appendChild(createFavoritePanel(false));
+		favContent.appendChild(createFavoritePanel(false, true));
 
 	} // DPFavourites
 
-	private Box createFavoritePanel(boolean isReload)
+	private Box createFavoritePanel(boolean isReload, boolean isInitiate)
 	{
+		/**
+		 * After login 1st time loading tree then check if user having his own tree then load that.
+		 * Otherwise check default tree for role specific is exists then load that else load as user
+		 * tree with empty node
+		 */
+		if (isInitiate)
+		{
+			int myFavTreeID = MTreeFavorite.getFavoriteTreeID(AD_User_ID, Env.getAD_Role_ID(Env.getCtx()));
+			if (myFavTreeID > 0)
+			{
+				int nodeCount = DB.getSQLValue(null, MTreeFavorite.SQL_COUNT_TREE_FAVORITENODE, myFavTreeID);
+				if (nodeCount <= 0)
+				{
+					int defaultFavTreeID = MTreeFavorite.getFavoriteTreeID(0, Env.getAD_Role_ID(Env.getCtx()));
+					int defNodeCount = DB.getSQLValue(null, MTreeFavorite.SQL_COUNT_TREE_FAVORITENODE, defaultFavTreeID);
+					if (defNodeCount > 0)
+					{
+						isDefaultTree = true;
+						AD_User_ID = 0;
+						isReload = true;
+					}
+				}
+			}
+		}
+
+		//
 		boolean isDisabledShowMyTree = !isDefaultTree;
 		boolean isDisabledShowDefaultTree = isDefaultTree;
 		boolean isDisabledCopyTree = !isDefaultTree;
@@ -202,7 +230,7 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 		btnShowDefaultTree.setVisible(!isDisabledShowDefaultTree);
 
 		btnAdd.setDisabled(!(isDefaultTreeWriteAccess || isDisabledShowMyTree));
-		btnEdit.setDisabled(!(isDefaultTreeWriteAccess || isDisabledShowMyTree));
+		btnEdit.setDisabled(!(isDefaultTreeWriteAccess || isDisabledShowMyTree) || isInitiate);
 		btnAutoLaunch.setDisabled(!(isDefaultTreeWriteAccess || isDisabledShowMyTree));
 
 		tree = new Tree();
@@ -252,7 +280,7 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 			else if (event.getTarget() == btnCopyTree)
 			{
 				int roleID = Env.getAD_Role_ID(Env.getCtx());
-				int defFavTreeID = MTreeFavorite.getFavoriteTreeID(AD_User_ID, roleID);
+				int defFavTreeID = MTreeFavorite.getFavoriteTreeID(0, roleID);
 
 				AD_User_ID = Env.getAD_User_ID(Env.getCtx());
 				isDefaultTree = false;
@@ -316,7 +344,7 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 
 		//
 		favContent = new Panelchildren();
-		favContent.appendChild(createFavoritePanel(true));
+		favContent.appendChild(createFavoritePanel(true, false));
 		favContent.setDroppable(DPFavourites.FAVOURITE_DROPPABLE);
 		favContent.addEventListener(Events.ON_DROP, this);
 		panel.appendChild(favContent);
@@ -335,6 +363,15 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 	 */
 	private void doFolderOpr(boolean isAddFolder)
 	{
+		if (!isAddFolder)
+		{
+			if (getCurrentSelectedNodeID(tree) <= 0)
+			{
+				FDialog.error(0, "PleaseSelect");
+				return;
+			}
+		}
+
 		FavouriteFolderDialog addFolderPanel = new FavouriteFolderDialog(isAddFolder, treeModel, tree);
 
 		AEnv.showCenterScreen(addFolderPanel);

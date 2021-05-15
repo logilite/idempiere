@@ -87,9 +87,9 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 	 * Tree Initialization
 	 * 
 	 * @param  tree
+	 * @param  AD_User_ID
 	 * @param  isReload
-	 * @param  trxName
-	 * @return          {@link FavoriteSimpleTreeModel}
+	 * @return            {@link FavoriteSimpleTreeModel}
 	 */
 	public static FavoriteSimpleTreeModel initADTree(Tree tree, int AD_User_ID, boolean isReload)
 	{
