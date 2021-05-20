@@ -22,9 +22,11 @@ import java.util.Properties;
 import org.adempiere.util.GridRowCtx;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.LayoutUtils;
+import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Button;
 import org.adempiere.webui.component.Checkbox;
 import org.adempiere.webui.component.EditorBox;
+import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.component.NumberBox;
 import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Urlbox;
@@ -43,6 +45,7 @@ import org.adempiere.webui.util.GridTabDataBinder;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
+import org.compiere.model.Lookup;
 import org.compiere.model.MStyle;
 import org.compiere.model.MSysConfig;
 import org.compiere.util.DisplayType;
@@ -59,6 +62,7 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Cell;
 import org.zkoss.zul.Grid;
+import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Html;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Paging;
@@ -79,6 +83,8 @@ import org.zkoss.zul.impl.XulElement;
 public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt, RendererCtrl, EventListener<Event> {
 
 	public static final String GRID_ROW_INDEX_ATTR = "grid.row.index";
+	public static final String ZOOM_RECORD_ATTR = "ZOOM_RECORD_ATTR";
+	public static final String ZOOM_LOOKUP_ATTR = "ZOOM_LOOKUP_ATTR";
 	private static final String CELL_DIV_STYLE = "height: 100%; cursor: pointer; ";
 	private static final String CELL_DIV_STYLE_ALIGN_CENTER = CELL_DIV_STYLE + "text-align:center; ";
 	private static final String CELL_DIV_STYLE_ALIGN_RIGHT = CELL_DIV_STYLE + "text-align:right; ";
@@ -254,9 +260,31 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 			String text = getDisplayText(value, gridField, rowIndex, isForceGetValue);
 			WEditor editor = getEditorCell(gridField);
 			if (editor.getDisplayComponent() == null){
+				
+				// Text Label
 				Label label = new Label();
 				setLabelText(text, label);
-				component = label;
+				if (DisplayType.Search == gridField.getDisplayType() && value != null) {
+					
+					// Button Zoom
+					Button button = new Button();
+					button.setSclass("editor-button editor-button-zoom");
+					button.setAttribute(ZOOM_RECORD_ATTR, value);
+					button.setAttribute(ZOOM_LOOKUP_ATTR, gridField.getLookup());
+					button.addEventListener(Events.ON_CLICK, this);
+					if (ThemeManager.isUseFontIconForImage())
+						button.setIconSclass("z-icon-Zoom");
+					else
+						button.setImage(ThemeManager.getThemeResource("images/Zoom16.png"));
+
+					Hbox hbox = new Hbox();
+					hbox.appendChild(label);
+					hbox.appendChild(button);
+
+					component = hbox;
+				} else {
+					component = label;
+				}
 			}else{
 				component = editor.getDisplayComponent();
 				if (component instanceof Html){
@@ -500,6 +528,10 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 				editors.put(gridPanelFields[i], editor);
 				if (editor instanceof WButtonEditor) {
 					((WButtonEditor)editor).addActionListener(buttonListener);
+				}
+				else if (editor instanceof WSearchEditor) {
+					((WSearchEditor) editor).setZoomButtonVisibility(Boolean.TRUE);
+					((WSearchEditor) editor).setReadWrite(true);
 				}
 				
 				//readonly for display text
@@ -935,6 +967,9 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 			Executions.getCurrent().setAttribute("gridView.onSelectRow", Boolean.TRUE);
 			Checkbox checkBox = (Checkbox) event.getTarget();
 			Events.sendEvent(gridPanel, new Event("onSelectRow", gridPanel, checkBox));
+		} else if (Events.ON_CLICK.equals(event.getName())) {
+			Button button = (Button) event.getTarget();
+			AEnv.actionZoom((Lookup) button.getAttribute(ZOOM_LOOKUP_ATTR), button.getAttribute(ZOOM_RECORD_ATTR));
 		}
 	}
 	

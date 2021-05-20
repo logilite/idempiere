@@ -46,6 +46,16 @@
 	top: 2px;
 }
 
+.editor-input-zoom {
+    padding-right: 38px;
+}
+
+.editor-button-zoom {
+    background-color: #ffffff;
+    right: 0px;
+    top: 6px;
+}
+
 .editor-button :hover {
 	-webkit-filter: contrast(1.5);
 	filter: contrast(150%);

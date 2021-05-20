@@ -201,9 +201,16 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 				imageUrl = ThemeManager.getThemeResource("images/PickOpen16.png");
 		}
 		if (ThemeManager.isUseFontIconForImage())
+		{
 			getComponent().getButton().setIconSclass(imageUrl);
+			getComponent().getButtonZoom().setIconSclass("z-icon-Zoom");
+		} 
 		else
+		{
 			getComponent().getButton().setImage(imageUrl);
+			getComponent().getButtonZoom().setImage(ThemeManager.getThemeResource("images/Zoom16.png"));
+		}
+		getComponent().getButtonZoom().addEventListener(Events.ON_CLICK, this);
 
 		addChangeLogMenu(popupMenu);
 		if (gridField != null)
@@ -320,12 +327,19 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 		}
 		else if (Events.ON_CLICK.equals(e.getName()))
 		{
-			if (infoPanel != null)
+			if (e.getTarget() == getComponent().getButtonZoom())
 			{
-				infoPanel.detach();
-				infoPanel = null;
+				actionZoom();
+			} 
+			else 
+			{
+				if (infoPanel != null)
+				{
+					infoPanel.detach();
+					infoPanel = null;
+				}
+				actionButton("");
 			}
-			actionButton("");
 		}
 	}
 
@@ -869,5 +883,15 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 			}
 		}
 		
+	}
+
+	/**
+	 * Set Zoom button visibility
+	 * 
+	 * @param isVisible
+	 */
+	public void setZoomButtonVisibility(boolean isVisible) {
+		getComponent().getButtonZoom().setVisible(isVisible);
+		getComponent().getButton().setStyle("right:20px");
 	}
 }

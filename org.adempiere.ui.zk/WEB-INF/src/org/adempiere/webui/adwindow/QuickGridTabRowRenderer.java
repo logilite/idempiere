@@ -304,6 +304,7 @@ public class QuickGridTabRowRenderer
 				} else if (componentEditor instanceof WSearchEditor) {
 					((WSearchEditor) componentEditor).getComponent().getButton().addEventListener(Events.ON_FOCUS,
 							gridPanel);
+					((WSearchEditor) componentEditor).setZoomButtonVisibility(Boolean.TRUE);
 				}
 				else if (componentEditor instanceof WNumberEditor)
 				{

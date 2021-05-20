@@ -33,6 +33,7 @@ public class EditorBox extends Div {
 			this);
 	protected Textbox txt;
 	protected Button btn;
+	protected Button btnZoom;
 
 	public EditorBox() {
 		initComponents();
@@ -55,9 +56,17 @@ public class EditorBox extends Div {
 
 	private void initComponents() {
 		txt = new Textbox();
-		txt.setSclass("editor-input");
+		txt.setSclass("editor-input editor-input-zoom");
 		ZKUpdateUtil.setHflex(txt, "0");
 		appendChild(txt);
+
+		btnZoom = new Button();
+		btnZoom.setTabindex(-1);
+		ZKUpdateUtil.setHflex(btnZoom, "0");
+		btnZoom.setSclass("editor-button");
+		btnZoom.setVisible(false);
+		appendChild(btnZoom);
+
 		btn = new Button();
 		btn.setTabindex(-1);
 		ZKUpdateUtil.setHflex(btn, "0");
@@ -150,15 +159,24 @@ public class EditorBox extends Div {
 		return btn;
 	}
 	
+	/**
+	 * @return Zoom Button
+	 */
+	public Button getButtonZoom() {
+		return btnZoom;
+	}
+	
 	public void setTableEditorMode(boolean flag) {
 		if (flag) {
 			ZKUpdateUtil.setHflex(this, "0");
 			LayoutUtils.addSclass("grid-editor-input", txt);
 			LayoutUtils.addSclass("grid-editor-button", btn);
+			LayoutUtils.addSclass("grid-editor-button", btnZoom);
 		} else {
 			ZKUpdateUtil.setHflex(this, "1");
 			LayoutUtils.removeSclass("grid-editor-input", txt);
 			LayoutUtils.removeSclass("grid-editor-button", btn);
+			LayoutUtils.removeSclass("grid-editor-button", btnZoom);
 		}
 			
 	}
