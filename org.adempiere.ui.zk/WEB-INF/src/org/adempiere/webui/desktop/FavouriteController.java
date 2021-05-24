@@ -46,7 +46,7 @@ public class FavouriteController
 	private Tree						tree;
 	private FavoriteSimpleTreeModel		treeModel;
 
-	private FavouriteController()
+	protected FavouriteController()
 	{
 		m_AD_User_ID = Env.getAD_User_ID(Env.getCtx());
 		m_AD_Role_ID = Env.getAD_Role_ID(Env.getCtx());
