@@ -17,6 +17,7 @@
 //package org.compiere.mfg.model;
 package org.eevolution.model;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import org.compiere.model.Query;
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 /**
  * PP Product BOM Model.
@@ -237,6 +239,16 @@ public class MPPProductBOM extends X_PP_Product_BOM
 		return true;
 	}
 
+	@Override
+	protected boolean beforeSave(boolean newRecord) {
+		if(BigDecimal.ZERO.compareTo(getQty())>=0) {
+			log.saveError("Error",Msg.parseTranslation(Env.getCtx(),"@Qty@ @Should Be@ @Greater Than@ 0"));
+			return false;
+		}
+		
+		return true;
+	}
+	
 	@Override
 	protected boolean afterDelete(boolean success)
 	{
