@@ -840,12 +840,12 @@ public class AbstractService {
 				return false;
 		    return true;
 		}
-		if ((System.currentTimeMillis() - authToken.getLastAccessTime().getTime())/(timeoutmin*6000) > timeoutmin)
+		if ((System.currentTimeMillis() - authToken.getLastAccessTime().getTime())/60000 > timeoutmin)
 		{ 
 			if (needRequery)
 			{
 				authToken = MAuthorizationToken.get(m_cs.getCtx(), loginRequest.getUser(), loginRequest.getToken());
-				if ((System.currentTimeMillis() - authToken.getLastAccessTime().getTime())/(timeoutmin*6000) > timeoutmin)
+				if ((System.currentTimeMillis() - authToken.getLastAccessTime().getTime())/60000 > timeoutmin)
 				{
 					CompiereService.removeToken(authToken.getToken());
 					authToken.setIsActive(false);

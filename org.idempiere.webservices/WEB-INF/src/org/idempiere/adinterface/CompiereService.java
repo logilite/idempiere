@@ -295,6 +295,8 @@ public class CompiereService {
 		Env.setContext( getCtx(), "#M_Warehouse_ID", M_Warehouse_ID );
 		Env.setContext(getCtx(), Env.LANGUAGE, m_language.getAD_Language());
 		
+		AuthTokenContext authTokenCtx = null;
+		
 		if (remoteIP != null) {
 			// Create Token
 			MAuthorizationToken token = new MAuthorizationToken(getCtx(), 0,
@@ -313,7 +315,7 @@ public class CompiereService {
 			token.saveEx();
 			m_Token = token.getToken();
 
-			AuthTokenContext authTokenCtx = new AuthTokenContext();
+			authTokenCtx = new AuthTokenContext();
 			authTokenCtx.setAuthToken(token);
 			authTokenCtx.setPropertie((Properties) getCtx().clone());
 			authContexts.put(token.getToken(), authTokenCtx);
@@ -329,8 +331,11 @@ public class CompiereService {
 		session.setWebSession("WebService");
 		
 		session.setDescription(session.getDescription() + "\nUser Agent: " + getCtx().getProperty("#UserAgent"));
-
 		session.saveEx();
+		
+		if(authTokenCtx != null) {
+			authTokenCtx.setPropertie((Properties) getCtx().clone());
+		}
 				
 		m_loggedin = true;		
 		
@@ -396,19 +401,32 @@ public class CompiereService {
 		Env.setContext( getCtx(), "#M_Warehouse_ID", token.getM_Warehouse_ID() );
 		Env.setContext( getCtx(), Env.LANGUAGE, m_language.getAD_Language());
 		
-		AuthTokenContext authTokenCtx = new AuthTokenContext();
+		AuthTokenContext authTokenCtx = CompiereService.getTokenContext(token.getToken());
+		if(authTokenCtx == null) {
+			authTokenCtx = new AuthTokenContext();
+		}
+		
 		authTokenCtx.setAuthToken(token);
-		authTokenCtx.setPropertie((Properties) getCtx().clone());
-		authContexts.put(token.getToken(), authTokenCtx);
+		
+		String sessionId = null;
+		if(authTokenCtx.getPropertie() != null) {
+			sessionId = authTokenCtx.getPropertie().getProperty("#AD_Session_ID");
+		}
 		
 		// Create session
-		MSession session = MSession.get (getCtx(), false);
-		if (session == null){
-			log.fine("No Session found");
-			session = MSession.get (getCtx(), true);    	
+		if(Util.isEmpty(sessionId, true)) {
+			MSession session = MSession.get (getCtx(), false);
+			if (session == null){
+				log.fine("No Session found");
+				session = MSession.get (getCtx(), true);    	
+			}
+			
+			session.setWebSession("WebService");
+			session.saveEx();
 		}
-		session.setWebSession("WebService");
-		session.saveEx();
+		
+		authTokenCtx.setPropertie((Properties) getCtx().clone());
+		authContexts.put(token.getToken(), authTokenCtx);
 		
 		token.setLastAccessTime(new Timestamp(System.currentTimeMillis()));
 		token.saveEx();
