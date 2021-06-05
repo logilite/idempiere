@@ -626,5 +626,12 @@ public class CompiereService {
 		}
 		return expired;
 	}
+	
+	/**
+	 * @return connection count
+	 */
+	public synchronized int getConnectionCount() {
+		return m_connectCount;
+	}
 
 }
