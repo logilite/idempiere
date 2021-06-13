@@ -29,13 +29,19 @@
 
 package org.adempiere.webui.dashboard;
 
+import java.sql.Timestamp;
+
 import org.adempiere.webui.apps.graph.WDocumentStatusPanel;
+import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.ToolBarButton;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ServerPushTemplate;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
+import org.zkoss.zk.ui.Desktop;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -48,16 +54,30 @@ public class DPDocumentStatus extends DashboardPanel implements EventListener<Ev
 	 */
 	private static final long serialVersionUID = 7904122964566112177L;
 	private WDocumentStatusPanel statusPanel;
+	private Label statusLabel;
 
 	@Override
 	public void refresh(ServerPushTemplate template) {
-		statusPanel.refresh();
-		template.execute(this);
+		
+		final DPDocumentStatus documentStatus = this;
+		// An Async task
+		Thread thread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				statusPanel.refresh();
+				template.executeAsync(documentStatus);
+			}
+		});
+		thread.start();
 	}
 
 	@Override
 	public void updateUI() {
 		statusPanel.updateUI();
+		// show last run time
+		String lastRunTime = DisplayType.getDateFormat(DisplayType.DateTime, Env.getLanguage(Env.getCtx()))
+				.format(new Timestamp(System.currentTimeMillis()));
+		statusLabel.setText(lastRunTime);
 	}
 
 	public DPDocumentStatus()
@@ -89,14 +109,19 @@ public class DPDocumentStatus extends DashboardPanel implements EventListener<Ev
 			imgr.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Refresh")));
 			imgr.addEventListener(Events.ON_CLICK, this);
 		}
+		
+		statusLabel = new Label();
+		documentStatusToolbar.appendChild(statusLabel);
 	}
 
 	public void onEvent(Event event) throws Exception {
 		String eventName = event.getName();
 
 		if (eventName.equals(Events.ON_CLICK)) {
-			statusPanel.refresh();
-			statusPanel.updateUI();
+			Desktop desktop = Executions.getCurrent().getDesktop();
+			ServerPushTemplate template = new ServerPushTemplate(desktop);
+
+			refresh(template);
 		}
 	}	
 	
