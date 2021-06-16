@@ -131,15 +131,16 @@ public class FavouriteController
 		}
 		else
 		{
-			MTreeFavoriteNode favNode = MTreeFavoriteNode.getFavouriteTreeNodeFromMenuID(m_AD_Tree_Favorite_ID, Menu_ID);
-			if (favNode != null) {
-				try {
-					//For service users, needs to persist data in system tenant
-					PO.setCrossTenantSafe();
+			//For service users, needs to persist data in system tenant
+			PO.setCrossTenantSafe();
+			try {
+				MTreeFavoriteNode favNode = MTreeFavoriteNode.getFavouriteTreeNodeFromMenuID(m_AD_Tree_Favorite_ID,
+						Menu_ID);
+				if (favNode != null) {
 					return favNode.delete(true);
-				}finally {
-					PO.clearCrossTenantSafe();
 				}
+			}finally {
+				PO.clearCrossTenantSafe();
 			}
 		}
 		return false;
@@ -197,6 +198,8 @@ public class FavouriteController
 	 */
 	public boolean removeNode(int nodeId)
 	{
+		try {
+		PO.setCrossTenantSafe();
 		MTreeFavoriteNode favNode = MTreeFavoriteNode.getFavouriteTreeNodeFromMenuID(m_AD_Tree_Favorite_ID, nodeId);
 		if (favNode != null && barUpdate(false, nodeId))
 		{
@@ -212,6 +215,9 @@ public class FavouriteController
 				callback.onCallback(nodeId);
 			}
 			return true;
+		}
+		}finally {
+			PO.clearCrossTenantSafe();
 		}
 		return false;
 	} // removeNode

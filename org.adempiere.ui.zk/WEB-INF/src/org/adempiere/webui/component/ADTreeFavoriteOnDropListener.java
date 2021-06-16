@@ -224,7 +224,13 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 		MTreeNode mtn = (MTreeNode) toNode.getData();
 		if (mtn.isSummary())
 		{
-			MTreeFavoriteNode favNode = (MTreeFavoriteNode) MTable.get(Env.getCtx(), MTreeFavoriteNode.Table_ID).getPO(mtn.getNode_ID(), null);
+			PO.setCrossTenantSafe();
+			MTreeFavoriteNode favNode;
+			try{
+				favNode = (MTreeFavoriteNode) MTable.get(Env.getCtx(), MTreeFavoriteNode.Table_ID).getPO(mtn.getNode_ID(), null);
+			}finally {
+				PO.clearCrossTenantSafe();
+			}
 			if (favNode.isCollapsible())
 			{
 				menuItem = new Menuitem(Msg.getMsg(Env.getCtx(), MENU_ITEM_DEFAULT_EXPANDED));
@@ -399,18 +405,18 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 	 */
 	private void updateTFNParentAndSeqNo(MTreeNode parentTNode, MTreeNode moveTNode, int seqNo)
 	{
-		MTreeFavoriteNode favNode = (MTreeFavoriteNode) MTable.get(Env.getCtx(), MTreeFavoriteNode.Table_ID).getPO(moveTNode.getNode_ID(), null);
-		if (favNode.getParent_ID() != parentTNode.getNode_ID() || favNode.getSeqNo() != seqNo)
-		{
-			favNode.setParent_ID(parentTNode.getNode_ID());
-			favNode.setSeqNo(seqNo);
-			try {
-				//For service users, needs to persist data in system tenant
-				PO.setCrossTenantSafe();
+        //For service users, needs to persist data in system tenant
+		PO.setCrossTenantSafe();
+		try {
+			MTreeFavoriteNode favNode = (MTreeFavoriteNode) MTable.get(Env.getCtx(), MTreeFavoriteNode.Table_ID)
+					.getPO(moveTNode.getNode_ID(), null);
+			if (favNode.getParent_ID() != parentTNode.getNode_ID() || favNode.getSeqNo() != seqNo) {
+				favNode.setParent_ID(parentTNode.getNode_ID());
+				favNode.setSeqNo(seqNo);
 				favNode.save();
-			}finally {
-				PO.clearCrossTenantSafe();
 			}
+		}finally {
+			PO.clearCrossTenantSafe();
 		}
 	} // updateTFNParentAndSeqNo
 
@@ -446,21 +452,26 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 		private void deleteNodeItem(DefaultTreeNode<Object> toNode)
 		{
 			int nodeID = ((MTreeNode) toNode.getData()).getNode_ID();
-			MTreeFavoriteNode favNode = (MTreeFavoriteNode) MTable.get(Env.getCtx(), MTreeFavoriteNode.Table_ID).getPO(nodeID, null);
-			if (favNode.getAD_Menu_ID() > 0 && favNode.isFavourite())
-			{
-				FavouriteController controller = FavouriteController.getInstance(Executions.getCurrent().getDesktop().getSession());
-				if (!controller.removeNode(favNode.getAD_Menu_ID()))
-				{
-					throw new AdempiereException(Msg.getMsg(favNode.getCtx(), CLogger.retrieveError().getValue()));
+			PO.setCrossTenantSafe();
+			try {
+				MTreeFavoriteNode favNode = (MTreeFavoriteNode) MTable.get(Env.getCtx(), MTreeFavoriteNode.Table_ID)
+						.getPO(nodeID, null);
+
+				if (favNode.getAD_Menu_ID() > 0 && favNode.isFavourite()) {
+					FavouriteController controller = FavouriteController
+							.getInstance(Executions.getCurrent().getDesktop().getSession());
+					if (!controller.removeNode(favNode.getAD_Menu_ID())) {
+						throw new AdempiereException(Msg.getMsg(favNode.getCtx(), CLogger.retrieveError().getValue()));
+					}
+				} else {
+					boolean isNodeDeleted = favNode.delete(true);
+					if (isNodeDeleted)
+						treeModel.removeNode(toNode);
+					else
+						throw new AdempiereException(Msg.getMsg(favNode.getCtx(), CLogger.retrieveError().getValue()));
 				}
-			}
-			else
-			{
-				if (favNode.delete(true))
-					treeModel.removeNode(toNode);
-				else
-					throw new AdempiereException(Msg.getMsg(favNode.getCtx(), CLogger.retrieveError().getValue()));
+			}finally {
+				PO.clearCrossTenantSafe();
 			}
 		} // deleteNodeItem
 
