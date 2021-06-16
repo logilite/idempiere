@@ -2134,8 +2134,10 @@ public final class Env
 	/**	Big Decimal 100	 */
 	static final public BigDecimal ONEHUNDRED = BigDecimal.valueOf(100.0);
 
-	/**	New Line 		 */
+	/** New Line 		 */
 	public static final String	NL = System.getProperty("line.separator");
+	/* Prefix for predefined context variables coming from menu or window definition */
+	private static final String PREFIX_PREDEFINED_VARIABLE = "+";
 
 
 	/**
@@ -2144,7 +2146,40 @@ public final class Env
 	static
 	{
 		//  Set English as default Language
-		getCtx().put(LANGUAGE, Language.getBaseAD_Language());
-	}   //  static
+ 		getCtx().put(LANGUAGE, Language.getBaseAD_Language());
+ 	}   //  static
+ 
 
-}   //  Env
+	/**
+	 * Add in context predefined variables with prefix +, coming from menu or window definition
+	 * Predefined variables must come separated by new lines in one of the formats:
+	 *   VAR=VALUE
+	 *   VAR="VALUE"
+	 *   VAR='VALUE'
+	 *  The + prefix is not required, is added here to the defined variables
+	 * @param ctx
+	 * @param windowNo
+	 * @param predefinedVariables
+	 */
+	public static void setPredefinedVariables(Properties ctx, int windowNo, String predefinedVariables) {
+		if (predefinedVariables != null) {
+			String[] lines = predefinedVariables.split("\n");
+			for (String line : lines) {
+				int idxEq = line.indexOf("=");
+				if (idxEq > 0) {
+					String var = line.substring(0, idxEq).trim();
+					if (var.length() > 0) {
+						String value = line.substring(idxEq+1).trim();
+						if (   (value.startsWith("\"") && value.endsWith("\""))
+							|| (value.startsWith("'")  && value.endsWith("'") )
+							) {
+							value = value.substring(1, value.length()-1);
+						}
+						Env.setContext(ctx, windowNo, PREFIX_PREDEFINED_VARIABLE + var, value);
+					}
+				}
+			}
+		}
+	}
+
+ }   //  Env
