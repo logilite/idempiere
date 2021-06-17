@@ -31,8 +31,8 @@ public class AuthTokenContext
 		if (m_ctx != null)
 		{
 			this.m_ctx = m_ctx;
-			this.m_ctx.setProperty("#AD_Session_ID", "");
-			Env.setContext(m_ctx, "#AD_Session_ID", "");
+			//this.m_ctx.setProperty("#AD_Session_ID", "");
+			//Env.setContext(m_ctx, "#AD_Session_ID", "");
 		}
 	}
 
