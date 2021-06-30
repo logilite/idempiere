@@ -1,7 +1,7 @@
 SET SQLBLANKLINES ON
 SET DEFINE OFF
 
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
+-- Adding Access tab on Document Status (Activity)
 -- Jun 28, 2021, 10:03:55 PM IST
 INSERT INTO AD_Table (AD_Table_ID,Name,TableName,LoadSeq,AccessLevel,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsSecurityEnabled,IsDeleteable,IsHighVolume,IsView,EntityType,ImportTable,IsChangeLog,ReplicationType,CopyColumnsFromTable,IsCentrallyMaintained,AD_Table_UU,Processing,DatabaseViewDrop,CopyComponentsFromView) VALUES (200278,'Document Status Access','PA_DocumentStatusAccess',0,'7',0,0,'Y',TO_DATE('2021-06-28 22:03:54','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2021-06-28 22:03:54','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','N','N','D','N','Y','L','N','Y','c77c16a1-b2fd-492d-ac1d-3afcce935568','N','N','N')
 ;
@@ -118,7 +118,7 @@ ALTER TABLE PA_DocumentStatusAccess ADD AD_User_ID NUMBER(10) DEFAULT NULL
 ;
 
 -- Jun 28, 2021, 10:04:06 PM IST
-INSERT INTO AD_Column (AD_Column_ID,Version,Name,AD_Table_ID,ColumnName,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,FKConstraintName,FKConstraintType,IsHtml) VALUES (214532,0,'Document Status',200278,'PA_DocumentStatus_ID',10,'N','N','N','N','N',0,'N',19,0,0,'Y',TO_DATE('2021-06-28 22:04:05','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2021-06-28 22:04:05','YYYY-MM-DD HH24:MI:SS'),100,203069,'N','N','D','Y','N','N','Y','86869fbf-ad42-408c-991a-ccb1db786a40','Y',0,'N','N','PADocumentStatus_PADocumentSta','N','N')
+INSERT INTO AD_Column (AD_Column_ID,Version,Name,AD_Table_ID,ColumnName,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,FKConstraintName,FKConstraintType,IsHtml) VALUES (214532,0,'Document Status',200278,'PA_DocumentStatus_ID',10,'N','N','N','N','N',0,'N',19,0,0,'Y',TO_DATE('2021-06-28 22:04:05','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2021-06-28 22:04:05','YYYY-MM-DD HH24:MI:SS'),100,203069,'N','N','D','Y','N','N','Y','86869fbf-ad42-408c-991a-ccb1db786a40','Y',0,'N','N','PADocumentStatus_PADocStatAccs','N','N')
 ;
 
 -- Jun 28, 2021, 10:04:06 PM IST
@@ -275,7 +275,7 @@ ALTER TABLE PA_DocumentStatusAccess ADD CONSTRAINT ADUser_PADocumentStatusAccess
 ;
 
 -- Jun 28, 2021, 10:04:26 PM IST
-ALTER TABLE PA_DocumentStatusAccess ADD CONSTRAINT PADocumentStatus_PADocumentSta FOREIGN KEY (PA_DocumentStatus_ID) REFERENCES pa_documentstatus(pa_documentstatus_id) DEFERRABLE INITIALLY DEFERRED
+ALTER TABLE PA_DocumentStatusAccess ADD CONSTRAINT PADocumentStatus_PADocStatAccs FOREIGN KEY (PA_DocumentStatus_ID) REFERENCES pa_documentstatus(pa_documentstatus_id) DEFERRABLE INITIALLY DEFERRED
 ;
 
 -- Jun 28, 2021, 10:05:00 PM IST
