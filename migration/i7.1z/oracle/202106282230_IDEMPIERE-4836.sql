@@ -282,5 +282,5 @@ ALTER TABLE PA_DocumentStatusAccess ADD CONSTRAINT PADocumentStatus_PADocStatAcc
 Insert Into PA_DocumentStatusAccess (AD_Client_ID,AD_Org_ID,AD_Role_ID,AD_User_ID,Created,CreatedBy,IsActive,Updated,UpdatedBy,PA_DocumentStatus_ID,PA_DocumentStatusAccess_ID,PA_DocumentStatusAccess_UU) ( SELECT AD_Client_ID,AD_Org_ID,AD_Role_ID,AD_User_ID,Created,CreatedBy,IsActive,Updated,UpdatedBy,PA_DocumentStatus_ID,(nextid((SELECT AD_Sequence_ID FROM AD_Sequence WHERE Name = 'PA_DocumentStatusAccess')::Integer, 'N'::Varchar)), generate_uuid() FROM PA_DocumentStatus WHERE AD_Role_ID>0 OR AD_User_ID>0 )
 ;
 
-SELECT register_migration_script('202106281400_IDEMPIERE-4836.sql') FROM dual
+SELECT register_migration_script('202106282230_IDEMPIERE-4836.sql') FROM dual
 ;
