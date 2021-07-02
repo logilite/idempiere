@@ -92,6 +92,7 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.HtmlBasedComponent;
+import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -649,6 +650,11 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 	}
 	
 	protected void saveReportOption (){
+		if (runAsJobField.isChecked() && notificationTypeField.getValue() == null) {
+			throw new WrongValueException(notificationTypeField.getComponent(),
+					Msg.translate(Env.getCtx(), "FillMandatory"));
+		}
+		
 		if (!isReport() && !isJasperReport()){
 			return;
 		}
