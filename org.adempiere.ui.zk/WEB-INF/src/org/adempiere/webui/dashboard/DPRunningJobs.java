@@ -199,7 +199,10 @@ public class DPRunningJobs extends DashboardPanel implements EventListener<Event
 			btnJob.setAttribute(AD_PINSTANCE_ID_ATTR, String.valueOf(pi.getAD_PInstance_ID()));
 			bxJobs.appendChild(btnJob);
 			btnJob.setLabel(label);
-			btnJob.setImage(ThemeManager.getThemeResource(getIconFile()));
+			if (ThemeManager.isUseFontIconForImage())
+				btnJob.setIconSclass("z-icon-Window");
+			else
+				btnJob.setImage(ThemeManager.getThemeResource("images/mWindow.png"));
 			btnJob.addEventListener(Events.ON_CLICK, this);
 			btnJob.setSclass("menu-href");
 			ZKUpdateUtil.setHflex(btnJob, "1");
@@ -215,14 +218,6 @@ public class DPRunningJobs extends DashboardPanel implements EventListener<Event
 			.setOrderBy("Updated DESC")
 			.list();
 		return pis;
-	}
-		
-	private String getIconFile() 
-	{
-		if (ThemeManager.isUseFontIconForImage())
-			return "z-icon-Window";
-		else
-			return "images/mWindow.png";
 	}
 
 	@Override

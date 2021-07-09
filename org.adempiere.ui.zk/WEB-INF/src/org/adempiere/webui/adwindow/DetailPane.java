@@ -367,7 +367,10 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 		
 		// ADD Quick Form Button
 		button = new ToolBarButton();
-		button.setImage(ThemeManager.getThemeResource(QUICK_FORM_IMAGE));
+		if (ThemeManager.isUseFontIconForImage())
+			button.setIconSclass("z-icon-QuickForm");
+		else
+			button.setImage(ThemeManager.getThemeResource(QUICK_FORM_IMAGE));
 		button.setId(BTN_QUICK_FORM_ID);
 		button.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
 			@Override
