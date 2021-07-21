@@ -89,6 +89,7 @@ import org.compiere.model.MLookupFactory;
 import org.compiere.model.MLookupInfo;
 import org.compiere.model.MProduct;
 import org.compiere.model.MQuery;
+import org.compiere.model.MRefTable;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
@@ -3056,6 +3057,18 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 			}
 			else
 			{
+				if (field.isLookup())
+				{
+					MLookup lookup = (MLookup) field.getLookup();
+					MLookupInfo mInfo = lookup.getLookupInfo();
+					if (MRefTable.Table_Name.equals(mInfo.TableName))
+					{
+						MRefTable refTable = (MRefTable) MTable.get(Env.getCtx(), MRefTable.Table_Name).getPO(mInfo.AD_Reference_Value_ID, null);
+						if (refTable.getAD_().getAD_Reference_ID() == DisplayType.String)
+							isAddApostrophe = true;
+					}
+				}
+
 				if (field.getDisplayType() == DisplayType.List)
 					isAddApostrophe = true;
 
