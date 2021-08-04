@@ -17,6 +17,8 @@
 
 package org.adempiere.webui.editor;
 
+import static org.compiere.model.SystemIDs.WINDOW_WAREHOUSE_LOCATOR;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.PreparedStatement;
@@ -44,7 +46,7 @@ import org.compiere.model.MQuery;
 import org.compiere.model.MRole;
 import org.compiere.model.MTable;
 import org.compiere.model.MWarehouse;
-import static org.compiere.model.SystemIDs.*;
+import org.compiere.model.X_M_MovementLine;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -447,7 +449,17 @@ public class WLocatorEditor extends WEditor implements EventListener<Event>, Pro
 	
 	public int getOnly_Warehouse_ID()
 	{
-		String only_Warehouse = Env.getContext(Env.getCtx(), m_WindowNo, "M_Warehouse_ID", true);
+		//IDEMPIERE-4882 : Load Locator To field value as per Warehouse TO field value
+		String only_Warehouse;
+		if (X_M_MovementLine.COLUMNNAME_M_LocatorTo_ID.equals(gridField.getColumnName()))
+		{
+			only_Warehouse = Env.getContext(Env.getCtx(), m_WindowNo, "M_WarehouseTo_ID", true);
+		}
+		else
+		{
+			only_Warehouse = Env.getContext(Env.getCtx(), m_WindowNo, "M_Warehouse_ID", true);
+		}
+		
 		int only_Warehouse_ID = 0;
 	
 		try
