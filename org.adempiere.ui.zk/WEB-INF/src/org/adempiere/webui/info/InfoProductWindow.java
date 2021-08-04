@@ -441,9 +441,10 @@ public class InfoProductWindow extends InfoWindow {
 	@Override
 	protected void initParameters() {
 		int M_Warehouse_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "M_Warehouse_ID");
-		String ignorePriceList=Env.getContext(Env.getCtx(), p_WindowNo, Env.PREFIX_PREDEFINED_VARIABLE+"IgnorePriceListInProductInfo");
+
+		String usePriceList=Env.getContext(Env.getCtx(), p_WindowNo, Env.PREFIX_PREDEFINED_VARIABLE+"UsePriceListInProductInfo");
 		int M_PriceList_Version_ID = 0;
-		if (!"Y".equalsIgnoreCase(ignorePriceList))
+		if ("Y".equalsIgnoreCase(usePriceList))
 		{
 			int M_PriceList_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "M_PriceList_ID");
 
