@@ -221,7 +221,35 @@ public class ProcessInfoParameter implements Serializable
 			return (BigDecimal) m_Parameter;
 		return new BigDecimal(m_Parameter.toString());
 	}	//	getParameterAsBigDecimal	
-	
+
+	/**
+	 * Method get Parameter as Integer Array
+	 * 
+	 * @return Integer[]
+	 */
+	public Integer[] getParameterAsIntegerArray()
+	{
+		if (m_Parameter == null)
+			return null;
+		if (m_Parameter instanceof Integer[])
+			return (Integer[]) m_Parameter;
+		return null;
+	} // getParameterAsIntegerArray
+
+	/**
+	 * Method get Parameter as String Array
+	 * 
+	 * @return String[]
+	 */
+	public String[] getParameterAsStringArray()
+	{
+		if (m_Parameter == null)
+			return null;
+		if (m_Parameter instanceof String[])
+			return (String[]) m_Parameter;
+		return null;
+	} // getParameterAsStringArray
+
 	/**
 	 * Method getParameterName
 	 * @return String

@@ -33,7 +33,7 @@ public class X_AD_PInstance_Para extends PO implements I_AD_PInstance_Para, I_Pe
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20171031L;
+	private static final long serialVersionUID = 20210813L;
 
     /** Standard Constructor */
     public X_AD_PInstance_Para (Properties ctx, int AD_PInstance_Para_ID, String trxName)
@@ -223,6 +223,23 @@ public class X_AD_PInstance_Para extends PO implements I_AD_PInstance_Para, I_Pe
 		return bd;
 	}
 
+	/** Set Process Number Array.
+		@param P_Number_Array 
+		Process Parameter
+	  */
+	public void setP_Number_Array (Integer[] P_Number_Array)
+	{
+		set_Value (COLUMNNAME_P_Number_Array, P_Number_Array);
+	}
+
+	/** Get Process Number Array.
+		@return Process Parameter
+	  */
+	public Integer[] getP_Number_Array () 
+	{
+		return (Integer[])get_Value(COLUMNNAME_P_Number_Array);
+	}
+
 	/** Set Process Number To.
 		@param P_Number_To 
 		Process Parameter
@@ -258,6 +275,23 @@ public class X_AD_PInstance_Para extends PO implements I_AD_PInstance_Para, I_Pe
 	public String getP_String () 
 	{
 		return (String)get_Value(COLUMNNAME_P_String);
+	}
+
+	/** Set Process String Array.
+		@param P_String_Array 
+		Process Parameter
+	  */
+	public void setP_String_Array (String[] P_String_Array)
+	{
+		set_Value (COLUMNNAME_P_String_Array, P_String_Array);
+	}
+
+	/** Get Process String Array.
+		@return Process Parameter
+	  */
+	public String[] getP_String_Array () 
+	{
+		return (String[])get_Value(COLUMNNAME_P_String_Array);
 	}
 
 	/** Set Process String To.

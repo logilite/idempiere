@@ -217,6 +217,30 @@ public class MPInstancePara extends X_AD_PInstance_Para
 	}	//	setParameter
 
 	/**
+	 * Set String Array Parameter
+	 * 
+	 * @param parameterName    name
+	 * @param stringArrayParam value
+	 */
+	public void setParameter(String parameterName, String[] stringArrayParam)
+	{
+		setParameterName(parameterName);
+		setP_String_Array(stringArrayParam);
+	} // setParameter
+
+	/**
+	 * Set Integer Array Parameter
+	 * 
+	 * @param parameterName     name
+	 * @param integerArrayParam value
+	 */
+	public void setParameter(String parameterName, Integer[] integerArrayParam)
+	{
+		setParameterName(parameterName);
+		setP_Number_Array(integerArrayParam);
+	} // setParameter
+
+	/**
 	 * @return Display type
 	 */
 	public int getDisplayType() 

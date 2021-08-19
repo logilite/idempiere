@@ -185,6 +185,19 @@ public interface I_AD_PInstance_Para
 	  */
 	public BigDecimal getP_Number();
 
+    /** Column name P_Number_Array */
+    public static final String COLUMNNAME_P_Number_Array = "P_Number_Array";
+
+	/** Set Process Number Array.
+	  * Process Parameter
+	  */
+	public void setP_Number_Array (Integer[] P_Number_Array);
+
+	/** Get Process Number Array.
+	  * Process Parameter
+	  */
+	public Integer[] getP_Number_Array();
+
     /** Column name P_Number_To */
     public static final String COLUMNNAME_P_Number_To = "P_Number_To";
 
@@ -210,6 +223,19 @@ public interface I_AD_PInstance_Para
 	  * Process Parameter
 	  */
 	public String getP_String();
+
+    /** Column name P_String_Array */
+    public static final String COLUMNNAME_P_String_Array = "P_String_Array";
+
+	/** Set Process String Array.
+	  * Process Parameter
+	  */
+	public void setP_String_Array (String[] P_String_Array);
+
+	/** Get Process String Array.
+	  * Process Parameter
+	  */
+	public String[] getP_String_Array();
 
     /** Column name P_String_To */
     public static final String COLUMNNAME_P_String_To = "P_String_To";
