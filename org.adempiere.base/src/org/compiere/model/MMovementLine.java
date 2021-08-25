@@ -205,6 +205,17 @@ public class MMovementLine extends X_M_MovementLine
 			}
 		}
 
+		// Set Movement Qty from Qty Entered as per UOM if Qty value is Not Null or Zero.
+		if (getQtyEntered().compareTo(Env.ZERO) != 0
+				&& (newRecord || is_ValueChanged(COLUMNNAME_QtyEntered) || is_ValueChanged(COLUMNNAME_C_UOM_ID)))
+		{
+			BigDecimal MovementQty = MUOMConversion.convertProductFrom(Env.getCtx(), getM_Product_ID(), getC_UOM_ID(),
+					getQtyEntered());
+			if (MovementQty == null)
+				MovementQty = getQtyEntered();
+			setMovementQty(MovementQty);
+		}
+		
 		//	Qty Precision
 		if (newRecord || is_ValueChanged(COLUMNNAME_MovementQty))
 			setMovementQty(getMovementQty());
