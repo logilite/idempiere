@@ -113,6 +113,7 @@ import org.zkoss.zul.Separator;
 import org.zkoss.zul.South;
 import org.zkoss.zul.Space;
 import org.zkoss.zul.Style;
+import org.zkoss.zul.Toolbar;
 import org.zkoss.zul.TreeModel;
 import org.zkoss.zul.Treeitem;
 import org.zkoss.zul.Vlayout;
@@ -373,15 +374,12 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
     /**
      *
      * @param winPanel
-     * @param windowNo
      * @param gridTab
-     * @param gridWindow
      */
-    public void init(AbstractADWindowContent winPanel, int windowNo, GridTab gridTab,
-            GridWindow gridWindow)
+    public void init(AbstractADWindowContent winPanel, GridTab gridTab)
     {
-        this.windowNo = windowNo;
-        this.gridWindow = gridWindow;
+        this.gridWindow = gridTab.getGridWindow();
+        this.windowNo = gridWindow.getWindowNo();
         this.gridTab = gridTab;
         // callout dialog ask for input - devCoffee #3390
         gridTab.setCalloutUI(new CalloutDialog(Executions.getCurrent().getDesktop(), windowNo));
@@ -2083,20 +2081,6 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
 		editorTraverse(editorTaverseCallback, editors);
 		
 	}
-	
-	@Override
-	public boolean isEnableCustomizeButton()
-	{
-		return isGridView();
-	}
-
-	@Override
-	public boolean isEnableProcessButton()
-	{
-		return getToolbarButtons().size() > 0 && !gridTab.isNew();
-	}
-
-
 
 	@Override
 	public boolean isEnableQuickFormButton()
@@ -2123,4 +2107,23 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
 		
 		return hasQuickForm;
 	}
+
+	@Override
+	public boolean isEnableCustomizeButton()
+	{
+		return isGridView();
+	}
+
+	@Override
+	public void updateToolbar(ADWindowToolbar toolbar)
+	{
+
+	}
+
+	@Override
+	public void updateDetailToolbar(Toolbar toolbar)
+	{
+
+	}
+
 }

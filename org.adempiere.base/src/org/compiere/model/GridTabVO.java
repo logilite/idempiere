@@ -518,7 +518,7 @@ public class GridTabVO implements Evaluatee, Serializable
 	public int			PageSize = 0;
 	/**	Detail View Page Size	*/
 	public int			DetailPageSize = 0;	
-	
+	/** Tab type uses by IADTabpanel service to identify implementors*/
 	public String AD_TabType = null;
 
 	/** Fields contain MFieldVO entities    */

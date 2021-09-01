@@ -22,18 +22,6 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 
 public class ServiceUtil {
-	public static IADTabpanel getADTabPanel(String type) {
-		IADTabpanel Object = null;
-		List<IADTabPanelFactory> factoryList = Service.locator().list(IADTabPanelFactory.class).getServices();
-		if (factoryList == null)
-			return null;
-		for (IADTabPanelFactory factory : factoryList) {
-			Object = factory.getInstance(type);
-			if (Object != null)
-				return Object;
-		}
-		return null;
-	}
 
 	/**
 	 * Call to IWAttachmentFactory service

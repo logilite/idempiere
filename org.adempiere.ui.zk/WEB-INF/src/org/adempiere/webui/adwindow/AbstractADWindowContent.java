@@ -31,10 +31,12 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.DBException;
 import org.adempiere.util.Callback;
 import org.adempiere.webui.AdempiereIdGenerator;
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.ClientInfo;
+import org.adempiere.webui.Extensions;
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.WArchive;
 import org.adempiere.webui.WRequest;
@@ -638,67 +640,70 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		{
 			gTab.setUpdateWindowContext(false);
 		}
-		
 
 		String type = gTab.getTabType();
-		if(!Util.isEmpty(type)){
-			
-			IADTabpanel adTabPan = ServiceUtil.getADTabPanel(type);
-			if (adTabPan != null) {
-				gTab.addDataStatusListener(this);
-				adTabPan.init(this, curWindowNo, gTab, gridWindow);
-				adTabbox.addTab(gTab, adTabPan);
-				if (tabIndex == 0) {
-					adTabPan.createUI();
-					if (!m_queryInitiating) {
-						initFirstTabpanel();
-					}
-				}
-
-				adTabPan.addEventListener(ADTabpanel.ON_DYNAMIC_DISPLAY_EVENT,
-						this);
-				if (!m_queryInitiating && tabIndex == 0) {
-					initQueryOnNew(query);
-				}
-			} else {
-				logger.log(Level.SEVERE, "No implementaton for tab type " + type + " Found");
+		if (!Util.isEmpty(type))
+		{
+			IADTabpanel adTabPanal = Extensions.getADTabPanel(type);
+			if (adTabPanal != null)
+			{
+				initTabPanel(query, tabIndex, gTab, adTabPanal);
 			}
-
-		} else if (gTab.isSortTab()) {
-			ADSortTab sortTab = new ADSortTab(curWindowNo, gTab);
-
+			else
+			{
+				logger.log(Level.SEVERE, "No implementaton for tab type " + type + " Found", new Exception("No implementaton for tab type " + type + " Found"));
+			}
+		}
+		else if (gTab.isSortTab())
+		{
+			ADSortTab sortTab = new ADSortTab();
+			sortTab.init(this, gTab);
 			adTabbox.addTab(gTab, sortTab);
 			sortTab.registerAPanel(this);
 			if (tabIndex == 0) {
 				sortTab.createUI();
-				if (!m_queryInitiating) 
+				if (!m_queryInitiating)
 				{
 					initFirstTabpanel();
 				}
 			}
 			gTab.addDataStatusListener(this);
-		}else{
+		}
+		else
+		{
 			ADTabpanel fTabPanel = new ADTabpanel();
+			initTabPanel(query, tabIndex, gTab, fTabPanel);
+		}
 
-			fTabPanel.addEventListener(ADTabpanel.ON_DYNAMIC_DISPLAY_EVENT,this);
-			gTab.addDataStatusListener(this);
-			fTabPanel.init(this, curWindowNo, gTab, gridWindow);
-			adTabbox.addTab(gTab, fTabPanel);
-			if (tabIndex == 0){
-				fTabPanel.createUI();
-				if (!m_queryInitiating) 
-				{
-					initFirstTabpanel();
-				}
-			}
+		return gTab;
+	} // initTab
 
-			if (!m_queryInitiating && tabIndex == 0) 
+	private void initTabPanel(MQuery query, int tabIndex, final GridTab gTab, IADTabpanel adTabPanal)
+	{
+		adTabPanal.addEventListener(ADTabpanel.ON_DYNAMIC_DISPLAY_EVENT, this);
+		gTab.addDataStatusListener(this);
+		adTabPanal.init(this, gTab);
+		adTabbox.addTab(gTab, adTabPanal);
+		if (tabIndex == 0)
+		{
+			adTabPanal.createUI();
+			if (!m_queryInitiating)
 			{
-				initQueryOnNew(query);
+		    		try {
+						initFirstTabpanel();
+		    		} catch (Exception e) {
+		        		if (DBException.isTimeout(e)) {
+		        			FDialog.error(curWindowNo, GridTable.LOAD_TIMEOUT_ERROR_MESSAGE);
+		        		}
+		    		}
 			}
 		}
-		return gTab;
-	}
+
+		if (!m_queryInitiating && tabIndex == 0)
+		{
+			initQueryOnNew(query);
+		}
+	} // initTabPanel
 
 	public void initFirstTabpanel() {
 		adTabbox.getSelectedTabpanel().query(m_onlyCurrentRows, m_onlyCurrentDays, adTabbox.getSelectedGridTab().getMaxQueryRecords());
@@ -1130,9 +1135,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     public void onToggle()
     {
     	adTabbox.getSelectedTabpanel().switchRowPresentation();
-    	//Deepak-Enabling customize button IDEMPIERE-364
-        if(!(adTabbox.getSelectedTabpanel() instanceof ADSortTab))
-        	toolbar.enableCustomize(adTabbox.getSelectedTabpanel().isEnableCustomizeButton());
+    	toolbar.enableCustomize(adTabbox.getSelectedTabpanel().isEnableCustomizeButton());
     	focusToActivePanel();
     }
 
@@ -1423,6 +1426,11 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 			if (value != newTabpanel)
 			{
 				newTabpanel.query();
+				if (newTabpanel instanceof ADTabpanel)
+				{
+					ADTabpanel adtabpanel = (ADTabpanel) newTabpanel;
+					Events.echoEvent(ADTabpanel.ON_POST_INIT_EVENT, adtabpanel, null);
+				}			
 			}
 			else 
 			{
@@ -1473,28 +1481,22 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		}
 
 		toolbar.enablePrint(adTabbox.getSelectedGridTab().isPrinted() && !adTabbox.getSelectedGridTab().isNew());
-		
-		toolbar.enableCustomize(adTabbox.getSelectedTabpanel().isEnableCustomizeButton());
 
 		toolbar.enableQuickForm(adTabbox.getSelectedTabpanel().isEnableQuickFormButton() && !adTabbox.getSelectedGridTab().isReadOnly());
-		
+
 		boolean isNewRow = adTabbox.getSelectedGridTab().getRowCount() == 0 || adTabbox.getSelectedGridTab().isNew();
-        //Deepak-Enabling customize button IDEMPIERE-364
-        if(adTabbox.getSelectedTabpanel() instanceof ADSortTab){//consistent with dataStatusChanged
-        	toolbar.enableProcessButton (false);
-        	toolbar.enableCustomize(false);
-        }else{
-        	IADTabpanel adtab = adTabbox.getSelectedTabpanel();
-            toolbar.enableProcessButton(!isNewRow && adtab != null && adtab.getToolbarButtons().size() > 0);
-            toolbar.enableCustomize(adtab.isGridView());
-        }
         
+		IADTabpanel adtab = adTabbox.getSelectedTabpanel();
+        toolbar.enableProcessButton(adtab != null && adtab.isEnableProcessButton());
+        toolbar.enableCustomize(adtab.isEnableCustomizeButton());
         
 		toolbar.setPressed("Find",adTabbox.getSelectedGridTab().isQueryActive() || 
 				(!isNewRow && (m_onlyCurrentRows || m_onlyCurrentDays > 0)));
 		
 		toolbar.refreshUserQuery(adTabbox.getSelectedGridTab().getAD_Tab_ID(), findWindow != null ? findWindow.getAD_UserQuery_ID() : 0);
 
+		// update from customized implementation
+		adtab.updateToolbar(toolbar);
 	}
 
 	/**
@@ -1871,7 +1873,6 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         }
 
         boolean isNewRow = adTabbox.getSelectedGridTab().getRowCount() == 0 || adTabbox.getSelectedGridTab().isNew();
-        toolbar.enableProcessButton(!isNewRow && adTabbox.getSelectedTabpanel().isEnableProcessButton());
         toolbar.enableArchive(!isNewRow);
         toolbar.enableZoomAcross(!isNewRow);
         toolbar.enableActiveWorkflows(!isNewRow);
@@ -1888,8 +1889,9 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         
         toolbar.enableTabNavigation(breadCrumb.hasParentLink(), adTabbox.getSelectedDetailADTabpanel() != null);
         
-        
-        toolbar.enableCustomize(adTabbox.getSelectedTabpanel().isEnableCustomizeButton());
+        IADTabpanel adtab = adTabbox.getSelectedTabpanel();
+        toolbar.enableProcessButton(!isNewRow && adtab != null && adtab.isEnableProcessButton());
+        toolbar.enableCustomize(adtab.isEnableCustomizeButton());
         
     }
 
@@ -3402,7 +3404,11 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		}
 		else
 		{
-			final IADTabpanel adtabPanel = findADTabpanel(wButton);
+			IADTabpanel adtabPanel = null;
+			if (adTabbox.getSelectedGridTab().isQuickForm())
+				adtabPanel = this.getADTab().getSelectedTabpanel();
+			else
+				adtabPanel = findADTabpanel(wButton);
 
 			ProcessInfo pi = new ProcessInfo("", wButton.getProcess_ID(), table_ID, record_ID);
 			if (adtabPanel != null && adtabPanel.isGridView() && adtabPanel.getGridTab() != null)
