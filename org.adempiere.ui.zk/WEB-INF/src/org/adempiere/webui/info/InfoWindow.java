@@ -1982,9 +1982,15 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		String keyTableAlias = tableInfos[0].getSynonym() != null && tableInfos[0].getSynonym().trim().length() > 0
 				? tableInfos[0].getSynonym()
 						: tableInfos[0].getTableName();
-
+		
+				// To support double click zoom functionality on reference info window
+				String p_tableName = info.getAD_Table().getTableName();
+				String p_keyColumn = p_tableName + "_ID";
+				
 				String keySelectClause = keyTableAlias + "." + p_keyColumn;
 
+				list.add(new ColumnInfo(" ", keySelectClause, IDColumn.class, true, false, null, p_keyColumn));
+				
 				for (MInfoColumn infoColumn : infoColumns)
 				{
 					if (infoColumn.isDisplayed(infoContext, p_WindowNo))

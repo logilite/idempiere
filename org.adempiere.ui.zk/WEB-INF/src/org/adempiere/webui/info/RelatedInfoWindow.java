@@ -13,6 +13,7 @@
  *****************************************************************************/
 package org.adempiere.webui.info;
 
+import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,18 +23,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.ListModelTable;
 import org.adempiere.webui.component.WListItemRenderer;
 import org.adempiere.webui.component.WListbox;
 import org.adempiere.webui.editor.WEditor;
+import org.adempiere.webui.event.ValueChangeEvent;
+import org.adempiere.webui.event.ValueChangeListener;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.EmbedWinInfo;
 import org.compiere.minigrid.IDColumn;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.KeyNamePair;
@@ -43,6 +49,8 @@ import org.compiere.util.ValueNamePair;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.event.SelectEvent;
+import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Paging;
 import org.zkoss.zul.event.PagingEvent;
 import org.zkoss.zul.event.ZulEvents;
@@ -78,8 +86,20 @@ public class RelatedInfoWindow implements EventListener<Event>, Sortable<Object>
 	protected String m_infoSqlCount;
 	protected int numPagePreLoad = MSysConfig.getIntValue(MSysConfig.ZK_INFO_NUM_PAGE_PRELOAD, DEFAULT_PAGE_PRELOAD);
 	protected boolean isHasNextPage = false;
-
+	
 	protected ColumnInfo[] columnsLayout;
+	
+	WListbox									contentPanel			= null;
+	// in case double click to item. this store clicked item (maybe it's
+	// un-select item)
+	protected int								m_lastSelectedIndex		= -1;
+	/** ValueChange listeners */
+	protected ArrayList<ValueChangeListener>	listeners				= new ArrayList<ValueChangeListener>();
+	/** Key Column Name */
+	protected String							p_keyColumn;
+	/** Table Name */
+	protected String							p_tableName;
+
 
 	/**
 	 * @param infoWindow
@@ -95,6 +115,9 @@ public class RelatedInfoWindow implements EventListener<Event>, Sortable<Object>
 		m_infoSqlCount = infoSqlCount;
 
 		columnsLayout = layoutEmbedded;
+		contentPanel = (WListbox) info.getInfoTbl();
+		p_tableName = info.getInfowin().getAD_Table().getTableName();
+		p_keyColumn = p_tableName + "_ID";
 	}
 
 	public void refresh(Object id) {
@@ -136,7 +159,6 @@ public class RelatedInfoWindow implements EventListener<Event>, Sortable<Object>
 
 	protected void renderItems() {
 		int pageSize = parentInfoWindow.getPageSize();
-		WListbox contentPanel = (WListbox) info.getInfoTbl();
 		if (m_count > 0)
         {
         	if (m_count > pageSize && paging != null)
@@ -184,13 +206,14 @@ public class RelatedInfoWindow implements EventListener<Event>, Sortable<Object>
             contentPanel.setData(model, null);
         }
 		contentPanel.getParent().invalidate();
+		
+		addDoubleClickListener();
 	}
 
 	@Override
 	public void onEvent(Event event) throws Exception {
 		if (event.getTarget() == paging)
         {
-			WListbox contentPanel = (WListbox) info.getInfoTbl();
 			int pageSize = parentInfoWindow.getPageSize();
         	int pgNo = paging.getActivePage();
         	if (pgNo == paging.getPageCount()-1  && !info.getInfowin().isLoadPageNum()) {
@@ -218,8 +241,117 @@ public class RelatedInfoWindow implements EventListener<Event>, Sortable<Object>
 				contentPanel.setSelectedIndex(0);
 			}
         }
+		else if (event.getTarget() == contentPanel && event.getName().equals(Events.ON_SELECT))
+		{
+			SelectEvent<?, ?> selectEvent = (SelectEvent<?, ?>) event;
+			if (selectEvent.getReference() != null && selectEvent.getReference() instanceof Listitem)
+			{
+				Listitem m_lastOnSelectItem = (Listitem) selectEvent.getReference();
+				m_lastSelectedIndex = m_lastOnSelectItem.getIndex();
+			}
+		}
+		else if (event.getTarget() == contentPanel && event.getName().equals(Events.ON_DOUBLE_CLICK))
+		{
+			if (event.getClass().equals(MouseEvent.class))
+			{
+				return;
+			}
+			if (contentPanel.isMultiple() && m_lastSelectedIndex >= 0)
+			{
+
+				contentPanel.setSelectedIndex(m_lastSelectedIndex);
+
+				model.clearSelection();
+				List<Object> lsSelectedItem = new ArrayList<Object>();
+				lsSelectedItem.add(model.getElementAt(m_lastSelectedIndex));
+				model.setSelection(lsSelectedItem);
+
+				int m_keyColumnIndex = contentPanel.getKeyColumnIndex();
+				for (int i = 0; i < contentPanel.getRowCount(); i++)
+				{
+					// Find the IDColumn Key
+					Object data = contentPanel.getModel().getValueAt(i, m_keyColumnIndex);
+					if (data instanceof IDColumn)
+					{
+						IDColumn dataColumn = (IDColumn) data;
+
+						if (i == m_lastSelectedIndex)
+						{
+							dataColumn.setSelected(true);
+						}
+						else
+						{
+							dataColumn.setSelected(false);
+						}
+					}
+				}
+			}
+			// zoom on selected line
+			zoom();
+			contentPanel.repaint();
+			m_lastSelectedIndex = -1;
+		}
 	}
 
+	public void zoom()
+	{
+		Integer recordId = contentPanel.getSelectedRowKey();
+		// prevent NPE when double click is raise but no record is selected
+		if (recordId == null)
+			return;
+
+		if (listeners != null && listeners.size() > 0)
+		{
+			ValueChangeEvent event = new ValueChangeEvent(this, "zoom", contentPanel.getSelectedRowKey(),
+					contentPanel.getSelectedRowKey());
+			fireValueChange(event);
+		}
+		else
+		{
+			int AD_Table_ID = MTable.getTable_ID(p_tableName);
+			if (AD_Table_ID <= 0)
+			{
+				if (p_keyColumn.endsWith("_ID"))
+				{
+					AD_Table_ID = MTable.getTable_ID(p_keyColumn.substring(0, p_keyColumn.length() - 3));
+				}
+			}
+			if (AD_Table_ID > 0)
+				AEnv.zoom(AD_Table_ID, recordId);
+		}
+	}
+
+	public void addValueChangeListener(ValueChangeListener listener)
+	{
+		if (listener == null)
+		{
+			return;
+		}
+
+		listeners.add(listener);
+	}
+
+	public void fireValueChange(ValueChangeEvent event)
+	{
+		for (ValueChangeListener listener : listeners)
+		{
+			listener.valueChange(event);
+		}
+	}
+
+	private void addDoubleClickListener()
+	{
+		Iterator<EventListener<? extends Event>> i = contentPanel.getEventListeners(Events.ON_DOUBLE_CLICK).iterator();
+		while (i.hasNext())
+		{
+			if (i.next() == this)
+				return;
+		}
+		contentPanel.addEventListener(Events.ON_DOUBLE_CLICK, this);
+		contentPanel.addEventListener(Events.ON_SELECT, this);
+	}
+
+	  
 	/**
 	 * @return the cacheStart
 	 */
