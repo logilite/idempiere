@@ -507,9 +507,9 @@ public class MRequisition extends X_M_Requisition implements DocAction
 		if (m_processMsg != null)
 			return false;
 
-	//	setProcessed(false);
-		if (! reverseCorrectIt())
-			return false;
+		setProcessed(false);
+		//if (! reverseCorrectIt())
+		//	return false;
 
 		// After reActivate
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REACTIVATE);

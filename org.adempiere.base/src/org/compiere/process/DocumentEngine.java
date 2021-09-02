@@ -49,6 +49,7 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
 import org.compiere.model.MProduction;
 import org.compiere.model.MRMA;
+import org.compiere.model.MRequisition;
 import org.compiere.model.MRole;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
@@ -1241,7 +1242,15 @@ public class DocumentEngine implements DocAction
 				}
 				options[index++] = DocumentEngine.ACTION_Reverse_Accrual;
 			}
+		}else if (AD_Table_ID == MRequisition.Table_ID)
+		{
+			//	Complete                    ..  CO
+			if (docStatus.equals(DocumentEngine.STATUS_Completed))
+			{
+				options[index++] = DocumentEngine.ACTION_ReActivate;
+			}
 		}
+
 
 
 		if (po instanceof DocOptions)
