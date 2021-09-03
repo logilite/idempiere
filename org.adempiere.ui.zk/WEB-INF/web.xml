@@ -85,10 +85,6 @@
 	<!-- /////////// -->
 	<!-- Miscellaneous -->
 	<session-config>
-		<cookie-config>
-                        <http-only>true</http-only>
-                        <secure>true</secure>
-                </cookie-config>
 		<session-timeout>60</session-timeout>
 	</session-config>
 
