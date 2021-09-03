@@ -451,7 +451,7 @@ public class WLocatorEditor extends WEditor implements EventListener<Event>, Pro
 	{
 		//IDEMPIERE-4882 : Load Locator To field value as per Warehouse TO field value
 		String only_Warehouse;
-		if (X_M_MovementLine.COLUMNNAME_M_LocatorTo_ID.equals(gridField.getColumnName()))
+		if (gridField!=null && X_M_MovementLine.COLUMNNAME_M_LocatorTo_ID.equals(gridField.getColumnName()))
 		{
 			only_Warehouse = Env.getContext(Env.getCtx(), m_WindowNo, "M_WarehouseTo_ID", true);
 		}
