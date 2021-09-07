@@ -368,11 +368,11 @@ public class MStorageOnHand extends X_M_StorageOnHand
 			MProduct product = MProduct.get(Env.getCtx(), M_Product_ID);
 			
 			if(product.isUseGuaranteeDateForMPolicy()){
-				sql += "ORDER BY l.PriorityNo DESC, COALESCE(asi.GuaranteeDate,s.DateMaterialPolicy)";
+				sql += "ORDER BY COALESCE(asi.GuaranteeDate,s.DateMaterialPolicy)";
 				if (!FiFo)
-					sql += " DESC, s.M_AttributeSetInstance_ID DESC ";
+					sql += " DESC, l.PriorityNo DESC, s.M_AttributeSetInstance_ID DESC ";
 				else
-					sql += ", s.M_AttributeSetInstance_ID ";
+					sql += ", l.PriorityNo DESC, s.M_AttributeSetInstance_ID ";
 			}
 			else
 			{
