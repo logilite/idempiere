@@ -62,18 +62,18 @@ public class WInOutGen extends InOutGen implements IFormController, EventListene
 	/**	Logger			*/
 	private static final CLogger log = CLogger.getCLogger(WInOutGen.class);
 	//
-	private Label lWarehouse = new Label();
-	private WTableDirEditor fWarehouse;
-	private Label lBPartner = new Label();
-	private WSearchEditor fBPartner;
-	private Label     lDocType = new Label();
-	private Listbox  cmbDocType = ListboxFactory.newDropdownListbox();
-	private Label   lDocAction = new Label();
-	private WTableDirEditor docAction;
-	private Label	lOrg = new Label();
-	private WTableDirEditor fOrg;
+	protected Label lWarehouse = new Label();
+	protected WTableDirEditor fWarehouse;
+	protected Label lBPartner = new Label();
+	protected WSearchEditor fBPartner;
+	protected Label     lDocType = new Label();
+	protected Listbox  cmbDocType = ListboxFactory.newDropdownListbox();
+	protected Label   lDocAction = new Label();
+	protected WTableDirEditor docAction;
+	protected Label	lOrg = new Label();
+	protected WTableDirEditor fOrg;
 
-	private int noOfColumn;
+	protected int noOfColumn;
 
 	public WInOutGen()
 	{
