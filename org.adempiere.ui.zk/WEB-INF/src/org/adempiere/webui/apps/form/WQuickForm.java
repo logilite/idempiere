@@ -32,6 +32,7 @@ import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.CustomizeGridViewDialog;
 import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.QuickFormPasteData;
 import org.compiere.model.DataStatusEvent;
 import org.compiere.model.DataStatusListener;
 import org.compiere.model.GridField;
@@ -77,6 +78,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 	private Button					bIgnore				= confirmPanel.createButton("Ignore");
 	private Button					bCustomize			= confirmPanel.createButton("Customize");
 	private Button					bUnSort				= confirmPanel.createButton("UnSort");
+	private Button					bPasteData			= confirmPanel.createButton("Paste");
 
 	private boolean					onlyCurrentRows		= false;
 
@@ -134,12 +136,14 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		bDelete.setEnabled(!gridTab.isReadOnly());
 		bIgnore.setEnabled(!gridTab.isReadOnly());
 		bUnSort.setEnabled(!gridTab.isReadOnly());
+		bPasteData.setEnabled(!gridTab.isReadOnly());
 
 		bSave.addEventListener(Events.ON_CLICK, this);
 		bDelete.addEventListener(Events.ON_CLICK, this);
 		bIgnore.addEventListener(Events.ON_CLICK, this);
 		bCustomize.addEventListener(Events.ON_CLICK, this);
 		bUnSort.addEventListener(Events.ON_CLICK, this);
+		bPasteData.addEventListener(Events.ON_CLICK, this);
 
 		Button bRefresh = confirmPanel.getButton(ConfirmPanel.A_REFRESH);
 		Button bCancel = confirmPanel.getButton(ConfirmPanel.A_CANCEL);
@@ -151,6 +155,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		bIgnore.setTooltiptext(Msg.translate(Env.getCtx(), "QuickFormIgnore")); // 'Alt + Z'
 		bUnSort.setTooltiptext(Msg.translate(Env.getCtx(), "QuickFormUnSort")); // 'Alt + R'
 		bCustomize.setTooltiptext(Msg.translate(Env.getCtx(), "QuickFormCustomize")); // 'Alt + L'
+		bPasteData.setTooltiptext(Msg.translate(Env.getCtx(), "QuickFormPaste")); // 'Alt + V'
 		bOk.setTooltiptext(Msg.translate(Env.getCtx(), "QuickFormOk")); // 'Alt + K' - Save_Close
 		bCancel.setTooltiptext(Msg.translate(Env.getCtx(), "QuickFormCancel")); // 'Alt + X'
 		bRefresh.setTooltiptext(Msg.translate(Env.getCtx(), "QuickFormRefresh")); // 'Alt + E'
@@ -160,6 +165,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		confirmPanel.addComponentsLeft(bIgnore);
 		confirmPanel.addComponentsLeft(bCustomize);
 		confirmPanel.addComponentsLeft(bUnSort);
+		confirmPanel.addComponentsLeft(bPasteData);
 		confirmPanel.addActionListener(this);
 
 		mainLayout.appendCenter(Center);
@@ -207,6 +213,10 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		else if (event.getTarget() == confirmPanel.getButton("UnSort"))
 		{
 			onUnSort();
+		}
+		else if (event.getTarget() == bPasteData)
+		{
+			onPasteData();
 		}
 		event.stopPropagation();
 	} // onEvent
@@ -372,6 +382,13 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 			createNewRow();
 	} // onRefresh
 
+	public void onPasteData()
+	{
+		onSave();
+
+		QuickFormPasteData.showDialog(0, gridTab, quickGridView, this);
+	} // onPasteData
+
 	@Override
 	public void dispose()
 	{
@@ -406,7 +423,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		adWinContent.getADTab().getSelectedTabpanel().query(onlyCurrentRows, onlyCurrentDays, MRole.getDefault().getMaxQueryRecords()); // autoSize
 	} // dispose
 
-	private void createNewRow()
+	public void createNewRow()
 	{
 		int row = gridTab.getRowCount();
 		// creating the first record from the parent tab first record is duplicated on KEY DOWN.

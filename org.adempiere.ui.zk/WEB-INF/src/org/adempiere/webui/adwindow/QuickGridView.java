@@ -104,7 +104,7 @@ public class QuickGridView extends Vbox
 
 	private static final String ATTR_ON_POST_SELECTED_ROW_CHANGED = "org.adempiere.webui.adwindow.GridView.onPostSelectedRowChanged";
 
-	public static final String  CNTRL_KEYS  = "#left#right#up#down#home@k@r";
+	public static final String  CNTRL_KEYS  = "#left#right#up#down#home@k@r@v";
 
 	// 'Enter' Work as Down key
 	private static final int		KEYBOARD_KEY_ENTER					= 13;
@@ -960,6 +960,10 @@ public class QuickGridView extends Vbox
 				else if (code == ADWindowToolbar.VK_R)
 				{
 					quickForm.onUnSort();
+				}
+				else if (code == ADWindowToolbar.VK_V)
+				{
+					quickForm.onPasteData();
 				}
 
 				event.stopPropagation();

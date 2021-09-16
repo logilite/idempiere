@@ -343,3 +343,6 @@
 .z-icon-SelectAll:before {
 	content: "\f008";
 }
+.z-icon-Paste:before {
+	content: "\f0ea";
+}
