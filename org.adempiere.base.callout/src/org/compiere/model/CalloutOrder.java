@@ -827,9 +827,9 @@ public class CalloutOrder extends CalloutEngine
 				if (available == null)
 					available = Env.ZERO;
 				if (available.signum() == 0)
-					mTab.fireDataStatusEEvent ("NoQtyAvailable", "0", false);
+					mTab.fireDataStatusEEvent ("NoQtyAvailable",product.getName()+"["+product.getValue()+"] " + "0", false);
 				else if (available.compareTo(QtyOrdered) < 0)
-					mTab.fireDataStatusEEvent ("InsufficientQtyAvailable", available.toString(), false);
+					mTab.fireDataStatusEEvent ("InsufficientQtyAvailable",product.getName()+"["+product.getValue()+"] " + available.toString(), false);
 				else
 				{
 					Integer C_OrderLine_ID = (Integer)mTab.getValue("C_OrderLine_ID");
@@ -843,7 +843,7 @@ public class CalloutOrder extends CalloutEngine
 					BigDecimal total = available.subtract(notReserved);
 					if (total.compareTo(QtyOrdered) < 0)
 					{
-						String info = Msg.parseTranslation(ctx, "@QtyAvailable@=" + available
+						String info = Msg.parseTranslation(ctx, product.getName()+"["+product.getValue()+"] " +  "@QtyAvailable@=" + available
 							+ " - @QtyNotReserved@=" + notReserved + " = " + total);
 						mTab.fireDataStatusEEvent ("InsufficientQtyAvailable",
 							info, false);
@@ -1162,12 +1162,13 @@ public class CalloutOrder extends CalloutEngine
 			PriceActual = PriceLimit;
 			PriceEntered = MUOMConversion.convertProductFrom (ctx, M_Product_ID,
 				C_UOM_To_ID, PriceLimit);
+			MProduct product = MProduct.get(ctx, M_Product_ID);
 			if (PriceEntered == null)
 				PriceEntered = PriceLimit;
 			if (log.isLoggable(Level.FINE)) log.fine("(under) PriceEntered=" + PriceEntered + ", Actual" + PriceLimit);
 			mTab.setValue ("PriceActual", PriceLimit);
 			mTab.setValue ("PriceEntered", PriceEntered);
-			mTab.fireDataStatusEEvent ("UnderLimitPrice", "", false);
+			mTab.fireDataStatusEEvent ("UnderLimitPrice", " for Product "+ product.getName()+"["+product.getValue()+"] " , false);
 			//	Repeat Discount calc
 			if (PriceList.compareTo(Env.ZERO) != 0)
 			{
@@ -1318,9 +1319,9 @@ public class CalloutOrder extends CalloutEngine
 				if (available == null)
 					available = Env.ZERO;
 				if (available.signum() == 0)
-					mTab.fireDataStatusEEvent ("NoQtyAvailable", "0", false);
+					mTab.fireDataStatusEEvent ("NoQtyAvailable", product.getName()+"["+product.getValue()+"] " + "0", false);
 				else if (available.compareTo(QtyOrdered) < 0)
-					mTab.fireDataStatusEEvent ("InsufficientQtyAvailable", available.toString(), false);
+					mTab.fireDataStatusEEvent ("InsufficientQtyAvailable", product.getName()+"["+product.getValue()+"] " + available.toString(), false);
 				else
 				{
 					Integer C_OrderLine_ID = (Integer)mTab.getValue("C_OrderLine_ID");
@@ -1334,7 +1335,7 @@ public class CalloutOrder extends CalloutEngine
 					BigDecimal total = available.subtract(notReserved);
 					if (total.compareTo(QtyOrdered) < 0)
 					{
-						StringBuilder msgpts = new StringBuilder("@QtyAvailable@=").append(available)
+						StringBuilder msgpts = new StringBuilder(product.getName()).append("[").append(product.getValue()).append("] ").append("@QtyAvailable@=").append(available)
 								.append("  -  @QtyNotReserved@=").append(notReserved).append("  =  ").append(total);
 						String info = Msg.parseTranslation(ctx, msgpts.toString());
 						mTab.fireDataStatusEEvent ("InsufficientQtyAvailable",
