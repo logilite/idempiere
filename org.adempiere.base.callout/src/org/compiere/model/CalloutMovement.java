@@ -59,6 +59,7 @@ public class CalloutMovement extends CalloutEngine
 		else
 			mTab.setValue("M_AttributeSetInstance_ID", null);
 		
+		mTab.setValue("M_AttributeSetInstanceTo_ID", null);
 		
 		mTab.setValue("C_UOM_ID", p.getC_UOM_ID()); 
 		checkQtyAvailable(ctx, mTab, WindowNo, M_Product_ID, null);
