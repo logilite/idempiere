@@ -34,6 +34,8 @@ import org.adempiere.model.MBroadcastMessage;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.adwindow.ADWindow;
+import org.adempiere.webui.adwindow.ADWindowContent;
+import org.adempiere.webui.adwindow.IADTabpanel;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.apps.BusyDialog;
 import org.adempiere.webui.apps.ProcessDialog;
@@ -175,6 +177,13 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	
 	private ToolBarButton westBtn;
 
+	// For quick info optimization
+	private GridTab	gridTab;
+	private GridTab	detailGridTab;
+
+	// Right side Quick info is visible
+	private boolean	isQuickInfoOpen	= true;
+
     public DefaultDesktop()
     {
     	super();
@@ -259,6 +268,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 			@Override
 			public void onEvent(Event event) throws Exception {
 				OpenEvent oe = (OpenEvent) event;
+				isQuickInfoOpen = oe.isOpen();
 				updateHelpCollapsedPreference(!oe.isOpen());
 				HtmlBasedComponent comp = windowContainer.getComponent();
 				if (comp != null) {
@@ -424,6 +434,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         contextHelp.setSclass("window-container-toolbar-btn context-help-btn");
         contextHelp.setTooltiptext(Util.cleanAmp(Msg.getElement(Env.getCtx(), "AD_CtxHelp_ID")));
         contextHelp.setVisible(!e.isVisible());
+        isQuickInfoOpen = e.isVisible();
         
         if (!mobile) {
 	        boolean headerCollapsed= pref.isPropertyBool(UserPreference.P_HEADER_COLLAPSED);
@@ -660,6 +671,10 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	        		LayoutUtils.removeSclass("slide", layout.getEast());
 	        		contextHelp.setVisible(false);
 	        		updateHelpCollapsedPreference(false);
+
+	        		isQuickInfoOpen = true;
+	        		updateHelpQuickInfo(gridTab);
+	        		updateHelpDetailQuickInfo(detailGridTab);
         		}
         	}
         	else if (comp == westBtn)
@@ -969,7 +984,14 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 		Component window = getActiveWindow();
 		ADWindow adwindow = ADWindow.findADWindow(window);
 		if (adwindow != null) {
-			gridTab = adwindow.getADWindowContent().getActiveGridTab();
+			ADWindowContent windowContect = adwindow.getADWindowContent();
+			gridTab = windowContect.getActiveGridTab();
+			if (windowContect.getADTab() != null) {
+				IADTabpanel detailTabPanel = windowContect.getADTab().getSelectedDetailADTabpanel();
+				if (detailTabPanel != null && detailTabPanel.getGridTab() != null) {
+					updateHelpDetailQuickInfo(detailTabPanel.getGridTab());
+				}
+			}
 		}
 		updateHelpQuickInfo(gridTab);
 	}
@@ -986,12 +1008,16 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 
 	@Override
 	public void updateHelpQuickInfo(GridTab gridTab) {
-		helpController.renderQuickInfo(gridTab);
+		this.gridTab = gridTab;
+		if (isQuickInfoOpen)
+			helpController.renderQuickInfo(gridTab);
 	}
 	
 	@Override
 	public void updateHelpDetailQuickInfo(GridTab gridTab) {
-		helpController.renderDetailQuickInfo(gridTab);
+		detailGridTab = gridTab;  
+		if (isQuickInfoOpen)
+			helpController.renderDetailQuickInfo(gridTab);
 	}
 
 	@Override
