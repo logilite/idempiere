@@ -713,8 +713,25 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				String s_sqlFrom = embedInfo.getFromClause();
 				/** Where Clause						*/
 				String s_sqlWhere = relatedInfo.getLinkColumnName() + "=?";
+				
+				/** Info window Where Clause */
+				String whereClause = getInfoWindowWhereClause(embedInfo);
+				if (!Util.isEmpty(whereClause, true))
+					s_sqlWhere = s_sqlWhere + " AND " + whereClause;
+
+				/** Info window Other Clause */
+				String otherClause = getInfoWindowOtherClause(embedInfo);
+				if (!Util.isEmpty(otherClause, true))
+					s_sqlWhere = s_sqlWhere +" "+ otherClause;
+
+				/** Info window Order By Clause */
+				String orderByClause = getInfoWindowOrderByClause(embedInfo);
+
 				String s_sqlCount = "SELECT COUNT(*) FROM " + s_sqlFrom + " WHERE " + s_sqlWhere;
-				m_sqlEmbedded = embeddedTbl.prepareTable(s_layoutEmbedded, s_sqlFrom, s_sqlWhere, false, tableName);
+
+				// prepare embedded info window
+				m_sqlEmbedded = prepareEmbeddedInfoWindowTable(embedInfo, embeddedTbl, s_layoutEmbedded, s_sqlWhere,
+						orderByClause, tableName);
 
 				embeddedTbl.setMultiSelection(false);
 
@@ -761,6 +778,83 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		return true;
 	}
 
+	protected String prepareEmbeddedInfoWindowTable(MInfoWindow embedInfo, WListbox embeddedTbl, ColumnInfo[] layout,
+			String where, String orderBy, String tableName)
+	{
+
+		String m_sqlEmbedded = embeddedTbl.prepareTable(layout, embedInfo.getFromClause(), where, false, tableName);
+
+		if (m_sqlEmbedded.indexOf("@") >= 0)
+		{
+			String sql = Env.parseContext(Env.getCtx(), p_WindowNo, m_sqlEmbedded, true);
+			if (sql == null || sql.length() == 0)
+				log.severe("Failed to parsed sql. sql=" + sql);
+			else
+				m_sqlEmbedded = sql;
+		}
+
+		if (m_sqlEmbedded.length() > 0 && embedInfo.isDistinct())
+		{
+			m_sqlEmbedded = m_sqlEmbedded.substring("SELECT ".length());
+			m_sqlEmbedded = "SELECT DISTINCT " + m_sqlEmbedded;
+		}
+
+		if (m_sqlEmbedded.length() > 0 && !Util.isEmpty(orderBy, true))
+			m_sqlEmbedded = m_sqlEmbedded + " ORDER BY " + orderBy;
+
+		return m_sqlEmbedded;
+	}
+
+	protected String getInfoWindowOrderByClause(MInfoWindow infoWindow)
+	{
+		String orderBy = "";
+		if (infoWindow != null && !Util.isEmpty(infoWindow.getOrderByClause(), true))
+		{
+			orderBy = infoWindow.getOrderByClause();
+			if (orderBy.indexOf("@") >= 0)
+			{
+				orderBy = Env.parseContext(Env.getCtx(), p_WindowNo, orderBy, true, false);
+				if (orderBy == null || orderBy.length() == 0)
+					log.severe("Failed to parse order by sql. sql=" + infoWindow.getOrderByClause());
+			}
+		}
+		return orderBy;
+	}
+
+	protected String getInfoWindowOtherClause(MInfoWindow infoWindow)
+	{
+		String otherClause = "";
+		if (infoWindow != null && !Util.isEmpty(infoWindow.getOtherClause(), true))
+		{
+			otherClause = infoWindow.getOtherClause();
+			if (otherClause.indexOf("@") >= 0)
+			{
+				otherClause = Env.parseContext(Env.getCtx(), p_WindowNo, otherClause, true, false);
+				if (otherClause.length() == 0)
+					log.severe("Failed to parse other clause. sql=" + infoWindow.getOtherClause());
+			}
+		}
+
+		return otherClause;
+	}
+
+	protected String getInfoWindowWhereClause(MInfoWindow infoWindow)
+	{
+		String whereClause = "";
+		if (infoWindow != null && !Util.isEmpty(infoWindow.getWhereClause(), true))
+		{
+			whereClause = infoWindow.getWhereClause();
+			if (whereClause.indexOf("@") >= 0)
+			{
+				whereClause = Env.parseContext(Env.getCtx(), p_WindowNo, whereClause, true, false);
+				if (whereClause.length() == 0)
+					log.severe("Failed to parse where clause. sql=" + infoWindow.getWhereClause());
+			}
+		}
+
+		return whereClause;
+	}
+	
 	protected void prepareTable() {		
 		List<ColumnInfo> list = new ArrayList<ColumnInfo>();
 		String keyTableAlias = tableInfos[0].getSynonym() != null && tableInfos[0].getSynonym().trim().length() > 0 
