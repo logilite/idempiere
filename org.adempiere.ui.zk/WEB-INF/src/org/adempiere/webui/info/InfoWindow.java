@@ -769,6 +769,8 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 					
 		String keySelectClause = keyTableAlias+"."+p_keyColumn;
 		list.add(new ColumnInfo(" ", keySelectClause, IDColumn.class, true, false, null, p_keyColumn));
+
+		List<Integer> hide_layoutColumnIdx = new ArrayList<Integer>();
 		
 		List<MInfoColumn> gridDisplayedIC = new ArrayList<>();				
 		gridDisplayedIC.add(null); // First column does not have any matching info column		
@@ -778,7 +780,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		int i = 0;
 		for(MInfoColumn infoColumn : infoColumns) 
 		{						
-			if (infoColumn.isDisplayed(infoContext, p_WindowNo)) 
+			if (infoColumn.isDisplayed(infoContext, p_WindowNo) || infoColumn.isHideInfoColumn())
 			{
 				ColumnInfo columnInfo = null;
 				String colSQL = infoColumn.getSelectClause();
@@ -825,6 +827,9 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				}
 
 				mapInfoColumnID_layoutColumnIdx.put(infoColumn.getAD_InfoColumn_ID(), list.size() - 1);
+				
+				if (infoColumn.isHideInfoColumn())
+					hide_layoutColumnIdx.add(list.size() - 1);
 			}
 			i++;
 		}
@@ -836,9 +841,10 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		columnInfos = list.toArray(new ColumnInfo[0]);
 		MInfoColumn gridDisplayedInfoColumns[] = gridDisplayedIC.toArray(new MInfoColumn[gridDisplayedIC.size()]);
 		
-		if(infoWindowListItemRenderer != null)
-			infoWindowListItemRenderer.setGridDisplaydInfoColumns(gridDisplayedInfoColumns,columnInfos);
-		
+		if (infoWindowListItemRenderer != null)
+			infoWindowListItemRenderer.setGridDisplaydInfoColumns(gridDisplayedInfoColumns, columnInfos,
+					hide_layoutColumnIdx, mapInfoColumnID_layoutColumnIdx);
+
 		prepareTable(columnInfos, infoWindow.getFromClause(), p_whereClause, infoWindow.getOrderByClause());		
 	}
 

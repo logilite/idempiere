@@ -22,6 +22,7 @@
 package org.adempiere.webui.component;
 
 import java.util.List;
+import java.util.Map;
 
 import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.editor.WebEditorFactory;
@@ -37,6 +38,8 @@ import org.compiere.model.MStyle;
 import org.compiere.util.Env;
 import org.compiere.util.Evaluatee;
 import org.compiere.util.KeyNamePair;
+import org.compiere.util.Util;
+import org.zkoss.zk.ui.Component;
 import org.zkoss.zul.Listcell;
 
 public class WInfoWindowListItemRenderer extends WListItemRenderer
@@ -44,6 +47,8 @@ public class WInfoWindowListItemRenderer extends WListItemRenderer
 	private MInfoColumn[]	gridDisplayedInfoColumns = null;
 	private ColumnInfo[]	gridDisplayedColumnInfos = null;
 	private InfoWindow infoWindow = null;
+	private List<Integer>			hide_layoutColumnIdx			= null;
+	private Map<Integer, Integer>	mapInfoColumnID_layoutColumnIdx	= null;
 
 	public WInfoWindowListItemRenderer(InfoWindow infoWindow)
 	{
@@ -56,10 +61,13 @@ public class WInfoWindowListItemRenderer extends WListItemRenderer
 		this.infoWindow = infoWindow;
 	}
 	
-	public void setGridDisplaydInfoColumns(MInfoColumn[] infoColumns, ColumnInfo[] columnInfos)
+	public void setGridDisplaydInfoColumns(MInfoColumn[] infoColumns, ColumnInfo[] columnInfos,
+			List<Integer> hide_layoutColumnIdx, Map<Integer, Integer> mapInfoColumnID_layoutColumnIdx)
 	{
 		this.gridDisplayedInfoColumns = infoColumns;
 		this.gridDisplayedColumnInfos = columnInfos;
+		this.hide_layoutColumnIdx = hide_layoutColumnIdx;
+		this.mapInfoColumnID_layoutColumnIdx = mapInfoColumnID_layoutColumnIdx;
 	}		
 		
 	@Override
@@ -83,46 +91,46 @@ public class WInfoWindowListItemRenderer extends WListItemRenderer
 			final WEditor editor = WebEditorFactory.getEditor(gridField, false);
 
 			if(model.isSelected(obj)) // First index may be null
-		{
-			if(infoColumn.isReadOnly() == false 
-					&& columnIndex > 0)
 			{
-				ListCell listCell = new ListCell();
-
-				
-				// Set editor value
-				
-				Object value = table.getValueAt(rowIndex, columnIndex);
-				
-				if(value instanceof IDColumn)
+				if(infoColumn.isReadOnly() == false 
+						&& columnIndex > 0)
 				{
-					IDColumn idc = (IDColumn)value;
-					value = idc.getRecord_ID();
-				}
-				else if(value instanceof KeyNamePair)
-				{
-					KeyNamePair knp = (KeyNamePair)value;
-					value = knp.getKey();
-				}
-				
-				editor.setValue(value);
-				
-				editor.addValueChangeListener(new ValueChangeListener()
-				{					
-					@Override
-					public void valueChange(ValueChangeEvent evt)
+					ListCell listCell = new ListCell();
+	
+					
+					// Set editor value
+					
+					Object value = table.getValueAt(rowIndex, columnIndex);
+					
+					if(value instanceof IDColumn)
 					{
-						infoWindow.onCellEditCallback(evt, rowIndex, columnIndex, editor, gridField);
+						IDColumn idc = (IDColumn)value;
+						value = idc.getRecord_ID();
 					}
-				});
-				
-				listCell.appendChild(editor.getComponent());
-				listcell = listCell;
+					else if(value instanceof KeyNamePair)
+					{
+						KeyNamePair knp = (KeyNamePair)value;
+						value = knp.getKey();
+					}
+					
+					editor.setValue(value);
+					
+					editor.addValueChangeListener(new ValueChangeListener()
+					{					
+						@Override
+						public void valueChange(ValueChangeEvent evt)
+						{
+							infoWindow.onCellEditCallback(evt, rowIndex, columnIndex, editor, gridField);
+						}
+					});
+					
+					listCell.appendChild(editor.getComponent());
+					listcell = listCell;
+				}
 			}
-		}
 		
-		if(listcell == null)
-			listcell = super.getCellComponent(table, field, rowIndex, columnIndex);
+			if(listcell == null)
+				listcell = super.getCellComponent(table, field, rowIndex, columnIndex);
 		
 			if (gridField.getAD_FieldStyle_ID() > 0)
 			{
@@ -159,12 +167,50 @@ public class WInfoWindowListItemRenderer extends WListItemRenderer
 					listcell.setStyle(styleStr);
 				}
 			}
+			
+			// add tooltip to the column
+			int tooltipColumnID = infoColumn.getTooltip_InfoColumn_ID();
+			if (tooltipColumnID > 0 && mapInfoColumnID_layoutColumnIdx != null
+					&& mapInfoColumnID_layoutColumnIdx.containsKey(tooltipColumnID))
+			{
+				int tooltipIdx = mapInfoColumnID_layoutColumnIdx.get(tooltipColumnID);
+				if (tooltipIdx >= 0)
+				{
+					String tooltip = String.valueOf(table.getValueAt(rowIndex, tooltipIdx));
+					if (!Util.isEmpty(tooltip, true))
+						listcell.setTooltiptext(tooltip);
+				}
+			}
 		}
 
 		if(listcell == null)
 			listcell = super.getCellComponent(table, field, rowIndex, columnIndex);
-
+		
 		return listcell;
+	}
+	
+	/**
+	 * Create a ListHeader using the given <code>headerValue</code> to generate
+	 * the header text. The <code>toString</code> method of the
+	 * <code>headerValue</code> is used to set the header text.
+	 *
+	 * @param headerValue The object to use for generating the header text.
+	 * @param tooltipText
+	 * @param headerIndex The column index of the header
+	 * @param classType
+	 * @return The generated ListHeader
+	 * @see #renderListHead(ListHead)
+	 */
+	protected Component getListHeaderComponent(Object headerValue, String tooltipText, int headerIndex,
+			Class<?> classType)
+	{
+		ListHeader header = (ListHeader) super.getListHeaderComponent(headerValue, tooltipText, headerIndex, classType);
+
+		// hide the column if Hide Column flag true on the info column
+		if (hide_layoutColumnIdx != null && hide_layoutColumnIdx.contains(headerIndex))
+			header.setVisible(false);
+
+		return header;
 	}
 
 //

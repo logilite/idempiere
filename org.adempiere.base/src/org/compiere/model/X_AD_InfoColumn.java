@@ -30,7 +30,7 @@ public class X_AD_InfoColumn extends PO implements I_AD_InfoColumn, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20210915L;
 
     /** Standard Constructor */
     public X_AD_InfoColumn (Properties ctx, int AD_InfoColumn_ID, String trxName)
@@ -465,6 +465,31 @@ public class X_AD_InfoColumn extends PO implements I_AD_InfoColumn, I_Persistent
 		return false;
 	}
 	
+
+	/** Set Hide Column.
+		@param IsHideInfoColumn 
+		Determines, if this field is hide but it will render its data.
+	  */
+	public void setIsHideInfoColumn (boolean IsHideInfoColumn)
+	{
+		set_Value (COLUMNNAME_IsHideInfoColumn, Boolean.valueOf(IsHideInfoColumn));
+	}
+
+	/** Get Hide Column.
+		@return Determines, if this field is hide but it will render its data.
+	  */
+	public boolean isHideInfoColumn () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsHideInfoColumn);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+	
 	/**
 	 * Set Read Only.
 	 * 
@@ -730,6 +755,34 @@ public class X_AD_InfoColumn extends PO implements I_AD_InfoColumn, I_Persistent
 	public int getSeqNoSelection () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_SeqNoSelection);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_AD_InfoColumn getTooltip_InfoColumn() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_InfoColumn)MTable.get(getCtx(), org.compiere.model.I_AD_InfoColumn.Table_Name)
+			.getPO(getTooltip_InfoColumn_ID(), get_TrxName());	}
+
+	/** Set Tooltip Column.
+		@param Tooltip_InfoColumn_ID 
+		To show tooltip on the column.
+	  */
+	public void setTooltip_InfoColumn_ID (int Tooltip_InfoColumn_ID)
+	{
+		if (Tooltip_InfoColumn_ID < 1) 
+			set_Value (COLUMNNAME_Tooltip_InfoColumn_ID, null);
+		else 
+			set_Value (COLUMNNAME_Tooltip_InfoColumn_ID, Integer.valueOf(Tooltip_InfoColumn_ID));
+	}
+
+	/** Get Tooltip Column.
+		@return To show tooltip on the column.
+	  */
+	public int getTooltip_InfoColumn_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Tooltip_InfoColumn_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
