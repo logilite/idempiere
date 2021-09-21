@@ -164,12 +164,12 @@ public class DefaultInfoFactory implements IInfoFactory {
 			if (Env.getContext(Env.getCtx(), lookup.getWindowNo(), "IsSOTrx").equals("N"))
 				isSOTrx = false;
 
-			info = new InfoBPartnerPanel(queryValue, lookup.getWindowNo(), isSOTrx,false, whereClause);
+			info = new InfoBPartnerPanel(queryValue, lookup.getWindowNo(), isSOTrx, multiSelection, whereClause);
 			info.setTitle("Business Partner Info");
 		}
 		else	//	General Info
 		{
-			info = create(lookup.getWindowNo(), tableName, keyColumn, queryValue, false, whereClause, AD_InfoWindow_ID, true);
+			info = create(lookup.getWindowNo(), tableName, keyColumn, queryValue, multiSelection, whereClause, AD_InfoWindow_ID, true);
 		}
 		return info;
 	}

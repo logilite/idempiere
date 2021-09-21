@@ -94,14 +94,14 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 
 	private int noOfParameterColumn;
 
-	public InfoGeneralPanel(String queryValue, int windowNo,String tableName,String keyColumn, boolean isSOTrx, String whereClause)
+	public InfoGeneralPanel(String queryValue, int windowNo,String tableName,String keyColumn, boolean multipleSelection, String whereClause)
 	{
-		this(queryValue, windowNo, tableName, keyColumn, isSOTrx, whereClause, true);
+		this(queryValue, windowNo, tableName, keyColumn, multipleSelection, whereClause, true);
 	}
 
-	public InfoGeneralPanel(String queryValue, int windowNo,String tableName,String keyColumn, boolean isSOTrx, String whereClause, boolean lookup)
+	public InfoGeneralPanel(String queryValue, int windowNo,String tableName,String keyColumn, boolean multipleSelection, String whereClause, boolean lookup)
 	{
-		super(windowNo, tableName, keyColumn, false,whereClause, lookup);
+		super(windowNo, tableName, keyColumn, multipleSelection, whereClause, lookup);
 
 		setTitle(Msg.getMsg(Env.getCtx(), "Info"));
 

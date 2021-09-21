@@ -424,7 +424,7 @@ public class WChosenboxSearchEditor extends WEditor implements ContextMenuListen
 		if (m_tableName == null)	//	sets table name & key column
 			getDirectAccessSQL("*");
 
-		final InfoPanel ip = InfoManager.create(lookup, gridField, m_tableName, m_keyColumnName, null, false, whereClause);
+		final InfoPanel ip = InfoManager.create(lookup, gridField, m_tableName, m_keyColumnName, null, true, whereClause);
 		if (ip != null)
 			showInfoPanel(ip);
 	}
@@ -763,7 +763,7 @@ public class WChosenboxSearchEditor extends WEditor implements ContextMenuListen
 				if (m_tableName == null)	//	sets table name & key column
 					getDirectAccessSQL("*");
 				
-				final InfoPanel ip = InfoManager.create(lookup, gridField, m_tableName, m_keyColumnName, queryText, false, getWhereClause());
+				final InfoPanel ip = InfoManager.create(lookup, gridField, m_tableName, m_keyColumnName, queryText, true, getWhereClause());
 				if (ip != null && ip.loadedOK()) {
 					int rowCount = ip.getRowCount();
 					if (rowCount > 0) {
