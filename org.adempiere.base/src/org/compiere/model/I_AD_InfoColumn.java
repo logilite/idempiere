@@ -323,6 +323,19 @@ public interface I_AD_InfoColumn
 	  * Determines, if this field is displayed
 	  */
 	public boolean isDisplayed();
+	
+    /** Column name IsHideInfoColumn */
+    public static final String COLUMNNAME_IsHideInfoColumn = "IsHideInfoColumn";
+
+	/** Set Hide Column.
+	  * Determines, if this field is hide but it will render its data.
+	  */
+	public void setIsHideInfoColumn (boolean IsHideInfoColumn);
+
+	/** Get Hide Column.
+	  * Determines, if this field is hide but it will render its data.
+	  */
+	public boolean isHideInfoColumn();
 
     /** Column name IsReadOnly */
     public static final String COLUMNNAME_IsReadOnly = "IsReadOnly";
@@ -477,6 +490,21 @@ public interface I_AD_InfoColumn
 	  * Selection Column Sequence
 	  */
 	public int getSeqNoSelection();
+
+    /** Column name Tooltip_InfoColumn_ID */
+    public static final String COLUMNNAME_Tooltip_InfoColumn_ID = "Tooltip_InfoColumn_ID";
+
+	/** Set Tooltip Column.
+	  * To show tooltip on the column.
+	  */
+	public void setTooltip_InfoColumn_ID (int Tooltip_InfoColumn_ID);
+
+	/** Get Tooltip Column.
+	  * To show tooltip on the column.
+	  */
+	public int getTooltip_InfoColumn_ID();
+
+	public org.compiere.model.I_AD_InfoColumn getTooltip_InfoColumn() throws RuntimeException;
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";
