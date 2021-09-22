@@ -607,6 +607,16 @@ public class ProcessParameterPanel extends Panel implements
 				para.setP_String(value);
 				// to does not make sense
 			}
+			else if (result instanceof String[])
+			{
+				String[] value = (String[])result;
+				para.setP_String_Array(value);
+			}
+			else if (result instanceof Integer[])
+			{
+				Integer[] value = (Integer[])result;
+				para.setP_Number_Array(value);
+			}
 			// String
 			else {
 				if (result != null)
@@ -695,6 +705,16 @@ public class ProcessParameterPanel extends Panel implements
 				String value = bb.booleanValue() ? "Y" : "N";
 				para.setP_String(value);
 				// to does not make sense
+			}
+			else if (result instanceof String[])
+			{
+				String[] value = (String[])result;
+				para.setP_String_Array(value);
+			}
+			else if (result instanceof Integer[])
+			{
+				Integer[] value = (Integer[])result;
+				para.setP_Number_Array(value);
 			}
 			// String
 			else {

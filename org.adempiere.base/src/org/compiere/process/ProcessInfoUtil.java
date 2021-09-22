@@ -16,6 +16,7 @@
  *****************************************************************************/
 package org.compiere.process;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,6 +27,7 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 /**
  * 	Process Info with Utilities
@@ -209,8 +211,9 @@ public class ProcessInfoUtil
 		ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
 		String sql = "SELECT p.ParameterName,"         			    	//  1
 			+ " p.P_String,p.P_String_To, p.P_Number,p.P_Number_To,"    //  2/3 4/5
-			+ " p.P_Date,p.P_Date_To, p.Info,p.Info_To, "               //  6/7 8/9
-			+ " i.AD_Client_ID, i.AD_Org_ID, i.AD_User_ID "				//	10..12
+			+ " p.P_Date,p.P_Date_To, p.P_Number_Array,p.P_String_Array,"//  6/7 8/9
+			+ " p.Info,p.Info_To,	"	           						//  10/11
+			+ " i.AD_Client_ID, i.AD_Org_ID, i.AD_User_ID "				//	12..14
 			+ "FROM AD_PInstance_Para p"
 			+ " INNER JOIN AD_PInstance i ON (p.AD_PInstance_ID=i.AD_PInstance_ID) "
 			+ "WHERE p.AD_PInstance_ID=? "
@@ -240,16 +243,27 @@ public class ProcessInfoUtil
 					Parameter = rs.getTimestamp(6);
 					Parameter_To = rs.getTimestamp(7);
 				}
+				// Multi-select table
+				if (Parameter == null && rs.getArray(8) != null) 
+				{
+					Parameter = Util.convertBigDecimalToInteger((BigDecimal[]) rs.getArray(8).getArray());
+				}
+				// Multi-select List
+				if (Parameter == null && rs.getArray(9) != null) 
+				{
+					Parameter = rs.getArray(9).getArray();
+				}
+
 				//	Info
-				String Info = rs.getString(8);
-				String Info_To = rs.getString(9);
+				String Info = rs.getString(10);
+				String Info_To = rs.getString(11);
 				//
 				list.add (new ProcessInfoParameter(ParameterName, Parameter, Parameter_To, Info, Info_To));
 				//
 				if (pi.getAD_Client_ID() == null)
-					pi.setAD_Client_ID (rs.getInt(10));
+					pi.setAD_Client_ID (rs.getInt(12));
 				if (pi.getAD_User_ID() == null)
-					pi.setAD_User_ID(rs.getInt(12));
+					pi.setAD_User_ID(rs.getInt(14));
 			}
 		}
 		catch (SQLException e)
