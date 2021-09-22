@@ -1210,24 +1210,26 @@ public class LayoutEngine implements Pageable, Printable, Doc
 					}
 				}
 				//	We know Position and Size
-			//	log.fine( "LayoutEngine.layoutForm",
-			//		"Page=" + m_pageNo + " [" + m_area + "] " + m_position[m_area].x + "/" + m_position[m_area].y
-			//		+ " w=" + lastWidth[m_area] + ",h=" + lastHeight[m_area] + " " + item);
+				//	log.fine( "LayoutEngine.layoutForm",
+				//		"Page=" + m_pageNo + " [" + m_area + "] " + m_position[m_area].x + "/" + m_position[m_area].y
+				//		+ " w=" + lastWidth[m_area] + ",h=" + lastHeight[m_area] + " " + item);
 				if (element != null)
-					element.setLocation(m_position[m_area]);
-				//	Add to Area
-				if (m_area == AREA_CONTENT)
-					m_currPage.addElement (element);
-				else
-					m_headerFooter.addElement (element);
-				
-				if (PrintDataEvaluatee.hasPageLogic(item.getDisplayLogic()))
 				{
-					element.setPrintData(m_data);
-					element.setRowIndex(row);
-					element.setPageLogic(item.getDisplayLogic());
+					element.setLocation(m_position[m_area]);
+					//	Add to Area
+					if (m_area == AREA_CONTENT)
+						m_currPage.addElement (element);
+					else
+						m_headerFooter.addElement (element);
+
+					if (PrintDataEvaluatee.hasPageLogic(item.getDisplayLogic()))
+					{
+						element.setPrintData(m_data);
+						element.setRowIndex(row);
+						element.setPageLogic(item.getDisplayLogic());
+					}
 				}
-				
+
 				//
 				if (m_lastHeight[m_area] > m_maxHeightSinceNewLine[m_area])
 					m_maxHeightSinceNewLine[m_area] = m_lastHeight[m_area];
