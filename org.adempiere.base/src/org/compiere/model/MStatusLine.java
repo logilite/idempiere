@@ -33,6 +33,7 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 /**
  *	Status Line Model
@@ -179,13 +180,21 @@ public class MStatusLine extends X_AD_StatusLine
 	}
 
 	public String parseLine(int windowNo) {
+		return parseLine(windowNo, 0);
+	}
+
+	public String parseLine(int windowNo, int tabNo) {
 		String sql = getSQLStatement();
 
 		if (sql.indexOf("@") >= 0) {
-			sql = Env.parseContext(Env.getCtx(), windowNo, sql, false, false);
-			if (sql.length() == 0) {
+			String parseSQL = Env.parseContext(Env.getCtx(), windowNo, tabNo, sql, false, false);
+			if (Util.isEmpty(parseSQL))
+				sql = Env.parseContext(Env.getCtx(), windowNo, sql, false, false);
+			else
+				sql = parseSQL;
+
+			if (Util.isEmpty(sql))
 				return null;
-			}
 		}
 
 		MessageFormat mf = null;

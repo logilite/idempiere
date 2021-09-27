@@ -2076,7 +2076,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		MStatusLine sl = MStatusLine.getSL(getAD_Window_ID(), getAD_Tab_ID(), getAD_Table_ID());
 		if (sl != null)
 		{
-			String line = sl.parseLine(getWindowNo());
+			String line = sl.parseLine(getWindowNo(), getTabNo());
 			return line;
 		}
 
@@ -2094,7 +2094,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		{
 			StringBuilder lines = new StringBuilder();
 			for (MStatusLine wl : wls) {
-				String line = wl.parseLine(getWindowNo());
+				String line = wl.parseLine(getWindowNo(), getTabNo());
 				if (line != null) {
 					lines.append(line).append("<br>");
 				}

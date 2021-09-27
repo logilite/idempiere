@@ -341,15 +341,21 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         	eastPopup = new Popup();
         	ToolBarButton btn = new ToolBarButton();
         	btn.setIconSclass("z-icon-remove");
-        	btn.addEventListener(Events.ON_CLICK, evt -> eastPopup.close());
+			btn.addEventListener(Events.ON_CLICK, evt -> {
+				eastPopup.close();
+				isQuickInfoOpen = false;
+			});
         	eastPopup.appendChild(btn);
         	btn.setStyle("position: absolute; top: 20px; right: 0px; padding: 2px 0px;");
         	eastPopup.setStyle("padding-top: 20px;");
         	eastPopup.appendChild(content);
         	eastPopup.setPage(getComponent().getPage());
-        	eastPopup.setHeight("100%");        	
+        	eastPopup.setHeight("100%");
         	helpController.setupFieldTooltip();
-        	
+			eastPopup.addEventListener(Events.ON_OPEN, (OpenEvent oe) -> {
+				isQuickInfoOpen = oe.isOpen();
+			});
+
         	westPopup = new Popup();        	
         	westPopup.setStyle("padding-top: 10px;");
         	westPopup.setPage(getComponent().getPage());
@@ -671,11 +677,10 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	        		LayoutUtils.removeSclass("slide", layout.getEast());
 	        		contextHelp.setVisible(false);
 	        		updateHelpCollapsedPreference(false);
-
-	        		isQuickInfoOpen = true;
-	        		updateHelpQuickInfo(gridTab);
-	        		updateHelpDetailQuickInfo(detailGridTab);
         		}
+        		isQuickInfoOpen = true;
+        		updateHelpQuickInfo(gridTab);
+        		updateHelpDetailQuickInfo(detailGridTab);
         	}
         	else if (comp == westBtn)
         	{
