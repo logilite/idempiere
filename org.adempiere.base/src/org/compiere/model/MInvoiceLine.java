@@ -895,7 +895,42 @@ public class MInvoiceLine extends X_C_InvoiceLine
 			}
 		}
 	  }
-		
+		//Mark shipment line as invoiced if qty invoiced is more then qty delivered
+		MInvoice inv = getParent();
+		if (inv.isSOTrx() && is_ValueChanged(COLUMNNAME_QtyInvoiced))
+		{
+			// Marking isInvoiced on shipment line
+			if (getM_InOutLine_ID() != 0 && !inv.isReversal()
+					&& (MInvoice.DOCACTION_Complete.equals(inv.getDocAction())
+							|| MInvoice.DOCACTION_None.equals(inv.getDocAction())
+							|| MInvoice.DOCACTION_Prepare.equals(inv.getDocAction())
+							|| MInvoice.DOCACTION_Close.equals(inv.getDocAction())))
+			{
+				MInOutLine iol = (MInOutLine) getM_InOutLine();
+				if (iol.getMovementQty().compareTo(getQtyInvoiced()) == 0)
+				{
+					iol.setIsInvoiced(true);
+				}
+				else
+				{
+					final String sql = "SELECT sum(il.QtyInvoiced) From  C_InvoiceLine il JOIN C_Invoice ci ON (ci.C_Invoice_ID = il.C_Invoice_ID)"
+							+ " WHERE il.M_InOutLine_ID=? AND il.C_InvoiceLine_ID!=? ";
+					BigDecimal QtyInvoiced = DB.getSQLValueBD(get_TrxName(), sql, iol.getM_InOutLine_ID(),getC_InvoiceLine_ID());
+					if(QtyInvoiced==null)
+						QtyInvoiced = Env.ZERO;
+					
+					QtyInvoiced = QtyInvoiced.add(getQtyInvoiced());
+					if (QtyInvoiced.compareTo(iol.getMovementQty()) >= 0)
+					{
+						iol.setIsInvoiced(true);
+					}else {
+						iol.setIsInvoiced(false);
+					}
+				}
+				if (iol.is_ValueChanged(MInOutLine.COLUMNNAME_IsInvoiced))
+					iol.saveEx(get_TrxName());
+			}
+		}
 		return true;
 	}	//	beforeSave
 
