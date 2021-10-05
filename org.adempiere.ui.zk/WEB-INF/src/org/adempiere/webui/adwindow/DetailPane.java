@@ -3,7 +3,6 @@
  */
 package org.adempiere.webui.adwindow;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +121,8 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 	public static final String ON_QUICK_FORM_EVENT = "onQuickForm";
 	
     private HashMap<String, ToolBarButton> buttons = new HashMap<String, ToolBarButton>();
-    private List<ToolbarCustomButton> toolbarCustomButtons = new ArrayList<ToolbarCustomButton>();
+    // Map Button ID and ToolbarCustomButton
+    private HashMap<String, ToolbarCustomButton> mapToolbarCustomBtn = new HashMap<String, ToolbarCustomButton>();
 
 	public DetailPane() {
 		tabbox = new Tabbox();
@@ -428,7 +428,7 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 						}
 
 						ToolbarCustomButton toolbarCustomBtn = new ToolbarCustomButton(toolbarButton, btn, actionId, tabPanel.getGridTab().getWindowNo());
-						toolbarCustomButtons.add(toolbarCustomBtn);
+						mapToolbarCustomBtn.put(btn.getId(), toolbarCustomBtn);
 
 						toolbar.appendChild(btn);
 					}
@@ -768,6 +768,11 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 				{
 					btn.setDisabled(!(adtab.isEnableQuickFormButton() && !adtab.getGridTab().isReadOnly()));
 				}
+				else if (mapToolbarCustomBtn.containsKey(btn.getId()))
+				{
+					mapToolbarCustomBtn.get(btn.getId()).updateToolbarCustomBtn(adtab, changed, readOnly);
+				}
+
         		if (windowRestrictList.contains(btn.getId())) {
         			btn.setVisible(false);
         		} else if (tabRestrictList.contains(btn.getId())) {

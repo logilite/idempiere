@@ -13,6 +13,7 @@
  *****************************************************************************/
 package org.adempiere.webui.action;
 
+import org.adempiere.webui.adwindow.IADTabpanel;
 import org.zkoss.zul.Toolbarbutton;
 
 /**
@@ -34,4 +35,14 @@ public interface IAction {
 	public default void decorate(Toolbarbutton toolbarButton) {
 		
 	}
+
+	/**
+	 * you can customize toolbar button enable/disable based on current panel toolbar update.
+	 * 
+	 * @param toolbarButton
+	 * @param tabPanel
+	 * @param changed
+	 * @param readOnly
+	 */
+	public void updateToolbarCustomBtn(Toolbarbutton toolbarButton, IADTabpanel tabPanel, boolean changed, boolean readOnly);
 }
