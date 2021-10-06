@@ -173,6 +173,10 @@ public final class Adempiere
 		return "Unknown";
 	}   //  getVersion
 
+	public static boolean showLoginLeftPanel(){ 
+		return MSysConfig.getBooleanValue(MSysConfig.ZK_LOGIN_LEFTPANEL_SHOWN, true);
+	}
+
 	public static boolean isVersionShown(){ 
 		return MSysConfig.getBooleanValue(MSysConfig.APPLICATION_MAIN_VERSION_SHOWN, true);
 	}
