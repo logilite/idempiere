@@ -38,6 +38,7 @@ import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.factory.InfoManager;
+import org.adempiere.webui.factory.QuickEntryServiceUtil;
 import org.adempiere.webui.grid.WQuickEntry;
 import org.adempiere.webui.panel.IHelpContext;
 import org.adempiere.webui.panel.InfoPanel;
@@ -52,8 +53,8 @@ import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MLookupInfo;
 import org.compiere.model.MRole;
-import org.compiere.model.MTable;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MTable;
 import org.compiere.model.X_AD_CtxHelp;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
@@ -552,7 +553,8 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
     	}
 
     	int tabNo = gridField != null && gridField.getGridTab() != null ? gridField.getGridTab().getTabNo() : 0;
-    	final WQuickEntry vqe = new WQuickEntry(lookup.getWindowNo(), tabNo, zoomWindowId);
+		int tabId = this.getGridField() != null ? this.getGridField().getVO().AD_Tab_ID : -1;
+		final WQuickEntry vqe = QuickEntryServiceUtil.getWQuickEntry(lookup.getWindowNo(), zoomWindowId, tabNo, tabId);
 		if (vqe.getQuickFields()<=0)
 			return;
 		vqe.loadRecord (Record_ID);
