@@ -849,8 +849,10 @@ public class MOrderLine extends X_C_OrderLine
 				log.saveError("UnderLimitPrice", "PriceEntered=" + getPriceEntered() + ", PriceLimit=" + getPriceLimit() + ", Product = " + getProduct().getValue()); 
 				return false;
 			}
+			int C_DocType_ID = getParent().getDocTypeID();
+			MDocType docType = MDocType.get(getCtx(), C_DocType_ID);
 			//
-			if (!m_productPrice.isCalculated())
+			if (!docType.isNoPriceListCheck() && !m_productPrice.isCalculated())
 			{
 				throw new ProductNotOnPriceListException(m_productPrice, getLine());
 			}
