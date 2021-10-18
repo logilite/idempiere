@@ -741,6 +741,19 @@ public class Util
 	 */
 	public static String convertArrayToStringForDB(Object array)
 	{
+		return convertArrayToStringForDB(array, false);
+	} // convertArrayToStringForDB
+
+	/**
+	 * Convert array argument to String for insert/update directly into DB.
+	 * ( IDEMPIERE-3413 )
+	 * 
+	 * @param array - Array items of Integer/String
+	 * @return string - to build query value
+	 * @param isAddQuoteInEachValue - if True then add quote in each value
+	 */
+	public static String convertArrayToStringForDB(Object array, boolean isAddQuoteInEachValue)
+	{
 		if (array == null)
 			return "NULL";
 
@@ -754,7 +767,10 @@ public class Util
 
 			for (int i = 0;; i++)
 			{
-				sb.append(String.valueOf(objStr[i]));
+				if (isAddQuoteInEachValue)
+					sb.append(DB.TO_STRING(String.valueOf(objStr[i])));
+				else
+					sb.append(String.valueOf(objStr[i]));
 				if (i == iMax)
 					return sb.append('}').toString();
 				sb.append(", ");

@@ -43,6 +43,7 @@ import org.adempiere.webui.component.Tabpanels;
 import org.adempiere.webui.component.Tabs;
 import org.adempiere.webui.component.WListbox;
 import org.adempiere.webui.editor.WEditor;
+import org.adempiere.webui.editor.WMultiSelectEditor;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.editor.WebEditorFactory;
@@ -876,30 +877,42 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				}
 
 				String queryOperator = mInfoColumn.getQueryOperator();
-				if (MInfoColumn.OPERATORS_MULTISELECT.contains(queryOperator) && DisplayType.isMultiSelect(editor.getGridField().getDisplayType()))
+				if (X_AD_InfoColumn.QUERYOPERATOR_IN.equals(mInfoColumn.getQueryOperator()) && mInfoColumn.isMultiSelectCriteria())
 				{
-					if (DisplayType.MultiSelectList == editor.getGridField().getDisplayType())
-						columnClause = columnName + " :: text []";
-					else
-						columnClause = columnName + " :: numeric []";
+					builder.append(columnClause).append(" IN ");
+					// Convert the multi select array value to string for use IN condition
+					String value = Util.convertArrayToStringForDB(editor.getValue(), true);
+					if (!Util.isEmpty(value, true))
+						value = value.replaceAll("([{}])", "");
+					builder.append(" ( " + value + " ) ");
 				}
+				else
+				{
+					if (MInfoColumn.OPERATORS_MULTISELECT.contains(queryOperator) && DisplayType.isMultiSelect(editor.getGridField().getDisplayType()))
+					{
+						if (DisplayType.MultiSelectList == editor.getGridField().getDisplayType())
+							columnClause = columnName + " :: text []";
+						else
+							columnClause = columnName + " :: numeric []";
+					}
 
-				if (MInfoColumn.QUERYOPERATOR_EXCLUDE.equals(queryOperator))
-				{
-					builder.append("(");
-				}
-				builder.append(columnClause)
-					   .append(" ")
-					   .append(queryOperator);
-				if (columnClause.toUpperCase().startsWith("UPPER(")) {
-					builder.append(" UPPER(?)");
-				} else {
-					builder.append(" ? ");
-				}
+					if (MInfoColumn.QUERYOPERATOR_EXCLUDE.equals(queryOperator))
+					{
+						builder.append("(");
+					}
+					builder.append(columnClause)
+						   .append(" ")
+						   .append(queryOperator);
+					if (columnClause.toUpperCase().startsWith("UPPER(")) {
+						builder.append(" UPPER(?)");
+					} else {
+						builder.append(" ? ");
+					}
 
-				if (MInfoColumn.QUERYOPERATOR_EXCLUDE.equals(queryOperator))
-				{
-					builder.append(")").append(MQuery.EXCLUDE_OP2);
+					if (MInfoColumn.QUERYOPERATOR_EXCLUDE.equals(queryOperator))
+					{
+						builder.append(")").append(MQuery.EXCLUDE_OP2);
+					}
 				}
 			}
 		}	
@@ -994,7 +1007,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			
 			if (editor.getGridField() != null && editor.getValue() != null && editor.getValue().toString().trim().length() > 0) {
 				MInfoColumn mInfoColumn = findInfoColumn(editor.getGridField());
-				if (mInfoColumn == null || mInfoColumn.getSelectClause().equals("0")) {
+				if (mInfoColumn == null || mInfoColumn.getSelectClause().equals("0") || mInfoColumn.isMultiSelectCriteria()) {
 					continue;
 				}
 				Object value = editor.getValue();
@@ -1378,7 +1391,10 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
         }
         else 
         {
-	        editor = WebEditorFactory.getEditor(mField, false);
+			if (infoColumn.isMultiSelectCriteria())
+				editor = new WMultiSelectEditor(mField);
+			else
+				editor = WebEditorFactory.getEditor(mField, false);
 	        editor.setReadWrite(true);
 	        editor.dynamicDisplay();
 	        editor.addValueChangeListener(this);
