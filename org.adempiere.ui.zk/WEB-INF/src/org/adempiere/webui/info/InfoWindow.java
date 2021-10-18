@@ -69,6 +69,8 @@ import org.compiere.model.MInfoWindow;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MLookupInfo;
 import org.compiere.model.MProcess;
+import org.compiere.model.MQuery;
+import org.compiere.model.MRefList;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
@@ -690,6 +692,17 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 					
 					columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), colSQL, DisplayType.getClass(infoColumn.getAD_Reference_ID(), true), infoColumn.isReadOnly());
 				}
+				else if (DisplayType.isMultiSelect(infoColumn.getAD_Reference_ID()))
+				{
+					WEditor editor = WebEditorFactory.getEditor(gridFields.get(i), true);
+					editor.setMandatory(false);
+					editor.setReadWrite(false);
+					editorMap.put(colSQL, editor);
+					if (infoColumn.getAD_Reference_ID() == DisplayType.MultiSelectTable)
+						columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), colSQL, Integer[].class, infoColumn.isReadOnly());
+					else
+						columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), colSQL, String[].class, infoColumn.isReadOnly());
+				}
 				else if (DisplayType.isLookup(infoColumn.getAD_Reference_ID()))
 				{
 					if (infoColumn.getAD_Reference_ID() == DisplayType.List)
@@ -861,13 +874,32 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				} else {
 					columnClause = columnName;
 				}
+
+				String queryOperator = mInfoColumn.getQueryOperator();
+				if (MInfoColumn.OPERATORS_MULTISELECT.contains(queryOperator) && DisplayType.isMultiSelect(editor.getGridField().getDisplayType()))
+				{
+					if (DisplayType.MultiSelectList == editor.getGridField().getDisplayType())
+						columnClause = columnName + " :: text []";
+					else
+						columnClause = columnName + " :: numeric []";
+				}
+
+				if (MInfoColumn.QUERYOPERATOR_EXCLUDE.equals(queryOperator))
+				{
+					builder.append("(");
+				}
 				builder.append(columnClause)
 					   .append(" ")
-					   .append(mInfoColumn.getQueryOperator());
+					   .append(queryOperator);
 				if (columnClause.toUpperCase().startsWith("UPPER(")) {
 					builder.append(" UPPER(?)");
 				} else {
-					builder.append(" ?");
+					builder.append(" ? ");
+				}
+
+				if (MInfoColumn.QUERYOPERATOR_EXCLUDE.equals(queryOperator))
+				{
+					builder.append(")").append(MQuery.EXCLUDE_OP2);
 				}
 			}
 		}	
@@ -1000,6 +1032,8 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 					valueStr.append("%");
 			}
 			pstmt.setString(parameterIndex, valueStr.toString());
+		} else if (MInfoColumn.OPERATORS_MULTISELECT.contains(queryOperator) && (value instanceof Integer[] || value instanceof String[])) {
+    		DB.setParameter(pstmt, parameterIndex, value);    		
 		} else {
 			pstmt.setObject(parameterIndex, value);
 		}
@@ -1365,7 +1399,15 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
         		infoColumn.getQueryOperator().equals(X_AD_InfoColumn.QUERYOPERATOR_NotEq )) {
         		label.setValue(label.getValue() + " " + infoColumn.getQueryOperator());
         	}
-        }
+			else if (infoColumn.getQueryOperator().equals(X_AD_InfoColumn.QUERYOPERATOR_IN)
+					|| infoColumn.getQueryOperator().equals(X_AD_InfoColumn.QUERYOPERATOR_HAVE)
+					|| infoColumn.getQueryOperator().equals(X_AD_InfoColumn.QUERYOPERATOR_EXCLUDE)
+					|| infoColumn.getQueryOperator().equals(X_AD_InfoColumn.QUERYOPERATOR_OVERLAP))
+			{
+				String oprName = MRefList.getListName(Env.getCtx(), X_AD_InfoColumn.QUERYOPERATOR_AD_Reference_ID, infoColumn.getQueryOperator());
+				label.setValue(label.getValue() + " " + oprName);
+			}
+		}
 
         addSearchParameter(label, fieldEditor);
         

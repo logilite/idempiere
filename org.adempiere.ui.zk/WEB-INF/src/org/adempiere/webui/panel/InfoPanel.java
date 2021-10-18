@@ -19,6 +19,7 @@ package org.adempiere.webui.panel;
 
 import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -69,6 +70,7 @@ import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
+import org.compiere.minigrid.MultiSelectColumn;
 import org.compiere.model.GridField;
 import org.compiere.model.MInfoColumn;
 import org.compiere.model.MInfoWindow;
@@ -85,6 +87,7 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
+import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
 import org.zkoss.zk.au.out.AuEcho;
 import org.zkoss.zk.ui.Page;
@@ -606,6 +609,34 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		        value = new Double(rs.getDouble(colIndex));
 			else if (c == Integer.class)
 		        value = new Integer(rs.getInt(colIndex));
+			else if (c == Integer[].class)
+			{
+				Array arr = rs.getArray(colIndex);
+				if (arr != null)
+				{
+					Object intArrayValue = (Object) Util.convertBigDecimalToInteger((BigDecimal[]) arr.getArray());
+					WEditor editor = editorMap.get(p_layout[col].getColSQL());
+					if (editor != null)
+					{
+						editor.setValue(intArrayValue);
+						value = new MultiSelectColumn((Integer[]) intArrayValue, editor.getDisplayTextForGridView(intArrayValue), editor.getGridField().getLookup());
+					}
+				}
+			}
+			else if (c == String[].class)
+			{
+				Array arr = rs.getArray(colIndex);
+				if (arr != null)
+				{
+					Object strArrayValue = (String[]) arr.getArray();
+					WEditor editor = editorMap.get(p_layout[col].getColSQL());
+					if (editor != null)
+					{
+						editor.setValue(strArrayValue);
+						value = new MultiSelectColumn((String[]) strArrayValue, editor.getDisplayTextForGridView(strArrayValue), editor.getGridField().getLookup());
+					}
+				}
+			}
 			else if (c == KeyNamePair.class)
 			{				
 				if (p_layout[col].isKeyPairCol())
@@ -2094,7 +2125,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	{
 		int counter = 0;
 		StringBuilder select = new StringBuilder();
-		String insert = "INSERT INTO T_Selection_InfoWindow (AD_PINSTANCE_ID, T_SELECTION_ID, VIEWID, COLUMNNAME, VALUE_STRING, VALUE_NUMBER, VALUE_DATE) VALUES ( ";
+		String insert = "INSERT INTO T_Selection_InfoWindow (AD_PINSTANCE_ID, T_SELECTION_ID, VIEWID, COLUMNNAME, VALUE_STRING, VALUE_NUMBER, VALUE_DATE, VALUE_NUMBER_ARRAY, VALUE_STRING_ARRAY) VALUES ( ";
 		for (Entry<KeyNamePair, LinkedHashMap<String, Object>> records : m_values.entrySet())
 		{
 			// set Record ID
@@ -2126,12 +2157,31 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 					select.append("NULL,");
 					select.append(id.getRecord_ID());
 					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+					select.append(", NULL, NULL");
 				}
 				else if (data instanceof String)
 				{
 					select.append("'").append(data).append("'");
 					select.append(",NULL");
 					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+					select.append(", NULL, NULL");
+				}
+				else if (data instanceof MultiSelectColumn)
+				{
+					select.append("NULL, ");
+					select.append("NULL, ");
+					select.append("NULL::TIMESTAMP WITHOUT TIME ZONE, ");
+					Object multiValue = ((MultiSelectColumn)data).getValue();
+					if (multiValue instanceof Integer[])
+					{
+						select.append("'").append(Util.convertArrayToStringForDB(multiValue)).append("', ");
+						select.append("NULL");
+					}
+					else
+					{
+						select.append("NULL, ");
+						select.append("'").append(Util.convertArrayToStringForDB(multiValue)).append("'");
+					}
 				}
 				else if (data instanceof BigDecimal || data instanceof Integer || data instanceof Double)
 				{
@@ -2144,12 +2194,14 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 					else
 						select.append(data);
 					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+					select.append(", NULL, NULL");
 				}
 				else if (data instanceof Integer)
 				{
 					select.append("NULL,");
 					select.append((Integer) data);
 					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+					select.append(", NULL, NULL");
 				}
 				else if (data instanceof Timestamp || data instanceof Date)
 				{
@@ -2166,6 +2218,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 						select.append(data);
 					}
 					select.append("'");
+					select.append(", NULL, NULL");
 				}
 				else
 				{
@@ -2175,6 +2228,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 						select.append("'").append(data).append("'");
 					select.append(",NULL");
 					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+					select.append(", NULL, NULL");
 				}
 
 				select.append(" ) ");

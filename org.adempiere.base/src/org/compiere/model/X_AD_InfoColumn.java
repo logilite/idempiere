@@ -53,6 +53,8 @@ public class X_AD_InfoColumn extends PO implements I_AD_InfoColumn, I_Persistent
 			setIsMandatory (false);
 // N
 			setIsQueryCriteria (false);
+			setIsReadOnly (true);
+// Y
 			setName (null);
 			setSelectClause (null);
 			setSeqNo (0);
@@ -613,6 +615,14 @@ public class X_AD_InfoColumn extends PO implements I_AD_InfoColumn, I_Persistent
 	public static final String QUERYOPERATOR_NotEq = "!=";
 	/** Full Like = LIKE */
 	public static final String QUERYOPERATOR_FullLike = "LIKE";
+	/** HAVE = >>> */
+	public static final String QUERYOPERATOR_HAVE = ">>>";
+	/** IN = <<< */
+	public static final String QUERYOPERATOR_IN = "<<<";
+	/** OVERLAP = && */
+	public static final String QUERYOPERATOR_OVERLAP = "&&";
+	/** EXCLUDE = -&& */
+	public static final String QUERYOPERATOR_EXCLUDE = "-&&";
 	/** Set Query Operator.
 		@param QueryOperator 
 		Operator for database query
