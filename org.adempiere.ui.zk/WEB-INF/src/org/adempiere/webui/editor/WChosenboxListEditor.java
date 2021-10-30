@@ -16,6 +16,7 @@ package org.adempiere.webui.editor;
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -232,7 +233,19 @@ public class WChosenboxListEditor extends WEditor implements ContextMenuListener
     	
     	if (value != null)
         {
-    		String[] values = ((String)value).split("[,]");
+    		String[] values =null;
+    		if(value instanceof Integer[])
+    		{
+    			Integer[] intValues = (Integer[])value;
+    			String [] strVal = new String [intValues.length];
+    			for(int i=0;i<intValues.length;i++)
+    			{
+    				strVal[i]=intValues[i].toString();
+    			}
+    			values =strVal;
+    		}else {
+    			values = ((String)value).split("[,]");
+    		}
             Set<ValueNamePair> selected = new LinkedHashSet<>();
             for (String key : values) {
             	if (!Util.isEmpty(key)) {
