@@ -2817,9 +2817,9 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		}
 
 		@Override
-		public boolean isDisplayed(int row, int col) {
-			// TODO Auto-generated method stub
-			return false;
-		}		
-	}	
+		public boolean isDisplayed(int row, int col)
+		{
+			return true;
+		}
+	}
 }
