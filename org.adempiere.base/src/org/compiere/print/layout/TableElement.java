@@ -704,6 +704,12 @@ public class TableElement extends PrintElement
 				}
 				if (pageBreak)
 				{
+					// availableHeight is negative or do not have enough space to print then print current line in next page
+					if (availableHeight < 0 || (dataRow > 1 && availableHeight < rowHeight))
+						addlRows = -1;
+					else
+						addlRows = 0;
+
 					availableHeight = firstPage ? m_firstPage.height : m_nextPages.height;
 					m_firstRowOnPage.add(Integer.valueOf(dataRow+addlRows));	//	Y
 					if (!firstPage)
@@ -718,6 +724,13 @@ public class TableElement extends PrintElement
 					//
 					availableHeight -= m_headerHeight;
 					usedHeight += m_headerHeight;
+
+					// calculate the previous line height
+					if (addlRows < 0 && dataRow > 0)
+					{
+						availableHeight -= ((Float) m_rowHeights.get(dataRow - 1)).floatValue();
+						usedHeight += ((Float) m_rowHeights.get(dataRow - 1)).floatValue();
+					}
 				}
 				availableHeight -= rowHeight;
 				usedHeight += rowHeight;

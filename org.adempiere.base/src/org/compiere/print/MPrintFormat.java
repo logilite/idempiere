@@ -62,6 +62,12 @@ public class MPrintFormat extends X_AD_PrintFormat
 	 */
 	private static final long serialVersionUID = 2979978408305853342L;
 
+	private static final String	SQL_GET_PF_ITEMS	= "SELECT * FROM AD_PrintFormatItem pfi WHERE pfi.AD_PrintFormat_ID=? AND pfi.IsActive='Y' "
+														// Display restrictions - Passwords, etc.
+														+ "AND NOT EXISTS (SELECT * FROM AD_Field f WHERE pfi.AD_Column_ID=f.AD_Column_ID AND (f.IsEncrypted='Y' OR f.ObscureType IS NOT NULL))";
+
+	private static final String	ORDER_BY_CLAUSE		= " ORDER BY SeqNo";
+
 	/**
 	 *	Public Constructor.
 	 * 	Use static get methods
@@ -109,6 +115,12 @@ public class MPrintFormat extends X_AD_PrintFormat
 	private Language 				m_language;
 	/** Table Format					*/
 	private MPrintTableFormat 		m_tFormat;
+
+	private ArrayList<MPrintFormatItem>	listHeaderItems				= null;
+
+	private ArrayList<MPrintFormatItem>	listFooterItems				= null;
+
+	private ArrayList<MPrintFormatItem>	listContentItems			= null;
 
 	/**	Static Logger	*/
 	private static CLogger			s_log = CLogger.getCLogger (MPrintFormat.class);
@@ -197,16 +209,30 @@ public class MPrintFormat extends X_AD_PrintFormat
 	 * 	Get active Items
 	 * 	@return items
 	 */
-	private MPrintFormatItem[] getItems()
+	public MPrintFormatItem[] getItems()
 	{
 		ArrayList<MPrintFormatItem> list = new ArrayList<MPrintFormatItem>();
-		String sql = "SELECT * FROM AD_PrintFormatItem pfi "
-			+ "WHERE pfi.AD_PrintFormat_ID=? AND pfi.IsActive='Y'"
-			//	Display restrictions - Passwords, etc.
-			+ " AND NOT EXISTS (SELECT * FROM AD_Field f "
-				+ "WHERE pfi.AD_Column_ID=f.AD_Column_ID"
-				+ " AND (f.IsEncrypted='Y' OR f.ObscureType IS NOT NULL))"
-			+ "ORDER BY SeqNo";
+		list.addAll(getItemsList(SQL_GET_PF_ITEMS + ORDER_BY_CLAUSE));
+		//
+		MPrintFormatItem[] retValue = new MPrintFormatItem[list.size()];
+		list.toArray(retValue);
+		return retValue;
+	} // getItems
+
+	/**
+	 * get the Print Format Items
+	 * 
+	 * @param  sql Query
+	 * @return
+	 */
+	private ArrayList<MPrintFormatItem> getItemsList(String sql)
+	{
+		ArrayList<MPrintFormatItem> list = new ArrayList<MPrintFormatItem>();
+
+		listHeaderItems = new ArrayList<MPrintFormatItem>();
+		listContentItems = new ArrayList<MPrintFormatItem>();
+		listFooterItems = new ArrayList<MPrintFormatItem>();
+
 		MRole role = MRole.getDefault(getCtx(), false);
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -219,7 +245,14 @@ public class MPrintFormat extends X_AD_PrintFormat
 			{
 				MPrintFormatItem pfi = new MPrintFormatItem(p_ctx, rs, get_TrxName());
 				if (role.isColumnAccess(getAD_Table_ID(), pfi.getAD_Column_ID(), true))
-					list.add (pfi);
+				{
+					if (pfi.isHeader())
+						listHeaderItems.add(pfi);
+					else if (pfi.isContent())
+						listContentItems.add(pfi);
+					else if (pfi.isFooter())
+						listFooterItems.add(pfi);
+				}
 			}
 		}
 		catch (SQLException e)
@@ -230,11 +263,51 @@ public class MPrintFormat extends X_AD_PrintFormat
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
 		}
+		list.addAll(listHeaderItems);
+		list.addAll(listFooterItems);
+		list.addAll(listContentItems);
 		//
-		MPrintFormatItem[] retValue = new MPrintFormatItem[list.size()];
-		list.toArray(retValue);
-		return retValue;
-	}	//	getItems
+		return list;
+	} // getItemsList
+
+	/**
+	 * @return Header Item List
+	 */
+	public ArrayList<MPrintFormatItem> getHeaderItems()
+	{
+		if (listHeaderItems == null || listHeaderItems.isEmpty())
+		{
+			String sql = SQL_GET_PF_ITEMS + " AND pfi.PrintAreaType = '" + MPrintFormatItem.PRINTAREATYPE_Header + "' " + ORDER_BY_CLAUSE;
+			listHeaderItems = getItemsList(sql);
+		}
+		return listHeaderItems;
+	} // getHeaderItems
+
+	/**
+	 * @return Content Item List
+	 */
+	public ArrayList<MPrintFormatItem> getContentItems()
+	{
+		if (listContentItems == null || listContentItems.isEmpty())
+		{
+			String sql = SQL_GET_PF_ITEMS + " AND pfi.PrintAreaType = '" + MPrintFormatItem.PRINTAREATYPE_Content + "' " + ORDER_BY_CLAUSE;
+			listContentItems = getItemsList(sql);
+		}
+		return listContentItems;
+	}// getContentItems
+
+	/**
+	 * @return Footer Item List
+	 */
+	public ArrayList<MPrintFormatItem> getFooterItems()
+	{
+		if (listFooterItems == null || listFooterItems.isEmpty())
+		{
+			String sql = SQL_GET_PF_ITEMS + " AND pfi.PrintAreaType = '" + MPrintFormatItem.PRINTAREATYPE_Footer + "' " + ORDER_BY_CLAUSE;
+			listFooterItems = getItemsList(sql);
+		}
+		return listFooterItems;
+	} // getFooterItems
 
 	/**
 	 * 	Get All Items

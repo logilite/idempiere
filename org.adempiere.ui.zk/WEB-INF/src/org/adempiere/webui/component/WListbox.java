@@ -35,12 +35,14 @@ import org.adempiere.webui.exception.ApplicationException;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
 import org.compiere.minigrid.IMiniTable;
+import org.compiere.minigrid.MultiSelectColumn;
 import org.compiere.model.MRole;
 import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Util;
+import org.compiere.util.ValueNamePair;
 import org.zkoss.zul.ListModel;
 import org.zkoss.zul.event.ZulEvents;
 
@@ -1086,7 +1088,13 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 				idColumn.setSelected(newBoolean);
 				this.setValueAt(idColumn, row, col);
 			}
-			// othewise just set the value in the model to the new value
+			else if (this.getValueAt(row, col) instanceof MultiSelectColumn)
+			{
+				MultiSelectColumn msCol = (MultiSelectColumn) this.getValueAt(row, col);
+				msCol.setValue((ArrayList<ValueNamePair>) event.getNewValue());
+				this.setValueAt(msCol, row, col);
+			}
+			// otherwise just set the value in the model to the new value
 			else
 			{
 				this.setValueAt(event.getNewValue(), row, col);

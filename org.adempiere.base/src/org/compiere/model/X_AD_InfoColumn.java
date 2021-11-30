@@ -587,6 +587,30 @@ public class X_AD_InfoColumn extends PO implements I_AD_InfoColumn, I_Persistent
 		return false;
 	}
 
+	/** Set Multi Select Criteria.
+		@param IsMultiSelectCriteria 
+		The column is also used as a query criteria
+	  */
+	public void setIsMultiSelectCriteria (boolean IsMultiSelectCriteria)
+	{
+		set_Value (COLUMNNAME_IsMultiSelectCriteria, Boolean.valueOf(IsMultiSelectCriteria));
+	}
+
+	/** Get Multi Select Criteria.
+		@return The column is also used as a query criteria
+	  */
+	public boolean isMultiSelectCriteria () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsMultiSelectCriteria);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Query Criteria.
 		@param IsQueryCriteria 
 		The column is also used as a query criteria
@@ -685,6 +709,14 @@ public class X_AD_InfoColumn extends PO implements I_AD_InfoColumn, I_Persistent
 	public static final String QUERYOPERATOR_NotEq = "!=";
 	/** Full Like = LIKE */
 	public static final String QUERYOPERATOR_FullLike = "LIKE";
+	/** HAVE = >>> */
+	public static final String QUERYOPERATOR_HAVE = ">>>";
+	/** IN = <<< */
+	public static final String QUERYOPERATOR_IN = "<<<";
+	/** OVERLAP = && */
+	public static final String QUERYOPERATOR_OVERLAP = "&&";
+	/** EXCLUDE = -&& */
+	public static final String QUERYOPERATOR_EXCLUDE = "-&&";
 	/** Set Query Operator.
 		@param QueryOperator 
 		Operator for database query

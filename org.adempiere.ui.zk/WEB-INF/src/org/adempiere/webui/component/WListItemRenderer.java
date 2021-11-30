@@ -41,8 +41,11 @@ import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.event.TableValueChangeEvent;
 import org.adempiere.webui.event.TableValueChangeListener;
+import org.adempiere.webui.event.ValueChangeEvent;
+import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.minigrid.IDColumn;
+import org.compiere.minigrid.MultiSelectColumn;
 import org.compiere.model.MImage;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -73,7 +76,7 @@ import org.zkoss.zul.ext.SelectionControl;
  * @author Andrew Kimball
  *
  */
-public class WListItemRenderer implements ListitemRenderer<Object>, EventListener<Event>, ListitemRendererExt
+public class WListItemRenderer implements ListitemRenderer<Object>, EventListener<Event>, ListitemRendererExt, ValueChangeListener
 {
 	/** Array of listeners for changes in the table components. */
 	protected ArrayList<TableValueChangeListener> m_listeners =
@@ -376,6 +379,23 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
 					table.addEventListener(Events.ON_SELECT, this);
 				}
 			}
+			else if (field instanceof MultiSelectColumn)
+			{
+				MultiSelectColumn multeSelectField = (MultiSelectColumn) field;
+				listcell.setValue(multeSelectField.getValue());
+				if (isCellEditable)
+				{
+					MultiSelectionBox multiSelectBox = new MultiSelectionBox(multeSelectField.getItemList(), true);
+					multiSelectBox.setValues(multeSelectField.getSelectedItems());
+					multiSelectBox.addValueChangeListener(this);
+					ZkCssHelper.appendStyle(multiSelectBox, "width: 96%;");
+					listcell.appendChild(multiSelectBox);
+				}
+				else
+				{
+					listcell.setLabel(multeSelectField.getDisplayValue());
+				}
+			}
 			else
 			{
 				listcell.setLabel(field.toString());
@@ -668,6 +688,10 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
 			else if (source instanceof Textbox)
 			{
 				value = ((Textbox)source).getValue();
+			}
+			else if (source instanceof MultiSelectionBox)
+			{
+				value = ((MultiSelectionBox) source).getValues();
 			}
 
 			if(value != null)
@@ -1122,6 +1146,19 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
 			}
 		}
 
+	}
+
+	@Override
+	public void valueChange(ValueChangeEvent evt)
+	{
+		try
+		{
+			onEvent(new Event(Events.ON_CHANGE, (Component) evt.getSource()));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 }
 

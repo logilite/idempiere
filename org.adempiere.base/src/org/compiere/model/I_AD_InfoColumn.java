@@ -389,6 +389,19 @@ public interface I_AD_InfoColumn
 	  */
 	public boolean isMandatory();
 
+    /** Column name IsMultiSelectCriteria */
+    public static final String COLUMNNAME_IsMultiSelectCriteria = "IsMultiSelectCriteria";
+
+	/** Set Multi Select Criteria.
+	  * The column is also used as a query criteria
+	  */
+	public void setIsMultiSelectCriteria (boolean IsMultiSelectCriteria);
+
+	/** Get Multi Select Criteria.
+	  * The column is also used as a query criteria
+	  */
+	public boolean isMultiSelectCriteria();
+
     /** Column name IsQueryCriteria */
     public static final String COLUMNNAME_IsQueryCriteria = "IsQueryCriteria";
 

@@ -19,6 +19,8 @@ package org.compiere.model;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -45,6 +47,18 @@ public class MInfoColumn extends X_AD_InfoColumn implements IInfoColumn
 	 * 
 	 */
 	private static final long serialVersionUID = -6313260451237775302L;
+
+	public static final List<String> OPERATORS_MULTISELECT = new ArrayList<String>() {
+																private static final long serialVersionUID = 9036220292029870530L;
+																{
+																	add(QUERYOPERATOR_Eq);
+																	add(QUERYOPERATOR_NotEq);
+																	add(QUERYOPERATOR_IN);
+																	add(QUERYOPERATOR_HAVE);
+																	add(QUERYOPERATOR_OVERLAP);
+																	add(QUERYOPERATOR_EXCLUDE);
+																}
+															};
 
 	/**
 	 * 	Stanfard Constructor
