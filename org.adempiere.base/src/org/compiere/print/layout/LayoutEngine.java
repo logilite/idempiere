@@ -1454,7 +1454,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 					}
 				}
 
-				if (PrintDataEvaluatee.hasPageLogic(item.getDisplayLogic()))
+				if (element!=null && PrintDataEvaluatee.hasPageLogic(item.getDisplayLogic()))
 				{
 					element.setPrintData(m_data);
 					element.setRowIndex(row);
