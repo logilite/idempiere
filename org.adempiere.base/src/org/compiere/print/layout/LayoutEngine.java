@@ -1176,6 +1176,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 			if (log.isLoggable(Level.INFO)) log.info("Row=" + row);
 			m_data.setRowIndex(row);
 			if (row > 0 && m_format.isBreakPagePerRecord())
+				newPage(true, false); // break page per record when the report is a form
 
 			List <MPrintFormatItem> printItems = (m_parentLayout != null && m_parentLayout.m_currPage == m_currPage) ? Arrays.asList(m_format.getItems()) : m_format.getContentItems();
 
