@@ -34,9 +34,11 @@ import java.util.regex.Pattern;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 
+import org.adempiere.base.event.EventManager;
+import org.adempiere.base.event.IEventTopics;
+import org.adempiere.base.event.ReportSendEMailEventData;
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.LayoutUtils;
-import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.AttachmentItem;
 import org.adempiere.webui.component.Button;
@@ -64,6 +66,7 @@ import org.compiere.model.MMailText;
 import org.compiere.model.MUser;
 import org.compiere.model.MUserMail;
 import org.compiere.model.PO;
+import org.compiere.model.PrintInfo;
 import org.compiere.util.ByteArrayDataSource;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
@@ -172,6 +175,8 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	protected String  m_cc;
 	protected String  m_subject;
 	protected String  m_message;
+	private int m_Record_ID;
+	private int m_AD_Table_ID;
 	/**	File to be optionally attached	*/
 	protected DataSource	m_attachment;
 	
@@ -830,7 +835,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	{
 		MMailText mt = (MMailText) MUser.get(Env.getCtx()).getR_DefaultMailText();
 		if (mt.get_ID() > 0) {
-			mt.setPO(MUser.get(Env.getCtx()));
+			mt.setPO(m_po);
 			MAttachment attachment = MAttachment.get(Env.getCtx(), MMailText.Table_ID, mt.get_ID());
 			if (attachment != null) {
 				MAttachmentEntry[] entries = attachment.getEntries();
@@ -849,15 +854,19 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 			}
 
 			fMessage.setValue(getMessage() + "\n" + embedImgToEmail(mt, attachment));
-			
+			String subj = mt.getMailHeader();
+			if(subj!=null)
+				fSubject.setValue(subj);
 		}
 	}
 	
 	@Override
-	public void init(String title, MUser from, String to, String subject, String message, File attachment)
+	public void init(String title, MUser from, String to, String subject, String message, File attachment,
+			int m_WindowNo, int ad_Table_ID, int record_ID, PrintInfo printInfo)
 	{
 		Components.removeAllChildren(this);
-		
+		this.m_AD_Table_ID = ad_Table_ID;
+		this.m_Record_ID = record_ID;
 		this.setTitle(title);
 		this.setSclass("popup-dialog");
 		this.setClosable(true);
@@ -882,6 +891,10 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		fMessage.setConfig(lang);
 		
 		commonInit(from, to, subject, message, new FileDataSource(attachment));
+		
+		clearEMailContext(m_WindowNo);
+		sendEvent(m_WindowNo, m_AD_Table_ID, m_Record_ID, null, "");
+		setValuesFromContext(m_WindowNo);
 	}
 
 	public void setPO(PO m_po)
@@ -905,5 +918,85 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	public IEmailDialog createInstance()
 	{
 		return new WEMailDialog();
+	}
+	
+	/**
+	 * Set the user to editor and trigger the event change
+	 * @param newUserTo
+	 */
+	protected void setUserTo(int newUserTo)
+	{
+		ValueChangeEvent vce = new ValueChangeEvent(fUser, fUser.getColumnName(),fUser.getValue(),newUserTo);
+		fUser.valueChange(vce);		
+	}
+	
+	/**
+	 * Set the user Cc editor and trigger the event change
+	 * @param newUserCc
+	 */
+	protected void setUserCc(int newUserCc)
+	{
+		ValueChangeEvent vce = new ValueChangeEvent(fCcUser,fCcUser.getColumnName(),fCcUser.getValue(),newUserCc);
+		fCcUser.valueChange(vce);
+	}
+	
+	/**
+	 * Clear the window context variables to prefill the dialog
+	 * 
+	 * @param m_WindowNo
+	 */
+	protected void clearEMailContext(int m_WindowNo)
+	{
+		Env.setContext(Env.getCtx(), m_WindowNo, ReportSendEMailEventData.CONTEXT_EMAIL_TO, "");
+		Env.setContext(Env.getCtx(), m_WindowNo, ReportSendEMailEventData.CONTEXT_EMAIL_USER_TO, "");
+		Env.setContext(Env.getCtx(), m_WindowNo, ReportSendEMailEventData.CONTEXT_EMAIL_CC, "");
+		Env.setContext(Env.getCtx(), m_WindowNo, ReportSendEMailEventData.CONTEXT_EMAIL_USER_CC, "");
+		Env.setContext(Env.getCtx(), m_WindowNo, ReportSendEMailEventData.CONTEXT_EMAIL_SUBJECT, "");
+		Env.setContext(Env.getCtx(), m_WindowNo, ReportSendEMailEventData.CONTEXT_EMAIL_MESSAGE, "");
+	}
+	
+	/**
+	 * Send the event to listeners that prefill dialog variables
+	 * 
+	 * @param windowNo
+	 * @param tableId
+	 * @param recordId
+	 * @param printInfo
+	 * @param subject
+	 */
+	private void sendEvent(int windowNo, int tableId, int recordId, PrintInfo printInfo, String subject)
+	{
+        ReportSendEMailEventData eventData = new ReportSendEMailEventData(windowNo, tableId, recordId, printInfo,
+                subject);
+        org.osgi.service.event.Event event = EventManager.newEvent(IEventTopics.REPORT_SEND_EMAIL, eventData);
+        EventManager.getInstance().sendEvent(event);
+	}
+
+	
+	/**
+	 * Set the default dialog values from context
+	 * 
+	 * @param windowNo
+	 */
+	private void setValuesFromContext(int windowNo)
+	{
+		String newTo = Env.getContext(Env.getCtx(), windowNo, ReportSendEMailEventData.CONTEXT_EMAIL_TO);
+		if (!Util.isEmpty(newTo))
+			setTo(newTo);
+		int newUserTo = Env.getContextAsInt(Env.getCtx(), windowNo, ReportSendEMailEventData.CONTEXT_EMAIL_USER_TO);
+		if (newUserTo > 0)
+			setUserTo(newUserTo);
+		String newCc = Env.getContext(Env.getCtx(), windowNo, ReportSendEMailEventData.CONTEXT_EMAIL_CC);
+		if (!Util.isEmpty(newCc))
+			setCc(newCc);
+		int newUserCc = Env.getContextAsInt(Env.getCtx(), windowNo, ReportSendEMailEventData.CONTEXT_EMAIL_USER_CC);
+		if (newUserCc > 0)
+			setUserCc(newUserCc);
+		String newSubject = Env.getContext(Env.getCtx(), windowNo, ReportSendEMailEventData.CONTEXT_EMAIL_SUBJECT);
+		if (!Util.isEmpty(newSubject))
+			setSubject(newSubject);
+		String newMessage = Env.getContext(Env.getCtx(), windowNo, ReportSendEMailEventData.CONTEXT_EMAIL_MESSAGE);
+		if (!Util.isEmpty(newMessage))
+			setMessage(newMessage);
 	}
 }	//	WEMailDialog

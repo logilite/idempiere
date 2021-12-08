@@ -18,7 +18,8 @@ import java.io.File;
 import javax.activation.DataSource;
 
 import org.compiere.model.MUser;
-import org.compiere.model.PO; 
+import org.compiere.model.PO;
+import org.compiere.model.PrintInfo; 
 
 /**
  * @author Logilite
@@ -28,7 +29,7 @@ public interface IEmailDialog
 {
 
 	public void init(String title, MUser from, String to, String subject, String message,
-			File attachment);
+			File attachment, int m_WindowNo,int ad_Table_ID, int record_ID, PrintInfo printInfo);
 
 	public void addTo(String supportEMail, boolean isShowEmailFirst);
 

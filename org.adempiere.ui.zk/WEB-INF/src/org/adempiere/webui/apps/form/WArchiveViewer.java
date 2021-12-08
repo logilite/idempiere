@@ -21,11 +21,15 @@
 
 package org.adempiere.webui.apps.form;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.Callback;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.LayoutUtils;
@@ -56,13 +60,16 @@ import org.adempiere.webui.panel.CustomForm;
 import org.adempiere.webui.panel.IFormController;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.EMailDialogUtil;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.IEmailDialog;
 import org.compiere.apps.form.Archive;
 import org.compiere.model.MArchive;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MUser;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
@@ -176,7 +183,8 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 	private Textbox helpField = new Textbox();
 	private ConfirmPanel confirmPanel = new ConfirmPanel(true);
 	private Button updateArchive = new Button(); 
-	private Button deleteArchive = new Button(); 
+	private Button deleteArchive = new Button();
+	private Button bEmail = new Button();
 		
 	private Tabbox tabbox = new Tabbox();
 	private Tabs tabs = new Tabs();
@@ -295,6 +303,13 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 		bRefresh.addEventListener(Events.ON_CLICK, this);
 		
 		if (ThemeManager.isUseFontIconForImage())
+			bEmail.setIconSclass("z-icon-SendMail");
+		else
+			bEmail.setImage(ThemeManager.getThemeResource("images/SendMail24.png"));
+		bEmail.setTooltiptext(Msg.getMsg(Env.getCtx(), "EMail"));
+		bEmail.addEventListener(Events.ON_CLICK, this);
+		
+		if(ThemeManager.isUseFontIconForImage())
 			bBack.setIconSclass("z-icon-Previous");
 		else
 			bBack.setImage(ThemeManager.getThemeResource("images/wfBack24.png"));
@@ -508,6 +523,7 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 		Hbox hbox = new Hbox();
 		hbox.appendChild(deleteArchive);
 		hbox.appendChild(bRefresh);
+		hbox.appendChild(bEmail);
 		hbox.appendChild(updateArchive);
 		cell = new Cell();
 		cell.setColspan(3);
@@ -613,6 +629,8 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 			updateVDisplay(false);
 		else if (e.getTarget() == bNext)
 			updateVDisplay(true);
+		else if(e.getTarget() == bEmail)
+			sendMail();
 		else if (e.getTarget() == bRefresh)
 			iframe.invalidate();
 		else if (e.getTarget() instanceof Tab)
@@ -667,7 +685,36 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 			}
 		});
 	}
+	
+	/**
+	 * Send EMail with the current displayed file as attachment
+	 */
+	private void sendMail()
+	{
+		MArchive ar = m_archives[m_index];
 
+		MUser from = MUser.get(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()));
+		String fileName = System.getProperty("java.io.tmpdir") + System.getProperty("file.separator") + ar.getName()
+				+ ".pdf";
+		File attachment = new File(fileName);
+		try
+		{
+			Files.write(attachment.toPath(), ar.getBinaryData());
+		}
+		catch (IOException e)
+		{
+			throw new AdempiereException(e);
+		}
+
+		IEmailDialog dialog = EMailDialogUtil.getEmailDialog();
+		if (dialog != null)
+		{
+			dialog.init(Msg.getMsg(Env.getCtx(), "SendMail"), from, "", "", "", attachment, m_WindowNo, m_AD_Table_ID,
+					m_Record_ID, null);
+			dialog.show();
+		}
+	}
+	
 	/**
 	 * 	Update View Display
 	 * 	@param next show next Archive

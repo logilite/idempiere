@@ -302,7 +302,7 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 		IEmailDialog dialog = EMailDialogUtil.getEmailDialog(); 
 		if(dialog!=null){
 			dialog.init(Msg.getMsg(Env.getCtx(), "SendMail"),
-				from, to, subject, "", attachment);
+				from, to, subject, "", attachment,m_WindowNo,m_printInfo.getAD_Table_ID(),m_printInfo.getRecord_ID(),m_printInfo);
 			dialog.show();
 		}
 		else

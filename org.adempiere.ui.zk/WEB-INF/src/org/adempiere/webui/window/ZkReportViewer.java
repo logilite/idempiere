@@ -1116,8 +1116,10 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 
 			if (m_reportEngine.getQuery() != null)
 				dialog.setAD_PInstance_ID(m_reportEngine.getQuery().getAD_PInstance_ID());
-			dialog.init(Msg.getMsg(Env.getCtx(), "SendMail"), from, to, subject, message, attachment);
-			
+			dialog.init(Msg.getMsg(Env.getCtx(), "SendMail"), from, to, subject, message, attachment, m_WindowNo,
+					m_reportEngine.getPrintInfo().getAD_Table_ID(), m_reportEngine.getPrintInfo().getRecord_ID(),
+					m_reportEngine.getPrintInfo());
+
 			dialog.show();
 		}
 		else

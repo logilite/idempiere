@@ -104,5 +104,8 @@ public interface IEventTopics {
 	public static final String AFTER_PROCESS = "idempiere/afterProcess";
 	/** Called after a process is committed */
 	public static final String POST_PROCESS = "idempiere/postProcess";
+	
+	/** Called from dialog to send an email, to prefill dialog variables */
+	public static final String REPORT_SEND_EMAIL = "idempiere/reportSendEMail";
 
 }
