@@ -57,12 +57,16 @@ import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.compiere.model.I_C_Invoice;
+import org.compiere.model.I_R_MailText;
 import org.compiere.model.Lookup;
 import org.compiere.model.MAttachment;
 import org.compiere.model.MAttachmentEntry;
 import org.compiere.model.MClient;
+import org.compiere.model.MDocType;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MMailText;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.MUserMail;
 import org.compiere.model.PO;
@@ -833,30 +837,58 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	
 	protected void addMailText()
 	{
-		MMailText mt = (MMailText) MUser.get(Env.getCtx()).getR_DefaultMailText();
-		if (mt.get_ID() > 0) {
-			mt.setPO(m_po);
-			MAttachment attachment = MAttachment.get(Env.getCtx(), MMailText.Table_ID, mt.get_ID());
-			if (attachment != null) {
-				MAttachmentEntry[] entries = attachment.getEntries();
-				for (MAttachmentEntry entry : entries) {
-					boolean alreadyAdded = false;
-					for (DataSource attach : attachments)
-						if (attach.getName().equals(entry.getName()))
-							alreadyAdded = true;
-					if (alreadyAdded)
-						continue;
-					byte[] data = entry.getData();
-					ByteArrayDataSource dataSource = new ByteArrayDataSource(data, entry.getContentType());
-					dataSource.setName(entry.getName());
-					addAttachment(dataSource, true);
+		MMailText mt = null;
+		// Get the mail template based on the document type. If it is not
+		// available on document then User's default mail template will
+		// considered.
+		if (m_po != null)
+		{
+			int C_Doctype_ID = m_po.get_ValueAsInt(I_C_Invoice.COLUMNNAME_C_DocTypeTarget_ID);
+			if (C_Doctype_ID > 0)
+			{
+				MDocType docType = MDocType.get(Env.getCtx(), C_Doctype_ID);
+				int R_DefaultMailText_ID = docType.get_ValueAsInt("R_DefaultMailText_ID");
+				if (R_DefaultMailText_ID > 0)
+				{
+					mt = (MMailText) MTable.get(Env.getCtx(), I_R_MailText.Table_ID).getPO(R_DefaultMailText_ID, null);
 				}
 			}
+		}
 
-			fMessage.setValue(getMessage() + "\n" + embedImgToEmail(mt, attachment));
-			String subj = mt.getMailHeader();
-			if(subj!=null)
-				fSubject.setValue(subj);
+		if (mt == null)
+		{
+			mt = (MMailText) MUser.get(Env.getCtx()).getR_DefaultMailText();
+		}
+		
+		if (mt != null && mt.get_ID() > 0)
+		{
+			if (mt.get_ID() > 0)
+			{
+				mt.setPO(m_po);
+				MAttachment attachment = MAttachment.get(Env.getCtx(), MMailText.Table_ID, mt.get_ID());
+				if (attachment != null)
+				{
+					MAttachmentEntry[] entries = attachment.getEntries();
+					for (MAttachmentEntry entry : entries)
+					{
+						boolean alreadyAdded = false;
+						for (DataSource attach : attachments)
+							if (attach.getName().equals(entry.getName()))
+								alreadyAdded = true;
+						if (alreadyAdded)
+							continue;
+						byte[] data = entry.getData();
+						ByteArrayDataSource dataSource = new ByteArrayDataSource(data, entry.getContentType());
+						dataSource.setName(entry.getName());
+						addAttachment(dataSource, true);
+					}
+				}
+
+				fMessage.setValue(getMessage() + "\n" + embedImgToEmail(mt, attachment));
+				String subj = mt.getMailHeader();
+				if (subj != null)
+					fSubject.setValue(subj);
+			}
 		}
 	}
 	
