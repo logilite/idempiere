@@ -24,7 +24,9 @@ import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.MArchive;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
+import org.compiere.model.PO;
 import org.compiere.model.PrintInfo;
 import org.compiere.tools.FileUtil;
 import org.compiere.util.CLogger;
@@ -301,6 +303,14 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 
 		IEmailDialog dialog = EMailDialogUtil.getEmailDialog(); 
 		if(dialog!=null){
+			
+			PO po = null;
+			if (m_printInfo.getAD_Table_ID() > 0 && m_printInfo.getRecord_ID() > 0)
+			{
+				po = MTable.get(Env.getCtx(), m_printInfo.getAD_Table_ID())
+						.getPO(m_printInfo.getRecord_ID(), null);
+				dialog.setPO(po);
+			}
 			dialog.init(Msg.getMsg(Env.getCtx(), "SendMail"),
 				from, to, subject, "", attachment,m_WindowNo,m_printInfo.getAD_Table_ID(),m_printInfo.getRecord_ID(),m_printInfo);
 			dialog.show();
