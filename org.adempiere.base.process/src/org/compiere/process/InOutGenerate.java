@@ -623,7 +623,7 @@ public class InOutGenerate extends SvrProcess
 	/**
 	 * 	InOutGenerate Parameter
 	 */
-	static class SParameter
+	protected static class SParameter
 	{
 		/**
 		 * 	Parameter
@@ -633,7 +633,7 @@ public class InOutGenerate extends SvrProcess
 		 *	@param p_minGuaranteeDate
 		 *	@param p_FiFo
 		 */
-		protected SParameter (int p_Warehouse_ID, 
+		public SParameter (int p_Warehouse_ID, 
 			int p_Product_ID, int p_AttributeSetInstance_ID, 
 			Timestamp p_minGuaranteeDate,boolean p_FiFo)
 		{
