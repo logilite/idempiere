@@ -30,10 +30,12 @@ import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MConversionRate;
 import org.compiere.model.MCostDetail;
+import org.compiere.model.MCostElement;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInOutLineMA;
+import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrderLandedCostAllocation;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
@@ -512,6 +514,9 @@ public class Doc_InOut extends Doc
 				MProduct product = line.getProduct();
 				MOrderLine orderLine = null;
 				BigDecimal landedCost = BigDecimal.ZERO;
+				MInOutLine inoutLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(line.get_ID(),
+						getTrxName());
+				MInvoiceLine invoiceLine = MInvoiceLine.getOfInOutLine(inoutLine);
 				String costingMethod = product.getCostingMethod(as);
 				if (!isReversal(line))
 				{					
@@ -536,8 +541,21 @@ public class Doc_InOut extends Doc
 						MAcctSchema.COSTINGMETHOD_LastPOPrice.equals(costingMethod)  ||
 						( MAcctSchema.COSTINGMETHOD_StandardCosting.equals(costingMethod) &&  MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as))))
 					{
+						MCostDetail cdInv=MCostDetail.get(getCtx(), "M_InOutLine_ID = ?",inoutLine.getM_InOutLine_ID() ,inoutLine.getM_AttributeSetInstance_ID(),as.getC_AcctSchema_ID() ,getTrxName());
+						boolean isPOFirst = true;
+						if(cdInv!=null) {
+							//Match PO cost detail
+							MCostDetail cdPO=MCostDetail.get(getCtx(), "M_InOutLine_ID = ? AND C_OrderLine_ID > 0",inoutLine.getM_InOutLine_ID() ,inoutLine.getM_AttributeSetInstance_ID(),as.getC_AcctSchema_ID() ,getTrxName());
+							if(cdPO==null) {
+								isPOFirst = false;
+							}else if(cdInv.getCreated().before(cdPO.getCreated())) {
+								isPOFirst = false;
+							}
+							
+						}
+						
 						// Low - check if c_orderline_id is valid
-						if (orderLine != null)
+						if (orderLine != null && isPOFirst)
 						{
 						    // Elaine 2008/06/26
 						    C_Currency_ID = orderLine.getC_Currency_ID();
@@ -561,8 +579,37 @@ public class Doc_InOut extends Doc
 								}	//	correct included Tax
 						    }
 						    costs = costs.multiply(line.getQty());
-	                    }
-	                    else
+						}else if (invoiceLine!=null) { //For Average PO case, if MR with invoice and without PO
+							 	C_Currency_ID = invoiceLine.getC_Invoice().getC_Currency_ID();
+							    //
+							    
+							 	costs = invoiceLine.getPriceActual();
+								//Correct included Tax
+							    int C_Tax_ID = invoiceLine.getC_Tax_ID();
+								if (invoiceLine.isTaxIncluded() && C_Tax_ID != 0)
+								{
+									MTax tax = MTax.get(getCtx(), C_Tax_ID);
+									if (!tax.isZeroTax())
+									{
+										int stdPrecision = MCurrency.getStdPrecision(getCtx(), C_Currency_ID);
+										BigDecimal costTax = tax.calculateTax(costs, true, stdPrecision);
+										if (log.isLoggable(Level.FINE)) log.fine("Costs=" + costs + " - Tax=" + costTax);
+										costs = costs.subtract(costTax);
+									}
+								}	//	correct included Tax
+							    costs = costs.multiply(line.getQty());
+							 
+							    if(line.getM_Product_ID()!=0) {
+							    	for(MCostElement ce:MCostElement.getCostingMethods(invoiceLine)) {
+								    	if(MCostElement.COSTINGMETHOD_AveragePO.equals(ce.getCostingMethod())) {
+								    		if(!MCostDetail.createShipment
+								    				(as, line.getAD_Org_ID(), line.getM_Product_ID(),
+								    				line.getM_AttributeSetInstance_ID(), inoutLine.getM_InOutLine_ID(), ce.getM_CostElement_ID(), 
+								    				costs, line.getQty(), line.getDescription(),false,getTrxName()));
+								    	}
+							    	}
+							    }
+	                    }else
 	                    {	                    	
 	                    	p_Error = Msg.getMsg(getCtx(),"Resubmit - No Costs for") + " " + product.getName() + Msg.getMsg(getCtx()," (required order line)");
 	                        log.log(Level.WARNING, p_Error);

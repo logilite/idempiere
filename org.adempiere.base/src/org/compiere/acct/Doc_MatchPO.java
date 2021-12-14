@@ -599,7 +599,7 @@ public class Doc_MatchPO extends Doc
 					getM_Product_ID(), mMatchPO.getM_AttributeSetInstance_ID(),
 					m_oLine.getC_OrderLine_ID(), 0,		//	no cost element
 					tAmt, tQty,			//	Delivered
-					m_oLine.getDescription(), getTrxName()))
+					m_oLine.getDescription(),mMatchPO.getM_InOutLine_ID() ,getTrxName()))
 			{
 				return "SaveError";
 			}

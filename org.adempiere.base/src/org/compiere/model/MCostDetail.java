@@ -78,7 +78,14 @@ public class MCostDetail extends X_M_CostDetail
 		int M_Product_ID, int M_AttributeSetInstance_ID,
 		int C_OrderLine_ID, int M_CostElement_ID, 
 		BigDecimal Amt, BigDecimal Qty,
-		String Description, String trxName)
+			String Description, String trxName) {
+		return createOrder(as, AD_Org_ID, M_Product_ID, M_AttributeSetInstance_ID, C_OrderLine_ID, M_CostElement_ID, Amt, Qty, Description,0, trxName);
+	}
+	public static boolean createOrder (MAcctSchema as, int AD_Org_ID, 
+		int M_Product_ID, int M_AttributeSetInstance_ID,
+		int C_OrderLine_ID, int M_CostElement_ID, 
+		BigDecimal Amt, BigDecimal Qty,
+		String Description,int M_InOutLine_ID,String trxName)
 	{
 		MCostDetail cd = get (as.getCtx(), "C_OrderLine_ID=? AND Coalesce(M_CostElement_ID,0)="+M_CostElement_ID, 
 			C_OrderLine_ID, M_AttributeSetInstance_ID, as.getC_AcctSchema_ID(), trxName);
@@ -90,6 +97,8 @@ public class MCostDetail extends X_M_CostDetail
 				M_CostElement_ID, 
 				Amt, Qty, Description, trxName);
 			cd.setC_OrderLine_ID (C_OrderLine_ID);
+			if(M_InOutLine_ID>0)
+				cd.setM_InOutLine_ID(M_InOutLine_ID);
 		}
 		else
 		{
@@ -143,9 +152,9 @@ public class MCostDetail extends X_M_CostDetail
 	 *	@return true if created
 	 */
 	public static boolean createInvoice (MAcctSchema as, int AD_Org_ID, 
-		int M_Product_ID, int M_AttributeSetInstance_ID,
-		int C_InvoiceLine_ID, int M_CostElement_ID, 
-		BigDecimal Amt, BigDecimal Qty,
+			int M_Product_ID, int M_AttributeSetInstance_ID,
+			int C_InvoiceLine_ID, int M_CostElement_ID,
+			BigDecimal Amt, BigDecimal Qty,
 		String Description, String trxName)
 	{
 		MCostDetail cd = get (as.getCtx(), "C_InvoiceLine_ID=? AND Coalesce(M_CostElement_ID,0)="+M_CostElement_ID+" AND M_Product_ID="+M_Product_ID, 
@@ -1066,8 +1075,14 @@ public class MCostDetail extends X_M_CostDetail
 		if (getC_OrderLine_ID() != 0)
 		{		
 			boolean isReturnTrx = qty.signum() < 0;
-			
-			if (ce.isAveragePO())
+			boolean isPOFirst = true;
+			if(getM_InOutLine_ID()!=0) {
+				MCostDetail cd=MCostDetail.get(getCtx(), "M_InOutLine_ID = ?",getM_InOutLine_ID() ,getM_AttributeSetInstance_ID(),as.getC_AcctSchema_ID() ,get_TrxName());
+				if(cd!=null && cd.getCreated().before(this.getCreated())) {
+					isPOFirst = false;
+				}
+			}
+			if (ce.isAveragePO() && isPOFirst)
 			{
 				cost.setWeightedAverage(amt, qty);
 				if (log.isLoggable(Level.FINER)) log.finer("PO - AveragePO - " + cost);
@@ -1195,6 +1210,18 @@ public class MCostDetail extends X_M_CostDetail
 			{
 				cost.setWeightedAverage(amt, qty);
 			}
+		} 
+		else if (getM_InOutLine_ID() != 0 && !isSOTrx())
+		{
+			//NO PO Posted
+			MCostDetail cd=MCostDetail.get(getCtx(), "M_InOutLine_ID = ? AND C_OrderLine_ID > 0",getM_InOutLine_ID() ,getM_AttributeSetInstance_ID(),as.getC_AcctSchema_ID() ,get_TrxName());
+			boolean isPOFirst = false;
+			if(cd!=null && cd.getCreated().before(this.getCreated())) {
+				isPOFirst = true;
+			}
+			// MR without PO 
+			if(!isPOFirst ) 
+				cost.setWeightedAverage(amt, qty);
 		}
 		//	*** Qty Adjustment Detail Record ***
 		else if (getM_InOutLine_ID() != 0 		//	AR Shipment Detail Record  
