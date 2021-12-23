@@ -192,7 +192,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		lstRegion.appendItem("", null);
 		for (MRegion region : MRegion.getRegions(Env.getCtx(), m_origCountry_ID))
 		{
-			lstRegion.appendItem(region.getName(),region);
+			lstRegion.appendItem(region.toString(),region);
 		}
 		if (m_location.getCountry().isHasRegion()) {
 			if (m_location.getCountry().get_Translation(MCountry.COLUMNNAME_RegionName) != null
@@ -543,7 +543,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 				lstRegion.appendItem("", null);
 				for (MRegion region : MRegion.getRegions(Env.getCtx(), country.getC_Country_ID()))
 				{
-					lstRegion.appendItem(region.getName(),region);
+					lstRegion.appendItem(region.toString(),region);
 				}
 				if (m_location.getCountry().get_Translation(MCountry.COLUMNNAME_RegionName) != null
 						&& m_location.getCountry().get_Translation(MCountry.COLUMNNAME_RegionName).trim().length() > 0)
