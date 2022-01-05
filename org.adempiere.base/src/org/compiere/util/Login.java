@@ -31,6 +31,7 @@ import java.util.logging.Level;
 
 import javax.swing.JOptionPane;
 
+import org.adempiere.exceptions.DBException;
 import org.adempiere.base.Core;
 import org.adempiere.base.ILogin;
 import org.compiere.Adempiere;
@@ -39,6 +40,8 @@ import org.compiere.model.I_M_Warehouse;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MClientInfo;
 import org.compiere.model.MCountry;
+import org.compiere.model.MMFARegisteredDevice;
+import org.compiere.model.MMFARegistration;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MSystem;
@@ -57,10 +60,10 @@ import org.compiere.model.Query;
  *  @author Jorg Janke
  *  @author victor.perez@e-evolution.com, e-Evolution http://www.e-evolution.com
  *		<li>Incorrect global Variable when you use multi Account Schema
- *			http://sourceforge.net/tracker/?func=detail&atid=879335&aid=2531597&group_id=176962
+ *			https://sourceforge.net/p/adempiere/bugs/1713/
  *  @author teo.sarca@gmail.com
  *  	<li>BF [ 2867246 ] Do not show InTrazit WHs on login
- *  		https://sourceforge.net/tracker/?func=detail&aid=2867246&group_id=176962&atid=879332
+ *  		https://sourceforge.net/p/adempiere/bugs/2136/
  *  @version $Id: Login.java,v 1.6 2006/10/02 05:19:06 jjanke Exp $
  */
 public class Login implements ILogin
@@ -110,7 +113,7 @@ public class Login implements ILogin
 			}
 		}
 		//
-		Env.setContext(ctx, "#Date", "2000-01-01");
+		Env.setContext(ctx, Env.DATE, "2000-01-01");
 	//	logger.exiting("Env", "initTest");
 		return ctx;
 	}   //  testInit
@@ -313,7 +316,7 @@ public class Login implements ILogin
 			}
 		} 
 		else{
-			StringBuffer sql = new StringBuffer("SELECT AD_User.AD_User_ID ").append(" FROM AD_User ");
+			StringBuilder sql = new StringBuilder("SELECT AD_User.AD_User_ID ").append(" FROM AD_User ");
 			sql.append(" WHERE ").append(userNameCol).append("=?");
 			sql.append(" AND AD_User.IsActive='Y'").append(" AND EXISTS (SELECT * FROM AD_Client c WHERE AD_User.AD_Client_ID=c.AD_Client_ID AND c.IsActive='Y')");
 
@@ -348,7 +351,7 @@ public class Login implements ILogin
 		}
 
 		if(authenticated){	
-			StringBuffer sql = new StringBuffer("SELECT AD_User.AD_User_ID, r.AD_Role_ID,r.Name")
+			StringBuilder sql = new StringBuilder("SELECT AD_User.AD_User_ID, r.AD_Role_ID,r.Name")
 			.append(" FROM AD_User ")
 			.append(" INNER JOIN AD_User_Roles ur ON (AD_User.AD_User_ID=ur.AD_User_ID AND ur.IsActive='Y')")
 			.append(" INNER JOIN AD_Role r ON (ur.AD_Role_ID=r.AD_Role_ID AND r.IsActive='Y') ");
@@ -372,10 +375,10 @@ public class Login implements ILogin
 				if (!rs.next())		//	no record found
 					if (force)
 					{
-						Env.setContext(m_ctx, "#AD_User_Name", "System");
-						Env.setContext(m_ctx, "#AD_User_ID", "0");
+						Env.setContext(m_ctx, Env.AD_USER_NAME, "System");
+						Env.setContext(m_ctx, Env.AD_USER_ID, "0");
 						Env.setContext(m_ctx, "#AD_User_Description", "System Forced Login");
-						Env.setContext(m_ctx, "#User_Level", "S  ");  	//	Format 'SCO'
+						Env.setContext(m_ctx, Env.USER_LEVEL, "S  ");  	//	Format 'SCO'
 						Env.setContext(m_ctx, "#User_Client", "0");		//	Format c1, c2, ...
 						Env.setContext(m_ctx, "#User_Org", "0"); 		//	Format o1, o2, ...
 						retValue = new KeyNamePair[] {new KeyNamePair(0, "System Administrator")};
@@ -387,9 +390,9 @@ public class Login implements ILogin
 						return null;
 					}
 
-				Env.setContext(m_ctx, "#AD_User_Name", app_user);
-				Env.setContext(m_ctx, "#AD_User_ID", rs.getInt(1));
-				Env.setContext(m_ctx, "#SalesRep_ID", rs.getInt(1));
+				Env.setContext(m_ctx, Env.AD_USER_NAME, app_user);
+				Env.setContext(m_ctx, Env.AD_USER_ID, rs.getInt(1));
+				Env.setContext(m_ctx, Env.SALESREP_ID, rs.getInt(1));
 
 				if (Ini.isClient())
 				{
@@ -488,11 +491,11 @@ public class Login implements ILogin
 			}
 
 			//  Role Info
-			Env.setContext(m_ctx, "#AD_Role_ID", role.getKey());
-			Env.setContext(m_ctx, "#AD_Role_Name", role.getName());
+			Env.setContext(m_ctx, Env.AD_ROLE_ID, role.getKey());
+			Env.setContext(m_ctx, Env.AD_ROLE_NAME, role.getName());
 			Ini.setProperty(Ini.P_ROLE, role.getName());
 			//	User Level
-			Env.setContext(m_ctx, "#User_Level", rs.getString(1));  	//	Format 'SCO'
+			Env.setContext(m_ctx, Env.USER_LEVEL, rs.getString(1));  	//	Format 'SCO'
 			
 			//  load Clients
 			do
@@ -525,18 +528,18 @@ public class Login implements ILogin
 	 *  Load Organizations.
 	 *  <p>
 	 *  Sets Client info in context and loads its organization, the role has access to
-	 *  @param  client    client information
+	 *  @param  rol
 	 *  @return list of valid Org KeyNodePairs or null if in error
 	 */
 	public KeyNamePair[] getOrgs (KeyNamePair rol)
 	{
 		if (rol == null)
 			throw new IllegalArgumentException("Rol missing");
-		if (Env.getContext(m_ctx,"#AD_Client_ID").length() == 0)	//	could be number 0
+		if (Env.getContext(m_ctx,Env.AD_CLIENT_ID).length() == 0)	//	could be number 0
 			throw new UnsupportedOperationException("Missing Context #AD_Client_ID");
 		
-		int AD_Client_ID = Env.getContextAsInt(m_ctx,"#AD_Client_ID");
-		int AD_User_ID = Env.getContextAsInt(m_ctx, "#AD_User_ID");
+		int AD_Client_ID = Env.getContextAsInt(m_ctx,Env.AD_CLIENT_ID);
+		int AD_User_ID = Env.getContextAsInt(m_ctx, Env.AD_USER_ID);
 	//	s_log.fine("Client: " + client.toStringX() + ", AD_Role_ID=" + AD_Role_ID);
 
 		//	get Client details for role
@@ -574,11 +577,11 @@ public class Login implements ILogin
 				return null;
 			}
 			//  Role Info
-			Env.setContext(m_ctx, "#AD_Role_ID", rol.getKey());
-			Env.setContext(m_ctx, "#AD_Role_Name", rol.getName());
+			Env.setContext(m_ctx, Env.AD_ROLE_ID, rol.getKey());
+			Env.setContext(m_ctx, Env.AD_ROLE_NAME, rol.getName());
 			Ini.setProperty(Ini.P_ROLE, rol.getName());
 			//	User Level
-			Env.setContext(m_ctx, "#User_Level", rs.getString(1));  	//	Format 'SCO'
+			Env.setContext(m_ctx, Env.USER_LEVEL, rs.getString(1));  	//	Format 'SCO'
 			//  load Orgs
 			
 			do{
@@ -833,7 +836,7 @@ public class Login implements ILogin
 		long today = System.currentTimeMillis();
 		if (timestamp != null)
 			today = timestamp.getTime();
-		Env.setContext(m_ctx, "#Date", new java.sql.Timestamp(today));
+		Env.setContext(m_ctx, Env.DATE, new java.sql.Timestamp(today));
 
 		//	Optional Printer
 		if (printerName == null)
@@ -842,25 +845,25 @@ public class Login implements ILogin
 		Ini.setProperty(Ini.P_PRINTER, printerName);
 		
 		//	Load Role Info
-		MRole.getDefault(m_ctx, true);	
+		MRole.getDefault(m_ctx, false);	
 
 		//	Other
 		loadUserPreferences();
 		
 		if (MRole.getDefault(m_ctx, false).isShowAcct())
-			Env.setContext(m_ctx, "#ShowAcct", Ini.getProperty(Ini.P_SHOW_ACCT));
+			Env.setContext(m_ctx, Env.SHOW_ACCOUNTING, Ini.getProperty(Ini.P_SHOW_ACCT));
 		else
-			Env.setContext(m_ctx, "#ShowAcct", "N");
-		Env.setContext(m_ctx, "#ShowTrl", Ini.getProperty(Ini.P_SHOW_TRL));
-		Env.setContext(m_ctx, "#ShowAdvanced", MRole.getDefault().isAccessAdvanced());
+			Env.setContext(m_ctx, Env.SHOW_ACCOUNTING, "N");
+		Env.setContext(m_ctx, Env.SHOW_TRANSLATION, Ini.getProperty(Ini.P_SHOW_TRL));
+		Env.setContext(m_ctx, Env.SHOW_ADVANCED, MRole.getDefault().isAccessAdvanced());
 
 		String retValue = "";
-		int AD_Client_ID = Env.getContextAsInt(m_ctx, "#AD_Client_ID");
+		int AD_Client_ID = Env.getContextAsInt(m_ctx, Env.AD_CLIENT_ID);
 		int AD_Org_ID =  org.getKey();
 
 		//	Other Settings
 		Env.setContext(m_ctx, "#YYYY", "Y");
-		Env.setContext(m_ctx, "#StdPrecision", 2);
+		Env.setContext(m_ctx, Env.STANDARD_PRECISION, 2);
 
 		//	AccountSchema Info (first)
 		String sql = "SELECT * "
@@ -888,9 +891,9 @@ public class Login implements ILogin
 			{
 				//	Accounting Info
 				C_AcctSchema_ID = rs.getInt("C_AcctSchema_ID");
-				Env.setContext(m_ctx, "$C_AcctSchema_ID", C_AcctSchema_ID);
-				Env.setContext(m_ctx, "$C_Currency_ID", rs.getInt("C_Currency_ID"));
-				Env.setContext(m_ctx, "$HasAlias", rs.getString("HasAlias"));
+				Env.setContext(m_ctx, Env.C_ACCTSCHEMA_ID, C_AcctSchema_ID);
+				Env.setContext(m_ctx, Env.C_CURRENCY_ID, rs.getInt("C_Currency_ID"));
+				Env.setContext(m_ctx, Env.HAS_ALIAS, rs.getString("HasAlias"));
 			}
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
@@ -911,9 +914,9 @@ public class Login implements ILogin
 						else 
 						{
 							C_AcctSchema_ID = as.getC_AcctSchema_ID();
-							Env.setContext(m_ctx, "$C_AcctSchema_ID", C_AcctSchema_ID);
-							Env.setContext(m_ctx, "$C_Currency_ID", as.getC_Currency_ID());
-							Env.setContext(m_ctx, "$HasAlias", as.isHasAlias());
+							Env.setContext(m_ctx, Env.C_ACCTSCHEMA_ID, C_AcctSchema_ID);
+							Env.setContext(m_ctx, Env.C_CURRENCY_ID, as.getC_Currency_ID());
+							Env.setContext(m_ctx, Env.HAS_ALIAS, as.isHasAlias());
 							break;
 						}
 					}
@@ -1002,7 +1005,7 @@ public class Login implements ILogin
 			rs = null; pstmt = null;
 		}
 		//	Country
-		Env.setContext(m_ctx, "#C_Country_ID", MCountry.getDefault(m_ctx).getC_Country_ID());
+		Env.setContext(m_ctx, Env.C_COUNTRY_ID, MCountry.getDefault().getC_Country_ID());
 		// Call ModelValidators afterLoadPreferences - teo_sarca FR [ 1670025 ]
 		if (Util.isEmpty(retValue, true))
 			return ModelValidationEngine.get().afterLoadPreferences(m_ctx);
@@ -1027,32 +1030,25 @@ public class Login implements ILogin
 		if (TableName.startsWith("AD_Window")
 			|| TableName.startsWith("AD_PrintFormat")
 			|| TableName.startsWith("AD_Workflow")
+			|| TableName.equals("AD_StorageProvider")
 			|| TableName.startsWith("M_Locator") )
 			return;
 		String value = null;
 		//
-		String sql = "SELECT " + ColumnName + " FROM " + TableName	//	most specific first
-			+ " WHERE IsDefault='Y' AND IsActive='Y' ORDER BY AD_Client_ID DESC, AD_Org_ID DESC";
-		sql = MRole.getDefault(m_ctx, false).addAccessSQL(sql, 
+		StringBuilder sqlb = new StringBuilder("SELECT ")
+			.append(ColumnName).append(" FROM ").append(TableName)	//	most specific first
+			.append(" WHERE IsDefault='Y' AND IsActive='Y' ORDER BY AD_Client_ID DESC, AD_Org_ID DESC, ")
+			.append(ColumnName);
+		String sql = MRole.getDefault(m_ctx, false).addAccessSQL(sqlb.toString(), 
 			TableName, MRole.SQL_NOTQUALIFIED, MRole.SQL_RO);
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
 		try
 		{
-			pstmt = DB.prepareStatement(sql, null);
-			rs = pstmt.executeQuery();
-			if (rs.next())
-				value = rs.getString(1);
+			value = DB.getSQLValueString(value, sql);
 		}
-		catch (SQLException e)
+		catch (DBException e)
 		{
 			log.log(Level.SEVERE, TableName + " (" + sql + ")", e);
 			return;
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
 		}
 		//	Set Context Value
 		if (value != null && value.length() != 0)
@@ -1324,7 +1320,6 @@ public class Login implements ILogin
 		} finally {
 			PO.clearCrossTenantSafe();
 		}
-
 		
 		if (users.size() == 0) {
 			log.saveError("UserPwdError", app_user, false);
@@ -1354,7 +1349,7 @@ public class Login implements ILogin
 						user.setIsLocked(false);
 						user.setDateAccountLocked(null);
 						user.setFailedLoginCount(0);
-						Env.setContext(Env.getCtx(), "#AD_Client_ID", user.getAD_Client_ID());
+						Env.setContext(Env.getCtx(), Env.AD_CLIENT_ID, user.getAD_Client_ID());
 						if (!user.save())
 							log.severe("Failed to unlock user account");
 					}
@@ -1368,7 +1363,7 @@ public class Login implements ILogin
 				{
 					user.setIsLocked(true);
 					user.setDateAccountLocked(new Timestamp(now));
-					Env.setContext(Env.getCtx(), "#AD_Client_ID", user.getAD_Client_ID());
+					Env.setContext(Env.getCtx(), Env.AD_CLIENT_ID, user.getAD_Client_ID());
 					if (!user.save())
 						log.severe("Failed to lock user account");
 				}
@@ -1477,7 +1472,7 @@ public class Login implements ILogin
 			{
 				user.setFailedLoginCount(0);
 				user.setDateLastLogin(new Timestamp(now));
-				Env.setContext(Env.getCtx(), "#AD_Client_ID", user.getAD_Client_ID());
+				Env.setContext(Env.getCtx(), Env.AD_CLIENT_ID, user.getAD_Client_ID());
 				if (!user.save())
 					log.severe("Failed to update user record with date last login (" + user.getName() + " / clientID = " + user.getAD_Client_ID() + ")");
 			}
@@ -1527,7 +1522,7 @@ public class Login implements ILogin
 				user.setFailedLoginCount(count);
 				user.setIsLocked(reachMaxAttempt);
 				user.setDateAccountLocked(user.isLocked() ? new Timestamp(now) : null);
-				Env.setContext(Env.getCtx(), "#AD_Client_ID", user.getAD_Client_ID());
+				Env.setContext(Env.getCtx(), Env.AD_CLIENT_ID, user.getAD_Client_ID());
 				if (!user.save())
 					log.severe("Failed to update user record with increase failed login count");
 			}
@@ -1560,7 +1555,7 @@ public class Login implements ILogin
 		String whereRoleType = MRole.getWhereRoleType(roleTypes, "r");
 		ArrayList<KeyNamePair> rolesList = new ArrayList<KeyNamePair>();
 		KeyNamePair[] retValue = null;
-		StringBuffer sql = new StringBuffer("SELECT u.AD_User_ID, r.AD_Role_ID,r.Name ")
+		StringBuilder sql = new StringBuilder("SELECT u.AD_User_ID, r.AD_Role_ID,r.Name ")
 			.append("FROM AD_User u")
 			.append(" INNER JOIN AD_User_Roles ur ON (u.AD_User_ID=ur.AD_User_ID AND ur.IsActive='Y')")
 			.append(" INNER JOIN AD_Role r ON (ur.AD_Role_ID=r.AD_Role_ID AND r.IsActive='Y') ");
@@ -1625,22 +1620,22 @@ public class Login implements ILogin
 			rs = null; pstmt = null;
 		}
 		 //Client Info
-		Env.setContext(m_ctx, "#AD_Client_ID", client.getKey());
-		Env.setContext(m_ctx, "#AD_Client_Name", client.getName());
+		Env.setContext(m_ctx, Env.AD_CLIENT_ID, client.getKey());
+		Env.setContext(m_ctx, Env.AD_CLIENT_NAME, client.getName());
 		Ini.setProperty(Ini.P_CLIENT, client.getName());
 		return retValue;
 	}   //  getRoles
 	
     public KeyNamePair[] getClients() {
 		
-		if (Env.getContext(m_ctx,"#AD_User_ID").length() == 0){
+		if (Env.getContext(m_ctx,Env.AD_USER_ID).length() == 0){
 			throw new UnsupportedOperationException("Missing Context #AD_User_ID");
 		}
 		
 		loginErrMsg = null;
 		isPasswordExpired = false;
 		
-		int AD_User_ID = Env.getContextAsInt(m_ctx, "#AD_User_ID");
+		int AD_User_ID = Env.getContextAsInt(m_ctx, Env.AD_USER_ID);
 		KeyNamePair[] retValue = null;
 		ArrayList<KeyNamePair> clientList = new ArrayList<KeyNamePair>();
 		StringBuilder sql= new StringBuilder("SELECT  DISTINCT cli.AD_Client_ID, cli.Name, u.AD_User_ID, u.Name");
@@ -1676,5 +1671,18 @@ public class Login implements ILogin
 		}
 		return retValue;		
 	}
-	
+
+	/**
+	 * Validate if MFA is required taking into account the registerCookie and the IPAddress
+	 * @param registerCookie
+	 * @return
+	 */
+	public boolean isMFARequired(String registerCookie) {
+		if (registerCookie != null && MMFARegisteredDevice.isValid(registerCookie))
+			return false;
+		if (MMFARegistration.userHasValidRegistration())
+			return true;
+		return false;
+	}
+
 }	//	Login

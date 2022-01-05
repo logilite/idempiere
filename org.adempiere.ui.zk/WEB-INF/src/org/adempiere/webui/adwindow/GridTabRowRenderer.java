@@ -30,6 +30,7 @@ import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.component.NumberBox;
 import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Urlbox;
+import org.adempiere.webui.editor.IEditorConfiguration;
 import org.adempiere.webui.editor.WButtonEditor;
 import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.editor.WEditorPopupMenu;
@@ -78,7 +79,7 @@ import org.zkoss.zul.impl.XulElement;
  * 
  * @author Teo Sarca, teo.sarca@gmail.com
  * 		<li>BF [ 2996608 ] GridPanel is not displaying time
- * 			https://sourceforge.net/tracker/?func=detail&aid=2996608&group_id=176962&atid=955896
+ * 			https://sourceforge.net/p/adempiere/zk-web-client/420/
  */
 public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt, RendererCtrl, EventListener<Event> {
 
@@ -115,6 +116,18 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 	/** DefaultFocusField		*/
 	private WEditor	defaultFocusField = null;
 
+	private final static IEditorConfiguration readOnlyEditorConfiguration = new IEditorConfiguration() {
+		@Override
+		public Boolean getReadonly() {
+			return Boolean.TRUE;
+		}
+
+		@Override
+		public Boolean getMandatory() {
+			return Boolean.FALSE;
+		}
+	};
+	
 	/**
 	 *
 	 * @param gridTab
@@ -189,13 +202,31 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 	}
 
 	/**
+	 * Check existence of readonly editor and return display text
+	 * @param value
+	 * @param gridField
+	 * @param rowIndex
+	 * @return display text
+	 */
+	protected String getDisplayTextWithEditorCheck(Object value, GridField gridField, int rowIndex) {
+		WEditor readOnlyEditor = readOnlyEditors.get(gridField);
+		if (readOnlyEditor == null) {
+			readOnlyEditor = WebEditorFactory.getEditor(gridField, true, readOnlyEditorConfiguration);
+			if (readOnlyEditor != null) {
+				readOnlyEditors.put(gridField, readOnlyEditor);
+			}
+		}
+		return getDisplayText(value, gridField, rowIndex);
+	}
+	
+	/**
 	 * call {@link #getDisplayText(Object, GridField, int, boolean)} with isForceGetValue = false
 	 * @param value
 	 * @param gridField
 	 * @param rowIndex
-	 * @return
+	 * @return display text
 	 */
-	private String getDisplayText(Object value, GridField gridField, int rowIndex){
+	public String getDisplayText(Object value, GridField gridField, int rowIndex){
 		return getDisplayText(value, gridField, rowIndex, false);
 	}
 	
@@ -205,7 +236,7 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 	 * @param gridField
 	 * @param rowIndex
 	 * @param isForceGetValue
-	 * @return
+	 * @return display text
 	 */
 	private String getDisplayText(Object value, GridField gridField, int rowIndex, boolean isForceGetValue)
 	{
@@ -428,7 +459,7 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 	/**
 	 * @param row
 	 * @param data
-	 * @see RowRenderer#render(Row, Object)
+	 * @param index
 	 */
 	@Override
 	public void render(Row row, Object[] data, int index) throws Exception {
@@ -446,7 +477,8 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 				columnCount = gridPanelFields.length;
 				gridTabFields = gridTab.getFields();
 				isGridViewCustomized = gridTabFields.length != gridPanelFields.length;
-			}	
+			}
+			gridPanel.autoHideEmptyColumns();
 		}
 		
 		if (grid == null)
@@ -535,9 +567,8 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 				}
 				
 				//readonly for display text
-				WEditor readOnlyEditor = WebEditorFactory.getEditor(gridPanelFields[i], true);
+				WEditor readOnlyEditor = WebEditorFactory.getEditor(gridPanelFields[i], true, readOnlyEditorConfiguration);
 				if (readOnlyEditor != null) {
-					readOnlyEditor.setReadWrite(false);
 					readOnlyEditors.put(gridPanelFields[i], readOnlyEditor);
 				}
 				
@@ -627,6 +658,8 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 			grid.invalidate();
 		}
 
+		if (MSysConfig.getBooleanValue(MSysConfig.ZK_GRID_VIEW_USE_DEFER_RENDERING, false, Env.getAD_Client_ID(Env.getCtx())))
+			row.setRenderdefer(1);
 		// IDEMPIERE-4165 After adding a new row to the list (New or copy)
 		// repaint the grid when rendering the last row
 		if (gridTab.isNew() && rowIndex == grid.getRows().getChildren().size() - 1)
@@ -745,8 +778,10 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 		            {
 		            	popupMenu.addMenuListener((ContextMenuListener)editor);
 		            	div.appendChild(popupMenu);
-		            	popupMenu.addContextElement((XulElement) editor.getComponent());
-		            }		            
+		            	Component editorComponent = editor.getComponent();
+		            	if (editorComponent instanceof XulElement)
+		            		popupMenu.addContextElement((XulElement) editorComponent);		            	
+		            }		  
 		            
 		            
 		            Properties ctx = isDetailPane() ? new GridRowCtx(Env.getCtx(), gridTab) 

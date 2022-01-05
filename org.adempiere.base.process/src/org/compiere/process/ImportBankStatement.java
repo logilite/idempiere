@@ -35,6 +35,7 @@ import org.compiere.util.Env;
  *	author Eldir Tomassen
  *	@version $Id: ImportBankStatement.java,v 1.2 2006/07/30 00:51:01 jjanke Exp $
  */
+@org.adempiere.base.annotation.Process
 public class ImportBankStatement extends SvrProcess
 {
 	/**	Client to be imported to		*/
@@ -93,7 +94,7 @@ public class ImportBankStatement extends SvrProcess
 		//	Delete Old Imported
 		if (p_deleteOldImported)
 		{
-			sql = new StringBuilder ("DELETE I_BankStatement ")
+			sql = new StringBuilder ("DELETE FROM I_BankStatement ")
 				  .append("WHERE I_IsImported='Y'").append (clientCheck);
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
@@ -101,12 +102,12 @@ public class ImportBankStatement extends SvrProcess
 
 		//	Set Client, Org, IsActive, Created/Updated
 		sql = new StringBuilder ("UPDATE I_BankStatement ")
-			  .append("SET AD_Client_ID = COALESCE (AD_Client_ID,").append (p_AD_Client_ID).append ("),")
-			  .append(" AD_Org_ID = COALESCE (AD_Org_ID,").append (p_AD_Org_ID).append ("),");
+			  .append("SET AD_Client_ID = CASE WHEN COALESCE(AD_Client_ID,0) = 0 THEN ").append (p_AD_Client_ID).append (" ELSE AD_Client_ID END,")
+			  .append(" AD_Org_ID = CASE WHEN COALESCE(AD_Org_ID,0) = 0 THEN ").append (p_AD_Org_ID).append (" ELSE AD_Org_ID END,");
 		sql.append(" IsActive = COALESCE (IsActive, 'Y'),")
-			  .append(" Created = COALESCE (Created, SysDate),")
+			  .append(" Created = COALESCE (Created, getDate()),")
 			  .append(" CreatedBy = COALESCE (CreatedBy, 0),")
-			  .append(" Updated = COALESCE (Updated, SysDate),")
+			  .append(" Updated = COALESCE (Updated, getDate()),")
 			  .append(" UpdatedBy = COALESCE (UpdatedBy, 0),")
 			  .append(" I_ErrorMsg = ' ',")
 			  .append(" I_IsImported = 'N' ")
@@ -459,12 +460,9 @@ public class ImportBankStatement extends SvrProcess
 				MBankStatementLine line = new MBankStatementLine(statement, lineNo);
 				
 				//	Copy statement line data
-				//line.setC_BPartner_ID(imp.getC_BPartner_ID());
-				//line.setC_Invoice_ID(imp.getC_Invoice_ID());
 				line.setReferenceNo(imp.getReferenceNo());
 				line.setDescription(imp.getLineDescription());
 				line.setStatementLineDate(imp.getStatementLineDate());
-				// line.setDateAcct(imp.getStatementLineDate()); // set on beforeSave
 				line.setValutaDate(imp.getValutaDate());
 				line.setIsReversal(imp.isReversal());
 				line.setC_Currency_ID(imp.getC_Currency_ID());
@@ -523,7 +521,7 @@ public class ImportBankStatement extends SvrProcess
 		
 		//	Set Error to indicator to not imported
 		sql = new StringBuilder ("UPDATE I_BankStatement ")
-			.append("SET I_IsImported='N', Updated=SysDate ")
+			.append("SET I_IsImported='N', Updated=getDate() ")
 			.append("WHERE I_IsImported<>'Y'").append(clientCheck);
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		addLog (0, null, new BigDecimal (no), "@Errors@");

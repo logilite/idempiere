@@ -127,6 +127,9 @@ public class LoginPanel extends Window implements EventListener<Event>
     protected ConfirmPanel pnlButtons; 
     protected boolean email_login = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
     protected String validLstLanguage = null;
+
+	/* Number of failures to calculate an incremental delay on every trial */
+	private int failures = 0;
     
     public LoginPanel(Properties ctx, LoginWindow loginWindow)
     {
@@ -596,6 +599,11 @@ public class LoginPanel extends Window implements EventListener<Event>
             }
         	logAuthFailure.log(x_Forward_IP, "/webui", userId, loginErrMsg);
 
+			// Incremental delay to avoid brute-force attack on testing codes
+			try {
+				Thread.sleep(failures * 2000);
+			} catch (InterruptedException e) {}
+			failures++;
         	Clients.clearBusy();
        		throw new WrongValueException(loginErrMsg);
         }
@@ -630,7 +638,7 @@ public class LoginPanel extends Window implements EventListener<Event>
 
 		// This temporary validation code is added to check the reported bug
 		// [ adempiere-ZK Web Client-2832968 ] User context lost?
-		// https://sourceforge.net/tracker/?func=detail&atid=955896&aid=2832968&group_id=176962
+		// https://sourceforge.net/p/adempiere/zk-web-client/303/
 		// it's harmless, if there is no bug then this must never fail        
         currSess.setAttribute("Check_AD_User_ID", Env.getAD_User_ID(ctx));
 		// End of temporary code for [ adempiere-ZK Web Client-2832968 ] User context lost?
@@ -682,17 +690,18 @@ public class LoginPanel extends Window implements EventListener<Event>
 				.append(" AD_User.IsActive='Y'")
 				.append(" AND AD_User.SecurityQuestion IS NOT NULL")
 				.append(" AND AD_User.Answer IS NOT NULL");
-		
+
 		List<MUser> users;
-		try{
+		try {
 			PO.setCrossTenantSafe();
 			users = new Query(ctx, MUser.Table_Name, whereClause.toString(), null)
 					.setParameters(userId)
 					.setOrderBy(MUser.COLUMNNAME_AD_User_ID)
 					.list();
-		}finally {
+		} finally {
 			PO.clearCrossTenantSafe();
 		}
+
 		wndLogin.resetPassword(userId, users.size() == 0);
 	}
 

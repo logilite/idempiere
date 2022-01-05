@@ -74,6 +74,7 @@ import org.zkoss.zul.Separator;
 import org.zkoss.zul.Vbox;
 
 
+@org.idempiere.ui.zk.annotation.Form
 public class WReportCustomization  implements IFormController,EventListener<Event> {
 	
 	protected CustomForm form = new CustomForm();	
@@ -285,6 +286,7 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 		btnSave = new Button();
 		btnSave.setName("btnSave");
 		btnSave.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Save")));
+		//devCoffee #6142
 		if (ThemeManager.isUseFontIconForImage())
 			btnSave.setIconSclass("z-icon-Save");
 		else
@@ -300,6 +302,7 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 
 		if (m_isCanExport)
 		{
+			//devCoffee #6142
 			if (ThemeManager.isUseFontIconForImage())
 				bExport.setIconSclass("z-icon-Export");
 			else

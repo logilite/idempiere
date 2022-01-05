@@ -31,7 +31,7 @@ import org.adempiere.webui.adwindow.ADWindow;
 import org.adempiere.webui.adwindow.ADWindowContent;
 import org.adempiere.webui.adwindow.QuickGridTabRowRenderer;
 import org.adempiere.webui.apps.AEnv;
-import org.adempiere.webui.component.Searchbox;
+import org.adempiere.webui.component.ComboEditorBox;
 import org.adempiere.webui.event.ContextMenuEvent;
 import org.adempiere.webui.event.ContextMenuListener;
 import org.adempiere.webui.event.DialogEvents;
@@ -68,6 +68,7 @@ import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.event.InputEvent;
 import org.zkoss.zk.ui.util.Clients;
 
 
@@ -80,25 +81,42 @@ import org.zkoss.zk.ui.util.Clients;
  */
 public class WSearchEditor extends WEditor implements ContextMenuListener, ValueChangeListener, IZoomableEditor
 {
+	private static final int DEFAULT_MAX_AUTO_COMPLETE_ROWS = 500;	
 	private static final String[] LISTENER_EVENTS = {Events.ON_CLICK, Events.ON_CHANGE, Events.ON_OK};
 	public static final String		ATTRIBUTE_IS_INFO_PANEL_OPEN	= "ATTRIBUTE_IS_INFO_PANEL_OPEN";
-	protected Lookup				lookup;
+	protected Lookup 				lookup;
 	protected String				m_tableName						= null;
 	protected String				m_keyColumnName					= null;
 	protected String				columnName;
 	protected Object				value;
 	protected InfoPanel				infoPanel						= null;
 	protected String				imageUrl;
+	private InfoListSubModel listModel = null;
 
 	private static final CLogger log = CLogger.getCLogger(WSearchEditor.class);
 
 	private static final String IN_PROGRESS_IMAGE = "~./zk/img/progress3.gif";
 	
-	protected ADWindow				adwindow;
+	protected ADWindow adwindow;
 
+	/**
+	 * 
+	 * @param gridField
+	 */
 	public WSearchEditor (GridField gridField)
 	{
-		super(new CustomSearchBox(), gridField);
+		this(gridField, false, null);
+	}
+	
+	/**
+	 * 
+	 * @param gridField
+	 * @param tableEditor
+	 * @param editorConfiguration
+	 */
+	public WSearchEditor (GridField gridField, boolean tableEditor, IEditorConfiguration editorConfiguration)
+	{
+		super(new CustomSearchBox(), gridField, tableEditor, editorConfiguration);
 
 		lookup = gridField.getLookup();
 
@@ -111,8 +129,8 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 
 
     @Override
-	public Searchbox getComponent() {
-		return (Searchbox) super.getComponent();
+	public ComboEditorBox getComponent() {
+		return (ComboEditorBox) super.getComponent();
 	}
 
 	@Override
@@ -139,7 +157,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 	 */
 	public WSearchEditor (Lookup lookup, String label, String description, boolean mandatory, boolean readonly, boolean updateable)
 	{
-		super(new Searchbox(), label, description, mandatory, readonly, updateable);
+		super(new CustomSearchBox() , label, description, mandatory, readonly, updateable);
 
 		if (lookup == null)
 		{
@@ -155,7 +173,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 	public WSearchEditor(String columnName, boolean mandatory, boolean readonly, boolean updateable,
     		Lookup lookup)
 	{
-		super(new Searchbox(), null, null, mandatory, readonly, updateable);
+		super(new CustomSearchBox(), null, null, mandatory, readonly, updateable);
 
 		if (lookup == null)
 		{
@@ -215,7 +233,25 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 
 		addChangeLogMenu(popupMenu);
 		if (gridField != null)
-			getComponent().getTextbox().setPlaceholder(gridField.getPlaceholder());
+			getComponent().getCombobox().setPlaceholder(gridField.getPlaceholder());
+		
+		if (gridField != null && gridField.isAutocomplete()) {
+			setTableAndKeyColumn();
+			listModel = new InfoListSubModel(lookup, gridField, m_tableName, m_keyColumnName);
+			int maxRows = MSysConfig.getIntValue(MSysConfig.ZK_SEARCH_AUTO_COMPLETE_MAX_ROWS, DEFAULT_MAX_AUTO_COMPLETE_ROWS, Env.getAD_Client_ID(Env.getCtx()));
+			getComponent().getCombobox().setModel(listModel.getSubModel(null, maxRows));
+			
+			getComponent().getCombobox().addEventListener(Events.ON_CHANGING, (EventListener<InputEvent>)(e) -> {
+				if (!e.isChangingBySelectBack()) {
+					listModel.setWhereClause(getWhereClause());
+					String s = e.getValue();					
+					getComponent().getCombobox().setModel(listModel.getSubModel(s, maxRows));
+				}
+			});
+		} else {
+			getComponent().getCombobox().setAutodrop(false);
+		}
+		
 		return;
 	}
 
@@ -308,11 +344,11 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 			actionText(getComponent().getText());
 		}
 		else if ((Events.ON_OK.equals(e.getName()))) {
-			// Not allow to open info panel if the component text is empty and is belongs to quick form.
+			// Do not allow to open info panel if component text is empty & belongs to quick form.
 			boolean isQuickFormComp = false;
 			if (getComponent().getAttribute(QuickGridTabRowRenderer.IS_QUICK_FORM_COMPONENT) != null)
-				isQuickFormComp = (boolean) getComponent()
-						.getAttribute(QuickGridTabRowRenderer.IS_QUICK_FORM_COMPONENT);
+				isQuickFormComp = (boolean) getComponent().getAttribute(QuickGridTabRowRenderer.IS_QUICK_FORM_COMPONENT);
+			
 			if ((getComponent().getText() == null || getComponent().getText().length() == 0) && !isQuickFormComp)
 			{
 				// open Info window similar to swing client
@@ -460,7 +496,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 		focusNext();
 
 		//safety check: if focus is going no where, focus back to self
-		String uid = getComponent().getTextbox().getUuid();
+		String uid = getComponent().getCombobox().getUuid();
 		String script = "setTimeout(function(){try{var e = zk.Widget.$('#" + uid +
 				"').$n(); if (jq(':focus').size() == 0) e.focus();} catch(error){}}, 100);";
 		Clients.response(new AuScript(script));
@@ -674,12 +710,13 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 						getComponent().setText("");
 						actionCombo(null);
 					}
-					getComponent().getTextbox().focus();
+					getComponent().getCombobox().focus();
 				}
 				else
 				{
 					if (log.isLoggable(Level.CONFIG)) log.config(getColumnName() + " - Result = null (not cancelled)");
-					getComponent().getTextbox().focus();
+					getComponent().getCombobox().focus();
+					getComponent().setAttribute(ATTRIBUTE_IS_INFO_PANEL_OPEN, false);
 				}
 				getComponent().setAttribute(ATTRIBUTE_IS_INFO_PANEL_OPEN, false);
 			}
@@ -859,9 +896,8 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 		}
 		return s;
 	}
-
-
-	static class CustomSearchBox extends Searchbox {
+	
+	static class CustomSearchBox extends ComboEditorBox {
 
 		/**
 		 * generated serial id
@@ -875,10 +911,10 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 				String w = "try{var btn=jq('#'+this.parent.uuid+' @button').zk.$();}catch(err){}";
 				if (ThemeManager.isUseFontIconForImage()) {
 					String sclass = "z-icon-spinner z-icon-spin";
-					getTextbox().setWidgetListener("onChange", "try{"+w+"btn.setIconSclass('" + sclass + "');"
+					getCombobox().setWidgetListener("onChange", "try{"+w+"btn.setIconSclass('" + sclass + "');"
 							+ "btn.setDisabled(true, {adbs: false, skip: false});}catch(err){}");
 				} else {
-					getTextbox().setWidgetListener("onChange", "try{"+w+"btn.setImage(\""
+					getCombobox().setWidgetListener("onChange", "try{"+w+"btn.setImage(\""
 						+ Executions.getCurrent().encodeURL(IN_PROGRESS_IMAGE)+"\");"
 						+ "btn.setDisabled(true, {adbs: false, skip: false});}catch(err){}");
 				}
@@ -895,5 +931,5 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 	public void setZoomButtonVisibility(boolean isVisible) {
 		getComponent().getButtonZoom().setVisible(isVisible);
 		getComponent().getButton().setStyle("right:20px");
-	}
+	}	
 }

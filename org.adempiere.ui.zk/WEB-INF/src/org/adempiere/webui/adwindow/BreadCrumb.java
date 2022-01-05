@@ -88,15 +88,16 @@ public class BreadCrumb extends Div implements EventListener<Event> {
 
 	protected Menupopup linkPopup;
 
-	private AbstractADWindowContent adWinContent;
 	private GridTab m_gridTab;
 
+	private AbstractADWindowContent windowContent;
+
 	/**
-	 * @param adWindowContent 
+	 * @param windowContent 
 	 * @param windowNo
 	 */
-	public BreadCrumb(AbstractADWindowContent adWinContent, int windowNo) {
-		this.adWinContent = adWinContent;
+	public BreadCrumb(AbstractADWindowContent windowContent, int windowNo) {
+		this.windowContent = windowContent;
 		this.windowNo = windowNo;
 		layout = new Hlayout();
 		layout.setValign("middle");
@@ -155,7 +156,7 @@ public class BreadCrumb extends Div implements EventListener<Event> {
 		if (clickable) {
 			BreadCrumbLink a = new BreadCrumbLink();
 			a.setLabel(label);
-			a.setId("breadcrumb-"+label);
+			a.setId("breadcrumb-"+id+"-"+label);
 			a.setPathId(id);
 			a.addEventListener(Events.ON_CLICK, this);
 			if (layout.getChildren().size() > 0) {
@@ -166,7 +167,7 @@ public class BreadCrumb extends Div implements EventListener<Event> {
 			layout.appendChild(a);
 		} else {
 			Label pathLabel = new Label();
-			pathLabel.setId("breadcrumb-"+label);
+			pathLabel.setId("breadcrumb-"+id+"-"+label);
 			pathLabel.setValue(label);
 			if (layout.getChildren().size() > 0) {
 				Label symbol = new Label();
@@ -282,15 +283,15 @@ public class BreadCrumb extends Div implements EventListener<Event> {
 					}					
 				});
 				linkPopup.setPage(pathLabel.getPage());
-				linkPopup.open(pathLabel);								
+				linkPopup.open(pathLabel, "after_start");
 			}
 		};
 		pathLabel.addEventListener(Events.ON_CLICK, listener);
 		pathLabel.addEventListener(Events.ON_MOUSE_OVER, listener);
 		pathLabel.addEventListener(Events.ON_MOUSE_OUT, listener);
 		pathLabel.addEventListener(ON_MOUSE_OVER_ECHO_EVENT, listener);
-		ZkCssHelper.appendStyle(pathLabel, "background: transparent url('theme/" + ThemeManager.getTheme() + 
-				"/images/downarrow.png') no-repeat right center");
+		String imageUrl = Executions.getCurrent().encodeURL(ThemeManager.getThemeResource("images/downarrow.png"));		
+		ZkCssHelper.appendStyle(pathLabel, "background: transparent url('" + imageUrl + "') no-repeat right center");
 	}
 
 	@Override
@@ -325,9 +326,12 @@ public class BreadCrumb extends Div implements EventListener<Event> {
 			if (!LayoutUtils.isReallyVisible(this)) return;
 
 			// If Quick form is opened then prevent navigation keyEvent
-			if (adWinContent != null && adWinContent.getOpenQuickFormTabs().size() > 0)
+			if (windowContent != null && windowContent.getOpenQuickFormTabs().size() > 0)
 				return;
 
+			if (windowContent != null && windowContent.isBlock())
+				return;
+			
 			KeyEvent keyEvent = (KeyEvent) event;
 			if (keyEvent.isAltKey()) {
 				if (keyEvent.getKeyCode() == KeyEvent.LEFT) {

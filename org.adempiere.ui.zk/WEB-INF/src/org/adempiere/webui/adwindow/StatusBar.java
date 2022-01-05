@@ -26,19 +26,19 @@ import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.Tabpanel;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.adempiere.webui.window.WTextEditorDialog;
 import org.compiere.process.ProcessInfoLog;
-import org.zkoss.zul.Html;
-import org.zkoss.zhtml.Text;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zk.ui.util.Clients;
+import org.zkoss.zk.ui.util.Notification;
 import org.zkoss.zul.Caption;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Hlayout;
+import org.zkoss.zul.Html;
 import org.zkoss.zul.Separator;
 import org.zkoss.zul.Space;
 
@@ -52,11 +52,11 @@ import org.zkoss.zul.Space;
  */
 public class StatusBar extends Panel implements EventListener<Event> 
 {
-    /**
+	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1519490416637936553L;
-	
+	private static final long serialVersionUID = 7091641684809092888L;
+
 	private Panel infoPanel;
 
 	private Html infoLine;
@@ -174,13 +174,12 @@ public class StatusBar extends Panel implements EventListener<Event>
 		
     	String labelText = buildLabelText(m_statusText);
     	if (error) {
-    		Clients.showNotification(buildNotificationText(m_statusText), "error", findPanelComponent(this), "top_left", 3500, true);
+    		Notification.show(buildNotificationText(m_statusText), "error", findTabpanel(this), "top_left", 3500, true);
     	} else if (ClientInfo.maxWidth(ClientInfo.SMALL_WIDTH)) {
-    		Clients.showNotification(buildNotificationText(m_statusText), "info", findPanelComponent(this), "top_left", 2000, true);
+    		Notification.show(buildNotificationText(m_statusText), "info", findTabpanel(this), "top_left", 2000, true);
     	}
-
-    	messageContainer.setSclass(error ? "docstatus-error" : "docstatus-normal");
     	
+    	messageContainer.setSclass(error ? "docstatus-error" : "docstatus-normal");
     	if (!ClientInfo.maxWidth(ClientInfo.SMALL_WIDTH))
     	{
 	    	Label label = new Label(labelText);	    	
@@ -188,7 +187,7 @@ public class StatusBar extends Panel implements EventListener<Event>
 			if (labelText.length() != m_statusText.length() || (div != null && div.getChildren().size() > 0)) {
 				label.addEventListener(Events.ON_CLICK, this);
 				label.setStyle("cursor: pointer");
-
+			
 				label = new Label(" ...");
 				label.setStyle("cursor: pointer");
 				messageContainer.appendChild(label);
@@ -204,7 +203,7 @@ public class StatusBar extends Panel implements EventListener<Event>
 			label.addEventListener(Events.ON_CLICK, this);
     	}
     	
-		if (m_logs != null) {
+    	if (m_logs != null) {
 			div = new Div();
 			for (int i = 0; i < m_logs.length; i++) {
 				if (m_logs[i].getP_Msg() != null) {
@@ -218,7 +217,7 @@ public class StatusBar extends Panel implements EventListener<Event>
 				}
 			}
 		}
-
+    	
     	createPopupContent();
     	if(div!=null)
     	{
@@ -239,7 +238,7 @@ public class StatusBar extends Panel implements EventListener<Event>
 	}
     
 	protected void createPopupContent() {
-		Text t = new Text(m_statusText);
+		Html t = new Html(WTextEditorDialog.sanitize(m_statusText));
 		msgPopupCnt.getChildren().clear();
 		msgPopupCnt.appendChild(t);
 	}
@@ -256,7 +255,7 @@ public class StatusBar extends Panel implements EventListener<Event>
 		return statusText.substring(0, 136) + " ...";
 	}
 	
-	private Component findPanelComponent(Component comp) {
+	private Component findTabpanel(Component comp) {
 		Component parent = comp.getParent();
 		while (parent != null) {
 			if (parent instanceof Tabpanel)
@@ -304,6 +303,7 @@ public class StatusBar extends Panel implements EventListener<Event>
     private void createPopup() {
 		msgPopupCnt = new Div();
 		ZKUpdateUtil.setVflex(msgPopupCnt, "1");
+		msgPopupCnt.setStyle("flex-basis: auto");
 
 		
 		msgPopup = new Window();
@@ -317,9 +317,8 @@ public class StatusBar extends Panel implements EventListener<Event>
         msgPopupCaption = new Caption();
         msgPopup.appendChild(msgPopupCaption);        
 	}
-    
+
     protected void onClientInfo() {
     	ZKUpdateUtil.setWindowWidthX(msgPopup, 500);
     }
-
 }

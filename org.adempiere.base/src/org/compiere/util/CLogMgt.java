@@ -35,8 +35,9 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-import org.adempiere.base.Service;
+import org.adempiere.base.Core;
 import org.compiere.Adempiere;
+import org.compiere.db.AdempiereDatabase;
 import org.compiere.db.CConnection;
 import org.compiere.model.MClient;
 import org.idempiere.distributed.IClusterMember;
@@ -521,13 +522,13 @@ public class CLogMgt
 		sb.append(getMsg("Database")).append(eq)    .append(getDatabaseInfo()).append(NL);
 		sb.append(getMsg("Schema")).append(eq)      .append(CConnection.get().getDbUid()).append(NL);
 		//
-		sb.append(getMsg("AD_User_ID")).append(eq)  .append(Env.getContext(Env.getCtx(), "#AD_User_Name")).append(NL);
-		sb.append(getMsg("AD_Role_ID")).append(eq)  .append(Env.getContext(Env.getCtx(), "#AD_Role_Name")).append(NL);
+		sb.append(getMsg("AD_User_ID")).append(eq)  .append(Env.getContext(Env.getCtx(), Env.AD_USER_NAME)).append(NL);
+		sb.append(getMsg("AD_Role_ID")).append(eq)  .append(Env.getContext(Env.getCtx(), Env.AD_ROLE_NAME)).append(NL);
 		//
-		sb.append(getMsg("AD_Client_ID")).append(eq).append(Env.getContext(Env.getCtx(), "#AD_Client_Name")).append(NL);
-		sb.append(getMsg("AD_Org_ID")).append(eq)   .append(Env.getContext(Env.getCtx(), "#AD_Org_Name")).append(NL);
+		sb.append(getMsg("AD_Client_ID")).append(eq).append(Env.getContext(Env.getCtx(), Env.AD_CLIENT_NAME)).append(NL);
+		sb.append(getMsg("AD_Org_ID")).append(eq)   .append(Env.getContext(Env.getCtx(), Env.AD_ORG_NAME)).append(NL);
 		//
-		sb.append(getMsg("Date")).append(eq)        .append(Env.getContext(Env.getCtx(), "#Date")).append(NL);
+		sb.append(getMsg("Date")).append(eq)        .append(Env.getContext(Env.getCtx(), Env.DATE)).append(NL);
 		sb.append(getMsg("Printer")).append(eq)     .append(Env.getContext(Env.getCtx(), "#Printer")).append(NL);
 		// Show Implementation Vendor / Version - teo_sarca, [ 1622855 ]
 		sb.append(getMsg("ImplementationVendor")).append(eq).append(org.compiere.Adempiere.getImplementationVendor()).append(NL);
@@ -560,7 +561,7 @@ public class CLogMgt
 		//
 		//cluster info
 		if (Env.getAD_Client_ID(Env.getCtx()) == 0) {
-			IClusterService service = Service.locator().locate(IClusterService.class).getService();
+			IClusterService service = Core.getClusterService();
 			if (service != null) {
 				IClusterMember local = service.getLocalMember();
 				Collection<IClusterMember> members = service.getMembers();				
@@ -669,18 +670,6 @@ public class CLogMgt
 		//  Host
 		sb.append(cc.getAppsHost());
 		
-		if (Ini.isClient())
-		{
-			sb.append(" (");
-
-			//  Server
-			if (!cc.getAppsHost().equalsIgnoreCase("MyAppsServer") && cc.isAppsServerOK(false))
-				sb.append(CConnection.get().getServerVersion());
-			else
-				sb.append(getMsg("NotActive"));
-			//
-			sb.append(")\n  ");
-		}
 		//
 		return sb.toString();
 	}   //  getServerInfo
@@ -692,9 +681,17 @@ public class CLogMgt
 	private static String getDatabaseInfo()
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(CConnection.get().getDbHost()).append(" : ")
-			.append(CConnection.get().getDbPort()).append(" / ")
+		sb.append(CConnection.get().getDbHost()).append(":")
+			.append(CConnection.get().getDbPort()).append("/")
 			.append(CConnection.get().getDbName());
+		
+		AdempiereDatabase db = DB.getDatabase();
+		sb.append(" (").append(db.getName());
+		if (!DB.isOracle()) 
+		{
+			sb.append(", ").append(db.isNativeMode() ? "Native Dialect" : "Oracle Dialect");
+		}
+		sb.append(")");
 		//  Connection Manager
 		if (CConnection.get().isViaFirewall())
 			sb.append(getMsg("via")).append(" ")

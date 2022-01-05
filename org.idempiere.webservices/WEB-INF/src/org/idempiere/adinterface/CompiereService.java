@@ -40,6 +40,7 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Language;
 import org.compiere.util.Util;
+import org.compiere.util.Util;
 import org.idempiere.adInterface.x10.ADLoginRequest;
 import org.idempiere.webservices.AbstractService;
 
@@ -132,7 +133,7 @@ public class CompiereService {
 		CompiereUtil.initWeb();
 
 		ServerContext.setCurrentInstance(new Properties());
-		Env.setContext(getCtx(), "#AD_Language", "en_US" );
+		Env.setContext(getCtx(), Env.LANGUAGE, "en_US" );
 		m_language = Language.getLanguage("en_US");
 
 		dateFormat = DisplayType.getDateFormat(DisplayType.Date, m_language);
@@ -277,7 +278,7 @@ public class CompiereService {
 		else
 			m_userName = Util.isEmpty(user.getLDAPUser()) ? user.getName() : user.getLDAPUser();
 
-		Env.setContext( getCtx(), "#AD_Language", Lang);
+		Env.setContext( getCtx(), Env.LANGUAGE, Lang);
 		m_language = Language.getLanguage(Lang);
 		Env.verifyLanguage( getCtx(), m_language );
 
@@ -292,10 +293,10 @@ public class CompiereService {
 		Timestamp ts = new Timestamp(System.currentTimeMillis());
 		
 		SimpleDateFormat dateFormat4Timestamp = new SimpleDateFormat( dateFormatOnlyForCtx ); 
-		Env.setContext( getCtx(), "#Date", dateFormat4Timestamp.format(ts)+" 00:00:00" );    //  JDBC format
-		if (log.isLoggable(Level.INFO)) log.info(" #Date = "+ Env.getContextAsDate( getCtx(), "#Date"));
+		Env.setContext( getCtx(), Env.DATE, dateFormat4Timestamp.format(ts)+" 00:00:00" );    //  JDBC format
+		if (log.isLoggable(Level.INFO)) log.info(" #Date = "+ Env.getContextAsDate( getCtx(), Env.DATE));
 
-		Env.setContext( getCtx(), "#M_Warehouse_ID", M_Warehouse_ID );
+		Env.setContext( getCtx(), Env.M_WAREHOUSE_ID, M_Warehouse_ID );
 		Env.setContext(getCtx(), Env.LANGUAGE, m_language.getAD_Language());
 		
 		AuthTokenContext authTokenCtx = null;
@@ -506,7 +507,7 @@ public class CompiereService {
 	}
 	
 	/*
-	 * @return set password
+	 * @param pass
 	 */
 	public synchronized void setPassword(String pass) {
 		m_password = pass;
@@ -520,7 +521,7 @@ public class CompiereService {
 	}
 
 	/**
-	 * @return set expiry minutes
+	 * @param expiryMinutes
 	 */
 	public synchronized void setExpiryMinutes(int expiryMinutes) {
 		m_expiryMinutes = expiryMinutes;

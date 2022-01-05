@@ -51,10 +51,11 @@ import org.compiere.util.TimeUtil;
  *
  *  @author Jorg Janke
  *	@author Armen Rizal, Goodwill Consulting
- *			<li>FR [2857076] User Element 1 and 2 completion - https://sourceforge.net/tracker/?func=detail&aid=2857076&group_id=176962&atid=879335
+ *			<li>FR [2857076] User Element 1 and 2 completion - https://sourceforge.net/p/adempiere/feature-requests/817/
  *
  *  @version $Id: FinReport.java,v 1.2 2006/07/30 00:51:05 jjanke Exp $
  */
+@org.adempiere.base.annotation.Process
 public class FinReport extends SvrProcess
 {
 	/**	Period Parameter				*/
@@ -112,7 +113,7 @@ public class FinReport extends SvrProcess
 	 */
 	public void prepare()
 	{
-		StringBuffer sb = new StringBuffer ("Record_ID=")
+		StringBuilder sb = new StringBuilder ("Record_ID=")
 			.append(getRecord_ID());
 		//	Parameter
 		ProcessInfoParameter[] para = getParameter();
@@ -202,11 +203,11 @@ public class FinReport extends SvrProcess
 		m_report = new MReport (getCtx(), getRecord_ID(), null);
 		sb.append(" - ").append(m_report);
 
-		/* Exclude adjustment period
-		 * - if the report period is standard
-		 * - and there is an adjustment period with the same end date (on the same year) 
-		 */
-		if (p_C_Period_ID > 0) {
+		setPeriods();
+		sb.append(" - C_Period_ID=").append(p_C_Period_ID).append(" - ").append(m_parameterWhere);
+
+		// Exclude adjustment period(s) ?
+		if (m_report.getExcludeAdjustmentPeriods().equals(MReport.EXCLUDEADJUSTMENTPERIODS_OnlyReportPeriod)) { // if the report period is standard and there is an adjustment period with the same end date (on the same year) 
 			MPeriod per = MPeriod.get(getCtx(), p_C_Period_ID);
 			if (MPeriod.PERIODTYPE_StandardCalendarPeriod.equals(per.getPeriodType())) {
 				int adjPeriodToExclude_ID = DB.getSQLValue(get_TrxName(),
@@ -214,17 +215,15 @@ public class FinReport extends SvrProcess
 						MPeriod.PERIODTYPE_AdjustmentPeriod, per.getEndDate(), per.getC_Year_ID());
 				if (adjPeriodToExclude_ID > 0) {
 					p_AdjPeriodToExclude = " C_Period_ID!=" + adjPeriodToExclude_ID + " AND ";
-					log.warning("Will Exclude Adjustment Period -> " + p_AdjPeriodToExclude);
+					log.info("Will Exclude Adjustment Period -> " + p_AdjPeriodToExclude);
 				}
 			}
 		}
-		
-		//
-		setPeriods();
-		sb.append(" - C_Period_ID=").append(p_C_Period_ID)
-			.append(" - ").append(m_parameterWhere);
-		//
-		
+		else if (m_report.getExcludeAdjustmentPeriods().equals(MReport.EXCLUDEADJUSTMENTPERIODS_AllAdjustmentPeriods)) {
+			p_AdjPeriodToExclude = new StringBuilder(" C_Period_ID NOT IN (SELECT C_Period_ID FROM C_Period p, C_Year y WHERE p.C_Year_ID = y.C_Year_ID AND y.C_Calendar_ID = ")
+					.append(m_report.getC_Calendar_ID()).append(" AND PeriodType = 'A') AND ").toString();
+		}
+
 		if ( p_PA_ReportCube_ID > 0)
 			m_parameterWhere.append(" AND PA_ReportCube_ID=").append(p_PA_ReportCube_ID);
 		
@@ -317,9 +316,9 @@ public class FinReport extends SvrProcess
 		//	** Create Temporary and empty Report Lines from PA_ReportLine
 		//	- AD_PInstance_ID, PA_ReportLine_ID, 0, 0
 		int PA_ReportLineSet_ID = m_report.getLineSet().getPA_ReportLineSet_ID();
-		StringBuffer sql = new StringBuffer ("INSERT INTO T_Report "
+		StringBuilder sql = new StringBuilder ("INSERT INTO T_Report "
 			+ "(AD_PInstance_ID, PA_ReportLine_ID, Record_ID,Fact_Acct_ID, SeqNo,LevelNo, Name,Description) "
-			+ "SELECT ").append(getAD_PInstance_ID()).append(", rl.PA_ReportLine_ID, 0,0, rl.SeqNo,0, CASE WHEN LineType='B' THEN '' ELSE NVL(trl.Name, rl.Name) END as Name , NVL(trl.Description,rl.Description) as Description "
+			+ "SELECT ").append(getAD_PInstance_ID()).append(", rl.PA_ReportLine_ID, 0,0, rl.SeqNo,0, CASE WHEN LineType='B' THEN '' ELSE NVL(trl.Name, rl.Name) END as Name, NVL(trl.Description,rl.Description) as Description "
 			+ "FROM PA_ReportLine rl "
 			+ "LEFT JOIN PA_ReportLine_Trl trl ON trl.PA_ReportLine_ID = rl.PA_ReportLine_ID AND trl.AD_Language = '" + Env.getAD_Language(Env.getCtx()) + "' "
 			+ "WHERE rl.IsActive='Y' AND rl.PA_ReportLineSet_ID=").append(PA_ReportLineSet_ID);
@@ -382,7 +381,7 @@ public class FinReport extends SvrProcess
 			return;
 		}
 
-		StringBuffer update = new StringBuffer();
+		StringBuilder update = new StringBuilder();
 		//	for all columns
 		for (int col = 0; col < m_columns.length; col++)
 		{
@@ -393,7 +392,7 @@ public class FinReport extends SvrProcess
 			info.append("Line=").append(line).append(",Col=").append(col);
 
 			//	SELECT SUM()
-			StringBuffer select = new StringBuffer ("SELECT ");
+			StringBuilder select = new StringBuilder ("SELECT ");
 			if (m_lines[line].getPAAmountType() != null)				//	line amount type overwrites column
 			{
 				String sql = m_lines[line].getSelectClause (true);
@@ -551,7 +550,7 @@ public class FinReport extends SvrProcess
 			update.append(" WHERE AD_PInstance_ID=").append(getAD_PInstance_ID())
 				.append(" AND PA_ReportLine_ID=").append(m_lines[line].getPA_ReportLine_ID())
 				.append(" AND ABS(LevelNo)<2");		//	0=Line 1=Acct
-			int no = DB.executeUpdate(update.toString(), get_TrxName());
+			int no = DB.executeUpdateEx(update.toString(), get_TrxName());
 			if (no != 1)
 				log.log(Level.SEVERE, "#=" + no + " for " + update);
 			if (log.isLoggable(Level.FINEST)) log.finest(update.toString());
@@ -694,7 +693,7 @@ public class FinReport extends SvrProcess
 				sb.append("WHERE T_Report.AD_PInstance_ID=").append(getAD_PInstance_ID())
 					.append(" AND T_Report.PA_ReportLine_ID=").append(m_lines[line].getPA_ReportLine_ID())
 					.append(" AND ABS(T_Report.LevelNo)<1");		//	not trx
-				int no = DB.executeUpdate(sb.toString(), get_TrxName());
+				int no = DB.executeUpdateEx(sb.toString(), get_TrxName());
 				if (no != 1)
 					log.log(Level.SEVERE, "(+) #=" + no + " for " + m_lines[line] + " - " + sb.toString());
 				else
@@ -757,7 +756,7 @@ public class FinReport extends SvrProcess
 				sb.append("WHERE T_Report.AD_PInstance_ID=").append(getAD_PInstance_ID())
 					   .append(" AND T_Report.PA_ReportLine_ID=").append(m_lines[line].getPA_ReportLine_ID())
 					.append(" AND ABS(T_Report.LevelNo)<1");			//	0=Line 1=Acct
-				int no = DB.executeUpdate(sb.toString(), get_TrxName());
+				int no = DB.executeUpdateEx(sb.toString(), get_TrxName());
 				if (no != 1)
 				{
 					log.severe ("(x) #=" + no + " for " + m_lines[line] + " - " + sb.toString ());
@@ -845,7 +844,7 @@ public class FinReport extends SvrProcess
 				sb.append("WHERE r1.AD_PInstance_ID=").append(getAD_PInstance_ID())
 					   .append(" AND r1.PA_ReportLine_ID=").append(m_lines[line].getPA_ReportLine_ID())
 					.append(" AND ABS(r1.LevelNo)<1");			//	0=Line 1=Acct
-				no = DB.executeUpdate(sb.toString(), get_TrxName());
+				no = DB.executeUpdateEx(sb.toString(), get_TrxName());
 				if (no != 1)
 					log.severe ("(x) #=" + no + " for " + m_lines[line] + " - " + sb.toString ());
 				else
@@ -958,7 +957,7 @@ public class FinReport extends SvrProcess
 			//
 			sb.append(" WHERE AD_PInstance_ID=").append(getAD_PInstance_ID())
 				.append(" AND ABS(LevelNo)<2");			//	0=Line 1=Acct
-			int no = DB.executeUpdate(sb.toString(), get_TrxName());
+			int no = DB.executeUpdateEx(sb.toString(), get_TrxName());
 			if (no < 1)
 				log.severe ("#=" + no + " for " + m_columns[col] 
 					+ " - " + sb.toString());
@@ -971,7 +970,7 @@ public class FinReport extends SvrProcess
 
 		// allow opposite sign
 		boolean hasOpposites = false;
-		StringBuffer sb = new StringBuffer("UPDATE T_Report SET ");
+		StringBuilder sb = new StringBuilder("UPDATE T_Report SET ");
 		for (int col = 0; col < m_columns.length; col++)
 		{
 			if (m_columns[col].isAllowOppositeSign())
@@ -992,7 +991,7 @@ public class FinReport extends SvrProcess
 			// 0=Line 1=Acct
 			sb.append(" AND ABS(LevelNo) < 2 ");
 			sb.append(" AND EXISTS (SELECT 1 FROM PA_ReportLine rl WHERE rl.PA_ReportLine_ID=T_Report.PA_ReportLine_ID AND rl.IsShowOppositeSign='Y' AND rl.IsActive='Y') ");
-			int no = DB.executeUpdate(sb.toString(), get_TrxName());
+			int no = DB.executeUpdateEx(sb.toString(), get_TrxName());
 			if (no < 1)
 				log.severe("#=" + no + " for setting opposite sign" + " - " + sb.toString());
 			else
@@ -1100,7 +1099,7 @@ public class FinReport extends SvrProcess
 			for (int i = 0; i < seqlist.size(); i++)
 			{
 				int currentSeq = seqlist.get(i);
-				StringBuffer sb = new StringBuffer ("UPDATE T_Report SET ");
+				StringBuilder sb = new StringBuilder ("UPDATE T_Report SET ");
 				//	Column to set
 				sb.append ("Col_").append (col).append("=");
 
@@ -1146,7 +1145,7 @@ public class FinReport extends SvrProcess
 						sb.append(" AND seqNo < " + nextSeq);
 					}
 				}
-				int no = DB.executeUpdate(sb.toString(), get_TrxName());
+				int no = DB.executeUpdateEx(sb.toString(), get_TrxName());
 				if (no < 1)
 					log.severe ("#=" + no + " for " + m_columns[col]
 						+ " - " + sb.toString());
@@ -1306,8 +1305,9 @@ public class FinReport extends SvrProcess
 			//	Clean up empty rows
 			StringBuilder sql = new StringBuilder("DELETE FROM T_Report WHERE ABS(LevelNo)<>0")
 				.append(" AND Col_0 IS NULL AND Col_1 IS NULL AND Col_2 IS NULL AND Col_3 IS NULL AND Col_4 IS NULL AND Col_5 IS NULL AND Col_6 IS NULL AND Col_7 IS NULL AND Col_8 IS NULL AND Col_9 IS NULL")
-				.append(" AND Col_10 IS NULL AND Col_11 IS NULL AND Col_12 IS NULL AND Col_13 IS NULL AND Col_14 IS NULL AND Col_15 IS NULL AND Col_16 IS NULL AND Col_17 IS NULL AND Col_18 IS NULL AND Col_19 IS NULL AND Col_20 IS NULL"); 
-			int no = DB.executeUpdate(sql.toString(), get_TrxName());
+				.append(" AND Col_10 IS NULL AND Col_11 IS NULL AND Col_12 IS NULL AND Col_13 IS NULL AND Col_14 IS NULL AND Col_15 IS NULL AND Col_16 IS NULL AND Col_17 IS NULL AND Col_18 IS NULL AND Col_19 IS NULL")
+				.append(" AND Col_20 IS NULL AND Col_21 IS NULL AND Col_22 IS NULL AND Col_23 IS NULL AND Col_24 IS NULL AND Col_25 IS NULL AND Col_26 IS NULL AND Col_27 IS NULL AND Col_28 IS NULL AND Col_29 IS NULL AND Col_30 IS NULL"); 
+			int no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine("Deleted empty #=" + no);
 		}
 		//
@@ -1319,7 +1319,7 @@ public class FinReport extends SvrProcess
 				+ "WHERE r1.AD_PInstance_ID=r2.AD_PInstance_ID AND r1.PA_ReportLine_ID=r2.PA_ReportLine_ID"
 				+ " AND r2.Record_ID=0 AND r2.Fact_Acct_ID=0)"
 			+ "WHERE SeqNo IS NULL");
-		int no = DB.executeUpdate(sql.toString(), get_TrxName());
+		int no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("SeqNo #=" + no);
 
 		if (!m_report.isListTrx())
@@ -1336,7 +1336,7 @@ public class FinReport extends SvrProcess
 			.append(sql_select).append(") "
 			+ "WHERE Fact_Acct_ID <> 0 AND AD_PInstance_ID=")
 			.append(getAD_PInstance_ID());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Trx Name #=" + no + " - " + sql.toString());
 	}	//	insertLineDetail
 
@@ -1384,7 +1384,7 @@ public class FinReport extends SvrProcess
 
 			boolean listSourceNoTrx = m_report.isListSourcesXTrx() && variable.equalsIgnoreCase(I_C_ValidCombination.COLUMNNAME_Account_ID);
 			// SQL to get the Account Element which no transaction
-			StringBuffer unionInsert = listSourceNoTrx ? new StringBuffer() : null;
+		StringBuilder unionInsert = listSourceNoTrx ? new StringBuilder() : null;
 			if (listSourceNoTrx) {
 				unionInsert.append(" UNION SELECT ")
 				.append(getAD_PInstance_ID()).append(",")
@@ -1402,6 +1402,8 @@ public class FinReport extends SvrProcess
 					unionInsert.append("1 ");
 			}
 
+		String numericType = DB.getDatabase().getNumericDataType();
+		
 			int combinationID = 0;
 			if (isCombination)
 			{
@@ -1418,23 +1420,23 @@ public class FinReport extends SvrProcess
 			{
 				insert.append(", ");
 				if (listSourceNoTrx)
-					unionInsert.append(", Cast(NULL AS NUMBER)");
+				unionInsert.append(", Cast(NULL AS ").append(numericType).append(")");
 				// No calculation
 				if (m_columns[col].isColumnTypeCalculation())
 				{
-					insert.append("Cast(NULL AS NUMBER)");
+				insert.append("Cast(NULL AS ").append(numericType).append(")");
 					continue;
 				}
 
 				// SELECT SUM()
-				StringBuffer select = new StringBuffer("SELECT ");
+			StringBuilder select = new StringBuilder ("SELECT ");
 				if (m_lines[line].getPAAmountType() != null) //	line amount type overwrites column
 					select.append(m_lines[line].getSelectClause(true));
 				else if (m_columns[col].getPAAmountType() != null)
 					select.append(m_columns[col].getSelectClause(true));
 				else
 				{
-					insert.append("Cast(NULL AS NUMBER)");
+				insert.append("Cast(NULL AS ").append(numericType).append(")");
 					continue;
 				}
 
@@ -1556,7 +1558,7 @@ public class FinReport extends SvrProcess
 			else
 				where.append(m_lines[line].getWhereClause(p_PA_Hierarchy_ID));
 
-			StringBuffer unionWhere = listSourceNoTrx ? new StringBuffer() : null;
+			StringBuilder unionWhere = listSourceNoTrx ? new StringBuilder() : null;
 			if (listSourceNoTrx && m_lines[line].getSources() != null && m_lines[line].getSources().length > 0){
 				// Only one
 				if (m_lines[line].getSources().length == 1 
@@ -1567,7 +1569,7 @@ public class FinReport extends SvrProcess
 				else
 				{
 					// Multiple
-					StringBuffer sb = new StringBuffer("(");
+					StringBuilder sb = new StringBuilder ("(");
 					for (int i = 0; i < m_lines[line].getSources().length; i++)
 					{
 						if ((m_lines[line].getSources()[i]).getElementType().equalsIgnoreCase(MReportSource.ELEMENTTYPE_Account)) {
@@ -1640,13 +1642,13 @@ public class FinReport extends SvrProcess
 				insert.append(unionInsert);
 			}
 
-			int no = DB.executeUpdate(insert.toString(), get_TrxName());
+			int no = DB.executeUpdateEx(insert.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine("Source #=" + no + " - " + insert);
 			if (no == 0)
 				return;
 
 			// Set Name,Description
-			StringBuffer sql = new StringBuffer("UPDATE T_Report SET (Name,Description)=(")
+			StringBuilder sql = new StringBuilder ("UPDATE T_Report SET (Name,Description)=(")
 					.append(m_lines[line].getSourceValueQuery());
 
 			if (isCombination)
@@ -1687,7 +1689,7 @@ public class FinReport extends SvrProcess
 		if (log.isLoggable(Level.INFO)) log.info("Line=" + line + " - Variable=" + variable);
 
 		//	Insert
-		StringBuffer insert = new StringBuffer("INSERT INTO T_Report "
+		StringBuilder insert = new StringBuilder("INSERT INTO T_Report "
 			+ "(AD_PInstance_ID, PA_ReportLine_ID, Record_ID,Fact_Acct_ID,LevelNo ");
 		boolean isCombination = variable.matches("[0-9]*") && whereComb != null;
 		if(isCombination)
@@ -1709,6 +1711,8 @@ public class FinReport extends SvrProcess
 		else
 			insert.append("2 ");
 
+		String numericType = DB.getDatabase().getNumericDataType();
+		
 		if(isCombination)
 			insert.append("," + variable + " ");
 		//	for all columns create select statement
@@ -1718,19 +1722,19 @@ public class FinReport extends SvrProcess
 			//	No calculation
 			if (m_columns[col].isColumnTypeCalculation())
 			{
-				insert.append("Cast(NULL AS NUMBER)");
+				insert.append("Cast(NULL AS ").append(numericType).append(")");
 				continue;
 			}
 
 			//	SELECT
-			StringBuffer select = new StringBuffer ("SELECT ");
+			StringBuilder select = new StringBuilder ("SELECT ");
 			if (m_lines[line].getPAAmountType() != null)				//	line amount type overwrites column
 				select.append (m_lines[line].getSelectClause (false));
 			else if (m_columns[col].getPAAmountType() != null)
 				select.append (m_columns[col].getSelectClause (false));
 			else
 			{
-				insert.append("Cast(NULL AS NUMBER)");
+				insert.append("Cast(NULL AS ").append(numericType).append(")");
 				continue;
 			}
 
@@ -1840,7 +1844,7 @@ public class FinReport extends SvrProcess
 			whereClause = whereClause.replaceAll(" AND PA_ReportCube_ID=" + p_PA_ReportCube_ID, "");
 		insert.append(whereClause); // IDEMPIERE-130
 
-		int no = DB.executeUpdate(insert.toString(), get_TrxName());
+		int no = DB.executeUpdateEx(insert.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINEST)) log.finest("Trx #=" + no + " - " + insert);
 		if (no == 0)
 			return;
@@ -1859,7 +1863,7 @@ public class FinReport extends SvrProcess
 			{
 				String sql = "DELETE FROM T_Report WHERE AD_PInstance_ID=" + getAD_PInstance_ID()
 					+ " AND PA_ReportLine_ID=" + m_lines[line].getPA_ReportLine_ID();
-				int no = DB.executeUpdate(sql, get_TrxName());
+				int no = DB.executeUpdateEx(sql, get_TrxName());
 				if (no > 0)
 					if (log.isLoggable(Level.FINE)) log.fine(m_lines[line].getName() + " - #" + no);
 			}
@@ -1885,7 +1889,7 @@ public class FinReport extends SvrProcess
 				String sql = "UPDATE T_Report SET Col_" + column 
 					+ "=Col_" + column + "/" + divisor
 					+  " WHERE AD_PInstance_ID=" + getAD_PInstance_ID();
-				int no = DB.executeUpdate(sql, get_TrxName());
+				int no = DB.executeUpdateEx(sql, get_TrxName());
 				if (no > 0)
 					if (log.isLoggable(Level.FINE)) log.fine(m_columns[column].getName() + " - #" + no);
 			}
@@ -1914,7 +1918,10 @@ public class FinReport extends SvrProcess
 			m_report.saveEx();
 		}
 		else
+		{
 			pf = MPrintFormat.get (getCtx(), AD_PrintFormat_ID, false);	//	use Cache
+			pf = new MPrintFormat(getCtx(), pf);
+		}
 
 		//	Print Format Sync
 		if (!m_report.getName().equals(pf.getName())) {

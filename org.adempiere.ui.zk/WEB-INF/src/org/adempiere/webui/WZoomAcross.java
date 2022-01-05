@@ -91,12 +91,16 @@ public class WZoomAcross
 		}
 		m_popup.setStyle("overflow: auto;max-height: 80%;");
 		Popup popup = LayoutUtils.findPopup(invoker);
-		if (popup != null) {
+		if (popup != null)
+		{
 			popup.appendChild(m_popup);
-		} else {
+		}
+		else
+		{
 			m_popup.setPage(invoker.getPage());
 			LayoutUtils.autoDetachOnClose(m_popup);
 		}
+		
 		m_popup.open(invoker, "after_start");
 	}
 

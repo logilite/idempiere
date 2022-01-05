@@ -145,9 +145,12 @@ public class WArchive implements EventListener<Event>
 		//
 			
 		Popup popup = LayoutUtils.findPopup(invoker);
-		if (popup != null) {
+		if (popup != null)
+		{
 			popup.appendChild(m_popup);
-		} else {
+		}
+		else
+		{
 			m_popup.setPage(invoker.getPage());
 			LayoutUtils.autoDetachOnClose(m_popup);
 		}
@@ -173,6 +176,10 @@ public class WArchive implements EventListener<Event>
 				av.query(true, m_AD_Table_ID, m_Record_ID);
 			else	//	all Reports
 				av.query(true, m_AD_Table_ID, 0);
+			
+			if (m_popup.getParent() instanceof Popup) {
+				((Popup)m_popup.getParent()).close();
+			}
 
 			form.setAttribute(Window.MODE_KEY, form.getWindowMode());
 			SessionManager.getAppDesktop().showWindow(form);

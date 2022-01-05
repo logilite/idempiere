@@ -83,7 +83,7 @@ public class TableElement extends PrintElement
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 4185521888252077894L;
+	private static final long serialVersionUID = -4144554863262696285L;
 
 
 	/**
@@ -129,7 +129,8 @@ public class TableElement extends PrintElement
 		SerializableMatrix<Serializable> data, KeyNamePair[] pk, String pkColumnName,
 		int pageNoStart, Rectangle firstPage, Rectangle nextPages, int repeatedColumns, HashMap<Integer,Integer> additionalLines,
 		HashMap<Point,Font> rowColFont, HashMap<Point,Color> rowColColor, HashMap<Point,Color> rowColBackground,
-		MPrintTableFormat tFormat, ArrayList<Integer> pageBreak, Boolean[] colSuppressRepeats, HashMap<Point, MReportLine> rowColReportLine, ArrayList<Integer> finReportSumRows)
+		MPrintTableFormat tFormat, ArrayList<Integer> pageBreak, Boolean[] colSuppressRepeats, HashMap<Point, MReportLine> rowColReportLine,
+		ArrayList<Integer> finReportSumRows)
 	{
 		super();
 		if (log.isLoggable(Level.FINE))
@@ -255,7 +256,7 @@ public class TableElement extends PrintElement
 
 	/** first data row number per page	*/
 	private ArrayList<Integer>	m_firstRowOnPage = new ArrayList<Integer>();
-	/** first column number per -> page	*/
+	/** first column number per -&gt; page	*/
 	private ArrayList<Integer>	m_firstColumnOnPage = new ArrayList<Integer>();
 	/** Height of page					*/
 	private ArrayList<Float>	m_pageHeight = new ArrayList<Float>();
@@ -294,7 +295,7 @@ public class TableElement extends PrintElement
 	
 	/**************************************************************************
 	 * 	Layout and Calculate Size.
-	 * 	Set p_width & p_height
+	 * 	Set p_width and p_height
 	 * 	@return true if calculated
 	 */
 	protected boolean calculateSize()
@@ -352,7 +353,7 @@ public class TableElement extends PrintElement
 				{
 					dimensions.add(null);
 				}
-				
+
 				Font font = getFont(row, dataCol);
 
 				Serializable dataItem = m_data.getRowData().get(dataCol);
@@ -1745,7 +1746,7 @@ public class TableElement extends PrintElement
 					g2D.setPaint(m_tFormat.getHeaderLine_Color());
 					g2D.setStroke(rLine.getUnderlineStroke(m_tFormat.getVLineStroke()));
 					g2D.drawLine(origX, curY, (int) (origX + colWidth - m_tFormat.getVLineStroke().floatValue()), curY);
-					curY += V_GAP;
+					curY += V_GAP + m_tFormat.getVLineStroke().floatValue();
 				}
 				if (rLine.getUnderline() > 0)
 				{
@@ -1792,15 +1793,15 @@ public class TableElement extends PrintElement
                 boolean nextIsFunction = m_functionRows.contains(Integer.valueOf(row+1));
                 if (nextIsFunction && m_functionRows.contains(Integer.valueOf(row)))
                     nextIsFunction = false;     //  this is a function line too
-                
 				MReportLine nextLine = getReportLine(row + 1, col);
 				if (nextIsFunction || (m_finReportSumRows.contains(Integer.valueOf(row + 1)) && nextLine != null
-				                       && nextLine.getOverline() == 0))
+						&& nextLine.getOverline() == 0))
 				{
 					g2D.setPaint(m_tFormat.getFunctFG_Color());
 					g2D.setStroke(m_tFormat.getHLine_Stroke());
-					// -> - (bottom)
-					g2D.drawLine(origX, curY, (int) (origX + colWidth - m_tFormat.getVLineStroke().floatValue()), curY);
+					
+					g2D.drawLine(origX, curY, 				// -> - (bottom)
+							(int) (origX + colWidth - m_tFormat.getVLineStroke().floatValue()), curY);
 				}
                 else if (m_tFormat.isPaintHLines())
                 {

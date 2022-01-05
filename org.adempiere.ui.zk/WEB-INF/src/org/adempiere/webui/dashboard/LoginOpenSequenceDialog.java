@@ -671,3 +671,4 @@ public class LoginOpenSequenceDialog extends Window
 	} // DragListener
 
 }
+}

@@ -59,6 +59,7 @@ import org.zkoss.zul.Center;
 import org.zkoss.zul.North;
 import org.zkoss.zul.South;
 
+@org.idempiere.ui.zk.annotation.Form(name = "org.compiere.apps.form.VFactReconcile")
 public class WFactReconcile extends FactReconcile 
 implements IFormController, EventListener<Event>, WTableModelListener, ValueChangeListener{
 	
@@ -186,7 +187,9 @@ implements IFormController, EventListener<Event>, WTableModelListener, ValueChan
 		
 		// Parameter Panel
 		North north = new North();
-		north.setStyle("border: none; max-height: 60%;");
+		north.setStyle("border: none;");
+		if (ClientInfo.isMobile())
+			north.setStyle("max-height: 60%;");
 		mainLayout.appendChild(north);
 		north.appendChild(parameterPanel);
 		north.setCollapsible(true);
@@ -531,8 +534,7 @@ implements IFormController, EventListener<Event>, WTableModelListener, ValueChan
 	
 	/**
 	 *	Zoom to target
-	 *  @param AD_Window_ID window id
-	 *  @param zoomQuery zoom query
+	 *  @param tableID table id
 	 */
 	protected void zoom (int tableID)
 	{

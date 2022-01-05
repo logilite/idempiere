@@ -22,14 +22,15 @@ import java.util.Properties;
 
 /** Generated Model for AD_Tree_Favorite
  *  @author iDempiere (generated) 
- *  @version Release 3.1 - $Id$ */
+ *  @version Release 9 - $Id$ */
+@org.adempiere.base.Model(table="AD_Tree_Favorite")
 public class X_AD_Tree_Favorite extends PO implements I_AD_Tree_Favorite, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20201109L;
+	private static final long serialVersionUID = 20211224L;
 
     /** Standard Constructor */
     public X_AD_Tree_Favorite (Properties ctx, int AD_Tree_Favorite_ID, String trxName)
@@ -37,7 +38,6 @@ public class X_AD_Tree_Favorite extends PO implements I_AD_Tree_Favorite, I_Pers
       super (ctx, AD_Tree_Favorite_ID, trxName);
       /** if (AD_Tree_Favorite_ID == 0)
         {
-			setAD_Role_ID (0);
 			setAD_Tree_Favorite_ID (0);
 			setAD_User_ID (0);
         } */
@@ -66,7 +66,7 @@ public class X_AD_Tree_Favorite extends PO implements I_AD_Tree_Favorite, I_Pers
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_AD_Tree_Favorite[")
+      StringBuilder sb = new StringBuilder ("X_AD_Tree_Favorite[")
         .append(get_ID()).append("]");
       return sb.toString();
     }

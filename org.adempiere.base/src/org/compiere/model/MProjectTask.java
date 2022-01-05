@@ -46,11 +46,7 @@ public class MProjectTask extends X_C_ProjectTask
 		super (ctx, C_ProjectTask_ID, trxName);
 		if (C_ProjectTask_ID == 0)
 		{
-		//	setC_ProjectTask_ID (0);	//	PK
-		//	setC_ProjectPhase_ID (0);	//	Parent
-		//	setC_Task_ID (0);			//	FK
 			setSeqNo (0);
-		//	setName (null);
 			setQty (Env.ZERO);
 		}
 	}	//	MProjectTask
@@ -105,7 +101,7 @@ public class MProjectTask extends X_C_ProjectTask
 		final String whereClause = "C_ProjectPhase_ID=? and C_ProjectTask_ID=? ";
 		List <MProjectLine> list = new Query(getCtx(), I_C_ProjectLine.Table_Name, whereClause, get_TrxName())
 			.setParameters(getC_ProjectPhase_ID(), getC_ProjectTask_ID())
-			.setOrderBy("Line")
+			.setOrderBy("Line,C_ProjectLine_ID")
 			.list();		
 		//
 		MProjectLine[] retValue = new MProjectLine[list.size()];

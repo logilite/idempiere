@@ -1,5 +1,6 @@
 package org.adempiere.pipo2;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -7,11 +8,14 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.zip.ZipInputStream;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.MArchive;
 import org.compiere.model.MAttachment;
 import org.compiere.model.MAttachmentEntry;
 import org.compiere.model.MColumn;
+import org.compiere.model.MImage;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.model.POInfo;
@@ -29,9 +33,9 @@ public class PoFiller{
 	private Element element;
 
 	/**
-	 *
+	 * @param ctx
 	 * @param po
-	 * @param atts
+	 * @param element
 	 * @param handler
 	 */
 	public PoFiller(PIPOContext ctx, PO po, Element element, AbstractElementHandler handler){
@@ -54,10 +58,12 @@ public class PoFiller{
 		String value = getStringValue(columnName);
 		if(value == null)
 			return false;
-		
-		String strParts [] = value.split("[|]");
-		return strParts.length == 2;
 
+		String strParts [] = value.split("[|]");
+		return (   strParts.length == 2
+				&& strParts[0].endsWith(PackOut.PACKOUT_BLOB_FILE_EXTENSION)
+				&& (   PoExporter.POEXPORTER_BLOB_TYPE_STRING.equals(strParts[1]) // see PoExporter.addBlob
+					|| PoExporter.POEXPORTER_BLOB_TYPE_BYTEARRAY.equals(strParts[1])));
 	}
 	
 	/**
@@ -213,11 +219,11 @@ public class PoFiller{
 					}
 				}
 				if (po.get_ColumnIndex(columnName) >= 0) {
-				MColumn col = MColumn.get(ctx.ctx, po.get_TableName(), columnName);
+				MColumn col = MColumn.get(ctx.ctx, po.get_TableName(), columnName, po.get_TrxName());
 				MTable foreignTable = null;
 				String refTableName = col.getReferenceTableName();
 				if (refTableName != null) {
-					foreignTable = MTable.get(Env.getCtx(), refTableName);
+					foreignTable = MTable.get(Env.getCtx(), refTableName, po.get_TrxName());
 				} else {
 					if ("Record_ID".equalsIgnoreCase(columnName)) {
 						// special case - get the foreign table using AD_Table_ID
@@ -234,7 +240,7 @@ public class PoFiller{
 							}
 						}
 						if (tableID > 0) {
-							foreignTable = MTable.get(Env.getCtx(), tableID);
+							foreignTable = MTable.get(Env.getCtx(), tableID, po.get_TrxName());
 							refTableName = foreignTable.getTableName();
 						}
 					}
@@ -387,7 +393,11 @@ public class PoFiller{
 				} else if (DisplayType.isLOB(info.getColumnDisplayType(index))) {
 					setBlob(qName);
 				} else {
-					setString(qName);
+					if (isBlobOnPackinFile(qName)) {
+						setBlob(qName);
+					} else {
+						setString(qName);
+					}
 				}
 			}
 		}
@@ -439,7 +449,7 @@ public class PoFiller{
 					PackIn packIn = ctx.packIn;
 					try {
 						bytes = packIn.readBlob(fileName);
-						if ("byte[]".equals(dataType)) {
+						if (PoExporter.POEXPORTER_BLOB_TYPE_BYTEARRAY.equals(dataType)) {
 							data = bytes;
 						} else {
 							data = new String(bytes, "UTF-8");
@@ -448,7 +458,30 @@ public class PoFiller{
 						throw new AdempiereException(e.getLocalizedMessage(), e);
 					}
 				}
-				po.set_ValueNoCheck(qName, data);
+				if ("BinaryData".equals(qName) && data instanceof byte[]) {
+					if (po instanceof MArchive) {
+						/* it comes as a zip file with a single PDF file */
+					    byte[] output = null;
+					    try (ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream((byte[]) data));) {
+							if (zipStream.getNextEntry() != null) {
+								output = zipStream.readAllBytes();
+							}
+						} catch (Exception e) {
+							throw new AdempiereException(e.getLocalizedMessage(), e);
+						}
+						if (output != null) {
+						    ((MArchive) po).setBinaryData((byte[]) output);
+						} else {
+							throw new AdempiereException("Zip file for Archive could not be decompressed");
+						}
+					} else if (po instanceof MImage) {
+						((MImage) po).setBinaryData((byte[]) data);
+					} else {
+						po.set_ValueNoCheck(qName, data);
+					}
+				} else {
+					po.set_ValueNoCheck(qName, data);
+				}
 			}
 		}
 	}

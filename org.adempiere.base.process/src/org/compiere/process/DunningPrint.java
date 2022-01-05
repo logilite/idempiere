@@ -43,6 +43,7 @@ import org.compiere.util.EMail;
  *  
  *  FR 2872010 - Dunning Run for a complete Dunning (not just level) - Developer: Carlos Ruiz - globalqss - Sponsor: Metas
  */
+@org.adempiere.base.annotation.Process
 public class DunningPrint extends SvrProcess
 {
 	/**	Mail PDF				*/
@@ -97,14 +98,13 @@ public class DunningPrint extends SvrProcess
 		//	Need to have Template
 		if (p_EMailPDF && p_R_MailText_ID == 0)
 			throw new AdempiereUserError ("@NotFound@: @R_MailText_ID@");
-//		String subject = "";
+
 		MMailText mText = null;
 		if (p_EMailPDF)
 		{
 			mText = (MMailText) MTable.get(getCtx(), MMailText.Table_ID).getPO(p_R_MailText_ID, get_TrxName());
 			if (p_EMailPDF && mText.get_ID() == 0)
 				throw new AdempiereUserError ("@NotFound@: @R_MailText_ID@ - " + p_R_MailText_ID);
-//			subject = mText.getMailHeader();
 		}
 		//
 		MDunningRun run = new MDunningRun (getCtx(), p_C_DunningRun_ID, get_TrxName());

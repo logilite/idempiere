@@ -26,7 +26,6 @@ import org.compiere.model.MLookupFactory;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
-import org.compiere.util.Util;
 
 /**
  * Excel Exporter Adapter for GridTab
@@ -84,12 +83,7 @@ public class GridTabXLSXExporter extends AbstractXLSXExporter implements IGridTa
 
 		if (lookup != null)
 		{
-			if (DisplayType.isMultiSelect(f.getDisplayType()))
-			{
-				value = Util.convertArrayToStingForExport(key, lookup);
-			}
-			else
-				value = lookup.getDisplay(key);
+			value = lookup.getDisplay(key);
 		}
 		return value;
 	}
@@ -204,7 +198,7 @@ public class GridTabXLSXExporter extends AbstractXLSXExporter implements IGridTa
 	{
 		return false;
 	}
-
+	
 	@Override
 	public boolean isDisplayed(int row, int col)
 	{

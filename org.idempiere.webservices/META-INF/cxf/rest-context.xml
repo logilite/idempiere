@@ -31,5 +31,4 @@ http://cxf.apache.org/schemas/jaxrs.xsd">
 		
 	<bean id="xmlBeansJSONProvider"
 		class="org.idempiere.jaxrs.provider.xmlbeans.XMLBeansJSONProvider" />
-
 </beans>

@@ -40,9 +40,9 @@ import org.compiere.util.TimeUtil;
  *  @author Jorg Janke
  *  @author victor.perez@e-evolution.com, e-Evolution http://www.e-evolution.com
  * 			<li>FR [ 1948157  ]  Is necessary the reference for document reverse
- *  		@see http://sourceforge.net/tracker/?func=detail&atid=879335&aid=1948157&group_id=176962
+ *  		@see https://sourceforge.net/p/adempiere/feature-requests/412/
  * 			<li> FR [ 2520591 ] Support multiples calendar for Org 
- *			@see http://sourceforge.net/tracker2/?func=detail&atid=879335&aid=2520591&group_id=176962 
+ *			@see https://sourceforge.net/p/adempiere/feature-requests/631/
  *  @author Armen Rizal, Goodwill Consulting
  * 			<li>BF [ 1745154 ] Cost in Reversing Material Related Docs  
  *  @author Teo Sarca, www.arhipac.ro
@@ -54,7 +54,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 3201199540429467933L;
+	private static final long serialVersionUID = 5415969431202357692L;
 
 	/**
 	 * 	Standard Constructor
@@ -67,7 +67,6 @@ public class MMovement extends X_M_Movement implements DocAction
 		super (ctx, M_Movement_ID, trxName);
 		if (M_Movement_ID == 0)
 		{
-		//	setC_DocType_ID (0);
 			setDocAction (DOCACTION_Complete);	// CO
 			setDocStatus (DOCSTATUS_Drafted);	// DR
 			setIsApproved (false);
@@ -111,7 +110,7 @@ public class MMovement extends X_M_Movement implements DocAction
 		final String whereClause = "M_Movement_ID=?";
 		List<MMovementLine> list = new Query(getCtx(), I_M_MovementLine.Table_Name, whereClause, get_TrxName())
 		 										.setParameters(getM_Movement_ID())
-		 										.setOrderBy(MMovementLine.COLUMNNAME_Line)
+		 										.setOrderBy(MMovementLine.COLUMNNAME_Line+","+MMovementLine.COLUMNNAME_M_MovementLine_ID)
 		 										.list();
 		m_lines = new MMovementLine[list.size ()];
 		list.toArray (m_lines);
@@ -183,10 +182,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	 */
 	public File createPDF (File file)
 	{
-	//	ReportEngine re = ReportEngine.get (getCtx(), ReportEngine.INVOICE, getC_Invoice_ID());
-	//	if (re == null)
-			return null;
-	//	return re.getPDF(file);
+		return null;
 	}	//	createPDF
 
 	
@@ -298,7 +294,7 @@ public class MMovement extends X_M_Movement implements DocAction
 			//      Mandatory Instance
 			MProduct product = line.getProduct();
 			if (line.getM_AttributeSetInstance_ID() == 0 || line.getM_AttributeSetInstanceTo_ID() == 0) {
-				if (product != null && product.isASIMandatory(true)) {
+				if (product != null && product.isASIMandatoryFor(null, true)) {
 					if (product.getAttributeSet() != null && !product.getAttributeSet().excludeTableEntry(MMovementLine.Table_ID, true)) {  // outgoing
 						BigDecimal qtyDiff = line.getMovementQty();
 						// verify if the ASIs are captured on lineMA
@@ -343,7 +339,6 @@ public class MMovement extends X_M_Movement implements DocAction
 		if (confirmations.length > 0)
 			return;
 		
-		//	Create Confirmation
 		MMovementConfirm.create (this, false);
 	}	//	createConfirmation
 	
@@ -391,19 +386,11 @@ public class MMovement extends X_M_Movement implements DocAction
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
 
-		//	Outstanding (not processed) Incoming Confirmations ?
-		MMovementConfirm[] confirmations = getConfirmations(true);
-		for (int i = 0; i < confirmations.length; i++)
-		{
-			MMovementConfirm confirm = confirmations[i];
-			if (!confirm.isProcessed())
-			{
-				m_processMsg = "Open: @M_MovementConfirm_ID@ - " 
-					+ confirm.getDocumentNo();
-				return DocAction.STATUS_InProgress;
-			}
+		if (pendingConfirmations()) {
+			m_processMsg = "@Open@: @M_MovementConfirm_ID@";
+			return DocAction.STATUS_InProgress;
 		}
-		
+
 		//	Implicit Approval
 		if (!isApproved())
 			approveIt();
@@ -449,7 +436,7 @@ public class MMovement extends X_M_Movement implements DocAction
 						//
 						MLocator locator = new MLocator (getCtx(), line.getM_Locator_ID(), get_TrxName());
 						//Update Storage 
-						if (!MStorageOnHand.add(getCtx(),locator.getM_Warehouse_ID(),
+							if (!MStorageOnHand.add(getCtx(),
 								line.getM_Locator_ID(),
 								line.getM_Product_ID(), 
 								ma.getM_AttributeSetInstance_ID(),
@@ -470,7 +457,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	
 						//Update Storage 
 						MLocator locatorTo = new MLocator (getCtx(), line.getM_LocatorTo_ID(), get_TrxName());
-						if (!MStorageOnHand.add(getCtx(),locatorTo.getM_Warehouse_ID(),
+						if (!MStorageOnHand.add(getCtx(),
 								line.getM_LocatorTo_ID(),
 								line.getM_Product_ID(), 
 								M_AttributeSetInstanceTo_ID,
@@ -535,12 +522,11 @@ public class MMovement extends X_M_Movement implements DocAction
 						if (dateMPolicy == null && storages.length > 0)
 							dateMPolicy = storages[0].getDateMaterialPolicy();
 						
-						MLocator locator = new MLocator (getCtx(), line.getM_Locator_ID(), get_TrxName());
 						//Update Storage 
 						Timestamp effDateMPolicy = dateMPolicy;
 						if (dateMPolicy == null && qtyToAllocate.negate().signum() > 0)
 							effDateMPolicy = getMovementDate();
-						if (!MStorageOnHand.add(getCtx(),locator.getM_Warehouse_ID(),
+						if (!MStorageOnHand.add(getCtx(),
 								line.getM_Locator_ID(),
 								line.getM_Product_ID(), 
 								line.getM_AttributeSetInstance_ID(),
@@ -555,8 +541,7 @@ public class MMovement extends X_M_Movement implements DocAction
 						effDateMPolicy = dateMPolicy;
 						if (dateMPolicy == null && qtyToAllocate.signum() > 0)
 							effDateMPolicy = getMovementDate();
-						MLocator locatorTo = new MLocator (getCtx(), line.getM_LocatorTo_ID(), get_TrxName());
-						if (!MStorageOnHand.add(getCtx(),locatorTo.getM_Warehouse_ID(),
+						if (!MStorageOnHand.add(getCtx(),
 								line.getM_LocatorTo_ID(),
 								line.getM_Product_ID(), 
 								line.getM_AttributeSetInstanceTo_ID(),
@@ -619,7 +604,21 @@ public class MMovement extends X_M_Movement implements DocAction
 		setDocAction(DOCACTION_Close);
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
-	
+
+	/**
+	 * Outstanding (not processed) Incoming Confirmations ?
+	 * @return true if there are pending Confirmations
+	 */
+	public boolean pendingConfirmations() {
+		MMovementConfirm[] confirmations = getConfirmations(true);
+		for (int i = 0; i < confirmations.length; i++) {
+			MMovementConfirm confirm = confirmations[i];
+			if (!confirm.isProcessed())
+				return true;
+		}
+		return false;
+	}
+
 	/**
 	 * 	Set the definite document number after completed
 	 */
@@ -814,7 +813,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	
 	protected MMovement reverse(boolean accrual)
 	{
-		Timestamp reversalDate = accrual ? Env.getContextAsDate(getCtx(), "#Date") : getMovementDate();
+		Timestamp reversalDate = accrual ? Env.getContextAsDate(getCtx(), Env.DATE) : getMovementDate();
 		if (reversalDate == null) {
 			reversalDate = new Timestamp(System.currentTimeMillis());
 		}
@@ -992,8 +991,6 @@ public class MMovement extends X_M_Movement implements DocAction
 	 */
 	public int getC_Currency_ID()
 	{
-	//	MPriceList pl = MPriceList.get(getCtx(), getM_PriceList_ID());
-	//	return pl.getC_Currency_ID();
 		return 0;
 	}	//	getC_Currency_ID
 	

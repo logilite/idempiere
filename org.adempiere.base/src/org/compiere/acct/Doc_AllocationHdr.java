@@ -32,6 +32,7 @@ import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MAllocationLine;
 import org.compiere.model.MCashLine;
 import org.compiere.model.MConversionRate;
+import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
@@ -106,6 +107,16 @@ public class Doc_AllocationHdr extends Doc
 		{
 			MAllocationLine line = lines[i];
 			DocLine_Allocation docLine = new DocLine_Allocation(line, this);
+
+			//	Get Payment Conversion Rate
+			if (line.getC_Payment_ID() != 0)
+			{
+				MPayment payment = new MPayment (getCtx(), line.getC_Payment_ID(), getTrxName());
+				int C_ConversionType_ID = payment.getC_ConversionType_ID();
+				docLine.setC_ConversionType_ID(C_ConversionType_ID);
+				if (payment.isOverrideCurrencyRate())
+					docLine.setCurrencyRate(payment.getCurrencyRate());
+			}
 			//
 			if (log.isLoggable(Level.FINE)) log.fine(docLine.toString());
 			list.add (docLine);
@@ -158,14 +169,14 @@ public class Doc_AllocationHdr extends Doc
 	 *  CashBankTransfer
 	 *      -
 	 *  ==============================
-	 *  Realized Gain & Loss
+	 *  Realized Gain and Loss
 	 * 		AR/AP			DR		CR
 	 * 		Realized G/L	DR		CR
 	 *
 	 *
 	 *  </pre>
-	 *  Tax needs to be corrected for discount & write-off;
-	 *  Currency gain & loss is realized here.
+	 *  Tax needs to be corrected for discount and write-off;
+	 *  Currency gain and loss is realized here.
 	 *  @param as accounting schema
 	 *  @return Fact
 	 */
@@ -434,7 +445,8 @@ public class Doc_AllocationHdr extends Doc
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
 						fl.setC_BPartner_ID(payment.getC_BPartner_ID());
 					}
-					allocPayAccounted = allocPayAccounted.add(fl.getAcctBalance().negate());
+					if (fl != null)
+						allocPayAccounted = allocPayAccounted.add(fl.getAcctBalance().negate());
 				}
 				else if (isUsingClearing && line.getC_CashLine_ID() != 0) // Avoid usage of clearing accounts
 				{
@@ -523,6 +535,9 @@ public class Doc_AllocationHdr extends Doc
 					fact.remove(factline);
 			}
 		}
+		
+		if (getC_Currency_ID() != as.getC_Currency_ID())
+			balanceAccounting(as, fact);
 
 		//	reset line info
 		setC_BPartner_ID(0);
@@ -753,26 +768,6 @@ public class Doc_AllocationHdr extends Doc
 
 
 	/**************************************************************************
-	 * 	Create Realized Gain & Loss.
-	 * 	Compares the Accounted Amount of the Invoice to the
-	 * 	Accounted Amount of the Allocation
-	 *	@param as accounting schema
-	 *	@param fact fact
-	 *	@param acct account
-	 *	@param invoice invoice
-	 *	@param allocationSource source amt
-	 *	@param allocationAccounted acct amt
-	 *	@return Error Message or null if OK
-	 *
-	 */
-	protected String createRealizedGainLoss (DocLine line, MAcctSchema as, Fact fact, MAccount acct,
-		MInvoice invoice, BigDecimal allocationSource, BigDecimal allocationAccounted)
-	{
-		return createInvoiceGainLoss(line, as, fact, acct, invoice, allocationSource, allocationAccounted);
-	}	//	createRealizedGainLoss
-
-
-	/**************************************************************************
 	 * 	Create Tax Correction.
 	 * 	Requirement: Adjust the tax amount, if you did not receive the full
 	 * 	amount of the invoice (payment discount, write-off).
@@ -873,7 +868,7 @@ public class Doc_AllocationHdr extends Doc
 		// For Invoice
 		List<Object> valuesInv = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
 				MInvoice.Table_ID, invoice.getC_Invoice_ID(), as.getC_AcctSchema_ID(), acct.getAccount_ID());
-		if (valuesInv != null) {
+		if (valuesInv != null && valuesInv.size() >= 4) {
 			if (invoice.getReversal_ID() == 0 || invoice.get_ID() < invoice.getReversal_ID())
 			{
 				if ((invoice.isSOTrx() && invoice.getGrandTotal().signum() >= 0 && !invoice.isCreditMemo()) 
@@ -1001,12 +996,14 @@ public class Doc_AllocationHdr extends Doc
 		// For Payment
 		List<Object> valuesPay = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
 				MPayment.Table_ID, payment.getC_Payment_ID(), as.getC_AcctSchema_ID(), acct.getAccount_ID());
-		if (valuesPay != null) {
+		if (valuesPay != null && valuesPay.size() >= 4) {
 			paymentSource = (BigDecimal) valuesPay.get(0); // AmtSourceDr
 			paymentAccounted = (BigDecimal) valuesPay.get(1); // AmtAcctDr
-			if (paymentSource.signum() == 0 && paymentAccounted.signum() == 0) {
-				paymentSource = (BigDecimal) valuesPay.get(2); // AmtSourceCr
-				paymentAccounted = (BigDecimal) valuesPay.get(3); // AmtAcctCr
+			if (paymentSource != null && paymentAccounted != null) {
+				if (paymentSource.signum() == 0 && paymentAccounted.signum() == 0) {
+					paymentSource = (BigDecimal) valuesPay.get(2); // AmtSourceCr
+					paymentAccounted = (BigDecimal) valuesPay.get(3); // AmtAcctCr
+				}
 			}
 		}
 		
@@ -1116,7 +1113,7 @@ public class Doc_AllocationHdr extends Doc
 			// For Invoice
 			List<Object> valuesInv = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
 					MInvoice.Table_ID, invoice.getC_Invoice_ID(), as.getC_AcctSchema_ID(), acct.getAccount_ID());
-			if (valuesInv != null) {
+			if (valuesInv != null && valuesInv.size() >= 4) {
 				BigDecimal invoiceSource = null;
 				BigDecimal invoiceAccounted = null;
 				if (invoice.getReversal_ID() == 0 || invoice.get_ID() < invoice.getReversal_ID())
@@ -1275,7 +1272,7 @@ public class Doc_AllocationHdr extends Doc
 				// For Allocation
 				List<Object> valuesAlloc = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
 						MAllocationHdr.Table_ID, alloc.get_ID(), as.getC_AcctSchema_ID(), acct.getAccount_ID(), alloc.get_ID(), invoice.getC_Invoice_ID());
-				if (valuesAlloc != null) {
+				if (valuesAlloc != null && valuesAlloc.size() >= 4) {
 					totalAmtSourceDr = (BigDecimal) valuesAlloc.get(0);
 					if (totalAmtSourceDr == null)
 						totalAmtSourceDr = Env.ZERO;
@@ -1323,6 +1320,7 @@ public class Doc_AllocationHdr extends Doc
 					.append(" AND C_AcctSchema_ID=?")
 					.append(" AND PostingType='A'")
 					.append(" AND (Account_ID=? OR Account_ID=? OR Account_ID=?)")
+					.append(" AND Description LIKE 'Invoice%'")
 					.append(" AND Line_ID IN (SELECT C_AllocationLine_ID FROM C_AllocationLine WHERE C_AllocationHdr_ID=? AND C_Invoice_ID=?)");
 				
 				// For Allocation
@@ -1330,7 +1328,7 @@ public class Doc_AllocationHdr extends Doc
 						MAllocationHdr.Table_ID, alloc.get_ID(), as.getC_AcctSchema_ID(), 
 						gain.getAccount_ID(), loss.getAccount_ID(), as.getCurrencyBalancing_Acct().getAccount_ID(),
 						alloc.get_ID(), invoice.getC_Invoice_ID());
-				if (valuesAlloc != null) {
+				if (valuesAlloc != null && valuesAlloc.size() >= 4) {
 					totalAmtSourceDr = (BigDecimal) valuesAlloc.get(0);
 					if (totalAmtSourceDr == null)
 						totalAmtSourceDr = Env.ZERO;
@@ -1468,15 +1466,17 @@ public class Doc_AllocationHdr extends Doc
 			// For Payment
 			List<Object> valuesPay = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
 					MPayment.Table_ID, payment.getC_Payment_ID(), as.getC_AcctSchema_ID(), htPayAcct.get(payment.getC_Payment_ID()).getAccount_ID());
-			if (valuesPay != null) {
+			if (valuesPay != null && valuesPay.size() >= 4) {
 				BigDecimal paymentSource = (BigDecimal) valuesPay.get(0); // AmtSourceDr
 				BigDecimal paymentAccounted = (BigDecimal) valuesPay.get(1); // AmtAcctDr
-				if (paymentSource.signum() == 0 && paymentAccounted.signum() == 0) {
-					paymentSource = (BigDecimal) valuesPay.get(2); // AmtSourceCr
-					paymentAccounted = (BigDecimal) valuesPay.get(3); // AmtAcctCr
+				if (paymentSource != null && paymentAccounted != null) {
+					if (paymentSource.signum() == 0 && paymentAccounted.signum() == 0) {
+						paymentSource = (BigDecimal) valuesPay.get(2); // AmtSourceCr
+						paymentAccounted = (BigDecimal) valuesPay.get(3); // AmtAcctCr
+					}
+					htPaySource.put(payment.getC_Payment_ID(), paymentSource);
+					htPayAccounted.put(payment.getC_Payment_ID(), paymentAccounted);
 				}
-				htPaySource.put(payment.getC_Payment_ID(), paymentSource);
-				htPayAccounted.put(payment.getC_Payment_ID(), paymentAccounted);
 			}
 		}
 		
@@ -1605,7 +1605,7 @@ public class Doc_AllocationHdr extends Doc
 				// For Allocation
 				List<Object> valuesAlloc = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
 						MAllocationHdr.Table_ID, alloc.get_ID(), as.getC_AcctSchema_ID(), htPayAcct.get(payment.getC_Payment_ID()).getAccount_ID(), alloc.get_ID(), payment.getC_Payment_ID());
-				if (valuesAlloc != null) {
+				if (valuesAlloc != null && valuesAlloc.size() >= 4) {
 					totalAmtSourceDr = (BigDecimal) valuesAlloc.get(0);
 					if (totalAmtSourceDr == null)
 						totalAmtSourceDr = Env.ZERO;
@@ -1653,6 +1653,7 @@ public class Doc_AllocationHdr extends Doc
 					.append(" AND C_AcctSchema_ID=?")
 					.append(" AND PostingType='A'")
 					.append(" AND (Account_ID=? OR Account_ID=? OR Account_ID=?)")
+					.append(" AND Description LIKE 'Payment%'")
 					.append(" AND Line_ID IN (SELECT C_AllocationLine_ID FROM C_AllocationLine WHERE C_AllocationHdr_ID=? AND C_Payment_ID=?)");
 				
 				// For Allocation
@@ -1660,7 +1661,7 @@ public class Doc_AllocationHdr extends Doc
 						MAllocationHdr.Table_ID, alloc.get_ID(), as.getC_AcctSchema_ID(), 
 						gain.getAccount_ID(), loss.getAccount_ID(), as.getCurrencyBalancing_Acct().getAccount_ID(),
 						alloc.get_ID(), payment.getC_Payment_ID());
-				if (valuesAlloc != null) {
+				if (valuesAlloc != null && valuesAlloc.size() >= 4) {
 					totalAmtSourceDr = (BigDecimal) valuesAlloc.get(0);
 					if (totalAmtSourceDr == null)
 						totalAmtSourceDr = Env.ZERO;
@@ -1753,6 +1754,37 @@ public class Doc_AllocationHdr extends Doc
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Balance Accounting
+	 * @param as accounting schema
+	 * @param fact
+	 * @return
+	 */
+	private FactLine balanceAccounting(MAcctSchema as, Fact fact)
+	{
+		FactLine line = null;
+		if (!fact.isAcctBalanced())
+		{
+			MAccount gain = MAccount.get(as.getCtx(), as.getAcctSchemaDefault().getRealizedGain_Acct());
+			MAccount loss = MAccount.get(as.getCtx(), as.getAcctSchemaDefault().getRealizedLoss_Acct());
+
+			BigDecimal totalAmtAcctDr = Env.ZERO;
+			BigDecimal totalAmtAcctCr = Env.ZERO;
+			for (FactLine factLine : fact.getLines())
+			{
+				totalAmtAcctDr = totalAmtAcctDr.add(factLine.getAmtAcctDr());
+				totalAmtAcctCr = totalAmtAcctCr.add(factLine.getAmtAcctCr());
+			}
+			
+			BigDecimal acctDifference = totalAmtAcctDr.subtract(totalAmtAcctCr);
+			if (as.isCurrencyBalancing() && acctDifference.abs().compareTo(TOLERANCE) < 0)
+				line = fact.createLine (null, as.getCurrencyBalancing_Acct(), as.getC_Currency_ID(), acctDifference.negate());
+			else
+				line = fact.createLine(null, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
+		}
+		return line;
 	}
 }   //  Doc_Allocation
 
@@ -1858,6 +1890,9 @@ class Doc_AllocationTax
 				return false;
 			}
 
+			Doc doc = DocManager.getDocument(as, MInvoice.Table_ID, factAcct.getRecord_ID(), line.getPO().get_TrxName());
+			MDocType dt = new MDocType(Env.getCtx(), (doc!=null)?doc.getC_DocType_ID():-1, line.getPO().get_TrxName());
+			String docBaseType=(dt.getC_DocType_ID()>0)?dt.getDocBaseType():"";
 
 //			Discount Amount
 			if (m_DiscountAmt.signum() != 0)
@@ -1867,22 +1902,37 @@ class Doc_AllocationTax
 				{
 					BigDecimal amount = calcAmount(factAcct.getAmtSourceDr(),
 						total, m_DiscountAmt, precision);
+
 					if (amount.signum() != 0)
 					{
 						//for sales actions
 						if (m_IsSOTrx) {
-							fact.createLine (line, m_DiscountAccount,
-								as.getC_Currency_ID(), amount, null);
-							fact.createLine (line, taxAcct,
-								as.getC_Currency_ID(), null, amount);
+							if(docBaseType.equals(MDocType.DOCBASETYPE_ARCreditMemo)) {
+								fact.createLine (line, m_DiscountAccount,
+										as.getC_Currency_ID(), amount.negate(), null);
+								fact.createLine (line, taxAcct,
+										as.getC_Currency_ID(), null, amount.negate());
+							}else {
+
+								fact.createLine (line, m_DiscountAccount,
+										as.getC_Currency_ID(), amount, null);
+								fact.createLine (line, taxAcct,
+										as.getC_Currency_ID(), null, amount);
+							}
 						} else {
 						//for purchase actions
-							fact.createLine (line, m_DiscountAccount,
-								as.getC_Currency_ID(), amount.negate(), null);
-							fact.createLine (line, taxAcct,
-								as.getC_Currency_ID(), null, amount.negate());
+							if(docBaseType.equals(MDocType.DOCBASETYPE_APCreditMemo)) {
+								fact.createLine (line, m_DiscountAccount,
+										as.getC_Currency_ID(), amount, null);
+								fact.createLine (line, taxAcct,
+										as.getC_Currency_ID(), null, amount);
+							} else {
+								fact.createLine (line, m_DiscountAccount,
+										as.getC_Currency_ID(), amount.negate(), null);
+								fact.createLine (line, taxAcct,
+										as.getC_Currency_ID(), null, amount.negate());
+							}
 						}
-
 					}
 				}
 				//	Original Tax is CR - need to correct it DR
@@ -1894,15 +1944,33 @@ class Doc_AllocationTax
 					{
 //						for sales actions
 						if (m_IsSOTrx) {
-							fact.createLine (line, taxAcct,
-								as.getC_Currency_ID(), amount, null);
-							fact.createLine (line, m_DiscountAccount,
-								as.getC_Currency_ID(), null, amount);
+							if(docBaseType.equals(MDocType.DOCBASETYPE_ARCreditMemo)) {
+								fact.createLine (line, taxAcct,
+										as.getC_Currency_ID(), amount.negate(), null);
+								fact.createLine (line, m_DiscountAccount,
+									as.getC_Currency_ID(), null, amount.negate());
+							}else {
+
+								fact.createLine (line, taxAcct,
+									as.getC_Currency_ID(), amount, null);
+								fact.createLine (line, m_DiscountAccount,
+									as.getC_Currency_ID(), null, amount);
+							}
+
 						} else {
-							fact.createLine (line, taxAcct,
-								as.getC_Currency_ID(), amount.negate(), null);
-							fact.createLine (line, m_DiscountAccount,
-								as.getC_Currency_ID(), null, amount.negate());
+							if(docBaseType.equals(MDocType.DOCBASETYPE_APCreditMemo)) {
+								fact.createLine (line, taxAcct,
+									as.getC_Currency_ID(), amount, null);
+								fact.createLine (line, m_DiscountAccount,
+									as.getC_Currency_ID(), null, amount);
+							}else {
+
+								fact.createLine (line, taxAcct,
+									as.getC_Currency_ID(), amount.negate(), null);
+								fact.createLine (line, m_DiscountAccount,
+									as.getC_Currency_ID(), null, amount.negate());
+							}
+
 						}
 					}
 				}
@@ -1919,15 +1987,29 @@ class Doc_AllocationTax
 					if (amount.signum() != 0)
 					{
 						if (m_IsSOTrx) {
-							fact.createLine (line, m_WriteOffAccount,
-									as.getC_Currency_ID(), amount, null);
-							fact.createLine (line, taxAcct,
-									as.getC_Currency_ID(), null, amount);
-						} else {
-							fact.createLine (line, m_WriteOffAccount,
+							if(docBaseType.equals(MDocType.DOCBASETYPE_ARCreditMemo)) {
+								fact.createLine (line, m_WriteOffAccount,
 									as.getC_Currency_ID(), amount.negate(), null);
-							fact.createLine (line, taxAcct,
+								fact.createLine (line, taxAcct,
 									as.getC_Currency_ID(), null, amount.negate());
+							} else {
+								fact.createLine (line, m_WriteOffAccount,
+									as.getC_Currency_ID(), amount, null);
+								fact.createLine (line, taxAcct,
+									as.getC_Currency_ID(), null, amount);
+							}
+						} else {
+							if(docBaseType.equals(MDocType.DOCBASETYPE_APCreditMemo)) {
+								fact.createLine (line, m_WriteOffAccount,
+									as.getC_Currency_ID(), amount, null);
+								fact.createLine (line, taxAcct,
+									as.getC_Currency_ID(), null, amount);
+							} else {
+								fact.createLine (line, m_WriteOffAccount,
+									as.getC_Currency_ID(), amount.negate(), null);
+								fact.createLine (line, taxAcct,
+									as.getC_Currency_ID(), null, amount.negate());
+							}
 						}
 					}
 				}
@@ -1939,20 +2021,33 @@ class Doc_AllocationTax
 					if (amount.signum() != 0)
 					{
 						if(m_IsSOTrx) {
-							fact.createLine (line, taxAcct,
-									as.getC_Currency_ID(), amount, null);
-							fact.createLine (line, m_WriteOffAccount,
-									as.getC_Currency_ID(), null, amount);
-						} else {
-							fact.createLine (line, taxAcct,
+							if(docBaseType.equals(MDocType.DOCBASETYPE_ARCreditMemo)) {
+								fact.createLine (line, taxAcct,
 									as.getC_Currency_ID(), amount.negate(), null);
-							fact.createLine (line, m_WriteOffAccount,
+								fact.createLine (line, m_WriteOffAccount,
 									as.getC_Currency_ID(), null, amount.negate());
+							} else {
+								fact.createLine (line, taxAcct,
+									as.getC_Currency_ID(), amount, null);
+								fact.createLine (line, m_WriteOffAccount,
+									as.getC_Currency_ID(), null, amount);
+							}
+						} else {
+							if(docBaseType.equals(MDocType.DOCBASETYPE_APCreditMemo)) {
+								fact.createLine (line, taxAcct,
+									as.getC_Currency_ID(), amount, null);
+								fact.createLine (line, m_WriteOffAccount,
+									as.getC_Currency_ID(), null, amount);
+							} else {
+								fact.createLine (line, taxAcct,
+									as.getC_Currency_ID(), amount.negate(), null);
+								fact.createLine (line, m_WriteOffAccount,
+									as.getC_Currency_ID(), null, amount.negate());
+							}
 						}
 					}
 				}
 			}	//	WriteOff
-
 		}	//	for all lines
 		return true;
 	}	//	createEntries

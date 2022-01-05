@@ -33,6 +33,7 @@ import org.compiere.util.Env;
  *
  *	@author Nicolas Micoud - IDEMPIERE 448
  */
+@org.adempiere.base.annotation.Process
 public class CopyFromBankStmt extends SvrProcess
 {
 	private int		m_C_BankStatement_ID = 0;

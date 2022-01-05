@@ -21,14 +21,17 @@ import java.lang.ref.WeakReference;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.adempiere.util.ServerContext;
+import org.adempiere.util.ServerContextURLHandler;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.DrillCommand;
 import org.adempiere.webui.component.TokenCommand;
@@ -41,7 +44,9 @@ import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ITheme;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.BrowserToken;
+import org.adempiere.webui.util.DesktopWatchDog;
 import org.adempiere.webui.util.UserPreference;
+import org.compiere.Adempiere;
 import org.compiere.model.MRole;
 import org.compiere.model.MSession;
 import org.compiere.model.MSysConfig;
@@ -63,10 +68,14 @@ import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.Session;
+import org.zkoss.zk.ui.WebApp;
 import org.zkoss.zk.ui.event.ClientInfoEvent;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.sys.DesktopCache;
+import org.zkoss.zk.ui.sys.SessionCtrl;
+import org.zkoss.zk.ui.sys.WebAppCtrl;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Window;
 
@@ -85,7 +94,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -3320656546509525766L;
+	private static final long serialVersionUID = -6725805283410008847L;
 
 	public static final String ZK_CLIENT_CONTEXT = "zk_client_context";
 	
@@ -136,10 +145,18 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 
 	public void onCreate()
     {
+		String ping = Executions.getCurrent().getHeader("X-PING");
+		if (!Util.isEmpty(ping, true))
+		{
+			cleanupForPing();
+	        return;
+		}
+		
         Executions.getCurrent().getDesktop().enableServerPush(true);
+        DesktopWatchDog.addDesktop(Executions.getCurrent().getDesktop());
         
         SessionManager.setSessionApplication(this);
-        Session session = Executions.getCurrent().getDesktop().getSession();
+        final Session session = Executions.getCurrent().getDesktop().getSession();
         
         Properties ctx = Env.getCtx();
         langSession = Env.getContext(ctx, Env.LANGUAGE);
@@ -170,6 +187,11 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
         else
         {
         	Clients.showBusy(null);
+        	if (session.getAttribute(CLIENT_INFO) != null)
+        	{
+        		clientInfo = (ClientInfo) session.getAttribute(CLIENT_INFO);
+        	}
+        	getRoot().addEventListener(Events.ON_CLIENT_INFO, this);
         	//use echo event to make sure server push have been started when loginCompleted is call
         	Events.echoEvent(ON_LOGIN_COMPLETED, this, null);
         }
@@ -178,8 +200,27 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
         Executions.getCurrent().getDesktop().addListener(new TokenCommand());
         Executions.getCurrent().getDesktop().addListener(new ZoomCommand());
         
-        eventThreadEnabled = Executions.getCurrent().getDesktop().getWebApp().getConfiguration().isEventThreadEnabled();
+        eventThreadEnabled = Executions.getCurrent().getDesktop().getWebApp().getConfiguration().isEventThreadEnabled();        
     }
+
+	private void cleanupForPing() {
+		final Desktop desktop = Executions.getCurrent().getDesktop();
+		final WebApp wapp = desktop.getWebApp();
+		final DesktopCache desktopCache = ((WebAppCtrl) wapp).getDesktopCache(desktop.getSession());	    	    
+		final Session session = desktop.getSession();
+		
+		//clear context, invalidate session
+		Env.getCtx().clear();		
+		Adempiere.getThreadPoolExecutor().schedule(() -> {
+			((SessionCtrl)session).invalidateNow();
+			desktop.setAttribute(DESKTOP_SESSION_INVALIDATED_ATTR, Boolean.TRUE);
+		    try {
+				desktopCache.removeDesktop(desktop);
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}
+		}, 1, TimeUnit.SECONDS);
+	}
 
     public void onOk()
     {
@@ -212,7 +253,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
         }
 
         MSystem system = MSystem.get(Env.getCtx());
-        Env.setContext(ctx, "#System_Name", system.getName());
+        Env.setContext(ctx, Env.SYSTEM_NAME, system.getName());
         
         // Validate language
 		Language language = Language.getLanguage(langLogin);
@@ -258,8 +299,8 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 		currSess.setAttribute("Check_AD_User_ID", Env.getAD_User_ID(ctx));
 
 		//enable full interface, relook into this when doing preference
-		Env.setContext(ctx, "#ShowTrl", true);
-		Env.setContext(ctx, "#ShowAcct", MRole.getDefault().isShowAcct());
+		Env.setContext(ctx, Env.SHOW_TRANSLATION, true);
+		Env.setContext(ctx, Env.SHOW_ACCOUNTING, MRole.getDefault().isShowAcct());
 
 		// to reload preferences when the user refresh the browser
 		userPreference = loadUserPreference(Env.getAD_User_ID(ctx));
@@ -270,7 +311,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 
 		keyListener = new Keylistener();
 		keyListener.setPage(this.getPage());
-		keyListener.setCtrlKeys("@a@c@d@e@f@h@n@o@p@r@s@t@z@x@#left@#right@#up@#down@#home@#end#enter^u@u@#pgdn@#pgup$#f2^#f2@l");
+		keyListener.setCtrlKeys("@a@c@d@e@f@h@l@m@n@o@p@r@s@t@w@x@z@#left@#right@#up@#down@#home@#end#enter^u@u@#pgdn@#pgup$#f2^#f2");
 		keyListener.setAutoBlur(false);
 		
 		//create new desktop
@@ -300,15 +341,15 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 			BrowserToken.remove();
 		}
 		
-		Env.setContext(ctx, "#UIClient", "zk");
-		Env.setContext(ctx, "#DBType", DB.getDatabase().getName());
+		Env.setContext(ctx, Env.UI_CLIENT, "zk");
+		Env.setContext(ctx, Env.DB_TYPE, DB.getDatabase().getName());
 		StringBuilder localHttpAddr = new StringBuilder(Executions.getCurrent().getScheme());
 		localHttpAddr.append("://").append(Executions.getCurrent().getLocalAddr());
 		int port = Executions.getCurrent().getLocalPort();
 		if (port > 0 && port != 80) {
 			localHttpAddr.append(":").append(port);
 		}
-		Env.setContext(ctx, "#LocalHttpAddr", localHttpAddr.toString());		
+		Env.setContext(ctx, Env.LOCAL_HTTP_ADDRESS, localHttpAddr.toString());		
 		Clients.response(new AuScript("zAu.cmd0.clearBusy()"));
 		
 		//init favorite
@@ -399,31 +440,50 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 	 */
     public void logout()
     {
-	    Desktop desktop = Executions.getCurrent().getDesktop();
-	    if (desktop.isServerPushEnabled())
-			desktop.enableServerPush(false);
-    	
-    	Session session = logout0();
-    	
+	    final Desktop desktop = Executions.getCurrent().getDesktop();    	
+	    final WebApp wapp = desktop.getWebApp();
+	    final DesktopCache desktopCache = ((WebAppCtrl) wapp).getDesktopCache(desktop.getSession());	    	    
+	    final Session session = logout0();
+	    
     	//clear context, invalidate session
     	Env.getCtx().clear();
-    	session.invalidate();
+    	afterLogout(session);
     	desktop.setAttribute(DESKTOP_SESSION_INVALIDATED_ATTR, Boolean.TRUE);
             	
         //redirect to login page
-        Executions.sendRedirect("index.zul");        
+        Executions.sendRedirect("index.zul");       
+        
+        try {
+    		desktopCache.removeDesktop(desktop);
+    		DesktopWatchDog.removeDesktop(desktop);
+    	} catch (Throwable t) {
+    		t.printStackTrace();
+    	}
     }
+
+	private void afterLogout(final Session session) {
+		try {
+    		((SessionCtrl)session).onDestroyed();
+    	} catch (Throwable t) {
+    		t.printStackTrace();
+    	}
+    	((SessionCtrl)session).invalidateNow();
+	}
     
+	/**
+	 * Perform logout after user close a browser tab without first logging out
+	 */
     public void logoutAfterTabDestroyed(){
     	Desktop desktop = Executions.getCurrent().getDesktop();
-	    if (desktop.isServerPushEnabled())
-			desktop.enableServerPush(false);
+	    DesktopWatchDog.removeDesktop(desktop);
 	    
        	Session session = logout0();
 
     	//clear context, invalidate session
     	Env.getCtx().clear();
-    	session.invalidate();
+    	SessionCtrl ctrl = (SessionCtrl) session;
+    	if (!ctrl.isInvalidated() && session.getNativeSession() != null)
+    		afterLogout(session);
     }
     
 
@@ -486,7 +546,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 			clientInfo.desktopXOffset = c.getDesktopXOffset();
 			clientInfo.desktopYOffset = c.getDesktopYOffset();
 			clientInfo.orientation = c.getOrientation();
-			clientInfo.timeZone = c.getTimeZone();			
+			clientInfo.timeZone = TimeZone.getTimeZone(c.getZoneId());			
 			String ua = Servlets.getUserAgent((ServletRequest) Executions.getCurrent().getNativeRequest());
 			clientInfo.userAgent = ua;
 			ua = ua.toLowerCase();
@@ -550,9 +610,14 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 		//save context for re-login
 		Properties properties = new Properties();
 		Env.setContext(properties, Env.AD_CLIENT_ID, Env.getAD_Client_ID(Env.getCtx()));
+		Env.setContext(properties, Env.AD_CLIENT_NAME, Env.getContext(Env.getCtx(), Env.AD_CLIENT_NAME));
 		Env.setContext(properties, Env.AD_ORG_ID, Env.getAD_Org_ID(Env.getCtx()));
 		Env.setContext(properties, Env.AD_USER_ID, user.getAD_User_ID());
+		Env.setContext(properties, Env.SALESREP_ID, user.getAD_User_ID());
+		Env.setContext(properties, Env.AD_USER_NAME, Env.getContext(Env.getCtx(), Env.AD_USER_NAME));
 		Env.setContext(properties, Env.AD_ROLE_ID, Env.getAD_Role_ID(Env.getCtx()));
+		Env.setContext(properties, Env.AD_ROLE_NAME, Env.getContext(Env.getCtx(), Env.AD_ROLE_NAME));
+		Env.setContext(properties, Env.USER_LEVEL, Env.getContext(Env.getCtx(), Env.USER_LEVEL));
 		Env.setContext(properties, Env.AD_ORG_NAME, Env.getContext(Env.getCtx(), Env.AD_ORG_NAME));
 		Env.setContext(properties, Env.M_WAREHOUSE_ID, Env.getContext(Env.getCtx(), Env.M_WAREHOUSE_ID));
 		Env.setContext(properties, BrowserToken.REMEMBER_ME, Env.getContext(Env.getCtx(), BrowserToken.REMEMBER_ME));
@@ -571,7 +636,9 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 		Locale locale = (Locale) desktop.getSession().getAttribute(Attributes.PREFERRED_LOCALE);
 		HttpServletRequest httpRequest = (HttpServletRequest) Executions.getCurrent().getNativeRequest();		
 		Env.setContext(properties, SessionContextListener.SERVLET_SESSION_ID, httpRequest.getSession().getId());
-		
+		if (Env.getCtx().get(ServerContextURLHandler.SERVER_CONTEXT_URL_HANDLER) != null)
+			properties.put(ServerContextURLHandler.SERVER_CONTEXT_URL_HANDLER, Env.getCtx().get(ServerContextURLHandler.SERVER_CONTEXT_URL_HANDLER));
+
 		//stop key listener
 		if (keyListener != null) {
 			keyListener.detach();

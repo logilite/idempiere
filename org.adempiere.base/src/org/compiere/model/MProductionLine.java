@@ -14,6 +14,7 @@ import org.adempiere.exceptions.AdempiereException;
 import org.compiere.process.DocAction;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 
@@ -36,10 +37,8 @@ public class MProductionLine extends X_M_ProductionLine {
 		super (ctx, M_ProductionLine_ID, trxName);
 		if (M_ProductionLine_ID == 0)
 		{
-			setLine (0);	// @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM M_ProductionLine WHERE M_Production_ID=@M_Production_ID@
+			setLine (0);
 			setM_AttributeSetInstance_ID (0);
-//			setM_Locator_ID (0);	// @M_Locator_ID@
-//			setM_Product_ID (0);
 			setM_ProductionLine_ID (0);
 			setM_Production_ID (0);
 			setMovementQty (Env.ZERO);
@@ -55,7 +54,7 @@ public class MProductionLine extends X_M_ProductionLine {
 	
 	/**
 	 * Parent Constructor
-	 * @param plan
+	 * @param header
 	 */
 	@Deprecated
 	public MProductionLine( MProduction header ) {
@@ -374,6 +373,10 @@ public class MProductionLine extends X_M_ProductionLine {
 
 		if (getM_Production_ID() > 0) 
 		{
+			if (newRecord && productionParent.isProcessed()) {
+				log.saveError("ParentComplete", Msg.translate(getCtx(), "M_Production_ID"));
+				return false;
+			}
 			if ( productionParent.getM_Product_ID() == getM_Product_ID() && productionParent.getProductionQty().signum() == getMovementQty().signum())
 				setIsEndProduct(true);
 			else 
@@ -382,6 +385,11 @@ public class MProductionLine extends X_M_ProductionLine {
 		else 
 		{
 			I_M_ProductionPlan plan = getM_ProductionPlan();
+			MProduction prod = new MProduction(getCtx(), plan.getM_Production_ID(), get_TrxName());
+			if (newRecord && prod.isProcessed()) {
+				log.saveError("ParentComplete", Msg.translate(getCtx(), "M_Production_ID"));
+				return false;
+			}
 			if (plan.getM_Product_ID() == getM_Product_ID() && plan.getProductionQty().signum() == getMovementQty().signum())
 				setIsEndProduct(true);
 			else 

@@ -61,7 +61,7 @@ import org.compiere.util.Util;
  *  @author victor.perez@e-evolution.com, e-Evolution http://www.e-evolution.com
  *			<li> Original contributor of Distribution Functionality
  * 			<li> FR [ 2520591 ] Support multiples calendar for Org 
- *			@see http://sourceforge.net/tracker2/?func=detail&atid=879335&aid=2520591&group_id=176962 
+ *			@see https://sourceforge.net/p/adempiere/feature-requests/631/ 
  */
 public class MDDOrder extends X_DD_Order implements DocAction
 {
@@ -258,7 +258,7 @@ public class MDDOrder extends X_DD_Order implements DocAction
 	}	//	setShip_User_ID
 
 	/**
-	 * 	Set Business Partner Defaults & Details.
+	 * 	Set Business Partner Defaults and Details.
 	 * 	SOTrx should be set.
 	 * 	@param bp business partner
 	 */
@@ -374,7 +374,7 @@ public class MDDOrder extends X_DD_Order implements DocAction
 	 */
 	public String toString ()
 	{
-		StringBuffer sb = new StringBuffer ("MDDOrder[")
+		StringBuilder sb = new StringBuilder ("MDDOrder[")
 			.append(get_ID()).append("-").append(getDocumentNo())
 			.append(",IsSOTrx=").append(isSOTrx())
 			.append(",C_DocType_ID=").append(getC_DocType_ID())
@@ -434,7 +434,7 @@ public class MDDOrder extends X_DD_Order implements DocAction
 	 */
 	public MDDOrderLine[] getLines (String whereClause, String orderClause)
 	{
-		StringBuffer whereClauseFinal = new StringBuffer(MDDOrderLine.COLUMNNAME_DD_Order_ID).append("=?");
+		StringBuilder whereClauseFinal = new StringBuilder(MDDOrderLine.COLUMNNAME_DD_Order_ID).append("=?");
 		if (!Util.isEmpty(whereClause, true))
 			whereClauseFinal.append(" AND (").append(whereClause).append(")");
 		//
@@ -608,7 +608,7 @@ public class MDDOrder extends X_DD_Order implements DocAction
 		//	Default Warehouse
 		if (getM_Warehouse_ID() == 0)
 		{
-			int ii = Env.getContextAsInt(getCtx(), "#M_Warehouse_ID");
+			int ii = Env.getContextAsInt(getCtx(), Env.M_WAREHOUSE_ID);
 			if (ii != 0)
 				setM_Warehouse_ID(ii);
 			else
@@ -638,7 +638,7 @@ public class MDDOrder extends X_DD_Order implements DocAction
 		//	Default Sales Rep
 		if (getSalesRep_ID() == 0)
 		{
-			int ii = Env.getContextAsInt(getCtx(), "#AD_User_ID");
+			int ii = Env.getContextAsInt(getCtx(), Env.AD_USER_ID);
 			if (ii != 0)
 				setSalesRep_ID (ii);
 		}
@@ -842,7 +842,6 @@ public class MDDOrder extends X_DD_Order implements DocAction
 	 * 	Reserve Inventory. 
 	 * 	Counterpart: MMovement.completeIt()
 	 * 	@param lines distribution order lines (ordered by M_Product_ID for deadlock prevention)
-	 * 	@return true if (un) reserved
 	 */
 	public void reserveStock (MDDOrderLine[] lines)
 	{
@@ -882,7 +881,7 @@ public class MDDOrder extends X_DD_Order implements DocAction
 					if (product.isStocked())
 					{
 						//	Update Storage
-						if (!MStorageOnHand.add(getCtx(), locator_to.getM_Warehouse_ID(), locator_to.getM_Locator_ID(), 
+						if (!MStorageOnHand.add(getCtx(), locator_to.getM_Locator_ID(), 
 							line.getM_Product_ID(), 
 							line.getM_AttributeSetInstance_ID(),
 							Env.ZERO,null, get_TrxName()))
@@ -890,7 +889,7 @@ public class MDDOrder extends X_DD_Order implements DocAction
 							throw new AdempiereException();
 						}
 						
-						if (!MStorageOnHand.add(getCtx(), locator_from.getM_Warehouse_ID(), locator_from.getM_Locator_ID(), 
+						if (!MStorageOnHand.add(getCtx(), locator_from.getM_Locator_ID(), 
 							line.getM_Product_ID(), 
 							line.getM_AttributeSetInstanceTo_ID(),
 							Env.ZERO,null, get_TrxName()))
@@ -1047,7 +1046,7 @@ public class MDDOrder extends X_DD_Order implements DocAction
 			return true;
 		
 		if (log.isLoggable(Level.INFO)) log.info("createReversals");
-		StringBuffer info = new StringBuffer();
+		StringBuilder info = new StringBuilder();
 		
 		//	Reverse All *Shipments*
 		info.append("@M_InOut_ID@:");

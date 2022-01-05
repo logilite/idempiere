@@ -29,10 +29,13 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.logging.Level;
 
+import javax.activation.FileDataSource;
+
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.Callback;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.LayoutUtils;
+import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Button;
 import org.adempiere.webui.component.Checkbox;
 import org.adempiere.webui.component.Column;
@@ -97,7 +100,7 @@ import org.zkoss.zul.impl.XulElement;
  * @author	Niraj Sohun
  * @date	September 28, 2007
 */
-
+@org.idempiere.ui.zk.annotation.Form(name = "org.compiere.apps.form.ArchiveViewer")
 public class WArchiveViewer extends Archive implements IFormController, EventListener<Event>
 {
 	private static final String ONCLOSE_TIMESTAMP_ATTR = "onclose.timestamp";
@@ -147,7 +150,6 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 	};
 	private CustomForm form;
 	
-//	private Vbox queryPanel = new Vbox();
 	private Checkbox reportField = new Checkbox();
 	private Label processLabel = new Label(Msg.translate(Env.getCtx(), "AD_Process_ID"));
 	private Listbox processField = new Listbox();
@@ -167,7 +169,6 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 	private Datebox createdQFrom = new Datebox();
 	private Datebox createdQTo = new Datebox();
 	
-//	private Vbox viewEnterPanel = new Vbox();
 	private Button bBack = new Button();
 	private Button bNext = new Button();
 	private Label positionInfo = new Label(".");
@@ -183,7 +184,7 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 	private Textbox helpField = new Textbox();
 	private ConfirmPanel confirmPanel = new ConfirmPanel(true);
 	private Button updateArchive = new Button(); 
-	private Button deleteArchive = new Button();
+	private Button deleteArchive = new Button(); 
 	private Button bEmail = new Button();
 		
 	private Tabbox tabbox = new Tabbox();
@@ -267,7 +268,7 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 	private void jbInit() throws Exception
 	{
 		ZKUpdateUtil.setWidth(tabbox, "100%");
-		ZKUpdateUtil.setHeight(tabbox, "90%");
+		ZKUpdateUtil.setVflex(tabbox, "1");		
 		tabbox.appendChild(tabs);
 		tabbox.appendChild(tabpanels);
 		tabbox.addEventListener(Events.ON_SELECT, this);
@@ -308,8 +309,8 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 			bEmail.setImage(ThemeManager.getThemeResource("images/SendMail24.png"));
 		bEmail.setTooltiptext(Msg.getMsg(Env.getCtx(), "EMail"));
 		bEmail.addEventListener(Events.ON_CLICK, this);
-		
-		if(ThemeManager.isUseFontIconForImage())
+
+		if (ThemeManager.isUseFontIconForImage())
 			bBack.setIconSclass("z-icon-Previous");
 		else
 			bBack.setImage(ThemeManager.getThemeResource("images/wfBack24.png"));
@@ -503,7 +504,6 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 		rows.appendChild(row);
 		row.appendCellChild(descriptionField, 3);
 		descriptionField.setRows(3);
-		ZKUpdateUtil.setHeight(descriptionField, "100%");
 		ZKUpdateUtil.setHflex(descriptionField, "1");
 		
 		row = new Row();
@@ -515,7 +515,6 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 		rows.appendChild(row);
 		row.appendCellChild(helpField, 3);
 		helpField.setRows(3);
-		ZKUpdateUtil.setHeight(helpField, "100%");
 		ZKUpdateUtil.setHflex(helpField, "1");
 		
 		row = new Row();
@@ -591,6 +590,8 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 		tabpanels.appendChild(tabViewPanel);
 		
 		confirmPanel.addActionListener(this);
+		ZKUpdateUtil.setVflex(confirmPanel, "min");
+		confirmPanel.setStyle("padding-top: 2px;padding-bottom: 2px;");
 		updateQDisplay();
 
 		iframe.setId("reportFrame");
@@ -629,7 +630,7 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 			updateVDisplay(false);
 		else if (e.getTarget() == bNext)
 			updateVDisplay(true);
-		else if(e.getTarget() == bEmail)
+		else if (e.getTarget() == bEmail)
 			sendMail();
 		else if (e.getTarget() == bRefresh)
 			iframe.invalidate();
@@ -685,24 +686,20 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 			}
 		});
 	}
-	
+
 	/**
 	 * Send EMail with the current displayed file as attachment
 	 */
-	private void sendMail()
-	{
+	private void sendMail() {
 		MArchive ar = m_archives[m_index];
 
 		MUser from = MUser.get(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()));
-		String fileName = System.getProperty("java.io.tmpdir") + System.getProperty("file.separator") + ar.getName()
-				+ ".pdf";
+		String fileName = System.getProperty("java.io.tmpdir") +
+				System.getProperty("file.separator") + ar.getName() + ".pdf";
 		File attachment = new File(fileName);
-		try
-		{
+		try {
 			Files.write(attachment.toPath(), ar.getBinaryData());
-		}
-		catch (IOException e)
-		{
+		} catch (IOException e) {
 			throw new AdempiereException(e);
 		}
 
@@ -714,7 +711,7 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 			dialog.show();
 		}
 	}
-	
+
 	/**
 	 * 	Update View Display
 	 * 	@param next show next Archive

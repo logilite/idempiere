@@ -39,7 +39,6 @@ import org.compiere.model.MQuery;
 import org.compiere.model.MRole;
 import org.compiere.model.Query;
 import org.compiere.model.X_AD_PrintFormat;
-import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -47,6 +46,8 @@ import org.compiere.util.KeyNamePair;
 import org.compiere.util.Language;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
+import org.idempiere.cache.ImmutableIntPOCache;
+import org.idempiere.cache.ImmutablePOSupport;
 
 /**
  *	AD_PrintFormat - Print Format Model.
@@ -55,12 +56,12 @@ import org.compiere.util.Util;
  * 	@author 	Jorg Janke
  * 	@version 	$Id: MPrintFormat.java,v 1.3 2006/07/30 00:53:02 jjanke Exp $
  */
-public class MPrintFormat extends X_AD_PrintFormat
+public class MPrintFormat extends X_AD_PrintFormat implements ImmutablePOSupport
 {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 2979978408305853342L;
+	private static final long serialVersionUID = -5693788724825608611L;
 
 	private static final String	SQL_GET_PF_ITEMS	= "SELECT * FROM AD_PrintFormatItem pfi WHERE pfi.AD_PrintFormat_ID=? AND pfi.IsActive='Y' "
 														// Display restrictions - Passwords, etc.
@@ -92,6 +93,8 @@ public class MPrintFormat extends X_AD_PrintFormat
 
 	public void reloadItems() {
 		m_items = getItems();
+		if (is_Immutable() && m_items != null && m_items.length > 0)
+			Arrays.stream(m_items).forEach(e -> e.markImmutable());
 	}
 	
 	/**
@@ -107,6 +110,41 @@ public class MPrintFormat extends X_AD_PrintFormat
 		m_items = getItems();
 	}	//	MPrintFormat
 
+	/**
+	 * 
+	 * @param copy
+	 */
+	public MPrintFormat(MPrintFormat copy) 
+	{
+		this(Env.getCtx(), copy);
+	}
+
+	/**
+	 * 
+	 * @param ctx
+	 * @param copy
+	 */
+	public MPrintFormat(Properties ctx, MPrintFormat copy) 
+	{
+		this(ctx, copy, (String) null);
+	}
+
+	/**
+	 * 
+	 * @param ctx
+	 * @param copy
+	 * @param trxName
+	 */
+	public MPrintFormat(Properties ctx, MPrintFormat copy, String trxName) 
+	{
+		this(ctx, 0, trxName);
+		copyPO(copy);
+		this.m_translationViewLanguage = copy.m_translationViewLanguage;
+		this.m_items = copy.m_items != null ? Arrays.stream(copy.m_items).map(e -> {return new MPrintFormatItem(ctx, e, trxName);}).toArray(MPrintFormatItem[]::new) : null;
+		this.m_language = copy.m_language != null ? new Language(copy.m_language) : null;
+		this.m_tFormat = copy.m_tFormat != null ? new MPrintTableFormat(ctx, copy.m_tFormat, trxName) : null;
+	}
+	
 	/** Items							*/
 	private MPrintFormatItem[]		m_items = null;
 	/** Translation View Language		*/
@@ -143,7 +181,6 @@ public class MPrintFormat extends X_AD_PrintFormat
 		if (language != null)
 		{
 			m_language = language;
-		//	log.fine("setLanguage - " + language);
 		}
 		m_translationViewLanguage = null;
 	}	//	getLanguage
@@ -418,7 +455,7 @@ public class MPrintFormat extends X_AD_PrintFormat
 	 */
 	public void setTranslation()
 	{
-		StringBuffer sb = new StringBuffer ("UPDATE AD_PrintFormatItem_Trl t"
+		StringBuilder sb = new StringBuilder ("UPDATE AD_PrintFormatItem_Trl t"
 			+ " SET (PrintName, PrintNameSuffix)="
 			+ " (SELECT PrintName, PrintNameSuffix FROM AD_PrintFormatItem i WHERE i.AD_PrintFormatItem_ID=t.AD_PrintFormatItem_ID) "
 			+ "WHERE AD_PrintFormatItem_ID IN"
@@ -507,6 +544,8 @@ public class MPrintFormat extends X_AD_PrintFormat
 	{
 		super.setAD_PrintTableFormat_ID(AD_PrintTableFormat_ID);
 		m_tFormat = MPrintTableFormat.get (getCtx(), AD_PrintTableFormat_ID, getAD_PrintFont_ID());
+		if (is_Immutable())
+			m_tFormat.markImmutable();
 	}	//	getAD_PrintTableFormat_ID
 
 	/**
@@ -516,7 +555,11 @@ public class MPrintFormat extends X_AD_PrintFormat
 	public MPrintTableFormat getTableFormat()
 	{
 		if (m_tFormat == null)
+		{
 			m_tFormat = MPrintTableFormat.get(getCtx(), getAD_PrintTableFormat_ID(), getAD_PrintFont_ID());
+			if (is_Immutable())
+				m_tFormat.markImmutable();
+		}
 		return m_tFormat;
 	}	//	getTableFormat
 
@@ -526,7 +569,7 @@ public class MPrintFormat extends X_AD_PrintFormat
 	 */
 	public String toString()
 	{
-		StringBuffer sb = new StringBuffer ("MPrintFormat[ID=").append(get_ID())
+		StringBuilder sb = new StringBuilder ("MPrintFormat[ID=").append(get_ID())
 			.append(",Name=").append(getName())
 			.append(",Language=").append(getLanguage())
 			.append(",Items=").append(getItemCount())
@@ -545,8 +588,6 @@ public class MPrintFormat extends X_AD_PrintFormat
 	 */
 	protected Object loadSpecial (ResultSet rs, int index) throws SQLException
 	{
-		//	CreateCopy
-	//	log.config(p_info.getColumnName(index));
 		return null;
 	}   //  loadSpecial
 
@@ -559,11 +600,6 @@ public class MPrintFormat extends X_AD_PrintFormat
 	 */
 	protected String saveNewSpecial (Object value, int index)
 	{
-		//	CreateCopy
-	//	String colName = p_info.getColumnName(index);
-	//	String colClass = p_info.getColumnClass(index).toString();
-	//	String colValue = value == null ? "null" : value.getClass().toString();
-	//	log.log(Level.SEVERE, "Unknown class for column " + colName + " (" + colClass + ") - Value=" + colValue);
 		if (value == null)
 			return "NULL";
 		return value.toString();
@@ -809,7 +845,6 @@ public class MPrintFormat extends X_AD_PrintFormat
 
 		//	Save & complete
 		pf.saveEx();
-	//	pf.dump();
 		pf.setItems (createItems(ctx, pf));
 		//
 		return pf;
@@ -885,7 +920,6 @@ public class MPrintFormat extends X_AD_PrintFormat
 
 		//	Save & complete
 		pf.saveEx();
-	//	pf.dump();
 		pf.setItems (createItems(ctx, pf));
 		//
 		return pf;
@@ -1034,14 +1068,14 @@ public class MPrintFormat extends X_AD_PrintFormat
 		MPrintFormatItem[] items = fromFormat.getItemsNotIn(toFormat.get_ID());
 		for (int i = 0; i < items.length; i++)
 		{
-			MPrintFormatItem pfi = items[i].copyToClient (toFormat.getAD_Client_ID(), toFormat.get_ID());
+			MPrintFormatItem pfi = items[i].copyToClient (toFormat.getAD_Client_ID(), toFormat.get_ID(), toFormat.get_TrxName());
 			if (pfi != null)
 				list.add (pfi);
 		}
 		//
 		MPrintFormatItem[] retValue = new MPrintFormatItem[list.size()];
 		list.toArray(retValue);
-		copyTranslationItems (items, retValue);	//	JTP fix
+		copyTranslationItems (items, retValue, toFormat.get_TrxName());	//	JTP fix
 		return retValue;
 	}	//	copyItems
 
@@ -1049,9 +1083,10 @@ public class MPrintFormat extends X_AD_PrintFormat
      *	Copy translation records (from - to)
      *	@param fromItems from items
      *	@param toItems to items
+     *  @param trxName
      */
     static private void copyTranslationItems (MPrintFormatItem[] fromItems,
-    	MPrintFormatItem[] toItems)
+    	MPrintFormatItem[] toItems, String trxName)
     {
     	if (fromItems == null || toItems == null)
             return;		//	should not happen
@@ -1062,7 +1097,7 @@ public class MPrintFormat extends X_AD_PrintFormat
             int fromID = fromItems[i].getAD_PrintFormatItem_ID();
             int toID = toItems[i].getAD_PrintFormatItem_ID();
 
-            StringBuffer sql = new StringBuffer("UPDATE AD_PrintFormatItem_Trl new ")
+            StringBuilder sql = new StringBuilder("UPDATE AD_PrintFormatItem_Trl new ")
             	//	Set
             	.append("SET (PrintName, PrintNameSuffix, IsTranslated) = ")
             	.append("(")
@@ -1078,7 +1113,7 @@ public class MPrintFormat extends X_AD_PrintFormat
             		.append(" WHERE old.AD_Language=new.AD_Language")
             		.append(" AND AD_PrintFormatItem_ID =").append(fromID)
             		.append(")");
-            int no = DB.executeUpdate(sql.toString(), null);
+            int no = DB.executeUpdate(sql.toString(), trxName);
             if (no == 0)	//	if first has no translation, the rest does neither
             	break;
             counter += no;
@@ -1110,7 +1145,21 @@ public class MPrintFormat extends X_AD_PrintFormat
 	public static MPrintFormat copyToClient (Properties ctx,
 		int AD_PrintFormat_ID, int to_Client_ID)
 	{
-		return copy (ctx, AD_PrintFormat_ID, 0, to_Client_ID);
+		return copyToClient(ctx, AD_PrintFormat_ID, to_Client_ID, (String)null);
+	}
+	
+	/**
+	 * 	Copy existing Definition To Client
+	 * 	@param ctx context
+	 * 	@param AD_PrintFormat_ID format
+	 * 	@param to_Client_ID to client
+	 *  @param trxName
+	 * 	@return print format
+	 */
+	public static MPrintFormat copyToClient (Properties ctx,
+		int AD_PrintFormat_ID, int to_Client_ID, String trxName)
+	{
+		return copy (ctx, AD_PrintFormat_ID, 0, to_Client_ID, trxName);
 	}	//	copy
 
 	/**
@@ -1124,14 +1173,28 @@ public class MPrintFormat extends X_AD_PrintFormat
 	private static MPrintFormat copy (Properties ctx, int from_AD_PrintFormat_ID,
 		int to_AD_PrintFormat_ID, int to_Client_ID)
 	{
+		return copy(ctx, from_AD_PrintFormat_ID, to_AD_PrintFormat_ID, to_Client_ID, (String)null);
+	}
+	
+	/**
+	 * 	Copy existing Definition To Client
+	 * 	@param ctx context
+	 * 	@param from_AD_PrintFormat_ID format
+	 *  @param to_AD_PrintFormat_ID to format or 0 for new
+	 * 	@param to_Client_ID to client (ignored, if to_AD_PrintFormat_ID <> 0)
+	 * 	@return print format
+	 */
+	private static MPrintFormat copy (Properties ctx, int from_AD_PrintFormat_ID,
+		int to_AD_PrintFormat_ID, int to_Client_ID, String trxName)
+	{
 		if (s_log.isLoggable(Level.INFO)) s_log.info ("From AD_PrintFormat_ID=" + from_AD_PrintFormat_ID
 			+ ", To AD_PrintFormat_ID=" + to_AD_PrintFormat_ID
 			+ ", To Client_ID=" + to_Client_ID);
 		if (from_AD_PrintFormat_ID == 0)
 			throw new IllegalArgumentException ("From_AD_PrintFormat_ID is 0");
 		//
-		MPrintFormat from = new MPrintFormat(ctx, from_AD_PrintFormat_ID, null);
-		MPrintFormat to = new MPrintFormat (ctx, to_AD_PrintFormat_ID, null);		//	could be 0
+		MPrintFormat from = new MPrintFormat(ctx, from_AD_PrintFormat_ID, trxName);
+		MPrintFormat to = new MPrintFormat (ctx, to_AD_PrintFormat_ID, trxName);		//	could be 0
 		MPrintFormat.copyValues (from, to);
 		//	New
 		if (to_AD_PrintFormat_ID == 0)
@@ -1163,10 +1226,20 @@ public class MPrintFormat extends X_AD_PrintFormat
 	}
 
 	/** Cached Formats						*/
-	static private CCache<Integer,MPrintFormat> s_formats = new CCache<Integer,MPrintFormat>(Table_Name, 30);
+	static private ImmutableIntPOCache<Integer,MPrintFormat> s_formats = new ImmutableIntPOCache<Integer,MPrintFormat>(Table_Name, 30);
 
 	/**
-	 * 	Get Format
+	 * 	Get Format from cache (immutable)
+	 * 	@param AD_PrintFormat_ID id
+	 * 	@return Format
+	 */
+	static public MPrintFormat get (int AD_PrintFormat_ID)
+	{
+		return get(Env.getCtx(), AD_PrintFormat_ID, false);
+	}
+	
+	/**
+	 * 	Get Format from cache (immutable)
 	 * 	@param ctx context
 	 * 	@param AD_PrintFormat_ID id
 	 *  @param readFromDisk refresh from disk
@@ -1177,24 +1250,18 @@ public class MPrintFormat extends X_AD_PrintFormat
 		Integer key = Integer.valueOf(AD_PrintFormat_ID);
 		MPrintFormat pf = null;
 		if (!readFromDisk)
-			pf = (MPrintFormat)s_formats.get(key);
+			pf = s_formats.get(ctx, key, e -> new MPrintFormat(ctx, e));
 		if (pf == null)
 		{
-			pf = new MPrintFormat (ctx, AD_PrintFormat_ID, null);
-			if (pf.get_ID() <= 0)
-				pf = null;
-			else
-				s_formats.put(key, pf);
+			pf = new MPrintFormat (ctx, AD_PrintFormat_ID, (String)null);
+			if (pf.get_ID() == AD_PrintFormat_ID)
+			{
+				s_formats.put(key, pf, e -> new MPrintFormat(Env.getCtx(), e));
+				return pf;
+			}
+			return null;
 		}
 
-		if (pf != null)
-		{
-			try {
-				pf = pf.clone();
-			} catch (CloneNotSupportedException e) {
-				throw new RuntimeException(e);
-			}
-		}
 		return pf;
 	}	//	get
 
@@ -1248,7 +1315,7 @@ public class MPrintFormat extends X_AD_PrintFormat
     //begin vpj-cd e-evolution
 	/**
 	 * Get ID of Print Format use Name
-	 * @param String formatName
+	 * @param formatName
 	 * @param AD_Table_ID
 	 * @param AD_Client_ID
 	 * @return AD_PrintFormat_ID
@@ -1262,10 +1329,11 @@ public class MPrintFormat extends X_AD_PrintFormat
 	//end vpj-cd e-evolution
 
 	/**
- 	 * @param AD_Table_ID
+	 * @param AD_Table_ID
 	 * @param AD_Window_ID
-	 * @param AD_Client_ID use -1 to retrieve from all client
 	 * @param trxName
+	 * @param makeNewWhenEmpty
+	 * @return
 	 */
 	public static List<KeyNamePair> getAccessiblePrintFormats (int AD_Table_ID, int AD_Window_ID, String trxName, boolean makeNewWhenEmpty)
 	{
@@ -1327,6 +1395,7 @@ public class MPrintFormat extends X_AD_PrintFormat
 	}
 
 	@Override
+	@Deprecated
 	public MPrintFormat clone() throws CloneNotSupportedException {
 		MPrintFormat clone = (MPrintFormat) super.clone();
 		clone.m_items = m_items == null ? null : new MPrintFormatItem[m_items.length];
@@ -1344,26 +1413,18 @@ public class MPrintFormat extends X_AD_PrintFormat
 		return pfAD_Window_ID;
 	}
 
-	/**************************************************************************
-	 * 	Test
-	 * 	@param args arga
-	 */
-	static public void main (String[] args)
+	@Override
+	public MPrintFormat markImmutable() 
 	{
-		org.compiere.Adempiere.startup(true);
-		/**
-		MPrintFormat.createFromTable(Env.getCtx(), 496);	//	Order
-		MPrintFormat.createFromTable(Env.getCtx(), 497);
-		MPrintFormat.createFromTable(Env.getCtx(), 516);	//	Invoice
-		MPrintFormat.createFromTable(Env.getCtx(), 495);
-		MPrintFormat.createFromTable(Env.getCtx(), 500);	//	Shipment
-		MPrintFormat.createFromTable(Env.getCtx(), 501);
-
-		MPrintFormat.createFromTable(Env.getCtx(), 498);	//	Check
-		MPrintFormat.createFromTable(Env.getCtx(), 499);
-		MPrintFormat.createFromTable(Env.getCtx(), 498);	//	Remittance
-		**/
-	}	//	main
-
+		if (is_Immutable())
+			return this;
+		
+		makeImmutable();
+		if (m_items != null && m_items.length > 0)
+			Arrays.stream(m_items).forEach(e -> e.markImmutable());
+		if (m_tFormat != null)
+			m_tFormat.markImmutable();
+		return this;
+	}
 
 }	//	MPrintFormat

@@ -44,19 +44,24 @@ public class MPrintFormatTest extends AbstractTestCase {
 	public void testCopyConstructor() {
 		int orderHeader = 118;
 		
-		/*
-		 * MPrintFormat pf = new MPrintFormat(Env.getCtx(), orderHeader, getTrxName());
-		 * MPrintFormat copy = new MPrintFormat(pf); assertFalse(copy.is_new());
-		 * assertFalse(copy.is_Changed()); assertNull(copy.get_TrxName());
-		 * assertTrue(copy.get_ID() == pf.get_ID()); assertTrue(pf.equals(copy)); int
-		 * count = pf.get_ColumnCount(); for(int i = 0; i < count; i++)
-		 * assertEquals(pf.get_Value(i), copy.get_Value(i));
-		 * 
-		 * copy.set_TrxName(getTrxName()); String copyDescription =
-		 * copy.getDescription() + " copy"; copy.setDescription(copyDescription);
-		 * assertTrue(copy.is_Changed()); copy.saveEx();
-		 * 
-		 * pf.load(getTrxName()); assertEquals(copyDescription, pf.getDescription());
-		 */
+		MPrintFormat pf = new MPrintFormat(Env.getCtx(), orderHeader, getTrxName());
+		MPrintFormat copy = new MPrintFormat(pf);
+		assertFalse(copy.is_new());
+		assertFalse(copy.is_Changed());
+		assertNull(copy.get_TrxName());
+		assertTrue(copy.get_ID() == pf.get_ID());
+		assertTrue(pf.equals(copy));
+		int count = pf.get_ColumnCount();
+		for(int i = 0; i < count; i++)
+			assertEquals(pf.get_Value(i), copy.get_Value(i));
+		
+		copy.set_TrxName(getTrxName());
+		String copyDescription = copy.getDescription() + " copy";
+		copy.setDescription(copyDescription);
+		assertTrue(copy.is_Changed());
+		copy.saveEx();
+		
+		pf.load(getTrxName());
+		assertEquals(copyDescription, pf.getDescription());
 	}
 }

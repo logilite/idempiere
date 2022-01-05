@@ -21,7 +21,6 @@ import java.util.logging.Level;
 
 import org.adempiere.util.Callback;
 import org.adempiere.webui.ClientInfo;
-import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.component.Checkbox;
 import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.Listbox;
@@ -69,6 +68,7 @@ import org.zkoss.zul.Treeitem;
  *  @author Jorg Janke (modify: Sergio Oropeza sergioropeza@gmail.com, soropeza@dcsla.com	06/03/2014)
  *  @version $Id: VTreeMaintenance.java,v 1.3 2006/07/30 00:51:28 jjanke Exp $
  */
+@org.idempiere.ui.zk.annotation.Form(name = "org.compiere.apps.form.VTreeMaintenance")
 public class WTreeMaintenance extends TreeMaintenance implements IFormController, EventListener<Event>
 {
 	private CustomForm form = new CustomForm();	
@@ -98,7 +98,6 @@ public class WTreeMaintenance extends TreeMaintenance implements IFormController
 			preInit();
 			jbInit ();
 			action_loadTree();
-			LayoutUtils.sendDeferLayoutEvent(mainLayout, 100);
 		}
 		catch (Exception ex)
 		{
@@ -253,7 +252,6 @@ public class WTreeMaintenance extends TreeMaintenance implements IFormController
 		if (e.getTarget() == treeField)
 		{
 			action_loadTree();
-			LayoutUtils.sendDeferLayoutEvent(mainLayout, 100);
 		}
 		else if (e.getTarget() == bAddAll)
 			action_treeAddAll();

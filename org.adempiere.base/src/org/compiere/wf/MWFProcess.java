@@ -49,7 +49,7 @@ public class MWFProcess extends X_AD_WF_Process
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -4447369291008183913L;
+	private static final long serialVersionUID = 5981488658756275526L;
 
 	/**
 	 * 	Standard Constructor
@@ -184,7 +184,8 @@ public class MWFProcess extends X_AD_WF_Process
 			params.add(false);
 		}
 		List<MWFActivity> list = new Query(getCtx(), MWFActivity.Table_Name, whereClause.toString(), trxName)
-								.setParameters(params).setOrderBy("Created")
+								.setParameters(params)
+								.setOrderBy(MWFActivity.COLUMNNAME_AD_WF_Activity_ID)
 								.list();
 		m_activities = new MWFActivity[list.size ()];
 		list.toArray (m_activities);
@@ -255,9 +256,9 @@ public class MWFProcess extends X_AD_WF_Process
 	
 	/**************************************************************************
 	 * 	Check Status of Activities.
-	 * 	- update Process if required
 	 * 	- start new activity
 	 * 	@param trxName transaction
+	 * 	@param lastPO PO
 	 */
 	public void checkActivities(String trxName, PO lastPO)
 	{
@@ -273,8 +274,6 @@ public class MWFProcess extends X_AD_WF_Process
 		//
 		MWFActivity[] activities = getActivities (true, true, trxName);	//	requery active
 		String closedState = null;
-		boolean suspended = false;
-		boolean running = false;
 		for (int i = 0; i < activities.length; i++)
 		{
 			MWFActivity activity = activities[i];
@@ -309,6 +308,58 @@ public class MWFProcess extends X_AD_WF_Process
 			else	//	not closed
 			{
 				closedState = null;		//	all need to be closed
+			}
+		}	//	for all activities
+		if (activities.length == 0)
+		{
+			setTextMsg("No Active Processed found");
+			addTextMsg(new Exception(""));
+			closedState = WFSTATE_Terminated;
+		}
+		if (closedState != null)
+			getPO();
+	}	//	checkActivities
+
+	/**************************************************************************
+	 * 	Update process status based on status of activities.
+	 * 	@param trxName transaction
+	 */
+	public void checkCloseActivities(String trxName) {
+		this.set_TrxName(trxName); // ensure process is working on the same transaction
+		if (log.isLoggable(Level.INFO)) log.info("(" + getAD_Workflow_ID() + ") - " + getWFState() 
+			+ (trxName == null ? "" : "[" + trxName + "]"));
+		if (m_state.isClosed())
+			return;
+
+		//
+		MWFActivity[] activities = getActivities (true, false, trxName);	//	requery active
+		String closedState = null;
+		boolean suspended = false;
+		boolean running = false;
+		for (int i = 0; i < activities.length; i++)
+		{
+			MWFActivity activity = activities[i];
+			StateEngine activityState = activity.getState(); 
+			//
+			String activityWFState = activity.getWFState();
+			if (activityState.isClosed())
+			{
+				//
+				if (closedState == null)
+					closedState = activityWFState;
+				else if (!closedState.equals(activityState.getState()))
+				{
+					//	Overwrite if terminated
+					if (activityState.isTerminated())
+						closedState = activityWFState;
+					//	Overwrite if activity aborted and no other terminated
+					else if (activityState.isAborted() && !WFSTATE_Terminated.equals(closedState))
+						closedState = activityWFState;
+				}
+			}
+			else	//	not closed
+			{
+				closedState = null;		//	all need to be closed
 				if (activityState.isSuspended())
 					suspended = true;
 				if (activityState.isRunning())
@@ -324,17 +375,13 @@ public class MWFProcess extends X_AD_WF_Process
 		if (closedState != null)
 		{
 			setWFState(closedState);
-			getPO();
-			//hengsin: remove lock/unlock in workflow which is causing deadlock in many place
-			//if (m_po != null)
-				//m_po.unlock(null);
 		}
 		else if (suspended)
 			setWFState(WFSTATE_Suspended);
 		else if (running)
 			setWFState(WFSTATE_Running);
-	}	//	checkActivities
-
+		saveEx();
+	}	//	checkCloseActivities
 
 	/**
 	 * 	Start Next Activity
@@ -494,7 +541,7 @@ public class MWFProcess extends X_AD_WF_Process
 	public MWorkflow getWorkflow()
 	{
 		if (m_wf == null)
-			m_wf = MWorkflow.get (getCtx(), getAD_Workflow_ID());
+			m_wf = MWorkflow.getCopy(getCtx(), getAD_Workflow_ID(), get_TrxName());
 		if (m_wf.get_ID() == 0)
 			throw new IllegalStateException("Not found - AD_Workflow_ID=" + getAD_Workflow_ID());
 		return m_wf;

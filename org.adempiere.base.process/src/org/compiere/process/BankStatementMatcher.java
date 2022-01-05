@@ -32,6 +32,7 @@ import org.compiere.model.X_I_BankStatement;
  *  @author Jorg Janke
  *  @version $Id: BankStatementMatcher.java,v 1.3 2006/09/25 00:59:41 jjanke Exp $
  */
+@org.adempiere.base.annotation.Process
 public class BankStatementMatcher extends SvrProcess
 {
 	/**	Matchers					*/

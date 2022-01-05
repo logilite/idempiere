@@ -48,11 +48,11 @@ import org.compiere.model.I_AD_Field;
 import org.compiere.model.MField;
 import org.compiere.model.MRefList;
 import org.compiere.model.MRole;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTab;
 import org.compiere.model.Query;
 import org.compiere.model.X_AD_Tab_Customization;
 import org.compiere.util.CLogger;
-import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.NamePair;
@@ -79,7 +79,7 @@ public class CustomizeGridViewPanel extends Panel
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -6300916636341781651L;
+	private static final long serialVersionUID = -6200912526954948898L;
 
 	private Map<Integer, String> m_columnsWidth;
 	ArrayList<Integer> tableSeqs;
@@ -88,9 +88,11 @@ public class CustomizeGridViewPanel extends Panel
 	/**
 	 *	Sort Tab Constructor
 	 *
-	 *  @param WindowNo Window No
-	 * @param columnsWidth 
-	 *  @param GridTab
+	 * @param WindowNo Window No
+	 * @param AD_Tab_ID
+	 * @param AD_User_ID
+	 * @param columnsWidth
+	 * @param gridFieldIds
 	 */
 	public CustomizeGridViewPanel(int WindowNo, int AD_Tab_ID, int AD_User_ID, Map<Integer, String> columnsWidth,ArrayList<Integer> gridFieldIds)
 	{
@@ -119,6 +121,7 @@ public class CustomizeGridViewPanel extends Panel
 	private Checkbox chkSaveWidth = new Checkbox();
 	private Label lblGridMode = new Label();
 	private Listbox lstGridMode = new Listbox();
+	private Checkbox chkAutoHideEmptyColumn = new Checkbox();
 
 	//
 	SimpleListModel noModel = new SimpleListModel();
@@ -273,6 +276,11 @@ public class CustomizeGridViewPanel extends Panel
 		southPanel.appendChild(lstGridMode);
 		
 		sep = new Separator();
+		southPanel.appendChild(sep);
+		chkAutoHideEmptyColumn.setLabel(Msg.getElement(Env.getCtx(), "IsAutoHideEmptyColumn"));
+		southPanel.appendChild(chkAutoHideEmptyColumn);
+		
+		sep = new Separator();
 		sep.setSpacing("2px");
 		southPanel.appendChild(sep);
 
@@ -283,13 +291,12 @@ public class CustomizeGridViewPanel extends Panel
 			public void onEvent(Event event) throws Exception {
 				if (event.getTarget().equals(
 						confirmPanel.getButton(ConfirmPanel.A_OK))) {
-					saveData();
+					onOk();
 				} else if (event.getTarget().equals(
 						confirmPanel.getButton(ConfirmPanel.A_CANCEL))) {
-					getParent().detach();
+					onCancel();
 				} else if (event.getTarget().equals(confirmPanel.getButton(ConfirmPanel.A_RESET))) {
-					tableSeqs.clear();
-					loadData();
+					onReset();
 				}
 				else if (event.getTarget().equals(confirmPanel.getButton(ConfirmPanel.A_RESET)))
 				{
@@ -324,6 +331,28 @@ public class CustomizeGridViewPanel extends Panel
 		
 	}	//	init
 	
+	/**
+	 * reset form
+	 */
+	public void onReset() {
+		tableSeqs.clear();
+		loadData();
+	}
+
+	/**
+	 * save changes
+	 */
+	public void onOk() {
+		saveData();
+	}
+
+	/**
+	 * cancel form
+	 */
+	public void onCancel() {
+		getParent().detach();
+	}
+	
 	public void loadData()
 	{
 		MTabCustomization tabCust = MTabCustomization.get(Env.getCtx(), m_AD_User_ID, m_AD_Tab_ID,  null);
@@ -343,7 +372,7 @@ public class CustomizeGridViewPanel extends Panel
 		{
 			List<MField> lsFieldsOfGrid = query.list();
 			HashMap<Integer, ListElement> curTabSel = new HashMap<Integer, CustomizeGridViewPanel.ListElement>();
-			MTab tab = new MTab(Env.getCtx(), m_AD_Tab_ID, null);
+			MTab tab = MTab.get(m_AD_Tab_ID);
 			
 			for (MField field : lsFieldsOfGrid)
 			{
@@ -406,6 +435,13 @@ public class CustomizeGridViewPanel extends Panel
 		if ((tabCust != null && tabCust.getCustom().indexOf("px") > 0)
 			|| (tabCust == null && tabCustAll != null && tabCustAll.getCustom().indexOf("px") > 0))
 			chkSaveWidth.setChecked(true);
+		
+		if (m_tabcust != null && m_tabcust.getIsAutoHideEmptyColumn() != null) {
+			chkAutoHideEmptyColumn.setChecked("Y".equalsIgnoreCase(m_tabcust.getIsAutoHideEmptyColumn()));
+			chkAutoHideEmptyColumn.setAttribute("ad_tab_customization.value", m_tabcust.getIsAutoHideEmptyColumn());
+		} else {
+			chkAutoHideEmptyColumn.setChecked(MSysConfig.getBooleanValue(MSysConfig.ZK_GRID_AUTO_HIDE_EMPTY_COLUMNS, false, Env.getAD_Client_ID(Env.getCtx())));
+		}
 	}	//	loadData
 
 	/**
@@ -575,6 +611,13 @@ public class CustomizeGridViewPanel extends Panel
 		if (lstGridMode.getSelectedItem() != null && lstGridMode.getSelectedItem().toString().length() > 0)
 			gridview = lstGridMode.getSelectedItem().toString();
 		final String dView = gridview;
+
+		String isAutoHide = null;
+		if (chkAutoHideEmptyColumn.isChecked() != MSysConfig.getBooleanValue(MSysConfig.ZK_GRID_AUTO_HIDE_EMPTY_COLUMNS, false, Env.getAD_Client_ID(Env.getCtx()))) {
+			isAutoHide = chkAutoHideEmptyColumn.isChecked() ? "Y" : "N";
+		} else if (chkAutoHideEmptyColumn.getAttribute("ad_tab_customization.value") != null) {
+			isAutoHide = chkAutoHideEmptyColumn.isChecked() ? "Y" : "N";
+		}
 		
 		boolean ok = MTabCustomization.saveData(Env.getCtx(), m_AD_Tab_ID, m_AD_User_ID, custom.toString(), dView, null, false);
 		if (!ok)

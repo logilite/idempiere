@@ -182,7 +182,6 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		txtSummary = new Textbox();
 		txtSummary.setMultiline(true);
 		ZKUpdateUtil.setWidth(txtSummary, "95%");
-		ZKUpdateUtil.setHeight(txtSummary, "100%");
 		txtSummary.setRows(3);
 		
 		dbxStartPlan = new DatetimeBox();

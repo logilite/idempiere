@@ -21,6 +21,8 @@ import java.util.logging.Level;
 
 import org.compiere.model.MBPartner;
 import org.compiere.model.MTable;
+import org.compiere.util.AdempiereUserError;
+import org.compiere.util.Msg;
 
 /**
  *	UnLink Business Partner from Organization 
@@ -28,6 +30,7 @@ import org.compiere.model.MTable;
  *  @author Jorg Janke
  *  @version $Id: BPartnerOrgUnLink.java,v 1.2 2006/07/30 00:51:02 jjanke Exp $
  */
+@org.adempiere.base.annotation.Process
 public class BPartnerOrgUnLink extends SvrProcess
 {
 	/** Business Partner		*/
@@ -63,7 +66,7 @@ public class BPartnerOrgUnLink extends SvrProcess
 			throw new IllegalArgumentException ("No Business Partner ID");
 		MBPartner bp = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(p_C_BPartner_ID, get_TrxName());
 		if (bp.get_ID() == 0)
-			throw new IllegalArgumentException ("Business Partner not found - C_BPartner_ID=" + p_C_BPartner_ID);
+			throw new AdempiereUserError (Msg.getMsg(getCtx(), "BPartnerNotFound") + " - C_BPartner_ID=" + p_C_BPartner_ID);
 		//
 		if (bp.getAD_OrgBP_ID() == 0)
 			throw new IllegalArgumentException ("Business Partner not linked to an Organization");

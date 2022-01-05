@@ -40,12 +40,14 @@ import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.GridTab;
 import org.compiere.model.MRole;
+import org.compiere.model.MSysConfig;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.compiere.util.NamePair;
+import org.compiere.util.Util;
 import org.zkoss.zk.au.out.AuFocus;
 import org.zkoss.zk.ui.event.DropEvent;
 import org.zkoss.zk.ui.event.Event;
@@ -67,7 +69,7 @@ import org.zkoss.zul.event.ListDataEvent;
  *
  * @author victor.perez@e-evolution.com, e-Evolution
  * 				FR [ 2826406 ] The Tab Sort without parent column
- *				<li> https://sourceforge.net/tracker/?func=detail&atid=879335&aid=2826406&group_id=176962
+ *				<li> https://sourceforge.net/p/adempiere/feature-requests/776/
  * Zk Port
  * @author Low Heng Sin
  * @author Juan David Arboleda : Refactoring Yes and No List to work with multiple choice.
@@ -132,9 +134,9 @@ public class ADSortTab extends Panel implements IADTabpanel
 	//
 	SimpleListModel noModel = new SimpleListModel() {
 		/**
-		 *
+		 * 
 		 */
-		private static final long serialVersionUID = -8261235952902938774L;
+		private static final long serialVersionUID = 3488081120336708285L;
 
 		@Override
 		public void addElement(Object obj) {
@@ -173,7 +175,7 @@ public class ADSortTab extends Panel implements IADTabpanel
 		int identifiersCount = 0;
 		StringBuilder identifierSql = new StringBuilder();
 		String sql = "SELECT t.TableName, c.AD_Column_ID, c.ColumnName, e.Name,"	//	1..4
-			+ "c.IsParent, c.IsKey, c.IsIdentifier, c.IsTranslated "				//	4..8
+			+ "c.IsParent, c.IsKey, c.IsIdentifier, c.IsTranslated, c.ColumnSQL, c.AD_Reference_ID "	//	5..10
 			+ "FROM AD_Table t, AD_Column c, AD_Element e "
 			+ "WHERE t.AD_Table_ID=?"						//	#1
 			+ " AND t.AD_Table_ID=c.AD_Table_ID"
@@ -183,7 +185,7 @@ public class ADSortTab extends Panel implements IADTabpanel
 		boolean trl = !Env.isBaseLanguage(Env.getCtx(), "AD_Element");
 		if (trl)
 			sql = "SELECT t.TableName, c.AD_Column_ID, c.ColumnName, et.Name,"	//	1..4
-				+ "c.IsParent, c.IsKey, c.IsIdentifier, c.IsTranslated "		//	4..8
+				+ "c.IsParent, c.IsKey, c.IsIdentifier, c.IsTranslated, c.ColumnSQL, c.AD_Reference_ID "	//	5..10
 				+ "FROM AD_Table t, AD_Column c, AD_Element_Trl et "
 				+ "WHERE t.AD_Table_ID=?"						//	#1
 				+ " AND t.AD_Table_ID=c.AD_Table_ID"
@@ -232,20 +234,30 @@ public class ADSortTab extends Panel implements IADTabpanel
 					m_KeyColumnName = rs.getString(3);
 				}
 				//	Identifier
-				else if (rs.getString(7).equals("Y"))
+				if (rs.getString(7).equals("Y"))
 				{
 					if (log.isLoggable(Level.FINE)) log.fine("Identifier=" + rs.getString(1) + "." + rs.getString(3));
 					boolean isTranslated = trl && "Y".equals(rs.getString(8));
+					int AD_Reference_ID = rs.getInt(10);
 					if (identifierSql.length() > 0)
-						identifierSql.append(",");
-					identifierSql.append(isTranslated ? "tt." : "t.").append(rs.getString(3));
+					{
+						identifierSql.append(" || '")
+							.append(MSysConfig.getValue(MSysConfig.IDENTIFIER_SEPARATOR, "_", Env.getAD_Client_ID(Env.getCtx())))
+							.append("' || ");
+					}
+					identifierSql.append("NVL(");
+					if (!Util.isEmpty(rs.getString(9)))
+					{
+						String value = rs.getString(9).replace(m_TableName + ".", isTranslated ? "tt." : "t.");
+						identifierSql.append(DB.TO_CHAR("("+value+")", AD_Reference_ID, Env.getAD_Language(Env.getCtx())));			
+					}
+					else
+						identifierSql.append(DB.TO_CHAR((isTranslated ? "tt." : "t.")+rs.getString(3), AD_Reference_ID, Env.getAD_Language(Env.getCtx())));
+					identifierSql.append(",'')");
 					identifiersCount++;
-//					m_IdentifierColumnName = rs.getString(3);
 					if (isTranslated)
 						m_IdentifierTranslated = true;
 				}
-				else
-					if (log.isLoggable(Level.FINE)) log.fine("??NotUsed??=" + rs.getString(1) + "." + rs.getString(3));
 			}
 		}
 		catch (SQLException e)
@@ -260,10 +272,8 @@ public class ADSortTab extends Panel implements IADTabpanel
 		//
 		if (identifiersCount == 0)
 			m_IdentifierSql = "NULL";
-		else if (identifiersCount == 1)
-			m_IdentifierSql = identifierSql.toString();
 		else
-			m_IdentifierSql = identifierSql.insert(0, "COALESCE(").append(")").toString();
+			m_IdentifierSql = identifierSql.toString();
 		//
 		noLabel.setValue(Msg.getMsg(Env.getCtx(), "Available"));
 		log.fine(m_ColumnSortName);
@@ -444,7 +454,7 @@ public class ADSortTab extends Panel implements IADTabpanel
 
 			if (m_IdentifierTranslated)
 				pstmt.setString(idx++, Env.getAD_Language(Env.getCtx()));
-			
+
 			pstmt.setInt(idx++, Env.getAD_Client_ID(Env.getCtx()));
 			
 			rs = pstmt.executeQuery();
@@ -666,7 +676,6 @@ public class ADSortTab extends Panel implements IADTabpanel
 
 
 	/** (non-Javadoc)
-	 * @see org.compiere.grid.APanelTab#saveData()
 	 */
 	public void saveData()
 	{
@@ -690,7 +699,7 @@ public class ADSortTab extends Panel implements IADTabpanel
 			.append(" SET ").append(m_ColumnSortName).append("=0");
 			if (m_ColumnYesNoName != null)
 				sql.append(",").append(m_ColumnYesNoName).append("='N'");
-			sql.append(", Updated=sysdate, UpdatedBy=").append(Env.getAD_User_ID(Env.getCtx()));
+			sql.append(", Updated=getDate(), UpdatedBy=").append(Env.getAD_User_ID(Env.getCtx()));
 			sql.append(" WHERE ").append(m_KeyColumnName).append("=").append(pp.getKey());
 			if (DB.executeUpdate(sql.toString(), null) == 1) {
 				pp.setSortNo(0);
@@ -720,7 +729,7 @@ public class ADSortTab extends Panel implements IADTabpanel
 			.append(" SET ").append(m_ColumnSortName).append("=").append(index);
 			if (m_ColumnYesNoName != null)
 				sql.append(",").append(m_ColumnYesNoName).append("='Y'");
-			sql.append(", Updated=sysdate, UpdatedBy=").append(Env.getAD_User_ID(Env.getCtx()));
+			sql.append(", Updated=getDate(), UpdatedBy=").append(Env.getAD_User_ID(Env.getCtx()));
 			sql.append(" WHERE ").append(m_KeyColumnName).append("=").append(pp.getKey());
 			if (DB.executeUpdate(sql.toString(), null) == 1) {
 				pp.setSortNo(index);
@@ -749,9 +758,9 @@ public class ADSortTab extends Panel implements IADTabpanel
 	 */
 	private class ListElement extends NamePair {
 		/**
-		 *
+		 * 
 		 */
-		private static final long serialVersionUID = -5645910649588308798L;
+		private static final long serialVersionUID = -6319536467438753815L;
 		private int		m_key;
 		private int		m_AD_Client_ID;
 		private int		m_AD_Org_ID;
@@ -1084,4 +1093,3 @@ public class ADSortTab extends Panel implements IADTabpanel
 	}
 
 }	//ADSortTab
-

@@ -31,8 +31,6 @@ import org.compiere.model.MSysConfig;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.zkoss.zk.au.out.AuOuter;
-import org.zkoss.zk.ui.HtmlBasedComponent;
-import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -94,11 +92,12 @@ public class NumberBox extends Div
     	ZKUpdateUtil.setHflex(decimalBox, "0");
     	decimalBox.setSclass("editor-input");
         decimalBox.setId(decimalBox.getUuid());
-        
+
         char separatorChar = DisplayType.getNumberFormat(DisplayType.Number, null).getDecimalFormatSymbols().getDecimalSeparator();
         String separator = Character.toString(separatorChar);
         boolean processDotKeypad = MSysConfig.getBooleanValue(MSysConfig.ZK_DECIMALBOX_PROCESS_DOTKEYPAD, true, Env.getAD_Client_ID(Env.getCtx()));
-        if (processDotKeypad) {
+        if (processDotKeypad && ! ".".equals(separator)) {
+        	/* this code works for the decimalbox - the calculator is managed in calc.js */
             StringBuffer funct = new StringBuffer();
             funct.append("function(evt)");
             funct.append("{");
@@ -118,7 +117,10 @@ public class NumberBox extends Div
             funct.append("if (key == 108 || key == 110 || key == 188 || key == 190 || key == 194) {");
             funct.append("    var id = '$'.concat('").append(decimalBox.getId()).append("');");
             funct.append("    var calcText = jq(id)[0];");
-            funct.append("    calcText.value += '").append(separator).append("';");
+            funct.append("    var position = calcText.selectionStart;");
+            funct.append("    var newValue = calcText.value.substring(0, position) + '").append(separator).append("' + calcText.value.substring(position);");
+            funct.append("    calcText.value = newValue;");
+            funct.append("    calcText.setSelectionRange(position+1, position+1);");
             funct.append("    event.stop;");
             funct.append("};");
             decimalBox.setWidgetListener("onKeyDown", funct.toString());
@@ -132,29 +134,30 @@ public class NumberBox extends Div
 		else
 			btn.setImage(ThemeManager.getThemeResource("images/Calculator16.png"));
 		btn.setTabindex(-1);
-		ZKUpdateUtil.setHflex(btn, "0");
+		ZKUpdateUtil.setHflex(btn, "0");	
+		
 		btn.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
 			@Override
 			public void onEvent(Event event) throws Exception {
-				if (btn.getPopup() != null) {
-					String uid = btn.getPopup();
-					if (uid.startsWith("uuid("))
-						uid = uid.substring(5, uid.length()-1);
-					HtmlBasedComponent comp = (HtmlBasedComponent) btn.getDesktop().getComponentByUuidIfAny(uid);
-					if (comp != null) {	
-						Textbox ctbox = (Textbox) comp.getLastChild().getFirstChild();
-						if (ctbox != null && decimalBox.getValue() != null) {
-							ctbox.setText(decimalBox.getValue().toString());
-							StringWriter writer = new StringWriter(1024);
-							try {
-								ctbox.redraw(writer);
-								Clients.response(new AuOuter(ctbox, writer.toString()));
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
+				if (popup != null) {
+					popup.open(NumberBox.this, "after_start");
+					// Fill the calculator with the actual value of the field
+					// TODO: this could be made a user preference
+			        String curValue = "";
+					if (decimalBox.getValue() != null) {
+						curValue = decimalBox.getValue().toString();
+				        boolean processDotKeypad = MSysConfig.getBooleanValue(MSysConfig.ZK_DECIMALBOX_PROCESS_DOTKEYPAD, true, Env.getAD_Client_ID(Env.getCtx()));
+				        if (processDotKeypad) {
+					        char separatorChar = DisplayType.getNumberFormat(DisplayType.Number, null).getDecimalFormatSymbols().getDecimalSeparator();
+					        String separator = Character.toString(separatorChar);
+					        curValue = curValue.replace(".", separator);
+				        }
+						if ("0".equals(curValue)) {
+							curValue = "";
 						}
-						comp.focus();
 					}
+					String txtCalcId = txtCalc.getId();
+					Clients.evalJavaScript("calc.append('" + txtCalcId + "', '" + curValue + "')");					
 				}				
 			}
 		});
@@ -163,7 +166,6 @@ public class NumberBox extends Div
         
         popup = getCalculatorPopup();
         appendChild(popup);
-        btn.setPopup(popup);
         btn.setStyle("text-align: center;");        
      
         LayoutUtils.addSclass("number-box", this);	     
@@ -249,22 +251,7 @@ public class NumberBox extends Div
     
     private Popup getCalculatorPopup()
     {
-        Popup popup = new Popup() {
-        	/**
-			 * 
-			 */
-			private static final long serialVersionUID = -5991248152956632527L;
-
-			@Override
-        	public void onPageAttached(Page newpage, Page oldpage) {
-        		super.onPageAttached(newpage, oldpage);
-        		if (newpage != null) {
-        			if (btn.getPopup() != null) {
-        				btn.setPopup(this);
-        			}
-        		}
-        	}
-        };
+        Popup popup = new Popup();
 
         Vbox vbox = new Vbox();
 
@@ -285,7 +272,7 @@ public class NumberBox extends Div
         } else {
             // restrict allowed characters
             String decimalSep = separator;
-            if (!processDotKeypad && !".".equals(separator))
+            if (!".".equals(separator))
             	decimalSep += ".";
             funct.append("    if (!this._shallIgnore(evt, '= -/()*%+0123456789").append(decimalSep).append("'))");
         }
@@ -445,6 +432,8 @@ public class NumberBox extends Div
 
         popup.appendChild(vbox);
         popup.setWidgetListener("onOpen", "calc.clearAll('" + txtCalcId + "')");
+        
+        popup.addEventListener(Events.ON_CANCEL, e -> popup.close());        
         return popup;
     }
 
@@ -475,17 +464,15 @@ public class NumberBox extends Div
 	public void setEnabled(boolean enabled)
 	{
 	     decimalBox.setReadonly(!enabled);
+	     decimalBox.setDisabled(!enabled);
 	     btn.setEnabled(enabled);
 	     if (enabled)
 	     {
 	    	 if (btn.getParent() != decimalBox.getParent())
 	    		 btn.setParent(decimalBox.getParent());
-	    	 btn.setPopup(popup);
 	     }
 	     else 
 	     {
-	    	 Popup p = null;
-	    	 btn.setPopup(p);
 	    	 if (btn.getParent() != null)
 	    		 btn.detach();
 	     }

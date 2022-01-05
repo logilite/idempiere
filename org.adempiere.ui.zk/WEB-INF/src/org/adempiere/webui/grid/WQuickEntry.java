@@ -10,6 +10,9 @@
  * You should have received a copy of the GNU General Public License along    *
  * with this program; if not, write to the Free Software Foundation, Inc.,    *
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.                     *
+ *                                                                            *
+ * Contributor:                                                               *
+ *   Andreas Sumerauer                                                        *
  *****************************************************************************/
 
 package org.adempiere.webui.grid;
@@ -21,7 +24,6 @@ import java.util.logging.Level;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.component.ConfirmPanel;
 import org.adempiere.webui.component.Label;
-import org.adempiere.webui.component.Window;
 import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.editor.WLocationEditor;
 import org.adempiere.webui.editor.WebEditorFactory;
@@ -61,7 +63,7 @@ import org.zkoss.zul.Vlayout;
  * Author: Carlos Ruiz
  */
 
-public class WQuickEntry extends Window implements EventListener<Event>, ValueChangeListener
+public class WQuickEntry extends AbstractWQuickEntry implements EventListener<Event>, ValueChangeListener
 {
 	/**
 	 * 
@@ -119,11 +121,10 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 		parent_WindowNo = WindowNo;
 		parent_tabNo = TabNo;
 		m_WindowNo = SessionManager.getAppDesktop().registerWindow(this);
-		log.info("R/O=" + m_readOnly);
 
 		try
 		{
-			jbInit();
+			initLayout();
 		}
 		catch(Exception ex)
 		{
@@ -134,6 +135,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 		Env.setContext(Env.getCtx(), m_WindowNo, QUICK_ENTRY_CALLER_WINDOW, parent_WindowNo);
 		Env.setContext(Env.getCtx(), m_WindowNo, QUICK_ENTRY_CALLER_TAB, parent_tabNo);
 		initPOs();
+		log.info("R/O=" + isReadOnly());
 
 	}	//	WQuickEntry
 	
@@ -144,7 +146,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 		m_AD_Window_ID = AD_Window_ID;
 		parent_WindowNo = 0;
 		m_WindowNo = 0;
-		log.info("R/O=" + m_readOnly);
+		log.info("R/O=" + isReadOnly());
 	}	//	WQuickEntry
 	
 	public WQuickEntry(int WindowNo, int AD_Window_ID, int TabNo, int AD_Tab_ID)
@@ -179,7 +181,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	 * 	@throws Exception
 	 */
 
-	protected void jbInit() throws Exception
+	protected void initLayout() throws Exception
 	{
 		if (!ThemeManager.isUseCSSForWindowSize()) {
 			ZKUpdateUtil.setWindowWidthX(this, 350);
@@ -199,6 +201,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 		ZKUpdateUtil.setWidth(centerPanel, "100%");
 
 		confirmPanel.addActionListener(Events.ON_CLICK, this);
+		addEventListener(Events.ON_CANCEL, e -> onCancel());
 		
 		if (ClientInfo.isMobile())
 		{
@@ -242,12 +245,12 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 			if (!gridtab.isLoadComplete())
 				gridwindow.initTab(i);
 			for (GridField gridfield : gridtab.getFields()) {
-				MField field = new MField(Env.getCtx(), gridfield.getAD_Field_ID(), null);
+				MField field = MField.get(Env.getCtx(), gridfield.getAD_Field_ID());
 				if (field.isQuickEntry()) {
 					if (! isValidQuickEntryType(field.getAD_Reference_ID()))
 						continue;
 			        WEditor editor = WebEditorFactory.getEditor(gridfield, false);
-			        if (m_readOnly)
+			        if (isReadOnly())
 			        	editor.setReadWrite(false);
 			        if (gridfield.isMandatory(false))
 			        	editor.setMandatory(true);
@@ -316,7 +319,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	 * @return
 	 */
 	public boolean isAvailableQuickEdit (){
-		return isHasField && !m_readOnly;
+		return isHasField && !isReadOnly();
 	}
 	
 	/**
@@ -328,6 +331,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	public boolean loadRecord (int Record_ID)
 	{
 		String parentColumn = null;
+		quickPOs = new ArrayList<PO>();
 		for (int idxt = 0; idxt < quickTabs.size(); idxt++) {
 			GridTab gridtab = quickTabs.get(idxt);
 			int id = 0;
@@ -543,7 +547,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 
 	public void onEvent(Event e) throws Exception
 	{
-		if (m_readOnly)
+		if (isReadOnly())
 			this.detach();
 
 		//	OK pressed
@@ -552,8 +556,12 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 
 		//	Cancel pressed
 		else if (e.getTarget() == confirmPanel.getButton("Cancel"))
-			this.detach();
+			onCancel();
 
+	}
+
+	private void onCancel() {
+		this.detach();
 	}
 
 	@Override
@@ -582,10 +590,10 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 					// see WLocationEditor firing twice ValueChangeEvent (first with null and then with value)
 				} else {
 					mTable.setValueAt(evt.getNewValue(), row, col);
-					field.setValue(evt.getNewValue(), field.getGridTab().getTableModel().isInserting());
+					// field.setValue(evt.getNewValue(), field.getGridTab().getTableModel().isInserting());
 					gridTab.processFieldChange(field);
 				}
-	            // Refresh the list on dependant fields
+	            // Refresh the list on dependent fields
 	            ArrayList<GridField> dependants = gridTab.getDependantFields(columnName);
 	    		for (GridField dependentField : dependants)
 	    		{
@@ -639,8 +647,23 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	/**
 	 *	get size quickfields
 	 */
-	public int getQuickFields(){
+	public final int getQuickFields(){
 		return quickFields.size();
 	}// size of quickfields
 
+	/**
+	 * get readOnly 
+	 */
+	protected final boolean isReadOnly() {
+		return m_readOnly;
+	}
+
+	/**
+	 * @return the confirmPanel
+	 */
+	protected final ConfirmPanel getConfirmPanel() {
+		return confirmPanel;
+	}
+
 } // WQuickEntry
+ 

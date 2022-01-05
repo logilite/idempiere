@@ -42,7 +42,10 @@ public class MReportLine extends X_PA_ReportLine
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -3957315092529097396L;
+	private static final long serialVersionUID = -6310984172477566729L;
+
+	private BasicStroke			overline_Stroke;
+	private Stroke				underline_Stroke;
 
 	private BasicStroke			overline_Stroke;
 	private Stroke				underline_Stroke;
@@ -330,7 +333,7 @@ public class MReportLine extends X_PA_ReportLine
 	 */
 	public String toString ()
 	{
-		StringBuffer sb = new StringBuffer ("MReportLine[")
+		StringBuilder sb = new StringBuilder ("MReportLine[")
 			.append(get_ID()).append(" - ").append(getName()).append(" - ").append(getDescription())
 			.append(", SeqNo=").append(getSeqNo()).append(", AmountType=").append(getPAAmountType())
 			.append(", PeriodType=").append(getPAPeriodType())
@@ -367,11 +370,11 @@ public class MReportLine extends X_PA_ReportLine
 	 * Line Type Blank Line
 	 * @return true if Blank Line
 	 */
-	public boolean isLineTypeBlankLine()
+	public boolean isLineTypeBlankLine() 
 	{
 		return LINETYPE_BlankLine.equals(getLineType());
 	}
-	
+
 	/**
 	 * 	Calculation Type Range
 	 *	@return true if range

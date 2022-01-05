@@ -56,6 +56,7 @@ import org.compiere.util.Trx;
  *  @author Jorg Janke
  *  @version $Id: InvoiceGenerate.java,v 1.2 2006/07/30 00:51:01 jjanke Exp $
  */
+@org.adempiere.base.annotation.Process
 public class InvoiceGenerate extends SvrProcess
 {
 	/**	Manual Selection		*/
@@ -127,7 +128,7 @@ public class InvoiceGenerate extends SvrProcess
 
 		//	Login Date
 		if (p_DateInvoiced == null)
-			p_DateInvoiced = Env.getContextAsDate(getCtx(), "#Date");
+			p_DateInvoiced = Env.getContextAsDate(getCtx(), Env.DATE);
 		if (p_DateInvoiced == null)
 			p_DateInvoiced = new Timestamp(System.currentTimeMillis());
 

@@ -20,7 +20,6 @@ import org.adempiere.webui.component.ZkCssHelper;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.TreeUtils;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MMenu;
 import org.compiere.model.MTable;
 import org.compiere.model.MTreeFavorite;
@@ -71,7 +70,6 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 	private ToolBarButton			btnCopyTree;
 	private ToolBarButton			btnShowMyTree;
 	private ToolBarButton			btnShowDefaultTree;
-
 	private Tree					tree;
 
 	private boolean					isDefaultTree				= false;
@@ -92,6 +90,9 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 		this.appendChild(panel);
 
 		favContent = new Panelchildren();
+		favContent.appendChild(createFavoritePanel());
+		favContent.setDroppable(FAVOURITE_DROPPABLE);
+		favContent.addEventListener(Events.ON_DROP, this);
 		favContent.setDroppable(FAVOURITE_DROPPABLE);
 		favContent.addEventListener(Events.ON_DROP, this);
 		panel.appendChild(favContent);
@@ -428,8 +429,7 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 	public static void insertMenuInTree(int menuID, int parentNodeID, int treeFavoriteID, Tree tree, FavoriteSimpleTreeModel treeModel,
 										DefaultTreeNode<Object> parentDTN)
 	{
-		MTreeFavoriteNode favNode = MTreeFavoriteNode.create(	Env.getAD_Client_ID(Env.getCtx()), Env.getContextAsInt(Env.getCtx(), Env.AD_ORG_ID),
-																treeFavoriteID,
+		MTreeFavoriteNode favNode = MTreeFavoriteNode.create(	Env.getAD_Client_ID(Env.getCtx()), Env.getContextAsInt(Env.getCtx(), Env.AD_ORG_ID), treeFavoriteID,
 																menuID, parentNodeID, 0, null, false, true, false);
 		addNodeInTree(treeModel, tree, parentDTN, favNode);
 	} // insertMenuInTree

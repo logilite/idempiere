@@ -29,6 +29,7 @@ import org.compiere.model.MTable;
  *  @author Jorg Janke
  *  @version $Id: PackageCreate.java,v 1.2 2006/07/30 00:51:01 jjanke Exp $
  */
+@org.adempiere.base.annotation.Process
 public class PackageCreate extends SvrProcess
 {
 	/**	Shipper				*/
@@ -59,11 +60,6 @@ public class PackageCreate extends SvrProcess
 			else
 				log.log(Level.SEVERE, "prepare - Unknown Parameter: " + name);
 		}
-
-		// Bug [ 1754889 ] Create Package error
-		// Commenting these lines because this process is called also from window "Ship/Receipt Confirm"
-		// if (p_M_InOut_ID == 0)
-			// p_M_InOut_ID = getRecord_ID();
 
 	}	//	prepare
 

@@ -33,7 +33,7 @@ import org.adempiere.webui.theme.ThemeManager;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
 import org.compiere.model.GridField;
-import org.compiere.model.MInfoColumn;
+import org.compiere.model.InfoColumnVO;
 import org.compiere.model.MStyle;
 import org.compiere.util.Env;
 import org.compiere.util.Evaluatee;
@@ -44,7 +44,7 @@ import org.zkoss.zul.Listcell;
 
 public class WInfoWindowListItemRenderer extends WListItemRenderer
 {
-	private MInfoColumn[]	gridDisplayedInfoColumns = null;
+	private InfoColumnVO[]	gridDisplayedInfoColumns = null;
 	private ColumnInfo[]	gridDisplayedColumnInfos = null;
 	private InfoWindow infoWindow = null;
 	private List<Integer>			hide_layoutColumnIdx			= null;
@@ -61,7 +61,7 @@ public class WInfoWindowListItemRenderer extends WListItemRenderer
 		this.infoWindow = infoWindow;
 	}
 	
-	public void setGridDisplaydInfoColumns(MInfoColumn[] infoColumns, ColumnInfo[] columnInfos,
+	public void setGridDisplaydInfoColumns(InfoColumnVO[] infoColumns, ColumnInfo[] columnInfos,
 			List<Integer> hide_layoutColumnIdx, Map<Integer, Integer> mapInfoColumnID_layoutColumnIdx)
 	{
 		this.gridDisplayedInfoColumns = infoColumns;
@@ -83,7 +83,7 @@ public class WInfoWindowListItemRenderer extends WListItemRenderer
 		ListModelTable model = table.getModel();
 		Object obj = model.get(rowIndex);
 		
-		MInfoColumn infoColumn = gridDisplayedInfoColumns[columnIndex];
+		InfoColumnVO infoColumn = gridDisplayedInfoColumns[columnIndex];
 		if (infoColumn != null)
 		{
 		
@@ -143,7 +143,7 @@ public class WInfoWindowListItemRenderer extends WListItemRenderer
 						String value = null;
 
 						int idx = 0;
-						for (MInfoColumn ic : gridDisplayedInfoColumns)
+						for (InfoColumnVO ic : gridDisplayedInfoColumns)
 						{
 							if (ic != null && ic.getColumnName().equals(variableName))
 							{

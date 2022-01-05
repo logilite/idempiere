@@ -42,6 +42,7 @@ import org.compiere.model.GridTable;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.StateChangeEvent;
 import org.compiere.model.StateChangeListener;
+import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -51,6 +52,7 @@ import org.zkoss.zk.au.out.AuFocus;
 import org.zkoss.zk.au.out.AuScript;
 import org.zkoss.zk.ui.AbstractComponent;
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.IdSpace;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -63,7 +65,6 @@ import org.zkoss.zul.Div;
 import org.zkoss.zul.Frozen;
 import org.zkoss.zul.Paging;
 import org.zkoss.zul.Row;
-import org.zkoss.zul.Tabpanel;
 import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.event.ZulEvents;
 import org.zkoss.zul.impl.CustomGridDataLoader;
@@ -75,11 +76,20 @@ import org.zkoss.zul.impl.CustomGridDataLoader;
  */
 public class GridView extends Vlayout implements EventListener<Event>, IdSpace, IFieldEditorContainer, StateChangeListener
 {
+	public static final String ZERO_PX_WIDTH = "0px";
+
+	private static final String GRID_VIEW_GRID_FIELD_INDEX = "gridView.gridField.index";
+
+	public static final String COLUMN_WIDTH_ORIGINAL = "column.width.original";
+
+	private static final String COLUMN_HFLEX_ORIGINAL = "column.hflex.original";
+
+	private static final int MIN_COLUMN_MOBILE_WIDTH = 100;
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 3046157124327495333L;
+	private static final long serialVersionUID = 3995829393137424527L;
 
 	private static final String HEADER_GRID_STYLE = "border: none; margin:0; padding: 0;";
 
@@ -101,7 +111,10 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 
 	private static final String ATTR_ON_POST_SELECTED_ROW_CHANGED = "org.adempiere.webui.adwindow.GridView.onPostSelectedRowChanged";
 
-	protected Grid listbox = null;
+	/**	Static Logger	*/
+	private static CLogger	s_log	= CLogger.getCLogger (GridView.class);
+
+	private Grid listbox = null;
 
 	protected int pageSize = DEFAULT_PAGE_SIZE;
 
@@ -143,8 +156,10 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 	protected Checkbox selectAll;
 	
 	boolean isHasCustomizeData = false;
-	
+
 	private boolean showCurrentRowIndicatorColumn = true;
+
+	private String m_isAutoHideEmptyColumn;
 
 	public GridView()
 	{
@@ -168,7 +183,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 		//default paging size
 		if (ClientInfo.isMobile())
 		{
-			//Shoud be <= 20 on mobile
+			//Should be <= 20 on mobile
 			pageSize = MSysConfig.getIntValue(MSysConfig.ZK_MOBILE_PAGING_SIZE, DEFAULT_MOBILE_PAGE_SIZE, Env.getAD_Client_ID(Env.getCtx()));
 			String limit = Library.getProperty(CustomGridDataLoader.GRID_DATA_LOADER_LIMIT);
 			if (limit == null || !(limit.equals(Integer.toString(pageSize)))) {
@@ -210,7 +225,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 		listbox.setEmptyMessage(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Processing")));
 	}
 	
-	public void setDetailPaneMode(boolean detailPaneMode) {
+	public void setDetailPaneMode(boolean detailPaneMode, GridTab gridTab) {
 		if (this.detailPaneMode != detailPaneMode) {
 			this.detailPaneMode = detailPaneMode;
 			initPageSize(detailPaneMode);
@@ -218,9 +233,52 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 		}
 	}
 
-	/** Returns the number of records to be displayed in detail grid (TODO : manage exceptions defined in SysConfig - see https://idempiere.atlassian.net/browse/IDEMPIERE-3786) */
-	int getDetailPageSize() {
-		return MSysConfig.getIntValue(MSysConfig.ZK_PAGING_DETAIL_SIZE, DEFAULT_DETAIL_PAGE_SIZE, Env.getAD_Client_ID(Env.getCtx()));
+	/** Returns the number of records to be displayed in detail grid */
+	private int getDetailPageSize(GridTab gridTab) {
+		int size = DEFAULT_DETAIL_PAGE_SIZE;
+		String pageDetailSizes = MSysConfig.getValue(MSysConfig.ZK_PAGING_DETAIL_SIZE, Env.getAD_Client_ID(Env.getCtx()));
+		if (Util.isEmpty(pageDetailSizes, true)) {
+			return size;
+		}
+		/* Format of ZK_PAGING_DETAIL_SIZE is a list of components separated by ;
+		 * first component is the wide default
+		 * next components are exceptions defined as pair of tab:size - where tab can be AD_Tab_ID, AD_Tab_UU or AD_TableName
+		 */
+		for (String pageDetailSize : pageDetailSizes.split(";")) {
+			String[] parts = pageDetailSize.split(":");
+			if (parts.length < 1 || parts.length > 2) {
+				s_log.warning("Misconfiguration of ZK_PAGING_DETAIL_SIZE - cannot split : in -> " + pageDetailSize);
+				return size;
+			}
+			String sizeToParse = null;
+			if (parts.length == 1) {
+				sizeToParse = parts[0];
+			} else {
+				String tab = parts[0];
+				if (   tab.equalsIgnoreCase(String.valueOf(gridTab.getAD_Tab_ID()))
+					|| tab.equalsIgnoreCase(String.valueOf(gridTab.getAD_Tab_UU()))
+					|| tab.equalsIgnoreCase(String.valueOf(gridTab.getTableName()))) {
+					sizeToParse = parts[1];
+				}
+			}
+			if (sizeToParse != null) {
+				int sizeParsed = -1;
+				try {
+					sizeParsed = Integer.valueOf(sizeToParse);
+				} catch (NumberFormatException e) {
+					s_log.warning("Misconfiguration of ZK_PAGING_DETAIL_SIZE - cannot parse as integer -> " + sizeToParse);
+					return size;
+				}
+				if (sizeParsed > 0) {
+					size = sizeParsed;
+					if (parts.length > 1) {
+						// found a specific tab size configuration
+						break;
+					}
+				}
+			}
+		}
+		return size;
 	}
 
 	public boolean isDetailPaneMode() {
@@ -256,12 +314,15 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 		
 		setupColumns();
 		render();
+		
 		if (listbox.getFrozen() != null){
-			listbox.getFrozen().setWidgetOverride("syncScroll", "function (){syncScrollOVR(this);}");
+			listbox.getFrozen().setWidgetOverride("syncScroll", "function (){idempiere.syncScrollFrozen(this);}");
 		}
 		
 		updateListIndex();
 
+		autoHideEmptyColumns();
+		
 		this.init = true;
 		
 		showRecordsCount();
@@ -333,6 +394,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 					columnWidthMap.put(gridField[i].getAD_Field_ID(), widths[i]);
 				}
 			}
+			m_isAutoHideEmptyColumn = tabCustomization.getIsAutoHideEmptyColumn();
 		} else {
 			ArrayList<GridField> gridFieldList = new ArrayList<GridField>();
 			
@@ -506,6 +568,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 		Columns columns = new Columns();
 		
 		//frozen not working well on tablet devices yet
+		//unlikely to be fixed since the working 'smooth scrolling frozen' is a zk ee only feature
 		if (!ClientInfo.isMobile())
 		{
 			Frozen frozen = new Frozen();
@@ -513,7 +576,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 			frozen.setColumns(2);
 			listbox.appendChild(frozen);
 		}
-		
+				
 		org.zkoss.zul.Column selection = new Column();
 		selection.setHeight("2em");
 		ZKUpdateUtil.setWidth(selection, "22px");
@@ -529,7 +592,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 		
 		if (ClientInfo.isMobile())
 			showCurrentRowIndicatorColumn = MSysConfig.getBooleanValue(MSysConfig.ZK_GRID_MOBILE_SHOW_CURRENT_ROW_INDICATOR, false);
-
+		
 		if (showCurrentRowIndicatorColumn)
 		{
 			org.zkoss.zul.Column indicator = new Column();
@@ -541,7 +604,6 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 			indicator.setStyle("border-left: none");
 			columns.appendChild(indicator);
 		}
-
 		
 		listbox.appendChild(columns);
 		columns.setSizable(true);
@@ -559,6 +621,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 				colnames.put(index, gridField[i].getHeader());
 				index++;
 				org.zkoss.zul.Column column = new Column();
+				column.setAttribute(GRID_VIEW_GRID_FIELD_INDEX, i);
 				column.setHeight("2em");
 				int colindex =tableModel.findColumn(gridField[i].getColumnName()); 
 				column.setSortAscending(new SortComparator(colindex, true, Env.getLanguage(Env.getCtx())));
@@ -678,6 +741,100 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 			hidePagingControl();
 		}		
 		
+	}
+
+	/**
+	 * auto hide empty columns
+	 */
+	protected void autoHideEmptyColumns() {
+		if (!isAutoHideEmptyColumns()) {
+			return;
+		}
+		
+		String attr = listbox.getUuid()+".autoHideEmptyColumns";
+		if (Executions.getCurrent().getAttribute(attr) != null) {
+			return;
+		} else {
+			Executions.getCurrent().setAttribute(attr, Boolean.TRUE);
+		}
+		
+		org.zkoss.zul.Columns columns = listbox.getColumns();
+		List<Column> columnList = columns.getChildren();
+		int rowCount = listModel.getSize();
+		GridField[] gridTabFields = gridTab.getFields();
+		Map<Integer, Integer> indexMap = new HashMap<Integer, Integer>();
+		if (rowCount > 0) {
+			for(Column column : columnList) {
+				Object value = column.getAttribute(GRID_VIEW_GRID_FIELD_INDEX);
+				if (value == null || !(value instanceof Integer))
+					continue;
+				int index = (Integer)value;
+				for(int i = 0; i < gridTabFields.length; i++) {
+					if (gridField[index].getAD_Field_ID() == gridTabFields[i].getAD_Field_ID()) {
+						indexMap.put(index, i);
+						break;
+					}
+				}
+			}
+		}
+		
+		for(Column column : columnList) {
+			Object value = column.getAttribute(GRID_VIEW_GRID_FIELD_INDEX);
+			if (value == null || !(value instanceof Integer))
+				continue;
+			int index = (Integer)value;
+			boolean hideColumn = false;
+			if (rowCount > 0) {
+				int valueIndex = indexMap.get(index);
+				hideColumn = true;
+				for (int i = 0; i < rowCount; i++) {
+					Object[] values = (Object[]) listModel.getElementAt(i);					
+					int rowIndex = i;
+					if (paging != null && paging.getPageSize() > 0) {
+						rowIndex = (paging.getActivePage() * paging.getPageSize()) + rowIndex;
+					}
+					String display = renderer.getDisplayTextWithEditorCheck(values[valueIndex], gridField[index], rowIndex);
+					if (!Util.isEmpty(display, true)) {
+						hideColumn = false;
+						break;
+					} else if (gridTab.getCurrentRow() == rowIndex && gridTab.isNew()) {
+						if (gridField[index].isEditable(false) && (gridField[index].isMandatory(false) || !Util.isEmpty(gridField[index].getVO().MandatoryLogic) 
+							|| !Util.isEmpty(gridField[index].getVO().DisplayLogic)
+							|| !Util.isEmpty(gridField[index].getVO().ReadOnlyLogic))) {
+							hideColumn = false;
+							break;
+						}
+					}
+				}
+			}
+			
+			if (hideColumn && column.isVisible() && !ZERO_PX_WIDTH.equals(column.getWidth())) {
+				String width = column.getWidth();
+				String hflex = column.getHflex();
+				if (!Util.isEmpty(hflex, true)) {
+					column.setAttribute(COLUMN_HFLEX_ORIGINAL, hflex);
+					column.setHflex(null);
+				}
+				column.setWidth(ZERO_PX_WIDTH);
+				if (column.getAttribute(COLUMN_WIDTH_ORIGINAL) == null)
+					column.setAttribute(COLUMN_WIDTH_ORIGINAL, width != null ? width : "");
+			} else if (!hideColumn && column.isVisible() && ZERO_PX_WIDTH.equals(column.getWidth()) && column.getAttribute(COLUMN_WIDTH_ORIGINAL) != null) {
+				if (column.getAttribute(COLUMN_HFLEX_ORIGINAL) != null ) {
+					String hflex = (String)column.getAttribute(COLUMN_HFLEX_ORIGINAL);
+					column.setWidth(null);
+					column.setHflex(hflex);
+				} else {
+					column.setWidth((String) column.getAttribute(COLUMN_WIDTH_ORIGINAL));
+				}
+			}
+		}
+	}
+
+	private boolean isAutoHideEmptyColumns() {
+		if (!Util.isEmpty(m_isAutoHideEmptyColumn, true)) 
+			return "Y".equalsIgnoreCase(m_isAutoHideEmptyColumn);
+		else
+			return MSysConfig.getBooleanValue(MSysConfig.ZK_GRID_AUTO_HIDE_EMPTY_COLUMNS, false, Env.getAD_Client_ID(Env.getCtx()));
 	}
 
 	private void updateEmptyMessage() {
@@ -817,19 +974,19 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 			reInit();
 		}
 	}
-	
+
 	private Center findCenter(GridView gridView) {
 		if (gridView == null)
 			return null;
 		Component p = gridView.getParent();
 		while (p != null) {
 			if (p instanceof Center)
-				return (Center) p;
+				return (Center)p;
 			p = p.getParent();
 		}
 		return null;
 	}
-
+	
 	private boolean isAllSelected() {
 		org.zkoss.zul.Rows rows = listbox.getRows();
 		List<Component> childs = rows.getChildren();
@@ -993,7 +1150,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 				}
 			}
 			if (cmp != null)
-				Clients.response(new AuScript(null, "scrollToRow('" + cmp.getUuid() + "');"));
+				Clients.response(new AuScript(null, "idempiere.scrollToRow('" + cmp.getUuid() + "');"));
 
 			if (columnOnClick != null && columnOnClick.trim().length() > 0) {
 				List<?> list = row.getChildren();
@@ -1002,7 +1159,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 						Div div = (Div) element;
 						if (columnOnClick.equals(div.getAttribute("columnName"))) {
 							cmp = div.getFirstChild();
-							Clients.response(new AuScript(null, "scrollToRow('" + cmp.getUuid() + "');"));
+							Clients.response(new AuScript(null, "idempiere.scrollToRow('" + cmp.getUuid() + "');"));
 							break;
 						}
 					}
@@ -1030,6 +1187,19 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 		}
 
 		if (gridTab.getCurrentRow() != rowIndex) {
+			ADWindow adwindow = ADWindow.findADWindow(this);
+			if (adwindow != null) {
+				final boolean[] retValue = new boolean[] {false};
+				final int index = rowIndex;
+				adwindow.getADWindowContent().saveAndNavigate(e -> {
+					if (e) {
+						gridTab.navigate(index);
+						retValue[0] = true;
+					}
+				});
+				return retValue[0];
+			}
+			
 			gridTab.navigate(rowIndex);
 			return true;
 		}
@@ -1192,7 +1362,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 		scrollToCurrentRow();
 		invalidateGridView();
 	}
-	
+
 	/**
 	 * redraw grid view
 	 */
@@ -1269,13 +1439,8 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 		if (isDetailPane()) {
 			Component parent = this.getParent();
 			while (parent != null) {
-				if (parent instanceof Tabpanel) {
-					Component firstChild = parent.getFirstChild();
-					if ( gridFooter.getParent() != firstChild ) { 
-						firstChild.appendChild(gridFooter);
-						ZKUpdateUtil.setHflex(gridFooter, "0");
-						gridFooter.setSclass("adwindow-detailpane-adtab-grid-south");												
-					}
+				if (parent instanceof DetailPane.Tabpanel) {
+					((DetailPane.Tabpanel) parent).setPagingControl(gridFooter);
 					break;
 				}
 				parent = parent.getParent();

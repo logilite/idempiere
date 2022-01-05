@@ -37,6 +37,7 @@ import org.compiere.util.Msg;
  *
  *	@author Chuck Boecking
  */
+@org.adempiere.base.annotation.Process
 public class ProjectGenProduction extends SvrProcess
 {
 	/** Project Parameter			*/

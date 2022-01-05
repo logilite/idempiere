@@ -54,7 +54,7 @@ import org.compiere.util.Env;
  *  		<li>BF [ 2213252 ] Matching Inv-Receipt generated unproperly value for src amt
  *	Teo Sarca
  *			<li>FR [ 2819081 ] FactLine.getDocLine should be public
- *				https://sourceforge.net/tracker/?func=detail&atid=879335&aid=2819081&group_id=176962
+ *				https://sourceforge.net/p/adempiere/feature-requests/764/
  *  
  */
 public final class FactLine extends X_Fact_Acct
@@ -62,7 +62,7 @@ public final class FactLine extends X_Fact_Acct
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 6141312459030795891L;
+	private static final long serialVersionUID = -533308106857819424L;
 
 	/**
 	 *	Constructor
@@ -82,7 +82,6 @@ public final class FactLine extends X_Fact_Acct
 		setAmtAcctDr (Env.ZERO);
 		setAmtSourceCr (Env.ZERO);
 		setAmtSourceDr (Env.ZERO);
-	//	Log.trace(this,Log.l1_User, "FactLine " + AD_Table_ID + ":" + Record_ID);
 		setAD_Table_ID (AD_Table_ID);
 		setRecord_ID (Record_ID);
 		setLine_ID (Line_ID);
@@ -771,21 +770,45 @@ public final class FactLine extends X_Fact_Acct
 			if (AD_Org_ID == 0)
 				AD_Org_ID = m_doc.getAD_Org_ID();
 		}
-		
+
 		Timestamp convDate = getDateAcct();
 
-		if (m_docLine != null && m_doc instanceof Doc_BankStatement)
-			convDate = m_docLine.getDateConv();				
-			
-		
-		setAmtAcctDr (MConversionRate.convert (getCtx(),
-			getAmtSourceDr(), getC_Currency_ID(), m_acctSchema.getC_Currency_ID(),
-			convDate, C_ConversionType_ID, m_doc.getAD_Client_ID(), AD_Org_ID));
-		if (getAmtAcctDr() == null)
-			return false;
-		setAmtAcctCr (MConversionRate.convert (getCtx(),
-			getAmtSourceCr(), getC_Currency_ID(), m_acctSchema.getC_Currency_ID(),
-			convDate, C_ConversionType_ID, m_doc.getAD_Client_ID(), AD_Org_ID));
+		if (( m_doc instanceof Doc_BankStatement || m_doc instanceof Doc_AllocationHdr ) && m_docLine != null)
+			convDate = m_docLine.getDateConv();
+
+		BigDecimal currencyRate = null;
+		if (m_docLine != null && m_docLine.getCurrencyRate() != null && m_docLine.getCurrencyRate().signum() > 0) 
+		{
+			currencyRate = m_docLine.getCurrencyRate();
+		}
+		if (currencyRate == null && m_doc != null && m_doc.getCurrencyRate() != null && m_doc.getCurrencyRate().signum() > 0)
+		{
+			currencyRate = m_doc.getCurrencyRate();
+		}
+
+		if (currencyRate != null && currencyRate.signum() > 0)
+		{
+			BigDecimal amtAcctDr = getAmtSourceDr().multiply(currencyRate);
+			int stdPrecision = MCurrency.getStdPrecision(getCtx(), m_acctSchema.getC_Currency_ID());
+			if (amtAcctDr.scale() > stdPrecision)
+				amtAcctDr = amtAcctDr.setScale(stdPrecision, RoundingMode.HALF_UP);
+			setAmtAcctDr(amtAcctDr);
+			BigDecimal amtAcctCr = getAmtSourceCr().multiply(currencyRate);
+			if (amtAcctCr.scale() > stdPrecision)
+				amtAcctCr = amtAcctCr.setScale(stdPrecision, RoundingMode.HALF_UP);
+			setAmtAcctCr(amtAcctCr);
+		} 
+		else 
+		{
+			setAmtAcctDr (MConversionRate.convert (getCtx(),
+					getAmtSourceDr(), getC_Currency_ID(), m_acctSchema.getC_Currency_ID(),
+					convDate, C_ConversionType_ID, m_doc.getAD_Client_ID(), AD_Org_ID));
+			if (getAmtAcctDr() == null)
+				return false;
+			setAmtAcctCr (MConversionRate.convert (getCtx(),
+					getAmtSourceCr(), getC_Currency_ID(), m_acctSchema.getC_Currency_ID(),
+					convDate, C_ConversionType_ID, m_doc.getAD_Client_ID(), AD_Org_ID));
+		}
 		return true;
 	}	//	convert
 
@@ -943,11 +966,6 @@ public final class FactLine extends X_Fact_Acct
 			if (m_acct != null && super.getC_SalesRegion_ID() == 0)
 				setC_SalesRegion_ID (m_acct.getC_SalesRegion_ID());
 		}
-		//
-	//	log.fine("C_SalesRegion_ID=" + super.getC_SalesRegion_ID() 
-	//		+ ", C_BPartner_Location_ID=" + m_docVO.C_BPartner_Location_ID
-	//		+ ", BP_C_SalesRegion_ID=" + m_docVO.BP_C_SalesRegion_ID 
-	//		+ ", SR=" + m_acctSchema.isAcctSchemaElement(MAcctSchemaElement.ELEMENTTYPE_SalesRegion));
 		return super.getC_SalesRegion_ID();
 	}	//	getC_SalesRegion_ID
 
@@ -1197,9 +1215,7 @@ public final class FactLine extends X_Fact_Acct
 				//  Accounted Amounts - reverse
 				BigDecimal dr = fact.getAmtAcctDr();
 				BigDecimal cr = fact.getAmtAcctCr();
-				// setAmtAcctDr (cr.multiply(multiplier));
-				// setAmtAcctCr (dr.multiply(multiplier));
-				setAmtAcct(fact.getC_Currency_ID(), cr.multiply(multiplier), dr.multiply(multiplier));
+				setAmtAcct(getC_Currency_ID(), cr.multiply(multiplier), dr.multiply(multiplier));
 				//  
 				//  Bayu Sistematika - Source Amounts
 				//  Fixing source amounts

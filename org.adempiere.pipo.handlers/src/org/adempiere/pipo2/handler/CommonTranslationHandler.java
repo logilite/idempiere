@@ -129,7 +129,7 @@ public class CommonTranslationHandler extends AbstractElementHandler implements 
 			if(pstm.executeUpdate()<0){
 				throw new SAXException();
 			}
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			throw new DBException(e);
 		} finally {
 			DB.close(pstm);

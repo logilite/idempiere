@@ -101,7 +101,7 @@ import org.zkoss.zul.South;
  *  @version 	$Id: EMailDialog.java,v 1.2 2006/07/30 00:51:27 jjanke Exp $
  *  
  *  globalqss: integrate phib fixing bug reported here
- *     http://sourceforge.net/tracker/index.php?func=detail&aid=1568765&group_id=176962&atid=879332
+ *     https://sourceforge.net/p/adempiere/bugs/62/
  * 
  *  phib - fixing bug [ 1568765 ] Close email dialog button broken
  *  
@@ -113,7 +113,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -3675260492572002393L;
+	private static final long serialVersionUID = 556391720307848225L;
 
 	/**
 	 * 	EMail Dialog
@@ -126,7 +126,27 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	 */
 	public WEMailDialog ()
 	{
+		this(title, from, to, subject, message, attachment, -1, -1, -1, null);
+	}	//	EmailDialog
+
+	/**
+	 * EMail Dialog
+	 * @param title title
+	 * @param from from
+	 * @param to to 
+	 * @param subject subject
+	 * @param message message
+	 * @param attachment optional attachment
+	 * @param m_WindowNo
+	 * @param ad_Table_ID
+	 * @param record_ID
+	 * @param printInfo
+	 */
+	public WEMailDialog(String title, MUser from, String to, String subject, String message, DataSource attachment,
+			int m_WindowNo, int ad_Table_ID, int record_ID, PrintInfo printInfo) {
 		super();
+		this.m_AD_Table_ID = ad_Table_ID;
+		this.m_Record_ID = record_ID;
 		
 	}	//	EmailDialog
 
@@ -163,6 +183,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		set(from, to, subject, message);
 		setAttachment(attachment);
 		setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
+		addEventListener(Events.ON_CANCEL, e -> onCancel());
 	}	//	commonInit
 
 
@@ -264,7 +285,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		div.appendChild(lFrom);
 		row.appendChild(div);
 		row.appendChild(fFrom);
-		ZKUpdateUtil.setHflex(fFrom, "1");
+		ZKUpdateUtil.setWidth(fFrom, "100%");
 		
 		row = new Row();
 		rows.appendChild(row);
@@ -273,13 +294,13 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		div.appendChild(lTo);
 		row.appendChild(div);
 		row.appendChild(fUser.getComponent());
-		ZKUpdateUtil.setHflex(fUser.getComponent(), "1");
+		ZKUpdateUtil.setWidth(fUser.getComponent(), "100%");
 		
 		row = new Row();
 		rows.appendChild(row);
 		row.appendChild(new Label(""));
 		row.appendChild(fTo);
-		ZKUpdateUtil.setHflex(fTo, "1");
+		ZKUpdateUtil.setWidth(fTo, "100%");
 		
 		row = new Row();
 		rows.appendChild(row);
@@ -288,13 +309,13 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		div.appendChild(lCc);
 		row.appendChild(div);
 		row.appendChild(fCcUser.getComponent());
-		ZKUpdateUtil.setHflex(fCcUser.getComponent(), "1");
+		ZKUpdateUtil.setWidth(fCcUser.getComponent(), "100%");
 		
 		row = new Row();
 		rows.appendChild(row);
 		row.appendChild(new Label(""));
 		row.appendChild(fCc);
-		ZKUpdateUtil.setHflex(fCc, "1");
+		ZKUpdateUtil.setWidth(fCc, "100%");
 		
 		row = new Row();
 		rows.appendChild(row);
@@ -308,7 +329,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		div.appendChild(lSubject);
 		row.appendChild(div);
 		row.appendChild(fSubject);
-		ZKUpdateUtil.setHflex(fSubject, "1");
+		ZKUpdateUtil.setWidth(fSubject, "100%");
 		
 		row = new Row();
 		rows.appendChild(row);
@@ -355,7 +376,10 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 			LayoutUtils.addSclass("large-toolbarbutton", btn);
 
 		bAddDefaultMailText = new Button();
-		bAddDefaultMailText.setImage(ThemeManager.getThemeResource("images/DefaultMailText.png"));
+		if(ThemeManager.isUseFontIconForImage())
+			bAddDefaultMailText.setIconSclass("z-icon-GetMail");
+		else
+			bAddDefaultMailText.setImage(ThemeManager.getThemeResource("images/DefaultMailText.png"));
 		bAddDefaultMailText.addEventListener(Events.ON_CLICK, this);
 		bAddDefaultMailText.setTooltiptext(Msg.getMsg(Env.getCtx(), "AddDefaultMailTextContent"));
 		if (new MUser(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()), null).getR_DefaultMailText_ID() > 0)
@@ -365,7 +389,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		
 		Borderlayout borderlayout = new Borderlayout();
 		this.appendChild(borderlayout);
-		ZKUpdateUtil.setHflex(borderlayout, "1");
+		ZKUpdateUtil.setWidth(borderlayout, "100%");
 		
 		Center centerPane = new Center();
 		centerPane.setSclass("dialog-content");
@@ -516,9 +540,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	 */
 	public void onEvent(Event event) throws Exception {		
 		if (event.getTarget().getId().equals(ConfirmPanel.A_CANCEL))
-			onClose();
-				
-		//	Send
+			onCancel();
 		else if (event.getTarget().getId().equals(ConfirmPanel.A_OK))
 		{
 			Clients.clearBusy();
@@ -582,6 +604,10 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		}
 		else if (event.getTarget() == bAddDefaultMailText) // Insert the mail text at cursor (light side) ? or at the end (dark side) :D
 			addMailText();
+	}
+
+	private void onCancel() {
+		onClose();
 	}
 
 	/**
@@ -952,33 +978,37 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		return new WEMailDialog();
 	}
 	
+
+	@Override
+	public void focus() {
+		super.focus();
+		if (fUser != null)
+			fUser.getComponent().focus();
+	}
+
 	/**
 	 * Set the user to editor and trigger the event change
 	 * @param newUserTo
 	 */
-	protected void setUserTo(int newUserTo)
-	{
-		ValueChangeEvent vce = new ValueChangeEvent(fUser, fUser.getColumnName(),fUser.getValue(),newUserTo);
-		fUser.valueChange(vce);		
+	public void setUserTo(int newUserTo) {
+		ValueChangeEvent vce = new ValueChangeEvent(fUser, fUser.getColumnName(), fUser.getValue(), newUserTo);
+		fUser.valueChange(vce);
 	}
-	
+
 	/**
 	 * Set the user Cc editor and trigger the event change
 	 * @param newUserCc
 	 */
-	protected void setUserCc(int newUserCc)
-	{
-		ValueChangeEvent vce = new ValueChangeEvent(fCcUser,fCcUser.getColumnName(),fCcUser.getValue(),newUserCc);
-		fCcUser.valueChange(vce);
+	public void setUserCc(int newUserCc) {
+		ValueChangeEvent vce = new ValueChangeEvent(fCcUser, fCcUser.getColumnName(), fCc.getValue(), newUserCc);
+		fUser.valueChange(vce);
 	}
-	
+
 	/**
 	 * Clear the window context variables to prefill the dialog
-	 * 
 	 * @param m_WindowNo
 	 */
-	protected void clearEMailContext(int m_WindowNo)
-	{
+	private void clearEMailContext(int m_WindowNo) {
 		Env.setContext(Env.getCtx(), m_WindowNo, ReportSendEMailEventData.CONTEXT_EMAIL_TO, "");
 		Env.setContext(Env.getCtx(), m_WindowNo, ReportSendEMailEventData.CONTEXT_EMAIL_USER_TO, "");
 		Env.setContext(Env.getCtx(), m_WindowNo, ReportSendEMailEventData.CONTEXT_EMAIL_CC, "");
@@ -986,32 +1016,27 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		Env.setContext(Env.getCtx(), m_WindowNo, ReportSendEMailEventData.CONTEXT_EMAIL_SUBJECT, "");
 		Env.setContext(Env.getCtx(), m_WindowNo, ReportSendEMailEventData.CONTEXT_EMAIL_MESSAGE, "");
 	}
-	
+
 	/**
 	 * Send the event to listeners that prefill dialog variables
-	 * 
 	 * @param windowNo
 	 * @param tableId
 	 * @param recordId
 	 * @param printInfo
 	 * @param subject
 	 */
-	private void sendEvent(int windowNo, int tableId, int recordId, PrintInfo printInfo, String subject)
-	{
-        ReportSendEMailEventData eventData = new ReportSendEMailEventData(windowNo, tableId, recordId, printInfo,
-                subject);
-        org.osgi.service.event.Event event = EventManager.newEvent(IEventTopics.REPORT_SEND_EMAIL, eventData);
-        EventManager.getInstance().sendEvent(event);
+	private void sendEvent(int windowNo, int tableId, int recordId, PrintInfo printInfo, String subject) {
+		ReportSendEMailEventData eventData = new ReportSendEMailEventData(windowNo, tableId, recordId, printInfo,
+				subject);
+		org.osgi.service.event.Event event = EventManager.newEvent(IEventTopics.REPORT_SEND_EMAIL, eventData);
+		EventManager.getInstance().sendEvent(event);
 	}
 
-	
 	/**
 	 * Set the default dialog values from context
-	 * 
 	 * @param windowNo
 	 */
-	private void setValuesFromContext(int windowNo)
-	{
+	private void setValuesFromContext(int windowNo) {
 		String newTo = Env.getContext(Env.getCtx(), windowNo, ReportSendEMailEventData.CONTEXT_EMAIL_TO);
 		if (!Util.isEmpty(newTo))
 			setTo(newTo);
@@ -1031,4 +1056,5 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		if (!Util.isEmpty(newMessage))
 			setMessage(newMessage);
 	}
+
 }	//	WEMailDialog

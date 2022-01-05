@@ -37,7 +37,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.compiere.db.Database;
-import org.compiere.model.MSysConfig;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -51,12 +50,12 @@ import org.compiere.util.Ini;
  *  
  *  @author Teo Sarca, www.arhipac.ro
  *  		<li>BF [ 2782095 ] Do not log *Access records
- *  			https://sourceforge.net/tracker/?func=detail&aid=2782095&group_id=176962&atid=879332
+ *  			https://sourceforge.net/p/adempiere/bugs/1867/
  *  		<li>TODO: BF [ 2782611 ] Migration scripts are not UTF8
- *  			https://sourceforge.net/tracker/?func=detail&aid=2782611&group_id=176962&atid=879332
+ *  			https://sourceforge.net/p/adempiere/bugs/1869/
  *  @author Teo Sarca
  *  		<li>BF [ 3137355 ] PG query not valid when contains quotes and backslashes
- *  			https://sourceforge.net/tracker/?func=detail&aid=3137355&group_id=176962&atid=879332	
+ *  			https://sourceforge.net/p/adempiere/bugs/2560/	
  */
 public abstract class Convert
 {
@@ -290,8 +289,10 @@ public abstract class Convert
 	
 	/**
 	 * Utility method to replace quoted string with a predefined marker
-	 * @param retValue
+
+	 * @param inputValue
 	 * @param retVars
+	 * @param nonce
 	 * @return string
 	 */
 	protected String replaceQuotedStrings(String inputValue, Vector<String>retVars, String nonce) {
@@ -306,7 +307,7 @@ public abstract class Convert
 		Pattern p = Pattern.compile("'[[^']*]*'");
 		Matcher m = p.matcher(inputValue);
 		int i = 0;
-		StringBuffer retValue = new StringBuffer(inputValue.length());
+		StringBuilder retValue = new StringBuilder(inputValue.length());
 		while (m.find()) {
 			String var = inputValue.substring(m.start(), m.end()).replace(quoteMarker, "''"); // Put back quotes, if any
 			retVars.addElement(var);
@@ -438,13 +439,7 @@ public abstract class Convert
 	public synchronized static void logMigrationScript(String oraStatement, String pgStatement) {
 		// Check AdempiereSys
 		// check property Log migration script
-		boolean logMigrationScript = false;
-		if (Ini.isClient()) {
-			logMigrationScript = Ini.isPropertyBool(Ini.P_LOGMIGRATIONSCRIPT);
-		} else {
-			String sysProperty = Env.getCtx().getProperty("LogMigrationScript", "N");
-			logMigrationScript = "y".equalsIgnoreCase(sysProperty) || "true".equalsIgnoreCase(sysProperty);
-		}
+		boolean logMigrationScript = isLogMigrationScript();
 		if (logMigrationScript) {
 			if (dontLog(oraStatement))
 				return;
@@ -480,6 +475,20 @@ public abstract class Convert
 		}
 	}
 
+	/**
+	 * @return true if it is in log migration script mode
+	 */
+	public static boolean isLogMigrationScript() {
+		boolean logMigrationScript = false;
+		if (Ini.isClient()) {
+			logMigrationScript = Ini.isPropertyBool(Ini.P_LOGMIGRATIONSCRIPT);
+		} else {
+			String sysProperty = Env.getCtx().getProperty("LogMigrationScript", "N");
+			logMigrationScript = "y".equalsIgnoreCase(sysProperty) || "true".equalsIgnoreCase(sysProperty);
+		}
+		return logMigrationScript;
+	}
+
 
 	private static String [] dontLogTables = new String[] {
 			"AD_ACCESSLOG",
@@ -505,8 +514,10 @@ public abstract class Convert
 			"AD_SCHEDULERLOG",
 			"AD_SESSION",
 			"AD_WINDOW_ACCESS",
+			"AD_WLISTBOX_CUSTOMIZATION",
 			"AD_WORKFLOW_ACCESS",
 			"AD_WORKFLOWPROCESSORLOG",
+			"AD_USERPREFERENCE",
 			"CM_WEBACCESSLOG",
 			"C_ACCTPROCESSORLOG",
 			"K_INDEXLOG",
@@ -576,13 +587,8 @@ public abstract class Convert
 
 	private static void writeLogMigrationScript(Writer w, String statement) throws IOException
 	{
-		boolean isUseCentralizedID = "Y".equals(MSysConfig.getValue(MSysConfig.DICTIONARY_ID_USE_CENTRALIZED_ID, "Y")); // defaults to Y
-		boolean isUseProjectCentralizedID = "Y".equals(MSysConfig.getValue(MSysConfig.PROJECT_ID_USE_CENTRALIZED_ID, "N")); // defaults to N
 		String prm_COMMENT;
-		if (!isUseCentralizedID && isUseProjectCentralizedID)
-			prm_COMMENT = MSysConfig.getValue(MSysConfig.PROJECT_ID_COMMENTS);
-		else
-			prm_COMMENT = MSysConfig.getValue(MSysConfig.DICTIONARY_ID_COMMENTS);
+		prm_COMMENT = Env.getContext(Env.getCtx(), "MigrationScriptComment");
 		if (prm_COMMENT != null && ! m_oldprm_COMMENT.equals(prm_COMMENT)) {
 			// log sysconfig comment
 			w.append("-- ");

@@ -36,7 +36,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Util;
 
 /**
- * Generic provider of zoom targets. Contains pieces of {@link org.compiere.apps.AZoomAcross}
+ * Generic provider of zoom targets. Contains pieces of {@link org.adempiere.webui.WZoomAcross}
  * methods <code>getZoomTargets</code> and <code>addTarget</code>
  * 
  * @author Tobias Schoeneberg, www.metas.de - FR [ 2897194  ] Advanced Zoom and RelationTypes
@@ -165,13 +165,13 @@ public class GenericZoomProvider implements IZoomProvider {
 		
 		final MQuery query = new MQuery();
 		MTable table = MTable.get(ctx, targetTableName);
-		if (table.getColumnIndex("AD_Client_ID") < 0) // table doesn't have AD_Client_ID
+		if (! table.columnExistsInDB("AD_Client_ID")) // table doesn't have AD_Client_ID
 			return null;
 
 		int tabIDLoop = AD_Tab_ID;
 		int levelUp = 0;
 		while (true) {
-			MTab tab = new MTab(ctx, tabIDLoop, null);
+			MTab tab = MTab.get(tabIDLoop);
 			String whereCtx = tab.getWhereClause();
 			if (!Util.isEmpty(whereCtx, true)) {
 				if (whereCtx.indexOf("@") != -1)
@@ -204,7 +204,7 @@ public class GenericZoomProvider implements IZoomProvider {
 				break;
 		}
 
-		query.addRestriction(targetColumnName + "=" + po.get_ID());
+		query.addRestriction(targetTableName + "." + targetColumnName + "=" + po.get_ID());
 		query.setZoomTableName(targetTableName);
 		query.setZoomColumnName(targetColumnName);
 		query.setZoomValue(po.get_ID());
@@ -217,9 +217,9 @@ public class GenericZoomProvider implements IZoomProvider {
 		if (   clientID != 0
 			&& ( MTable.ACCESSLEVEL_All.equals(accessLevel)
 			  || MTable.ACCESSLEVEL_SystemPlusClient.equals(accessLevel))) {
-			query.addRestriction("AD_Client_ID IN (0, " + clientID + ")");
+			query.addRestriction(targetTableName+".AD_Client_ID IN (0, " + clientID + ")");
 		} else {
-			query.addRestriction("AD_Client_ID=" + clientID);
+			query.addRestriction(targetTableName+".AD_Client_ID=" + clientID);
 		}
 
 		StringBuilder sqlb = new StringBuilder("SELECT COUNT(*) FROM ")

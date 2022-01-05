@@ -47,6 +47,7 @@ import org.compiere.util.Language;
  * 	@author 	Jorg Janke
  * 	@version 	$Id: InvoicePrint.java,v 1.2 2006/07/30 00:51:02 jjanke Exp $
  */
+@org.adempiere.base.annotation.Process
 public class InvoicePrint extends SvrProcess
 {
 	/**	Mail PDF			*/
@@ -349,7 +350,7 @@ public class InvoicePrint extends SvrProcess
 				if (printed)
 				{
 					StringBuilder sb = new StringBuilder ("UPDATE C_Invoice ")
-						.append("SET DatePrinted=SysDate, IsPrinted='Y' WHERE C_Invoice_ID=")
+						.append("SET DatePrinted=getDate(), IsPrinted='Y' WHERE C_Invoice_ID=")
 						.append (C_Invoice_ID);
 					@SuppressWarnings("unused")
 					int no = DB.executeUpdate(sb.toString(), get_TrxName());

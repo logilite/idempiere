@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.adempiere.exceptions.AdempiereException;
-import org.compiere.util.CCache;
 import org.compiere.util.Env;
+import org.idempiere.cache.ImmutablePOCache;
+import org.idempiere.cache.ImmutablePOSupport;
 
 /**
  * Model class for Process Customizations
@@ -29,12 +29,12 @@ import org.compiere.util.Env;
  * @author raphael.gildo (devCoffee, www.devcoffee.com.br)
  *
  */
-public class MUserDefProc extends X_AD_UserDef_Proc {
+public class MUserDefProc extends X_AD_UserDef_Proc implements ImmutablePOSupport {
 
 	/**
-	 *
+	 * 
 	 */
-	private static final long serialVersionUID = 2564901065651870698L;
+	private static final long serialVersionUID = 1599140293008534080L;
 	private static final Map<Integer, List<MUserDefProc>> m_fullMap = new HashMap<Integer, List<MUserDefProc>>();
 
 	/**
@@ -57,6 +57,34 @@ public class MUserDefProc extends X_AD_UserDef_Proc {
 		// TODO Auto-generated constructor stub
 	}
 
+	/**
+	 * 
+	 * @param copy
+	 */
+	public MUserDefProc(MUserDefProc copy) {
+		this(Env.getCtx(), copy);
+	}
+
+	/**
+	 * 
+	 * @param ctx
+	 * @param copy
+	 */
+	public MUserDefProc(Properties ctx, MUserDefProc copy) {
+		this(ctx, copy, (String) null);
+	}
+
+	/**
+	 * 
+	 * @param ctx
+	 * @param copy
+	 * @param trxName
+	 */
+	public MUserDefProc(Properties ctx, MUserDefProc copy, String trxName) {
+		this(ctx, 0, trxName);
+		copyPO(copy);
+	}
+	
 	private static MUserDefProc[] getAll (Properties ctx, int processID)
 	{
 		List<MUserDefProc> fullList = null;
@@ -107,7 +135,7 @@ public class MUserDefProc extends X_AD_UserDef_Proc {
 				.append(AD_User_ID)
 				.toString();
 		if (s_cache.containsKey(key))
-			return s_cache.get(key);
+			return s_cache.get(ctx, key, e -> new MUserDefProc(ctx, e));
 
 		//candidates
 		MUserDefProc[] candidates = getAll(ctx, AD_Process_ID);
@@ -170,7 +198,7 @@ public class MUserDefProc extends X_AD_UserDef_Proc {
 	    if (weight[maxindex] > -1) {
 	    	MUserDefProc retValue = null;
 	    	retValue = candidates[maxindex];
-	    	s_cache.put(key, retValue);
+	    	s_cache.put(key, retValue, e -> new MUserDefProc(Env.getCtx(), e));
 	    	return retValue;
 	    } else {
 	    	s_cache.put(key, null);
@@ -179,33 +207,10 @@ public class MUserDefProc extends X_AD_UserDef_Proc {
 	}
 
 	//Cache of selected MUserDefProc entries 					**/
-	private static CCache<String, MUserDefProc> s_cache = new CCache<String, MUserDefProc>(Table_Name, 3);	//  3 weights
+	private static ImmutablePOCache<String, MUserDefProc> s_cache = new ImmutablePOCache<String, MUserDefProc>(Table_Name, 3);	//  3 weights
 
 	@Override
 	protected boolean beforeSave(boolean newRecord) {
-		String whereClause = "AD_UserDef_Proc_ID!=" + get_ID();
-		List<MUserDefProc> records = new Query(getCtx(), MUserDefProc.Table_Name, whereClause, get_TrxName()).list();
-
-		if(records.size() > 0){
-			for(MUserDefProc record : records){
-				if(record.getAD_Org_ID() == getAD_Org_ID()
-						&& record.getAD_Role_ID() == getAD_Role_ID()
-						&& record.getAD_User_ID() == getAD_User_ID()
-						&& record.getAD_Process_ID() == getAD_Process_ID()){
-
-					throw new AdempiereException("Personalização de processo já existe: " + record.getName() + " - ID: " + record.get_ID());
-				}
-			}
-		}
-
-		if(!newRecord){
-			MUserDefProc old = (MUserDefProc) new Query(getCtx(), MUserDefProc.Table_Name, "AD_UserDef_Proc_ID=" + get_ID(), get_TrxName()).first();
-			records = new Query(getCtx(), MUserDefProcParameter.Table_Name, "AD_UserDef_Proc_ID=" + get_ID(), get_TrxName()).list();
-
-			if(records.size() > 0 && old.getAD_Process_ID() != getAD_Process_ID())
-				throw new AdempiereException("Esta personalização de processo já possui parametros configurados.");
-		}
-
 		synchronized (m_fullMap) {
 			m_fullMap.remove(getAD_Client_ID());
 		}
@@ -218,6 +223,15 @@ public class MUserDefProc extends X_AD_UserDef_Proc {
 			m_fullMap.remove(getAD_Client_ID());
 		}
 		return true;
+	}
+
+	@Override
+	public MUserDefProc markImmutable() {
+		if (is_Immutable())
+			return this;
+
+		makeImmutable();
+		return this;
 	}
 
 }

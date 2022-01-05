@@ -16,11 +16,14 @@
  *****************************************************************************/
 package org.compiere.model;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +44,7 @@ import org.compiere.util.Env;
  *  @version $Id: POInfo.java,v 1.2 2006/07/30 00:58:37 jjanke Exp $
  *  @author Victor Perez, e-Evolution SC
  *			<li>[ 2195894 ] Improve performance in PO engine
- *			<li>http://sourceforge.net/tracker/index.php?func=detail&aid=2195894&group_id=176962&atid=879335
+ *			<li>https://sourceforge.net/p/adempiere/feature-requests/555/
  */
 public class POInfo implements Serializable
 {
@@ -86,7 +89,7 @@ public class POInfo implements Serializable
 	}   //  getPOInfo
 
 	/** Cache of POInfo     */
-	private static CCache<Integer,POInfo>  s_cache = new CCache<Integer,POInfo>(I_AD_Table.Table_Name, "POInfo", 200);
+	private static CCache<Integer,POInfo>  s_cache = new CCache<Integer,POInfo>(I_AD_Table.Table_Name, "POInfo", 200, 0, false, 0);
 	
 	/**************************************************************************
 	 *  Create Persistent Info
@@ -115,7 +118,7 @@ public class POInfo implements Serializable
 	}   //  PInfo
 
 	/** Context             	*/
-	private Properties  m_ctx = null;
+	private transient Properties  m_ctx = null;
 	/** Table_ID            	*/
 	private int         m_AD_Table_ID = 0;
 	/** Table Name          	*/
@@ -745,6 +748,13 @@ public class POInfo implements Serializable
 					return "LessThanMinValue"+";"+m_columns[index].ValueMin_BD.toPlainString();
 				}
 			}
+			else if (value instanceof Timestamp && m_columns[index].ValueMin_TS != null)    // Date
+			{
+				if (((Timestamp) value).before(m_columns[index].ValueMin_TS))
+				{
+					return "LessThanMinValue"+";"+m_columns[index].ValueMin;
+				}
+			}
 			else	//	String
 			{
 				int comp = m_columns[index].ValueMin.compareTo(value.toString());
@@ -770,6 +780,13 @@ public class POInfo implements Serializable
 				if (comp < 0)
 				{
 					return "MoreThanMaxValue"+";"+m_columns[index].ValueMax_BD.toPlainString();
+				}
+			}
+			else if (value instanceof Timestamp && m_columns[index].ValueMax_TS != null)    // Date
+			{
+				if (((Timestamp) value).after(m_columns[index].ValueMax_TS))
+				{
+					return "MoreThanMaxValue"+";"+m_columns[index].ValueMax;
 				}
 			}
 			else	//	String
@@ -814,6 +831,8 @@ public class POInfo implements Serializable
 			if (count > 1)
 				sql.append(",");
 			String columnSQL = getColumnSQL(i);
+			if (!virtual)
+				columnSQL = DB.getDatabase().quoteColumnName(columnSQL);
 			if (fullyQualified && !virtual)
 				sql.append(getTableName()).append(".");
 			sql.append(columnSQL);	//	Normal and Virtual Column
@@ -833,4 +852,10 @@ public class POInfo implements Serializable
 		return m_IsChangeLog;
 	}
 	
+	private void readObject(ObjectInputStream ois)
+			throws ClassNotFoundException, IOException {
+	    // default deserialization
+	    ois.defaultReadObject();
+	    m_ctx = Env.getCtx();
+	}
 }   //  POInfo

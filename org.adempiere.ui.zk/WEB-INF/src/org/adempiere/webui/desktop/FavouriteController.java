@@ -131,16 +131,15 @@ public class FavouriteController
 		}
 		else
 		{
-			//For service users, needs to persist data in system tenant
-			PO.setCrossTenantSafe();
-			try {
-				MTreeFavoriteNode favNode = MTreeFavoriteNode.getFavouriteTreeNodeFromMenuID(m_AD_Tree_Favorite_ID,
-						Menu_ID);
-				if (favNode != null) {
+			MTreeFavoriteNode favNode = MTreeFavoriteNode.getFavouriteTreeNodeFromMenuID(m_AD_Tree_Favorite_ID, Menu_ID);
+			if (favNode != null) {
+				try {
+					//For service users, needs to persist data in system tenant
+					PO.setCrossTenantSafe();
 					return favNode.delete(true);
+				}finally {
+					PO.clearCrossTenantSafe();
 				}
-			}finally {
-				PO.clearCrossTenantSafe();
 			}
 		}
 		return false;
@@ -202,7 +201,7 @@ public class FavouriteController
 		PO.setCrossTenantSafe();
 		MTreeFavoriteNode favNode = MTreeFavoriteNode.getFavouriteTreeNodeFromMenuID(m_AD_Tree_Favorite_ID, nodeId);
 		if (favNode != null && barUpdate(false, nodeId))
-		{
+	{
 			if (treeModel != null)
 			{
 				DefaultTreeNode<Object> treeNode = treeModel.find(treeModel.getRoot(), favNode.getAD_Tree_Favorite_Node_ID());
@@ -223,19 +222,22 @@ public class FavouriteController
 	} // removeNode
 
 	/**
-	 * @param nodeId
-	 * @return true if node id is in the current favourites list
+	 * @param  nodeId
+	 * @return        true if node id is in the current favourites list
 	 */
-	public boolean hasNode(int nodeId) {
+	public boolean hasNode(int nodeId)
+	{
 		return nodeMap.keySet().contains(nodeId);
 	} // hasNode
 
 	/**
 	 * @return List of favourites node
 	 */
-	public List<MTreeNode> getFavourites() {
+	public List<MTreeNode> getFavourites()
+	{
 		List<MTreeNode> list = new ArrayList<>();
-		for(int key : nodeMap.keySet()) {
+		for (int key : nodeMap.keySet())
+		{
 			list.add(nodeMap.get(key));
 		}
 		return list;
@@ -243,17 +245,21 @@ public class FavouriteController
 
 	/**
 	 * add callback for after add node to favourites
+	 * 
 	 * @param callback
 	 */
-	public void addInsertedCallback(Callback<MTreeNode> callback) {
+	public void addInsertedCallback(Callback<MTreeNode> callback)
+	{
 		insertedCallbacks.add(callback);
 	}
-	
+
 	/**
 	 * add callback for after remove node from favourites
+	 * 
 	 * @param callback
 	 */
-	public void addDeletedCallback(Callback<Integer> callback) {
+	public void addDeletedCallback(Callback<Integer> callback)
+	{
 		deletedCallbacks.add(callback);
 	}
 

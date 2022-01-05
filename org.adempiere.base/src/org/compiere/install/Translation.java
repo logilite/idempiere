@@ -45,6 +45,7 @@ import org.compiere.model.MLanguage;
 import org.compiere.model.MPInstance;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
+import org.compiere.model.Query;
 import org.compiere.process.ProcessCall;
 import org.compiere.process.ProcessInfo;
 import org.compiere.util.CLogger;
@@ -81,7 +82,7 @@ public class Translation implements IApplication
 	 * Do not use this Constructor in normal calls. It is used e.g. by the
 	 * headless call for an only-translation batch script call.
 	 * 
-	 * @author tbayen - IDEMPIERE-1554
+	 * author tbayen - IDEMPIERE-1554
 	 */
 	public Translation(){
 		m_ctx=Env.getCtx();
@@ -126,7 +127,7 @@ public class Translation implements IApplication
 	 * 	Import Translation.
 	 * 	Uses TranslationHandler to update translation
 	 *	@param directory file directory
-	 * 	@param AD_Client_ID only certain client if id >= 0
+	 * 	@param AD_Client_ID only certain client if id &gt;= 0
 	 * 	@param AD_Language language
 	 * 	@param Trl_Table table
 	 * 	@return status message
@@ -169,7 +170,7 @@ public class Translation implements IApplication
 	/**************************************************************************
 	 * 	Import Translation
 	 *	@param directory file directory
-	 * 	@param AD_Client_ID only certain client if id >= 0
+	 * 	@param AD_Client_ID only certain client if id &gt;= 0
 	 * 	@param AD_Language language
 	 * 	@param Trl_Table translation table _Trl
 	 * 	@return status message
@@ -196,7 +197,7 @@ public class Translation implements IApplication
 		String uuidColumn = MTable.getUUIDColumnName(Base_Table);
 		String[] trlColumns = getTrlColumns (Base_Table);
 		//
-		StringBuffer sql = null;
+		StringBuilder sql = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
@@ -216,7 +217,7 @@ public class Translation implements IApplication
 			root.setAttribute(XML_ATTRIBUTE_TABLE, Base_Table);
 			document.appendChild(root);
 			//
-			sql = new StringBuffer ("SELECT ");
+			sql = new StringBuilder ("SELECT ");
 			if (isBaseLanguage)
 				sql.append("'Y',");							//	1
 			else
@@ -397,41 +398,30 @@ public class Translation implements IApplication
 		return retValue;
 	}	//	getTrlColumns
 
-	
+	/**
+	 * Validate Language.
+	 *  - Check if AD_Language record exists
+	 *  - Check Trl table records
+	 * 	@param p_AD_Language language
+	 * 	@return "" if validated - or error message
+	 */
+	public String validateLanguage(String p_AD_Language) {
+		return validateLanguage(p_AD_Language, null);
+	}
+
 	/**************************************************************************
 	 * 	Validate Language.
 	 *  - Check if AD_Language record exists
 	 *  - Check Trl table records
 	 * 	@param AD_Language language
+	 *  @param trxName transaction
 	 * 	@return "" if validated - or error message
 	 */
-	public String validateLanguage (String AD_Language)
+	public String validateLanguage (String AD_Language, String trxName)
 	{
-		String sql = "SELECT * "
-			+ "FROM AD_Language "
-			+ "WHERE AD_Language=?";
-		MLanguage language = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setString(1, AD_Language);
-			rs = pstmt.executeQuery();
-			if (rs.next())
-				language = new MLanguage (m_ctx, rs, null);
-		}
-		catch (SQLException e)
-		{
-			log.log(Level.SEVERE, sql, e);
-			return e.toString();
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
+		MLanguage language = new Query(m_ctx, MLanguage.Table_Name, "AD_Language=?", trxName)
+				.setParameters(AD_Language)
+				.first();
 
 		//	No AD_Language Record
 		if (language == null)

@@ -46,17 +46,17 @@ import org.compiere.util.TimeUtil;
  * 				<li>FR [ 1776045 ] Add ReActivate action to GL Journal
  *  @author victor.perez@e-evolution.com, e-Evolution http://www.e-evolution.com
  * 			<li>FR [ 1948157  ]  Is necessary the reference for document reverse
- *  		@see http://sourceforge.net/tracker/?func=detail&atid=879335&aid=1948157&group_id=176962
+ *  		@see https://sourceforge.net/p/adempiere/feature-requests/412/
  *  		<li>FR: [ 2214883 ] Remove SQL code and Replace for Query 
  * 			<li> FR [ 2520591 ] Support multiples calendar for Org 
- *			@see http://sourceforge.net/tracker2/?func=detail&atid=879335&aid=2520591&group_id=176962 	
+ *			@see https://sourceforge.net/p/adempiere/feature-requests/631/
  */
 public class MJournal extends X_GL_Journal implements DocAction
 {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 6116307358915557651L;
+	private static final long serialVersionUID = 4661098755828765138L;
 
 	/**
 	 * 	Standard Constructor
@@ -69,21 +69,10 @@ public class MJournal extends X_GL_Journal implements DocAction
 		super (ctx, GL_Journal_ID, trxName);
 		if (GL_Journal_ID == 0)
 		{
-		//	setGL_Journal_ID (0);		//	PK
-		//	setC_AcctSchema_ID (0);
-		//	setC_Currency_ID (0);
-		//	setC_DocType_ID (0);
-		//	setC_Period_ID (0);
-			//
 			setCurrencyRate (Env.ONE);
-		//	setC_ConversionType_ID(0);
-		//	setDateAcct (new Timestamp(System.currentTimeMillis()));
 			setDateDoc (new Timestamp(System.currentTimeMillis()));
-		//	setDescription (null);
 			setDocAction (DOCACTION_Complete);
 			setDocStatus (DOCSTATUS_Drafted);
-		//	setDocumentNo (null);
-		//	setGL_Category_ID (0);
 			setPostingType (POSTINGTYPE_Actual);
 			setTotalCr (Env.ZERO);
 			setTotalDr (Env.ZERO);
@@ -145,10 +134,6 @@ public class MJournal extends X_GL_Journal implements DocAction
 		setC_Currency_ID(original.getC_Currency_ID());
 		setC_ConversionType_ID(original.getC_ConversionType_ID());
 		setCurrencyRate(original.getCurrencyRate());
-		
-	//	setDateDoc(original.getDateDoc());
-	//	setDateAcct(original.getDateAcct());
-	//	setC_Period_ID(original.getC_Period_ID());
 	}	//	MJournal
 	
 	
@@ -213,7 +198,7 @@ public class MJournal extends X_GL_Journal implements DocAction
 	
 	/**************************************************************************
 	 * 	Get Journal Lines
-	 * 	@param requery requery
+	 * 	@param requery requery (not used)
 	 *	@return Array of lines
 	 */
 	public MJournalLine[] getLines (boolean requery)
@@ -222,7 +207,7 @@ public class MJournal extends X_GL_Journal implements DocAction
 		final String whereClause = "GL_Journal_ID=?";
 		List <MJournalLine> list = new Query(getCtx(), I_GL_JournalLine.Table_Name, whereClause, get_TrxName())
 			.setParameters(getGL_Journal_ID())
-			.setOrderBy("Line")
+			.setOrderBy("Line,GL_JournalLine_ID")
 			.list();
 		//
 		MJournalLine[] retValue = new MJournalLine[list.size()];
@@ -298,6 +283,13 @@ public class MJournal extends X_GL_Journal implements DocAction
 	 */
 	protected boolean beforeSave (boolean newRecord)
 	{
+		if (getGL_JournalBatch_ID() > 0) {
+			MJournalBatch parent = new MJournalBatch(getCtx(), getGL_JournalBatch_ID(), get_TrxName());
+			if (newRecord && parent.isProcessed()) {
+				log.saveError("ParentComplete", Msg.translate(getCtx(), "GL_JournalBatch_ID"));
+				return false;
+			}
+		}
 		//	Imported Journals may not have date
 		if (getDateDoc() == null)
 		{
@@ -332,6 +324,10 @@ public class MJournal extends X_GL_Journal implements DocAction
 
 		if (getGL_Category_ID() == 0 && getC_DocType_ID() > 0)
 			setGL_Category_ID(MDocType.get(getCtx(), getC_DocType_ID()).getGL_Category_ID());
+		if (getC_AcctSchema_ID() == 0)
+			setC_AcctSchema_ID(MClientInfo.get(getCtx(), getAD_Client_ID()).getC_AcctSchema1_ID());
+		if (getC_ConversionType_ID() == 0)
+			setC_ConversionType_ID(MConversionType.getDefault(getAD_Client_ID()));
 
 		// IDEMPIERE-63
 		// for documents that can be reactivated we cannot allow changing 
@@ -497,7 +493,7 @@ public class MJournal extends X_GL_Journal implements DocAction
 				return DocAction.STATUS_Invalid;
 			}
 			
-			MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
+			MDocType dt = MDocType.get(getC_DocType_ID());
 			// Michael Judd (mjudd) BUG: [ 2678088 ] Allow posting to system accounts for non-actual postings
 			if ((line.isDocControlled() && !dt.isOverrideDocControl()) && 
 					( getPostingType().equals(POSTINGTYPE_Actual) ||
@@ -884,7 +880,7 @@ public class MJournal extends X_GL_Journal implements DocAction
 		
 		if (reversalDate == null) 
 		{
-			reversalDate = Env.getContextAsDate(getCtx(), "#Date");
+			reversalDate = Env.getContextAsDate(getCtx(), Env.DATE);
 		}
 
 		if (reversalDate == null) {
@@ -1022,10 +1018,7 @@ public class MJournal extends X_GL_Journal implements DocAction
 	 */
 	public File createPDF (File file)
 	{
-	//	ReportEngine re = ReportEngine.get (getCtx(), ReportEngine.INVOICE, getC_Invoice_ID());
-	//	if (re == null)
-			return null;
-	//	return re.getPDF(file);
+		return null;
 	}	//	createPDF
 
 	
@@ -1067,5 +1060,14 @@ public class MJournal extends X_GL_Journal implements DocAction
 			|| DOCSTATUS_Closed.equals(ds)
 			|| DOCSTATUS_Reversed.equals(ds);
 	}	//	isComplete
+
+	/**
+	 * 	Get Document Status
+	 *	@return Document Status Clear Text
+	 */
+	public String getDocStatusName()
+	{
+		return MRefList.getListName(getCtx(), SystemIDs.REFERENCE_DOCUMENTSTATUS, getDocStatus());
+	}	//	getDocStatusName
 
 }	//	MJournal

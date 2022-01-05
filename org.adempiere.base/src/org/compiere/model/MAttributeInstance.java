@@ -36,7 +36,7 @@ public class MAttributeInstance extends X_M_AttributeInstance
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 6154044437449512042L;
+	private static final long serialVersionUID = 5697542928282761922L;
 
 
 	/**
@@ -247,7 +247,6 @@ public class MAttributeInstance extends X_M_AttributeInstance
 	 * Set ValueInt
 	 * 
 	 * @param valueInt
-	 * @param value
 	 */
 	public void setValueInt(int valueInt)
 	{

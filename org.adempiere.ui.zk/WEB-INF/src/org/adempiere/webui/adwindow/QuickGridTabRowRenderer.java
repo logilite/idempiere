@@ -95,8 +95,6 @@ public class QuickGridTabRowRenderer
 	private GridTabDataBinder dataBinder;
 	private Paging paging;
 
-	private RowListener rowListener;
-
 	private Grid grid = null;
 	private QuickGridView gridPanel = null;
 	private Row currentRow;
@@ -182,7 +180,7 @@ public class QuickGridTabRowRenderer
 	/**
 	 * @param row
 	 * @param data
-	 * @see RowRenderer#render(Row, Object)
+	 * @param index
 	 */
 	@Override
 	public void render(Row row, Object[] data, int index) throws Exception {
@@ -298,18 +296,17 @@ public class QuickGridTabRowRenderer
 				component.setAttribute(IS_QUICK_FORM_COMPONENT, true);
 				div.appendChild(component);
 				div.setAttribute("display.component", component);
-				if (componentEditor instanceof WPAttributeEditor) {
-					((WPAttributeEditor) componentEditor).getComponent().getButton().addEventListener(Events.ON_FOCUS,
-							gridPanel);
-				} else if (componentEditor instanceof WSearchEditor) {
-					((WSearchEditor) componentEditor).getComponent().getButton().addEventListener(Events.ON_FOCUS,
-							gridPanel);
-					((WSearchEditor) componentEditor).setZoomButtonVisibility(Boolean.TRUE);
+				if (componentEditor instanceof WPAttributeEditor)
+				{
+					((WPAttributeEditor) componentEditor).getComponent().getButton().addEventListener(Events.ON_FOCUS, gridPanel);
+				}
+				else if (componentEditor instanceof WSearchEditor)
+				{
+					((WSearchEditor) componentEditor).getComponent().getButton().addEventListener(Events.ON_FOCUS, gridPanel);
 				}
 				else if (componentEditor instanceof WNumberEditor)
 				{
-					((WNumberEditor) componentEditor).getComponent().getButton().addEventListener(Events.ON_FOCUS,
-							gridPanel);
+					((WNumberEditor) componentEditor).getComponent().getButton().addEventListener(Events.ON_FOCUS, gridPanel);
 				}
 				else if (componentEditor instanceof WMultiSelectEditor)
 				{

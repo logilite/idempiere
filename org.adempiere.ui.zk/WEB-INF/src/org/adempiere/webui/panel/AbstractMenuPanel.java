@@ -320,7 +320,7 @@ public abstract class AbstractMenuPanel extends Panel implements EventListener<E
 			MMenu menu = new MMenu(Env.getCtx(), menuId, null);
 			IDesktop desktop = SessionManager.getAppDesktop();
 			if (desktop instanceof AbstractDesktop)
-					((AbstractDesktop)desktop).setPredefinedContextVariables(menu.getPredefinedContextVariables());
+				((AbstractDesktop)desktop).setPredefinedContextVariables(menu.getPredefinedContextVariables());
 			
     		MQuery query = new MQuery("");
     		query.addRestriction("1=2");

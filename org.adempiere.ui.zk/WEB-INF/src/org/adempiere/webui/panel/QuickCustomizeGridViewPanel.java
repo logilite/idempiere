@@ -37,7 +37,6 @@ import org.adempiere.webui.component.Listbox;
 import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.SimpleListModel;
 import org.adempiere.webui.factory.ButtonFactory;
-import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.I_AD_Field;
@@ -69,54 +68,54 @@ import org.zkoss.zul.Vbox;
  * @since Nov 08, 2017
  */
 public class QuickCustomizeGridViewPanel extends Panel {
-
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 721233085611663253L;
+	private static final long serialVersionUID = 7566420005952940208L;
 
-	static CLogger log = CLogger.getCLogger(QuickCustomizeGridViewPanel.class);
+	static CLogger					log					= CLogger.getCLogger(QuickCustomizeGridViewPanel.class);
 
-	private Map<Integer, String> m_columnsWidth;
-	ArrayList<Integer> tableSeqs;
-	QuickGridView gridview = null;
+	private Map <Integer, String>	m_columnsWidth;
+	ArrayList <Integer>				tableSeqs;
+	QuickGridView					gridview			= null;
 	MTabCustomization m_tabcust;
+
+	private int						m_WindowNo;
+	private int						m_AD_Tab_ID;
+	private int						m_AD_User_ID;
+
+	// UI variables
+	private Label					yesLabel			= new Label();
+
+	private Button					bDown				= ButtonFactory.createNamedButton("MoveDown");
+	private Button					bUp					= ButtonFactory.createNamedButton("MoveUp");
+
+	private Checkbox				chkSaveWidth		= new Checkbox();
+
+	SimpleListModel					yesModel			= new SimpleListModel();
+	Listbox							yesList				= new Listbox();
+
+	private boolean					uiCreated;
+	private boolean					m_saved				= false;
+	private ConfirmPanel			confirmPanel		= new ConfirmPanel(true, false, true, false, false, false);
+
 	/**
 	 * Sort Tab Constructor
-	 *
 	 * @param WindowNo Window No
+	 * @param AD_Tab_ID
+	 * @param AD_User_ID
 	 * @param columnsWidth
-	 * @param GridTab
+	 * @param gridFieldIds
 	 */
-	public QuickCustomizeGridViewPanel(int WindowNo, int AD_Tab_ID, int AD_User_ID, Map<Integer, String> columnsWidth,
-			ArrayList<Integer> gridFieldIds) {
+	public QuickCustomizeGridViewPanel(int WindowNo, int AD_Tab_ID, int AD_User_ID, Map <Integer, String> columnsWidth, ArrayList <Integer> gridFieldIds)
+	{
 		m_WindowNo = WindowNo;
-		
 		m_AD_Tab_ID = AD_Tab_ID;
 		m_AD_User_ID = AD_User_ID;
 		m_columnsWidth = columnsWidth;
 		tableSeqs = gridFieldIds;
 		this.setStyle("position: relative; height: 100%; width: 100%; margin: none; border: none; padding: none;");
 	}
-
-	private int m_WindowNo;
-	private int m_AD_Tab_ID;
-	private int m_AD_User_ID;
-
-	// UI variables
-	private Label yesLabel = new Label();
-
-	private Button			bDown			= ButtonFactory.createNamedButton("MoveDown");
-	private Button			bUp				= ButtonFactory.createNamedButton("MoveUp");
-
-	private Checkbox chkSaveWidth = new Checkbox();
-
-	SimpleListModel yesModel = new SimpleListModel();
-	Listbox yesList = new Listbox();
-
-	private boolean uiCreated;
-	private boolean m_saved = false;
-	private ConfirmPanel confirmPanel = new ConfirmPanel(true, false, true, false, false, false);
 
 	/**
 	 * Static Layout
@@ -239,7 +238,7 @@ public class QuickCustomizeGridViewPanel extends Panel {
 		try {
 			List<MField> lsFieldsOfGrid = query.list();
 			HashMap<Integer, ListElement> curTabSel = new HashMap<Integer, QuickCustomizeGridViewPanel.ListElement>();
-			MTab tab = new MTab(Env.getCtx(), m_AD_Tab_ID, null);
+			MTab tab = MTab.get(m_AD_Tab_ID);
 
 			for (MField field : lsFieldsOfGrid) {
 				if (!MRole.getDefault(Env.getCtx(), false).isColumnAccess(tab.getAD_Table_ID(), field.getAD_Column_ID(),
@@ -459,11 +458,10 @@ public class QuickCustomizeGridViewPanel extends Panel {
 	 * ListElement Item
 	 */
 	private static class ListElement extends NamePair {
-		
 		/**
 		 * 
-		 */	
-		private static final long serialVersionUID = 884539656654102968L;
+		 */
+		private static final long serialVersionUID = -4428985595605126841L;
 
 		private int m_key;
 

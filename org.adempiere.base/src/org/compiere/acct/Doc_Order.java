@@ -83,7 +83,6 @@ public class Doc_Order extends Doc
 		//	Contained Objects
 		m_taxes = loadTaxes();
 		p_lines = loadLines(order);
-	//	log.fine( "Lines=" + p_lines.length + ", Taxes=" + m_taxes.length);
 		return null;
 	}   //  loadDocumentDetails
 
@@ -469,7 +468,6 @@ public class Doc_Order extends Doc
 			.append("FROM C_Order o, C_OrderLine ol ")
 			.append("WHERE o.C_Order_ID=ol.C_Order_ID")
 			.append(" AND po.M_Product_ID=ol.M_Product_ID AND po.C_BPartner_ID=o.C_BPartner_ID ");
-			//jz + " AND ROWNUM=1 AND o.C_Order_ID=").append(get_ID()).append(") ")
 			if (DB.isOracle()) //jz
 			{
 				sql.append(" AND ROWNUM=1 ");
@@ -641,7 +639,7 @@ public class Doc_Order extends Doc
 	 * 	Get Commitments Sales
 	 * 	@param doc document
 	 * 	@param maxQty Qty invoiced/matched
-	 * 	@param C_OrderLine_ID invoice line
+	 * 	@param M_InOutLine_ID invoice line
 	 *	@return commitments (order lines)
 	 */
 	protected static DocLine[] getCommitmentsSales(Doc doc, BigDecimal maxQty, int M_InOutLine_ID)
@@ -731,7 +729,7 @@ public class Doc_Order extends Doc
 	 *	@param as accounting schema
 	 *	@param doc doc
 	 *	@param Qty qty invoiced/matched
-	 *	@param C_OrderLine_ID line
+	 *	@param M_InOutLine_ID line
 	 *	@param multiplier 1 for accrual
 	 *	@return Fact
 	 */

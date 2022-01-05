@@ -16,7 +16,6 @@
  *****************************************************************************/
 package org.compiere.util;
 
-import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,12 +24,13 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.Map;
 import java.util.Properties;
-import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.idempiere.expression.logic.LogicEvaluator;
 
 
 /**
@@ -87,68 +87,14 @@ public class Evaluator
 	
 	/**
 	 *	Evaluate Logic.
-	 *  <code>
-	 *	format		:= <expression> [<logic> <expression>]
-	 *	expression	:= @<context>@<exLogic><value>
-	 *	logic		:= <|> | <&>
-	 *  exLogic		:= <=> | <!> | <^> | <<> | <>>
-	 *
-	 *	context		:= any global or window context
-	 *	value		:= strings can be with ' or "
-	 *	logic operators	:= AND or OR with the prevoius result from left to right
-	 *
-	 *	Example	'@AD_Table@=Test | @Language@=GERGER
-	 *  </code>
+	 *  @see LogicEvaluator#evaluateLogic(Evaluatee, String)
 	 *  @param source class implementing get_ValueAsString(variable)
 	 *  @param logic logic string
 	 *  @return logic result
 	 */
 	public static boolean evaluateLogic (Evaluatee source, String logic)
 	{
-		//	Conditional
-		StringTokenizer st = new StringTokenizer(logic.trim(), "&|", true);
-		int it = st.countTokens();
-		if (((it/2) - ((it+1)/2)) == 0)		//	only uneven arguments
-		{
-			s_log.severe ("Logic does not comply with format "
-				+ "'<expression> [<logic> <expression>]' => " + logic);
-			return false;
-		}
-
-		String exprStrand = st.nextToken().trim();		
-		if (exprStrand.matches("^@\\d+$") || "@P".equals(exprStrand))
-		{
-			exprStrand = exprStrand.concat(st.nextToken());
-			exprStrand = exprStrand.concat(st.nextToken());			
-		}		
-
-		//boolean retValue = evaluateLogicTuple(source, st.nextToken());
-		boolean retValue = evaluateLogicTuple(source, exprStrand);
-		while (st.hasMoreTokens())
-		{
-			String logOp = st.nextToken().trim();
-			//boolean temp = evaluateLogicTuple(source, st.nextToken());			
-
-			exprStrand = st.nextToken().trim();		
-			if (exprStrand.matches("^@\\d+$") || "@P".equals(exprStrand))
-			{
-				exprStrand = exprStrand.concat(st.nextToken());
-				exprStrand = exprStrand.concat(st.nextToken());				
-			}
-
-			boolean temp = evaluateLogicTuple(source, exprStrand);
-
-			if (logOp.equals("&"))
-				retValue = retValue & temp;
-			else if (logOp.equals("|"))
-				retValue = retValue | temp;
-			else
-			{
-				s_log.log(Level.SEVERE, "Logic operand '|' or '&' expected => " + logic);
-				return false;
-			}
-		}	// hasMoreTokens
-		return retValue;
+		return LogicEvaluator.evaluateLogic(source, logic);
 	}   //  evaluateLogic
 
 	/**

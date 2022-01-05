@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.LogRecord;
 
 import org.compiere.model.MBPartner;
@@ -126,7 +126,7 @@ public class InvoiceCustomerTest extends AbstractTestCase {
 		assertEquals(false, invoice.isPaid(), "Invoice isPaid() is not false");
 		assertTrue(payment1.isPosted(), "Payment not posted");
 		
-		ArrayList<PO> postProcessDocs = payment1.getDocsPostProcess();
+		List<PO> postProcessDocs = payment1.getDocsPostProcess();
 		for(PO postProcessDoc : postProcessDocs) {
 			assertTrue(postProcessDoc.get_ValueAsBoolean("Posted"), "Post Process Doc not posted: " + postProcessDoc);
 		}
@@ -161,9 +161,9 @@ public class InvoiceCustomerTest extends AbstractTestCase {
 		invoice.load(getTrxName());
 		assertEquals(true, invoice.isPaid(), "Invoice isPaid() is not true");
 		assertTrue(Env.ZERO.compareTo(invoice.getOpenAmt()) == 0, "Invoice open amount not zero: " + invoice.getOpenAmt().toPlainString());
-		assertTrue(TWOHUNDRED.compareTo(invoice.getOpenAmt(false, today)) == 0);
-		assertTrue(Env.ONEHUNDRED.compareTo(invoice.getOpenAmt(false, nextweek)) == 0);
-		assertTrue(Env.ZERO.compareTo(invoice.getOpenAmt(false, next2weeks)) == 0);
+		assertTrue(TWOHUNDRED.compareTo(invoice.getOpenAmt(false, today, true)) == 0);
+		assertTrue(Env.ONEHUNDRED.compareTo(invoice.getOpenAmt(false, nextweek, true)) == 0);
+		assertTrue(Env.ZERO.compareTo(invoice.getOpenAmt(false, next2weeks, true)) == 0);
 
 		errorLogs = CLogErrorBuffer.get(true).getRecords(true);
 		if (errorLogs != null)

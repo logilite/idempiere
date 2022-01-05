@@ -9,6 +9,9 @@
  * You should have received a copy of the GNU General Public License along    *
  * with this program; if not, write to the Free Software Foundation, Inc.,    *
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.                     *
+ *                                                                            * 
+ * Contributor:                                                               * 
+ *   Andreas Sumerauer                                                        * 
  *****************************************************************************/
 
 package org.adempiere.webui.apps.form;
@@ -32,20 +35,16 @@ import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.CustomizeGridViewDialog;
 import org.adempiere.webui.window.FDialog;
-import org.adempiere.webui.window.QuickFormPasteData;
 import org.compiere.model.DataStatusEvent;
-import org.compiere.model.DataStatusListener;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MRole;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
-import org.compiere.util.Trx;
 import org.zkforge.keylistener.Keylistener;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
-import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Column;
 import org.zkoss.zul.Columns;
@@ -56,15 +55,14 @@ import org.zkoss.zul.Columns;
  * @author Logilite Technologies
  * @since Nov 03, 2017
  */
-public class WQuickForm extends Window implements EventListener<Event>, DataStatusListener
+public class WQuickForm extends Window implements IQuickForm
 {
-
 	/**
 	 * 
 	 */
-	private static final long		serialVersionUID	= -5095168843989540551L;
+	private static final long serialVersionUID = -5363771364595732977L;
 
-	public Trx						trx					= null;
+		public Trx						trx					= null;
 
 	private Borderlayout			mainLayout			= new Borderlayout();
 	private AbstractADWindowContent	adWinContent		= null;
@@ -78,7 +76,6 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 	private Button					bIgnore				= confirmPanel.createButton("Ignore");
 	private Button					bCustomize			= confirmPanel.createButton("Customize");
 	private Button					bUnSort				= confirmPanel.createButton("UnSort");
-	private Button					bPasteData			= confirmPanel.createButton("Paste");
 
 	private boolean					onlyCurrentRows		= false;
 
@@ -87,6 +84,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 	QuickGridView					prevQGV				= null;
 
 	private int						windowNo;
+
 	public WQuickForm(AbstractADWindowContent winContent, boolean m_onlyCurrentRows, int m_onlyCurrentDays)
 	{
 		super();
@@ -101,7 +99,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		this.quickGridView.setVisible(true);
 		initForm();
 		gridTab.isQuickForm = true;
-		
+
 		gridTab.addDataStatusListener(this);
 
 		// To maintain parent-child Quick Form
@@ -109,14 +107,14 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		adWinContent.setCurrQGV(quickGridView);
 	}
 
-	protected void initForm()
+	protected void initForm( )
 	{
 		initZk();
 		createNewRow();
 		quickGridView.refresh(gridTab);
 	}
 
-	private void initZk()
+	private void initZk( )
 	{
 		// Center
 		Panel Center = new Panel();
@@ -213,8 +211,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		else if (event.getTarget() == confirmPanel.getButton("UnSort"))
 		{
 			onUnSort();
-		}
-		else if (event.getTarget() == bPasteData)
+		}else if (event.getTarget() == bPasteData)
 		{
 			onPasteData();
 		}
@@ -225,7 +222,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 	{
 		if (gridTab.getTableModel().getRowChanged() > -1)
 		{
-			FDialog.ask(windowNo, this, "SaveChanges?", new Callback<Boolean>() {
+			FDialog.ask(windowNo, this, "SaveChanges?", new Callback <Boolean>() {
 
 				@Override
 				public void onCallback(Boolean result)
@@ -242,7 +239,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		}
 	} // onCancel
 
-	public void onUnSort()
+	public void onUnSort( )
 	{
 		adWinContent.getActiveGridTab().getTableModel().resetCacheSortState();
 		Column sortColumn = quickGridView.findCurrentSortColumn();
@@ -255,14 +252,15 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "UnSort"), false);
 	} // onUnSort
 
-	public void onCustomize()
+	public void onCustomize( )
 	{
 		onSave();
+		//
 		Columns columns = quickGridView.getListbox().getColumns();
-		List<Component> columnList = columns.getChildren();
+		List <Component> columnList = columns.getChildren();
 		GridField[] fields = quickGridView.getGridField();
-		Map<Integer, String> columnsWidth = new HashMap<Integer, String>();
-		ArrayList<Integer> gridFieldIds = new ArrayList<Integer>();
+		Map <Integer, String> columnsWidth = new HashMap <Integer, String>();
+		ArrayList <Integer> gridFieldIds = new ArrayList <Integer>();
 
 		for (int i = 0; i < fields.length; i++)
 		{
@@ -278,7 +276,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		CustomizeGridViewDialog.showCustomize(0, gridTab.getAD_Tab_ID(), columnsWidth, gridFieldIds, null, quickGridView, true);
 	} // onCustomize
 
-	public void onIgnore()
+	public void onIgnore( )
 	{
 		gridTab.dataIgnore();
 		gridTab.dataRefreshAll();
@@ -291,7 +289,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		Events.echoEvent(QuickGridView.EVENT_ON_SET_FOCUS_TO_FIRST_CELL, quickGridView, null);
 	} // onIgnore
 
-	public void onDelete()
+	public void onDelete( )
 	{
 		if (gridTab == null || !quickGridView.isNewLineSaved)
 			return;
@@ -303,7 +301,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		final int[] indices = gridTab.getSelection();
 		if (indices.length > 0)
 		{
-			FDialog.ask(windowNo, this, "DeleteRecord?", new Callback<Boolean>() {
+			FDialog.ask(windowNo, this, "DeleteRecord?", new Callback <Boolean>() {
 
 				@Override
 				public void onCallback(Boolean result)
@@ -353,7 +351,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		}
 	} // onDelete
 
-	public void onSave()
+	public void onSave( )
 	{
 		if (gridTab.getTableModel().getRowChanged() == gridTab.getCurrentRow())
 		{
@@ -370,7 +368,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		}
 	} // onSave
 
-	public void onRefresh()
+	public void onRefresh( )
 	{
 		gridTab.dataRefreshAll();
 		adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "Refresh"), false);
@@ -390,7 +388,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 	} // onPasteData
 
 	@Override
-	public void dispose()
+	public void dispose( )
 	{
 		super.dispose();
 
@@ -423,7 +421,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		adWinContent.getADTab().getSelectedTabpanel().query(onlyCurrentRows, onlyCurrentDays, MRole.getDefault().getMaxQueryRecords()); // autoSize
 	} // dispose
 
-	public void createNewRow()
+	private void createNewRow( )
 	{
 		int row = gridTab.getRowCount();
 		// creating the first record from the parent tab first record is duplicated on KEY DOWN.

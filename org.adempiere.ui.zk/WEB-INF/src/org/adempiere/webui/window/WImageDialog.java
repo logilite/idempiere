@@ -92,7 +92,7 @@ public class WImageDialog extends Window implements EventListener<Event>
 		}
 		//  load data
 		if (m_mImage == null)
-			m_mImage = MImage.get (Env.getCtx(), 0);
+			m_mImage = new MImage (Env.getCtx(), 0, null);
 		else
 		{
 			if (m_mImage.getData()!=null)
@@ -240,6 +240,7 @@ public class WImageDialog extends Window implements EventListener<Event>
 		
 		addEventListener(Events.ON_UPLOAD, this);
 		addEventListener("onSave", this);
+		addEventListener(Events.ON_CANCEL, e -> onCancel());
 	}   //  init
 
 	public void onEvent(Event e) throws Exception {
@@ -255,8 +256,7 @@ public class WImageDialog extends Window implements EventListener<Event>
 		}
 		else if (e.getTarget().getId().equals(ConfirmPanel.A_CANCEL))
 		{
-			cancel = true;
-			detach();
+			onCancel();
 		}
 		else if (e.getTarget().getId().equals(ConfirmPanel.A_RESET))
 		{
@@ -297,7 +297,7 @@ public class WImageDialog extends Window implements EventListener<Event>
 				image.invalidate();
 				
 				if (m_mImage == null)
-					m_mImage = MImage.get (Env.getCtx(), 0);
+					m_mImage = new MImage (Env.getCtx(), 0, null);
 				m_mImage.setName(defaultNameForCaptureImage);
 				m_mImage.setBinaryData(imageData);
 				fileNameTextbox.setValue(defaultNameForCaptureImage);
@@ -323,6 +323,11 @@ public class WImageDialog extends Window implements EventListener<Event>
 				Clients.clearBusy(this);
 			}
 		}
+	}
+
+	private void onCancel() {
+		cancel = true;
+		detach();
 	}
 
 	private void onSave() {
@@ -387,7 +392,7 @@ public class WImageDialog extends Window implements EventListener<Event>
 
 		//  Save info
 		if (m_mImage == null)
-			m_mImage = MImage.get (Env.getCtx(), 0);
+			m_mImage = new MImage (Env.getCtx(), 0, null);
 		m_mImage.setName(fileName);
 		m_mImage.setImageURL(fileName);
 		if (image.getContent() != null)
@@ -419,5 +424,14 @@ public class WImageDialog extends Window implements EventListener<Event>
 	 */
 	public void setDefaultNameForCaptureImage(String defaultNameForCaptureImage) {
 		this.defaultNameForCaptureImage = defaultNameForCaptureImage;
+	}
+
+	@Override
+	public void focus() {
+		super.focus();
+		if (fileButton != null)
+			fileButton.focus();
 	}	
+	
+	
 }   //  WImageDialog

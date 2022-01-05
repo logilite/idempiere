@@ -70,7 +70,7 @@ import org.zkoss.zul.event.ZulEvents;
 import org.zkoss.zul.ext.SelectionControl;
 
 /**
- * Renderer for {@link org.adempiere.webui.component.ListItems}
+ * Renderer for {@link org.adempiere.webui.component.ListItem}
  * for the {@link org.adempiere.webui.component.Listbox}.
  *
  * @author Andrew Kimball

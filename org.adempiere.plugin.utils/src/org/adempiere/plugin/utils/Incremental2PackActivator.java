@@ -123,7 +123,7 @@ public class Incremental2PackActivator extends AbstractActivator {
 			Trx trx = Trx.get(Trx.createTrxName(), true);
 			trx.setDisplayName(getClass().getName()+"_packIn");
 			try {
-				Env.getCtx().put("#AD_Client_ID", 0);
+				Env.getCtx().put(Env.AD_CLIENT_ID, 0);
 				
 				firstImp = new X_AD_Package_Imp(Env.getCtx(), 0, trx.getTrxName());
 				firstImp.setName(getName());
@@ -210,8 +210,13 @@ public class Incremental2PackActivator extends AbstractActivator {
 
 	protected boolean packIn(URL packout) {
 		if (packout != null && service != null) {
+			MSession localSession = null;
 			//Create Session to be able to create records in AD_ChangeLog
-			MSession.get(Env.getCtx(), true);
+			if (Env.getContextAsInt(Env.getCtx(), Env.AD_SESSION_ID) <= 0) {
+				localSession = MSession.get(Env.getCtx(), true);
+				localSession.setWebSession("Incremental2PackActivator");
+				localSession.saveEx();
+			}
 			String path = packout.getPath();
 			String suffix = "_"+path.substring(path.lastIndexOf("2Pack_"));
 			logger.log(Level.WARNING, "Installing " + getName() + " " + path + " ...");
@@ -238,6 +243,8 @@ public class Incremental2PackActivator extends AbstractActivator {
 						zipstream.close();
 					} catch (Exception e2) {}
 				}
+				if (localSession != null)
+					localSession.logout();
 			}
 			logger.log(Level.WARNING, getName() + " " + packout.getPath() + " installed");
 		} 
@@ -257,7 +264,7 @@ public class Incremental2PackActivator extends AbstractActivator {
 
 	protected void setupPackInContext() {
 		Properties serverContext = new Properties();
-		serverContext.setProperty("#AD_Client_ID", "0");
+		serverContext.setProperty(Env.AD_CLIENT_ID, "0");
 		ServerContext.setCurrentInstance(serverContext);
 	};
 

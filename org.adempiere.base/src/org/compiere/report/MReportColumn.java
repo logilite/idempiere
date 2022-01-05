@@ -38,7 +38,7 @@ public class MReportColumn extends X_PA_ReportColumn
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 2395905882810790219L;
+	private static final long serialVersionUID = 2584173320087743126L;
 
 	/**
 	 * 	Constructor
@@ -490,7 +490,7 @@ public class MReportColumn extends X_PA_ReportColumn
 	 */
 	public String toString ()
 	{
-		StringBuffer sb = new StringBuffer ("MReportColumn[")
+		StringBuilder sb = new StringBuilder ("MReportColumn[")
 			.append(get_ID()).append(" - ").append(getName()).append(" - ").append(getDescription())
 			.append(", SeqNo=").append(getSeqNo()).append(", AmountType=").append(getPAAmountType())
 			.append(", PeriodType=").append(getPAPeriodType())
@@ -592,13 +592,13 @@ public class MReportColumn extends X_PA_ReportColumn
 
 	/**
 	 * Get Relative Period To
+	 * 
 	 * @return relative period to
 	 */
 	@Override
 	public BigDecimal getRelativePeriodTo()
 	{
-		if (getColumnType().equals(COLUMNTYPE_RelativePeriod)
-				|| getColumnType().equals(COLUMNTYPE_SegmentValue))
+		if (getColumnType().equals(COLUMNTYPE_RelativePeriod) || getColumnType().equals(COLUMNTYPE_SegmentValue))
 			return (BigDecimal) get_Value(COLUMNNAME_RelativePeriodTo);
 		return null;
 	} // getRelativePeriodTo

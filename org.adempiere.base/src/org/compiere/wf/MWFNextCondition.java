@@ -17,12 +17,17 @@
 package org.compiere.wf;
 
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Properties;
 import java.util.logging.Level;
 
 import org.compiere.model.PO;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
+import org.idempiere.cache.ImmutablePOSupport;
 import org.compiere.model.X_AD_WF_NextCondition;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -37,12 +42,12 @@ import org.compiere.util.Msg;
  * @author Teo Sarca, SC ARHIPAC SERVICE SRL
  * 		<li>BF [ 1943720 ] WF Next Condition: handling boolean values is poor
  */
-public class MWFNextCondition extends X_AD_WF_NextCondition
+public class MWFNextCondition extends X_AD_WF_NextCondition implements ImmutablePOSupport
 {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1690335423407194318L;
+	private static final long serialVersionUID = 3119863973003103716L;
 
 	/**
 	 * 	Default Constructor
@@ -66,6 +71,38 @@ public class MWFNextCondition extends X_AD_WF_NextCondition
 		super(ctx, rs, trxName);
 	}	//	MWFNextCondition
 	
+	/**
+	 * 
+	 * @param copy
+	 */
+	public MWFNextCondition(MWFNextCondition copy) 
+	{
+		this(Env.getCtx(), copy);
+	}
+
+	/**
+	 * 
+	 * @param ctx
+	 * @param copy
+	 */
+	public MWFNextCondition(Properties ctx, MWFNextCondition copy) 
+	{
+		this(ctx, copy, (String) null);
+	}
+
+	/**
+	 * 
+	 * @param ctx
+	 * @param copy
+	 * @param trxName
+	 */
+	public MWFNextCondition(Properties ctx, MWFNextCondition copy, String trxName) 
+	{
+		this(ctx, 0, trxName);
+		copyPO(copy);
+		this.m_numeric = copy.m_numeric;
+	}
+	
 	/**	Numeric evaluation		*/
 	private boolean		m_numeric = true;
 	
@@ -85,14 +122,42 @@ public class MWFNextCondition extends X_AD_WF_NextCondition
 	 */
 	public boolean evaluate (MWFActivity activity)
 	{
-		if (!getOperation().equals(OPERATION_Sql) && getAD_Column_ID() == 0)
-			throw new IllegalStateException("No Column defined - " + this);
+		return evaluate(activity.getPO());
+	}	//	evaluate
+	
+	/**
+	 * 	Evaluate Condition
+	 * 	@param po PO
+	 *	@return true if true
+	 */
+	protected boolean evaluate (PO po)
+	{
+		if (getAD_Column_ID() == 0 && Util.isEmpty(getSQLStatement(), true))
+			throw new IllegalStateException("No Column and SQL Statement defined - " + this);
 			
-		PO po = activity.getPO();
 		if (po == null || po.get_ID() == 0)
 			throw new IllegalStateException("Could not evaluate " + po + " - " + this);
 		//
-		Object valueObj = po.get_ValueOfColumn(getAD_Column_ID());
+		if (getOperation().equals(OPERATION_Sql)) {
+			String sqlStatement = getSQLStatement();
+			if (Util.isEmpty(getSQLStatement(), true))
+				return false;
+			if (sqlStatement.indexOf("@") >= 0)
+				sqlStatement = Env.parseVariable(sqlStatement, po, po.get_TrxName(), false);
+			String result = DB.getSQLValueStringEx(po.get_TrxName(), sqlStatement);
+			return "true".equalsIgnoreCase(result) || "y".equalsIgnoreCase(result);
+		}
+		//
+		Object valueObj = null;
+		if (!Util.isEmpty(getSQLStatement(), true)) {
+			try {
+				valueObj = getColumnSQLValue(po);
+			} catch (SQLException e) {
+				throw new RuntimeException("Could not get result from column sql: " + getSQLStatement(), e);
+			}
+		} else {
+			valueObj = po.get_ValueOfColumn(getAD_Column_ID());
+		}		
 		if (valueObj == null)
 			valueObj = "";
 		String value1 = getDecodedValue(getValue(), po);	// F3P: added value decoding
@@ -103,44 +168,6 @@ public class MWFNextCondition extends X_AD_WF_NextCondition
 			value2 = "";
 		
 		String resultStr = "PO:{" + valueObj + "} " + getOperation() + " Condition:{" + value1 + "}";
-		if (getOperation().equals(OPERATION_Sql))
-		{
-			if (DB.isReadOnly(value1) != null)
-			{
-				log.log(Level.SEVERE, "SQL must not update or insert record. : " + value1);
-				return false;
-			}
-			int i = value1.indexOf('@');
-			StringBuffer query = new StringBuffer();
-			while (i != -1)
-			{
-				query.append(value1.substring(0, i));			// up to @
-				value1 = value1.substring(i + 1, value1.length());	// from first @
-
-				int j = value1.indexOf('@');						// next @
-				if (j < 0)
-				{
-					log.log(Level.SEVERE, "No second tag: " + value1);
-					return false;						//	no second tag
-				}
-				String token = value1.substring(0, j);
-
-				String value = Env.getContext(Env.getCtx(), 0, token, false);	// get context
-				if (value.length() == 0 && (token.startsWith("#") || token.startsWith("$")))
-					value = Env.getContext(Env.getCtx(), token);	// get global context
-				if (value.length() == 0)
-				{
-					query.append(po.get_Value(token).toString());
-				}
-				else
-					query.append(value);
-				value1 = value1.substring(j + 1, value1.length());	// from second @
-				i = value1.indexOf('@');
-			}
-			query.append(value1);
-			String result = DB.getSQLValueString(null, query.toString());
-			return result.equalsIgnoreCase("t") || result.equalsIgnoreCase("Y") ? true : false;
-		}
 		if (getOperation().equals(OPERATION_X))
 			resultStr += "{" + value2 + "}";
 
@@ -162,10 +189,9 @@ public class MWFNextCondition extends X_AD_WF_NextCondition
 	 *  COL= remaining value is interpreted as a column of the associated record
 	 * 
 	 * @param sValue value to be decoded
-	 * @param PO model object bound to the activity
-	 * 
+	 * @param po PO model object bound to the activity
+	 * @return
 	 */
-	
 	protected String getDecodedValue(String sValue, PO po)
 	{		
 		String sRet = sValue;
@@ -339,20 +365,49 @@ public class MWFNextCondition extends X_AD_WF_NextCondition
 			.append ("]");
 		return sb.toString ();
 	} //	toString
-
+	
 	@Override
-	protected boolean beforeSave(boolean newRecord)
-	{
-		super.beforeSave(newRecord);
-		String error = null;
-		if (getOperation().equals(OPERATION_Sql))
-			error = DB.isReadOnly(getValue());
-		if (error != null && error.length() > 0)
-		{
-			log.saveError("SQLReadOnly", Msg.getElement(getCtx(), "Value"));
-			return false;
+	public MWFNextCondition markImmutable() {
+		if (is_Immutable())
+			return this;
+
+		makeImmutable();
+		return this;
+	}
+	
+	/**
+	 * Get value from Column SQL (SQLStatement) instead of from AD_Column_ID
+	 * @param po
+	 * @return Value from Column SQL
+	 * @throws SQLException 
+	 */
+	private Object getColumnSQLValue(PO po) throws SQLException {
+		String columnSQL = getSQLStatement();
+		if (columnSQL.indexOf("@") >= 0) {
+			columnSQL = Env.parseVariable(columnSQL, po, po.get_TrxName(), false);
 		}
-		return true;
+		String tableName = po.get_TableName();
+		String pkName = po.get_KeyColumns() != null && po.get_KeyColumns().length==1 ? po.get_KeyColumns()[0] : po.getUUIDColumnName();
+
+		String resultSql = String.format("SELECT (%s) FROM %s WHERE %s = ?", columnSQL, tableName, pkName);
+
+		try (PreparedStatement pstmt = DB.prepareStatement(resultSql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, po.get_TrxName())) {
+			if (pkName.endsWith("_UU"))
+				pstmt.setString(1, po.get_ValueAsString(po.getUUIDColumnName()));				
+			else
+				pstmt.setInt(1, po.get_ID());
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next())
+				return rs.getObject(1);
+		}
+		return null;
 	}
 
+	@Override
+	protected boolean beforeSave(boolean newRecord) {
+		if (!Util.isEmpty(getSQLStatement(), true)) {
+			setAD_Column_ID(0);
+		}
+		return true;
+	}	 
 }	//	MWFNextCondition

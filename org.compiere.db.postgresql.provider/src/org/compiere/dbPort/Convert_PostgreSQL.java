@@ -54,6 +54,9 @@ public class Convert_PostgreSQL extends Convert_SQL92 {
 	private static final CLogger log = CLogger.getCLogger(Convert_PostgreSQL.class);
 
 	
+	private final static Pattern likePattern = Pattern.compile("\\bLIKE\\b", REGEX_FLAGS);
+	
+	private final static Pattern sysDatePattern = Pattern.compile("\\bSYSDATE\\b", REGEX_FLAGS);
 	
 	/**
 	 * Is Oracle DB
@@ -78,6 +81,45 @@ public class Convert_PostgreSQL extends Convert_SQL92 {
 	 */
 	protected ArrayList<String> convertStatement(String sqlStatement) {
 		ArrayList<String> result = new ArrayList<String>();
+		
+		String statement = null;
+		if (DB_PostgreSQL.isUseNativeDialect()) {
+			statement = sqlStatement;
+			statement = convertSysDate(statement);
+			statement = convertSimilarTo(statement);
+		} else {
+			statement = convertOracleStatement(sqlStatement);
+		}		
+		result.add(statement);
+
+		if ("true".equals(System.getProperty("org.idempiere.db.debug"))) {
+			String filterPgDebug = System.getProperty("org.idempiere.db.debug.filter");
+			boolean print = true;
+			if (filterPgDebug != null)
+				print = statement.matches(filterPgDebug);
+			// log.warning("Oracle -> " + oraStatement);
+			if (print) {
+				log.warning("Oracle -> " + sqlStatement);
+				log.warning("PgSQL  -> " + statement);
+			}
+		}
+		return result;
+	} // convertStatement
+
+	/**
+	 * Convert Oracle SQL statement to PostgreSQL syntax
+	 * @param sqlStatement oracle sql statement
+	 * @return PostgreSQL statement
+	 */
+	public String convertOracleStatement(String sqlStatement) {
+		String statement;
+		String nonce = sharedNonce;
+
+		// check for collision with nonce
+		while ( sqlStatement.contains(nonce))
+		{
+			nonce = generateNonce();
+		}
 		/** Vector to save previous values of quoted strings **/
 		Vector<String> retVars = new Vector<String>();
 		
@@ -92,8 +134,8 @@ public class Convert_PostgreSQL extends Convert_SQL92 {
 		String statement = replaceQuotedStrings(sqlStatement, retVars, nonce);
 		statement = convertWithConvertMap(statement);
 		statement = convertSimilarTo(statement);
-		statement = statement.replace(DB_PostgreSQL.NATIVE_MARKER, "");
-		
+		statement = DB_PostgreSQL.removeNativeKeyworkMarker(statement);
+
 		String cmpString = statement.toUpperCase();
 		boolean isCreate = cmpString.startsWith("CREATE ");
 
@@ -110,9 +152,9 @@ public class Convert_PostgreSQL extends Convert_SQL92 {
 			statement = recoverQuotedStrings(statement, retVars, nonce);
 			retVars.clear();
 			statement = convertDDL(convertComplexStatement(statement));
-		/*
+			/*
 		} else if (cmpString.indexOf("ROWNUM") != -1) {
-			result.add(convertRowNum(convertComplexStatement(convertAlias(statement))));*/
+		    result.add(convertRowNum(convertComplexStatement(convertAlias(statement))));*/
 		} else if (cmpString.indexOf("DELETE ") != -1
 				&& cmpString.indexOf("DELETE FROM") == -1) {
 			statement = convertDelete(statement);
@@ -126,32 +168,42 @@ public class Convert_PostgreSQL extends Convert_SQL92 {
 		}
 		if (retVars.size() > 0)
 			statement = recoverQuotedStrings(statement, retVars, nonce);
-		result.add(statement);
+		return statement;
+	}
 
-		if ("true".equals(System.getProperty("org.idempiere.db.postgresql.debug"))) {
-			log.warning("Oracle -> " + sqlStatement);
-			log.warning("PgSQL  -> " + statement);
-		}
-		return result;
-	} // convertStatement
-
+	private String convertSysDate(String statement) {
+		String retValue = statement;
+		String replacement = "getDate()";
+		try {
+			Matcher m = sysDatePattern.matcher(retValue);
+			retValue = m.replaceAll(replacement);
+		} catch (Exception e) {
+			String error = "Error expression: " + sysDatePattern.pattern() + " - " + e;
+			log.info(error);
+			m_conversionError = error;
+		}		
+		return retValue;
+	}
+	
 	private String convertSimilarTo(String statement) {
 		String retValue = statement;
-		boolean useSimilarTo = "Y".equals(Env.getContext(Env.getCtx(), "P|IsUseSimilarTo"));
+		boolean useSimilarTo = isUseSimilarTo();
 		if (useSimilarTo) {
-			String regex = "\\bLIKE\\b";
 			String replacement = "SIMILAR TO";
 			try {
-				Pattern p = Pattern.compile(regex, REGEX_FLAGS);
-				Matcher m = p.matcher(retValue);
+				Matcher m = likePattern.matcher(retValue);
 				retValue = m.replaceAll(replacement);
 			} catch (Exception e) {
-				String error = "Error expression: " + regex + " - " + e;
+				String error = "Error expression: " + likePattern.pattern() + " - " + e;
 				log.info(error);
 				m_conversionError = error;
 			}
 		}
 		return retValue;
+	}
+
+	private boolean isUseSimilarTo() {
+		return "Y".equals(Env.getContext(Env.getCtx(), "P|IsUseSimilarTo"));
 	}
 
 	/**

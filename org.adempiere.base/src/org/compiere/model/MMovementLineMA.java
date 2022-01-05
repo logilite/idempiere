@@ -271,6 +271,11 @@ public class MMovementLineMA extends X_M_MovementLineMA
 	{
 		I_M_MovementLine line = getM_MovementLine();
 		
+		MMovementLine parentline = new MMovementLine(getCtx(), getM_MovementLine_ID(), get_TrxName());
+		if (newRecord && parentline.getParent().isProcessed()) {
+			log.saveError("ParentComplete", Msg.translate(getCtx(), "M_Movement_ID"));
+			return false;
+		}
 		//Set DateMaterialPolicy
 		if(!newRecord && is_ValueChanged(COLUMNNAME_M_AttributeSetInstance_ID)){
 			

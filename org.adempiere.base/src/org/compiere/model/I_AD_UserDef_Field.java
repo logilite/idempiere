@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_UserDef_Field
  *  @author iDempiere (generated) 
- *  @version Release 7.1
+ *  @version Release 9
  */
 public interface I_AD_UserDef_Field 
 {
@@ -48,6 +48,21 @@ public interface I_AD_UserDef_Field
 	  * Client/Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
+
+    /** Column name AD_FieldGroup_ID */
+    public static final String COLUMNNAME_AD_FieldGroup_ID = "AD_FieldGroup_ID";
+
+	/** Set Field Group.
+	  * Logical grouping of fields
+	  */
+	public void setAD_FieldGroup_ID (int AD_FieldGroup_ID);
+
+	/** Get Field Group.
+	  * Logical grouping of fields
+	  */
+	public int getAD_FieldGroup_ID();
+
+	public org.compiere.model.I_AD_FieldGroup getAD_FieldGroup() throws RuntimeException;
 
     /** Column name AD_Field_ID */
     public static final String COLUMNNAME_AD_Field_ID = "AD_Field_ID";
@@ -318,6 +333,19 @@ public interface I_AD_UserDef_Field
 	  */
 	public String getIsAlwaysUpdateable();
 
+    /** Column name IsAutocomplete */
+    public static final String COLUMNNAME_IsAutocomplete = "IsAutocomplete";
+
+	/** Set Autocomplete.
+	  * Automatic completion for textfields
+	  */
+	public void setIsAutocomplete (String IsAutocomplete);
+
+	/** Get Autocomplete.
+	  * Automatic completion for textfields
+	  */
+	public String getIsAutocomplete();
+
     /** Column name IsDisplayed */
     public static final String COLUMNNAME_IsDisplayed = "IsDisplayed";
 
@@ -330,6 +358,15 @@ public interface I_AD_UserDef_Field
 	  * Determines, if this field is displayed
 	  */
 	public String getIsDisplayed();
+
+    /** Column name IsDisplayedGrid */
+    public static final String COLUMNNAME_IsDisplayedGrid = "IsDisplayedGrid";
+
+	/** Set Show in Grid	  */
+	public void setIsDisplayedGrid (String IsDisplayedGrid);
+
+	/** Get Show in Grid	  */
+	public String getIsDisplayedGrid();
 
     /** Column name IsMandatory */
     public static final String COLUMNNAME_IsMandatory = "IsMandatory";
@@ -479,6 +516,15 @@ public interface I_AD_UserDef_Field
 	  */
 	public int getSeqNo();
 
+    /** Column name SeqNoGrid */
+    public static final String COLUMNNAME_SeqNoGrid = "SeqNoGrid";
+
+	/** Set Grid Sequence No	  */
+	public void setSeqNoGrid (int SeqNoGrid);
+
+	/** Get Grid Sequence No	  */
+	public int getSeqNoGrid();
+
     /** Column name SortNo */
     public static final String COLUMNNAME_SortNo = "SortNo";
 
@@ -513,13 +559,17 @@ public interface I_AD_UserDef_Field
 
 	/** Set Value Format.
 	  * Format of the value;
- Can contain fixed format elements, Variables: "_lLoOaAcCa09"
+ Can contain fixed format elements, Variables: &quot;
+_lLoOaAcCa09&quot;
+
 	  */
 	public void setVFormat (String VFormat);
 
 	/** Get Value Format.
 	  * Format of the value;
- Can contain fixed format elements, Variables: "_lLoOaAcCa09"
+ Can contain fixed format elements, Variables: &quot;
+_lLoOaAcCa09&quot;
+
 	  */
 	public String getVFormat();
 

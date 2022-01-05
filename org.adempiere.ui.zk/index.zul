@@ -13,40 +13,33 @@ Copyright (C) 2007 Ashley G Ramdass.
 <?link rel="stylesheet" type="text/css" href="${themeStyleSheetByBrowser}"?>
 <?link rel="stylesheet" type="text/css" href="css/PAPanel.css"?>
 <?link rel="manifest" href="manifest.json"?>
+<?style content="
+     .z-grid-header > table > tbody > tr.z-columns > th.z-column.hiddencol > .z-column-content {
+	     white-space: nowrap !important;     
+	     text-overflow: unset !important;
+     }
+"?>
 <zk>
 	<script><![CDATA[
+		zk.load("jawwa.atmosphere");
+		zk.load("org.idempiere.websocket");
+		zk.load("adempiere.local.storage");	
+		zk.load("html2canvas");
+		zk.load("org.idempiere.commons");
+		zk.load("jquery.maskedinput");
+		zk.load("photobooth");
+		
 		zk.afterLoad(function() {
 			zk._Erbx.push = function(msg) {
 				if (console) console.log(msg);
 			};
-
-            // default non th, tr, td use clone method to create ghost element
-            // this code implement same behavior for li to get drag-drop effect
-            // still have room for improve: https://www.zkoss.org/wiki/ZK_Client-side_Reference/Customization/Drag-and-Drop_Effects  
-			var superghost = zk.DnD.ghost;
-            zk.DnD.ghost = function (drag, ofs, msg) {
-                if (msg == null && drag.node){
-                    var dragNode = jq(drag.node)[0];
-                    var dragWg = zk.Widget.$(dragNode);
-                    
-                    var textNote = dragWg.$n('real') || dragWg.getCaveNode();
-                    
-                    if (jq.nodeName(dragNode, 'li')){
-                        msg = textNote ? textNote.textContent || textNote.innerText || '' : '';
-                    }
-                }
-                
-                return superghost(drag, ofs, msg);
-            };
-            
-            
 
 			zk.$package('id.zk');
 			
 			id.zk.Extend = zk.$extends(zk.Object, {}, {
 				fakeOnchange: function (wgt) {
 					// just sent fake event when control is textfield and value is not yet sync to server
-					if ((wgt.$instanceof(zul.inp.Textbox) || wgt.$instanceof(zul.inp.Decimalbox))  && wgt.$n().value != wgt.getText())
+					if ((wgt.$instanceof(zul.inp.Textbox) || wgt.$instanceof(zul.inp.Decimalbox)) && wgt.$n().value != wgt.getText())
 						zAu.send(new zk.Event(zk.Widget.$(wgt), 'onChange',{"value":wgt.$n().value}));
 
 					else if (zk.$import("ckez.CKeditor") != undefined && wgt.$instanceof(ckez.CKeditor)){//https://www.zkoss.org/javadoc/latest/jsdoc/_global_/zk.html#$import(_global_.String)
@@ -81,28 +74,6 @@ Copyright (C) 2007 Ashley G Ramdass.
 			});
 		});
 			
-		zk.afterLoad(function() {
-			jq(window).unload(function () {
-				//rmDesktop not call in window.onbeforeunload (mount.js) when zk.confirmClose is not null								
-				if (!zk.ie && zk.confirmClose){						
-					rmDesktop();
-				} 
-			});						
-			
-			//function rmDesktop duplicated from mount.js ( zk.jar 7.0.3 )
-			function rmDesktop() {
-				var bRmDesktop = !zk.opera && !zk.keepDesktop;
-				if (bRmDesktop || zk.pfmeter) {
-					try {
-						var dts = zk.Desktop.all;
-						for (var dtid in dts)
-							zAu._rmDesktop(dts[dtid], !bRmDesktop);
-					} catch (e) { 
-					}
-				}
-			}
-		});								
-		
 		zk.afterLoad('zul.inp', function () {
 			
 			// should filter out for only component inside standard window or component wish fire this event, 
@@ -193,7 +164,7 @@ Copyright (C) 2007 Ashley G Ramdass.
 			zk.override(zul.mesh.Paging.prototype, "bind_", function () {
 				this.$bind_.apply(this, arguments);
 				if (this._totalSize == 0x7fffffff){
-					jq(".z-paging-text", this).text("?");
+					jq(".z-paging-text", this).text(" / ?");
 				}
 			});
 			
@@ -254,106 +225,28 @@ Copyright (C) 2007 Ashley G Ramdass.
 			});
 		});	
 		
-		// overload for recalculate width of scroll when has frozen control
-		function syncScrollOVR (wgt){
-			var parent = wgt.parent;
+		zk.afterLoad("zul.mesh", function () {
+		    var _xFrozen = {};
+		    zk.override(zul.mesh.Frozen.prototype, _xFrozen, {
+		        _doScrollNow: function() {
+					var result = _xFrozen._doScrollNow.apply(this, arguments);
+					/*Patch: add class to non-visible columns*/
+					var mesh = this.parent;
+					if (mesh.head) {
+						var totalCols = mesh.head.nChildren,
+									hdcol = mesh.ehdfaker.firstChild;
 			
-			if (parent.eheadtbl && parent._nativebar) {
-				var scroll = wgt.$n('scrollX');
-				var cells = parent._getFirstRowCells(parent.eheadrows);
-				var totalcols = cells.length;
-				var columns = wgt._columns;
-				var scrollScale = totalcols - columns - 1; 
-				var leftWidth = 0;
-				
-				var headerWidth = 0; 
-				for (var i = 0; i < columns; i++)
-					headerWidth += cells[i].offsetWidth;
-				
-				var bodyWidth = parent.$n('body').offsetWidth;
-				var extraWidth = parent.$n('body').offsetWidth - headerWidth;
-				var extraColumnNum = 0;
-				for (var i = totalcols - 1; i >= columns; i--){
-					extraWidth -= cells[i].offsetWidth;
-					if (cells[i].offsetWidth == 0)// when scroll to right, column at left has width = 0
-						continue;
-					if (extraWidth >= 0){
-						extraColumnNum++;
-					}else{
-						break;
-					}
-				}
-				
-				
-				scroll.firstChild.style.width = jq.px0(bodyWidth + 50 * (scrollScale - extraColumnNum));
-			}
-			
-			wgt.$syncScroll ()
-		}
-		
-				
-		/*
-				Issue of file not able to download in mobile iOS devices (iPad, iPhone) 
-				Issue from ZK lower version, In ZK 8.5.2 version it was fixed. [ https://tracker.zkoss.org/browse/ZK-3886 ]
-			*/
-			zk.afterLoad('zk', function() {
-			zAu.cmd0.download = function(url) {
-				if (url) {
-
-					if (zk.mobile && zk.safari) {
-						var newwindow = window.open(url, "Download...", null);
-						if (window.focus) {
-							newwindow.focus();
-						}
-					} else if (zk.ios) {
-						var link = document.createElement('a'),
-							evt = document.createEvent('Event');
-						link.id = 'zk_download';
-						link.href = url;
-						if (zk.ios < 7) //ZK-2245: it's restriction to programmatically open new tab since ios7 
-							link.target = '_blank';
-						evt.initEvent('click', true, false);
-						link.dispatchEvent(evt);
-					} else {
-						var ifr = jq('#zk_download')[0];
-						if (ifr) {
-							ifr.src = url; //It is OK to reuse the same iframe 
-						} else {
-							var html = '<iframe src="' + url + '" id="zk_download" name="zk_download" style="display:none;width:0;height:0;border:0" frameborder="0"></iframe>';
-							jq(document.body).append(html);
-						}
-					}
-				}
-			};
-		}); //zk.afterLoad
-		
-		//Incorporate fix from https://tracker.zkoss.org/browse/ZK-4204
-		//Probably can be removed after the upgrade to zk9
-		zk.afterLoad('zk', function () {
-			if (navigator.sendBeacon && window.URLSearchParams) {
-				zAu._rmDesktop = function(dt, dummy) {
-					var url = zk.ajaxURI(null, {desktop: dt, au: true}),
-					data = jq.param({dtid: dt.id, cmd_0: dummy ? 'dummy' : 'rmDesktop', opt_0: 'i'}),
-					headers = {};
-					if (zk.pfmeter) {
-						var fakeReq = {
-							setRequestHeader: function (name, value) {
-								headers[name] = value;
+						for (var faker, i = 0; hdcol && i < totalCols; hdcol = hdcol.nextSibling, i++) {
+							if (hdcol.style.width.indexOf('0.001px') != -1 || hdcol.style.width.indexOf('0px') != -1) {
+								jq(zk.$(hdcol).$n()).addClass("hiddencol");
+							} else {
+								jq(zk.$(hdcol).$n()).removeClass("hiddencol");
 							}
-						};
-						zAu._pfsend(dt, fakeReq, true, false);
+						}
 					}
-					var params = new URLSearchParams(data);
-					for (var key in headers) {
-						if (headers.hasOwnProperty(key))
-							params.append(key, headers[key]);
-					}
-					navigator.sendBeacon(url, zk.chrome // https://crbug.com/747787
-						? new Blob([params.toString()], {type: 'application/x-www-form-urlencoded'})
-						: params
-					);
-				}
-			}
+					return result;
+		        }
+		    });
 		});
 
 

@@ -69,7 +69,7 @@ public class WTextEditorDialog extends Window implements EventListener<Event>{
 	 * @param text
 	 * @param editable
 	 * @param maxSize
-	 * @param isHtml - select the html tab at start
+	 * @param IsHtml - select the html tab at start
 	 */
 	public WTextEditorDialog(String title, String text, boolean editable, int maxSize, boolean IsHtml) {
 		this(title, text, editable, maxSize, IsHtml, true);
@@ -132,7 +132,7 @@ public class WTextEditorDialog extends Window implements EventListener<Event>{
 		tabPanels.appendChild(tabPanel);
 		textBox = new Textbox(text);
 		textBox.setCols(80);
-		textBox.setRows(30);
+		textBox.setMultiline(true);
 		ZKUpdateUtil.setHeight(textBox, "100%");
 		textBox.setEnabled(editable);
 		ZKUpdateUtil.setHflex(textBox, "1");
@@ -185,6 +185,7 @@ public class WTextEditorDialog extends Window implements EventListener<Event>{
 		setClosable(true);
 		setSizable(true);
 		setMaximizable(true);
+		addEventListener(Events.ON_CANCEL, e -> onCancel());
 	}
 
 	private void createEditor(org.zkoss.zul.Tabpanel tabPanel) {		
@@ -213,8 +214,7 @@ public class WTextEditorDialog extends Window implements EventListener<Event>{
 	 */
 	public void onEvent(Event event) throws Exception {
 		if (event.getTarget().getId().equals(ConfirmPanel.A_CANCEL)) {
-			cancelled = true;
-			detach();
+			onCancel();
 		} else if (event.getTarget().getId().equals(ConfirmPanel.A_OK)) {
 			if (editable) {
 				if (tabbox.getSelectedIndex() == 0) {
@@ -248,6 +248,11 @@ public class WTextEditorDialog extends Window implements EventListener<Event>{
 				updateStatus(editor.getValue().length());
 			}
 		}
+	}
+
+	private void onCancel() {
+		cancelled = true;
+		detach();
 	}
 	
 	private void updateStatus(int newLength) {

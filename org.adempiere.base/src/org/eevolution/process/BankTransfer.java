@@ -38,6 +38,7 @@ import org.compiere.util.Util;
  *	@author victor.perez@e-evoltuion.com
  *	
  **/
+@org.adempiere.base.annotation.Process
 public class BankTransfer extends SvrProcess
 {
 	protected String 		p_DocumentNo= "";				// Document No
@@ -128,7 +129,7 @@ public class BankTransfer extends SvrProcess
 
 		//	Login Date
 		if (p_StatementDate == null)
-			p_StatementDate = Env.getContextAsDate(getCtx(), "#Date");
+			p_StatementDate = Env.getContextAsDate(getCtx(), Env.DATE);
 		if (p_StatementDate == null)
 			p_StatementDate = new Timestamp(System.currentTimeMillis());			
 

@@ -185,9 +185,12 @@ public class WRequest implements EventListener<Event>
 		}
 		
 		Popup popup = LayoutUtils.findPopup(invoker);
-		if (popup != null) {
+		if (popup != null)
+		{
 			popup.appendChild(m_popup);
-		} else {
+		}
+		else
+		{
 			m_popup.setPage(invoker.getPage());
 			LayoutUtils.autoDetachOnClose(m_popup);
 		}
@@ -220,9 +223,9 @@ public class WRequest implements EventListener<Event>
 			}
 			
 			int AD_Window_ID = WINDOW_REQUESTS_ALL;		//	232=all - 201=my
-            if (m_popup.getParent() instanceof Popup) {
-                ((Popup)m_popup.getParent()).close();
-            }
+			if (m_popup.getParent() instanceof Popup) {
+				((Popup)m_popup.getParent()).close();
+			}
 			SessionManager.getAppDesktop().openWindow(AD_Window_ID, query, new Callback<ADWindow>() {
 				
 				@Override

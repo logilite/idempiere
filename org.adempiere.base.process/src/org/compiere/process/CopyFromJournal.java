@@ -29,6 +29,7 @@ import org.compiere.model.MTable;
  *	@author Jorg Janke
  *	@version $Id: CopyFromJournal.java,v 1.2 2006/07/30 00:51:02 jjanke Exp $
  */
+@org.adempiere.base.annotation.Process
 public class CopyFromJournal extends SvrProcess
 {
 	private int		m_GL_JournalBatch_ID = 0;

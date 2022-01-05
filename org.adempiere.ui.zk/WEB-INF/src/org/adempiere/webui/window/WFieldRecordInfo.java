@@ -164,6 +164,7 @@ public class WFieldRecordInfo extends Window implements EventListener<Event>
 		south.appendChild(confirmPanel);
 		
 		confirmPanel.addActionListener(Events.ON_CLICK, this);
+		addEventListener(Events.ON_CANCEL, e -> onCancel());
 		setSclass("field-record-info-dialog");
 	}	//	init
 	
@@ -372,6 +373,11 @@ public class WFieldRecordInfo extends Window implements EventListener<Event>
 	 * @param event
 	 */
 	public void onEvent(Event event) throws Exception {
+		onCancel();
+	}
+
+
+	private void onCancel() {
 		this.detach();
 	}
 
