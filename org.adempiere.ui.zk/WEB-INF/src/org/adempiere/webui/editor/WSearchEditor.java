@@ -25,6 +25,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.adempiere.webui.ClientInfo;
+import org.adempiere.webui.Extensions;
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.ValuePreference;
 import org.adempiere.webui.adwindow.ADWindow;
@@ -38,8 +39,7 @@ import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.factory.InfoManager;
-import org.adempiere.webui.factory.QuickEntryServiceUtil;
-import org.adempiere.webui.grid.WQuickEntry;
+import org.adempiere.webui.grid.AbstractWQuickEntry;
 import org.adempiere.webui.panel.IHelpContext;
 import org.adempiere.webui.panel.InfoPanel;
 import org.adempiere.webui.part.WindowContainer;
@@ -590,7 +590,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 
     	int tabNo = gridField != null && gridField.getGridTab() != null ? gridField.getGridTab().getTabNo() : 0;
 		int tabId = this.getGridField() != null ? this.getGridField().getVO().AD_Tab_ID : -1;
-		final WQuickEntry vqe = QuickEntryServiceUtil.getWQuickEntry(lookup.getWindowNo(), zoomWindowId, tabNo, tabId);
+		final AbstractWQuickEntry vqe = Extensions.getQuickEntry(lookup.getWindowNo(), tabNo, zoomWindowId, tabId);
 		if (vqe.getQuickFields()<=0)
 			return;
 		vqe.loadRecord (Record_ID);

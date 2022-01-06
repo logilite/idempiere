@@ -304,12 +304,12 @@ public class Extensions {
 	 * @param AdWindowID 
 	 * @return IQuickEntry instance or null if AdWindowID not found
 	 */
-	public static AbstractWQuickEntry getQuickEntry(int WindowNo, int TabNo, int AdWindowID) {
+	public static AbstractWQuickEntry getQuickEntry(int WindowNo, int TabNo, int AdWindowID,int AdTabID) {
 		IServiceReferenceHolder<IQuickEntryFactory> cache = s_quickEntryFactoryCache.get(AdWindowID);
 		if (cache != null) {
 			IQuickEntryFactory service = cache.getService();
 			if (service != null) {
-				AbstractWQuickEntry quickEntry = service.newQuickEntryInstance(WindowNo, TabNo, AdWindowID);
+				AbstractWQuickEntry quickEntry = service.newQuickEntryInstance(WindowNo, TabNo, AdWindowID,AdTabID);
 				if (quickEntry != null)
 					return quickEntry;
 			}
@@ -320,7 +320,7 @@ public class Extensions {
 			for(IServiceReferenceHolder<IQuickEntryFactory> factory : factories) {
 				IQuickEntryFactory service = factory.getService();
 				if (service != null) {
-					AbstractWQuickEntry quickEntry = service.newQuickEntryInstance(WindowNo, TabNo, AdWindowID);
+					AbstractWQuickEntry quickEntry = service.newQuickEntryInstance(WindowNo, TabNo, AdWindowID,AdTabID);
 					if (quickEntry != null) {
 						s_quickEntryFactoryCache.put(AdWindowID, factory);
 						return quickEntry;

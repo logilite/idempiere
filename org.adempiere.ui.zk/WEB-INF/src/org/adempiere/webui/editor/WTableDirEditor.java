@@ -28,7 +28,6 @@ import java.util.Properties;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
-import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.Extensions;
 import org.adempiere.webui.LayoutUtils;
@@ -43,8 +42,6 @@ import org.adempiere.webui.event.ContextMenuListener;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.grid.AbstractWQuickEntry;
-import org.adempiere.webui.grid.WQuickEntry;
-import org.adempiere.webui.factory.QuickEntryServiceUtil;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.WFieldRecordInfo;
@@ -653,7 +650,7 @@ ContextMenuListener, IZoomableEditor
 
 		int tabNo = this.getGridField().getVO().TabNo;
 		int tabId = this.getGridField().getVO().AD_Tab_ID;
-		final WQuickEntry vqe = QuickEntryServiceUtil.getWQuickEntry(lookup.getWindowNo(), lookup.getZoom(), tabNo, tabId);
+		final AbstractWQuickEntry vqe = Extensions.getQuickEntry(lookup.getWindowNo(), tabNo, lookup.getZoom(), tabId);
 		int Record_ID = 0;
 
 		Object value = getValue();

@@ -102,7 +102,7 @@ public class WQuickEntry extends AbstractWQuickEntry implements EventListener<Ev
 
 	public WQuickEntry(int WindowNo, int AD_Window_ID)
 	{
-		this(WindowNo, 0, AD_Window_ID);
+		this(WindowNo, 0, AD_Window_ID,0);
 	}
 
 	/**
@@ -113,13 +113,14 @@ public class WQuickEntry extends AbstractWQuickEntry implements EventListener<Ev
 	 */
 	
 
-	public WQuickEntry(int WindowNo, int TabNo, int AD_Window_ID)
+	public WQuickEntry(int WindowNo, int TabNo, int AD_Window_ID, int AD_Tab_ID)
 	{
 		super();
 
 		m_AD_Window_ID = AD_Window_ID;
 		parent_WindowNo = WindowNo;
 		parent_tabNo = TabNo;
+		m_AD_Tab_ID = AD_Tab_ID;
 		m_WindowNo = SessionManager.getAppDesktop().registerWindow(this);
 
 		try
@@ -147,33 +148,6 @@ public class WQuickEntry extends AbstractWQuickEntry implements EventListener<Ev
 		parent_WindowNo = 0;
 		m_WindowNo = 0;
 		log.info("R/O=" + isReadOnly());
-	}	//	WQuickEntry
-	
-	public WQuickEntry(int WindowNo, int AD_Window_ID, int TabNo, int AD_Tab_ID)
-	{
-		super();
-
-		m_AD_Window_ID = AD_Window_ID;
-		parent_WindowNo = WindowNo;
-		parent_tabNo = TabNo;
-		m_AD_Tab_ID = AD_Tab_ID;
-		m_WindowNo = SessionManager.getAppDesktop().registerWindow(this);
-		log.info("R/O=" + m_readOnly);
-
-		try
-		{
-			initLayout();
-		}
-		catch(Exception ex)
-		{
-			log.log(Level.SEVERE, ex.getMessage());
-		}
-
-		Env.setContext(Env.getCtx(), m_WindowNo, QUICK_ENTRY_MODE, "Y");
-		Env.setContext(Env.getCtx(), m_WindowNo, QUICK_ENTRY_CALLER_WINDOW, parent_WindowNo);
-		Env.setContext(Env.getCtx(), m_WindowNo, QUICK_ENTRY_CALLER_TAB, parent_tabNo);
-		initPOs();
-
 	}	//	WQuickEntry
 
 	/**

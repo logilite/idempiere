@@ -61,9 +61,7 @@ import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.event.WTableModelEvent;
 import org.adempiere.webui.factory.ButtonFactory;
-import org.adempiere.webui.factory.QuickEntryServiceUtil;
 import org.adempiere.webui.grid.AbstractWQuickEntry;
-import org.adempiere.webui.grid.WQuickEntry;
 import org.adempiere.webui.panel.InfoPanel;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
@@ -2374,7 +2372,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			GridWindow gridwindow = GridWindow.get(Env.getCtx(), 0, getADWindowID());
 			hasRightQuickEntry = gridwindow != null;
 			if (hasRightQuickEntry)
-				vqe = QuickEntryServiceUtil.getWQuickEntry(0, getADWindowID());
+				vqe = Extensions.getQuickEntry(0, 0, getADWindowID(),0);
 		}
 			
 		return hasNew && vqe != null && vqe.isAvailableQuickEdit();
@@ -2403,7 +2401,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		int tabNo = this.m_gridfield != null ? this.m_gridfield.getVO().TabNo : 0;
 		int tabId = this.m_gridfield != null ? this.m_gridfield.getVO().AD_Tab_ID : 0;
 		
-		WQuickEntry vqe = QuickEntryServiceUtil.getWQuickEntry(getWindowNo(), getADWindowID(), tabNo, tabId);
+		AbstractWQuickEntry vqe = Extensions.getQuickEntry(getWindowNo(), tabNo, getADWindowID(), tabId);
 		vqe.loadRecord (0);								
 		
 		final ISupportMask parent = LayoutUtils.showWindowWithMask(vqe, this, LayoutUtils.OVERLAP_SELF);
