@@ -40,8 +40,6 @@ import org.zkoss.zul.Messagebox;
  **/
 public final class ConfirmPanel extends Div
 {
-	private static final String SMALL_SCREEN_BUTTON_CLASS = "btn-small small-img-btn";
-
 	/**
 	 * 
 	 */
@@ -83,8 +81,6 @@ public final class ConfirmPanel extends Div
     private Map<String, Button> buttonMap = new HashMap<String, Button>();
 	private boolean m_withImage = true;
 	
-	private boolean useSmallButtonClassForSmallScreen;
-
     /**
      * Creates a button of the specified id
      *

@@ -436,9 +436,9 @@ public class CustomizeGridViewPanel extends Panel
 			|| (tabCust == null && tabCustAll != null && tabCustAll.getCustom().indexOf("px") > 0))
 			chkSaveWidth.setChecked(true);
 		
-		if (m_tabcust != null && m_tabcust.getIsAutoHideEmptyColumn() != null) {
-			chkAutoHideEmptyColumn.setChecked("Y".equalsIgnoreCase(m_tabcust.getIsAutoHideEmptyColumn()));
-			chkAutoHideEmptyColumn.setAttribute("ad_tab_customization.value", m_tabcust.getIsAutoHideEmptyColumn());
+		if (tabCust != null && tabCust.getIsAutoHideEmptyColumn() != null) {
+			chkAutoHideEmptyColumn.setChecked("Y".equalsIgnoreCase(tabCust.getIsAutoHideEmptyColumn()));
+			chkAutoHideEmptyColumn.setAttribute("ad_tab_customization.value", tabCust.getIsAutoHideEmptyColumn());
 		} else {
 			chkAutoHideEmptyColumn.setChecked(MSysConfig.getBooleanValue(MSysConfig.ZK_GRID_AUTO_HIDE_EMPTY_COLUMNS, false, Env.getAD_Client_ID(Env.getCtx())));
 		}

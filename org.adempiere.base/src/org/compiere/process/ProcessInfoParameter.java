@@ -255,20 +255,6 @@ public class ProcessInfoParameter implements Serializable
 	} // getParameterAsIntegerArray
 
 	/**
-	 * Method get Parameter as String Array
-	 * 
-	 * @return String[]
-	 */
-	public String[] getParameterAsStringArray()
-	{
-		if (m_Parameter == null)
-			return null;
-		if (m_Parameter instanceof String[])
-			return (String[]) m_Parameter;
-		return null;
-	} // getParameterAsStringArray
-
-	/**
 	 * Method getParameterName
 	 * @return String
 	 */

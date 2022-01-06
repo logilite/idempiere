@@ -107,7 +107,7 @@ public class ProductionCreate extends SvrProcess {
 		return msgreturn.toString();
 	}
 
-	public void validateEndProduct(int M_Product_ID) throws Exception {
+	public String validateEndProduct(int M_Product_ID) throws Exception {
 		MProduction production = new MProduction(Env.getCtx(), 0, get_TrxName());
 		return production.validateEndProduct(M_Product_ID);
 	}	

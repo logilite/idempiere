@@ -24,6 +24,7 @@
  **********************************************************************/
 package org.adempiere.webui.adwindow;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -876,9 +877,9 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 				} else if (BTN_TOGGLE_ID.equals(btn.getId())) {
 					btn.setDisabled(adtab.getGridTab().isSortTab());
 				}
-				else if (mapToolbarCustomBtn.containsKey(btn.getId()))
+				else if (tabpanel.toolbarCustomButtons.containsKey(btn.getId()))
 				{
-					mapToolbarCustomBtn.get(btn.getId()).updateToolbarCustomBtn(adtab, changed, readOnly);
+					tabpanel.toolbarCustomButtons.get(btn.getId()).updateToolbarCustomBtn(adtab, changed, readOnly);
 				}
 
         		if (windowRestrictList.contains(btn.getId())) {

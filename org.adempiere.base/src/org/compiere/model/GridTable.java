@@ -51,6 +51,7 @@ import java.util.logging.Level;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.DBException;
 import org.adempiere.util.ServerContext;
 import org.compiere.Adempiere;
@@ -111,8 +112,6 @@ public class GridTable extends AbstractTableModel
 	
 	public static final int DEFAULT_GRIDTABLE_LOAD_TIMEOUT_IN_SECONDS = 30;
 	
-	public static final String LOAD_TIMEOUT_ERROR_MESSAGE = "GridTabLoadTimeoutError";
-
 	public static final String LOAD_TIMEOUT_ERROR_MESSAGE = "GridTabLoadTimeoutError";
 
 	public static final String DATA_REFRESH_MESSAGE = "Refreshed";

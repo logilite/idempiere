@@ -35,7 +35,6 @@ import org.compiere.model.MProcess;
 import org.compiere.model.MProcessPara;
 import org.compiere.model.MQuery;
 import org.compiere.model.MTable;
-import org.compiere.model.MWebServiceType;
 import org.compiere.model.PO;
 import org.compiere.model.PrintInfo;
 import org.compiere.print.MPrintFormat;
@@ -69,6 +68,7 @@ import org.idempiere.adInterface.x10.RunProcessResponse;
 import org.idempiere.adInterface.x10.StandardResponse;
 import org.idempiere.adInterface.x10.StandardResponseDocument;
 import org.idempiere.webservices.fault.IdempiereServiceFault;
+import org.idempiere.webservices.model.MWebServiceType;
 
 /*
  * ADEMPIERE/COMPIERE

@@ -792,8 +792,8 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 
 	private void refreshModel() {		
 		events = getEvents(0, Env.getCtx(), null);
-		activities = getContactActivities("", ctx, null);
-		assignments = getResourceAssignments(0, ctx);
+		activities = getContactActivities("", Env.getCtx(), null);
+		assignments = getResourceAssignments(0, Env.getCtx());
 	}
 	
 	private void updateDateLabel() {

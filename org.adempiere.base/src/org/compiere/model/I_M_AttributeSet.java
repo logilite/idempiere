@@ -380,10 +380,5 @@ public interface I_M_AttributeSet
 
 	/** Get Use Guarantee Date for Material Policy	  */
 	public boolean isUseGuaranteeDateForMPolicy();
-	/** Column name M_AttributeSet_Type */
-    public static final String COLUMNNAME_M_AttributeSet_Type = "M_AttributeSet_Type";
-	/** Set M_AttributeSet_Type	  */
-	public void setM_AttributeSet_Type (String M_AttributeSet_Type);
-	/** Get M_AttributeSet_Type	  */
-	public String getM_AttributeSet_Type();
+
 }

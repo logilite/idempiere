@@ -142,7 +142,7 @@ public class MProductionLine extends X_M_ProductionLine {
 			//for reversal, keep the ma copy from original trx
 			if (reversalId <= 0  ) 
 			{
-				MProductionLineMA lineMA = new MProductionLineMA( this,
+				MProductionLineMA lineMA = MProductionLineMA.createFrom( this,
 						asi.get_ID(), getMovementQty(),dateMPolicy);
 				if ( !lineMA.save(get_TrxName()) ) {
 					log.log(Level.SEVERE, "Could not save MA for " + toString());

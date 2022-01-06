@@ -548,22 +548,4 @@ public class X_M_AttributeSet extends PO implements I_M_AttributeSet, I_Persiste
 		return false;
 	}
 	
-	/** Material = MMS */
-	public static final String M_ATTRIBUTESET_TYPE_Material = "MMS";
-	/** Document = DMS */
-	public static final String M_ATTRIBUTESET_TYPE_Document = "DMS";
-	/** Set M_AttributeSet_Type.
-		@param M_AttributeSet_Type M_AttributeSet_Type	  */
-	public void setM_AttributeSet_Type (String M_AttributeSet_Type)
-	{
-
-		set_Value (COLUMNNAME_M_AttributeSet_Type, M_AttributeSet_Type);
-	}
-
-	/** Get M_AttributeSet_Type.
-		@return M_AttributeSet_Type	  */
-	public String getM_AttributeSet_Type () 
-	{
-		return (String)get_Value(COLUMNNAME_M_AttributeSet_Type);
-	}
 }

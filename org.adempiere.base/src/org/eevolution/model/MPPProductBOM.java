@@ -338,16 +338,6 @@ public class MPPProductBOM extends X_PP_Product_BOM implements ImmutablePOSuppor
 			return false;
 		return true;
 	}
-
-	@Override
-	protected boolean beforeSave(boolean newRecord) {
-		if(BigDecimal.ZERO.compareTo(getQty())>=0) {
-			log.saveError("Error",Msg.parseTranslation(Env.getCtx(),"@Qty@ @Should Be@ @Greater Than@ 0"));
-			return false;
-		}
-		
-		return true;
-	}
 	
 	@Override
 	protected boolean afterDelete(boolean success)
@@ -366,6 +356,11 @@ public class MPPProductBOM extends X_PP_Product_BOM implements ImmutablePOSuppor
 	protected boolean beforeSave(boolean newRecord) {
 		boolean b = super.beforeSave(newRecord);
 		if (b) {
+			if(BigDecimal.ZERO.compareTo(getQty())>=0) {
+				log.saveError("Error",Msg.parseTranslation(Env.getCtx(),"@Qty@ @Should Be@ @Greater Than@ 0"));
+				return false;
+			}
+			
 			if (BOMTYPE_CurrentActive.equals(getBOMType()) && BOMUSE_Master.equals(getBOMUse()) && isActive()) {
 				if (newRecord || is_ValueChanged(COLUMNNAME_BOMType) || is_ValueChanged(COLUMNNAME_BOMUse) 
 						|| is_ValueChanged(COLUMNNAME_IsActive) || is_ValueChanged(COLUMNNAME_M_Product_ID)) {

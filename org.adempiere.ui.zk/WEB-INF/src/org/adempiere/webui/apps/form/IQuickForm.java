@@ -66,4 +66,9 @@ public interface IQuickForm extends EventListener <Event>, DataStatusListener
 	 * Dispose
 	 */
 	public void dispose();
+	
+	/**
+	 * Paste CSV Data
+	 */
+	public void onPasteData();
 }

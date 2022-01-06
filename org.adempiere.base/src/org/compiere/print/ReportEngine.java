@@ -2712,13 +2712,5 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			doc.appendHead(buildScriptContent.toString());
 		}
 	}
-	
-	private boolean isDisplayPFItem(MPrintFormatItem item)
-	{
-		if(Util.isEmpty(item.getDisplayLogic()))
-			return true;
-		
-		return Evaluator.evaluateLogic(new PrintDataEvaluatee(null, m_printData), item.getDisplayLogic());
-	}
 
 }	//	ReportEngine

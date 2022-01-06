@@ -867,7 +867,8 @@ public class Doc_MatchInv extends Doc
 
 		//  Invoice Price Variance 	difference
 		BigDecimal ipv = cr.getAcctBalance().add(dr.getAcctBalance()).negate();
-		processInvoicePriceVariance(as, fact, ipv);
+		BigDecimal ipvSource = dr.getAmtSourceDr().subtract(cr.getAmtSourceCr()).negate();
+		processInvoicePriceVariance(as, fact, ipv, ipvSource);
 		if (log.isLoggable(Level.FINE)) log.fine("IPV=" + ipv + "; Balance=" + fact.getSourceBalance());
 
 		String error = createMatchInvCostDetail(as);

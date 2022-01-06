@@ -4,7 +4,6 @@
 package org.adempiere.webui.info;
 
 import org.adempiere.webui.panel.InvoiceHistory;
-import org.compiere.model.GridField;
 import org.compiere.util.Env;
 
 /**
@@ -58,14 +57,14 @@ public class InfoBPartnerWindow extends InfoWindow {
 	 * @param multipleSelection
 	 * @param whereClause
 	 * @param AD_InfoWindow_ID
-	 * @param field
+	 * @param lookup
+	 * @param predefinedContextVariables
 	 */
 	public InfoBPartnerWindow(int WindowNo, String tableName, String keyColumn,
 			String queryValue, boolean multipleSelection, String whereClause,
-			int AD_InfoWindow_ID, GridField field) {
+			int AD_InfoWindow_ID, boolean lookup, String predefinedContextVariables) {
 		super(WindowNo, tableName, keyColumn, queryValue, multipleSelection,
-				whereClause, AD_InfoWindow_ID);
-		m_gridfield = field;
+				whereClause, AD_InfoWindow_ID, lookup, null, predefinedContextVariables);
 	}
 
 	/**

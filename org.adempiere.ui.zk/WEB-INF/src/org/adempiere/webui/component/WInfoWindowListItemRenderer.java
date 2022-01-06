@@ -169,7 +169,7 @@ public class WInfoWindowListItemRenderer extends WListItemRenderer
 			}
 			
 			// add tooltip to the column
-			int tooltipColumnID = infoColumn.getTooltip_InfoColumn_ID();
+			int tooltipColumnID = infoColumn.getAD_InfoColumn().getTooltip_InfoColumn_ID();
 			if (tooltipColumnID > 0 && mapInfoColumnID_layoutColumnIdx != null
 					&& mapInfoColumnID_layoutColumnIdx.containsKey(tooltipColumnID))
 			{

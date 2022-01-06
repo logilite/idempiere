@@ -46,9 +46,6 @@ public class MReportLine extends X_PA_ReportLine
 
 	private BasicStroke			overline_Stroke;
 	private Stroke				underline_Stroke;
-
-	private BasicStroke			overline_Stroke;
-	private Stroke				underline_Stroke;
 	private String				m_selectClauseCombination	= null;
 	List<String>				combinationGroupBy			= new ArrayList<String>();
 

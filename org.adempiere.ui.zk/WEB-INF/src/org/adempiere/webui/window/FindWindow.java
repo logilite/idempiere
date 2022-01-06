@@ -295,9 +295,9 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	 * @param findFields
 	 * @param minRecords
 	 */
-	public FindWindow(GridTab gridTab, GridField[] findFields, int minRecords)
+	public FindWindow(GridTab gridTab, GridField[] findFields, int minRecords, AbstractADWindowContent windowPanel)
 	{
-		this(gridTab.getWindowNo(), gridTab, gridTab.getWhereExtended(), findFields, minRecords);
+		this(gridTab.getWindowNo(), gridTab, gridTab.getWhereExtended(), findFields, minRecords,windowPanel);
 	}
 
 	/**
@@ -309,9 +309,9 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	 * @param findFields
 	 * @param minRecords
 	 */
-	public FindWindow(int windowNo, GridTab gridTab, String whereClause, GridField[] findFields, int minRecords)
+	public FindWindow(int windowNo, GridTab gridTab, String whereClause, GridField[] findFields, int minRecords, AbstractADWindowContent windowPanel)
 	{
-		this(windowNo, gridTab.getTabNo(), gridTab.getName(), gridTab.getAD_Table_ID(), gridTab.getTableName(), whereClause, findFields, minRecords, gridTab.getAD_Tab_ID());
+		this(windowNo, gridTab.getTabNo(), gridTab.getName(), gridTab.getAD_Table_ID(), gridTab.getTableName(), whereClause, findFields, minRecords, gridTab.getAD_Tab_ID(),windowPanel);
 		m_gridTab = gridTab;
 	}
 
@@ -410,7 +410,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         
         return true;
     }
-    public boolean validate(int targetWindowNo, int targetTabNo, String title,
+    public boolean validate(int targetWindowNo, String title,
             int AD_Table_ID, String tableName, String whereExtended,
             GridField[] findFields, int minRecords, int adTabId)
     {
@@ -2393,9 +2393,9 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            		m_query.addRestriction(clause, openBrackets, andOr);
 	            	else
 	            		m_query.addRestriction("NOT (" + clause + ")", openBrackets, andOr);
-	            } else {
-	            else if (MQuery.OPERATORS[MQuery.LIKE_INDEX].getValue().equals(Operator))
+	            } else if (MQuery.OPERATORS[MQuery.LIKE_INDEX].getValue().equals(Operator))
 	            	m_query.addRestriction(ColumnSQL, Operator, parsedValue, infoName, infoDisplay, and, openBrackets, true);
+	            else {
 	            if (table.getSelectedItem() != null && table.getSelectedItem().getValue().toString().equals(MAttribute.COLUMNNAME_M_Attribute_ID)
 	               			|| isExists) {
 
@@ -2632,7 +2632,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 								oper = MQuery.EQUAL;
 							}
 							m_query.addRestriction(ColumnSQL.toString(), oper, sValue, ColumnName, wed.getDisplay());
-							appendCode(code, ColumnName, oper, sValue, "", "AND", "", "");
+							appendCode(code, ColumnName, oper, sValue, "", "AND", "", "", m_AD_Tab_UU);
 						}
 					}
                     else {

@@ -46,6 +46,7 @@ public class HTMLExtension implements IHTMLExtension {
 	private String componentId;
 	private String scriptURL;
 	private String styleURL;
+	private String contextPath;
 	private String contextFullPath;
 	private String theme = "";
 	private List<String> extraScriptUrls;

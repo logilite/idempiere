@@ -752,7 +752,9 @@ public class Util
 			}
 		}
 	}
-	 * Convert BigDecimal array to Integer array ( IDEMPIERE-3413 )
+	
+	 /**
+	  *  Convert BigDecimal array to Integer array ( IDEMPIERE-3413 )
 	 * 
 	 * @param arrayBD - BigDecimal Array
 	 * @return Convert to integer array

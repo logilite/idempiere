@@ -162,7 +162,7 @@ public class DefaultInfoFactory implements IInfoFactory {
 		}
 		else if (col.equals("C_BPartner_ID"))
 		{
-			InfoWindow infoWindow = new InfoBPartnerWindow(lookup.getWindowNo(), tableName, keyColumn, queryValue, multiSelection, whereClause, AD_InfoWindow_ID, field);
+			InfoWindow infoWindow = new InfoBPartnerWindow(lookup.getWindowNo(), tableName, keyColumn, queryValue, multiSelection, whereClause, AD_InfoWindow_ID);
 			if (infoWindow.loadedOK())
 				return infoWindow;
 			

@@ -162,7 +162,7 @@ public class WQuickEntry extends AbstractWQuickEntry implements EventListener<Ev
 
 		try
 		{
-			jbInit();
+			initLayout();
 		}
 		catch(Exception ex)
 		{

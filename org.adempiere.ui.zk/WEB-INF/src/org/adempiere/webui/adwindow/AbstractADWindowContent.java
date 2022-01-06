@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -767,7 +768,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         	m_findCreateNew = false;
             GridField[] findFields = mTab.getFields();
             
-			findWindow = new FindWindow(curWindowNo, mTab, where.toString(), findFields, 10); // no query below 10
+            FindWindow findWindow = new FindWindow(curWindowNo, mTab, where.toString(), findFields, 10,this); // no query below 10
            	tabFindWindowHashMap.put(mTab, findWindow);
             setupEmbeddedFindwindow(findWindow);
             if (findWindow.initialize())
@@ -2215,7 +2216,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	public void doOnFind() {
 		//  Gets Fields from AD_Field_v
         GridField[] findFields = adTabbox.getSelectedGridTab().getFields();
-        if (findWindow == null || !findWindow.validate(adTabbox.getSelectedGridTab().getWindowNo(), adTabbox.getSelectedGridTab().getTabNo(), adTabbox.getSelectedGridTab().getName(),
+        if (getCurrentFindWindow() == null || !getCurrentFindWindow().validate(adTabbox.getSelectedGridTab().getWindowNo(), adTabbox.getSelectedGridTab().getName(),
             adTabbox.getSelectedGridTab().getAD_Table_ID(), adTabbox.getSelectedGridTab().getTableName(),
             adTabbox.getSelectedGridTab().getWhereExtended(), findFields, 1, adTabbox.getSelectedGridTab().getAD_Tab_ID())) {
         	if (!getFindWindow(findFields))

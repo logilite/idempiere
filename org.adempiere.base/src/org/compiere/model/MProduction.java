@@ -780,7 +780,7 @@ public class MProduction extends X_M_Production implements DocAction {
 				MProductionLineMA mas[] = MProductionLineMA.get(getCtx(), sLines[i].get_ID(), get_TrxName());
 				for (int j = 0; j < mas.length; j++)
 				{
-					MProductionLineMA ma = new MProductionLineMA (tLines[i],
+					MProductionLineMA ma = MProductionLineMA.createFrom (tLines[i],
 						mas[j].getM_AttributeSetInstance_ID(),
 						mas[j].getMovementQty().negate(),mas[j].getDateMaterialPolicy());
 					ma.saveEx(get_TrxName());					

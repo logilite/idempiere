@@ -91,6 +91,8 @@ public class QuickGridView extends Vbox
 	private static final String HEADER_GRID_STYLE = "border: none; margin:0; padding: 0;";
 
 	private static final int DEFAULT_PAGE_SIZE = 20;
+	
+	private static final int DEFAULT_MOBILE_PAGE_SIZE = 20;
 
 	private static final int MIN_COLUMN_WIDTH = 100;
 
@@ -170,7 +172,7 @@ public class QuickGridView extends Vbox
 	// To prevent 'onFocus' event fire twice on same component.
 	private Component preEventComponent;
 
-	public WQuickForm				quickForm;
+	public IQuickForm				quickForm;
 
 	public GridField[] getGridField() {
 		return gridFields;
@@ -203,6 +205,11 @@ public class QuickGridView extends Vbox
 		{
 			//anything more than 20 is very slow on a tablet
 			pageSize = 10;
+			pageSize = MSysConfig.getIntValue(MSysConfig.ZK_MOBILE_PAGING_SIZE, DEFAULT_MOBILE_PAGE_SIZE, Env.getAD_Client_ID(Env.getCtx()));
+			String limit = Library.getProperty(CustomGridDataLoader.GRID_DATA_LOADER_LIMIT);
+			if (limit == null || !(limit.equals(Integer.toString(pageSize)))) {
+				Library.setProperty(CustomGridDataLoader.GRID_DATA_LOADER_LIMIT, Integer.toString(pageSize));
+			}
 		}
 		else
 		{
@@ -233,7 +240,7 @@ public class QuickGridView extends Vbox
 		addEventListener(EVENT_ONFOCUS_AFTER_SAVE, this);
 	}
 
-	public QuickGridView(AbstractADWindowContent abstractADWindowContent, GridTab gridTab, WQuickForm wQuickForm)
+	public QuickGridView(AbstractADWindowContent abstractADWindowContent, GridTab gridTab, IQuickForm wQuickForm)
 	{
 		this(abstractADWindowContent.getWindowNo());
 		setADWindowPanel(abstractADWindowContent);

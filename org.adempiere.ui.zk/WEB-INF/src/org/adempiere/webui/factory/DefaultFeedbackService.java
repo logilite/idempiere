@@ -145,14 +145,15 @@ public class DefaultFeedbackService implements IFeedbackService {
 					dialog.addCC(s.trim(), false);
 			}
 
-			AEnv.showWindow(dialog);
+			
 			if (imageBytes != null && imageBytes.length > 0) {
 				ByteArrayDataSource screenShot = new ByteArrayDataSource(imageBytes, "image/png");
 				screenShot.setName("screenshot.png");
 				dialog.addAttachment(screenShot, true);
 			}
-			dialog.focus();
+			dialog.show();
 		}
+			}
 		
 		protected String getFeedbackRecipient(String scValue) {
 			String retValue = MSysConfig.getValue(scValue, Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx()));

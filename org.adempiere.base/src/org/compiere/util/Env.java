@@ -131,8 +131,6 @@ public final class Env
 
 	private static final String PREFIX_SYSTEM_VARIABLE = "$env.";
 	
-	public static final String RUNNING_UNIT_TESTING_TEST_CASE = "#RUNNING_UNIT_TESTING_TEST_CASE";
-
 	private final static ContextProvider clientContextProvider = new DefaultContextProvider();
 
 	

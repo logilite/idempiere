@@ -553,7 +553,7 @@ public class MPeriod extends X_C_Period implements ImmutablePOSupport
 	} // copyFrom
 
 	
-	 * 
+	/**
 	 * @param copy
 	 */
 	public MPeriod(MPeriod copy) 

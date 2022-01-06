@@ -41,6 +41,7 @@ import org.compiere.model.MMatchInvHdr;
 import org.compiere.model.MMatchPO;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MRole;
+import org.compiere.model.MStorageReservation;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.Query;
 import org.compiere.model.MTable;
@@ -165,7 +166,7 @@ public class Match
 	 *  Process Button Pressed - Process Matching
 	 * @param isCreateMatchInvHdr 
 	 */
-	protected void cmd_process(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, int matchMode, int matchFrom, Object matchTo, BigDecimal m_xMatched, boolean isCreateMatchInvHdr)
+	public void cmd_process(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, int matchMode, int matchFrom, Object matchTo, BigDecimal m_xMatched, boolean isCreateMatchInvHdr)
 	{
 		log.config("");
 		matchInvHdr = null;
@@ -227,7 +228,7 @@ public class Match
 					innerTrx.setDisplayName(getClass().getName()+"_cmd_process");
 				
 				try {
-					if (createMatchRecord(invoice, M_InOutLine_ID, Line_ID, BigDecimal.valueOf(qty),  m_trxName != null ? m_trxName : innerTrxName)) {
+					if (createMatchRecord(invoice, M_InOutLine_ID, Line_ID, BigDecimal.valueOf(qty),  m_trxName != null ? m_trxName : innerTrxName,0)) {
 						
 							if(matchInvHdr != null)
 							{
@@ -249,6 +250,7 @@ public class Match
 					if (innerTrx != null) {
 						innerTrx.close();
 						innerTrx = null;
+					}
 					}
 				}
 			}

@@ -586,7 +586,7 @@ public class MatchPOTest extends AbstractTestCase {
 		toTable.prepareTable(layout, null, null, false, null);
 		Match match = new Match();
 		match.setTrxName(getTrxName());
-		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false);
+		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false,0);
 		assertTrue(fromTable.getRowCount()>0, "Unexpected number of records for not matched Material Receipt: " + fromTable.getRowCount());
 		int selectedRow = -1;
 		for(int i = 0; i < fromTable.getRowCount(); i++) {
@@ -642,7 +642,7 @@ public class MatchPOTest extends AbstractTestCase {
 		
 		fromTable.prepareTable(layout, null, null, false, null);
 		toTable.prepareTable(layout, null, null, false, null);
-		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false);
+		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false,0);
 		assertTrue(fromTable.getRowCount()>0, "Unexpected number of records for not matched Material Receipt: " + fromTable.getRowCount());
 		selectedRow = -1;
 		for(int i = 0; i < fromTable.getRowCount(); i++) {
@@ -676,7 +676,7 @@ public class MatchPOTest extends AbstractTestCase {
 				
 		IDColumn idColumn = (IDColumn)toTable.getValueAt(selectedOrderRow, 0);
 		idColumn.setSelected(true);
-		match.cmd_process(fromTable, toTable, Match.MODE_NOTMATCHED, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), new BigDecimal(1));
+		match.cmd_process(fromTable, toTable, Match.MODE_NOTMATCHED, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), new BigDecimal(1),false);
 		
 		orderLine.load(getTrxName());
 		assertEquals(0, orderLine.getQtyReserved().intValue(), "Unexpected order line qty ordered value");
@@ -783,7 +783,7 @@ public class MatchPOTest extends AbstractTestCase {
 		toTable.prepareTable(layout, null, null, false, null);
 		Match match = new Match();
 		match.setTrxName(getTrxName());
-		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false);
+		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false,0);
 		assertTrue(fromTable.getRowCount()>0, "Unexpected number of records for not matched Material Receipt: " + fromTable.getRowCount());
 		int selectedRow = -1;
 		for(int i = 0; i < fromTable.getRowCount(); i++) {
@@ -837,7 +837,7 @@ public class MatchPOTest extends AbstractTestCase {
 		
 		fromTable.prepareTable(layout, null, null, false, null);
 		toTable.prepareTable(layout, null, null, false, null);
-		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false);
+		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false,0);
 		assertTrue(fromTable.getRowCount()>0, "Unexpected number of records for not matched Material Receipt: " + fromTable.getRowCount());
 		selectedRow = -1;
 		for(int i = 0; i < fromTable.getRowCount(); i++) {
@@ -871,7 +871,7 @@ public class MatchPOTest extends AbstractTestCase {
 		
 		IDColumn idColumn = (IDColumn)toTable.getValueAt(selectedOrderRow, 0);
 		idColumn.setSelected(true);
-		match.cmd_process(fromTable, toTable, Match.MODE_NOTMATCHED, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), new BigDecimal(1));
+		match.cmd_process(fromTable, toTable, Match.MODE_NOTMATCHED, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), new BigDecimal(1),false);
 		
 		orderLine.load(getTrxName());
 		assertEquals(1, orderLine.getQtyReserved().intValue(), "Unexpected order line qty ordered value");

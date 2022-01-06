@@ -122,16 +122,7 @@ public class Convert_PostgreSQL extends Convert_SQL92 {
 		}
 		/** Vector to save previous values of quoted strings **/
 		Vector<String> retVars = new Vector<String>();
-		
-		String nonce = sharedNonce;
-
-		// check for collision with nonce
-		while ( sqlStatement.contains(nonce))
-		{
-			nonce = generateNonce();
-		}
-
-		String statement = replaceQuotedStrings(sqlStatement, retVars, nonce);
+		statement = replaceQuotedStrings(sqlStatement, retVars, nonce);			
 		statement = convertWithConvertMap(statement);
 		statement = convertSimilarTo(statement);
 		statement = DB_PostgreSQL.removeNativeKeyworkMarker(statement);

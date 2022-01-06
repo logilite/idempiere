@@ -167,14 +167,6 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
 	
 	private static final String ON_DEFER_SET_SELECTED_NODE_ATTR = "onDeferSetSelectedNode.Event.Posted";
 	
-	private static final String SLIDE_LEFT_IN_CSS = "slide-left-in";
-
-	private static final String SLIDE_LEFT_OUT_CSS = "slide-left-out";
-
-	private static final String SLIDE_RIGHT_IN_CSS = "slide-right-in";
-
-	private static final String SLIDE_RIGHT_OUT_CSS = "slide-right-out";
-	
 	private static final CLogger logger;
 
     static

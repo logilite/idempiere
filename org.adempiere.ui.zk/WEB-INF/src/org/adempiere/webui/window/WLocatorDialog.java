@@ -710,16 +710,6 @@ public class WLocatorDialog extends Window implements EventListener<Event>
 		this.mainPanel = mainPanel;
 	}
 
-	public Listbox getLstLocator()
-	{
-		return lstLocator;
-	}
-
-	public void setLstLocator(Listbox lstLocator)
-	{
-		this.lstLocator = lstLocator;
-	}
-
 	public Listbox getLstWarehouse()
 	{
 		return lstWarehouse;

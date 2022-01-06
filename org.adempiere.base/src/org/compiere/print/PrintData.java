@@ -857,39 +857,5 @@ public class PrintData implements Serializable
 		if (m_hasLevelNo && reportLineID != 0)
 			addNode(new PrintDataElement(0, "PA_ReportLine_ID", reportLineID, DisplayType.Integer, null));
 	}
-	
-	public MReportLine getMReportLine()
-	{
-		List<Serializable> nodes = m_matrix.getRowData();
-
-		if (nodes == null || !m_hasLevelNo)
-			return null;
-
-		for (int i = 0; i < nodes.size(); i++)
-		{
-			Object o = nodes.get(i);
-			if (o instanceof PrintDataElement)
-			{
-				PrintDataElement pde = (PrintDataElement) o;
-				if (MReportLine.COLUMNNAME_PA_ReportLine_ID.equals(pde.getColumnName()))
-				{
-					Integer ii = (Integer) pde.getValue();
-					if (ii > 0)
-					{
-						return new MReportLine(m_ctx, ii, null);
-					}
-				}
-			}
-		}
-
-		return null;
-	} // getMReportLine
-
-	public void addRow(boolean functionRow, int levelNo, int reportLineID)
-	{
-		addRow(functionRow, levelNo);
-		if (m_hasLevelNo && reportLineID != 0)
-			addNode(new PrintDataElement("PA_ReportLine_ID", new Integer(reportLineID), DisplayType.Integer, null));
-	}
 
 }	//	PrintData

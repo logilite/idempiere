@@ -20,6 +20,7 @@ import org.adempiere.webui.component.ZkCssHelper;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.TreeUtils;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MMenu;
 import org.compiere.model.MTable;
 import org.compiere.model.MTreeFavorite;
@@ -90,8 +91,6 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 		this.appendChild(panel);
 
 		favContent = new Panelchildren();
-		favContent.appendChild(createFavoritePanel());
-		favContent.setDroppable(FAVOURITE_DROPPABLE);
 		favContent.addEventListener(Events.ON_DROP, this);
 		favContent.setDroppable(FAVOURITE_DROPPABLE);
 		favContent.addEventListener(Events.ON_DROP, this);
@@ -104,6 +103,7 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 			MUser user = (MUser) MTable.get(Env.getCtx(), MUser.Table_ID).getPO(AD_User_ID, null);
 			isDefaultTreeWriteAccess = user.isAllowAccessDefaultFavTree();
 		}
+		favContent.setDroppable(FAVOURITE_DROPPABLE);
 
 		//
 		btnExpand = new ToolBarButton("Expand");

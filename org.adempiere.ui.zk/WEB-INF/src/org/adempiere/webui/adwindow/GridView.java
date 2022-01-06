@@ -107,8 +107,6 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 
 	private static final int MIN_NUMERIC_COL_WIDTH = 120;
 	
-	private static final int MIN_COLUMN_MOBILE_WIDTH = 100;
-
 	private static final String ATTR_ON_POST_SELECTED_ROW_CHANGED = "org.adempiere.webui.adwindow.GridView.onPostSelectedRowChanged";
 
 	/**	Static Logger	*/
@@ -333,7 +331,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 	 */
 	public void initPageSize(boolean detaiPanelMode)
 	{
-		pageSize = detailPaneMode ? DEFAULT_DETAIL_PAGE_SIZE : MSysConfig.getIntValue(MSysConfig.ZK_PAGING_SIZE, 20, Env.getAD_Client_ID(Env.getCtx()));
+		pageSize = detailPaneMode ? getDetailPageSize(gridTab): MSysConfig.getIntValue(MSysConfig.ZK_PAGING_SIZE, 20, Env.getAD_Client_ID(Env.getCtx()));
 		if (gridTab != null)
 		{
 			if (!detailPaneMode && gridTab.getPageSize() > 0)

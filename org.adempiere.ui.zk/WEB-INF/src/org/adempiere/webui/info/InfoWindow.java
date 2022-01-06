@@ -59,10 +59,11 @@ import org.adempiere.webui.editor.WebEditorFactory;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
-import org.adempiere.webui.factory.QuickEntryServiceUtil;
 import org.adempiere.webui.event.WTableModelEvent;
 import org.adempiere.webui.factory.ButtonFactory;
+import org.adempiere.webui.factory.QuickEntryServiceUtil;
 import org.adempiere.webui.grid.AbstractWQuickEntry;
+import org.adempiere.webui.grid.WQuickEntry;
 import org.adempiere.webui.panel.InfoPanel;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
@@ -75,7 +76,6 @@ import org.compiere.model.AccessSqlParser.TableInfo;
 import org.compiere.model.GridField;
 import org.compiere.model.GridFieldVO;
 import org.compiere.model.GridWindow;
-import org.compiere.model.Lookup;
 import org.compiere.model.InfoColumnVO;
 import org.compiere.model.InfoRelatedVO;
 import org.compiere.model.Lookup;
@@ -929,7 +929,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		list.add(new ColumnInfo(" ", keySelectClause, IDColumn.class, true, false, null, p_keyColumn));
 		
 		List<Integer> hide_layoutColumnIdx = new ArrayList<Integer>();
-		List<MInfoColumn> gridDisplayedIC = new ArrayList<>();				
+		List<InfoColumnVO> gridDisplayedIC = new ArrayList<>();				
 		gridDisplayedIC.add(null); // First column does not have any matching info column		
 		
 		boolean haveNotProcess = !haveProcess; // A field is editabile only if is not readonly and theres a process
@@ -957,9 +957,9 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 					editor.setReadWrite(false);
 					editorMap.put(colSQL, editor);
 					if (infoColumn.getAD_Reference_ID() == DisplayType.MultiSelectTable)
-						columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), colSQL, Integer[].class, infoColumn.isReadOnly());
+						columnInfo = new ColumnInfo(infoColumn.getAD_InfoColumn().get_Translation("Name"), colSQL, Integer[].class, infoColumn.isReadOnly());
 					else
-						columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), colSQL, String[].class, infoColumn.isReadOnly());
+						columnInfo = new ColumnInfo(infoColumn.getAD_InfoColumn().get_Translation("Name"), colSQL, String[].class, infoColumn.isReadOnly());
 				}
 				else if (DisplayType.isLookup(infoColumn.getAD_Reference_ID()))
 				{
@@ -1174,7 +1174,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 					}
 
 				String queryOperator = InfoColumnVO.getQueryOperator();
-				if (X_AD_InfoColumn.QUERYOPERATOR_IN.equals(mInfoColumn.getQueryOperator()) && mInfoColumn.isMultiSelectCriteria())
+				if (X_AD_InfoColumn.QUERYOPERATOR_IN.equals(queryOperator) && InfoColumnVO.isMultiSelectCriteria())
 				{
 					builder.append(columnClause).append(" IN ");
 					// Convert the multi select array value to string for use IN condition

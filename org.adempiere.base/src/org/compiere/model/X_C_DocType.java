@@ -369,6 +369,8 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 	public static final String DOCBASETYPE_ManufacturingOrder = "MOP";
 	/** Quality Order = MQO */
 	public static final String DOCBASETYPE_QualityOrder = "MQO";
+	/** Match Workbench = MWB */
+	public static final String DOCBASETYPE_MatchInvHdr = "MWB";
 	/** Match Invoice = MXI */
 	public static final String DOCBASETYPE_MatchInvoice = "MXI";
 	/** Match PO = MXP */

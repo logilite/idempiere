@@ -111,6 +111,10 @@ public class InfoColumnVO implements Serializable, Cloneable {
 	
 	private MInfoColumn infoColumn;
 
+	private boolean isHideInfoColumn;
+	
+	private boolean isMultiSelectCriteria;
+
 	/**
 	 * Default Constructor
 	 * @param ctx
@@ -149,7 +153,9 @@ public class InfoColumnVO implements Serializable, Cloneable {
 		AD_FieldStyle_ID = infoColumn.getAD_FieldStyle_ID();
 		isAutocomplete = infoColumn.isAutocomplete();
 		SeqNo = infoColumn.getSeqNo();
-		AD_Val_Rule_ID = infoColumn.getAD_Val_Rule_ID();		
+		AD_Val_Rule_ID = infoColumn.getAD_Val_Rule_ID();	
+		isHideInfoColumn = infoColumn.isHideInfoColumn();
+		isMultiSelectCriteria = infoColumn.isMultiSelectCriteria();
 		if (infoColumn.getAD_Val_Rule_ID() > 0)
 			ValidationCode  = MValRule.get(ctx, infoColumn.getAD_Val_Rule_ID()).getCode();
 		
@@ -251,7 +257,23 @@ public class InfoColumnVO implements Serializable, Cloneable {
 		return infoColumns.toArray(new InfoColumnVO[infoColumns.size()]);
 	}
 	
+	
+	public boolean isHideInfoColumn() {
+		return isHideInfoColumn;
+	}
 
+	public void setHideInfoColumn(boolean isHideInfoColumn) {
+		this.isHideInfoColumn = isHideInfoColumn;
+	}
+
+	public boolean isMultiSelectCriteria() {
+		return isMultiSelectCriteria;
+	}
+	
+	public void setMultiSlectCriteria(boolean isMultiSelectCriteria) {
+		this.isMultiSelectCriteria = isMultiSelectCriteria;
+	}
+	
 	/**
 	 * @param ctx
 	 * @param windowNo

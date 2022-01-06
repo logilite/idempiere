@@ -294,7 +294,8 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 				if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Path="+path + " Prefix="+prefix);
 				File file = File.createTempFile(prefix, "."+HTML_FILE_EXT, new File(path));
 				String contextPath = Executions.getCurrent().getContextPath();
-				m_reportEngine.createHTML(file, false, m_reportEngine.getPrintFormat().getLanguage(), new HTMLExtension(contextPath, "rp", getUuid()));
+				String contextFullPath=Executions.getCurrent().getDesktop().getWebApp().getRealPath("/");
+				m_reportEngine.createHTML(file, false, m_reportEngine.getPrintFormat().getLanguage(), new HTMLExtension(contextFullPath, contextPath, "rp", getUuid()));
 				return new AMedia(file.getName(), HTML_FILE_EXT, HTML_MIME_TYPE, file, false);
 			} catch (Exception e) {
 				if (e instanceof RuntimeException)

@@ -35,12 +35,14 @@ import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.CustomizeGridViewDialog;
 import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.QuickFormPasteData;
 import org.compiere.model.DataStatusEvent;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MRole;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Trx;
 import org.zkforge.keylistener.Keylistener;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
@@ -76,6 +78,7 @@ public class WQuickForm extends Window implements IQuickForm
 	private Button					bIgnore				= confirmPanel.createButton("Ignore");
 	private Button					bCustomize			= confirmPanel.createButton("Customize");
 	private Button					bUnSort				= confirmPanel.createButton("UnSort");
+	private Button					bPasteData			= confirmPanel.createButton("Paste");
 
 	private boolean					onlyCurrentRows		= false;
 
@@ -380,6 +383,7 @@ public class WQuickForm extends Window implements IQuickForm
 			createNewRow();
 	} // onRefresh
 
+	@Override
 	public void onPasteData()
 	{
 		onSave();

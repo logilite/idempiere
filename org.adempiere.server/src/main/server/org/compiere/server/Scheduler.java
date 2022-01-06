@@ -100,9 +100,6 @@ public class Scheduler extends AdempiereServer
 	protected ProcessInfo pi;
 
 	private static ImmutableIntPOCache<Integer,MScheduler> s_cache = new ImmutableIntPOCache<Integer,MScheduler>(MScheduler.Table_Name, 10, 60);
-	private static CCache<Integer, Integer> sessionCache = new CCache<Integer, Integer>(
-			"AD_Session_ID", 40, 30);
-
 
 	/**
 	 * 	Work
@@ -777,46 +774,6 @@ public class Scheduler extends AdempiereServer
 		return value;
 	}
 	
-	/**
-	 * Creates AD_Session per scheduler record
-	 * @param ctx
-	 * @param AD_Scheduler_ID
-	 * @return AD_Session_ID
-	 */
-	private int getAD_Session_ID(Properties ctx)
-	{
-		// If sessionID is available in cache, use it.
-		if (sessionCache.get(AD_Scheduler_ID) != null && sessionCache.get(AD_Scheduler_ID) > 0)
-		{
-			return sessionCache.get(AD_Scheduler_ID);
-		}
-
-		int AD_Session_ID = 0;
-
-		// Look for session on scheduler record
-		if (get(getCtx(), AD_Scheduler_ID).getAD_Session_ID() > 0)
-		{
-			MSession session = (MSession) MTable.get(ctx, MSession.Table_ID).getPO(get(getCtx(), AD_Scheduler_ID).getAD_Session_ID(), null);
-			if (!session.isProcessed())
-			{
-				AD_Session_ID = session.getAD_Session_ID();
-			}
-		}
-
-		// If session not found on scheduler, Create new session
-		if (AD_Session_ID == 0)
-		{
-			MSession session = MSession.get(ctx, true);
-			AD_Session_ID = session.getAD_Session_ID();
-
-			get(getCtx(), AD_Scheduler_ID).setAD_Session_ID(AD_Session_ID);
-		}
-
-		sessionCache.put(AD_Scheduler_ID, AD_Session_ID);
-		return AD_Session_ID;
-	}
-
-
 	/**
 	 * 	Get Server Info
 	 *	@return info

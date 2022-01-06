@@ -39,7 +39,6 @@ import org.compiere.model.MQuery;
 import org.compiere.model.MReportView;
 import org.compiere.model.MRole;
 import org.compiere.model.MTable;
-import org.compiere.model.X_AD_ReportView;
 import org.compiere.util.CLogMgt;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -584,7 +583,7 @@ public class DataEngine
 							.append(lookupSQL).append(") AND ").append(alias).append(m_synonym)
 							.append(".AD_Reference_ID=").append(AD_Reference_Value_ID).append(")").append(" AS ")
 							.append(m_synonym).append(ColumnName).append(",");
-					pdc = new PrintDataColumn(AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName,
+					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName,
 							isPageBreak);
 					synonymNext();
 				}
@@ -1105,7 +1104,7 @@ public class DataEngine
 									counter++;
 								if (display != null && !rs.wasNull())
 								{
-									pde = new PrintDataElement(pdc.getColumnName(), display, pdc.getDisplayType(), pdc.getFormatPattern(), pdc.getForeignColumnName());
+									pde = new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), display, pdc.getDisplayType(), pdc.getFormatPattern(), pdc.getForeignColumnName());
 								}
 							}
 							else if (pdc.getColumnName().endsWith("_ID"))
@@ -1193,7 +1192,7 @@ public class DataEngine
 								Object javaArray = null;
 								if (array != null)
 									javaArray = (Object) Util.convertBigDecimalToInteger((BigDecimal[]) array.getArray());
-								pde = new PrintDataElement(pdc.getColumnName(), (Serializable) Util.convertArrayToStringForDB(javaArray), pdc.getDisplayType(), pdc.getFormatPattern());
+								pde = new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), (Serializable) Util.convertArrayToStringForDB(javaArray), pdc.getDisplayType(), pdc.getFormatPattern());
 							}
             				else if (pdc.getDisplayType() == DisplayType.MultiSelectList)
             				{
@@ -1201,7 +1200,7 @@ public class DataEngine
             					Object javaArray = null;
             					if (arr != null)
             						javaArray = (String[]) arr.getArray();
-            					pde = new PrintDataElement(pdc.getColumnName(), (Serializable) Util.convertArrayToStringForDB(javaArray), pdc.getDisplayType(), pdc.getFormatPattern());
+            					pde = new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), (Serializable) Util.convertArrayToStringForDB(javaArray), pdc.getDisplayType(), pdc.getFormatPattern());
             				}
 							else
 							//	The general case

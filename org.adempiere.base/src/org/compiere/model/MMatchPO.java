@@ -477,7 +477,7 @@ public class MMatchPO extends X_M_MatchPO
 			{				
 				if (qty.signum() != 0)
 				{
-					retValue = MMatchPO.createFrom(sLine, dateTrx, qty);
+					retValue = MMatchPO.createFrom(sLine, dateTrx, qty,sLine.get_TrxName());
 					retValue.setC_OrderLine_ID(C_OrderLine_ID);
 					MMatchPO otherMatchPO = null;
 					if (iLine == null) {
@@ -679,6 +679,7 @@ public class MMatchPO extends X_M_MatchPO
 						if (toMatch.signum() <= 0)
 							break;
 					}
+					}
 				}
 			}
 		}
@@ -823,9 +824,9 @@ public class MMatchPO extends X_M_MatchPO
 	 *	@param dateTrx optional date
 	 *	@param qty matched quantity
 	 */
-	public static MMatchPO createFrom(MInOutLine sLine, Timestamp dateTrx, BigDecimal qty)
+	public static MMatchPO createFrom(MInOutLine sLine, Timestamp dateTrx, BigDecimal qty, String trxName)
 	{
-		MMatchPO mPO = (MMatchPO) MTable.get(sLine.getCtx(), MMatchPO.Table_ID).getPO(0, sLine.get_TrxName());
+		MMatchPO mPO = (MMatchPO) MTable.get(sLine.getCtx(), MMatchPO.Table_ID).getPO(0, trxName);
 		mPO.setClientOrg(sLine);
 		mPO.setM_InOutLine_ID(sLine.getM_InOutLine_ID());
 		mPO.setC_OrderLine_ID(sLine.getC_OrderLine_ID());
@@ -1192,6 +1193,7 @@ public class MMatchPO extends X_M_MatchPO
 				{
 					MOrderLine line = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(getC_OrderLine_ID(),
 							get_TrxName());
+					BigDecimal qtyOrdered = line.getQtyOrdered();
 					BigDecimal invoicedQty = DB.getSQLValueBD(get_TrxName(), "SELECT Coalesce(SUM(Qty),0) FROM M_MatchPO WHERE C_InvoiceLine_ID > 0 and C_OrderLine_ID=? AND Reversal_ID IS NULL" , getC_OrderLine_ID());
 					if (    invoicedQty != null
 						&& (   (qtyOrdered.signum() > 0 && invoicedQty.compareTo(qtyOrdered) > 0)

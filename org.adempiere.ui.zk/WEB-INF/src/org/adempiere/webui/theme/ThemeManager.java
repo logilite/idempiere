@@ -33,8 +33,6 @@ import org.zkoss.image.AImage;
  */
 public final class ThemeManager {
 
-	private static final CCache<String, Boolean> s_themeHasCustomCSSCache = new CCache<String, Boolean>(null,
-			"ThemeHasCustomCSSCache", 2, -1, false);
 	private static CCache<Integer, String> logoCache = new CCache<Integer, String>(null, "LogoImages", 5, false);
 
 	//zk predefined starting path for classpath resources (src/web)

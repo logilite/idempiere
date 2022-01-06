@@ -30,6 +30,7 @@ import org.adempiere.base.Service;
 import org.adempiere.base.ServiceQuery;
 import org.adempiere.webui.adwindow.IADTabpanel;
 import org.adempiere.webui.apps.IProcessParameterListener;
+import org.adempiere.webui.apps.graph.IChartRendererService;
 import org.adempiere.webui.factory.IADTabPanelFactory;
 import org.adempiere.webui.factory.IADTabPanelFactory;
 import org.adempiere.webui.factory.IDashboardGadgetFactory;

@@ -95,6 +95,8 @@ public class QuickGridTabRowRenderer
 	private GridTabDataBinder dataBinder;
 	private Paging paging;
 
+	private RowListener rowListener;
+
 	private Grid grid = null;
 	private QuickGridView gridPanel = null;
 	private Row currentRow;

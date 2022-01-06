@@ -17,6 +17,7 @@ import org.adempiere.report.jasper.ReportStarter;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.Extensions;
 import org.adempiere.webui.LayoutUtils;
+import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Listbox;
 import org.adempiere.webui.component.Tabpanel;
 import org.adempiere.webui.component.ToolBarButton;
@@ -576,7 +577,6 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 			throw new AdempiereException("Dialog cannot be initiate.");
 		}
 
-		AEnv.showWindow(dialog);
 	}	//	cmd_sendMail
 
 	public void onEvent(Event event) throws Exception {

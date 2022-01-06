@@ -48,6 +48,7 @@ public class ComboEditorBox extends Div {
 			this);
 	protected Combobox txt;
 	protected Button btn;
+	protected Button btnZoom;
 
 	public ComboEditorBox() {
 		initComponents();
@@ -71,13 +72,21 @@ public class ComboEditorBox extends Div {
 	private void initComponents() {
 		txt = new Combobox();
 		txt.setButtonVisible(false);
-		txt.setSclass("editor-input");
+		txt.setSclass("editor-input editor-input-zoom");
 		txt.setAutocomplete(true);
 		txt.setAutodrop(true);
 		txt.setSubmitByEnter(true);
 		txt.setInstantSelect(false);
 		ZKUpdateUtil.setHflex(txt, "0");
 		appendChild(txt);
+
+		btnZoom = new Button();
+		btnZoom.setTabindex(-1);
+		ZKUpdateUtil.setHflex(btnZoom, "0");
+		btnZoom.setSclass("editor-button");
+		btnZoom.setVisible(false);
+		appendChild(btnZoom);
+
 		btn = new Button();
 		btn.setTabindex(-1);
 		ZKUpdateUtil.setHflex(btn, "0");
@@ -177,15 +186,24 @@ public class ComboEditorBox extends Div {
 		return btn;
 	}
 	
+	/**
+	 * @return Zoom Button
+	 */
+	public Button getButtonZoom() {
+		return btnZoom;
+	}
+	
 	public void setTableEditorMode(boolean flag) {
 		if (flag) {
 			ZKUpdateUtil.setHflex(this, "0");
 			LayoutUtils.addSclass("grid-editor-input", txt);
 			LayoutUtils.addSclass("grid-editor-button", btn);
+			LayoutUtils.addSclass("grid-editor-button", btnZoom);
 		} else {
 			ZKUpdateUtil.setHflex(this, "1");
 			LayoutUtils.removeSclass("grid-editor-input", txt);
 			LayoutUtils.removeSclass("grid-editor-button", btn);
+			LayoutUtils.removeSclass("grid-editor-button", btnZoom);
 		}
 			
 	}
