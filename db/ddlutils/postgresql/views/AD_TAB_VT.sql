@@ -20,7 +20,7 @@ SELECT trl.AD_Language, t.AD_Tab_ID, t.AD_Window_ID, t.AD_Table_ID, trl.Name, tr
     t.AD_ColumnSortOrder_ID, t.AD_ColumnSortYesNo_ID, t.Included_Tab_ID, t.Parent_Column_ID,
     t.AD_Tab_UU, tbl.AD_Table_UU, t.TreeDisplayedOn, t.MaxQueryRecords,
     t.IsAllowAdvancedLookup, t.IsLookupOnlySelection, t.AD_TabType,
-    t.PageSize, t.DetailPageSize, t.EntityType)
+    t.PageSize, t.DetailPageSize, t.EntityType
 FROM AD_Tab t 
 	INNER JOIN AD_Table tbl ON (t.AD_Table_ID = tbl.AD_Table_ID)
 	INNER JOIN AD_Tab_Trl trl ON (t.AD_Tab_ID = trl.AD_Tab_ID)
