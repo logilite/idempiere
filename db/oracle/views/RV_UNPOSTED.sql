@@ -74,12 +74,6 @@ as
           posted, processing, processed, 'CO' as docstatus, processedon
      from M_MATCHINV
     WHERE Posted <> 'Y' AND NVL(M_MatchInvHdr_ID, 0) = 0                                  --AND DocStatus<>'VO'
-UNION
-   SELECT AD_Client_ID, AD_Org_ID, Created, CreatedBy, Updated, UpdatedBy,
-          IsActive, DocumentNo, DateTrx, DateAcct, 200196, M_MatchInvHdr_ID, 'N',
-          Posted, Processing, Processed, DocStatus, Processedon
-     FROM M_MatchInvHdr
-  WHERE Posted <> 'Y'
    UNION
    SELECT AD_Client_ID, AD_Org_ID, Created, CreatedBy, Updated, UpdatedBy,
           IsActive, DocumentNo, DateTrx, DateAcct, 473, M_MatchPO_ID, 'N',
@@ -98,5 +92,11 @@ UNION
           M_Requisition_ID, 'N', posted, processing, processed, docstatus, processedon
      from M_REQUISITION
     WHERE Posted <> 'Y' AND DocStatus <> 'VO'
+   UNION
+   SELECT AD_Client_ID, AD_Org_ID, Created, CreatedBy, Updated, UpdatedBy,
+          IsActive, DocumentNo, DateTrx, DateAcct, 200196, M_MatchInvHdr_ID, 'N',
+          Posted, Processing, Processed, DocStatus, Processedon
+     FROM M_MatchInvHdr
+    WHERE Posted <> 'Y'
 ;
 
