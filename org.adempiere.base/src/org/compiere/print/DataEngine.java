@@ -31,12 +31,12 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.apache.commons.collections4.map.HashedMap;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MQuery;
 import org.compiere.model.MReportView;
 import org.compiere.model.MRole;
 import org.compiere.model.MTable;
-import org.compiere.model.X_AD_ReportView;
 import org.compiere.util.CLogMgt;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -116,6 +116,8 @@ public class DataEngine
 	private String			m_trxName = null;
 	/** Report Summary FR [ 2011569 ]**/ 
 	private boolean 		m_summary = false;
+	/** Show Summary Multiple Row Only **/
+	private boolean 		m_showSummaryMultRowOnly = false;
 	/** Key Indicator in Report			*/
 	public static final String KEY = "*";
 
@@ -144,13 +146,14 @@ public class DataEngine
 	 */
 	public PrintData getPrintData (Properties ctx, MPrintFormat format, MQuery query, boolean summary)
 	{
+		if (format == null)
+			throw new IllegalStateException ("No print format");
+
 		MQuery queryCopy = query.deepCopy();
 
 		/** Report Summary FR [ 2011569 ]**/ 
 		m_summary = summary; 
-
-		if (format == null)
-			throw new IllegalStateException ("No print format");
+		m_showSummaryMultRowOnly = format.isShowSummaryMultipleRowOnly();
 
 		 if (format.getJasperProcess_ID() > 0)
 			 return null;
@@ -904,6 +907,7 @@ public class DataEngine
 	 */
 	private void loadPrintData (PrintData pd, MPrintFormat format)
 	{
+		HashedMap<PrintDataColumn, Integer> groupStartMap = new HashedMap<PrintDataColumn, Integer>();
 		//	Translate Spool Output
 		boolean translateSpool = pd.getTableName().equals("T_Spool");
 		m_runningTotalString = Msg.getMsg(format.getLanguage(), "RunningTotal");
@@ -932,6 +936,15 @@ public class DataEngine
 						break;
 					}
 				}
+			}
+
+			// First group start with zero row
+			for (int i = 0; i < pd.getColumnInfo().length; i++)
+			{
+				PrintDataColumn group_pdc = pd.getColumnInfo()[i];
+				if (!m_group.isGroupColumn(group_pdc.getColumnName()))
+					continue;
+				groupStartMap.put(group_pdc, rowNo);
 			}
 
 			//	Row Loop
@@ -970,11 +983,14 @@ public class DataEngine
 						}
 					}
 					
+					int groupRowStart = rowNo;
 					for (int j = changedGroups.size() - 1; j >= 0; j--) //	backwards (least group first)
 					{
 						PrintDataColumn group_pdc = changedGroups.get(j);
 						Object value = changedValues.get(j);
-						
+						boolean isGroupMultiRow = !m_showSummaryMultRowOnly || (groupRowStart > 1 && (groupRowStart - groupStartMap.get(group_pdc)) > 1);
+						if (isGroupMultiRow || m_summary)
+						{
 							char[] functions = m_group.getFunctions(group_pdc.getColumnName());
 							for (int f = 0; f < functions.length; f++)
 							{
@@ -1006,13 +1022,20 @@ public class DataEngine
 									}
 								}	//	 for all columns
 							}	//	for all functions
-							//	Reset Group Values
-							for (int c = 0; c < pd.getColumnInfo().length; c++)
-							{
-								pdc = pd.getColumnInfo()[c];
-								m_group.reset(group_pdc.getColumnName(), pdc.getColumnName());
-							}
-						}	//	Group change
+						}
+						//	Reset Group Values
+						for (int c = 0; c < pd.getColumnInfo().length; c++)
+						{
+							pdc = pd.getColumnInfo()[c];
+							m_group.reset(group_pdc.getColumnName(), pdc.getColumnName());
+						}
+					}	//	Group change
+
+					for (int j = changedGroups.size() - 1; j >= 0; j--) // backwards (least group first)
+					{
+						PrintDataColumn group_pdc = changedGroups.get(j);
+						groupStartMap.put(group_pdc, rowNo);
+					}
 				}	//	group change
 
 				//	new row ---------------------------------------------------
@@ -1199,40 +1222,44 @@ public class DataEngine
 				PrintDataColumn group_pdc = pd.getColumnInfo()[i];
 				if (!m_group.isGroupColumn(group_pdc.getColumnName()))
 					continue;
-				Object value = m_group.groupChange(group_pdc.getColumnName(), new Object(), false);
-				if (value != null)	//	Group change
+				boolean isGroupMultiRow = !m_showSummaryMultRowOnly || (rowNo > 1 && (rowNo - groupStartMap.get(group_pdc)) > 1);
+				if (isGroupMultiRow || m_summary)
 				{
-					char[] functions = m_group.getFunctions(group_pdc.getColumnName());
-					for (int f = 0; f < functions.length; f++)
+					Object value = m_group.groupChange(group_pdc.getColumnName(), new Object(), false);
+					if (value != null)	//	Group change
 					{
-						printRunningTotal(pd, levelNo, rowNo++);
-						pd.addRow(true, levelNo);
-						//	get columns
-						for (int c = 0; c < pd.getColumnInfo().length; c++)
+						char[] functions = m_group.getFunctions(group_pdc.getColumnName());
+						for (int f = 0; f < functions.length; f++)
 						{
-							pdc = pd.getColumnInfo()[c];
-							if (group_pdc.getColumnName().equals(pdc.getColumnName()))
+							printRunningTotal(pd, levelNo, rowNo++);
+							pd.addRow(true, levelNo);
+							//	get columns
+							for (int c = 0; c < pd.getColumnInfo().length; c++)
 							{
-								String valueString = value.toString();
-								if (value instanceof Timestamp)
-									valueString = DisplayType.getDateFormat(pdc.getDisplayType(), m_language).format(value);
-								if (format.getTableFormat().isPrintFunctionSymbols())		//	Translate Sum, etc.
-									valueString	+= PrintDataFunction.getFunctionSymbol(functions[f]);
-								pd.addNode(new PrintDataElement(pdc.getColumnName(),
-									valueString, DisplayType.String, pdc.getFormatPattern()));
+								pdc = pd.getColumnInfo()[c];
+								if (group_pdc.getColumnName().equals(pdc.getColumnName()))
+								{
+									String valueString = value.toString();
+									if (value instanceof Timestamp)
+										valueString = DisplayType.getDateFormat(pdc.getDisplayType(), m_language).format(value);
+									if (format.getTableFormat().isPrintFunctionSymbols())		//	Translate Sum, etc.
+										valueString	+= PrintDataFunction.getFunctionSymbol(functions[f]);
+									pd.addNode(new PrintDataElement(pdc.getColumnName(),
+										valueString, DisplayType.String, pdc.getFormatPattern()));
+								}
+								else if (m_group.isFunctionColumn(pdc.getColumnName(), functions[f]))
+								{
+									pd.addNode(new PrintDataElement(pdc.getColumnName(),
+										m_group.getValue(group_pdc.getColumnName(), 
+											pdc.getColumnName(), functions[f]),
+										PrintDataFunction.getFunctionDisplayType(functions[f],
+												pdc.getDisplayType()),pdc.getFormatPattern()));
+								}
 							}
-							else if (m_group.isFunctionColumn(pdc.getColumnName(), functions[f]))
-							{
-								pd.addNode(new PrintDataElement(pdc.getColumnName(),
-									m_group.getValue(group_pdc.getColumnName(), 
-										pdc.getColumnName(), functions[f]),
-									PrintDataFunction.getFunctionDisplayType(functions[f],
-											pdc.getDisplayType()),pdc.getFormatPattern()));
-							}
-						}
-					}	//	for all functions
-					//	No Need to Reset
-				}	//	Group change
+						}	//	for all functions
+						//	No Need to Reset
+					}	//	Group change
+				}
 			}
 		}	//	last group change
 

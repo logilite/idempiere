@@ -327,6 +327,19 @@ public interface I_AD_PrintFormat
 	  */
 	public boolean isForm();
 
+    /** Column name IsShowSummaryMultipleRowOnly */
+    public static final String COLUMNNAME_IsShowSummaryMultipleRowOnly = "IsShowSummaryMultipleRowOnly";
+
+	/** Set Show Summary Multiple Row Only.
+	  * Show Summary Line For Multiple Row Only
+	  */
+	public void setIsShowSummaryMultipleRowOnly (boolean IsShowSummaryMultipleRowOnly);
+
+	/** Get Show Summary Multiple Row Only.
+	  * Show Summary Line For Multiple Row Only
+	  */
+	public boolean isShowSummaryMultipleRowOnly();
+
     /** Column name IsStandardHeaderFooter */
     public static final String COLUMNNAME_IsStandardHeaderFooter = "IsStandardHeaderFooter";
 

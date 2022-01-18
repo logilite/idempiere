@@ -30,7 +30,7 @@ public class X_AD_PrintFormat extends PO implements I_AD_PrintFormat, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20220105L;
 
     /** Standard Constructor */
     public X_AD_PrintFormat (Properties ctx, int AD_PrintFormat_ID, String trxName)
@@ -50,6 +50,8 @@ public class X_AD_PrintFormat extends PO implements I_AD_PrintFormat, I_Persiste
 // N
 			setIsDefault (false);
 			setIsForm (false);
+			setIsShowSummaryMultipleRowOnly (false);
+// N
 			setIsStandardHeaderFooter (true);
 // Y
 			setIsTableBased (true);
@@ -484,6 +486,30 @@ public class X_AD_PrintFormat extends PO implements I_AD_PrintFormat, I_Persiste
 	public boolean isForm () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsForm);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Show Summary Multiple Row Only.
+		@param IsShowSummaryMultipleRowOnly 
+		Show Summary Line For Multiple Row Only
+	  */
+	public void setIsShowSummaryMultipleRowOnly (boolean IsShowSummaryMultipleRowOnly)
+	{
+		set_Value (COLUMNNAME_IsShowSummaryMultipleRowOnly, Boolean.valueOf(IsShowSummaryMultipleRowOnly));
+	}
+
+	/** Get Show Summary Multiple Row Only.
+		@return Show Summary Line For Multiple Row Only
+	  */
+	public boolean isShowSummaryMultipleRowOnly () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsShowSummaryMultipleRowOnly);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 
