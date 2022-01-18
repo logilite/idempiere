@@ -193,7 +193,6 @@ public class MProductionPlan extends X_M_ProductionPlan {
 
 						MProductionLine BOMLine = null;
 						int prevLoc = -1;
-						int previousAttribSet = -1;
 						// Create lines from storage until qty is reached
 						for (int sl = 0; sl < storages.length; sl++) {
 
@@ -202,15 +201,9 @@ public class MProductionPlan extends X_M_ProductionPlan {
 								if (lineQty.compareTo(BOMMovementQty) > 0)
 									lineQty = BOMMovementQty;
 
-
 								int loc = storages[sl].getM_Locator_ID();
-								int slASI = storages[sl].getM_AttributeSetInstance_ID();
-								int locAttribSet = new MAttributeSetInstance(getCtx(), slASI,
-										get_TrxName()).getM_AttributeSet_ID();
-
-								// roll up costing attributes if in the same locator
-								if (locAttribSet == 0 && previousAttribSet == 0
-										&& prevLoc == loc) {
+								// same locator
+								if (prevLoc == loc) {
 									BOMLine.setQtyUsed(BOMLine.getQtyUsed()
 											.add(lineQty));
 									BOMLine.setPlannedQty(BOMLine.getQtyUsed());
@@ -225,15 +218,12 @@ public class MProductionPlan extends X_M_ProductionPlan {
 									BOMLine.setM_Locator_ID( loc );
 									BOMLine.setQtyUsed( lineQty);
 									BOMLine.setPlannedQty( lineQty);
-									if ( slASI != 0 && locAttribSet != 0 )  // ie non costing attribute
-										BOMLine.setM_AttributeSetInstance_ID(slASI);
 									BOMLine.saveEx(get_TrxName());
 
 									lineno = lineno + 10;
 									count++;
 								}
 								prevLoc = loc;
-								previousAttribSet = locAttribSet;
 								// enough ?
 								BOMMovementQty = BOMMovementQty.subtract(lineQty);
 								if (BOMMovementQty.signum() == 0)
@@ -245,10 +235,8 @@ public class MProductionPlan extends X_M_ProductionPlan {
 						if (BOMMovementQty.signum() != 0 ) {
 							if (!mustBeStocked)
 							{
-
-								// roll up costing attributes if in the same locator
-								if ( previousAttribSet == 0
-										&& prevLoc == defaultLocator) {
+								//same locator
+								if (prevLoc == defaultLocator) {
 									BOMLine.setQtyUsed(BOMLine.getQtyUsed()
 											.add(BOMMovementQty));
 									BOMLine.setPlannedQty(BOMLine.getQtyUsed());
@@ -257,7 +245,6 @@ public class MProductionPlan extends X_M_ProductionPlan {
 								}
 								// otherwise create new line
 								else {
-
 									BOMLine = MProductionLine.createFrom( this );
 									BOMLine.setLine( lineno );
 									BOMLine.setM_Product_ID( BOMProduct_ID );
@@ -269,7 +256,6 @@ public class MProductionPlan extends X_M_ProductionPlan {
 									lineno = lineno + 10;
 									count++;
 								}
-
 							}
 							else
 							{
