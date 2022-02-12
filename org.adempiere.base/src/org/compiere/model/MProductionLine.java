@@ -34,7 +34,11 @@ public class MProductionLine extends X_M_ProductionLine {
 	 */
 	public MProductionLine (Properties ctx, int M_ProductionLine_ID, String trxName)
 	{
-		super (ctx, M_ProductionLine_ID, trxName);
+		this (ctx, M_ProductionLine_ID, trxName, (String[]) null);
+	}	// MProductionLine
+
+	public MProductionLine(Properties ctx, int M_ProductionLine_ID, String trxName, String... virtualColumns) {
+		super(ctx, M_ProductionLine_ID, trxName, virtualColumns);
 		if (M_ProductionLine_ID == 0)
 		{
 			setLine (0);
@@ -44,9 +48,8 @@ public class MProductionLine extends X_M_ProductionLine {
 			setMovementQty (Env.ZERO);
 			setProcessed (false);
 		}
-			
-	}	// MProductionLine
-	
+	}
+
 	public MProductionLine (Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);

@@ -126,15 +126,12 @@ public class WTreeMaintenance extends TreeMaintenance implements IFormController
 	 */
 	private void jbInit () throws Exception
 	{
-		if (ThemeManager.isUseFontIconForImage())
-		{
+		if (ThemeManager.isUseFontIconForImage()) {
 			bAddAll.setIconSclass("z-icon-FastBack");
 			bAdd.setIconSclass("z-icon-StepBack");
 			bDelete.setIconSclass("z-icon-StepForward");
 			bDeleteAll.setIconSclass("z-icon-FastForward");
-		}
-		else
-		{
+		} else {
 			bAddAll.setImage(ThemeManager.getThemeResource("images/FastBack24.png"));
 			bAdd.setImage(ThemeManager.getThemeResource("images/StepBack24.png"));
 			bDelete.setImage(ThemeManager.getThemeResource("images/StepForward24.png"));

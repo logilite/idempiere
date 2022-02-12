@@ -412,8 +412,8 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	        	
 	        };
 	        toolbar.appendChild(showHeader);
-			if (ThemeManager.isUseFontIconForImage())
-				showHeader.setIconSclass("z-icon-Bars");
+	        if (ThemeManager.isUseFontIconForImage())
+	        	showHeader.setIconSclass("z-icon-ThreeLineMenu");
 			else
 				showHeader.setImage(ThemeManager.getThemeResource(IMAGES_THREELINE_MENU_PNG));
 	        showHeader.addEventListener(Events.ON_CLICK, this);
@@ -422,8 +422,8 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	        
 	        max = new ToolBarButton();
 	        toolbar.appendChild(max);
-			if (ThemeManager.isUseFontIconForImage())
-				max.setIconSclass("z-icon-DoubleArrowUp");
+	        if (ThemeManager.isUseFontIconForImage())
+	        	max.setIconSclass("z-icon-Collapsing");
 			else
 				max.setImage(ThemeManager.getThemeResource(IMAGES_UPARROW_PNG));
 	        max.addEventListener(Events.ON_CLICK, this);
@@ -451,8 +451,8 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         
         if (mobile) {
 	        westBtn = new ToolBarButton();
-			if (ThemeManager.isUseFontIconForImage())
-				westBtn.setIconSclass("z-icon-Bars");
+	        if (ThemeManager.isUseFontIconForImage())
+	        	westBtn.setIconSclass("z-icon-ThreeLineMenu");
 			else
 				westBtn.setImage(ThemeManager.getThemeResource(IMAGES_THREELINE_MENU_PNG));
 	        westBtn.addEventListener(Events.ON_CLICK, this);
@@ -751,7 +751,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	protected void restoreHeader() {
 		layout.getNorth().setVisible(true);
 		if (ThemeManager.isUseFontIconForImage())
-			max.setIconSclass("z-icon-DoubleArrowUp");
+        	max.setIconSclass("z-icon-Collapsing");
 		else
 			max.setImage(ThemeManager.getThemeResource(IMAGES_UPARROW_PNG));
 		showHeader.setVisible(false);
@@ -764,7 +764,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	protected void collapseHeader() {
 		layout.getNorth().setVisible(false);
 		if (ThemeManager.isUseFontIconForImage())
-			max.setIconSclass("z-icon-DoubleArrowDown");
+        	max.setIconSclass("z-icon-Expanding");
 		else
 			max.setImage(ThemeManager.getThemeResource(IMAGES_DOWNARROW_PNG));
 		showHeader.setVisible(true);
