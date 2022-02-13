@@ -112,7 +112,33 @@ UPDATE AD_ViewColumn SET ColumnSQL='COALESCE(t.IsHighVolume, tbl.IsHighVolume)',
 ;
 
 -- Jan 19, 2022, 10:04:03 AM CET
-CREATE OR REPLACE VIEW AD_Tab_v(AD_Tab_ID, AD_Window_ID, AD_Table_ID, Name, Description, Help, SeqNo, IsSingleRow, HasTree, IsInfoTab, ReplicationType, TableName, AccessLevel, IsSecurityEnabled, IsDeleteable, IsHighVolume, IsView, hasassociation, IsTranslationTab, IsReadOnly, AD_Image_ID, TabLevel, WhereClause, OrderByClause, CommitWarning, ReadOnlyLogic, DisplayLogic, AD_Column_ID, AD_Process_ID, IsSortTab, IsInsertRecord, IsAdvancedTab, AD_ColumnSortOrder_ID, AD_ColumnSortYesNo_ID, Included_Tab_ID, Parent_Column_ID, AD_Tab_UU, AD_Table_UU, TreeDisplayedOn, MaxQueryRecords, IsAllowAdvancedLookup, IsLookupOnlySelection, AD_TabType) AS SELECT t.ad_tab_id AS AD_Tab_ID, t.ad_window_id AS AD_Window_ID, t.ad_table_id AS AD_Table_ID, t.name AS Name, t.description AS Description, t.help AS Help, t.seqno AS SeqNo, t.issinglerow AS IsSingleRow, t.hastree AS HasTree, t.isinfotab AS IsInfoTab, tbl.replicationtype AS ReplicationType, tbl.tablename AS TableName, tbl.accesslevel AS AccessLevel, tbl.issecurityenabled AS IsSecurityEnabled, tbl.isdeleteable AS IsDeleteable, COALESCE(t.IsHighVolume, tbl.IsHighVolume) AS IsHighVolume, tbl.isview AS IsView, CAST('N' AS char(1)) AS hasassociation, t.istranslationtab AS IsTranslationTab, t.isreadonly AS IsReadOnly, t.ad_image_id AS AD_Image_ID, t.tablevel AS TabLevel, t.whereclause AS WhereClause, t.orderbyclause AS OrderByClause, t.commitwarning AS CommitWarning, t.readonlylogic AS ReadOnlyLogic, t.displaylogic AS DisplayLogic, t.ad_column_id AS AD_Column_ID, t.ad_process_id AS AD_Process_ID, t.issorttab AS IsSortTab, t.isinsertrecord AS IsInsertRecord, t.isadvancedtab AS IsAdvancedTab, t.ad_columnsortorder_id AS AD_ColumnSortOrder_ID, t.ad_columnsortyesno_id AS AD_ColumnSortYesNo_ID, t.included_tab_id AS Included_Tab_ID, t.parent_column_id AS Parent_Column_ID, t.ad_tab_uu AS AD_Tab_UU, tbl.ad_table_uu AS AD_Table_UU, t.treedisplayedon AS TreeDisplayedOn, t.maxqueryrecords AS MaxQueryRecords, t.isallowadvancedlookup AS IsAllowAdvancedLookup, t.islookuponlyselection AS IsLookupOnlySelection, t.ad_tabtype AS AD_TabType FROM ad_tab t JOIN ad_table tbl ON t.ad_table_id = tbl.ad_table_id WHERE t.isactive = 'Y' AND tbl.isactive = 'Y'
+CREATE OR REPLACE VIEW AD_TAB_V
+(AD_TAB_ID, AD_WINDOW_ID, AD_TABLE_ID, NAME, DESCRIPTION, 
+ HELP, SEQNO, ISSINGLEROW, HASTREE, ISINFOTAB, 
+ REPLICATIONTYPE, TABLENAME, ACCESSLEVEL, ISSECURITYENABLED, ISDELETEABLE, 
+ ISHIGHVOLUME, ISVIEW, HASASSOCIATION, ISTRANSLATIONTAB, ISREADONLY, 
+ AD_IMAGE_ID, TABLEVEL, WHERECLAUSE, ORDERBYCLAUSE, COMMITWARNING, 
+ READONLYLOGIC, DISPLAYLOGIC, AD_COLUMN_ID, AD_PROCESS_ID, ISSORTTAB, 
+ ISINSERTRECORD, ISADVANCEDTAB, AD_COLUMNSORTORDER_ID, AD_COLUMNSORTYESNO_ID,
+ INCLUDED_TAB_ID, PARENT_COLUMN_ID, AD_Tab_UU, AD_Table_UU, TREEDISPLAYEDON,
+ MAXQUERYRECORDS, IsAllowAdvancedLookup, IsLookupOnlySelection, AD_TabType,
+ PageSize, DetailPageSize, EntityType)
+AS 
+SELECT t.AD_Tab_ID, t.AD_Window_ID, t.AD_Table_ID, t.Name, t.Description, 
+    t.Help, t.SeqNo, t.IsSingleRow, t.HasTree, t.IsInfoTab, tbl.ReplicationType,
+    tbl.TableName, tbl.AccessLevel, tbl.IsSecurityEnabled, tbl.IsDeleteable, 
+    COALESCE(t.IsHighVolume, tbl.IsHighVolume) AS IsHighVolume , tbl.IsView, cast('N' as char) AS HasAssociation, -- compatibility
+    t.IsTranslationTab, t.IsReadOnly, t.AD_Image_ID, t.TabLevel, 
+    t.WhereClause, t.OrderByClause, t.CommitWarning, t.ReadOnlyLogic, t.DisplayLogic,
+    t.AD_Column_ID, t.AD_Process_ID, t.IsSortTab, t.IsInsertRecord, t.IsAdvancedTab,
+    t.AD_ColumnSortOrder_ID, t.AD_ColumnSortYesNo_ID, t.Included_Tab_ID, t.Parent_Column_ID,
+    t.AD_Tab_UU, tbl.AD_Table_UU, t.TreeDisplayedOn, t.MaxQueryRecords,
+    t.IsAllowAdvancedLookup, t.IsLookupOnlySelection, t.AD_TabType,
+    t.PageSize, t.DetailPageSize, t.EntityType
+FROM AD_Tab t 
+	INNER JOIN AD_Table tbl ON (t.AD_Table_ID = tbl.AD_Table_ID)
+WHERE t.IsActive='Y'
+  AND tbl.IsActive='Y'
 ;
 
 -- Jan 19, 2022, 10:04:23 AM CET
@@ -120,7 +146,34 @@ UPDATE AD_ViewColumn SET ColumnSQL='COALESCE(t.IsHighVolume, tbl.IsHighVolume)',
 ;
 
 -- Jan 19, 2022, 10:04:27 AM CET
-CREATE OR REPLACE VIEW AD_Tab_vt(AD_Language, AD_Tab_ID, AD_Window_ID, AD_Table_ID, Name, Description, Help, SeqNo, IsSingleRow, HasTree, IsInfoTab, ReplicationType, TableName, AccessLevel, IsSecurityEnabled, IsDeleteable, IsHighVolume, IsView, hasassociation, IsTranslationTab, IsReadOnly, AD_Image_ID, TabLevel, WhereClause, OrderByClause, CommitWarning, ReadOnlyLogic, DisplayLogic, AD_Column_ID, AD_Process_ID, IsSortTab, IsInsertRecord, IsAdvancedTab, AD_ColumnSortOrder_ID, AD_ColumnSortYesNo_ID, Included_Tab_ID, Parent_Column_ID, AD_Tab_UU, AD_Table_UU, TreeDisplayedOn, MaxQueryRecords, IsAllowAdvancedLookup, IsLookupOnlySelection, AD_TabType) AS SELECT trl.ad_language AS AD_Language, t.ad_tab_id AS AD_Tab_ID, t.ad_window_id AS AD_Window_ID, t.ad_table_id AS AD_Table_ID, trl.name AS Name, trl.description AS Description, trl.help AS Help, t.seqno AS SeqNo, t.issinglerow AS IsSingleRow, t.hastree AS HasTree, t.isinfotab AS IsInfoTab, tbl.replicationtype AS ReplicationType, tbl.tablename AS TableName, tbl.accesslevel AS AccessLevel, tbl.issecurityenabled AS IsSecurityEnabled, tbl.isdeleteable AS IsDeleteable, COALESCE(t.IsHighVolume, tbl.IsHighVolume) AS IsHighVolume, tbl.isview AS IsView, CAST('N' AS char(1)) AS hasassociation, t.istranslationtab AS IsTranslationTab, t.isreadonly AS IsReadOnly, t.ad_image_id AS AD_Image_ID, t.tablevel AS TabLevel, t.whereclause AS WhereClause, t.orderbyclause AS OrderByClause, trl.commitwarning AS CommitWarning, t.readonlylogic AS ReadOnlyLogic, t.displaylogic AS DisplayLogic, t.ad_column_id AS AD_Column_ID, t.ad_process_id AS AD_Process_ID, t.issorttab AS IsSortTab, t.isinsertrecord AS IsInsertRecord, t.isadvancedtab AS IsAdvancedTab, t.ad_columnsortorder_id AS AD_ColumnSortOrder_ID, t.ad_columnsortyesno_id AS AD_ColumnSortYesNo_ID, t.included_tab_id AS Included_Tab_ID, t.parent_column_id AS Parent_Column_ID, t.ad_tab_uu AS AD_Tab_UU, tbl.ad_table_uu AS AD_Table_UU, t.treedisplayedon AS TreeDisplayedOn, t.maxqueryrecords AS MaxQueryRecords, t.isallowadvancedlookup AS IsAllowAdvancedLookup, t.islookuponlyselection AS IsLookupOnlySelection, t.ad_tabtype AS AD_TabType FROM ad_tab t JOIN ad_table tbl ON t.ad_table_id = tbl.ad_table_id JOIN ad_tab_trl trl ON t.ad_tab_id = trl.ad_tab_id WHERE t.isactive = 'Y' AND tbl.isactive = 'Y'
+CREATE OR REPLACE VIEW AD_TAB_VT
+(AD_LANGUAGE, AD_TAB_ID, AD_WINDOW_ID, AD_TABLE_ID, NAME, 
+ DESCRIPTION, HELP, SEQNO, ISSINGLEROW, HASTREE, 
+ ISINFOTAB, REPLICATIONTYPE, TABLENAME, ACCESSLEVEL, ISSECURITYENABLED, 
+ ISDELETEABLE, ISHIGHVOLUME, ISVIEW, HASASSOCIATION, ISTRANSLATIONTAB, 
+ ISREADONLY, AD_IMAGE_ID, TABLEVEL, WHERECLAUSE, ORDERBYCLAUSE, 
+ COMMITWARNING, READONLYLOGIC, DISPLAYLOGIC, AD_COLUMN_ID, AD_PROCESS_ID, 
+ ISSORTTAB, ISINSERTRECORD, ISADVANCEDTAB, AD_COLUMNSORTORDER_ID, AD_COLUMNSORTYESNO_ID, 
+ INCLUDED_TAB_ID, PARENT_COLUMN_ID, AD_Tab_UU, AD_Table_UU, TREEDISPLAYEDON,
+ MAXQUERYRECORDS, IsAllowAdvancedLookup, IsLookupOnlySelection, AD_TabType,
+ PageSize, DetailPageSize, EntityType)
+AS 
+SELECT trl.AD_Language, t.AD_Tab_ID, t.AD_Window_ID, t.AD_Table_ID, trl.Name, trl.Description, 
+    trl.Help, t.SeqNo, t.IsSingleRow, t.HasTree, t.IsInfoTab, tbl.ReplicationType,
+    tbl.TableName, tbl.AccessLevel, tbl.IsSecurityEnabled, tbl.IsDeleteable, 
+    COALESCE(t.IsHighVolume, tbl.IsHighVolume) AS IsHighVolume, tbl.IsView, cast('N' as char) AS HasAssociation, -- compatibility
+    t.IsTranslationTab, t.IsReadOnly, t.AD_Image_ID, t.TabLevel, 
+    t.WhereClause, t.OrderByClause, trl.CommitWarning, t.ReadOnlyLogic, t.DisplayLogic,
+    t.AD_Column_ID, t.AD_Process_ID, t.IsSortTab, t.IsInsertRecord, t.IsAdvancedTab,
+    t.AD_ColumnSortOrder_ID, t.AD_ColumnSortYesNo_ID, t.Included_Tab_ID, t.Parent_Column_ID,
+    t.AD_Tab_UU, tbl.AD_Table_UU, t.TreeDisplayedOn, t.MaxQueryRecords,
+    t.IsAllowAdvancedLookup, t.IsLookupOnlySelection, t.AD_TabType,
+    t.PageSize, t.DetailPageSize, t.EntityType
+FROM AD_Tab t 
+	INNER JOIN AD_Table tbl ON (t.AD_Table_ID = tbl.AD_Table_ID)
+	INNER JOIN AD_Tab_Trl trl ON (t.AD_Tab_ID = trl.AD_Tab_ID)
+WHERE t.IsActive='Y'
+  AND tbl.IsActive='Y'
 ;
 
 SELECT register_migration_script('202201191000_IDEMPIERE-3044.sql') FROM dual
