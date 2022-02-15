@@ -744,7 +744,6 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				{
 					embedExtendScript(doc, extension.getScriptURL());
 				}
-				appendExtraScript(extension, isExport, doc);
 				appendInlineCss(doc);
 				
 				if (extension != null && !isExport){
@@ -2617,49 +2616,6 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			return true;
 		
 		return Evaluator.evaluateLogic(new PrintDataEvaluatee(null, m_printData), item.getDisplayLogic());
-	}
-	/**
-	 * if isExport, embed script content other embed script url
-	 * 
-	 * @param extension
-	 * @param isExport
-	 * @param doc
-	 * @throws IOException
-	 */
-	protected void appendExtraScript(IHTMLExtension extension, boolean isExport, XhtmlDocument doc) throws IOException
-	{
-		// embed extend script by link
-		if (extension != null && isExport)
-		{
-			for (String extraScriptPath : extension.getFullPathExtraScriptURLs())
-			{
-				appendInlineScriptContent(doc, readResourceFile(extraScriptPath));
-			}
-			// embed extend script by content
-		}
-		else if (extension != null && !isExport)
-		{
-			for (String extraScriptUrl : extension.getExtraScriptURLs())
-			{
-				embedExtendScript(doc, extraScriptUrl);
-			}
-		}
-
-		if (extension != null)
-		{
-			StringBuilder embedJs = new StringBuilder();
-			embedJs.append("<script type=\"text/javascript\">");
-			embedJs.append("\n");
-			embedJs.append("$(window).load(function() {");
-			embedJs.append("\n");
-			embedJs.append("$('.rp-table').floatThead();");
-			embedJs.append("\n");
-			embedJs.append("});");
-			embedJs.append("\n");
-			embedJs.append("</script>");
-
-			doc.appendHead(embedJs.toString());
-		}
 	}
 
 	/**

@@ -928,8 +928,7 @@ public class DashboardController implements EventListener<Event> {
 		ReportEngine re = runReport(AD_Process_ID, parameters);
 
 		File file = File.createTempFile(re.getName(), ".html");		
-		re.createHTML(file, false, AEnv.getLanguage(Env.getCtx()), new HTMLExtension(Executions.getCurrent()
-				.getDesktop().getWebApp().getRealPath("/"), Executions.getCurrent().getContextPath(), "rp",
+		re.createHTML(file, false, AEnv.getLanguage(Env.getCtx()), new HTMLExtension(Executions.getCurrent().getContextPath(), "rp",
 				SessionManager.getAppDesktop().getComponent().getUuid()));
 		return new AMedia(re.getName(), "html", "text/html", file, false);
 	}

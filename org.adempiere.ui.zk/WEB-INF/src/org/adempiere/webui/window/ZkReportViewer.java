@@ -31,8 +31,8 @@ import java.util.logging.Level;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.base.upload.IUploadService;
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.DBException;
 import org.adempiere.pdf.Document;
 import org.adempiere.util.ContextRunnable;
@@ -294,8 +294,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 				if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Path="+path + " Prefix="+prefix);
 				File file = File.createTempFile(prefix, "."+HTML_FILE_EXT, new File(path));
 				String contextPath = Executions.getCurrent().getContextPath();
-				String contextFullPath=Executions.getCurrent().getDesktop().getWebApp().getRealPath("/");
-				m_reportEngine.createHTML(file, false, m_reportEngine.getPrintFormat().getLanguage(), new HTMLExtension(contextFullPath, contextPath, "rp", getUuid()));
+				m_reportEngine.createHTML(file, false, m_reportEngine.getPrintFormat().getLanguage(), new HTMLExtension(contextPath, "rp", getUuid()));
 				return new AMedia(file.getName(), HTML_FILE_EXT, HTML_MIME_TYPE, file, false);
 			} catch (Exception e) {
 				if (e instanceof RuntimeException)
@@ -819,8 +818,6 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 				
 			}
 		});
-		
-		Events.echoEvent("onPostInit", this, null);
 	}
 
 	/**
@@ -1741,12 +1738,9 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 	static class HTMLRendererRunnable extends ContextRunnable implements IServerPushCallback {
 
 		private ZkReportViewer viewer;
-		private String contextFullPath;
 		public HTMLRendererRunnable(ZkReportViewer viewer) {
 			super();
 			this.viewer = viewer;
-			
-			contextFullPath = Executions.getCurrent().getDesktop().getWebApp().getRealPath("/");
 		}
 
 		@Override

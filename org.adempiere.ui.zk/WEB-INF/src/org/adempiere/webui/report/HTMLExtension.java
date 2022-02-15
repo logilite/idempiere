@@ -18,8 +18,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.apps.AEnv;
@@ -47,12 +45,9 @@ public class HTMLExtension implements IHTMLExtension {
 	private String scriptURL;
 	private String styleURL;
 	private String contextPath;
-	private String contextFullPath;
 	private String theme = "";
-	private List<String> extraScriptUrls;
-	private List<String> fullPathExtraScriptUrls;
 
-	public HTMLExtension(String contextFullPath, String contextPath, String classPrefix, String componentId) {
+	public HTMLExtension(String contextPath, String classPrefix, String componentId) {
 
 		theme = MSysConfig.getValue(MSysConfig.HTML_REPORT_THEME, "/", Env.getAD_Client_ID(Env.getCtx()));
 
@@ -70,15 +65,7 @@ public class HTMLExtension implements IHTMLExtension {
 		} else {
 			this.styleURL = contextPath + theme + "css/report.css";
 		}
-		this.contextFullPath = contextFullPath;
-		
-		extraScriptUrls = new ArrayList<String>();
-		extraScriptUrls.add(contextPath + theme + "js/jquery.min.js");
-		extraScriptUrls.add(contextPath + theme + "js/jquery.floatThead.min.js");
 
-		fullPathExtraScriptUrls = new ArrayList<>();
-		fullPathExtraScriptUrls.add(this.contextFullPath + theme + "js/jquery.min.js");
-		fullPathExtraScriptUrls.add(this.contextFullPath + theme + "js/jquery.floatThead.min.js");
 		this.contextPath = contextPath;
 	}
 	
@@ -185,18 +172,6 @@ public class HTMLExtension implements IHTMLExtension {
 		} else {
 			return null;
 		}
-	}
-
-	@Override
-	public List<String> getExtraScriptURLs()
-	{
-		return extraScriptUrls;
-	}
-
-	@Override
-	public List<String> getFullPathExtraScriptURLs()
-	{
-		return fullPathExtraScriptUrls;
 	}
 
 	@Override
