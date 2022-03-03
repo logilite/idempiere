@@ -87,9 +87,18 @@ public class MMovementLineConfirm extends X_M_MovementLineConfirm
 	 */
 	public void setMovementLine (MMovementLine line)
 	{
+		BigDecimal ConfirmedQtyEntered = Env.ZERO;
+		
 		setM_MovementLine_ID(line.getM_MovementLine_ID());
 		setTargetQty(line.getMovementQty());
 		setConfirmedQty(getTargetQty());	//	suggestion
+		setC_UOM_ID(line.getC_UOM_ID());
+		setQtyEntered(line.getQtyEntered());
+		setM_Product_ID(line.getM_Product_ID());
+
+		ConfirmedQtyEntered = MUOMConversion.convertProductTo(getCtx(), getM_Product_ID(), getC_UOM_ID(),
+				getConfirmedQty());
+		setConfirmedQtyEntered(ConfirmedQtyEntered);
 		m_line = line;
 	}	//	setMovementLine
 	

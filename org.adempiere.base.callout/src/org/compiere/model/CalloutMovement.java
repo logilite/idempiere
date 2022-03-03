@@ -201,4 +201,31 @@ public class CalloutMovement extends CalloutEngine
 		}
 		// End Armen
 	}
+	
+	public String quantity(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value)
+	{
+		if (value == null)
+			return "";
+
+		int M_Product_Id = (int) mTab.getValue(MMovementLineConfirm.COLUMNNAME_M_Product_ID);
+
+		Integer C_UOM_TO_ID = (Integer) mTab.getValue(MMovementLineConfirm.COLUMNNAME_C_UOM_ID);
+
+		if (mField.getColumnName().equals(MMovementLineConfirm.COLUMNNAME_ConfirmedQtyEntered))
+		{
+			BigDecimal ConfirmedQtyEntered = (BigDecimal) value;
+			BigDecimal ConfirmedQty = MUOMConversion.convertProductFrom(ctx, M_Product_Id, C_UOM_TO_ID, ConfirmedQtyEntered);
+
+			mTab.setValue(MMovementLineConfirm.COLUMNNAME_ConfirmedQty, ConfirmedQty);
+		}
+		else if (mField.getColumnName().equals(MMovementLineConfirm.COLUMNNAME_ScrappedQtyEntered))
+		{
+			BigDecimal ScrappedQtyEntered = (BigDecimal) value;
+			BigDecimal ScrappedQty = MUOMConversion.convertProductFrom(ctx, M_Product_Id, C_UOM_TO_ID,
+					ScrappedQtyEntered);
+
+			mTab.setValue(MMovementLineConfirm.COLUMNNAME_ScrappedQty, ScrappedQty);
+		}
+		return "";
+	}
 }	//	CalloutMove
