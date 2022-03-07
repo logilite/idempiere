@@ -2084,6 +2084,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		// Set selection and adding keycandidate for Okey event
 		if (isSetDefaultFirstRow) {
 			contentPanel.setSelectedIndex(0);
+			Events.postEvent(new SelectEvent<WListbox, Object>(Events.ON_SELECT, contentPanel, null));
 			contentPanel.getModel().addToSelection(contentPanel.getModel().get(0));
 			if (p_multipleSelection) {
 				Integer keyCandidate = getColumnValue(0);
