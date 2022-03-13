@@ -168,7 +168,7 @@ public class CostAdjustmentCalloutFactory implements IColumnCalloutFactory {
 				MCost cost = product.getCostingRecord(as, AD_Org_ID, M_ASI_ID, costingMethod);
 				if (cost == null) {
 					if (!MCostElement.COSTINGMETHOD_StandardCosting.equals(costingMethod)) {
-						mTab.setValue(mField, null);
+						//mTab.setValue(mField, null);
 						return Msg.getMsg(Env.getCtx(), "NoCostingRecord");
 					}
 				}
