@@ -350,10 +350,11 @@ public class MInventoryLine extends X_M_InventoryLine
 			int AD_Org_ID = getAD_Org_ID();
 			MCost cost = product.getCostingRecord(as, AD_Org_ID, M_ASI_ID, costingMethod);					
 			if (cost == null) {
-				if (!MCostElement.COSTINGMETHOD_StandardCosting.equals(costingMethod)) {
-					log.saveError("NoCostingRecord", "");
-					return false;
-				}
+				/*
+				 * if (!MCostElement.COSTINGMETHOD_StandardCosting.equals(
+				 * costingMethod)) { log.saveError("NoCostingRecord", "");
+				 * return false; }
+				 */
 			}
 			setM_Locator_ID(0);
 		} else {
