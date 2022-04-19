@@ -189,7 +189,7 @@ public class CompositeADTabbox extends AbstractADTabbox
 							if (result)
 							{
 								onEditDetail(row, formView);
-								adWindowPanel.onQuickForm();
+								adWindowPanel.onQuickForm(true);
 							}
 						}
 					});

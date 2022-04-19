@@ -341,7 +341,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         	eastPopup = new Popup();
         	ToolBarButton btn = new ToolBarButton();
         	btn.setIconSclass("z-icon-remove");
-			btn.addEventListener(Events.ON_CLICK, evt -> {
+        	btn.addEventListener(Events.ON_CLICK, evt -> {
 				eastPopup.close();
 				isQuickInfoOpen = false;
 			});
@@ -352,10 +352,10 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         	eastPopup.setPage(getComponent().getPage());
         	eastPopup.setHeight("100%");
         	helpController.setupFieldTooltip();
-			eastPopup.addEventListener(Events.ON_OPEN, (OpenEvent oe) -> {
+        	eastPopup.addEventListener(Events.ON_OPEN, (OpenEvent oe) -> {
 				isQuickInfoOpen = oe.isOpen();
 			});
-
+        	
         	westPopup = new Popup();        	
         	westPopup.setStyle("padding-top: 10px;");
         	westPopup.setPage(getComponent().getPage());
@@ -671,6 +671,8 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         		if (mobile && eastPopup != null)
         		{
         			eastPopup.open(layout.getCenter(), "overlap_end");
+        			isQuickInfoOpen = true;
+            		updateHelpQuickInfo(gridTab);
         		}
         		else
         		{
@@ -679,10 +681,9 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	        		LayoutUtils.removeSclass("slide", layout.getEast());
 	        		contextHelp.setVisible(false);
 	        		updateHelpCollapsedPreference(false);
+	        		isQuickInfoOpen = true;
+	        		updateHelpQuickInfo(gridTab);
         		}
-        		isQuickInfoOpen = true;
-        		updateHelpQuickInfo(gridTab);
-        		updateHelpDetailQuickInfo(detailGridTab);
         	}
         	else if (comp == westBtn)
         	{
@@ -1015,9 +1016,9 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 
 	@Override
 	public void updateHelpQuickInfo(GridTab gridTab) {
-		this.gridTab = gridTab;
-		if (isQuickInfoOpen)
-			helpController.renderQuickInfo(gridTab);
+        this.gridTab = gridTab;
+        if (isQuickInfoOpen)
+            helpController.renderQuickInfo(gridTab);
 	}
 	
 	@Override

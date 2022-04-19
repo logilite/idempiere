@@ -25,7 +25,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_Role
  *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @version Release 10 - $Id$ */
 @org.adempiere.base.Model(table="AD_Role")
 public class X_AD_Role extends PO implements I_AD_Role, I_Persistent 
 {
@@ -33,7 +33,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20220303L;
 
     /** Standard Constructor */
     public X_AD_Role (Properties ctx, int AD_Role_ID, String trxName)
@@ -74,6 +74,8 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 			setIsCanSaveGridCustPrefEveryone (false);
 // N 
 			setIsChangeLog (false);
+// N
+			setIsClientAdministrator (false);
 // N
 			setIsDiscountAllowedOnTotal (false);
 			setIsDiscountUptoLimitPrice (false);
@@ -139,6 +141,8 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 			setIsCanReport (true);
 // Y
 			setIsChangeLog (false);
+// N
+			setIsClientAdministrator (false);
 // N
 			setIsDiscountAllowedOnTotal (false);
 			setIsDiscountUptoLimitPrice (false);
@@ -804,6 +808,29 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isChangeLog()
 	{
 		Object oo = get_Value(COLUMNNAME_IsChangeLog);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Client Administrator.
+		@param IsClientAdministrator This role is a client administrator
+	*/
+	public void setIsClientAdministrator (boolean IsClientAdministrator)
+	{
+		set_Value (COLUMNNAME_IsClientAdministrator, Boolean.valueOf(IsClientAdministrator));
+	}
+
+	/** Get Client Administrator.
+		@return This role is a client administrator
+	  */
+	public boolean isClientAdministrator()
+	{
+		Object oo = get_Value(COLUMNNAME_IsClientAdministrator);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 
