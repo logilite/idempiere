@@ -673,6 +673,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         			eastPopup.open(layout.getCenter(), "overlap_end");
         			isQuickInfoOpen = true;
             		updateHelpQuickInfo(gridTab);
+                    updateHelpDetailQuickInfo(detailGridTab);
         		}
         		else
         		{
@@ -683,6 +684,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	        		updateHelpCollapsedPreference(false);
 	        		isQuickInfoOpen = true;
 	        		updateHelpQuickInfo(gridTab);
+	                updateHelpDetailQuickInfo(detailGridTab);
         		}
         	}
         	else if (comp == westBtn)
