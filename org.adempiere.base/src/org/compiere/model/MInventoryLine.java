@@ -377,6 +377,7 @@ public class MInventoryLine extends X_M_InventoryLine
 				 * if (!MCostElement.COSTINGMETHOD_StandardCosting.equals(
 				 * costingMethod)) { log.saveError("NoCostingRecord", "");
 				 * return false; }
+				 */
 			} else {
 				if (is_new() || is_ValueChanged(COLUMNNAME_M_Product_ID) || is_ValueChanged(COLUMNNAME_M_AttributeSetInstance_ID))
 					setCurrentCostPrice(cost.getCurrentCostPrice());

@@ -34,7 +34,6 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import org.adempiere.exceptions.AdempiereException;
-import org.apache.commons.collections4.map.HashedMap;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MQuery;
 import org.compiere.model.MReportView;
@@ -948,7 +947,7 @@ public class DataEngine
 	 */
 	private void loadPrintData (PrintData pd, MPrintFormat format)
 	{
-		HashedMap<PrintDataColumn, Integer> groupStartMap = new HashedMap<PrintDataColumn, Integer>();
+		HashMap<PrintDataColumn, Integer> groupStartMap = new HashMap<PrintDataColumn, Integer>();
 		//	Translate Spool Output
 		boolean translateSpool = pd.getTableName().equals("T_Spool");
 		m_runningTotalString = Msg.getMsg(format.getLanguage(), "RunningTotal");
@@ -983,7 +982,7 @@ public class DataEngine
 			for (int i = 0; i < pd.getColumnInfo().length; i++)
 			{
 				PrintDataColumn group_pdc = pd.getColumnInfo()[i];
-				if (!m_group.isGroupColumn(group_pdc.getColumnName()))
+				if (!m_group.isGroupColumn(group_pdc.getAD_PrintFormatItem_ID()))
 					continue;
 				groupStartMap.put(group_pdc, rowNo);
 			}
@@ -1031,7 +1030,7 @@ public class DataEngine
 						boolean isGroupMultiRow = !m_showSummaryMultRowOnly || (groupRowStart > 1 && (groupRowStart - groupStartMap.get(group_pdc)) > 1);
 						if (isGroupMultiRow || m_summary)
 						{
-							char[] functions = m_group.getFunctions(group_pdc.getColumnName());
+							char[] functions = m_group.getFunctions(group_pdc.getAD_PrintFormatItem_ID());
 							for (int f = 0; f < functions.length; f++)
 							{
 								printRunningTotal(pd, levelNo, rowNo++);
