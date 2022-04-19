@@ -75,6 +75,19 @@ public interface I_M_MovementLineConfirm
 	  */
 	public BigDecimal getConfirmedQty();
 
+    /** Column name ConfirmedQtyEntered */
+    public static final String COLUMNNAME_ConfirmedQtyEntered = "ConfirmedQtyEntered";
+
+	/** Set Confirmed Quantity Entered.
+	  * Confirmation of a received quantity
+	  */
+	public void setConfirmedQtyEntered (BigDecimal ConfirmedQtyEntered);
+
+	/** Get Confirmed Quantity Entered.
+	  * Confirmation of a received quantity
+	  */
+	public BigDecimal getConfirmedQtyEntered();
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -90,6 +103,21 @@ public interface I_M_MovementLineConfirm
 	  * User who created this records
 	  */
 	public int getCreatedBy();
+
+    /** Column name C_UOM_ID */
+    public static final String COLUMNNAME_C_UOM_ID = "C_UOM_ID";
+
+	/** Set UOM.
+	  * Unit of Measure
+	  */
+	public void setC_UOM_ID (int C_UOM_ID);
+
+	/** Get UOM.
+	  * Unit of Measure
+	  */
+	public int getC_UOM_ID();
+
+	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException;
 
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";
@@ -197,6 +225,21 @@ public interface I_M_MovementLineConfirm
 
 	public org.compiere.model.I_M_MovementLine getM_MovementLine() throws RuntimeException;
 
+    /** Column name M_Product_ID */
+    public static final String COLUMNNAME_M_Product_ID = "M_Product_ID";
+
+	/** Set Product.
+	  * Product, Service, Item
+	  */
+	public void setM_Product_ID (int M_Product_ID);
+
+	/** Get Product.
+	  * Product, Service, Item
+	  */
+	public int getM_Product_ID();
+
+	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException;
+
     /** Column name Processed */
     public static final String COLUMNNAME_Processed = "Processed";
 
@@ -210,6 +253,19 @@ public interface I_M_MovementLineConfirm
 	  */
 	public boolean isProcessed();
 
+    /** Column name QtyEntered */
+    public static final String COLUMNNAME_QtyEntered = "QtyEntered";
+
+	/** Set Quantity.
+	  * The Quantity Entered is based on the selected UoM
+	  */
+	public void setQtyEntered (BigDecimal QtyEntered);
+
+	/** Get Quantity.
+	  * The Quantity Entered is based on the selected UoM
+	  */
+	public BigDecimal getQtyEntered();
+
     /** Column name ScrappedQty */
     public static final String COLUMNNAME_ScrappedQty = "ScrappedQty";
 
@@ -222,6 +278,19 @@ public interface I_M_MovementLineConfirm
 	  * The Quantity scrapped due to QA issues
 	  */
 	public BigDecimal getScrappedQty();
+
+    /** Column name ScrappedQtyEntered */
+    public static final String COLUMNNAME_ScrappedQtyEntered = "ScrappedQtyEntered";
+
+	/** Set Scrapped Quantity Entered.
+	  * The Quantity scrapped due to QA issues
+	  */
+	public void setScrappedQtyEntered (BigDecimal ScrappedQtyEntered);
+
+	/** Get Scrapped Quantity Entered.
+	  * The Quantity scrapped due to QA issues
+	  */
+	public BigDecimal getScrappedQtyEntered();
 
     /** Column name TargetQty */
     public static final String COLUMNNAME_TargetQty = "TargetQty";

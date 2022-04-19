@@ -373,10 +373,10 @@ public class MInventoryLine extends X_M_InventoryLine
 			int AD_Org_ID = getAD_Org_ID();
 			MCost cost = product.getCostingRecord(as, AD_Org_ID, M_ASI_ID, costingMethod);					
 			if (cost == null) {
-				if (!MCostElement.COSTINGMETHOD_StandardCosting.equals(costingMethod)) {
-					log.saveError("NoCostingRecord", "");
-					return false;
-				}
+				/*
+				 * if (!MCostElement.COSTINGMETHOD_StandardCosting.equals(
+				 * costingMethod)) { log.saveError("NoCostingRecord", "");
+				 * return false; }
 			} else {
 				if (is_new() || is_ValueChanged(COLUMNNAME_M_Product_ID) || is_ValueChanged(COLUMNNAME_M_AttributeSetInstance_ID))
 					setCurrentCostPrice(cost.getCurrentCostPrice());

@@ -261,10 +261,8 @@ public class MReportTree
 				{
 					if (sb.length () > 0)
 					{
-						sb.append (" OR ");
+						sb.append (",");
 					}
-					sb.append (ColumnName);
-					sb.append ('=');
 					sb.append (nn.getNode_ID ());
 					if (log.isLoggable(Level.FINEST)) log.finest ("- " + nn);
 				}
@@ -272,8 +270,9 @@ public class MReportTree
 					if (log.isLoggable(Level.FINEST)) log.finest ("- skipped parent (" + nn + ")");
 			}
 			result = new StringBuilder (" ( ");
+			result.append (ColumnName).append(" IN ( ");
 			result.append (sb);
-			result.append (" ) ");
+			result.append (" )) ");
 		}
 		else	//	not found or not summary 
 			result = new StringBuilder (ColumnName).append("=").append(ID);

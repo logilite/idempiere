@@ -33,7 +33,7 @@ public class X_M_MovementLineConfirm extends PO implements I_M_MovementLineConfi
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20211201L;
 
     /** Standard Constructor */
     public X_M_MovementLineConfirm (Properties ctx, int M_MovementLineConfirm_ID, String trxName)
@@ -114,6 +114,54 @@ public class X_M_MovementLineConfirm extends PO implements I_M_MovementLineConfi
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	/** Set Confirmed Quantity Entered.
+		@param ConfirmedQtyEntered 
+		Confirmation of a received quantity
+	  */
+	public void setConfirmedQtyEntered (BigDecimal ConfirmedQtyEntered)
+	{
+		set_Value (COLUMNNAME_ConfirmedQtyEntered, ConfirmedQtyEntered);
+	}
+
+	/** Get Confirmed Quantity Entered.
+		@return Confirmation of a received quantity
+	  */
+	public BigDecimal getConfirmedQtyEntered () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ConfirmedQtyEntered);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_UOM)MTable.get(getCtx(), org.compiere.model.I_C_UOM.Table_Name)
+			.getPO(getC_UOM_ID(), get_TrxName());	}
+
+	/** Set UOM.
+		@param C_UOM_ID 
+		Unit of Measure
+	  */
+	public void setC_UOM_ID (int C_UOM_ID)
+	{
+		if (C_UOM_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_C_UOM_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_C_UOM_ID, Integer.valueOf(C_UOM_ID));
+	}
+
+	/** Get UOM.
+		@return Unit of Measure
+	  */
+	public int getC_UOM_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_UOM_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Description.
@@ -280,6 +328,34 @@ public class X_M_MovementLineConfirm extends PO implements I_M_MovementLineConfi
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_Product)MTable.get(getCtx(), org.compiere.model.I_M_Product.Table_Name)
+			.getPO(getM_Product_ID(), get_TrxName());	}
+
+	/** Set Product.
+		@param M_Product_ID 
+		Product, Service, Item
+	  */
+	public void setM_Product_ID (int M_Product_ID)
+	{
+		if (M_Product_ID < 1) 
+			set_Value (COLUMNNAME_M_Product_ID, null);
+		else 
+			set_Value (COLUMNNAME_M_Product_ID, Integer.valueOf(M_Product_ID));
+	}
+
+	/** Get Product.
+		@return Product, Service, Item
+	  */
+	public int getM_Product_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Product_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Processed.
 		@param Processed The document has been processed
 	*/
@@ -303,6 +379,26 @@ public class X_M_MovementLineConfirm extends PO implements I_M_MovementLineConfi
 		return false;
 	}
 
+	/** Set Quantity.
+		@param QtyEntered 
+		The Quantity Entered is based on the selected UoM
+	  */
+	public void setQtyEntered (BigDecimal QtyEntered)
+	{
+		set_ValueNoCheck (COLUMNNAME_QtyEntered, QtyEntered);
+	}
+
+	/** Get Quantity.
+		@return The Quantity Entered is based on the selected UoM
+	  */
+	public BigDecimal getQtyEntered () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyEntered);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set Scrapped Quantity.
 		@param ScrappedQty The Quantity scrapped due to QA issues
 	*/
@@ -317,6 +413,26 @@ public class X_M_MovementLineConfirm extends PO implements I_M_MovementLineConfi
 	public BigDecimal getScrappedQty()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ScrappedQty);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Scrapped Quantity Entered.
+		@param ScrappedQtyEntered 
+		The Quantity scrapped due to QA issues
+	  */
+	public void setScrappedQtyEntered (BigDecimal ScrappedQtyEntered)
+	{
+		set_Value (COLUMNNAME_ScrappedQtyEntered, ScrappedQtyEntered);
+	}
+
+	/** Get Scrapped Quantity Entered.
+		@return The Quantity scrapped due to QA issues
+	  */
+	public BigDecimal getScrappedQtyEntered () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ScrappedQtyEntered);
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
