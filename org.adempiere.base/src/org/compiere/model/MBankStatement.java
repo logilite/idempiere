@@ -634,7 +634,7 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 		MFactAcct.deleteEx(MBankStatement.Table_ID, getC_BankStatement_ID(), get_TrxName());
 		setPosted(false);
 		
-		
+		setProcessed(false);
 		// After reActivate
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REACTIVATE);
 		if (m_processMsg != null)
