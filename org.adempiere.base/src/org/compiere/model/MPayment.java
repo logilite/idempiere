@@ -2234,6 +2234,9 @@ public class MPayment extends X_C_Payment
 		int counterAD_Org_ID = bp.getAD_OrgBP_ID(); 
 		if (counterAD_Org_ID == 0)
 			return null;
+		//Org and counter org can not be same.
+		if(getAD_Org_ID()==counterAD_Org_ID)
+			return null;
 		
 		MBPartner counterBP = (MBPartner) MTable.get(getCtx(), MBPartner.Table_ID).getPO(counterC_BPartner_ID,
 				get_TrxName());
