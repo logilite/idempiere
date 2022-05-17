@@ -807,14 +807,14 @@ public final class DisplayType
 		}
 		if (displayType == DisplayType.MultiSelectTable)
 		{
-			return "NUMBER(10)[]";
+			return getDatabase().getNumericDataType()+"(10)[]";
 		}
 		if (displayType == DisplayType.MultiSelectList)
 		{
 			if (fieldLength == 1)
-				return "CHAR(" + fieldLength + ")[]";
+				return getDatabase().getCharacterDataType()+"(" + fieldLength + ")[]";
 			else
-				return "VARCHAR2(" + fieldLength + ")[]";
+				return getDatabase().getVarcharDataType()+"(" + fieldLength + getDatabase().getVarcharLengthSuffix() + ")[]";
 		}
 		
 		IServiceReferenceHolder<IDisplayTypeFactory> cache = s_displayTypeFactoryCache.get(displayType);

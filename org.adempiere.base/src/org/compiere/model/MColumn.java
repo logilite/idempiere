@@ -926,7 +926,7 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 		if (!column.isKey() && !column.getColumnName().equals(PO.getUUIDColumnName(table.getTableName())) && !column.isVirtualColumn())
 		{
 			int refid = column.getAD_Reference_ID();
-			if (!DisplayType.isList(refid))
+			if (!DisplayType.isList(refid) && !DisplayType.isMultiSelect(refid))
 			{
 				String referenceTableName = column.getReferenceTableName();
 				if (referenceTableName != null)

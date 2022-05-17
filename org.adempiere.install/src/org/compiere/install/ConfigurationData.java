@@ -971,6 +971,8 @@ public class ConfigurationData
 		} else {
 			Ini.setProperty(Ini.P_CONNECTION, cc.toStringLong(true));
 		}
+		// 
+		Ini.setProperty("PostgreSQLNative", "N");
 		Ini.saveProperties(false);
 		return true;
 	}	//	saveIni

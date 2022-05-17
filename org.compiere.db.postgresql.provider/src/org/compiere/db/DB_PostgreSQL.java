@@ -1370,7 +1370,26 @@ public class DB_PostgreSQL implements AdempiereDatabase
 	 */
 	public String getSQLModify (MTable table, MColumn column, boolean setNullOption)
 	{
-		StringBuilder sql = new StringBuilder ("INSERT INTO t_alter_column values('")
+		StringBuilder sql = new StringBuilder();
+		if (DisplayType.isMultiSelect(column.getAD_Reference_ID()))
+		{
+			// Drop default value
+			sql.append(" ALTER TABLE").append(table.getTableName())
+				.append(" ALTER COLUMN ").append(column.getColumnName())
+				.append(" DROP DEFAULT ")
+				.append(DB.SQLSTATEMENT_SEPARATOR);
+
+			// Drop foreign key constraint
+			if (!Util.isEmpty(column.getFKConstraintName(), true))
+			{
+				sql.append("ALTER TABLE ").append(table.getTableName())
+					.append(" DROP CONSTRAINT IF EXISTS ")
+					.append(column.getFKConstraintName())
+					.append(DB.SQLSTATEMENT_SEPARATOR);
+			}
+		}
+
+		sql.append("INSERT INTO t_alter_column values('")
 			.append(table.getTableName())
 			.append("','").append(quoteColumnName(column.getColumnName()))
 			.append("','")
@@ -1408,6 +1427,14 @@ public class DB_PostgreSQL implements AdempiereDatabase
 		{
 			sql.append("null");
 			defaultValue = null;
+		}
+
+		if (DisplayType.isMultiSelect(column.getAD_Reference_ID()))
+		{
+			String dt = column.getSQLDataType();
+			sql.append(",' USING string_to_array(array_to_string((ARRAY[]::").append(dt.substring(0, dt.indexOf("(")))
+				.append("[] || ").append(column.getColumnName()).append(")::").append(dt).append(",'','') ,'','')::")
+				.append(dt).append("'");
 		}
 		sql.append(")");
 		

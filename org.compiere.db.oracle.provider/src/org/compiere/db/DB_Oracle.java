@@ -1482,75 +1482,103 @@ public class DB_Oracle implements AdempiereDatabase
 			.append(table.getTableName())
 			.append(" MODIFY ").append(column.getColumnName());
 		
+		boolean isMultiSelect = false;
+		if (DisplayType.isMultiSelect(column.getAD_Reference_ID()))
+			isMultiSelect = true;
 		//	Default
-		StringBuilder sqlDefault = new StringBuilder(sqlBase)
-			.append(" ").append(column.getSQLDataType());
-		String defaultValue = column.getDefaultValue();
-		String originalDefaultValue = defaultValue;
-		if (defaultValue != null 
-			&& defaultValue.length() > 0
-			&& defaultValue.indexOf('@') == -1		//	no variables
-			&& ( ! (DisplayType.isID(column.getAD_Reference_ID()) && defaultValue.equals("-1") ) ) )  // not for ID's with default -1
+		StringBuilder sqlDefault = new StringBuilder(sqlBase).append(" ");
+		if (isMultiSelect && DB.isPostgreSQL())
 		{
-			if (DisplayType.isText(column.getAD_Reference_ID()) 
-				|| DisplayType.isList(column.getAD_Reference_ID())
-				|| column.getAD_Reference_ID() == DisplayType.YesNo
-				|| column.getAD_Reference_ID() == DisplayType.Payment
-				// Two special columns: Defined as Table but DB Type is String 
-				|| column.getColumnName().equals("EntityType") || column.getColumnName().equals("AD_Language")
-				|| (column.getAD_Reference_ID() == DisplayType.Button &&
-						!(column.getColumnName().endsWith("_ID"))))
+			sql	.append("SELECT columndropdefault('").append(table.getTableName()).append("','")
+				.append(column.getColumnName()).append("')").append(DB.SQLSTATEMENT_SEPARATOR);
+
+			// Drop foreign key constraint
+			if (!Util.isEmpty(column.getFKConstraintName(), true))
 			{
-				if (!defaultValue.startsWith("'") && !defaultValue.endsWith("'"))
-					defaultValue = DB.TO_STRING(defaultValue);
+				sql	.append("ALTER TABLE ").append(table.getTableName()).append(" DROP CONSTRAINT IF EXISTS ")
+					.append(column.getFKConstraintName()).append(DB.SQLSTATEMENT_SEPARATOR);
 			}
-			sqlDefault.append(" DEFAULT ").append(defaultValue);
+
+			// Set Array data type & Convert existing data into Array structure
+			String dt = column.getSQLDataType();
+			sql.append(sqlDefault).append(dt);
+			sql	.append(" USING string_to_array(array_to_string((ARRAY[]::").append(dt.substring(0, dt.indexOf("(")))
+				.append("[] || ").append(column.getColumnName()).append(")::").append(dt).append(",'','') ,'','')::")
+				.append(dt);
 		}
 		else
-		{
-			if (! column.isMandatory())
-				sqlDefault.append(" DEFAULT NULL ");
-			defaultValue = null;
-		}
-		sql.append(sqlDefault);
-		
-		//	Constraint
+			sqlDefault.append(column.getSQLDataType());
 
-		//	Null Values
-		if (column.isMandatory() && defaultValue != null && defaultValue.length() > 0)
+		if (!isMultiSelect)
 		{
-			if (!(DisplayType.isText(column.getAD_Reference_ID()) 
+			String defaultValue = column.getDefaultValue();
+			String originalDefaultValue = defaultValue;
+			if (defaultValue != null 
+				&& defaultValue.length() > 0
+				&& defaultValue.indexOf('@') == -1		//	no variables
+				&& ( ! (DisplayType.isID(column.getAD_Reference_ID()) && defaultValue.equals("-1") ) ) )  // not for ID's with default -1
+			{
+				if (DisplayType.isText(column.getAD_Reference_ID()) 
 					|| DisplayType.isList(column.getAD_Reference_ID())
 					|| column.getAD_Reference_ID() == DisplayType.YesNo
 					|| column.getAD_Reference_ID() == DisplayType.Payment
 					// Two special columns: Defined as Table but DB Type is String 
 					|| column.getColumnName().equals("EntityType") || column.getColumnName().equals("AD_Language")
 					|| (column.getAD_Reference_ID() == DisplayType.Button &&
-							!(column.getColumnName().endsWith("_ID")))))
-			{
-				defaultValue = originalDefaultValue;
+							!(column.getColumnName().endsWith("_ID"))))
+				{
+					if (!defaultValue.startsWith("'") && !defaultValue.endsWith("'"))
+						defaultValue = DB.TO_STRING(defaultValue);
+				}
+				sqlDefault.append(" DEFAULT ").append(defaultValue);
 			}
-			StringBuilder sqlSet = new StringBuilder("UPDATE ")
-				.append(table.getTableName())
-				.append(" SET ").append(column.getColumnName())
-				.append("=").append(defaultValue)
-				.append(" WHERE ").append(column.getColumnName()).append(" IS NULL");
-			sql.append(DB.SQLSTATEMENT_SEPARATOR).append(sqlSet);
-		}
-		
-		//	Null
-		if (setNullOption)
-		{
-			StringBuilder sqlNull = new StringBuilder(sqlBase);
-			if (column.isMandatory())
-				sqlNull.append(" NOT NULL");
 			else
-				sqlNull.append(" NULL");
-			sql.append(DB.SQLSTATEMENT_SEPARATOR).append(sqlNull);
+			{
+				if (! column.isMandatory())
+					sqlDefault.append(" DEFAULT NULL ");
+				defaultValue = null;
+			}
+			sql.append(sqlDefault);
+		
+			//	Constraint
+
+			//	Null Values
+			if (column.isMandatory() && defaultValue != null && defaultValue.length() > 0)
+			{
+				if (!(DisplayType.isText(column.getAD_Reference_ID()) 
+						|| DisplayType.isList(column.getAD_Reference_ID())
+						|| column.getAD_Reference_ID() == DisplayType.YesNo
+						|| column.getAD_Reference_ID() == DisplayType.Payment
+						// Two special columns: Defined as Table but DB Type is String 
+						|| column.getColumnName().equals("EntityType") || column.getColumnName().equals("AD_Language")
+						|| (column.getAD_Reference_ID() == DisplayType.Button &&
+								!(column.getColumnName().endsWith("_ID")))))
+				{
+					defaultValue = originalDefaultValue;
+				}
+				StringBuilder sqlSet = new StringBuilder("UPDATE ")
+					.append(table.getTableName())
+					.append(" SET ").append(column.getColumnName())
+					.append("=").append(defaultValue)
+					.append(" WHERE ").append(column.getColumnName()).append(" IS NULL");
+				sql.append(DB.SQLSTATEMENT_SEPARATOR).append(sqlSet);
+			}
+		
+			//	Null
+			if (setNullOption)
+			{
+				StringBuilder sqlNull = new StringBuilder(sqlBase);
+				if (column.isMandatory())
+					sqlNull.append(" NOT NULL");
+				else
+					sqlNull.append(" NULL");
+				sql.append(DB.SQLSTATEMENT_SEPARATOR).append(sqlNull);
+			}
 		}
 		//
 		return sql.toString();
 	}	//	getSQLModify
+
 
 	@Override
 	public boolean isQueryTimeout(SQLException ex) {
