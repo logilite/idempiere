@@ -127,3 +127,64 @@ table.z-vbox > tbody > tr > td > table {
 <c:if test="${u:isThemeHasCustomCSSFragment()}">
     <c:include page="fragment/custom.css.dsp" />
 </c:if>
+
+
+<%-- Multi Select List & Table Editor Start --%>
+
+.multi-select-box {
+}
+
+.multi-select-popup {
+  background: #f5f5f5;
+  border: solid 1px #828282;
+  border-radius: 5px;
+  max-height: 350px;
+  min-width: 250px;
+  overflow: auto;
+}
+
+.multi-select-vbox {
+  background: white;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.multi-select-textbox {
+  background-color: white !important;
+}
+
+.multi-select-textbox-readonly {
+  background-color: #F0F0F0 !important;
+}
+
+<%-- Multi Select List & Table Editor End --%>
+
+
+<%-- Attachment by Drag & Drop Start --%>
+
+.drop-btn-holder {
+	background: #eee;
+    border: 5px dashed #ccc;
+    width: 99%;
+    min-height: 100px;
+    margin: 1px 1px !important;
+}
+
+.drop-btn-holder:hover {
+    border: 5px dashed #2184ba;
+}
+
+.attachment-drag-entered {
+    border: 5px dashed #3fb900;
+}
+
+.drop-progress-meter
+{
+	width:100% !important;
+}
+
+.z-progressmeter-image {
+	background: linear-gradient(to bottom, #1eff00 0%, #1a6b18 100%);
+}
+
+<%-- Attachment by Drag & Drop End --%>
