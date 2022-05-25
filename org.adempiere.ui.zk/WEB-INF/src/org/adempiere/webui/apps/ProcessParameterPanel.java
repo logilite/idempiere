@@ -500,6 +500,15 @@ public class ProcessParameterPanel extends Panel implements
 								editor2.setValue(para.getP_Number_To());
 						}
 					}
+					else if (para.getP_Number_Array() != null)
+					{
+						editor.setValue(para.getP_Number_Array());
+					}
+					else if (para.getP_String_Array() != null)
+					{
+						editor.setValue(para.getP_String_Array());
+					}
+
 					if (editor.getValue() != null) {
 	            		ValueChangeEvent changeEvent = new ValueChangeEvent(editor, editor.getColumnName(), null, editor.getValue());
 	            		valueChange(changeEvent);
