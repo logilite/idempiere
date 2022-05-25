@@ -54,6 +54,7 @@ import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_DASHBOARD_CONTENT;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_SINGLE_SELECTION_GRID;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_MULTI_SELECT_TABLE;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_MULTI_SELECT_LIST;
+import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_MULTI_SELECT_SEARCH;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_MULTIPLE_SELECTION_GRID;
 
 import java.text.DateFormat;
@@ -155,6 +156,8 @@ public final class DisplayType
 	public static final int MultiSelectTable = REFERENCE_DATATYPE_MULTI_SELECT_TABLE;
 	/** Display Type 200139	Multi Select List */
 	public static final int MultiSelectList = REFERENCE_DATATYPE_MULTI_SELECT_LIST;
+	/** Display Type 200205	Multi Select Search */
+	public static final int MultiSelectSearch = REFERENCE_DATATYPE_MULTI_SELECT_SEARCH;
 	
 	public static final int DashboardContent = REFERENCE_DATATYPE_DASHBOARD_CONTENT;
 	
@@ -319,7 +322,8 @@ public final class DisplayType
 	{
 		if (displayType == List || displayType == Table
 			|| displayType == TableDir || displayType == Search 
-			|| displayType == MultiSelectTable || displayType == MultiSelectList)
+			|| displayType == MultiSelectTable || displayType == MultiSelectList
+			|| displayType == MultiSelectSearch)
 			return true;
 		
 		List<IDisplayTypeFactory> factoryList = Service.locator().list(IDisplayTypeFactory.class).getServices();
@@ -581,7 +585,7 @@ public final class DisplayType
 			return String.class;
 		else if (isLOB(displayType))	//	CLOB is String
 			return byte[].class;
-		else if (displayType == MultiSelectTable)
+		else if (displayType == MultiSelectTable || displayType == MultiSelectSearch)
 			return Integer[].class;
 		else if (displayType == MultiSelectList)
 			return String[].class;
@@ -655,7 +659,7 @@ public final class DisplayType
 			else
 				return "CHAR(" + fieldLength + ")";
 		}
-		if (displayType == DisplayType.MultiSelectTable)
+		if (displayType == DisplayType.MultiSelectTable || displayType == DisplayType.MultiSelectSearch)
 		{
 			return "NUMBER(10)[]";
 		}
@@ -759,6 +763,8 @@ public final class DisplayType
 			return "MultiSelectTable";
 		if (displayType == MultiSelectList)
 			return "MultiSelectList";
+		if (displayType == MultiSelectSearch)
+			return "MultiSelectSearch";
 
 		List<IDisplayTypeFactory> factoryList = Service.locator().list(IDisplayTypeFactory.class).getServices();
 		for(IDisplayTypeFactory factory : factoryList){
@@ -793,6 +799,6 @@ public final class DisplayType
 	 */
 	public static boolean isMultiSelect(int displayType)
 	{
-		return (MultiSelectTable == displayType || MultiSelectList == displayType);
+		return (MultiSelectTable == displayType || MultiSelectList == displayType || MultiSelectSearch == displayType);
 	}
 }	//	DisplayType

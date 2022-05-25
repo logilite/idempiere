@@ -202,6 +202,7 @@ public class MSysConfig extends X_AD_SysConfig
 	public static final String ZK_ALLOW_ROW_SELECTION_IN_MULTIPLE_GRID_PAGES = "ZK_ALLOW_ROW_SELECTION_IN_MULTIPLE_GRID_PAGES";
 	public static final String MULTISELECT_DEFAULT_LOOKUP_OPERATOR = "MULTISELECT_DEFAULT_LOOKUP_OPERATOR";
 	public static final String ZK_LOGIN_LEFTPANEL_SHOWN = "ZK_LOGIN_LEFTPANEL_SHOWN";
+	public static final String ZK_SEARCH_AUTO_COMPLETE_MAX_ROWS = "ZK_SEARCH_AUTO_COMPLETE_MAX_ROWS";
 
 	/**
 	 * 	Standard Constructor

@@ -2500,6 +2500,10 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	public Integer getFirstRowKey() {
 		return contentPanel.getFirstRowKey();
 	}
+	
+	public Integer getRowKeyAt(int row) {
+		return contentPanel.getRowKeyAt(row);
+	}
 
 	/**
 	 * @return the cacheStart

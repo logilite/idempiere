@@ -744,7 +744,7 @@ public class MColumn extends X_AD_Column
 		int refid = getAD_Reference_ID();
 		if (DisplayType.TableDir == refid || (DisplayType.Search == refid && getAD_Reference_Value_ID() == 0)) {
 			foreignTable = getColumnName().substring(0, getColumnName().length()-3);
-		} else 	if (DisplayType.Table == refid || DisplayType.Search == refid || DisplayType.MultiSelectTable == refid) {
+		} else 	if (DisplayType.Table == refid || DisplayType.Search == refid || DisplayType.MultiSelectTable == refid || DisplayType.MultiSelectSearch == refid) {
 			X_AD_Reference ref = new X_AD_Reference(getCtx(), getAD_Reference_Value_ID(), get_TrxName());
 			if (X_AD_Reference.VALIDATIONTYPE_TableValidation.equals(ref.getValidationType())) {
 				int cnt = DB.getSQLValueEx(get_TrxName(), "SELECT COUNT(*) FROM AD_Ref_Table WHERE AD_Reference_ID=?", getAD_Reference_Value_ID());

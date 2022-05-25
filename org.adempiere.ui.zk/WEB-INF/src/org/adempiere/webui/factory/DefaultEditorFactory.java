@@ -18,6 +18,7 @@ import org.adempiere.webui.editor.WAssignmentEditor;
 import org.adempiere.webui.editor.WBinaryEditor;
 import org.adempiere.webui.editor.WButtonEditor;
 import org.adempiere.webui.editor.WChartEditor;
+import org.adempiere.webui.editor.WMultiSelectSearchEditor;
 import org.adempiere.webui.editor.WDashboardContentEditor;
 import org.adempiere.webui.editor.WDateEditor;
 import org.adempiere.webui.editor.WDatetimeEditor;
@@ -203,6 +204,10 @@ public class DefaultEditorFactory implements IEditorFactory {
         {
         	editor = new WGridTabMultiSelectionEditor(gridField, tableEditor);
         }
+		else if (displayType == DisplayType.MultiSelectSearch)
+		{
+			editor = new WMultiSelectSearchEditor(gridField);
+		}
 		else if (DisplayType.isMultiSelect(displayType))
 		{
 			editor = new WMultiSelectEditor(gridField);
