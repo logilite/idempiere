@@ -157,3 +157,7 @@
 	cursor: pointer;
 	background-color: #D3EFFA;
 }
+
+.editor-box .editor-button {
+    height: 98%;
+}

@@ -1969,7 +1969,7 @@ public class GridTable extends AbstractTableModel
 							else
 								rs.updateString (colRs, yn); 					//	***
 						}
-						else if (field.getDisplayType() == DisplayType.MultiSelectTable)
+						else if (field.getDisplayType() == DisplayType.MultiSelectTable || field.getDisplayType() == DisplayType.MultiSelectSearch)
 						{
 							Integer[] ids = (Integer[]) rowData[col];
 							if (manualUpdate)
@@ -2265,7 +2265,7 @@ public class GridTable extends AbstractTableModel
 					|| (value != null && value.equals (dbValue)) 
 					|| ((oldValue != null && dbValue != null && oldValue.getClass().equals(byte[].class) && dbValue.getClass().equals(byte[].class)) && Arrays.equals((byte[])oldValue, (byte[])dbValue))
 					|| ((value != null && dbValue != null && value.getClass().equals(byte[].class) && dbValue.getClass().equals(byte[].class)) && Arrays.equals((byte[])oldValue, (byte[])dbValue))
-					|| (oldValue != null && dbValue != null && field.getDisplayType() == DisplayType.MultiSelectTable
+					|| (oldValue != null && dbValue != null && (field.getDisplayType() == DisplayType.MultiSelectTable || field.getDisplayType() == DisplayType.MultiSelectSearch)
 						&& oldValue instanceof Integer[] && dbValue instanceof Integer[] && Arrays.equals((Integer[]) oldValue, (Integer[]) dbValue))
 					|| (oldValue != null && dbValue != null && field.getDisplayType() == DisplayType.MultiSelectList
 						&& oldValue instanceof String[] && dbValue instanceof String[] && Arrays.equals((String[]) oldValue, (String[]) dbValue))
@@ -3358,7 +3358,7 @@ public class GridTable extends AbstractTableModel
 					else if (value instanceof byte[])
 						rowData[j] = value;
 				}
-				else if (displayType == DisplayType.MultiSelectTable)
+				else if (displayType == DisplayType.MultiSelectTable || displayType == DisplayType.MultiSelectSearch)
 				{
 					Array arr = rs.getArray(j + 1);
 					Object javaArray = null;

@@ -18,6 +18,7 @@ import org.adempiere.webui.editor.WAssignmentEditor;
 import org.adempiere.webui.editor.WBinaryEditor;
 import org.adempiere.webui.editor.WButtonEditor;
 import org.adempiere.webui.editor.WChartEditor;
+import org.adempiere.webui.editor.WMultiSelectSearchEditor;
 import org.adempiere.webui.editor.WChosenboxListEditor;
 import org.adempiere.webui.editor.WChosenboxSearchEditor;
 import org.adempiere.webui.editor.WDashboardContentEditor;
@@ -220,6 +221,10 @@ public class DefaultEditorFactory implements IEditorFactory {
         {
         	editor = new WChosenboxSearchEditor(gridField);
         }
+		else if (displayType == DisplayType.MultiSelectSearch)
+		{
+			editor = new WMultiSelectSearchEditor(gridField);
+		}
 		else if (DisplayType.isMultiSelect(displayType))
 		{
 			editor = new WMultiSelectEditor(gridField);

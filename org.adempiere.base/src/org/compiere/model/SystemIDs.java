@@ -133,6 +133,7 @@ public class SystemIDs
 	public final static int REFERENCE_DATATYPE_SINGLE_SELECTION_GRID = 200127;
 	public final static int REFERENCE_DATATYPE_MULTI_SELECT_TABLE = 200138;
 	public final static int REFERENCE_DATATYPE_MULTI_SELECT_LIST = 200139;
+	public final static int REFERENCE_DATATYPE_MULTI_SELECT_SEARCH = 200205;
 	public final static int REFERENCE_DATATYPE_MULTIPLE_SELECTION_GRID = 200128;
 
 	public final static int REFERENCE_AD_USER = 110;

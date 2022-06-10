@@ -433,7 +433,7 @@ public class DataEngine
 				}
 
 				//	-- Table --
-				else if (AD_Reference_ID == DisplayType.Table || AD_Reference_ID == DisplayType.MultiSelectTable
+				else if (AD_Reference_ID == DisplayType.Table || AD_Reference_ID == DisplayType.MultiSelectTable || AD_Reference_ID == DisplayType.MultiSelectSearch
 						|| (AD_Reference_ID == DisplayType.Search && AD_Reference_Value_ID != 0)
 					)
 				{
@@ -444,7 +444,7 @@ public class DataEngine
 
 					String eSql;
 					
-					if (AD_Reference_ID == DisplayType.MultiSelectTable)
+					if (AD_Reference_ID == DisplayType.MultiSelectTable || AD_Reference_ID == DisplayType.MultiSelectSearch)
 						eSql = MLookupFactory.getLookup_MultiSelectTableEmbed(m_language, ColumnName, tableName, AD_Reference_Value_ID, true);
 					else
 						eSql = MLookupFactory.getLookup_TableEmbed(m_language, ColumnName, tableName, AD_Reference_Value_ID, true);
@@ -1087,7 +1087,7 @@ public class DataEngine
 							String display = rs.getString(counter++);
 							if (DisplayType.isMultiSelect(pdc.getDisplayType()))
 							{
-								if (pdc.getDisplayType() == DisplayType.MultiSelectTable)
+								if (pdc.getDisplayType() == DisplayType.MultiSelectTable || pdc.getDisplayType() == DisplayType.MultiSelectSearch)
 									counter++;
 								if (display != null && !rs.wasNull())
 								{
@@ -1150,7 +1150,7 @@ public class DataEngine
                                 Timestamp datetime = rs.getTimestamp(counter++);
                                 pde = new PrintDataElement(pdc.getColumnName(), datetime, pdc.getDisplayType(), pdc.getFormatPattern());
                             }
-                            else if (pdc.getDisplayType() == DisplayType.MultiSelectTable)
+                            else if (pdc.getDisplayType() == DisplayType.MultiSelectTable || pdc.getDisplayType() == DisplayType.MultiSelectSearch)
 							{
 								Array array = rs.getArray(counter++);
 								Object javaArray = null;

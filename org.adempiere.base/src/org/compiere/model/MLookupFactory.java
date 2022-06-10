@@ -193,7 +193,7 @@ public class MLookupFactory
 		}
 		//	Table or Search or MultiSelectTable with Reference_Value
 		else if ((AD_Reference_ID == DisplayType.Table || AD_Reference_ID == DisplayType.Search
-			|| AD_Reference_ID == DisplayType.ChosenMultipleSelectionTable || AD_Reference_ID == DisplayType.ChosenMultipleSelectionSearch || AD_Reference_ID == DisplayType.MultiSelectTable)
+			|| AD_Reference_ID == DisplayType.ChosenMultipleSelectionTable || AD_Reference_ID == DisplayType.ChosenMultipleSelectionSearch || AD_Reference_ID == DisplayType.MultiSelectTable || AD_Reference_ID == DisplayType.MultiSelectSearch)
 			&& AD_Reference_Value_ID != 0)
 		{
 			info = getLookup_Table (ctx, language, WindowNo, AD_Reference_Value_ID);
