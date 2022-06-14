@@ -2667,10 +2667,6 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		return contentPanel.getRowKeyAt(row);
 	}
 
-	public Integer getRowKeyAt(int row) {
-		return contentPanel.getRowKeyAt(row);
-	}
-
 	/**
 	 * @return the cacheStart
 	 */
