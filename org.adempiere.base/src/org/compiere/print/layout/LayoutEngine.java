@@ -111,10 +111,12 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	 *  @param format Print Format
 	 *  @param data Print Data
 	 *  @param query query for parameter info
+	 *  @param info
+	 *  @param windowNo
 	 */
-	public LayoutEngine (MPrintFormat format, PrintData data, MQuery query, PrintInfo info )
+	public LayoutEngine (MPrintFormat format, PrintData data, MQuery query, PrintInfo info, int windowNo )
 	{
-		this(format, data, query, info , null, null);
+		this(format, data, query, info , null, null, windowNo);
 	}	//	LayoutEngine
 	
 	/**
@@ -122,11 +124,14 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	 *  @param format Print Format
 	 *  @param data Print Data
 	 *  @param query query for parameter info
+	 *  @param info
 	 *  @param trxName
-	 * @param parentLayout
+	 *  @param parentLayout
+	 *  @param windowNo
 	 */
-	public LayoutEngine (MPrintFormat format, PrintData data, MQuery query, PrintInfo info ,  String trxName, LayoutEngine parentLayout)
+	public LayoutEngine (MPrintFormat format, PrintData data, MQuery query, PrintInfo info ,  String trxName, LayoutEngine parentLayout, int windowNo)
 	{
+		m_windowNo = windowNo;
 		m_TrxName = trxName;
 		m_parentLayout = parentLayout;
 		if (log.isLoggable(Level.INFO)) log.info(format + " - " + data + " - " + query);
@@ -165,7 +170,8 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	private PrintInfo			m_PrintInfo = null;
 	/** Parent Print format LayoutEngine  **/
 	private LayoutEngine		m_parentLayout = null;
-
+	/** Window No				*/
+	private int 				m_windowNo = 0;
 
 	/**	Paper - default: standard portrait		*/
 	private CPaper				m_paper;
@@ -1527,7 +1533,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		if (log.isLoggable(Level.FINE))
 			log.fine(query.toString());
 		//
-		DataEngine de = new DataEngine(format.getLanguage(),m_TrxName);
+		DataEngine de = new DataEngine(format.getLanguage(),m_TrxName, m_windowNo);
 		PrintData includedData = de.getPrintData(data.getCtx(), format, query);
 		if (includedData == null)
 			return null;
@@ -1547,7 +1553,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 				m_isInclHeaderArea = item.isHeader();
 			}
 
-			LayoutEngine le = new LayoutEngine(format, includedData, query, getPrintInfo(), m_TrxName, this);
+			LayoutEngine le = new LayoutEngine(format, includedData, query, getPrintInfo(), m_TrxName, this, m_windowNo);
 			ArrayList <Page> includePages = le.getPages();
 			HeaderFooter hf = le.getHeaderFooter();
 			if (item.isHeader() || item.isFooter())
