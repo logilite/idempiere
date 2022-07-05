@@ -174,6 +174,11 @@ import org.compiere.util.Msg;
 				return false;				
 			}
 		}
+		
+		if (getC_Payment_ID() != 0 && getC_DepositBatch_ID() != 0) {
+			log.saveError("Cannot set value of Payment and Payment into Batch fields at a time", Msg.translate(getCtx(), "C_BankStatementLine"));
+			return false;
+		}
 
 		//	Calculate Charge = Statement - trx - Interest  
 		BigDecimal amt = getStmtAmt();
