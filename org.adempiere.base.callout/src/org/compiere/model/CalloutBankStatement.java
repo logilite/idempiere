@@ -194,7 +194,7 @@ public class CalloutBankStatement extends CalloutEngine
 		}
 		catch (SQLException e)
 		{
-			log.log(Level.SEVERE, "BankStmt_Payment", e);
+			log.log(Level.SEVERE, "BankStmt_PaymentIntoBatch", e);
 			return e.getLocalizedMessage();
 		}
 		finally

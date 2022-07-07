@@ -34,6 +34,7 @@ import java.util.logging.*;
 import org.compiere.model.*;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
+import org.compiere.util.DB;
  
 /**
  *  Close Deposit Batch.
@@ -81,11 +82,28 @@ public class DepositBatchClose extends SvrProcess
 			depositbatchLines[line].setProcessed(true);
 			depositbatchLines[line].saveEx();
 		}
+		
+		//Re-calculate lines total amount and Update Header Deposit Amount
+		updateDepositAmount();
 
 		depositbatch.setProcessed(true);
 		depositbatch.saveEx();
 
 		return "";
 	}	//	doIt
+	
+	/**
+	 * 	Calculate lines total amount and Update Header Deposit Amount
+	 */
+	private void updateDepositAmount()
+	{
+		String sql = "UPDATE C_DepositBatch dp "
+				+ "SET DepositAmt=(SELECT COALESCE(SUM(C_Payment.payamt),0) FROM C_Payment "
+				+ "INNER JOIN C_DepositBatchLine ON C_Payment.C_Payment_ID = C_DepositBatchLine.C_Payment_ID "
+				+ "WHERE C_DepositBatchLine.C_DepositBatch_ID=dp.C_DepositBatch_ID "
+				+ "AND C_Payment.DocStatus IN ('CO','CL') AND C_Payment.PayAmt<>0) "
+				+ "WHERE C_DepositBatch_ID=?";
+		DB.executeUpdateEx(sql, new Object[] {m_C_DepositBatch_ID}, get_TrxName());
+	}
 
 }	//	DepositBatchClose

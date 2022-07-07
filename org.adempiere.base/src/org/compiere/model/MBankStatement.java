@@ -425,6 +425,12 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 			if (line.getC_Payment_ID() != 0)
 			{
 				MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(line.getC_Payment_ID(),get_TrxName());
+				
+				if (payment.isReconciled()) {
+					m_processMsg = Msg.getMsg(getCtx(), "PaymentIsAlreadyReconciled") + payment;
+					return DocAction.STATUS_Invalid;
+				}
+				
 				payment.setIsReconciled(true);
 				payment.saveEx(get_TrxName());
 			}
@@ -434,6 +440,12 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 				for (MDepositBatchLine mDepositBatchLine : depositBatchLines)
 				{
 					MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(mDepositBatchLine.getC_Payment_ID(),get_TrxName());
+					
+					if (payment.isReconciled()) {
+						m_processMsg = Msg.getMsg(getCtx(), "PaymentIsAlreadyReconciled") + payment;
+						return DocAction.STATUS_Invalid;
+					}
+					
 					payment.setIsReconciled(true);
 					payment.saveEx(get_TrxName());
 				}

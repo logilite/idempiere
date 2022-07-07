@@ -176,8 +176,12 @@ import org.compiere.util.Msg;
 		}
 		
 		if (getC_Payment_ID() != 0 && getC_DepositBatch_ID() != 0) {
-			log.saveError("Cannot set value of Payment and Payment into Batch fields at a time", Msg.translate(getCtx(), "C_BankStatementLine"));
+			log.saveError("SaveError", Msg.translate(getCtx(), "NotSetBothValue_Payment_And_DepositBatch"));
 			return false;
+		}
+		
+		if (!getC_DepositBatch().isProcessed()) {
+			log.saveError("SaveError", Msg.getMsg(getCtx(), "DepositBatchIsNotProcessed")+ getC_DepositBatch());
 		}
 
 		//	Calculate Charge = Statement - trx - Interest  

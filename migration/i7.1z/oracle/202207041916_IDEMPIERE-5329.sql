@@ -1,7 +1,9 @@
+-- IDEMPIERE-5329 Multiple Payments against single Bank/Cash statement line
+SELECT register_migration_script('202207041916_IDEMPIERE-5329.sql') FROM dual;
+
 SET SQLBLANKLINES ON
 SET DEFINE OFF
 
--- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
 -- 04-Jul-2022, 7:16:06 PM IST
 UPDATE AD_Table SET AD_Window_ID=200031, AD_Val_Rule_ID=NULL, PO_Window_ID=NULL, Processing='N',Updated=TO_DATE('2022-07-04 19:16:06','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Table_ID=200056
 ;
@@ -77,3 +79,22 @@ INSERT INTO AD_Field (AD_Field_ID,Name,AD_Tab_ID,AD_Column_ID,IsDisplayed,Displa
 ALTER TABLE C_BankStatementLine ADD CONSTRAINT CDepositBatch_CBankStatementLi FOREIGN KEY (C_DepositBatch_ID) REFERENCES c_depositbatch(c_depositbatch_id) DEFERRABLE INITIALLY DEFERRED
 ;
 
+-- Jul 6, 2022, 4:28:40 PM IST
+UPDATE AD_Val_Rule SET Name='C_DepositBatch not in BankStatement', Code='NOT EXISTS (SELECT * FROM C_BankStatementLine bsl INNER JOIN C_BankStatement bs ON (bsl.C_BankStatement_ID = bs.C_BankStatement_ID) WHERE bsl.C_DepositBatch_ID = C_DepositBatch.C_DepositBatch_ID AND bs.docstatus NOT IN (''VO'')) AND C_DepositBatch.processed = ''Y'' AND (C_DepositBatch.AD_Org_ID, C_DepositBatch.C_BankAccount_ID) = (SELECT AD_Org_ID, C_BankAccount_ID FROM C_BankStatement WHERE C_BankStatement_ID = @C_BankStatement_ID@)',Updated=TO_DATE('2022-07-06 16:28:40','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Val_Rule_ID=200161
+;
+
+-- Jul 6, 2022, 4:28:52 PM IST
+INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('E','Cannot set value of Payment and Deposit Batch field at a time',0,0,'Y',TO_DATE('2022-07-06 16:28:51','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2022-07-06 16:28:51','YYYY-MM-DD HH24:MI:SS'),100,200769,'NotSetBothValue_Payment_And_DepositBatch','D','9812b0ad-d789-46dd-8090-4978666c6b8a')
+;
+
+-- Jul 6, 2022, 4:28:53 PM IST
+INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('E','Deposit Batch is not Processed',0,0,'Y',TO_DATE('2022-07-06 16:28:52','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2022-07-06 16:28:52','YYYY-MM-DD HH24:MI:SS'),100,200770,'DepositBatchIsNotProcessed','D','c3985aca-0da4-4bbf-b48b-035a4c9ed823')
+;
+
+-- Jul 6, 2022, 4:28:54 PM IST
+INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('E','Fail to get Payments Into Batch amount',0,0,'Y',TO_DATE('2022-07-06 16:43:29','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2022-07-06 16:43:29','YYYY-MM-DD HH24:MI:SS'),100,200772,'BankStmt_PaymentIntoBatch','D','78f49a7e-e646-48b8-a325-a834b1ba1ed1')
+;
+
+-- 07-Jul-2022, 6:18:54 PM IST
+INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('I','Payment is already Reconciled ',0,0,'Y',TO_DATE('2022-07-07 18:18:53','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2022-07-07 18:18:53','YYYY-MM-DD HH24:MI:SS'),100,200773,'PaymentIsAlreadyReconciled','D','7b7ac70e-21fd-49a3-81c8-395cae858331')
+;
