@@ -44,11 +44,11 @@ import org.zkoss.zul.Listcell;
 
 public class WInfoWindowListItemRenderer extends WListItemRenderer
 {
-	private MInfoColumn[]	gridDisplayedInfoColumns = null;
-	private ColumnInfo[]	gridDisplayedColumnInfos = null;
-	private InfoWindow infoWindow = null;
-	private List<Integer>			hide_layoutColumnIdx			= null;
-	private Map<Integer, Integer>	mapInfoColumnID_layoutColumnIdx	= null;
+	protected MInfoColumn[]	gridDisplayedInfoColumns = null;
+	protected ColumnInfo[]	gridDisplayedColumnInfos = null;
+	protected InfoWindow infoWindow = null;
+	protected List<Integer>			hide_layoutColumnIdx			= null;
+	protected Map<Integer, Integer>	mapInfoColumnID_layoutColumnIdx	= null;
 
 	public WInfoWindowListItemRenderer(InfoWindow infoWindow)
 	{
