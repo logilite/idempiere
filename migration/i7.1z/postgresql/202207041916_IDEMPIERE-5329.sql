@@ -76,7 +76,7 @@ INSERT INTO AD_Field (AD_Field_ID,Name,AD_Tab_ID,AD_Column_ID,IsDisplayed,Displa
 ALTER TABLE C_BankStatementLine ADD CONSTRAINT CDepositBatch_CBankStatementLi FOREIGN KEY (C_DepositBatch_ID) REFERENCES c_depositbatch(c_depositbatch_id) DEFERRABLE INITIALLY DEFERRED
 ;
 
-UPDATE AD_Val_Rule SET Name='NOT EXISTS (SELECT * FROM C_BankStatementLine bsl INNER JOIN C_BankStatement bs ON (bsl.C_BankStatement_ID = bs.C_BankStatement_ID) WHERE bsl.C_DepositBatch_ID = C_DepositBatch.C_DepositBatch_ID AND bs.docstatus NOT IN (''VO'')) AND C_DepositBatch.processed = ''Y'' AND (C_DepositBatch.AD_Org_ID, C_DepositBatch.C_BankAccount_ID) = (SELECT AD_Org_ID, C_BankAccount_ID FROM C_BankStatement WHERE C_BankStatement_ID = @C_BankStatement_ID@)',Updated=TO_TIMESTAMP('2022-07-06 16:28:40','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Val_Rule_ID=200161
+UPDATE AD_Val_Rule SET Name='C_DepositBatch not in BankStatement', Code='NOT EXISTS (SELECT * FROM C_BankStatementLine bsl INNER JOIN C_BankStatement bs ON (bsl.C_BankStatement_ID = bs.C_BankStatement_ID) WHERE bsl.C_DepositBatch_ID = C_DepositBatch.C_DepositBatch_ID AND bs.docstatus NOT IN (''VO'')) AND C_DepositBatch.processed = ''Y'' AND (C_DepositBatch.AD_Org_ID, C_DepositBatch.C_BankAccount_ID) = (SELECT AD_Org_ID, C_BankAccount_ID FROM C_BankStatement WHERE C_BankStatement_ID = @C_BankStatement_ID@)',Updated=TO_TIMESTAMP('2022-07-06 16:28:40','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Val_Rule_ID=200161
 ;
 
 -- Jul 6, 2022, 4:28:52 PM IST
