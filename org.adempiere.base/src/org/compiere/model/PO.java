@@ -2564,11 +2564,14 @@ public abstract class PO
 			m_newValues = new Object[size];
 			m_createNew = false;
 		}
-		if (!newRecord) {
-			Adempiere.getThreadPoolExecutor().submit(() -> CacheMgt.get().reset(p_info.getTableName(), get_ID()));
+		if (!newRecord)
 			MRecentItem.clearLabel(p_info.getAD_Table_ID(), get_ID());
-		} else if (get_ID() > 0 && success)
-			Adempiere.getThreadPoolExecutor().submit(() -> CacheMgt.get().newRecord(p_info.getTableName(), get_ID()));
+		if (CacheMgt.get().hasCache(p_info.getTableName())) {
+			if (!newRecord)
+				Adempiere.getThreadPoolExecutor().submit(() -> CacheMgt.get().reset(p_info.getTableName(), get_ID()));
+			else if (get_ID() > 0 && success)
+				Adempiere.getThreadPoolExecutor().submit(() -> CacheMgt.get().newRecord(p_info.getTableName(), get_ID()));
+		}
 		
 		return success;
 	}	//	saveFinish
@@ -2687,7 +2690,7 @@ public abstract class PO
 		lobReset();
 
 		//	Change Log
-		MSession session = MSession.get (p_ctx, false);
+		MSession session = MSession.get (p_ctx);
 		if (session == null)
 			log.fine("No Session found");
 		int AD_ChangeLog_ID = 0;
@@ -3167,7 +3170,7 @@ public abstract class PO
 		lobReset();
 
 		//	Change Log
-		MSession session = MSession.get (p_ctx, false);
+		MSession session = MSession.get (p_ctx);
 		if (session == null)
 			log.fine("No Session found");
 		int AD_ChangeLog_ID = 0;
@@ -3763,7 +3766,7 @@ public abstract class PO
 					if( p_info.isChangeLog())
 					{
 						//	Change Log
-						MSession session = MSession.get (p_ctx, false);
+						MSession session = MSession.get (p_ctx);
 						if (session == null)
 							log.fine("No Session found");
 						else if (m_IDs.length == 1)

@@ -281,7 +281,7 @@ public class MPrintFormat extends X_AD_PrintFormat implements ImmutablePOSupport
 			while (rs.next())
 			{
 				MPrintFormatItem pfi = new MPrintFormatItem(p_ctx, rs, get_TrxName());
-				if (role.isColumnAccess(getAD_Table_ID(), pfi.getAD_Column_ID(), true))
+				if (role.isColumnAccess(getAD_Table_ID(), pfi.getAD_Column_ID(), true, get_TrxName()))
 				{
 					if (pfi.isHeader())
 						listHeaderItems.add(pfi);
@@ -1402,6 +1402,7 @@ public class MPrintFormat extends X_AD_PrintFormat implements ImmutablePOSupport
 		
 		query.setParameters(lsParameter);
 		
+		query.setOnlyActiveRecords(true);
 		query.setOrderBy(" ORDER BY AD_Client_ID DESC, IsDefault DESC, Name ");
 		
 		// query print fomart just in this client  
