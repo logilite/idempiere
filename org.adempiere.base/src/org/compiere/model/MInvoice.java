@@ -1487,25 +1487,6 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
 			return m_openAmt.negate();
 		return m_openAmt;
 	}	//	getOpenAmt
-	
-	/*
-     *    Get open amt depending on payment date
-     *    @return open Amt
-     */
-    public BigDecimal getOpenAmt (Timestamp paymentDate)
-    {
-    	BigDecimal retValue;
-    	if (paymentDate == null) {
-            retValue = DB.getSQLValueBDEx(get_TrxName(),
-            		"SELECT invoiceOpen(?,?) FROM DUAL",
-            		getC_Invoice_ID(), 0);
-    	} else {
-            retValue = DB.getSQLValueBDEx(get_TrxName(),
-            		"SELECT invoiceOpenToDate(?,?,?) FROM DUAL",
-            		getC_Invoice_ID(), 0, paymentDate);
-    	}
-        return retValue;
-    }    //    getOpenAmt
 
 	/*
      *    Get open amt depending on payment date
