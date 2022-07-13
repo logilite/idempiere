@@ -285,7 +285,7 @@ public final class MLookup extends Lookup implements Serializable
 	public boolean containsKey (Object key)
 	{
 		//should check direct too
-		if (m_info.DisplayType == DisplayType.MultiSelectTable)
+		if (m_info.DisplayType == DisplayType.MultiSelectTable || m_info.DisplayType == DisplayType.MultiSelectSearch)
 		{
 			Set<Integer> values = new TreeSet<Integer>(Arrays.asList((Integer[]) key));
 			return CollectionUtils.containsAny(m_lookup.keySet(), values);
@@ -313,7 +313,7 @@ public final class MLookup extends Lookup implements Serializable
 	public boolean containsKeyNoDirect (Object key)
 	{
 		//should check direct too
-		if (m_info.DisplayType == DisplayType.MultiSelectTable)
+		if (m_info.DisplayType == DisplayType.MultiSelectTable || m_info.DisplayType == DisplayType.MultiSelectSearch)
 		{
 			Set<Integer> values = new TreeSet<Integer>(Arrays.asList((Integer[]) key));
 			return CollectionUtils.containsAny(m_lookup.keySet(), values);

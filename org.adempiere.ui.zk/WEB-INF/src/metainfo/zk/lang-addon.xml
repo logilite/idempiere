@@ -32,6 +32,17 @@ Copyright (C) 2007 Ashley G Ramdass (ADempiere WebUI).
 			<mold-uri>mold/key-listener.js</mold-uri>
 		</mold>
 	</component>
+	
+	<component>
+		<component-name>chosenbox</component-name>
+		<component-class>org.zkoss.addon.chosenbox.Chosenbox</component-class>
+		<widget-class>chosenbox.Chosenbox</widget-class>
+		<mold>
+			<mold-name>default</mold-name>
+			<mold-uri>mold/chosenbox.js</mold-uri>
+			<css-uri>css/chosenbox.css.dsp</css-uri>
+		</mold>
+	</component>
 
 	<component>
 		<component-name>chosenbox</component-name>

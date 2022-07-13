@@ -148,6 +148,7 @@ public class SystemIDs
 	public final static int REFERENCE_DATATYPE_YES_NO = 20;
 	public final static int REFERENCE_DATATYPE_MULTI_SELECT_TABLE = 200138;
 	public final static int REFERENCE_DATATYPE_MULTI_SELECT_LIST = 200139;
+	public final static int REFERENCE_DATATYPE_MULTI_SELECT_SEARCH = 200205;
 
 	public final static int REFERENCE_ACCOUNT = 175;
 	public final static int REFERENCE_AD_LANGUAGE = 106;

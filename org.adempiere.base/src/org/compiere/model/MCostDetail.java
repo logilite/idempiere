@@ -1205,7 +1205,7 @@ public class MCostDetail extends X_M_CostDetail
 			|| getC_ProjectIssue_ID() != 0
 			|| getPP_Cost_Collector_ID() != 0)
 		{
-			boolean addition = qty.signum() > 0;
+			boolean addition = (isDelta() && getQty().signum()>0) || qty.signum() > 0;
 			boolean adjustment = getM_InventoryLine_ID() > 0 && qty.signum() == 0 && amt.signum() != 0;
 			boolean isVendorRMA = isVendorRMA();
 			//

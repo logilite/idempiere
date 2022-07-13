@@ -1454,11 +1454,12 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
 	{
 		return getOpenAmt (true, null, false);
 	}	//	getOpenAmt
-
+	
 	public BigDecimal getOpenAmt (boolean creditMemoAdjusted, Timestamp paymentDate)
 	{
 		return getOpenAmt(creditMemoAdjusted, paymentDate, false);
 	}
+
 	/**
 	 * 	Get Open Amount
 	 * 	@param creditMemoAdjusted adjusted for CM (negative)
@@ -1476,7 +1477,8 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
 				if (isCreditMemo() && creditMemoAdjusted)
 					return l_openAmt.negate();
 				return l_openAmt;
-			} else {
+			} else 
+			{
 				m_openAmt = l_openAmt;
 			}
 		}
@@ -1485,6 +1487,25 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
 			return m_openAmt.negate();
 		return m_openAmt;
 	}	//	getOpenAmt
+	
+	/*
+     *    Get open amt depending on payment date
+     *    @return open Amt
+     */
+    public BigDecimal getOpenAmt (Timestamp paymentDate)
+    {
+    	BigDecimal retValue;
+    	if (paymentDate == null) {
+            retValue = DB.getSQLValueBDEx(get_TrxName(),
+            		"SELECT invoiceOpen(?,?) FROM DUAL",
+            		getC_Invoice_ID(), 0);
+    	} else {
+            retValue = DB.getSQLValueBDEx(get_TrxName(),
+            		"SELECT invoiceOpenToDate(?,?,?) FROM DUAL",
+            		getC_Invoice_ID(), 0, paymentDate);
+    	}
+        return retValue;
+    }    //    getOpenAmt
 
 	/*
      *    Get open amt depending on payment date

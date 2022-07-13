@@ -188,7 +188,7 @@ public class PoFiller{
 		if (value != null && value.trim().length() > 0)
 		{
 			int index = po.get_ColumnIndex(columnName);
-			if (info != null && info.getColumnDisplayType(index) == DisplayType.MultiSelectTable)
+			if (info != null && (info.getColumnDisplayType(index) == DisplayType.MultiSelectTable || info.getColumnDisplayType(index) == DisplayType.MultiSelectSearch))
 			{
 				// Get Array of UUIDs from element.
 				Object[] uuids = (Object[]) Util.getArrayObjectFromString(DisplayType.MultiSelectList,

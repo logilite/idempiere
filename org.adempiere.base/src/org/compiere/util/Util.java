@@ -854,7 +854,7 @@ public class Util
 		strValue = strValue.replaceAll("([{}])", "");
 		String[] values = strValue.split(",");
 
-		if (dt == DisplayType.MultiSelectTable)
+		if (dt == DisplayType.MultiSelectTable || dt == DisplayType.MultiSelectSearch)
 		{
 			Integer[] arr = new Integer[values.length];
 			for (int i = 0; i < values.length; i++)

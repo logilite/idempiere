@@ -170,6 +170,22 @@ import org.compiere.util.Msg;
 				log.saveError("SaveError", Msg.getMsg(getCtx(), "BankStatementLinePeriodNotSameAsHeader", new Object[] {getLine()}));
 				return false;				
 			}
+
+		// Make sure date is on the same period as header if used for posting
+		if (newRecord || is_ValueChanged(COLUMNNAME_DateAcct)) {
+			if (!isDateConsistentIfUsedForPosting()) {
+				log.saveError("SaveError", Msg.getMsg(getCtx(), "BankStatementLinePeriodNotSameAsHeader", new Object[] {getLine()}));
+				return false;				
+			}
+		}
+		
+		if (getC_Payment_ID() != 0 && getC_DepositBatch_ID() != 0) {
+			log.saveError("SaveError", Msg.translate(getCtx(), "NotSetBothValue_Payment_And_DepositBatch"));
+			return false;
+		}
+		
+		if (!getC_DepositBatch().isProcessed()) {
+			log.saveError("SaveError", Msg.getMsg(getCtx(), "DepositBatchIsNotProcessed")+ getC_DepositBatch());
 		}
 
 		//	Calculate Charge = Statement - trx - Interest  

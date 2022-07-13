@@ -86,18 +86,20 @@ public class DataEngine
 	 */
 	public DataEngine (Language language)
 	{
-		this(language, null);
+		this(language, null, 0);
 	}	//	DataEngine
 	
 	/**
 	 *	Constructor
 	 *	@param language Language of the data (for translation)
-	 *  @param trxName
+	 *	@param trxName
+	 *	@param windowNo
 	 */
-	public DataEngine (Language language, String trxName){
+	public DataEngine (Language language, String trxName, int windowNo){
 		if (language != null)
 			m_language = language;
 		m_trxName = trxName;
+		m_windowNo = windowNo;
 	}	//	DataEngine
 
 	/**	Logger							*/
@@ -125,7 +127,8 @@ public class DataEngine
 	private boolean 		m_showSummaryMultRowOnly = false;
 	/** Key Indicator in Report			*/
 	public static final String KEY = "*";
-
+	/** Window No 						*/
+	private int				m_windowNo = 0;
 	private Map<Object, Object> m_summarized = new HashMap<Object, Object>();
 
 	/**************************************************************************
@@ -191,7 +194,7 @@ public class DataEngine
 						if (whereClause.indexOf("@") == -1) {
 							queryCopy.addRestriction(whereClause);
 						} else { // replace context variables
-							queryCopy.addRestriction(Env.parseContext(ctx, 0, whereClause.toString(), false, true));
+							queryCopy.addRestriction(Env.parseContext(ctx, m_windowNo, whereClause.toString(), false, true));
 						}
 					}
 				}
@@ -335,7 +338,7 @@ public class DataEngine
 				if (ColumnSQL != null && ColumnSQL.length() > 0 && ColumnSQL.startsWith("@SQL="))
 					ColumnSQL = "NULL";
 				if (ColumnSQL != null && ColumnSQL.contains("@"))
-					ColumnSQL = Env.parseContext(Env.getCtx(), -1, ColumnSQL, false, true);
+					ColumnSQL = Env.parseContext(Env.getCtx(), m_windowNo, ColumnSQL, false, true);
 				if (ColumnSQL == null)
 					ColumnSQL = "";
 				else{
@@ -469,7 +472,7 @@ public class DataEngine
 				}
 
 				//	-- Table --
-				else if (AD_Reference_ID == DisplayType.Table || AD_Reference_ID == DisplayType.MultiSelectTable
+				else if (AD_Reference_ID == DisplayType.Table || AD_Reference_ID == DisplayType.MultiSelectTable || AD_Reference_ID == DisplayType.MultiSelectSearch
 						|| (AD_Reference_ID == DisplayType.Search && AD_Reference_Value_ID != 0)
 					)
 				{
@@ -480,7 +483,7 @@ public class DataEngine
 
 					String eSql;
 					
-					if (AD_Reference_ID == DisplayType.MultiSelectTable)
+					if (AD_Reference_ID == DisplayType.MultiSelectTable || AD_Reference_ID == DisplayType.MultiSelectSearch)
 						eSql = MLookupFactory.getLookup_MultiSelectTableEmbed(m_language, ColumnName, tableName, AD_Reference_Value_ID, true);
 					else
 						eSql = MLookupFactory.getLookup_TableEmbed(m_language, ColumnName, tableName, AD_Reference_Value_ID, true);
@@ -1124,7 +1127,7 @@ public class DataEngine
 							String display = rs.getString(counter++);
 							if (DisplayType.isMultiSelect(pdc.getDisplayType()))
 							{
-								if (pdc.getDisplayType() == DisplayType.MultiSelectTable)
+								if (pdc.getDisplayType() == DisplayType.MultiSelectTable || pdc.getDisplayType() == DisplayType.MultiSelectSearch)
 									counter++;
 								if (display != null && !rs.wasNull())
 								{
@@ -1210,7 +1213,7 @@ public class DataEngine
                                 Timestamp datetime = rs.getTimestamp(counter++);
                                 pde = new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), datetime, pdc.getDisplayType(), pdc.getFormatPattern());
                             }
-                            else if (pdc.getDisplayType() == DisplayType.MultiSelectTable)
+                            else if (pdc.getDisplayType() == DisplayType.MultiSelectTable || pdc.getDisplayType() == DisplayType.MultiSelectSearch)
 							{
 								Array array = rs.getArray(counter++);
 								Object javaArray = null;
@@ -1504,7 +1507,16 @@ public class DataEngine
 		MQuery query = new MQuery();
 		query.addRestriction("AD_Table_ID", MQuery.LESS, 105);
 	}
-		
+
+	public int getWindowNo()
+	{
+		return m_windowNo;
+	}
+
+	public void setWindowNo(int windowNo)
+	{
+		this.m_windowNo = windowNo;
+	}
 }	//	DataEngine
 
 /**

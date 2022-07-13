@@ -111,8 +111,6 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 	private HtmlBasedComponent messageResultContent;
 	private HtmlBasedComponent infoResultContent;
 
-	/** Window No					*/
-	private int                 m_WindowNo = -1;
 	private long prevKeyEventTime = 0;
 	private KeyEvent prevKeyEvent;
 
@@ -563,7 +561,7 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 		for (int i = 0; i < m_ids.length; i++)
 		{
 			int M_InOut_ID = m_ids[i];
-			ReportEngine re = ReportEngine.get (Env.getCtx(), ReportEngine.SHIPMENT, M_InOut_ID);
+			ReportEngine re = ReportEngine.get (Env.getCtx(), ReportEngine.SHIPMENT, M_InOut_ID, getWindowNo());
 			pdfList.add(re.getPDF());				
 		}
 		
@@ -648,7 +646,7 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 		for (int i = 0; i < m_ids.length; i++)
 		{
 			int C_Invoice_ID = m_ids[i];
-			ReportEngine re = ReportEngine.get (Env.getCtx(), ReportEngine.INVOICE, C_Invoice_ID);
+			ReportEngine re = ReportEngine.get (Env.getCtx(), ReportEngine.INVOICE, C_Invoice_ID, getWindowNo());
 			pdfList.add(re.getPDF());				
 		}
 		
