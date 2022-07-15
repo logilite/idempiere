@@ -70,7 +70,7 @@ public class MultiFileDownloadDialog extends Window {
 		this.setSizable(true);
 		this.setMaximizable(true);
 		this.setBorder("normal");
-		this.setContentStyle("min-height: 200px; min-width:300px");
+		this.setContentStyle("min-height: 200px; min-width:300px; overflow: scroll;");
 		this.setPosition("center");
 		if (this.getTitle() == null || this.getTitle().length() == 0) {
 			this.setTitle("Downloads");
