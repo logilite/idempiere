@@ -17,6 +17,8 @@
 package org.compiere.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,6 +34,7 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
 
 /**
@@ -86,7 +89,8 @@ public class MQuery implements Serializable
 			SQL = "SELECT ip.ParameterName,ip.P_String,ip.P_String_To,"			//	1..3
 				+ "ip.P_Number,ip.P_Number_To,"									//	4..5
 				+ "ip.P_Date,ip.P_Date_To, ip.Info,ip.Info_To, "				//	6..9
-				+ "pp.Name, pp.IsRange, pp.AD_Reference_ID "	//	10..12
+				+ "pp.Name, pp.IsRange, pp.AD_Reference_ID, "	//	10..12
+				+ "ip.P_Number_Array, ip.P_String_Array " // 13..14
 				+ "FROM AD_PInstance_Para ip, AD_PInstance i, AD_Process_Para pp "
 				+ "WHERE i.AD_PInstance_ID=ip.AD_PInstance_ID"
 				+ " AND pp.AD_Process_ID=i.AD_Process_ID"
@@ -97,7 +101,8 @@ public class MQuery implements Serializable
 		else
 			SQL = "SELECT ip.ParameterName,ip.P_String,ip.P_String_To, ip.P_Number,ip.P_Number_To,"
 				+ "ip.P_Date,ip.P_Date_To, ip.Info,ip.Info_To, "
-				+ "ppt.Name, pp.IsRange, pp.AD_Reference_ID "
+				+ "ppt.Name, pp.IsRange, pp.AD_Reference_ID, "
+				+ "ip.P_Number_Array, ip.P_String_Array " 
 				+ "FROM AD_PInstance_Para ip, AD_PInstance i, AD_Process_Para pp, AD_Process_Para_Trl ppt "
 				+ "WHERE i.AD_PInstance_ID=ip.AD_PInstance_ID"
 				+ " AND pp.AD_Process_ID=i.AD_Process_ID"
@@ -150,6 +155,9 @@ public class MQuery implements Serializable
 				//
 				int Reference_ID = rs.getInt(12);
 				//
+				Array numArray = rs.getArray(13);
+				Array strArray = rs.getArray(14);
+				//
 				if (s_log.isLoggable(Level.FINE)) s_log.fine(ParameterName + " S=" + P_String + "-" + P_String_To
 					+ ", N=" + P_Number + "-" + P_Number_To + ", D=" + P_Date + "-" + P_Date_To
 					+ "; Name=" + Name + ", Info=" + Info + "-" + Info_To + ", Range=" + isRange);
@@ -159,9 +167,25 @@ public class MQuery implements Serializable
 				{
 					query = reportQuery.getReportProcessQuery();
 				}
+				// For Multi-Select - array data type
+				if (numArray != null && (Reference_ID == DisplayType.MultiSelectTable || Reference_ID == DisplayType.MultiSelectSearch))
+				{
+					Object arrObj = null;
+					if (numArray != null)
+						arrObj = (Object) Util.convertBigDecimalToInteger((BigDecimal[]) numArray.getArray());
 
+					query.addRestriction(DB.inClauseForCSV(TableName + "." + ParameterName, arrObj), MQuery.EQUAL, Name, Info);
+				}
+				else if (strArray != null && Reference_ID == DisplayType.MultiSelectList)
+				{
+					Object arrObj = null;
+					if (strArray != null)
+						arrObj = (String[]) strArray.getArray();
+
+					query.addRestriction(DB.inClauseForCSV(TableName + "." + ParameterName, arrObj), MQuery.EQUAL, Name, Info);
+				}
 				//-------------------------------------------------------------
-				if (P_String != null)
+				else if (P_String != null)
 				{
 					if (P_String_To == null)
 					{
