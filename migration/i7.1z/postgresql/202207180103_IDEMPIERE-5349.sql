@@ -1,5 +1,5 @@
 -- 
-SELECT register_migration_script('202207180103_PlaceholderForTicket.sql') FROM dual;
+SELECT register_migration_script('202207180103_IDEMPIERE-5349.sql') FROM dual;
 
 -- Jul 18, 2022, 1:03:26 AM IST
 INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,ColumnName,Name,Description,Help,PrintName,EntityType,AD_Element_UU,Placeholder) VALUES (203631,0,0,'Y',TO_TIMESTAMP('2022-07-18 01:03:25','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2022-07-18 01:03:25','YYYY-MM-DD HH24:MI:SS'),100,'AlwaysUpdatableLogic','Always Updatable Logic','Logic to determine if field is Updatable irrespective if record''s active status or processed status. This logic Applicable only if Always Updatable is Yes.','format := {expression} [{logic} {expression}]<br> 

@@ -1,5 +1,5 @@
 -- 
-SELECT register_migration_script('202207180103_PlaceholderForTicket.sql') FROM dual;
+SELECT register_migration_script('202207180103_IDEMPIERE-5349.sql') FROM dual;
 
 SET SQLBLANKLINES ON
 SET DEFINE OFF
