@@ -47,7 +47,7 @@ public class GridFieldVO implements Serializable
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -3894697577296104861L;
+	private static final long serialVersionUID = -4069340866487289281L;
 
 	/**
 	 *  Return the SQL statement used for the MFieldVO.create
@@ -189,6 +189,8 @@ public class GridFieldVO implements Serializable
 					vo.AD_Process_ID = rs.getInt (i);
 				else if (columnName.equalsIgnoreCase("ReadOnlyLogic"))
 					vo.ReadOnlyLogic = rs.getString (i);
+				else if (columnName.equalsIgnoreCase("AlwaysUpdatableLogic"))
+					vo.AlwaysUpdatableLogic = rs.getString (i);
 				else if (columnName.equalsIgnoreCase("MandatoryLogic"))
 					vo.MandatoryLogic = rs.getString (i);	
 				else if (columnName.equalsIgnoreCase("ObscureType"))
@@ -294,7 +296,12 @@ public class GridFieldVO implements Serializable
 				if (userDef.getIsUpdateable()!= null)
 				    vo.IsUpdateable = "Y".equals(userDef.getIsUpdateable());
 				if (userDef.getIsAlwaysUpdateable()!= null)	
-				   vo.IsAlwaysUpdateable = "Y".equals(userDef.getIsAlwaysUpdateable());
+				{ 
+					vo.IsAlwaysUpdateable = "Y".equals(userDef.getIsAlwaysUpdateable());
+					if(vo.IsAlwaysUpdateable && userDef.getAlwaysUpdatableLogic()!=null) {
+						vo.AlwaysUpdatableLogic = userDef.getAlwaysUpdatableLogic();
+					}
+				}
 				if (userDef.getReadOnlyLogic()!= null)
 					vo.ReadOnlyLogic = userDef.getReadOnlyLogic();
 				if (userDef.getMandatoryLogic()!= null )
@@ -724,6 +731,8 @@ public class GridFieldVO implements Serializable
 	public String 		MandatoryLogic = "";
 	/**	Read Only Logic	*/
 	public String       ReadOnlyLogic = "";
+	/**	Always Updatable Logic	*/
+	public String       AlwaysUpdatableLogic = "";
 	/**	Display Obscure	*/
 	public String		ObscureType = null;
 	/** Default Focus	*/
@@ -817,6 +826,8 @@ public class GridFieldVO implements Serializable
 			Callout = "";
 		if (ReadOnlyLogic == null)
 			ReadOnlyLogic = "";
+		if (AlwaysUpdatableLogic == null)
+			AlwaysUpdatableLogic = "";
 		if (MandatoryLogic == null)
 			MandatoryLogic = "";
 		if (Placeholder == null)
@@ -912,6 +923,7 @@ public class GridFieldVO implements Serializable
 		clone.Description = Description;
 		clone.Help = Help;
 		clone.ReadOnlyLogic = ReadOnlyLogic;
+		clone.AlwaysUpdatableLogic = AlwaysUpdatableLogic;
 		clone.MandatoryLogic = MandatoryLogic;
 		clone.ObscureType = ObscureType;
 		clone.IsDefaultFocus = IsDefaultFocus;
