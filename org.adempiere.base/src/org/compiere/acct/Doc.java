@@ -49,8 +49,8 @@ import org.compiere.model.MMatchInvHdr;
 import org.compiere.model.MMatchPO;
 import org.compiere.model.MNote;
 import org.compiere.model.MPeriod;
-import org.compiere.model.MTable;
 import org.compiere.model.MRefList;
+import org.compiere.model.MTable;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -296,10 +296,18 @@ public abstract class Doc
 			{
 				if (AD_Table_ID == MInvoice.Table_ID)
 				{
+					ArrayList<Integer> reversed = new ArrayList<Integer>();
 					MMatchInv[] matchInvs = MMatchInv.getInvoice(Env.getCtx(), Record_ID, trx.getTrxName());
 					HashSet<Integer> macthInvHdrs = new HashSet<Integer>();
 					for (MMatchInv matchInv : matchInvs) 
 					{
+						if(matchInv.getReversal_ID()>0 && !matchInv.isReversal())
+						{
+							reversed.add(matchInv.getReversal_ID());
+							continue;
+						}else if(matchInv.getReversal_ID()>0 && reversed.contains(matchInv.get_ID())) {
+							continue;
+						}
 						if(matchInv.getM_MatchInvHdr_ID() == 0)
 						{
 							if (!matchInv.isPosted())
