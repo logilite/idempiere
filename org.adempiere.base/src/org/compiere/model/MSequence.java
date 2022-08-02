@@ -24,6 +24,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -61,6 +62,9 @@ public class MSequence extends X_AD_Sequence
 	private static final int QUERY_TIME_OUT = 30;
 	
 	private static final String NoYearNorMonth = "-";
+	
+	/**  Control the sequence based on fiscal year */
+	private static final String FISCAL_YEAR = "@FY@";
 
 	public static int getNextID (int AD_Client_ID, String TableName)
 	{
@@ -328,6 +332,7 @@ public class MSequence extends X_AD_Sequence
 		boolean isStartNewMonth = seq.isStartNewMonth();
 		String dateColumn = seq.getDateColumn();
 		boolean isUseOrgLevel = seq.isOrgLevelSequence();
+		boolean IsUseFiscalYear = seq.isUseFiscalYear();
 		String orgColumn = seq.getOrgColumn();
 		int startNo = seq.getStartNo();
 		int incrementNo = seq.getIncrementNo();
@@ -378,13 +383,14 @@ public class MSequence extends X_AD_Sequence
 		Connection conn = null;
 		Trx trx = trxName == null ? null : Trx.get(trxName, true);
 		//
-		
+		String errorMsg = null;
 		String calendarYearMonth = NoYearNorMonth;
 		int docOrg_ID = 0;
 		int next = -1;
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		MPeriod period = null;
 		try
 		{
 			if (trx != null)
@@ -403,15 +409,33 @@ public class MSequence extends X_AD_Sequence
 				else
 					sdf = new SimpleDateFormat("yyyy");
 				
+				
 				if (po != null && dateColumn != null && dateColumn.length() > 0)
 				{
-					Date docDate = (Date)po.get_Value(dateColumn);
-					calendarYearMonth = sdf.format(docDate);
+					Object docDate = po.get_Value(dateColumn);
+					if (docDate != null && docDate instanceof Date)
+					{
+						Timestamp timestamp = new Timestamp(((Date)docDate).getTime());
+						period = MPeriod.get(Env.getCtx(), timestamp, Env.getAD_Org_ID(Env.getCtx()), null);
+					
+						if(IsUseFiscalYear && !isStartNewMonth) {
+							calendarYearMonth = period.getC_Year().getFiscalYear();
+						}
+						else
+							calendarYearMonth = sdf.format((Date) docDate);
+					}
+					else if (docDate != null)
+					{
+						errorMsg = "DateColumnInvalid";
+					}
 				}
 				else
 				{
 					calendarYearMonth = sdf.format(new Date());
 				}
+
+				if (!Util.isEmpty(errorMsg, true))
+					throw new AdempiereException(errorMsg);
 			}
 			
 			if (isUseOrgLevel)
@@ -505,7 +529,9 @@ public class MSequence extends X_AD_Sequence
 		catch (Exception e)
 		{
 			s_log.log(Level.SEVERE, "(DocType) [" + trxName + "]", e);
-			if (DBException.isTimeout(e))
+			if (!Util.isEmpty(errorMsg, true))
+				throw new AdempiereException(errorMsg, e);
+			else if (DBException.isTimeout(e))
 				throw new AdempiereException("GenerateDocumentNoTimeOut", e);
 			else
 				throw new AdempiereException("GenerateDocumentNoError", e);
@@ -534,6 +560,13 @@ public class MSequence extends X_AD_Sequence
 		//	create DocumentNo
 		StringBuilder doc = new StringBuilder();
 		if (prefix != null && prefix.length() > 0) {
+			if(isStartNewYear && IsUseFiscalYear && !isStartNewMonth)
+				prefix = prefix.replace(FISCAL_YEAR, calendarYearMonth);
+			
+			//Supporting to support Period and year related columns in prefix
+			if(period!=null)
+				prefix = Env.parseVariable(prefix, period, trxName, true);
+			
 			String prefixValue = Env.parseVariable(prefix, po, trxName, false);
 			if (!Util.isEmpty(prefixValue))
 				doc.append(prefixValue);
@@ -545,6 +578,13 @@ public class MSequence extends X_AD_Sequence
 			doc.append(next);
 
 		if (suffix != null && suffix.length() > 0) {
+			if(isStartNewYear && IsUseFiscalYear && !isStartNewMonth)
+				suffix = suffix.replace(FISCAL_YEAR, calendarYearMonth);
+			
+			//Supporting to support Period and year related columns in suffix
+			if(period!=null)
+				suffix = Env.parseVariable(suffix, period, trxName, true);
+			
 			String suffixValue = Env.parseVariable(suffix, po, trxName, false);
 			if (!Util.isEmpty(suffixValue))
 				doc.append(suffixValue);

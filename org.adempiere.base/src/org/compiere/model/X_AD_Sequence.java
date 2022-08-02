@@ -30,7 +30,7 @@ public class X_AD_Sequence extends PO implements I_AD_Sequence, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20220729L;
 
     /** Standard Constructor */
     public X_AD_Sequence (Properties ctx, int AD_Sequence_ID, String trxName)
@@ -319,6 +319,30 @@ public class X_AD_Sequence extends PO implements I_AD_Sequence, I_Persistent
 	public boolean isTableID () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsTableID);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Use Fiscal Year.
+		@param IsUseFiscalYear 
+		Use Fiscal Year to restart the sequence.
+	  */
+	public void setIsUseFiscalYear (boolean IsUseFiscalYear)
+	{
+		set_Value (COLUMNNAME_IsUseFiscalYear, Boolean.valueOf(IsUseFiscalYear));
+	}
+
+	/** Get Use Fiscal Year.
+		@return Use Fiscal Year to restart the sequence.
+	  */
+	public boolean isUseFiscalYear () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsUseFiscalYear);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 
