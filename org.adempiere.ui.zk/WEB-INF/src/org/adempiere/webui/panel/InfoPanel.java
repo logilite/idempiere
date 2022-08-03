@@ -92,6 +92,7 @@ import org.compiere.util.Trx;
 import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
 import org.zkoss.zk.au.out.AuEcho;
+import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -556,6 +557,12 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
         String sql =contentPanel.prepareTable(layout, from,
                 where,p_multipleSelection,
                 getTableName(),false);
+        
+		if (infoWindow != null)
+			contentPanel.setwListBoxName("AD_InfoWindow_UU|" + infoWindow.getAD_InfoWindow_UU());
+		else
+			contentPanel.setwListBoxName("AD_InfoPanel|" + from);
+
         p_layout = contentPanel.getLayout();
 		m_sqlMain = sql;
 		m_sqlCount = "SELECT COUNT(*) FROM " + from + " WHERE " + where;
@@ -575,6 +582,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	 */
 	protected void executeQuery()
 	{
+		saveWlistBoxColumnWidth(this.getFirstChild());
 		line = new ArrayList<Object>();
 		setCacheStart(-1);
 		cacheEnd = -1;
@@ -862,6 +870,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
             model.addTableModelListener(this);
             model.setMultiple(p_multipleSelection);
 			defaultFirstRowSelect();
+			contentPanel.renderCustomHeaderWidth();
         }
         restoreSelectedInPage();
         updateStatusBar (m_count);
@@ -2609,6 +2618,21 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	        this.detach();
     }   //  dispose
 
+	private void saveWlistBoxColumnWidth(Component comp)
+	{
+
+		if (comp instanceof WListbox)
+		{
+			((WListbox) comp).saveColumnWidth();
+		}
+
+		List<Component> list = comp.getChildren();
+		for (Component child : list)
+		{
+			saveWlistBoxColumnWidth(child);
+		}
+	}
+
 	public void sort(Comparator<Object> cmpr, boolean ascending) {
 		updateListSelected();
 		WListItemRenderer.ColumnComparator lsc = (WListItemRenderer.ColumnComparator) cmpr;
@@ -2709,7 +2733,11 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		super.onPageDetached(page);
 		try {
 			SessionManager.getSessionApplication().getKeylistener().removeEventListener(Events.ON_CTRL_KEY, this);
-		} catch (Exception e){}
+			if (getFirstChild() != null)
+				saveWlistBoxColumnWidth(getFirstChild());
+		} catch (Exception e){
+			log.log(Level.WARNING, e.getMessage(), e);
+		}
 	}
 
 	/**
