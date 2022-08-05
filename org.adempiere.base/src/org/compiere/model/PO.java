@@ -1516,7 +1516,7 @@ public abstract class PO
 				if (p_info.isVirtualColumn(index)) {	//	if rs constructor used
 					if (log.isLoggable(Level.FINER))log.log(Level.FINER, "Virtual Column not loaded: " + columnName);
 				} else {
-					log.log(Level.SEVERE, "(rs) - " + String.valueOf(index)
+					log.log(Level.SEVERE,"Trx Name - " + get_TrxName() + " (rs) - " + String.valueOf(index)
 						+ ": " + p_info.getTableName() + "." + p_info.getColumnName(index)
 						+ " (" + p_info.getColumnClass(index) + ") - " + e);
 					success = false;

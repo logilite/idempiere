@@ -725,10 +725,10 @@ public class Trx
 					long since = System.currentTimeMillis() - trxs[i].m_startTime;
 					if (since > trxs[i].getTimeout() * 1000)
 					{
-						trxs[i].log.log(Level.WARNING, "Transaction timeout. Name="+trxs[i].getTrxName() + ", timeout(sec)="+(since / 1000));
+						trxs[i].log.log(Level.SEVERE, "Transaction timeout. Name="+trxs[i].getTrxName() + ", timeout(sec)="+(since / 1000));
 						if (trxs[i].trace != null)
 						{
-							trxs[i].log.log(Level.WARNING, "Transaction timeout. Trace:\n" + trxs[i].getStrackTrace());
+							trxs[i].log.log(Level.SEVERE, "Transaction timeout. Trace:\n" + trxs[i].getStrackTrace());
 						}
 						trxs[i].rollbackAndCloseOnTimeout();
 					}
