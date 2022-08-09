@@ -114,7 +114,6 @@ public class PrintDataGroup
 		m_groupMap.put(groupColumnName, newValue);
 		return null;
 	}	//	groupChange
-
 	
 	/**************************************************************************
 	 * 	Add Function Column
@@ -253,6 +252,29 @@ public class PrintDataGroup
 		if (pdf != null)
 			pdf.reset();
 	}	//	reset
+	
+	public Object getGroupValue(String groupColumnName)
+	{
+		if (!isGroupColumn(groupColumnName))
+			return null;
+		if (m_groupMap.containsKey(groupColumnName))
+		{
+			return m_groupMap.get(groupColumnName);
+		}
+		return null;
+	}
+	
+	public boolean isSameValueGroup(String groupColumnName, PrintDataColumn[] columnInfo, char function, BigDecimal lastvalue)
+	{
+		for (int c = 0; c < columnInfo.length; c++)
+		{
+			if (isFunctionColumn(columnInfo[c].getColumnName(), function) && lastvalue != null && lastvalue.equals(getValue(groupColumnName, columnInfo[c].getColumnName(), function)))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	/**************************************************************************
 	 * 	String Representation
