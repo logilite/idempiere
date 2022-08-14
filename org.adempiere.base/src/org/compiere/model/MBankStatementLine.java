@@ -180,8 +180,9 @@ import org.compiere.util.Msg;
 			return false;
 		}
 		
-		if (!getC_DepositBatch().isProcessed()) {
-			log.saveError("SaveError", Msg.getMsg(getCtx(), "DepositBatchIsNotProcessed")+ getC_DepositBatch());
+		if (getC_DepositBatch_ID() != 0 && !getC_DepositBatch().isProcessed()) {
+			log.saveError("SaveError", Msg.getMsg(getCtx(), "DepositBatchIsNotProcessed") + getC_DepositBatch());
+			return false;
 		}
 
 		//	Calculate Charge = Statement - trx - Interest  
