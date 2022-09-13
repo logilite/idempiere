@@ -18,6 +18,8 @@
 package org.adempiere.webui.editor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.adempiere.webui.component.Menupopup;
 import org.adempiere.webui.event.ContextMenuEvent;
@@ -61,6 +63,8 @@ public class WEditorPopupMenu extends Menupopup implements EventListener<Event>
     public static final String SHOWLOCATION_EVENT = "SHOW_LOCATION";
     public static final String CHANGE_LOG_EVENT = "CHANGE_LOG";
     public static final String EDITOR_EVENT = "EDITOR";
+    public static final String COPY_EVENT = "COPY_EVENT";
+    public static final String PASTE_EVENT = "PASTE_EVENT";
    
     private boolean newEnabled = true;
     private boolean updateEnabled = true; // Elaine 2009/02/16 - update record
@@ -68,6 +72,7 @@ public class WEditorPopupMenu extends Menupopup implements EventListener<Event>
     private boolean requeryEnabled = true;
     private boolean preferencesEnabled = true;
 	private boolean showLocation = true;
+	private boolean copyPasteEnabled = true;
     
     private Menuitem zoomItem;
     private Menuitem requeryItem;
@@ -75,6 +80,10 @@ public class WEditorPopupMenu extends Menupopup implements EventListener<Event>
     private Menuitem newItem;
     private Menuitem updateItem; // Elaine 2009/02/16 - update record   
 	private Menuitem showLocationItem;
+	private Menuitem copyItem;
+	private Menuitem pasteItem;
+	
+	public static Map<Integer, Object> mapClipboard = new HashMap<Integer, Object>();
     
     private ArrayList<ContextMenuListener> menuListeners = new ArrayList<ContextMenuListener>();
     
@@ -100,6 +109,11 @@ public class WEditorPopupMenu extends Menupopup implements EventListener<Event>
     {
     	this(zoom, requery, preferences, newRecord, updateRecord, false, null);
     }
+    
+    public WEditorPopupMenu(boolean zoom, boolean requery, boolean preferences, boolean newRecord, boolean updateRecord, boolean showLocation, Lookup lookup)
+    {
+    	this(zoom, requery, preferences, newRecord, updateRecord, showLocation, false, lookup);
+    }
 
     /**
      * @param zoom - enable zoom in menu - disabled if the lookup cannot zoom
@@ -108,9 +122,10 @@ public class WEditorPopupMenu extends Menupopup implements EventListener<Event>
      * @param newRecord - enable new record (ignored and recalculated if lookup is received)
      * @param updateRecord - enable update record (ignored and recalculated if lookup is received)
      * @param showLocation - enable show location in menu
+     * @param copyPasteEnabled - enable copy paste in menu
      * @param lookup - when this parameter is received then new and update are calculated based on the zoom and quickentry
      */
-    public WEditorPopupMenu(boolean zoom, boolean requery, boolean preferences, boolean newRecord, boolean updateRecord, boolean showLocation, Lookup lookup)
+    public WEditorPopupMenu(boolean zoom, boolean requery, boolean preferences, boolean newRecord, boolean updateRecord, boolean showLocation, boolean copyPasteEnabled, Lookup lookup)
     {
     	super();
     	this.zoomEnabled = zoom;
@@ -119,6 +134,7 @@ public class WEditorPopupMenu extends Menupopup implements EventListener<Event>
     	this.newEnabled = newRecord;
     	this.updateEnabled = updateRecord; // Elaine 2009/02/16 - update record
     	this.showLocation = showLocation;
+    	this.copyPasteEnabled = copyPasteEnabled;
 
     	String tableName = null;
     	if (lookup != null && lookup.getColumnName() != null)
@@ -271,6 +287,31 @@ public class WEditorPopupMenu extends Menupopup implements EventListener<Event>
         	this.appendChild(showLocationItem);
         }
         
+        if (copyPasteEnabled)
+        {
+        	// copy
+        	copyItem = new Menuitem();
+        	copyItem.setAttribute(EVENT_ATTRIBUTE, COPY_EVENT);
+        	copyItem.setLabel(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "DocumentCopy")).intern());
+        	if (ThemeManager.isUseFontIconForImage())
+        		copyItem.setIconSclass("z-icon-Copy");
+        	else
+        		copyItem.setImage(ThemeManager.getThemeResource("images/Copy16.png"));
+        	copyItem.addEventListener(Events.ON_CLICK, this);
+        	this.appendChild(copyItem);
+        	
+        	// paste
+        	pasteItem = new Menuitem();
+        	pasteItem.setAttribute(EVENT_ATTRIBUTE, PASTE_EVENT);
+        	pasteItem.setLabel(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Paste")).intern());
+        	if (ThemeManager.isUseFontIconForImage())
+        		pasteItem.setIconSclass("z-icon-Paste");
+        	else
+        		pasteItem.setImage(ThemeManager.getThemeResource("images/Paste16.png"));
+        	pasteItem.addEventListener(Events.ON_CLICK, this);
+        	this.appendChild(pasteItem);
+        }
+        
     }
     
     public void addMenuListener(ContextMenuListener listener)
@@ -310,4 +351,33 @@ public class WEditorPopupMenu extends Menupopup implements EventListener<Event>
 		});
 		appendChild(editor);		
 	}	
+
+	/**
+	 * Set value to clipboard
+	 * 
+	 * @param content
+	 */
+	public static void setClipboard(Object content)
+	{
+		int AD_Session_ID = Env.getContextAsInt(Env.getCtx(), "#AD_Session_ID");
+		if (AD_Session_ID > 0)
+		{
+			mapClipboard.put(AD_Session_ID, content);
+		}
+	}
+
+	/**
+	 * to get value from clipboard
+	 * 
+	 * @return
+	 */
+	public static Object getClipboard()
+	{
+		int AD_Session_ID = Env.getContextAsInt(Env.getCtx(), "#AD_Session_ID");
+		if (AD_Session_ID > 0)
+		{
+			return mapClipboard.get(AD_Session_ID);
+		}
+		return null;
+	}
 }
