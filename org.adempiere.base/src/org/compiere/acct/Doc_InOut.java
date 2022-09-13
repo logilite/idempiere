@@ -819,7 +819,8 @@ public class Doc_InOut extends Doc
 					{
 						//IDEMPIERE-5419: On reversal get cost of original return line
 						MCostDetail cdInv=MCostDetail.get(getCtx(), "M_InOutLine_ID = ?",ioLine.getReversalLine_ID(),line.getM_AttributeSetInstance_ID(),as.getC_AcctSchema_ID() ,getTrxName());
-						costs=cdInv.getAmt();
+						if(cdInv!=null)
+							costs=cdInv.getAmt();
 						
 						if (costs == null || costs.signum() == 0)
 						{
