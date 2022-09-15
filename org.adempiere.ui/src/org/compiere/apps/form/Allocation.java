@@ -64,13 +64,13 @@ public class Allocation
 	public Timestamp allocDate = null;
 
 	//  Index	changed if multi-currency
-	private int         i_payment = 7;
+	protected int         i_payment = 7;
 	//
-	private int         i_open = 6;
-	private int         i_discount = 7;
-	private int         i_writeOff = 8; 
-	private int         i_applied = 9;
-	private int 		i_overUnder = 10;
+	protected int         i_open = 6;
+	protected int         i_discount = 7;
+	protected int         i_writeOff = 8; 
+	protected int         i_applied = 9;
+	protected int 		i_overUnder = 10;
 //	private int			i_multiplier = 10;
 	
 	public int         	m_AD_Org_ID = 0;
