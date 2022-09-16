@@ -27,8 +27,11 @@ import org.compiere.model.MCostDetail;
 import org.compiere.model.MMovement;
 import org.compiere.model.MMovementLine;
 import org.compiere.model.MMovementLineMA;
+import org.compiere.model.MProduct;
 import org.compiere.model.ProductCost;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 /**
  *  Post Invoice Documents.
@@ -181,19 +184,60 @@ public class Doc_Movement extends Doc
 		{
 			DocLine line = p_lines[i];
 			BigDecimal costs = null;
-			
+			MProduct product = MProduct.get(getCtx(), line.getM_Product_ID());
 			if (!isReversal(line))
 			{
 				// MZ Goodwill
-				// if Inventory Move CostDetail exist then get Cost from Cost Detail
+				// if Inventory Move CostDetail exist then get Cost from
+				// Cost Detail
 				costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_MovementLine_ID=? AND IsSOTrx='N'");
 				// end MZ
 			}
 			else
 			{
-				costs = BigDecimal.ZERO;
+				// In case of reversal, use cost from original movement line
+				MMovementLine mline = (MMovementLine) line.getPO();
+				MCostDetail cdInv = MCostDetail.get(getCtx(), "M_MovementLine_ID = ? AND IsSOTrx='N'",
+						mline.getReversalLine_ID(), line.getM_AttributeSetInstance_ID(), as.getC_AcctSchema_ID(),
+						getTrxName());
+				if (cdInv != null)
+					costs = cdInv.getAmt();
 			}
 
+			if (costs == null || costs.signum() == 0)
+			{
+				if (product.isStocked())
+				{
+					// ok if we have purchased zero cost item from vendor
+					// before
+					String sql = "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)"
+							+ " AND AD_Client_ID = ? ";
+					ArrayList<Integer> list = new ArrayList<Integer>();
+					list.add(product.getM_Product_ID());
+					list.add(getAD_Client_ID());
+
+					String costingLevel = product.getCostingLevel(as);
+					if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))
+					{
+						sql = "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)"
+								+ " AND AD_Client_ID = ?  AND M_AttributeSetInstance_ID=?";
+						list.add(line.getM_AttributeSetInstance_ID());
+					}
+
+					int count = DB.getSQLValue(null, sql, list.toArray());
+					if (count > 0)
+					{
+						costs = BigDecimal.ZERO;
+					}
+					else
+					{
+						p_Error = Msg.getMsg(getCtx(), "No Costs for") + " " + line.getProduct().getName();
+						log.log(Level.WARNING, p_Error);
+						return null;
+					}
+				}
+			}
+			
 			//  ** Inventory       DR      CR
 			dr = fact.createLine(line,
 				line.getAccount(ProductCost.ACCTTYPE_P_Asset, as),
