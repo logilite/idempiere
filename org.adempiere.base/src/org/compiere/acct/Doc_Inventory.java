@@ -325,7 +325,7 @@ public class Doc_Inventory extends Doc
 							
 							if(MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))
 							{
-								sql += "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)"
+								sql = "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)"
 									+ " AND AD_Client_ID = ? AND M_AttributeSetInstance_ID=?";
 								list.add(line.getM_AttributeSetInstance_ID());
 							}
