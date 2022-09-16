@@ -1271,7 +1271,8 @@ public class Login implements ILogin
 		if (system == null)
 			throw new IllegalStateException("No System Info");
 
-		if (app_pwd == null || app_pwd.length() == 0)
+		boolean isAlreadyAuthenticate = "Y".equalsIgnoreCase(Env.getContext(Env.getCtx(), Env.SSO_IS_ALREADY_AUTHENTICATE));
+		if (!isAlreadyAuthenticate  && (app_pwd == null || app_pwd.length() == 0))
 		{
 			log.warning("No Apps Password");
 			return null;
@@ -1280,7 +1281,7 @@ public class Login implements ILogin
 		loginErrMsg = null;
 		isPasswordExpired = false;
 
-		if (system.isLDAP())
+		if (!isAlreadyAuthenticate && system.isLDAP())
 		{
 			authenticated = system.isLDAP(app_user, app_pwd);
 			if (authenticated) {
@@ -1295,7 +1296,7 @@ public class Login implements ILogin
 		ArrayList<KeyNamePair> clientList = new ArrayList<KeyNamePair>();
 		ArrayList<Integer> clientsValidated = new ArrayList<Integer>();
 
-		StringBuilder where = new StringBuilder("Password IS NOT NULL AND ");
+		StringBuilder where = new StringBuilder(isAlreadyAuthenticate ? "" : "Password IS NOT NULL AND ");
 		if (email_login)
 			where.append("EMail=?");
 		else
@@ -1384,7 +1385,7 @@ public class Login implements ILogin
 			clientsValidated.add(user.getAD_Client_ID());
 			boolean valid = false;
 			// authenticated by ldap
-			if (authenticated) {
+			if (authenticated || isAlreadyAuthenticate) {
 				valid = true;
 			} else {
 				if (!system.isLDAP() || Util.isEmpty(user.getLDAPUser())) {
@@ -1557,6 +1558,7 @@ public class Login implements ILogin
 		if (client == null)
 			throw new IllegalArgumentException("Client missing");
 
+		boolean isAlreadyAuthenticate = "Y".equalsIgnoreCase(Env.getContext(Env.getCtx(), Env.SSO_IS_ALREADY_AUTHENTICATE));
 		String whereRoleType = MRole.getWhereRoleType(roleTypes, "r");
 		ArrayList<KeyNamePair> rolesList = new ArrayList<KeyNamePair>();
 		KeyNamePair[] retValue = null;
@@ -1564,7 +1566,7 @@ public class Login implements ILogin
 			.append("FROM AD_User u")
 			.append(" INNER JOIN AD_User_Roles ur ON (u.AD_User_ID=ur.AD_User_ID AND ur.IsActive='Y')")
 			.append(" INNER JOIN AD_Role r ON (ur.AD_Role_ID=r.AD_Role_ID AND r.IsActive='Y') ");
-		sql.append("WHERE u.Password IS NOT NULL AND ur.AD_Client_ID=? AND ");		
+		sql.append("WHERE ur.AD_Client_ID=? ").append(isAlreadyAuthenticate ? "" : " AND u.Password IS NOT NULL ").append(" AND ");
 		boolean email_login = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
 		if (email_login)
 			sql.append("u.EMail=?");

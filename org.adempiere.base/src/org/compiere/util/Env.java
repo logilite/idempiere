@@ -98,6 +98,8 @@ public final class Env
 	public static final String M_WAREHOUSE_ID = "#M_Warehouse_ID";
 	
 	public static final String RUNNING_UNIT_TESTING_TEST_CASE = "#RUNNING_UNIT_TESTING_TEST_CASE";
+	
+	public static final String SSO_IS_ALREADY_AUTHENTICATE = "#SSO_IS_ALREADY_AUTHENTICATE";
 
 	private final static ContextProvider clientContextProvider = new DefaultContextProvider();
 

@@ -38,6 +38,7 @@ import org.adempiere.webui.desktop.FavouriteController;
 import org.adempiere.webui.desktop.IDesktop;
 import org.adempiere.webui.session.SessionContextListener;
 import org.adempiere.webui.session.SessionManager;
+import org.adempiere.webui.sso.ISSOPrinciple;
 import org.adempiere.webui.theme.ITheme;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.BrowserToken;
@@ -557,6 +558,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 		Env.setContext(properties, Env.M_WAREHOUSE_ID, Env.getContext(Env.getCtx(), Env.M_WAREHOUSE_ID));
 		Env.setContext(properties, BrowserToken.REMEMBER_ME, Env.getContext(Env.getCtx(), BrowserToken.REMEMBER_ME));
 		Env.setContext(properties, UserPreference.LANGUAGE_NAME, Env.getContext(Env.getCtx(), UserPreference.LANGUAGE_NAME));
+		Env.setContext(properties, Env.SSO_IS_ALREADY_AUTHENTICATE, Env.getContext(Env.getCtx(), Env.SSO_IS_ALREADY_AUTHENTICATE));	
 		Env.setContext(properties, Env.LANGUAGE, Env.getContext(Env.getCtx(), Env.LANGUAGE));
 		Env.setContext(properties, AEnv.LOCALE, Env.getContext(Env.getCtx(), AEnv.LOCALE));
 		Env.setContext(properties, ITheme.ZK_TOOLBAR_BUTTON_SIZE, Env.getContext(Env.getCtx(), ITheme.ZK_TOOLBAR_BUTTON_SIZE));
@@ -597,7 +599,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
     		String attribute = attributes.nextElement();
     		
     		//need to keep zk's session attributes
-    		if (attribute.contains("zkoss."))
+    		if (attribute.contains("zkoss.") || ISSOPrinciple.SSO_PRINCIPLE_SESSION_NAME.equalsIgnoreCase(attribute))
     			continue;
     		
     		httpRequest.getSession().removeAttribute(attribute);
