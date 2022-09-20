@@ -1328,7 +1328,7 @@ public class Login implements ILogin
 
 		
 		if (users.size() == 0) {
-			log.saveError("UserPwdError", app_user, false);
+			log.saveError(isAlreadyAuthenticate ? "UserNotFoundError": "UserPwdError", app_user, false);
 			return null;
 		}
 

@@ -46,6 +46,7 @@ import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.adempiere.webui.window.LoginWindow;
 import org.adempiere.base.ILogin;
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
@@ -433,6 +434,12 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
                 	lstRole.setSelectedIndex(0);
                 }
             }
+			else
+			{
+				boolean isAlreadyAuthenticate = "Y".equalsIgnoreCase(Env.getContext(Env.getCtx(), Env.SSO_IS_ALREADY_AUTHENTICATE));
+				if (isAlreadyAuthenticate)
+					throw new AdempiereException("UserNoRoleError");
+			}
             //
 
 

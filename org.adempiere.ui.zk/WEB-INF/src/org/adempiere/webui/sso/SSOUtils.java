@@ -40,6 +40,7 @@ public class SSOUtils
 	public static void setErrorMessageText(String errorMsg)
 	{
 		String continueMsg = Msg.getMsg(Env.getCtx(), "continue").trim();
+		errorMsg =  Msg.getMsg(Env.getCtx(), errorMsg).trim();
 		errorMsg = Strings.escape(errorMsg, "\"");
 		String errorScript = "adempiere.set(\"zkErrorMsg\", \"" + errorMsg + "\");";
 		errorScript += " adempiere.set(\"zkContinueText\", \"" + continueMsg + "\");";
