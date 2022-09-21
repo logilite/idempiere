@@ -13,6 +13,7 @@
 package org.adempiere.webui.sso.filter;
 
 import java.io.IOException;
+import java.util.logging.Level;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -94,6 +95,7 @@ public class SSOWebuiFilter implements Filter
 			}
 			catch (Throwable exc)
 			{
+				log.log(Level.SEVERE, "Exception while authenticating: ",exc);
 				if (m_SSOPrinciple != null)
 					m_SSOPrinciple.removePrincipleFromSession(httpRequest);
 				httpResponse.setStatus(500);

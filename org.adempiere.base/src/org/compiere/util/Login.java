@@ -1331,7 +1331,7 @@ public class Login implements ILogin
 			log.saveError(isAlreadyAuthenticate ? "UserNotFoundError": "UserPwdError", app_user, false);
 			return null;
 		}
-
+		log.log(Level.WARNING,users.size() + " matched user found for :" + app_user);
 		int MAX_ACCOUNT_LOCK_MINUTES = MSysConfig.getIntValue(MSysConfig.USER_LOCKING_MAX_ACCOUNT_LOCK_MINUTES, 0);
 		int MAX_INACTIVE_PERIOD_DAY = MSysConfig.getIntValue(MSysConfig.USER_LOCKING_MAX_INACTIVE_PERIOD_DAY, 0);
 		int MAX_PASSWORD_AGE = MSysConfig.getIntValue(MSysConfig.USER_LOCKING_MAX_PASSWORD_AGE_DAY, 0);
