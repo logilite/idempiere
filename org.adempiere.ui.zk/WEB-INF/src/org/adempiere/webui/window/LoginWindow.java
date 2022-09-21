@@ -135,6 +135,7 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 				loginOk(username, true, clients);
 			else
 			{
+				log.log(Level.WARNING,"No Client found for user:" + username);
 				ValueNamePair error = CLogger.retrieveError();
 				if (error == null)
 					error = CLogger.retrieveWarning();
