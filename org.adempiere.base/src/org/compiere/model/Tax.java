@@ -220,7 +220,7 @@ public class Tax
 			}
 			else if ("Y".equals (IsTaxExempt))
 			{
-				return getExemptTax (ctx, AD_Org_ID, trxName);
+				return getExemptTax (ctx, AD_Org_ID, C_TaxCategory_ID, trxName);
 			}
 		}
 		catch (SQLException e)
@@ -358,7 +358,7 @@ public class Tax
 			if (found && "Y".equals(IsTaxExempt))
 			{
 				if (log.isLoggable(Level.FINE)) log.fine("getProduct - Business Partner is Tax exempt");
-				return getExemptTax(ctx, AD_Org_ID, trxName);
+				return getExemptTax(ctx, AD_Org_ID, C_TaxCategory_ID, trxName);
 			}
 			else if (found)
 			{
@@ -430,7 +430,7 @@ public class Tax
 				throw new TaxCriteriaNotFoundException(variable, billC_BPartner_Location_ID);
 			}
 			if ("Y".equals(IsTaxExempt))
-				return getExemptTax(ctx, AD_Org_ID, trxName);
+				return getExemptTax(ctx, AD_Org_ID, C_TaxCategory_ID, trxName);
 
 			//  Reverse for PO
 			if (!IsSOTrx)
@@ -501,16 +501,35 @@ public class Tax
 	 */
 	public static int getExemptTax (Properties ctx, int AD_Org_ID, String trxName)
 	{
+		return getExemptTax(ctx, AD_Org_ID, 0, trxName);
+	}	//	getExemptTax
+
+	/**
+	 * Get Exempt Tax Code
+	 * 
+	 * @param  ctx              - context
+	 * @param  AD_Org_ID        - Org to find client
+	 * @param  C_TaxCategory_ID - Tax category
+	 * @param  trxName          - Transaction
+	 * @return                  C_Tax_ID
+	 */
+	public static int getExemptTax (Properties ctx, int AD_Org_ID, int C_TaxCategory_ID, String trxName)
+	{
 		final String sql = "SELECT t.C_Tax_ID "
 			+ "FROM C_Tax t"
 			+ " INNER JOIN AD_Org o ON (t.AD_Client_ID=o.AD_Client_ID) "
 			+ "WHERE t.IsTaxExempt='Y' AND o.AD_Org_ID=? AND t.IsActive='Y' "
+			+ (C_TaxCategory_ID > 0 ? " AND t.C_TaxCategory_ID = " + C_TaxCategory_ID + " " : " ")
 			+ "ORDER BY t.Rate DESC";
 		int C_Tax_ID = DB.getSQLValueEx(trxName, sql, AD_Org_ID);
 		if (log.isLoggable(Level.FINE)) log.fine("getExemptTax - TaxExempt=Y - C_Tax_ID=" + C_Tax_ID);
-		if (C_Tax_ID <= 0)
+		if (C_Tax_ID <= 0 && C_TaxCategory_ID <= 0)
 		{
 			throw new TaxNoExemptFoundException(AD_Org_ID);
+		}
+		else if (C_Tax_ID <= 0 && C_TaxCategory_ID > 0)
+		{
+			return getExemptTax(ctx, AD_Org_ID, 0, trxName);
 		}
 		else
 		{
@@ -518,7 +537,6 @@ public class Tax
 		}
 	}	//	getExemptTax
 
-	
 	/**************************************************************************
 	 *	Get Tax ID (Detail).
 	 *  @param ctx context
