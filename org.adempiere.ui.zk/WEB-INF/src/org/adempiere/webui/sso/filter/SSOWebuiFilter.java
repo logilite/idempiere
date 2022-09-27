@@ -66,6 +66,7 @@ public class SSOWebuiFilter implements Filter
 		{
 			HttpServletRequest httpRequest = (HttpServletRequest) request;
 			HttpServletResponse httpResponse = (HttpServletResponse) response;
+			boolean isRedirectToLoginOnError = false; 
 			try
 			{
 				if (m_SSOPrinciple == null)
@@ -89,6 +90,7 @@ public class SSOWebuiFilter implements Filter
 					else if (m_SSOPrinciple.isAccessTokenExpired(httpRequest, httpResponse))
 					{
 						// Refresh token after expired
+						isRedirectToLoginOnError = true;
 						m_SSOPrinciple.refreshToken(httpRequest, httpResponse);
 					}
 				}
@@ -98,8 +100,15 @@ public class SSOWebuiFilter implements Filter
 				log.log(Level.SEVERE, "Exception while authenticating: ",exc);
 				if (m_SSOPrinciple != null)
 					m_SSOPrinciple.removePrincipleFromSession(httpRequest);
-				httpResponse.setStatus(500);
-				httpResponse.sendRedirect(SSOUtils.ERROR_API + exc.getMessage());
+				if(isRedirectToLoginOnError)
+				{
+					httpResponse.sendRedirect("webui/index.zul");
+				}
+				else
+				{
+					httpResponse.setStatus(500);
+					httpResponse.sendRedirect(SSOUtils.ERROR_API + exc.getMessage());
+				}
 				return;
 			}
 		}

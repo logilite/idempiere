@@ -38,7 +38,6 @@ import org.adempiere.webui.desktop.FavouriteController;
 import org.adempiere.webui.desktop.IDesktop;
 import org.adempiere.webui.session.SessionContextListener;
 import org.adempiere.webui.session.SessionManager;
-import org.adempiere.webui.sso.ISSOPrinciple;
 import org.adempiere.webui.theme.ITheme;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.BrowserToken;
@@ -598,8 +597,8 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
     	while(attributes.hasMoreElements()) {
     		String attribute = attributes.nextElement();
     		
-    		//need to keep zk's session attributes
-    		if (attribute.contains("zkoss.") || ISSOPrinciple.SSO_PRINCIPLE_SESSION_NAME.equalsIgnoreCase(attribute))
+    		//need to keep zk's and sso session attributes
+    		if (attribute.contains("zkoss.") || attribute.startsWith("sso."))
     			continue;
     		
     		httpRequest.getSession().removeAttribute(attribute);
