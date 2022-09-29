@@ -1005,7 +1005,7 @@ public class DataEngine
 				if (m_group.getGroupColumnCount() > 1)	//	one is GRANDTOTAL_
 				{
 					ArrayList<PrintDataColumn> changedGroups = new ArrayList<PrintDataColumn>();
-					Map<PrintDataColumn, Object> changedValues = new HashedMap<PrintDataColumn, Object>();
+					Map<PrintDataColumn, Object> changedValues = new HashMap<PrintDataColumn, Object>();
 					boolean force = false;
 					
 					//	Check Columns for Function Columns
@@ -1289,7 +1289,7 @@ public class DataEngine
 		{
 			
 			ArrayList<PrintDataColumn> changedGroups = new ArrayList<PrintDataColumn>();
-			Map<PrintDataColumn, Object> changedValues = new HashedMap<PrintDataColumn, Object>();
+			Map<PrintDataColumn, Object> changedValues = new HashMap<PrintDataColumn, Object>();
 			//	Check Columns for Function Columns
 			for (int i = 0; i < pd.getColumnInfo().length; i++)	
 			{
