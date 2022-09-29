@@ -767,7 +767,7 @@ public class Util
 			arrayInt = new Integer[arrayBD.length];
 			for (int i = 0; i < arrayBD.length; i++)
 			{
-				arrayInt[i] = new Integer(arrayBD[i].intValue());
+				arrayInt[i] = Integer.valueOf(arrayBD[i].intValue());
 			}
 		}
 		return arrayInt;

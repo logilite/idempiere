@@ -576,7 +576,11 @@ public class Chosenbox<T> extends HtmlBasedComponent {
 	}
 	
 	private String[] getChgSel() {
-		prepareItems(null, true, _model);
+		return getChgSel(true);
+	}
+	
+	private String[] getChgSel(boolean excludeUnselected) {
+		prepareItems(null, excludeUnselected, _model);
 		if (_options != null) {
 			String [] chgSel = _options;
 			_options = null;
@@ -688,7 +692,8 @@ public class Chosenbox<T> extends HtmlBasedComponent {
 			smartUpdate("items", _options);
 			_options = null; //purge the data
 		}
-		smartUpdate("chgSel", getChgSel());
+		// While updating item selIdxs is not updated so take set value from model
+		smartUpdate("chgSel", getChgSel(false));
 	}
 
 	private void updateListContent(String prefix, ListModel<T> subModel) {		

@@ -406,7 +406,7 @@ public class Doc_InOut extends Doc
 							String costingLevel = product.getCostingLevel(as);
 							if(MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))
 							{
-								sql += "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)"
+								sql = "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)"
 									+ " AND AD_Client_ID = ?  AND M_AttributeSetInstance_ID=?";
 								list.add(line.getM_AttributeSetInstance_ID());
 							}
@@ -757,55 +757,78 @@ public class Doc_InOut extends Doc
 				DocLine_InOut line = (DocLine_InOut) p_lines[i];
 				BigDecimal costs = null;
 				MProduct product = line.getProduct();
-				if (!isReversal(line))
+				MInOutLine ioLine = (MInOutLine) line.getPO();
+				
+				String costingMethod = product.getCostingMethod(as);
+				//IDEMPIERE-5419: if cost detail already present use it.
+				if (MAcctSchema.COSTINGMETHOD_AveragePO.equals(costingMethod) ||
+						MAcctSchema.COSTINGMETHOD_AverageInvoice.equals(costingMethod) ||
+						MAcctSchema.COSTINGMETHOD_LastPOPrice.equals(costingMethod)  ||
+						( MAcctSchema.COSTINGMETHOD_StandardCosting.equals(costingMethod) &&  MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as))))
 				{
-					MInOutLine ioLine = (MInOutLine) line.getPO();
-					I_M_RMALine rmaLine = ioLine.getM_RMALine();
-					costs = rmaLine != null ? rmaLine.getAmt() : BigDecimal.ZERO;
-					I_M_InOutLine originalInOutLine = rmaLine != null ? rmaLine.getM_InOutLine() : null;
-					if (originalInOutLine != null && originalInOutLine.getC_OrderLine_ID() > 0)
+					MCostDetail cdInv=MCostDetail.get(getCtx(), "M_InOutLine_ID = ?",ioLine.getM_InOutLine_ID() ,line.getM_AttributeSetInstance_ID(),as.getC_AcctSchema_ID() ,getTrxName());
+					if(cdInv!=null)
+						costs=cdInv.getAmt();
+				}
+				if(costs==null) {
+					if (!isReversal(line))
 					{
-						MOrderLine originalOrderLine = (MOrderLine) originalInOutLine.getC_OrderLine();
-						//	Goodwill: Correct included Tax
-				    	int C_Tax_ID = originalOrderLine.getC_Tax_ID();
-				    	if (originalOrderLine.isTaxIncluded() && C_Tax_ID != 0)
+						I_M_RMALine rmaLine = ioLine.getM_RMALine();
+						costs = rmaLine != null ? rmaLine.getAmt() : BigDecimal.ZERO;
+						I_M_InOutLine originalInOutLine = rmaLine != null ? rmaLine.getM_InOutLine() : null;
+						if (originalInOutLine != null && originalInOutLine.getC_OrderLine_ID() > 0)
 						{
-							MTax tax = MTax.get(getCtx(), C_Tax_ID);
-							if (!tax.isZeroTax())
+							MOrderLine originalOrderLine = (MOrderLine) originalInOutLine.getC_OrderLine();
+							//	Goodwill: Correct included Tax
+					    	int C_Tax_ID = originalOrderLine.getC_Tax_ID();
+					    	if (originalOrderLine.isTaxIncluded() && C_Tax_ID != 0)
 							{
-								int stdPrecision = MCurrency.getStdPrecision(getCtx(), originalOrderLine.getC_Currency_ID());
-								BigDecimal costTax = tax.calculateTax(costs, true, stdPrecision);
-								if (log.isLoggable(Level.FINE)) log.fine("Costs=" + costs + " - Tax=" + costTax);
-								costs = costs.subtract(costTax);
-							}
-						}	//	correct included Tax
-				    	
-				    	// different currency
-				    	if (C_Currency_ID  != originalOrderLine.getC_Currency_ID()) 
-						{
-							costs = MConversionRate.convert (getCtx(),
-									costs, originalOrderLine.getC_Currency_ID(), C_Currency_ID,
+								MTax tax = MTax.get(getCtx(), C_Tax_ID);
+								if (!tax.isZeroTax())
+								{
+									int stdPrecision = MCurrency.getStdPrecision(getCtx(), originalOrderLine.getC_Currency_ID());
+									BigDecimal costTax = tax.calculateTax(costs, true, stdPrecision);
+									if (log.isLoggable(Level.FINE)) log.fine("Costs=" + costs + " - Tax=" + costTax);
+									costs = costs.subtract(costTax);
+								}
+							}	//	correct included Tax
+					    	
+					    	// different currency
+					    	if (C_Currency_ID  != originalOrderLine.getC_Currency_ID()) 
+							{
+								costs = MConversionRate.convert (getCtx(),
+										costs, originalOrderLine.getC_Currency_ID(), C_Currency_ID,
 									getDateAcct(), line.getC_ConversionType_ID(), getAD_Client_ID(), getAD_Org_ID(), true);
+							}
+	
+					    	costs = costs.multiply(line.getQty());
+					    	costs = costs.negate();
 						}
-
-				    	costs = costs.multiply(line.getQty());
-				    	costs = costs.negate();
+						else
+						{
+							costs = line.getProductCosts(as, line.getAD_Org_ID(), false);	//	current costs
+						}
+						if (costs == null || costs.signum() == 0)
+						{
+								p_Error = Msg.getMsg(getCtx(),"Resubmit - No Costs for") + " " + product.getName();
+							log.log(Level.WARNING, p_Error);
+							return null;
+						}
 					}
 					else
 					{
-						costs = line.getProductCosts(as, line.getAD_Org_ID(), false);	//	current costs
+						//IDEMPIERE-5419: On reversal get cost of original return line
+						MCostDetail cdInv=MCostDetail.get(getCtx(), "M_InOutLine_ID = ?",ioLine.getReversalLine_ID(),line.getM_AttributeSetInstance_ID(),as.getC_AcctSchema_ID() ,getTrxName());
+						if(cdInv!=null)
+							costs=cdInv.getAmt();
+						
+						if (costs == null || costs.signum() == 0)
+						{
+								p_Error = Msg.getMsg(getCtx(),"Resubmit - No Costs for") + " " + product.getName();
+							log.log(Level.WARNING, p_Error);
+							return null;
+						}
 					}
-					if (costs == null || costs.signum() == 0)
-					{
-							p_Error = Msg.getMsg(getCtx(),"Resubmit - No Costs for") + " " + product.getName();
-						log.log(Level.WARNING, p_Error);
-						return null;
-					}
-				}
-				else
-				{
-					//update below
-					costs = Env.ONE;
 				}
 
 				dr = fact.createLine(line,

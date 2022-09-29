@@ -108,7 +108,6 @@ public class PrintDataGroup
 		m_groupMap.put(AD_PrintFormatItem_ID, newValue);
 		return null;
 	}	//	groupChange
-
 	
 	/**************************************************************************
 	 * 	Add Function Column
@@ -247,6 +246,29 @@ public class PrintDataGroup
 		if (pdf != null)
 			pdf.reset();
 	}	//	reset
+	
+	public Object getGroupValue(int AD_PrintFormatItem_ID)
+	{
+		if (!isGroupColumn(AD_PrintFormatItem_ID))
+			return null;
+		if (m_groupMap.containsKey(AD_PrintFormatItem_ID))
+		{
+			return m_groupMap.get(AD_PrintFormatItem_ID);
+		}
+		return null;
+	}
+	
+	public boolean isSameValueGroup(int groupId, PrintDataColumn[] columnInfo, char function, BigDecimal lastvalue)
+	{
+		for (int c = 0; c < columnInfo.length; c++)
+		{
+			if (isFunctionColumn(columnInfo[c].getAD_PrintFormatItem_ID(), function) && lastvalue != null && lastvalue.equals(getValue(groupId, columnInfo[c].getAD_PrintFormatItem_ID(), function)))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	/**************************************************************************
 	 * 	String Representation

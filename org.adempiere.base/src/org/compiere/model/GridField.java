@@ -290,6 +290,8 @@ public class GridField
 		Evaluator.parseDepends(list, m_vo.DisplayLogic);
 		Evaluator.parseDepends(list, m_vo.ReadOnlyLogic);
 		Evaluator.parseDepends(list, m_vo.MandatoryLogic);
+		if(m_vo.IsAlwaysUpdateable)
+			Evaluator.parseDepends(list, m_vo.AlwaysUpdatableLogic);
 		// Virtual UI Column
 		if (m_vo.ColumnSQL != null && m_vo.ColumnSQL.length() > 0 && m_vo.ColumnSQL.startsWith("@SQL="))
 			Evaluator.parseDepends(list, m_vo.ColumnSQL.substring(5));
@@ -444,8 +446,30 @@ public class GridField
 		}
 
 		//  Fields always updateable
-		if (m_vo.IsAlwaysUpdateable)      //  Zoom
-			return true;
+		if (m_vo.IsAlwaysUpdateable)
+		{
+			boolean isAlwaysUpdatable = true;
+			//  Do we have a Always updatable rule
+			if (checkContext && m_vo.AlwaysUpdatableLogic.length() > 0)
+			{
+				if (m_vo.AlwaysUpdatableLogic.startsWith("@SQL="))
+				{
+					boolean retValue = Evaluator.parseSQLLogic(m_vo.AlwaysUpdatableLogic, m_vo.ctx, m_vo.WindowNo, m_vo.TabNo, m_vo.ColumnName);
+					if (!retValue)
+						isAlwaysUpdatable = false;
+				}
+				else
+				{
+					boolean retValue = Evaluator.evaluateLogic(this, m_vo.AlwaysUpdatableLogic);
+					if (log.isLoggable(Level.FINEST)) log.finest(m_vo.ColumnName + " R/O(" + m_vo.AlwaysUpdatableLogic + ") => R/W-" + retValue);
+					if (!retValue)
+						isAlwaysUpdatable = false;
+				}
+			}
+			if(isAlwaysUpdatable)
+				return true;
+		}
+			
 
 		//check tab context
 		if (checkContext && getGridTab() != null &&

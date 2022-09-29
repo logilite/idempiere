@@ -343,6 +343,30 @@ public class X_AD_Sequence extends PO implements I_AD_Sequence, I_Persistent
 		return false;
 	}
 
+	/** Set Use Fiscal Year.
+		@param IsUseFiscalYear 
+		Use Fiscal Year to restart the sequence.
+	  */
+	public void setIsUseFiscalYear (boolean IsUseFiscalYear)
+	{
+		set_Value (COLUMNNAME_IsUseFiscalYear, Boolean.valueOf(IsUseFiscalYear));
+	}
+
+	/** Get Use Fiscal Year.
+		@return Use Fiscal Year to restart the sequence.
+	  */
+	public boolean isUseFiscalYear () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsUseFiscalYear);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Name.
 		@param Name Alphanumeric identifier of the entity
 	*/

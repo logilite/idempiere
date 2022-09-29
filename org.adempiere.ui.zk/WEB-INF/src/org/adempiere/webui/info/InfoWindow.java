@@ -950,7 +950,10 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				if (infoColumn.getAD_Reference_ID() == DisplayType.ID) 
 				{
 					if (infoColumn.getSelectClause().equalsIgnoreCase(keySelectClause))
+					{
+						i++; // To fix issue of 1).Not showing data for Lookup Column 2).NPE; when Key column is ID Column and have Display/Hide Column flag is true on Column.
 						continue;
+					}
 					
 					columnInfo = new ColumnInfo(infoColumn.getNameTrl(), colSQL, DisplayType.getClass(infoColumn.getAD_Reference_ID(), true), infoColumn.isReadOnly() || haveNotProcess);
 				}

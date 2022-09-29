@@ -2700,7 +2700,30 @@ public final class DB
 		builder.append(")");
 		return builder.toString();
 	}
-	
+
+	/**
+	 * @param  columnName
+	 * @param  arrObj       array object for integer or string
+	 * @return              IN clause
+	 * @throws SQLException
+	 */
+	public static String inClauseForCSV(String columnName, Object arrObj) throws SQLException
+	{
+		String s = Util.convertArrayToStringForDB(arrObj, true);
+		if (!Util.isEmpty(s, true))
+			s = s.replaceAll("([{}])", "");
+		if (Util.isEmpty(s, true))
+			return "";
+		else if ("NULL".equals(s))
+			return "";
+
+		StringBuilder builder = new StringBuilder(columnName);
+		builder.append(" IN ( ");
+		builder.append(s.toString());
+		builder.append(" ) ");
+		return builder.toString();
+	} // inClauseForCSV
+
 	/**
 	 * 
 	 * @param columnName

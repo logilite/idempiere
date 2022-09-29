@@ -182,12 +182,12 @@ public interface I_AD_Sequence
     public static final String COLUMNNAME_IsActive = "IsActive";
 
 	/** Set Active.
-	  * The record is active in the system
+	  * Active is something that is no longer being used or is out of date
 	  */
 	public void setIsActive (boolean IsActive);
 
 	/** Get Active.
-	  * The record is active in the system
+	  * Active is something that is no longer being used or is out of date
 	  */
 	public boolean isActive();
 
@@ -242,6 +242,19 @@ public interface I_AD_Sequence
 	  * The document number  will be used as the record key
 	  */
 	public boolean isTableID();
+
+    /** Column name IsUseFiscalYear */
+    public static final String COLUMNNAME_IsUseFiscalYear = "IsUseFiscalYear";
+
+	/** Set Use Fiscal Year.
+	  * Use Fiscal Year to restart the sequence.
+	  */
+	public void setIsUseFiscalYear (boolean IsUseFiscalYear);
+
+	/** Get Use Fiscal Year.
+	  * Use Fiscal Year to restart the sequence.
+	  */
+	public boolean isUseFiscalYear();
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";

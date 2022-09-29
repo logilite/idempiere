@@ -313,6 +313,8 @@ public class GridFieldVO implements Serializable, Cloneable
 					vo.AD_Process_ID = rs.getInt (i);
 				else if (columnName.equalsIgnoreCase("ReadOnlyLogic"))
 					vo.ReadOnlyLogic = rs.getString (i);
+				else if (columnName.equalsIgnoreCase("AlwaysUpdatableLogic"))
+					vo.AlwaysUpdatableLogic = rs.getString (i);
 				else if (columnName.equalsIgnoreCase("MandatoryLogic"))
 					vo.MandatoryLogic = rs.getString (i);	
 				else if (columnName.equalsIgnoreCase("ObscureType"))
@@ -772,6 +774,8 @@ public class GridFieldVO implements Serializable, Cloneable
 	public String 		MandatoryLogic = "";
 	/**	Read Only Logic	*/
 	public String       ReadOnlyLogic = "";
+	/**	Always Updatable Logic	*/
+	public String       AlwaysUpdatableLogic = "";
 	/**	Display Obscure	*/
 	public String		ObscureType = null;
 	/** Default Focus	*/
@@ -867,6 +871,8 @@ public class GridFieldVO implements Serializable, Cloneable
 			Callout = "";
 		if (ReadOnlyLogic == null)
 			ReadOnlyLogic = "";
+		if (AlwaysUpdatableLogic == null)
+			AlwaysUpdatableLogic = "";
 		if (MandatoryLogic == null)
 			MandatoryLogic = "";
 		if (Placeholder == null)

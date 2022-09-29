@@ -39,7 +39,7 @@ public class PrintDataColumn
 	 *  @param isPageBreak if true force page break after function
 	 *  @param foreignColumnName name foreign
 	 */
-	public PrintDataColumn(int AD_PrintFormatItem_ID, int AD_Column_ID, String columnName,int displayType, int columnSize,String alias, boolean isPageBreak, String foreignColumnName) 
+	public PrintDataColumn(int AD_PrintFormatItem_ID, int AD_Column_ID, String columnName,int displayType, int columnSize,String alias, boolean isPageBreak, String foreignColumnName, int SortNo) 
 	{
 		m_AD_PrintFormatItem_ID = AD_PrintFormatItem_ID;
 		m_AD_Column_ID = AD_Column_ID;
@@ -53,11 +53,12 @@ public class PrintDataColumn
 			m_alias = columnName;
 		m_pageBreak = isPageBreak;
 		m_foreignColumnName = foreignColumnName;
+		m_SortNo = SortNo;
 	}
 
-	public PrintDataColumn (int AD_PrintFormatItem_ID, int AD_Column_ID, String columnName,int displayType, int columnSize,String alias, boolean isPageBreak)
+	public PrintDataColumn (int AD_PrintFormatItem_ID, int AD_Column_ID, String columnName,int displayType, int columnSize,String alias, boolean isPageBreak, int SortNo)
 	{
-		this(AD_PrintFormatItem_ID, AD_Column_ID, columnName, displayType, columnSize, alias, isPageBreak, null);
+		this(AD_PrintFormatItem_ID, AD_Column_ID, columnName, displayType, columnSize, alias, isPageBreak, null, SortNo);
 	}	//	PrintDataColumn
 	
 	private int 		m_AD_PrintFormatItem_ID;
@@ -69,6 +70,7 @@ public class PrintDataColumn
 	private String		m_alias;
 	private boolean		m_pageBreak;
 	private String      m_FormatPattern;
+	private int			m_SortNo;
 
 	/*************************************************************************/
 
@@ -172,6 +174,16 @@ public class PrintDataColumn
 	
 	public String getFormatPattern() {
 		return m_FormatPattern;
+	}
+	
+	public int getM_SortNo( )
+	{
+		return m_SortNo;
+	}
+
+	public void setM_SortNo(int m_SortNo)
+	{
+		this.m_SortNo = m_SortNo;
 	}
 
 }	//	PrintDataColumn

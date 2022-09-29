@@ -14,6 +14,7 @@
 package org.adempiere.webui.editor;
 
 import java.beans.PropertyChangeEvent;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -190,7 +191,7 @@ public class WChosenboxSearchEditor extends WEditor implements ContextMenuListen
 					imageUrl = ThemeManager.getThemeResource("images/Product16.png");
 			}
 		}
-		popupMenu = new WEditorPopupMenu(false, true, isShowPreference(), false, false, false, lookup);
+		popupMenu = new WEditorPopupMenu(false, true, isShowPreference(), false, false, false, true, lookup);
 		if (ThemeManager.isUseFontIconForImage())
 			getComponent().getButton().setIconSclass(imageUrl);
 		else
@@ -343,6 +344,37 @@ public class WChosenboxSearchEditor extends WEditor implements ContextMenuListen
 		else if (WEditorPopupMenu.CHANGE_LOG_EVENT.equals(evt.getContextEvent()))
 		{
 			WFieldRecordInfo.start(gridField);
+		}
+		else if (WEditorPopupMenu.COPY_EVENT.equals(evt.getContextEvent()))
+		{
+			WEditorPopupMenu.setClipboard(value);
+		}
+		else if (WEditorPopupMenu.PASTE_EVENT.equals(evt.getContextEvent()))
+		{
+			Object obj = WEditorPopupMenu.getClipboard();
+			if (obj != null && isValueChange(obj))
+			{
+				String oldValue = value;
+				String newValue = obj.toString();
+
+				// append new value if old value is not null
+				if (!Util.isEmpty(oldValue, true))
+				{
+					String[] newValues = newValue.split(",");
+					String[] oldValues = oldValue.split(",");
+
+					// make sure unique id string, no duplication
+					LinkedHashSet<String> uniqueValues = new LinkedHashSet<String>();
+					uniqueValues.addAll(Arrays.asList(oldValues));
+					uniqueValues.addAll(Arrays.asList(newValues));
+
+					// Convert the List of String to String
+					newValue = String.join(",", uniqueValues);
+				}
+
+				// to let UI know something has changed.
+				fireValueChangeEvent(newValue);
+			}
 		}
 	}
 

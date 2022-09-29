@@ -177,8 +177,9 @@ import org.compiere.util.Msg;
 			return false;
 		}
 		
-		if (!getC_DepositBatch().isProcessed()) {
-			log.saveError("SaveError", Msg.getMsg(getCtx(), "DepositBatchIsNotProcessed")+ getC_DepositBatch());
+		if (getC_DepositBatch_ID() != 0 && !getC_DepositBatch().isProcessed()) {
+			log.saveError("SaveError", Msg.getMsg(getCtx(), "DepositBatchIsNotProcessed") + getC_DepositBatch());
+			return false;
 		}
 
 		//	Calculate Charge = Statement - trx - Interest  
@@ -298,7 +299,11 @@ import org.compiere.util.Msg;
 		if (MBankStatement.isPostWithDateFromLine(getAD_Client_ID())) {
 			MPeriod headerPeriod = MPeriod.get(getCtx(), getParent().getDateAcct(), getParent().getAD_Org_ID(), get_TrxName());
 			MPeriod linePeriod = MPeriod.get(getCtx(), getDateAcct(), getParent().getAD_Org_ID(), get_TrxName());
-
+			
+			if(headerPeriod != null && linePeriod != null && MSysConfig.getBooleanValue(MSysConfig.BANK_STATEMENT_POST_WITH_LINE_DATE_YEARLY, false, Env.getAD_Client_ID(Env.getCtx()))) {
+				return headerPeriod.getC_Year_ID()==linePeriod.getC_Year_ID();
+			}
+			
 			return headerPeriod != null && linePeriod != null && headerPeriod.getC_Period_ID() == linePeriod.getC_Period_ID();	
 		}
 		return true;

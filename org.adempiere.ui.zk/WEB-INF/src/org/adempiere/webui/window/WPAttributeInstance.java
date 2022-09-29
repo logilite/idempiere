@@ -403,5 +403,10 @@ public class WPAttributeInstance extends Window implements EventListener<Event>
 	{
 		return m_M_Locator_ID;
 	}	//	getM_Locator_ID
+	
+	public WListbox getWListBox()
+	{
+		return m_table;
+	}	// getWListBox
 
 }	//	PAttributeInstance

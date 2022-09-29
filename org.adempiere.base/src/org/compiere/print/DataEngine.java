@@ -383,7 +383,7 @@ public class DataEngine
 
 				//	General Info
 				boolean IsPrinted = "Y".equals(rs.getString(15));
-
+				int SortNo = rs.getInt(16);
 				boolean isPageBreak = "Y".equals(rs.getString(17));
 				
 				String formatPattern = rs.getString(25);
@@ -407,7 +407,7 @@ public class DataEngine
 					//	=>	Table.Column,
 					sqlSELECT.append(tableName).append(".").append(ColumnName).append(",");
 					groupByColumns.add(tableName+"."+ColumnName);
-					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, KEY, isPageBreak);	//	KeyColumn
+					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, KEY, isPageBreak, SortNo);	//	KeyColumn
 				}
 				/** START DEVCOFFEE: script column  **/
 				else if (ColumnName == null || script != null && !script.isEmpty())
@@ -433,7 +433,7 @@ public class DataEngine
 					// Warning here: Oracle treats empty strings '' as NULL and the code below checks for wasNull on this column
 					.append("' '").append(" AS \"").append(pfiName).append("\",");
 					//
-					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, -1, pfiName, DisplayType.Text, FieldLength, orderName, isPageBreak);
+					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, -1, pfiName, DisplayType.Text, FieldLength, orderName, isPageBreak,SortNo);
 					synonymNext();
 				}
 				//	-- Parent, TableDir (and unqualified Search) --
@@ -467,7 +467,7 @@ public class DataEngine
 					groupByColumns.add(lookupSQL);
 					orderName = m_synonym + display;
 					//
-					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak);
+					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak, SortNo);
 					synonymNext();
 				}
 
@@ -499,7 +499,7 @@ public class DataEngine
 					//
 					TableReference tr = getTableReference(AD_Reference_Value_ID);
 					String foreignColumnName = tr.KeyColumn;
-					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak, foreignColumnName);
+					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak, foreignColumnName, SortNo);
 					synonymNext();
 				}
 
@@ -545,7 +545,7 @@ public class DataEngine
 					// 	TableName.ColumnName,
 					sqlSELECT.append(lookupSQL).append(" AS ").append(ColumnName).append(",");
 					groupByColumns.add(lookupSQL); 
-					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak);
+					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak, SortNo);
 					synonymNext();
 				}
 				else if (AD_Reference_ID == DisplayType.MultiSelectList)
@@ -591,7 +591,7 @@ public class DataEngine
 							.append(".AD_Reference_ID=").append(AD_Reference_Value_ID).append(")").append(" AS ")
 							.append(m_synonym).append(ColumnName).append(",");
 					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName,
-							isPageBreak);
+							isPageBreak, SortNo);
 					synonymNext();
 				}
 
@@ -659,7 +659,7 @@ public class DataEngine
 						.append(lookupSQL).append("=")
 						.append(m_synonym).append(".").append(key).append(")");
 					//
-					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak);
+					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak, SortNo);
 					synonymNext();
 				}
 
@@ -697,7 +697,7 @@ public class DataEngine
 						orderName = ColumnName;		//	no prefix for synonym
 					}
 					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, 
-						AD_Reference_ID, FieldLength, ColumnName, isPageBreak);
+						AD_Reference_ID, FieldLength, ColumnName, isPageBreak, SortNo);
 				}
 
 				//	Order Sequence - Overwrite order column name
@@ -1005,7 +1005,7 @@ public class DataEngine
 				if (m_group.getGroupColumnCount() > 1)	//	one is GRANDTOTAL_
 				{
 					ArrayList<PrintDataColumn> changedGroups = new ArrayList<PrintDataColumn>();
-					ArrayList<Object> changedValues = new ArrayList<Object>();
+					Map<PrintDataColumn, Object> changedValues = new HashedMap<PrintDataColumn, Object>();
 					boolean force = false;
 					
 					//	Check Columns for Function Columns
@@ -1020,22 +1020,28 @@ public class DataEngine
 						if (value != null)	//	Group change
 						{
 							changedGroups.add(group_pdc);
-							changedValues.add(value);
+							changedValues.put(group_pdc, value);
 							force = true; // all subsequent groups force change
 						}
 					}
 					
 					int groupRowStart = rowNo;
+					Map<String, BigDecimal> lastValueMap = new HashMap<>();
 					for (int j = changedGroups.size() - 1; j >= 0; j--) //	backwards (least group first)
 					{
 						PrintDataColumn group_pdc = changedGroups.get(j);
-						Object value = changedValues.get(j);
+						Object value = changedValues.get(group_pdc);
 						boolean isGroupMultiRow = !m_showSummaryMultRowOnly || (groupRowStart > 1 && (groupRowStart - groupStartMap.get(group_pdc)) > 1);
 						if (isGroupMultiRow || m_summary)
 						{
 							char[] functions = m_group.getFunctions(group_pdc.getAD_PrintFormatItem_ID());
 							for (int f = 0; f < functions.length; f++)
 							{
+								if (m_showSummaryMultRowOnly
+									&& m_group.isSameValueGroup(group_pdc.getAD_PrintFormatItem_ID(), pd.getColumnInfo(), functions[f], lastValueMap.get(String.valueOf(functions[f]))))
+								{
+									continue;
+								}
 								printRunningTotal(pd, levelNo, rowNo++);
 								pd.addRow(true, levelNo);
 								//	get columns
@@ -1043,24 +1049,25 @@ public class DataEngine
 								{
 									pdc = pd.getColumnInfo()[c];
 								//	log.fine("loadPrintData - PageBreak = " + pdc.isPageBreak());
-
-									if (group_pdc.getAD_PrintFormatItem_ID() == pdc.getAD_PrintFormatItem_ID())
+									if (m_group.isGroupColumn(pdc.getAD_PrintFormatItem_ID()) && pdc.getM_SortNo() <= group_pdc.getM_SortNo())
 									{
+										Object gpValue = changedGroups.contains(pdc) ? changedValues.get(pdc) : m_group.getGroupValue(pdc.getAD_PrintFormatItem_ID());
+										value = gpValue != null ? gpValue : value;
 										String valueString = value.toString();
 										if (value instanceof Timestamp)
 											valueString = DisplayType.getDateFormat(pdc.getDisplayType(), m_language).format(value);
-										if (format.getTableFormat().isPrintFunctionSymbols())		//	Translate Sum, etc.
-											valueString	+= PrintDataFunction.getFunctionSymbol(functions[f]);
+										if (format.getTableFormat().isPrintFunctionSymbols()) // Translate Sum, etc.
+											valueString += PrintDataFunction.getFunctionSymbol(functions[f]);
 										pd.addNode(new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(),
-											valueString, DisplayType.String, false, pdc.isPageBreak(), pdc.getFormatPattern()));
+														valueString, DisplayType.String, false, pdc.isPageBreak(), pdc.getFormatPattern()));
 									}
-									else if (m_group.isFunctionColumn(pdc.getAD_PrintFormatItem_ID(), functions[f]))
+									if (m_group.isFunctionColumn(pdc.getAD_PrintFormatItem_ID(), functions[f]) && group_pdc.getAD_PrintFormatItem_ID()!=pdc.getAD_PrintFormatItem_ID())
 									{
-										pd.addNode(new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(),
-											m_group.getValue(group_pdc.getAD_PrintFormatItem_ID(), 
-												pdc.getAD_PrintFormatItem_ID(), functions[f]), 
-											PrintDataFunction.getFunctionDisplayType(functions[f], pdc.getDisplayType()), 
-												false, pdc.isPageBreak(), pdc.getFormatPattern()));
+										BigDecimal groupValue = m_group.getValue(group_pdc.getAD_PrintFormatItem_ID(), 
+												pdc.getAD_PrintFormatItem_ID(), functions[f]);
+										pd.addNode(new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), groupValue, PrintDataFunction.getFunctionDisplayType(functions[f], pdc.getDisplayType()), false, pdc
+														.isPageBreak(), pdc.getFormatPattern())); 
+										lastValueMap.put(String.valueOf(functions[f]), groupValue);
 									}
 								}	//	 for all columns
 							}	//	for all functions
@@ -1280,43 +1287,70 @@ public class DataEngine
 		//	Check last Group Change
 		if (m_group.getGroupColumnCount() > 1)	//	one is TOTAL
 		{
-			for (int i = pd.getColumnInfo().length-1; i >= 0; i--)	//	backwards (leaset group first)
+			
+			ArrayList<PrintDataColumn> changedGroups = new ArrayList<PrintDataColumn>();
+			Map<PrintDataColumn, Object> changedValues = new HashedMap<PrintDataColumn, Object>();
+			//	Check Columns for Function Columns
+			for (int i = 0; i < pd.getColumnInfo().length; i++)	
 			{
 				PrintDataColumn group_pdc = pd.getColumnInfo()[i];
+				if (!m_group.isGroupColumn(group_pdc.getAD_PrintFormatItem_ID()))
+					continue;
+
+				// Group change
+				Object value = m_group.groupChange(group_pdc.getAD_PrintFormatItem_ID(), new Object(), false);
+				if (value != null) // Group change
+				{
+					changedGroups.add(group_pdc);
+					changedValues.put(group_pdc, value);
+				}
+			}
+			
+			Map<String, BigDecimal> lastValueMap = new HashMap<>();
+			for (int i = changedGroups.size() - 1; i >= 0; i--)	//	backwards (leaset group first)
+			{
+				PrintDataColumn group_pdc = changedGroups.get(i);
 				if (!m_group.isGroupColumn(group_pdc.getAD_PrintFormatItem_ID()))
 					continue;
 				boolean isGroupMultiRow = !m_showSummaryMultRowOnly || (rowNo > 1 && (rowNo - groupStartMap.get(group_pdc)) > 1);
 				if (isGroupMultiRow || m_summary)
 				{
-					Object value = m_group.groupChange(group_pdc.getAD_PrintFormatItem_ID(), new Object(), false);
+					Object value = changedValues.get(group_pdc);
 					if (value != null)	//	Group change
 					{
 					char[] functions = m_group.getFunctions(group_pdc.getAD_PrintFormatItem_ID());
 						for (int f = 0; f < functions.length; f++)
 						{
+							if (m_showSummaryMultRowOnly
+								&& m_group.isSameValueGroup(group_pdc.getAD_PrintFormatItem_ID(), pd.getColumnInfo(), functions[f], lastValueMap.get(String.valueOf(functions[f]))))
+							{
+								continue;
+							}
 							printRunningTotal(pd, levelNo, rowNo++);
 							pd.addRow(true, levelNo);
 							//	get columns
 							for (int c = 0; c < pd.getColumnInfo().length; c++)
 							{
 								pdc = pd.getColumnInfo()[c];
-								if (group_pdc.getColumnName().equals(pdc.getColumnName()))
+								if (m_group.isGroupColumn(pdc.getAD_PrintFormatItem_ID()) && pdc.getM_SortNo() <= group_pdc.getM_SortNo())
 								{
+									Object gpValue = changedGroups.contains(pdc) ? changedValues.get(pdc) : m_group.getGroupValue(pdc.getAD_PrintFormatItem_ID());
+									value = gpValue != null ? gpValue : value;
 									String valueString = value.toString();
 									if (value instanceof Timestamp)
 										valueString = DisplayType.getDateFormat(pdc.getDisplayType(), m_language).format(value);
-									if (format.getTableFormat().isPrintFunctionSymbols())		//	Translate Sum, etc.
-										valueString	+= PrintDataFunction.getFunctionSymbol(functions[f]);
+									if (format.getTableFormat().isPrintFunctionSymbols()) // Translate Sum, etc.
+										valueString += PrintDataFunction.getFunctionSymbol(functions[f]);
 								pd.addNode(new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(),
-										valueString, DisplayType.String, pdc.getFormatPattern()));
+													valueString, DisplayType.String, pdc.getFormatPattern()));
 								}
-							else if (m_group.isFunctionColumn(pdc.getAD_PrintFormatItem_ID(), functions[f]))
+								else if (m_group.isFunctionColumn(pdc.getAD_PrintFormatItem_ID(), functions[f]) && group_pdc.getAD_PrintFormatItem_ID()!=pdc.getAD_PrintFormatItem_ID())
 								{
-								pd.addNode(new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(),
-									m_group.getValue(group_pdc.getAD_PrintFormatItem_ID(), 
-										pdc.getAD_PrintFormatItem_ID(), functions[f]),
-										PrintDataFunction.getFunctionDisplayType(functions[f],
-												pdc.getDisplayType()),pdc.getFormatPattern()));
+									BigDecimal groupValue = m_group.getValue(group_pdc.getAD_PrintFormatItem_ID(), pdc.getAD_PrintFormatItem_ID(), functions[f]);
+									pd.addNode(new PrintDataElement(pdc.getAD_PrintFormatItem_ID(),pdc.getColumnName(), groupValue, 
+											PrintDataFunction.getFunctionDisplayType(functions[f], pdc.getDisplayType()), pdc
+													.getFormatPattern()));
+									lastValueMap.put(String.valueOf(functions[f]), groupValue);
 								}
 							}
 						}	//	for all functions

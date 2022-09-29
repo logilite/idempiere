@@ -77,6 +77,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String BACKGROUND_JOB_MAX_PER_CLIENT = "BACKGROUND_JOB_MAX_PER_CLIENT";
     public static final String BACKGROUND_JOB_MAX_PER_USER = "BACKGROUND_JOB_MAX_PER_USER";
     public static final String BANK_STATEMENT_POST_WITH_DATE_FROM_LINE = "BANK_STATEMENT_POST_WITH_DATE_FROM_LINE";
+    public static final String BANK_STATEMENT_POST_WITH_LINE_DATE_YEARLY = "BANK_STATEMENT_POST_WITH_LINE_DATE_YEARLY";
 	public static final String BPARTNER_QUICK_ENTRY_OPTIONAL_LOCATION_TABLES = "BPARTNER_QUICK_ENTRY_OPTIONAL_LOCATION_TABLES";
     public static final String CALENDAR_ALTERNATE_TIMEZONE = "CALENDAR_ALTERNATE_TIMEZONE";
     public static final String CASH_AS_PAYMENT = "CASH_AS_PAYMENT";
@@ -237,6 +238,7 @@ public class MSysConfig extends X_AD_SysConfig
 	public static final String MULTISELECT_DEFAULT_LOOKUP_OPERATOR = "MULTISELECT_DEFAULT_LOOKUP_OPERATOR";
 	public static final String ZK_DASHBOARD_SLOW_QUERY_TIME_INTERVAL = "ZK_DASHBOARD_SLOW_QUERY_TIME_INTERVAL";
 	public static final String ZK_LOGIN_LEFTPANEL_SHOWN = "ZK_LOGIN_LEFTPANEL_SHOWN";
+	public static final String ENABLE_SSO = "ENABLE_SSO";
 
 	/**
 	 * 	Standard Constructor
