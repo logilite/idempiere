@@ -1026,7 +1026,7 @@ public class DataEngine
 					}
 					
 					int groupRowStart = rowNo;
-					Map<String, BigDecimal> lastValueMap = new HashMap<>();
+					Map<String, Serializable> lastValueMap = new HashMap<>();
 					for (int j = changedGroups.size() - 1; j >= 0; j--) //	backwards (least group first)
 					{
 						PrintDataColumn group_pdc = changedGroups.get(j);
@@ -1063,7 +1063,7 @@ public class DataEngine
 									}
 									if (m_group.isFunctionColumn(pdc.getAD_PrintFormatItem_ID(), functions[f]) && group_pdc.getAD_PrintFormatItem_ID()!=pdc.getAD_PrintFormatItem_ID())
 									{
-										BigDecimal groupValue = m_group.getValue(group_pdc.getAD_PrintFormatItem_ID(), 
+										Serializable groupValue = m_group.getValue(group_pdc.getAD_PrintFormatItem_ID(), 
 												pdc.getAD_PrintFormatItem_ID(), functions[f]);
 										pd.addNode(new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), groupValue, PrintDataFunction.getFunctionDisplayType(functions[f], pdc.getDisplayType()), false, pdc
 														.isPageBreak(), pdc.getFormatPattern())); 
@@ -1306,7 +1306,7 @@ public class DataEngine
 				}
 			}
 			
-			Map<String, BigDecimal> lastValueMap = new HashMap<>();
+			Map<String, Serializable> lastValueMap = new HashMap<>();
 			for (int i = changedGroups.size() - 1; i >= 0; i--)	//	backwards (leaset group first)
 			{
 				PrintDataColumn group_pdc = changedGroups.get(i);
@@ -1346,7 +1346,7 @@ public class DataEngine
 								}
 								else if (m_group.isFunctionColumn(pdc.getAD_PrintFormatItem_ID(), functions[f]) && group_pdc.getAD_PrintFormatItem_ID()!=pdc.getAD_PrintFormatItem_ID())
 								{
-									BigDecimal groupValue = m_group.getValue(group_pdc.getAD_PrintFormatItem_ID(), pdc.getAD_PrintFormatItem_ID(), functions[f]);
+									Serializable groupValue = m_group.getValue(group_pdc.getAD_PrintFormatItem_ID(), pdc.getAD_PrintFormatItem_ID(), functions[f]);
 									pd.addNode(new PrintDataElement(pdc.getAD_PrintFormatItem_ID(),pdc.getColumnName(), groupValue, 
 											PrintDataFunction.getFunctionDisplayType(functions[f], pdc.getDisplayType()), pdc
 													.getFormatPattern()));

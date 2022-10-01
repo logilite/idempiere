@@ -1003,16 +1003,6 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				}
 				else if (LookupFactoryHelper.isLookup(infoColumn))
 				{
-					WEditor editor = WebEditorFactory.getEditor(gridFields.get(i), true);
-					editor.setMandatory(false);
-					editor.setReadWrite(false);
-					editorMap.put(colSQL, editor);
-					if (infoColumn.getAD_Reference_ID() == DisplayType.MultiSelectTable || infoColumn.getAD_Reference_ID() == DisplayType.MultiSelectSearch)
-						columnInfo = new ColumnInfo(infoColumn.getAD_InfoColumn().get_Translation("Name"), colSQL, Integer[].class, infoColumn.isReadOnly());
-					else
-						columnInfo = new ColumnInfo(infoColumn.getAD_InfoColumn().get_Translation("Name"), colSQL, String[].class, infoColumn.isReadOnly());
-				}
-				{
 					if (infoColumn.getAD_Reference_ID() == DisplayType.List)
 					{
 						WEditor editor = null;

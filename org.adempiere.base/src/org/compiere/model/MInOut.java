@@ -3101,7 +3101,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		if (C_InvoiceLine_ID != 0)
 			il = new MInvoiceLine (Env.getCtx(), C_InvoiceLine_ID, get_TrxName());
 		
-		MInOutLine iol = new MInOutLine (this);
+		MInOutLine iol = MInOutLine.createFrom(this);
 		iol.setM_Product_ID(M_Product_ID, C_UOM_ID);	//	Line UOM
 		iol.setQty(Qty);							//	Movement/Entered
 		//
@@ -3110,7 +3110,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		if (C_OrderLine_ID != 0)
 		{
 			iol.setC_OrderLine_ID(C_OrderLine_ID);
-			ol = new MOrderLine (Env.getCtx(), C_OrderLine_ID, get_TrxName());
+            ol = (MOrderLine) MTable.get(Env.getCtx(), MOrderLine.Table_ID).getPO(C_OrderLine_ID, get_TrxName());
 			if (ol.getQtyEntered().compareTo(ol.getQtyOrdered()) != 0)
 			{
 				iol.setMovementQty(Qty
@@ -3151,7 +3151,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		}
 		else if (M_RMALine_ID != 0)
 		{
-			rmal = new MRMALine(Env.getCtx(), M_RMALine_ID, get_TrxName());
+            rmal = (MRMALine) MTable.get(Env.getCtx(), MRMALine.Table_ID).getPO(M_RMALine_ID, get_TrxName());
 			iol.setM_RMALine_ID(M_RMALine_ID);
 			iol.setQtyEntered(Qty);
 			iol.setDescription(rmal.getDescription());

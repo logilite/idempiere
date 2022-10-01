@@ -3109,7 +3109,7 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
 	public void createLineFrom(int C_OrderLine_ID, int M_InOutLine_ID, int M_RMALine_ID, 
 			int M_Product_ID, int C_UOM_ID, BigDecimal Qty)
 	{
-		MInvoiceLine invoiceLine = new MInvoiceLine (this);
+		MInvoiceLine invoiceLine = MInvoiceLine.createFrom(this);
 		invoiceLine.setM_Product_ID(M_Product_ID, C_UOM_ID);	//	Line UOM
 		invoiceLine.setQty(Qty);							//	Invoiced/Entered
 		BigDecimal QtyInvoiced = null;
@@ -3124,16 +3124,18 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
 		//  Info
 		MOrderLine orderLine = null;
 		if (C_OrderLine_ID != 0)
-			orderLine = new MOrderLine (Env.getCtx(), C_OrderLine_ID, get_TrxName());
+            orderLine = (MOrderLine) MTable.get(Env.getCtx(), MOrderLine.Table_ID).getPO(C_OrderLine_ID,
+            		get_TrxName());
 		//
 		MRMALine rmaLine = null;
 		if (M_RMALine_ID > 0)
-			rmaLine = new MRMALine (Env.getCtx(), M_RMALine_ID, get_TrxName());
+            rmaLine = (MRMALine) MTable.get(Env.getCtx(), MRMALine.Table_ID).getPO(M_RMALine_ID, get_TrxName());
 		//
 		MInOutLine inoutLine = null;
 		if (M_InOutLine_ID != 0)
 		{
-			inoutLine = new MInOutLine (Env.getCtx(), M_InOutLine_ID, get_TrxName());
+            inoutLine = (MInOutLine) MTable.get(Env.getCtx(), MInOutLine.Table_ID).getPO(M_InOutLine_ID,
+            		get_TrxName());
 			if (orderLine == null && inoutLine.getC_OrderLine_ID() != 0)
 			{
 				C_OrderLine_ID = inoutLine.getC_OrderLine_ID();

@@ -990,7 +990,7 @@ public class MRMA extends X_M_RMA implements DocAction
 	 */
 	public void createLineFrom(int M_InOutLine_ID, BigDecimal MovementQty, String Description)
 	{
-		MRMALine rmaLine = new MRMALine(Env.getCtx(), 0, get_TrxName());
+        MRMALine rmaLine = (MRMALine) MTable.get(getCtx(), MRMALine.Table_ID).getPO(0, get_TrxName());
 		rmaLine.setM_RMA_ID(getM_RMA_ID());
         rmaLine.setM_InOutLine_ID(M_InOutLine_ID);
         rmaLine.setQty(MovementQty);

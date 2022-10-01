@@ -258,7 +258,7 @@ public class PrintDataGroup
 		return null;
 	}
 	
-	public boolean isSameValueGroup(int groupId, PrintDataColumn[] columnInfo, char function, BigDecimal lastvalue)
+	public boolean isSameValueGroup(int groupId, PrintDataColumn[] columnInfo, char function, Serializable lastvalue)
 	{
 		for (int c = 0; c < columnInfo.length; c++)
 		{
