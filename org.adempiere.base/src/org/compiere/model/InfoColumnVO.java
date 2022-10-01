@@ -51,6 +51,8 @@ public class InfoColumnVO implements Serializable, Cloneable {
 	
 	private boolean isQueryCriteria;
 	
+	private boolean isQueryAfterChange;
+	
 	private boolean isReadOnly;
 	
 	private boolean isDisplayed;
@@ -129,6 +131,7 @@ public class InfoColumnVO implements Serializable, Cloneable {
 		ColumnName = infoColumn.getColumnName();
 		isMandatory = infoColumn.isMandatory();
 		isQueryCriteria = infoColumn.isQueryCriteria();
+		isQueryAfterChange = infoColumn.isQueryAfterChange();
 		NameTrl = infoColumn.get_Translation("Name");
 		Name = infoColumn.getName();
 		AD_Reference_ID = infoColumn.getAD_Reference_ID();
@@ -219,6 +222,8 @@ public class InfoColumnVO implements Serializable, Cloneable {
 				vo.InputFieldValidation = userDef.getInputFieldValidation();
 			if (userDef.getIsQueryCriteria() != null)
 				vo.isQueryCriteria = "Y".equals(userDef.getIsQueryCriteria());
+			if (userDef.getIsQueryAfterChange() != null)
+				vo.isQueryAfterChange = "Y".equals(userDef.getIsQueryAfterChange());
 			if (userDef.getQueryFunction()!= null)
 				vo.QueryFunction= userDef.getQueryFunction();
 			if (userDef.getQueryOperator()!= null)
@@ -308,6 +313,10 @@ public class InfoColumnVO implements Serializable, Cloneable {
 		return isQueryCriteria;
 	}
 
+	public boolean isQueryAfterChange() {
+		return isQueryAfterChange;
+	}
+	
 	public String getNameTrl() {
 		return NameTrl;
 	}

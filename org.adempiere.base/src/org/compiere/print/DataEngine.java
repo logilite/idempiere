@@ -1385,9 +1385,9 @@ public class DataEngine
 					else if (m_group.isFunctionColumn(pdc.getAD_PrintFormatItem_ID(), functions[f]))
 					{
 						pd.addNode(new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(),
-							m_group.getValue(PrintDataGroup.TOTAL, 
-								pdc.getAD_PrintFormatItem_ID(), functions[f]),
-							PrintDataFunction.getFunctionDisplayType(functions[f], pdc.getDisplayType()), pdc.getFormatPattern()));
+								m_group.getValue(PrintDataGroup.TOTAL, 
+										pdc.getAD_PrintFormatItem_ID(), functions[f]), 
+								PrintDataFunction.getFunctionDisplayType(functions[f], pdc.getDisplayType()), pdc.getFormatPattern()));
 					}
 				}	//	for all columns
 			}	//	for all functions

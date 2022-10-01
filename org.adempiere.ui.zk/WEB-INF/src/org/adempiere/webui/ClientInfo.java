@@ -113,6 +113,18 @@ public class ClientInfo implements Serializable {
 	}
 
 	/**
+	 * 
+	 * @param version null to match all version
+	 * @return true if browser is firefox and match the pass in version parameter
+	 */
+	public static boolean isFirefox(String version) {
+		StringBuilder ua = new StringBuilder("Firefox");
+		if (!Util.isEmpty(version, true))
+			ua.append("/").append(version);
+		return get() != null && get().userAgent != null && get().userAgent.contains(ua.toString());
+	}
+	
+	/**
 	 * @return the current clientinfo instance
 	 */
 	public static ClientInfo get() {

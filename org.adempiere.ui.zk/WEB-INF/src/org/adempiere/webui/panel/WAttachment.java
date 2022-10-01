@@ -62,6 +62,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.idempiere.ui.zk.media.IMediaView;
+import org.idempiere.ui.zk.media.Medias;
 import org.zkoss.util.media.AMedia;
 import org.zkoss.util.media.Media;
 import org.zkoss.zk.au.out.AuEcho;
@@ -71,6 +72,7 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.UploadEvent;
+import org.zkoss.zk.ui.ext.render.DynamicMedia;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
@@ -82,6 +84,8 @@ import org.zkoss.zul.North;
 import org.zkoss.zul.Progressmeter;
 import org.zkoss.zul.South;
 import org.zkoss.zul.Vlayout;
+import org.zkoss.zul.impl.Utils;
+import org.zkoss.zul.impl.XulElement;
 
 /**
  *
@@ -93,7 +97,7 @@ public class WAttachment extends Window implements EventListener<Event>
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 8266807399792500541L;
+	private static final long serialVersionUID = -710884973406502168L;
 
 	private static final CLogger log = CLogger.getCLogger(WAttachment.class);
 
@@ -108,7 +112,10 @@ public class WAttachment extends Window implements EventListener<Event>
 
 	protected Iframe preview = new Iframe();
 
-	protected Textbox text = new Textbox();
+	protected AMedia media;
+	private int mediaVersion = 0;
+
+	private Textbox text = new Textbox();
 
 	protected Label sizeLabel = new Label();
 
@@ -526,7 +533,7 @@ public class WAttachment extends Window implements EventListener<Event>
 				if (view != null) 
 				{
 					if (data.length <= maxPreviewSize) {
-						AMedia media = new AMedia(entry.getName(), null, mimeType, entry.getData());
+						media = new AMedia(entry.getName(), null, mimeType, entry.getData());
 						try {
 							customPreviewComponent = view.renderMediaView(previewPanel, media, true);
 						} catch (Exception e) {
@@ -611,9 +618,16 @@ public class WAttachment extends Window implements EventListener<Event>
 			try
 			{
 				String contentType = entry.getContentType();
-				AMedia media = new AMedia(entry.getName(), null, contentType, entry.getData());
-
-				preview.setContent(media);
+				media = new AMedia(entry.getName(), null, contentType, entry.getData());
+				if (   MSysConfig.getBooleanValue(MSysConfig.ZK_USE_PDF_JS_VIEWER, false, Env.getAD_Client_ID(Env.getCtx())) 
+					&& Medias.PDF_MIME_TYPE.equals(contentType)) {
+					mediaVersion++;
+					String url = Utils.getDynamicMediaURI(this, mediaVersion, media.getName(), media.getFormat());	
+					String pdfJsUrl = "pdf.js/web/viewer.html?file="+url;
+					preview.setSrc(pdfJsUrl);
+				} else {
+					preview.setContent(media);
+				}
 				preview.setVisible(true);
 				preview.invalidate();
 			}
@@ -884,7 +898,7 @@ public class WAttachment extends Window implements EventListener<Event>
 		{
 			try
 			{
-				AMedia media = new AMedia(entry.getName(), null, entry.getContentType(), entry.getData());
+				media = new AMedia(entry.getName(), null, entry.getContentType(), entry.getData());
 				Filedownload.save(media);
 			}
 			catch (Exception e)
@@ -911,7 +925,7 @@ public class WAttachment extends Window implements EventListener<Event>
 		
 		if (zipFile != null) {
 			String name = MTable.get(Env.getCtx(), m_attachment.getAD_Table_ID()).getTableName() + "_" + m_attachment.getRecord_ID();
-			AMedia media = null;	
+			media = null;
 			try {
 				media = new AMedia(name, null, "application/zip", zipFile, true);
 			} catch (Exception e) {
@@ -938,6 +952,22 @@ public class WAttachment extends Window implements EventListener<Event>
 		AEnv.showWindow(dialog);
 	}
 	
+	
+	//-- ComponentCtrl --//
+	public Object getExtraCtrl() {
+		return new ExtraCtrl();
+	}
+	/** A utility class to implement {@link #getExtraCtrl}.
+	 * It is used only by component developers.
+	 */
+	protected class ExtraCtrl extends XulElement.ExtraCtrl
+	implements DynamicMedia {
+		//-- DynamicMedia --//
+		public Media getMedia(String pathInfo) {
+			return media;
+		}
+	}
+
 	/**
 	 * Remove suffix before comparing name
 	 * 

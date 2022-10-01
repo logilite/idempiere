@@ -61,10 +61,7 @@ import org.zkoss.zul.Space;
  * 	Document Status Indicator
  */
 public class WDocumentStatusIndicator extends Panel implements EventListener<Event> {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 794746556509546913L;
+	private static final long serialVersionUID = -9076405331101242792L;
 
 	/**
 	 * 	Constructor
@@ -234,6 +231,14 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 			else
 				imgrHelp.setVisible(false);
 		}
+	}
+
+	/**
+	 * Return the count for this indicator
+	 * @return
+	 */
+	public int getStatusCount() {
+		return statusCount;
 	}
 
 }
