@@ -296,12 +296,9 @@ public class GridFieldVO implements Serializable
 				if (userDef.getIsUpdateable()!= null)
 				    vo.IsUpdateable = "Y".equals(userDef.getIsUpdateable());
 				if (userDef.getIsAlwaysUpdateable()!= null)	
-				{ 
 					vo.IsAlwaysUpdateable = "Y".equals(userDef.getIsAlwaysUpdateable());
-					if(vo.IsAlwaysUpdateable && userDef.getAlwaysUpdatableLogic()!=null) {
-						vo.AlwaysUpdatableLogic = userDef.getAlwaysUpdatableLogic();
-					}
-				}
+				if(userDef.getAlwaysUpdatableLogic()!=null)
+					vo.AlwaysUpdatableLogic = userDef.getAlwaysUpdatableLogic();
 				if (userDef.getReadOnlyLogic()!= null)
 					vo.ReadOnlyLogic = userDef.getReadOnlyLogic();
 				if (userDef.getMandatoryLogic()!= null )
