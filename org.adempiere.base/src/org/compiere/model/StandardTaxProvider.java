@@ -40,7 +40,7 @@ public class StandardTaxProvider implements ITaxProvider {
 		//	Lines
 		BigDecimal totalLines = Env.ZERO;
 		ArrayList<Integer> taxList = new ArrayList<Integer>();
-		MOrderLine[] lines = order.getLines();
+		MOrderLine[] lines = order.getLines(true, null);
 		for (int i = 0; i < lines.length; i++)
 		{
 			MOrderLine line = lines[i];
@@ -168,7 +168,7 @@ public class StandardTaxProvider implements ITaxProvider {
 		//	Lines
 		BigDecimal totalLines = Env.ZERO;
 		ArrayList<Integer> taxList = new ArrayList<Integer>();
-		MInvoiceLine[] lines = invoice.getLines(false);
+		MInvoiceLine[] lines = invoice.getLines(true);
 		for (int i = 0; i < lines.length; i++)
 		{
 			MInvoiceLine line = lines[i];
@@ -295,7 +295,7 @@ public class StandardTaxProvider implements ITaxProvider {
 		//	Lines
 		BigDecimal totalLines = Env.ZERO;
 		ArrayList<Integer> taxList = new ArrayList<Integer>();
-		MRMALine[] lines = rma.getLines(false);
+		MRMALine[] lines = rma.getLines(true);
 		for (int i = 0; i < lines.length; i++)
 		{
 			MRMALine line = lines[i];
