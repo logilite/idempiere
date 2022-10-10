@@ -240,7 +240,7 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 		}
 	}
 
-	public void loginCompleted(Login login, KeyNamePair m_orgKNPair, Window component)
+	public void loginCompleted(ILogin login, KeyNamePair m_orgKNPair, Window component)
     {
 		Session currSess = Executions.getCurrent().getDesktop().getSession();
 		HttpSession httpSess = (HttpSession) currSess.getNativeSession();

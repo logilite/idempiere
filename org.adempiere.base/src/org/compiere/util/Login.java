@@ -178,7 +178,7 @@ public class Login implements ILogin
 	 * @deprecated
 	 */
 	@Deprecated(since = "2", forRemoval = true)
-	protected KeyNamePair[] getRoles (CConnection cc,
+	public KeyNamePair[] getRoles (CConnection cc,
 		String app_user, String app_pwd, boolean force)
 	{
 		//	Establish connection
