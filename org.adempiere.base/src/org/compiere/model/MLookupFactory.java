@@ -254,13 +254,17 @@ public class MLookupFactory
 		//String local_validationCode = "";
 		if (info.ValidationCode.length() == 0)
 			info.IsValidated = true;
+
 		else
 		{
-			String local_validationCode = Env.parseContext(ctx, WindowNo, info.ValidationCode, true);
-			if (local_validationCode.length() == 0) // returns "" if not all variables were parsed
+			/*
+			local_validationCode = Env.parseContext (ctx, WindowNo, info.ValidationCode, true);
+			if (local_validationCode.length() == 0)   //  returns "" if not all variables were parsed
 				info.IsValidated = false;
 			else
 				info.IsValidated = true;
+			*/
+			info.IsValidated = false;
 		}
 
 		//	Add Security

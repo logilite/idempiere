@@ -2540,13 +2540,13 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			if(val != null)
 			{
 				if(val instanceof Integer)
-					Env.setContext(ctx, p_WindowNo, column, (Integer)val);
+					Env.setContext(ctx, 0, column, (Integer)val);
 				else if(val instanceof Timestamp)
-					Env.setContext(ctx, p_WindowNo, column, (Timestamp)val);
+					Env.setContext(ctx, 0, column, (Timestamp)val);
 				else if(val instanceof Boolean)
-					Env.setContext(ctx, p_WindowNo, column, (Boolean)val);
+					Env.setContext(ctx, 0, column, (Boolean)val);
 				else
-					Env.setContext(ctx, p_WindowNo, column, val.toString());
+					Env.setContext(ctx, 0, column, val.toString());
 			}
 		}
 		
@@ -2577,13 +2577,13 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				}
 								
 				if(val instanceof Integer)
-					Env.setContext(ctx, p_WindowNo, column, (Integer)val);
+					Env.setContext(ctx, 0, column, (Integer)val);
 				else if(val instanceof Timestamp)
-					Env.setContext(ctx, p_WindowNo, column, (Timestamp)val);
+					Env.setContext(ctx, 0, column, (Timestamp)val);
 				else if(val instanceof Boolean)
-					Env.setContext(ctx, p_WindowNo, column, (Boolean)val);
+					Env.setContext(ctx, 0, column, (Boolean)val);
 				else
-					Env.setContext(ctx, p_WindowNo, column, val.toString());
+					Env.setContext(ctx, 0, column, val.toString());
 			}				
 		}
 		
@@ -2614,7 +2614,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			Properties ctx = getRowaAsCtx(rowIndex, colIndex, val);
 			
 			String rawSQL = infoColumn.getInputFieldValidation(); 
-			validationSQL = Env.parseContext(ctx, p_WindowNo, rawSQL, false);
+			validationSQL = Env.parseContext(ctx, 0, rawSQL, false);
 			
 			try
 			{

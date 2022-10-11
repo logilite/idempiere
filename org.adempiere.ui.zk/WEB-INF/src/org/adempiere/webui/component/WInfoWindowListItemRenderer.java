@@ -23,7 +23,6 @@ package org.adempiere.webui.component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.editor.WebEditorFactory;
@@ -35,7 +34,6 @@ import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
 import org.compiere.model.GridField;
 import org.compiere.model.InfoColumnVO;
-import org.compiere.model.GridFieldVO;
 import org.compiere.model.MStyle;
 import org.compiere.util.Env;
 import org.compiere.util.Evaluatee;
@@ -126,17 +124,8 @@ public class WInfoWindowListItemRenderer extends WListItemRenderer
 						}
 					});
 					
- 					listCell.appendChild(editor.getComponent());
+					listCell.appendChild(editor.getComponent());
 					listcell = listCell;
-					
-					//set values of info columns of current row  in context and use that context to parse dynamic validation of current info column 
-					if(infoColumn.getAD_Val_Rule_ID() > 0)
-					{
-						Properties ctx = infoWindow.getRowaAsCtx(rowIndex, columnIndex, value);
-						GridFieldVO gridFieldVO = gridField.getVO();
-						gridFieldVO.setCtx(ctx);
-						gridField.refreshLookup();
-					}
 				}
 			}
 		
