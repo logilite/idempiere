@@ -259,7 +259,18 @@ public final class NaturalAccountMap<K,V> extends CCache<K,V>
 			}
 			
 			//  Add to Cache
-			put((K)Default_Account.toUpperCase(), (V)na);
+			if(Default_Account.contains(" ")) {
+				StringTokenizer st1 = new StringTokenizer(Default_Account, " ", false);
+				if ((st1!=null ) &&(st1.countTokens()>0)) {
+					do {
+						String s = st1.nextToken();
+						if(!Util.isEmpty(s)) {
+							put((K)s.toUpperCase(), (V)na);
+						}
+					}while(st1.hasMoreTokens());
+				}
+			}else
+				put((K)Default_Account.toUpperCase(), (V)na);
 		}
 		catch (Exception e)
 		{
