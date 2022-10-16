@@ -23,6 +23,7 @@ package org.adempiere.webui.component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.editor.WebEditorFactory;
@@ -33,6 +34,7 @@ import org.adempiere.webui.theme.ThemeManager;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
 import org.compiere.model.GridField;
+import org.compiere.model.GridFieldVO;
 import org.compiere.model.MInfoColumn;
 import org.compiere.model.MStyle;
 import org.compiere.util.Env;
@@ -40,6 +42,9 @@ import org.compiere.util.Evaluatee;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Util;
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.event.EventListener;
+import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Listcell;
 
 public class WInfoWindowListItemRenderer extends WListItemRenderer
@@ -126,6 +131,38 @@ public class WInfoWindowListItemRenderer extends WListItemRenderer
 					
 					listCell.appendChild(editor.getComponent());
 					listcell = listCell;
+					
+					// set values of info columns of current row in context and
+					// use that context to parse dynamic validation of current
+					// info column
+					if (infoColumn.getAD_Val_Rule_ID() > 0)
+					{
+						editor.getComponent().addEventListener(Events.ON_CLICK, new EventListener<Event>() {
+
+							@Override
+							public void onEvent(Event event) throws Exception
+							{
+								Properties ctx = infoWindow.getRowaAsCtx(rowIndex, columnIndex, editor.getValue());
+								GridFieldVO gridFieldVO = gridField.getVO();
+								Properties gridFieldVOCtx = new Properties(gridFieldVO.ctx);
+
+								gridFieldVO.setCtx(ctx);
+
+								if (editor.getComponent() instanceof Searchbox
+										|| editor.getComponent() instanceof ChosenSearchBox)
+								{
+									editor.onEvent(event);
+								}
+								else
+								{
+									gridField.refreshLookup();
+									// again set previous ctx in grid field VO
+									// so context for current rowIndex is not used for other rowIndexs
+									gridFieldVO.setCtx(gridFieldVOCtx);
+								}
+							}
+						});
+					}
 				}
 			}
 		
