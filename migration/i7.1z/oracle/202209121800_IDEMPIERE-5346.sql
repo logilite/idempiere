@@ -276,10 +276,6 @@ INSERT INTO AD_SysConfig (AD_SysConfig_ID,AD_Client_ID,AD_Org_ID,Created,Updated
 INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,ColumnName,Name,Description,PrintName,EntityType,AD_Element_UU) VALUES (203670,0,0,'Y',TO_DATE('2022-09-15 11:56:41','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2022-09-15 11:56:41','YYYY-MM-DD HH24:MI:SS'),100,'SSO_Provider','SSO Provider','Single Sign-On (SSO) Providers ( Microsoft Azure , Google, Jump Cloud etc..)','SSO Provider','D','959ffea1-effb-434a-8480-f035fca65815')
 ;
 
--- Sep 15, 2022, 11:56:46 AM IST
-INSERT INTO AD_Wlistbox_Customization (AD_Client_ID,AD_Org_ID,AD_Wlistbox_Customization_ID,WlistboxName,AD_User_ID,Created,CreatedBy,Custom,IsActive,Updated,UpdatedBy,AD_Wlistbox_Customization_UU) VALUES (0,0,200000,'AD_InfoPanel|AD_Element',100,TO_DATE('2022-09-15 11:56:46','YYYY-MM-DD HH24:MI:SS'),100,'AD_Element_ID=null,AD_Client_ID=null,AD_Org_ID=null,ColumnName=null,Name=null,PrintName=null,Description=null,Help=null,Placeholder=null,IsActive=null,EntityType=null,PO_Name=null,PO_PrintName=null,PO_Description=null,PO_Help=null','Y',TO_DATE('2022-09-15 11:56:46','YYYY-MM-DD HH24:MI:SS'),100,'1ee40dc2-9814-404c-9d6f-67ededfdeae0')
-;
-
 -- Sep 15, 2022, 11:58:07 AM IST
 INSERT INTO AD_Reference (AD_Reference_ID,Name,ValidationType,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,EntityType,IsOrderByValue,AD_Reference_UU) VALUES (200213,'SSO Provider List','L',0,0,'Y',TO_DATE('2022-09-15 11:58:06','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2022-09-15 11:58:06','YYYY-MM-DD HH24:MI:SS'),100,'D','N','f12db9ec-7c5c-46a7-a2ba-d01b4043dae2')
 ;

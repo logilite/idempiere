@@ -100,6 +100,7 @@ public class SSOWebuiFilter implements Filter
 				log.log(Level.SEVERE, "Exception while authenticating: ",exc);
 				if (m_SSOPrinciple != null)
 					m_SSOPrinciple.removePrincipleFromSession(httpRequest);
+				m_SSOPrinciple = null;
 				if(isRedirectToLoginOnError)
 				{
 					httpResponse.sendRedirect("webui/index.zul");
