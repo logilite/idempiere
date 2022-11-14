@@ -29,7 +29,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220915L;
+	private static final long serialVersionUID = 20221104L;
 
     /** Standard Constructor */
     public X_SSO_PrincipleConfig (Properties ctx, int SSO_PrincipleConfig_ID, String trxName)
@@ -37,10 +37,6 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
       super (ctx, SSO_PrincipleConfig_ID, trxName);
       /** if (SSO_PrincipleConfig_ID == 0)
         {
-			setSSO_ApplicationClientID (null);
-			setSSO_ApplicationRedirectURIs (null);
-			setSSO_ApplicationSecretKey (null);
-			setSSO_AuthorizationTenantID (null);
 			setSSO_PrincipleConfig_ID (0);
 			setSSO_Provider (null);
         } */
@@ -130,6 +126,40 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 	public String getSSO_ApplicationClientID () 
 	{
 		return (String)get_Value(COLUMNNAME_SSO_ApplicationClientID);
+	}
+
+	/** Set Application Discovery URI.
+		@param SSO_ApplicationDiscoveryURI 
+		SSO Application Discovery URI
+	  */
+	public void setSSO_ApplicationDiscoveryURI (String SSO_ApplicationDiscoveryURI)
+	{
+		set_Value (COLUMNNAME_SSO_ApplicationDiscoveryURI, SSO_ApplicationDiscoveryURI);
+	}
+
+	/** Get Application Discovery URI.
+		@return SSO Application Discovery URI
+	  */
+	public String getSSO_ApplicationDiscoveryURI () 
+	{
+		return (String)get_Value(COLUMNNAME_SSO_ApplicationDiscoveryURI);
+	}
+
+	/** Set Application Domain.
+		@param SSO_ApplicationDomain 
+		SSO Application Domain
+	  */
+	public void setSSO_ApplicationDomain (String SSO_ApplicationDomain)
+	{
+		set_Value (COLUMNNAME_SSO_ApplicationDomain, SSO_ApplicationDomain);
+	}
+
+	/** Get Application Domain.
+		@return SSO Application Domain
+	  */
+	public String getSSO_ApplicationDomain () 
+	{
+		return (String)get_Value(COLUMNNAME_SSO_ApplicationDomain);
 	}
 
 	/** Set Application Logout URL.
