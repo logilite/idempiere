@@ -28,10 +28,12 @@ import org.adempiere.exceptions.DBException;
 import org.compiere.model.I_R_Request;
 import org.compiere.model.MClient;
 import org.compiere.model.MNote;
+import org.compiere.model.MOrg;
 import org.compiere.model.MRequest;
 import org.compiere.model.MRequestAction;
 import org.compiere.model.MRequestType;
 import org.compiere.model.MRequestUpdate;
+import org.compiere.model.MSession;
 import org.compiere.model.MUser;
 import org.compiere.model.PO;
 import org.compiere.model.X_AD_User;
@@ -279,6 +281,31 @@ public class RequestEventHandler extends AbstractEventHandler implements Managed
 		else
 			message.append("\n").append(Msg.translate(r.getCtx(), "Created"))
 				.append(": ").append(r.getCreated());
+		
+		// client
+		MClient client = MClient.get(r.getCtx());
+		if (client != null)
+			message.append("\n").append(Msg.translate(r.getCtx(), "AD_Client_ID")).append(": ")
+					.append(client.getName());
+
+		// Org
+		String orgName = "*";
+		int orgId = Env.getAD_Org_ID(r.getCtx());
+		if (orgId > 0)
+		{
+			MOrg org = MOrg.get(r.getCtx(), Env.getAD_Client_ID(r.getCtx()));
+			orgName = org.getName();
+		}
+		
+		if (orgName != null)
+			message.append("\n").append(Msg.translate(r.getCtx(), "AD_Org_ID")).append(": ").append(orgName);
+
+		// system info
+		MSession cSession = MSession.get(Env.getCtx(), false);
+		if (cSession != null)
+			message.append("\n").append(Msg.translate(r.getCtx(), "ServerName")).append(": ")
+					.append(cSession.getServerName());
+
 		//	Changes
 		for (int i = 0; i < list.size(); i++)
 		{
@@ -300,7 +327,6 @@ public class RequestEventHandler extends AbstractEventHandler implements Managed
 		if (s_log.isLoggable(Level.FINER)) s_log.finer(message.toString());
 		
 		//	Prepare sending Notice/Mail
-		MClient client = MClient.get(r.getCtx());
 		//	Reset from if external
 		if (from.getEMailUser() == null || from.getEMailUserPW() == null)
 			from = null;
