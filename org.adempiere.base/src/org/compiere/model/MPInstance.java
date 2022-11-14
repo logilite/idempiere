@@ -498,5 +498,19 @@ public class MPInstance extends X_AD_PInstance
 		}
 		return cksum.toString();
 	}
+	
+	/**
+	 * 	Before Save
+	 *	@param newRecord new
+	 *	@return true
+	 */
+	protected boolean beforeSave (boolean newRecord)
+	{
+		if (newRecord) {
+			setAD_Session_ID(Env.getContextAsInt(Env.getCtx(), "#AD_Session_ID"));
+		}
+		
+		return true;
+	}	//	beforeSave
 
 }	//	MPInstance
