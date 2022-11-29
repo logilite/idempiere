@@ -568,10 +568,6 @@ public class Match
 				m_sql.append(" AND ((dt.DocBaseType = 'API' AND lin.C_InvoiceLine_ID =").append(C_InvoiceLine_ID)
 						.append(") OR (dt.DocBaseType = 'APC'))");
 			}
-			else
-			{
-				m_sql.append(" AND dt.DocBaseType <> 'APC' ");
-			}
 			
 			m_groupBy = " GROUP BY hdr.C_Invoice_ID, dt.C_DocType_ID, hdr.DocumentNo,hdr.DateInvoiced,bp.Name,hdr.C_BPartner_ID,"
 				+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,dt.DocBaseType,lin.QtyInvoiced, org.Name, hdr.AD_Org_ID, dt.DocBaseType " //JAVIER
@@ -620,22 +616,25 @@ public class Match
 			m_qtyColumn = "lin.MovementQty";
 			m_sql.append("SELECT hdr.M_InOut_ID,hdr.DocumentNo, hdr.MovementDate, bp.Name,hdr.C_BPartner_ID,"
 				+ " lin.Line,lin.M_InOutLine_ID, p.Name,lin.M_Product_ID,"
-				+ " lin.MovementQty,SUM(NVL(m.Qty,0)),org.Name, hdr.AD_Org_ID " //JAVIER
+				+ " CASE WHEN dt.DocBaseType='MMS' AND dt.IsSOTrx='N' THEN -lin.MovementQty ELSE lin.MovementQty END, "
+				+ " CASE WHEN dt.DocBaseType='MMS' AND dt.IsSOTrx='N' THEN SUM(NVL(m.Qty,0)) * (-1) ELSE SUM(NVL(m.Qty,0)) END,"
+				+ " org.Name, hdr.AD_Org_ID " //JAVIER
 				+ "FROM M_InOut hdr"
 				+ " INNER JOIN AD_Org org ON (hdr.AD_Org_ID=org.AD_Org_ID)" //JAVIER
 				+ " INNER JOIN C_BPartner bp ON (hdr.C_BPartner_ID=bp.C_BPartner_ID)"
 				+ " INNER JOIN M_InOutLine lin ON (hdr.M_InOut_ID=lin.M_InOut_ID)"
 				+ " INNER JOIN M_Product p ON (lin.M_Product_ID=p.M_Product_ID)"
-				+ " INNER JOIN C_DocType dt ON (hdr.C_DocType_ID = dt.C_DocType_ID AND dt.DocBaseType='MMR')"
+				+ " INNER JOIN C_DocType dt ON (hdr.C_DocType_ID = dt.C_DocType_ID)"
 				+ " FULL JOIN ")
 				.append(matchToType == MATCH_ORDER ? "M_MatchPO" : "M_MatchInv")
 				.append(" m ON (lin.M_InOutLine_ID=m.M_InOutLine_ID) "
-				+ "WHERE hdr.DocStatus IN ('CO','CL')");
+				+ "WHERE hdr.DocStatus IN ('CO','CL') AND hdr.IsSOTrx='N'");
 			m_groupBy = " GROUP BY hdr.M_InOut_ID,hdr.DocumentNo,hdr.MovementDate,bp.Name,hdr.C_BPartner_ID,"
-				+ " lin.Line,lin.M_InOutLine_ID,p.Name,lin.M_Product_ID,lin.MovementQty, org.Name, hdr.AD_Org_ID " //JAVIER
+				+ " lin.Line,lin.M_InOutLine_ID,p.Name,lin.M_Product_ID,lin.MovementQty, org.Name, hdr.AD_Org_ID, dt.C_DocType_ID " //JAVIER
 				+ "HAVING "
 				+ (matched ? "0" : "lin.MovementQty")
-				+ "<>SUM(NVL(m.Qty,0))";
+				+ "<>(CASE WHEN dt.DocBaseType='MMS' AND dt.IsSOTrx='N' "
+				+ "THEN SUM(NVL(m.Qty,0)) * (-1) ELSE SUM(NVL(m.Qty,0)) END)";
 		}
 	//	Log.trace(7, "VMatch.tableInit", m_sql + "\n" + m_groupBy);
 	}   //  tableInit
