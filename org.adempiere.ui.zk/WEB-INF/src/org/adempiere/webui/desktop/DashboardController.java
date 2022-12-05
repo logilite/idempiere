@@ -388,6 +388,7 @@ public class DashboardController implements EventListener<Event> {
         String htmlContent = dc.get_ID() > 0 ? dc.get_Translation(MDashboardContent.COLUMNNAME_HTML) : null;
         if(htmlContent != null)
         {
+        	htmlContent = Env.parseContext(Env.getCtx(), 0, htmlContent, true);
             StringBuilder result = new StringBuilder("<html><head>");
 
     		URL url = getClass().getClassLoader().getResource("org/compiere/css/PAPanel.css");

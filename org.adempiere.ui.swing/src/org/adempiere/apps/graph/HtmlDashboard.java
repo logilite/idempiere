@@ -175,6 +175,7 @@ public class HtmlDashboard extends JPanel implements MouseListener,
 						if (appendToHome != null) {
 							if (descriptionTrl != null)
 								result.append("<H2>").append(descriptionTrl).append("</H2>\n");
+							appendToHome = Env.parseContext(Env.getCtx(), 0, appendToHome, true);
 							result.append(stripHtml(appendToHome, false)).append("<br>\n");
 						}
 						
