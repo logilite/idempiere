@@ -956,7 +956,19 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			String processMsg = e.getLocalizedMessage();
 			if (processMsg == null || processMsg.length() == 0)
 				processMsg = e.getMessage();
-			setTextMsg(processMsg);
+			
+			StringBuilder msg = new StringBuilder();
+			if (m_process.getProcessMsg() != null)
+			{
+				StateEngine state = m_process.getState();
+				if (!Util.isEmpty(m_process.getProcessMsg()) && (state.isTerminated() || state.isAborted()))
+				{
+					msg.append(m_process.getProcessMsg());
+					msg.append("\n");
+				}				
+			}
+			msg.append(processMsg);
+			setTextMsg(msg.toString());
 			// addTextMsg(e); // do not add the exception text
 			boolean contextLost = false;
 			if (e instanceof AdempiereException && "Context lost".equals(e.getMessage()))
