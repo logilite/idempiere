@@ -274,6 +274,20 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 		return true;
 	}	//	beforeSave
 	
+	@Override
+	protected boolean beforeDelete()
+	{
+		MBankStatementLine[] lines = getLines(true);
+		if (lines != null && lines.length > 0)
+		{
+			log.saveError("LineExists",
+					"This Bank Statement can't be deleted as it contains Lines, Delete lines and try again");
+			return false;
+		}
+
+		return true;
+	}
+
 	/**************************************************************************
 	 * 	Process document
 	 *	@param processAction document action
