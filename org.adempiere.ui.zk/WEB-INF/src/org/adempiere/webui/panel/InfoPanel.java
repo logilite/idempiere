@@ -2575,6 +2575,14 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 					select.append("'");
 					select.append(", NULL, NULL");
 				}
+				else if (data instanceof KeyNamePair) 
+				{
+					KeyNamePair knpData = (KeyNamePair) data;
+					select.append("NULL,");
+					select.append(knpData.getKey());
+					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+					select.append(", NULL, NULL");
+				}
 				else
 				{
 					if (data == null)
