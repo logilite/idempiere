@@ -38,6 +38,7 @@ import org.compiere.model.MBankStatement;
 import org.compiere.model.MCash;
 import org.compiere.model.MClient;
 import org.compiere.model.MColumn;
+import org.compiere.model.MDepositBatch;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInventory;
 import org.compiere.model.MInvoice;
@@ -1247,6 +1248,18 @@ public class DocumentEngine implements DocAction
 			//	Complete                    ..  CO
 			if (docStatus.equals(DocumentEngine.STATUS_Completed))
 			{
+				options[index++] = DocumentEngine.ACTION_ReActivate;
+			}
+		}
+		/********************
+		 *  Deposit Batch
+		 */
+		else if (AD_Table_ID == MDepositBatch.Table_ID)
+		{
+			//	Complete
+			if (docStatus.equals(DocumentEngine.STATUS_Completed)) 
+			{
+				options[index++] = DocumentEngine.ACTION_Void;
 				options[index++] = DocumentEngine.ACTION_ReActivate;
 			}
 		}

@@ -40,8 +40,12 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
+import org.compiere.process.DocAction;
+import org.compiere.process.DocumentEngine;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 /**
  *  Deposit Batch Model
@@ -49,7 +53,7 @@ import org.compiere.util.Env;
  *	@author Alejandro Falcone
  *	@version $Id: MDepositBatch.java,v 1.3 2007/06/28 00:51:03 afalcone Exp $
  */
-public class MDepositBatch extends X_C_DepositBatch
+public class MDepositBatch extends X_C_DepositBatch implements DocAction
 {
 	/**
 	 * 
@@ -68,6 +72,7 @@ public class MDepositBatch extends X_C_DepositBatch
 		if (C_DepositBatch_ID == 0)
 		{
 			setDocStatus (DOCSTATUS_Drafted);
+			setDocAction (DOCACTION_Complete);
 			setProcessed (false);
 			setProcessing (false);
 			setDepositAmt(Env.ZERO);
@@ -151,6 +156,7 @@ public class MDepositBatch extends X_C_DepositBatch
 	public boolean invalidateIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("invalidateIt - " + toString());
+		setDocAction(DOCACTION_Prepare);
 		return true;
 	}	//	invalidateIt
 	
@@ -167,12 +173,44 @@ public class MDepositBatch extends X_C_DepositBatch
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_VOID);
 		if (m_processMsg != null)
 			return false;
+		
+		if (DOCSTATUS_Closed.equals(getDocStatus())
+				|| DOCSTATUS_Reversed.equals(getDocStatus())
+				|| DOCSTATUS_Voided.equals(getDocStatus()))
+			{
+				m_processMsg = "Document Closed: " + getDocStatus();
+				setDocAction(DOCACTION_None);
+				return false;
+			}
+		
+		MDepositBatchLine[] lines = getLines();			
+		for (int i = 0; i < lines.length; i++)
+		{
+			MDepositBatchLine line = lines[i];
+			if (line.getPayAmt().compareTo(Env.ZERO) != 0)
+			{
+
+				if (line.getC_Payment_ID() != 0) 
+				{
+					String sql = "UPDATE C_Payment p SET C_DepositBatch_ID= null WHERE p.C_Payment_ID=?";
+					DB.executeUpdateEx(sql, new Object[] {line.getC_Payment_ID()}, get_TrxName());
+				}
+				line.setPayAmt(Env.ZERO);
+				line.setProcessed(true);
+				line.saveEx();
+			}
+		}
+		addDescription(Msg.getMsg(getCtx(), "Voided"));
+		setDepositAmt(Env.ZERO);
+		
 		// After Void
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_VOID);
 		if (m_processMsg != null)
 			return false;
 		
-		return false;
+		setProcessed(true);
+		setDocAction(DOCACTION_None);
+		return true;
 	}	//	voidIt
 
 
@@ -309,5 +347,230 @@ public class MDepositBatch extends X_C_DepositBatch
 		list.toArray(retValue);
 		return retValue;
 	}	//	getLines
+
+
+	/**************************************************************************
+	 * 	Process document
+	 *	@param processAction document action
+	 *	@return true if performed
+	 */
+	@Override
+	public boolean processIt(String action) throws Exception {
+		m_processMsg = null;
+		DocumentEngine engine = new DocumentEngine (this, getDocStatus());
+		return engine.processIt (action, getDocAction());
+	}
+
+	/**	Just Prepared Flag			*/
+	protected boolean m_justPrepared = false;
+
+	@Override
+	public String prepareIt() {
+		if (log.isLoggable(Level.INFO)) log.info(toString());
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_PREPARE);
+		if (m_processMsg != null)
+			return DocAction.STATUS_Invalid;
+		
+		MDepositBatchLine[] lines = getLines();
+		if (lines.length == 0)
+		{
+			m_processMsg = "@NoLines@";
+			return DocAction.STATUS_Invalid;
+		}
+		
+		BigDecimal total = Env.ZERO;
+		
+		for (int i = 0; i < lines.length; i++)
+		{
+			MDepositBatchLine line = lines[i];
+			if (!line.isActive())
+				continue;
+
+			total = total.add(line.getPayAmt());
+		}
+		
+		setDepositAmt(total);
+		
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
+		if (m_processMsg != null)
+			return DocAction.STATUS_Invalid;
+		
+		m_justPrepared = true;
+		if (!DOCACTION_Complete.equals(getDocAction()))
+			setDocAction(DOCACTION_Complete);
+		
+		return DocAction.STATUS_InProgress;
+	}
+
+
+	@Override
+	public boolean approveIt() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public boolean rejectIt() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public String completeIt() {
+		//	Re-Check
+		if (!m_justPrepared)
+		{
+			String status = prepareIt();
+			m_justPrepared = false;
+			if (!DocAction.STATUS_InProgress.equals(status))
+				return status;
+		}
+		
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_COMPLETE);
+		if (m_processMsg != null)
+			return DocAction.STATUS_Invalid;
+		
+		if (log.isLoggable(Level.INFO)) log.info("completeIt - " + toString());
+		
+		MDepositBatchLine[] depositbatchLines = getLines();
+		//	Close lines
+		for (int line = 0; line < depositbatchLines.length; line++)
+		{
+			depositbatchLines[line].setProcessed(true);
+			depositbatchLines[line].saveEx();
+		}
+		
+		//	User Validation
+		String valid = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_COMPLETE);
+		if (valid != null)
+		{
+			m_processMsg = valid;
+			return DocAction.STATUS_Invalid;
+		}
+			
+		setProcessed(true);
+		
+		setDocAction(DOCACTION_Close);
+		return DocAction.STATUS_Completed;
+	}
+
+
+	@Override
+	public boolean closeIt() {
+		if (log.isLoggable(Level.INFO)) log.info("closeIt - " + toString());
+		// Before Close
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_CLOSE);
+		if (m_processMsg != null)
+			return false;		
+
+		setDocAction(DOCACTION_None);
+
+		// After Close
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_CLOSE);
+		if (m_processMsg != null)
+			return false;
+		return true;
+	}
+
+
+	@Override
+	public boolean reverseCorrectIt() {
+		if (log.isLoggable(Level.INFO)) log.info("reverseCorrectIt - " + toString());
+		// Before reverseCorrect
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REVERSECORRECT);
+		if (m_processMsg != null)
+			return false;
+		
+		// After reverseCorrect
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSECORRECT);
+		if (m_processMsg != null)
+			return false;
+		return false;
+	}
+
+
+	@Override
+	public boolean reverseAccrualIt() {
+		if (log.isLoggable(Level.INFO)) log.info("reverseAccrualIt - " + toString());
+		// Before reverseAccrual
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REVERSEACCRUAL);
+		if (m_processMsg != null)
+			return false;
+		
+		// After reverseAccrual
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSEACCRUAL);
+		if (m_processMsg != null)
+			return false;
+		return false;
+	}
+
+
+	@Override
+	public boolean reActivateIt() {
+		if (log.isLoggable(Level.INFO)) log.info("reActivateIt - " + toString());
+		// Before reActivate
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REACTIVATE);
+		if (m_processMsg != null)
+			return false;		
+		
+		if (log.isLoggable(Level.INFO)) log.info("ReactivateIt - " + toString());
+		// Set Payment reconciled false
+		MDepositBatchLine[] depositbatchLines = getLines();
+
+		// Close lines
+		for (int line = 0; line < depositbatchLines.length; line++) {
+			
+			// Throw idempiere exception for payment already reconciled
+			if(depositbatchLines[line].getC_Payment().isReconciled()) {
+				throw new AdempiereException(Msg.getMsg(getCtx(), "NotAllowReActivationOfReconciledPaymentsIntoBatch"));
+			}
+			
+			depositbatchLines[line].setProcessed(false);
+			depositbatchLines[line].saveEx();
+		}
+		
+		setProcessed(false);
+		// After reActivate
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REACTIVATE);
+		if (m_processMsg != null)
+			return false;		
+		return true;
+	}
+	
+ 	/**
+	 * 	Add to Description
+	 *	@param description text
+	 */
+	public void addDescription (String description)
+	{
+		String desc = getDescription();
+		if (desc == null)
+			setDescription(description);
+		else{
+			StringBuilder msgd = new StringBuilder(desc).append(" | ").append(description);
+			setDescription(msgd.toString());
+		}	
+	}	//	addDescription
+
+
+	@Override
+	public String getSummary() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getDocumentNo());
+		sb.append(": ")
+			.append(Msg.translate(getCtx(),"DepositBatchAmt")).append("=").append(getDepositAmt());
+		if (getDescription() != null && getDescription().length() > 0)
+			sb.append(" - ").append(getDescription());
+		return sb.toString();
+	}
+
+
+	@Override
+	public int getC_Currency_ID() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
 }	//	MDepositBatch

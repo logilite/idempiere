@@ -131,7 +131,7 @@ import org.compiere.util.Env;
 		}
 		
 		//	Set DepositBatch_ID into C_Payment table
-		if (getC_Payment_ID() != 0 )
+		if (getC_Payment_ID() != 0 && !getC_DepositBatch().getDocAction().equals(MDepositBatch.ACTION_Void))
 		{
 			String sql = "UPDATE C_Payment p SET C_DepositBatch_ID=? WHERE p.C_Payment_ID=?";			
 			DB.executeUpdateEx(sql, new Object[] {getC_DepositBatch_ID(), getC_Payment_ID()}, get_TrxName());
