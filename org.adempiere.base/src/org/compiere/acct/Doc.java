@@ -1398,8 +1398,8 @@ public abstract class Doc
 		/** Account Type - Payment  */
 		else if (AcctType == ACCTTYPE_UnallocatedCash)
 		{
-			sql = "SELECT B_UnallocatedCash_Acct FROM C_BankAccount_Acct WHERE C_BankAccount_ID=? AND C_AcctSchema_ID=?";
-			para_1 = getC_BankAccount_ID();
+			sql = "SELECT B_UnallocatedCash_Acct FROM C_BP_Customer_Acct WHERE C_BPartner_ID=? AND C_AcctSchema_ID=?";
+			para_1 = getC_BPartner_ID();
 		}
 		else if (AcctType == ACCTTYPE_BankInTransit)
 		{
@@ -1408,8 +1408,8 @@ public abstract class Doc
 		}
 		else if (AcctType == ACCTTYPE_PaymentSelect)
 		{
-			sql = "SELECT B_PaymentSelect_Acct FROM C_BankAccount_Acct WHERE C_BankAccount_ID=? AND C_AcctSchema_ID=?";
-			para_1 = getC_BankAccount_ID();
+			sql = "SELECT B_PaymentSelect_Acct FROM C_BP_Vendor_Acct WHERE C_BPartner_ID=? AND C_AcctSchema_ID=?";
+			para_1 = getC_BPartner_ID();
 		}
 
 		/** Account Type - Allocation   */

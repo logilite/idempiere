@@ -29,7 +29,7 @@ public class X_C_BP_Customer_Acct extends PO implements I_C_BP_Customer_Acct, I_
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20230113L;
 
     /** Standard Constructor */
     public X_C_BP_Customer_Acct (Properties ctx, int C_BP_Customer_Acct_ID, String trxName)
@@ -37,6 +37,7 @@ public class X_C_BP_Customer_Acct extends PO implements I_C_BP_Customer_Acct, I_
       super (ctx, C_BP_Customer_Acct_ID, trxName);
       /** if (C_BP_Customer_Acct_ID == 0)
         {
+			setB_UnallocatedCash_Acct (0);
 			setC_AcctSchema_ID (0);
 			setC_BPartner_ID (0);
 			setC_Prepayment_Acct (0);
@@ -72,6 +73,31 @@ public class X_C_BP_Customer_Acct extends PO implements I_C_BP_Customer_Acct, I_
         .append(get_ID()).append("]");
       return sb.toString();
     }
+
+	public I_C_ValidCombination getB_UnallocatedCash_A() throws RuntimeException
+    {
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_Name)
+			.getPO(getB_UnallocatedCash_Acct(), get_TrxName());	}
+
+	/** Set Unallocated Cash.
+		@param B_UnallocatedCash_Acct 
+		Unallocated Cash Clearing Account
+	  */
+	public void setB_UnallocatedCash_Acct (int B_UnallocatedCash_Acct)
+	{
+		set_Value (COLUMNNAME_B_UnallocatedCash_Acct, Integer.valueOf(B_UnallocatedCash_Acct));
+	}
+
+	/** Get Unallocated Cash.
+		@return Unallocated Cash Clearing Account
+	  */
+	public int getB_UnallocatedCash_Acct () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_B_UnallocatedCash_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
 
 	public org.compiere.model.I_C_AcctSchema getC_AcctSchema() throws RuntimeException
     {
