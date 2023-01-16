@@ -124,6 +124,40 @@ public class MZoomCondition extends X_AD_ZoomCondition
 		return 0;
 	}
 	
+	private static MZoomCondition findZoomConditionByTableId(int AD_Table_ID, MQuery query, int windowNo)
+	{
+		final int winNo = windowNo;
+		if (query == null)
+			return null;
+
+		MZoomCondition[] conditions = MZoomCondition.getConditions(AD_Table_ID);
+		if (conditions.length > 0)
+		{
+			Evaluatee evaluatee = new Evaluatee() {
+				public String get_ValueAsString(String variableName) {
+					return Env.getContext(Env.getCtx(), winNo, variableName);
+				}
+			};
+
+			for (MZoomCondition condition : conditions)
+			{
+				if (! Util.isEmpty(condition.getZoomLogic())) {
+					if (!Evaluator.evaluateLogic(evaluatee, condition.getZoomLogic())) {
+						continue;
+					}
+				}
+
+				boolean evaluation = condition.evaluate(query.getWhereClause(true));
+				
+				if (evaluation)
+				{
+					return condition;
+				}
+			}				
+		}
+		return null;
+	}
+	
 	/**
 	 * find first AD_Window_ID from matching zoom condition record 
 	 * @param query
@@ -231,6 +265,85 @@ public class MZoomCondition extends X_AD_ZoomCondition
 		return 0;
 	}
 	
+	public static MZoomCondition findZoomConditionaByWindowId(int AD_Window_ID, MQuery query, int windowNo)
+	{
+		if (query == null)
+			return null;
+		
+		int tableID = DB.getSQLValueEx(null,
+				"SELECT t.AD_Table_ID " +
+				    "FROM AD_Tab tab JOIN AD_Table t ON t.AD_Table_ID=tab.AD_Table_ID " +
+				    "WHERE t.IsActive='Y' AND tab.IsActive='Y' AND tab.AD_Window_ID=? " +
+				    "ORDER BY tab.SeqNo",
+				AD_Window_ID);
+		String tableName = null;
+		if (tableID > 0) {
+			tableName = MTable.get(Env.getCtx(), tableID).getTableName();
+		}
+
+		if (tableName != null && tableName.equals(query.getZoomTableName())) {
+			return findZoomConditionByTableId(tableID, query, windowNo);
+		} else {
+			try {
+				GridWindow window = GridWindow.get(Env.getCtx(), -1, AD_Window_ID);
+				if (window == null || window.getTabCount() == 0)
+					return null;
+				//resolve zoom to detail
+				int size = window.getTabCount();
+				GridTab gTab = null;
+				for(int i = 0; i < size; i++)
+				{
+					if (window.getTab(i).getTableName().equals(query.getZoomTableName()))
+					{
+						gTab = window.getTab(i);
+						break;
+					}
+				}
+				if (gTab != null)
+				{
+					window.initTab(gTab.getTabNo());				
+					GridTab parentTab = gTab.getParentTab();
+					int parentId = -1;
+					if (!Util.isEmpty(gTab.getLinkColumnName()))
+						parentId = DB.getSQLValue(null, "SELECT " + gTab.getLinkColumnName() + " FROM " + gTab.getTableName() + " WHERE " + query.getWhereClause());
+					if (parentId <= 0) {
+						if (Util.isEmpty(parentTab.getKeyColumnName()))
+							parentTab.initTab(false);
+						// no parent link -- search in context of window
+						String parentctxid = Env.getContext(Env.getCtx(), windowNo, parentTab.getKeyColumnName());
+						if (! Util.isEmpty(parentctxid)) {
+							parentId = DB.getSQLValue(null, "SELECT " + parentTab.getKeyColumnName() + " FROM " + parentTab.getTableName() 
+									+ " WHERE " + parentTab.getKeyColumnName() + "=" + parentctxid);
+						}
+						if (parentId <= 0)
+							return null;
+					}
+					
+					while (parentTab != null)
+					{					
+						window.initTab(parentTab.getTabNo());					
+						if (parentTab.getParentTab() != null)
+						{
+							parentId = DB.getSQLValue(null, "SELECT " + parentTab.getLinkColumnName() + " FROM " + parentTab.getTableName() + " WHERE " 
+									+ parentTab.getTableName()+"_ID="+parentId);
+							if (parentId <= 0) return null;
+							parentTab = parentTab.getParentTab();
+						}
+						else
+						{
+							if (parentTab == window.getTab(0))
+							{
+								return findZoomConditionByTableId(parentTab.getAD_Table_ID(), parentId, windowNo);
+							}
+						}
+					}
+				}
+			} finally {
+				Env.clearWinContext(-1);
+			}
+		}		
+		return null;
+	}
 	public static int findZoomWindowByTableId(int AD_Table_ID, int recordID)
 	{
 		return findZoomWindowByTableId(AD_Table_ID, recordID, 0);
@@ -276,6 +389,39 @@ public class MZoomCondition extends X_AD_ZoomCondition
 		return 0;
 	}
 
+	public static MZoomCondition findZoomConditionByTableId(int AD_Table_ID, int recordID, int windowNo)
+	{
+		final int winNo = windowNo;
+		MTable table = MTable.get(Env.getCtx(), AD_Table_ID);		
+		MZoomCondition[] conditions = MZoomCondition.getConditions(AD_Table_ID);
+		if (conditions.length > 0)
+		{
+			Evaluatee evaluatee = new Evaluatee() {
+				public String get_ValueAsString(String variableName) {
+					return Env.getContext(Env.getCtx(), winNo, variableName);
+				}
+			};
+
+			String whereClause = table.getTableName() + "_ID="+recordID;
+			for (MZoomCondition condition : conditions)
+			{
+				if (! Util.isEmpty(condition.getZoomLogic())) {
+					if (!Evaluator.evaluateLogic(evaluatee, condition.getZoomLogic())) {
+						continue;
+					}
+				}
+
+				boolean evaluation = condition.evaluate(whereClause);
+				
+				if (evaluation)
+				{
+					return condition;
+				}
+			}
+		}
+
+		return null;
+	}
 	/**
 	 * @param whereClause filter to get record for evaluation
 	 * @return true if the condition is empty (applies for all records) or if the condition is true for the record   
