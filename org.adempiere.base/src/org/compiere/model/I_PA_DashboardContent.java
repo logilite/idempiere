@@ -103,6 +103,17 @@ public interface I_PA_DashboardContent
 
 	public org.compiere.model.I_AD_Role getAD_Role() throws RuntimeException;
 
+    /** Column name AD_StatusLine_ID */
+    public static final String COLUMNNAME_AD_StatusLine_ID = "AD_StatusLine_ID";
+
+	/** Set Status Line	  */
+	public void setAD_StatusLine_ID (int AD_StatusLine_ID);
+
+	/** Get Status Line	  */
+	public int getAD_StatusLine_ID();
+
+	public org.compiere.model.I_AD_StatusLine getAD_StatusLine() throws RuntimeException;
+
     /** Column name AD_User_ID */
     public static final String COLUMNNAME_AD_User_ID = "AD_User_ID";
 
