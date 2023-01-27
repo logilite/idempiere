@@ -22,13 +22,17 @@ package org.adempiere.webui;
 
 import java.util.List;
 
+import org.adempiere.base.IServiceReferenceHolder;
 import org.adempiere.base.Service;
 import org.adempiere.base.ServiceQuery;
 import org.adempiere.webui.adwindow.IADTabpanel;
 import org.adempiere.webui.apps.IProcessParameterListener;
 import org.adempiere.webui.factory.IADTabPanelFactory;
+import org.adempiere.webui.factory.IDashboardGadgetFactory;
 import org.adempiere.webui.factory.IFormFactory;
 import org.adempiere.webui.panel.ADForm;
+import org.compiere.util.CCache;
+import org.zkoss.zk.ui.Component;
 
 /**
  *
@@ -88,4 +92,43 @@ public class Extensions {
 		}
 		return null;
 	} // getADTabPanel
+	
+	// partial migration of IDEMPIERE-4498
+	private static final CCache<String, IServiceReferenceHolder<IDashboardGadgetFactory>> s_dashboardGadgetFactoryCache = new CCache<>(
+			null, "IDashboardGadgetFactory", 100, false);
+
+	/**
+	 * 
+	 * @param url
+	 * @param parent
+	 * @return Gadget component
+	 */
+	public static final Component getDashboardGadget(String url,
+			Component parent) {
+		IServiceReferenceHolder<IDashboardGadgetFactory> cache = s_dashboardGadgetFactoryCache
+				.get(url);
+		if (cache != null) {
+			IDashboardGadgetFactory service = cache.getService();
+			if (service != null) {
+				Component component = service.getGadget(url, parent);
+				if (component != null)
+					return component;
+			}
+			s_dashboardGadgetFactoryCache.remove(url);
+		}
+
+		List<IServiceReferenceHolder<IDashboardGadgetFactory>> f = Service
+				.locator().list(IDashboardGadgetFactory.class)
+				.getServiceReferences();
+		for (IServiceReferenceHolder<IDashboardGadgetFactory> factory : f) {
+			IDashboardGadgetFactory service = factory.getService();
+			if (service != null) {
+				Component component = service.getGadget(url, parent);
+				if (component != null)
+					return component;
+			}
+		}
+
+		return null;
+	}
 }

@@ -34,6 +34,7 @@ import java.util.logging.Level;
 import org.adempiere.base.Service;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.ClientInfo;
+import org.adempiere.webui.Extensions;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.apps.graph.IChartRendererService;
 import org.adempiere.webui.apps.graph.WGraph;
@@ -42,7 +43,6 @@ import org.adempiere.webui.apps.graph.model.ChartModel;
 import org.adempiere.webui.component.ToolBarButton;
 import org.adempiere.webui.dashboard.DashboardPanel;
 import org.adempiere.webui.dashboard.DashboardRunnable;
-import org.adempiere.webui.factory.IDashboardGadgetFactory;
 import org.adempiere.webui.report.HTMLExtension;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
@@ -545,13 +545,7 @@ public class DashboardController implements EventListener<Event> {
     	{
         	try {
         		
-                Component component = null;
-                List<IDashboardGadgetFactory> f = Service.locator().list(IDashboardGadgetFactory.class).getServices();
-                for (IDashboardGadgetFactory factory : f) {
-                        component = factory.getGadget(url.toString(),content);
-                        if(component != null)
-                                break;
-                }
+        		Component component = Extensions.getDashboardGadget(url, content);
                 
                 if(component != null)
                 {
