@@ -31,6 +31,7 @@ import org.adempiere.webui.factory.IADTabPanelFactory;
 import org.adempiere.webui.factory.IDashboardGadgetFactory;
 import org.adempiere.webui.factory.IFormFactory;
 import org.adempiere.webui.panel.ADForm;
+import org.compiere.model.MDashboardContent;
 import org.compiere.util.CCache;
 import org.zkoss.zk.ui.Component;
 
@@ -103,14 +104,25 @@ public class Extensions {
 	 * @param parent
 	 * @return Gadget component
 	 */
+	public static final Component getDashboardGadget(String url, Component parent) {
+		return getDashboardGadget(url, parent, null);
+	}
+	
+	/**
+	 *
+	 * @param url
+	 * @param parent
+	 * @param dc
+	 * @return Gadget component
+	 */
 	public static final Component getDashboardGadget(String url,
-			Component parent) {
+			Component parent, MDashboardContent dc) {
 		IServiceReferenceHolder<IDashboardGadgetFactory> cache = s_dashboardGadgetFactoryCache
 				.get(url);
 		if (cache != null) {
 			IDashboardGadgetFactory service = cache.getService();
 			if (service != null) {
-				Component component = service.getGadget(url, parent);
+				Component component = service.getGadget(url, parent, dc);
 				if (component != null)
 					return component;
 			}
@@ -123,7 +135,7 @@ public class Extensions {
 		for (IServiceReferenceHolder<IDashboardGadgetFactory> factory : f) {
 			IDashboardGadgetFactory service = factory.getService();
 			if (service != null) {
-				Component component = service.getGadget(url, parent);
+				Component component = service.getGadget(url, parent, dc);
 				if (component != null)
 					return component;
 			}
