@@ -633,18 +633,18 @@ public class Match
 			if (matchToType == MATCH_ORDER)
 				m_sql.append("SUM(CASE WHEN m.M_InOutLine_ID IS NOT NULL THEN COALESCE(m.Qty,0) ELSE 0 END),");
 			else
-				m_sql.append("SUM(COALESCE(m.Qty,0)),");
+				m_sql.append("SUM(CASE WHEN dt.DocBaseType='MMS' AND dt.IsSOTrx='N' THEN COALESCE(m.Qty,0) * -1 ELSE COALESCE(m.Qty,0) END),");
 			m_sql.append("org.Name, hdr.AD_Org_ID " //JAVIER
 				+ "FROM M_InOut hdr"
 				+ " INNER JOIN AD_Org org ON (hdr.AD_Org_ID=org.AD_Org_ID)" //JAVIER
 				+ " INNER JOIN C_BPartner bp ON (hdr.C_BPartner_ID=bp.C_BPartner_ID)"
 				+ " INNER JOIN M_InOutLine lin ON (hdr.M_InOut_ID=lin.M_InOut_ID)"
 				+ " INNER JOIN M_Product p ON (lin.M_Product_ID=p.M_Product_ID)"
-				+ " INNER JOIN C_DocType dt ON (hdr.C_DocType_ID = dt.C_DocType_ID AND dt.DocBaseType='MMR')"
+				+ " INNER JOIN C_DocType dt ON (hdr.C_DocType_ID = dt.C_DocType_ID)"
 				+ " FULL JOIN ")
 				.append(matchToType == MATCH_ORDER ? "M_MatchPO" : "M_MatchInv")
 				.append(" m ON (lin.M_InOutLine_ID=m.M_InOutLine_ID) "
-				+ "WHERE hdr.DocStatus IN ('CO','CL')");
+		        + "WHERE hdr.DocStatus IN ('CO','CL') AND hdr.IsSOTrx='N'");
 			m_groupBy = " GROUP BY hdr.M_InOut_ID,hdr.DocumentNo,hdr.MovementDate,bp.Name,hdr.C_BPartner_ID,"
 				+ " lin.Line,lin.M_InOutLine_ID,p.Name,lin.M_Product_ID,lin.MovementQty, org.Name, hdr.AD_Org_ID, dt.DocBaseType " //JAVIER
 				+ "HAVING "
@@ -652,7 +652,7 @@ public class Match
 			if (matchToType == MATCH_ORDER)
 				m_groupBy = m_groupBy + "<>SUM(CASE WHEN m.M_InOutLine_ID IS NOT NULL THEN COALESCE(m.Qty,0) ELSE 0 END)";
 			else
-				m_groupBy = m_groupBy + "<>SUM(COALESCE(m.Qty,0))";
+				m_groupBy = m_groupBy + "<>SUM(CASE WHEN dt.DocBaseType='MMS' AND dt.IsSOTrx='N' THEN COALESCE(m.Qty,0) * -1 ELSE COALESCE(m.Qty,0) END))";
 		}
 	}   //  tableInit
 
