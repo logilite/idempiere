@@ -1,5 +1,6 @@
 package org.compiere.acct;
 
+import org.compiere.model.MBankStatement;
 import org.compiere.model.MPayment;
 import org.compiere.util.DB;
 
@@ -17,7 +18,7 @@ public class DocLine_DepositBatch extends DocLine {
 
 		//
 		setDateDoc(line.getDateTrx());
-		setDateAcct(doc.getDateAcct());
+		setDateAcct(MBankStatement.isPostWithDateFromLine(doc.getAD_Client_ID()) ? line.getDateAcct() : doc.getDateAcct());
 		setC_BPartner_ID(line.getC_BPartner_ID());
 	}
 

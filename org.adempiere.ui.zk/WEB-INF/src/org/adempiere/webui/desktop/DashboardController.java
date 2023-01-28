@@ -61,7 +61,9 @@ import org.compiere.model.MPInstance;
 import org.compiere.model.MPInstancePara;
 import org.compiere.model.MProcess;
 import org.compiere.model.MProcessPara;
+import org.compiere.model.MStatusLine;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.PO;
 import org.compiere.print.ReportEngine;
 import org.compiere.process.ProcessInfo;
 import org.compiere.tools.FileUtil;
@@ -398,6 +400,7 @@ public class DashboardController implements EventListener<Event> {
         String htmlContent = dc.get_ID() > 0 ? dc.get_Translation(MDashboardContent.COLUMNNAME_HTML) : null;
         if(htmlContent != null)
         {
+        	htmlContent = Env.parseContext(Env.getCtx(), 0, htmlContent, true);
             StringBuilder result = new StringBuilder("<html><head>");
 
     		URL url = getClass().getClassLoader().getResource("org/compiere/css/PAPanel.css");
@@ -594,6 +597,19 @@ public class DashboardController implements EventListener<Event> {
 			});
     	}
     	
+    	// Status Line
+    	final int AD_StatusLine_ID = dc.getAD_StatusLine_ID();
+    	if(AD_StatusLine_ID > 0) {
+    		MStatusLine sl = new MStatusLine(Env.getCtx(), AD_StatusLine_ID, null);
+    		final Html statusLineHtml = new Html();
+    		statusLineHtml.setContent(sl.parseLine(0));
+    		Div div = new Div();
+    		div.appendChild(statusLineHtml);
+    		div.setSclass("statusline-gadget");
+    		content.appendChild(div);
+    		empty = false;
+    	}
+    	
     	return !empty;
 	}
 	
@@ -697,8 +713,13 @@ public class DashboardController implements EventListener<Event> {
     				int PA_DashboardPreference_ID = Integer.parseInt(value.toString());
     				MDashboardPreference preference = new MDashboardPreference(Env.getCtx(), PA_DashboardPreference_ID, null);
     				preference.setIsCollapsedByDefault(!panel.isOpen());
-    				if (!preference.save())
-    					logger.log(Level.SEVERE, "Failed to save dashboard preference " + preference.toString());
+                    try {
+                        PO.setCrossTenantSafe();
+                        if (!preference.save())
+                            logger.log(Level.SEVERE, "Failed to save dashboard preference " + preference.toString());
+                    } finally {
+                        PO.clearCrossTenantSafe();
+                    }
     			}
     		}
 		}
@@ -928,9 +949,16 @@ public class DashboardController implements EventListener<Event> {
 	public AMedia generateReport(int AD_Process_ID, String parameters) throws Exception {
 		ReportEngine re = runReport(AD_Process_ID, parameters);
 
-		File file = FileUtil.createTempFile(re.getName(), ".html");		
-		re.createHTML(file, false, AEnv.getLanguage(Env.getCtx()), new HTMLExtension(Executions.getCurrent().getContextPath(), "rp",
-				SessionManager.getAppDesktop().getComponent().getUuid()));
+		File file = File.createTempFile(re.getName(), ".html");
+
+		// Keeping logic of logilite-7.1 to create instance of HTMLExtension
+		re.createHTML(file, false, AEnv.getLanguage(Env.getCtx()),
+				new HTMLExtension(
+						Executions.getCurrent().getDesktop().getWebApp()
+								.getRealPath("/"),
+						Executions.getCurrent().getContextPath(), "rp",
+						SessionManager.getAppDesktop().getComponent()
+								.getUuid()));
 		return new AMedia(re.getName(), "html", "text/html", file, false);
 	}
 
@@ -939,7 +967,7 @@ public class DashboardController implements EventListener<Event> {
    		new ZkReportViewerProvider().openViewer(re);
    	}
 
-	private void fillParameter(MPInstance pInstance, String parameters) {		
+	private void fillParameter(MPInstance pInstance, String parameters) {
 		if (parameters != null && parameters.trim().length() > 0) {
 			Map<String, String> paramMap = new HashMap<String, String>();
 			String[] params = parameters.split("[,]");
@@ -1041,9 +1069,22 @@ public class DashboardController implements EventListener<Event> {
 							 iPara.setP_Number(new BigDecimal (value.toString()));
 							 iPara.setInfo(getDisplay(pInstance, iPara, id));
 						 }
-					 }
-					 else if (DisplayType.isDate(iPara.getDisplayType()))
-					 {
+						
+					} 
+					else if (iPara.getDisplayType() == DisplayType.Search
+							|| iPara.getDisplayType() == DisplayType.Table
+							|| iPara.getDisplayType() == DisplayType.TableDir) {
+						int id = new BigDecimal(value.toString()).intValue();
+						if (isTo) {
+							iPara.setP_Number_To(
+									new BigDecimal(value.toString()));
+							iPara.setInfo_To(getDisplay(pInstance, iPara, id));
+						} else {
+							iPara.setP_Number(new BigDecimal(value.toString()));
+							iPara.setInfo(getDisplay(pInstance, iPara, id));
+						}
+					}
+					else if (DisplayType.isDate(iPara.getDisplayType())) {
 						 Timestamp ts = null;
 						 if (value instanceof Timestamp)
 							 ts = (Timestamp)value;
@@ -1086,7 +1127,8 @@ public class DashboardController implements EventListener<Event> {
 			if (pp != null) {
 
 				MLookupInfo mli = MLookupFactory.getLookupInfo(Env.getCtx(), 0, 0, pp.getAD_Reference_ID(), Env.getLanguage(Env.getCtx()), "", pp.getAD_Reference_Value_ID(), false, "");
-
+				// custom logic for branch logilite-7.1 - to handle NPE
+				if (mli != null) {
 				PreparedStatement pstmt = null;
 				ResultSet rs = null;
 				StringBuilder name = new StringBuilder("");
@@ -1116,6 +1158,7 @@ public class DashboardController implements EventListener<Event> {
 				}
 
 				return name.toString();
+			}
 			}
 		}
 		catch (Exception e) {

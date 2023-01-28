@@ -225,7 +225,7 @@ public class Doc_BankStatement extends Doc
 						
 						fl = fact.createLine(docDepositLine,
 								getAccount(Doc.ACCTTYPE_BankInTransit, as),
-								payment.getC_Currency_ID(), payment.getPayAmt().negate());
+								payment.getC_Currency_ID(), payment.isReceipt()? payment.getPayAmt().negate():payment.getPayAmt());
 						// line id
 						fl.setLine_ID(statementLine.get_ID());
 						if (fl != null) {

@@ -36,7 +36,9 @@ import org.adempiere.webui.window.WTask;
 import org.compiere.model.MInfoWindow;
 import org.compiere.model.MQuery;
 import org.compiere.model.MTask;
+import org.compiere.model.MZoomCondition;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 import org.compiere.wf.MWorkflow;
 import org.zkoss.util.media.AMedia;
 import org.zkoss.zk.ui.Component;
@@ -251,7 +253,14 @@ public abstract class TabbedDesktop extends AbstractDesktop {
 
     	final DesktopTabpanel tabPanel = new DesktopTabpanel();		
 		final Tab tab = windowContainer.insertAfter(windowContainer.getSelectedTab(), tabPanel, wnd.getTitle(), true, true, DecorateInfo.get(wnd));
-		tab.setClosable(false);		
+		tab.setClosable(false);	
+		//If zoom condition matched, then apply PredefinedContextVariables from zoom condition
+		MZoomCondition zoomCondition = MZoomCondition.findZoomConditionaByWindowId(AD_Window_ID, query, 0);
+    	if(zoomCondition!=null && !Util.isEmpty(zoomCondition.getPredefinedContextVariables())) {
+    		int windowNo = wnd.getADWindowContent().getWindowNo();
+			setPredefinedContextVariables(zoomCondition.getPredefinedContextVariables());
+			Env.setPredefinedVariables(Env.getCtx(), windowNo, getPredefinedContextVariables());
+    	}
 		final OpenWindowRunnable runnable = new OpenWindowRunnable(wnd, tab, tabPanel, null);
 		preOpenNewTab();
 		runnable.run();

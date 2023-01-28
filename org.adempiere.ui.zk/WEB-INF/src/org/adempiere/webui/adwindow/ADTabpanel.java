@@ -206,7 +206,7 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
 
 	List<Group> allCollapsibleGroups;
 
-	private Borderlayout formContainer = null;
+	protected Borderlayout formContainer = null;
 
 	private ADTreePanel treePanel = null;
 

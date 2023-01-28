@@ -31,6 +31,7 @@ import java.util.logging.Level;
 import org.adempiere.base.Core;
 import org.adempiere.base.ILogin;
 import javax.servlet.http.HttpSession;
+import org.adempiere.exceptions.AdempiereException;
 
 import org.adempiere.util.Callback;
 import org.adempiere.webui.IWebClient;
@@ -137,6 +138,12 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 			ISSOPrinciple ssoPrinciple = SSOWebuiFilter.getSSOPrinciple();
 			String username = ssoPrinciple.getUserName(result);
 			Language language = ssoPrinciple.getLanguage(result);
+			boolean isEmailLogin = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
+			if (Util.isEmpty(username))
+				throw new AdempiereException("No Apps " + (isEmailLogin ? "Email" : "User"));
+			if (language == null)
+				language = Language.getBaseLanguage();
+
 			Env.setContext(ctx, UserPreference.LANGUAGE_NAME, language.getName());
 			Locale locale = language.getLocale();
 			getDesktop().getSession().setAttribute(Attributes.PREFERRED_LOCALE, locale);

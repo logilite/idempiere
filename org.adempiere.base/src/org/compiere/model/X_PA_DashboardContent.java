@@ -33,7 +33,7 @@ public class X_PA_DashboardContent extends PO implements I_PA_DashboardContent, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20230125L;
 
     /** Standard Constructor */
     public X_PA_DashboardContent (Properties ctx, int PA_DashboardContent_ID, String trxName)
@@ -179,6 +179,31 @@ public class X_PA_DashboardContent extends PO implements I_PA_DashboardContent, 
 	public int getAD_Role_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Role_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_AD_StatusLine getAD_StatusLine() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_StatusLine)MTable.get(getCtx(), org.compiere.model.I_AD_StatusLine.Table_Name)
+			.getPO(getAD_StatusLine_ID(), get_TrxName());	}
+
+	/** Set Status Line.
+		@param AD_StatusLine_ID Status Line	  */
+	public void setAD_StatusLine_ID (int AD_StatusLine_ID)
+	{
+		if (AD_StatusLine_ID < 1) 
+			set_Value (COLUMNNAME_AD_StatusLine_ID, null);
+		else 
+			set_Value (COLUMNNAME_AD_StatusLine_ID, Integer.valueOf(AD_StatusLine_ID));
+	}
+
+	/** Get Status Line.
+		@return Status Line	  */
+	public int getAD_StatusLine_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_StatusLine_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

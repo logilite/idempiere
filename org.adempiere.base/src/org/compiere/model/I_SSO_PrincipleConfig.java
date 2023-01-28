@@ -130,6 +130,32 @@ public interface I_SSO_PrincipleConfig
 	  */
 	public String getSSO_ApplicationClientID();
 
+    /** Column name SSO_ApplicationDiscoveryURI */
+    public static final String COLUMNNAME_SSO_ApplicationDiscoveryURI = "SSO_ApplicationDiscoveryURI";
+
+	/** Set Application Discovery URI.
+	  * SSO Application Discovery URI
+	  */
+	public void setSSO_ApplicationDiscoveryURI (String SSO_ApplicationDiscoveryURI);
+
+	/** Get Application Discovery URI.
+	  * SSO Application Discovery URI
+	  */
+	public String getSSO_ApplicationDiscoveryURI();
+
+    /** Column name SSO_ApplicationDomain */
+    public static final String COLUMNNAME_SSO_ApplicationDomain = "SSO_ApplicationDomain";
+
+	/** Set Application Domain.
+	  * SSO Application Domain
+	  */
+	public void setSSO_ApplicationDomain (String SSO_ApplicationDomain);
+
+	/** Get Application Domain.
+	  * SSO Application Domain
+	  */
+	public String getSSO_ApplicationDomain();
+
     /** Column name SSO_ApplicationLogoutURL */
     public static final String COLUMNNAME_SSO_ApplicationLogoutURL = "SSO_ApplicationLogoutURL";
 

@@ -1243,14 +1243,15 @@ public final class MSetup
 		else
 			log.log(Level.SEVERE, "Product NOT inserted");
 		//  Default
-		sqlCmd = new StringBuilder ("UPDATE C_AcctSchema_Element SET ");
-		sqlCmd.append("M_Product_ID=").append(product.getM_Product_ID());
-		sqlCmd.append(" WHERE C_AcctSchema_ID=").append(m_as.getC_AcctSchema_ID());
-		sqlCmd.append(" AND ElementType='PR'");
-		no = DB.executeUpdateEx(sqlCmd.toString(), m_trx.getTrxName());
-		if (no != 1)
-			log.log(Level.SEVERE, "AcctSchema Element Product NOT updated");
-
+		if(product.getM_Product_ID()>0) {
+			sqlCmd = new StringBuffer ("UPDATE C_AcctSchema_Element SET ");
+			sqlCmd.append("M_Product_ID=").append(product.getM_Product_ID());
+			sqlCmd.append(" WHERE C_AcctSchema_ID=").append(m_as.getC_AcctSchema_ID());
+			sqlCmd.append(" AND ElementType='PR'");
+			no = DB.executeUpdateEx(sqlCmd.toString(), m_trx.getTrxName());
+			if (no != 1)
+				log.log(Level.SEVERE, "AcctSchema Element Product NOT updated");
+		}
 		/**
 		 *  Location, Warehouse, Locator
 		 */
@@ -1287,7 +1288,8 @@ public final class MSetup
 		//  Update ClientInfo
 		sqlCmd = new StringBuilder ("UPDATE AD_ClientInfo SET ");
 		sqlCmd.append("C_BPartnerCashTrx_ID=").append(bp.getC_BPartner_ID());
-		sqlCmd.append(",M_ProductFreight_ID=").append(product.getM_Product_ID());
+		if(product.getM_Product_ID()>0) 
+			sqlCmd.append(",M_ProductFreight_ID=").append(product.getM_Product_ID());
 		sqlCmd.append(" WHERE AD_Client_ID=").append(getAD_Client_ID());
 		no = DB.executeUpdateEx(sqlCmd.toString(), m_trx.getTrxName());
 		if (no != 1)
@@ -1324,11 +1326,12 @@ public final class MSetup
 		if (!plv.save())
 			log.log(Level.SEVERE, "PriceList_Version NOT inserted");
 		//  ProductPrice
-		MProductPrice pp = new MProductPrice(plv, product.getM_Product_ID(), 
-			Env.ONE, Env.ONE, Env.ONE);
-		if (!pp.save())
-			log.log(Level.SEVERE, "ProductPrice NOT inserted");
-
+		if( product.getM_Product_ID()>0) {
+			MProductPrice pp = new MProductPrice(plv, product.getM_Product_ID(), 
+				Env.ONE, Env.ONE, Env.ONE);
+			if (!pp.save())
+				log.log(Level.SEVERE, "ProductPrice NOT inserted");
+		}
 
 		//	Create Sales Rep for Client-User
 		MBPartner bpCU = new MBPartner (m_ctx, 0, m_trx.getTrxName());

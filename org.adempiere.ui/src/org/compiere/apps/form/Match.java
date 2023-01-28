@@ -568,10 +568,6 @@ public class Match
 				m_sql.append(" AND ((dt.DocBaseType = 'API' AND lin.C_InvoiceLine_ID =").append(C_InvoiceLine_ID)
 						.append(") OR (dt.DocBaseType = 'APC'))");
 			}
-			else
-			{
-				m_sql.append(" AND dt.DocBaseType <> 'APC' ");
-			}
 			
 			m_groupBy = " GROUP BY hdr.C_Invoice_ID, dt.C_DocType_ID, hdr.DocumentNo,hdr.DateInvoiced,bp.Name,hdr.C_BPartner_ID,"
 				+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,dt.DocBaseType,lin.QtyInvoiced, org.Name, hdr.AD_Org_ID, dt.DocBaseType " //JAVIER

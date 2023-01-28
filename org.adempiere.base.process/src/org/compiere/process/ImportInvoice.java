@@ -676,7 +676,7 @@ public class ImportInvoice extends SvrProcess
 					if (oldDocumentNo == null)
 						oldDocumentNo = "";
 					//
-					invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(0, null);
+					invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(0, get_TrxName());
 					invoice.setClientOrg (imp.getAD_Client_ID(), imp.getAD_Org_ID());
 					invoice.setC_DocTypeTarget_ID(imp.getC_DocType_ID());
 					invoice.setIsSOTrx(imp.isSOTrx());

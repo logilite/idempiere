@@ -30,7 +30,7 @@ public class X_AD_ZoomCondition extends PO implements I_AD_ZoomCondition, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20230113L;
 
     /** Standard Constructor */
     public X_AD_ZoomCondition (Properties ctx, int AD_ZoomCondition_ID, String trxName)
@@ -231,6 +231,23 @@ public class X_AD_ZoomCondition extends PO implements I_AD_ZoomCondition, I_Pers
 	public String getName()
 	{
 		return (String)get_Value(COLUMNNAME_Name);
+	}
+
+	/** Set Predefined Context Variables.
+		@param PredefinedContextVariables 
+		Predefined context variables to inject when opening a menu entry or a window
+	  */
+	public void setPredefinedContextVariables (String PredefinedContextVariables)
+	{
+		set_Value (COLUMNNAME_PredefinedContextVariables, PredefinedContextVariables);
+	}
+
+	/** Get Predefined Context Variables.
+		@return Predefined context variables to inject when opening a menu entry or a window
+	  */
+	public String getPredefinedContextVariables () 
+	{
+		return (String)get_Value(COLUMNNAME_PredefinedContextVariables);
 	}
 
 	/** Set Sequence.
