@@ -34,6 +34,7 @@ import org.adempiere.webui.theme.ThemeManager;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
 import org.compiere.model.GridField;
+import org.compiere.model.GridFieldVO;
 import org.compiere.model.InfoColumnVO;
 import org.compiere.model.MStyle;
 import org.compiere.util.Env;

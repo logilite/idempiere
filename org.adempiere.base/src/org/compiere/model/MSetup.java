@@ -1244,7 +1244,7 @@ public final class MSetup
 			log.log(Level.SEVERE, "Product NOT inserted");
 		//  Default
 		if(product.getM_Product_ID()>0) {
-			sqlCmd = new StringBuffer ("UPDATE C_AcctSchema_Element SET ");
+			sqlCmd = new StringBuilder ("UPDATE C_AcctSchema_Element SET ");
 			sqlCmd.append("M_Product_ID=").append(product.getM_Product_ID());
 			sqlCmd.append(" WHERE C_AcctSchema_ID=").append(m_as.getC_AcctSchema_ID());
 			sqlCmd.append(" AND ElementType='PR'");

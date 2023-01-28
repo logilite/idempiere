@@ -343,7 +343,18 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 		return retValue;
 	}	//	getLines
 
-
+	/**
+	 * 	Document Status is Complete or Closed
+	 *	@return true if CO, CL or RE
+	 */
+	public boolean isComplete()
+	{
+		String ds = getDocStatus();
+		return DOCSTATUS_Completed.equals(ds)
+			|| DOCSTATUS_Closed.equals(ds)
+			|| DOCSTATUS_Reversed.equals(ds);
+	}	//	isComplete
+	
 	/**************************************************************************
 	 * 	Process document
 	 *	@param processAction document action

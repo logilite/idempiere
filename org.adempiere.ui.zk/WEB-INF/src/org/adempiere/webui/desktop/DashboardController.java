@@ -949,16 +949,9 @@ public class DashboardController implements EventListener<Event> {
 	public AMedia generateReport(int AD_Process_ID, String parameters) throws Exception {
 		ReportEngine re = runReport(AD_Process_ID, parameters);
 
-		File file = File.createTempFile(re.getName(), ".html");
-
-		// Keeping logic of logilite-7.1 to create instance of HTMLExtension
-		re.createHTML(file, false, AEnv.getLanguage(Env.getCtx()),
-				new HTMLExtension(
-						Executions.getCurrent().getDesktop().getWebApp()
-								.getRealPath("/"),
-						Executions.getCurrent().getContextPath(), "rp",
-						SessionManager.getAppDesktop().getComponent()
-								.getUuid()));
+		File file = FileUtil.createTempFile(re.getName(), ".html");		
+		re.createHTML(file, false, AEnv.getLanguage(Env.getCtx()), new HTMLExtension(Executions.getCurrent().getContextPath(), "rp", 
+				SessionManager.getAppDesktop().getComponent().getUuid()));
 		return new AMedia(re.getName(), "html", "text/html", file, false);
 	}
 

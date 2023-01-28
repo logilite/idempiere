@@ -393,7 +393,7 @@ public class GridFieldVO implements Serializable, Cloneable
 	 */
 	public static GridFieldVO createParameter (Properties ctx, int WindowNo, int ProcessIDOfPanel, int WindowIDOfPanel, int InfoWindowIDOfPanel, ResultSet rs)
 	{
-		return GridFieldVO.createParameter(ctx, WindowNo, 0, ProcessIDOfPanel, WindowIDOfPanel, adInfoPaneId, rs);
+		return GridFieldVO.createParameter(ctx, WindowNo, 0, ProcessIDOfPanel, WindowIDOfPanel, InfoWindowIDOfPanel, rs);
 	}
 	/**
 	 *  Init Field for Process Parameter
@@ -402,7 +402,7 @@ public class GridFieldVO implements Serializable, Cloneable
 	 *  @param rs result set AD_Process_Para
 	 *  @return MFieldVO
 	 */
-	public static GridFieldVO createParameter (Properties ctx, int WindowNo, int TabNo, int ProcessIDOfPanel, int WindowIDOfPanel, int adInfoPaneId, ResultSet rs)
+	public static GridFieldVO createParameter (Properties ctx, int WindowNo, int TabNo, int ProcessIDOfPanel, int WindowIDOfPanel, int InfoWindowIDOfPanel, ResultSet rs)
 	{
 		GridFieldVO vo = new GridFieldVO (ctx, WindowNo, TabNo, 0, 0, false);
 		vo.isProcess = true;
