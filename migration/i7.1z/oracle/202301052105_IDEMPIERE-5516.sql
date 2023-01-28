@@ -4,6 +4,71 @@ SELECT register_migration_script('202301052105_IDEMPIERE-5516.sql') FROM dual;
 SET SQLBLANKLINES ON
 SET DEFINE OFF
 
+
+-- CHECK SAME CLIENT & ACCT_SCHEMA AGAINST DUPLICATE ELEMENT ACCOUNT USED IN BANK ACCOUNT ACCOUNTING
+-- For UnAllocatedCash_Acct
+SET SERVEROUTPUT ON;
+DECLARE 
+CURSOR cursorRecord IS SELECT DISTINCT ba.AD_Client_ID, ba.C_AcctSchema_ID, vu.Account_ID
+	FROM C_BankAccount_Acct ba
+	INNER JOIN C_ValidCombination vu ON (vu.C_ValidCombination_ID = ba.B_UnAllocatedCash_Acct)
+	WHERE ba.IsActive = 'Y'
+	ORDER BY ba.C_AcctSchema_ID;
+
+	acctSchemaID number:=0;
+
+	duplicateAcct EXCEPTION;
+
+BEGIN
+	FOR item IN cursorRecord 
+	LOOP
+		DBMS_OUTPUT.PUT_LINE( 'UnAllocatedCash account used, clientID: ' || item.AD_Client_ID || '; acctSchemaID:' || item.C_AcctSchema_ID || ' accountID: ' || item.Account_ID);
+
+		IF ( item.C_AcctSchema_ID = acctSchemaID ) 
+		THEN
+			RAISE duplicateAcct;
+		ELSE
+			acctSchemaID := item.C_AcctSchema_ID;
+		END IF;
+	END LOOP;
+
+	EXCEPTION WHEN duplicateAcct THEN
+		DBMS_OUTPUT.PUT_LINE('EXCEPTION: Error Bank account found different UnAllocatedCash account used against same client and same acctSchema, Please verify manually to correct action as per ticket on IDEMPIERE-5516.');
+END;
+
+
+-- For PaymentSelect_Acct
+SET SERVEROUTPUT ON;
+DECLARE 
+CURSOR cursorRecord IS SELECT DISTINCT ba.AD_Client_ID, ba.C_AcctSchema_ID, vu.Account_ID
+	FROM C_BankAccount_Acct ba
+	INNER JOIN C_ValidCombination vu ON (vu.C_ValidCombination_ID = ba.B_PaymentSelect_Acct)
+	WHERE ba.IsActive = 'Y'
+	ORDER BY ba.C_AcctSchema_ID;
+
+	acctSchemaID number:=0;
+
+	duplicateAcct EXCEPTION;
+
+BEGIN
+	FOR item IN cursorRecord 
+	LOOP
+		DBMS_OUTPUT.PUT_LINE( 'Payment Selection account used, clientID: ' || item.AD_Client_ID || '; acctSchemaID:' || item.C_AcctSchema_ID || ' accountID: ' || item.Account_ID);
+
+		IF ( item.C_AcctSchema_ID = acctSchemaID ) 
+		THEN
+			RAISE duplicateAcct;
+		ELSE
+			acctSchemaID := item.C_AcctSchema_ID;
+		END IF;
+	END LOOP;
+
+	EXCEPTION WHEN duplicateAcct THEN
+		DBMS_OUTPUT.PUT_LINE('EXCEPTION: Error Bank account found different Payment Selection account used against same client and same acctSchema, Please verify manually to correct action as per ticket on IDEMPIERE-5516.');
+END;
+
+
+
 -- Jan 5, 2023, 9:05:21 PM IST
 INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,Help,AD_Table_ID,ColumnName,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,IsToolbarButton,IsSecure,FKConstraintType,IsHtml) VALUES (215733,1,'Unallocated Cash','Unallocated Cash Clearing Account','Receipts not allocated to Invoices',183,'B_UnallocatedCash_Acct',22,'N','N','Y','N','N',0,'N',25,0,0,'Y',TO_TIMESTAMP('2023-01-05 21:05:20','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2023-01-05 21:05:20','YYYY-MM-DD HH24:MI:SS'),100,1687,'Y','N','D','N','N','N','Y','087716e2-a724-4c43-8cb4-28fc88ec05cc','Y','N','N','N','N')
 ;
