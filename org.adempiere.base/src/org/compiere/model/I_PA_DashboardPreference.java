@@ -121,6 +121,19 @@ public interface I_PA_DashboardPreference
 	  */
 	public int getCreatedBy();
 
+    /** Column name FlexGrow */
+    public static final String COLUMNNAME_FlexGrow = "FlexGrow";
+
+	/** Set Flex Grow.
+	  * This defines the ability for a flex item to grow if necessary. It accepts a unitless value that serves as a proportion. It dictates what amount of the available space inside the flex container the item should take up.
+	  */
+	public void setFlexGrow (int FlexGrow);
+
+	/** Get Flex Grow.
+	  * This defines the ability for a flex item to grow if necessary. It accepts a unitless value that serves as a proportion. It dictates what amount of the available space inside the flex container the item should take up.
+	  */
+	public int getFlexGrow();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 

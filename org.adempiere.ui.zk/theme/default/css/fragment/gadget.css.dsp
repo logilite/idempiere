@@ -10,6 +10,27 @@
 	background-image: none; background-color: #FFFFFF;
 }
 
+.statusline-wrapper > .z-panel-head {
+	position: absolute;
+	top: 1;
+	z-index: 1;
+	width: calc(100% - 8px);
+}
+
+.dashboard-widget > .z-panel-body {
+	height: 100%;
+}
+
+.statusline-wrapper {
+	height: 100%;
+}
+
+.statusline-wrapper > .z-panel-body {
+	position: relative;
+	top: 0;
+	height: 100%;
+}
+
 .z-panel {
 	border-radius: 5px;
 	border: 1px solid #d8d8d8;
@@ -22,6 +43,7 @@
 
 .z-panelchildren {
 	border: none;
+	height: 100%;
 }
 
 .z-panel-head {
