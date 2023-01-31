@@ -715,7 +715,7 @@ public class CLogMgt
 	 *  Get Localhost
 	 *  @return local host
 	 */
-	private static String getLocalHost()
+	public static String getLocalHost()
 	{
 		try
 		{
