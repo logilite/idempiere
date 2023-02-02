@@ -367,6 +367,8 @@
         <setEntry value="org.idempiere.felix.webconsole@default:true"/>
         <setEntry value="org.idempiere.hazelcast.service@default:default"/>
         <setEntry value="org.idempiere.webservices@default:default"/>
+        <setEntry value="org.idempiere.zk.billboard.chart@default:default"/>
+        <setEntry value="org.idempiere.zk.billboard@default:default"/>
         <setEntry value="org.idempiere.zk.extra@default:default"/>
     </setAttribute>
     <booleanAttribute key="show_selected_only" value="false"/>

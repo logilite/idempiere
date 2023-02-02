@@ -48,6 +48,8 @@
 		<module>org.idempiere.ui.zk.selenium</module>
 		<module>org.idempiere.webservices</module>
 		<module>org.idempiere.zk.extra</module>
+		<module>org.idempiere.zk.billboard</module>
+		<module>org.idempiere.zk.billboard.chart</module>
 		<module>org.adempiere.report.jasper-feature</module>
 		<module>org.adempiere.bundles.external-feature</module>
 		<module>org.adempiere.base-feature</module>
