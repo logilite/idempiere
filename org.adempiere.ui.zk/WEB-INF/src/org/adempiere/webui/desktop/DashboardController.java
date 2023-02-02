@@ -830,7 +830,8 @@ public class DashboardController implements EventListener<Event> {
 	        		model.chart = chartModel;
 	        		List<IChartRendererService> list = Service.locator().list(IChartRendererService.class).getServices();
 	        		for (IChartRendererService renderer : list) {
-	        			if (renderer.renderChart(chartPanel, width, height, model))
+						if (renderer.renderChart(chartPanel, width, height,
+								model, dc.isShowTitle()))
 	        				break;
 	        		}
 				}

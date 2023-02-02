@@ -68,7 +68,8 @@ public class WChartEditor extends WEditor
 	        model.chart = chartModel;
 	        List<IChartRendererService> list = Service.locator().list(IChartRendererService.class).getServices();
 			for (IChartRendererService renderer : list) {
-				if (renderer.renderChart(chartDiv, chartWidth, chartHeight, model))
+				if (renderer.renderChart(chartDiv, chartWidth, chartHeight,
+						model, true))
 					break;
 			}
     	}
@@ -158,7 +159,8 @@ public class WChartEditor extends WEditor
     		model.chart = chartModel;
     		List<IChartRendererService> list = Service.locator().list(IChartRendererService.class).getServices();
     		for (IChartRendererService renderer : list) {
-    			if (renderer.renderChart(chartDiv, chartWidth, chartHeight, model))
+				if (renderer.renderChart(chartDiv, chartWidth, chartHeight,
+						model, true))
     				break;
     		}
 		}
