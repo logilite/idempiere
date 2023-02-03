@@ -290,6 +290,8 @@ public class X_PA_DashboardContent extends PO implements I_PA_DashboardContent, 
 	public static final String GOALDISPLAY_HTMLTable = "T";
 	/** Chart = C */
 	public static final String GOALDISPLAY_Chart = "C";
+	/** Gauge Indicator = G */
+	public static final String GOALDISPLAY_GaugeIndicator = "G";
 	/** Set Goal Display.
 		@param GoalDisplay 
 		Type of goal display on dashboard
