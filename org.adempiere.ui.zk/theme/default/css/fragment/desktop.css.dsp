@@ -261,3 +261,9 @@
 	overflow-x: auto;
 	padding: 8px;
 }
+
+.dashboard-content-help .z-popup-content {
+	background: black;
+	color: white;
+	border-radius: 5px;
+}
