@@ -17,7 +17,7 @@
 	cursor: pointer;
 }
 .tabs .bd {
-	background: ##c5c5c5;
+	background: #c5c5c5;
 	zoom: 1;
 }
 .tabs .t1, .tabs .t2, .tabs .t3 {
@@ -212,4 +212,9 @@
 }
 .z-calendars-day-of-week-inner {
 	color: #000000;
+}
+
+/*notes: without this fix calendar increases repeatedly height when switching between home and window tab in dashboard row orientation*/
+.z-calendars-month-cnt {
+	height: 300px !important;
 }
