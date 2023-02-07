@@ -693,8 +693,10 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 		}
 		
 		getProcessInfo().setIsSummary(chbIsSummary.isChecked());
-		if (fLanguageType != null)
-			getProcessInfo().setLanguageID(fLanguageType.getValue() == null?0:(int)fLanguageType.getValue());
+		if (fLanguageType != null && fLanguageType.getValue() != null)
+			getProcessInfo().setLanguageID(fLanguageType.getValue() == null ? 0 : (int) fLanguageType.getValue());
+		else
+			getProcessInfo().setLanguageID(MLanguage.get(getCtx(), Env.getLanguage(getCtx())).getAD_Language_ID());
 	}
 	
 	protected void autoStart()
