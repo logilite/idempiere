@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.zkoss.lang.Objects;
 import org.zkoss.xel.VariableResolver;
 import org.zkoss.zk.au.out.AuSetAttribute;
@@ -730,7 +731,7 @@ public class Chosenbox<T> extends HtmlBasedComponent {
 	}
 	
 	private Integer getIndexFromValue(String valueHTML, boolean checkSubList) {
-		String value = valueHTML; // StringEscapeUtils.unescapeHtml4(valueHTML);
+		String value = StringEscapeUtils.unescapeHtml4(valueHTML);
 		for (int i = 0; i < _model.getSize(); i++) {
 			if (value.equals(_model.getElementAt(i).toString()))
 				return Integer.valueOf(i);
