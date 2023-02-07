@@ -38,7 +38,7 @@ public class MMeasureCalc extends X_PA_MeasureCalc
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 4720674127987683534L;
+	private static final long serialVersionUID = -1334100963468705584L;
 
 	/**
 	 * 	Get MMeasureCalc from Cache
@@ -441,7 +441,7 @@ public class MMeasureCalc extends X_PA_MeasureCalc
 			return finalSQL;
 		if (role == null)
 			role = MRole.getDefault();
-		String retValue = role.addAccessSQL(finalSQL, tableName, true, false);
+		String retValue = role.addAccessSQL(finalSQL, null, true, false);
 		return retValue;
 	}	//	addRestrictions
 
@@ -465,5 +465,15 @@ public class MMeasureCalc extends X_PA_MeasureCalc
 		return sb.toString ();
 	}	//	toString
 	
+	/**
+	 * Get the Where clause adding the WHERE keyword when needed
+	 */
+	@Override
+	public String getWhereClause() {
+		String whereClause = super.getWhereClause();
+		if (!whereClause.toLowerCase().startsWith("where "))
+			whereClause = "WHERE " + whereClause;
+		return whereClause;
+	}
 	
 }	//	MMeasureCalc
