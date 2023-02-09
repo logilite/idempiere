@@ -746,7 +746,7 @@ public class DashboardController implements EventListener<Event> {
 				iframe.setSclass("dashboard-report-iframe");
 				content.appendChild(iframe);
 				iframe.setContent(
-						generateReport(AD_Process_ID, processParameters));
+						generateReport(AD_Process_ID, dc.getAD_PrintFormat_ID(), processParameters));
 				
 				Toolbar toolbar = new Toolbar();
 				content.appendChild(toolbar);
@@ -756,6 +756,7 @@ public class DashboardController implements EventListener<Event> {
 				btn = new ToolBarButton();
 				btn.setAttribute("AD_Process_ID", AD_Process_ID);
 				btn.setAttribute("ProcessParameters", processParameters);
+				btn.setAttribute("AD_PrintFormat_ID", dc.getAD_PrintFormat_ID());
 				btn.addEventListener(Events.ON_CLICK, this);
 				btn.setLabel(Msg.getMsg(Env.getCtx(), "ViewReportInNewTab"));
 				toolbar.appendChild(new Separator("vertical"));
@@ -769,8 +770,8 @@ public class DashboardController implements EventListener<Event> {
 					btn.setImage(ThemeManager
 							.getThemeResource("images/Refresh16.png"));
 
-				btn.addEventListener(Events.ON_CLICK, e -> iframe.setContent(
-						generateReport(AD_Process_ID, processParameters)));
+				btn.addEventListener(Events.ON_CLICK, e -> iframe
+						.setContent(generateReport(AD_Process_ID, dc.getAD_PrintFormat_ID(), processParameters)));
 				toolbar.appendChild(btn);
 			}
 			else
@@ -969,8 +970,9 @@ public class DashboardController implements EventListener<Event> {
             	{
             		int processId = (Integer)btn.getAttribute("AD_Process_ID");
             		String parameters = (String)btn.getAttribute("ProcessParameters");
+					int printFormatId = (Integer) btn.getAttribute("AD_PrintFormat_ID");
             		if (processId > 0)
-            			openReportInViewer(processId, parameters);
+						openReportInViewer(processId, printFormatId, parameters);
             	}
             }
         }
@@ -1405,7 +1407,7 @@ public class DashboardController implements EventListener<Event> {
 		return htmlString;
 	}
 	
-	private ReportEngine runReport(int AD_Process_ID, String parameters) {
+	private ReportEngine runReport(int AD_Process_ID, int AD_PrintFormat_ID, String parameters) {
    		MProcess process = MProcess.get(Env.getCtx(), AD_Process_ID);
 		if (!process.isReport() || process.getAD_ReportView_ID() == 0)
 			 throw new IllegalArgumentException("Not a Report AD_Process_ID=" + process.getAD_Process_ID()
@@ -1414,7 +1416,9 @@ public class DashboardController implements EventListener<Event> {
 		int AD_Table_ID = 0;
 		int Record_ID = 0;
 		//
-		MPInstance pInstance = new MPInstance(process, Record_ID);
+		MPInstance pInstance = new MPInstance(Env.getCtx(), AD_Process_ID, Record_ID);
+		if (AD_PrintFormat_ID > 0)
+			pInstance.setAD_PrintFormat_ID(AD_PrintFormat_ID);
 		pInstance.setIsProcessing(true);
 		pInstance.saveEx();
 		try {
@@ -1439,9 +1443,8 @@ public class DashboardController implements EventListener<Event> {
 		}
    	}
    	
-	private AMedia generateReport(int AD_Process_ID, String parameters)
-			throws Exception {
-		ReportEngine re = runReport(AD_Process_ID, parameters);
+	private AMedia generateReport(int AD_Process_ID, int AD_PrintFormat_ID, String parameters) throws Exception {
+		ReportEngine re = runReport(AD_Process_ID, AD_PrintFormat_ID, parameters);
 
 		File file = File.createTempFile(re.getName(), ".html");
 
@@ -1456,8 +1459,8 @@ public class DashboardController implements EventListener<Event> {
 		return new AMedia(re.getName(), "html", "text/html", file, false);
 	}
    	
-   	protected void openReportInViewer(int AD_Process_ID, String parameters) {
-   		ReportEngine re = runReport(AD_Process_ID, parameters);
+	protected void openReportInViewer(int AD_Process_ID, int AD_PrintFormat_ID, String parameters) {
+		ReportEngine re = runReport(AD_Process_ID, AD_PrintFormat_ID, parameters);
    		new ZkReportViewerProvider().openViewer(re);
    	}
 
