@@ -221,6 +221,7 @@ public abstract class AbstractProcessCtl implements Runnable
 				pinstance.setIsProcessing(false);
 				pinstance.saveEx();
 			}
+			return;
 		}
 
 		// Clear Jasper Report class if default - to be executed later
