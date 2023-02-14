@@ -293,7 +293,7 @@ public class RequestEventHandler extends AbstractEventHandler implements Managed
 		int orgId = Env.getAD_Org_ID(r.getCtx());
 		if (orgId > 0)
 		{
-			MOrg org = MOrg.get(r.getCtx(), Env.getAD_Client_ID(r.getCtx()));
+			MOrg org = MOrg.get(r.getCtx(), orgId);
 			orgName = org.getName();
 		}
 		
