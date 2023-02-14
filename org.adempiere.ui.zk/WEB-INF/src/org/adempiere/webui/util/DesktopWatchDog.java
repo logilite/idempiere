@@ -29,8 +29,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import org.compiere.Adempiere;
+import org.compiere.util.CLogger;
 import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.WebApp;
@@ -49,11 +51,15 @@ import fi.jawsy.jawwa.zk.atmosphere.AtmosphereServerPush;
  */
 public class DesktopWatchDog {
 
+
+	private static CLogger	log	= CLogger.getCLogger(DesktopWatchDog.class);
+	
 	private final static DesktopWatchDog INSTANCE = new DesktopWatchDog();
 	
-	private final ConcurrentLinkedDeque<DesktopEntry> desktops = new ConcurrentLinkedDeque<DesktopWatchDog.DesktopEntry>();
+	public final ConcurrentLinkedDeque<DesktopEntry> desktops = new ConcurrentLinkedDeque<DesktopWatchDog.DesktopEntry>();
 	
 	private DesktopWatchDog() {
+		printLog("Constructor called, Instance Creation:", "");
 		Adempiere.getThreadPoolExecutor().scheduleWithFixedDelay(() -> {
 			doMonitoring();
 		}, 60, 40, TimeUnit.SECONDS);
@@ -107,14 +113,17 @@ public class DesktopWatchDog {
 			for(Session session : toDestroy) {
 				if (!((SessionCtrl)session).isInvalidated()) {
 					((SessionCtrl)session).invalidateNow();
+					printLog("doMonitoring: ", "toDestroy list invalidated, Size=" + INSTANCE.desktops.size());
 				}
 			}
 		}
+
+		printLog("doMonitoring: ", "Size = " + INSTANCE.desktops.size());
 	}
 
-	private final static class DesktopEntry {		
-		Desktop desktop;
-		int noAtmosphereResourceCount = 0;
+	public final static class DesktopEntry {		
+		public Desktop desktop;
+		public int noAtmosphereResourceCount = 0;
 		
 		private DesktopEntry(Desktop desktop) {
 			this.desktop = desktop;
@@ -127,6 +136,7 @@ public class DesktopWatchDog {
 	 */
 	public static void addDesktop(Desktop desktop) {
 		INSTANCE.desktops.add(new DesktopEntry(desktop));
+		printLog("addDesktop: ", "Size = " + INSTANCE.desktops.size());
 	}
 	
 	/**
@@ -142,5 +152,16 @@ public class DesktopWatchDog {
 				break;
 			}
 		}
+		printLog("removeDesktop: ", "after removed Size=" + INSTANCE.desktops.size());
+	}
+
+	private final static void printLog(String info, String msg)
+	{
+		log.log(Level.SEVERE, info + " --- " + msg);
+	}
+
+	public static DesktopWatchDog getINSTANCE()
+	{
+		return INSTANCE;
 	}
 }
