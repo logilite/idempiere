@@ -482,7 +482,7 @@ public class MMeasureCalc extends X_PA_MeasureCalc implements ImmutablePOSupport
 			return finalSQL;
 		if (role == null)
 			role = MRole.getDefault();
-		String retValue = role.addAccessSQL(finalSQL, tableName, true, false);
+		String retValue = role.addAccessSQL(finalSQL, null, true, false);
 		return retValue;
 	}	//	addRestrictions
 
@@ -513,6 +513,16 @@ public class MMeasureCalc extends X_PA_MeasureCalc implements ImmutablePOSupport
 
 		makeImmutable();
 		return this;
+	}
+	/**
+	 * Get the Where clause adding the WHERE keyword when needed
+	 */
+	@Override
+	public String getWhereClause() {
+		String whereClause = super.getWhereClause();
+		if (!whereClause.toLowerCase().startsWith("where "))
+			whereClause = "WHERE " + whereClause;
+		return whereClause;
 	}
 
 }	//	MMeasureCalc

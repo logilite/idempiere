@@ -369,6 +369,14 @@ public class MInvoiceLine extends X_C_InvoiceLine
             setPrice(rmaLine.getAmt());
             setC_Tax_ID(rmaLine.getC_Tax_ID());
             setLineNetAmt(rmaLine.getLineNetAmt());
+            
+			// set List Price and Limit Price as of original Invoice
+			MInvoiceLine originalInvoiceLine = MInvoiceLine.getOfInOutLine(rmaLine.getShipLine());
+			if (originalInvoiceLine != null)
+			{
+				setPriceList(originalInvoiceLine.getPriceList());
+				setPriceLimit(originalInvoiceLine.getPriceLimit());
+			}
         }
 		else
 		{

@@ -1169,10 +1169,13 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			//	Process
 			MProcess process = MProcess.get(getCtx(), m_node.getAD_Process_ID());
 			MPInstance pInstance = new MPInstance(process, getRecord_ID());
-			fillParameter(pInstance, trx);
-			//
-			ProcessInfo pi = new ProcessInfo (m_node.getName(true), m_node.getAD_Process_ID(),
-				getAD_Table_ID(), getRecord_ID());
+			pInstance.setIsProcessing(true);
+			pInstance.saveEx();
+			try {
+				fillParameter(pInstance, trx);
+				//
+				ProcessInfo pi = new ProcessInfo(m_node.getName(true), m_node.getAD_Process_ID(), getAD_Table_ID(),
+						getRecord_ID());
 			
 			//check record id overwrite
 			MWFNodePara[] nParams = m_node.getParameters();
@@ -1196,12 +1199,14 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				}
 			}
 
-			pi.setAD_User_ID(getAD_User_ID());
-			pi.setAD_Client_ID(getAD_Client_ID());
-			pi.setAD_PInstance_ID(pInstance.getAD_PInstance_ID());
-			boolean success = process.processItWithoutTrxClose(pi, trx);
-			setTextMsg(pi.getSummary());
-			return success;
+				pi.setAD_User_ID(getAD_User_ID());
+				pi.setAD_Client_ID(getAD_Client_ID());
+				pi.setAD_PInstance_ID(pInstance.getAD_PInstance_ID());
+				return process.processItWithoutTrxClose(pi, trx);
+			} finally {
+				pInstance.setIsProcessing(false);
+				pInstance.saveEx();
+			}
 		}
 
 		/******	Start Task (Probably redundant;

@@ -519,6 +519,13 @@ public class CLogMgt
 			sb = new StringBuffer();
 		final String eq = " = ";
 		sb.append(getMsg("Host")).append(eq)        .append(getServerInfo()).append(NL);
+
+		String localHost = getLocalHost();
+		if (localHost.contains("/"))
+			localHost = localHost.substring(0, localHost.lastIndexOf('/'));
+
+		sb.append(getMsg("Server Node")).append(eq).append(localHost).append(NL);
+
 		sb.append(getMsg("Database")).append(eq)    .append(getDatabaseInfo()).append(NL);
 		sb.append(getMsg("Schema")).append(eq)      .append(CConnection.get().getDbUid()).append(NL);
 		//
@@ -705,7 +712,7 @@ public class CLogMgt
 	 *  Get Localhost
 	 *  @return local host
 	 */
-	private static String getLocalHost()
+	public static String getLocalHost()
 	{
 		try
 		{

@@ -279,7 +279,6 @@ public abstract class CreateFromShipment extends CreateFrom
 	    sqlStmt.append("SELECT rl.M_RMALine_ID, rl.line, rl.Qty - rl.QtyDelivered, p.M_Product_ID, COALESCE(p.Name, c.Name), uom.C_UOM_ID, COALESCE(uom.UOMSymbol,uom.Name) ");
 	    sqlStmt.append("FROM M_RMALine rl INNER JOIN M_InOutLine iol ON rl.M_InOutLine_ID=iol.M_InOutLine_ID ");
 	    sqlStmt.append("LEFT OUTER JOIN M_Product p ON p.M_Product_ID=iol.M_Product_ID ");
-	          
 	    if (Env.isBaseLanguage(Env.getCtx(), "C_UOM"))
         {
 	        sqlStmt.append("LEFT OUTER JOIN C_UOM uom ON (uom.C_UOM_ID=COALESCE(p.C_UOM_ID,iol.C_UOM_ID)) ");

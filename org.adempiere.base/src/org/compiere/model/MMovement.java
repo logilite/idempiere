@@ -858,6 +858,8 @@ public class MMovement extends X_M_Movement implements DocAction
 			rLine.setReversalLine_ID(oLine.getM_MovementLine_ID());
 			//
 			rLine.setMovementQty(rLine.getMovementQty().negate());
+			if(rLine.getQtyEntered()!=null)
+				rLine.setQtyEntered(rLine.getQtyEntered().negate());
 			rLine.setTargetQty(Env.ZERO);
 			rLine.setScrappedQty(Env.ZERO);
 			rLine.setConfirmedQty(Env.ZERO);

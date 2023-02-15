@@ -732,7 +732,7 @@ public class Chosenbox<T> extends HtmlBasedComponent {
 	}
 	
 	private Integer getIndexFromValue(String valueHTML, boolean checkSubList) {
-		String value = valueHTML; // StringEscapeUtils.unescapeHtml4(valueHTML);
+		String value = StringEscapeUtils.unescapeHtml4(valueHTML);
 		for (int i = 0; i < _model.getSize(); i++) {
 			if (value.equals(_model.getElementAt(i).toString()))
 				return Integer.valueOf(i);

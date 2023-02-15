@@ -47,11 +47,14 @@ public interface IChartRendererService {
 	
 	/**
 	 * render chart for AD_Chart
+	 * 
 	 * @param parent
 	 * @param width
 	 * @param height
 	 * @param chartModel
+	 * @param showTitle
 	 * @return true if render successfully
 	 */
-	public boolean renderChart(Component parent, int width, int height, ChartModel chartModel);
+	public boolean renderChart(Component parent, int width, int height,
+			ChartModel chartModel, boolean showTitle);
 }

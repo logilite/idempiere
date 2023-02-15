@@ -1074,6 +1074,14 @@ public class AdempiereMonitor extends HttpServlet
 		line.addElement(new th().addElement(systemInfo.getJavaVM()));
 		line.addElement(new td().addElement("Average GC Time=" + systemInfo.getGarbageCollectionTime() / systemInfo.getGarbageCollectionCount() + " ms"));
 		table.addElement(line);
+		// Server Node
+		line = new tr();
+		String localHost = CLogMgt.getLocalHost();
+		line.addElement(new th().addElement("Server Node"));
+		if (localHost.contains("/"))
+			localHost = localHost.substring(0, localHost.lastIndexOf('/'));
+		line.addElement(new td().addElement(localHost));
+		table.addElement(line);
 		//	DB + Instance
 		line = new tr();
 		line.addElement(new th().addElement(systemInfo.getDatabaseDescription()));
