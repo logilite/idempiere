@@ -1678,10 +1678,10 @@ public class DashboardController implements EventListener<Event> {
 		}			
 	}
 
-	private void renderChart(final Div chartPanel, int width, int height, ChartModel model) {
+	private void renderChart(final Div chartPanel, int width, int height, ChartModel model, boolean showTitle) {
 		List<IChartRendererService> list = Extensions.getChartRendererServices();
 		for (IChartRendererService renderer : list) {
-			if (renderer.renderChart(chartPanel, width, height, model))
+			if (renderer.renderChart(chartPanel, width, height, model,showTitle))
 				break;
 		}
 	}

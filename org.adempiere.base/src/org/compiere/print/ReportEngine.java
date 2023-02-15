@@ -2787,8 +2787,6 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			doc.appendHead(buildScriptContent.toString());
 		}
 	}
-
-	}
 	
 	public static void setDefaultReportTypeToPInstance(Properties ctx, MPInstance instance, int printFormatID) {
 		if (Util.isEmpty(instance.getReportType())) {
@@ -2801,4 +2799,5 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 							Env.getAD_Org_ID(ctx));
 			instance.setReportType(type);
 		}
+	}
 }	//	ReportEngine
