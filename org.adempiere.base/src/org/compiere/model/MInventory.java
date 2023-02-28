@@ -420,7 +420,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 					+ " AND p.IsStocked = 'Y' and p.ProductType = 'I' " + " Group By iol.M_InventoryLine_ID, p.value";
 			
 			if (MDocType.DOCSUBTYPEINV_InternalUseInventory.equals(docSubTypeInv))
-				sql += " Having  Sum(Coalesce(iol.QtyInternalUse, 0)) <> Sum(Coalesce(ma.MovementQty, 0))";
+				sql += " Having  Coalesce(iol.QtyInternalUse, 0) <> Sum(Coalesce(ma.MovementQty, 0))";
 			else
 				sql += " Having  (iol.QtyBook - iol.QtyCount) <> Sum(Coalesce(ma.MovementQty, 0))";
 			
