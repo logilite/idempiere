@@ -108,7 +108,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 
 	protected boolean m_show = true;
 
-	private RolePanel component;
+	protected RolePanel component;
 
 	private boolean isChangeRole = false;
 
@@ -123,7 +123,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 	// backup old value
 	private Properties ctxBeforeChangeRole = null;
 
-	private static final String ON_DEFER_LOGOUT = "onDeferLogout";
+	protected static final String ON_DEFER_LOGOUT = "onDeferLogout";
 
 	public RolePanel(Properties ctx, LoginWindow loginWindow, String userName, boolean show, KeyNamePair[] clientsKNPairs) {
     	this.wndLogin = loginWindow;

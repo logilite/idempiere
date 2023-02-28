@@ -30,6 +30,7 @@ import java.util.logging.Level;
 import org.adempiere.base.Core;
 import org.adempiere.base.ILogin;
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.webui.Extensions;
 import org.adempiere.webui.IWebClient;
 import org.adempiere.webui.component.FWindow;
 import org.adempiere.webui.panel.ChangePasswordPanel;
@@ -175,7 +176,7 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 
 	protected void createRolePanel(String userName, boolean show,
 			KeyNamePair[] clientsKNPairs) {
-		pnlRole = new RolePanel(ctx, this, userName, show, clientsKNPairs);
+		pnlRole = Extensions.getRolePanel(ctx, this, userName, show, clientsKNPairs);
 	}
     
     public void changePassword(String userName, String userPassword, boolean show, KeyNamePair[] clientsKNPairs)

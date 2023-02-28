@@ -21,6 +21,7 @@
 package org.adempiere.webui;
 
 import java.util.List;
+import java.util.Properties;
 
 import org.adempiere.base.IServiceReferenceHolder;
 import org.adempiere.base.Service;
@@ -30,9 +31,13 @@ import org.adempiere.webui.apps.IProcessParameterListener;
 import org.adempiere.webui.factory.IADTabPanelFactory;
 import org.adempiere.webui.factory.IDashboardGadgetFactory;
 import org.adempiere.webui.factory.IFormFactory;
+import org.adempiere.webui.factory.IRolePanelFactory;
 import org.adempiere.webui.panel.ADForm;
+import org.adempiere.webui.panel.RolePanel;
+import org.adempiere.webui.window.LoginWindow;
 import org.compiere.model.MDashboardContent;
 import org.compiere.util.CCache;
+import org.compiere.util.KeyNamePair;
 import org.zkoss.zk.ui.Component;
 
 /**
@@ -141,6 +146,31 @@ public class Extensions {
 			}
 		}
 
+		return null;
+	}
+	
+	/**
+	 * get RolePanel
+	 * @param ctx
+	 * @param loginWindow
+	 * @param userName
+	 * @param show
+	 * @param clientsKNPairs
+	 * @return
+	 */
+	public static RolePanel getRolePanel(Properties ctx, LoginWindow loginWindow, String userName, boolean show,
+			KeyNamePair[] clientsKNPairs)
+	{
+		List<IRolePanelFactory> factories = Service.locator().list(IRolePanelFactory.class).getServices();
+		if (factories != null && !factories.isEmpty())
+		{
+			for (IRolePanelFactory factory : factories)
+			{
+				RolePanel rolePanel = factory.newInstance(ctx, loginWindow, userName, show, clientsKNPairs);
+				if (rolePanel != null)
+					return rolePanel;
+			}
+		}
 		return null;
 	}
 }

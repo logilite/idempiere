@@ -177,7 +177,7 @@ Bundle-Activator: org.adempiere.webui.WebUIActivator
 Eclipse-ExtensibleAPI: true
 Web-ContextPath: webui
 Service-Component: OSGI-INF/reportviewerprovider.xml, OSGI-INF/defaultinfofactory.xml, OSGI-INF/defaulteditorfactory.xml, OSGI-INF/jrviewerprovider.xml, OSGI-INF/resourcefinder.xml, OSGI-INF/defaultpaymentformfactory.xml, OSGI-INF/processfactory.xml, OSGI-INF/defaultprintshippinglabel.xml, OSGI-INF/defaultcreatefromfactory.xml, OSGI-INF/defaultformfactory.xml, OSGI-INF/feedbackservice.xml, OSGI-INF/zulgadgetfactory.xml, OSGI-INF/jfgchartrenderer.xml,
- OSGI-INF/tabpanelfactory.xml,OSGI-INF/defaultquickentryfactory.xml, OSGI-INF/wattachmentfactory.xml,OSGI-INF/defaultEmailDialog.xml
+ OSGI-INF/tabpanelfactory.xml,OSGI-INF/defaultquickentryfactory.xml, OSGI-INF/wattachmentfactory.xml,OSGI-INF/defaultEmailDialog.xml, OSGI-INF/defaultrolepanelfactory.xml
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: org.adempiere.ui.zk
 Bundle-Vendor: iDempiere Community
