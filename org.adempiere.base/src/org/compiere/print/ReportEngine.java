@@ -1139,6 +1139,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 										if (item.getColumnName().equals(MFactAcct.COLUMNNAME_Record_ID) || isDirectZoom) {
 											if (cssPrefix != null)
 												href.setClass(cssPrefix + "-image");
+											href.setStyle("	background: url(" + extension.getZoomIconURL() + ") no-repeat center;");
 										} else {
 											href.addElement(Util.maskHTML(value));
 											if (cssPrefix != null)
@@ -1146,7 +1147,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 										}
 
 										if (isDirectZoom)
-											href.addAttribute("onclick", "parent.zoom('" + extension.getComponentId() + "','" + pde.getForeignColumnName() + "','" + pde.getValueAsString() + "')");
+											href.addAttribute("onclick", "parent.window.idempiere.zoom('" + extension.getComponentId() + "','" + pde.getForeignColumnName() + "','" + pde.getValueAsString() + "')");
 										else
 											extension.extendIDColumn(row, td, href, pde);
 									} else {

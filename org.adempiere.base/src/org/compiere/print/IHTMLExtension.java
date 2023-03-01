@@ -39,4 +39,7 @@ public interface IHTMLExtension {
 	public String getFullPathStyle ();
 	
 	public String getComponentId();
+	
+	public String getZoomIconURL();
+
 }

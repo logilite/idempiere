@@ -31,6 +31,7 @@ import org.compiere.print.PrintData;
 import org.compiere.print.PrintDataElement;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 import org.zkoss.zk.ui.Executions;
 
 /**
@@ -45,6 +46,7 @@ public class HTMLExtension implements IHTMLExtension {
 	private String scriptURL;
 	private String styleURL;
 	private String contextPath;
+	private String zoomIconURL;
 	private String theme = "";
 
 	public HTMLExtension(String contextPath, String classPrefix, String componentId) {
@@ -69,6 +71,25 @@ public class HTMLExtension implements IHTMLExtension {
 		this.contextPath = contextPath;
 	}
 	
+	public String getZoomIconURL() {
+		if (Util.isEmpty(zoomIconURL, true)) {
+			StringBuilder findImgURL = new StringBuilder();
+			String findImg = ThemeManager.getThemeResource("images/Find24.png");
+			if (findImg.startsWith("~./")) {
+				if (Executions.getCurrent() != null) {
+					findImgURL.append(Executions.encodeURL(findImg));
+				}
+			} else {
+				findImgURL.append(contextPath);
+				if (!findImg.startsWith("/") && !contextPath.endsWith("/"))
+					findImgURL.append("/");
+				findImgURL.append(findImg);
+			}
+			zoomIconURL = findImgURL.toString();
+		}
+		return zoomIconURL;
+	}
+
 	public void extendIDColumn(int row, ConcreteElement columnElement, a href,
 			PrintDataElement dataElement) {
 		href.addAttribute("onclick", "parent.idempiere.showColumnMenu(document, event, '" + dataElement.getColumnName() + "', " + row + ")");		
