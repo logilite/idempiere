@@ -1308,7 +1308,7 @@ public class GridField
 		}
 		String value = null;
 		if( m_vo.TabNo == 0)
-	    	value = Env.getContext (ctx, m_vo.WindowNo, variableName, true);
+			value = Env.getContext (ctx, m_vo.WindowNo, 0, variableName, false, true);
 	    else
 	    {
 	    	boolean tabOnly = false;
