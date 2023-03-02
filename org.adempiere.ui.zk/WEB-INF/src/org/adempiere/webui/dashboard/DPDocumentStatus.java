@@ -31,6 +31,7 @@ package org.adempiere.webui.dashboard;
 
 import java.sql.Timestamp;
 
+import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.apps.graph.WDocumentStatusPanel;
 import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.ToolBarButton;
@@ -61,14 +62,13 @@ public class DPDocumentStatus extends DashboardPanel implements EventListener<Ev
 		
 		final DPDocumentStatus documentStatus = this;
 		// An Async task
-		Thread thread = new Thread(new Runnable() {
+		AEnv.executeAsyncDesktopTask(new Runnable() {
 			@Override
 			public void run() {
 				statusPanel.refresh();
 				template.executeAsync(documentStatus);
 			}
 		});
-		thread.start();
 	}
 
 	@Override
