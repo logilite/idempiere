@@ -768,7 +768,7 @@ public class Doc_InOut extends Doc
 				{
 					MCostDetail cdInv=MCostDetail.get(getCtx(), "M_InOutLine_ID = ?",ioLine.getM_InOutLine_ID() ,line.getM_AttributeSetInstance_ID(),as.getC_AcctSchema_ID() ,getTrxName());
 					if(cdInv!=null)
-						costs=cdInv.getAmt();
+						costs=cdInv.getAmt().negate();
 				}
 				if(costs==null) {
 					if (!isReversal(line))
