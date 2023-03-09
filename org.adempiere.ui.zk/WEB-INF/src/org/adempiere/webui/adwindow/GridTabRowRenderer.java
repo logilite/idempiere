@@ -249,8 +249,8 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 		} else if (gridField.isHeading()) {
 			component = createInvisibleComponent();
 		} else if (gridField.getDisplayType() == DisplayType.Button) {
+			// Each row renderer --- ctx per row wise
 			GridRowCtx gridRowCtx = new GridRowCtx(Env.getCtx(), gridTab, rowIndex);
-			gridField.getVO().setCtx(gridRowCtx);
 			WButtonEditor editor = new WButtonEditor(gridField, rowIndex);
 			editor.setValue(gridTab.getValue(rowIndex, gridField.getColumnName()));
 			editor.setReadWrite(gridField.isEditable(gridRowCtx, true,true));
@@ -587,7 +587,7 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 				}
 				
 				GridRowCtx ctx = new GridRowCtx(Env.getCtx(), gridTab, rowIndex);
-				if (! (gridPanelFields[i].isDisplayed(ctx, true) || gridPanelFields[i].isDisplayedGrid(ctx, true))){
+				if (!gridPanelFields[i].isDisplayedGrid(ctx, true)){
 					// IDEMPIERE-2253 
 					component.setVisible(false);
 				}
@@ -750,12 +750,10 @@ public class GridTabRowRenderer implements RowRenderer<Object[]>, RowRendererExt
 		            }		            
 		            
 		            
-					Properties ctx = isDetailPane() ? new GridRowCtx(Env.getCtx(), gridTab)
-							: gridPanelFields[i].getVO().ctx;
-					if (isDetailPane())
-						gridPanelFields[i].getVO().setCtx(ctx);
+		            Properties ctx = isDetailPane() ? new GridRowCtx(Env.getCtx(), gridTab) 
+		            	: gridPanelFields[i].getVO().ctx;
 		            //check context
-					if (!(gridPanelFields[i].isDisplayed(ctx, true) || gridPanelFields[i].isDisplayedGrid(ctx, true))){
+					if (!gridPanelFields[i].isDisplayedGrid(ctx, true)){
 						// IDEMPIERE-2253 
 						editor.getComponent().setVisible(false);
 					}
