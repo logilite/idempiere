@@ -139,7 +139,7 @@ public class DashboardController implements EventListener<Event> {
 	private static final String FLEX_GROW_ATTRIBUTE = "FlexGrow";
 	private static final String IMAGES_CONTEXT_HELP_PNG = "images/Help16.png";
 
-	private final static int DEFAULT_DASHBOARD_WIDTH = 95;
+	private final static int DEFAULT_DASHBOARD_WIDTH = 99;
 	private final static String DASHBOARD_LAYOUT_COLUMNS = "C";
 	private final static String DASHBOARD_LAYOUT_ROWS = "R";
 	private final static int MAX_NO_OF_PREFS_IN_ROW = 10;
