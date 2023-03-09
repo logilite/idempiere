@@ -208,6 +208,32 @@ public interface I_SSO_PrincipleConfig
 	  */
 	public String getSSO_AuthorizationTenantID();
 
+    /** Column name SSO_IDempMonitorRedirectURIs */
+    public static final String COLUMNNAME_SSO_IDempMonitorRedirectURIs = "SSO_IDempMonitorRedirectURIs";
+
+	/** Set iDempiere Monitor Redirect URIs.
+	  * iDempiere Monitor Redirect URIs
+	  */
+	public void setSSO_IDempMonitorRedirectURIs (String SSO_IDempMonitorRedirectURIs);
+
+	/** Get iDempiere Monitor Redirect URIs.
+	  * iDempiere Monitor Redirect URIs
+	  */
+	public String getSSO_IDempMonitorRedirectURIs();
+
+    /** Column name SSO_OSGIRedirectURIs */
+    public static final String COLUMNNAME_SSO_OSGIRedirectURIs = "SSO_OSGIRedirectURIs";
+
+	/** Set Felix Web Console Redirect URIs.
+	  * Apache Felix Web Console Bundles Redirect URIs
+	  */
+	public void setSSO_OSGIRedirectURIs (String SSO_OSGIRedirectURIs);
+
+	/** Get Felix Web Console Redirect URIs.
+	  * Apache Felix Web Console Bundles Redirect URIs
+	  */
+	public String getSSO_OSGIRedirectURIs();
+
     /** Column name SSO_PrincipleConfig_ID */
     public static final String COLUMNNAME_SSO_PrincipleConfig_ID = "SSO_PrincipleConfig_ID";
 

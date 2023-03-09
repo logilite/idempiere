@@ -12,14 +12,26 @@
 package org.adempiere.eclipse.equinox.http.servlet;
 
 import java.io.IOException;
-import javax.servlet.*;
+import java.util.logging.Level;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.adempiere.base.sso.ISSOPrinciple;
+import org.adempiere.base.sso.SSOUtils;
+import org.compiere.model.MUser;
+import org.compiere.util.CLogger;
+import org.compiere.util.Env;
 import org.osgi.service.http.HttpContext;
 
 //This class wraps the servlet object registered in the HttpService.registerServlet call, to manage the context classloader when handleRequests are being asked.
 public class ServletRegistration extends Registration {
 
+	/** Logger */
+	protected static CLogger	log	= CLogger.getCLogger(ServletRegistration.class);
 	private Servlet servlet; //The actual servlet object registered against the http service. All requests will eventually be delegated to it.
 	private HttpContext httpContext; //The context used during the registration of the servlet
 	private ClassLoader registeredContextClassLoader;
@@ -57,8 +69,27 @@ public class ServletRegistration extends Registration {
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(registeredContextClassLoader);
-			if (httpContext.handleSecurity(req, resp))
+			if (SSOUtils.getSSOPrinciple() != null)
+			{
+				Object principle = req.getSession().getAttribute(ISSOPrinciple.SSO_PRINCIPLE_SESSION_NAME);
+				if (checkSSOAuthorization(principle))
+				{
+					servlet.service(req, resp);
+					if (req.getPathInfo().endsWith("logout"))
+					{
+						req.getSession().removeAttribute(ISSOPrinciple.SSO_PRINCIPLE_SESSION_NAME);
+						resp.sendRedirect("osgi/system/console/bundles");
+					}
+				}
+				else
+				{
+					req.getSession().removeAttribute(ISSOPrinciple.SSO_PRINCIPLE_SESSION_NAME);
+				}
+			}
+			else if (httpContext.handleSecurity(req, resp))
+			{
 				servlet.service(req, resp);
+			}
 		} finally {
 			Thread.currentThread().setContextClassLoader(original);
 		}
@@ -70,5 +101,38 @@ public class ServletRegistration extends Registration {
 
 	public HttpContext getHttpContext() {
 		return httpContext;
+	}
+	
+	private boolean checkSSOAuthorization(Object token)
+	{
+		if (token == null)
+			return false;
+		try
+		{
+			String username = SSOUtils.getSSOPrinciple().getUserName(token);
+			return validateUser(username, null, true);
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, "SSOAuthorizationChekError", e);
+		}
+		return false;
+	}
+	
+	private boolean validateUser(String name, String password, boolean isSSO)
+	{
+		MUser user = MUser.get(Env.getCtx(), name, password, isSSO);
+		if (user == null)
+		{
+			log.warning ("User not found: '" + name);
+			return false;
+		}
+		if (!user.isAdministrator() && !user.hasURLFormAccess("/osgi/system/console"))
+		{
+			log.warning ("User doesn't have access to /osgi/system/console = " + name);
+			return false;
+		}
+		if (log.isLoggable(Level.INFO)) log.info ("Name=" + name);
+		return Boolean.TRUE;
 	}
 }

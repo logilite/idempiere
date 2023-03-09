@@ -29,7 +29,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221104L;
+	private static final long serialVersionUID = 20230222L;
 
     /** Standard Constructor */
     public X_SSO_PrincipleConfig (Properties ctx, int SSO_PrincipleConfig_ID, String trxName)
@@ -228,6 +228,40 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 	public String getSSO_AuthorizationTenantID () 
 	{
 		return (String)get_Value(COLUMNNAME_SSO_AuthorizationTenantID);
+	}
+
+	/** Set iDempiere Monitor Redirect URIs.
+		@param SSO_IDempMonitorRedirectURIs 
+		iDempiere Monitor Redirect URIs
+	  */
+	public void setSSO_IDempMonitorRedirectURIs (String SSO_IDempMonitorRedirectURIs)
+	{
+		set_Value (COLUMNNAME_SSO_IDempMonitorRedirectURIs, SSO_IDempMonitorRedirectURIs);
+	}
+
+	/** Get iDempiere Monitor Redirect URIs.
+		@return iDempiere Monitor Redirect URIs
+	  */
+	public String getSSO_IDempMonitorRedirectURIs () 
+	{
+		return (String)get_Value(COLUMNNAME_SSO_IDempMonitorRedirectURIs);
+	}
+
+	/** Set Felix Web Console Redirect URIs.
+		@param SSO_OSGIRedirectURIs 
+		Apache Felix Web Console Bundles Redirect URIs
+	  */
+	public void setSSO_OSGIRedirectURIs (String SSO_OSGIRedirectURIs)
+	{
+		set_Value (COLUMNNAME_SSO_OSGIRedirectURIs, SSO_OSGIRedirectURIs);
+	}
+
+	/** Get Felix Web Console Redirect URIs.
+		@return Apache Felix Web Console Bundles Redirect URIs
+	  */
+	public String getSSO_OSGIRedirectURIs () 
+	{
+		return (String)get_Value(COLUMNNAME_SSO_OSGIRedirectURIs);
 	}
 
 	/** Set SSO Configuration.

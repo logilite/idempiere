@@ -24,6 +24,7 @@ package org.adempiere.webui;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Properties;
 
 import org.adempiere.base.IServiceReferenceHolder;
 import org.adempiere.base.Service;
@@ -36,9 +37,12 @@ import org.adempiere.webui.factory.IADTabPanelFactory;
 import org.adempiere.webui.factory.IDashboardGadgetFactory;
 import org.adempiere.webui.factory.IFormFactory;
 import org.adempiere.webui.factory.IMappedFormFactory;
+import org.adempiere.webui.factory.IRolePanelFactory;
 import org.adempiere.webui.factory.IQuickEntryFactory;
 import org.adempiere.webui.grid.AbstractWQuickEntry;
 import org.adempiere.webui.panel.ADForm;
+import org.adempiere.webui.panel.RolePanel;
+import org.adempiere.webui.window.LoginWindow;
 import org.compiere.grid.ICreateFrom;
 import org.compiere.grid.ICreateFromFactory;
 import org.compiere.grid.IPaymentForm;
@@ -46,6 +50,7 @@ import org.compiere.grid.IPaymentFormFactory;
 import org.compiere.model.GridTab;
 import org.compiere.model.MDashboardContent;
 import org.compiere.util.CCache;
+import org.compiere.util.KeyNamePair;
 import org.idempiere.ui.zk.media.IMediaView;
 import org.idempiere.ui.zk.media.IMediaViewProvider;
 import org.zkoss.zk.ui.Component;
@@ -231,6 +236,31 @@ public class Extensions {
         	}
         }
         
+		return null;
+	}
+	
+	/**
+	 * get RolePanel
+	 * @param ctx
+	 * @param loginWindow
+	 * @param userName
+	 * @param show
+	 * @param clientsKNPairs
+	 * @return
+	 */
+	public static RolePanel getRolePanel(Properties ctx, LoginWindow loginWindow, String userName, boolean show,
+			KeyNamePair[] clientsKNPairs)
+	{
+		List<IRolePanelFactory> factories = Service.locator().list(IRolePanelFactory.class).getServices();
+		if (factories != null && !factories.isEmpty())
+		{
+			for (IRolePanelFactory factory : factories)
+			{
+				RolePanel rolePanel = factory.newInstance(ctx, loginWindow, userName, show, clientsKNPairs);
+				if (rolePanel != null)
+					return rolePanel;
+			}
+		}
         return null;
 	}
 	

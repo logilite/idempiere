@@ -29,11 +29,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.adempiere.base.sso.ISSOPrinciple;
+import org.adempiere.base.sso.SSOUtils;
+import org.apache.commons.codec.binary.Base64;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.util.CLogger;
-import org.compiere.util.Env;
-
-import org.apache.commons.codec.binary.Base64; 
+import org.compiere.util.Env; 
 
 /**
  * 	Adempiere Monitor Filter.
@@ -62,6 +64,8 @@ public class AdempiereMonitorFilter implements Filter
 	/** Authorization Marker			*/
 	private Long					m_authorization = null;
 	
+	private static ISSOPrinciple	m_SSOPrinciple	= null;
+
 	/**
 	 * 	Init
 	 *	@param config configuration
@@ -93,29 +97,77 @@ public class AdempiereMonitorFilter implements Filter
 				request.getRequestDispatcher(errorPage).forward(request, response);
 				return;
 			}
-			HttpServletRequest req = (HttpServletRequest)request;
-			HttpServletResponse resp = (HttpServletResponse)response;
-			//	Previously checked
+			HttpServletRequest req = (HttpServletRequest) request;
+			HttpServletResponse resp = (HttpServletResponse) response;
+			boolean isRedirectToLoginOnError = false;
 			HttpSession session = req.getSession(true);
-			Long compare = (Long)session.getAttribute(AUTHORIZATION);
-			if (compare != null && compare.compareTo(m_authorization) == 0)
-			{
-				pass = true;
+			boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
+			if (isSSOEnable) {
+				try {
+					if (m_SSOPrinciple == null) {
+						m_SSOPrinciple = SSOUtils.getSSOPrinciple();
+					}
+
+					if (m_SSOPrinciple != null) {
+						if (m_SSOPrinciple.hasAuthenticationCode(req, resp)) {
+							// Use authentication code get get token
+							m_SSOPrinciple.getAuthenticationToken(req, resp, SSOUtils.SSO_MODE_MONITOR);
+							return;
+						} else if (!m_SSOPrinciple.isAuthenticated(req, resp)) {
+							// Redirect to SSO sing in page for authentication
+							m_SSOPrinciple.redirectForAuthentication(req, resp, SSOUtils.SSO_MODE_MONITOR);
+							return;
+						} else if (m_SSOPrinciple.isAccessTokenExpired(req, resp)) {
+							// Refresh token after expired
+							isRedirectToLoginOnError = true;
+							m_SSOPrinciple.refreshToken(req, resp, SSOUtils.SSO_MODE_MONITOR);
+						}
+						// validate the user
+						if (checkSSOAuthorization(session.getAttribute(ISSOPrinciple.SSO_PRINCIPLE_SESSION_NAME)))
+						{
+							chain.doFilter(request, response);
+							return;
+						}
+					}
+					session.removeAttribute(ISSOPrinciple.SSO_PRINCIPLE_SESSION_NAME);
+					resp.sendRedirect("idempiereMonitor");
+				} catch (Throwable exc) {
+					log.log(Level.SEVERE, "Exception while authenticpating: ", exc);
+					if (m_SSOPrinciple != null)
+						m_SSOPrinciple.removePrincipleFromSession(req);
+					if (isRedirectToLoginOnError) {
+						resp.sendRedirect("idempiereMonitor");
+					} else {
+						resp.setStatus(500);
+						resp.sendRedirect(SSOUtils.ERROR_API);
+					}
+					return;
+				}
 			}
-			else if (checkAuthorization (req.getHeader("Authorization")))
+
+			if (m_SSOPrinciple == null || !isSSOEnable)
 			{
-				session.setAttribute(AUTHORIZATION, m_authorization);
-				pass = true;
-			}
-			//	--------------------------------------------
-			if (pass)
-			{
-				chain.doFilter(request, response);
-			}
-			else
-			{
-				resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				resp.setHeader("WWW-Authenticate", "BASIC realm=\"Adempiere Server\"");
+				// Previously checked
+				Long compare = (Long) session.getAttribute(AUTHORIZATION);
+				if (compare != null && compare.compareTo(m_authorization) == 0)
+				{
+					pass = true;
+				}
+				else if (checkAuthorization(req.getHeader("Authorization")))
+				{
+					session.setAttribute(AUTHORIZATION, m_authorization);
+					pass = true;
+				}
+				// --------------------------------------------
+				if (pass)
+				{
+					chain.doFilter(request, response);
+				}
+				else
+				{
+					resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+					resp.setHeader("WWW-Authenticate", "BASIC realm=\"Adempiere Server\"");
+				}
 			}
 			return;
 		}
@@ -125,6 +177,40 @@ public class AdempiereMonitorFilter implements Filter
 		}
 		request.getRequestDispatcher(errorPage).forward(request, response);
 	}	//	doFilter
+
+	private boolean checkSSOAuthorization(Object token)
+	{
+		if (token == null)
+			return false;
+		try
+		{
+			String username = m_SSOPrinciple.getUserName(token);
+			return validateUser(username, null, true);
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, "check", e);
+		}
+		return false;
+	}
+
+
+	private boolean validateUser(String name, String password, boolean isSSO)
+	{
+		MUser user = MUser.get(Env.getCtx(), name, password, isSSO);
+		if (user == null)
+		{
+			log.warning ("User not found: '" + name);
+			return false;
+		}
+		if (!user.isAdministrator() && !user.hasURLFormAccess("/idempiereMonitor"))
+		{
+			log.warning ("User doesn't have access to /idempiereMonitor = " + name);
+			return false;
+		}
+		if (log.isLoggable(Level.INFO)) log.info ("Name=" + name);
+		return true;
+	}
 
 	/**
 	 * 	Check Authorization
@@ -144,19 +230,7 @@ public class AdempiereMonitorFilter implements Filter
 			int index = namePassword.indexOf(':');
 			String name = namePassword.substring(0, index);
 			String password = namePassword.substring(index+1);
-			MUser user = MUser.get(Env.getCtx(), name, password);
-			if (user == null)
-			{
-				log.warning ("User not found: '" + name);
-				return false;
-			}
-			if (!user.isAdministrator() && !user.hasURLFormAccess("/idempiereMonitor"))
-			{
-				log.warning ("User doesn't have access to /idempiereMonitor = " + name);
-				return false;
-			}
-			if (log.isLoggable(Level.INFO)) log.info ("Name=" + name);
-			return true;
+			return validateUser(name, password, false);
 		}
 		catch (Exception e)
 		{

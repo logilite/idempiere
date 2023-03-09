@@ -79,7 +79,7 @@ public class DefaultEvaluatee implements Evaluatee {
 		
 		String value = null;
 		if( m_TabNo == 0)
-	    	value = Env.getContext (ctx, m_WindowNo, variableName, true);
+	    	value = Env.getContext (ctx, m_WindowNo, 0, variableName,false, true);
 	    else
 	    {
 	    	boolean tabOnly = false;

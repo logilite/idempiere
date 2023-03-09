@@ -133,8 +133,6 @@ public final class Env
 
 	private static final String PREFIX_SYSTEM_VARIABLE = "$env.";
 	
-	public static final String SSO_IS_ALREADY_AUTHENTICATE = "#SSO_IS_ALREADY_AUTHENTICATE";
-
 	private final static ContextProvider clientContextProvider = new DefaultContextProvider();
 
 	

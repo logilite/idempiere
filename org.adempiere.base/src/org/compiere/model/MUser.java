@@ -178,6 +178,11 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	{
 		return get(ctx, Env.getAD_User_ID(ctx));
 	}	//	get
+	
+	public static MUser get (Properties ctx, String name, String password)
+	{
+		return MUser.get(ctx, name, password, false);
+	}
 
 	/**
 	 * Get updateable copy of MUser from cache
@@ -201,9 +206,9 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	 *	@param password password
 	 *	@return user or null
 	 */
-	public static MUser get (Properties ctx, String name, String password)
+	public static MUser get (Properties ctx, String name, String password, boolean isSSOLogin)
 	{
-		if (name == null || name.length() == 0 || password == null || password.length() == 0)
+		if (name == null || name.length() == 0 || (!isSSOLogin && (password == null || password.length() == 0)))
 		{
 			s_log.warning ("Invalid Name/Password = " + name);
 			return null;
@@ -250,8 +255,9 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 			if (system == null)
 				throw new IllegalStateException("No System Info");
 			
-			
-			if (system.isLDAP() && ! Util.isEmpty(user.getLDAPUser())) {
+			if (isSSOLogin) {
+				valid = true;
+			} else if (system.isLDAP() && ! Util.isEmpty(user.getLDAPUser())) {
 				valid = system.isLDAP(name, password);
 			} else if (hash_password) {
 				valid = user.authenticateHash(password);
@@ -1048,12 +1054,11 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 		MUser retValue = null;
 		int AD_Client_ID = Env.getAD_Client_ID(ctx);
 
-		boolean isAlreadyAuthenticate = "Y".equalsIgnoreCase(Env.getContext(Env.getCtx(), Env.SSO_IS_ALREADY_AUTHENTICATE));
 		StringBuffer sql = new StringBuffer("SELECT DISTINCT u.AD_User_ID ")
 			.append("FROM AD_User u")
 			.append(" INNER JOIN AD_User_Roles ur ON (u.AD_User_ID=ur.AD_User_ID AND ur.IsActive='Y')")
 			.append(" INNER JOIN AD_Role r ON (ur.AD_Role_ID=r.AD_Role_ID AND r.IsActive='Y') ");
-		sql.append("WHERE ur.AD_Client_ID=? ").append(isAlreadyAuthenticate ? "" : " AND u.Password IS NOT NULL ").append(" AND ");
+		sql.append("WHERE ur.AD_Client_ID=? AND u.Password IS NOT NULL AND ");
 		boolean email_login = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
 		if (email_login)
 			sql.append("u.EMail=?");
