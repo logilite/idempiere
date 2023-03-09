@@ -29,6 +29,8 @@ import java.util.logging.Level;
 
 import org.adempiere.base.Core;
 import org.adempiere.base.ILogin;
+import org.adempiere.base.sso.ISSOPrinciple;
+import org.adempiere.base.sso.SSOUtils;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.Extensions;
 import org.adempiere.webui.IWebClient;
@@ -38,11 +40,10 @@ import org.adempiere.webui.panel.LoginPanel;
 import org.adempiere.webui.panel.ResetPasswordPanel;
 import org.adempiere.webui.panel.RolePanel;
 import org.adempiere.webui.session.SessionContextListener;
-import org.adempiere.webui.sso.ISSOPrinciple;
-import org.adempiere.webui.sso.SSOUtils;
 import org.adempiere.webui.sso.filter.SSOWebuiFilter;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.UserPreference;
+import org.adempiere.webui.util.ZkSSOUtils;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.util.CLogger;
@@ -137,10 +138,15 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 			getDesktop().getSession().setAttribute(Attributes.PREFERRED_LOCALE, locale);
 
 			Login login = new Login(ctx);
-			Env.setContext(ctx, Env.SSO_IS_ALREADY_AUTHENTICATE, true);
-			KeyNamePair[] clients = login.getClients(username, null, null);
+			boolean isShowRolePanel = MSysConfig.getBooleanValue(MSysConfig.SSO_SELECT_ROLE, true);
+			
+			// show role panel when change role
+			if (getDesktop().getSession().hasAttribute(SSOUtils.ISCHANGEROLE_REQUEST))
+				isShowRolePanel = isShowRolePanel || (boolean) getDesktop().getSession().getAttribute(SSOUtils.ISCHANGEROLE_REQUEST);
+
+			KeyNamePair[] clients = login.getClients(username, null, null, true);
 			if (clients != null)
-				loginOk(username, true, clients);
+				loginOk(username, isShowRolePanel, clients, true);
 			else
 			{
 				log.log(Level.WARNING,"No Client found for user:" + username);
@@ -158,7 +164,7 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 
 		if (!Util.isEmpty(errorMessage))
 		{
-			SSOUtils.setErrorMessageText(errorMessage);
+			ZkSSOUtils.setErrorMessageText(errorMessage);
 			Executions.sendRedirect(SSOUtils.ERROR_VALIDATION);
 		}
 	}
@@ -167,16 +173,23 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 		pnlLogin = new LoginPanel(ctx, this);
 	}
 
-    public void loginOk(String userName, boolean show, KeyNamePair[] clientsKNPairs)
+	public void loginOk(String userName, boolean show, KeyNamePair[] clientsKNPairs)
+	{
+		loginOk(userName, show, clientsKNPairs, false);
+	}
+
+    public void loginOk(String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isSSOLogin)
     {
-        createRolePanel(userName, show, clientsKNPairs);
+        createRolePanel(userName, show, clientsKNPairs, isSSOLogin);
         this.getChildren().clear();
         this.appendChild(pnlRole);
     }
 
-	protected void createRolePanel(String userName, boolean show,
-			KeyNamePair[] clientsKNPairs) {
+	protected void createRolePanel(String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isSSOLogin) {
 		pnlRole = Extensions.getRolePanel(ctx, this, userName, show, clientsKNPairs);
+		pnlRole.setIsSSOLogin(isSSOLogin);
+		if (!pnlRole.isShow())
+			pnlRole.validateRoles();
 	}
     
     public void changePassword(String userName, String userPassword, boolean show, KeyNamePair[] clientsKNPairs)

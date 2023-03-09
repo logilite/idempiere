@@ -503,7 +503,7 @@ public class LoginPanel extends Window implements EventListener<Event>
 			for(int i = 0; i < lstLanguage.getItemCount(); i++)
 			{
 				Comboitem li = lstLanguage.getItemAtIndex(i);
-				if(li.getLabel().equals(initDefault))
+				if(li.getLabel().equals(initDefault) || li.getValue().equals(initDefault))
 				{
 					lstLanguage.setSelectedIndex(i);
 					languageChanged(li.getLabel()); // Elaine 2009/04/17 language changed
@@ -608,7 +608,6 @@ public class LoginPanel extends Window implements EventListener<Event>
         		langName = Language.getBaseLanguage().getName();
         	Language language = findLanguage(langName);
             Env.setContext(ctx, UserPreference.LANGUAGE_NAME, language.getName()); // Elaine 2009/02/06
-            Env.setContext(ctx, Env.SSO_IS_ALREADY_AUTHENTICATE, false);
 
             if (login.isPasswordExpired())
             	wndLogin.changePassword(userId, userPassword, chkSelectRole.isChecked(), clientsKNPairs);

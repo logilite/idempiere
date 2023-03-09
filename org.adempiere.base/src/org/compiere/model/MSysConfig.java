@@ -99,6 +99,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String DPViews_ShowInfoSchedule = "DPViews_ShowInfoSchedule";
     public static final String EMAIL_NOTIFY_2PACK = "EMAIL_NOTIFY_2PACK";
     public static final String ENABLE_PAYMENTBOX_BUTTON = "ENABLE_PAYMENTBOX_BUTTON";
+	public static final String ENABLE_SSO = "ENABLE_SSO";
     public static final String GRIDTABLE_LOAD_TIMEOUT_IN_SECONDS = "GRIDTABLE_LOAD_TIMEOUT_IN_SECONDS";
     public static final String HTML_REPORT_THEME = "HTML_REPORT_THEME";
     public static final String IBAN_VALIDATION = "IBAN_VALIDATION";
@@ -154,6 +155,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String SYSTEM_IN_MAINTENANCE_MODE = "SYSTEM_IN_MAINTENANCE_MODE";
     public static final String SYSTEM_INSERT_CHANGELOG = "SYSTEM_INSERT_CHANGELOG";
     public static final String SYSTEM_NATIVE_SEQUENCE = "SYSTEM_NATIVE_SEQUENCE";
+	public static final String SSO_SELECT_ROLE = "SSO_SELECT_ROLE";
     public static final String TOP_MARGIN_PIXELS_FOR_HEADER = "TOP_MARGIN_PIXELS_FOR_HEADER";
     public static final String TRACE_ALL_TRX_CONNECTION_GET = "TRACE_ALL_TRX_CONNECTION_GET";
     public static final String TWOPACK_COMMIT_DDL = "2PACK_COMMIT_DDL";
@@ -220,7 +222,6 @@ public class MSysConfig extends X_AD_SysConfig
 	public static final String ZK_DASHBOARD_SLOW_QUERY_TIME_INTERVAL = "ZK_DASHBOARD_SLOW_QUERY_TIME_INTERVAL";
 	public static final String ZK_LOGIN_LEFTPANEL_SHOWN = "ZK_LOGIN_LEFTPANEL_SHOWN";
 	public static final String ZK_SEARCH_AUTO_COMPLETE_MAX_ROWS = "ZK_SEARCH_AUTO_COMPLETE_MAX_ROWS";
-	public static final String ENABLE_SSO = "ENABLE_SSO";
 
 	/**
 	 * 	Standard Constructor

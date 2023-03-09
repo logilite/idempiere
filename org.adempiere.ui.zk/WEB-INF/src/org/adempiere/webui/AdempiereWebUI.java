@@ -28,6 +28,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.adempiere.base.sso.SSOUtils;
 import org.adempiere.util.ServerContext;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.DrillCommand;
@@ -557,7 +558,6 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 		Env.setContext(properties, Env.M_WAREHOUSE_ID, Env.getContext(Env.getCtx(), Env.M_WAREHOUSE_ID));
 		Env.setContext(properties, BrowserToken.REMEMBER_ME, Env.getContext(Env.getCtx(), BrowserToken.REMEMBER_ME));
 		Env.setContext(properties, UserPreference.LANGUAGE_NAME, Env.getContext(Env.getCtx(), UserPreference.LANGUAGE_NAME));
-		Env.setContext(properties, Env.SSO_IS_ALREADY_AUTHENTICATE, Env.getContext(Env.getCtx(), Env.SSO_IS_ALREADY_AUTHENTICATE));	
 		Env.setContext(properties, Env.LANGUAGE, Env.getContext(Env.getCtx(), Env.LANGUAGE));
 		Env.setContext(properties, AEnv.LOCALE, Env.getContext(Env.getCtx(), AEnv.LOCALE));
 		Env.setContext(properties, ITheme.ZK_TOOLBAR_BUTTON_SIZE, Env.getContext(Env.getCtx(), ITheme.ZK_TOOLBAR_BUTTON_SIZE));
@@ -604,6 +604,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
     		httpRequest.getSession().removeAttribute(attribute);
     	}
 
+    	httpRequest.getSession().setAttribute(SSOUtils.ISCHANGEROLE_REQUEST, true);
     	//logout ad_session
     	AEnv.logout();
 		

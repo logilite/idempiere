@@ -23,3 +23,4 @@ Import-Package: javax.servlet;version="2.3",
 Bundle-ManifestVersion: 2
 Bundle-ClassPath: .
 Automatic-Module-Name: org.adempiere.eclipse.equinox.http.servlet
+Require-Bundle: org.adempiere.base
