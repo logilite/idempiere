@@ -93,7 +93,6 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 	 */
 	private static final long serialVersionUID = -1159253307008488232L;
 
-	private static final String ALOGIN_SHOWDATE = "ALogin_ShowDate";
 	protected LoginWindow wndLogin;
 	protected ILogin login;
 
@@ -113,8 +112,6 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 	protected UserPreference m_userpreference=null;
 
 	protected boolean m_showRolePanel = true;
-
-	protected boolean m_isSSOLogin = false;
 
 	protected RolePanel component;
 
@@ -830,23 +827,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
             return;
 		}
 
-		if (m_isSSOLogin)
-		{
-			this.addEventListener(SSOUtils.EVENT_ON_AFTER_SSOLOGIN, new EventListener<Event>() {
-
-				@Override
-				public void onEvent(Event ev) throws Exception
-				{
-					updatePerference();
-				}
-			});
-
-			Events.echoEvent(SSOUtils.EVENT_ON_AFTER_SSOLOGIN, this, null);
-		}
-		else
-		{
-			updatePerference();
-		}
+		updatePerference();
 
 		if (m_isClientDefined || isMFAValidated)
 			wndLogin.loginCompleted(login, orgKNPair, this);
@@ -906,11 +887,6 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 
 	public boolean isDeferrable() {
 		return false;
-	}
-	
-	public void setIsSSOLogin(boolean isSSOLogin)
-	{
-		this.m_isSSOLogin = isSSOLogin;
 	}
 	
 	public boolean isShow()

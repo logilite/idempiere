@@ -23,8 +23,8 @@ package org.adempiere.webui;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.adempiere.base.IServiceReferenceHolder;
 import org.adempiere.base.Service;
@@ -33,12 +33,11 @@ import org.adempiere.webui.adwindow.IADTabpanel;
 import org.adempiere.webui.apps.IProcessParameterListener;
 import org.adempiere.webui.apps.graph.IChartRendererService;
 import org.adempiere.webui.factory.IADTabPanelFactory;
-import org.adempiere.webui.factory.IADTabPanelFactory;
 import org.adempiere.webui.factory.IDashboardGadgetFactory;
 import org.adempiere.webui.factory.IFormFactory;
 import org.adempiere.webui.factory.IMappedFormFactory;
-import org.adempiere.webui.factory.IRolePanelFactory;
 import org.adempiere.webui.factory.IQuickEntryFactory;
+import org.adempiere.webui.factory.IRolePanelFactory;
 import org.adempiere.webui.grid.AbstractWQuickEntry;
 import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.panel.RolePanel;
@@ -246,17 +245,18 @@ public class Extensions {
 	 * @param userName
 	 * @param show
 	 * @param clientsKNPairs
+	 * @param isClientDefined 
 	 * @return
 	 */
 	public static RolePanel getRolePanel(Properties ctx, LoginWindow loginWindow, String userName, boolean show,
-			KeyNamePair[] clientsKNPairs)
+			KeyNamePair[] clientsKNPairs, boolean isClientDefined)
 	{
 		List<IRolePanelFactory> factories = Service.locator().list(IRolePanelFactory.class).getServices();
 		if (factories != null && !factories.isEmpty())
 		{
 			for (IRolePanelFactory factory : factories)
 			{
-				RolePanel rolePanel = factory.newInstance(ctx, loginWindow, userName, show, clientsKNPairs);
+				RolePanel rolePanel = factory.newInstance(ctx, loginWindow, userName, show, clientsKNPairs, isClientDefined);
 				if (rolePanel != null)
 					return rolePanel;
 			}

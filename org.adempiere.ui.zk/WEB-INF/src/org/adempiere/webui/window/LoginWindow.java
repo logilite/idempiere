@@ -194,19 +194,39 @@ public class LoginWindow extends FWindow implements EventListener<Event>
     {
         boolean isClientDefined = (clientsKNPairs.length == 1 || ! Util.isEmpty(Env.getContext(ctx, Env.AD_USER_ID)));
 		if (pnlRole == null)
-			createRolePanel(userName, show, clientsKNPairs, isClientDefined,isSSOLogin);
-    	if (isClientDefined) {
+			createRolePanel(userName, show, clientsKNPairs, isClientDefined);
+		if (isSSOLogin)
+		{
+			this.addEventListener(SSOUtils.EVENT_ON_AFTER_SSOLOGIN, new EventListener<Event>() {
+
+				@Override
+				public void onEvent(Event arg0) throws Exception
+				{
+					validateMFPanel(userName, show, clientsKNPairs, isClientDefined);
+				}
+			});
+			Events.echoEvent(SSOUtils.EVENT_ON_AFTER_SSOLOGIN, this, null);
+		}
+		else
+		{
+			validateMFPanel(userName, show, clientsKNPairs, isClientDefined);
+		}
+	}
+
+	private void validateMFPanel(String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isClientDefined)
+	{
+		if (isClientDefined) {
     		createValidateMFAPanel(null, isClientDefined, userName, show, clientsKNPairs);
     	} else {
             showRolePanel(userName, show, clientsKNPairs, isClientDefined, false);
-            if (! pnlRole.show())
+			if (!pnlRole.isShow())
             	createValidateMFAPanel(null, isClientDefined, userName, show, clientsKNPairs);
     	}
-    }
+	}
 
 	public void showRolePanel(String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isClientDefined, boolean isMFAValidated) {
         this.getChildren().clear();
-        if (pnlRole.show()) {
+        if (pnlRole.isShow()) {
         	this.appendChild(pnlRole);
         } else if (isMFAValidated) {
         	pnlRole.validateRoles(isMFAValidated);
@@ -219,11 +239,8 @@ public class LoginWindow extends FWindow implements EventListener<Event>
         }
 	}
     
-	protected void createRolePanel(String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isSSOLogin) {
-		pnlRole = Extensions.getRolePanel(ctx, this, userName, show, clientsKNPairs);
-		pnlRole.setIsSSOLogin(isSSOLogin);
-		if (!pnlRole.isShow())
-			pnlRole.validateRoles();
+	protected void createRolePanel(String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isClientDefined) {
+		pnlRole = Extensions.getRolePanel(ctx, this, userName, show, clientsKNPairs, isClientDefined);
 	}
     public void changePassword(String userName, String userPassword, boolean show, KeyNamePair[] clientsKNPairs)
     {
