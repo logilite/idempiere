@@ -50,6 +50,7 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.NamePair;
+import org.compiere.util.Util;
 import org.zkoss.util.Pair;
 import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Html;
@@ -305,19 +306,27 @@ public class RecordTimeLinePanel extends Vlayout {
 							Env.getLanguage(Env.getCtx()), column.getColumnName(),
 							column.getAD_Reference_Value_ID(),
 							column.isParent(), null);
-						if (oldValue != null)
+						if (DisplayType.isMultiSelect(column.getAD_Reference_ID()))
 						{
-							Object key = oldValue; 
-							NamePair pp = lookup.get(key);
-							if (pp != null)
-								showOldValue = pp.getName();
+							showOldValue = Util.getPrintableNameFromMultiKey(oldValue, column.getAD_Reference_ID(), lookup);
+							showNewValue = Util.getPrintableNameFromMultiKey(newValue, column.getAD_Reference_ID(), lookup);
 						}
-						if (newValue != null)
+						else
 						{
-							Object key = newValue; 
-							NamePair pp = lookup.get(key);
-							if (pp != null)
-								showNewValue = pp.getName();
+							if (oldValue != null)
+							{
+								Object key = oldValue;
+								NamePair pp = lookup.get(key);
+								if (pp != null)
+									showOldValue = pp.getName();
+							}
+							if (newValue != null)
+							{
+								Object key = newValue;
+								NamePair pp = lookup.get(key);
+								if (pp != null)
+									showNewValue = pp.getName();
+							}
 						}
 					}
 					else if (DisplayType.isLOB (column.getAD_Reference_ID ()))
