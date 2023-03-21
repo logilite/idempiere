@@ -117,7 +117,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 
 	private boolean isChangeRole = false;
 
-	private boolean m_isClientDefined;
+	protected boolean m_isClientDefined;
 
 	public boolean isChangeRole() {
 		return isChangeRole;
