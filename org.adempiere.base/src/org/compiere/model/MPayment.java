@@ -703,6 +703,31 @@ public class MPayment extends X_C_Payment
 		return retValue;    //  Payment processed
 	}   //  startProcess
 
+	@Override
+	protected boolean afterSave(boolean newRecord, boolean success)
+	{
+		if (isComplete() && 
+				(is_ValueChanged(COLUMNNAME_C_Charge_ID) 
+						|| is_ValueChanged(COLUMNNAME_DateAcct) 
+						|| is_ValueChanged(COLUMNNAME_C_BankAccount_ID)
+			             || is_ValueChanged(COLUMNNAME_C_BPartner_ID)
+			             || is_ValueChanged(COLUMNNAME_C_Currency_ID)
+			             || is_ValueChanged(COLUMNNAME_DateTrx)
+			             || is_ValueChanged(COLUMNNAME_DiscountAmt)
+			             || is_ValueChanged(COLUMNNAME_PayAmt)
+			             || is_ValueChanged(COLUMNNAME_WriteOffAmt)))
+		{ //Repost if accounting related columns changes
+			String error = DocumentEngine.postImmediate(Env.getCtx(), getAD_Client_ID(), get_Table_ID(), get_ID(),
+					true, get_TrxName());
+			// forced post via process - throw exception to inform the
+			// caller about the error
+			if (!Util.isEmpty(error))
+			{
+				throw new AdempiereException(error);
+			}
+		}
+		return super.afterSave(newRecord, success);
+	}
 	
 	/**
 	 * 	Before Save
@@ -713,12 +738,9 @@ public class MPayment extends X_C_Payment
 	{
 		if (isComplete() && 
 			! is_ValueChanged(COLUMNNAME_Processed) &&
-            (   is_ValueChanged(COLUMNNAME_C_BankAccount_ID)
-             || is_ValueChanged(COLUMNNAME_C_BPartner_ID)
-             || is_ValueChanged(COLUMNNAME_C_Charge_ID)
+            (   is_ValueChanged(COLUMNNAME_C_BPartner_ID)
              || is_ValueChanged(COLUMNNAME_C_Currency_ID)
              || is_ValueChanged(COLUMNNAME_C_DocType_ID)
-             || is_ValueChanged(COLUMNNAME_DateAcct)
              || is_ValueChanged(COLUMNNAME_DateTrx)
              || is_ValueChanged(COLUMNNAME_DiscountAmt)
              || is_ValueChanged(COLUMNNAME_PayAmt)
@@ -726,6 +748,20 @@ public class MPayment extends X_C_Payment
 			log.saveError("PaymentAlreadyProcessed", Msg.translate(getCtx(), "C_Payment_ID"));
 			return false;
 		}
+		//Not allow to set charge when no charge set and user setting charge
+		if (isComplete() && ! is_ValueChanged(COLUMNNAME_Processed) &&
+				is_ValueChanged(COLUMNNAME_C_Charge_ID) && get_ValueOld(COLUMNNAME_C_Charge_ID)==null) {
+			log.saveError("PaymentAlreadyProcessed", Msg.translate(getCtx(), "C_Payment_ID"));
+			return false;
+		}
+		if (isComplete() && 
+				! is_ValueChanged(COLUMNNAME_Processed) &&
+	            (is_ValueChanged(COLUMNNAME_C_BankAccount_ID) && isReconciled()))
+		{
+			log.saveError("PaymentAlreadyProcessed", Msg.translate(getCtx(), "C_Payment_ID"));
+			return false;
+		}
+		
 		// @Trifon - CashPayments
 		//if ( getTenderType().equals("X") ) {
 		if ( isCashbookTrx()) {
