@@ -89,6 +89,19 @@ public interface I_AD_Session
 	  * User Session Online or Web
 	  */
 	public int getAD_Session_ID();
+	
+	 /** Column name AD_SessionType */
+    public static final String COLUMNNAME_AD_SessionType = "AD_SessionType";
+
+	/** Set Session Type.
+	  * it indicates from where this session is created  i.e from Webui,WebService etc.
+	  */
+	public void setAD_SessionType (String AD_SessionType);
+
+	/** Get Session Type.
+	  * it indicates from where this session is created  i.e from Webui,WebService etc.
+	  */
+	public String getAD_SessionType();
 
     /** Column name AD_Session_UU */
     public static final String COLUMNNAME_AD_Session_UU = "AD_Session_UU";
