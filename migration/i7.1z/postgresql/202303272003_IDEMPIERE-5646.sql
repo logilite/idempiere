@@ -16,7 +16,7 @@ INSERT INTO AD_Ref_List (AD_Ref_List_ID,Name,AD_Reference_ID,Value,AD_Client_ID,
 ;
 
 -- 27-Mar-2023, 4:24:17 PM IST
-INSERT INTO AD_Column (AD_Column_ID,Version,Name,AD_Table_ID,ColumnName,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Reference_Value_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,FKConstraintType,IsHtml) VALUES (215807,0,'Session Type',566,'AD_SessionType',25,'N','N','N','N','N',0,'N',17,200238,0,0,'Y',TO_TIMESTAMP('2023-03-27 16:24:16','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2023-03-27 16:24:16','YYYY-MM-DD HH24:MI:SS'),100,203797,'N','N','D','N','N','N','Y','840766bb-10f9-47fd-9b18-212e4510f66c','Y',0,'N','N','N','N')
+INSERT INTO AD_Column (AD_Column_ID,Version,Name,AD_Table_ID,ColumnName,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Reference_Value_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,FKConstraintType,IsHtml) VALUES (215807,0,'Session Type',566,'AD_SessionType',25,'N','N','N','N','N',0,'N',17,200238,0,0,'Y',TO_TIMESTAMP('2023-03-27 16:24:16','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2023-03-27 16:24:16','YYYY-MM-DD HH24:MI:SS'),100,203797,'Y','N','D','N','N','N','Y','840766bb-10f9-47fd-9b18-212e4510f66c','Y',0,'N','N','N','N')
 ;
 
 -- 27-Mar-2023, 4:27:29 PM IST
