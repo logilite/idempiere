@@ -883,6 +883,8 @@ public class Process {
 		PrintInfo info = new PrintInfo(pi);
 
 		ReportEngine re = new ReportEngine(Env.getCtx(), format, query, info);
+		if(pi.getTransientObject()!=null)
+			re.setTranPrintFormat(format);
 		//new Viewer(re);
 		return re;
 	}	//	startFinReport	

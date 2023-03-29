@@ -1486,8 +1486,12 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	{
 		newLine();
 		PrintElement element = null;
+
+		if (item.getAD_PrintFormatChild_ID() <= 0)
+			return null;
 		//
-		MPrintFormat format = MPrintFormat.get (getCtx(), item.getAD_PrintFormatChild_ID(), false);
+		MPrintFormat format = m_format.getTranPFChild(item.getAD_PrintFormatChild_ID()) != null ? m_format.getTranPFChild(item.getAD_PrintFormatChild_ID())
+																								: MPrintFormat.get(getCtx(), item.getAD_PrintFormatChild_ID(), false);
 		format.setLanguage(m_format.getLanguage());
 		if (m_format.isTranslationView())
 			format.setTranslationLanguage(m_format.getLanguage());

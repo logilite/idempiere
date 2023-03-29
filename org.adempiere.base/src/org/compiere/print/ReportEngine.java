@@ -243,6 +243,8 @@ public class ReportEngine implements PrintServiceAttributeListener
 
 	/**	Print Format			*/
 	private MPrintFormat	m_printFormat;
+	/** Transient Object Print Format			*/
+	private MPrintFormat	m_tranPrintFormat;
 	/** Print Info				*/
 	private PrintInfo		m_info;
 	/**	Query					*/
@@ -289,12 +291,18 @@ public class ReportEngine implements PrintServiceAttributeListener
 	 */
 	public void setPrintFormat (MPrintFormat pf)
 	{
-		m_printFormat = pf;
-		pf.reloadItems();
+		if (m_tranPrintFormat != null && m_tranPrintFormat.get_ID() == pf.get_ID())
+			m_printFormat = m_tranPrintFormat;
+		else
+		{
+			m_printFormat = pf;
+			pf.reloadItems();
+		}
+
 		if (m_layout != null)
 		{
 			setPrintData();
-			m_layout.setPrintFormat(pf, false);
+			m_layout.setPrintFormat(m_printFormat, false);
 			m_layout.setPrintData(m_printData, m_query, true);	//	format changes data
 		}
 		
@@ -926,7 +934,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 
 							td.setStyle(style);
 
-							Object obj = m_printData.getNode(new Integer(item.getAD_Column_ID()));
+							Object obj = m_printData.getNode(Integer.valueOf(item.getAD_Column_ID()));
 							if (obj == null || !isDisplayPFItem(item))
 							{
 								td.addElement("&nbsp;");
@@ -2656,6 +2664,16 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 							Env.getAD_Org_ID(ctx));
 			instance.setReportType(type);
 		}
+	}
+
+	public MPrintFormat getTranPrintFormat()
+	{
+		return this.m_tranPrintFormat;
+	}
+
+	public void setTranPrintFormat(MPrintFormat m_tranPrintFormat)
+	{
+		this.m_tranPrintFormat = m_tranPrintFormat;
 	}
 
 }	//	ReportEngine

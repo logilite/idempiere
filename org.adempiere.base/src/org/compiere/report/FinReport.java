@@ -1928,7 +1928,7 @@ public class FinReport extends SvrProcess
 		}
 		else if (!m_report.getDescription().equals(pf.getDescription()))
 			pf.setDescription(m_report.getDescription());
-		pf.saveEx();
+
 		if (log.isLoggable(Level.FINE)) log.fine(pf + " - #" + pf.getItemCount());
 
 		//	Print Format Item Sync
@@ -2044,7 +2044,6 @@ public class FinReport extends SvrProcess
 				if (pfi.getSortNo() != 0)
 					pfi.setSortNo(0);
 			}
-			pfi.saveEx();
 			if (log.isLoggable(Level.FINE)) log.fine(pfi.toString());
 		}
 		//	set translated to original
@@ -2052,9 +2051,6 @@ public class FinReport extends SvrProcess
 
 		if (m_report.getAD_PrintFormatHeader_ID() <= 0)
 			return pf;
-
-		// Reload to pick up changed pfi
-		pf = MPrintFormat.get(getCtx(), AD_PrintFormat_ID, true); // no cache
 
 		MPrintFormat header = MPrintFormat.get(getCtx(), m_report.getAD_PrintFormatHeader_ID(), true);
 
@@ -2083,8 +2079,8 @@ public class FinReport extends SvrProcess
 			{
 				setPFItemOptions(pfi);
 				pfi.setAD_PrintFormatChild_ID(pf.get_ID());
+				header.addTranPFChild(pf.get_ID(), pf);
 			}
-
 			if (name.contains("@Organization@"))
 			{
 				if (p_Org_ID != 0)
@@ -2153,10 +2149,7 @@ public class FinReport extends SvrProcess
 					pfi.setIsPrinted(false);
 				}
 			}
-
-			pfi.saveEx();
 		}
-
 		return header;
 	}	//	getPrintFormat
 

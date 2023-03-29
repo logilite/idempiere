@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -121,6 +122,8 @@ public class MPrintFormat extends X_AD_PrintFormat
 	private ArrayList<MPrintFormatItem>	listFooterItems				= null;
 
 	private ArrayList<MPrintFormatItem>	listContentItems			= null;
+	/** Transient Object Child Print Format */
+	private Map<Integer, MPrintFormat>	tranPFChildMap				= new HashMap<Integer, MPrintFormat>();
 
 	/**	Static Logger	*/
 	private static CLogger			s_log = CLogger.getCLogger (MPrintFormat.class);
@@ -212,6 +215,11 @@ public class MPrintFormat extends X_AD_PrintFormat
 	public MPrintFormatItem[] getItems()
 	{
 		ArrayList<MPrintFormatItem> list = new ArrayList<MPrintFormatItem>();
+
+		listHeaderItems = new ArrayList<MPrintFormatItem>();
+		listContentItems = new ArrayList<MPrintFormatItem>();
+		listFooterItems = new ArrayList<MPrintFormatItem>();
+
 		list.addAll(getItemsList(SQL_GET_PF_ITEMS + ORDER_BY_CLAUSE));
 		//
 		MPrintFormatItem[] retValue = new MPrintFormatItem[list.size()];
@@ -228,10 +236,6 @@ public class MPrintFormat extends X_AD_PrintFormat
 	private ArrayList<MPrintFormatItem> getItemsList(String sql)
 	{
 		ArrayList<MPrintFormatItem> list = new ArrayList<MPrintFormatItem>();
-
-		listHeaderItems = new ArrayList<MPrintFormatItem>();
-		listContentItems = new ArrayList<MPrintFormatItem>();
-		listFooterItems = new ArrayList<MPrintFormatItem>();
 
 		MRole role = MRole.getDefault(getCtx(), false);
 		PreparedStatement pstmt = null;
@@ -278,7 +282,7 @@ public class MPrintFormat extends X_AD_PrintFormat
 		if (listHeaderItems == null || listHeaderItems.isEmpty())
 		{
 			String sql = SQL_GET_PF_ITEMS + " AND pfi.PrintAreaType = '" + MPrintFormatItem.PRINTAREATYPE_Header + "' " + ORDER_BY_CLAUSE;
-			listHeaderItems = getItemsList(sql);
+			getItemsList(sql);
 		}
 		return listHeaderItems;
 	} // getHeaderItems
@@ -291,7 +295,7 @@ public class MPrintFormat extends X_AD_PrintFormat
 		if (listContentItems == null || listContentItems.isEmpty())
 		{
 			String sql = SQL_GET_PF_ITEMS + " AND pfi.PrintAreaType = '" + MPrintFormatItem.PRINTAREATYPE_Content + "' " + ORDER_BY_CLAUSE;
-			listContentItems = getItemsList(sql);
+			getItemsList(sql);
 		}
 		return listContentItems;
 	}// getContentItems
@@ -304,7 +308,7 @@ public class MPrintFormat extends X_AD_PrintFormat
 		if (listFooterItems == null || listFooterItems.isEmpty())
 		{
 			String sql = SQL_GET_PF_ITEMS + " AND pfi.PrintAreaType = '" + MPrintFormatItem.PRINTAREATYPE_Footer + "' " + ORDER_BY_CLAUSE;
-			listFooterItems = getItemsList(sql);
+			getItemsList(sql);
 		}
 		return listFooterItems;
 	} // getFooterItems
@@ -1342,6 +1346,18 @@ public class MPrintFormat extends X_AD_PrintFormat
 	public static int getZoomWindowID(int AD_PrintFormat_ID) {
 		int pfAD_Window_ID = Env.getZoomWindowID(Table_ID, AD_PrintFormat_ID);
 		return pfAD_Window_ID;
+	}
+
+	public void addTranPFChild(Integer pfID, MPrintFormat pf)
+	{
+		tranPFChildMap.put(pfID, pf);
+	}
+
+	public MPrintFormat getTranPFChild(Integer pfID)
+	{
+		if (tranPFChildMap.containsKey(pfID))
+			return tranPFChildMap.get(pfID);
+		return null;
 	}
 
 	/**************************************************************************

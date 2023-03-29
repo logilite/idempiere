@@ -273,6 +273,8 @@ public class ReportCtl
 				query.addRestriction(TableName + "_ID", MQuery.EQUAL, pi.getRecord_ID());
 			PrintInfo info = new PrintInfo(pi);
 			re = new ReportEngine(ctx, format, query, info, pi.isSummary(), null, WindowNo);
+			if(pi.getTransientObject()!=null)
+				re.setTranPrintFormat(format);
 		}
 		//
 		// Create Report Engine normally
@@ -330,6 +332,8 @@ public class ReportCtl
 		PrintInfo info = new PrintInfo(pi);
 
 		ReportEngine re = new ReportEngine(Env.getCtx(), format, query, info, pi.isSummary(), null, WindowNo);
+		if(pi.getTransientObject()!=null)
+			re.setTranPrintFormat(format);
 		if (pi.getReportType() != null) {
 			re.setReportType(pi.getReportType());
 		}
