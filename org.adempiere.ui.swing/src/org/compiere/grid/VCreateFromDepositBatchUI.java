@@ -231,7 +231,7 @@ public class VCreateFromDepositBatchUI extends CreateFromDepositBatch implements
     	if (bankAccountField != null)
     		parameterBankPanel.add(bankAccountField, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0
     				,GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(5, 0, 5, 5), 0, 0));
-
+    	
     	parameterBankPanel.add(documentTypeLabel, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0
     			,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
     	if(documentTypeField!= null)

@@ -25,6 +25,7 @@ import org.compiere.minigrid.IMiniTable;
 import org.compiere.model.GridTab;
 import org.compiere.model.MDepositBatch;
 import org.compiere.model.MDepositBatchLine;
+import org.compiere.model.MOrg;
 import org.compiere.model.MPayment;
 import org.compiere.model.MTable;
 import org.compiere.util.DB;
@@ -39,6 +40,11 @@ import org.compiere.util.Msg;
  */
 public abstract class CreateFromDepositBatch extends CreateFromBatch 
 {
+	//AD_Org_ID
+	protected int AD_Org_ID = 0;
+	/** Window No               */
+	protected int p_WindowNo;
+		
 	public CreateFromDepositBatch(GridTab mTab) 
 	{
 		super(mTab);
@@ -50,6 +56,9 @@ public abstract class CreateFromDepositBatch extends CreateFromBatch
 		log.config("");
 		setTitle(Msg.getElement(Env.getCtx(), "C_DepositBatch_ID") + " .. " + Msg.translate(Env.getCtx(), "CreateFrom"));
 
+		//  Set AD_Org_ID
+		AD_Org_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, MOrg.COLUMNNAME_AD_Org_ID);
+		
 		return true;
 	}
 	
@@ -66,7 +75,7 @@ public abstract class CreateFromDepositBatch extends CreateFromBatch
 		sql.append(" INNER JOIN C_Currency c ON (p.C_Currency_ID=c.C_Currency_ID)");
 		sql.append(" INNER JOIN C_Payment py ON (py.C_Payment_ID=p.C_Payment_ID)");
 		sql.append(" LEFT OUTER JOIN C_BPartner bp ON (p.C_BPartner_ID=bp.C_BPartner_ID) ");
-		sql.append(getSQLWhere(BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode));
+		sql.append(getSQLWhere(BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, AD_Org_ID));
 		
 		sql.append(" AND py.IsReconciled = 'N'");
 		sql.append(" AND py.TrxType <> 'X'");
@@ -79,7 +88,7 @@ public abstract class CreateFromDepositBatch extends CreateFromBatch
 		try
 		{
 			pstmt = DB.prepareStatement(sql.toString(), null);
-			setParameters(pstmt, BankAccount, BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode);
+			setParameters(pstmt, BankAccount, BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, AD_Org_ID);
 			rs = pstmt.executeQuery();
 			while(rs.next())
 			{
