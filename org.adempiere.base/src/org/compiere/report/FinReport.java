@@ -43,7 +43,6 @@ import org.compiere.process.SvrProcess;
 import org.compiere.util.AdempiereUserError;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
-import org.compiere.util.Ini;
 import org.compiere.util.TimeUtil;
 
 /**
@@ -352,17 +351,9 @@ public class FinReport extends SvrProcess
 		scaleResults();
 
 		//	Create Report
-		if (Ini.isClient()) 
-		{
-			if (getProcessInfo().getTransientObject() == null)
+		if (getProcessInfo().getTransientObject() == null)
 				getProcessInfo().setTransientObject (getPrintFormat());
-		}
-		else
-		{
-			if (getProcessInfo().getSerializableObject() == null)
-				getProcessInfo().setSerializableObject(getPrintFormat());
-		}
-
+		
 		if (log.isLoggable(Level.FINE)) log.fine((System.currentTimeMillis() - m_start) + " ms");
 		return "";
 	}	//	doIt
