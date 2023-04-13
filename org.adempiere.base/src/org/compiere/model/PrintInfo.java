@@ -37,6 +37,7 @@ public class PrintInfo
 		setAD_Process_ID(pi.getAD_Process_ID());
 		setAD_Table_ID(pi.getTable_ID());
 		setRecord_ID(pi.getRecord_ID());
+		setIsTransientObject(pi.getTransientObject() != null);
 	}	//	PrintInfo
 	
 	
@@ -71,6 +72,7 @@ public class PrintInfo
 	boolean m_withDialog = false;
 	private int m_copies = 1;
 	private boolean m_isDocumentCopy = false;
+	private boolean m_isTransientObject = false;
 	private String m_printerName = null;
 	//
 	private String m_Name = null;
@@ -258,6 +260,16 @@ public class PrintInfo
 	public void setRecord_ID (int record_ID)
 	{
 		m_Record_ID = record_ID;
+	}
+
+	public boolean isTransientObject( )
+	{
+		return m_isTransientObject;
+	}
+
+	public void setIsTransientObject(boolean isTransientObject)
+	{
+		this.m_isTransientObject = isTransientObject;
 	}
 	
 	/**

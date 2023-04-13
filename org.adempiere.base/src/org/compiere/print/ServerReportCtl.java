@@ -293,8 +293,6 @@ public class ServerReportCtl {
 			MQuery query = MQuery.get (ctx, pi.getAD_PInstance_ID(), TableName);
 			PrintInfo info = new PrintInfo(pi);
 			re = new ReportEngine(ctx, format, query, info, pi.isSummary(), pi.getTransactionName());
-			if(pi.getTransientObject()!=null)
-				re.setTranPrintFormat(format);
 			if (pi.isPrintPreview() && pi.isBatch())
 			{
 				if ("HTML".equals(pi.getReportType())) 
@@ -395,8 +393,6 @@ public class ServerReportCtl {
 		PrintInfo info = new PrintInfo(pi);
 
 		ReportEngine re = new ReportEngine(Env.getCtx(), format, query, info);
-		if(pi.getTransientObject()!=null)
-			re.setTranPrintFormat(format);
 		if (pi.isPrintPreview() && pi.isBatch())
 		{
 			if ("HTML".equals(pi.getReportType())) 

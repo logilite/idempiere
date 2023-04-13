@@ -228,6 +228,8 @@ public class ReportEngine implements PrintServiceAttributeListener
 		m_info = info;
 		m_trxName = trxName;
 		m_windowNo = windowNo;
+		if (info.isTransientObject())
+			setTranPrintFormat(pf);
 		setQuery(query);		//	loads Data
 		
 	}	//	ReportEngine
@@ -355,7 +357,7 @@ public class ReportEngine implements PrintServiceAttributeListener
 			return;
 		
 		DataEngine de = new DataEngine(m_printFormat.getLanguage(),m_trxName, m_windowNo);
-		setPrintData(de.getPrintData (m_ctx, m_printFormat, m_query, m_summary));
+		setPrintData(de.getPrintData (m_ctx, m_printFormat, m_query, m_summary, m_info.isTransientObject()));
 	//	m_printData.dump();
 	}	//	setPrintData
 
