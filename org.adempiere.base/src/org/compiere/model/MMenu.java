@@ -27,6 +27,7 @@ import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  *	Menu Model
@@ -217,5 +218,28 @@ public class MMenu extends X_AD_Menu
 		}
 		return retValue;
 	}
-	
+
+	/** Returns the name using UserDef module ; if nothing is defined, fallback to the translated name */
+	public String getDisplayedName() {
+
+		if (!Util.isEmpty(getAction())) {
+			if (ACTION_Window.equals(getAction())) {
+				MUserDefWin userDef = MUserDefWin.getBestMatch(getCtx(), getAD_Window_ID());
+				if (userDef != null) {
+					if (userDef.getName() != null)
+						return userDef.getName();
+				}
+			}
+			else if (ACTION_Process.equals(getAction()) || ACTION_Report.equals(getAction())) {
+				MUserDefProc userDef = MUserDefProc.getBestMatch(getCtx(), getAD_Process_ID());
+				if (userDef != null) {
+					if (userDef.getName() != null)
+						return userDef.getName();
+				}
+			}
+		}
+
+		return get_Translation(MMenu.COLUMNNAME_Name);
+	}
+
 }	//	MMenu

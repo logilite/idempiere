@@ -428,8 +428,7 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 	public static void insertMenuInTree(int menuID, int parentNodeID, int treeFavoriteID, Tree tree, FavoriteSimpleTreeModel treeModel,
 										DefaultTreeNode<Object> parentDTN)
 	{
-		MTreeFavoriteNode favNode = MTreeFavoriteNode.create(	Env.getAD_Client_ID(Env.getCtx()), Env.getContextAsInt(Env.getCtx(), Env.AD_ORG_ID),
-																treeFavoriteID,
+		MTreeFavoriteNode favNode = MTreeFavoriteNode.create(	Env.getAD_Client_ID(Env.getCtx()), Env.getContextAsInt(Env.getCtx(), Env.AD_ORG_ID), treeFavoriteID,
 																menuID, parentNodeID, 0, null, false, true, false);
 		addNodeInTree(treeModel, tree, parentDTN, favNode);
 	} // insertMenuInTree
@@ -450,7 +449,7 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 		if (favNode.getAD_Menu_ID() > 0)
 		{
 			MMenu menu = (MMenu) MTable.get(Env.getCtx(), MMenu.Table_ID).getPO(favNode.getAD_Menu_ID(), null);
-			name = menu.get_Translation(MMenu.COLUMNNAME_Name);
+			name = menu.getDisplayedName();
 			action = menu.getAction();
 		}
 		else
