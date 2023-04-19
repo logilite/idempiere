@@ -83,5 +83,5 @@ INSERT INTO AD_WF_NodeNext (AD_WF_Node_ID,IsActive,Created,CreatedBy,Updated,Upd
 UPDATE AD_Process SET AD_Workflow_ID=200012,Updated=TO_TIMESTAMP('2023-01-10 19:56:14','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Process_ID=200148
 ;
 
-SELECT register_migration_script('202301111205_DepositBatchDocAction.sql') FROM dual
+SELECT register_migration_script('202301111205_IDEMPIERE-5329.sql') FROM dual
 ;

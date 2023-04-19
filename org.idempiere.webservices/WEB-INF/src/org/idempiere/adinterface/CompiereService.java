@@ -336,7 +336,7 @@ public class CompiereService {
 		}
 
 		session.setWebSession("WebService");
-		
+		session.setAD_SessionType(MSession.AD_SESSIONTYPE_WebService);
 		session.setDescription(session.getDescription() + "\nUser Agent: " + getCtx().getProperty("#UserAgent"));
 		session.saveEx();
 		
@@ -429,6 +429,7 @@ public class CompiereService {
 			}
 			
 			session.setWebSession("WebService");
+			session.setAD_SessionType(MSession.AD_SESSIONTYPE_WebService);
 			session.saveEx();
 		}
 		

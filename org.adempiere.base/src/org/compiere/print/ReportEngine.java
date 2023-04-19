@@ -233,6 +233,8 @@ public class ReportEngine implements PrintServiceAttributeListener
 		m_trxName = trxName;
 		m_windowNo = windowNo;
 		initName();
+		if (info.isTransientObject())
+			setTranPrintFormat(pf);
 		setQuery(query);		//	loads Data
 		
 	}	//	ReportEngine
@@ -248,6 +250,8 @@ public class ReportEngine implements PrintServiceAttributeListener
 
 	/**	Print Format			*/
 	private MPrintFormat	m_printFormat;
+	/** Transient Object Print Format			*/
+	private MPrintFormat	m_tranPrintFormat;
 	/** Print Info				*/
 	private PrintInfo		m_info;
 	/**	Query					*/
@@ -296,12 +300,18 @@ public class ReportEngine implements PrintServiceAttributeListener
 	 */
 	public void setPrintFormat (MPrintFormat pf)
 	{
-		m_printFormat = pf;
-		pf.reloadItems();
+		if (m_tranPrintFormat != null && m_tranPrintFormat.get_ID() == pf.get_ID())
+			m_printFormat = m_tranPrintFormat;
+		else
+		{
+			m_printFormat = pf;
+			pf.reloadItems();
+		}
+
 		if (m_layout != null)
 		{
 			setPrintData();
-			m_layout.setPrintFormat(pf, false);
+			m_layout.setPrintFormat(m_printFormat, false);
 			m_layout.setPrintData(m_printData, m_query, true);	//	format changes data
 		}
 		
@@ -354,7 +364,7 @@ public class ReportEngine implements PrintServiceAttributeListener
 			return;
 		
 		DataEngine de = new DataEngine(m_printFormat.getLanguage(),m_trxName, m_windowNo);
-		setPrintData(de.getPrintData (m_ctx, m_printFormat, m_query, m_summary));
+		setPrintData(de.getPrintData (m_ctx, m_printFormat, m_query, m_summary, m_info.isTransientObject()));
 	//	m_printData.dump();
 	}	//	setPrintData
 
@@ -2800,5 +2810,15 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 							Env.getAD_Org_ID(ctx));
 			instance.setReportType(type);
 		}
+	}
+
+	public MPrintFormat getTranPrintFormat()
+	{
+		return this.m_tranPrintFormat;
+	}
+
+	public void setTranPrintFormat(MPrintFormat m_tranPrintFormat)
+	{
+		this.m_tranPrintFormat = m_tranPrintFormat;
 	}
 }	//	ReportEngine

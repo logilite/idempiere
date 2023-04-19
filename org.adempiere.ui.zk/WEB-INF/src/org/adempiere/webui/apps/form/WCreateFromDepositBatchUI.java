@@ -90,9 +90,6 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 		}
 		AEnv.showWindow(window);
 	}
-	
-	/** Window No               */
-	private int p_WindowNo;
 
 	/**	Logger			*/
 	private static final CLogger log = CLogger.getCLogger(WCreateFromDepositBatchUI.class);
@@ -124,7 +121,7 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 	protected WDateEditor dateFromField = new WDateEditor("DateFrom", false, false, true, Msg.translate(Env.getCtx(), "DateFrom"));
 	protected Label dateToLabel = new Label("-");
 	protected WDateEditor dateToField = new WDateEditor("DateTo", false, false, true, Msg.translate(Env.getCtx(), "DateTo"));
-
+	
 	/**
 	 *  Dynamic Init
 	 *  @throws Exception if Lookups cannot be initialized
@@ -156,6 +153,7 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 		int C_BankAccount_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_BankAccount_ID");
 		bankAccountField.setValue(Integer.valueOf(C_BankAccount_ID));
 		bankAccountField.setReadWrite(false);
+		
 		//  initial Loading
 		authorizationField = new WStringEditor ("authorization", false, false, true, 10, 30, null, null);
 //		authorizationField.getComponent().addEventListener(Events.ON_CHANGE, this);
@@ -191,7 +189,7 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 	
 	protected void zkInit() throws Exception
 	{
-		window.setWidth("800px");
+		window.setWidth("1100px");
 		bankAccountLabel.setText(Msg.translate(Env.getCtx(), "C_BankAccount_ID"));
     	authorizationLabel.setText(Msg.translate(Env.getCtx(), "R_AuthCode"));
     	
@@ -205,7 +203,7 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
     	amtToField.getComponent().setTooltiptext(Msg.translate(Env.getCtx(), "AmtTo"));
     	
     	Borderlayout parameterLayout = new Borderlayout();
-    	ZKUpdateUtil.setHeight(parameterLayout, "130px");
+    	ZKUpdateUtil.setHeight(parameterLayout, "120px");
 		ZKUpdateUtil.setWidth(parameterLayout, "100%");
     	Panel parameterPanel = window.getParameterPanel();
 		parameterPanel.appendChild(parameterLayout);
@@ -223,45 +221,47 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 		Column column = new Column();
 		columns.appendChild(column);		
 		column = new Column();
-		ZKUpdateUtil.setWidth(column, "15%");
+		ZKUpdateUtil.setWidth(column, "12%");
 		columns.appendChild(column);
-		ZKUpdateUtil.setWidth(column, "35%");
+		ZKUpdateUtil.setWidth(column, "19%");
 		column = new Column();
-		ZKUpdateUtil.setWidth(column, "15%");
+		ZKUpdateUtil.setWidth(column, "13%");
 		columns.appendChild(column);
 		column = new Column();
-		ZKUpdateUtil.setWidth(column, "35%");
+		ZKUpdateUtil.setWidth(column, "27%");
+		columns.appendChild(column);
+		column = new Column();
+		ZKUpdateUtil.setWidth(column, "10%");
+		columns.appendChild(column);
+		column = new Column();
+		ZKUpdateUtil.setWidth(column, "19%");
 		columns.appendChild(column);
 		
 		Rows rows = (Rows) parameterBankLayout.newRows();
 		Row row = rows.newRow();
 		row.appendChild(bankAccountLabel.rightAlign());
 		row.appendChild(bankAccountField.getComponent());
+		row.appendChild(documentTypeLabel.rightAlign());
+		row.appendChild(documentTypeField.getComponent());
 		row.appendChild(documentNoLabel.rightAlign());
 		row.appendChild(documentNoField.getComponent());
 		
 		row = rows.newRow();
-		row.appendChild(documentTypeLabel.rightAlign());
-		row.appendChild(documentTypeField.getComponent());
+		row.appendChild(BPartner_idLabel.rightAlign());
+		row.appendChild(bPartnerLookup.getComponent());
 		row.appendChild(authorizationLabel.rightAlign());
 		row.appendChild(authorizationField.getComponent());
-		
-		row = rows.newRow();
 		row.appendChild(tenderTypeLabel.rightAlign());
 		row.appendChild(tenderTypeField.getComponent());
-
+		
+		row = rows.newRow();
 		row.appendChild(amtFromLabel.rightAlign());
 		Hbox hbox = new Hbox();
 		hbox.appendChild(amtFromField.getComponent());
 		hbox.appendChild(amtToLabel.rightAlign());
 		hbox.appendChild(amtToField.getComponent());
 		row.appendChild(hbox);
-		
-		row = rows.newRow();
-		row.appendChild(BPartner_idLabel.rightAlign());
-		row.appendChild(bPartnerLookup.getComponent());
 		row.appendChild(dateFromLabel.rightAlign());
-		
 		hbox = new Hbox();
 		hbox.appendChild(dateFromField.getComponent());
 		hbox.appendChild(dateToLabel.rightAlign());

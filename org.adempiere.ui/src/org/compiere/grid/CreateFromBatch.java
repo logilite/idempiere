@@ -43,6 +43,12 @@ public abstract class CreateFromBatch extends CreateFrom
 	public String getSQLWhere(Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
 			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode)
 	{
+		return getSQLWhere(BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, 0);
+	}
+	
+	public String getSQLWhere(Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
+			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode, int AD_Org_ID)
+	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("WHERE p.Processed='Y' AND p.IsReconciled='N'");
 		sql.append(" AND p.DocStatus IN ('CO','CL','RE','VO') AND p.PayAmt<>0"); 
@@ -84,6 +90,9 @@ public abstract class CreateFromBatch extends CreateFrom
 			else if(from != null && to != null)
 				sql.append(" AND TRUNC(p.DateTrx) BETWEEN ? AND ?");
 		}
+		
+		if(AD_Org_ID > 0)
+			sql.append(" AND p.AD_Org_ID = ?");
 
 		if (log.isLoggable(Level.FINE)) log.fine(sql.toString());
 		return sql.toString();
@@ -91,6 +100,13 @@ public abstract class CreateFromBatch extends CreateFrom
 	
 	protected void setParameters(PreparedStatement pstmt, Object BankAccount, Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
 			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode)
+	throws SQLException
+	{
+		setParameters(pstmt, BankAccount, BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, 0);
+	}
+	
+	protected void setParameters(PreparedStatement pstmt, Object BankAccount, Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
+			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode, int AD_Org_ID)
 	throws SQLException
 	{
 		//  Get StatementDate
@@ -149,6 +165,9 @@ public abstract class CreateFromBatch extends CreateFrom
 				pstmt.setTimestamp(index++, to);
 			}
 		}
+		
+		if(AD_Org_ID > 0)
+			pstmt.setInt(index++, (Integer) AD_Org_ID);
 	}
 	
 	protected String getSQLText(String text)

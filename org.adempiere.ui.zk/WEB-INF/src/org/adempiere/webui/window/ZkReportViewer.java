@@ -1135,6 +1135,8 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 			comboReport.appendItem(pp.getName(), pp.getKey());
 		}
 		comboReport.addEventListener(Events.ON_SELECT, this);
+		if(m_reportEngine.getTranPrintFormat() != null)
+			comboReport.setEnabled(false);
 	}	//	fillComboReport
 
 	/**

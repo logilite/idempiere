@@ -1457,7 +1457,9 @@ public class LayoutEngine implements Pageable, Printable, Doc
 			return element;
 		}
 
-		MPrintFormat format = MPrintFormat.get (getCtx(), item.getAD_PrintFormatChild_ID(), false);
+		boolean isTranPrintFormat = m_format.getTranPFChild(item.getAD_PrintFormatChild_ID()) != null;
+		MPrintFormat format = isTranPrintFormat ? m_format.getTranPFChild(item.getAD_PrintFormatChild_ID()) : MPrintFormat.get(getCtx(), item.getAD_PrintFormatChild_ID(), false);
+		
 		format.setLanguage(m_format.getLanguage());
 		if (m_format.isTranslationView())
 			format.setTranslationLanguage(m_format.getLanguage());
@@ -1504,7 +1506,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 			log.fine(query.toString());
 		//
 		DataEngine de = new DataEngine(format.getLanguage(),m_TrxName, m_windowNo);
-		PrintData includedData = de.getPrintData(data.getCtx(), format, query);
+		PrintData includedData = de.getPrintData(data.getCtx(), format, query, false, isTranPrintFormat);
 		if (includedData == null)
 			return null;
 		if (log.isLoggable(Level.FINE))

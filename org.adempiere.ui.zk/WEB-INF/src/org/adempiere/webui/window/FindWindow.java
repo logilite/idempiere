@@ -431,8 +431,12 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     	}
     	
     	m_minRecords = minRecords;
-    	m_total = getNoOfRecords(null, false);
-    	if (m_total != COUNTING_RECORDS_TIMED_OUT && m_total < m_minRecords)
+
+		// no query in case of high volume & window type maintain
+		boolean noQuery = (m_gridTab != null) ? m_gridTab.isHighVolume() : false;
+		m_total = noQuery ? m_minRecords : getNoOfRecords(null, false);
+		
+    	if (m_total != COUNTING_RECORDS_TIMED_OUT && m_total < m_minRecords)	
         {
             return false;
         }
@@ -1010,11 +1014,15 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         }
         
         gridFieldList = null;
-        m_total = getNoOfRecords(null, false);
+     
+        // no query in case of high volume & window type maintain
+     	boolean noQuery = (m_gridTab != null) ? m_gridTab.isHighVolume() : false;
+		m_total = noQuery ? m_minRecords : getNoOfRecords(null, false);
 
-        /** START DEVCOFFEE **/
-    	//	Get Total
-		setStatusDB (m_total);
+		/** START DEVCOFFEE **/
+		// Get Total
+		if (!noQuery)
+			setStatusDB(m_total);
 		statusBar.setStatusLine("");
 		/** END DEVCOFFEE **/
     }   //  initFind

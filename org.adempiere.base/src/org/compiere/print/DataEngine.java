@@ -147,13 +147,27 @@ public class DataEngine
 	/**************************************************************************
 	 * 	Load Data
 	 *
+	 * @param ctx
+	 * @param format
+	 * @param query
+	 * @param summary
+	 * @return
+	 */
+	public PrintData getPrintData (Properties ctx, MPrintFormat format, MQuery query, boolean summary)
+	{
+		return getPrintData(ctx, format, query, summary, false);
+	}
+	
+	/**************************************************************************
+	 * 	Load Data
+	 *
 	 * 	@param format print format
 	 * 	@param query query
 	 * 	@param ctx context
 	 *  @param summary
 	 * 	@return PrintData or null
 	 */
-	public PrintData getPrintData (Properties ctx, MPrintFormat format, MQuery query, boolean summary)
+	public PrintData getPrintData (Properties ctx, MPrintFormat format, MQuery query, boolean summary, boolean isTranPrintFormat)
 	{
 		if (format == null)
 			throw new IllegalStateException ("No print format");
@@ -229,7 +243,7 @@ public class DataEngine
 			}
 		}		
 		//
-		PrintData pd = getPrintDataInfo (ctx, format, queryCopy, reportName, tableName);
+		PrintData pd = getPrintDataInfo (ctx, format, queryCopy, reportName, tableName, isTranPrintFormat);
 		if (pd == null)
 			return null;
 		loadPrintData(pd, format);
@@ -245,10 +259,11 @@ public class DataEngine
 	 * 	@param query query
 	 *  @param reportName report name
 	 *  @param tableName table name
+	 * @param isTranPrintFormat 
 	 * 	@return PrintData or null
 	 */
 	private PrintData getPrintDataInfo (Properties ctx, MPrintFormat format, MQuery query,
-		String reportName, String tableName)
+		String reportName, String tableName, boolean isTranPrintFormat)
 	{
 		m_startTime = System.currentTimeMillis();
 		if (log.isLoggable(Level.INFO)) log.info(reportName + " - " + m_language.getAD_Language());
@@ -294,9 +309,12 @@ public class DataEngine
 			.append(" INNER JOIN AD_PrintFormatItem pfi ON (pf.AD_PrintFormat_ID=pfi.AD_PrintFormat_ID)")
 			.append(" LEFT JOIN AD_Column c ON (pfi.AD_Column_ID=c.AD_Column_ID)")
 			.append(" LEFT OUTER JOIN AD_ReportView_Col rvc ON (pf.AD_ReportView_ID=rvc.AD_ReportView_ID AND c.AD_Column_ID=rvc.AD_Column_ID) ")
-			.append("WHERE pf.AD_PrintFormat_ID=?")					//	#1
-			.append(" AND pfi.IsActive='Y' AND (pfi.IsPrinted='Y' OR c.IsKey='Y' OR pfi.SortNo > 0 ")
-			.append(" OR EXISTS(select 1 from AD_PrintFormatItem x where x.AD_PrintFormat_ID=pf.AD_PrintFormat_ID and x.DisplayLogic is not null and ")
+			.append("WHERE pf.AD_PrintFormat_ID=?");					//	#1
+			if(isTranPrintFormat)
+				sql.append(" AND pfi.AD_PrintFormatItem_ID IN ( " + getTranPrintFormatItemIDs(format) + ")");
+			else
+				sql.append(" AND pfi.IsActive='Y' AND (pfi.IsPrinted='Y' OR c.IsKey='Y' OR pfi.SortNo > 0) ");
+			sql.append(" OR EXISTS(select 1 from AD_PrintFormatItem x where x.AD_PrintFormat_ID=pf.AD_PrintFormat_ID and x.DisplayLogic is not null and ")
 			.append("(x.DisplayLogic Like '%@'||c.ColumnName||'@%' OR x.DisplayLogic Like '%@'||c.ColumnName||':%@%' OR x.DisplayLogic Like '%@'||c.ColumnName||'.%@%'))) ")
 			.append(" AND pfi.PrintFormatType IN ('"
 				+ MPrintFormatItem.PRINTFORMATTYPE_Field
@@ -325,6 +343,10 @@ public class DataEngine
 				orgTable = MTable.getTableName(ctx, format.getAD_Table_ID());
 				regTranslateTable =  Pattern.compile("\\b" + orgTable + "\\b", Pattern.CASE_INSENSITIVE);
 			}
+			
+			ArrayList <Integer> printPFT = null;
+			if (isTranPrintFormat)
+				printPFT = getPrintedTranPFItemList(format);
 			
 			while (rs.next())
 			{
@@ -395,6 +417,13 @@ public class DataEngine
 				String script = rs.getString(27);
 				String pfiName = rs.getString(28);
 
+
+				if(isTranPrintFormat) {				
+					if (!printPFT.isEmpty() && printPFT.contains(AD_PrintFormatItem_ID))
+						IsPrinted = true;
+					else
+						IsPrinted = false;
+				}
 
 				//	Fully qualified Table.Column for ordering
 				String orderName = tableName + "." + ColumnName;
@@ -865,6 +894,40 @@ public class DataEngine
 		}
 		return pd;
 	}	//	getPrintDataInfo
+
+	/**
+	 * @param format
+	 * @return list of printed print format item IDs.
+	 */
+	private ArrayList<Integer> getPrintedTranPFItemList(MPrintFormat format)
+	{
+		ArrayList<Integer> printPFT = new ArrayList<Integer>();
+		for (int i = 0; i < format.getItemCount(); i++)
+		{
+			MPrintFormatItem pfi = format.getItem(i);
+			if (pfi.isActive() && pfi.isPrinted())
+			{
+				printPFT.add(pfi.getAD_PrintFormatItem_ID());
+			}
+		}
+		return printPFT;
+	}// getPrintedTranPFItemList
+
+	private String getTranPrintFormatItemIDs(MPrintFormat format)
+	{
+		String pfiIDs = "";
+		for (int i = 0; i < format.getItemCount(); i++)
+		{
+			MPrintFormatItem pfi = format.getItem(i);
+			if (pfi.isActive() && (pfi.isPrinted() || pfi.getSortNo() > 0 || (pfi.getAD_Column_ID() > 0 && pfi.getAD_Column().isKey())))
+			{
+				if (!Util.isEmpty(pfiIDs, true))
+					pfiIDs += ", ";
+				pfiIDs += pfi.getAD_PrintFormatItem_ID();
+			}
+		}
+		return pfiIDs;
+	}// getTranPrintFormatItemIDs
 
 	/**
 	 *	Next Synonym.

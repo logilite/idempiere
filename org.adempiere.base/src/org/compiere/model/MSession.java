@@ -109,16 +109,17 @@ public class MSession extends X_AD_Session implements ImmutablePOSupport
 	 *	@param Remote_Addr remote address
 	 *	@param Remote_Host remote host
 	 *	@param WebSession web session
+	 *	@param AD_SessionType session type
 	 *	@return session
 	 */
-	public static MSession get (Properties ctx, String Remote_Addr, String Remote_Host, String WebSession)
+	public static MSession get (Properties ctx, String Remote_Addr, String Remote_Host, String WebSession, String AD_SessionType)
 	{
 		int AD_Session_ID = Env.getContextAsInt(ctx, Env.AD_SESSION_ID);
 		MSession session = get(ctx);
 
 		if (session == null)
 		{
-			session = new MSession (ctx, Remote_Addr, Remote_Host, WebSession, null);	//	remote session
+			session = new MSession (ctx, Remote_Addr, Remote_Host, WebSession, AD_SessionType, null);	//	remote session
 			session.saveEx();
 			AD_Session_ID = session.getAD_Session_ID();
 			Env.setContext(ctx, Env.AD_SESSION_ID, AD_Session_ID);
@@ -165,9 +166,10 @@ public class MSession extends X_AD_Session implements ImmutablePOSupport
 	 *	@param Remote_Addr remote address
 	 *	@param Remote_Host remote host
 	 *	@param WebSession web session
+	 *  @param AD_SessionType session type
 	 *	@param trxName transaction
 	 */
-	public MSession (Properties ctx, String Remote_Addr, String Remote_Host, String WebSession, String trxName)
+	public MSession (Properties ctx, String Remote_Addr, String Remote_Host, String WebSession, String AD_SessionType, String trxName)
 	{
 		this (ctx, 0, trxName);
 		
@@ -178,6 +180,8 @@ public class MSession extends X_AD_Session implements ImmutablePOSupport
 			setRemote_Host(Remote_Host);
 		if (WebSession != null)
 			setWebSession(WebSession);
+		if (AD_SessionType != null)
+			setAD_SessionType(AD_SessionType);
 		setDescription(Adempiere.MAIN_VERSION + "_"
 				+ Adempiere.DATE_VERSION + " "
 				+ Adempiere.getImplementationVersion());

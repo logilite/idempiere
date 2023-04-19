@@ -141,6 +141,30 @@ public class X_AD_Session extends PO implements I_AD_Session, I_Persistent
     {
         return new KeyNamePair(get_ID(), String.valueOf(getAD_Session_ID()));
     }
+    
+    /** AD_SessionType AD_Reference_ID=200238 */
+	public static final int AD_SESSIONTYPE_AD_Reference_ID=200238;
+	/** Webui = WBUI */
+	public static final String AD_SESSIONTYPE_Webui = "WBUI";
+	/** Web Service = WBSR */
+	public static final String AD_SESSIONTYPE_WebService = "WBSR";
+	/** Set Session Type.
+		@param AD_SessionType 
+		it indicates from where this session is created  i.e from Webui,WebService etc.
+	  */
+	public void setAD_SessionType (String AD_SessionType)
+	{
+
+		set_Value (COLUMNNAME_AD_SessionType, AD_SessionType);
+	}
+
+	/** Get Session Type.
+		@return it indicates from where this session is created  i.e from Webui,WebService etc.
+	  */
+	public String getAD_SessionType () 
+	{
+		return (String)get_Value(COLUMNNAME_AD_SessionType);
+	}
 
 	/** Set AD_Session_UU.
 		@param AD_Session_UU AD_Session_UU
