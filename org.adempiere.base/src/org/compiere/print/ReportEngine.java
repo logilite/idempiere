@@ -84,6 +84,7 @@ import org.compiere.model.MFactAcct;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInventory;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MLocation;
 import org.compiere.model.MMovement;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPInstance;
@@ -1046,6 +1047,33 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 										td.addElement(Util.maskHTML(value));
 									}
 
+								}
+								else if (pde.getColumnName().equalsIgnoreCase(MLocation.COLUMNNAME_LATITUDE)
+											|| pde.getColumnName().equalsIgnoreCase(MLocation.COLUMNNAME_LONGITUDE))
+								{
+									PrintDataElement latitude = (PrintDataElement) m_printData.getNode(MLocation.COLUMNNAME_LATITUDE);
+									PrintDataElement longitude = (PrintDataElement) m_printData.getNode(MLocation.COLUMNNAME_LONGITUDE);
+									//
+									if (latitude != null && longitude != null)
+									{
+										a href = new a("javascript:void(0)");
+										href.setID(pde.getColumnName() + "_" + row + "_a");
+										td.addElement(href);
+
+										if (cssPrefix != null)
+										{
+											href.setClass(cssPrefix + "-image");
+										}
+
+										String mapURL = MLocation.LOCATION_MAPS_URL_LAT_LONG.replaceAll("<LAT>", latitude.getValue().toString());
+										mapURL = mapURL.replaceAll("<LNG>", longitude.getValue().toString());
+										href.setHref(mapURL);
+										href.setTarget("_blank");
+									}
+									else
+									{
+										td.addElement(Util.maskHTML(value));
+									}
 								}
 								else
 								{
