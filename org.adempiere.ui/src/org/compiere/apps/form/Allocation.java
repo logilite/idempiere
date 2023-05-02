@@ -129,9 +129,10 @@ public class Allocation
 			+ "c.ISO_Code,p.PayAmt,"                            //  4..5
 			+ "currencyConvert(p.PayAmt,p.C_Currency_ID,?,?,p.C_ConversionType_ID,p.AD_Client_ID,p.AD_Org_ID),"//  6   #1, #2
 			+ "currencyConvert(paymentAvailable(C_Payment_ID),p.C_Currency_ID,?,?,p.C_ConversionType_ID,p.AD_Client_ID,p.AD_Org_ID),"  //  7   #3, #4
-			+ "p.MultiplierAP "
+			+ "p.MultiplierAP,dt.Name "	//  8..9
 			+ "FROM C_Payment_v p"		//	Corrected for AP/AR
 			+ " INNER JOIN C_Currency c ON (p.C_Currency_ID=c.C_Currency_ID) "
+			+ " INNER JOIN C_DocType dt ON (dt.C_DocType_ID = p.C_DocType_ID) "
 			+ "WHERE p.IsAllocated='N' AND p.Processed='Y'"
 			+ " AND p.C_Charge_ID IS NULL"		//	Prepayments OK
 			+ " AND p.C_BPartner_ID=?");                   		//      #5
@@ -177,6 +178,7 @@ public class Allocation
 				line.add(available);				//  4/6-ConvOpen/Available
 				line.add(Env.ZERO);					//  5/7-Payment
 //				line.add(rs.getBigDecimal(8));		//  6/8-Multiplier
+				line.add(rs.getString(9)); 			//  9-Document Type
 				//
 				data.add(line);
 			}
@@ -209,6 +211,7 @@ public class Allocation
 		columnNames.add(Msg.getMsg(Env.getCtx(), "OpenAmt"));
 		columnNames.add(Msg.getMsg(Env.getCtx(), "AppliedAmt"));
 //		columnNames.add(" ");	//	Multiplier
+		columnNames.add(Msg.translate(Env.getCtx(), "Document Type"));
 		
 		return columnNames;
 	}
@@ -228,6 +231,7 @@ public class Allocation
 		paymentTable.setColumnClass(i++, BigDecimal.class, true);       //  6-ConvOpen
 		paymentTable.setColumnClass(i++, BigDecimal.class, false);      //  7-Allocated
 //		paymentTable.setColumnClass(i++, BigDecimal.class, true);      	//  8-Multiplier
+		paymentTable.setColumnClass(i++, String.class, true); 			// 9-Document Type
 
 		//
 		i_payment = isMultiCurrency ? 7 : 5;
@@ -262,9 +266,10 @@ public class Allocation
 			+ "currencyConvert(invoiceOpen(C_Invoice_ID,C_InvoicePaySchedule_ID),i.C_Currency_ID,?,?,i.C_ConversionType_ID,i.AD_Client_ID,i.AD_Org_ID)*i.MultiplierAP, "  //  7   #3, #4  Converted Open
 			+ "currencyConvert(invoiceDiscount"                               //  8       AllowedDiscount
 			+ "(i.C_Invoice_ID,?,C_InvoicePaySchedule_ID),i.C_Currency_ID,?,i.DateInvoiced,i.C_ConversionType_ID,i.AD_Client_ID,i.AD_Org_ID)*i.Multiplier*i.MultiplierAP,"               //  #5, #6
-			+ "i.MultiplierAP "
+			+ "i.MultiplierAP,dt.Name "      	// 9..10
 			+ "FROM C_Invoice_v i"		//  corrected for CM/Split
 			+ " INNER JOIN C_Currency c ON (i.C_Currency_ID=c.C_Currency_ID) "
+			+"  INNER JOIN C_DocType dt ON (dt.C_DocType_ID = i.C_DocType_ID) "
 			+ "WHERE i.IsPaid='N' AND i.Processed='Y'"
 			+ " AND i.C_BPartner_ID=?");                                            //  #7
 		if (!isMultiCurrency)
@@ -316,8 +321,9 @@ public class Allocation
 				line.add(Env.ZERO);      			//  6/8-WriteOff
 				line.add(Env.ZERO);					// 7/9-Applied
 				line.add(open);				    //  8/10-OverUnder
-
+				
 //				line.add(rs.getBigDecimal(9));		//	8/10-Multiplier
+				line.add(rs.getString(10));        	//  11-Document Type
 				//	Add when open <> 0 (i.e. not if no conversion rate)
 				if (Env.ZERO.compareTo(open) != 0)
 					data.add(line);
@@ -354,7 +360,7 @@ public class Allocation
 		columnNames.add(Msg.getMsg(Env.getCtx(), "AppliedAmt"));
 		columnNames.add(Msg.getMsg(Env.getCtx(), "OverUnderAmt"));
 //		columnNames.add(" ");	//	Multiplier
-		
+		columnNames.add(Msg.translate(Env.getCtx(), "Document Type"));
 		return columnNames;
 	}
 	
@@ -376,6 +382,7 @@ public class Allocation
 		invoiceTable.setColumnClass(i++, BigDecimal.class, false);      //  9-Conv OverUnder
 		invoiceTable.setColumnClass(i++, BigDecimal.class, true);		//	10-Conv Applied
 //		invoiceTable.setColumnClass(i++, BigDecimal.class, true);      	//  10-Multiplier
+		invoiceTable.setColumnClass(i++, String.class, true);			//  11-Document Type
 		//  Table UI
 		invoiceTable.autoSize();
 	}
