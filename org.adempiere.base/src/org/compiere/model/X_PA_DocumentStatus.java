@@ -29,7 +29,7 @@ public class X_PA_DocumentStatus extends PO implements I_PA_DocumentStatus, I_Pe
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20230429L;
 
     /** Standard Constructor */
     public X_PA_DocumentStatus (Properties ctx, int PA_DocumentStatus_ID, String trxName)
@@ -428,6 +428,23 @@ public class X_PA_DocumentStatus extends PO implements I_PA_DocumentStatus, I_Pe
 	public String getPA_DocumentStatus_UU () 
 	{
 		return (String)get_Value(COLUMNNAME_PA_DocumentStatus_UU);
+	}
+
+	/** Set Predefined Context Variables.
+		@param PredefinedContextVariables 
+		Predefined context variables to inject when opening a menu entry or a window
+	  */
+	public void setPredefinedContextVariables (String PredefinedContextVariables)
+	{
+		set_Value (COLUMNNAME_PredefinedContextVariables, PredefinedContextVariables);
+	}
+
+	/** Get Predefined Context Variables.
+		@return Predefined context variables to inject when opening a menu entry or a window
+	  */
+	public String getPredefinedContextVariables () 
+	{
+		return (String)get_Value(COLUMNNAME_PredefinedContextVariables);
 	}
 
 	/** Set Sequence.

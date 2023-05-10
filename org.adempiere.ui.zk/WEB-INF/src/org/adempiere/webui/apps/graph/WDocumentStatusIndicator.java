@@ -37,6 +37,8 @@ import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.ToolBarButton;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.component.ZkCssHelper;
+import org.adempiere.webui.desktop.AbstractDesktop;
+import org.adempiere.webui.desktop.IDesktop;
 import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
@@ -186,6 +188,17 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 				if (AD_Window_ID > 0) {
 					MQuery query = new MQuery(m_documentStatus.getAD_Table_ID());
 					query.addRestriction(MDocumentStatus.getWhereClause(m_documentStatus));
+					
+					// Apply PredefinedContextVariables from Document Status
+					String predefinedVariables = m_documentStatus.getPredefinedContextVariables();
+					if (predefinedVariables != null && !Util.isEmpty(predefinedVariables))
+					{
+						IDesktop desktop = SessionManager.getAppDesktop();
+						if (desktop instanceof AbstractDesktop)
+							((AbstractDesktop) desktop)
+									.setPredefinedContextVariables(predefinedVariables);
+					}
+					
 					AEnv.zoom(AD_Window_ID, query);
 				} else if (AD_Form_ID > 0) {
 					ADForm form = ADForm.openForm(AD_Form_ID);
