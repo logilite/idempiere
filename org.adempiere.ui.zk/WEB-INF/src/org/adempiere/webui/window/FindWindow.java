@@ -1102,6 +1102,8 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	        if (columnName == null || columnName == "")
 	        	return;
 	    	String value = fields.length > INDEX_VALUE ? fields[INDEX_VALUE] : "";
+        	String operator = fields.length > INDEX_OPERATOR ? fields[INDEX_OPERATOR] : "";
+        	boolean isMulti = operator.equals(MQuery.IN) || operator.equals(MQuery.NOT_IN);
 			if (value.length() > 0)
 			{
 				GridField gfield = getTargetMField(columnName);
@@ -1109,7 +1111,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 					cellQueryFrom.setAttribute("value", Util.getArrayObjectFromString(gfield.getDisplayType(), value));
 				else
 					cellQueryFrom.setAttribute("value", value); // Elaine 2009/03/16 - set attribute value
-				cellQueryFrom.appendChild(parseString(gfield, value, listItem, false));
+				cellQueryFrom.appendChild(parseString(gfield, value, listItem, false, isMulti));
 			}
 	    	// QueryTo
 	    	String value2 = fields.length > INDEX_VALUE2 ? fields[INDEX_VALUE2] : "";
@@ -1191,7 +1193,6 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         ValueNamePair[] cols = new ValueNamePair[items.size()];
         items.toArray(cols);
         Arrays.sort(cols);      //  sort alpha
-        ValueNamePair[] op = MQuery.OPERATORS;
 
         if(fields == null)
         {
@@ -1200,7 +1201,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
                 listColumn.appendItem(item.getName(), item.getValue());
         	listColumn.setSelectedIndex(0);
 
-            for (ValueNamePair item: op)
+            for (ValueNamePair item: MQuery.OPERATORS)
                 listOperator.appendItem(item.getName(), item.getValue());
             listOperator.setSelectedIndex(0);
         }
@@ -1222,19 +1223,12 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
             	}
             }
             if(!selected) listColumn.setSelectedIndex(0);
-
-			MTable table = MTable.get(Env.getCtx(), m_tableName);
-			MColumn col = table.getColumn(columnName);
-
-			if (DisplayType.isMultiSelect(col.getAD_Reference_ID()))
-				op = MQuery.OPERATORS_MULTISELECT;
-
             selected = false;
-            for (int i = 0; i < op.length; i++)
+			addOperators(listColumn.getSelectedItem(), listOperator);
+            for (int i = 0; i < listOperator.getItemCount(); i++)
             {
-            	ValueNamePair item = op[i];
-            	ListItem li = listOperator.appendItem(item.getName(), item.getValue());
-            	if(item.getValue().equals(operator))
+            	ListItem li = listOperator.getItemAtIndex(i);
+            	if(li.getValue().equals(operator))
             	{
             		listOperator.setSelectedItem(li);
             		selected = true;
@@ -1656,11 +1650,26 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	 * 	Parse String
 	 * 	@param field column
 	 * 	@param in value
-	 * @param to
-	 * @param listItem
+	 *  @param listItem
+	 *  @param to
 	 * 	@return data type corrected value
 	 */
 	public Component parseString(GridField field, String in, ListItem listItem, boolean to)
+	{
+		return parseString(field, in, listItem, to, false);
+	}
+
+	/**
+	 * Parse String
+	 * 
+	 * @param  field    column
+	 * @param  in       value
+	 * @param  listItem
+	 * @param  to
+	 * @param  isMulti
+	 * @return          data type corrected value
+	 */
+	public Component parseString(GridField field, String in, ListItem listItem, boolean to, boolean isMulti)
 	{
 		if (in == null)
 			return null;
@@ -1668,7 +1677,14 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 		try
 		{
 			WEditor editor = null;
-			if (field.isKey())
+			if (isMulti)
+			{
+				editor = multiSelectEditor(field);
+				Lookup lookup = field.getLookup();
+				if (lookup != null && lookup instanceof MLookup)
+					dt = ((MLookup) lookup).getLookupInfo().DisplayType;
+			}
+			else if (field.isKey())
 	            editor = new WNumberEditor(field);
 	        else
 	            editor = WebEditorFactory.getEditor(field, true);
@@ -2352,28 +2368,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         
 		if (isMultiSelect)
 		{
-			if (DisplayType.isLookup(findField.getDisplayType()))
-			{
-				Lookup lookup = findField.getLookup();
-				if (lookup != null && lookup instanceof MLookup)
-				{
-					MLookup mLookup = (MLookup) lookup;
-					MLookupInfo mInfo = mLookup.getLookupInfo();
-					mInfo.tabNo = TABNO;
-					if (mInfo.DisplayType == DisplayType.Table
-						|| mInfo.DisplayType == DisplayType.TableDir
-						|| mInfo.DisplayType == DisplayType.Search)
-					{
-						mInfo.DisplayType = DisplayType.ChosenMultipleSelectionTable;
-					}
-					else if (mInfo.DisplayType == DisplayType.List)
-					{
-						mInfo.DisplayType = DisplayType.ChosenMultipleSelectionList;
-					}
-					editor = new WChosenboxListEditor(findField);
-				}
-				findField.getLookup().refresh();
-			}
+			editor = multiSelectEditor(findField);
 
 			if (editor == null)
 			{
@@ -2454,6 +2449,34 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         return editor.getComponent();
 
     }   //  getTableCellEditorComponent
+
+	private WEditor multiSelectEditor(GridField findField)
+	{
+		WEditor editor = null;
+		if (DisplayType.isLookup(findField.getDisplayType()))
+		{
+			Lookup lookup = findField.getLookup();
+			if (lookup != null && lookup instanceof MLookup)
+			{
+				MLookup mLookup = (MLookup) lookup;
+				MLookupInfo mInfo = mLookup.getLookupInfo();
+				mInfo.tabNo = TABNO;
+				if (mInfo.DisplayType == DisplayType.Table
+					|| mInfo.DisplayType == DisplayType.TableDir
+					|| mInfo.DisplayType == DisplayType.Search)
+				{
+					mInfo.DisplayType = DisplayType.ChosenMultipleSelectionTable;
+				}
+				else if (mInfo.DisplayType == DisplayType.List)
+				{
+					mInfo.DisplayType = DisplayType.ChosenMultipleSelectionList;
+				}
+				editor = new WChosenboxListEditor(findField);
+			}
+			findField.getLookup().refresh();
+		}
+		return editor;
+	}
 
     /**
      *  Get Target MField
