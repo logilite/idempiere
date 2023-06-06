@@ -39,6 +39,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.compiere.model.Lookup;
 import org.compiere.model.MAuthorizationToken;
 import org.compiere.model.MClient;
+import org.compiere.model.MSession;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.model.PO;
@@ -223,7 +224,7 @@ public class AbstractService {
 			boolean validForSameClient = isValidForSameClient(webService, method, serviceType, m_cs,
 					loginRequest.getClientID(), loginRequest.getRoleID());
 			
-			if (!m_cs.login(AD_User_ID, loginRequest.getRoleID(), loginRequest.getClientID(), loginRequest.getOrgID(), loginRequest.getWarehouseID(), loginRequest.getLang(),remoteIP,validForSameClient))
+			if (!m_cs.login(AD_User_ID, loginRequest.getRoleID(), loginRequest.getClientID(), loginRequest.getOrgID(), loginRequest.getWarehouseID(), loginRequest.getLang(),remoteIP,validForSameClient,  MSession.AD_SESSIONTYPE_WebService))
 				return "Error logging in";
 			
 		} else {
@@ -306,7 +307,7 @@ public class AbstractService {
 							user.getAD_User_ID());
 				}
 			}
-			if (!m_cs.login(mAuthorizationToken))
+			if (!m_cs.login(mAuthorizationToken,  MSession.AD_SESSIONTYPE_WebService))
 				return "Error logging in";
 		} else {
 			return "Error logging in - Token or Password Mandatory";

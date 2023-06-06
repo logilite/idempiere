@@ -259,7 +259,7 @@ public class CompiereService {
 	 * @param remoteIP 
 	 * @return true if login is successful
 	 */
-	public synchronized boolean login( int AD_User_ID, int AD_Role_ID, int AD_Client_ID, int AD_Org_ID, int M_Warehouse_ID, String Lang,String remoteIP,boolean isValidForSameClient ) {
+	public synchronized boolean login( int AD_User_ID, int AD_Role_ID, int AD_Client_ID, int AD_Org_ID, int M_Warehouse_ID, String Lang,String remoteIP,boolean isValidForSameClient, String sessionType ) {
 		m_loggedin = false;
 		String loginInfo = checkLogin (getCtx(), AD_User_ID, AD_Role_ID, AD_Client_ID, AD_Org_ID, M_Warehouse_ID );				
 		if (loginInfo == null)
@@ -336,7 +336,7 @@ public class CompiereService {
 		}
 
 		session.setWebSession("WebService");
-		session.setAD_SessionType(MSession.AD_SESSIONTYPE_WebService);
+		session.setAD_SessionType(sessionType);
 		session.setDescription(session.getDescription() + "\nUser Agent: " + getCtx().getProperty("#UserAgent"));
 		session.saveEx();
 		
@@ -377,7 +377,7 @@ public class CompiereService {
 	 * @param token
 	 * @return true if login is successful
 	 */
-	public boolean login(MAuthorizationToken token) {
+	public boolean login(MAuthorizationToken token, String sessionType) {
 		m_loggedin = false;
 		m_AD_Client_ID = token.getAD_Client_ID();
 		m_AD_Org_ID = token.getAD_Org_ID();
@@ -429,7 +429,7 @@ public class CompiereService {
 			}
 			
 			session.setWebSession("WebService");
-			session.setAD_SessionType(MSession.AD_SESSIONTYPE_WebService);
+			session.setAD_SessionType(sessionType);
 			session.saveEx();
 		}
 		
