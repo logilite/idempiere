@@ -76,6 +76,7 @@ SELECT c_payment.c_payment_id,
     c_payment.description,
     c_payment.isselfservice,
     c_payment.processedon,
-    c_payment.reversal_id 
+    c_payment.reversal_id,
+    c_payment.c_depositbatch_id 
 FROM c_payment
 ;
