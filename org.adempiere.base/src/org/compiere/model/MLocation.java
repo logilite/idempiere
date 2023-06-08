@@ -54,11 +54,15 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 	private static final long serialVersionUID = -3421958100626539835L;
 	
 	// http://jira.idempiere.com/browse/IDEMPIERE-147
-	public static String LOCATION_MAPS_URL_PREFIX     = MSysConfig.getValue(MSysConfig.LOCATION_MAPS_URL_PREFIX);
-	public static String LOCATION_MAPS_ROUTE_PREFIX   = MSysConfig.getValue(MSysConfig.LOCATION_MAPS_ROUTE_PREFIX);
-	public static String LOCATION_MAPS_SOURCE_ADDRESS      = MSysConfig.getValue(MSysConfig.LOCATION_MAPS_SOURCE_ADDRESS);
-	public static String LOCATION_MAPS_DESTINATION_ADDRESS = MSysConfig.getValue(MSysConfig.LOCATION_MAPS_DESTINATION_ADDRESS);
-	
+	public static String		LOCATION_MAPS_URL_PREFIX			= MSysConfig.getValue(MSysConfig.LOCATION_MAPS_URL_PREFIX);
+	public static String		LOCATION_MAPS_ROUTE_PREFIX			= MSysConfig.getValue(MSysConfig.LOCATION_MAPS_ROUTE_PREFIX);
+	public static String		LOCATION_MAPS_SOURCE_ADDRESS		= MSysConfig.getValue(MSysConfig.LOCATION_MAPS_SOURCE_ADDRESS);
+	public static String		LOCATION_MAPS_DESTINATION_ADDRESS	= MSysConfig.getValue(MSysConfig.LOCATION_MAPS_DESTINATION_ADDRESS);
+	public static String		LOCATION_MAPS_URL_LAT_LONG			= MSysConfig.getValue(MSysConfig.LOCATION_MAPS_URL_LAT_LONG);
+
+	public static String		COLUMNNAME_LATITUDE					= "Latitude";
+	public static String		COLUMNNAME_LONGITUDE				= "Longitude";
+
 	/**
 	 * 	Get Location from Cache
 	 *	@param C_Location_ID id

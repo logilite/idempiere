@@ -33,6 +33,7 @@ import org.adempiere.webui.part.WindowContainer;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.adempiere.webui.window.WTask;
+import org.compiere.model.MDocumentStatus;
 import org.compiere.model.MInfoWindow;
 import org.compiere.model.MQuery;
 import org.compiere.model.MTask;
@@ -250,17 +251,18 @@ public abstract class TabbedDesktop extends AbstractDesktop {
     public void showZoomWindow(int AD_Window_ID, MQuery query)
     {
     	final ADWindow wnd = new ADWindow(Env.getCtx(), AD_Window_ID, query);
-
+    	int windowNo = wnd.getADWindowContent().getWindowNo();
     	final DesktopTabpanel tabPanel = new DesktopTabpanel();		
 		final Tab tab = windowContainer.insertAfter(windowContainer.getSelectedTab(), tabPanel, wnd.getTitle(), true, true, DecorateInfo.get(wnd));
-		tab.setClosable(false);	
+		tab.setClosable(false);
+		
 		//If zoom condition matched, then apply PredefinedContextVariables from zoom condition
 		MZoomCondition zoomCondition = MZoomCondition.findZoomConditionaByWindowId(AD_Window_ID, query, 0);
     	if(zoomCondition!=null && !Util.isEmpty(zoomCondition.getPredefinedContextVariables())) {
-    		int windowNo = wnd.getADWindowContent().getWindowNo();
 			setPredefinedContextVariables(zoomCondition.getPredefinedContextVariables());
-			Env.setPredefinedVariables(Env.getCtx(), windowNo, getPredefinedContextVariables());
     	}
+    	Env.setPredefinedVariables(Env.getCtx(), windowNo, getPredefinedContextVariables());
+    	    	
 		final OpenWindowRunnable runnable = new OpenWindowRunnable(wnd, tab, tabPanel, null);
 		preOpenNewTab();
 		runnable.run();

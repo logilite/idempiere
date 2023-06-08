@@ -199,7 +199,7 @@ public class WPAttributeInstance extends Window implements EventListener<Event>
 	private static String s_sqlWhere = "s.M_Product_ID=? AND l.M_Warehouse_ID=?"; 
 	private static String s_sqlWhereWithoutWarehouse = " s.M_Product_ID=?"; 
 
-	private String	m_sqlNonZero = " AND (s.QtyOnHand<>0 OR s.QtyReserved<>0 OR s.QtyOrdered<>0)";
+	protected String	m_sqlNonZero = " AND (s.QtyOnHand<>0 OR s.QtyReserved<>0 OR s.QtyOrdered<>0)";
 	private String	m_sqlMinLife = "";
 
 	/**
@@ -268,7 +268,7 @@ public class WPAttributeInstance extends Window implements EventListener<Event>
 	/**
 	 * 	Refresh Query
 	 */
-	private void refresh()
+	protected void refresh()
 	{
 		String sql = m_sql;
 		int pos = m_sql.lastIndexOf(" GROUP BY ");

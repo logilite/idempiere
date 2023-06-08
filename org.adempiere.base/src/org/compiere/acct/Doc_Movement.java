@@ -90,6 +90,9 @@ public class Doc_Movement extends Doc
 		for (int i = 0; i < lines.length; i++)
 		{
 			MMovementLine line = lines[i];
+			if(!line.isActive())
+				continue;
+			
 			if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(line.getProduct().getCostingLevel(m_as))
 					&& line.getM_AttributeSetInstance_ID() <= 0)
 			{

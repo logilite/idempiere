@@ -453,6 +453,23 @@ public class X_PA_DocumentStatus extends PO implements I_PA_DocumentStatus, I_Pe
 		return (String)get_Value(COLUMNNAME_PA_DocumentStatus_UU);
 	}
 
+	/** Set Predefined Context Variables.
+		@param PredefinedContextVariables 
+		Predefined context variables to inject when opening a menu entry or a window
+	  */
+	public void setPredefinedContextVariables (String PredefinedContextVariables)
+	{
+		set_Value (COLUMNNAME_PredefinedContextVariables, PredefinedContextVariables);
+	}
+
+	/** Get Predefined Context Variables.
+		@return Predefined context variables to inject when opening a menu entry or a window
+	  */
+	public String getPredefinedContextVariables () 
+	{
+		return (String)get_Value(COLUMNNAME_PredefinedContextVariables);
+	}
+
 	/** Set Sequence.
 		@param SeqNo Method of ordering records; lowest number comes first
 	*/
