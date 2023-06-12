@@ -14,10 +14,9 @@
 }
 
 .menu-href img {
-	padding: 2px;
-	padding-right: 4px;
 	width: 16px;
 	height: 16px;
+	margin-right: 4px;
 }
 
 .menu-href-newbtn {
@@ -153,9 +152,8 @@
 }
 
 .menu-href [class^="z-icon-"] {
-    font-size: medium;
 	color: #333;	
-	padding-right: 4px;
+	margin-right: 4px;
 	text-align: center;
 }
 .menu-href [class^="z-icon-"]:before {
