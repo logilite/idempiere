@@ -153,7 +153,7 @@
 }
 
 .menu-href [class^="z-icon-"] {
-	font-size: larger;
+    font-size: medium;
 	color: #333;	
 	padding-right: 4px;
 	text-align: center;
