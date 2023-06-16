@@ -42,6 +42,7 @@ import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.component.Button;
+import org.adempiere.webui.component.ChosenSearchBox;
 import org.adempiere.webui.component.Column;
 import org.adempiere.webui.component.Columns;
 import org.adempiere.webui.component.Combobox;
@@ -1824,6 +1825,9 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            		 value = new Timestamp(((Date)dtbox.getValue()).getTime());
 	            }
 	            else if(compo instanceof MultiSelectBox) {
+					value = Util.convertArrayToStringForDB(cellQueryFrom.getAttribute("value"));
+				}
+	            else if(compo instanceof ChosenSearchBox) {
 					value = Util.convertArrayToStringForDB(cellQueryFrom.getAttribute("value"));
 				}
 	            else {
