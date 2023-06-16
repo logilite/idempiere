@@ -45,6 +45,7 @@ import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.adwindow.AbstractADWindowContent;
 import org.adempiere.webui.component.Button;
 import org.adempiere.webui.component.Checkbox;
+import org.adempiere.webui.component.ChosenSearchBox;
 import org.adempiere.webui.component.Column;
 import org.adempiere.webui.component.Columns;
 import org.adempiere.webui.component.ComboItem;
@@ -2288,6 +2289,9 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            	value = ((boolean) cellQueryFrom.getAttribute("value") ? "Y" : "N");
 	            }
 	            else if(compo instanceof MultiSelectBox) {
+					value = Util.convertArrayToStringForDB(cellQueryFrom.getAttribute("value"));
+				}
+	            else if(compo instanceof ChosenSearchBox) {
 					value = Util.convertArrayToStringForDB(cellQueryFrom.getAttribute("value"));
 				}
 	            else {

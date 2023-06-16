@@ -850,10 +850,6 @@ public class Util
 				sb.append(", ");
 			}
 		}
-		else
-		{
-			log.warning("Invalid array object.");
-		}
 		return array.toString();
 	} // convertArrayToStringForDB
 
