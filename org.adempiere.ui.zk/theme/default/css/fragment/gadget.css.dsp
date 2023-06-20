@@ -16,6 +16,11 @@
 
 .statusline-wrapper {
 	height: 100%;
+	margin-top: 1px; 
+	margin-left: auto; 
+	margin-right: auto;
+	position: relative;
+	width: 99%;
 }
 
 .z-panel {
