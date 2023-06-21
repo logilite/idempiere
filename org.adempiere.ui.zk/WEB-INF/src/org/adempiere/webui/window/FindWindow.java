@@ -704,7 +704,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         btnSave.setStyle("vertical-align: middle;");
         if (ThemeManager.isUseFontIconForImage())
         	LayoutUtils.addSclass("large-toolbarbutton", btnSave);
-        
+
         btnShare = new ToolBarButton();
         btnShare.setAttribute("name","btnShareAdv");
         btnShare.setTooltiptext(Msg.getMsg(Env.getCtx(), "ShareFilter"));
@@ -1274,7 +1274,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 					cellQueryFrom.setAttribute("value", value); // Elaine 2009/03/16 - set attribute value
 	    		//Attribute Values Parsing
 	    		if(tableName.equals(MAttribute.COLUMNNAME_M_Attribute_ID))	    			
-	    			cellQueryFrom.appendChild(parseAttributeString( Integer.valueOf(columnName), value, listItem, false, isMulti));
+	    			cellQueryFrom.appendChild(parseAttributeString( Integer.valueOf(columnName), value, listItem, false));
 	    		else	    			
 	    			 cellQueryFrom.appendChild(parseString(getTargetMField(columnName), value, listItem, false, isMulti));
 	    	}
@@ -1447,7 +1447,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	        	}
 	        	listColumn.setSelectedIndex(0);
 
-            for (ValueNamePair item: MQuery.OPERATORS)
+            	for (ValueNamePair item: MQuery.OPERATORS)
 	                listOperator.appendItem(Msg.getMsg(Env.getCtx(), item.getName()).trim(), item.getValue());
 	            listOperator.setSelectedIndex(0);
 	        }
@@ -1470,6 +1470,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            	}
 	            }
 	            if(!selected) listColumn.setSelectedIndex(0);
+
 	            selected = false;
 	            if (liCol != null) {
 	            	addOperators(liCol, listOperator);
@@ -1779,16 +1780,16 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
    	                	row.getFellow("cellQueryFrom"+row.getId()).getChildren().clear();
    	                	row.getFellow("cellQueryTo"+row.getId()).getChildren().clear();
    	                }
-				else if (betweenValue.equals(MQuery.NOT_IN) || betweenValue.equals(MQuery.IN))
-				{
-					Component compChosenMultiSelect = getEditorComponent(row, false, true);
-					compChosenMultiSelect.setId("chosen-multi-select-field" + row.getId());
+					else if (betweenValue.equals(MQuery.NOT_IN) || betweenValue.equals(MQuery.IN))
+					{
+						Component compChosenMultiSelect = getEditorComponent(row, false, true);
+						compChosenMultiSelect.setId("chosen-multi-select-field" + row.getId());
 
-					row.getFellow("cellQueryFrom" + row.getId()).getChildren().clear();
-					row.getFellow("cellQueryTo" + row.getId()).getChildren().clear();
+						row.getFellow("cellQueryFrom" + row.getId()).getChildren().clear();
+						row.getFellow("cellQueryTo" + row.getId()).getChildren().clear();
 
-					addRowEditor(compChosenMultiSelect, (ListCell) row.getFellow("cellQueryFrom" + row.getId()));
-				}
+						addRowEditor(compChosenMultiSelect, (ListCell) row.getFellow("cellQueryFrom" + row.getId()));
+					}
    	                else if (listbox.getId().equals(listColumn.getId()) || listbox.getId().equals(listOperator.getId())) 
    	                {
    	                	addRowEditor(componentFrom, (ListCell)row.getFellow("cellQueryFrom"+row.getId()));
@@ -1808,6 +1809,16 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	                	row.getFellow("cellQueryFrom"+row.getId()).getChildren().clear();
 	                	row.getFellow("cellQueryTo"+row.getId()).getChildren().clear();
 	                }
+	                else if (betweenValue.equals(MQuery.NOT_IN) || betweenValue.equals(MQuery.IN))
+					{
+						Component compChosenMultiSelect = getEditorComponent(row, false, true);
+						compChosenMultiSelect.setId("chosen-multi-select-field" + row.getId());
+
+						row.getFellow("cellQueryFrom" + row.getId()).getChildren().clear();
+						row.getFellow("cellQueryTo" + row.getId()).getChildren().clear();
+
+						addRowEditor(compChosenMultiSelect, (ListCell) row.getFellow("cellQueryFrom" + row.getId()));
+					}
 	                else if (listbox.getId().equals(listColumn.getId()) || listbox.getId().equals(listOperator.getId())) 
 	                {
 	                	addRowEditor(componentFrom, (ListCell)row.getFellow("cellQueryFrom"+row.getId()));
@@ -2330,7 +2341,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            if (table.getSelectedItem() != null && table.getSelectedItem().getValue().toString().equals(MAttribute.COLUMNNAME_M_Attribute_ID))
 	            	parsedValue = parseAttributeValue(Integer.valueOf(ColumnName), value);
 	            else if (isInOperator(Operator))
-				parsedValue = parseValueForIn(field, value);
+					parsedValue = parseValueForIn(field, value);
 			 else
 				parsedValue = parseValue(field, value);
 	            if (parsedValue == null)
@@ -2339,9 +2350,9 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            // When Atribute is set Field is null
 	            if(table.getSelectedItem() != null && !table.getSelectedItem().getValue().toString().equals(MAttribute.COLUMNNAME_M_Attribute_ID))
 	            {
-				if (isInOperator(Operator))
-					infoDisplay = (String) parsedValue;
-				else if (field.isLookup() && !DisplayType.isMultiSelect(field.getDisplayType()))
+					if (isInOperator(Operator))
+						infoDisplay = (String) parsedValue;
+					else if (field.isLookup() && !DisplayType.isMultiSelect(field.getDisplayType()))
 		                infoDisplay = field.getLookup().getDisplay(value);
 		            else if (field.getDisplayType() == DisplayType.YesNo)
 		                infoDisplay = Msg.getMsg(Env.getCtx(), infoDisplay);
@@ -2448,7 +2459,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            } else if (MQuery.OPERATORS[MQuery.LIKE_INDEX].getValue().equals(Operator))
 	            	m_query.addRestriction(ColumnSQL, Operator, parsedValue, infoName, infoDisplay, and, openBrackets, true);
 	            else {
-	            if (table.getSelectedItem() != null && table.getSelectedItem().getValue().toString().equals(MAttribute.COLUMNNAME_M_Attribute_ID)
+	            	if (table.getSelectedItem() != null && table.getSelectedItem().getValue().toString().equals(MAttribute.COLUMNNAME_M_Attribute_ID)
 	               			|| isExists) {
 
 	                	String where = "";
@@ -2641,7 +2652,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
                         if (!valueStr.toString().endsWith("%"))
                             valueStr.append("%");
                         //
-                        // ColumnSQL = new StringBuilder("UPPER(").append(ColumnSQL).append(")");
+                        ColumnSQL = new StringBuilder("UPPER(").append(ColumnSQL).append(")");
                         value = valueStr.toString();
                     }
                     //
@@ -3034,7 +3045,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 			findField.getLookup().refresh();
 		}
 		return editor;
-	}
+	} // multiSelectEditor
 
     /**
      *  Get Target MField
@@ -3596,7 +3607,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	
 	public boolean isSearchLike(GridField field)
 	{
-		return DisplayType.isText(field.getDisplayType())
+		return DisplayType.isText(field.getDisplayType()) && !field.isVirtualColumn()
 		&& (field.isSelectionColumn() || MColumn.isSuggestSelectionColumn(field.getColumnName(), true));
 	}
 
@@ -3702,7 +3713,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	 * 	@param value value
 	 *  @param isValueTo
 	 *  @param listItem
-	 * 	@return data type corected value
+	 * 	@return data type corrected value
 	 */
 	private Component parseAttributeString(int M_Attribute_ID, String value, ListItem listItem, boolean isValueTo)
 	{
