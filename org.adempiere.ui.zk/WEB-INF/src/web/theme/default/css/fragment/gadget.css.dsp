@@ -115,7 +115,7 @@
 
 .recentitems-box A {
 	display: block;
-	padding: 2px 1px;
+	padding: 4px 9px;
 }
 
 .recentitems-box .z-toolbar-start {
