@@ -81,6 +81,7 @@ public class WMultiSelectSearchEditor extends WEditor implements ContextMenuList
 	public WMultiSelectSearchEditor(GridField gridField)
 	{
 		super(new ChosenSearchBox(), gridField);
+		((ChosenSearchBox) getComponent()).setToolTipText(gridField.getDescription());
 
 		lookup = gridField.getLookup();
 
