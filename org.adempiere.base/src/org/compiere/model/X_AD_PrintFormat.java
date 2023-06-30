@@ -30,7 +30,7 @@ public class X_AD_PrintFormat extends PO implements I_AD_PrintFormat, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220105L;
+	private static final long serialVersionUID = 20230629L;
 
     /** Standard Constructor */
     public X_AD_PrintFormat (Properties ctx, int AD_PrintFormat_ID, String trxName)
@@ -50,6 +50,8 @@ public class X_AD_PrintFormat extends PO implements I_AD_PrintFormat, I_Persiste
 // N
 			setIsDefault (false);
 			setIsForm (false);
+			setIsPrinterPreview (false);
+// N
 			setIsShowSummaryMultipleRowOnly (false);
 // N
 			setIsStandardHeaderFooter (true);
@@ -486,6 +488,30 @@ public class X_AD_PrintFormat extends PO implements I_AD_PrintFormat, I_Persiste
 	public boolean isForm () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsForm);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Direct Printer Preview.
+		@param IsPrinterPreview 
+		Open Printer Preview dialog box directly if the report is PDF type
+	  */
+	public void setIsPrinterPreview (boolean IsPrinterPreview)
+	{
+		set_Value (COLUMNNAME_IsPrinterPreview, Boolean.valueOf(IsPrinterPreview));
+	}
+
+	/** Get Direct Printer Preview.
+		@return Open Printer Preview dialog box directly if the report is PDF type
+	  */
+	public boolean isPrinterPreview () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsPrinterPreview);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 

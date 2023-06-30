@@ -38,6 +38,7 @@ public class PrintInfo
 		setAD_Table_ID(pi.getTable_ID());
 		setRecord_ID(pi.getRecord_ID());
 		setIsTransientObject(pi.getTransientObject() != null);
+		setIsPrinterPreview(pi.isPrinterPreview());
 	}	//	PrintInfo
 	
 	
@@ -82,8 +83,9 @@ public class PrintInfo
 	private int m_AD_Table_ID = 0;
 	private int m_Record_ID = 0;
 	private int m_C_BPartner_ID = 0;
-	
-	
+
+	private boolean	m_isPrinterPreview	= false;
+
 	/**
 	 * 	Is this a Report
 	 *	@return true if report
@@ -271,7 +273,23 @@ public class PrintInfo
 	{
 		this.m_isTransientObject = isTransientObject;
 	}
-	
+
+	/**
+	 * @param isPrinterPreview set the printer preview option
+	 */
+	public void setIsPrinterPreview(boolean isPrinterPreview)
+	{
+		m_isPrinterPreview = isPrinterPreview;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public boolean isPrinterPreview()
+	{
+		return m_isPrinterPreview;
+	}
+
 	/**
 	 * 	String Representation
 	 *	@return info

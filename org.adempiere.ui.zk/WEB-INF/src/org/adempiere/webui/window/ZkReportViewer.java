@@ -722,6 +722,11 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 				} else {
 					iframe.setSrc(null);
 					iframe.setContent(media);
+
+					// Printer print preview zoom
+					if (selected == null || "PDF".equals(selected.getValue())) {
+						printPreviewPDF(iframe, m_reportEngine.getPrintFormat().isPrinterPreview());
+					}
 				}
 			}
 			
@@ -1850,4 +1855,26 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 			viewer.onPreviewReport();
 		}
 	} // CSVRendererRunnable
+
+	/**
+	 * PDF Printer Print Preview page load directly
+	 * 
+	 * @param iframe           - iFrame
+	 * @param isPrinterPreview - if it's true then open printer print preview dialog box directly
+	 */
+	public static void printPreviewPDF(Iframe iframe, boolean isPrinterPreview)
+	{
+		// Printer print preview zoom is enabled/disabled
+		if (isPrinterPreview)
+		{
+			// Directly zoom the printer print preview
+			Clients.evalJavaScript(	" document.getElementById('"	+ iframe.getUuid() + "').addEventListener('load', myPrintFunction); "
+									+ " function myPrintFunction() {	 																"
+									+ "			var myPrintContent = document.getElementById('" + iframe.getUuid() + "').contentWindow; "
+									+ "			myPrintContent.print(); 																"
+									+ "	} 																								");
+
+		}
+	} // printPreviewPDF
+
 }

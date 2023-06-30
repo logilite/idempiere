@@ -109,7 +109,8 @@ public class ProcessInfo implements Serializable
 	private String    			m_Summary = "";
 	/** Execution had an error      */
 	private boolean     		m_Error = false;
-
+	/** Printer print preview		*/
+	private boolean				m_isPrinterPreview = false;
 
 	/*	General Data Object			*/
 	private Serializable		m_SerializableObject = null;
@@ -579,7 +580,26 @@ public class ProcessInfo implements Serializable
 		return m_AD_User_ID;
 	}
 
-	
+	/**
+	 * Method setIsPrinterPreview
+	 * 
+	 * @param isPrinterPreview boolean
+	 */
+	public void setIsPrinterPreview(boolean isPrinterPreview)
+	{
+		m_isPrinterPreview = isPrinterPreview;
+	} // setIsPrinterPreview
+
+	/**
+	 * Method isPrinterPreview
+	 * 
+	 * @return boolean
+	 */
+	public boolean isPrinterPreview()
+	{
+		return m_isPrinterPreview;
+	} // isPrinterPreview
+
 	/**************************************************************************
 	 * 	Get Parameter
 	 *	@return Parameter Array

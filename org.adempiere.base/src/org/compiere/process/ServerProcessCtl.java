@@ -140,7 +140,7 @@ public class ServerProcessCtl implements Runnable {
 		String sql = "SELECT p.Name, p.ProcedureName,p.ClassName, p.AD_Process_ID,"		//	1..4
 			+ " p.isReport,p.IsDirectPrint,p.AD_ReportView_ID,p.AD_Workflow_ID,"		//	5..8
 			+ " CASE WHEN COALESCE(p.Statistic_Count,0)=0 THEN 0 ELSE p.Statistic_Seconds/p.Statistic_Count END CASE,"	//	9
-			+ " p.IsServerProcess, p.JasperReport, p.AD_Process_UU " 	//	10..12
+			+ " p.IsServerProcess, p.JasperReport, p.AD_Process_UU, p.isPrinterPreview "//	10..13
 			+ "FROM AD_Process p"
 			+ " INNER JOIN AD_PInstance i ON (p.AD_Process_ID=i.AD_Process_ID) "
 			+ "WHERE p.IsActive='Y'"
@@ -149,11 +149,11 @@ public class ServerProcessCtl implements Runnable {
 			sql = "SELECT COALESCE(t.Name, p.Name), p.ProcedureName,p.ClassName, p.AD_Process_ID,"		//	1..4
 				+ " p.isReport, p.IsDirectPrint,p.AD_ReportView_ID,p.AD_Workflow_ID,"	//	5..8
 				+ " CASE WHEN COALESCE(p.Statistic_Count,0)=0 THEN 0 ELSE p.Statistic_Seconds/p.Statistic_Count END CASE,"	//	9
-				+ " p.IsServerProcess, p.JasperReport, p.AD_Process_UU " 	//	10..12
+				+ " p.IsServerProcess, p.JasperReport, p.AD_Process_UU, p.isPrinterPreview " //	10..13
 				+ "FROM AD_Process p"
 				+ " INNER JOIN AD_PInstance i ON (p.AD_Process_ID=i.AD_Process_ID) "
 				+ " LEFT OUTER JOIN AD_Process_Trl t ON (p.AD_Process_ID=t.AD_Process_ID"
-					+ " AND t.AD_Language='" + Env.getAD_Language(Env.getCtx()) + "') "
+				+ " 	AND t.AD_Language='" + Env.getAD_Language(Env.getCtx()) + "') "
 				+ "WHERE p.IsActive='Y'"
 				+ " AND i.AD_PInstance_ID=?";
 		//
@@ -176,6 +176,7 @@ public class ServerProcessCtl implements Runnable {
 				if ("Y".equals(rs.getString(5)))
 				{
 					IsReport = true;
+					m_pi.setIsPrinterPreview(rs.getBoolean(13));
 				}
 				AD_ReportView_ID = rs.getInt(7);
 				AD_Workflow_ID = rs.getInt(8);
