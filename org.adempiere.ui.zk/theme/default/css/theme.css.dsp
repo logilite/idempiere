@@ -102,6 +102,8 @@ table.z-vbox > tbody > tr > td > table {
 
 <c:include page="fragment/printformat.css.dsp" />
 
+<c:include page="fragment/gadget-kpi.css.dsp" />
+
 <c:if test="${u:isThemeHasCustomCSSFragment()}">
     <c:include page="fragment/custom.css.dsp" />
 </c:if>
