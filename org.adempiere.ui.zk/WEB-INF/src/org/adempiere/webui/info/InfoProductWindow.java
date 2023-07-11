@@ -83,6 +83,9 @@ public class InfoProductWindow extends InfoWindow {
 
 	protected int m_M_Locator_ID;
 	
+	public static final String USE_WAREHOUSE_IN_PRODUCTINFO = Env.PREFIX_PREDEFINED_VARIABLE + "UseWarehouseInProductInfo";
+	public static final String USE_PRICELIST_IN_PRODUCTINFO = Env.PREFIX_PREDEFINED_VARIABLE + "UsePriceListInProductInfo";
+	
 	/**
 	 * @param WindowNo
 	 * @param tableName
@@ -444,9 +447,8 @@ public class InfoProductWindow extends InfoWindow {
 	 */
 	@Override
 	protected void initParameters() {
-		int M_Warehouse_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "M_Warehouse_ID");
 
-		String usePriceList=Env.getContext(Env.getCtx(), p_WindowNo, Env.PREFIX_PREDEFINED_VARIABLE+"UsePriceListInProductInfo");
+		String usePriceList=Env.getContext(Env.getCtx(), p_WindowNo, USE_PRICELIST_IN_PRODUCTINFO);
 		int M_PriceList_Version_ID = 0;
 		if ("Y".equalsIgnoreCase(usePriceList))
 		{
@@ -455,10 +457,15 @@ public class InfoProductWindow extends InfoWindow {
 			M_PriceList_Version_ID = findPLV(M_PriceList_ID);
 		}
 		//	Set Warehouse
-		if (M_Warehouse_ID == 0)
-			M_Warehouse_ID = Env.getContextAsInt(Env.getCtx(), "#M_Warehouse_ID");
-		if (M_Warehouse_ID != 0)
-			setWarehouse (M_Warehouse_ID);
+		String useWarehouse = Env.getContext(Env.getCtx(), p_WindowNo, USE_WAREHOUSE_IN_PRODUCTINFO);
+		if ("Y".equalsIgnoreCase(useWarehouse))
+		{
+			int M_Warehouse_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "M_Warehouse_ID");
+			if (M_Warehouse_ID == 0)
+				M_Warehouse_ID = Env.getContextAsInt(Env.getCtx(), "#M_Warehouse_ID");
+			if (M_Warehouse_ID != 0)
+				setWarehouse (M_Warehouse_ID);
+		}
 		// 	Set PriceList Version
 		if (M_PriceList_Version_ID != 0)
 			setPriceListVersion (M_PriceList_Version_ID);
