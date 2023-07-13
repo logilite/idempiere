@@ -315,7 +315,7 @@ public class DataEngine
 			else
 				sql.append(" AND pfi.IsActive='Y' AND (pfi.IsPrinted='Y' OR c.IsKey='Y' OR pfi.SortNo > 0) ");
 			sql.append(" OR EXISTS(select 1 from AD_PrintFormatItem x where x.AD_PrintFormat_ID=pf.AD_PrintFormat_ID and x.DisplayLogic is not null and ")
-			.append("(x.DisplayLogic Like '%@'||c.ColumnName||'@%' OR x.DisplayLogic Like '%@'||c.ColumnName||':%@%' OR x.DisplayLogic Like '%@'||c.ColumnName||'.%@%'))) ")
+			.append("(x.DisplayLogic Like '%@'||c.ColumnName||'@%' OR x.DisplayLogic Like '%@'||c.ColumnName||':%@%' OR x.DisplayLogic Like '%@'||c.ColumnName||'.%@%')) ")
 			.append(" AND pfi.PrintFormatType IN ('"
 				+ MPrintFormatItem.PRINTFORMATTYPE_Field
 				+ "','"
