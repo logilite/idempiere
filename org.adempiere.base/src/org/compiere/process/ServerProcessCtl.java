@@ -166,6 +166,7 @@ public class ServerProcessCtl implements Runnable {
 				if (info.isReport)
 				{
 					IsReport = true;
+					m_pi.setIsPrinterPreview(info.isPrinterPreview);
 				}
 				AD_ReportView_ID = info.AD_ReportView_ID;
 				AD_Workflow_ID = info.AD_Workflow_ID;

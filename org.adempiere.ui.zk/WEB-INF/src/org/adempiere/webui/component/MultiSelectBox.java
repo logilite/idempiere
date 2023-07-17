@@ -81,7 +81,6 @@ public class MultiSelectBox extends Div
 			public void setValue(String value) throws WrongValueException
 			{
 				super.setValue(value);
-				setTooltiptext(value);
 			}
 		};
 

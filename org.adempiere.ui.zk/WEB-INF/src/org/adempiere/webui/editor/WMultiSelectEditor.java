@@ -61,6 +61,8 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 	{
 		super(new MultiSelectBox(), gridField);
 		((MultiSelectBox) getComponent()).editor = this;
+		((MultiSelectBox) getComponent()).getTextbox().setPlaceholder(gridField.getPlaceholder());
+		((MultiSelectBox) getComponent()).getTextbox().setTooltip(gridField.getDescription());
 		lookup = gridField.getLookup();
 		init();
 	}
@@ -192,6 +194,10 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 		if (values == null)
 			return Msg.getMsg(Env.getCtx(), "PleaseSelect");
 
+		// Track the list of values which are retrieve after dynamic validation logic applies
+		ArrayList<Object> lookupMatchedValues = new ArrayList<Object>();
+
+		//
 		for (Checkbox cbx : getComponent().getCheckboxList())
 		{
 			String val = cbx.getAttribute(MultiSelectBox.ATTRIBUTE_MULTI_SELECT).toString();
@@ -199,10 +205,12 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 			{
 				for (Integer value : (Integer[]) values)
 				{
-					if (value.compareTo(new Integer(val)) == 0)
+					if (value.compareTo(Integer.valueOf(val)) == 0)
 					{
 						cbx.setChecked(true);
 						sb.append(cbx.getLabel()).append("; ");
+						//
+						lookupMatchedValues.add(value);
 						break;
 					}
 					cbx.setChecked(false);
@@ -216,6 +224,8 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 					{
 						cbx.setChecked(true);
 						sb.append(cbx.getLabel()).append("; ");
+						//
+						lookupMatchedValues.add(value);
 						break;
 					}
 					cbx.setChecked(false);
@@ -240,7 +250,11 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 				{
 					String name = lookup.getDisplay(value);
 					if (!Util.isEmpty(name))
+					{
 						sb.append(name).append("; ");
+						//
+						addExistingValue(lookupMatchedValues, name, value);
+					}
 				}
 			}
 			else
@@ -249,13 +263,37 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 				{
 					String name = lookup.getDisplay(value);
 					if (!Util.isEmpty(name))
+					{
 						sb.append(name).append("; ");
+						//
+						addExistingValue(lookupMatchedValues, name, value);
+					}
 				}
 			}
 		}
 
 		return sb.toString();
 	} // getPrintableValue
+
+	/**
+	 * For keep existing selected values
+	 * Add values in selection list which are missed by dynamic validation logic
+	 * 
+	 * @param lookupMatchedValues
+	 * @param name
+	 * @param value
+	 */
+	private void addExistingValue(ArrayList<Object> lookupMatchedValues, String name, Object value)
+	{
+		if (!lookupMatchedValues.contains(value))
+		{
+			Checkbox cbx = new Checkbox(name);
+			cbx.setAttribute(MultiSelectBox.ATTRIBUTE_MULTI_SELECT, value);
+			cbx.setChecked(true);
+			getComponent().getCheckboxList().add(cbx);
+			getComponent().getVBox().appendChild(cbx);
+		}
+	} // addExistingValue
 
 	@Override
 	public Object getValue()
@@ -295,7 +333,7 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 				{
 					String val = cbx.getAttribute(MultiSelectBox.ATTRIBUTE_MULTI_SELECT).toString();
 					if (DisplayType.MultiSelectTable == lookup.getDisplayType())
-						itemsInt.add(new Integer(val));
+						itemsInt.add(Integer.valueOf(val));
 					else
 						itemsStr.add(val);
 				}

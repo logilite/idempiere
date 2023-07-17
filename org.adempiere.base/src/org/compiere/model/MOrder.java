@@ -30,6 +30,7 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import org.adempiere.base.Core;
+import org.adempiere.base.IProductPricing;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.BPartnerNoBillToAddressException;
 import org.adempiere.exceptions.BPartnerNoShipToAddressException;
@@ -1134,9 +1135,19 @@ public class MOrder extends X_C_Order implements DocAction
 		if (!newRecord && (is_ValueChanged(COLUMNNAME_M_PriceList_ID) || is_ValueChanged(COLUMNNAME_DateOrdered))) {
 			int cnt = DB.getSQLValueEx(get_TrxName(), "SELECT COUNT(*) FROM C_OrderLine WHERE C_Order_ID=? AND M_Product_ID>0", getC_Order_ID());
 			if (cnt > 0) {
-				if (is_ValueChanged(COLUMNNAME_M_PriceList_ID)) {
-					log.saveError("Error", Msg.getMsg(getCtx(), "CannotChangePl"));
-					return false;
+				if (is_ValueChanged(COLUMNNAME_M_PriceList_ID))
+				{
+					// update List Price in Order Lines
+					MOrderLine[] lines = getLines();
+					for (MOrderLine line : lines)
+					{
+						if (line.getM_Product_ID() > 0)
+						{
+							IProductPricing productPricing = line.getProductPricing(getM_PriceList_ID());
+							line.setPriceList(productPricing.getPriceList());
+							line.saveEx();
+						}
+					}
 				}
 				if (is_ValueChanged(COLUMNNAME_DateOrdered)) {
 					MPriceList pList =  MPriceList.get(getCtx(), getM_PriceList_ID(), null);

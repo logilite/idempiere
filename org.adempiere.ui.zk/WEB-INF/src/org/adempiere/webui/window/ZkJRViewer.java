@@ -813,6 +813,8 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 					attachIFrame();
 					iframe.setSrc(null);
 					iframe.setContent(media);
+				//
+				ZkReportViewer.printPreviewPDF(iframe, m_printInfo.isPrinterPreview());
 				}
 			}
 		}

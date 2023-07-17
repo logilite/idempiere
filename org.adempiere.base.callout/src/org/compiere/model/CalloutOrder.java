@@ -686,7 +686,26 @@ public class CalloutOrder extends CalloutEngine
 				Env.setContext(ctx, WindowNo, "M_PriceList_Version_ID", (String) null);
 			}
 		}
+		
+		//display warning when pricelist is changed in Order header
+		if (!mTab.isNew() && mTab.getTableName().equals(MOrder.Table_Name)
+				&& mField.getColumnName().equals(MOrder.COLUMNNAME_M_PriceList_ID))
+		{
+			Integer M_PriceList_ID_Old = (Integer) mField.getOldValue();
 
+			if (M_PriceList_ID != M_PriceList_ID_Old)
+			{
+				int orderId = (int) mTab.getValue(MOrder.COLUMNNAME_C_Order_ID);
+				int cnt = DB.getSQLValueEx(null,
+						"SELECT COUNT(*) FROM C_OrderLine WHERE C_Order_ID=? AND M_Product_ID>0", orderId);
+				if (cnt > 0)
+				{
+					mTab.fireDataStatusEEvent("PricelistChange", "It will not change Price Entered in Order lines",
+							false);
+				}
+			}
+		}
+		
 		return "";
 	}	//	priceListFill
 

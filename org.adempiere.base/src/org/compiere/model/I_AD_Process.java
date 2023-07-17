@@ -325,6 +325,19 @@ public interface I_AD_Process
 	  */
 	public boolean isDirectPrint();
 
+    /** Column name IsPrinterPreview */
+    public static final String COLUMNNAME_IsPrinterPreview = "IsPrinterPreview";
+
+	/** Set Direct Printer Preview.
+	  * Open Printer Preview dialog box directly if the report is PDF type
+	  */
+	public void setIsPrinterPreview (boolean IsPrinterPreview);
+
+	/** Get Direct Printer Preview.
+	  * Open Printer Preview dialog box directly if the report is PDF type
+	  */
+	public boolean isPrinterPreview();
+
     /** Column name IsReport */
     public static final String COLUMNNAME_IsReport = "IsReport";
 

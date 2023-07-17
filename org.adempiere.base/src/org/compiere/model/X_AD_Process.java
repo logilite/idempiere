@@ -31,7 +31,7 @@ public class X_AD_Process extends PO implements I_AD_Process, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220315L;
+	private static final long serialVersionUID = 20230629L;
 
     /** Standard Constructor */
     public X_AD_Process (Properties ctx, int AD_Process_ID, String trxName)
@@ -61,6 +61,8 @@ public class X_AD_Process extends PO implements I_AD_Process, I_Persistent
 			setEntityType (null);
 // @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
 			setIsBetaFunctionality (false);
+			setIsPrinterPreview (false);
+// N
 			setIsReport (false);
 			setName (null);
 			setValue (null);
@@ -483,6 +485,30 @@ public class X_AD_Process extends PO implements I_AD_Process, I_Persistent
 	public boolean isDirectPrint()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDirectPrint);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Direct Printer Preview.
+		@param IsPrinterPreview 
+		Open Printer Preview dialog box directly if the report is PDF type
+	  */
+	public void setIsPrinterPreview (boolean IsPrinterPreview)
+	{
+		set_Value (COLUMNNAME_IsPrinterPreview, Boolean.valueOf(IsPrinterPreview));
+	}
+
+	/** Get Direct Printer Preview.
+		@return Open Printer Preview dialog box directly if the report is PDF type
+	  */
+	public boolean isPrinterPreview () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsPrinterPreview);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 
