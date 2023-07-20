@@ -24,6 +24,7 @@ import org.compiere.model.MTable;
 import org.compiere.model.X_M_Cost;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Trx;
 
@@ -96,7 +97,7 @@ public class Merge
 		boolean success = true;
 		m_totalCount = 0;
 		m_errorLog = new StringBuffer();
-		String sql = "SELECT t.TableName, c.ColumnName "
+		String sql = "SELECT t.TableName, c.ColumnName, c.AD_Reference_ID "
 			+ "FROM AD_Table t"
 			+ " INNER JOIN AD_Column c ON (t.AD_Table_ID=c.AD_Table_ID) "
 			+ "WHERE t.IsView='N'"
@@ -125,9 +126,10 @@ public class Merge
 			{
 				String tName = rs.getString(1);
 				String cName = rs.getString(2);
+				int AD_Reference_ID = rs.getInt(3);
 				if (!TableName.equals(tName))	//	to be sure - sql should prevent it
 				{
-					int count = mergeTable (tName, cName, from_ID, to_ID);
+					int count = mergeTable (tName, cName, AD_Reference_ID, from_ID, to_ID);
 					if (count < 0)
 						success = false;
 					else
@@ -181,16 +183,27 @@ public class Merge
 	 * 	Merge Table
 	 * 	@param TableName table
 	 * 	@param ColumnName column
+	 *      @param AD_Reference_ID
 	 * 	@param from_ID from
 	 * 	@param to_ID to
 	 * 	@return -1 for error or number of changes
 	 */
-	public int mergeTable (String TableName, String ColumnName, int from_ID, int to_ID)
+	public int mergeTable (String TableName, String ColumnName, int AD_Reference_ID, int from_ID, int to_ID)
 	{
 		if (log.isLoggable(Level.FINE)) log.fine(TableName + "." + ColumnName + " - From=" + from_ID + ",To=" + to_ID);
-		String sql = "UPDATE " + TableName
-			+ " SET " + ColumnName + "=" + to_ID
-			+ " WHERE " + ColumnName + "=" + from_ID;
+		
+		String sql = "UPDATE " + TableName + " SET " + ColumnName;
+		if (DisplayType.isMultiSelect(AD_Reference_ID))
+		{
+
+			sql += "= ARRAY_REPLACE(" + ColumnName + "," + from_ID + "::numeric, " + to_ID + "::numeric)" 
+					+ " WHERE "	+ from_ID + "= ANY (" + ColumnName + ")";
+		}
+		else
+		{
+			sql += "=" + to_ID + " WHERE " + ColumnName + "=" + from_ID;
+		}
+		
 		boolean delete = false;
 		for (int i = 0; i < m_deleteTables.length; i++)
 		{
