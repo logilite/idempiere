@@ -316,7 +316,7 @@ public class DataEngine
 				+ "','"
 				+ MPrintFormatItem.PRINTFORMATTYPE_PrintFormat
 				+ "') ")
-			.append("ORDER BY pfi.IsPrinted DESC, pfi.SeqNo");			//	Functions are put in first column
+			.append(" ORDER BY pfi.IsPrinted DESC, pfi.SeqNo");			//	Functions are put in first column
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try

@@ -444,7 +444,7 @@ public final class MRole extends X_AD_Role
 			+ "(wa.AD_Role_ID=" + getAD_Role_ID()
 			+ " AND w.AD_Window_ID = wa.AD_Window_ID) "
 			+ "WHERE wa.AD_Window_ID IS NULL AND t.SeqNo=(SELECT MIN(SeqNo) FROM AD_Tab xt "	// only check first tab
-				+ "WHERE xt.AD_Window_ID=w.AD_Window_ID)"
+				+ "WHERE xt.AD_Window_ID=w.AD_Window_ID) "
 			+ "AND tt.AccessLevel IN ";
 		
 		String sqlProcess = "INSERT INTO AD_Process_Access "

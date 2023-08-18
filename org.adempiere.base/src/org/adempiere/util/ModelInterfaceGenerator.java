@@ -823,7 +823,7 @@ public class ModelInterfaceGenerator
 		//	complete sql
 		String filterViews = null;
 		if (tableLike.toString().contains("%")) {
-			filterViews = "AND (TableName IN ('RV_WarehousePrice','RV_BPartner') OR IsView='N')"; 	//	special views
+			filterViews = " AND (TableName IN ('RV_WarehousePrice','RV_BPartner') OR IsView='N')"; 	//	special views
 		}
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT AD_Table_ID ")

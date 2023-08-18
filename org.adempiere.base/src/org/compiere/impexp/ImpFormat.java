@@ -309,7 +309,7 @@ public final class ImpFormat
 		String sql = "SELECT f.SeqNo,c.ColumnName,f.StartNo,f.EndNo,f.DataType,c.FieldLength,"		//	1..6
 					+ "f.DataFormat,f.DecimalPoint,f.DivideBy100,f.ConstantValue,f.Callout,f.Name "	//	7..12
 					+ "FROM AD_ImpFormat_Row f,AD_Column c "
-					+ "WHERE f.AD_ImpFormat_ID=? AND f.AD_Column_ID=c.AD_Column_ID AND f.IsActive='Y'"
+					+ "WHERE f.AD_ImpFormat_ID=? AND f.AD_Column_ID=c.AD_Column_ID AND f.IsActive='Y' "
 					+ "ORDER BY f.SeqNo";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
