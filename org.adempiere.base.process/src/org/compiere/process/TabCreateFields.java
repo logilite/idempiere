@@ -102,7 +102,7 @@ public class TabCreateFields extends SvrProcess
 		if(p_CreatedSince != null)
 			sql += " AND c.created >= ? ";
 
-		sql += "ORDER  BY CASE "
+		sql += " ORDER  BY CASE "
 			+ "            WHEN c.ColumnName = 'AD_Client_ID' THEN -100 "
 			+ "            WHEN c.ColumnName = 'AD_Org_ID' THEN -90 "
 			+ "            WHEN c.ColumnName = 'Value' THEN -80 "
