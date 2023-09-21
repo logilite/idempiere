@@ -60,7 +60,7 @@ public class MDDOrderLine extends X_DD_OrderLine
 	 *	@param M_Locator_ID wh
 	 *	@param M_Product_ID product
 	 *	@param M_AttributeSetInstance_ID asi
-	 *	@param excludeC_OrderLine_ID exclude C_OrderLine_ID
+	 *	@param excludeDD_OrderLine_ID exclude DD_OrderLine_ID
 	 *	@return Unreserved Qty
 	 */
 	public static BigDecimal getNotReserved (Properties ctx, int M_Locator_ID, 
@@ -405,7 +405,7 @@ public class MDDOrderLine extends X_DD_OrderLine
 	 */
 	public String toString ()
 	{
-		StringBuffer sb = new StringBuffer ("MDDOrderLine[")
+		StringBuilder sb = new StringBuilder ("MDDOrderLine[")
 			.append(get_ID()).append(",Line=").append(getLine())
 			.append(",Ordered=").append(getQtyOrdered())
 			.append(",Delivered=").append(getQtyDelivered())
@@ -515,8 +515,8 @@ public class MDDOrderLine extends X_DD_OrderLine
 	 */
 	protected boolean beforeSave (boolean newRecord)
 	{
-		if (newRecord && getParent().isComplete()) {
-			log.saveError("ParentComplete", Msg.translate(getCtx(), "DD_OrderLine"));
+		if (newRecord && getParent().isProcessed()) {
+			log.saveError("ParentComplete", Msg.translate(getCtx(), "DD_Order_ID"));
 			return false;
 		}
 		//	Get Defaults from Parent
