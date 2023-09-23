@@ -73,8 +73,8 @@ public class GenericZoomProvider implements IZoomProvider {
 			.append(justFirstTab)
 			.append(") "
 			+ "JOIN AD_Window w ON (tt.AD_Window_ID=w.AD_Window_ID AND w.IsActive='Y') "
-			+ "JOIN AD_Column c ON (t.AD_Table_ID=c.AD_Table_ID AND c.IsActive='Y' AND c.IsKey='N' AND c.IsParent='N' AND c.ColumnSQL IS NULL) "
-			+ "JOIN AD_Field f ON (f.AD_Column_ID=c.AD_Column_ID AND f.AD_Tab_ID=tt.AD_Tab_ID AND f.IsActive='Y' AND f.IsDisplayed='Y') ");
+			+ "JOIN AD_Column c ON (t.AD_Table_ID=c.AD_Table_ID AND c.IsActive='Y' AND c.IsKey='N' AND c.IsParent='N' AND c.ColumnSQL IS NULL AND c.IsDisableZoomAcross = 'N') "
+			+ "JOIN AD_Field f ON (f.AD_Column_ID=c.AD_Column_ID AND f.AD_Tab_ID=tt.AD_Tab_ID AND f.IsActive='Y' AND f.IsDisplayed='Y' AND f.IsDisableZoomAcross = 'N') ");
 		} else {
 			sqlb.append(
 			  "tt0.SeqNo "
@@ -85,8 +85,8 @@ public class GenericZoomProvider implements IZoomProvider {
 			+ "JOIN AD_Tab_Trl tt ON (tt.AD_Tab_ID=tt0.AD_Tab_ID AND tt.AD_Language=?) "
 			+ "JOIN AD_Window w0 ON (tt0.AD_Window_ID=w0.AD_Window_ID AND w0.IsActive='Y') "
 			+ "JOIN AD_Window_Trl w ON (w.AD_Window_ID=w0.AD_Window_ID AND w.AD_Language=?) "
-			+ "JOIN AD_Column c ON (t.AD_Table_ID=c.AD_Table_ID AND c.IsActive='Y' AND c.IsKey='N' AND c.IsParent='N' AND c.ColumnSQL IS NULL) "
-			+ "JOIN AD_Field f0 ON (f0.AD_Column_ID=c.AD_Column_ID AND f0.AD_Tab_ID=tt0.AD_Tab_ID AND f0.IsActive='Y' AND f0.IsDisplayed='Y') "
+			+ "JOIN AD_Column c ON (t.AD_Table_ID=c.AD_Table_ID AND c.IsActive='Y' AND c.IsKey='N' AND c.IsParent='N' AND c.ColumnSQL IS NULL AND c.IsDisableZoomAcross = 'N') "
+			+ "JOIN AD_Field f0 ON (f0.AD_Column_ID=c.AD_Column_ID AND f0.AD_Tab_ID=tt0.AD_Tab_ID AND f0.IsActive='Y' AND f0.IsDisplayed='Y' AND f0.IsDisableZoomAcross = 'N') "
 			+ "JOIN AD_Field_Trl f ON (f.AD_Field_ID=f0.AD_Field_ID AND f.AD_Language=?) ");
 		}
 		sqlb.append(
