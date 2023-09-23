@@ -373,7 +373,10 @@ public class WResetPassword implements IFormController, EventListener<Event>, Va
 			user.setIsExpired(true);
 		
 		try {
-			user.saveEx();
+            if (user.getAD_Client_ID() == 0 && Env.getAD_Client_ID(Env.getCtx()) != 0)
+                user.saveCrossTenantSafeEx();
+            else
+                user.saveEx();
 		}
 		catch(AdempiereException e)
 		{
