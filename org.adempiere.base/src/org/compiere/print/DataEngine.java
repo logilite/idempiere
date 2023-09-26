@@ -311,12 +311,16 @@ public class DataEngine
 			.append(" LEFT OUTER JOIN AD_ReportView_Col rvc ON (pf.AD_ReportView_ID=rvc.AD_ReportView_ID AND c.AD_Column_ID=rvc.AD_Column_ID) ")
 			.append("WHERE pf.AD_PrintFormat_ID=?");					//	#1
 			if(isTranPrintFormat)
+			{
 				sql.append(" AND pfi.AD_PrintFormatItem_ID IN ( " + getTranPrintFormatItemIDs(format) + ")");
+			}
 			else
-				sql.append(" AND pfi.IsActive='Y' AND (pfi.IsPrinted='Y' OR c.IsKey='Y' OR pfi.SortNo > 0 ");
-			sql.append(" OR EXISTS(select 1 from AD_PrintFormatItem x where x.AD_PrintFormat_ID=pf.AD_PrintFormat_ID and x.DisplayLogic is not null and ")
-			.append("(x.DisplayLogic Like '%@'||c.ColumnName||'@%' OR x.DisplayLogic Like '%@'||c.ColumnName||':%@%' OR x.DisplayLogic Like '%@'||c.ColumnName||'.%@%'))) ")
-			.append(" AND pfi.PrintFormatType IN ('"
+			{
+				sql.append(" AND pfi.IsActive='Y' AND (AD_PrintFormatItempfi.IsPrinted='Y' OR c.IsKey='Y' OR pfi.SortNo > 0 ")
+				.append(" OR EXISTS(select 1 from x where x.AD_PrintFormat_ID=pf.AD_PrintFormat_ID and x.DisplayLogic is not null and ")
+				.append("(x.DisplayLogic Like '%@'||c.ColumnName||'@%' OR x.DisplayLogic Like '%@'||c.ColumnName||':%@%' OR x.DisplayLogic Like '%@'||c.ColumnName||'.%@%'))) ");
+			}
+			sql.append(" AND pfi.PrintFormatType IN ('"
 				+ MPrintFormatItem.PRINTFORMATTYPE_Field
 				+ "','"
 				+ MPrintFormatItem.PRINTFORMATTYPE_Image
