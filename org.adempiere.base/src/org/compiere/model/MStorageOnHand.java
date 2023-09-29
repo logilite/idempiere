@@ -170,7 +170,7 @@ public class MStorageOnHand extends X_M_StorageOnHand
 	public static MStorageOnHand[] getAll (Properties ctx, 
 		int M_Product_ID, int M_Locator_ID, String trxName, boolean forUpdate, int timeout)
 	{
-		String sqlWhere = "M_Product_ID=? AND M_Locator_ID=? AND QtyOnHand <> 0";
+		String sqlWhere = "M_StorageOnHand.M_Product_ID=? AND M_Locator_ID=? AND QtyOnHand <> 0";
 		Query query = new Query(ctx, MStorageOnHand.Table_Name, sqlWhere, trxName)
 								.setParameters(M_Product_ID, M_Locator_ID);
 		MProduct product = MProduct.get(ctx, M_Product_ID);
