@@ -188,6 +188,12 @@ public class Doc_Movement extends Doc
 			DocLine line = p_lines[i];
 			BigDecimal costs = null;
 			MProduct product = MProduct.get(getCtx(), line.getM_Product_ID());
+            
+            //If expense type stocked product, no accounting impacted
+            if(MProduct.PRODUCTTYPE_ExpenseType.equals(product.getProductType()) && product.isStocked()) {
+                continue;
+            }
+			
 			if (!isReversal(line))
 			{
 				// MZ Goodwill

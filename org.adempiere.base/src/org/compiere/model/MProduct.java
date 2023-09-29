@@ -501,7 +501,7 @@ public class MProduct extends X_M_Product
 	@Override
 	public boolean isStocked ()
 	{
-		return super.isStocked() && isItem();
+		return super.isStocked() && (isItem() || PRODUCTTYPE_ExpenseType.equals(getProductType()));
 	}	//	isStocked
 	
 	/**
@@ -590,7 +590,7 @@ public class MProduct extends X_M_Product
 		//	Reset Stocked if not Item
 		//AZ Goodwill: Bug Fix isStocked always return false
 		//if (isStocked() && !PRODUCTTYPE_Item.equals(getProductType()))
-		if (!PRODUCTTYPE_Item.equals(getProductType()))
+		if (!PRODUCTTYPE_Item.equals(getProductType()) && !PRODUCTTYPE_ExpenseType.equals(getProductType()))
 			setIsStocked(false);
 		
 		//	UOM reset
