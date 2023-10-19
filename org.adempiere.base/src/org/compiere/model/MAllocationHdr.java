@@ -22,12 +22,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.base.Core;
+import org.adempiere.base.ICreditManager;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.PeriodClosedException;
 import org.compiere.process.DocAction;
@@ -550,11 +550,13 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 			approveIt();
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 
-		//	Link
-		getLines(false);
-		updateOpenBalForMultipleBP(false);
-		if(!updateBP())
-			return DocAction.STATUS_Invalid;
+		ICreditManager creditManager = Core.getCreditManager(this);
+		if (creditManager != null)
+		{
+			m_processMsg = creditManager.creditCheck(DOCACTION_Complete);
+			if (m_processMsg != null)
+				return DocAction.STATUS_Invalid;
+		}
 		
 		for (int i = 0; i < m_lines.length; i++)
 		{
@@ -608,8 +610,13 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 
 			//	Set lines to 0
 			MAllocationLine[] lines = getLines(true);
-			if(!updateBP())
-				return false;
+			ICreditManager creditManager = Core.getCreditManager(this);
+			if (creditManager != null)
+			{
+				m_processMsg = creditManager.creditCheck(DOCACTION_Void);
+				if (m_processMsg != null)
+					return false;
+			}
 			
 			for (int i = 0; i < lines.length; i++)
 			{
@@ -930,12 +937,14 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 			//	Delete Posting
 			MFactAcct.deleteEx(MAllocationHdr.Table_ID, getC_AllocationHdr_ID(), get_TrxName());
 			
-			//	Unlink Invoices
-			getLines(true);
-			updateOpenBalForMultipleBP(true);
-			if(!updateBP())
-				return false;
-			
+			ICreditManager creditManager = Core.getCreditManager(this);
+			if (creditManager != null)
+			{
+				m_processMsg = creditManager.creditCheck(accrual ? DOCACTION_Reverse_Accrual : DOCACTION_Reverse_Correct);
+				if (m_processMsg != null)
+					return false;
+			}
+
 			for (int i = 0; i < m_lines.length; i++)
 			{
 				MAllocationLine line = m_lines[i];
@@ -972,66 +981,6 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 		} // for all lines
 		return true;
 	}	//	updateBP
-
-	/**
-	 * Update open balance of BP
-	 * when multiple business partner
-	 * 
-	 * @param isReverseCorrectIt = true allocation amount will be negate.
-	 */
-
-	public void updateOpenBalForMultipleBP(boolean isReverseCorrectIt)
-	{
-		HashMap<Integer, BigDecimal> openBPBal = new HashMap<Integer, BigDecimal>();
-		for (MAllocationLine line : m_lines)
-		{
-			int C_Payment_ID = line.getC_Payment_ID();
-			int M_Invoice_ID = line.getC_Invoice_ID();
-
-			MInvoice invoice = M_Invoice_ID > 0
-					? (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(M_Invoice_ID, get_TrxName()) : null;
-
-			MPayment payment = C_Payment_ID > 0
-					? (MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(C_Payment_ID, get_TrxName()) : null;
-
-			BigDecimal allocationAmt = isReverseCorrectIt ? line.getAmount().negate() : line.getAmount();
-			BigDecimal bpOpenBal = Env.ZERO;
-
-			if (invoice != null)
-			{
-				int bPartnerID = invoice.getC_BPartner_ID();
-				bpOpenBal = openBPBal.get(bPartnerID) == null ? Env.ZERO : openBPBal.get(bPartnerID);
-				bpOpenBal = bpOpenBal.subtract(allocationAmt);
-				openBPBal.put(bPartnerID, bpOpenBal);
-			} 
-		   if (payment != null)
-			{
-			    int bPartnerID = payment.getC_BPartner_ID();
-			    bpOpenBal = openBPBal.get(bPartnerID) == null ? Env.ZERO : openBPBal.get(bPartnerID);
-			    bpOpenBal = bpOpenBal.add(allocationAmt);
-				openBPBal.put(bPartnerID, bpOpenBal);
-			} 
-		}
-		
-		/* Update open balance for invoice BP */
-		if (!openBPBal.isEmpty())
-		{
-			for (Map.Entry<Integer, BigDecimal> entry : openBPBal.entrySet())
-			{
-				int bPartnerID = entry.getKey();
-				BigDecimal allocAmt = entry.getValue();
-				if (Env.ZERO.compareTo(allocAmt) != 0)
-				{
-					MBPartner bPartner = MBPartner.get(getCtx(), bPartnerID);
-					bPartner.set_TrxName(get_TrxName());
-					DB.getDatabase().forUpdate(bPartner, 0);
-					BigDecimal bpOpenBal = bPartner.getTotalOpenBalance().add(allocAmt);
-					bPartner.setTotalOpenBalance(bpOpenBal);
-					bPartner.saveEx(get_TrxName());
-				}
-			}
-		}
-	}
 
 	/**
 	 * 	Document Status is Complete or Closed

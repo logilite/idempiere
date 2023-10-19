@@ -33,11 +33,13 @@ import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MDocType;
 import org.compiere.model.MLocator;
 import org.compiere.model.MMovement;
+import org.compiere.model.MMovementLine;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProject;
 import org.compiere.model.MRefList;
 import org.compiere.model.MStorageOnHand;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.ModelValidationEngine;
@@ -218,8 +220,7 @@ public class MDDOrder extends X_DD_Order implements DocAction
 	private MDDOrderLine[] 	m_lines = null;
 	
 	/** Force Creation of order		*/
-	@SuppressWarnings("unused")
-	private boolean			m_forceCreation = false;
+	//private boolean			m_forceCreation = false;
 
 	/**
 	 * 	Add to Description
@@ -436,14 +437,14 @@ public class MDDOrder extends X_DD_Order implements DocAction
 	 * 	@param orderClause order clause
 	 * 	@return lines
 	 */
-	public MDDOrderLine[] getLines (String whereClause, String orderClause)
+	public MDDOrderLine[] getLines (String whereClause, String orderClause, Object... params)
 	{
-		StringBuilder whereClauseFinal = new StringBuilder(MDDOrderLine.COLUMNNAME_DD_Order_ID).append("=?");
+		StringBuilder whereClauseFinal = new StringBuilder(MDDOrderLine.COLUMNNAME_DD_Order_ID).append("=").append(getDD_Order_ID());
 		if (!Util.isEmpty(whereClause, true))
 			whereClauseFinal.append(" AND (").append(whereClause).append(")");
 		//
 		List<MDDOrderLine> list = new Query(getCtx(), I_DD_OrderLine.Table_Name, whereClauseFinal.toString(), get_TrxName())
-												.setParameters(getDD_Order_ID())
+												.setParameters(params)
 												.setOrderBy(orderClause)
 												.list();
 		return list.toArray(new MDDOrderLine[list.size()]);		
@@ -533,8 +534,8 @@ public class MDDOrder extends X_DD_Order implements DocAction
 		finally
 		{
 			DB.close(rs, pstmt);
-			rs = null;
 			pstmt = null;
+			rs = null;
 		}
 		//
 		MMovement[] retValue = new MMovement[list.size()];
@@ -711,7 +712,7 @@ public class MDDOrder extends X_DD_Order implements DocAction
 	public void setDocAction (String DocAction, boolean forceCreation)
 	{
 		super.setDocAction (DocAction);
-		m_forceCreation = forceCreation;
+		//m_forceCreation = forceCreation;
 	}	//	setDocAction
 
 
@@ -844,11 +845,16 @@ public class MDDOrder extends X_DD_Order implements DocAction
 
 	/**
 	 * 	Reserve Inventory. 
+	 *  No allocation is done.
 	 * 	Counterpart: MMovement.completeIt()
 	 * 	@param lines distribution order lines (ordered by M_Product_ID for deadlock prevention)
 	 */
 	public void reserveStock (MDDOrderLine[] lines)
 	{
+		// Use Reserve Stock in DDOrder
+		if(!MSysConfig.getBooleanValue("ENABLE_DDO_RESERVATIONS", false, getAD_Client_ID()))
+			return;		
+		
 		BigDecimal Volume = Env.ZERO;
 		BigDecimal Weight = Env.ZERO;
 		
@@ -883,8 +889,8 @@ public class MDDOrder extends X_DD_Order implements DocAction
 				try
 				{
 					if (product.isStocked())
-					{
-						//	Update Storage
+					{//TODO adding stock instead of reserving
+						//	TODO: Locator TO - ordered - ADempiere
 						if (!MStorageOnHand.add(getCtx(), locator_to.getM_Locator_ID(), 
 							line.getM_Product_ID(), 
 							line.getM_AttributeSetInstance_ID(),
@@ -893,7 +899,8 @@ public class MDDOrder extends X_DD_Order implements DocAction
 							throw new AdempiereException();
 						}
 						
-						if (!MStorageOnHand.add(getCtx(), locator_from.getM_Locator_ID(), 
+						// TODO: Locator FROM - reserved - ADempiere
+						if (!MStorageOnHand.add(getCtx(), locator_from.getM_Warehouse_ID(), locator_from.getM_Locator_ID(), 
 							line.getM_Product_ID(), 
 							line.getM_AttributeSetInstanceTo_ID(),
 							Env.ZERO,null, get_TrxName()))
@@ -955,8 +962,7 @@ public class MDDOrder extends X_DD_Order implements DocAction
 	 */
 	public String completeIt()
 	{
-		@SuppressWarnings("unused")
-		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
+		//MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
 		
 		//	Just prepare
 		if (DOCACTION_Prepare.equals(getDocAction()))
@@ -1213,6 +1219,23 @@ public class MDDOrder extends X_DD_Order implements DocAction
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REACTIVATE);
 		if (m_processMsg != null)
 			return false;	
+		
+		//Check if we don't have connected Inventory Move
+		MDDOrderLine[] m_DDOrderLines = getLines();
+		for(MDDOrderLine m_DDOrderLine : m_DDOrderLines) {
+			
+			String whereClause = " DD_OrderLine_ID = ? ";
+			int p_M_MovementLine_ID = new Query(getCtx(), MMovementLine.Table_Name, whereClause, get_TrxName())
+				.setClient_ID()
+				.setParameters(m_DDOrderLine.getDD_OrderLine_ID())
+				.firstId();			
+			
+			if(p_M_MovementLine_ID > 0 || m_DDOrderLine.getQtyDelivered().signum() > 0 || m_DDOrderLine.getQtyInTransit().signum() > 0 ){
+				m_processMsg = Msg.getMsg(getCtx(), "DDOrderCannotBeReactivated");			
+				return false;
+			}
+		}	
+		
 		// After reActivate
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REACTIVATE);
 		if (m_processMsg != null)
@@ -1283,4 +1306,31 @@ public class MDDOrder extends X_DD_Order implements DocAction
 			|| DOCSTATUS_Reversed.equals(ds);
 	}	//	isComplete
 
+	
+	public boolean activateIt() 
+	{
+		if (log.isLoggable(Level.INFO)) log.info(toString());
+		//
+		return true;
+	}
+
+	public boolean cancelIt() 
+	{
+		if (log.isLoggable(Level.INFO)) log.info(toString());
+		//
+		return true;
+	}
+
+	public boolean suspendIt() 
+	{
+		if (log.isLoggable(Level.INFO)) log.info(toString());
+		//
+		return true;
+	}
+	
+	public void setProcessMsg(String msg)
+	{
+		m_processMsg = msg;
+	}
+	
 }	//	MDDOrder

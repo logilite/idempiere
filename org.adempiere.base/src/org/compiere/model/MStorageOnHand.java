@@ -190,7 +190,7 @@ public class MStorageOnHand extends X_M_StorageOnHand
 	public static MStorageOnHand[] getAll (Properties ctx, 
 		int M_Product_ID, int M_Locator_ID, boolean locatorPriority, boolean fifo, String trxName, boolean forUpdate, int timeout)
 	{
-		String sqlWhere = "M_Product_ID=? AND QtyOnHand <> 0";
+		String sqlWhere = "M_StorageOnHand.M_Product_ID=? AND QtyOnHand <> 0";
 		if (M_Locator_ID > 0)
 			sqlWhere = sqlWhere + " AND M_Locator_ID=? ";
 		Query query = new Query(ctx, MStorageOnHand.Table_Name, sqlWhere, trxName);
@@ -378,7 +378,7 @@ public class MStorageOnHand extends X_M_StorageOnHand
 		{
 			sql += " AND s.QtyOnHand <> 0 ";
 		}
-		sql += "ORDER BY l.PriorityNo DESC, DateMaterialPolicy ";
+		sql += " ORDER BY l.PriorityNo DESC, DateMaterialPolicy ";
 		if (!FiFo)
 			sql += " DESC, s.M_AttributeSetInstance_ID DESC ";
 		else
@@ -408,13 +408,13 @@ public class MStorageOnHand extends X_M_StorageOnHand
 			
 			if (minGuaranteeDate != null)
 			{
-				sql += "AND (asi.GuaranteeDate IS NULL OR asi.GuaranteeDate>?) ";
+				sql += " AND (asi.GuaranteeDate IS NULL OR asi.GuaranteeDate>?) ";
 			}
 			
 			MProduct product = MProduct.get(Env.getCtx(), M_Product_ID);
 			
 			if(product.isUseGuaranteeDateForMPolicy()){
-				sql += "ORDER BY COALESCE(asi.GuaranteeDate,s.DateMaterialPolicy)";
+				sql += " ORDER BY COALESCE(asi.GuaranteeDate,s.DateMaterialPolicy)";
 				if (!FiFo)
 					sql += " DESC, l.PriorityNo DESC, s.M_AttributeSetInstance_ID DESC ";
 				else
@@ -422,7 +422,7 @@ public class MStorageOnHand extends X_M_StorageOnHand
 			}
 			else
 			{
-				sql += "ORDER BY l.PriorityNo DESC, l.M_Locator_ID, s.DateMaterialPolicy";
+				sql += " ORDER BY l.PriorityNo DESC, s.DateMaterialPolicy";
 				if (!FiFo)
 					sql += " DESC, s.M_AttributeSetInstance_ID DESC ";
 				else
@@ -565,14 +565,14 @@ public class MStorageOnHand extends X_M_StorageOnHand
 		MProduct product = MProduct.get(Env.getCtx(), M_Product_ID, trxName);
 		
 		if(product.isUseGuaranteeDateForMPolicy()){
-			sql += "ORDER BY l.PriorityNo DESC, " +
+			sql += " ORDER BY l.PriorityNo DESC, " +
 				   "asi.GuaranteeDate";
 			if (!FiFo)
 				sql += " DESC";
 		}
 		else
 		{
-			sql += "ORDER BY l.PriorityNo DESC, l.M_Locator_ID, s.DateMaterialPolicy";
+			sql += " ORDER BY l.PriorityNo DESC, s.DateMaterialPolicy";
 			if (!FiFo)
 				sql += " DESC, s.M_AttributeSetInstance_ID DESC ";
 			else

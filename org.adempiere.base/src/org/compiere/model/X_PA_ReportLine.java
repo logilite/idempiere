@@ -33,7 +33,7 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221011L;
+	private static final long serialVersionUID = 20231013L;
 
     /** Standard Constructor */
     public X_PA_ReportLine (Properties ctx, int PA_ReportLine_ID, String trxName)
@@ -141,6 +141,40 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 	public String getDescription()
 	{
 		return (String)get_Value(COLUMNNAME_Description);
+	}
+
+	/** DimensionGroup AD_Reference_ID=200249 */
+	public static final int DIMENSIONGROUP_AD_Reference_ID=200249;
+	/** Organization = OO */
+	public static final String DIMENSIONGROUP_Organization = "OO";
+	/** Product = PR */
+	public static final String DIMENSIONGROUP_Product = "PR";
+	/** Sales Region = SR */
+	public static final String DIMENSIONGROUP_SalesRegion = "SR";
+	/** Project = PJ */
+	public static final String DIMENSIONGROUP_Project = "PJ";
+	/** Campaign = MC */
+	public static final String DIMENSIONGROUP_Campaign = "MC";
+	/** Activity = AY */
+	public static final String DIMENSIONGROUP_Activity = "AY";
+	/** Business Partner = BP */
+	public static final String DIMENSIONGROUP_BusinessPartner = "BP";
+	/** Set Dimension Group.
+		@param DimensionGroup 
+		Dimension Group for report line and source.
+	  */
+	public void setDimensionGroup (String DimensionGroup)
+	{
+
+		set_Value (COLUMNNAME_DimensionGroup, DimensionGroup);
+	}
+
+	/** Get Dimension Group.
+		@return Dimension Group for report line and source.
+	  */
+	public String getDimensionGroup () 
+	{
+		return (String)get_Value(COLUMNNAME_DimensionGroup);
 	}
 
 	public org.compiere.model.I_GL_Budget getGL_Budget() throws RuntimeException
@@ -434,6 +468,8 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 	public static final String PAPERIODTYPE_Total = "T";
 	/** Year = Y */
 	public static final String PAPERIODTYPE_Year = "Y";
+	/** Natural Year opening = O */
+	public static final String PAPERIODTYPE_NaturalYearOpening = "O";
 	/** Set Period Type.
 		@param PAPeriodType PA Period Type
 	*/
