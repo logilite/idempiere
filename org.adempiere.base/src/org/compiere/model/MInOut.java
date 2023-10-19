@@ -1488,7 +1488,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * Check if Document is Customer Return.
 	 * @return True if Document is Customer Return
 	 */
-	private boolean isCustomerReturn() {
+	public boolean isCustomerReturn() {
 		MDocType doctype = MDocType.get(getC_DocType_ID());
 		if(isSOTrx() && doctype.getDocBaseType().equals("MMR") && doctype.isSOTrx())
 			return true;

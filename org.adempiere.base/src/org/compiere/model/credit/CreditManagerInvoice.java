@@ -13,6 +13,7 @@
 package org.compiere.model.credit;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -21,6 +22,7 @@ import org.compiere.model.MBPartner;
 import org.compiere.model.MClient;
 import org.compiere.model.MConversionRate;
 import org.compiere.model.MConversionRateUtil;
+import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MTable;
@@ -70,18 +72,40 @@ public class CreditManagerInvoice implements ICreditManager
 		}
 		else if (MInvoice.DOCACTION_Complete.equals(docAction))
 		{
+	
 			// Update BP Statistics
 			Properties ctx = mInvoice.getCtx();
 			String trxName = mInvoice.get_TrxName();
+
+			// POS supports multiple payments
+			boolean fromPOS = false;
+			if (mInvoice.getC_Order_ID() > 0)
+			{
+				fromPOS = mInvoice.getC_Order().getC_POS_ID() > 0;
+			}
+
 			MBPartner bp = (MBPartner) MTable.get(ctx, MBPartner.Table_ID).getPO(mInvoice.getC_BPartner_ID(), trxName);
 			DB.getDatabase().forUpdate(bp, 0);
 			// Update total revenue and balance / credit limit (reversed on
 			// AllocationLine.processIt)
-			BigDecimal invAmt = MConversionRate.convertBase(ctx, mInvoice.getGrandTotal(true), // CM
-																								// adjusted
-															mInvoice.getC_Currency_ID(), mInvoice.getDateAcct(), mInvoice.getC_ConversionType_ID(), mInvoice
-																																							.getAD_Client_ID(),
-															mInvoice.getAD_Org_ID());
+			BigDecimal invAmt = null;
+			int baseCurrencyId = Env.getContextAsInt(ctx, Env.C_CURRENCY_ID);
+
+			if (mInvoice.getC_Currency_ID() != baseCurrencyId && mInvoice.isOverrideCurrencyRate())
+			{
+				invAmt = mInvoice.getGrandTotal(true).multiply(mInvoice.getCurrencyRate());
+				int stdPrecision = MCurrency.getStdPrecision(ctx, baseCurrencyId);
+				if (invAmt.scale() > stdPrecision)
+					invAmt = invAmt.setScale(stdPrecision, RoundingMode.HALF_UP);
+			}
+			else
+			{
+				invAmt = MConversionRate.convertBase(ctx, mInvoice.getGrandTotal(true), // CM
+																						// adjusted
+						mInvoice.getC_Currency_ID(), mInvoice.getDateAcct(), mInvoice.getC_ConversionType_ID(),
+						mInvoice.getAD_Client_ID(), mInvoice.getAD_Org_ID());
+			}
+			
 			if (invAmt == null)
 			{
 				return MConversionRateUtil.getErrorMessage(	ctx, "ErrorConvertingCurrencyToBaseCurrency",
@@ -123,7 +147,11 @@ public class CreditManagerInvoice implements ICreditManager
 				if (log.isLoggable(Level.FINE)) log.fine("GrandTotal=" + mInvoice.getGrandTotal(true) + "(" + invAmt
 					+ ") Balance=" + bp.getTotalOpenBalance() + " -> " + newBalance);
 			}
-			bp.setTotalOpenBalance(newBalance);
+			// the payment just created already updated the open balance
+			if ( ! (MInvoice.PAYMENTRULE_Cash.equals(mInvoice.getPaymentRule()) && !fromPOS ) )
+			{
+				bp.setTotalOpenBalance(newBalance);
+			}
 			bp.setSOCreditStatus();
 			if (!bp.save(trxName))
 			{

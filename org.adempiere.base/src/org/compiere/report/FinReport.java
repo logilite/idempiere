@@ -1771,8 +1771,8 @@ public class FinReport extends SvrProcess
 			return;
 
 		// Set Name,Description
-			StringBuilder sql = new StringBuilder ("UPDATE T_Report SET (Name,Description)=(")
-			.append(m_lines[line].getSourceValueQuery());
+		StringBuilder sql = new StringBuilder ("UPDATE T_Report SET (Name,Description)=(")
+		.append(m_lines[line].getSourceValueQuery());
 
 		if (isCombination)
 			sql.append(combinationID);
@@ -1792,7 +1792,7 @@ public class FinReport extends SvrProcess
 		if (!Util.isEmpty(dimGroupVariable) && isDimensionLine)
 		{
 			// Set Dimension Group Value in Description
-			sql = new StringBuffer("UPDATE T_Report SET Description = (");
+			sql = new StringBuilder("UPDATE T_Report SET Description = (");
 			sql	.append(m_lines[line].getDimensionGroupQuery(srcLine))
 				.append("T_Report.DimensionGroupRecord_ID) || ' ( ' || Description || ' ) ' ")
 				.append("WHERE AD_PInstance_ID=")
@@ -1806,7 +1806,7 @@ public class FinReport extends SvrProcess
 				log.fine("Name #=" + no + " - " + sql.toString());
 
 			// Set Name Dimension Group Name
-			sql = new StringBuffer("UPDATE T_Report SET DimensionGroupName =  ");
+			sql = new StringBuilder("UPDATE T_Report SET DimensionGroupName =  ");
 			// for combination we use record id for grouping
 			if (isCombination)
 				sql.append("T_Report.Record_ID");

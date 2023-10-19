@@ -57,6 +57,8 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 
 	 */
 	private static final long serialVersionUID = -7787519874581251920L;
+	/**	Tolerance Gain and Loss */
+	public static final BigDecimal	TOLERANCE = BigDecimal.valueOf(0.02);
 
 	/**
 	 * 	Get Allocations of Payment

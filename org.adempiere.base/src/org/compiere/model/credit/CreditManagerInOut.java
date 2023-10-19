@@ -46,7 +46,7 @@ public class CreditManagerInOut implements ICreditManager
 	@Override
 	public String creditCheck(String docAction)
 	{
-		if (MInOut.DOCACTION_Prepare.equals(docAction) && mInOut.isSOTrx() && !mInOut.isReversal())
+		if (MInOut.DOCACTION_Prepare.equals(docAction) && mInOut.isSOTrx() && !mInOut.isReversal() && !mInOut.isCustomerReturn())
 		{
 			I_C_Order order = mInOut.getC_Order();
 			if (order != null

@@ -28,7 +28,6 @@ import java.util.logging.Level;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCostDetail;
-import org.compiere.model.MInOutLineMA;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProductionLine;
 import org.compiere.model.MProductionLineMA;
@@ -362,7 +361,7 @@ public class Doc_Production extends Doc
 				if (line.isProductionBOM() && !(MAcctSchema.COSTINGMETHOD_StandardCosting.equals(costingMethod)))
 				{
 					factLineAmt = bomCost.negate();
-					
+				}
 				fl = fact.createLine(line, assets,
 					as.getC_Currency_ID(), factLineAmt.setScale(stdPrecision, RoundingMode.HALF_UP));
 				if (fl == null)
@@ -401,10 +400,10 @@ public class Doc_Production extends Doc
 							line.get_ID(), 0,
 							bomCost.negate(), line.getQty(),
 							description, getTrxName()))
-						{
-							p_Error = "Failed to create cost detail record";
-							return null;
-						}
+					{
+						p_Error = "Failed to create cost detail record";
+						return null;
+					}
 				}
 				else
 				{

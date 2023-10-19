@@ -82,13 +82,23 @@ public class CreditManagerPayment implements ICreditManager
 				MBPartner bp = (MBPartner) MTable.get(ctx, MBPartner.Table_ID).getPO(payment.getC_BPartner_ID(), trxName);
 				DB.getDatabase().forUpdate(bp, 0);
 				// Update total balance to include this payment
-				BigDecimal payAmt = MConversionRate.convertBase(ctx, payment.getPayAmt(), payment.getC_Currency_ID(), payment.getDateAcct(),
-																payment.getC_ConversionType_ID(), payment.getAD_Client_ID(), payment.getAD_Org_ID());
-				if (payAmt == null)
+				BigDecimal payAmt = null;
+				int baseCurrencyId = Env.getContextAsInt(ctx, Env.C_CURRENCY_ID);
+				if (payment.getC_Currency_ID() != baseCurrencyId && payment.isOverrideCurrencyRate())
 				{
-					return MConversionRateUtil.getErrorMessage(	ctx, "ErrorConvertingCurrencyToBaseCurrency",
-																payment.getC_Currency_ID(), MClient.get(ctx).getC_Currency_ID(),
-																payment.getC_ConversionType_ID(), payment.getDateAcct(), trxName);
+					payAmt = payment.getConvertedAmt();
+				}
+				else
+				{
+					payAmt = MConversionRate.convertBase(ctx, payment.getPayAmt(), payment.getC_Currency_ID(),
+							payment.getDateAcct(), payment.getC_ConversionType_ID(), payment.getAD_Client_ID(),
+							payment.getAD_Org_ID());
+					if (payAmt == null)
+					{
+						return MConversionRateUtil.getErrorMessage(ctx, "ErrorConvertingCurrencyToBaseCurrency",
+								payment.getC_Currency_ID(), MClient.get(ctx).getC_Currency_ID(),
+								payment.getC_ConversionType_ID(), payment.getDateAcct(), trxName);
+					}
 				}
 				// Total Balance
 				BigDecimal newBalance = bp.getTotalOpenBalance();
