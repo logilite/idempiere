@@ -32,6 +32,7 @@ import org.adempiere.base.event.IEventManager;
 import org.adempiere.base.event.IEventTopics;
 import org.adempiere.model.MBroadcastMessage;
 import org.adempiere.webui.ClientInfo;
+import org.adempiere.webui.Extensions;
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.adwindow.ADWindow;
 import org.adempiere.webui.adwindow.ADWindowContent;
@@ -208,7 +209,8 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
     @SuppressWarnings("serial")
 	protected Component doCreatePart(Component parent)
     {
-    	PageDefinition pagedef = Executions.getCurrent().getPageDefinition(ThemeManager.getThemeResource("zul/desktop/desktop.zul"));
+    	String zulPath = "zul/desktop/desktop.zul";
+		PageDefinition pagedef = Executions.getCurrent().getPageDefinition(ThemeManager.getThemeResource(zulPath));
     	Component page = Executions.createComponents(pagedef, parent, null);
     	layout = (Borderlayout) page.getFellow("layout");
     	headerContainer = page.getFellow("northBody");
@@ -460,6 +462,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	        westBtn.setStyle("cursor: pointer; padding: 0px; margin: 0px;");
         }
         
+        Extensions.doZulCustomAction(page, zulPath);
         return layout;
     }
 

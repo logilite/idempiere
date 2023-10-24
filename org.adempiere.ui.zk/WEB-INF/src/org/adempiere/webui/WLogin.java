@@ -55,8 +55,9 @@ public class WLogin extends AbstractUIPart
 
     protected Component doCreatePart(Component parent)
     {
-    	PageDefinition pageDefintion = Executions.getCurrent().getPageDefinition(ThemeManager.getThemeResource("zul/login/login.zul"));
-    	Component loginPage = Executions.createComponents(pageDefintion, parent, null);
+		String zulPath = "zul/login/login.zul";
+		PageDefinition pageDefintion = Executions.getCurrent().getPageDefinition(ThemeManager.getThemeResource(zulPath));
+        Component loginPage = Executions.createComponents(pageDefintion, parent, null);
     	
         layout = (Borderlayout) loginPage.getFellow("layout");
 
@@ -121,6 +122,8 @@ public class WLogin extends AbstractUIPart
         	south.setVisible(false);
         }
 
+		//
+		Extensions.doZulCustomAction(loginPage, zulPath);
         return layout;
     }
 
