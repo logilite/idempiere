@@ -365,6 +365,11 @@ public class Evaluator
 			return;
 	//	log.fine( "MField.parseDepends", parseString);
 		String s = parseString;
+
+		// Parse string if sql query having context based variables
+		if (s.startsWith("@SQL="))
+			s = s.substring(5);
+
 		//  while we have variables
 		while (s.indexOf('@') != -1)
 		{
