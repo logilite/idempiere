@@ -38,6 +38,7 @@ import org.adempiere.webui.factory.IFormFactory;
 import org.adempiere.webui.factory.IMappedFormFactory;
 import org.adempiere.webui.factory.IQuickEntryFactory;
 import org.adempiere.webui.factory.IRolePanelFactory;
+import org.adempiere.webui.factory.IZulComponentService;
 import org.adempiere.webui.grid.AbstractWQuickEntry;
 import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.panel.RolePanel;
@@ -421,4 +422,22 @@ public class Extensions {
 		}
 		return null;
 	} // getADTabPanel
+	
+	/**
+	 * Do zul component any customize action and its handling
+	 * 
+	 * @param page        - Component
+	 * @param zulFilePath - Zul File Path
+	 */
+	public static void doZulCustomAction(Component page, String zulFilePath)
+	{
+		List<IZulComponentService> zulServices = Service.locator().list(IZulComponentService.class).getServices();
+		for (IZulComponentService service : zulServices)
+		{
+			if (service.isZulCustomize(zulFilePath))
+			{
+				service.doAction(page);
+			}
+		}
+	} // doZulCustomAction
 }

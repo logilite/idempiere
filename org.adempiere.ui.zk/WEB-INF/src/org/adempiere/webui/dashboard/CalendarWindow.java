@@ -29,6 +29,7 @@ import java.util.TimeZone;
 import java.util.logging.Level;
 
 import org.adempiere.webui.ClientInfo;
+import org.adempiere.webui.Extensions;
 import org.adempiere.webui.component.MultiSelectionBox;
 import org.adempiere.webui.component.Tabpanel;
 import org.adempiere.webui.component.Window;
@@ -139,8 +140,9 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 		Properties ctx = Env.getCtx();
 		setTitle(Msg.getMsg(ctx,"Calendar"));
 		setAttribute(Window.MODE_KEY, Window.MODE_EMBEDDED);
-		
-		Component component = Executions.createComponents(ThemeManager.getThemeResource("zul/calendar/calendar.zul"), this, null);
+
+		String zulPath = "zul/calendar/calendar.zul";
+		Component component = Executions.createComponents(ThemeManager.getThemeResource(zulPath), this, null);
 
 		Borderlayout borderlayout = (Borderlayout) component.getFellow("main");
 		borderlayout.setStyle("position: absolute");
@@ -307,7 +309,11 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 		}				
 		renderCalenderEvent();
 		divTabClicked(7);
-		}
+
+		//
+		Extensions.doZulCustomAction(component, zulPath);
+	}
+
 	private void afterPageAttached() {
 		Component p = getParent();
 		while (p != null) {

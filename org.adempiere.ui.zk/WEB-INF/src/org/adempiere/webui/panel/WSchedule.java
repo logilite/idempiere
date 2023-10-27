@@ -25,6 +25,7 @@ import java.util.TimeZone;
 import java.util.logging.Level;
 
 import org.adempiere.webui.ClientInfo;
+import org.adempiere.webui.Extensions;
 import org.adempiere.webui.component.Tabpanel;
 import org.adempiere.webui.component.ToolBarButton;
 import org.adempiere.webui.component.Window;
@@ -141,9 +142,10 @@ public class WSchedule extends Window implements EventListener<Event>
 	private void init() throws Exception
 	{
 		this.getChildren().clear();
-				
-		calendarContainer = Executions.createComponents(ThemeManager.getThemeResource("zul/calendar/calendar.zul"), this, null);
-		
+
+		String zulPath = "zul/calendar/calendar.zul";
+		calendarContainer = Executions.createComponents(ThemeManager.getThemeResource(zulPath), this, null);
+
 		borderlayout = (Borderlayout) calendarContainer.getFellow("main");
 		borderlayout.setStyle("position: absolute; width: 98%; margin: auto;");
 		ZKUpdateUtil.setHeight(borderlayout, "100%");
@@ -212,6 +214,9 @@ public class WSchedule extends Window implements EventListener<Event>
 			addCallback(AFTER_PAGE_ATTACHED, t -> afterPageAttached());
 			addEventListener(ON_MOBILE_SET_SELECTED_TAB_ECHO, evt -> calendars.invalidate());
 		}
+
+		//
+		Extensions.doZulCustomAction(calendarContainer, zulPath);
 	}
 
 	private void afterPageAttached() {

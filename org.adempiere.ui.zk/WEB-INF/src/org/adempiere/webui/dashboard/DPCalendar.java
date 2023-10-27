@@ -31,6 +31,7 @@ import org.adempiere.base.event.AbstractEventHandler;
 import org.adempiere.base.event.EventManager;
 import org.adempiere.base.event.IEventTopics;
 import org.adempiere.webui.ClientInfo;
+import org.adempiere.webui.Extensions;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.component.Tabpanel;
 import org.adempiere.webui.part.WindowContainer;
@@ -116,7 +117,9 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 	public DPCalendar() {
 		super();
 
-		Component component = Executions.createComponents(ThemeManager.getThemeResource("zul/calendar/calendar_mini.zul"), this, null);
+
+		String zulPath = "zul/calendar/calendar_mini.zul";
+		Component component = Executions.createComponents(ThemeManager.getThemeResource(zulPath), this, null);
 
 		calendars = (Calendars) component.getFellow("cal");
 
@@ -156,6 +159,9 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 			addCallback(AFTER_PAGE_ATTACHED, t -> afterPageAttached());
 			addEventListener(ON_MOBILE_SET_SELECTED_TAB_ECHO, evt -> calendars.invalidate());
 		}
+
+		//
+		Extensions.doZulCustomAction(component, zulPath);
 	}
 
 	private void afterPageAttached() {

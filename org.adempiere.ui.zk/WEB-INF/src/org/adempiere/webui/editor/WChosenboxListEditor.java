@@ -536,6 +536,11 @@ public class WChosenboxListEditor extends WEditor implements ContextMenuListener
     }
     
     @Override
+	public WEditorPopupMenu getPopupMenu()
+	{
+		return null;
+	}
+    
 	public void onMenu(ContextMenuEvent evt) 
 	{
 		if (WEditorPopupMenu.REQUERY_EVENT.equals(evt.getContextEvent()))
