@@ -232,6 +232,18 @@
             class="org.adempiere.pipo2.handler.InfoWindowAccessElementHandler"
             id="AD_InfoWindow_Access">
       </handler>
+      <handler
+            class="org.adempiere.pipo2.handler.AttributeSetElementHandler"
+            id="M_AttributeSet">
+      </handler>
+      <handler
+            class="org.adempiere.pipo2.handler.AttributeUseElementHandler"
+            id="M_AttributeUse">
+      </handler>
+      <handler
+            class="org.adempiere.pipo2.handler.TableAttributeElementHandler"
+            id="AD_TableAttribute">
+      </handler>
    </extension>
 
 </plugin>

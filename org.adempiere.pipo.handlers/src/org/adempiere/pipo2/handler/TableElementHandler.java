@@ -156,12 +156,35 @@ public class TableElementHandler extends AbstractElementHandler {
 		PackOut packOut = ctx.packOut;
 		AttributesImpl atts = new AttributesImpl();
 		X_AD_Table m_Table = new X_AD_Table (ctx.ctx, AD_Table_ID, null);
+		if (m_Table.getM_AttributeSet_ID() > 0)
+		{
+			try
+			{
+				new AttributeSetElementHandler().packOut(ctx.packOut, document, null, m_Table.getM_AttributeSet_ID());
+			}
+			catch (Exception e)
+			{
+				if (log.isLoggable(Level.INFO))
+					log.info(e.toString());
+			}
+		}
 		boolean createElement = isPackOutElement(ctx, m_Table);
 		if (createElement) {
 			verifyPackOutRequirement(m_Table);
 			addTypeName(atts, "table");
 			document.startElement("","",I_AD_Table.Table_Name,atts);
 			createTableBinding(ctx,document,m_Table);
+		}
+		
+		try
+		{
+			packOut.getCtx().ctx.put("Table_Name", I_AD_Table.Table_Name);
+			new TableAttributeElementHandler(I_AD_Table.Table_Name).packOut(packOut, document, null, m_Table.get_ID());
+		}
+		catch (Exception e)
+		{
+			if (log.isLoggable(Level.INFO))
+				log.info(e.toString());
 		}
 
 		try {

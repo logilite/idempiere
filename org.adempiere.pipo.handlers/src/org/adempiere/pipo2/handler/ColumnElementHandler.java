@@ -339,16 +339,30 @@ public class ColumnElementHandler extends AbstractElementHandler {
 		AttributesImpl atts = new AttributesImpl();
 		X_AD_Column m_Column = new X_AD_Column(ctx.ctx, AD_Column_ID,
 				getTrxName(ctx));
+		boolean createElement = isPackOutElement(ctx, m_Column);
+		PackOut packOut = ctx.packOut;
+		if (createElement)
+		{
+			verifyPackOutRequirement(m_Column);
 
-		if (!isPackOutElement(ctx, m_Column))
-			return;
+			addTypeName(atts, "table");
+			document.startElement("", "", I_AD_Column.Table_Name, atts);
+			createColumnBinding(ctx, document, m_Column);
+		}
 
-		verifyPackOutRequirement(m_Column);
-		
-		addTypeName(atts, "table");
-		document.startElement("", "", I_AD_Column.Table_Name, atts);
-		createColumnBinding(ctx, document, m_Column);
-		document.endElement("", "", I_AD_Column.Table_Name);
+		try
+		{
+			packOut.getCtx().ctx.put("Table_Name", I_AD_Column.Table_Name);
+			new TableAttributeElementHandler(I_AD_Column.Table_Name).packOut(packOut, document, null, m_Column.get_ID());
+		}
+		catch (Exception e)
+		{
+			if (log.isLoggable(Level.INFO))
+				log.info(e.toString());
+		}
+
+		if (createElement)
+			document.endElement("", "", I_AD_Column.Table_Name);
 	}
 
 	private void createColumnBinding(PIPOContext ctx, TransformerHandler document,

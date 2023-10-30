@@ -133,23 +133,40 @@ public class FieldElementHandler extends AbstractElementHandler {
 			throw new SAXException(e);
 		}
 
-		if (!isPackOutElement(ctx, m_Field))
-			return;
+		boolean createElement = isPackOutElement(ctx, m_Field);
+		if (createElement)
+		{
+			verifyPackOutRequirement(m_Field);
 
-		verifyPackOutRequirement(m_Field);
-		
-		AttributesImpl atts = new AttributesImpl();
-		addTypeName(atts, "table");
-		document.startElement("", "", X_AD_Field.Table_Name, atts);
-		createFieldBinding(ctx, document, m_Field);
-		packOut.getCtx().ctx.put("Table_Name",X_AD_Field.Table_Name);
-		try {
-			new CommonTranslationHandler().packOut(packOut,document,null,m_Field.get_ID());
-		} catch(Exception e) {
-			if (log.isLoggable(Level.INFO)) log.info(e.toString());
+			AttributesImpl atts = new AttributesImpl();
+			addTypeName(atts, "table");
+			document.startElement("", "", X_AD_Field.Table_Name, atts);
+			createFieldBinding(ctx, document, m_Field);
+			packOut.getCtx().ctx.put("Table_Name", X_AD_Field.Table_Name);
+			try
+			{
+				new CommonTranslationHandler().packOut(packOut, document, null, m_Field.get_ID());
+			}
+			catch (Exception e)
+			{
+				if (log.isLoggable(Level.INFO))
+					log.info(e.toString());
+			}
 		}
 
-		document.endElement("", "", X_AD_Field.Table_Name);
+		try
+		{
+			packOut.getCtx().ctx.put("Table_Name", X_AD_Field.Table_Name);
+			new TableAttributeElementHandler(X_AD_Field.Table_Name).packOut(packOut, document, null, m_Field.get_ID());
+		}
+		catch (Exception e)
+		{
+			if (log.isLoggable(Level.INFO))
+				log.info(e.toString());
+		}
+
+		if (createElement)
+			document.endElement("", "", X_AD_Field.Table_Name);
 	}
 
 	private void createFieldBinding(PIPOContext ctx, TransformerHandler document,

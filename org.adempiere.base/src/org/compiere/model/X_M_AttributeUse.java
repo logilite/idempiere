@@ -30,7 +30,7 @@ public class X_M_AttributeUse extends PO implements I_M_AttributeUse, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20231027L;
 
     /** Standard Constructor */
     public X_M_AttributeUse (Properties ctx, int M_AttributeUse_ID, String trxName)
@@ -52,7 +52,7 @@ public class X_M_AttributeUse extends PO implements I_M_AttributeUse, I_Persiste
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 6 - System - Client 
       */
     protected int get_AccessLevel()
     {
@@ -72,6 +72,23 @@ public class X_M_AttributeUse extends PO implements I_M_AttributeUse, I_Persiste
         .append(get_ID()).append("]");
       return sb.toString();
     }
+
+	/** Set Default Logic.
+		@param DefaultValue 
+		Default value hierarchy, separated by ;
+	  */
+	public void setDefaultValue (String DefaultValue)
+	{
+		set_Value (COLUMNNAME_DefaultValue, DefaultValue);
+	}
+
+	/** Get Default Logic.
+		@return Default value hierarchy, separated by ;
+	  */
+	public String getDefaultValue () 
+	{
+		return (String)get_Value(COLUMNNAME_DefaultValue);
+	}
 
 	public org.compiere.model.I_M_Attribute getM_Attribute() throws RuntimeException
     {

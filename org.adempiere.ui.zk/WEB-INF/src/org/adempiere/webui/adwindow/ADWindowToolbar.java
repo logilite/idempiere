@@ -134,7 +134,7 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
     
     private ToolBarButton btnShowMore;
     private ToolBarButton btnQuickForm;
-
+    private ToolBarButton btnAttributeForm;
 
     private HashMap<String, ToolBarButton> buttons = new HashMap<String, ToolBarButton>();
 	private ArrayList<ToolBarButton> mobileShowMoreButtons = new ArrayList<ToolBarButton>();
@@ -260,6 +260,9 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
         
         btnQuickForm = createButton("QuickForm", "QuickForm", "QuickForm");
         btnQuickForm.setDisabled(false);
+        
+        btnAttributeForm = createButton("AttributeForm", "AttributeForm", "AttributeForm");
+        btnAttributeForm.setDisabled(false);
         
         // Help and Exit should always be enabled
         btnHelp.setDisabled(false);
@@ -681,6 +684,15 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 	public void enableQuickForm(boolean enabled)
 	{
 		btnQuickForm.setDisabled(!enabled);
+	}
+	
+    /**
+     * Enable/disable Attribute Form button
+     * @param enabled
+     */
+	public void enableAttributeForm(boolean enabled)
+	{
+		btnAttributeForm.setDisabled(!enabled);
 	}
 
     public void lock(boolean locked)

@@ -155,6 +155,17 @@ public class ProcessElementHandler extends AbstractElementHandler {
 				}
 
 			}
+			
+			try
+			{
+				packOut.getCtx().ctx.put("Table_Name", I_AD_Process.Table_Name);
+				new TableAttributeElementHandler(I_AD_Process.Table_Name).packOut(packOut, document, null, m_Process.get_ID());
+			}
+			catch (Exception e)
+			{
+				if (log.isLoggable(Level.INFO))
+					log.info(e.toString());
+			}
 
 			Query query = new Query(ctx.ctx, "AD_Process_PARA", "AD_Process_ID = ?", getTrxName(ctx));
 			List<X_AD_Process_Para> paralist = query.setParameters(new Object[]{AD_Process_ID}).list();

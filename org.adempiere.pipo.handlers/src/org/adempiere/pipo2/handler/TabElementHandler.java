@@ -124,6 +124,17 @@ public class TabElementHandler extends AbstractElementHandler {
 				if (log.isLoggable(Level.INFO)) log.info(e.toString());
 			}
 		}
+		
+		try
+		{
+			packOut.getCtx().ctx.put("Table_Name", X_AD_Tab.Table_Name);
+			new TableAttributeElementHandler(X_AD_Tab.Table_Name).packOut(packOut, document, null, m_Tab.get_ID());
+		}
+		catch (Exception e)
+		{
+			if (log.isLoggable(Level.INFO))
+				log.info(e.toString());
+		}
 
 		//Fields tags.
 		String sql = "SELECT AD_Field_ID FROM AD_FIELD WHERE AD_TAB_ID = " + AD_Tab_ID

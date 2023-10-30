@@ -62,7 +62,7 @@ import org.xml.sax.helpers.AttributesImpl;
  */
 public class GenericPOElementHandler extends AbstractElementHandler {
 
-	private String m_tableName;
+	protected String m_tableName;
 
 	public GenericPOElementHandler() {
 	}
@@ -117,6 +117,7 @@ public class GenericPOElementHandler extends AbstractElementHandler {
 	public void endElement(PIPOContext ctx, Element element) throws SAXException {
 	}
 
+	@SuppressWarnings("resource")
 	public void create(PIPOContext ctx, TransformerHandler document)
 			throws SAXException {
 		AttributesImpl atts = new AttributesImpl();
@@ -196,6 +197,17 @@ public class GenericPOElementHandler extends AbstractElementHandler {
 						}
 					}
 				}
+				
+				try
+				{
+					ctx.packOut.getCtx().ctx.put("Table_Name", tableName);
+					new TableAttributeElementHandler(tableName).packOut(ctx.packOut, document, null, po.get_ID());
+				}
+				catch (Exception e)
+				{
+					if (log.isLoggable(Level.INFO))
+						log.info(e.toString());
+				}
 
 				for (int i = 1; i < components.length; i++) {
 					String tables[] = components[i].split("[>]");
@@ -252,6 +264,17 @@ public class GenericPOElementHandler extends AbstractElementHandler {
 						} catch(Exception e) {
 							if (log.isLoggable(Level.INFO)) log.info(e.toString());
 						}
+					}
+					
+					try
+					{
+						ctx.packOut.getCtx().ctx.put("Table_Name", mainTable);
+						new TableAttributeElementHandler(mainTable).packOut(ctx.packOut, document, null, po.get_ID());
+					}
+					catch (Exception e)
+					{
+						if (log.isLoggable(Level.INFO))
+							log.info(e.toString());
 					}
 				}
 				for (int i=1; i<tables.length; i++) {

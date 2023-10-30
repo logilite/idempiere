@@ -158,6 +158,17 @@ public class WindowElementHandler extends AbstractElementHandler {
 				if (log.isLoggable(Level.INFO)) log.info(e.toString());
 			}
 		}
+		
+		try
+		{
+			packOut.getCtx().ctx.put("Table_Name", X_AD_Window.Table_Name);
+			new TableAttributeElementHandler(X_AD_Window.Table_Name).packOut(packOut, document, null, m_Window.get_ID());
+		}
+		catch (Exception e)
+		{
+			if (log.isLoggable(Level.INFO))
+				log.info(e.toString());
+		}
 		// Tab Tag
 		String sql = "SELECT AD_Tab_ID, AD_Table_ID FROM AD_TAB WHERE AD_WINDOW_ID = "
 				+ AD_Window_ID;
