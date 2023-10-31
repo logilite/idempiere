@@ -42,6 +42,7 @@ import org.compiere.model.MTable;
 import org.compiere.model.PrintInfo;
 import org.compiere.process.ProcessInfo;
 import org.compiere.util.CLogger;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 
 /**
@@ -268,9 +269,20 @@ public class ReportCtl
 			Properties ctx = Env.getCtx();
 			MPrintFormat format = (MPrintFormat)o;
 			String TableName = MTable.getTableName(ctx, format.getAD_Table_ID());
-			MQuery query = MQuery.get (ctx, pi.getAD_PInstance_ID(), TableName);
-			if (query != null && !TableName.startsWith("T_") && pi.getRecord_ID() > 0)
+			MQuery query = MQuery.get(ctx, pi.getAD_PInstance_ID(), TableName);
+
+			if (query != null && !TableName.startsWith("T_") && pi.getRecord_IDs() != null
+					&& pi.getRecord_IDs().size() > 0)
+			{
+				// Remove parentheses from the Record_IDs array value converted for CSV string data
+				String whereClause = DB.inClauseForCSV(TableName + "_ID", pi.getRecord_IDs()).replaceAll("\\[|\\]", "");
+				query.addRestriction(whereClause);
+			}
+			else if (query != null && !TableName.startsWith("T_") && pi.getRecord_ID() > 0)
+			{
+
 				query.addRestriction(TableName + "_ID", MQuery.EQUAL, pi.getRecord_ID());
+			}
 			PrintInfo info = new PrintInfo(pi);
 			re = new ReportEngine(ctx, format, query, info, pi.isSummary(), null, WindowNo);
 		}

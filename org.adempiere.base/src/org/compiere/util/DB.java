@@ -2725,9 +2725,8 @@ public final class DB
 	 * @param  columnName
 	 * @param  arrObj       array object for integer or string
 	 * @return              IN clause
-	 * @throws SQLException
 	 */
-	public static String inClauseForCSV(String columnName, Object arrObj) throws SQLException
+	public static String inClauseForCSV(String columnName, Object arrObj)
 	{
 		String s = Util.convertArrayToStringForDB(arrObj, true);
 		if (!Util.isEmpty(s, true))
