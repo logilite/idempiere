@@ -35,6 +35,7 @@ import org.adempiere.pipo2.exception.DatabaseAccessException;
 import org.adempiere.pipo2.exception.POSaveFailedException;
 import org.compiere.model.I_AD_Process;
 import org.compiere.model.I_AD_Tab;
+import org.compiere.model.I_AD_TableAttribute;
 import org.compiere.model.I_AD_Window;
 import org.compiere.model.MTab;
 import org.compiere.model.X_AD_Field;
@@ -125,10 +126,11 @@ public class TabElementHandler extends AbstractElementHandler {
 			}
 		}
 		
+		packOut.getCtx().ctx.put("Table_Name", X_AD_Tab.Table_Name);
 		try
 		{
-			packOut.getCtx().ctx.put("Table_Name", X_AD_Tab.Table_Name);
-			new TableAttributeElementHandler(X_AD_Tab.Table_Name).packOut(packOut, document, null, m_Tab.get_ID());
+			ElementHandler handler = packOut.getHandler(I_AD_TableAttribute.Table_Name);
+			handler.packOut(packOut, document, null, m_Tab.get_ID());
 		}
 		catch (Exception e)
 		{

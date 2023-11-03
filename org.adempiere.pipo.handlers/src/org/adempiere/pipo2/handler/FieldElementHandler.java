@@ -33,6 +33,7 @@ import org.compiere.model.I_AD_Field;
 import org.compiere.model.I_AD_FieldGroup;
 import org.compiere.model.I_AD_Reference;
 import org.compiere.model.I_AD_Tab;
+import org.compiere.model.I_AD_TableAttribute;
 import org.compiere.model.I_AD_Val_Rule;
 import org.compiere.model.MField;
 import org.compiere.model.X_AD_Field;
@@ -154,10 +155,11 @@ public class FieldElementHandler extends AbstractElementHandler {
 			}
 		}
 
+		packOut.getCtx().ctx.put("Table_Name", X_AD_Field.Table_Name);
 		try
 		{
-			packOut.getCtx().ctx.put("Table_Name", X_AD_Field.Table_Name);
-			new TableAttributeElementHandler(X_AD_Field.Table_Name).packOut(packOut, document, null, m_Field.get_ID());
+			ElementHandler handler = packOut.getHandler(I_AD_TableAttribute.Table_Name);
+			handler.packOut(packOut, document, null, m_Field.get_ID());
 		}
 		catch (Exception e)
 		{

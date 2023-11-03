@@ -32,6 +32,7 @@ import org.adempiere.pipo2.exception.POSaveFailedException;
 import org.compiere.model.I_AD_Element;
 import org.compiere.model.I_AD_Process;
 import org.compiere.model.I_AD_Process_Para;
+import org.compiere.model.I_AD_TableAttribute;
 import org.compiere.model.X_AD_Package_Imp_Detail;
 import org.compiere.model.X_AD_Process_Para;
 import org.compiere.util.Env;
@@ -137,10 +138,11 @@ public class ProcessParaElementHandler extends AbstractElementHandler {
 			}
 		}
 
+		packOut.getCtx().ctx.put("Table_Name", I_AD_Process_Para.Table_Name);
 		try
 		{
-			packOut.getCtx().ctx.put("Table_Name", I_AD_Process_Para.Table_Name);
-			new TableAttributeElementHandler(I_AD_Process_Para.Table_Name).packOut(packOut, document, null, m_Processpara.get_ID());
+			ElementHandler handler = packOut.getHandler(I_AD_TableAttribute.Table_Name);
+			handler.packOut(packOut, document, null, m_Processpara.get_ID());
 		}
 		catch (Exception e)
 		{

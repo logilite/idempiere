@@ -42,6 +42,7 @@ import org.compiere.model.I_AD_Form;
 import org.compiere.model.I_AD_InfoWindow;
 import org.compiere.model.I_AD_Process;
 import org.compiere.model.I_AD_Role;
+import org.compiere.model.I_AD_TableAttribute;
 import org.compiere.model.I_AD_Window;
 import org.compiere.model.I_C_DocType;
 import org.compiere.model.MColumn;
@@ -198,10 +199,11 @@ public class GenericPOElementHandler extends AbstractElementHandler {
 					}
 				}
 				
+				ctx.packOut.getCtx().ctx.put("Table_Name", tableName);
 				try
 				{
-					ctx.packOut.getCtx().ctx.put("Table_Name", tableName);
-					new TableAttributeElementHandler(tableName).packOut(ctx.packOut, document, null, po.get_ID());
+					ElementHandler handler = ctx.packOut.getHandler(I_AD_TableAttribute.Table_Name);
+					handler.packOut(ctx.packOut, document, null, po.get_ID());
 				}
 				catch (Exception e)
 				{
@@ -266,10 +268,11 @@ public class GenericPOElementHandler extends AbstractElementHandler {
 						}
 					}
 					
+					ctx.packOut.getCtx().ctx.put("Table_Name", mainTable);
 					try
 					{
-						ctx.packOut.getCtx().ctx.put("Table_Name", mainTable);
-						new TableAttributeElementHandler(mainTable).packOut(ctx.packOut, document, null, po.get_ID());
+						ElementHandler handler = ctx.packOut.getHandler(I_AD_TableAttribute.Table_Name);
+						handler.packOut(ctx.packOut, document, null, po.get_ID());
 					}
 					catch (Exception e)
 					{

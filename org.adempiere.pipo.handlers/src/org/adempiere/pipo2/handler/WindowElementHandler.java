@@ -36,6 +36,7 @@ import org.adempiere.pipo2.exception.DatabaseAccessException;
 import org.adempiere.pipo2.exception.POSaveFailedException;
 import org.compiere.model.I_AD_Color;
 import org.compiere.model.I_AD_Image;
+import org.compiere.model.I_AD_TableAttribute;
 import org.compiere.model.I_AD_Window;
 import org.compiere.model.MWindow;
 import org.compiere.model.X_AD_Package_Exp_Detail;
@@ -159,10 +160,11 @@ public class WindowElementHandler extends AbstractElementHandler {
 			}
 		}
 		
+		packOut.getCtx().ctx.put("Table_Name", X_AD_Window.Table_Name);
 		try
 		{
-			packOut.getCtx().ctx.put("Table_Name", X_AD_Window.Table_Name);
-			new TableAttributeElementHandler(X_AD_Window.Table_Name).packOut(packOut, document, null, m_Window.get_ID());
+			ElementHandler handler = packOut.getHandler(I_AD_TableAttribute.Table_Name);
+			handler.packOut(packOut, document, null, m_Window.get_ID());
 		}
 		catch (Exception e)
 		{

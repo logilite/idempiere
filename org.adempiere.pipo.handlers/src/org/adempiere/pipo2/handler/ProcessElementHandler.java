@@ -34,6 +34,7 @@ import org.compiere.model.I_AD_PrintFormat;
 import org.compiere.model.I_AD_Process;
 import org.compiere.model.I_AD_Reference;
 import org.compiere.model.I_AD_ReportView;
+import org.compiere.model.I_AD_TableAttribute;
 import org.compiere.model.I_AD_Val_Rule;
 import org.compiere.model.I_AD_Workflow;
 import org.compiere.model.MAttachment;
@@ -156,10 +157,11 @@ public class ProcessElementHandler extends AbstractElementHandler {
 
 			}
 			
+			packOut.getCtx().ctx.put("Table_Name", I_AD_Process.Table_Name);
 			try
 			{
-				packOut.getCtx().ctx.put("Table_Name", I_AD_Process.Table_Name);
-				new TableAttributeElementHandler(I_AD_Process.Table_Name).packOut(packOut, document, null, m_Process.get_ID());
+				ElementHandler handler = packOut.getHandler(I_AD_TableAttribute.Table_Name);
+				handler.packOut(packOut, document, null, m_Process.get_ID());
 			}
 			catch (Exception e)
 			{

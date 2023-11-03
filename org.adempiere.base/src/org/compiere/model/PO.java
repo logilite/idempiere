@@ -122,16 +122,15 @@ public abstract class PO
 	private static final int QUERY_TIME_OUT = 300;
 	
 	/** Get value of the attribute for Table ID and Record ID  **/
-	private static final String	TABLE_ATTRIBUTE_VALUE_SQL = "SELECT a.Name, a.AttributeValueType, a.AD_Reference_ID, ta.Value, ta.ValueDate, ta.ValueNumber, av.M_AttributeValue_ID "
+	private static final String	TABLE_ATTRIBUTE_VALUE_SQL = "SELECT a.Name, a.AttributeValueType, a.AD_Reference_ID, ta.Value, ta.ValueDate, ta.ValueNumber, ta.M_AttributeValue_ID "
 																		+ "	FROM AD_TableAttribute ta "
 																		+ "	INNER JOIN M_Attribute a ON (a.M_Attribute_ID = ta.M_Attribute_ID) "
-																		+ "	LEFT JOIN M_AttributeValue av ON (av.M_AttributeValue_ID = ta.M_AttributeValue_ID) "
 																		+ "	WHERE ta.AD_Table_ID = ? AND Record_ID = ? AND a.IsActive = 'Y' ";
 	/** Get Default value of the attribute **/
 	private static final String				TABLE_ATTRIBUTE_DEFAULTVALUE_SQL	= "SELECT a.Name, a.AttributeValueType, a.AD_Reference_ID, COALESCE(atsu.DefaultValue , a.DefaultValue)	"
-																					+ "	FROM M_Attribute a	"
-																					+ "	INNER JOIN M_AttributeUse atsu ON (atsu.M_Attribute_ID = a.M_Attribute_ID)	"
-																					+ "	INNER JOIN AD_Table tb ON (tb.M_AttributeSet_ID = atsu.M_AttributeSet_ID)	"
+																					+ "	FROM AD_Table tb "
+																					+ "	INNER JOIN M_AttributeUse atsu ON (atsu.M_AttributeSet_ID = tb.M_AttributeSet_ID) "
+																					+ "	INNER JOIN M_Attribute a ON (a.M_Attribute_ID = atsu.M_Attribute_ID) "
 																					+ "	WHERE a.Name = ? AND a.IsActive = 'Y' AND tb.AD_Table_ID = ?	";
 
 	private static CCache<String, Object> s_tableAttributeDefault = new CCache<String, Object>("AD_TableAttribute_Default", 30);	

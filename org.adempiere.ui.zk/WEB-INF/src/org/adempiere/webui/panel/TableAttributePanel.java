@@ -1,3 +1,15 @@
+/******************************************************************************
+ * Copyright (C) 2016 Logilite Technologies LLP								  *
+ * This program is free software; you can redistribute it and/or modify it    *
+ * under the terms version 2 of the GNU General Public License as published   *
+ * by the Free Software Foundation. This program is distributed in the hope   *
+ * that it will be useful, but WITHOUT ANY WARRANTY; without even the implied *
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.           *
+ * See the GNU General Public License for more details.                       *
+ * You should have received a copy of the GNU General Public License along    *
+ * with this program; if not, write to the Free Software Foundation, Inc.,    *
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.                     *
+ *****************************************************************************/
 package org.adempiere.webui.panel;
 
 import java.math.BigDecimal;
@@ -31,6 +43,7 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -81,12 +94,12 @@ public class TableAttributePanel extends Window implements EventListener<Event>
 	} // InfoPAttribute
 
 	/** Attribute Editors */
-	private Map<MAttribute, WEditor>	m_attEditors	= new HashMap<MAttribute, WEditor>();
+	private Map<Integer, WEditor>	m_attEditors	= new HashMap<Integer, WEditor>();
 	/** Logger */
-	private static final CLogger		log				= CLogger.getCLogger(TableAttributePanel.class);
+	private static final CLogger	log				= CLogger.getCLogger(TableAttributePanel.class);
 
-	private Rows						rows			= null;
-	private ConfirmPanel				confirmPanel	= new ConfirmPanel(true);
+	private Rows					rows			= null;
+	private ConfirmPanel			confirmPanel	= new ConfirmPanel(true);
 
 	/**
 	 * Layout dialog
@@ -161,7 +174,9 @@ public class TableAttributePanel extends Window implements EventListener<Event>
 				Row row = rows.newRow();
 
 				Label label = editor.getLabel();
-				if (label.getValue() == null || label.getValue().trim().length() < 1)
+				if (!Util.isEmpty(attribute.getDescription(), true))
+					label.setValue(attribute.getDescription());
+				else if (Util.isEmpty(label.getValue(), true))
 					label.setValue(attribute.getName());
 
 				row.appendCellChild(label.rightAlign());
@@ -187,7 +202,7 @@ public class TableAttributePanel extends Window implements EventListener<Event>
 				Component fieldEditor = editor.getComponent();
 				row.appendCellChild(fieldEditor, 2);
 				editor.showMenu();
-				m_attEditors.put(attribute, editor);
+				m_attEditors.put(attribute.getM_Attribute_ID(), editor);
 			}
 		}
 		return 0;
@@ -282,11 +297,12 @@ public class TableAttributePanel extends Window implements EventListener<Event>
 
 	private void saveAttribute()
 	{
-		for (MAttribute att : m_attEditors.keySet())
+		for (Integer att_ID : m_attEditors.keySet())
 		{
-			WEditor editor = m_attEditors.get(att);
+			WEditor editor = m_attEditors.get(att_ID);
 			Object value = editor.getValue();
 
+			MAttribute att = new MAttribute(Env.getCtx(), att_ID, null);
 			MTableAttribute tableAtt = MTableAttribute.get(p_AD_Table_ID, p_Record_ID, att.getM_Attribute_ID());
 			if (tableAtt == null)
 			{
