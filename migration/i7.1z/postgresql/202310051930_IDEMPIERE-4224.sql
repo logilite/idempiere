@@ -212,3 +212,11 @@ INSERT INTO AD_Field (AD_Field_ID,Name,Description,Help,AD_Tab_ID,AD_Column_ID,I
 -- Oct 27, 2023, 2:46:42 PM IST
 ALTER TABLE M_AttributeUse ADD COLUMN DefaultValue VARCHAR(2000) DEFAULT NULL 
 ;
+
+-- Nov 4, 2023, 9:19:53 AM IST
+UPDATE AD_Column SET FieldLength=2000, AD_Reference_ID=14,Updated=TO_TIMESTAMP('2023-11-04 09:19:53','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID=215941
+;
+
+-- Nov 4, 2023, 9:19:58 AM IST
+INSERT INTO t_alter_column values('ad_tableattribute','Value','VARCHAR(2000)',null,'NULL',null)
+;
