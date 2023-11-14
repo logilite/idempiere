@@ -265,22 +265,6 @@ public class MReportColumn extends X_PA_ReportColumn
 			return false;
 		return PAPERIODTYPE_Natural.equals(pt);
 	}
-	
-	/**
-	 * Is it natural year opening balance ?
-	 * Natural type for year opening is for balance sheet account, it total till starting of finical
-	 * year. and for P&L it 0
-	 * 
-	 * @return true if Natural Natural year opening Balance Amount Type
-	 */
-	public boolean isNaturalYearOpening()
-	{
-		String pt = getPAPeriodType();
-		if (pt == null)
-			return false;
-
-		return PAPERIODTYPE_NaturalYearOpening.equals(pt);
-	}
 
 	/**
 	 * 	Get Segment Value Where Clause

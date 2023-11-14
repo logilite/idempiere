@@ -32,7 +32,7 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20231013L;
+	private static final long serialVersionUID = 20191121L;
 
     /** Standard Constructor */
     public X_PA_ReportColumn (Properties ctx, int PA_ReportColumn_ID, String trxName)
@@ -1113,8 +1113,6 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public static final String PAPERIODTYPE_Period = "P";
 	/** Natural = N */
 	public static final String PAPERIODTYPE_Natural = "N";
-	/** Natural Year opening = O */
-	public static final String PAPERIODTYPE_NaturalYearOpening = "O";
 	/** Set Period Type.
 		@param PAPeriodType 
 		PA Period Type

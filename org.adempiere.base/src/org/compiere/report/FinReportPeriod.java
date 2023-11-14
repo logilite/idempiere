@@ -89,19 +89,6 @@ public class FinReportPeriod
 		sql.append(DB.TO_DATE(m_EndDate));
 		return sql.toString();
 	}	//	getPeriodWhere
-	
-	/**
-	 * Get Opening Info
-	 * 
-	 * @return < start
-	 */
-	public String getYearOpeningWhere()
-	{
-		StringBuilder sql = new StringBuilder("< ");
-		sql.append(DB.TO_DATE(m_YearStartDate));
-		return sql.toString();
-	} // getOpeningWhere
-
 
 	/**
 	 * 	Is date in period
@@ -166,29 +153,12 @@ public class FinReportPeriod
 	 * @return is balance sheet a/c and <= end or BETWEEN start AND end 
 	 */
 	public String getNaturalWhere(String alias) {
-		return getTotalWhere() + " AND ( " + getNotPLAccountWhere(alias) + " OR TRUNC(" + alias + ".DateAcct) " + getYearWhere() + " ) ";
+		String yearWhere = getYearWhere();
+		String totalWhere = getTotalWhere();
+		String bs = " EXISTS (SELECT C_ElementValue_ID FROM C_ElementValue WHERE C_ElementValue_ID = " + alias + ".Account_ID AND AccountType NOT IN ('R', 'E'))";
+		String full = totalWhere + " AND ( " + bs + " OR TRUNC(" + alias + ".DateAcct) " + yearWhere + " ) ";
+		
+		return full;
 	}
-
-	/**
-	 * Get natural year opening balance dateacct filter
-	 * 
-	 * @param  alias table name or alias name
-	 * @return       is balance sheet a/c and < start
-	 */
-	public String getNaturalYearOpeningWhere(String alias)
-	{
-		return getYearOpeningWhere() + " AND " + getNotPLAccountWhere(alias);
-	} // getNaturalOpeningWhere
-
-	/**
-	 * Not P & L Account where
-	 * 
-	 * @param  alias
-	 * @return
-	 */
-	private String getNotPLAccountWhere(String alias)
-	{
-		return " EXISTS (SELECT C_ElementValue_ID FROM C_ElementValue WHERE C_ElementValue_ID = " + alias + ".Account_ID AND AccountType NOT IN ('R', 'E')) ";
-	} // getNotPLAccountWhere
 
 }	//	FinReportPeriod

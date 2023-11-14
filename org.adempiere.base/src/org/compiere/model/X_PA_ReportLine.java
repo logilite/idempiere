@@ -30,7 +30,7 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20231013L;
+	private static final long serialVersionUID = 20231004L;
 
     /** Standard Constructor */
     public X_PA_ReportLine (Properties ctx, int PA_ReportLine_ID, String trxName)
@@ -401,8 +401,6 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 	public static final String PAPERIODTYPE_Period = "P";
 	/** Natural = N */
 	public static final String PAPERIODTYPE_Natural = "N";
-	/** Natural Year opening = O */
-	public static final String PAPERIODTYPE_NaturalYearOpening = "O";
 	/** Set Period Type.
 		@param PAPeriodType 
 		PA Period Type
