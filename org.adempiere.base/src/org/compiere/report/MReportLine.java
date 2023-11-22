@@ -26,9 +26,13 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.model.I_C_AcctSchema_Element;
 import org.compiere.model.MAcctSchemaElement;
 import org.compiere.model.X_PA_ReportLine;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
+import org.compiere.util.Language;
+import org.compiere.util.Util;
 
 
 /**
@@ -47,7 +51,7 @@ public class MReportLine extends X_PA_ReportLine
 	private BasicStroke			overline_Stroke;
 	private Stroke				underline_Stroke;
 	private String				m_selectClauseCombination	= null;
-	List<String>				combinationGroupBy			= new ArrayList<String>();
+	private List<String>		combinationGroupBy			= new ArrayList<String>();
 
 	/**
 	 * 	Constructor
@@ -273,13 +277,30 @@ public class MReportLine extends X_PA_ReportLine
 	 */
 	public String getWhereClause(int PA_Hierarchy_ID)
 	{
+		return getWhereClause(PA_Hierarchy_ID, -1);
+	}
+
+	/**
+	 * Get SQL where clause (sources, posting type)
+	 * 
+	 * @param  PA_Hierarchy_ID hierarchy
+	 * @param  srcLine
+	 * @return                 where clause
+	 */
+	public String getWhereClause(int PA_Hierarchy_ID, int srcLine)
+	{
 		if (m_sources == null)
 			return "";
-		if (m_whereClause == null)
+		if (m_whereClause == null || srcLine >= 0)
 		{
 			//	Only one
 			if (m_sources.length == 0)
 				m_whereClause = "";
+			else if (srcLine >= 0 && m_sources.length > srcLine)
+			{
+				// TODO handle multiple source line with multiple accounts source line
+				m_whereClause = m_sources[srcLine].getWhereClause(PA_Hierarchy_ID);
+			}
 			else if (m_sources.length == 1)
 				m_whereClause = m_sources[0].getWhereClause(PA_Hierarchy_ID);
 			else
@@ -548,6 +569,152 @@ public class MReportLine extends X_PA_ReportLine
 		return new float[] { 10 * width, 4 * width };
 	} // getPatternDashed
 
+	/**
+	 * Get Value Query for Segment Type
+	 * 
+	 * @return Query for first source element or null
+	 */
+	public String getDimensionGroupQuery(int srcLine)
+	{
+		String dimensionGroupValue = getDimensionColumnNameValue(srcLine);
+		if (!Util.isEmpty(dimensionGroupValue))
+			return getDimensionGroupQuery(dimensionGroupValue);
+		return null;
+	} //
+
+	/**
+	 * Get Value Query for Dimension Group
+	 * 
+	 * @param  dimensionGroup Dimension Group
+	 * @return                query "SELECT Name FROM Table WHERE ID=" or "" if not found
+	 */
+	public static String getDimensionGroupQuery(String dimensionGroup)
+	{
+		String baseLanguage = Language.getBaseAD_Language();
+		String language = Language.getLoginLanguage().getAD_Language();
+		boolean translated = Env.isMultiLingualDocument(Env.getCtx()) && !language.equalsIgnoreCase(baseLanguage);
+		if (dimensionGroup.equals(DIMENSIONGROUP_Organization))
+		{
+			return "SELECT Name FROM AD_Org WHERE AD_Org_ID=";
+		}
+		else if (dimensionGroup.equals(DIMENSIONGROUP_BusinessPartner))
+		{
+			return "SELECT Name FROM C_BPartner WHERE C_BPartner_ID=";
+		}
+		else if (dimensionGroup.equals(DIMENSIONGROUP_Product))
+		{
+			if (translated)
+				return "SELECT t.Name FROM M_Product o JOIN M_Product_Trl t ON (o.M_Product_ID=t.M_Product_ID AND t.AD_Language="	+ DB.TO_STRING(language)
+						+ ") WHERE o.M_Product_ID=";
+			else
+				return "SELECT Name FROM M_Product WHERE M_Product_ID=";
+		}
+		else if (dimensionGroup.equals(DIMENSIONGROUP_Activity))
+		{
+			if (translated)
+				return "SELECT Name FROM C_Activity o JOIN C_Activity_Trl t ON (o.C_Activity_ID=t.C_Activity_ID AND t.AD_Language=" + DB.TO_STRING(language)
+						+ ") WHERE o.C_Activity_ID=";
+			else
+				return "SELECT Name FROM C_Activity WHERE C_Activity_ID=";
+		}
+		else if (dimensionGroup.equals(DIMENSIONGROUP_Campaign))
+		{
+			if (translated)
+				return "SELECT Name FROM C_Campaign o JOIN C_Campaign_Trl t ON (o.C_Campaign_ID=t.C_Campaign_ID AND t.AD_Language=" + DB.TO_STRING(language)
+						+ ") WHERE o.C_Campaign_ID=";
+			else
+				return "SELECT Name FROM C_Campaign WHERE C_Campaign_ID=";
+		}
+		else if (dimensionGroup.equals(DIMENSIONGROUP_Project))
+		{
+			return "SELECT Name FROM C_Project WHERE C_Project_ID=";
+		}
+		else if (dimensionGroup.equals(DIMENSIONGROUP_SalesRegion))
+		{
+			if (translated)
+				return "SELECT Name FROM C_SalesRegion o JOIN C_SalesRegion_Trl t ON (o.C_SalesRegion_ID=t.C_SalesRegion_ID AND t.AD_Language="
+						+ DB.TO_STRING(language) + ") WHERE o.C_SalesRegion_ID=";
+			else
+				return "SELECT Name FROM C_SalesRegion WHERE C_SalesRegion_ID=";
+		}
+		//
+		return "";
+	} // getValueQuery
+
+	/**
+	 * @param  srcLine
+	 * @return         Dimension Group Column Name
+	 */
+	public String getDimensionColumnName(int srcLine)
+	{
+		String groupValue = getDimensionColumnNameValue(srcLine);
+		return !Util.isEmpty(groupValue) ? getDimensionColumnName(groupValue) : null;
+	}
+
+	/**
+	 * get Dimension Group Value
+	 * First preference is given to source level and then report line level.
+	 * 
+	 * @param  srcLine
+	 * @return         Dimension Group Value
+	 */
+	private String getDimensionColumnNameValue(int srcLine)
+	{
+		String groupValue = null;
+		if (m_sources != null && m_sources.length > srcLine && srcLine >= 0)
+		{
+			groupValue = m_sources[srcLine].getDimensionGroup();
+		}
+		else
+		{
+			for (int i = 0; i < m_sources.length; i++)
+			{
+				if (Util.isEmpty(m_sources[i].getDimensionGroup()))
+					continue;
+
+				String col = m_sources[i].getDimensionGroup();
+				if (groupValue == null || groupValue.length() == 0)
+					groupValue = col;
+				else if (!groupValue.equals(col))
+				{
+					if (log.isLoggable(Level.CONFIG))
+						log.config("More than one: " + groupValue + " - " + col);
+					break;
+				}
+			}
+		}
+
+		if (Util.isEmpty(groupValue) && !Util.isEmpty(getDimensionGroup()))
+			groupValue = getDimensionGroup();
+
+		return groupValue;
+	} // getDimensionGroupValue
+
+	/**
+	 * Get Column Name of DimensionGroup
+	 * 
+	 * @param  elementType DimensionGroup
+	 * @return             column name or "" if not found
+	 */
+	public static String getDimensionColumnName(String elementType)
+	{
+		if (elementType.equals(DIMENSIONGROUP_Activity))
+			return I_C_AcctSchema_Element.COLUMNNAME_C_Activity_ID;
+		else if (elementType.equals(DIMENSIONGROUP_BusinessPartner))
+			return I_C_AcctSchema_Element.COLUMNNAME_C_BPartner_ID;
+		else if (elementType.equals(DIMENSIONGROUP_Campaign))
+			return I_C_AcctSchema_Element.COLUMNNAME_C_Campaign_ID;
+		else if (elementType.equals(DIMENSIONGROUP_Organization))
+			return I_C_AcctSchema_Element.COLUMNNAME_AD_Org_ID;
+		else if (elementType.equals(DIMENSIONGROUP_Product))
+			return I_C_AcctSchema_Element.COLUMNNAME_M_Product_ID;
+		else if (elementType.equals(DIMENSIONGROUP_Project))
+			return I_C_AcctSchema_Element.COLUMNNAME_C_Project_ID;
+		else if (elementType.equals(DIMENSIONGROUP_SalesRegion))
+			return I_C_AcctSchema_Element.COLUMNNAME_C_SalesRegion_ID;
+		return "";
+	} // getDimensionColumnName
+	
 	/**
 	 * Get Select Clause for Combination
 	 * 

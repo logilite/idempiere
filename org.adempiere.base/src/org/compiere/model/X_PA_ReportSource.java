@@ -30,7 +30,7 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20231004L;
 
     /** Standard Constructor */
     public X_PA_ReportSource (Properties ctx, int PA_ReportSource_ID, String trxName)
@@ -334,6 +334,40 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
 	public String getDescription () 
 	{
 		return (String)get_Value(COLUMNNAME_Description);
+	}
+
+	/** DimensionGroup AD_Reference_ID=200249 */
+	public static final int DIMENSIONGROUP_AD_Reference_ID=200249;
+	/** Organization = OO */
+	public static final String DIMENSIONGROUP_Organization = "OO";
+	/** Product = PR */
+	public static final String DIMENSIONGROUP_Product = "PR";
+	/** Sales Region = SR */
+	public static final String DIMENSIONGROUP_SalesRegion = "SR";
+	/** Project = PJ */
+	public static final String DIMENSIONGROUP_Project = "PJ";
+	/** Campaign = MC */
+	public static final String DIMENSIONGROUP_Campaign = "MC";
+	/** Activity = AY */
+	public static final String DIMENSIONGROUP_Activity = "AY";
+	/** Business Partner = BP */
+	public static final String DIMENSIONGROUP_BusinessPartner = "BP";
+	/** Set Dimension Group.
+		@param DimensionGroup 
+		Dimension Group for report line and source.
+	  */
+	public void setDimensionGroup (String DimensionGroup)
+	{
+
+		set_Value (COLUMNNAME_DimensionGroup, DimensionGroup);
+	}
+
+	/** Get Dimension Group.
+		@return Dimension Group for report line and source.
+	  */
+	public String getDimensionGroup () 
+	{
+		return (String)get_Value(COLUMNNAME_DimensionGroup);
 	}
 
 	/** ElementType AD_Reference_ID=53280 */

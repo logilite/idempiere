@@ -209,6 +209,19 @@ public interface I_PA_ReportSource
 	  */
 	public String getDescription();
 
+    /** Column name DimensionGroup */
+    public static final String COLUMNNAME_DimensionGroup = "DimensionGroup";
+
+	/** Set Dimension Group.
+	  * Dimension Group for report line and source.
+	  */
+	public void setDimensionGroup (String DimensionGroup);
+
+	/** Get Dimension Group.
+	  * Dimension Group for report line and source.
+	  */
+	public String getDimensionGroup();
+
     /** Column name ElementType */
     public static final String COLUMNNAME_ElementType = "ElementType";
 
