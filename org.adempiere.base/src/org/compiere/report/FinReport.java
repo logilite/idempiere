@@ -446,6 +446,10 @@ public class FinReport extends SvrProcess
 				{
 						select.append( frp.getNaturalWhere("fa"));
 				}
+				else if (m_lines[line].isNaturalYearOpening())
+				{
+					select.append(frp.getNaturalYearOpeningWhere("fa"));
+				}
 				else
 				{
 					log.log(Level.SEVERE, "No valid Line PAPeriodType");
@@ -490,6 +494,10 @@ public class FinReport extends SvrProcess
 						String bs = " EXISTS (SELECT C_ElementValue_ID FROM C_ElementValue WHERE C_ElementValue_ID = fa.Account_ID AND AccountType NOT IN ('R', 'E'))";
 						select.append(totalWhere + " AND ( " + bs + " OR TRUNC(fa.DateAcct) " + yearWhere + " ) ");
 					}
+				}
+				else if (m_columns[col].isNaturalYearOpening())
+				{
+					select.append(frp.getNaturalYearOpeningWhere("fa"));
 				}
 				else
 				{
@@ -1538,6 +1546,8 @@ public class FinReport extends SvrProcess
 					select.append(frp.getYearWhere());
 				else if (m_lines[line].isNatural())
 					select.append(frp.getNaturalWhere("fb"));
+				else if (m_lines[line].isNaturalYearOpening())
+					select.append(frp.getNaturalYearOpeningWhere("fb"));
 				else
 					select.append(frp.getTotalWhere());
 			}
@@ -1569,6 +1579,10 @@ public class FinReport extends SvrProcess
 						String full = totalWhere + " AND ( " + bs + " OR TRUNC(fb.DateAcct) " + yearWhere + " ) ";
 						select.append(full);
 					}
+				}
+				else if (m_columns[col].isNaturalYearOpening())
+				{
+					select.append(frp.getNaturalYearOpeningWhere("fb"));
 				}
 				else
 				{
@@ -1905,6 +1919,8 @@ public class FinReport extends SvrProcess
 					select.append(frp.getYearWhere());
 				else if (m_lines[line].isNatural())
 					select.append(frp.getNaturalWhere("fb"));
+				else if (m_lines[line].isNaturalYearOpening())
+					select.append(frp.getNaturalYearOpeningWhere("fb"));
 				else
 					select.append(frp.getTotalWhere());
 			}
@@ -1936,6 +1952,10 @@ public class FinReport extends SvrProcess
 						String full = totalWhere + " AND ( " + bs + " OR TRUNC(fb.DateAcct) " + yearWhere + " ) ";
 						select.append(full);
 					}
+				}
+				else if (m_columns[col].isNaturalYearOpening())
+				{
+					select.append(frp.getNaturalYearOpeningWhere("fb"));
 				}
 				else
 				{
