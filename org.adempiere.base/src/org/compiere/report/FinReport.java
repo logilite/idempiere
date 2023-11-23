@@ -551,7 +551,7 @@ public class FinReport extends SvrProcess
 			update.insert (0, "UPDATE T_Report SET ");
 			update.append(" WHERE AD_PInstance_ID=").append(getAD_PInstance_ID())
 				.append(" AND PA_ReportLine_ID=").append(m_lines[line].getPA_ReportLine_ID())
-				.append(" AND ABS(LevelNo)<3");		//	0=Line 1=Acct
+				.append(" AND ABS(LevelNo)<2");		//	0=Line 1=Acct
 			int no = DB.executeUpdate(update.toString(), get_TrxName());
 			if (no != 1)
 				log.log(Level.SEVERE, "#=" + no + " for " + update);
@@ -688,13 +688,13 @@ public class FinReport extends SvrProcess
 					sb.append(oper_1);
 				else
 					sb.append(getLineIDs (oper_1, oper_2));		//	list of columns to add up
-				sb.append(") AND ABS(r2.LevelNo)<2) ");		//	0=Line 1=Acct
+				sb.append(") AND ABS(r2.LevelNo)<1) ");		//	0=Line 1=Acct
 				if (DB.isPostgreSQL()) {
 					sb.append(" r2 ");
 				}
 				sb.append("WHERE T_Report.AD_PInstance_ID=").append(getAD_PInstance_ID())
 					.append(" AND T_Report.PA_ReportLine_ID=").append(m_lines[line].getPA_ReportLine_ID())
-					.append(" AND ABS(T_Report.LevelNo)<2");		//	not trx
+					.append(" AND ABS(T_Report.LevelNo)<1");		//	not trx
 				int no = DB.executeUpdate(sb.toString(), get_TrxName());
 				if (no != 1)
 					log.log(Level.SEVERE, "(+) #=" + no + " for " + m_lines[line] + " - " + sb.toString());
@@ -757,7 +757,7 @@ public class FinReport extends SvrProcess
 				//
 				sb.append("WHERE T_Report.AD_PInstance_ID=").append(getAD_PInstance_ID())
 					   .append(" AND T_Report.PA_ReportLine_ID=").append(m_lines[line].getPA_ReportLine_ID())
-					.append(" AND ABS(T_Report.LevelNo)<2");			//	0=Line 1=Acct
+					.append(" AND ABS(T_Report.LevelNo)<1");			//	0=Line 1=Acct
 				int no = DB.executeUpdate(sb.toString(), get_TrxName());
 				if (no != 1)
 				{
@@ -845,7 +845,7 @@ public class FinReport extends SvrProcess
 				//
 				sb.append("WHERE r1.AD_PInstance_ID=").append(getAD_PInstance_ID())
 					   .append(" AND r1.PA_ReportLine_ID=").append(m_lines[line].getPA_ReportLine_ID())
-					.append(" AND ABS(r1.LevelNo)<3");			//	0=Line 1=Acct
+					.append(" AND ABS(r1.LevelNo)<1");			//	0=Line 1=Acct
 				no = DB.executeUpdate(sb.toString(), get_TrxName());
 				if (no != 1)
 					log.severe ("(x) #=" + no + " for " + m_lines[line] + " - " + sb.toString ());
@@ -958,7 +958,7 @@ public class FinReport extends SvrProcess
 			}
 			//
 			sb.append(" WHERE AD_PInstance_ID=").append(getAD_PInstance_ID())
-				.append(" AND ABS(LevelNo)<3");			//	0=Line 1=Acct
+				.append(" AND ABS(LevelNo)<2");			//	0=Line 1=Acct
 			int no = DB.executeUpdate(sb.toString(), get_TrxName());
 			if (no < 1)
 				log.severe ("#=" + no + " for " + m_columns[col] 
@@ -991,7 +991,7 @@ public class FinReport extends SvrProcess
 		{
 			sb.append(" WHERE 	AD_PInstance_ID = ").append(getAD_PInstance_ID());
 			// 0=Line 1=Acct
-			sb.append(" AND ABS(LevelNo) < 3 ");
+			sb.append(" AND ABS(LevelNo) < 2  ");
 			sb.append(" AND EXISTS (SELECT 1 FROM PA_ReportLine rl WHERE rl.PA_ReportLine_ID=T_Report.PA_ReportLine_ID AND rl.IsShowOppositeSign='Y' AND rl.IsActive='Y') ");
 			int no = DB.executeUpdate(sb.toString(), get_TrxName());
 			if (no < 1)
@@ -1128,7 +1128,7 @@ public class FinReport extends SvrProcess
 				}
 							//
 				sb.append(" WHERE AD_PInstance_ID=").append(getAD_PInstance_ID())
-					.append(" AND ABS(LevelNo)<3");			//	0=Line 1=Acct
+					.append(" AND ABS(LevelNo)<2");			//	0=Line 1=Acct
 				if (lteq)
 				{
 					sb.append(" AND seqNo <= " + currentSeq);
@@ -1322,7 +1322,7 @@ public class FinReport extends SvrProcess
 				+ "FROM T_Report r2 "
 				+ "WHERE r1.AD_PInstance_ID=r2.AD_PInstance_ID AND r1.PA_ReportLine_ID=r2.PA_ReportLine_ID"
 				+ " AND r2.Record_ID=0 AND r2.Fact_Acct_ID=0)"
-			+ "WHERE SeqNo IS NULL");
+			+ " WHERE SeqNo IS NULL");
 		int no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("SeqNo #=" + no);
 
@@ -1391,7 +1391,7 @@ public class FinReport extends SvrProcess
 
 		MReportSource[] sources = m_lines[line].getSources();
 		boolean isCombination = sources[0].getElementType().equals("CO");
-		for (int srcLine = 0; srcLine < m_lines[line].getSources().length; srcLine++)
+		for (int srcLine = 0; srcLine < sources.length; srcLine++)
 		{
 			// Handle the default behavior: if it is not a combination line and dimension is not set then it user all source lines as where clause and break loop
 			String srcDimGroupVariable = m_lines[line].getDimensionColumnName(srcLine);
@@ -1507,7 +1507,6 @@ public class FinReport extends SvrProcess
 		// for all columns create select statement
 		for (int col = 0; col < m_columns.length; col++)
 		{
-			insert.append(", ");
 			if (listSourceNoTrx)
 				unionInsert.append(", Cast(NULL AS NUMBER)");
 			// No calculation
@@ -1626,7 +1625,7 @@ public class FinReport extends SvrProcess
 			if (log.isLoggable(Level.FINEST))
 				log.finest("Col=" + col + ", Line=" + line + ": " + select);
 			//
-			insert.append("(").append(select).append(")");
+			insert.append(", (").append(select).append(")");
 		}
 		// WHERE (sources, posting type)
 		StringBuffer where = new StringBuffer("");
