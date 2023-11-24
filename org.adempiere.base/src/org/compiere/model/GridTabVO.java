@@ -170,7 +170,7 @@ public class GridTabVO implements Evaluatee, Serializable
 			
 			if (rs.getString("IsReadOnly").equals("Y"))
 				vo.IsReadOnly = true;
-			if (userDef != null && userDef.getIsReadOnly() != null)
+			if (userDef != null)
 				vo.IsReadOnly = MUserDefTab.ISREADONLY_Yes.equals(userDef.getIsReadOnly());
 			vo.ReadOnlyLogic = rs.getString("ReadOnlyLogic");
 			if (userDef != null && userDef.getReadOnlyLogic() != null)

@@ -29,6 +29,7 @@ import javax.xml.transform.sax.TransformerHandler;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.pipo2.AbstractElementHandler;
 import org.adempiere.pipo2.Element;
+import org.adempiere.pipo2.ElementHandler;
 import org.adempiere.pipo2.PIPOContext;
 import org.adempiere.pipo2.PackOut;
 import org.adempiere.pipo2.PoExporter;
@@ -37,6 +38,7 @@ import org.adempiere.pipo2.exception.DatabaseAccessException;
 import org.adempiere.pipo2.exception.POSaveFailedException;
 import org.compiere.model.I_AD_Column;
 import org.compiere.model.I_AD_Table;
+import org.compiere.model.I_AD_TableAttribute;
 import org.compiere.model.MColumn;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
@@ -345,16 +347,31 @@ public class ColumnElementHandler extends AbstractElementHandler {
 		AttributesImpl atts = new AttributesImpl();
 		X_AD_Column m_Column = new X_AD_Column(ctx.ctx, AD_Column_ID,
 				getTrxName(ctx));
+		boolean createElement = isPackOutElement(ctx, m_Column);
+		PackOut packOut = ctx.packOut;
+		if (createElement)
+		{//TODO what if column not changed but related table attribute changed? I suggest in that case only Column's min field exported while changes table attribute exported
+			verifyPackOutRequirement(m_Column);
 
-		if (!isPackOutElement(ctx, m_Column))
-			return;
+			addTypeName(atts, "table");
+			document.startElement("", "", I_AD_Column.Table_Name, atts);
+			createColumnBinding(ctx, document, m_Column);
+		}
 
-		verifyPackOutRequirement(m_Column);
-		
-		addTypeName(atts, "table");
-		document.startElement("", "", I_AD_Column.Table_Name, atts);
-		createColumnBinding(ctx, document, m_Column);
-		document.endElement("", "", I_AD_Column.Table_Name);
+		packOut.getCtx().ctx.put("Table_Name", I_AD_Column.Table_Name);
+		try
+		{
+			ElementHandler handler = packOut.getHandler(I_AD_TableAttribute.Table_Name);
+			handler.packOut(packOut, document, null, m_Column.get_ID());
+		}
+		catch (Exception e)
+		{
+			if (log.isLoggable(Level.INFO))
+				log.info(e.toString());
+		}
+
+		if (createElement)
+			document.endElement("", "", I_AD_Column.Table_Name);
 	}
 
 	private void createColumnBinding(PIPOContext ctx, TransformerHandler document,

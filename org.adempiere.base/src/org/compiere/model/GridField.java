@@ -1293,7 +1293,7 @@ public class GridField
 	{
 		//  ** static content **
 		//  not displayed
-		if (!m_vo.IsDisplayedGrid)
+		if (!m_vo.IsDisplayedGrid && !m_vo.IsDisplayed)
 			return false;
 		//  no restrictions
 		if (m_vo.DisplayLogic.equals(""))

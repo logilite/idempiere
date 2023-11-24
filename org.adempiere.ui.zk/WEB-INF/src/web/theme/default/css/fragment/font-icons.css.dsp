@@ -372,3 +372,7 @@
 .z-icon-Paste:before {
 	content: "\f0ea";
 }
+
+.z-icon-AttributeForm:before {
+	content: "\f29e";
+}
