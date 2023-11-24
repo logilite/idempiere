@@ -80,6 +80,7 @@
 .datetime-box {
 	display: inline-block;
 	white-space:nowrap;
+	width: 50%;
 }
 
 .datetime-box .z-datebox {
