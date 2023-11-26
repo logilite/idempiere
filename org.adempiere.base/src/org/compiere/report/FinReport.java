@@ -1335,7 +1335,7 @@ public class FinReport extends SvrProcess
 									+ "WHERE DimensionGroupName IS NULL AND AD_PInstance_ID = ").append(getAD_PInstance_ID());
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE))
-			log.fine("SeqNo #=" + no);
+			log.fine("dimension summary line with dimension record id #=" + no);
 		
 		// make the dimension group name the same as a summary line of the account, if the line does not have any value in the dimension record id
 		sql = new StringBuilder("UPDATE T_Report r1 "
@@ -1346,7 +1346,14 @@ public class FinReport extends SvrProcess
 									+ "WHERE DimensionGroupName IS NULL AND AD_PInstance_ID = ").append(getAD_PInstance_ID());
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE))
-			log.fine("SeqNo #=" + no);
+			log.fine("dimension summary line of the account without dimension record id #=" + no);
+		
+		// Set dimension group name remaining line
+		sql = new StringBuilder("UPDATE T_Report SET DimensionGroupName = Name WHERE AD_PInstance_ID=")
+				.append(getAD_PInstance_ID()).append(" AND DimensionGroupName IS NULL");
+		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.FINE))
+			log.fine("dimension group name remaining line #=" + no);
 
 		if (!m_report.isListTrx())
 			return;
