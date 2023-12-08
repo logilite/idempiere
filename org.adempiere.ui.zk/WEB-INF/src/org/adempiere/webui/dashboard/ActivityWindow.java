@@ -168,7 +168,6 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 		txtComments = new Textbox();
 		txtComments.setRows(5);
 		ZKUpdateUtil.setWidth(txtComments, "95%");
-		ZKUpdateUtil.setHeight(txtComments, "100%");
 		txtComments.setReadonly(m_readOnly);
 
 		txtDescription = new Textbox();
