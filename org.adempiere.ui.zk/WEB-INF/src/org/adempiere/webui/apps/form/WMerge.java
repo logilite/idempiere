@@ -64,22 +64,22 @@ public class WMerge extends Merge implements IFormController, EventListener<Even
 	@SuppressWarnings("unused")
 	private static final long serialVersionUID = 5797395051958101596L;
 	
-	private WMergeUI form;
+	protected WMergeUI form;
 
-	private Label[]	m_label = null;
-	private WEditor[]	m_from = null;
-	private WEditor[]	m_to = null;
+	protected Label[]	m_label = null;
+	protected WEditor[]	m_from = null;
+	protected WEditor[]	m_to = null;
 
-	private Borderlayout mainLayout = new Borderlayout();
-	private Panel CenterPanel = new Panel();
-	private Grid centerLayout = GridFactory.newGridLayout();
-	private Label mergeFromLabel = new Label();
-	private Label mergeToLabel = new Label();
-	private ConfirmPanel confirmPanel = new ConfirmPanel(true);
-	private String m_msg;
-	private boolean m_success;
+	protected Borderlayout mainLayout = new Borderlayout();
+	protected Panel CenterPanel = new Panel();
+	protected Grid centerLayout = GridFactory.newGridLayout();
+	protected Label mergeFromLabel = new Label();
+	protected Label mergeToLabel = new Label();
+	protected ConfirmPanel confirmPanel = new ConfirmPanel(true);
+	protected String m_msg;
+	protected boolean m_success;
 
-	private MergeRunnable runnable;
+	protected MergeRunnable runnable;
 
 	/**
 	 *	Initialize Panel
@@ -104,7 +104,7 @@ public class WMerge extends Merge implements IFormController, EventListener<Even
 	/**
 	 * 	Pre Init
 	 */
-	private void preInit()
+	protected void preInit()
 	{
 		int count = 4;			//	** Update **
 		m_columnName = new String[count];
@@ -126,7 +126,7 @@ public class WMerge extends Merge implements IFormController, EventListener<Even
 	 *	@param displayType display type
 	 *	@param ColumnName column name
 	 */
-	private void preInit (int index, int AD_Column_ID, int displayType, String ColumnName)
+	protected void preInit (int index, int AD_Column_ID, int displayType, String ColumnName)
 	{
 		m_columnName[index] = ColumnName;
 		String what = Msg.translate(Env.getCtx(), ColumnName);
@@ -149,7 +149,7 @@ public class WMerge extends Merge implements IFormController, EventListener<Even
 	 * 	Static init
 	 * 	@throws java.lang.Exception
 	 */
-	void zkInit () throws Exception
+	protected void zkInit () throws Exception
 	{
 		form.appendChild (mainLayout);
 		ZKUpdateUtil.setHeight(mainLayout, "100%");
