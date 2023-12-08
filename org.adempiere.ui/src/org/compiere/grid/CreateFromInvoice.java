@@ -450,14 +450,6 @@ public abstract class CreateFromInvoice extends CreateFrom
 
 				//	Create new Invoice Line
 				invoice.createLineFrom(C_OrderLine_ID, M_InOutLine_ID, M_RMALine_ID, M_Product_ID, C_UOM_ID, QtyEntered);
-					if(invoiceLine.getC_UOM_ID()!=inoutLine.getC_UOM_ID()) {
-						invoiceLine.setC_UOM_ID(inoutLine.getC_UOM_ID());						
-						BigDecimal PriceEntered = MUOMConversion.convertProductFrom (Env.getCtx(), M_Product_ID, 
-								inoutLine.getC_UOM_ID(), invoiceLine.getPriceEntered());
-							if (PriceEntered == null)
-								throw new AdempiereException("No Conversion For Price=" + invoiceLine.getPriceEntered());
-						invoiceLine.setPriceEntered(PriceEntered);
-					}
 			}   //   if selected
 		}   //  for all rows
 		
