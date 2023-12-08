@@ -652,7 +652,7 @@ public class Match
 			if (matchToType == MATCH_ORDER)
 				m_groupBy = m_groupBy + "<>SUM(CASE WHEN m.M_InOutLine_ID IS NOT NULL THEN COALESCE(m.Qty,0) ELSE 0 END)";
 			else
-				m_groupBy = m_groupBy + "<>SUM(CASE WHEN dt.DocBaseType='MMS' AND dt.IsSOTrx='N' THEN COALESCE(m.Qty,0) * -1 ELSE COALESCE(m.Qty,0) END))";
+				m_groupBy = m_groupBy + "<>SUM(CASE WHEN dt.DocBaseType='MMS' AND dt.IsSOTrx='N' THEN COALESCE(m.Qty,0) * -1 ELSE COALESCE(m.Qty,0) END)";
 		}
 	}   //  tableInit
 
