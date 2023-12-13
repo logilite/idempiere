@@ -1671,6 +1671,29 @@ public class MInOut extends X_M_InOut implements DocAction
 	
 						if (dateMPolicy == null && storages.length > 0)
 							dateMPolicy = storages[0].getDateMaterialPolicy();
+						
+						// if dateMPolicy is null and it is customer return then get all storage records for same Product, ASI and Warehouse and use material policy date from first storage
+						if (dateMPolicy == null && sLine.getM_RMALine_ID() > 0)
+						{
+							MLocator locator = MLocator.get(getCtx(), sLine.getM_Locator_ID());
+							MWarehouse warehouse = MWarehouse.get(getCtx(), locator.getM_Warehouse_ID());
+							
+							String sqlWhere = "M_StorageOnHand.M_Product_ID=?"
+									+ " AND M_StorageOnHand.M_AttributeSetInstance_ID=?"
+									+ " AND loc.M_Warehouse_ID=?"
+									+ " AND M_StorageOnHand.DateMaterialPolicy IS NOT NULL";
+							MStorageOnHand storage = new Query(getCtx(), MStorageOnHand.Table_Name, sqlWhere,
+									get_TrxName())
+											.addJoinClause(
+													"INNER JOIN M_Locator loc ON loc.M_Locator_ID=M_StorageOnHand.M_Locator_ID")
+											.setParameters(sLine.getM_Product_ID(),
+													sLine.getM_AttributeSetInstance_ID(), warehouse.getM_Warehouse_ID())
+											.setOrderBy("M_StorageOnHand.Created").first();
+							if (storage != null)
+							{
+								dateMPolicy = storage.getDateMaterialPolicy();
+							}
+						}
 	
 						if(dateMPolicy==null)
 							dateMPolicy = getMovementDate();
