@@ -20,6 +20,7 @@ import javax.swing.event.ListDataListener;
 
 import org.adempiere.webui.ValuePreference;
 import org.adempiere.webui.adwindow.QuickGridTabRowRenderer;
+import org.adempiere.webui.component.Button;
 import org.adempiere.webui.component.MultiSelectBox;
 import org.adempiere.webui.event.ContextMenuEvent;
 import org.adempiere.webui.event.ContextMenuListener;
@@ -34,6 +35,7 @@ import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
+import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -74,6 +76,7 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 	{
 		getComponent().getPopupComponent().addEventListener(Events.ON_OPEN, this);
 		getComponent().getTextbox().addEventListener(Events.ON_CLICK, this);
+		getComponent().getBtnSelectAll().addEventListener(Events.ON_CLICK, this);
 
 		if (lookup != null)
 		{
@@ -93,6 +96,10 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 	@Override
 	public void onEvent(Event event) throws Exception
 	{
+		if (event.getName().equals(Events.ON_CLICK) && event.getTarget() instanceof Button && event.getTarget() == getComponent().getBtnSelectAll())
+		{
+			doActionSelectAllItems();
+		}
 		if (event.getName().equals(Events.ON_CLICK))
 		{
 			Object isQuickFormComponent = getComponent().getAttribute(QuickGridTabRowRenderer.IS_QUICK_FORM_COMPONENT);
@@ -111,6 +118,25 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 			}
 		}
 	} // onEvent
+
+	private void doActionSelectAllItems()
+	{
+		boolean checked = "Y".equals((String) getComponent().getBtnSelectAll().getAttribute(MultiSelectBox.ATTRIBUTE_ACTION_SELECT_ALL));
+
+		//
+		for (Checkbox list : getComponent().getCheckboxList())
+		{
+			list.setChecked(checked);
+		}
+		for (Component list : getComponent().getVBox().getChildren())
+		{
+			((Checkbox) list).setChecked(checked);
+		}
+
+		//
+		getComponent().getBtnSelectAll().setAttribute(MultiSelectBox.ATTRIBUTE_ACTION_SELECT_ALL, checked ? "N" : "Y");
+		getComponent().getBtnSelectAll().setLabel(Msg.getMsg(Env.getCtx(), (checked ? "DeSelectAll" : "select.all")));
+	} // doActionSelectAllItems
 
 	@Override
 	public void setReadWrite(boolean readWrite)

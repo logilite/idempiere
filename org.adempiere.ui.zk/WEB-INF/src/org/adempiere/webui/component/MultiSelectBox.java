@@ -15,6 +15,8 @@ import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.editor.WMultiSelectEditor;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.util.CacheMgt;
+import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.WrongValueException;
@@ -37,19 +39,21 @@ public class MultiSelectBox extends Div
 	/**
 	 * 
 	 */
-	private static final long	serialVersionUID		= -632973531627268781L;
+	private static final long	serialVersionUID			= -632973531627268781L;
 
-	public static final String	ATTRIBUTE_MULTI_SELECT	= "ATTRIBUTE_MULTI_SELECT";
+	public static final String	ATTRIBUTE_MULTI_SELECT		= "ATTRIBUTE_MULTI_SELECT";
+	public static final String	ATTRIBUTE_ACTION_SELECT_ALL	= "ATTRIB_ACTION_SELECT_ALL";
 
 	public WMultiSelectEditor	editor;
-	protected DesktopCleanup	listener				= null;
+	protected DesktopCleanup	listener					= null;
 
+	private Button				btnSelectAll;
 	private Textbox				textbox;
 	private Popup				popup;
 	private Vbox				vbox;
 	private boolean				editable;
 
-	private ArrayList<Checkbox>	cbxList					= new ArrayList<Checkbox>();
+	private ArrayList<Checkbox>	cbxList						= new ArrayList<Checkbox>();
 
 	public MultiSelectBox()
 	{
@@ -64,11 +68,20 @@ public class MultiSelectBox extends Div
 
 		popup = new Popup();
 		LayoutUtils.addSclass("multi-select-popup", popup);
+		ZKUpdateUtil.setVflex(popup, "1");
 		appendChild(popup);
 
 		vbox = new Vbox();
 		ZKUpdateUtil.setHflex(vbox, "1");
+		ZKUpdateUtil.setWidth(vbox, "100%");
 		LayoutUtils.addSclass("multi-select-vbox", vbox);
+
+		btnSelectAll = new Button(Msg.getMsg(Env.getCtx(), "select.all"));
+		btnSelectAll.setAttribute(ATTRIBUTE_ACTION_SELECT_ALL, "Y");
+		LayoutUtils.addSclass("multi-select-all-btn", btnSelectAll);
+
+		//
+		popup.appendChild(btnSelectAll);
 		popup.appendChild(vbox);
 
 		textbox = new Textbox("") {
@@ -111,6 +124,11 @@ public class MultiSelectBox extends Div
 	public Vbox getVBox()
 	{
 		return vbox;
+	}
+
+	public Button getBtnSelectAll()
+	{
+		return btnSelectAll;
 	}
 
 	public boolean isEnabled()
