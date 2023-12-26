@@ -153,6 +153,11 @@ table.z-vbox > tbody > tr > td > table {
   padding: 5px;
 }
 
+.multi-select-all-btn {
+ width: 100%;
+ height: 30px;
+}
+
 .multi-select-textbox {
   background-color: white !important;
 }
