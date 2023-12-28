@@ -13,6 +13,7 @@ import org.compiere.model.MAttachment;
 import org.compiere.model.MAttachmentEntry;
 import org.compiere.model.MColumn;
 import org.compiere.model.MTable;
+import org.compiere.model.MTree;
 import org.compiere.model.PO;
 import org.compiere.model.POInfo;
 import org.compiere.util.DB;
@@ -236,6 +237,20 @@ public class PoFiller{
 						if (tableID > 0) {
 							foreignTable = MTable.get(Env.getCtx(), tableID);
 							refTableName = foreignTable.getTableName();
+						}
+					} else if ("Node_ID".equalsIgnoreCase(columnName) || "Parent_ID".equalsIgnoreCase(columnName)) {
+						refTableName = e.attributes.getValue("reference-key");
+						if (refTableName != null) {
+							foreignTable = MTable.get(Env.getCtx(), refTableName);
+						} else if (po.get_ColumnIndex(MTree.COLUMNNAME_AD_Tree_ID) > 0) {
+							MTree tree = new MTree(Env.getCtx(), po.get_ValueAsInt(MTree.COLUMNNAME_AD_Tree_ID), po.get_TrxName());
+							if (MTree.TREETYPE_CustomTable.equals(tree.getTreeType())) {
+								foreignTable = MTable.get(Env.getCtx(), tree.getAD_Table_ID());
+								refTableName = foreignTable.getTableName();
+							} else {
+								refTableName = MTree.getSourceTableName(po.get_ValueAsString(MTree.COLUMNNAME_TreeType));
+								foreignTable = MTable.get(Env.getCtx(), refTableName);
+							}
 						}
 					}
 				}
