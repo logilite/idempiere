@@ -16,8 +16,6 @@
  *****************************************************************************/
 package org.compiere.report;
 
-import static org.compiere.model.SystemIDs.TABLE_T_REPORT;
-
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -27,6 +25,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import org.compiere.model.I_C_ValidCombination;
+import org.compiere.model.I_T_Report;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchemaElement;
 import org.compiere.model.MBPartner;
@@ -35,6 +34,7 @@ import org.compiere.model.MLocation;
 import org.compiere.model.MOrg;
 import org.compiere.model.MOrgInfo;
 import org.compiere.model.MPeriod;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MReportCube;
 import org.compiere.print.MPrintFormat;
 import org.compiere.print.MPrintFormatItem;
@@ -153,7 +153,7 @@ public class FinReport extends SvrProcess
 			else if (name.equals("PA_ReportCube_ID"))
 				p_PA_ReportCube_ID = para[i].getParameterAsInt();
 			else
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 		//	Optional Org
 		if (p_Org_ID != 0)
@@ -2113,7 +2113,7 @@ public class FinReport extends SvrProcess
 		//	Create New
 		if (createNew)
 		{
-			int AD_Table_ID = TABLE_T_REPORT;		//	T_Report
+			int AD_Table_ID = I_T_Report.Table_ID;		//	T_Report
 			pf = MPrintFormat.createFromTable(Env.getCtx(), AD_Table_ID);
 			AD_PrintFormat_ID = pf.getAD_PrintFormat_ID();
 			m_report.setAD_PrintFormat_ID(AD_PrintFormat_ID);

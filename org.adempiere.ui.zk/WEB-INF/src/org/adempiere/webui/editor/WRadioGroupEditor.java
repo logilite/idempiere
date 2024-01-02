@@ -20,7 +20,6 @@
 
 package org.adempiere.webui.editor;
 
-import java.beans.PropertyChangeEvent;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
@@ -43,6 +42,7 @@ import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
 import org.compiere.model.MRole;
 import org.compiere.model.MTable;
+import org.compiere.model.SystemIDs;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -58,7 +58,8 @@ import org.zkoss.zul.Radio;
 import org.zkoss.zul.Radiogroup;
 
 /**
- * 
+ * Default editor for {@link DisplayType#RadiogroupList}.<br/>
+ * Implemented with {@link RadioGroupEditor} component.
  * @author hengsin
  *
  */
@@ -75,8 +76,10 @@ public class WRadioGroupEditor extends WEditor implements ContextMenuListener, L
     }
     
     private Lookup  lookup;
+    /** selected value */
     private Object oldValue;
 
+    /** true when editor is handling ON_CHECK event */
 	private boolean onselecting = false;
 
 	/**
@@ -104,10 +107,10 @@ public class WRadioGroupEditor extends WEditor implements ContextMenuListener, L
 	/** 
 	 * Constructor for use if a grid field is unavailable
 	 * 
-	 * @param lookup		Store of selectable data
-	 * @param label			column name (not displayed)
+	 * @param lookup		Lookup list
+	 * @param label			field label
 	 * @param description	description of component
-	 * @param mandatory		whether a selection must be made
+	 * @param mandatory		whether a field is mandatory
 	 * @param readonly		whether or not the editor is read only
 	 * @param updateable	whether the editor contents can be changed
 	 */   
@@ -144,6 +147,9 @@ public class WRadioGroupEditor extends WEditor implements ContextMenuListener, L
     	init();
     }
     
+    /**
+     * Init lookup and context menu
+     */
     private void init()
     {
     	boolean zoom= false;
@@ -153,7 +159,7 @@ public class WRadioGroupEditor extends WEditor implements ContextMenuListener, L
         	lookup.setMandatory(true);
             lookup.setMandatory(isMandatory());
             
-            if ((lookup.getDisplayType() == DisplayType.List && Env.getContextAsInt(Env.getCtx(), Env.AD_ROLE_ID) == 0)
+            if ((lookup.getDisplayType() == DisplayType.List && Env.getContextAsInt(Env.getCtx(), Env.AD_ROLE_ID) == SystemIDs.ROLE_SYSTEM)
             		|| lookup.getDisplayType() != DisplayType.List) 
             {
     			zoom= true;
@@ -199,6 +205,7 @@ public class WRadioGroupEditor extends WEditor implements ContextMenuListener, L
         return retVal;
     }
 
+    @Override
     public void setValue(Object value)
     {
     	if (onselecting) {
@@ -292,6 +299,9 @@ public class WRadioGroupEditor extends WEditor implements ContextMenuListener, L
 		getComponent().setEnabled(readWrite);
 	}
 
+	/**
+	 * Refresh lookup list
+	 */
 	private void refreshList()
     {
     	if (getComponent().getItemCount() > 0)
@@ -371,6 +381,7 @@ public class WRadioGroupEditor extends WEditor implements ContextMenuListener, L
     	getComponent().setValue(oldValue);
     }
     
+	@Override
     public void onEvent(Event event)
     {
     	if (Events.ON_CHECK.equalsIgnoreCase(event.getName()))
@@ -397,16 +408,24 @@ public class WRadioGroupEditor extends WEditor implements ContextMenuListener, L
     	}
     }
 
+	/**
+	 * @param newValue
+	 * @return true if newValue is different from {@link #oldValue}
+	 */
 	private boolean isValueChange(Object newValue) {
 		return (oldValue == null && newValue != null) || (oldValue != null && newValue == null) 
 			|| ((oldValue != null && newValue != null) && !oldValue.equals(newValue));
 	}
     
+	@Override
     public String[] getEvents()
     {
         return LISTENER_EVENTS;
     }
 
+	/**
+	 * Refresh lookup list
+	 */
     public void actionRefresh()
     {    	
 		if (lookup != null)
@@ -429,11 +448,15 @@ public class WRadioGroupEditor extends WEditor implements ContextMenuListener, L
         }
     }
     
+    /**
+     * @return Lookup
+     */
     public Lookup getLookup()
     {
     	return lookup;
     }
     
+    @Override
 	public void onMenu(ContextMenuEvent evt) 
 	{
 		if (WEditorPopupMenu.REQUERY_EVENT.equals(evt.getContextEvent()))
@@ -453,14 +476,6 @@ public class WRadioGroupEditor extends WEditor implements ContextMenuListener, L
 		else if (WEditorPopupMenu.ZOOM_EVENT.equals(evt.getContextEvent()))
 		{
 			actionZoom();
-		}
-	}
-	
-	public  void propertyChange(PropertyChangeEvent evt)
-	{
-		if ("FieldValue".equals(evt.getPropertyName()))
-		{
-			setValue(evt.getNewValue());
 		}
 	}
 	
@@ -486,14 +501,20 @@ public class WRadioGroupEditor extends WEditor implements ContextMenuListener, L
 			getPopupMenu().addContextElement(getComponent().radioGroup);
     }
 	
-	private static class RadioGroupEditor extends Hlayout {
+	/**
+	 * Container for {@link Radiogroup}  and {@link Radio} component.
+	 */
+	public static class RadioGroupEditor extends Hlayout {
 		/**
 		 * generated serial id
 		 */
-		private static final long serialVersionUID = -8814498538711459900L;
+		private static final long serialVersionUID = 6356574816984519621L;
 		private Radiogroup radioGroup;
 		private boolean enabled;
 		
+		/**
+		 * Default constructor
+		 */
 		private RadioGroupEditor() {
 			newRadioGroup();
 			appendChild(radioGroup);
@@ -502,6 +523,9 @@ public class WRadioGroupEditor extends WEditor implements ContextMenuListener, L
 			setStyle("white-space: normal");
 		}
 
+		/**
+		 * Create new {@link Radiogroup} instance.
+		 */
 		private void newRadioGroup() {
 			radioGroup = new Radiogroup();
 		}
@@ -518,6 +542,10 @@ public class WRadioGroupEditor extends WEditor implements ContextMenuListener, L
 			}
 		}
 
+		/**
+		 * @param value
+		 * @return true if value equals to value of selected {@link Radio} item.
+		 */
 		public boolean isSelected(Object value) {
 			Radio radio = getSelectedItem();
 			if (radio != null && radio.getValue() != null && value != null) {
@@ -526,16 +554,26 @@ public class WRadioGroupEditor extends WEditor implements ContextMenuListener, L
 			return false;
 		}
 
+		/**
+		 * @return selected {@link Radio} item
+		 */
 		public Radio getSelectedItem() {
 			return radioGroup.getSelectedItem();
 		}
 
+		/**
+		 * Set {@link #radioGroup} selected item to item
+		 * @param item
+		 */
 		public void setSelectedItem(Radio item) {
 			if (item != null && item.isSelected())
 				item.setSelected(false);
 			radioGroup.setSelectedItem(item);	
 		}
 		
+		/**
+		 * Remove all {@link Radio} items from {@link #radioGroup}
+		 */
 		public void removeAllItems() {
 			List<Radio> items = radioGroup.getItems();
 			for (Radio radio : items) {
@@ -543,6 +581,10 @@ public class WRadioGroupEditor extends WEditor implements ContextMenuListener, L
 			}
 		}
 
+		/**
+		 * Set selected item by newValue
+		 * @param newValue
+		 */
 		public void setValue(Object newValue) {			
 			boolean found = false;
 			if (newValue != null) {
@@ -559,10 +601,18 @@ public class WRadioGroupEditor extends WEditor implements ContextMenuListener, L
 				setSelectedItem(null);
 		}
 
+		/**
+		 * @return radio item count
+		 */
 		public int getItemCount() {
 			return radioGroup.getItemCount();
 		}
 
+		/**
+		 * Add new {@link Radio} item
+		 * @param name
+		 * @param value
+		 */
 		public void appendItem(String name, String value) {
 			if (Util.isEmpty(name))
 				return;
@@ -570,6 +620,12 @@ public class WRadioGroupEditor extends WEditor implements ContextMenuListener, L
 			radioGroup.appendChild(radio);
 		}
 
+		/**
+		 * Create new {@link Radio} item.
+		 * @param name
+		 * @param value
+		 * @return {@link Radio}
+		 */
 		protected Radio newRadio(String name, Object value) {
 			Radio radio = new Radio(name);
 			radio.setValue(value);
@@ -578,6 +634,11 @@ public class WRadioGroupEditor extends WEditor implements ContextMenuListener, L
 			return radio;
 		}
 
+		/**
+		 * Add new {@link Radio} item
+		 * @param name
+		 * @param key
+		 */
 		public void appendItem(String name, int key) {
 			if (Util.isEmpty(name))
 				return;

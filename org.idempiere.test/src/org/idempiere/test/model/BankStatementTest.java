@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
+import org.compiere.model.MBPartner;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MBankStatementLine;
 import org.compiere.model.MPayment;
@@ -40,12 +41,15 @@ import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfo;
 import org.compiere.util.CacheMgt;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.TimeUtil;
 import org.compiere.wf.MWorkflow;
 import org.idempiere.test.AbstractTestCase;
+import org.idempiere.test.DictionaryIDs;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 /**
  * @author hengsin
@@ -62,7 +66,7 @@ public class BankStatementTest extends AbstractTestCase {
 	@Test
 	public void testCompleteStatement() {
 		MBankStatement stmt = new MBankStatement(Env.getCtx(), 0, getTrxName());
-		stmt.setC_BankAccount_ID(100);
+		stmt.setC_BankAccount_ID(DictionaryIDs.C_BankAccount.ACCOUNT_1234.id);
 		Timestamp today = TimeUtil.getDay(System.currentTimeMillis());
 		stmt.setStatementDate(today);
 		stmt.setDateAcct(today);
@@ -76,17 +80,18 @@ public class BankStatementTest extends AbstractTestCase {
 		line.setStatementLineDate(today);
 		line.setStmtAmt(new BigDecimal("10.00"));
 		line.setTrxAmt(new BigDecimal("10.00"));
-		line.setC_Currency_ID(100);
+		line.setC_Currency_ID(DictionaryIDs.C_Currency.USD.id);
 		line.saveEx();
 		
 		ProcessInfo pi = MWorkflow.runDocumentActionWorkflow(stmt, DocAction.ACTION_Complete);
-		assertFalse(pi.isError());
+		assertFalse(pi.isError(), pi.getSummary());
 		
 		stmt.load(getTrxName());
 		assertEquals(DocAction.STATUS_Completed, stmt.getDocStatus());
 	}
 	
 	@Test
+	@ResourceLock(value = MSysConfig.ALLOW_REVERSAL_OF_RECONCILED_PAYMENT)
 	public void testReversalOfReconciledPayment1() {
 		Timestamp today = TimeUtil.getDay(System.currentTimeMillis());
 		
@@ -94,27 +99,25 @@ public class BankStatementTest extends AbstractTestCase {
 		MSysConfig sysConfig = query.setOrderBy("AD_Client_ID Desc").setParameters(MSysConfig.ALLOW_REVERSAL_OF_RECONCILED_PAYMENT, getAD_Client_ID()).first();
 		if (!sysConfig.getValue().equals("Y")) {
 			sysConfig.setValue("Y");
-			try {
-				PO.setCrossTenantSafe();
-				sysConfig.saveEx();
-			} finally {
-				PO.clearCrossTenantSafe();
-			}
+			sysConfig.saveCrossTenantSafeEx();
 			CacheMgt.get().reset();
 		} else {
 			sysConfig = null;
 		}
 		
 		try {
+			MBPartner bp = new MBPartner (Env.getCtx(), DictionaryIDs.C_BPartner.C_AND_W.id, getTrxName());
+			DB.getDatabase().forUpdate(bp, 0);
+			
 			MPayment payment1 = new MPayment(Env.getCtx(), 0, getTrxName());
-			payment1.setC_BPartner_ID(117); //C&W
+			payment1.setC_BPartner_ID(DictionaryIDs.C_BPartner.C_AND_W.id); //C&W
 			payment1.setC_DocType_ID(true); // Receipt
 			payment1.setDocStatus(DocAction.STATUS_Drafted);
 			payment1.setDocAction(DocAction.ACTION_Complete);
 			payment1.setPayAmt(Env.ONEHUNDRED);
 			payment1.setTenderType(MPayment.TENDERTYPE_Check);
-			payment1.setC_BankAccount_ID(100); // 1234_MoneyBank_123456789
-			payment1.setC_Currency_ID(100);  // USD
+			payment1.setC_BankAccount_ID(DictionaryIDs.C_BankAccount.ACCOUNT_1234.id); // 1234_MoneyBank_123456789
+			payment1.setC_Currency_ID(DictionaryIDs.C_Currency.USD.id);  // USD
 			payment1.setDateTrx(today);
 			payment1.setDateAcct(today);
 			payment1.saveEx();
@@ -125,7 +128,7 @@ public class BankStatementTest extends AbstractTestCase {
 			assertEquals(DocAction.STATUS_Completed, payment1.getDocStatus(), "Payment document status is not completed: " + payment1.getDocStatus());
 			
 			MBankStatement stmt = new MBankStatement(Env.getCtx(), 0, getTrxName());
-			stmt.setC_BankAccount_ID(100);		
+			stmt.setC_BankAccount_ID(DictionaryIDs.C_BankAccount.ACCOUNT_1234.id);		
 			stmt.setStatementDate(today);
 			stmt.setDateAcct(today);
 			stmt.setName(System.currentTimeMillis()+"");
@@ -139,11 +142,11 @@ public class BankStatementTest extends AbstractTestCase {
 			line.setStmtAmt(payment1.getPayAmt());
 			line.setTrxAmt(payment1.getPayAmt());
 			line.setC_Payment_ID(payment1.getC_Payment_ID());
-			line.setC_Currency_ID(100);
+			line.setC_Currency_ID(DictionaryIDs.C_Currency.USD.id);
 			line.saveEx();
 			
 			pi = MWorkflow.runDocumentActionWorkflow(stmt, DocAction.ACTION_Complete);
-			assertFalse(pi.isError());
+			assertFalse(pi.isError(), pi.getSummary());
 			
 			stmt.load(getTrxName());
 			assertEquals(DocAction.STATUS_Completed, stmt.getDocStatus());
@@ -157,17 +160,13 @@ public class BankStatementTest extends AbstractTestCase {
 		} finally {
 			if (sysConfig != null) {
 				sysConfig.setValue("N");
-				try {
-					PO.setCrossTenantSafe();
-					sysConfig.saveEx();
-				} finally {
-					PO.clearCrossTenantSafe();
-				}
+				sysConfig.saveCrossTenantSafeEx();
 			}
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MSysConfig.ALLOW_REVERSAL_OF_RECONCILED_PAYMENT)
 	public void testReversalOfReconciledPayment2() {
 		Timestamp today = TimeUtil.getDay(System.currentTimeMillis());
 		
@@ -175,26 +174,24 @@ public class BankStatementTest extends AbstractTestCase {
 		MSysConfig sysConfig = query.setOrderBy("AD_Client_ID Desc").setParameters(MSysConfig.ALLOW_REVERSAL_OF_RECONCILED_PAYMENT, getAD_Client_ID()).first();
 		if (!sysConfig.getValue().equals("N")) {
 			sysConfig.setValue("N");
-			try {
-				PO.setCrossTenantSafe();
-				sysConfig.saveEx();
-			} finally {
-				PO.clearCrossTenantSafe();
-			}
+			sysConfig.saveCrossTenantSafeEx();
 			CacheMgt.get().reset();
 		} else {
 			sysConfig = null;
 		}
 		try {
+			MBPartner bp = new MBPartner (Env.getCtx(), DictionaryIDs.C_BPartner.C_AND_W.id, getTrxName());
+			DB.getDatabase().forUpdate(bp, 0);
+			
 			MPayment payment1 = new MPayment(Env.getCtx(), 0, getTrxName());
-			payment1.setC_BPartner_ID(117); //C&W
+			payment1.setC_BPartner_ID(DictionaryIDs.C_BPartner.C_AND_W.id); //C&W
 			payment1.setC_DocType_ID(true); // Receipt
 			payment1.setDocStatus(DocAction.STATUS_Drafted);
 			payment1.setDocAction(DocAction.ACTION_Complete);
 			payment1.setPayAmt(Env.ONEHUNDRED);
 			payment1.setTenderType(MPayment.TENDERTYPE_Check);
-			payment1.setC_BankAccount_ID(100); // 1234_MoneyBank_123456789
-			payment1.setC_Currency_ID(100);  // USD
+			payment1.setC_BankAccount_ID(DictionaryIDs.C_BankAccount.ACCOUNT_1234.id); // 1234_MoneyBank_123456789
+			payment1.setC_Currency_ID(DictionaryIDs.C_Currency.USD.id);  // USD
 			payment1.setDateTrx(today);
 			payment1.setDateAcct(today);
 			payment1.saveEx();
@@ -205,7 +202,7 @@ public class BankStatementTest extends AbstractTestCase {
 			assertEquals(DocAction.STATUS_Completed, payment1.getDocStatus(), "Payment document status is not completed: " + payment1.getDocStatus());
 			
 			MBankStatement stmt = new MBankStatement(Env.getCtx(), 0, getTrxName());
-			stmt.setC_BankAccount_ID(100);		
+			stmt.setC_BankAccount_ID(DictionaryIDs.C_BankAccount.ACCOUNT_1234.id);		
 			stmt.setStatementDate(today);
 			stmt.setDateAcct(today);
 			stmt.setName(System.currentTimeMillis()+"");
@@ -219,11 +216,11 @@ public class BankStatementTest extends AbstractTestCase {
 			line.setStmtAmt(payment1.getPayAmt());
 			line.setTrxAmt(payment1.getPayAmt());
 			line.setC_Payment_ID(payment1.getC_Payment_ID());
-			line.setC_Currency_ID(100);
+			line.setC_Currency_ID(DictionaryIDs.C_Currency.USD.id);
 			line.saveEx();
 			
 			pi = MWorkflow.runDocumentActionWorkflow(stmt, DocAction.ACTION_Complete);
-			assertFalse(pi.isError());
+			assertFalse(pi.isError(), pi.getSummary());
 			
 			stmt.load(getTrxName());
 			assertEquals(DocAction.STATUS_Completed, stmt.getDocStatus());
@@ -237,12 +234,7 @@ public class BankStatementTest extends AbstractTestCase {
 		} finally {
 			if (sysConfig != null) {
 				sysConfig.setValue("Y");
-				try {
-					PO.setCrossTenantSafe();
-					sysConfig.saveEx();
-				} finally {
-					PO.clearCrossTenantSafe();
-				}
+				sysConfig.saveCrossTenantSafeEx();
 			}
 		}
 	}

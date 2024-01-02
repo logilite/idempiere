@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Vector;
 import java.util.logging.Level;
 
-import org.adempiere.exceptions.AdempiereException;
 import org.compiere.apps.IStatusBar;
 import org.compiere.minigrid.IMiniTable;
 import org.compiere.model.GridTab;
@@ -39,7 +38,7 @@ import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 
 /**
- *  Create Invoice Transactions from PO Orders or Receipt
+ *  Create Invoice Lines from Purchase Order, Material Receipt or Vendor RMA
  *
  *  @author Jorg Janke
  *  @version  $Id: VCreateFromInvoice.java,v 1.4 2006/07/30 00:51:28 jjanke Exp $
@@ -51,20 +50,17 @@ import org.compiere.util.Msg;
 public abstract class CreateFromInvoice extends CreateFrom
 {
 	/**
-	 *  Protected Constructor
+	 *  Constructor
 	 *  @param mTab MTab
 	 */
 	public CreateFromInvoice(GridTab mTab)
 	{
 		super(mTab);
 		if (log.isLoggable(Level.INFO)) log.info(mTab.toString());
-	}   //  VCreateFromInvoice
+	}   //  CreateFromInvoice
 
-	/**
-	 *  Dynamic Init
-	 *  @return true if initialized
-	 */
-	public boolean dynInit() throws Exception
+	@Override
+	protected boolean dynInit() throws Exception
 	{
 		log.config("");
 		setTitle(Msg.getElement(Env.getCtx(), "C_Invoice_ID", false) + " .. " + Msg.translate(Env.getCtx(), "CreateFrom"));
@@ -73,8 +69,9 @@ public abstract class CreateFromInvoice extends CreateFrom
 	}   //  dynInit
 
 	/**
-	 * Load PBartner dependent Order/Invoice/Shipment Field.
+	 * Load BPartner related Shipment records.
 	 * @param C_BPartner_ID
+	 * @return list of shipment records
 	 */
 	protected ArrayList<KeyNamePair> loadShipmentData (int C_BPartner_ID)
 	{
@@ -109,7 +106,7 @@ public abstract class CreateFromInvoice extends CreateFrom
 		ResultSet rs = null;
 		try
 		{
-			pstmt = DB.prepareStatement(sql.toString(), null);
+			pstmt = DB.prepareStatement(sql.toString(), getTrxName());
 			pstmt.setInt(1, C_BPartner_ID);
 			pstmt.setString(2, isSOTrxParam);
 			pstmt.setInt(3, C_BPartner_ID);
@@ -135,8 +132,9 @@ public abstract class CreateFromInvoice extends CreateFrom
 	}
 
 	/**
-	 *  Load PBartner dependent Order/Invoice/Shipment Field.
+	 *  Load BPartner related RMA records
 	 *  @param C_BPartner_ID BPartner
+	 *  @return list of RMA records
 	 */
 	protected ArrayList<KeyNamePair> loadRMAData(int C_BPartner_ID) {
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
@@ -150,7 +148,7 @@ public abstract class CreateFromInvoice extends CreateFrom
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try {
-			pstmt = DB.prepareStatement(sqlStmt, null);
+			pstmt = DB.prepareStatement(sqlStmt, getTrxName());
 			pstmt.setInt(1, C_BPartner_ID);
 			rs = pstmt.executeQuery();
 			while (rs.next()) {
@@ -168,21 +166,21 @@ public abstract class CreateFromInvoice extends CreateFrom
 	}
 
 	/**
-	 *  Load Data - Shipment not invoiced
+	 *  Load Shipment Lines not invoiced
 	 *  @param M_InOut_ID InOut
+	 *  @return shipment lines (selection,qty,[c_uom_id,uomSymbol/name],[m_product_id,name],vendorProductNo,[c_orderline_id,.],[m_inoutline_id,line],null)
 	 */
 	protected Vector<Vector<Object>> getShipmentData(int M_InOut_ID)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("M_InOut_ID=" + M_InOut_ID);
-		MInOut inout = (MInOut) MTable.get(Env.getCtx(), MInOut.Table_ID).getPO(M_InOut_ID, null);
+		MInOut inout = (MInOut) MTable.get(Env.getCtx(), MInOut.Table_ID).getPO(M_InOut_ID, getTrxName());
 		p_order = null;
 		if (inout.getC_Order_ID() != 0)
-			p_order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(inout.getC_Order_ID(), null);
+			p_order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(inout.getC_Order_ID(), getTrxName());
 
 		m_rma = null;
 		if (inout.getM_RMA_ID() != 0)
-			m_rma = (MRMA) MTable.get(Env.getCtx(), MRMA.Table_ID).getPO(inout.getM_RMA_ID(), null);
-
+			m_rma = (MRMA) MTable.get(Env.getCtx(), MRMA.Table_ID).getPO(inout.getM_RMA_ID(), getTrxName());
 		//
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 		StringBuilder sql = new StringBuilder("SELECT ");	//	QtyEntered
@@ -223,7 +221,7 @@ public abstract class CreateFromInvoice extends CreateFrom
 		ResultSet rs = null;
 		try
 		{
-			pstmt = DB.prepareStatement(sql.toString(), null);
+			pstmt = DB.prepareStatement(sql.toString(), getTrxName());
 			pstmt.setInt(1, M_InOut_ID);
 			rs = pstmt.executeQuery();
 			while (rs.next())
@@ -262,17 +260,16 @@ public abstract class CreateFromInvoice extends CreateFrom
 		}
 
 		return data;
-	}   //  loadShipment
+	}   //  getShipmentData
 
 	/**
-	 * Load RMA details
+	 * Load RMA line records
 	 * @param M_RMA_ID RMA
+	 * @return RMA lines (selection,qty,[c_uom_id,uomSymbol/name],[m_product_id,name],null,null,null,[m_rmaline_id,line])
 	 */
 	protected Vector<Vector<Object>> getRMAData(int M_RMA_ID)
 	{
 	    p_order = null;
-
-//	    MRMA m_rma = new MRMA(Env.getCtx(), M_RMA_ID, null);
 
 	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 	    StringBuilder sqlStmt = new StringBuilder();
@@ -312,7 +309,7 @@ public abstract class CreateFromInvoice extends CreateFrom
 	    ResultSet rs = null;
 	    try
 	    {
-	        pstmt = DB.prepareStatement(sqlStmt.toString(), null);
+	        pstmt = DB.prepareStatement(sqlStmt.toString(), getTrxName());
 	        pstmt.setInt(1, M_RMA_ID);
 	        pstmt.setInt(2, M_RMA_ID);
 	        rs = pstmt.executeQuery();
@@ -347,18 +344,20 @@ public abstract class CreateFromInvoice extends CreateFrom
 	    return data;
 	}
 
-	/**
-	 *  List number of rows selected
-	 */
+	@Override
 	public void info(IMiniTable miniTable, IStatusBar statusBar)
 	{
 
-	}   //  infoInvoice
+	}
 
+	/**
+	 * set class/type of columns
+	 * @param miniTable
+	 */
 	protected void configureMiniTable (IMiniTable miniTable)
 	{
 		miniTable.setColumnClass(0, Boolean.class, false);      //  0-Selection
-		miniTable.setColumnClass(1, BigDecimal.class, false);        //  1-Qty
+		miniTable.setColumnClass(1, BigDecimal.class, false);   //  1-Qty
 		miniTable.setColumnClass(2, String.class, true);        //  2-UOM
 		miniTable.setColumnClass(3, String.class, true);        //  3-Product
 		miniTable.setColumnClass(4, String.class, true);        //  4-VendorProductNo
@@ -373,6 +372,7 @@ public abstract class CreateFromInvoice extends CreateFrom
 	 *  Save - Create Invoice Lines
 	 *  @return true if saved
 	 */
+	@Override
 	public boolean save(IMiniTable miniTable, String trxName)
 	{
 		//  Invoice
@@ -391,18 +391,6 @@ public abstract class CreateFromInvoice extends CreateFrom
 			invoice.setM_RMA_ID(m_rma.getM_RMA_ID());
 			invoice.saveEx();
 		}
-
-//		MInOut inout = null;
-//		if (m_M_InOut_ID > 0)
-//		{
-//			inout = new MInOut(Env.getCtx(), m_M_InOut_ID, trxName);
-//		}
-//		if (inout != null && inout.getM_InOut_ID() != 0
-//			&& inout.getC_Invoice_ID() == 0)	//	only first time
-//		{
-//			inout.setC_Invoice_ID(C_Invoice_ID);
-//			inout.saveEx();
-//		}
 
 		//  Lines
 		for (int i = 0; i < miniTable.getRowCount(); i++)
@@ -457,8 +445,12 @@ public abstract class CreateFromInvoice extends CreateFrom
 		invoice.updateFrom(p_order);
 
 		return true;
-	}   //  saveInvoice
+	}   //  save
 
+	/**
+	 * 
+	 * @return column header names (select,quantity,uom,product,vendorProductNo,order,shipment,rma)
+	 */
 	protected Vector<String> getOISColumnNames()
 	{
 		//  Header Info

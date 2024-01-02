@@ -359,6 +359,10 @@ public class Process {
 				pInstance.setIsProcessing(false);
 				pInstance.saveEx();
 			}
+			finally {
+				pInstance.setIsProcessing(false);
+				pInstance.saveEx();
+			}
 		}
 	
 		if (process.isJavaProcess() && !jasperreport)
@@ -512,17 +516,20 @@ public class Process {
 	
 	private static MPInstance fillParameter(CompiereService m_cs, DataRow dr, MProcess process, Map<String, Object> requestCtx) throws Exception
 	{
-		MPInstance pInstance = new MPInstance (process, 0);
+		MPInstance pInstance = new MPInstance(Env.getCtx(), process.getAD_Process_ID(), 0, 0, null);
+		pInstance.saveEx();
 		
 		DataField f[] = dr.getFieldArray();
 		HashMap<String,DataField> fmap = new HashMap<String,DataField>();
 		for (int i=0; i<f.length; i++)
 			fmap.put(f[i].getColumn(), f[i]);
 		//
-		MPInstancePara[] iParams = pInstance.getParameters();
-		for (int pi = 0; pi < iParams.length; pi++)
+		MProcessPara[] processParams = pInstance.getProcessParameters();
+		for (int pi = 0; pi < processParams.length; pi++)
 		{
-			MPInstancePara iPara = iParams[pi];
+			MPInstancePara iPara = new MPInstancePara (pInstance, processParams[pi].getSeqNo());
+			iPara.setParameterName(processParams[pi].getColumnName());
+			iPara.setInfo(processParams[pi].getName());
 			String key = iPara.getParameterName();
 			MProcessPara pPara = process.getParameter(key);
 			if (pPara == null)
@@ -571,6 +578,7 @@ public class Process {
 			if (log.isLoggable(Level.FINE)) log.fine("fillParameter - " + key + " = " + valueString);
 			
 			Object value = valueString;
+			Object toValue = valueString2;
 			if (valueString != null && valueString.length() == 0)
 				value = null;
 			if (value != null && (DisplayType.isList(displayType) ||
@@ -585,6 +593,12 @@ public class Process {
 			}
 			else
 			{
+				if( DisplayType.isText(displayType)
+						&& Util.isEmpty(String.valueOf(value)) 
+						&& Util.isEmpty(String.valueOf(toValue))) {
+					if (log.isLoggable(Level.FINE)) log.fine(pPara.getColumnName() + " - empty string");
+						break;
+				}
 				//	Convert to Type
 				try
 				{

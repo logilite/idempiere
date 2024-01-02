@@ -55,6 +55,5 @@ public interface IChartRendererService {
 	 * @param showTitle
 	 * @return true if render successfully
 	 */
-	public boolean renderChart(Component parent, int width, int height,
-			ChartModel chartModel, boolean showTitle);
+	public boolean renderChart(Component parent, int width, int height, ChartModel chartModel, boolean showTitle);
 }

@@ -36,6 +36,7 @@ public class PromotionValidator implements ModelValidator {
 	private int m_AD_Client_ID;
 	private HashMap<PromotionRule.Parameter, Integer> promotionLineMap = new HashMap<PromotionRule.Parameter, Integer>();
 
+	@Override
 	public String docValidate(PO po, int timing) {
 		if (po instanceof MOrder ) {
 			if (timing == TIMING_AFTER_PREPARE) {
@@ -82,7 +83,10 @@ public class PromotionValidator implements ModelValidator {
 		return null;
 	}
 
-
+	/**
+	 * Increase M_PromotionPreCondition.PromotionCounter value
+	 * @param order
+	 */
 	private void increasePromotionCounter(MOrder order) {
 		MOrderLine[] lines = order.getLines(false, null);
 		String promotionCode = (String)order.get_Value("PromotionCode");
@@ -102,6 +106,10 @@ public class PromotionValidator implements ModelValidator {
 		}
 	}
 
+	/**
+	 * Decrease M_PromotionPreCondition.PromotionCounter value
+	 * @param order
+	 */
 	private void decreasePromotionCounter(MOrder order) {
 		MOrderLine[] lines = order.getLines(false, null);
 		String promotionCode = (String)order.get_Value("PromotionCode");
@@ -121,6 +129,12 @@ public class PromotionValidator implements ModelValidator {
 		}
 	}
 
+	/**
+	 * @param order
+	 * @param promotionCode
+	 * @param promotionID
+	 * @return M_PromotionPreCondition_ID
+	 */
 	private int findPromotionPreConditionId(MOrder order, String promotionCode,
 			Integer promotionID) {
 		String bpFilter = "M_PromotionPreCondition.C_BPartner_ID = ? OR M_PromotionPreCondition.C_BP_Group_ID = ? OR (M_PromotionPreCondition.C_BPartner_ID IS NULL AND M_PromotionPreCondition.C_BP_Group_ID IS NULL)";
@@ -161,10 +175,12 @@ public class PromotionValidator implements ModelValidator {
 		return M_PromotionPreCondition_ID;
 	}
 
+	@Override
 	public int getAD_Client_ID() {
 		return m_AD_Client_ID;
 	}
 
+	@Override
 	public void initialize(ModelValidationEngine engine, MClient client) {
 		if (client != null)
 			m_AD_Client_ID = client.getAD_Client_ID();
@@ -173,10 +189,12 @@ public class PromotionValidator implements ModelValidator {
 		
 	}
 
+	@Override
 	public String login(int AD_Org_ID, int AD_Role_ID, int AD_User_ID) {
 		return null;
 	}
 
+	@Override
 	public String modelChange(PO po, int type) throws Exception {
 		if (po instanceof MOrderLine) {
 			MOrderLine ol = (MOrderLine) po;

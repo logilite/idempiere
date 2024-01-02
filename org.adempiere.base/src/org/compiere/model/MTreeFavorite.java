@@ -22,6 +22,7 @@ import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 /**
  * Favorite Tree Model
@@ -31,11 +32,10 @@ import org.compiere.util.Msg;
  */
 public class MTreeFavorite extends X_AD_Tree_Favorite
 {
-
 	/**
 	 * 
 	 */
-	private static final long				serialVersionUID			= 6849737702264230347L;
+	private static final long serialVersionUID = 1468891496751650494L;
 
 	public static final String				SQL_GET_TREE_FAVORITE_ID	= "SELECT AD_Tree_Favorite_ID FROM AD_Tree_Favorite	WHERE IsActive='Y' ";
 
@@ -51,6 +51,18 @@ public class MTreeFavorite extends X_AD_Tree_Favorite
 	private ArrayList<MTreeNode>			m_buffer					= new ArrayList<MTreeNode>();
 	private MTreeNode						root						= null;
 
+    /**
+    * UUID based Constructor
+    * @param ctx  Context
+    * @param AD_Tree_Favorite_UU  UUID key
+    * @param trxName Transaction
+    */
+    public MTreeFavorite(Properties ctx, String AD_Tree_Favorite_UU, String trxName) {
+        super(ctx, AD_Tree_Favorite_UU, trxName);
+		if (! Util.isEmpty(AD_Tree_Favorite_UU))
+			loadNode();
+    }
+
 	/**
 	 * Construct Tree Favorite Model
 	 * 
@@ -63,9 +75,7 @@ public class MTreeFavorite extends X_AD_Tree_Favorite
 		super(ctx, AD_Tree_Favorite_ID, trxName);
 
 		if (AD_Tree_Favorite_ID > 0)
-		{
 			loadNode();
-		}
 	}
 
 	public MTreeFavorite(Properties ctx, ResultSet rs, String trxName)
@@ -103,6 +113,7 @@ public class MTreeFavorite extends X_AD_Tree_Favorite
 				int parentID = rs.getInt(2);
 				int seqNo = rs.getInt(3);
 				String name = rs.getString(4);
+				String description = null;
 				boolean isSummary = (rs.getString(5).equals("Y"));
 				boolean isCollapsible = rs.getString(7).equals("Y");
 				boolean isFavourite = rs.getString("IsFavourite").equals("Y");
@@ -119,12 +130,13 @@ public class MTreeFavorite extends X_AD_Tree_Favorite
 					if (access != null)
 					{
 						name = menu.getDisplayedName();
+						description = menu.get_Translation(MMenu.COLUMNNAME_Description);
 						img = menu.getAction();
 					}
 				}
 
 				if (access != null || isSummary)
-					addToTree(nodeID, parentID, seqNo, name, menuID, img, isSummary, isCollapsible, isFavourite);
+					addToTree(nodeID, parentID, seqNo, name, description, menuID, img, isSummary, isCollapsible, isFavourite);
 			}
 		}
 		catch (SQLException e)
@@ -147,16 +159,17 @@ public class MTreeFavorite extends X_AD_Tree_Favorite
 	 * @param parentID
 	 * @param seqNo
 	 * @param name
+	 * @param description
 	 * @param menuID
 	 * @param imgSrc
 	 * @param isSummary
 	 * @param isCollapsible
 	 * @param isFavourite
 	 */
-	private void addToTree(	int favNodeID, int parentID, int seqNo, String name, int menuID, String imgSrc, boolean isSummary, boolean isCollapsible,
+	private void addToTree(	int favNodeID, int parentID, int seqNo, String name, String description, int menuID, String imgSrc, boolean isSummary, boolean isCollapsible,
 							boolean isFavourite)
 	{
-		MTreeNode child = new MTreeNode(favNodeID, seqNo, name, name, parentID, menuID, imgSrc, isSummary, isCollapsible, isFavourite);
+		MTreeNode child = new MTreeNode(favNodeID, seqNo, name, description, parentID, menuID, imgSrc, isSummary, isCollapsible, isFavourite);
 
 		MTreeNode parent = null;
 		if (root != null)

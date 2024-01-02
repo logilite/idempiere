@@ -58,8 +58,7 @@ import org.zkoss.zul.North;
 import org.zkoss.zul.South;
 
 /**
- *	Visual and Control Part of Schedule.
- *  Contains Time and Schedule Panels
+ *	Window to view and manage scheduling of resources (S_Resource and S_ResourceAssignment)
  *
  * 	@author 	Jorg Janke
  * 	@version 	$Id: VSchedule.java,v 1.3 2006/07/30 00:51:27 jjanke Exp $
@@ -70,7 +69,7 @@ import org.zkoss.zul.South;
 public class WSchedule extends Window implements EventListener<Event>
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -4819513326165148245L;
 	private static final String ON_MOBILE_SET_SELECTED_TAB_ECHO = "onMobileSetSelectedTabEcho";
@@ -132,10 +131,10 @@ public class WSchedule extends Window implements EventListener<Event>
 	private Component btnRefresh;
 	
 	/**
-	 * 	Static init
+	 * 	Layout window
 	 *  <pre>
-	 * 	timePanel (West)
-	 *  schedlePanel (in schedulePane - Center)
+	 *  timePanel (West)
+	 *  schedulePanel (in schedulePane - Center)
 	 *  </pre>
 	 * 	@throws Exception
 	 */
@@ -247,6 +246,9 @@ public class WSchedule extends Window implements EventListener<Event>
 		Events.echoEvent("onAfterReCreate", this, null);
 	}	//	recreate
 
+	/**
+	 * Update calendar model ({@link #scm})
+	 */
 	private void updateModel() {
 		ScheduleUtil m_model = new ScheduleUtil (Env.getCtx());
 		
@@ -271,24 +273,8 @@ public class WSchedule extends Window implements EventListener<Event>
 			
 			for(MAssignmentSlot mas : list) {
 				SimpleCalendarEvent event = new SimpleCalendarEvent();
-				Timestamp startTime = mas.getStartTime();
-				Timestamp endTime = mas.getEndTime();
-				Calendar calStart = Calendar.getInstance();
-				calStart.setTime(startTime);
-				Calendar calEnd = Calendar.getInstance();
-				calEnd.setTime(endTime);
-				
-				calStart.add(Calendar.DAY_OF_MONTH, 1);
-				if (calStart.get(Calendar.YEAR) == calEnd.get(Calendar.YEAR) && calStart.get(Calendar.MONTH) == calEnd.get(Calendar.MONTH)
-					&& calStart.get(Calendar.DAY_OF_MONTH) == calEnd.get(Calendar.DAY_OF_MONTH)) {
-					if (calEnd.get(Calendar.HOUR_OF_DAY) == 0 && calEnd.get(Calendar.MINUTE) == 0) {
-						calEnd.add(Calendar.DAY_OF_MONTH, -1);
-						calEnd.set(Calendar.HOUR_OF_DAY, 23);
-					}
-				}
-				
-				event.setBeginDate(startTime);
-				event.setEndDate(calEnd.getTime());
+				event.setBeginDate(mas.getStartTime());
+				event.setEndDate(mas.getEndTime());
 				event.setTitle(mas.getName());
 				event.setContent(mas.getDescription() != null ? mas.getDescription() : mas.getName());
 				event.setHeaderColor('#'+ZkCssHelper.createHexColorString(mas.getColor(true)));
@@ -302,10 +288,14 @@ public class WSchedule extends Window implements EventListener<Event>
 		calendars.setModel(scm);
 	}
 	
+	/**
+	 * @return SimpleCalendarModel
+	 */
 	public SimpleCalendarModel getModel() {
 		return scm;
 	}
 	
+	@Override
 	public void onEvent(Event event) throws Exception {
 		String type = event.getName();
 		if (type.equals(Events.ON_CLICK)) {
@@ -333,12 +323,18 @@ public class WSchedule extends Window implements EventListener<Event>
 		}
 	}
 	
+	/**
+	 * Select current day
+	 */
 	private void btnCurrentDateClicked() {
 		calendars.setCurrentDate(Calendar.getInstance(calendars.getDefaultTimeZone()).getTime());
 		updateDateLabel();
 		updateModel();
 	}
 	
+	/**
+	 * Update label after calendar selection change
+	 */
 	private void updateDateLabel() {
 		Date b = calendars.getBeginDate();
 		Date e = calendars.getEndDate();
@@ -347,6 +343,10 @@ public class WSchedule extends Window implements EventListener<Event>
 		lblDate.setValue(sdfV.format(b) + " - " + sdfV.format(e));
 	}
 	
+	/**
+	 * Move to next/previous calendar page
+	 * @param isNext
+	 */
 	private void divArrowClicked(boolean isNext) {
 		if (isNext)
 			calendars.nextPage();
@@ -356,6 +356,10 @@ public class WSchedule extends Window implements EventListener<Event>
 		updateModel();
 	}
 	
+	/**
+	 * select different calendar tab/presentation
+	 * @param days
+	 */
 	private void divTabClicked(int days) {		
 		if (days > 0) {
 			calendars.setMold("default");
@@ -367,6 +371,10 @@ public class WSchedule extends Window implements EventListener<Event>
 		updateModel();
 	}
 
+	/**
+	 * Add pane to north of {@link #borderlayout}
+	 * @param pane
+	 */
 	public void addNorthPane(Component pane) {
 		if (borderlayout != null) {
 			if (borderlayout.getNorth() != null) {
@@ -378,6 +386,11 @@ public class WSchedule extends Window implements EventListener<Event>
 		}
 	}
 	
+	/**
+	 * Add pane to south of {@link #borderlayout}
+	 * @param pane
+	 * @param height
+	 */
 	public void addSouthPane(Component pane, String height) {
 		if (borderlayout != null) {
 			if (borderlayout.getSouth() != null) {
@@ -392,6 +405,9 @@ public class WSchedule extends Window implements EventListener<Event>
 		}
 	}
 	
+	/**
+	 * Remove {@link #btnRefresh}
+	 */
 	public void removeRefreshButton() {
 		if (btnRefresh != null) {
 			btnRefresh.detach();

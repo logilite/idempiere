@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_Movement
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="M_Movement")
-public class X_M_Movement extends PO implements I_M_Movement, I_Persistent 
+public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_M_Movement (Properties ctx, int M_Movement_ID, String trxName)
@@ -80,6 +80,72 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_M_Movement (Properties ctx, int M_Movement_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_Movement_ID, trxName, virtualColumns);
+      /** if (M_Movement_ID == 0)
+        {
+			setC_DocType_ID (0);
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setIsApproved (false);
+			setIsInTransit (false);
+			setM_Movement_ID (0);
+			setMovementDate (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setPosted (false);
+			setProcessed (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_Movement (Properties ctx, String M_Movement_UU, String trxName)
+    {
+      super (ctx, M_Movement_UU, trxName);
+      /** if (M_Movement_UU == null)
+        {
+			setC_DocType_ID (0);
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setIsApproved (false);
+			setIsInTransit (false);
+			setM_Movement_ID (0);
+			setMovementDate (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setPosted (false);
+			setProcessed (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_Movement (Properties ctx, String M_Movement_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_Movement_UU, trxName, virtualColumns);
+      /** if (M_Movement_UU == null)
+        {
+			setC_DocType_ID (0);
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setIsApproved (false);
+			setIsInTransit (false);
+			setM_Movement_ID (0);
+			setMovementDate (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setPosted (false);
+			setProcessed (false);
+        } */
+    }
+
     /** Load Constructor */
     public X_M_Movement (Properties ctx, ResultSet rs, String trxName)
     {
@@ -87,7 +153,7 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -408,7 +474,7 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 		return (String)get_Value(COLUMNNAME_CreateFrom);
 	}
 
-	/** Set Date received.
+	/** Set Date Received.
 		@param DateReceived Date a product was received
 	*/
 	public void setDateReceived (Timestamp DateReceived)
@@ -416,7 +482,7 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 		set_Value (COLUMNNAME_DateReceived, DateReceived);
 	}
 
-	/** Get Date received.
+	/** Get Date Received.
 		@return Date a product was received
 	  */
 	public Timestamp getDateReceived()
@@ -632,7 +698,7 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getDocumentNo());
     }
@@ -666,6 +732,8 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 	public static final String FREIGHTCOSTRULE_FreightIncluded = "I";
 	/** Line = L */
 	public static final String FREIGHTCOSTRULE_Line = "L";
+	/** Customer Account = U */
+	public static final String FREIGHTCOSTRULE_CustomerAccount = "U";
 	/** Set Freight Cost Rule.
 		@param FreightCostRule Method for charging Freight
 	*/
@@ -697,10 +765,10 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 	public boolean isApproved()
 	{
 		Object oo = get_Value(COLUMNNAME_IsApproved);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -720,10 +788,10 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 	public boolean isInTransit()
 	{
 		Object oo = get_Value(COLUMNNAME_IsInTransit);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -896,10 +964,10 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 	public boolean isPosted()
 	{
 		Object oo = get_Value(COLUMNNAME_Posted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -948,10 +1016,10 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -989,10 +1057,10 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

@@ -19,19 +19,19 @@ package org.compiere.model;
 
 import java.sql.ResultSet;
 import java.util.Properties;
-import org.compiere.util.KeyNamePair;
+import org.compiere.util.ValueNamePair;
 
 /** Generated Model for M_AttributeUse
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="M_AttributeUse")
-public class X_M_AttributeUse extends PO implements I_M_AttributeUse, I_Persistent 
+public class X_M_AttributeUse extends PO implements I_M_AttributeUse, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20231027L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_M_AttributeUse (Properties ctx, int M_AttributeUse_ID, String trxName)
@@ -51,6 +51,32 @@ public class X_M_AttributeUse extends PO implements I_M_AttributeUse, I_Persiste
     {
       super (ctx, M_AttributeUse_ID, trxName, virtualColumns);
       /** if (M_AttributeUse_ID == 0)
+        {
+			setM_Attribute_ID (0);
+			setM_AttributeSet_ID (0);
+			setSeqNo (0);
+// @SQL=SELECT NVL(MAX(SeqNo),0)+10 AS DefaultValue FROM M_AttributeUse WHERE M_AttributeSet_ID=@M_AttributeSet_ID@
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_AttributeUse (Properties ctx, String M_AttributeUse_UU, String trxName)
+    {
+      super (ctx, M_AttributeUse_UU, trxName);
+      /** if (M_AttributeUse_UU == null)
+        {
+			setM_Attribute_ID (0);
+			setM_AttributeSet_ID (0);
+			setSeqNo (0);
+// @SQL=SELECT NVL(MAX(SeqNo),0)+10 AS DefaultValue FROM M_AttributeUse WHERE M_AttributeSet_ID=@M_AttributeSet_ID@
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_AttributeUse (Properties ctx, String M_AttributeUse_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_AttributeUse_UU, trxName, virtualColumns);
+      /** if (M_AttributeUse_UU == null)
         {
 			setM_Attribute_ID (0);
 			setM_AttributeSet_ID (0);
@@ -83,7 +109,7 @@ public class X_M_AttributeUse extends PO implements I_M_AttributeUse, I_Persiste
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_M_AttributeUse[")
-        .append(get_ID()).append("]");
+        .append(get_UUID()).append("]");
       return sb.toString();
     }
 
@@ -160,12 +186,12 @@ public class X_M_AttributeUse extends PO implements I_M_AttributeUse, I_Persiste
 		return ii.intValue();
 	}
 
-    /** Get Record ID/ColumnName
-        @return ID/ColumnName pair
+    /** Get Record UU/ColumnName
+        @return UU/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public ValueNamePair getValueNamePair()
     {
-        return new KeyNamePair(get_ID(), String.valueOf(getM_AttributeSet_ID()));
+        return new ValueNamePair(get_UUID(), String.valueOf(getM_AttributeSet_ID()));
     }
 
 	/** Set M_AttributeUse_UU.

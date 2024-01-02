@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_UserDef_Tab
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="AD_UserDef_Tab")
-public class X_AD_UserDef_Tab extends PO implements I_AD_UserDef_Tab, I_Persistent 
+public class X_AD_UserDef_Tab extends PO implements I_AD_UserDef_Tab, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220119L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_AD_UserDef_Tab (Properties ctx, int AD_UserDef_Tab_ID, String trxName)
@@ -59,6 +59,32 @@ public class X_AD_UserDef_Tab extends PO implements I_AD_UserDef_Tab, I_Persiste
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_UserDef_Tab (Properties ctx, String AD_UserDef_Tab_UU, String trxName)
+    {
+      super (ctx, AD_UserDef_Tab_UU, trxName);
+      /** if (AD_UserDef_Tab_UU == null)
+        {
+			setAD_Tab_ID (0);
+			setAD_UserDef_Tab_ID (0);
+			setAD_UserDef_Win_ID (0);
+			setIsMultiRowOnly (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_UserDef_Tab (Properties ctx, String AD_UserDef_Tab_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_UserDef_Tab_UU, trxName, virtualColumns);
+      /** if (AD_UserDef_Tab_UU == null)
+        {
+			setAD_Tab_ID (0);
+			setAD_UserDef_Tab_ID (0);
+			setAD_UserDef_Win_ID (0);
+			setIsMultiRowOnly (false);
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_UserDef_Tab (Properties ctx, ResultSet rs, String trxName)
     {
@@ -66,7 +92,7 @@ public class X_AD_UserDef_Tab extends PO implements I_AD_UserDef_Tab, I_Persiste
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -146,7 +172,7 @@ public class X_AD_UserDef_Tab extends PO implements I_AD_UserDef_Tab, I_Persiste
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getAD_Tab_ID()));
     }
@@ -212,6 +238,21 @@ public class X_AD_UserDef_Tab extends PO implements I_AD_UserDef_Tab, I_Persiste
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Delete Confirmation Logic.
+		@param DeleteConfirmationLogic Delete Confirmation Logic
+	*/
+	public void setDeleteConfirmationLogic (String DeleteConfirmationLogic)
+	{
+		set_Value (COLUMNNAME_DeleteConfirmationLogic, DeleteConfirmationLogic);
+	}
+
+	/** Get Delete Confirmation Logic.
+		@return Delete Confirmation Logic	  */
+	public String getDeleteConfirmationLogic()
+	{
+		return (String)get_Value(COLUMNNAME_DeleteConfirmationLogic);
 	}
 
 	/** Set Description.
@@ -307,6 +348,29 @@ public class X_AD_UserDef_Tab extends PO implements I_AD_UserDef_Tab, I_Persiste
 		return (String)get_Value(COLUMNNAME_IsHighVolume);
 	}
 
+	/** IsHighVolume AD_Reference_ID=319 */
+	public static final int ISHIGHVOLUME_AD_Reference_ID=319;
+	/** No = N */
+	public static final String ISHIGHVOLUME_No = "N";
+	/** Yes = Y */
+	public static final String ISHIGHVOLUME_Yes = "Y";
+	/** Set High Volume.
+		@param IsHighVolume Use Search instead of Pick list
+	*/
+	public void setIsHighVolume (String IsHighVolume)
+	{
+
+		set_Value (COLUMNNAME_IsHighVolume, IsHighVolume);
+	}
+
+	/** Get High Volume.
+		@return Use Search instead of Pick list
+	  */
+	public String getIsHighVolume()
+	{
+		return (String)get_Value(COLUMNNAME_IsHighVolume);
+	}
+
 	/** IsLookupOnlySelection AD_Reference_ID=319 */
 	public static final int ISLOOKUPONLYSELECTION_AD_Reference_ID=319;
 	/** No = N */
@@ -344,10 +408,10 @@ public class X_AD_UserDef_Tab extends PO implements I_AD_UserDef_Tab, I_Persiste
 	public boolean isMultiRowOnly()
 	{
 		Object oo = get_Value(COLUMNNAME_IsMultiRowOnly);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

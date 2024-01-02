@@ -75,6 +75,7 @@ public class Doc_Inventory extends Doc
 	 *  Load Document Details
 	 *  @return error message or null
 	 */
+	@Override
 	protected String loadDocumentDetails()
 	{		
 		MInventory inventory = (MInventory)getPO();
@@ -102,7 +103,7 @@ public class Doc_Inventory extends Doc
 	}   //  loadDocumentDetails
 
 	/**
-	 *	Load Invoice Line
+	 *	Load inventory lines
 	 *	@param inventory inventory
 	 *  @return DocLine Array
 	 */
@@ -214,6 +215,7 @@ public class Doc_Inventory extends Doc
 	 *  Get Balance
 	 *  @return Zero (always balanced)
 	 */
+	@Override
 	public BigDecimal getBalance()
 	{
 		BigDecimal retValue = Env.ZERO;
@@ -231,6 +233,7 @@ public class Doc_Inventory extends Doc
 	 *  @param as account schema
 	 *  @return Fact
 	 */
+	@Override
 	public ArrayList<Fact> createFacts (MAcctSchema as)
 	{
 		//  create Fact Header
@@ -383,6 +386,7 @@ public class Doc_Inventory extends Doc
 							p_Error = "Original Physical Inventory not posted yet";
 							return null;
 						}
+						costs = dr.getAcctBalance(); //get original cost
 					}
 		
 					//  InventoryDiff   DR      CR
@@ -419,12 +423,11 @@ public class Doc_Inventory extends Doc
 						{
 							//	Set AmtAcctCr from Original Phys.Inventory
 							if (!cr.updateReverseLine (MInventory.Table_ID,
-									m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
+									m_Reversal_ID, line.getReversalLine_ID(),Env.ONE, dr))
 							{
 								p_Error = "Original Physical Inventory not posted yet";
 								return null;
-							}
-							costs = cr.getAcctBalance(); //get original cost
+							}							
 						}
 					}
 				}
@@ -440,10 +443,11 @@ public class Doc_Inventory extends Doc
 							getDateAcct(), 0, getAD_Client_ID(), getAD_Org_ID(), true);
 				}
 				//	Cost Detail
+					BigDecimal amt = costDetailAmt;
 				if (!MCostDetail.createInventory(as, line.getAD_Org_ID(),
 					line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
 					line.get_ID(), 0,
-					costDetailAmt, line.getQty(),
+						amt, line.getQty(),
 					line.getDescription(), getTrxName()))
 				{
 					p_Error = "Failed to create cost detail record";
@@ -457,7 +461,11 @@ public class Doc_Inventory extends Doc
 		return facts;
 	}   //  createFact
 
-	protected boolean isReversal(DocLine line) {
+	/**
+	 * @param line
+	 * @return true if line is for reversal
+	 */
+	private boolean isReversal(DocLine line) {
 		return m_Reversal_ID !=0 && line.getReversalLine_ID() != 0;
 	}
 

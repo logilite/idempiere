@@ -26,6 +26,7 @@ import org.compiere.model.MBPartner;
 import org.compiere.model.MConversionRate;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MProject;
 import org.compiere.model.MTable;
 import org.compiere.model.MTimeExpense;
@@ -74,7 +75,7 @@ public class ExpenseSOrder extends SvrProcess
 				m_DateTo = (Timestamp)para[i].getParameter_To();
 			}
 			else
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 	}	//	prepare
 

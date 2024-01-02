@@ -17,16 +17,28 @@
 
 package org.adempiere.webui.editor;
 
+import org.adempiere.webui.component.Textbox;
 import org.compiere.model.GridField;
 
 /**
- *
+ * Default editor for encrypted (AD_Field.IsEncrypted=Y) text display type (String, PrinterName, Text, TextLong and Memo).<br/>
+ * Extend {@link WStringEditor} and set {@link Textbox} to type="password".
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date    Mar 12, 2007
  * @version $Revision: 0.10 $
  */
 public class WPasswordEditor extends WStringEditor
-{
+{	
+	/** 
+	 * Default constructor
+	 */
+    public WPasswordEditor()
+    {
+        super();
+        super.setTypePassword(true);
+        setChangeEventWhenEditing(false);
+    }
+    
 	/**
 	 * 
 	 * @param gridField

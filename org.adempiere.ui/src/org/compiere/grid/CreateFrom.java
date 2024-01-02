@@ -34,6 +34,11 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
+/**
+ * 
+ * @author hengsin
+ *
+ */
 public abstract class CreateFrom implements ICreateFrom
 {
 	/**	Logger			*/
@@ -53,6 +58,13 @@ public abstract class CreateFrom implements ICreateFrom
 	
 	protected boolean isSOTrx = false;
 
+	/** optional db trx name **/
+	private String m_trxName;
+	
+	/**
+	 * 
+	 * @param gridTab
+	 */
 	public CreateFrom(GridTab gridTab) {
 		this.gridTab = gridTab;
 		
@@ -63,36 +75,63 @@ public abstract class CreateFrom implements ICreateFrom
 			isSOTrx = "Y".equals(Env.getContext(Env.getCtx(), gridTab.getWindowNo(), "IsSOTrx"));
 	}
 
-	public abstract boolean dynInit() throws Exception;
-
-	public abstract void info(IMiniTable miniTable, IStatusBar statusBar);
-
-	public abstract boolean save(IMiniTable miniTable, String trxName);
+	/**
+	 * dynamic initialization, usually for loading of data
+	 * @return true if initialization success
+	 * @throws Exception
+	 */
+	protected abstract boolean dynInit() throws Exception;
 
 	/**
-	 *	Init OK to be able to make changes?
-	 *  @return on if initialized
+	 * update status bar with info from miniTable
+	 * @param miniTable
+	 * @param statusBar
 	 */
+	public abstract void info(IMiniTable miniTable, IStatusBar statusBar);
+
+	/**
+	 * save changes
+	 * @param miniTable
+	 * @param trxName
+	 * @return true if save successfully
+	 */
+	public abstract boolean save(IMiniTable miniTable, String trxName);
+
+	@Override
 	public boolean isInitOK()
 	{
 		return initOK;
 	}
 
+	/**
+	 * 
+	 * @param initOK
+	 */
 	public void setInitOK(boolean initOK)
 	{
 		this.initOK = initOK;
 	}
 
 	/**
-	 *  Load PBartner dependent Order/Invoice/Shipment Field.
+	 *  Load BPartner related Orders.
 	 *  @param C_BPartner_ID BPartner
 	 *  @param forInvoice for invoice
+	 *  @param sameWarehouseOnly
+	 *  @return list of order records
 	 */
 	protected ArrayList<KeyNamePair> loadOrderData (int C_BPartner_ID, boolean forInvoice, boolean sameWarehouseOnly)
 	{
 		return loadOrderData(C_BPartner_ID, forInvoice, sameWarehouseOnly, false);
 	}
 	
+	/**
+	 * load order records
+	 * @param C_BPartner_ID
+	 * @param forInvoice
+	 * @param sameWarehouseOnly
+	 * @param forCreditMemo
+	 * @return list of order records
+	 */
 	protected ArrayList<KeyNamePair> loadOrderData (int C_BPartner_ID, boolean forInvoice, boolean sameWarehouseOnly, boolean forCreditMemo)
 	{
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
@@ -134,7 +173,7 @@ public abstract class CreateFrom implements ICreateFrom
 		ResultSet rs = null;
 		try
 		{
-			pstmt = DB.prepareStatement(sql.toString(), null);
+			pstmt = DB.prepareStatement(sql.toString(), m_trxName);
 			pstmt.setInt(1, C_BPartner_ID);
 			pstmt.setString(2, isSOTrxParam);
 			if(sameWarehouseOnly)
@@ -162,15 +201,23 @@ public abstract class CreateFrom implements ICreateFrom
 	}   //  initBPartnerOIS
 
 	/**
-	 *  Load Data - Order
+	 *  Load Order Line records
 	 *  @param C_Order_ID Order
 	 *  @param forInvoice true if for invoice vs. delivery qty
+	 *  @return list of order line records
 	 */
 	protected Vector<Vector<Object>> getOrderData (int C_Order_ID, boolean forInvoice)
 	{
 		return getOrderData (C_Order_ID, forInvoice, false);
 	}
 	
+	/**
+	 * Get order line records
+	 * @param C_Order_ID
+	 * @param forInvoice
+	 * @param forCreditMemo
+	 * @return list of order line records
+	 */
 	protected Vector<Vector<Object>> getOrderData (int C_Order_ID, boolean forInvoice, boolean forCreditMemo)
 	{
 		/**
@@ -184,7 +231,7 @@ public abstract class CreateFrom implements ICreateFrom
 		 *  InvoiceLine     - 7
 		 */
 		if (log.isLoggable(Level.CONFIG)) log.config("C_Order_ID=" + C_Order_ID);
-		p_order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(C_Order_ID, null);
+		p_order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(C_Order_ID, getTrxName());
 
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 		StringBuilder sql = new StringBuilder("SELECT ");
@@ -217,7 +264,7 @@ public abstract class CreateFrom implements ICreateFrom
 		ResultSet rs = null;
 		try
 		{
-			pstmt = DB.prepareStatement(sql.toString(), null);
+			pstmt = DB.prepareStatement(sql.toString(), getTrxName());
 			pstmt.setInt(1, C_Order_ID);
 			rs = pstmt.executeQuery();
 			while (rs.next())
@@ -232,7 +279,7 @@ public abstract class CreateFrom implements ICreateFrom
 				line.add(pp);                           //  2-UOM
 				pp = new KeyNamePair(rs.getInt(5), rs.getString(6));
 				line.add(pp);                           //  3-Product
-				line.add(rs.getString(7));				// 4-VendorProductNo
+				line.add(rs.getString(7));				//  4-VendorProductNo
 				pp = new KeyNamePair(rs.getInt(8), rs.getString(9));
 				line.add(pp);                           //  5-OrderLine
 				line.add(null);                         //  6-Ship
@@ -253,16 +300,22 @@ public abstract class CreateFrom implements ICreateFrom
 		return data;
 	}   //  LoadOrder
 
+	@Override
 	public void showWindow()
 	{
 
 	}
 
+	@Override
 	public void closeWindow()
 	{
 
 	}
 
+	/**
+	 * 
+	 * @return {@link GridTab}
+	 */
 	public GridTab getGridTab()
 	{
 		return gridTab;
@@ -277,11 +330,35 @@ public abstract class CreateFrom implements ICreateFrom
 		return Env.getContextAsInt(Env.getCtx(), gridTab.getWindowNo(), "M_Warehouse_ID");
 	}
 
+	/**
+	 * 
+	 * @return title
+	 */
 	public String getTitle() {
 		return title;
 	}
 
+	/**
+	 * 
+	 * @param title
+	 */
 	public void setTitle(String title) {
 		this.title = title;
+	}
+	
+	/**
+	 * 
+	 * @return trx name
+	 */
+	public String getTrxName() {
+		return m_trxName;
+	}
+	
+	/**
+	 * set optional trx name
+	 * @param trxName
+	 */
+	public void setTrxName(String trxName) {
+		m_trxName = trxName;
 	}
 }

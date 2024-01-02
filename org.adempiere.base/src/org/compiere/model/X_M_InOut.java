@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_InOut
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="M_InOut")
-public class X_M_InOut extends PO implements I_M_InOut, I_Persistent 
+public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220920L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_M_InOut (Properties ctx, int M_InOut_ID, String trxName)
@@ -122,6 +122,92 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_M_InOut (Properties ctx, String M_InOut_UU, String trxName)
+    {
+      super (ctx, M_InOut_UU, trxName);
+      /** if (M_InOut_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_BPartner_Location_ID (0);
+			setC_DocType_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDeliveryRule (null);
+// A
+			setDeliveryViaRule (null);
+// P
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setFreightCostRule (null);
+// I
+			setIsAlternateReturnAddress (false);
+// N
+			setIsApproved (false);
+			setIsInDispute (false);
+			setIsInTransit (false);
+			setIsPrinted (false);
+			setIsSOTrx (false);
+// @IsSOTrx@
+			setM_InOut_ID (0);
+			setMovementDate (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setMovementType (null);
+			setM_Warehouse_ID (0);
+			setPosted (false);
+			setPriorityRule (null);
+// 5
+			setProcessed (false);
+			setSendEMail (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_InOut (Properties ctx, String M_InOut_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_InOut_UU, trxName, virtualColumns);
+      /** if (M_InOut_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_BPartner_Location_ID (0);
+			setC_DocType_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDeliveryRule (null);
+// A
+			setDeliveryViaRule (null);
+// P
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setFreightCostRule (null);
+// I
+			setIsAlternateReturnAddress (false);
+// N
+			setIsApproved (false);
+			setIsInDispute (false);
+			setIsInTransit (false);
+			setIsPrinted (false);
+			setIsSOTrx (false);
+// @IsSOTrx@
+			setM_InOut_ID (0);
+			setMovementDate (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setMovementType (null);
+			setM_Warehouse_ID (0);
+			setPosted (false);
+			setPriorityRule (null);
+// 5
+			setProcessed (false);
+			setSendEMail (false);
+        } */
+    }
+
     /** Load Constructor */
     public X_M_InOut (Properties ctx, ResultSet rs, String trxName)
     {
@@ -129,7 +215,7 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -518,6 +604,22 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 		return (String)get_Value(COLUMNNAME_CreateLinesFrom);
 	}
 
+	/** Set Create lines from.
+		@param CreateLinesFrom Process which will generate a new document lines based on an existing document
+	*/
+	public void setCreateLinesFrom (String CreateLinesFrom)
+	{
+		set_Value (COLUMNNAME_CreateLinesFrom, CreateLinesFrom);
+	}
+
+	/** Get Create lines from.
+		@return Process which will generate a new document lines based on an existing document
+	  */
+	public String getCreateLinesFrom()
+	{
+		return (String)get_Value(COLUMNNAME_CreateLinesFrom);
+	}
+
 	/** Set Create Package.
 		@param CreatePackage Create Package
 	*/
@@ -565,7 +667,7 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 		return (Timestamp)get_Value(COLUMNNAME_DateOrdered);
 	}
 
-	/** Set Date printed.
+	/** Set Date Printed.
 		@param DatePrinted Date the document was printed.
 	*/
 	public void setDatePrinted (Timestamp DatePrinted)
@@ -573,7 +675,7 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 		set_Value (COLUMNNAME_DatePrinted, DatePrinted);
 	}
 
-	/** Get Date printed.
+	/** Get Date Printed.
 		@return Date the document was printed.
 	  */
 	public Timestamp getDatePrinted()
@@ -581,7 +683,7 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 		return (Timestamp)get_Value(COLUMNNAME_DatePrinted);
 	}
 
-	/** Set Date received.
+	/** Set Date Received.
 		@param DateReceived Date a product was received
 	*/
 	public void setDateReceived (Timestamp DateReceived)
@@ -589,7 +691,7 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 		set_Value (COLUMNNAME_DateReceived, DateReceived);
 	}
 
-	/** Get Date received.
+	/** Get Date Received.
 		@return Date a product was received
 	  */
 	public Timestamp getDateReceived()
@@ -778,7 +880,7 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getDocumentNo());
     }
@@ -974,6 +1076,8 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public static final String FREIGHTCOSTRULE_FreightIncluded = "I";
 	/** Line = L */
 	public static final String FREIGHTCOSTRULE_Line = "L";
+	/** Customer Account = U */
+	public static final String FREIGHTCOSTRULE_CustomerAccount = "U";
 	/** Set Freight Cost Rule.
 		@param FreightCostRule Method for charging Freight
 	*/
@@ -1042,10 +1146,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isAlternateReturnAddress()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAlternateReturnAddress);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1065,10 +1169,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isApproved()
 	{
 		Object oo = get_Value(COLUMNNAME_IsApproved);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1088,10 +1192,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isDropShip()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDropShip);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1111,10 +1215,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isInDispute()
 	{
 		Object oo = get_Value(COLUMNNAME_IsInDispute);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1134,10 +1238,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isInTransit()
 	{
 		Object oo = get_Value(COLUMNNAME_IsInTransit);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1157,10 +1261,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isPrinted()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPrinted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1180,10 +1284,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isSOTrx()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSOTrx);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1434,10 +1538,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isPosted()
 	{
 		Object oo = get_Value(COLUMNNAME_Posted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1486,10 +1590,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1527,10 +1631,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1708,10 +1812,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isSendEMail()
 	{
 		Object oo = get_Value(COLUMNNAME_SendEMail);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

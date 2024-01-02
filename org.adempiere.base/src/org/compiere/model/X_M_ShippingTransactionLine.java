@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_ShippingTransactionLine
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="M_ShippingTransactionLine")
-public class X_M_ShippingTransactionLine extends PO implements I_M_ShippingTransactionLine, I_Persistent 
+public class X_M_ShippingTransactionLine extends PO implements I_M_ShippingTransactionLine, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_M_ShippingTransactionLine (Properties ctx, int M_ShippingTransactionLine_ID, String trxName)
@@ -61,6 +61,45 @@ public class X_M_ShippingTransactionLine extends PO implements I_M_ShippingTrans
         } */
     }
 
+    /** Standard Constructor */
+    public X_M_ShippingTransactionLine (Properties ctx, int M_ShippingTransactionLine_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_ShippingTransactionLine_ID, trxName, virtualColumns);
+      /** if (M_ShippingTransactionLine_ID == 0)
+        {
+			setM_ShippingTransaction_ID (0);
+			setM_ShippingTransactionLine_ID (0);
+			setProcessed (false);
+// N
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_ShippingTransactionLine (Properties ctx, String M_ShippingTransactionLine_UU, String trxName)
+    {
+      super (ctx, M_ShippingTransactionLine_UU, trxName);
+      /** if (M_ShippingTransactionLine_UU == null)
+        {
+			setM_ShippingTransaction_ID (0);
+			setM_ShippingTransactionLine_ID (0);
+			setProcessed (false);
+// N
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_ShippingTransactionLine (Properties ctx, String M_ShippingTransactionLine_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_ShippingTransactionLine_UU, trxName, virtualColumns);
+      /** if (M_ShippingTransactionLine_UU == null)
+        {
+			setM_ShippingTransaction_ID (0);
+			setM_ShippingTransactionLine_ID (0);
+			setProcessed (false);
+// N
+        } */
+    }
+
     /** Load Constructor */
     public X_M_ShippingTransactionLine (Properties ctx, ResultSet rs, String trxName)
     {
@@ -68,7 +107,7 @@ public class X_M_ShippingTransactionLine extends PO implements I_M_ShippingTrans
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -269,7 +308,7 @@ public class X_M_ShippingTransactionLine extends PO implements I_M_ShippingTrans
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getM_ShippingTransaction_ID()));
     }
@@ -343,10 +382,10 @@ public class X_M_ShippingTransactionLine extends PO implements I_M_ShippingTrans
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

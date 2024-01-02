@@ -30,6 +30,7 @@
 package org.adempiere.webui.dashboard;
 
 import java.sql.Timestamp;
+import org.adempiere.webui.apps.BusyDialog;
 
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.apps.graph.WDocumentStatusPanel;
@@ -37,7 +38,9 @@ import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.ToolBarButton;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ServerPushTemplate;
+import org.adempiere.webui.util.ZkContextRunnable;
 import org.compiere.util.DisplayType;
+import org.compiere.Adempiere;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
@@ -49,9 +52,12 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Toolbar;
 
+/**
+ * Dashboard gadget for {@link WDocumentStatusPanel} 
+ */
 public class DPDocumentStatus extends DashboardPanel implements EventListener<Event> {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 7904122964566112177L;
 	private WDocumentStatusPanel statusPanel;
@@ -80,6 +86,9 @@ public class DPDocumentStatus extends DashboardPanel implements EventListener<Ev
 		statusLabel.setText(lastRunTime);
 	}
 
+	/**
+	 * Default constructor
+	 */
 	public DPDocumentStatus()
 	{
 		super();
@@ -114,19 +123,35 @@ public class DPDocumentStatus extends DashboardPanel implements EventListener<Ev
 		documentStatusToolbar.appendChild(statusLabel);
 	}
 
+	@Override
 	public void onEvent(Event event) throws Exception {
 		String eventName = event.getName();
 
 		if (eventName.equals(Events.ON_CLICK)) {
-			Desktop desktop = Executions.getCurrent().getDesktop();
-			ServerPushTemplate template = new ServerPushTemplate(desktop);
-
-			refresh(template);
+    		BusyDialog busyDialog = new BusyDialog();
+            busyDialog.setShadow(false);
+            getParent().insertBefore(busyDialog, getParent().getFirstChild());
+			ServerPushTemplate template = new ServerPushTemplate(getDesktop());
+    		ZkContextRunnable cr = new ZkContextRunnable() {
+    			@Override
+				protected void doRun() {
+    				refresh(template);
+    				template.executeAsync(() -> {
+    					busyDialog.detach();
+    				});
+    			}
+    		};
+    		Adempiere.getThreadPoolExecutor().submit(cr);
 		}
 	}	
 	
 	@Override
 	public boolean isPooling() {
+		return true;
+	}
+
+	@Override
+	public boolean isLazy() {
 		return true;
 	}
 }

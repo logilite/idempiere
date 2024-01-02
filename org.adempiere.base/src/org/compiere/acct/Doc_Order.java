@@ -70,6 +70,7 @@ public class Doc_Order extends Doc
 	 *  Load Specific Document Details
 	 *  @return error message or null
 	 */
+	@Override
 	protected String loadDocumentDetails ()
 	{
 		MOrder order = (MOrder)getPO();
@@ -88,7 +89,7 @@ public class Doc_Order extends Doc
 
 
 	/**
-	 *	Load Invoice Line
+	 *	Load order lines
 	 *	@param order order
 	 *  @return DocLine Array
 	 */
@@ -145,7 +146,6 @@ public class Doc_Order extends Doc
 		list.toArray(dl);
 		return dl;
 	}	//	loadLines
-
 
 	/**
 	 * 	Load Requisitions
@@ -214,7 +214,6 @@ public class Doc_Order extends Doc
 		return dls;
 	}	// loadRequisitions
 
-
 	/**
 	 * 	Get Currency Precision
 	 *	@return precision
@@ -227,7 +226,7 @@ public class Doc_Order extends Doc
 	}	//	getPrecision
 
 	/**
-	 *	Load Invoice Taxes
+	 *	Load Order Taxes
 	 *  @return DocTax Array
 	 */
 	public DocTax[] loadTaxes()
@@ -273,11 +272,11 @@ public class Doc_Order extends Doc
 		return tl;
 	}	//	loadTaxes
 
-
-	/**************************************************************************
+	/**
 	 *  Get Source Currency Balance - subtracts line and tax amounts from total - no rounding
 	 *  @return positive amount, if total invoice is bigger than lines
 	 */
+	@Override
 	public BigDecimal getBalance()
 	{
 		BigDecimal retValue = Env.ZERO;
@@ -319,8 +318,7 @@ public class Doc_Order extends Doc
 		return retValue;
 	}   //  getBalance
 
-
-	/*************************************************************************
+	/**
 	 *  Create Facts (the accounting logic) for
 	 *  SOO, POO.
 	 *  <pre>
@@ -335,6 +333,7 @@ public class Doc_Order extends Doc
 	 *  @param as accounting schema
 	 *  @return Fact
 	 */
+	@Override
 	public ArrayList<Fact> createFacts (MAcctSchema as)
 	{
 		ArrayList<Fact> facts = new ArrayList<Fact>();
@@ -342,8 +341,6 @@ public class Doc_Order extends Doc
 		if (getDocumentType().equals(DOCTYPE_POrder))
 		{
 			updateProductPO(as);
-
-			//BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
 
 			//  Commitment
 			@SuppressWarnings("unused")
@@ -451,7 +448,6 @@ public class Doc_Order extends Doc
 		return facts;
 	}   //  createFact
 
-
 	/**
 	 * 	Update ProductPO PriceLastPO
 	 *	@param as accounting schema
@@ -487,7 +483,6 @@ public class Doc_Order extends Doc
 		int no = DB.executeUpdate(sql.toString(), getTrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Updated=" + no);
 	}	//	updateProductPO
-
 
 	/**
 	 * 	Get Commitments
@@ -583,8 +578,8 @@ public class Doc_Order extends Doc
 	}	//	getCommitments
 
 	/**
-	 * 	Get Commitment Release.
-	 * 	Called from MatchInv for accrual and Allocation for Cash Based
+	 * 	Get Commitment Release.<br/>
+	 * 	Called from MatchInv for accrual and Allocation for cash based accounting
 	 *	@param as accounting schema
 	 *	@param doc doc
 	 *	@param Qty qty invoiced/matched

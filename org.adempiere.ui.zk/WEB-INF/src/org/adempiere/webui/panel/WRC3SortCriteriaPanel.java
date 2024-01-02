@@ -51,10 +51,13 @@ import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.Menupopup;
 import org.zkoss.zul.Vbox;
 
+/**
+ * Panel to edit sorting of print format
+ */
 public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener<Event>
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 6470498382547293013L;
 	//	UI variables
@@ -69,14 +72,22 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 	protected SimpleListModel yesModel = new SimpleListModel();
 	protected Listbox noList = new Listbox();
 	protected Listbox yesList = new Listbox();
+	/** List of print format items selected for ordering */
 	protected ArrayList<MPrintFormatItem> yesItems =new ArrayList<MPrintFormatItem>();
+	/** List of print format items not selected for ordering */
 	protected ArrayList<MPrintFormatItem> noItems =new ArrayList<MPrintFormatItem>();
 	private final String asc_desc = "asc_desc";
 
+	/**
+	 * default constructor
+	 */
 	public WRC3SortCriteriaPanel() {
 		super();
 	}
 
+	/**
+	 * Layout panel
+	 */
 	public void init()
 	{
 		//
@@ -210,6 +221,9 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 		}
 	}
 	
+	/**
+	 * Populate {@link #yesItems} and {@link #noItems} from print format items
+	 */
 	public void setListsColumns() {
 		yesItems =new ArrayList<MPrintFormatItem>();
 		noItems =new ArrayList<MPrintFormatItem>();
@@ -261,17 +275,23 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 		}
 	}
 
-	String getName(MPrintFormatItem pfi) {
+	protected String getName(MPrintFormatItem pfi) {
 		StringBuilder name = new StringBuilder(Util.isEmpty(pfi.getPrintName()) ? pfi.getName() : pfi.getPrintName())
 		.append(" (").append(pfi.isDesc() ? getOrderByDesc() : getOrderByAsc()).append(")");
 		return name.toString();
 	}
 
-	String getOrderByAsc() {
+	/**
+	 * @return translated text for ascending
+	 */
+	protected String getOrderByAsc() {
 		return MRefList.getListName(Env.getCtx(), REFERENCE_SQLORDERBY, "A");
 	}
 
-	String getOrderByDesc() {
+	/**
+	 * @return translated text for descending
+	 */
+	protected String getOrderByDesc() {
 		return MRefList.getListName(Env.getCtx(), REFERENCE_SQLORDERBY, "D");
 	}
 
@@ -300,6 +320,12 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 		migrateLists (listFrom,listTo,endIndex);
 	}	//	migrateValueAcrossLists
 	
+	/**
+	 * Move selected items from listFrom to listTo
+	 * @param listFrom
+	 * @param listTo
+	 * @param endIndex
+	 */
 	protected void migrateLists (Listbox listFrom , Listbox listTo , int endIndex)
 	{
 		int index = 0; 
@@ -362,7 +388,7 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 	}
 	
 	/**
-	 * 	Move within Yes List with Drag Event and Multiple Choice
+	 * 	Move selected items within Yes List
 	 *	@param event event
 	 */
 	protected void migrateValueWithinYesList (int endIndex, List<ListElement> selObjects)
@@ -391,7 +417,7 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 	}
 	
 	/**
-	 * 	Move within Yes List
+	 * 	Move selected items within Yes List
 	 *	@param event event
 	 */
 	protected void migrateValueWithinYesList (Event event)
@@ -481,10 +507,10 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 			}
 		}
 	}	//	migrateValueWithinYesList
-	
-	
+		
    /**	
-	*	@param int selIndexPI,int targetIndexPI
+	* @param selIndexPI
+	* @param targetIndexPI
 	*/
 	protected void updateSortNo(int selIndexPI,int targetIndexPI)
 	{
@@ -498,7 +524,7 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 	 */
 	public static class ListElement extends NamePair {
 		/**
-		 *
+		 * generated serial id
 		 */
 		private static final long serialVersionUID = -5645910649588308798L;
 		private int		m_key;

@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_User
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 11
  */
 public interface I_AD_User 
 {
@@ -44,8 +44,8 @@ public interface I_AD_User
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -66,12 +66,12 @@ public interface I_AD_User
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -118,6 +118,15 @@ public interface I_AD_User
 
 	/** Get Answer	  */
 	public String getAnswer();
+
+    /** Column name AuthenticationType */
+    public static final String COLUMNNAME_AuthenticationType = "AuthenticationType";
+
+	/** Set Authentication Type	  */
+	public void setAuthenticationType (String AuthenticationType);
+
+	/** Get Authentication Type	  */
+	public String getAuthenticationType();
 
     /** Column name Birthday */
     public static final String COLUMNNAME_Birthday = "Birthday";

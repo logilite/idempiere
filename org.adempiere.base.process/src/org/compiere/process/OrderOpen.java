@@ -19,6 +19,7 @@ package org.compiere.process;
 import java.util.logging.Level;
 
 import org.compiere.model.MOrder;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MTable;
 import org.compiere.util.AdempiereSystemError;
  
@@ -48,7 +49,7 @@ public class OrderOpen extends SvrProcess
 			else if (name.equals("C_Order_ID"))
 				p_C_Order_ID = para[i].getParameterAsInt();
 			else
-				log.log(Level.SEVERE, "prepare - Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 	}	//	prepare
 

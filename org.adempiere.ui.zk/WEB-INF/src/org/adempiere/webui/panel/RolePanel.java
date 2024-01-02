@@ -36,6 +36,7 @@ import org.adempiere.util.Callback;
 import org.adempiere.webui.AdempiereIdGenerator;
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.apps.AEnv;
+import org.adempiere.webui.component.Button;
 import org.adempiere.webui.component.ComboItem;
 import org.adempiere.webui.component.Combobox;
 import org.adempiere.webui.component.ConfirmPanel;
@@ -47,17 +48,19 @@ import org.adempiere.webui.theme.ITheme;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.UserPreference;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.adempiere.webui.window.LoginWindow;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
+import org.compiere.model.SystemProperties;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Language;
 import org.compiere.util.Login;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
+import org.compiere.util.WebUtil;
 import org.zkoss.util.Locales;
 import org.zkoss.web.Attributes;
 import org.zkoss.zhtml.Table;
@@ -66,20 +69,21 @@ import org.zkoss.zhtml.Tr;
 import org.zkoss.zk.au.out.AuFocus;
 import org.zkoss.zk.au.out.AuScript;
 import org.zkoss.zk.ui.Desktop;
+import org.zkoss.zk.ui.AbstractComponent;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zk.ui.event.Deferrable;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.sys.ComponentCtrl;
 import org.zkoss.zk.ui.util.Clients;
-import org.zkoss.zul.Button;
 import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Image;
 
 /**
- *
+ * Select role panel
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date    Feb 25, 2007
  * @version $Revision: 0.10 $
@@ -89,7 +93,7 @@ import org.zkoss.zul.Image;
 public class RolePanel extends Window implements EventListener<Event>, Deferrable
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -1159253307008488232L;
 
@@ -98,10 +102,11 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 
 	protected Combobox lstRole, lstClient, lstOrganisation, lstWarehouse;
 	protected Label lblRole, lblClient, lblDef, lblOrganisation, lblWarehouse, lblDate;
-	protected Label lblLanguage;
+    protected Label lblLanguage;
 	protected WDateEditor lstDate;
     protected Combobox lstLanguage;
     protected String validLstLanguage = null;
+    protected ConfirmPanel pnlButtons;
     /** Context					*/
 	protected Properties      m_ctx;
     /** Username					*/
@@ -132,6 +137,14 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 
 	protected static final String ON_DEFER_LOGOUT = "onDeferLogout";
 
+	/**
+	 * @param ctx
+	 * @param loginWindow
+	 * @param userName
+	 * @param show
+	 * @param clientsKNPairs
+	 * @param isClientDefined
+	 */
 	public RolePanel(Properties ctx, LoginWindow loginWindow, String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isClientDefined) {
     	this.wndLogin = loginWindow;
     	m_ctx = ctx;
@@ -141,14 +154,15 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     	m_isClientDefined = isClientDefined;
         m_clientKNPairs = clientsKNPairs;
         
+    	m_userpreference = SessionManager.getSessionApplication().getUserPreference();
         if( m_clientKNPairs.length == 1  &&  !m_showRolePanel ){
         	Env.setContext(m_ctx, Env.AD_CLIENT_ID, (String) m_clientKNPairs[0].getID());
         	MUser user = MUser.get (m_ctx, Login.getAppUser(m_userName));
-        	m_userpreference=new UserPreference();
         	m_userpreference.loadPreference(user.get_ID());        	
+        } else {
+        	m_userpreference.loadPreference(-1);
         }
     	
-        
         initComponents();
         init();
         this.setId("rolePanel");
@@ -175,12 +189,18 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
         } 
     }
 
+	/**
+	 * Layout panel
+	 */
     private void init()
     {
     	Clients.response(new AuScript("zAu.cmd0.clearBusy()"));
     	createUI();
     }
 
+    /**
+     * Layout panel
+     */
 	protected void createUI() {
 		Div div = new Div();
     	div.setSclass(ITheme.LOGIN_BOX_HEADER_CLASS);
@@ -294,11 +314,18 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 
     	div = new Div();
     	div.setSclass(ITheme.LOGIN_BOX_FOOTER_CLASS);
-        ConfirmPanel pnlButtons = new ConfirmPanel(true, false, false, false, false, false, true);
+        
+    	pnlButtons = new ConfirmPanel(true, false, false, false, false, false, true);
         pnlButtons.addActionListener(this);
         Button okBtn = pnlButtons.getButton(ConfirmPanel.A_OK);
         okBtn.setWidgetListener("onClick", "zAu.cmd0.showBusy(null)");
-        
+        okBtn.addCallback(ComponentCtrl.AFTER_PAGE_DETACHED, t -> ((AbstractComponent)t).setWidgetListener("onClick", null));
+
+        Button helpButton = pnlButtons.createButton(ConfirmPanel.A_HELP);
+		helpButton.addEventListener(Events.ON_CLICK, this);
+		helpButton.setSclass(ITheme.LOGIN_BUTTON_CLASS);
+		pnlButtons.addComponentsRight(helpButton);
+
         LayoutUtils.addSclass(ITheme.LOGIN_BOX_FOOTER_PANEL_CLASS, pnlButtons);
         ZKUpdateUtil.setWidth(pnlButtons, null);
         pnlButtons.getButton(ConfirmPanel.A_OK).setSclass(ITheme.LOGIN_BUTTON_CLASS);
@@ -346,6 +373,9 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 		return language;
 	}
 	
+	/**
+	 * Create components
+	 */
     private void initComponents()
     {
     	Language language = Env.getLanguage(m_ctx);
@@ -426,9 +456,11 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
             for(int i = 0; i < m_clientKNPairs.length; i++)
             {
             	ComboItem ci = new ComboItem(m_clientKNPairs[i].getName(), m_clientKNPairs[i].getID());
-            	String id = AdempiereIdGenerator.escapeId(ci.getLabel());
-            	if (lstClient.getFellowIfAny(id) == null)
-            		ci.setId(id);
+        		if (SystemProperties.isZkUnitTest()) {
+                	String id = AdempiereIdGenerator.escapeId(ci.getLabel());
+                	if (lstClient.getFellowIfAny(id) == null)
+                		ci.setId(id);
+        		}
             	lstClient.appendChild(ci);
                 if (m_clientKNPairs[i].getID().equals(initDefault))
                 	lstClient.setSelectedItem(ci);
@@ -453,7 +485,6 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
         {
         	lstDate.setReadWrite(false);
         }
-
         
         lstLanguage = new Combobox();
         lstLanguage.setAutocomplete(true);
@@ -492,15 +523,22 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     	component.addEventListener(ON_DEFER_LOGOUT, this);
     }
 
+    /**
+     * Update roles available for selection (after selection of tenant)
+     */
     private void updateRoleList()
     {
 		lstRole.getItems().clear();
 		lstRole.setText("");
+        setUserID();
+    	UserPreference userPreference = SessionManager.getSessionApplication().getUserPreference();
         Comboitem lstItemClient = lstClient.getSelectedItem();
         if (lstItemClient != null)
         {
+        	if (lstClient.getChildren().size() > 1) // load the preference was postponed until client selected
+        		userPreference.loadPreference(Env.getContextAsInt(m_ctx, Env.AD_USER_ID));
+
         	//  initial role
-        	UserPreference userPreference = SessionManager.getSessionApplication().getUserPreference();
 			String initDefault = userPreference.getProperty(UserPreference.P_ROLE);
 			if( initDefault.length() == 0 &&  !m_showRolePanel  &&  m_userpreference != null )
 			{
@@ -514,9 +552,11 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
                 for (int i = 0; i < roleKNPairs.length; i++)
                 {
                 	ComboItem ci = new ComboItem(roleKNPairs[i].getName(), roleKNPairs[i].getID());
-                	String id = AdempiereIdGenerator.escapeId(ci.getLabel());
-                	if (lstRole.getFellowIfAny(id) == null)
-                		ci.setId(id);
+            		if (SystemProperties.isZkUnitTest()) {
+                    	String id = AdempiereIdGenerator.escapeId(ci.getLabel());
+                    	if (lstRole.getFellowIfAny(id) == null)
+                    		ci.setId(id);
+            		}
                 	lstRole.appendChild(ci);
                     if (roleKNPairs[i].getID().equals(initDefault))
                     	lstRole.setSelectedItem(ci);
@@ -535,9 +575,28 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     			lstRole.setEnabled(true);
     		}
         }
-        setUserID();
         updateOrganisationList();
-    	updateLanguage();
+       	updateLanguage();
+    	if (lstClient.getChildren().size() > 1) {
+    		userPreference.loadPreference(Env.getContextAsInt(m_ctx, Env.AD_USER_ID));
+    		// saving the preferences was postponed until the user selects the client
+        	Comboitem lstItemRole = lstRole.getSelectedItem();
+        	Comboitem lstItemOrg = lstOrganisation.getSelectedItem();
+        	Comboitem lstItemWarehouse = lstWarehouse.getSelectedItem();
+        	Comboitem lstItemLanguage = lstLanguage.getSelectedItem();
+        	if (lstItemLanguage != null && lstItemLanguage.getValue() != null)
+        		userPreference.setProperty(UserPreference.P_LANGUAGE,  (String) lstItemLanguage.getValue());
+        	else
+        		userPreference.setProperty(UserPreference.P_LANGUAGE, Env.getContext(m_ctx, UserPreference.LANGUAGE_NAME));
+        	if (lstItemRole != null && lstItemRole.getValue() != null)
+        		userPreference.setProperty(UserPreference.P_ROLE, (String) lstItemRole.getValue());
+        	userPreference.setProperty(UserPreference.P_CLIENT, (String) lstItemClient.getValue());
+        	if (lstItemOrg != null && lstItemOrg.getValue() != null)
+        		userPreference.setProperty(UserPreference.P_ORG, (String) lstItemOrg.getValue());
+        	if (lstItemWarehouse != null && lstItemWarehouse.getValue() != null)
+        		userPreference.setProperty(UserPreference.P_WAREHOUSE, (String) lstItemWarehouse.getValue());
+        	userPreference.savePreference();
+    	}
     }
     
     private void updateLanguage()
@@ -565,6 +624,52 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 		}
 	}
 
+	private void languageChanged(String langName)
+	{
+		Language language = findLanguage(langName);
+		lblClient.setValue(Msg.getMsg(language, "Client"));
+		lblRole.setValue(Msg.getMsg(language, "Role"));
+		lblDef.setValue(Msg.getMsg(language, "Defaults"));
+		lblOrganisation.setValue(Msg.getMsg(language, "Organization"));
+		lblWarehouse.setValue(Msg.getMsg(language, "Warehouse"));
+		lblLanguage.setValue(Msg.getMsg(language, "Language"));
+		lblDate.setValue(Msg.getMsg(language, "Date"));
+		if (pnlButtons != null) {
+			pnlButtons.getButton(ConfirmPanel.A_OK).setLabel(Util.cleanAmp(Msg.getMsg(language, ConfirmPanel.A_OK)));
+			pnlButtons.getButton(ConfirmPanel.A_HELP)
+					.setLabel(Util.cleanAmp(Msg.getMsg(language, ConfirmPanel.A_HELP)));
+			pnlButtons.getButton(ConfirmPanel.A_CANCEL)
+					.setLabel(Util.cleanAmp(Msg.getMsg(language, ConfirmPanel.A_CANCEL)));
+		}
+	}
+    
+	private Language findLanguage(String langName)
+	{
+		Language tmp = Language.getLanguage(langName);
+		Language language = new Language(tmp.getName(), tmp.getAD_Language(), tmp.getLocale(), tmp.isDecimalPoint(),
+						tmp.getDateFormat().toPattern(), tmp.getMediaSize());
+		Env.verifyLanguage(m_ctx, language);
+		Env.setContext(m_ctx, Env.LANGUAGE, language.getAD_Language());
+		Env.setContext(m_ctx, AEnv.LOCALE, language.getLocale().toString());
+
+		// cph::erp added this in order to get the processing dialog in the correct language
+		Locale locale = language.getLocale();
+		try
+		{
+			Clients.reloadMessages(locale);
+		}
+		catch (IOException e)
+		{
+			Dialog.warn(0, e.getLocalizedMessage(), e.getMessage());
+		}
+		Locales.setThreadLocal(locale);
+		// cph::erp end
+		return language;
+	}
+
+    /**
+     * After organizations available for selection (after selection of role)
+     */
     private void updateOrganisationList()
     {
         lstOrganisation.getItems().clear();
@@ -586,9 +691,11 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
                 for(int i = 0; i < orgKNPairs.length; i++)
                 {
                 	ComboItem ci = new ComboItem(orgKNPairs[i].getName(), orgKNPairs[i].getID());
-                	String id = AdempiereIdGenerator.escapeId(ci.getLabel());
-                	if (lstOrganisation.getFellowIfAny(id) == null)
-                		ci.setId(id);
+            		if (SystemProperties.isZkUnitTest()) {
+                    	String id = AdempiereIdGenerator.escapeId(ci.getLabel());
+                    	if (lstOrganisation.getFellowIfAny(id) == null)
+                    		ci.setId(id);
+            		}
                 	lstOrganisation.appendChild(ci);
                     if(orgKNPairs[i].getID().equals(initDefault))
                     	lstOrganisation.setSelectedItem(ci);
@@ -633,6 +740,9 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
         updateWarehouseList();
     }
 
+    /**
+     * Update list of warehouse available for selection (after selection of organization)
+     */
     private void updateWarehouseList()
     {
         lstWarehouse.getItems().clear();
@@ -692,6 +802,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
         }
     }
 
+    @Override
     public void onEvent(Event event)
     {
         String eventCompId = event.getTarget().getId();
@@ -725,6 +836,10 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
         {
             validateRoles(false);
         }
+        else if (event.getTarget().getId().equals(ConfirmPanel.A_HELP))
+        {
+            openLoginHelp();
+        }
         else if (event.getTarget().getId().equals(ConfirmPanel.A_CANCEL))
         {
         	if (isChangeRole()) {
@@ -743,6 +858,28 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 		}
     }
     
+	private void openLoginHelp() {
+		String lang = Env.getContext(Env.getCtx(), Env.LANGUAGE);
+		lang = lang.substring(0, 2);
+		String helpURL = MSysConfig.getValue(MSysConfig.LOGIN_SELECT_ROLE_HELP_URL, "https://wiki.idempiere.org/{lang}/Login_Select_Role_Help");
+		if (helpURL.contains("{lang}")) {
+			String rawURL = helpURL;
+			helpURL = Util.replace(rawURL, "{lang}", lang);
+			if (!"en".equals(lang) && !WebUtil.isUrlOk(helpURL))
+				helpURL = Util.replace(rawURL, "{lang}", "en"); // default to English
+		}
+		try {
+			Executions.getCurrent().sendRedirect(helpURL, "_blank");
+		}
+		catch (Exception e) {
+			String message = e.getMessage();
+			Dialog.warn(0, "URLnotValid", message);
+		}
+	}
+
+	/**
+	 * Set user id to environment context
+	 */
     private void setUserID() {
     	if (lstClient.getSelectedItem() != null) {
         	Env.setContext(m_ctx, Env.AD_CLIENT_ID, (String) lstClient.getSelectedItem().getValue());
@@ -778,10 +915,10 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     }
 
     /**
-     *  validate Roles
+     * Validate fields
      * @param isMFAValidated
      *
-    **/
+     */
     public void validateRoles(boolean isMFAValidated)
     {
     	Clients.clearBusy();
@@ -789,6 +926,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     	Comboitem lstItemClient = lstClient.getSelectedItem();
     	Comboitem lstItemOrg = lstOrganisation.getSelectedItem();
     	Comboitem lstItemWarehouse = lstWarehouse.getSelectedItem();
+    	Comboitem lstItemLanguage = lstLanguage.getSelectedItem();
 
         if(lstItemRole == null || lstItemRole.getValue() == null)
         {
@@ -818,7 +956,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
         if (! Util.isEmpty(msg))
 		{
 			Env.getCtx().clear();
-			FDialog.error(0, this, "Error", msg, new Callback<Integer>() {					
+			Dialog.error(0, "Error", msg, new Callback<Integer>() {					
 				@Override
 				public void onCallback(Integer result) {
 					Events.echoEvent(new Event(ON_DEFER_LOGOUT, component));
@@ -849,10 +987,9 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 		// Elaine 2009/02/06 save preference to AD_Preference
 		UserPreference userPreference = SessionManager.getSessionApplication().getUserPreference();
 		if (lstItemLanguage != null && lstItemLanguage.getValue() != null)
-			userPreference.setProperty(UserPreference.P_LANGUAGE, (String) lstItemLanguage.getValue());
+			userPreference.setProperty(UserPreference.P_LANGUAGE,  (String) lstItemLanguage.getValue());
 		else
-			userPreference = SessionManager.getSessionApplication().getUserPreference();
-		userPreference.setProperty(UserPreference.P_LANGUAGE, Env.getContext(m_ctx, UserPreference.LANGUAGE_NAME));
+			userPreference.setProperty(UserPreference.P_LANGUAGE, Env.getContext(m_ctx, UserPreference.LANGUAGE_NAME));
 		userPreference.setProperty(UserPreference.P_ROLE, (String) lstItemRole.getValue());
 		userPreference.setProperty(UserPreference.P_CLIENT, (String) lstItemClient.getValue());
 		userPreference.setProperty(UserPreference.P_ORG, (String) lstItemOrg.getValue());
@@ -863,14 +1000,14 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 		// force reload of default role when more than 1 client
 		if (lstClient.getChildren().size() > 1)
 			MRole.getDefault(m_ctx, true);
-    	String langName = null;
-		if (lstItemLanguage != null)
-			langName = (String) lstItemLanguage.getLabel();
+		String langName = null;
+		if (lstLanguage.getSelectedItem() != null)
+			langName = (String) lstLanguage.getSelectedItem().getLabel();
 		else
 			langName = Language.getBaseLanguage().getName();
 		Language language = findLanguage(langName);
 		Env.setContext(m_ctx, UserPreference.LANGUAGE_NAME, language.getName());
-		
+
 		Locale locale = language.getLocale();
 		Desktop desktop = Executions.getCurrent().getDesktop();
 		desktop.getSession().setAttribute(Attributes.PREFERRED_LOCALE, locale);
@@ -880,17 +1017,27 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 		}
 		catch (IOException e)
 		{
-			FDialog.warn(0, e.getLocalizedMessage(), e.getMessage());
+			Dialog.warn(0, e.getLocalizedMessage(), e.getMessage());
 		}
 		Locales.setThreadLocal(locale);
-	}
 
+		if (m_isClientDefined || isMFAValidated)
+			wndLogin.loginCompleted(login, orgKNPair, this);
+		else
+			wndLogin.validateMFA(orgKNPair, m_isClientDefined, m_userName, m_showRolePanel, m_clientKNPairs);
+		
+		desktop.getSession().setAttribute(SSOUtils.ISCHANGEROLE_REQUEST, false);
+    }
+
+    @Override
 	public boolean isDeferrable() {
 		return false;
 	}
-	
-	public boolean isShow()
-	{
-		return this.m_showRolePanel;
+
+    /**
+     * @return true if role selection panel will be shown to user
+     */
+	public boolean show() {
+		return m_showRolePanel;
 	}
 }

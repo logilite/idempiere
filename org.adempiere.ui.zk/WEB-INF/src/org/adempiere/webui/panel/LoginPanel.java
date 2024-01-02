@@ -24,7 +24,6 @@
 package org.adempiere.webui.panel;
 
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -33,6 +32,7 @@ import java.util.logging.Level;
 
 import org.adempiere.base.Core;
 import org.adempiere.util.LogAuthFailure;
+import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Button;
@@ -49,7 +49,7 @@ import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.BrowserToken;
 import org.adempiere.webui.util.UserPreference;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.adempiere.webui.window.LoginWindow;
 import org.compiere.Adempiere;
 import org.adempiere.base.ILogin;
@@ -68,6 +68,7 @@ import org.compiere.util.Language;
 import org.compiere.util.Login;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
+import org.compiere.util.WebUtil;
 import org.zkoss.lang.Strings;
 import org.zkoss.util.Locales;
 import org.zkoss.web.Attributes;
@@ -78,6 +79,7 @@ import org.zkoss.zhtml.Td;
 import org.zkoss.zhtml.Tr;
 import org.zkoss.zk.au.out.AuFocus;
 import org.zkoss.zk.au.out.AuScript;
+import org.zkoss.zk.ui.AbstractComponent;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Session;
@@ -85,6 +87,7 @@ import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.sys.ComponentCtrl;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.A;
 import org.zkoss.zul.Checkbox;
@@ -102,7 +105,7 @@ import org.zkoss.zul.Image;
 public class LoginPanel extends Window implements EventListener<Event>
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -7859522563172088496L;
 
@@ -132,6 +135,10 @@ public class LoginPanel extends Window implements EventListener<Event>
 	/* Number of failures to calculate an incremental delay on every trial */
 	private int failures = 0;
     
+	/**
+	 * @param ctx
+	 * @param loginWindow
+	 */
     public LoginPanel(Properties ctx, LoginWindow loginWindow)
     {
         this.ctx = ctx;
@@ -148,6 +155,9 @@ public class LoginPanel extends Window implements EventListener<Event>
         this.addEventListener(ON_LOAD_TOKEN, this);
     }
 
+    /**
+     * Layout panel
+     */
     private void init()
     {
     	createUI();
@@ -192,7 +202,7 @@ public class LoginPanel extends Window implements EventListener<Event>
 							    			}
 							    		}
 						    			txtUserId.setValue(fillUser);
-								    	onUserIdChange(AD_User_ID);
+						    			onUserIdChange(AD_User_ID);
 								    	chkRememberMe.setChecked(true);
 							    	}
 							    	if (MSystem.isZKRememberPasswordAllowed()) {
@@ -237,6 +247,9 @@ public class LoginPanel extends Window implements EventListener<Event>
         txtPassword.removeEventListener(Events.ON_FOCUS, txtPassword);
     }
 
+    /**
+     * Layout panel
+     */
 	protected void createUI() {
 		Form form = new Form();
 
@@ -348,6 +361,7 @@ public class LoginPanel extends Window implements EventListener<Event>
         pnlButtons.addActionListener(this);
         Button okBtn = pnlButtons.getButton(ConfirmPanel.A_OK);
         okBtn.setWidgetListener("onClick", "zAu.cmd0.showBusy(null)");
+        okBtn.addCallback(ComponentCtrl.AFTER_PAGE_DETACHED, t -> ((AbstractComponent)t).setWidgetListener("onClick", null));
 
         Button helpButton = pnlButtons.createButton(ConfirmPanel.A_HELP);
 		helpButton.addEventListener(Events.ON_CLICK, this);
@@ -362,6 +376,9 @@ public class LoginPanel extends Window implements EventListener<Event>
         this.appendChild(form);
 	}
 
+	/**
+	 * Create components
+	 */
     private void initComponents()
     {
         lblUserId = new Label();
@@ -381,14 +398,12 @@ public class LoginPanel extends Window implements EventListener<Event>
         txtUserId.setCols(25);
         txtUserId.setMaxlength(40);
         ZKUpdateUtil.setWidth(txtUserId, "220px");
-        //txtUserId.addEventListener(Events.ON_CHANGE, this); // Elaine 2009/02/06
         txtUserId.setClientAttribute("autocomplete", "username");
 
         txtPassword = new Textbox();
         txtPassword.setId("txtPassword");
         txtPassword.setType("password");
         txtPassword.setCols(25);
-//        txtPassword.setMaxlength(40);
         ZKUpdateUtil.setWidth(txtPassword, "220px");
         if (MSysConfig.getBooleanValue(MSysConfig.ZK_LOGIN_ALLOW_CHROME_SAVE_PASSWORD, true))
         	txtPassword.setClientAttribute("autocomplete", "current-password");
@@ -423,8 +438,9 @@ public class LoginPanel extends Window implements EventListener<Event>
         if (lstLanguage.getItems().size() > 0){
         	validLstLanguage = (String)lstLanguage.getItems().get(0).getLabel();
         }                 
-   }
+    }
 
+    @Override
     public void onEvent(Event event)
     {
         Component eventComp = event.getTarget();
@@ -453,16 +469,6 @@ public class LoginPanel extends Window implements EventListener<Event>
         {
         	btnResetPasswordClicked();
         }
-        /* code below commented per security issue IDEMPIERE-1797 reported
-        // Elaine 2009/02/06 - initial language
-        else if (event.getName().equals(Events.ON_CHANGE))
-        {
-        	if(eventComp.getId().equals(txtUserId.getId()))
-        	{
-        		onUserIdChange(-1);
-        	}
-        }        
-        */
         else if (event.getName().equals(ON_LOAD_TOKEN)) 
         {
         	BrowserToken.load(txtUserId);
@@ -478,20 +484,28 @@ public class LoginPanel extends Window implements EventListener<Event>
     }
 
 	private void openLoginHelp() {
-		String langName = (String) lstLanguage.getSelectedItem().getValue();
-		langName = langName.substring(0, 2);
-		String helpURL = MSysConfig.getValue(MSysConfig.LOGIN_HELP_URL, "http://wiki.idempiere.org/{lang}/Login_Help");
-		if (helpURL.contains("{lang}"))
-			helpURL = Util.replace(helpURL, "{lang}", langName);
+		String lang = (String) lstLanguage.getSelectedItem().getValue();
+		lang = lang.substring(0, 2);
+		String helpURL = MSysConfig.getValue(MSysConfig.LOGIN_HELP_URL, "https://wiki.idempiere.org/{lang}/Login_Help");
+		if (helpURL.contains("{lang}")) {
+			String rawURL = helpURL;
+			helpURL = Util.replace(rawURL, "{lang}", lang);
+			if (!"en".equals(lang) && !WebUtil.isUrlOk(helpURL))
+				helpURL = Util.replace(rawURL, "{lang}", "en"); // default to English
+		}
 		try {
 			Executions.getCurrent().sendRedirect(helpURL, "_blank");
 		}
 		catch (Exception e) {
 			String message = e.getMessage();
-			FDialog.warn(0, this, "URLnotValid", message);
+			Dialog.warn(0, "URLnotValid", message, null);
 		}
 	}
 
+	/**
+	 * User id from onUserToken event.
+	 * @param AD_User_ID
+	 */
 	private void onUserIdChange(int AD_User_ID) {
 		String userName = txtUserId.getValue();
 		if (userName != null && userName.length() > 0 && AD_User_ID < 0)
@@ -516,16 +530,20 @@ public class LoginPanel extends Window implements EventListener<Event>
 			for(int i = 0; i < lstLanguage.getItemCount(); i++)
 			{
 				Comboitem li = lstLanguage.getItemAtIndex(i);
-				if(li.getLabel().equals(initDefault) || li.getValue().equals(initDefault))
+				if (li.getLabel().equals(initDefault) || li.getValue().equals(initDefault))
 				{
 					lstLanguage.setSelectedIndex(i);
-					languageChanged(li.getLabel()); // Elaine 2009/04/17 language changed
+					languageChanged(li.getLabel());
 					break;
 				}
 			}
 		}
 	}
 
+	/**
+	 * Apply language change to UI elements
+	 * @param langName
+	 */
     private void languageChanged(String langName)
     {
     	Language language = findLanguage(langName);
@@ -544,6 +562,11 @@ public class LoginPanel extends Window implements EventListener<Event>
     	pnlButtons.getButton(ConfirmPanel.A_HELP).setLabel(Util.cleanAmp(Msg.getMsg(language, ConfirmPanel.A_HELP)));
     }
 
+    /**
+     * Find language by name
+     * @param langName
+     * @return Language
+     */
 	private Language findLanguage(String langName) {
 		Language tmp = Language.getLanguage(langName);
     	Language language = new Language(tmp.getName(), tmp.getAD_Language(), tmp.getLocale(), tmp.isDecimalPoint(),
@@ -553,20 +576,20 @@ public class LoginPanel extends Window implements EventListener<Event>
     	Env.setContext(ctx, AEnv.LOCALE, language.getLocale().toString());
 
     	//cph::erp added this in order to get the processing dialog in the correct language
-    	 Locale locale = language.getLocale();
-    	 try {
+    	Locale locale = language.getLocale();
+    	try {
 				Clients.reloadMessages(locale);
-			} catch (IOException e) {
-				logger.log(Level.WARNING, e.getLocalizedMessage(), e);
-			}
-         Locales.setThreadLocal(locale);
-    	// cph::erp end
+		} catch (IOException e) {
+			logger.log(Level.WARNING, e.getLocalizedMessage(), e);
+		}
+        Locales.setThreadLocal(locale);
+    	
 		return language;
 	}
+	
     /**
-     *  validates user name and password when logging in
-     *
-    **/
+     * Validates user name and password when logging in
+     */
     public void validateLogin()
     {
         ILogin login = Core.getLogin(ctx);
@@ -653,12 +676,11 @@ public class LoginPanel extends Window implements EventListener<Event>
             	Clients.response("browserTimeoutScript", new AuScript(null, timeoutText));
         }
 
-		// This temporary validation code is added to check the reported bug
+		// This validation code is added to check the reported bug
 		// [ adempiere-ZK Web Client-2832968 ] User context lost?
 		// https://sourceforge.net/p/adempiere/zk-web-client/303/
 		// it's harmless, if there is no bug then this must never fail        
-        currSess.setAttribute("Check_AD_User_ID", Env.getAD_User_ID(ctx));
-		// End of temporary code for [ adempiere-ZK Web Client-2832968 ] User context lost?
+        currSess.setAttribute(AdempiereWebUI.CHECK_AD_USER_ID_ATTR, Env.getAD_User_ID(ctx));
 
         /* Check DB version */
         String version = DB.getSQLValueString(null, "SELECT Version FROM AD_System");
@@ -666,13 +688,15 @@ public class LoginPanel extends Window implements EventListener<Event>
         if (! Adempiere.DB_VERSION.equals(version)) {
             String AD_Message = "DatabaseVersionError";
             //  Code assumes Database version {0}, but Database has Version {1}.
-            String msg = Msg.getMsg(ctx, AD_Message);   //  complete message
-            msg = MessageFormat.format(msg, new Object[] {Adempiere.DB_VERSION, version});
+            String msg = Msg.getMsg(ctx, AD_Message, new Object[] {Adempiere.DB_VERSION, version});   //  complete message
             throw new ApplicationException(msg);
         }
 
     }
 
+    /**
+     * @return client side timeout script
+     */
 	private String getUpdateTimeoutTextScript() {
 		String msg = Msg.getMsg(Env.getCtx(), "SessionTimeoutText").trim();  //IDEMPIERE-847
 		String continueNsg = Msg.getMsg(Env.getCtx(), "continue").trim();   //IDEMPIERE-847
@@ -685,6 +709,9 @@ public class LoginPanel extends Window implements EventListener<Event>
 		return s;
 	}
 	
+	/**
+	 * Handle reset password event
+	 */
 	private void btnResetPasswordClicked()
 	{
 		String userId = Login.getAppUser(txtUserId.getValue());
@@ -722,7 +749,10 @@ public class LoginPanel extends Window implements EventListener<Event>
 		wndLogin.resetPassword(userId, users.size() == 0);
 	}
 
-	/** get default languages from the browser */
+	/**
+	 * Get default languages from the browser
+	 * @param header 
+	 */
 	private List<String> browserLanguages(String header) {
 		List<String> arrstr = new ArrayList<String>();
 		if (header == null)

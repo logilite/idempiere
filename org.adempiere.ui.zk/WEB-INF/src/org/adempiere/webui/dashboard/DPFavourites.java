@@ -45,7 +45,7 @@ import org.zkoss.zul.Treerow;
 import org.zkoss.zul.Vbox;
 
 /**
- * Dashboard item: User favourites - Tree based view organize
+ * Dashboard gadget: User favourites - Tree based view organize
  * 
  * @author Elaine
  * @author Logilite Technologies - IDEMPIERE-3340
@@ -53,14 +53,14 @@ import org.zkoss.zul.Vbox;
  */
 public class DPFavourites extends DashboardPanel implements EventListener<Event>
 {
-
 	/**
-	 * 
+	 * generated serial id 
 	 */
 	private static final long		serialVersionUID			= 7915726855926813700L;
 
 	public static final String		FAVOURITE_DROPPABLE			= "favourite";
 
+	/** model for {@link #tree} */
 	private FavoriteSimpleTreeModel	treeModel;
 
 	private ToolBarButton			btnAdd;
@@ -71,6 +71,7 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 	private ToolBarButton			btnCopyTree;
 	private ToolBarButton			btnShowMyTree;
 	private ToolBarButton			btnShowDefaultTree;
+	/** Favourites menu tree */
 	private Tree					tree;
 
 	private boolean					isDefaultTree				= false;
@@ -81,7 +82,9 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 	private Panel					panel;
 	private Panelchildren			favContent;
 
-	//
+	/**
+	 * Default constructor
+	 */
 	public DPFavourites()
 	{
 		super();
@@ -190,6 +193,10 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 
 	} // DPFavourites
 
+	/**
+	 * Create favourite tree panel
+	 * @return Box
+	 */
 	private Box createFavoritePanel(boolean isReload, boolean isInitiate)
 	{
 		/**
@@ -253,7 +260,7 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 	} // createFavoritePanel
 
 	/**
-	 * Creating Tree structure
+	 * Create Tree model ({@link #treeModel})
 	 * 
 	 * @param isReload
 	 */
@@ -265,6 +272,7 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 	/**
 	 * Event Like open Menu Window, Expand/Collapse Node, Add node into Tree
 	 */
+	@Override
 	public void onEvent(Event event)
 	{
 		String eventName = event.getName();
@@ -351,6 +359,9 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 		panel.appendChild(favContent);
 	} // updateUI
 
+	/**
+	 * Open {@link LoginOpenSequenceDialog}
+	 */
 	private void doLoginOpenSeq()
 	{
 		LoginOpenSequenceDialog dialog = new LoginOpenSequenceDialog(treeModel.getFavouriteController().getAD_Tree_Favorite_ID());
@@ -361,6 +372,7 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 
 	/**
 	 * Add or Edit folder
+	 * @param isAddFolder
 	 */
 	private void doFolderOpr(boolean isAddFolder)
 	{
@@ -399,6 +411,10 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 		}
 	} // doExpandCollapseAll
 
+	/**
+	 * @param tree
+	 * @return Current selected MTreeNode
+	 */
 	public static MTreeNode getCurrentSelectedTreeNode(Tree tree)
 	{
 		Treeitem selItem = tree.getSelectedItem();
@@ -411,13 +427,17 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 		return (MTreeNode) dtn.getData();
 	} // getCurrentSelectedTreeNode
 
+	/**
+	 * @param tree
+	 * @return Current selected Node_ID
+	 */
 	public static int getCurrentSelectedNodeID(Tree tree)
 	{
 		return getCurrentSelectedTreeNode(tree).getNode_ID();
 	} // getCurrentSelectedNodeID
 
 	/**
-	 * Insert Node into Tree it's contains only Menu type node, Dragged from Menu Tab.
+	 * Insert Node (Menu type node) into Tree, Dragged from Menu Tab.
 	 * 
 	 * @param menuID         - AD_Menu_ID
 	 * @param parentNodeID   - Parent AD_Favorite_Node_ID
@@ -435,7 +455,7 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 	} // insertMenuInTree
 
 	/**
-	 * Add Node in Tree view
+	 * Add Node into Tree view
 	 * 
 	 * @param treeModel - FavoriteSimpleTreeModel
 	 * @param tree      - Tree
@@ -445,20 +465,23 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 	public static void addNodeInTree(FavoriteSimpleTreeModel treeModel, Tree tree, DefaultTreeNode<Object> parentDTN, MTreeFavoriteNode favNode)
 	{
 		String name = null;
+		String description = null;
 		String action = null;
 
 		if (favNode.getAD_Menu_ID() > 0)
 		{
 			MMenu menu = (MMenu) MTable.get(Env.getCtx(), MMenu.Table_ID).getPO(favNode.getAD_Menu_ID(), null);
 			name = menu.getDisplayedName();
+			description = menu.get_Translation(MMenu.COLUMNNAME_Description);
 			action = menu.getAction();
 		}
 		else
 		{
 			name = favNode.getName();
+			description = name;
 		}
 
-		MTreeNode mtnNew = new MTreeNode(	favNode.getAD_Tree_Favorite_Node_ID(), favNode.getSeqNo(), name, name, favNode.getParent_ID(), favNode.getAD_Menu_ID(),
+		MTreeNode mtnNew = new MTreeNode(	favNode.getAD_Tree_Favorite_Node_ID(), favNode.getSeqNo(), name, description, favNode.getParent_ID(), favNode.getAD_Menu_ID(),
 											action, favNode.isSummary(), favNode.isCollapsible(), favNode.isFavourite());
 
 		DefaultTreeNode<Object> newNode = new DefaultTreeNode<Object>(mtnNew);

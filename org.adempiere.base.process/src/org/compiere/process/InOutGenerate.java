@@ -34,6 +34,7 @@ import org.compiere.model.MLocator;
 import org.compiere.model.MLocatorType;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MProduct;
 import org.compiere.model.MStorageOnHand;
 import org.compiere.model.MTable;
@@ -125,7 +126,7 @@ public class InOutGenerate extends SvrProcess
 			else if (name.equals("MovementDate"))
                 p_DateShipped = (Timestamp)para[i].getParameter();
 			else
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 		//  juddm - added ability to specify a shipment date from Generate Shipments
 		if (p_DateShipped == null) {
@@ -150,11 +151,10 @@ public class InOutGenerate extends SvrProcess
 			+ ", IsUnconfirmed=" + p_IsUnconfirmedInOut
 			+ ", Movement=" + m_movementDate);
 		
-		if (p_M_Warehouse_ID == 0)
-			throw new AdempiereUserError("@NotFound@ @M_Warehouse_ID@");
 		
-		if (p_Selection)	//	VInOutGen
+		if ((getProcessInfo().getAD_InfoWindow_ID() > 0) || (getProcessInfo().getAD_InfoWindow_ID()==0 && p_Selection))
 		{
+			p_Selection = true;
 			m_sql = new StringBuffer("SELECT C_Order.* FROM C_Order, T_Selection ")
 				.append("WHERE C_Order.DocStatus='CO' AND C_Order.IsSOTrx='Y' AND C_Order.AD_Client_ID=? ")
 				.append("AND C_Order.C_Order_ID = T_Selection.T_Selection_ID ") 
@@ -162,8 +162,13 @@ public class InOutGenerate extends SvrProcess
 		}
 		else
 		{
-			m_sql = new StringBuffer("SELECT * FROM C_Order o ")
-				.append("WHERE DocStatus='CO' AND IsSOTrx='Y'")
+			if (p_M_Warehouse_ID == 0)
+				throw new AdempiereUserError("@NotFound@ @M_Warehouse_ID@");
+
+			m_sql = new StringBuffer("SELECT o.* FROM m_inout_candidate_v ioc JOIN C_Order o ON o.C_Order_ID = ioc.C_Order_ID"
+					+ " LEFT JOIN M_Shipper ship ON ship.M_Shipper_ID = o.M_Shipper_ID"
+					+ " WHERE DocStatus='CO' AND IsSOTrx='Y' "
+					+ " AND ioc.AD_Client_ID = " + getAD_Client_ID())
 				//	No Offer,POS
 				.append(" AND o.C_DocType_ID IN (SELECT C_DocType_ID FROM C_DocType ")
 					.append("WHERE DocBaseType='SOO' AND DocSubTypeSO NOT IN ('ON','OB','WR'))")
@@ -171,7 +176,7 @@ public class InOutGenerate extends SvrProcess
 				.append(" AND o.DeliveryRule<>'M'")
 				//	Open Order Lines with Warehouse
 				.append(" AND EXISTS (SELECT * FROM C_OrderLine ol ")
-					.append("WHERE ol.M_Warehouse_ID=?");					//	#1
+					.append("WHERE ol.M_Warehouse_ID=? AND ioc.DocSource = 'O' ");					//	#1
 			if (p_DatePromised != null)
 				m_sql.append(" AND TRUNC(ol.DatePromised)<=?");		//	#2
 			m_sql.append(" AND o.C_Order_ID=ol.C_Order_ID AND ol.QtyOrdered<>ol.QtyDelivered)");
@@ -231,6 +236,10 @@ public class InOutGenerate extends SvrProcess
 					if (payment == null || payment.compareTo(order.getGrandTotal()) < 0)
 						continue;					
 				}
+				
+				//load warehouse
+				if(p_M_Warehouse_ID == 0)
+					p_M_Warehouse_ID = order.getM_Warehouse_ID();
 				
 				//	New Header different Shipper, Shipment Location
 				if (!p_ConsolidateDocument 
@@ -354,6 +363,10 @@ public class InOutGenerate extends SvrProcess
 					{
 						MStorageOnHand storage = storages[j];
 						onHand = onHand.add(storage.getQtyOnHand());
+						if (completeOrder && j == 0) {
+							// CompleteOrder is created at the end, so we need to subtract here to keep track of what is "consumed"
+							storage.setQtyOnHand(storage.getQtyOnHand().subtract(toDeliver));
+						}
 					}
 					boolean autoProduce = product.isBOM() && product.isVerified() && product.isAutoProduce();
 					boolean fullLine = onHand.compareTo(toDeliver) >= 0
@@ -418,6 +431,9 @@ public class InOutGenerate extends SvrProcess
 				//	Complete Order successful
 				if (completeOrder && MOrder.DELIVERYRULE_CompleteOrder.equals(order.getDeliveryRule()))
 				{
+					// reset storage cache - it was updated in memory above
+					resetStorageCache();
+
 					for (int i = 0; i < lines.length; i++)
 					{
 						MOrderLine line = lines[i];
@@ -629,8 +645,17 @@ public class InOutGenerate extends SvrProcess
 		}
 		return m_lastStorages;
 	}	//	getStorages
-	
-	
+
+	/**
+	 * Reset in memory map, array and parameters 
+	 */
+	public void resetStorageCache()
+	{
+		m_map = new HashMap<SParameter,MStorageOnHand[]>();
+		m_lastPP = null;
+		m_lastStorages = null;
+	}
+
 	/**
 	 * 	Complete Shipment
 	 */
@@ -650,11 +675,9 @@ public class InOutGenerate extends SvrProcess
 			String message = Msg.parseTranslation(getCtx(), "@ShipmentProcessed@ " + m_shipment.getDocumentNo());
 			addBufferLog(m_shipment.getM_InOut_ID(), m_shipment.getMovementDate(), null, message, m_shipment.get_Table_ID(),m_shipment.getM_InOut_ID());
 			m_created++;
-			
+
 			//reset storage cache as MInOut.completeIt will update m_storage
-			m_map = new HashMap<SParameter,MStorageOnHand[]>();
-			m_lastPP = null;
-			m_lastStorages = null;
+			resetStorageCache();
 		}
 		m_shipment = null;
 		m_line = 0;

@@ -21,16 +21,16 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 /** Generated Model for AD_UserDef_Info_Column
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="AD_UserDef_Info_Column")
-public class X_AD_UserDef_Info_Column extends PO implements I_AD_UserDef_Info_Column, I_Persistent 
+public class X_AD_UserDef_Info_Column extends PO implements I_AD_UserDef_Info_Column, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220920L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_AD_UserDef_Info_Column (Properties ctx, int AD_UserDef_Info_Column_ID, String trxName)
@@ -58,6 +58,32 @@ public class X_AD_UserDef_Info_Column extends PO implements I_AD_UserDef_Info_Co
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_UserDef_Info_Column (Properties ctx, String AD_UserDef_Info_Column_UU, String trxName)
+    {
+      super (ctx, AD_UserDef_Info_Column_UU, trxName);
+      /** if (AD_UserDef_Info_Column_UU == null)
+        {
+			setAD_InfoColumn_ID (0);
+			setAD_UserDef_Info_Column_ID (0);
+			setAD_UserDef_Info_ID (0);
+// @AD_UserDef_Info_ID@
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_UserDef_Info_Column (Properties ctx, String AD_UserDef_Info_Column_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_UserDef_Info_Column_UU, trxName, virtualColumns);
+      /** if (AD_UserDef_Info_Column_UU == null)
+        {
+			setAD_InfoColumn_ID (0);
+			setAD_UserDef_Info_Column_ID (0);
+			setAD_UserDef_Info_ID (0);
+// @AD_UserDef_Info_ID@
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_UserDef_Info_Column (Properties ctx, ResultSet rs, String trxName)
     {
@@ -65,7 +91,7 @@ public class X_AD_UserDef_Info_Column extends PO implements I_AD_UserDef_Info_Co
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -354,7 +380,7 @@ public class X_AD_UserDef_Info_Column extends PO implements I_AD_UserDef_Info_Co
 	}
 
 	/** Set Input field validation.
-		@param InputFieldValidation Input field validaton query
+		@param InputFieldValidation Input field validation query
 	*/
 	public void setInputFieldValidation (String InputFieldValidation)
 	{
@@ -362,7 +388,7 @@ public class X_AD_UserDef_Info_Column extends PO implements I_AD_UserDef_Info_Co
 	}
 
 	/** Get Input field validation.
-		@return Input field validaton query
+		@return Input field validation query
 	  */
 	public String getInputFieldValidation()
 	{
@@ -375,8 +401,8 @@ public class X_AD_UserDef_Info_Column extends PO implements I_AD_UserDef_Info_Co
 	public static final String ISAUTOCOMPLETE_No = "N";
 	/** Yes = Y */
 	public static final String ISAUTOCOMPLETE_Yes = "Y";
-	/** Set Autocomplete.
-		@param IsAutocomplete Automatic completion for textfields
+	/** Set Auto complete.
+		@param IsAutocomplete Automatic completion for text fields
 	*/
 	public void setIsAutocomplete (String IsAutocomplete)
 	{
@@ -384,8 +410,8 @@ public class X_AD_UserDef_Info_Column extends PO implements I_AD_UserDef_Info_Co
 		set_Value (COLUMNNAME_IsAutocomplete, IsAutocomplete);
 	}
 
-	/** Get Autocomplete.
-		@return Automatic completion for textfields
+	/** Get Auto complete.
+		@return Automatic completion for text fields
 	  */
 	public String getIsAutocomplete()
 	{

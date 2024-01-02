@@ -33,6 +33,7 @@ import org.adempiere.webui.info.InfoWindow;
 import org.adempiere.webui.theme.ThemeManager;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
+import org.compiere.minigrid.UUIDColumn;
 import org.compiere.model.GridField;
 import org.compiere.model.GridFieldVO;
 import org.compiere.model.InfoColumnVO;
@@ -40,13 +41,20 @@ import org.compiere.model.MStyle;
 import org.compiere.util.Env;
 import org.compiere.util.Evaluatee;
 import org.compiere.util.KeyNamePair;
+import org.compiere.util.ValueNamePair;
+import org.zkoss.zhtml.Text;
+import org.zkoss.zk.ui.HtmlBasedComponent;
 import org.compiere.util.Util;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Listcell;
+import org.zkoss.zul.Span;
 
+/**
+ * List item renderer for Info Window list box. 
+ */
 public class WInfoWindowListItemRenderer extends WListItemRenderer
 {
 	protected InfoColumnVO[]	gridDisplayedInfoColumns = null;
@@ -55,11 +63,18 @@ public class WInfoWindowListItemRenderer extends WListItemRenderer
 	protected List<Integer>			hide_layoutColumnIdx			= null;
 	protected Map<Integer, Integer>	mapInfoColumnID_layoutColumnIdx	= null;
 
+	/**
+	 * @param infoWindow
+	 */
 	public WInfoWindowListItemRenderer(InfoWindow infoWindow)
 	{
 		this.infoWindow = infoWindow;
 	}
 
+	/**
+	 * @param infoWindow
+	 * @param columnNames
+	 */
 	public WInfoWindowListItemRenderer(InfoWindow infoWindow, List<? extends String> columnNames)
 	{
 		super(columnNames);
@@ -90,21 +105,17 @@ public class WInfoWindowListItemRenderer extends WListItemRenderer
 		
 		InfoColumnVO infoColumn = gridDisplayedInfoColumns[columnIndex];
 		if (infoColumn != null)
-		{
-		
+		{		
 			final GridField gridField = gridDisplayedColumnInfos[columnIndex].getGridField();
 			final WEditor editor = WebEditorFactory.getEditor(gridField, false);
 
 			if(model.isSelected(obj)) // First index may be null
 			{
-				if(infoColumn.isReadOnly() == false 
-						&& columnIndex > 0)
+				if(infoColumn.isReadOnly() == false && columnIndex > 0)
 				{
 					ListCell listCell = new ListCell();
-	
 					
-					// Set editor value
-					
+					// Set editor value				
 					Object value = table.getValueAt(rowIndex, columnIndex);
 					
 					if(value instanceof IDColumn)
@@ -112,10 +123,20 @@ public class WInfoWindowListItemRenderer extends WListItemRenderer
 						IDColumn idc = (IDColumn)value;
 						value = idc.getRecord_ID();
 					}
+					else if(value instanceof UUIDColumn)
+					{
+						UUIDColumn idc = (UUIDColumn)value;
+						value = idc.getRecord_UU();
+					}
 					else if(value instanceof KeyNamePair)
 					{
 						KeyNamePair knp = (KeyNamePair)value;
 						value = knp.getKey();
+					}
+					else if(value instanceof ValueNamePair)
+					{
+						ValueNamePair vnp = (ValueNamePair)value;
+						value = vnp.getValue();
 					}
 					
 					editor.setValue(value);
@@ -172,7 +193,6 @@ public class WInfoWindowListItemRenderer extends WListItemRenderer
 			if (gridField.getAD_FieldStyle_ID() > 0)
 			{
 				MStyle style = MStyle.get(Env.getCtx(), gridField.getAD_FieldStyle_ID());
-				//devCoffee #5960
 				String styleStr = style.buildStyle(ThemeManager.getTheme(), new Evaluatee() {
 
 					@Override
@@ -194,14 +214,15 @@ public class WInfoWindowListItemRenderer extends WListItemRenderer
 						return value;
 					}
 				});
-				if (styleStr != null && styleStr.startsWith(MStyle.SCLASS_PREFIX)) {
-					String sclass = styleStr.substring(MStyle.SCLASS_PREFIX.length());
-					listcell.setSclass(sclass);
-				} else if (style != null && styleStr.startsWith(MStyle.ZCLASS_PREFIX)) {
-					String zclass = styleStr.substring(MStyle.ZCLASS_PREFIX.length());
-					listcell.setZclass(zclass);
-				} else {
-					ZkCssHelper.appendStyle(listcell, styleStr);
+				if(style.isWrapWithSpan()) {
+					Span span = new Span();
+					span.appendChild(new Text(listcell.getValue()));
+					listcell.setLabel(null);
+					listcell.appendChild(span);
+					setStyle(span, styleStr);
+				}
+				else {
+					setStyle(listcell, styleStr);
 				}
 			}
 			
@@ -249,51 +270,16 @@ public class WInfoWindowListItemRenderer extends WListItemRenderer
 
 		return header;
 	}
-
-//
-//	//devCoffee #5960 - Get CSS Style if pass through display logic.
-//	private String getStatusStyle(ListCell listcell, PO po) {
-//		if(po instanceof MInfoWindow) {
-//			if(po.get_ValueAsInt("AD_FieldStyle_ID") != 0 && listcell != null) {
-//				try {
-//					MTable t = new MTable(Env.getCtx(), po.get_ValueAsInt("AD_Table_ID"), null);
-//					PO recordPO = (PO) new Query(Env.getCtx(), t.getTableName(), t.getTableName() + "_ID =" + listcell.getValue(), null).first();
-//
-//					List<X_AD_StyleLine> lines = new Query(Env.getCtx(), X_AD_StyleLine.Table_Name, "AD_Style_ID = " + po.get_ValueAsInt("AD_FieldStyle_ID"), null).list();
-//
-//					StringBuilder styleBuilder = new StringBuilder();
-//					for (X_AD_StyleLine line : lines)
-//					{
-//						String inlineStyle = line.getInlineStyle().trim();
-//						String displayLogic = line.getDisplayLogic();
-//						String theme = line.getTheme();
-//						if (!Util.isEmpty(theme)) {
-//							if (!ThemeManager.getTheme().equals(theme))
-//								continue;
-//						}
-//						if (!Util.isEmpty(displayLogic))
-//						{
-//							if (!Evaluator.evaluateLogic(recordPO, displayLogic))
-//								continue;
-//						}
-//						if (styleBuilder.length() > 0 && !(styleBuilder.charAt(styleBuilder.length()-1)==';'))
-//							styleBuilder.append("; ");
-//
-//						styleBuilder.append(inlineStyle);
-//					}
-//
-//					//listcell.setStyle(styleBuilder.toString());
-//					return styleBuilder.toString();
-//				} catch (Exception e) {
-//					throw new AdempiereException(e.getMessage());
-//				}
-//			}
-//		}
-//
-//		return "";
-//	}
-
-
-
-
+	
+	private void setStyle(HtmlBasedComponent component, String style) {
+		if (style != null && style.startsWith(MStyle.SCLASS_PREFIX)) {
+			String sclass = style.substring(MStyle.SCLASS_PREFIX.length());
+			component.setSclass(sclass);
+		} else if (style != null && style.startsWith(MStyle.ZCLASS_PREFIX)) {
+			String zclass = style.substring(MStyle.ZCLASS_PREFIX.length());
+			component.setZclass(zclass);
+		} else {
+			ZkCssHelper.appendStyle(component, style);
+		}
+	}
 }

@@ -41,16 +41,15 @@ import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Vbox;
 
-
+/**
+ * Panel to edit order of printed print format items
+ */
 public class WRC2FieldOrderPanel extends WRCTabPanel implements EventListener<Event> {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -7732332384947376101L;
 
-	/**
-	 * 
-	 */
 	protected Button bUp = new Button();
 	protected Button bDown = new Button();
 	
@@ -58,10 +57,16 @@ public class WRC2FieldOrderPanel extends WRCTabPanel implements EventListener<Ev
 	protected SimpleListModel sortModel;
 	protected Listbox sortList;
 	
+	/**
+	 * default constructor
+	 */
 	public WRC2FieldOrderPanel() {
 		super();	
 	}
 
+	/**
+	 * Populate {@link #listColumns} with printed MPrintFormatItem
+	 */
 	public void setListColumns() {
 		listColumns = new ArrayList<MPrintFormatItem>();
 		for (MPrintFormatItem item : m_pfi)
@@ -69,9 +74,11 @@ public class WRC2FieldOrderPanel extends WRCTabPanel implements EventListener<Ev
 		       listColumns.add(item);
 	}
 	
+	/**
+	 * Layout panel
+	 */
 	public void init()
 	{
-
 		Hlayout hlayout = new Hlayout();
 		ZKUpdateUtil.setVflex(hlayout, "true");
 		ZKUpdateUtil.setHflex(hlayout, "true");
@@ -163,7 +170,7 @@ public class WRC2FieldOrderPanel extends WRCTabPanel implements EventListener<Ev
 	}
 	
 	/**
-	 * 	Move within Yes List with Drag Event and Multiple Choice
+	 * 	Move selected items within Yes List
 	 *	@param event event
 	 */
 	protected void migrateValueWithinYesList (int endIndex, List<ListElement> selObjects)
@@ -227,7 +234,7 @@ public class WRC2FieldOrderPanel extends WRCTabPanel implements EventListener<Ev
 	}
 	
 	/**
-	 * 	Move within Yes List
+	 * 	Move selected items within Yes List
 	 *	@param event event
 	 */
 	protected void migrateValueWithinSortList (Event event)
@@ -304,7 +311,7 @@ public class WRC2FieldOrderPanel extends WRCTabPanel implements EventListener<Ev
 	 */
 	public static class ListElement extends NamePair {
 		/**
-		 *
+		 * generated serial id
 		 */
 		private static final long serialVersionUID = -5645910649588308798L;
 		private int		m_key;
@@ -313,7 +320,13 @@ public class WRC2FieldOrderPanel extends WRCTabPanel implements EventListener<Ev
 		/** Initial seq number */
 		private int		m_sortNo;
 		
-
+		/**
+		 * @param key
+		 * @param name
+		 * @param sortNo
+		 * @param AD_Client_ID
+		 * @param AD_Org_ID
+		 */
 		public ListElement(int key, String name, int sortNo, int AD_Client_ID, int AD_Org_ID) {
 			super(name);
 			this.m_key = key;

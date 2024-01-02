@@ -47,17 +47,22 @@ public abstract class PaymentFormCash extends PaymentForm {
 	private static final String PAYMENTRULE = MInvoice.PAYMENTRULE_Cash;
 	
 	/** Start Payment */
-	public int 					m_C_Payment_ID = 0;
-	public MPayment 			m_mPayment = null;
-	public MPayment 			m_mPaymentOriginal = null;
+	protected int 					m_C_Payment_ID = 0;
+	protected MPayment 			m_mPayment = null;
+	protected MPayment 			m_mPaymentOriginal = null;
 	/** Start Bank Account */
-	public int 					m_C_BankAccount_ID = 0;
+	protected int 					m_C_BankAccount_ID = 0;
 	/** Start CashBook Line */
-	public int 					m_C_CashLine_ID = 0;
-	public MCashLine 			m_cashLine = null;
+	protected int 					m_C_CashLine_ID = 0;
+	protected MCashLine 			m_cashLine = null;
 	/** Start CashBook */
-	public int 					m_C_CashBook_ID = 0;
+	protected int 					m_C_CashBook_ID = 0;
 	
+	/**
+	 * 
+	 * @param windowNo
+	 * @param mTab
+	 */
 	public PaymentFormCash(int windowNo, GridTab mTab) {
 		super(windowNo, mTab);
 	}
@@ -101,7 +106,12 @@ public abstract class PaymentFormCash extends PaymentForm {
 		}
 	}
 	
-	public KeyNamePair selectedBankAccount;
+	protected KeyNamePair selectedBankAccount;
+	
+	/**
+	 * 
+	 * @return list of active bank account
+	 */
 	public ArrayList<KeyNamePair> getBankAccountList() {
 		selectedBankAccount = null;
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
@@ -147,7 +157,12 @@ public abstract class PaymentFormCash extends PaymentForm {
 		return list;
 	}
 	
-	public KeyNamePair selectedCashBook;
+	protected KeyNamePair selectedCashBook;
+	
+	/**
+	 * 
+	 * @return list of active cash book
+	 */
 	public ArrayList<KeyNamePair> getCashBookList() {
 		selectedCashBook = null;
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
@@ -208,8 +223,20 @@ public abstract class PaymentFormCash extends PaymentForm {
 		return ok;
 	}
 	
-	public String processMsg;
-	public boolean save(int newC_BankAccount_ID, int newC_CashBook_ID, Timestamp newDateAcct, BigDecimal newAmount, String trxName)
+	protected String processMsg;
+
+	private int newC_CashLine_ID;
+	
+	/**
+	 * 
+	 * @param C_BankAccount_ID
+	 * @param C_CashBook_ID
+	 * @param dateAcct
+	 * @param amount
+	 * @param trxName
+	 * @return true if save successfully
+	 */
+	public boolean save(int C_BankAccount_ID, int C_CashBook_ID, Timestamp dateAcct, BigDecimal amount, String trxName)
 	{
 		// set trxname for class objects
 		if (m_cashLine != null)
@@ -220,7 +247,7 @@ public abstract class PaymentFormCash extends PaymentForm {
 			m_mPaymentOriginal.set_TrxName(trxName);
 		
 		processMsg = null;
-		int newC_CashLine_ID = m_C_CashLine_ID;
+		newC_CashLine_ID = m_C_CashLine_ID;
 		
 		/***********************
 		 *  Changed PaymentRule
@@ -260,7 +287,7 @@ public abstract class PaymentFormCash extends PaymentForm {
 		if (invoice == null && C_Order_ID != 0)
 			order = (MOrder) MTable.get(Env.getCtx(), MOrder.Table_ID).getPO(C_Order_ID, null);
 		
-		BigDecimal payAmount = newAmount;
+		BigDecimal payAmount = amount;
 
 		// Info
 		if (log.isLoggable(Level.CONFIG)) log.config("C_Order_ID=" + C_Order_ID + ", C_Invoice_ID=" + C_Invoice_ID);
@@ -274,7 +301,7 @@ public abstract class PaymentFormCash extends PaymentForm {
 			
 			if (C_Invoice_ID == 0 && order == null)
 			{
-				log.config("No Invoice!");
+				if (log.isLoggable(Level.CONFIG)) log.config("No Invoice!");
 				processMsg = Msg.getMsg(Env.getCtx(), "CashNotCreated");
 				throw new AdempiereException(processMsg);
 			}
@@ -284,16 +311,16 @@ public abstract class PaymentFormCash extends PaymentForm {
 				if (m_cashLine != null
 					&& payAmount.compareTo(m_cashLine.getAmount()) != 0)
 				{
-					log.config("Changed CashBook Amount");
-					m_cashLine.setAmount(newAmount);
+					if (log.isLoggable(Level.CONFIG)) log.config("Changed CashBook Amount");
+					m_cashLine.setAmount(amount);
 					m_cashLine.saveEx();
 				}
 				//	Different Date/CashBook
 				if (m_cashLine != null
-					&& (newC_CashBook_ID != m_C_CashBook_ID 
-						|| !TimeUtil.isSameDay(m_cashLine.getStatementDate(), newDateAcct)))
+					&& (C_CashBook_ID != m_C_CashBook_ID 
+						|| !TimeUtil.isSameDay(m_cashLine.getStatementDate(), dateAcct)))
 				{
-					if (log.isLoggable(Level.CONFIG)) log.config("Changed CashBook/Date: " + m_C_CashBook_ID + "->" + newC_CashBook_ID);
+					if (log.isLoggable(Level.CONFIG)) log.config("Changed CashBook/Date: " + m_C_CashBook_ID + "->" + C_CashBook_ID);
 					MCashLine reverse = m_cashLine.createReversal();
 					reverse.saveEx();
 					m_cashLine = null;
@@ -302,17 +329,17 @@ public abstract class PaymentFormCash extends PaymentForm {
 				//	Create new
 				if (m_cashLine == null)
 				{
-					log.config("New CashBook");
+					if (log.isLoggable(Level.CONFIG)) log.config("New CashBook");
 					int C_Currency_ID = 0;
 					if (invoice != null)
 						C_Currency_ID = invoice.getC_Currency_ID();
 					if (C_Currency_ID == 0 && order != null)
 						C_Currency_ID = order.getC_Currency_ID();
 					MCash cash = null;
-					if (newC_CashBook_ID != 0)
-						cash = MCash.get (Env.getCtx(), newC_CashBook_ID, newDateAcct, null);
+					if (C_CashBook_ID != 0)
+						cash = MCash.get (Env.getCtx(), C_CashBook_ID, dateAcct, null);
 					else	//	Default
-						cash = MCash.get (Env.getCtx(), m_AD_Org_ID, newDateAcct, C_Currency_ID, null);
+						cash = MCash.get (Env.getCtx(), m_AD_Org_ID, dateAcct, C_Currency_ID, null);
 					if (cash == null || cash.get_ID() == 0)
 					{
 						processMsg = CLogger.retrieveErrorString("CashNotCreated");
@@ -321,8 +348,6 @@ public abstract class PaymentFormCash extends PaymentForm {
 					else
 					{
 						MCashLine cl = new MCashLine (cash);
-						// cl.setAmount(new BigDecimal(bAmountField.getText()));
-						//ADialog.info(m_WindowNo, this, "m_cashLine - New Cashbook", "Amount: "+cl.getAmount());
 						if (invoice != null)
 							cl.setInvoice(invoice);	// overrides amount
 						if (order != null)
@@ -330,9 +355,9 @@ public abstract class PaymentFormCash extends PaymentForm {
 							cl.setOrder(order, null); // overrides amount
 							m_needSave = true;
 						}
-						cl.setAmount(newAmount);
+						cl.setAmount(amount);
 						cl.saveEx();
-						log.config("CashCreated");						
+						if (log.isLoggable(Level.CONFIG)) log.config("CashCreated");						
 						if (invoice == null && C_Invoice_ID != 0)
 						{
 							invoice = (MInvoice) MTable.get(Env.getCtx(), MInvoice.Table_ID).getPO(C_Invoice_ID, null);
@@ -349,7 +374,7 @@ public abstract class PaymentFormCash extends PaymentForm {
 							order.setC_CashLine_ID(cl.getC_CashLine_ID());
 							order.saveEx(trxName);
 						}
-						log.config("Update Order & Invoice with CashLine");						
+						if (log.isLoggable(Level.CONFIG)) log.config("Update Order & Invoice with CashLine");						
 					}
 				}
 			}	//	have invoice
@@ -365,16 +390,15 @@ public abstract class PaymentFormCash extends PaymentForm {
 			m_mPayment.setAmount(m_C_Currency_ID, payAmount);
 			// Get changes to cash amount
 			m_mPayment.setTenderType(MPayment.TENDERTYPE_Cash);
-			m_mPayment.setBankCash(newC_BankAccount_ID, m_isSOTrx, MPayment.TENDERTYPE_Cash);
+			m_mPayment.setBankCash(C_BankAccount_ID, m_isSOTrx, MPayment.TENDERTYPE_Cash);
 			m_mPayment.setC_BPartner_ID(m_C_BPartner_ID);
 			m_mPayment.setC_Invoice_ID(C_Invoice_ID);
 			if (order != null)
 			{
-				m_mPayment.setC_Order_ID(C_Order_ID);
-				m_needSave = true;
+				m_mPayment.setC_Order_ID(C_Order_ID);				
 			}
-			m_mPayment.setDateTrx(newDateAcct);
-			m_mPayment.setDateAcct(newDateAcct);
+			m_mPayment.setDateTrx(dateAcct);
+			m_mPayment.setDateAcct(dateAcct);
 			m_mPayment.saveEx();
 			
 			//  Save/Post
@@ -393,12 +417,26 @@ public abstract class PaymentFormCash extends PaymentForm {
 			else
 				if (log.isLoggable(Level.FINE)) log.fine("NotDraft " + m_mPayment);
 		}
+				
+		return true;
+	}
+	
+	@Override
+	public void afterSave(boolean success) 
+	{
+		if (!success)
+			return;
 		
 		/**********************
 		 *	Save Values to mTab
 		 */
-		log.config("Saving changes");
-		//
+		//refresh
+		getGridTab().dataRefresh(false);
+		Object paymentIdValue = getGridTab().getValue("C_Payment_ID");
+		if (paymentIdValue != null && paymentIdValue instanceof Number)
+			m_C_Payment_ID = ((Number)paymentIdValue).intValue();
+		else
+			m_C_Payment_ID = 0;
 		//	Set Payment
 		if (m_mPayment.getC_Payment_ID() != m_C_Payment_ID)
 		{
@@ -406,7 +444,13 @@ public abstract class PaymentFormCash extends PaymentForm {
 				getGridTab().setValue("C_Payment_ID", null);
 			else
 				getGridTab().setValue("C_Payment_ID", Integer.valueOf(m_mPayment.getC_Payment_ID()));
+			m_needSave = true;
 		}
+		Object cashLineIdValue = getGridTab().getValue("C_CashLine_ID");
+		if (cashLineIdValue != null && cashLineIdValue instanceof Number)
+			m_C_CashLine_ID = ((Number)cashLineIdValue).intValue();
+		else
+			m_C_CashLine_ID = 0;
 		//	Set Cash
 		if (newC_CashLine_ID != m_C_CashLine_ID)
 		{
@@ -414,7 +458,7 @@ public abstract class PaymentFormCash extends PaymentForm {
 				getGridTab().setValue("C_CashLine_ID", null);
 			else
 				getGridTab().setValue("C_CashLine_ID", Integer.valueOf(newC_CashLine_ID));
+			m_needSave = true;
 		}
-		return true;
 	}
 }

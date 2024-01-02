@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_Process
  *  @author iDempiere (generated) 
- *  @version Release 10
+ *  @version Release 11
  */
 public interface I_AD_Process 
 {
@@ -171,13 +171,13 @@ public interface I_AD_Process
     /** Column name AllowMultipleExecution */
     public static final String COLUMNNAME_AllowMultipleExecution = "AllowMultipleExecution";
 
-	/** Set Multiple Execution.
-	  * Allow or disallow executing a process/report multiple times.
+	/** Set Allow Concurrent Execution.
+	  * Allow or disallow executing a process/report multiple times concurrently
 	  */
 	public void setAllowMultipleExecution (String AllowMultipleExecution);
 
-	/** Get Multiple Execution.
-	  * Allow or disallow executing a process/report multiple times.
+	/** Get Allow Concurrent Execution.
+	  * Allow or disallow executing a process/report multiple times concurrently
 	  */
 	public String getAllowMultipleExecution();
 
@@ -263,6 +263,15 @@ public interface I_AD_Process
 	  * Execution Type defines whether the report/process will always run in background or foreground. 
 	  */
 	public String getExecutionType();
+
+    /** Column name FileNamePattern */
+    public static final String COLUMNNAME_FileNamePattern = "FileNamePattern";
+
+	/** Set File Name Pattern	  */
+	public void setFileNamePattern (String FileNamePattern);
+
+	/** Get File Name Pattern	  */
+	public String getFileNamePattern();
 
     /** Column name FileNamePattern */
     public static final String COLUMNNAME_FileNamePattern = "FileNamePattern";

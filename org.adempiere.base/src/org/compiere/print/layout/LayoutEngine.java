@@ -52,7 +52,6 @@ import javax.print.attribute.DocAttributeSet;
 import org.adempiere.base.Core;
 import org.compiere.model.MQuery;
 import org.compiere.model.MTable;
-import org.compiere.model.PO;
 import org.compiere.model.PrintInfo;
 import org.compiere.print.ArchiveEngine;
 import org.compiere.print.CPaper;
@@ -109,6 +108,17 @@ import org.idempiere.print.StandardHeaderFooter;
 public class LayoutEngine implements Pageable, Printable, Doc
 {
 	/**
+	 * Constructor
+	 * @param format
+	 * @param data
+	 * @param query
+	 * @param info
+	 */
+	public LayoutEngine (MPrintFormat format, PrintData data, MQuery query, PrintInfo info)
+	{
+		this(format,data,query,info,0);
+	}
+	/**
 	 *	Detail Constructor
 	 *  @param format Print Format
 	 *  @param data Print Data
@@ -121,6 +131,18 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		this(format, data, query, info , null, null, windowNo);
 	}	//	LayoutEngine
 	
+	/**
+	 * Detail Constructor
+	 * @param format
+	 * @param data
+	 * @param query
+	 * @param info
+	 * @param trxName
+	 */
+	public LayoutEngine (MPrintFormat format, PrintData data, MQuery query, PrintInfo info ,  String trxName)
+	{
+		this(format,data,query,info,trxName,0);
+	}
 	/**
 	 *	Detail Constructor
 	 *  @param format Print Format
@@ -307,7 +329,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 
 		//	Print Context
 		Env.setContext(m_printCtx, Page.CONTEXT_REPORTNAME, m_format.get_Translation(MPrintFormat.COLUMNNAME_Name));
-		Env.setContext(m_printCtx, Page.CONTEXT_HEADER, Env.getHeader(m_printCtx, 0));
+		Env.setContext(m_printCtx, Page.CONTEXT_HEADER, Env.getHeader(m_printCtx, m_windowNo));
 		Env.setContext(m_printCtx, Env.LANGUAGE, m_format.getLanguage().getAD_Language());
 
 		if (m_hasLayout && doLayout)
@@ -1486,21 +1508,25 @@ public class LayoutEngine implements Pageable, Printable, Doc
 				+ " - AD_Column_ID=" + AD_Column_ID + " - " + item);
 			return null;
 		}
-		int Record_ID = 0;
-		try
-		{
-			Record_ID = Integer.parseInt(recordString);
-		}
-		catch (Exception e)
-		{
-			data.dumpCurrentRow();
-			log.log(Level.SEVERE, "Invalid Record Key - " + recordString
-				+ " (" + e.getMessage()
-				+ ") - AD_Column_ID=" + AD_Column_ID + " - " + item);
-			return null;
-		}
 		MQuery query = new MQuery (format.getAD_Table_ID());
-		query.addRestriction(item.getColumnName(), MQuery.EQUAL, Integer.valueOf(Record_ID));
+		if (Util.isUUID(recordString)) {
+			query.addRestriction(item.getColumnName(), MQuery.EQUAL, recordString);
+		} else {
+			int Record_ID = 0;
+			try
+			{
+				Record_ID = Integer.parseInt(recordString);
+			}
+			catch (Exception e)
+			{
+				data.dumpCurrentRow();
+				log.log(Level.SEVERE, "Invalid Record Key - " + recordString
+					+ " (" + e.getMessage()
+					+ ") - AD_Column_ID=" + AD_Column_ID + " - " + item);
+				return null;
+			}
+			query.addRestriction(item.getColumnName(), MQuery.EQUAL, Integer.valueOf(Record_ID));
+		}
 		format.setTranslationViewQuery(query);
 		if (log.isLoggable(Level.FINE))
 			log.fine(query.toString());
@@ -1884,10 +1910,11 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		firstPage.width -= xOffset;
 		int yOffset = (int)m_position[AREA_CONTENT].y - m_content.y;
 		firstPage.y += yOffset;
-		firstPage.height -= yOffset;
+		firstPage.height -= yOffset+m_content.y;
 		Rectangle nextPages = calcTableNextPageSize();
 		nextPages.x += xOffset;
 		nextPages.width -= xOffset;
+		nextPages.height -= yOffset;
 		//	Column count
 		List<Integer> instanceAttributeList = new ArrayList<>();
 		List<MPrintFormatItem> instanceAttributeItems = new ArrayList<>();
@@ -1937,13 +1964,8 @@ public class LayoutEngine implements Pageable, Printable, Doc
 						if (item.is_Immutable())
 							item = new MPrintFormatItem(item);
 						item.setIsSuppressNull(true);	//	display size will be set to 0 in TableElement
-						try {
-							//this can be tenant or system print format
-							PO.setCrossTenantSafe();
-							item.saveEx();
-						} finally {
-							PO.clearCrossTenantSafe();
-						}
+						//this can be tenant or system print format
+						item.saveCrossTenantSafeEx();
 						CacheMgt.get().reset(MPrintFormat.Table_Name, format.get_ID());
 					}
 				}
@@ -2184,6 +2206,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		//
 		ParameterElement pe = new ParameterElement(m_query, m_printCtx, m_format.getTableFormat());
 		pe.layout(0, 0, false, null);
+		pe.fitToPage((int) getPaper().getImageableWidth(true));
 		return pe;
 	}	//	layoutParameter
 	

@@ -48,13 +48,15 @@ import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.event.DialogEvents;
+import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.ReaderInputStream;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.GridTab;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MLookupInfo;
+import org.compiere.model.MSysConfig;
 import org.compiere.util.Env;
 import org.compiere.util.Ini;
 import org.compiere.util.Msg;
@@ -72,7 +74,7 @@ import org.zkoss.zul.Vbox;
 import org.zkoss.zul.Vlayout;
 
 /**
- *
+ * Action to import data from uploaded file to GridTab
  * @author Carlos Ruiz
  *
  */
@@ -80,7 +82,9 @@ public class FileImportAction implements EventListener<Event>
 {
 	private AbstractADWindowContent panel;
 
+	/** File Extension:IGridTabImporter */
 	private Map<String, IGridTabImporter> importerMap = null;
+	/** File Extension:Label */
 	private Map<String, String> extensionMap = null;
 
 	private Window winImportFile = null;
@@ -90,6 +94,8 @@ public class FileImportAction implements EventListener<Event>
 	private Listbox fCharset = new Listbox();
 	private WTableDirEditor fImportMode;
 	private InputStream m_file_istream = null;
+	/* SysConfig USE_ESC_FOR_TAB_CLOSING */
+	private boolean isUseEscForTabClosing = MSysConfig.getBooleanValue(MSysConfig.USE_ESC_FOR_TAB_CLOSING, false, Env.getAD_Client_ID(Env.getCtx()));
 	
 	/**
 	 * @param panel
@@ -100,7 +106,7 @@ public class FileImportAction implements EventListener<Event>
 	}
 
 	/**
-	 * execute import action
+	 * Execute import action
 	 */
 	public void fileImport()
 	{
@@ -252,10 +258,15 @@ public class FileImportAction implements EventListener<Event>
 			importFile();
 		} else if (event.getName().equals(DialogEvents.ON_WINDOW_CLOSE)) {
 			panel.hideBusyMask();
+			panel.focusToLastFocusEditor();
 		}
 	}
 
 	private void onCancel() {
+		// do not allow to close tab for Events.ON_CTRL_KEY event
+		if(isUseEscForTabClosing)
+			SessionManager.getAppDesktop().setCloseTabWithShortcut(false);
+
 		winImportFile.onClose();
 	}
 
@@ -279,12 +290,15 @@ public class FileImportAction implements EventListener<Event>
 		bFile.setLabel(media.getName());
 	}
 	
+	/**
+	 * Import uploaded file
+	 */
 	private void importFile() {
 		try {
 			ListItem li = cboType.getSelectedItem();
 			if(li == null || li.getValue() == null)
 			{
-				FDialog.error(0, winImportFile, "FileInvalidExtension");
+				Dialog.error(0, "FileInvalidExtension");
 				return;
 			}
 
@@ -292,7 +306,7 @@ public class FileImportAction implements EventListener<Event>
 			IGridTabImporter importer = importerMap.get(ext);
 			if (importer == null)
 			{
-				FDialog.error(0, winImportFile, "FileInvalidExtension");
+				Dialog.error(0, "FileInvalidExtension");
 				return;
 			}
 

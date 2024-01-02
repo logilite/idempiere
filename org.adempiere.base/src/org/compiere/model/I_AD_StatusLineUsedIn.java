@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_StatusLineUsedIn
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 11
  */
 public interface I_AD_StatusLineUsedIn 
 {
@@ -44,21 +44,36 @@ public interface I_AD_StatusLineUsedIn
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
+
+    /** Column name AD_InfoWindow_ID */
+    public static final String COLUMNNAME_AD_InfoWindow_ID = "AD_InfoWindow_ID";
+
+	/** Set Info Window.
+	  * Info and search/select Window
+	  */
+	public void setAD_InfoWindow_ID (int AD_InfoWindow_ID);
+
+	/** Get Info Window.
+	  * Info and search/select Window
+	  */
+	public int getAD_InfoWindow_ID();
+
+	public org.compiere.model.I_AD_InfoWindow getAD_InfoWindow() throws RuntimeException;
 
     /** Column name AD_Org_ID */
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 
 import org.compiere.model.MPInstanceLog;
+import org.compiere.model.X_AD_PInstance_Log;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -115,11 +116,15 @@ public class ProcessInfoUtil
 	}	//	setSummaryFromDB
 
 	/**
-	 *	Set Log of Process.
+	 *	Set Log of Process from Database JUST when they are not already in memory
 	 * 	@param pi process info
 	 */
 	public static void setLogFromDB (ProcessInfo pi)
 	{
+        ProcessInfoLog m_logs[] = pi.getLogs();
+        if (m_logs != null && m_logs.length > 0)
+        	return;
+
 	//	s_log.fine("setLogFromDB - AD_PInstance_ID=" + pi.getAD_PInstance_ID());
 		String sql = "SELECT Log_ID, P_ID, P_Date, P_Number, P_Msg, AD_Table_ID,Record_ID "				             
 			+ "FROM AD_PInstance_Log "
@@ -170,10 +175,10 @@ public class ProcessInfoUtil
 		{
 			MPInstanceLog il = new MPInstanceLog(pi.getAD_PInstance_ID(), logs[i].getLog_ID(), logs[i].getP_Date(),
 					logs[i].getP_ID(), logs[i].getP_Number(), logs[i].getP_Msg(),
-					logs[i].getAD_Table_ID(), logs[i].getRecord_ID());
+					logs[i].getAD_Table_ID(), logs[i].getRecord_ID(), 
+					!Util.isEmpty(logs[i].getPInstanceLogType()) ? logs[i].getPInstanceLogType() : X_AD_PInstance_Log.PINSTANCELOGTYPE_Result);
 			il.save();
 		}
-		pi.setLogList(null);	//	otherwise log entries are twice
 	}   //  saveLogToDB
 
 	/**
@@ -187,7 +192,8 @@ public class ProcessInfoUtil
 			+ " p.P_String,p.P_String_To, p.P_Number,p.P_Number_To,"    //  2/3 4/5
 			+ " p.P_Date,p.P_Date_To, p.P_Number_Array,p.P_String_Array,"//  6/7 8/9
 			+ " p.Info,p.Info_To,	"	           						//  10/11
-			+ " i.AD_Client_ID, i.AD_Org_ID, i.AD_User_ID "				//	12..14
+			+ " i.AD_Client_ID, i.AD_Org_ID, i.AD_User_ID, "				//	12..14
+			+ " p.IsNotClause "											//  15
 			+ "FROM AD_PInstance_Para p"
 			+ " INNER JOIN AD_PInstance i ON (p.AD_PInstance_ID=i.AD_PInstance_ID) "
 			+ "WHERE p.AD_PInstance_ID=? "
@@ -232,7 +238,8 @@ public class ProcessInfoUtil
 				String Info = rs.getString(10);
 				String Info_To = rs.getString(11);
 				//
-				list.add (new ProcessInfoParameter(ParameterName, Parameter, Parameter_To, Info, Info_To));
+				boolean isNotClause = "Y".equals(rs.getString(15));
+				list.add (new ProcessInfoParameter(ParameterName, Parameter, Parameter_To, Info, Info_To, isNotClause));
 				//
 				if (pi.getAD_Client_ID() == null)
 					pi.setAD_Client_ID (rs.getInt(12));

@@ -22,6 +22,7 @@ import org.compiere.model.MBPartner;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPeriod;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MTable;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
@@ -55,6 +56,8 @@ public class InvoiceCalculateTax extends SvrProcess
 			{
 				p_C_Invoice_ID = para.getParameterAsInt();
 			}
+			else
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para);
 		}
 		
 		if (p_C_Invoice_ID <= 0)

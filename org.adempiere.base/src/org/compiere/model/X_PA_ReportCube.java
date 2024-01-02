@@ -23,16 +23,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for PA_ReportCube
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="PA_ReportCube")
-public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent 
+public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_PA_ReportCube (Properties ctx, int PA_ReportCube_ID, String trxName)
@@ -62,6 +62,48 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_PA_ReportCube (Properties ctx, int PA_ReportCube_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, PA_ReportCube_ID, trxName, virtualColumns);
+      /** if (PA_ReportCube_ID == 0)
+        {
+			setC_Calendar_ID (0);
+			setName (null);
+			setPA_ReportCube_ID (0);
+			setProcessing (false);
+// N
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PA_ReportCube (Properties ctx, String PA_ReportCube_UU, String trxName)
+    {
+      super (ctx, PA_ReportCube_UU, trxName);
+      /** if (PA_ReportCube_UU == null)
+        {
+			setC_Calendar_ID (0);
+			setName (null);
+			setPA_ReportCube_ID (0);
+			setProcessing (false);
+// N
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PA_ReportCube (Properties ctx, String PA_ReportCube_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, PA_ReportCube_UU, trxName, virtualColumns);
+      /** if (PA_ReportCube_UU == null)
+        {
+			setC_Calendar_ID (0);
+			setName (null);
+			setPA_ReportCube_ID (0);
+			setProcessing (false);
+// N
+        } */
+    }
+
     /** Load Constructor */
     public X_PA_ReportCube (Properties ctx, ResultSet rs, String trxName)
     {
@@ -69,7 +111,7 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -148,10 +190,10 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 	public boolean isActivityDim()
 	{
 		Object oo = get_Value(COLUMNNAME_IsActivityDim);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -171,10 +213,10 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 	public boolean isBPartnerDim()
 	{
 		Object oo = get_Value(COLUMNNAME_IsBPartnerDim);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -194,10 +236,10 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 	public boolean isCampaignDim()
 	{
 		Object oo = get_Value(COLUMNNAME_IsCampaignDim);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -217,10 +259,10 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 	public boolean isGLBudgetDim()
 	{
 		Object oo = get_Value(COLUMNNAME_IsGLBudgetDim);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -240,10 +282,10 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 	public boolean isLocFromDim()
 	{
 		Object oo = get_Value(COLUMNNAME_IsLocFromDim);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -263,10 +305,10 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 	public boolean isLocToDim()
 	{
 		Object oo = get_Value(COLUMNNAME_IsLocToDim);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -286,10 +328,10 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 	public boolean isOrgTrxDim()
 	{
 		Object oo = get_Value(COLUMNNAME_IsOrgTrxDim);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -309,10 +351,10 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 	public boolean isProductDim()
 	{
 		Object oo = get_Value(COLUMNNAME_IsProductDim);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -332,10 +374,10 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 	public boolean isProjectDim()
 	{
 		Object oo = get_Value(COLUMNNAME_IsProjectDim);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -355,10 +397,10 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 	public boolean isProjectPhaseDim()
 	{
 		Object oo = get_Value(COLUMNNAME_IsProjectPhaseDim);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -378,10 +420,10 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 	public boolean isProjectTaskDim()
 	{
 		Object oo = get_Value(COLUMNNAME_IsProjectTaskDim);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -401,10 +443,10 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 	public boolean isSalesRegionDim()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSalesRegionDim);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -424,10 +466,10 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 	public boolean isSubAcctDim()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSubAcctDim);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -447,10 +489,10 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 	public boolean isUser1Dim()
 	{
 		Object oo = get_Value(COLUMNNAME_IsUser1Dim);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -470,10 +512,10 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 	public boolean isUser2Dim()
 	{
 		Object oo = get_Value(COLUMNNAME_IsUser2Dim);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -493,10 +535,10 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 	public boolean isUserElement1Dim()
 	{
 		Object oo = get_Value(COLUMNNAME_IsUserElement1Dim);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -516,10 +558,10 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 	public boolean isUserElement2Dim()
 	{
 		Object oo = get_Value(COLUMNNAME_IsUserElement2Dim);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -560,7 +602,7 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -615,10 +657,10 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

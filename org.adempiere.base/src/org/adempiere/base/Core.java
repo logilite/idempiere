@@ -46,6 +46,7 @@ import org.compiere.model.MAddressValidation;
 import org.compiere.model.MAuthorizationAccount;
 import org.compiere.model.MBankAccountProcessor;
 import org.compiere.model.MPaymentProcessor;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTaxProvider;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
@@ -1122,4 +1123,67 @@ public class Core {
 		
 		return DefaultReservationTracerFactory.getInstance();
 	}
+	
+	/**
+	 * Get tax lookup service
+	 * @return ITaxLookup service
+	 */
+	public static ITaxLookup getTaxLookup() {
+		String service = MSysConfig.getValue(MSysConfig.TAX_LOOKUP_SERVICE, DefaultTaxLookup.class.getName(), Env.getAD_Client_ID(Env.getCtx()));
+		IServiceHolder<ITaxLookup> serviceHolder = Service.locator().locate(ITaxLookup.class, service, null);
+		if (serviceHolder != null)
+			return serviceHolder.getService();
+
+		//fall back, should not reach here
+		return new DefaultTaxLookup();
+	}
+	
+	/**
+	 * @return {@link DefaultAnnotationBasedEventManager}
+	 */
+	public static DefaultAnnotationBasedEventManager getDefaultAnnotationBasedEventManager() {
+		IServiceReferenceHolder<DefaultAnnotationBasedEventManager> serviceReference = Service.locator().locate(DefaultAnnotationBasedEventManager.class).getServiceReference();
+		if (serviceReference != null) {
+			return serviceReference.getService();
+		}
+		return null;
+	}
+
+	/**
+	 * get Credit Manager
+	 * 
+	 * @param  PO
+	 * @return    instance of the ICreditManager
+	 */
+	public static ICreditManager getCreditManager(PO po)
+	{
+		if (po == null)
+		{
+			s_log.log(Level.SEVERE, "Invalid PO");
+			return null;
+		}
+
+		ICreditManager myCreditManager = null;
+
+		List<ICreditManagerFactory> factoryList = Service.locator().list(ICreditManagerFactory.class).getServices();
+		if (factoryList != null)
+		{
+			for (ICreditManagerFactory factory : factoryList)
+			{
+				myCreditManager = factory.getCreditManager(po);
+				if (myCreditManager != null)
+				{
+					break;
+				}
+			}
+		}
+
+		if (myCreditManager == null)
+		{
+			s_log.log(Level.CONFIG, "For " + po.get_TableName() + " not found any service/extension registry.");
+			return null;
+		}
+
+		return myCreditManager;
+	} // getCreditManager
 }

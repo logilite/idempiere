@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_DiscountSchemaBreak
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="M_DiscountSchemaBreak")
-public class X_M_DiscountSchemaBreak extends PO implements I_M_DiscountSchemaBreak, I_Persistent 
+public class X_M_DiscountSchemaBreak extends PO implements I_M_DiscountSchemaBreak, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_M_DiscountSchemaBreak (Properties ctx, int M_DiscountSchemaBreak_ID, String trxName)
@@ -69,6 +69,57 @@ public class X_M_DiscountSchemaBreak extends PO implements I_M_DiscountSchemaBre
         } */
     }
 
+    /** Standard Constructor */
+    public X_M_DiscountSchemaBreak (Properties ctx, int M_DiscountSchemaBreak_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_DiscountSchemaBreak_ID, trxName, virtualColumns);
+      /** if (M_DiscountSchemaBreak_ID == 0)
+        {
+			setBreakDiscount (Env.ZERO);
+			setBreakValue (Env.ZERO);
+			setIsBPartnerFlatDiscount (false);
+// N
+			setM_DiscountSchemaBreak_ID (0);
+			setM_DiscountSchema_ID (0);
+			setSeqNo (0);
+// @SQL=SELECT NVL(MAX(SeqNo),0)+10 AS DefaultValue FROM M_DiscountSchemaBreak WHERE M_DiscountSchema_ID=@M_DiscountSchema_ID@
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_DiscountSchemaBreak (Properties ctx, String M_DiscountSchemaBreak_UU, String trxName)
+    {
+      super (ctx, M_DiscountSchemaBreak_UU, trxName);
+      /** if (M_DiscountSchemaBreak_UU == null)
+        {
+			setBreakDiscount (Env.ZERO);
+			setBreakValue (Env.ZERO);
+			setIsBPartnerFlatDiscount (false);
+// N
+			setM_DiscountSchemaBreak_ID (0);
+			setM_DiscountSchema_ID (0);
+			setSeqNo (0);
+// @SQL=SELECT NVL(MAX(SeqNo),0)+10 AS DefaultValue FROM M_DiscountSchemaBreak WHERE M_DiscountSchema_ID=@M_DiscountSchema_ID@
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_DiscountSchemaBreak (Properties ctx, String M_DiscountSchemaBreak_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_DiscountSchemaBreak_UU, trxName, virtualColumns);
+      /** if (M_DiscountSchemaBreak_UU == null)
+        {
+			setBreakDiscount (Env.ZERO);
+			setBreakValue (Env.ZERO);
+			setIsBPartnerFlatDiscount (false);
+// N
+			setM_DiscountSchemaBreak_ID (0);
+			setM_DiscountSchema_ID (0);
+			setSeqNo (0);
+// @SQL=SELECT NVL(MAX(SeqNo),0)+10 AS DefaultValue FROM M_DiscountSchemaBreak WHERE M_DiscountSchema_ID=@M_DiscountSchema_ID@
+        } */
+    }
+
     /** Load Constructor */
     public X_M_DiscountSchemaBreak (Properties ctx, ResultSet rs, String trxName)
     {
@@ -76,7 +127,7 @@ public class X_M_DiscountSchemaBreak extends PO implements I_M_DiscountSchemaBre
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -135,6 +186,25 @@ public class X_M_DiscountSchemaBreak extends PO implements I_M_DiscountSchemaBre
 		return bd;
 	}
 
+	/** Set Fixed Price.
+		@param FixedPrice Fixed Price for Product
+	*/
+	public void setFixedPrice (BigDecimal FixedPrice)
+	{
+		set_Value (COLUMNNAME_FixedPrice, FixedPrice);
+	}
+
+	/** Get Fixed Price.
+		@return Fixed Price for Product
+	  */
+	public BigDecimal getFixedPrice()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_FixedPrice);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set B.Partner Flat Discount.
 		@param IsBPartnerFlatDiscount Use flat discount defined on Business Partner Level
 	*/
@@ -149,10 +219,10 @@ public class X_M_DiscountSchemaBreak extends PO implements I_M_DiscountSchemaBre
 	public boolean isBPartnerFlatDiscount()
 	{
 		Object oo = get_Value(COLUMNNAME_IsBPartnerFlatDiscount);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -301,7 +371,7 @@ public class X_M_DiscountSchemaBreak extends PO implements I_M_DiscountSchemaBre
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getSeqNo()));
     }

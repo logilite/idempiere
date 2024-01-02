@@ -19,12 +19,15 @@ package org.compiere.model;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  *	Order Tax Model
@@ -35,7 +38,7 @@ import org.compiere.util.Env;
 public class MOrderTax extends X_C_OrderTax
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -6776007249310373908L;
 
@@ -44,8 +47,8 @@ public class MOrderTax extends X_C_OrderTax
 	 * 	Get Tax Line for Order Line
 	 *	@param line Order line
 	 *	@param precision currency precision
-	 *	@param oldTax get old tax
-	 *	@param trxName transaction
+	 *	@param oldTax true to get old tax
+	 *	@param trxName transaction name
 	 *	@return existing or new tax
 	 */
 	public static MOrderTax get (MOrderLine line, int precision, 
@@ -124,12 +127,115 @@ public class MOrderTax extends X_C_OrderTax
 		return retValue;
 	}	//	get
 	
+	/**
+	 * 	Get Child Tax Line for Order Line
+	 *	@param line Order line
+	 *	@param precision currency precision
+	 *	@param oldTax true to get old tax
+	 *	@param trxName transaction name
+	 *	@return existing or new child tax lines
+	 */
+	public static MOrderTax[] getChildTaxes(MOrderLine line, int precision, 
+		boolean oldTax, String trxName)
+	{
+		List<MOrderTax> orderTaxes = new ArrayList<MOrderTax>();
+		
+		if (line == null || line.getC_Order_ID() == 0)
+		{
+			return orderTaxes.toArray(new MOrderTax[0]);
+		}
+		
+		int C_Tax_ID = line.getC_Tax_ID();
+		if (oldTax)
+		{
+			Object old = line.get_ValueOld(MOrderTax.COLUMNNAME_C_Tax_ID);
+			if (old == null)
+			{
+				return orderTaxes.toArray(new MOrderTax[0]);
+			}
+			C_Tax_ID = ((Integer)old).intValue();
+		}
+		if (C_Tax_ID == 0)
+		{
+			return orderTaxes.toArray(new MOrderTax[0]);
+		}
+		
+		MTax tax = MTax.get(C_Tax_ID);
+		if (!tax.isSummary())
+			return orderTaxes.toArray(new MOrderTax[0]);
+		
+		MTax[] cTaxes = tax.getChildTaxes(false);
+		for(MTax cTax : cTaxes) {
+			MOrderTax orderTax = null;
+			String sql = "SELECT * FROM C_OrderTax WHERE C_Order_ID=? AND C_Tax_ID=?";
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			try
+			{
+				pstmt = DB.prepareStatement (sql, trxName);
+				pstmt.setInt (1, line.getC_Order_ID());
+				pstmt.setInt (2, cTax.getC_Tax_ID());
+				rs = pstmt.executeQuery ();
+				if (rs.next ())
+					orderTax = new MOrderTax (line.getCtx(), rs, trxName);
+			}
+			catch (Exception e)
+			{
+				s_log.log(Level.SEVERE, sql, e);
+			}
+			finally
+			{
+				DB.close(rs, pstmt);
+				rs = null;
+				pstmt = null;
+			}
+			if (orderTax != null)
+			{
+				orderTax.setPrecision(precision);
+				orderTax.set_TrxName(trxName);
+				orderTaxes.add(orderTax);
+			}
+			// If the old tax was required and there is no MOrderTax for that
+			// return null, and not create another MOrderTax - teo_sarca [ 1583825 ]
+			else 
+			{
+				if (oldTax)
+					continue;
+			}
+			
+			if (orderTax == null)
+			{
+				//	Create New
+				orderTax = new MOrderTax(line.getCtx(), 0, trxName);
+				orderTax.set_TrxName(trxName);
+				orderTax.setClientOrg(line);
+				orderTax.setC_Order_ID(line.getC_Order_ID());
+				orderTax.setC_Tax_ID(cTax.getC_Tax_ID());
+				orderTax.setPrecision(precision);
+				orderTax.setIsTaxIncluded(line.isTaxIncluded());
+				orderTaxes.add(orderTax);
+			}
+		}
+		
+		return orderTaxes.toArray(new MOrderTax[0]);
+	}
+	
 	/**	Static Logger	*/
 	private static CLogger	s_log	= CLogger.getCLogger (MOrderTax.class);
-	
-	
-	/**************************************************************************
-	 * 	Persistence Constructor
+		
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param C_OrderTax_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MOrderTax(Properties ctx, String C_OrderTax_UU, String trxName) {
+        super(ctx, C_OrderTax_UU, trxName);
+		if (Util.isEmpty(C_OrderTax_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 *	@param ctx context
 	 *	@param ignored ignored
 	 *	@param trxName transaction
@@ -139,10 +245,17 @@ public class MOrderTax extends X_C_OrderTax
 		super(ctx, 0, trxName);
 		if (ignored != 0)
 			throw new IllegalArgumentException("Multi-Key");
+		setInitialDefaults();
+	}	//	MOrderTax
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
 		setTaxAmt (Env.ZERO);
 		setTaxBaseAmt (Env.ZERO);
 		setIsTaxIncluded(false);
-	}	//	MOrderTax
+	}
 
 	/**
 	 * 	Load Constructor.
@@ -163,7 +276,7 @@ public class MOrderTax extends X_C_OrderTax
 
 	/**
 	 * 	Get Precision
-	 * 	@return Returns the precision or 2
+	 * 	@return Returns the set precision or 2
 	 */
 	public int getPrecision ()
 	{
@@ -191,9 +304,8 @@ public class MOrderTax extends X_C_OrderTax
 			m_tax = MTax.get(getCtx(), getC_Tax_ID());
 		return m_tax;
 	}	//	getTax
-
 	
-	/**************************************************************************
+	/**
 	 * 	Calculate/Set Tax Amt from Order Lines
 	 * 	@return true if calculated
 	 */
@@ -204,8 +316,13 @@ public class MOrderTax extends X_C_OrderTax
 		//
 		boolean documentLevel = getTax().isDocumentLevel();
 		MTax tax = getTax();
+		int parentTaxId = tax.getParent_Tax_ID();
 		//
-		String sql = "SELECT LineNetAmt FROM C_OrderLine WHERE C_Order_ID=? AND C_Tax_ID=?";
+		String sql = "SELECT LineNetAmt FROM C_OrderLine WHERE C_Order_ID=? ";
+		if (parentTaxId > 0)
+			sql += "AND C_Tax_ID IN (?, ?) ";
+		else
+			sql += "AND C_Tax_ID=? ";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
@@ -213,6 +330,8 @@ public class MOrderTax extends X_C_OrderTax
 			pstmt = DB.prepareStatement (sql, get_TrxName());
 			pstmt.setInt (1, getC_Order_ID());
 			pstmt.setInt (2, getC_Tax_ID());
+			if (parentTaxId > 0)
+				pstmt.setInt(3,  parentTaxId);
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
@@ -256,6 +375,7 @@ public class MOrderTax extends X_C_OrderTax
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MOrderTax[")

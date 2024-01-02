@@ -47,7 +47,7 @@ public class POFinder {
 		int AD_Client_ID = Env.getAD_Client_ID(ctx);
 		if (AD_Client_ID==0)
 			return uuid;
-		MTable table = MTable.get(ctx, tableName);
+		MTable table = MTable.get(ctx, tableName, trxName);
 		if (table == null) {
 			throw new IllegalStateException("getTargetUUID couldn't find table named " + tableName);
 		}
@@ -64,7 +64,7 @@ public class POFinder {
 	 */
 	public static void updateUUIDMap(PIPOContext ctx, String tableName, String uuid, String targetUUID) {
 		X_AD_Package_UUID_Map map = new X_AD_Package_UUID_Map(ctx.ctx, 0, ctx.trx.getTrxName());
-		MTable table = MTable.get(ctx.ctx, tableName);
+		MTable table = MTable.get(ctx.ctx, tableName, ctx.trx.getTrxName());
 		map.setAD_Table_ID(table.getAD_Table_ID());
 		map.setSource_UUID(uuid);
 		map.setTarget_UUID(targetUUID);
@@ -113,7 +113,7 @@ public class POFinder {
     			Query query = new Query(ctx.ctx, tableName, idColumn+"=?", getTrxName(ctx));
     			/* Allow reading from a different tenant to show user a clearer error message below
     			 * This is, instead of "Cross tenant PO reading request" the user will see a message
-    			 * "2Pack cannot update/access record that belongs to another client" which is more explanatory */
+    			 * "2Pack cannot update/access record that belongs to another tenant" which is more explanatory */
     			try {
     				PO.setCrossTenantSafe();
     				po = query.setParameters(Integer.valueOf(id.trim())).firstOnly();
@@ -122,7 +122,7 @@ public class POFinder {
     			}
     			if (po != null && po.getAD_Client_ID() > 0) {
     				if (po.getAD_Client_ID() != Env.getAD_Client_ID(ctx.ctx)) {
-    					throw new IllegalStateException("2Pack cannot update/access record that belongs to another client. TableName="+po.get_TableName()
+    					throw new IllegalStateException("2Pack cannot update/access record that belongs to another tenant. TableName="+po.get_TableName()
     						+", Record_ID="+po.get_ID() + ", AD_Client_ID="+po.getAD_Client_ID()+" Context AD_Client_ID="+Env.getAD_Client_ID(ctx.ctx));
     				}
     			}

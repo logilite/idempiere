@@ -10,17 +10,17 @@
 	background-image: none; background-color: #FFFFFF;
 }
 
+.dashboard-widget.z-panel {
+	display: flex; 
+	flex-direction: column; 
+	justify-content: stretch;
+}
 .dashboard-widget > .z-panel-body {
-	height: 100%;
+	flex-grow: 1;
 }
 
 .statusline-wrapper {
 	height: 100%;
-	margin-top: 1px; 
-	margin-left: auto; 
-	margin-right: auto;
-	position: relative;
-	width: 99%;
 }
 
 .z-panel {
@@ -70,6 +70,7 @@
 	margin-right: auto;
 	position: relative;
 	width: 99%;	
+	height: 100%;
 }
 
 .dashboard-widget-max {
@@ -86,7 +87,6 @@
 	border: 1px solid lightgray; 
 	margin:auto;
 	width: 99%;
-	height: 90%;
 }
 
 .favourites-box {
@@ -133,6 +133,16 @@
 	display: inline-flex;
 	align-items: center;
 }
+
+.dashboard-report-toolbar .z-toolbar-content {
+	display: block;
+}
+
+.dashboard-report-toolbar .rowcount-label {
+	float: right;
+	padding: 5px;
+}
+
 .recentitems-box .trash-toolbarbutton .z-toolbarbutton-content {
 	font-size: 16px;
 }
@@ -202,7 +212,7 @@
 .performance-indicator-box {
 	background-color: #eee; 
 	border: 1px solid #d8d8d8; 
-	border-radius: 11px; 
+	border-radius: 5px; 
 	cursor: pointer;
 }
 .performance-indicator-title {
@@ -221,7 +231,7 @@
 	width: 100%;
 }
 
-.guage-indicator-title {
+.gauge-indicator-title {
 	text-align: center;
 	padding-top: 1px; 
 	padding-bottom: 1px;
@@ -257,6 +267,15 @@
 
 .statusline-gadget {
 	padding: 0px 10px 10px;
+}
+
+.statusline-gadget {
+	display: flex;
+	flex-direction: column;
+ 	justify-content: center;
+ 	align-items: center;
+ 	height: 100%;
+	padding: 10px 0px;
 }
 
 .help-content
@@ -314,3 +333,51 @@
   vertical-align: middle;
 }
 <%-- User Favorite Dashboard Panel End --%>
+
+.z-anchorchildren .z-hlayout {
+	white-space: normal;
+}
+
+.desktop-home-tabpanel .z-hlayout-inner {
+	padding: 5px !important;
+}
+
+.dashboard-content-help-icon {
+	padding: 5px;
+	cursor: default;
+	visibility: hidden;
+}
+
+.z-caption:hover .dashboard-content-help-icon {
+	visibility: visible;
+}
+
+.dashboard-content-help-popup {
+	display: none;
+}
+
+.dashboard-content-help-icon:hover ~ .dashboard-content-help-popup {
+	display: inline-flex;
+	background: black;
+	color: white;
+	border-radius: 5px;
+	padding: 4px 7px;
+    position: fixed;
+    z-index: 1800;
+    max-width: 300px;
+}
+
+.fill-mandatory-process-para-wrapper {
+	padding: 11px;
+	display: flex;
+	flex-direction: column;
+	max-width: 500px;
+}
+
+.fill-mandatory-process-para-text {
+    background: #C62223;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    opacity: 90%;
+}

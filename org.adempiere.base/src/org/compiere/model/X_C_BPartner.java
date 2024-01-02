@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_BPartner
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="C_BPartner")
-public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent 
+public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_C_BPartner (Properties ctx, int C_BPartner_ID, String trxName)
@@ -92,6 +92,90 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_BPartner (Properties ctx, int C_BPartner_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_BPartner_ID, trxName, virtualColumns);
+      /** if (C_BPartner_ID == 0)
+        {
+			setC_BPartner_ID (0);
+			setC_BP_Group_ID (0);
+			setIs1099Vendor (false);
+// N
+			setIsCustomer (false);
+			setIsEmployee (false);
+			setIsOneTime (false);
+			setIsPOTaxExempt (false);
+// N
+			setIsProspect (false);
+// N
+			setIsSalesRep (false);
+			setIsSummary (false);
+			setIsVendor (false);
+			setName (null);
+			setSendEMail (false);
+			setSO_CreditLimit (Env.ZERO);
+			setSO_CreditUsed (Env.ZERO);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_BPartner (Properties ctx, String C_BPartner_UU, String trxName)
+    {
+      super (ctx, C_BPartner_UU, trxName);
+      /** if (C_BPartner_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_BP_Group_ID (0);
+			setIs1099Vendor (false);
+// N
+			setIsCustomer (false);
+			setIsEmployee (false);
+			setIsOneTime (false);
+			setIsPOTaxExempt (false);
+// N
+			setIsProspect (false);
+// N
+			setIsSalesRep (false);
+			setIsSummary (false);
+			setIsVendor (false);
+			setName (null);
+			setSendEMail (false);
+			setSO_CreditLimit (Env.ZERO);
+			setSO_CreditUsed (Env.ZERO);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_BPartner (Properties ctx, String C_BPartner_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_BPartner_UU, trxName, virtualColumns);
+      /** if (C_BPartner_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_BP_Group_ID (0);
+			setIs1099Vendor (false);
+// N
+			setIsCustomer (false);
+			setIsEmployee (false);
+			setIsOneTime (false);
+			setIsPOTaxExempt (false);
+// N
+			setIsProspect (false);
+// N
+			setIsSalesRep (false);
+			setIsSummary (false);
+			setIsVendor (false);
+			setName (null);
+			setSendEMail (false);
+			setSO_CreditLimit (Env.ZERO);
+			setSO_CreditUsed (Env.ZERO);
+			setValue (null);
+        } */
+    }
+
     /** Load Constructor */
     public X_C_BPartner (Properties ctx, ResultSet rs, String trxName)
     {
@@ -99,7 +183,7 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -634,6 +718,8 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	public static final String FREIGHTCOSTRULE_FreightIncluded = "I";
 	/** Line = L */
 	public static final String FREIGHTCOSTRULE_Line = "L";
+	/** Customer Account = U */
+	public static final String FREIGHTCOSTRULE_CustomerAccount = "U";
 	/** Set Freight Cost Rule.
 		@param FreightCostRule Method for charging Freight
 	*/
@@ -719,10 +805,10 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	public boolean is1099Vendor()
 	{
 		Object oo = get_Value(COLUMNNAME_Is1099Vendor);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -742,10 +828,10 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	public boolean isCustomer()
 	{
 		Object oo = get_Value(COLUMNNAME_IsCustomer);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -765,10 +851,10 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	public boolean isDiscountPrinted()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDiscountPrinted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -788,10 +874,10 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	public boolean isEmployee()
 	{
 		Object oo = get_Value(COLUMNNAME_IsEmployee);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -811,10 +897,10 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	public boolean isManufacturer()
 	{
 		Object oo = get_Value(COLUMNNAME_IsManufacturer);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -833,10 +919,10 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	public boolean isOneTime()
 	{
 		Object oo = get_Value(COLUMNNAME_IsOneTime);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -856,10 +942,10 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	public boolean isPOTaxExempt()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPOTaxExempt);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -879,10 +965,10 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	public boolean isProspect()
 	{
 		Object oo = get_Value(COLUMNNAME_IsProspect);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -902,10 +988,10 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	public boolean isSalesRep()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSalesRep);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -925,10 +1011,10 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	public boolean isSummary()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSummary);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -948,10 +1034,10 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	public boolean isTaxExempt()
 	{
 		Object oo = get_Value(COLUMNNAME_IsTaxExempt);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -971,10 +1057,10 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	public boolean isVendor()
 	{
 		Object oo = get_Value(COLUMNNAME_IsVendor);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1092,7 +1178,7 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -1260,7 +1346,7 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 			.getPO(getPO_PriceList_ID(), get_TrxName());
 	}
 
-	/** Set Purchase Pricelist.
+	/** Set Purchase Price List.
 		@param PO_PriceList_ID Price List used by this Business Partner
 	*/
 	public void setPO_PriceList_ID (int PO_PriceList_ID)
@@ -1271,7 +1357,7 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 			set_Value (COLUMNNAME_PO_PriceList_ID, Integer.valueOf(PO_PriceList_ID));
 	}
 
-	/** Get Purchase Pricelist.
+	/** Get Purchase Price List.
 		@return Price List used by this Business Partner
 	  */
 	public int getPO_PriceList_ID()
@@ -1410,10 +1496,10 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	public boolean isSendEMail()
 	{
 		Object oo = get_Value(COLUMNNAME_SendEMail);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

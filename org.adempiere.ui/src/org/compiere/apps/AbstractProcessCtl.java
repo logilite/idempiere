@@ -171,13 +171,14 @@ public abstract class AbstractProcessCtl implements Runnable
 			pinstance.setIsProcessing(true);
 			pinstance.saveEx();
 			try {
-				startWorkflow(AD_Workflow_ID);
+				startWorkflow (AD_Workflow_ID);
 				String errmsg = m_pi.getSummary();
 				pinstance.setResult(!m_pi.isError());
-				pinstance.setErrorMsg(errmsg);
+				pinstance.setErrorMsg(errmsg);	
 				pinstance.saveEx();
 				unlock();
-			} finally {
+			}
+			finally {
 				pinstance.setIsProcessing(false);
 				pinstance.saveEx();
 			}

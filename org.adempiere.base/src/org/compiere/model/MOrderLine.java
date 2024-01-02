@@ -22,50 +22,52 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Properties;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 import org.adempiere.base.Core;
 import org.adempiere.base.IProductPricing;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.ProductNotOnPriceListException;
 import org.adempiere.model.ITaxProvider;
+import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 /**
  *  Order Line Model.
- * 	<code>
- * 			MOrderLine ol = new MOrderLine(m_order);
-			ol.setM_Product_ID(wbl.getM_Product_ID());
-			ol.setQtyOrdered(wbl.getQuantity());
-			ol.setPrice();
-			ol.setPriceActual(wbl.getPrice());
-			ol.setTax();
-			ol.saveEx();
-
- *	</code>
+ * 	<pre>
+ * 		MOrderLine ol = new MOrderLine(m_order);
+		ol.setM_Product_ID(wbl.getM_Product_ID());
+		ol.setQtyOrdered(wbl.getQuantity());
+		ol.setPrice();
+		ol.setPriceActual(wbl.getPrice());
+		ol.setTax();
+		ol.saveEx();
+ *	</pre>
  *  @author Jorg Janke
  *  @version $Id: MOrderLine.java,v 1.6 2006/10/02 05:18:39 jjanke Exp $
  * 
- * @author Teo Sarca, SC ARHIPAC SERVICE SRL
+ *  @author Teo Sarca, SC ARHIPAC SERVICE SRL
  *			<li>BF [ 2588043 ] Insufficient message ProductNotOnPriceList
  */
 public class MOrderLine extends X_C_OrderLine
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
-	private static final long serialVersionUID = -7152360636393521683L;
+	private static final long serialVersionUID = 7994694334621222461L;
 
 	/**
-	 * 	Get Order Unreserved Qty
+	 * 	Get Order Qty that have not been reserved
 	 *	@param ctx context
 	 *	@param M_Warehouse_ID wh
 	 *	@param M_Product_ID product
 	 *	@param M_AttributeSetInstance_ID asi
 	 *	@param excludeC_OrderLine_ID exclude C_OrderLine_ID
-	 *	@return Unreserved Qty
+	 *	@return Order Qty that have not been reserved
 	 */
 	public static BigDecimal getNotReserved (Properties ctx, int M_Warehouse_ID, 
 		int M_Product_ID, int M_AttributeSetInstance_ID, int excludeC_OrderLine_ID)
@@ -116,7 +118,19 @@ public class MOrderLine extends X_C_OrderLine
 	/**	Logger	*/
 	protected static CLogger s_log = CLogger.getCLogger (MOrderLine.class);
 	
-	/**************************************************************************
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param C_OrderLine_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MOrderLine(Properties ctx, String C_OrderLine_UU, String trxName) {
+        super(ctx, C_OrderLine_UU, trxName);
+		if (Util.isEmpty(C_OrderLine_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 *  Default Constructor
 	 *  @param ctx context
 	 *  @param  C_OrderLine_ID  order line to load
@@ -127,40 +141,45 @@ public class MOrderLine extends X_C_OrderLine
 		this (ctx, C_OrderLine_ID, trxName, (String[]) null);
 	}	//	MOrderLine
 
+	/**
+	 * @param ctx
+	 * @param C_OrderLine_ID
+	 * @param trxName
+	 * @param virtualColumns
+	 */
 	public MOrderLine(Properties ctx, int C_OrderLine_ID, String trxName, String... virtualColumns) {
 		super(ctx, C_OrderLine_ID, trxName, virtualColumns);
 		if (C_OrderLine_ID == 0)
-		{
-			setFreightAmt (Env.ZERO);
-			setLineNetAmt (Env.ZERO);
-			//
-			setPriceEntered(Env.ZERO);
-			setPriceActual (Env.ZERO);
-			setPriceLimit (Env.ZERO);
-			setPriceList (Env.ZERO);
-			//
-			setM_AttributeSetInstance_ID(0);
-			//
-			setQtyEntered (Env.ZERO);
-			setQtyOrdered (Env.ZERO);	// 1
-			setQtyDelivered (Env.ZERO);
-			setQtyInvoiced (Env.ZERO);
-			setQtyReserved (Env.ZERO);
-			//
-			setIsDescription (false);	// N
-			setProcessed (false);
-			setLine (0);
-		}
+			setInitialDefaults();
+	}
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setFreightAmt (Env.ZERO);
+		setLineNetAmt (Env.ZERO);
+		//
+		setPriceEntered(Env.ZERO);
+		setPriceActual (Env.ZERO);
+		setPriceLimit (Env.ZERO);
+		setPriceList (Env.ZERO);
+		//
+		setM_AttributeSetInstance_ID(0);
+		//
+		setQtyEntered (Env.ZERO);
+		setQtyOrdered (Env.ZERO);	// 1
+		setQtyDelivered (Env.ZERO);
+		setQtyInvoiced (Env.ZERO);
+		setQtyReserved (Env.ZERO);
+		//
+		setIsDescription (false);	// N
+		setProcessed (false);
+		setLine (0);
 	}
 
 	/**
 	 *  Parent Constructor.
-	 		ol.setM_Product_ID(wbl.getM_Product_ID());
-			ol.setQtyOrdered(wbl.getQuantity());
-			ol.setPrice();
-			ol.setPriceActual(wbl.getPrice());
-			ol.setTax();
-			ol.saveEx();
 	 *  @param  order parent order
 	 */
 	public static MOrderLine createFrom(MOrder order)
@@ -216,7 +235,6 @@ public class MOrderLine extends X_C_OrderLine
 	
 	/**
 	 * 	Set Defaults from Order.
-	 * 	Does not set Parent !!
 	 * 	@param order order
 	 */
 	public void setOrder (MOrder order)
@@ -258,7 +276,7 @@ public class MOrderLine extends X_C_OrderLine
 	
 	/**
 	 * 	Set Price Entered/Actual.
-	 * 	Use this Method if the Line UOM is the Product UOM 
+	 * 	Use this Method if the Line UOM is the Product UOM.
 	 *	@param PriceActual price
 	 */
 	public void setPrice (BigDecimal PriceActual)
@@ -281,8 +299,6 @@ public class MOrderLine extends X_C_OrderLine
 
 	/**
 	 * 	Set Price for Product and PriceList.
-	 * 	Use only if newly created.
-	 * 	Uses standard price list of not set by order constructor
 	 */
 	public void setPrice()
 	{
@@ -312,7 +328,7 @@ public class MOrderLine extends X_C_OrderLine
 			setPriceEntered(getPriceActual());
 		else
 			setPriceEntered(getPriceActual().multiply(getQtyOrdered()
-				.divide(getQtyEntered(), 12, RoundingMode.HALF_UP)));	//	recision
+				.divide(getQtyEntered(), 12, RoundingMode.HALF_UP)));	//	precision
 		
 		//	Calculate Discount
 		setDiscount(m_productPrice.getDiscount());
@@ -334,7 +350,7 @@ public class MOrderLine extends X_C_OrderLine
 		//
 		m_productPrice.calculatePrice();
 		return m_productPrice;
-	}	//	getProductPrice
+	}	//	getProductPricing
 	
 	/**
 	 *	Set Tax
@@ -342,10 +358,10 @@ public class MOrderLine extends X_C_OrderLine
 	 */
 	public boolean setTax()
 	{
-		int ii = Tax.get(getCtx(), getM_Product_ID(), getC_Charge_ID(), getDateOrdered(), getDateOrdered(),
+		int ii = Core.getTaxLookup().get(getCtx(), getM_Product_ID(), getC_Charge_ID(), getDateOrdered(), getDateOrdered(),
 			getAD_Org_ID(), getM_Warehouse_ID(),
 			getC_BPartner_Location_ID(),		//	should be bill to
-			getC_BPartner_Location_ID(), m_IsSOTrx, get_TrxName());
+			getC_BPartner_Location_ID(), m_IsSOTrx, getParent().getDeliveryViaRule(), get_TrxName());
 		if (ii == 0)
 		{
 			log.log(Level.SEVERE, "No Tax found");
@@ -357,7 +373,7 @@ public class MOrderLine extends X_C_OrderLine
 	
 	/**
 	 * 	Calculate Extended Amt.
-	 * 	May or may not include tax
+	 * 	May or may not include tax.
 	 */
 	public void setLineNetAmt ()
 	{
@@ -370,7 +386,7 @@ public class MOrderLine extends X_C_OrderLine
 	
 	/**
 	 * 	Get Charge
-	 *	@return product or null
+	 *	@return charge or null
 	 */
 	public MCharge getCharge()
 	{
@@ -441,12 +457,11 @@ public class MOrderLine extends X_C_OrderLine
 		}
 		setM_AttributeSetInstance_ID(0);
 	}	//	setProduct
-
 	
 	/**
 	 * 	Set M_Product_ID
 	 *	@param M_Product_ID product
-	 *	@param setUOM set also UOM
+	 *	@param setUOM true to set also UOM
 	 */
 	public void setM_Product_ID (int M_Product_ID, boolean setUOM)
 	{
@@ -469,8 +484,7 @@ public class MOrderLine extends X_C_OrderLine
 			super.setC_UOM_ID(C_UOM_ID);
 		setM_AttributeSetInstance_ID(0);
 	}	//	setM_Product_ID
-	
-	
+		
 	/**
 	 * 	Get Product
 	 *	@return product or null
@@ -535,7 +549,7 @@ public class MOrderLine extends X_C_OrderLine
 	
 	/**
 	 * 	Get C_Project_ID
-	 *	@return project
+	 *	@return C_Project_ID
 	 */
 	public int getC_Project_ID()
 	{
@@ -547,7 +561,7 @@ public class MOrderLine extends X_C_OrderLine
 	
 	/**
 	 * 	Get C_Activity_ID
-	 *	@return Activity
+	 *	@return C_Activity_ID
 	 */
 	public int getC_Activity_ID()
 	{
@@ -559,7 +573,7 @@ public class MOrderLine extends X_C_OrderLine
 	
 	/**
 	 * 	Get C_Campaign_ID
-	 *	@return Campaign
+	 *	@return C_Campaign_ID
 	 */
 	public int getC_Campaign_ID()
 	{
@@ -570,8 +584,8 @@ public class MOrderLine extends X_C_OrderLine
 	}	//	getC_Campaign_ID
 	
 	/**
-	 * 	Get User2_ID
-	 *	@return User2
+	 * 	Get User1_ID
+	 *	@return User1_ID
 	 */
 	public int getUser1_ID ()
 	{
@@ -583,7 +597,7 @@ public class MOrderLine extends X_C_OrderLine
 
 	/**
 	 * 	Get User2_ID
-	 *	@return User2
+	 *	@return User2_ID
 	 */
 	public int getUser2_ID ()
 	{
@@ -595,7 +609,7 @@ public class MOrderLine extends X_C_OrderLine
 
 	/**
 	 * 	Get AD_OrgTrx_ID
-	 *	@return trx org
+	 *	@return AD_OrgTrx_ID
 	 */
 	public int getAD_OrgTrx_ID()
 	{
@@ -605,10 +619,11 @@ public class MOrderLine extends X_C_OrderLine
 		return ii;
 	}	//	getAD_OrgTrx_ID
 
-	/**************************************************************************
+	/**
 	 * 	String Representation
 	 * 	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MOrderLine[")
@@ -638,7 +653,6 @@ public class MOrderLine extends X_C_OrderLine
 	
 	/**
 	 * 	Get Description Text.
-	 * 	For jsp access (vs. isDescription)
 	 *	@return description
 	 */
 	public String getDescriptionText()
@@ -648,7 +662,7 @@ public class MOrderLine extends X_C_OrderLine
 	
 	/**
 	 * 	Get Name
-	 *	@return get the name of the line (from Product)
+	 *	@return get the name of the line (from Product or Charge)
 	 */
 	public String getName()
 	{
@@ -673,8 +687,9 @@ public class MOrderLine extends X_C_OrderLine
 		if (C_Charge_ID > 0)
 			set_ValueNoCheck ("C_UOM_ID", null);
 	}	//	setC_Charge_ID
+	
 	/**
-	 *	Set Discount
+	 *	Calculate discount percentage (actual vs list)
 	 */
 	public void setDiscount()
 	{
@@ -703,11 +718,10 @@ public class MOrderLine extends X_C_OrderLine
 		MPriceList pl = MPriceList.get(getCtx(), m_M_PriceList_ID, get_TrxName());
 		return pl.isTaxIncluded();
 	}	//	isTaxIncluded
-
 	
 	/**
 	 * 	Set Qty Entered/Ordered.
-	 * 	Use this Method if the Line UOM is the Product UOM 
+	 * 	Use this Method if the Line UOM is the Product UOM.
 	 *	@param Qty QtyOrdered/Entered
 	 */
 	public void setQty (BigDecimal Qty)
@@ -717,7 +731,7 @@ public class MOrderLine extends X_C_OrderLine
 	}	//	setQty
 
 	/**
-	 * 	Set Qty Entered - enforce entered UOM 
+	 * 	Set Qty Entered - enforce entered UOM precision.
 	 *	@param QtyEntered
 	 */
 	public void setQtyEntered (BigDecimal QtyEntered)
@@ -731,7 +745,7 @@ public class MOrderLine extends X_C_OrderLine
 	}	//	setQtyEntered
 
 	/**
-	 * 	Set Qty Ordered - enforce Product UOM 
+	 * 	Set Qty Ordered - enforce Product UOM precision.
 	 *	@param QtyOrdered
 	 */
 	public void setQtyOrdered (BigDecimal QtyOrdered)
@@ -747,7 +761,7 @@ public class MOrderLine extends X_C_OrderLine
 
 	/**
 	 * 	Get Base value for Cost Distribution
-	 *	@param CostDistribution cost Distribution
+	 *	@param CostDistribution cost Distribution (MLandedCost.LANDEDCOSTDISTRIBUTION_*)
 	 *	@return base number
 	 */
 	public BigDecimal getBase (String CostDistribution)
@@ -785,11 +799,12 @@ public class MOrderLine extends X_C_OrderLine
 		return Env.ZERO;
 	}	//	getBase
 	
-	/**************************************************************************
+	/**
 	 * 	Before Save
 	 *	@param newRecord
 	 *	@return true if it can be saved
 	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		if (newRecord && getParent().isProcessed()) {
@@ -803,7 +818,6 @@ public class MOrderLine extends X_C_OrderLine
 			setOrder (getParent());
 		if (m_M_PriceList_ID == 0)
 			setHeaderInfo(getParent());
-
 		
 		//	R/O Check - Product/Warehouse Change
 		if (!newRecord 
@@ -891,13 +905,27 @@ public class MOrderLine extends X_C_OrderLine
 			}
 		}
 		
+		//sync qtyordered and qtylostsales for closed order
+		if (!newRecord && DocAction.STATUS_Closed.equals(getParent().getDocStatus()) && is_ValueChanged(COLUMNNAME_QtyDelivered)
+			&& !getParent().is_ValueChanged(MOrder.COLUMNNAME_DocStatus)) {
+			if (getQtyOrdered().compareTo(getQtyDelivered()) > 0)
+			{
+				setQtyLostSales(getQtyLostSales().add(getQtyOrdered().subtract(getQtyDelivered())));
+				setQtyOrdered(getQtyDelivered());
+			}
+			else
+			{
+				setQtyLostSales(Env.ZERO);
+			}
+		}
+		
 		return true;
 	}	//	beforeSave
 	
 	/***
-	 * Sets the default unit of measure
-	 * If there's a product, it sets the UOM of the product
-	 * If not, it sets the default UOM of the client
+	 * Set default unit of measurement.<br/>
+	 * If there's a product, it sets the UOM of the product.<br/>
+	 * If not, it sets the default UOM of the client.
 	 */
 	private void setDefaultC_UOM_ID() {
 		int C_UOM_ID = 0;
@@ -916,6 +944,7 @@ public class MOrderLine extends X_C_OrderLine
 	 * 	Before Delete
 	 *	@return true if it can be deleted
 	 */
+	@Override
 	protected boolean beforeDelete ()
 	{
 		//	R/O Check - Something delivered. etc.
@@ -948,6 +977,7 @@ public class MOrderLine extends X_C_OrderLine
 	 *	@param success success
 	 *	@return saved
 	 */
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (!success)
@@ -972,6 +1002,7 @@ public class MOrderLine extends X_C_OrderLine
 	 *	@param success success
 	 *	@return deleted
 	 */
+	@Override
 	protected boolean afterDelete (boolean success)
 	{
 		if (!success)
@@ -990,20 +1021,60 @@ public class MOrderLine extends X_C_OrderLine
 	 * @param oldTax true if the old C_Tax_ID should be used
 	 * @return true if success, false otherwise
 	 * 
-	 * author teo_sarca [ 1583825 ]
+	 * @author teo_sarca [ 1583825 ]
 	 */
 	public boolean updateOrderTax(boolean oldTax) {
-		MOrderTax tax = MOrderTax.get (this, getPrecision(), oldTax, get_TrxName());
-		if (tax != null) {
-			if (!tax.calculateTaxFromLines())
-				return false;
-			if (tax.getTaxAmt().signum() != 0) {
-				if (!tax.save(get_TrxName()))
-					return false;
+		int C_Tax_ID = getC_Tax_ID();
+		boolean isOldTax = oldTax && is_ValueChanged(MOrderLine.COLUMNNAME_C_Tax_ID); 
+		if (isOldTax)
+		{
+			Object old = get_ValueOld(MOrderLine.COLUMNNAME_C_Tax_ID);
+			if (old == null)
+			{
+				return true;
 			}
-			else {
-				if (!tax.is_new() && !tax.delete(false, get_TrxName()))
+			C_Tax_ID = ((Integer)old).intValue();
+		}
+		if (C_Tax_ID == 0)
+		{
+			return true;
+		}
+		
+		MTax t = MTax.get(C_Tax_ID);
+		if (t.isSummary())
+		{
+			MOrderTax[] taxes = MOrderTax.getChildTaxes(this, getPrecision(), isOldTax, get_TrxName());
+			if (taxes != null && taxes.length > 0)
+			{
+				for(MOrderTax tax : taxes)
+				{
+					if (!tax.calculateTaxFromLines())
+						return false;
+					if (tax.getTaxAmt().signum() != 0) {
+						if (!tax.save(get_TrxName()))
+							return false;
+					}
+					else {
+						if (!tax.is_new() && !tax.delete(false, get_TrxName()))
+							return false;
+					}
+				}
+			}
+		}
+		else
+		{
+			MOrderTax tax = MOrderTax.get (this, getPrecision(), oldTax, get_TrxName());
+			if (tax != null) {
+				if (!tax.calculateTaxFromLines())
 					return false;
+				if (tax.getTaxAmt().signum() != 0) {
+					if (!tax.save(get_TrxName()))
+						return false;
+				}
+				else {
+					if (!tax.is_new() && !tax.delete(false, get_TrxName()))
+						return false;
+				}
 			}
 		}
 		return true;
@@ -1032,8 +1103,28 @@ public class MOrderLine extends X_C_OrderLine
 
 	}	//	updateHeaderTax
 
+	/**
+	 * Reset {@link #m_parent} to null
+	 */
 	public void clearParent()
 	{
 		this.m_parent = null;
 	}
+
+	/**
+	 * Get the description stripping the Close tag that was created when closing the order
+	 * @return stripped description text
+	 */
+	public String getDescriptionStrippingCloseTag() {
+		String description = getDescription();
+		if (description == null)
+			return description;
+		Pattern pattern = Pattern.compile("( \\| )?Close \\(.*\\)");
+		String[] parts = pattern.split(description);
+		StringBuilder description_sb = new StringBuilder();
+		for (String s : parts)
+			description_sb.append(s);
+		return description_sb.toString();
+	}
+
 }	//	MOrderLine

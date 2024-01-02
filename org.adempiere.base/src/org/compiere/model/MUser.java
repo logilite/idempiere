@@ -154,7 +154,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 		if (retValue == null)
 		{
 			retValue = new MUser (ctx, AD_User_ID, (String)null);
-			if (AD_User_ID == 0)
+			if (AD_User_ID == SystemIDs.USER_SYSTEM_DEPRECATED)
 			{
 				String trxName = null;
 				retValue.load(trxName);	//	load System Record
@@ -199,11 +199,17 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 		return user;
 	}
 	
+	public static MUser get (Properties ctx, String name, String password)
+	{
+		return MUser.get(ctx, name, password, false);
+	}
+	
 	/**
 	 * 	Get User
 	 *	@param ctx context
 	 *	@param name name
 	 *	@param password password
+	 *	@param isSSOLogin when isSSOLogin is true, password is ignored.
 	 *	@return user or null
 	 */
 	public static MUser get (Properties ctx, String name, String password, boolean isSSOLogin)
@@ -311,6 +317,18 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	private static CLogger	s_log	= CLogger.getCLogger (MUser.class);
 	
 	
+    /**
+    * UUID based Constructor
+    * @param ctx  Context
+    * @param AD_User_UU  UUID key
+    * @param trxName Transaction
+    */
+    public MUser(Properties ctx, String AD_User_UU, String trxName) {
+        super(ctx, AD_User_UU, trxName);
+		if (Util.isEmpty(AD_User_UU))
+			setInitialDefaults();
+    }
+
 	/**************************************************************************
 	 * 	Default Constructor
 	 *	@param ctx context
@@ -321,11 +339,16 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	{
 		super (ctx, AD_User_ID, trxName);	//	0 is also System
 		if (AD_User_ID == 0)
-		{
-			setIsFullBPAccess (true);
-			setNotificationType(NOTIFICATIONTYPE_None);
-		}		
+			setInitialDefaults();
 	}	//	MUser
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setIsFullBPAccess (true);
+		setNotificationType(NOTIFICATIONTYPE_None);
+	}
 
 	/**
 	 * 	Parent Constructor
@@ -846,7 +869,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 			MRole[] roles = getRoles(0);
 			for (int i = 0; i < roles.length; i++)
 			{
-				if (roles[i].getAD_Role_ID() == 0)
+				if (roles[i].getAD_Role_ID() == SystemIDs.ROLE_SYSTEM)
 				{
 					m_isAdministrator = Boolean.TRUE;
 					break;

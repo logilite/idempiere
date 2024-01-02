@@ -45,7 +45,7 @@
 							<goal>wget</goal>
 						</goals>
 						<configuration>
-							<url>${lt.db.srv}/database/9/Adempiere_pg.jar</url>
+							<url>${lt.db.srv}/database/11/Adempiere_pg.jar</url>
 							<unpack>false</unpack>
 							<skipCache>true</skipCache>
 							<outputDirectory>data/seed</outputDirectory>
@@ -59,7 +59,7 @@
 							<goal>wget</goal>
 						</goals>
 						<configuration>
-							<url>${url.file.srv}/database/9/Adempiere.jar</url>
+							<url>${url.file.srv}/database/11/Adempiere.jar</url>
 							<unpack>false</unpack>
 							<skipCache>true</skipCache>
 							<outputDirectory>data/seed</outputDirectory>

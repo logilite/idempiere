@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_Role
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="AD_Role")
-public class X_AD_Role extends PO implements I_AD_Role, I_Persistent 
+public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220303L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_AD_Role (Properties ctx, int AD_Role_ID, String trxName)
@@ -171,6 +171,207 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_Role (Properties ctx, int AD_Role_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_Role_ID, trxName, virtualColumns);
+      /** if (AD_Role_ID == 0)
+        {
+			setAD_Role_ID (0);
+			setAllow_Info_Account (true);
+// Y
+			setAllow_Info_Asset (true);
+// Y
+			setAllow_Info_BPartner (true);
+// Y
+			setAllow_Info_InOut (true);
+// Y
+			setAllow_Info_Invoice (true);
+// Y
+			setAllow_Info_Order (true);
+// Y
+			setAllow_Info_Payment (true);
+// Y
+			setAllow_Info_Product (true);
+// Y
+			setAllow_Info_Resource (true);
+// Y
+			setAllow_Info_Schedule (true);
+// Y
+			setConfirmQueryRecords (0);
+// 0
+			setIsAccessAllOrgs (false);
+// N
+			setIsCanApproveOwnDoc (false);
+			setIsCanExport (true);
+// Y
+			setIsCanReport (true);
+// Y
+			setIsChangeLog (false);
+// N
+			setIsClientAdministrator (false);
+// N
+			setIsDiscountAllowedOnTotal (false);
+			setIsDiscountUptoLimitPrice (false);
+			setIsManual (true);
+// Y
+			setIsMasterRole (false);
+// N
+			setIsMenuAutoExpand (false);
+// N
+			setIsPersonalAccess (false);
+// N
+			setIsPersonalLock (false);
+// N
+			setIsShowAcct (false);
+// N
+			setIsUseUserOrgAccess (false);
+// N
+			setMaxQueryRecords (0);
+// 0
+			setName (null);
+			setOverwritePriceLimit (false);
+// N
+			setPreferenceType (null);
+// O
+			setUserLevel (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_Role (Properties ctx, String AD_Role_UU, String trxName)
+    {
+      super (ctx, AD_Role_UU, trxName);
+      /** if (AD_Role_UU == null)
+        {
+			setAD_Role_ID (0);
+			setAllow_Info_Account (true);
+// Y
+			setAllow_Info_Asset (true);
+// Y
+			setAllow_Info_BPartner (true);
+// Y
+			setAllow_Info_InOut (true);
+// Y
+			setAllow_Info_Invoice (true);
+// Y
+			setAllow_Info_Order (true);
+// Y
+			setAllow_Info_Payment (true);
+// Y
+			setAllow_Info_Product (true);
+// Y
+			setAllow_Info_Resource (true);
+// Y
+			setAllow_Info_Schedule (true);
+// Y
+			setConfirmQueryRecords (0);
+// 0
+			setIsAccessAllOrgs (false);
+// N
+			setIsCanApproveOwnDoc (false);
+			setIsCanExport (true);
+// Y
+			setIsCanReport (true);
+// Y
+			setIsChangeLog (false);
+// N
+			setIsClientAdministrator (false);
+// N
+			setIsDiscountAllowedOnTotal (false);
+			setIsDiscountUptoLimitPrice (false);
+			setIsManual (true);
+// Y
+			setIsMasterRole (false);
+// N
+			setIsMenuAutoExpand (false);
+// N
+			setIsPersonalAccess (false);
+// N
+			setIsPersonalLock (false);
+// N
+			setIsShowAcct (false);
+// N
+			setIsUseUserOrgAccess (false);
+// N
+			setMaxQueryRecords (0);
+// 0
+			setName (null);
+			setOverwritePriceLimit (false);
+// N
+			setPreferenceType (null);
+// O
+			setUserLevel (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_Role (Properties ctx, String AD_Role_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_Role_UU, trxName, virtualColumns);
+      /** if (AD_Role_UU == null)
+        {
+			setAD_Role_ID (0);
+			setAllow_Info_Account (true);
+// Y
+			setAllow_Info_Asset (true);
+// Y
+			setAllow_Info_BPartner (true);
+// Y
+			setAllow_Info_InOut (true);
+// Y
+			setAllow_Info_Invoice (true);
+// Y
+			setAllow_Info_Order (true);
+// Y
+			setAllow_Info_Payment (true);
+// Y
+			setAllow_Info_Product (true);
+// Y
+			setAllow_Info_Resource (true);
+// Y
+			setAllow_Info_Schedule (true);
+// Y
+			setConfirmQueryRecords (0);
+// 0
+			setIsAccessAllOrgs (false);
+// N
+			setIsCanApproveOwnDoc (false);
+			setIsCanExport (true);
+// Y
+			setIsCanReport (true);
+// Y
+			setIsChangeLog (false);
+// N
+			setIsClientAdministrator (false);
+// N
+			setIsDiscountAllowedOnTotal (false);
+			setIsDiscountUptoLimitPrice (false);
+			setIsManual (true);
+// Y
+			setIsMasterRole (false);
+// N
+			setIsMenuAutoExpand (false);
+// N
+			setIsPersonalAccess (false);
+// N
+			setIsPersonalLock (false);
+// N
+			setIsShowAcct (false);
+// N
+			setIsUseUserOrgAccess (false);
+// N
+			setMaxQueryRecords (0);
+// 0
+			setName (null);
+			setOverwritePriceLimit (false);
+// N
+			setPreferenceType (null);
+// O
+			setUserLevel (null);
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_Role (Properties ctx, ResultSet rs, String trxName)
     {
@@ -178,7 +379,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -305,10 +506,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isAllow_Info_Account()
 	{
 		Object oo = get_Value(COLUMNNAME_Allow_Info_Account);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -327,10 +528,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isAllow_Info_Asset()
 	{
 		Object oo = get_Value(COLUMNNAME_Allow_Info_Asset);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -349,10 +550,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isAllow_Info_BPartner()
 	{
 		Object oo = get_Value(COLUMNNAME_Allow_Info_BPartner);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -371,10 +572,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isAllow_Info_InOut()
 	{
 		Object oo = get_Value(COLUMNNAME_Allow_Info_InOut);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -393,10 +594,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isAllow_Info_Invoice()
 	{
 		Object oo = get_Value(COLUMNNAME_Allow_Info_Invoice);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -415,10 +616,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isAllow_Info_Order()
 	{
 		Object oo = get_Value(COLUMNNAME_Allow_Info_Order);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -437,10 +638,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isAllow_Info_Payment()
 	{
 		Object oo = get_Value(COLUMNNAME_Allow_Info_Payment);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -459,10 +660,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isAllow_Info_Product()
 	{
 		Object oo = get_Value(COLUMNNAME_Allow_Info_Product);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -481,10 +682,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isAllow_Info_Resource()
 	{
 		Object oo = get_Value(COLUMNNAME_Allow_Info_Resource);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -503,10 +704,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isAllow_Info_Schedule()
 	{
 		Object oo = get_Value(COLUMNNAME_Allow_Info_Schedule);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -645,17 +846,17 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isAccessAdvanced()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAccessAdvanced);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
 	}
 
 	/** Set Access all Orgs.
-		@param IsAccessAllOrgs Access all Organizations (no org access control) of the client
+		@param IsAccessAllOrgs Access all Organizations (no org access control) of the tenant
 	*/
 	public void setIsAccessAllOrgs (boolean IsAccessAllOrgs)
 	{
@@ -663,15 +864,15 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	}
 
 	/** Get Access all Orgs.
-		@return Access all Organizations (no org access control) of the client
+		@return Access all Organizations (no org access control) of the tenant
 	  */
 	public boolean isAccessAllOrgs()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAccessAllOrgs);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -715,10 +916,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isCanApproveOwnDoc()
 	{
 		Object oo = get_Value(COLUMNNAME_IsCanApproveOwnDoc);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -738,10 +939,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isCanExport()
 	{
 		Object oo = get_Value(COLUMNNAME_IsCanExport);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -761,10 +962,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isCanReport()
 	{
 		Object oo = get_Value(COLUMNNAME_IsCanReport);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -831,54 +1032,77 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isClientAdministrator()
 	{
 		Object oo = get_Value(COLUMNNAME_IsClientAdministrator);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
 	}
 
-	/** Set IsDiscountAllowedOnTotal.
-		@param IsDiscountAllowedOnTotal IsDiscountAllowedOnTotal
+	/** Set Tenant Administrator.
+		@param IsClientAdministrator This role is a tenant administrator
+	*/
+	public void setIsClientAdministrator (boolean IsClientAdministrator)
+	{
+		set_Value (COLUMNNAME_IsClientAdministrator, Boolean.valueOf(IsClientAdministrator));
+	}
+
+	/** Get Tenant Administrator.
+		@return This role is a tenant administrator
+	  */
+	public boolean isClientAdministrator()
+	{
+		Object oo = get_Value(COLUMNNAME_IsClientAdministrator);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Is Discount Allowed On Total.
+		@param IsDiscountAllowedOnTotal Is Discount Allowed On Total
 	*/
 	public void setIsDiscountAllowedOnTotal (boolean IsDiscountAllowedOnTotal)
 	{
 		set_Value (COLUMNNAME_IsDiscountAllowedOnTotal, Boolean.valueOf(IsDiscountAllowedOnTotal));
 	}
 
-	/** Get IsDiscountAllowedOnTotal.
-		@return IsDiscountAllowedOnTotal	  */
+	/** Get Is Discount Allowed On Total.
+		@return Is Discount Allowed On Total	  */
 	public boolean isDiscountAllowedOnTotal()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDiscountAllowedOnTotal);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
 	}
 
-	/** Set IsDiscountUptoLimitPrice.
-		@param IsDiscountUptoLimitPrice IsDiscountUptoLimitPrice
+	/** Set Is Discount Up to Limit Price.
+		@param IsDiscountUptoLimitPrice Is Discount Up to Limit Price
 	*/
 	public void setIsDiscountUptoLimitPrice (boolean IsDiscountUptoLimitPrice)
 	{
 		set_Value (COLUMNNAME_IsDiscountUptoLimitPrice, Boolean.valueOf(IsDiscountUptoLimitPrice));
 	}
 
-	/** Get IsDiscountUptoLimitPrice.
-		@return IsDiscountUptoLimitPrice	  */
+	/** Get Is Discount Up to Limit Price.
+		@return Is Discount Up to Limit Price	  */
 	public boolean isDiscountUptoLimitPrice()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDiscountUptoLimitPrice);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -898,10 +1122,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isManual()
 	{
 		Object oo = get_Value(COLUMNNAME_IsManual);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -921,10 +1145,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isMasterRole()
 	{
 		Object oo = get_Value(COLUMNNAME_IsMasterRole);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -944,10 +1168,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isMenuAutoExpand()
 	{
 		Object oo = get_Value(COLUMNNAME_IsMenuAutoExpand);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -967,10 +1191,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isPersonalAccess()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPersonalAccess);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -990,10 +1214,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isPersonalLock()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPersonalLock);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1013,10 +1237,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isShowAcct()
 	{
 		Object oo = get_Value(COLUMNNAME_IsShowAcct);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1036,10 +1260,10 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isUseUserOrgAccess()
 	{
 		Object oo = get_Value(COLUMNNAME_IsUseUserOrgAccess);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1083,7 +1307,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -1102,13 +1326,29 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	public boolean isOverwritePriceLimit()
 	{
 		Object oo = get_Value(COLUMNNAME_OverwritePriceLimit);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	/** Set Predefined Context Variables.
+		@param PredefinedContextVariables Predefined context variables to inject when opening a menu entry or a window
+	*/
+	public void setPredefinedContextVariables (String PredefinedContextVariables)
+	{
+		set_Value (COLUMNNAME_PredefinedContextVariables, PredefinedContextVariables);
+	}
+
+	/** Get Predefined Context Variables.
+		@return Predefined context variables to inject when opening a menu entry or a window
+	  */
+	public String getPredefinedContextVariables()
+	{
+		return (String)get_Value(COLUMNNAME_PredefinedContextVariables);
 	}
 
 	/** PreferenceType AD_Reference_ID=330 */
@@ -1204,16 +1444,16 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set UserDiscount.
-		@param UserDiscount UserDiscount
+	/** Set User Discount.
+		@param UserDiscount User Discount
 	*/
 	public void setUserDiscount (BigDecimal UserDiscount)
 	{
 		set_Value (COLUMNNAME_UserDiscount, UserDiscount);
 	}
 
-	/** Get UserDiscount.
-		@return UserDiscount	  */
+	/** Get User Discount.
+		@return User Discount	  */
 	public BigDecimal getUserDiscount()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_UserDiscount);
@@ -1233,7 +1473,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	/** System = S   */
 	public static final String USERLEVEL_System = "S  ";
 	/** Set User Level.
-		@param UserLevel System Client Organization
+		@param UserLevel System Tenant Organization
 	*/
 	public void setUserLevel (String UserLevel)
 	{
@@ -1242,7 +1482,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	}
 
 	/** Get User Level.
-		@return System Client Organization
+		@return System Tenant Organization
 	  */
 	public String getUserLevel()
 	{

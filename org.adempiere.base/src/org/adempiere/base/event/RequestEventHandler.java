@@ -48,7 +48,7 @@ import org.osgi.service.cm.ManagedService;
 import org.osgi.service.event.Event;
 
 /**
- * Request event handler
+ * Event handler for R_Request table and REQUEST_SEND_EMAIL event topic.
  * @author Nur Yasmin
  *
  */
@@ -102,6 +102,12 @@ public class RequestEventHandler extends AbstractEventHandler implements Managed
 		registerTableEvent(IEventTopics.PO_AFTER_CHANGE, I_R_Request.Table_Name);
 	}
 	
+	/**
+	 * Handle before update of R_Request record
+	 * @param r
+	 * @param newRecord
+	 * @return error message or null
+	 */
 	private String beforeSaveRequest(MRequest r, boolean newRecord)
 	{
 		//	New
@@ -214,6 +220,12 @@ public class RequestEventHandler extends AbstractEventHandler implements Managed
 		return null;
 	}
 	
+	/**
+	 * Handle after save of R_Request record
+	 * @param r
+	 * @param newRecord
+	 * @return error message or null
+	 */
 	private String afterSaveRequest(MRequest r, boolean newRecord)
 	{
 		//	Initial Mail
@@ -224,10 +236,10 @@ public class RequestEventHandler extends AbstractEventHandler implements Managed
 	}
 	
 	/**
-	 * 	Check for changes
+	 * 	Process changes
 	 *	@param ra request action
 	 *	@param columnName column
-	 *	@return true if changes
+	 *	@return true if columnName has changes
 	 */
 	public boolean checkChange (MRequest r, MRequestAction ra, String columnName)
 	{
@@ -401,7 +413,7 @@ public class RequestEventHandler extends AbstractEventHandler implements Managed
 					|| X_AD_User.NOTIFICATIONTYPE_EMailPlusNotice.equals(NotificationType))
 				{
 					RequestSendEMailEventData eventData = new RequestSendEMailEventData(client, from, to, subject, message.toString(), pdf, r.getR_Request_ID());
-					Event event = EventManager.newEvent(IEventTopics.REQUEST_SEND_EMAIL, eventData);
+					Event event = EventManager.newEvent(IEventTopics.REQUEST_SEND_EMAIL, eventData, true);
 					EventManager.getInstance().postEvent(event);
 				}
 				//	Send Note
@@ -427,10 +439,10 @@ public class RequestEventHandler extends AbstractEventHandler implements Managed
 		}
 	}	//	sendNotice
 	
-	/**************************************************************************
-	 * 	Get MailID
+	/**
+	 * 	Get mail trailer text
 	 * 	@param serverAddress server address
-	 *	@return Mail Trailer
+	 *	@return Mail trailer text
 	 */
 	private String getMailTrailer(MRequest r, String serverAddress)
 	{

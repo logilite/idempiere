@@ -69,6 +69,7 @@ import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
 import org.compiere.model.MDocType;
+import org.compiere.model.MProduct;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRole;
 import org.compiere.util.CLogMgt;
@@ -693,7 +694,7 @@ public class InfoProductPanel extends InfoPanel implements EventListener<Event>
 			rs = null; pstmt = null;
 		}
 
-		m_M_Product_ID = getSelectedRowKey();
+		m_M_Product_ID = getIntSelectedRowKey(MProduct.Table_ID);
 		sql = "SELECT DocumentNote FROM M_Product WHERE M_Product_ID=?";
 		fieldDescription.setText(DB.getSQLValueString(null, sql, m_M_Product_ID));
 
@@ -1173,7 +1174,7 @@ public class InfoProductPanel extends InfoPanel implements EventListener<Event>
 	protected void showHistory()
 	{
 		log.info("");
-		Integer M_Product_ID = getSelectedRowKey();
+		Integer M_Product_ID = getIntSelectedRowKey(MProduct.Table_ID);
 		if (M_Product_ID == null)
 			return;
 		int M_Warehouse_ID = 0;
@@ -1207,7 +1208,7 @@ public class InfoProductPanel extends InfoPanel implements EventListener<Event>
 	public void zoom()
 	{
 		log.info("");
-		Integer M_Product_ID = getSelectedRowKey();
+		Integer M_Product_ID = getIntSelectedRowKey(MProduct.Table_ID);
 		if (M_Product_ID == null)
 			return;
 
@@ -1251,7 +1252,7 @@ public class InfoProductPanel extends InfoPanel implements EventListener<Event>
 	protected void saveSelectionDetail()
 	{
 		//  publish for Callout to read
-		Integer ID = getSelectedRowKey();
+		Integer ID = getIntSelectedRowKey(MProduct.Table_ID);
 		Env.setContext(Env.getCtx(), p_WindowNo, Env.TAB_INFO, "M_Product_ID", ID == null ? "0" : ID.toString());
 		ListItem pickPL = (ListItem)pickPriceList.getSelectedItem();
 		if (pickPL!=null)
@@ -1402,7 +1403,7 @@ public class InfoProductPanel extends InfoPanel implements EventListener<Event>
     	int row = contentPanel != null ? contentPanel.getSelectedRow() : -1;
 		if (component.equals(m_PAttributeButton) && row != -1)
 		{
-			Integer productInteger = getSelectedRowKey();
+			Integer productInteger = getIntSelectedRowKey(MProduct.Table_ID);
 			String productName = (String)contentPanel.getValueAt(row, INDEX_NAME);
 
 			ListItem warehouse = pickWarehouse.getSelectedItem();

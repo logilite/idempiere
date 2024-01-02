@@ -55,6 +55,7 @@ import org.adempiere.webui.component.Window;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
+import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.I_C_Invoice;
@@ -67,6 +68,7 @@ import org.compiere.model.MDocType;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MMailText;
 import org.compiere.model.MTable;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.model.MUserMail;
 import org.compiere.model.PO;
@@ -96,7 +98,7 @@ import org.zkoss.zul.North;
 import org.zkoss.zul.South;
 
 /**
- *	EMail Dialog
+ *	Send EMail Dialog
  *
  *  @author 	Jorg Janke
  *  @version 	$Id: EMailDialog.java,v 1.2 2006/07/30 00:51:27 jjanke Exp $
@@ -112,7 +114,7 @@ import org.zkoss.zul.South;
 public class WEMailDialog extends Window implements EventListener<Event>, ValueChangeListener, IEmailDialog
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 556391720307848225L;
 
@@ -136,6 +138,25 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	 */
 	public WEMailDialog(String title, MUser from, String to, String subject, String message, DataSource attachment,
 			int m_WindowNo, int ad_Table_ID, int record_ID, PrintInfo printInfo) {
+		this(title, from, to, subject, message, attachment, m_WindowNo, ad_Table_ID, record_ID, null, printInfo);
+	}
+
+	/**
+	 * EMail Dialog
+	 * @param title title
+	 * @param from from
+	 * @param to to 
+	 * @param subject subject
+	 * @param message message
+	 * @param attachment optional attachment
+	 * @param m_WindowNo
+	 * @param ad_Table_ID
+	 * @param record_ID
+	 * @param record_UU
+	 * @param printInfo
+	 */
+	public WEMailDialog(String title, MUser from, String to, String subject, String message, DataSource attachment,
+			int m_WindowNo, int ad_Table_ID, int record_ID, String record_UU, PrintInfo printInfo) {
 		super();
 		init(title, from, to, subject, message, null, m_WindowNo, ad_Table_ID, record_ID, printInfo);
 	}	//	EmailDialog
@@ -147,6 +168,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		Components.removeAllChildren(this);
 		this.m_AD_Table_ID = ad_Table_ID;
 		this.m_Record_ID = record_ID;
+		this.m_Record_UU = record_UU;
 		this.setTitle(title);
 		this.setSclass("popup-dialog email-dialog");
 		this.setClosable(true);
@@ -176,7 +198,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		commonInit(from, to, subject, message, new FileDataSource(attachment));
 		
 		clearEMailContext(m_WindowNo);
-		sendEvent(m_WindowNo, m_AD_Table_ID, m_Record_ID, null, "");
+		sendEvent(m_WindowNo, m_AD_Table_ID, m_Record_ID, m_Record_UU, null, "");
 		setValuesFromContext(m_WindowNo);
 	}
 	
@@ -233,6 +255,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	protected String  m_subject;
 	protected String  m_message;
 	private int m_Record_ID;
+	private String m_Record_UU;
 	private int m_AD_Table_ID;
 	/**	File to be optionally attached	*/
 	protected DataSource	m_attachment;
@@ -260,6 +283,8 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	protected Checkbox isAcknowledgmentReceipt = new Checkbox();
 	protected PO m_po = null;
 	protected int pInstance_ID = 0;
+	/* SysConfig USE_ESC_FOR_TAB_CLOSING */
+	private boolean isUseEscForTabClosing = MSysConfig.getBooleanValue(MSysConfig.USE_ESC_FOR_TAB_CLOSING, false, Env.getAD_Client_ID(Env.getCtx()));
 	
 	@Override
 	public void onPageAttached(Page newpage, Page oldpage) {
@@ -280,7 +305,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	}
 
 	/**
-	 *	Static Init
+	 * Layout dialog
 	 */
 	protected void render() throws Exception
 	{
@@ -291,8 +316,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		lAttachment.setValue(Msg.getMsg(Env.getCtx(), "Attachment") + ":");
 		fFrom.setReadonly(true);
 		isAcknowledgmentReceipt.setLabel(Msg.getMsg(Env.getCtx(), "RequestReadReceipt"));
-		//
-				
+		//				
 		Grid grid = new Grid();
 		ZKUpdateUtil.setWidth(grid, "100%");
         grid.setStyle("margin:0; padding:0; align: center; valign: center; border:0");
@@ -438,7 +462,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	}	//	render
 
 	/**
-	 *	Set all properties
+	 *  Set value of fields
 	 */
 	public void set (MUser from, String to, String subject, String message)
 	{
@@ -450,7 +474,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	}	//	set
 
 	/**
-	 *  Set Address
+	 *  Set to Address
 	 */
 	public void setTo(String newTo)
 	{
@@ -468,7 +492,8 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	}	//	setCc
 
 	/**
-	 *  Get Address
+	 *  Get to Address
+	 *  @return to address
 	 */
 	public String getTo()
 	{
@@ -478,6 +503,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 
 	/**
 	 *  Get CC Address
+	 *  @return cc address
 	 */
 	public String getCc()
 	{
@@ -486,7 +512,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	}	//	getCc
 
 	/**
-	 *  Set Sender
+	 *  Set Sender (from)
 	 */
 	public void setFrom(MUser newFrom)
 	{
@@ -503,6 +529,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 
 	/**
 	 *  Get Sender
+	 *  @return from user
 	 */
 	public MUser getFrom()
 	{
@@ -511,6 +538,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 
 	/**
 	 *  Set Subject
+	 *  @param newSubject
 	 */
 	public void setSubject(String newSubject)
 	{
@@ -520,6 +548,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 
 	/**
 	 *  Get Subject
+	 *  @return subject
 	 */
 	public String getSubject()
 	{
@@ -529,16 +558,17 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 
 	/**
 	 *  Set Message
+	 *  @param newMessage
 	 */
 	public void setMessage(String newMessage)
 	{
 		m_message = newMessage;
 		fMessage.setValue(m_message);
-//		fMessage.setCaretPosition(0);
 	}   //  setMessage
 
 	/**
 	 *  Get Message
+	 *  @return message
 	 */
 	public String getMessage()
 	{
@@ -548,6 +578,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 
 	/**
 	 *  Set Attachment
+	 *  @param attachment
 	 */
 	public void setAttachment (DataSource attachment)
 	{
@@ -563,15 +594,17 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	
 	/**
 	 *  Get Attachment
+	 *  @return attachment data source
 	 */
 	public DataSource getAttachment()
 	{
 		return m_attachment;
 	}	//	getAttachment
 
-	/**************************************************************************
+	/**
 	 * 	Action Listener - Send email
 	 */
+	@Override	
 	public void onEvent(Event event) throws Exception {		
 		if (event.getTarget().getId().equals(ConfirmPanel.A_CANCEL))
 			onCancel();
@@ -615,14 +648,14 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 					new MUserMail(Env.getCtx(), email).saveEx();
 				if (email.isSentOK())
 				{
-					FDialog.info(0, this, "MessageSent");
+					Dialog.info(0, "MessageSent");
 					onClose();
 				}
 				else
-					FDialog.error(0, this, "MessageNotSent", status);
+					Dialog.error(0, "MessageNotSent", status);
 			}
 			else
-				FDialog.error(0, this, "MessageNotSent", status);
+				Dialog.error(0, "MessageNotSent", status);
 		}
 		else if (event instanceof UploadEvent)
 		{
@@ -640,10 +673,24 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 			addMailText();
 	}
 
+	/**
+	 * Handle onCancel event
+	 */
 	private void onCancel() {
+		// do not allow to close tab for Events.ON_CTRL_KEY event
+		if(isUseEscForTabClosing)
+			SessionManager.getAppDesktop().setCloseTabWithShortcut(false);
+
 		onClose();
 	}
 	
+	private void onSize() {
+		fMessage.invalidate();
+	}
+
+	/**
+	 * Handle onSize event
+	 */
 	private void onSize() {
 		fMessage.invalidate();
 	}
@@ -665,6 +712,11 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 			getFirstChild().invalidate();
 	}
 
+	/**
+	 * Get content of media
+	 * @param media
+	 * @return byte[] content
+	 */
 	protected byte[] getMediaData(Media media) {
 		byte[] bytes = null;
 		
@@ -696,6 +748,11 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		return bytes;
 	}
 	
+	/**
+	 * Get charset from content type header
+	 * @param contentType
+	 * @return charset
+	 */
 	protected String getCharset(String contentType) {
 		if (contentType != null) {
 			int j = contentType.indexOf("charset=");
@@ -708,15 +765,16 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	}
 	
 	/**
-	 * 	Vetoable Change - User selected 
 	 *	@param evt
 	 *	@throws PropertyVetoException
 	 */
+	@Override
 	public void valueChange(ValueChangeEvent evt) {
 		WSearchEditor source = (WSearchEditor) evt.getSource();
         Object value = evt.getNewValue();
 
-		log.info("Value=" + value);
+        if (log.isLoggable(Level.INFO))
+        	log.info("Value=" + value);
 
         if (value == null)
         {
@@ -731,7 +789,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 				m_user = MUser.get(Env.getCtx(), AD_User_ID);
 				if (Util.isEmpty(m_user.getEMail())) 
 				{
-					FDialog.error(0, Msg.getMsg(Env.getCtx(), "UserNoEmailAddress"));
+					Dialog.error(0, Msg.getMsg(Env.getCtx(), "UserNoEmailAddress"));
 				} 
 				else 
 				{
@@ -746,7 +804,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 				m_ccuser = MUser.get(Env.getCtx(), AD_User_ID);
 				if (Util.isEmpty(m_ccuser.getEMail())) 
 				{
-					FDialog.error(0, Msg.getMsg(Env.getCtx(), "UserNoEmailAddress"));
+					Dialog.error(0, Msg.getMsg(Env.getCtx(), "UserNoEmailAddress"));
 				}
 				else
 				{
@@ -758,6 +816,11 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
         return;
 	}
 	
+	/**
+	 * Add to email address
+	 * @param email
+	 * @param first
+	 */
 	public void addTo(String email, boolean first) {
 		if (Util.isEmpty(email))
 			return;
@@ -770,6 +833,11 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		}
 	}
 	
+	/**
+	 * Add cc email address
+	 * @param email
+	 * @param first
+	 */
 	public void addCC(String email, boolean first) {
 		if (Util.isEmpty(email))
 			return;
@@ -786,7 +854,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	 * convert attach image as base64 and embed to message content for preview in cfEditor
 	 * @param mt
 	 * @param attachment
-	 * @return
+	 * @return encoded image data
 	 */
 	public static String embedImgToEmail (MMailText mt, MAttachment attachment){
 
@@ -879,7 +947,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	/**
 	 * remove base64 image encode in message content before sent email 
 	 * @param base64
-	 * @return
+	 * @return alter string
 	 */
 	public static String replaceBASE64Img (String base64){
 		// pattern map base64 in image
@@ -903,7 +971,9 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		
 	}
 	
-	
+	/**
+	 * Add attachment from sender's default MMailText (if any)s
+	 */
 	protected void addMailText()
 	{
 		MMailText mt = null;
@@ -934,7 +1004,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 			if (mt.get_ID() > 0)
 			{
 				mt.setPO(m_po);
-				MAttachment attachment = MAttachment.get(Env.getCtx(), MMailText.Table_ID, mt.get_ID());
+				MAttachment attachment = MAttachment.get(Env.getCtx(), MMailText.Table_ID, mt.get_ID(), null, null);
 				if (attachment != null)
 				{
 					MAttachmentEntry[] entries = attachment.getEntries();
@@ -993,7 +1063,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	}
 
 	/**
-	 * Set the user to editor and trigger the event change
+	 * Update user to editor and fire value change event
 	 * @param newUserTo
 	 */
 	public void setUserTo(int newUserTo) {
@@ -1002,7 +1072,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	}
 
 	/**
-	 * Set the user Cc editor and trigger the event change
+	 * Update user cc editor and fire value change event
 	 * @param newUserCc
 	 */
 	public void setUserCc(int newUserCc) {
@@ -1011,7 +1081,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	}
 
 	/**
-	 * Clear the window context variables to prefill the dialog
+	 * Clear window context variables
 	 * @param m_WindowNo
 	 */
 	private void clearEMailContext(int m_WindowNo) {
@@ -1024,22 +1094,22 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	}
 
 	/**
-	 * Send the event to listeners that prefill dialog variables
+	 * Send REPORT_SEND_EMAIL OSGi event to initialize window context variables for dialog
 	 * @param windowNo
 	 * @param tableId
 	 * @param recordId
+	 * @param recordUU
 	 * @param printInfo
 	 * @param subject
 	 */
-	private void sendEvent(int windowNo, int tableId, int recordId, PrintInfo printInfo, String subject) {
-		ReportSendEMailEventData eventData = new ReportSendEMailEventData(windowNo, tableId, recordId, printInfo,
-				subject);
+	private void sendEvent(int windowNo, int tableId, int recordId, String recordUU, PrintInfo printInfo, String subject) {
+		ReportSendEMailEventData eventData = new ReportSendEMailEventData(windowNo, tableId, recordId, recordUU, printInfo, subject);
 		org.osgi.service.event.Event event = EventManager.newEvent(IEventTopics.REPORT_SEND_EMAIL, eventData);
 		EventManager.getInstance().sendEvent(event);
 	}
 
 	/**
-	 * Set the default dialog values from context
+	 * Set default fields value from window context
 	 * @param windowNo
 	 */
 	private void setValuesFromContext(int windowNo) {

@@ -120,12 +120,14 @@ import org.idempiere.fa.service.api.IDepreciationMethodFactory;
 import org.idempiere.test.AbstractTestCase;
 import org.idempiere.test.TestActivator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 
 /**
  * 
  * @author hengsin
  *
  */
+@Isolated
 public class CacheTest extends AbstractTestCase {
 
 	private static final int ORDER_HEADER_PRINT_FORMAT_ID = 118;
@@ -211,9 +213,11 @@ public class CacheTest extends AbstractTestCase {
 		assertEquals(oak, p2.getM_Product_ID());
 		assertTrue(pc.getHit() > hit, "Second get of product Oak, cache hit should increase");
 		
+		String oakDescription = p2.getDescription();
 		p2 = new MProduct(Env.getCtx(), p2, getTrxName());
 		p2.setDescription("Test Update @ " + System.currentTimeMillis());
 		p2.saveEx();
+		commit();
 		
 		//get after p2 update, miss should increase
 		//wait 500ms since cache reset after update is async
@@ -240,6 +244,7 @@ public class CacheTest extends AbstractTestCase {
 		p3.saveEx();
 		
 		p3.deleteEx(true);
+		commit();
 		
 		//cache for p2 not effected by p3 delete, hit should increase
 		hit = pc.getHit();
@@ -254,6 +259,11 @@ public class CacheTest extends AbstractTestCase {
 		p2.saveEx();
 		
 		rollback();
+		
+		//revert description update
+		p2 = new MProduct(Env.getCtx(), oak, null);
+		p2.setDescription(oakDescription);
+		p2.saveEx();
 	}
 	
 	@Test
@@ -560,7 +570,7 @@ public class CacheTest extends AbstractTestCase {
 		line1.saveEx();
 		ProcessInfo info = MWorkflow.runDocumentActionWorkflow(invoice, DocAction.ACTION_Complete);
 		invoice.load(getTrxName());
-		assertFalse(info.isError());
+		assertFalse(info.isError(), info.getSummary());
 		assertEquals(DocAction.STATUS_Completed, invoice.getDocStatus());
 		if (!invoice.isPosted()) {
 			String error = DocumentEngine.postImmediate(Env.getCtx(), invoice.getAD_Client_ID(), MInvoice.Table_ID, invoice.get_ID(), true, getTrxName());

@@ -28,6 +28,7 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Language;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 import org.idempiere.cache.ImmutablePOSupport;
 
 /**
@@ -42,14 +43,14 @@ import org.idempiere.cache.ImmutablePOSupport;
 public class MAcctSchemaElement extends X_C_AcctSchema_Element implements ImmutablePOSupport
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -747934131394469553L;
 
 	/**
-	 * Get ArrayList of Account Schema Elements from cache
+	 * Get array of Account Schema Elements from cache
 	 * @param as Accounting Schema
-	 * @return ArrayList with Elements
+	 * @return Elements array
 	 */
 	public static MAcctSchemaElement[] getAcctSchemaElements (MAcctSchema as)
 	{
@@ -183,16 +184,27 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 
 		//
 		return "";
-	}   //  getColumnName
+	}   //  getValueQuery
 
 	/**	Logger						*/
 	private static CLogger		s_log = CLogger.getCLogger (MAcctSchemaElement.class);
 
 	/**	Cache						*/
 	private static CCache<Integer,MAcctSchemaElement[]> s_cache = new CCache<Integer,MAcctSchemaElement[]>(Table_Name, 10);
-	
-	
-	/*************************************************************************
+		
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param C_AcctSchema_Element_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MAcctSchemaElement(Properties ctx, String C_AcctSchema_Element_UU, String trxName) {
+        super(ctx, C_AcctSchema_Element_UU, trxName);
+		if (Util.isEmpty(C_AcctSchema_Element_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 * Standard Constructor
 	 * @param ctx context
 	 * @param C_AcctSchema_Element_ID id
@@ -202,11 +214,16 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 	{
 		super (ctx, C_AcctSchema_Element_ID, trxName);
 		if (C_AcctSchema_Element_ID == 0)
-		{
-			setIsBalanced (false);
-			setIsMandatory (false);
-		}
+			setInitialDefaults();
 	}	//	MAcctSchemaElement
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setIsBalanced (false);
+		setIsMandatory (false);
+	}
 
 	/**
 	 * Load Constructor
@@ -231,7 +248,7 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 	}	//	MAcctSchemaElement
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param copy
 	 */
 	public MAcctSchemaElement(MAcctSchemaElement copy)
@@ -240,7 +257,7 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 	}
 	
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 */
@@ -250,7 +267,7 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 	}
 	
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 * @param trxName
@@ -266,7 +283,7 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 	private String		m_ColumnName = null;
 	
 	/**
-	 * Set Organization Type
+	 * Set value for Organization element Type
 	 * @param SeqNo sequence
 	 * @param Name name 
 	 * @param Org_ID id
@@ -280,7 +297,7 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 	}	//	setTypeOrg
 
 	/**
-	 * Set Type Account
+	 * Set value for Account element type
 	 * @param SeqNo squence
 	 * @param Name name
 	 * @param C_Element_ID element
@@ -296,7 +313,7 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 	}	//	setTypeAccount
 
 	/**
-	 * Set Type BPartner
+	 * Set value for BPartner element type
 	 * @param SeqNo sequence
 	 * @param Name name
 	 * @param C_BPartner_ID id
@@ -310,7 +327,7 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 	}	//	setTypeBPartner
 
 	/**
-	 * Set Type Product
+	 * Set value for Product element type
 	 * @param SeqNo sequence
 	 * @param Name name
 	 * @param M_Product_ID id
@@ -324,7 +341,7 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 	}	//	setTypeProduct
 	
 	/**
-	 * Set Type Project
+	 * Set value for Project element type
 	 * @param SeqNo sequence
 	 * @param Name name
 	 * @param C_Project_ID id
@@ -340,7 +357,7 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 	/**
 	 * Is Element Type
 	 * @param elementType type
-	 * @return ELEMENTTYPE type
+	 * @return true if this is an instance of elementType
 	 */
 	public boolean isElementType (String elementType)
 	{
@@ -390,7 +407,6 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 		return defaultValue;
 	}	//	getDefault
 
-
 	/**
 	 * Get Acct Fact ColumnName
 	 * @return column name
@@ -416,7 +432,6 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 		}
 		return getColumnName(et);
 	}	//	getDisplayColumnName
-
 	
 	/**
 	 * String representation
@@ -430,8 +445,6 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 				.append(",Pos=").append(getSeqNo()).append("]");
 		return msgreturn.toString();
 	}   //  toString
-
-	
 	
 	/**
 	 * Before Save
@@ -523,9 +536,9 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 	}	//	afterSave
 	
 	/**
-	 * Update ValidCombination and Fact with mandatory value
-	 * @param element element
-	 * @param id new default
+	 * Update ValidCombination and Fact with mandatory element value (where existing element value is null)
+	 * @param element element column name
+	 * @param id element id
 	 */
 	private void updateData (String element, int id)
 	{

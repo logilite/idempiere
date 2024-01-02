@@ -33,42 +33,47 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Label;
 
+/**
+ * Dashboard gadget panel for individual {@link WPerformanceIndicator}
+ */
 public class WPAWidget extends Panel {
 
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 5684412399657327777L;
-
-	/**************************************************************************
-	 * Constructor
+	
+	/**
+	 * @param goal
+	 * @param options
+	 * @param isShowTitle
 	 */
-	public WPAWidget(MGoal goal, Options options, boolean isShowTitle) {
+	public WPAWidget (MGoal goal, Options options, boolean isShowTitle)
+	{
 		super();
 		goal.updateGoal(false);
 		init(goal, options, isShowTitle);
 	}
-
+	
 	/**
-	 * Static/Dynamic Init
-	 * 
+	 * Render panel
 	 * @param goal
-	 * @param options
+	 * @param options 
 	 */
-	private void init(MGoal goal, Options options, boolean isShowTitle) {
+	private void init(MGoal goal, Options options, boolean isShowTitle)
+	{
 		Div div = new Div();
 		appendChild(div);
 		WPerformanceIndicator pi = new WPerformanceIndicator(goal, options);
 		div.appendChild(pi);
-		if (goal.getMeasure() != null)
-			pi.addEventListener(Events.ON_CLICK, e -> new WPerformanceDetail(pi.getGoal())); // Action Listener for
-																								// Drill Down
-		if (isShowTitle) {
+		if (goal.getMeasure() != null) 
+			pi.addEventListener(Events.ON_CLICK, e -> new WPerformanceDetail(pi.getGoal())); //Action Listener for Drill Down
+		if(isShowTitle) {
 			Div titleDiv = new Div();
 			titleDiv.setSclass("gauge-indicator-title");
 			Label label = new Label(pi.getTitle());
 			div.appendChild(titleDiv);
 			titleDiv.appendChild(label);
 		}
-	} // init
+	}	//	init
 }

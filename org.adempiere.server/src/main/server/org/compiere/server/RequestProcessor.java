@@ -493,7 +493,7 @@ public class RequestProcessor extends AdempiereServer
 				+ "SELECT * FROM R_RequestType rt "
 				+ "WHERE rt.R_RequestType_ID=r.R_RequestType_ID"
 				+ " AND rt.IsAutoChangeRequest='Y') "
-			+ "AND EXISTS ( "
+			+ " AND EXISTS ( "
 				+ "SELECT * FROM R_Group g "
 				+ "WHERE g.R_Group_ID=r.R_Group_ID"
 				+ " AND (g.M_BOM_ID IS NOT NULL OR g.M_ChangeNotice_ID IS NOT NULL)	)"

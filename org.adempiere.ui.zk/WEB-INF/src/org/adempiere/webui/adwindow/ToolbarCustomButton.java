@@ -28,18 +28,38 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Toolbarbutton;
 
+/**
+ * Model for AD_ToolBarButton with IsCustomization=Y
+ * @author hengsin
+ */
 public class ToolbarCustomButton implements EventListener<Event>, Evaluatee { 
 
+	/** Toolbarbutton instance **/
 	private Toolbarbutton toolbarButton;
+	/** AD_ToolBarButton.ActionClassName **/
 	private String actionId;
 	private int windowNo;
 	private int tabNo = -1;
+	/** model instance for AD_ToolBarButton **/
 	private MToolBarButton mToolbarButton;
 
+	/**
+	 * @param mToolbarButton
+	 * @param btn
+	 * @param actionId
+	 * @param windowNo
+	 */
 	public ToolbarCustomButton(MToolBarButton mToolbarButton, Toolbarbutton btn, String actionId, int windowNo) {
 		this(mToolbarButton, btn, actionId, windowNo, -1);
 	}
 	
+	/**
+	 * @param mToolbarButton
+	 * @param btn
+	 * @param actionId
+	 * @param windowNo
+	 * @param tabNo
+	 */
 	public ToolbarCustomButton(MToolBarButton mToolbarButton, Toolbarbutton btn, String actionId, int windowNo, int tabNo) {
 		toolbarButton = btn;
 		this.actionId = actionId;
@@ -50,6 +70,9 @@ public class ToolbarCustomButton implements EventListener<Event>, Evaluatee {
 		toolbarButton.addEventListener(Events.ON_CLICK, this);
 	}
 	
+	/**
+	 * Call {@link IAction#execute(Object)}.
+	 */
 	@Override
 	public void onEvent(Event event) throws Exception {
 		IServiceHolder<IAction> serviceHolder = Actions.getAction(actionId);
@@ -78,10 +101,17 @@ public class ToolbarCustomButton implements EventListener<Event>, Evaluatee {
 	    	return Env.getContext (Env.getCtx(), windowNo, tabNo, variableName, false, true);
 	}
 	
+	/**
+	 * Delegate to {@link #dynamicDisplay(boolean)}
+	 */
 	public void dynamicDisplay() {
 		dynamicDisplay(false);
 	}
 	
+	/**
+	 * Dynamic update of button state.
+	 * @param forceValidation if true, execute dynamic update event if button is in detached state
+	 */
 	public void dynamicDisplay(boolean forceValidation) {
 		if (toolbarButton.getParent() == null && !forceValidation)
 			return;
@@ -107,7 +137,85 @@ public class ToolbarCustomButton implements EventListener<Event>, Evaluatee {
 
 		toolbarButton.setVisible(visible);
 	}
-	
+
+	/**
+	 * Evaluate pressedLogic (if defined)
+	 */
+	public void pressedLogic() {
+		if (toolbarButton.getParent() == null)
+			return;
+
+		String pressedLogic = mToolbarButton.getPressedLogic();
+
+		if (Util.isEmpty(pressedLogic, true))
+			return;
+
+		ADWindow window = ADWindow.get(windowNo);
+
+		if (window == null)
+			return;
+
+		IADTabpanel adTabpanel = window.getADWindowContent().getADTab().getSelectedTabpanel();
+
+		if (adTabpanel == null || adTabpanel.getRecord_ID() <= 0)
+			return;
+
+		boolean isPressed = validateLogic(pressedLogic, adTabpanel.getTabNo());
+		((ToolBarButton) toolbarButton).setPressed(isPressed);
+	}
+
+	/**
+	 * Evaluate readOnlyLogic (if defined)
+	 */
+	public void readOnlyLogic() {
+		if (toolbarButton.getParent() == null)
+			return;
+
+		String readOnlyLogic = mToolbarButton.getReadOnlyLogic();
+
+		if (Util.isEmpty(readOnlyLogic, true))
+			return;
+
+		ADWindow window = ADWindow.get(windowNo);
+
+		if (window == null)
+			return;
+
+		IADTabpanel adTabpanel = window.getADWindowContent().getADTab().getSelectedTabpanel();
+
+		if (adTabpanel == null || adTabpanel.getRecord_ID() <= 0)
+			return;
+
+		boolean isReadOnly = validateLogic(readOnlyLogic, adTabpanel.getTabNo());
+
+		toolbarButton.setDisabled(isReadOnly);
+	}
+
+	/**
+	 * Evaluate SQL or boolean logic expression.
+	 * For SQL expression, return true if the SQL expression has result (it doesn't check the return value of the SQL statement).
+	 * @param logic
+	 * @param tabNo
+	 * @return result of evaluation of logic
+	 */
+	private boolean validateLogic(String logic, int tabNo) {
+		boolean isValid = false;
+
+		if (logic.startsWith("@SQL="))
+		{
+			isValid = Evaluator.parseSQLLogic(logic, Env.getCtx(), windowNo, tabNo, "");
+		}
+		else
+		{
+			isValid = Evaluator.evaluateLogic(this, logic);
+		}
+
+		return isValid;
+	}
+
+	/**
+	 * @return {@link Toolbarbutton}
+	 */
 	public Toolbarbutton getToolbarbutton() {
 		return toolbarButton;
 	}

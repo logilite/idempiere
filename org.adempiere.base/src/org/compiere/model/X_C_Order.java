@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_Order
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="C_Order")
-public class X_C_Order extends PO implements I_C_Order, I_Persistent 
+public class X_C_Order extends PO implements I_C_Order, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_C_Order (Properties ctx, int C_Order_ID, String trxName)
@@ -143,7 +143,217 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 			setInvoiceRule (null);
 // I
 			setIsApproved (false);
-// @IsApproved@
+// N
+			setIsCreditApproved (false);
+			setIsDelivered (false);
+			setIsDiscountPrinted (false);
+			setIsDropShip (false);
+// N
+			setIsInvoiced (false);
+			setIsPayScheduleValid (false);
+// N
+			setIsPrinted (false);
+			setIsPriviledgedRate (false);
+// N
+			setIsSelected (false);
+			setIsSelfService (false);
+			setIsSOTrx (false);
+// @IsSOTrx@
+			setIsTaxIncluded (false);
+			setIsTransferred (false);
+			setM_PriceList_ID (0);
+			setM_Warehouse_ID (0);
+			setPaymentRule (null);
+// B
+			setPosted (false);
+// N
+			setPriorityRule (null);
+// 5
+			setProcessed (false);
+			setSalesRep_ID (0);
+			setSendEMail (false);
+			setTotalLines (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_Order (Properties ctx, int C_Order_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_Order_ID, trxName, virtualColumns);
+      /** if (C_Order_ID == 0)
+        {
+			setC_BPartner_ID (0);
+			setC_BPartner_Location_ID (0);
+			setC_Currency_ID (0);
+// @C_Currency_ID@
+			setC_DocType_ID (0);
+// 0
+			setC_DocTypeTarget_ID (0);
+			setC_Order_ID (0);
+			setC_PaymentTerm_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDateOrdered (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDatePromised (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDeliveryRule (null);
+// F
+			setDeliveryViaRule (null);
+// P
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setFreightAmt (Env.ZERO);
+			setFreightCostRule (null);
+// I
+			setGrandTotal (Env.ZERO);
+			setInvoiceRule (null);
+// I
+			setIsApproved (false);
+// N
+			setIsCreditApproved (false);
+			setIsDelivered (false);
+			setIsDiscountPrinted (false);
+			setIsDropShip (false);
+// N
+			setIsInvoiced (false);
+			setIsPayScheduleValid (false);
+// N
+			setIsPrinted (false);
+			setIsPriviledgedRate (false);
+// N
+			setIsSelected (false);
+			setIsSelfService (false);
+			setIsSOTrx (false);
+// @IsSOTrx@
+			setIsTaxIncluded (false);
+			setIsTransferred (false);
+			setM_PriceList_ID (0);
+			setM_Warehouse_ID (0);
+			setPaymentRule (null);
+// B
+			setPosted (false);
+// N
+			setPriorityRule (null);
+// 5
+			setProcessed (false);
+			setSalesRep_ID (0);
+			setSendEMail (false);
+			setTotalLines (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_Order (Properties ctx, String C_Order_UU, String trxName)
+    {
+      super (ctx, C_Order_UU, trxName);
+      /** if (C_Order_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_BPartner_Location_ID (0);
+			setC_Currency_ID (0);
+// @C_Currency_ID@
+			setC_DocType_ID (0);
+// 0
+			setC_DocTypeTarget_ID (0);
+			setC_Order_ID (0);
+			setC_PaymentTerm_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDateOrdered (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDatePromised (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDeliveryRule (null);
+// F
+			setDeliveryViaRule (null);
+// P
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setFreightAmt (Env.ZERO);
+			setFreightCostRule (null);
+// I
+			setGrandTotal (Env.ZERO);
+			setInvoiceRule (null);
+// I
+			setIsApproved (false);
+// N
+			setIsCreditApproved (false);
+			setIsDelivered (false);
+			setIsDiscountPrinted (false);
+			setIsDropShip (false);
+// N
+			setIsInvoiced (false);
+			setIsPayScheduleValid (false);
+// N
+			setIsPrinted (false);
+			setIsPriviledgedRate (false);
+// N
+			setIsSelected (false);
+			setIsSelfService (false);
+			setIsSOTrx (false);
+// @IsSOTrx@
+			setIsTaxIncluded (false);
+			setIsTransferred (false);
+			setM_PriceList_ID (0);
+			setM_Warehouse_ID (0);
+			setPaymentRule (null);
+// B
+			setPosted (false);
+// N
+			setPriorityRule (null);
+// 5
+			setProcessed (false);
+			setSalesRep_ID (0);
+			setSendEMail (false);
+			setTotalLines (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_Order (Properties ctx, String C_Order_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_Order_UU, trxName, virtualColumns);
+      /** if (C_Order_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_BPartner_Location_ID (0);
+			setC_Currency_ID (0);
+// @C_Currency_ID@
+			setC_DocType_ID (0);
+// 0
+			setC_DocTypeTarget_ID (0);
+			setC_Order_ID (0);
+			setC_PaymentTerm_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDateOrdered (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDatePromised (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDeliveryRule (null);
+// F
+			setDeliveryViaRule (null);
+// P
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setFreightAmt (Env.ZERO);
+			setFreightCostRule (null);
+// I
+			setGrandTotal (Env.ZERO);
+			setInvoiceRule (null);
+// I
+			setIsApproved (false);
+// N
 			setIsCreditApproved (false);
 			setIsDelivered (false);
 			setIsDiscountPrinted (false);
@@ -183,7 +393,7 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -254,16 +464,16 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set AmountRefunded.
-		@param AmountRefunded AmountRefunded
+	/** Set Amount Refunded.
+		@param AmountRefunded Amount Refunded
 	*/
 	public void setAmountRefunded (BigDecimal AmountRefunded)
 	{
 		set_Value (COLUMNNAME_AmountRefunded, AmountRefunded);
 	}
 
-	/** Get AmountRefunded.
-		@return AmountRefunded	  */
+	/** Get Amount Refunded.
+		@return Amount Refunded	  */
 	public BigDecimal getAmountRefunded()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_AmountRefunded);
@@ -272,16 +482,16 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 		return bd;
 	}
 
-	/** Set AmountTendered.
-		@param AmountTendered AmountTendered
+	/** Set Amount Tendered.
+		@param AmountTendered Amount Tendered
 	*/
 	public void setAmountTendered (BigDecimal AmountTendered)
 	{
 		set_Value (COLUMNNAME_AmountTendered, AmountTendered);
 	}
 
-	/** Get AmountTendered.
-		@return AmountTendered	  */
+	/** Get Amount Tendered.
+		@return Amount Tendered	  */
 	public BigDecimal getAmountTendered()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_AmountTendered);
@@ -951,7 +1161,7 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 		return (Timestamp)get_Value(COLUMNNAME_DateOrdered);
 	}
 
-	/** Set Date printed.
+	/** Set Date Printed.
 		@param DatePrinted Date the document was printed.
 	*/
 	public void setDatePrinted (Timestamp DatePrinted)
@@ -959,7 +1169,7 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 		set_Value (COLUMNNAME_DatePrinted, DatePrinted);
 	}
 
-	/** Get Date printed.
+	/** Get Date Printed.
 		@return Date the document was printed.
 	  */
 	public Timestamp getDatePrinted()
@@ -1164,7 +1374,7 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getDocumentNo());
     }
@@ -1282,6 +1492,8 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public static final String FREIGHTCOSTRULE_FreightIncluded = "I";
 	/** Line = L */
 	public static final String FREIGHTCOSTRULE_Line = "L";
+	/** Customer Account = U */
+	public static final String FREIGHTCOSTRULE_CustomerAccount = "U";
 	/** Set Freight Cost Rule.
 		@param FreightCostRule Method for charging Freight
 	*/
@@ -1359,10 +1571,10 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public boolean isApproved()
 	{
 		Object oo = get_Value(COLUMNNAME_IsApproved);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1382,10 +1594,10 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public boolean isCreditApproved()
 	{
 		Object oo = get_Value(COLUMNNAME_IsCreditApproved);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1404,10 +1616,10 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public boolean isDelivered()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDelivered);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1427,10 +1639,10 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public boolean isDiscountPrinted()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDiscountPrinted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1450,10 +1662,10 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public boolean isDropShip()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDropShip);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1473,10 +1685,10 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public boolean isInvoiced()
 	{
 		Object oo = get_Value(COLUMNNAME_IsInvoiced);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1496,10 +1708,10 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public boolean isPayScheduleValid()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPayScheduleValid);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1519,32 +1731,32 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public boolean isPrinted()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPrinted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
 	}
 
-	/** Set Priviledged Rate.
-		@param IsPriviledgedRate Priviledged Rate
+	/** Set Privileged Rate.
+		@param IsPriviledgedRate Privileged Rate
 	*/
 	public void setIsPriviledgedRate (boolean IsPriviledgedRate)
 	{
 		set_Value (COLUMNNAME_IsPriviledgedRate, Boolean.valueOf(IsPriviledgedRate));
 	}
 
-	/** Get Priviledged Rate.
-		@return Priviledged Rate	  */
+	/** Get Privileged Rate.
+		@return Privileged Rate	  */
 	public boolean isPriviledgedRate()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPriviledgedRate);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1563,10 +1775,10 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public boolean isSelected()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSelected);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1586,10 +1798,10 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public boolean isSelfService()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSelfService);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1609,10 +1821,10 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public boolean isSOTrx()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSOTrx);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1632,10 +1844,10 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public boolean isTaxIncluded()
 	{
 		Object oo = get_Value(COLUMNNAME_IsTaxIncluded);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1655,10 +1867,10 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public boolean isTransferred()
 	{
 		Object oo = get_Value(COLUMNNAME_IsTransferred);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1911,10 +2123,10 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public boolean isPosted()
 	{
 		Object oo = get_Value(COLUMNNAME_Posted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1963,10 +2175,10 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -2004,10 +2216,10 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -2127,10 +2339,10 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public boolean isSendEMail()
 	{
 		Object oo = get_Value(COLUMNNAME_SendEMail);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

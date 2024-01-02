@@ -27,17 +27,18 @@ import java.sql.Timestamp;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.logging.Level;
-
 import org.adempiere.base.Core;
 import org.adempiere.base.ILogin;
 import javax.servlet.http.HttpSession;
-import org.adempiere.base.sso.ISSOPrinciple;
+
+import org.adempiere.base.sso.ISSOPrincipalService;
 import org.adempiere.base.sso.SSOUtils;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.Extensions;
 import org.adempiere.util.Callback;
+import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.IWebClient;
-import org.adempiere.webui.component.FWindow;
+import org.adempiere.webui.component.Window;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.panel.ChangePasswordPanel;
 import org.adempiere.webui.panel.LoginPanel;
@@ -64,6 +65,7 @@ import org.compiere.util.ValueNamePair;
 import org.zkoss.util.Locales;
 import org.zkoss.web.Attributes;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -79,10 +81,10 @@ import org.zkoss.zk.ui.util.Clients;
  * @author <a href="mailto:sendy.yagambrum@posterita.org">Sendy Yagambrum</a>
  * @date    July 18, 2007
  */
-public class LoginWindow extends FWindow implements EventListener<Event>
+public class LoginWindow extends Window implements EventListener<Event>
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 8570332386555237381L;
 	protected static final CLogger log = CLogger.getCLogger(LoginWindow.class);
@@ -99,6 +101,10 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 
     public LoginWindow() {}
 
+    /**
+     * Layout window
+     * @param app
+     */
     public void init(IWebClient app)
     {
     	this.ctx = Env.getCtx();
@@ -113,32 +119,35 @@ public class LoginWindow extends FWindow implements EventListener<Event>
         setWidgetListener("onOK", "zAu.cmd0.showBusy(null)");
     }
 
+    /**
+     * Create login panel
+     */
 	private void initComponents()
 	{
-		Object result = getDesktop().getSession().getAttribute(ISSOPrinciple.SSO_PRINCIPLE_SESSION_NAME);
-		if (result == null)
+		Object token = getDesktop().getSession().getAttribute(ISSOPrincipalService.SSO_PRINCIPAL_SESSION_TOKEN);
+		if (token == null)
 		{
 			createLoginPanel();
 		}
 		else
 		{
-			ssoLogin(result);
+			ssoLogin(token);
 		}
 	}
 
 	/**
 	 * Show role panel after SSO authentication.
 	 * 
-	 * @param result session principle to get user and language.
+	 * @param Session token for retrieving user and language.
 	 */
-	private void ssoLogin(Object result)
+	private void ssoLogin(Object token)
 	{
 		String errorMessage = null;
 		try
 		{
-			ISSOPrinciple ssoPrinciple = SSOWebuiFilter.getSSOPrinciple();
-			String username = ssoPrinciple.getUserName(result);
-			Language language = ssoPrinciple.getLanguage(result);
+			ISSOPrincipalService ssoPrincipal = SSOUtils.getSSOPrincipalService();
+			String username = ssoPrincipal.getUserName(token);
+			Language language = ssoPrincipal.getLanguage(token);
 			boolean isEmailLogin = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
 			if (Util.isEmpty(username))
 				throw new AdempiereException("No Apps " + (isEmailLogin ? "Email" : "User"));
@@ -152,11 +161,11 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 			Login login = new Login(ctx);
 			boolean isShowRolePanel = MSysConfig.getBooleanValue(MSysConfig.SSO_SELECT_ROLE, true);
 			
-			// show role panel when change role
-			if (getDesktop().getSession().hasAttribute(SSOUtils.ISCHANGEROLE_REQUEST))
+			// show role panel when change role 
+			if(getDesktop().getSession().hasAttribute(SSOUtils.ISCHANGEROLE_REQUEST))
 				isShowRolePanel = isShowRolePanel || (boolean) getDesktop().getSession().getAttribute(SSOUtils.ISCHANGEROLE_REQUEST);
-
-			KeyNamePair[] clients = login.getClients(username, null, null, true);
+			
+			KeyNamePair[] clients = login.getClients(username, null, null, token);
 			if (clients != null)
 				loginOk(username, isShowRolePanel, clients, true);
 			else
@@ -177,35 +186,36 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 		if (!Util.isEmpty(errorMessage))
 		{
 			ZkSSOUtils.setErrorMessageText(errorMessage);
-			Executions.sendRedirect(SSOUtils.ERROR_VALIDATION);
+			Executions.sendRedirect(SSOUtils.ERROR_VALIDATION_URL);
 		}
 	}
 
+    /**
+     * Create login panel
+     */
 	protected void createLoginPanel() {
 		pnlLogin = new LoginPanel(ctx, this);
 	}
 
+	/**
+	 * After verification of user name and password. 
+	 * @param userName
+	 * @param show
+	 * @param clientsKNPairs
+	 */
 	public void loginOk(String userName, boolean show, KeyNamePair[] clientsKNPairs)
 	{
 		loginOk(userName, show, clientsKNPairs, false);
 	}
 
     public void loginOk(String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isSSOLogin)
-    {
-        boolean isClientDefined = (clientsKNPairs.length == 1 || ! Util.isEmpty(Env.getContext(ctx, Env.AD_USER_ID)));
+	{
+		boolean isClientDefined = (clientsKNPairs.length == 1 || !Util.isEmpty(Env.getContext(ctx, Env.AD_USER_ID)));
 		if (pnlRole == null)
-			createRolePanel(userName, show, clientsKNPairs, isClientDefined);
+			pnlRole = new RolePanel(ctx, this, userName, show, clientsKNPairs, isClientDefined);
 		if (isSSOLogin)
 		{
-			this.addEventListener(SSOUtils.EVENT_ON_AFTER_SSOLOGIN, new EventListener<Event>() {
-
-				@Override
-				public void onEvent(Event arg0) throws Exception
-				{
-					validateMFPanel(userName, show, clientsKNPairs, isClientDefined);
-				}
-			});
-			Events.echoEvent(SSOUtils.EVENT_ON_AFTER_SSOLOGIN, this, null);
+			Executions.schedule(getDesktop(), e -> validateMFPanel(userName, show, clientsKNPairs, isClientDefined), new Event(SSOUtils.EVENT_ON_AFTER_SSOLOGIN));
 		}
 		else
 		{
@@ -219,11 +229,19 @@ public class LoginWindow extends FWindow implements EventListener<Event>
     		createValidateMFAPanel(null, isClientDefined, userName, show, clientsKNPairs);
     	} else {
             showRolePanel(userName, show, clientsKNPairs, isClientDefined, false);
-			if (!pnlRole.isShow())
+			if (!pnlRole.show())
             	createValidateMFAPanel(null, isClientDefined, userName, show, clientsKNPairs);
     	}
 	}
 
+    /**
+     * Show role selection panel
+     * @param userName
+     * @param show
+     * @param clientsKNPairs
+     * @param isClientDefined
+     * @param isMFAValidated
+     */
 	public void showRolePanel(String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isClientDefined, boolean isMFAValidated) {
         this.getChildren().clear();
         if (pnlRole.isShow()) {
@@ -242,6 +260,13 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 	protected void createRolePanel(String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isClientDefined) {
 		pnlRole = Extensions.getRolePanel(ctx, this, userName, show, clientsKNPairs, isClientDefined);
 	}
+	/**
+	 * Show change password panel
+	 * @param userName
+	 * @param userPassword
+	 * @param show
+	 * @param clientsKNPairs
+	 */
     public void changePassword(String userName, String userPassword, boolean show, KeyNamePair[] clientsKNPairs)
     {
     	Clients.clearBusy();
@@ -250,11 +275,23 @@ public class LoginWindow extends FWindow implements EventListener<Event>
         this.appendChild(pnlChangePassword);
     }
 
+    /**
+     * Create change password panel
+     * @param userName
+     * @param userPassword
+     * @param show
+     * @param clientsKNPairs
+     */
 	protected void createChangePasswordPanel(String userName,
 			String userPassword, boolean show, KeyNamePair[] clientsKNPairs) {
 		pnlChangePassword = new ChangePasswordPanel(ctx, this, userName, userPassword, show, clientsKNPairs);
 	}
     
+	/**
+	 * Show reset password panel
+	 * @param userName
+	 * @param noSecurityQuestion
+	 */
     public void resetPassword(String userName, boolean noSecurityQuestion)
     {
     	createResetPasswordPanel(userName, noSecurityQuestion);
@@ -262,16 +299,37 @@ public class LoginWindow extends FWindow implements EventListener<Event>
         this.appendChild(pnlResetPassword);
     }
 
+    /**
+     * Create reset password panel
+     * @param userName
+     * @param noSecurityQuestion
+     */
 	protected void createResetPasswordPanel(String userName,
 			boolean noSecurityQuestion) {
 		pnlResetPassword = new ResetPasswordPanel(ctx, this, userName, noSecurityQuestion);
 	}
 
+	/**
+	 * Show MFA panel
+	 * @param orgKNPair
+	 * @param isClientDefined
+	 * @param userName
+	 * @param show
+	 * @param clientsKNPairs
+	 */
 	public void validateMFA(KeyNamePair orgKNPair, boolean isClientDefined, String userName, boolean show, KeyNamePair[] clientsKNPairs) {
     	Clients.clearBusy();
 		createValidateMFAPanel(orgKNPair, isClientDefined, userName, show, clientsKNPairs);
 	}
 
+	/**
+	 * Create and show MFA panel
+	 * @param orgKNPair
+	 * @param isClientDefined
+	 * @param userName
+	 * @param show
+	 * @param clientsKNPairs
+	 */
 	private void createValidateMFAPanel(KeyNamePair orgKNPair, boolean isClientDefined, String userName, boolean show, KeyNamePair[] clientsKNPairs) {
 		if (pnlValidateMFA == null)
 			pnlValidateMFA = new ValidateMFAPanel(ctx, this, orgKNPair, isClientDefined, userName, show, clientsKNPairs);
@@ -281,6 +339,12 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 		}
 	}
 
+	/**
+	 * Complete login process
+	 * @param login
+	 * @param m_orgKNPair
+	 * @param component
+	 */
 	public void loginCompleted(ILogin login, KeyNamePair m_orgKNPair, Window component)
     {
 		Session currSess = Executions.getCurrent().getDesktop().getSession();
@@ -293,7 +357,7 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 		String msg = login.validateLogin(m_orgKNPair);
 		if (!Util.isEmpty(msg)) {
 			Env.getCtx().clear();
-			FDialog.error(0, this, "Error", msg, new Callback<Integer>() {
+			Dialog.error(0, "Error", msg, new Callback<Integer>() {
 				@Override
 				public void onCallback(Integer result) {
 					Events.echoEvent(new Event(ON_DEFER_LOGOUT, component));
@@ -311,7 +375,7 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 				Timestamp now = TimeUtil.getDay(null);
 
 				if (now.after(notifyAfter))
-					FDialog.warn(0, null, "", Msg.getMsg(Env.getCtx(), "YourPasswordWillExpireInDays",
+					Dialog.warn(0, "", Msg.getMsg(Env.getCtx(), "YourPasswordWillExpireInDays",
 							new Object[] { TimeUtil.getDaysBetween(now, limit) }));
 			}
 		}
@@ -319,13 +383,17 @@ public class LoginWindow extends FWindow implements EventListener<Event>
         app.loginCompleted();
     }
 
+	/**
+	 * Login cancel by user. Show login panel again.
+	 */
     public void loginCancelled()
     {
         createLoginPanel();
         this.getChildren().clear();
         this.appendChild(pnlLogin);
     }
-
+    
+    @Override
     public void onEvent(Event event)
     {
        // check that 'ENTER' key is pressed
@@ -401,8 +469,14 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 		else
 			loginName = user.getLDAPUser() != null ? user.getLDAPUser() : user.getName();
     	loginOk(loginName, true, login.getClients());
-    	getDesktop().getSession().setAttribute("Check_AD_User_ID", Env.getAD_User_ID(ctx));
+    	getDesktop().getSession().setAttribute(AdempiereWebUI.CHECK_AD_USER_ID_ATTR, Env.getAD_User_ID(ctx));
     	pnlRole.setChangeRole(true);
     	pnlRole.changeRole(ctx);
     }
+
+	@Override
+	public void onPageDetached(Page page) {
+		setWidgetListener("onOK", null);
+		super.onPageDetached(page);
+	}
 }

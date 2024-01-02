@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_Column
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="AD_Column")
-public class X_AD_Column extends PO implements I_AD_Column, I_Persistent 
+public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220920L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_AD_Column (Properties ctx, int AD_Column_ID, String trxName)
@@ -60,6 +60,128 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 			setIsKey (false);
 			setIsMandatory (false);
 			setIsParent (false);
+			setIsPartitionKey (false);
+// 'N'
+			setIsSecure (false);
+// N
+			setIsSelectionColumn (false);
+			setIsToolbarButton (null);
+// Y
+			setIsTranslated (false);
+			setIsUpdateable (true);
+// Y
+			setName (null);
+			setVersion (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_Column (Properties ctx, int AD_Column_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_Column_ID, trxName, virtualColumns);
+      /** if (AD_Column_ID == 0)
+        {
+			setAD_Column_ID (0);
+			setAD_Element_ID (0);
+			setAD_Reference_ID (0);
+			setAD_Table_ID (0);
+			setColumnName (null);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setIsAllowCopy (true);
+// Y
+			setIsAlwaysUpdateable (false);
+// N
+			setIsAutocomplete (false);
+// N
+			setIsEncrypted (null);
+// N
+			setIsIdentifier (false);
+			setIsKey (false);
+			setIsMandatory (false);
+			setIsParent (false);
+			setIsPartitionKey (false);
+// 'N'
+			setIsSecure (false);
+// N
+			setIsSelectionColumn (false);
+			setIsToolbarButton (null);
+// Y
+			setIsTranslated (false);
+			setIsUpdateable (true);
+// Y
+			setName (null);
+			setVersion (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_Column (Properties ctx, String AD_Column_UU, String trxName)
+    {
+      super (ctx, AD_Column_UU, trxName);
+      /** if (AD_Column_UU == null)
+        {
+			setAD_Column_ID (0);
+			setAD_Element_ID (0);
+			setAD_Reference_ID (0);
+			setAD_Table_ID (0);
+			setColumnName (null);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setIsAllowCopy (true);
+// Y
+			setIsAlwaysUpdateable (false);
+// N
+			setIsAutocomplete (false);
+// N
+			setIsEncrypted (null);
+// N
+			setIsIdentifier (false);
+			setIsKey (false);
+			setIsMandatory (false);
+			setIsParent (false);
+			setIsPartitionKey (false);
+// 'N'
+			setIsSecure (false);
+// N
+			setIsSelectionColumn (false);
+			setIsToolbarButton (null);
+// Y
+			setIsTranslated (false);
+			setIsUpdateable (true);
+// Y
+			setName (null);
+			setVersion (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_Column (Properties ctx, String AD_Column_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_Column_UU, trxName, virtualColumns);
+      /** if (AD_Column_UU == null)
+        {
+			setAD_Column_ID (0);
+			setAD_Element_ID (0);
+			setAD_Reference_ID (0);
+			setAD_Table_ID (0);
+			setColumnName (null);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setIsAllowCopy (true);
+// Y
+			setIsAlwaysUpdateable (false);
+// N
+			setIsAutocomplete (false);
+// N
+			setIsEncrypted (null);
+// N
+			setIsIdentifier (false);
+			setIsKey (false);
+			setIsMandatory (false);
+			setIsParent (false);
+			setIsPartitionKey (false);
+// 'N'
 			setIsSecure (false);
 // N
 			setIsSelectionColumn (false);
@@ -118,7 +240,7 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
     }
 
     /** AccessLevel
-      * @return 4 - System 
+      * @return 4 - System
       */
     protected int get_AccessLevel()
     {
@@ -443,6 +565,22 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 		return (String)get_Value(COLUMNNAME_AlwaysUpdatableLogic);
 	}
 
+	/** Set Always Updatable Logic.
+		@param AlwaysUpdatableLogic Logic to determine if field is Updatable irrespective if record&#039;s active status or processed status. This logic Applicable only if Always Updatable is N.
+	*/
+	public void setAlwaysUpdatableLogic (String AlwaysUpdatableLogic)
+	{
+		set_Value (COLUMNNAME_AlwaysUpdatableLogic, AlwaysUpdatableLogic);
+	}
+
+	/** Get Always Updatable Logic.
+		@return Logic to determine if field is Updatable irrespective if record&#039;s active status or processed status. This logic Applicable only if Always Updatable is N.
+	  */
+	public String getAlwaysUpdatableLogic()
+	{
+		return (String)get_Value(COLUMNNAME_AlwaysUpdatableLogic);
+	}
+
 	/** Set Callout.
 		@param Callout Fully qualified class names and method - separated by semicolons
 	*/
@@ -478,7 +616,7 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getColumnName());
     }
@@ -569,6 +707,33 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_AD_Message getFKConstraintMsg() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_Message)MTable.get(getCtx(), org.compiere.model.I_AD_Message.Table_ID)
+			.getPO(getFKConstraintMsg_ID(), get_TrxName());
+	}
+
+	/** Set Constraint Message.
+		@param FKConstraintMsg_ID Constraint Message
+	*/
+	public void setFKConstraintMsg_ID (int FKConstraintMsg_ID)
+	{
+		if (FKConstraintMsg_ID < 1)
+			set_Value (COLUMNNAME_FKConstraintMsg_ID, null);
+		else
+			set_Value (COLUMNNAME_FKConstraintMsg_ID, Integer.valueOf(FKConstraintMsg_ID));
+	}
+
+	/** Get Constraint Message.
+		@return Constraint Message	  */
+	public int getFKConstraintMsg_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_FKConstraintMsg_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Constraint Name.
 		@param FKConstraintName Constraint Name
 	*/
@@ -588,14 +753,18 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 	public static final int FKCONSTRAINTTYPE_AD_Reference_ID=200075;
 	/** Cascade = C */
 	public static final String FKCONSTRAINTTYPE_Cascade = "C";
-	/** Do Not Create = D */
-	public static final String FKCONSTRAINTTYPE_DoNotCreate = "D";
+	/** Do Not Create - Ignore = D */
+	public static final String FKCONSTRAINTTYPE_DoNotCreate_Ignore = "D";
 	/** Model Cascade = M */
 	public static final String FKCONSTRAINTTYPE_ModelCascade = "M";
-	/** No Action = N */
-	public static final String FKCONSTRAINTTYPE_NoAction = "N";
+	/** No Action - Forbid Deletion = N */
+	public static final String FKCONSTRAINTTYPE_NoAction_ForbidDeletion = "N";
+	/** Model No Action - Forbid Deletion = O */
+	public static final String FKCONSTRAINTTYPE_ModelNoAction_ForbidDeletion = "O";
 	/** Set Null = S */
 	public static final String FKCONSTRAINTTYPE_SetNull = "S";
+	/** Model Set Null = T */
+	public static final String FKCONSTRAINTTYPE_ModelSetNull = "T";
 	/** Set Constraint Type.
 		@param FKConstraintType Constraint Type
 	*/
@@ -658,10 +827,10 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 	public boolean isAllowCopy()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAllowCopy);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -681,10 +850,10 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 	public boolean isAllowLogging()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAllowLogging);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -704,33 +873,33 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 	public boolean isAlwaysUpdateable()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAlwaysUpdateable);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
 	}
 
-	/** Set Autocomplete.
-		@param IsAutocomplete Automatic completion for textfields
+	/** Set Auto complete.
+		@param IsAutocomplete Automatic completion for text fields
 	*/
 	public void setIsAutocomplete (boolean IsAutocomplete)
 	{
 		set_Value (COLUMNNAME_IsAutocomplete, Boolean.valueOf(IsAutocomplete));
 	}
 
-	/** Get Autocomplete.
-		@return Automatic completion for textfields
+	/** Get Auto complete.
+		@return Automatic completion for text fields
 	  */
 	public boolean isAutocomplete()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAutocomplete);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -773,10 +942,10 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 	public boolean isHtml()
 	{
 		Object oo = get_Value(COLUMNNAME_IsHtml);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -796,10 +965,10 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 	public boolean isIdentifier()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIdentifier);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -819,10 +988,10 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 	public boolean isKey()
 	{
 		Object oo = get_Value(COLUMNNAME_IsKey);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -842,10 +1011,10 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 	public boolean isMandatory()
 	{
 		Object oo = get_Value(COLUMNNAME_IsMandatory);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -865,10 +1034,33 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 	public boolean isParent()
 	{
 		Object oo = get_Value(COLUMNNAME_IsParent);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Partition Key.
+		@param IsPartitionKey This is a partition key
+	*/
+	public void setIsPartitionKey (boolean IsPartitionKey)
+	{
+		set_Value (COLUMNNAME_IsPartitionKey, Boolean.valueOf(IsPartitionKey));
+	}
+
+	/** Get Partition Key.
+		@return This is a partition key
+	  */
+	public boolean isPartitionKey()
+	{
+		Object oo = get_Value(COLUMNNAME_IsPartitionKey);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -888,10 +1080,10 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 	public boolean isSecure()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSecure);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -911,10 +1103,10 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 	public boolean isSelectionColumn()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSelectionColumn);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -975,10 +1167,10 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 	public boolean isTranslated()
 	{
 		Object oo = get_Value(COLUMNNAME_IsTranslated);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -998,10 +1190,10 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 	public boolean isUpdateable()
 	{
 		Object oo = get_Value(COLUMNNAME_IsUpdateable);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1065,6 +1257,29 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 		return ii.intValue();
 	}
 
+	/** PartitioningMethod AD_Reference_ID=200261 */
+	public static final int PARTITIONINGMETHOD_AD_Reference_ID=200261;
+	/** List = L */
+	public static final String PARTITIONINGMETHOD_List = "L";
+	/** Range = R */
+	public static final String PARTITIONINGMETHOD_Range = "R";
+	/** Set Partitioning Method.
+		@param PartitioningMethod Indicates how the Table is partitioned
+	*/
+	public void setPartitioningMethod (String PartitioningMethod)
+	{
+
+		set_Value (COLUMNNAME_PartitioningMethod, PartitioningMethod);
+	}
+
+	/** Get Partitioning Method.
+		@return Indicates how the Table is partitioned
+	  */
+	public String getPartitioningMethod()
+	{
+		return (String)get_Value(COLUMNNAME_PartitioningMethod);
+	}
+
 	/** Set Placeholder.
 		@param Placeholder Placeholder
 	*/
@@ -1078,6 +1293,22 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 	public String getPlaceholder()
 	{
 		return (String)get_Value(COLUMNNAME_Placeholder);
+	}
+
+	/** Set Range Partition Interval.
+		@param RangePartitionInterval Indicates the interval used in a range partitioning
+	*/
+	public void setRangePartitionInterval (String RangePartitionInterval)
+	{
+		set_Value (COLUMNNAME_RangePartitionInterval, RangePartitionInterval);
+	}
+
+	/** Get Range Partition Interval.
+		@return Indicates the interval used in a range partitioning
+	  */
+	public String getRangePartitionInterval()
+	{
+		return (String)get_Value(COLUMNNAME_RangePartitionInterval);
 	}
 
 	/** Set Read Only Logic.
@@ -1110,6 +1341,25 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 	public int getSeqNo()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_SeqNo);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Partition Key Sequence.
+		@param SeqNoPartition Indicates the order of partition keys
+	*/
+	public void setSeqNoPartition (int SeqNoPartition)
+	{
+		set_Value (COLUMNNAME_SeqNoPartition, Integer.valueOf(SeqNoPartition));
+	}
+
+	/** Get Partition Key Sequence.
+		@return Indicates the order of partition keys
+	  */
+	public int getSeqNoPartition()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_SeqNoPartition);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

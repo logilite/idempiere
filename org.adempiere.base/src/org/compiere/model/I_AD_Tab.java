@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_Tab
  *  @author iDempiere (generated) 
- *  @version Release 10
+ *  @version Release 11
  */
 public interface I_AD_Tab 
 {
@@ -44,8 +44,8 @@ public interface I_AD_Tab
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -124,12 +124,12 @@ public interface I_AD_Tab
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -241,6 +241,15 @@ public interface I_AD_Tab
 	  * User who created this records
 	  */
 	public int getCreatedBy();
+
+    /** Column name DeleteConfirmationLogic */
+    public static final String COLUMNNAME_DeleteConfirmationLogic = "DeleteConfirmationLogic";
+
+	/** Set Delete Confirmation Logic	  */
+	public void setDeleteConfirmationLogic (String DeleteConfirmationLogic);
+
+	/** Get Delete Confirmation Logic	  */
+	public String getDeleteConfirmationLogic();
 
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";
@@ -385,6 +394,19 @@ public interface I_AD_Tab
 	  */
 	public String getIsHighVolume();
 
+    /** Column name IsHighVolume */
+    public static final String COLUMNNAME_IsHighVolume = "IsHighVolume";
+
+	/** Set High Volume.
+	  * Use Search instead of Pick list
+	  */
+	public void setIsHighVolume (String IsHighVolume);
+
+	/** Get High Volume.
+	  * Use Search instead of Pick list
+	  */
+	public String getIsHighVolume();
+
     /** Column name IsInfoTab */
     public static final String COLUMNNAME_IsInfoTab = "IsInfoTab";
 
@@ -466,12 +488,12 @@ public interface I_AD_Tab
     /** Column name IsTranslationTab */
     public static final String COLUMNNAME_IsTranslationTab = "IsTranslationTab";
 
-	/** Set TranslationTab.
+	/** Set Translation Tab.
 	  * This Tab contains translation information
 	  */
 	public void setIsTranslationTab (boolean IsTranslationTab);
 
-	/** Get TranslationTab.
+	/** Get Translation Tab.
 	  * This Tab contains translation information
 	  */
 	public boolean isTranslationTab();

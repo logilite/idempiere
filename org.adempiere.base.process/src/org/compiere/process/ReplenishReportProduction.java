@@ -36,6 +36,7 @@ import org.compiere.model.MMovementLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MOrg;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProduction;
 import org.compiere.model.MReplenish;
@@ -67,17 +68,17 @@ import org.eevolution.model.MDDOrderLine;
 public class ReplenishReportProduction extends SvrProcess
 {
 	/** Warehouse				*/
-	private int		p_M_Warehouse_ID = 0;
+	protected int		p_M_Warehouse_ID = 0;
 	/**	Optional BPartner		*/
-	private int		p_C_BPartner_ID = 0;
-	/** Create (POO)Purchse Order or (POR)Requisition or (MMM)Movements */
-	private String	p_ReplenishmentCreate = null;
+	protected int		p_C_BPartner_ID = 0;
+	/** Create (POO)Purchase Order or (POR)Requisition or (MMM)Movement or (PRD)Production */
+	protected String	p_ReplenishmentCreate = null;
 	/** Document Type			*/
-	private int		p_C_DocType_ID = 0;
+	protected int		p_C_DocType_ID = 0;
 	/** Return Info				*/
-	private StringBuffer	m_info = new StringBuffer();
-	private int p_M_Product_Category_ID = 0;
-	private String isKanban = null;
+	protected StringBuffer	m_info = new StringBuffer();
+	protected int p_M_Product_Category_ID = 0;
+	protected String isKanban = null;
 	
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -103,7 +104,7 @@ public class ReplenishReportProduction extends SvrProcess
 			else if (name.equals("C_DocType_ID"))
 				p_C_DocType_ID = para[i].getParameterAsInt();
 			else
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 	}	//	prepare
 
@@ -116,6 +117,8 @@ public class ReplenishReportProduction extends SvrProcess
 	{				
 		if (log.isLoggable(Level.INFO)) log.info("M_Warehouse_ID=" + p_M_Warehouse_ID 
 				+ ", C_BPartner_ID=" + p_C_BPartner_ID 
+				+ ", M_Product_Category_ID=" + p_M_Product_Category_ID 
+				+ ", IsKanban=" + isKanban
 				+" - ReplenishmentCreate=" + p_ReplenishmentCreate
 				+ ", C_DocType_ID=" + p_C_DocType_ID);
 		
@@ -136,13 +139,13 @@ public class ReplenishReportProduction extends SvrProcess
 		if (!p_ReplenishmentCreate.equals("PRD") && !dt.getDocBaseType().equals(p_ReplenishmentCreate) )
 			throw new AdempiereSystemError("@C_DocType_ID@=" + dt.getName() + " <> " + p_ReplenishmentCreate);
 		//
-		if (p_ReplenishmentCreate.equals("POO"))
+		if (p_ReplenishmentCreate.equals(MDocType.DOCBASETYPE_PurchaseOrder))
 			createPO();
-		else if (p_ReplenishmentCreate.equals("POR"))
+		else if (p_ReplenishmentCreate.equals(MDocType.DOCBASETYPE_PurchaseRequisition))
 			createRequisition();
-		else if (p_ReplenishmentCreate.equals("MMM"))
+		else if (p_ReplenishmentCreate.equals(MDocType.DOCBASETYPE_MaterialMovement))
 			createMovements();
-		else if (p_ReplenishmentCreate.equals("DOO"))
+		else if (p_ReplenishmentCreate.equals(MDocType.DOCBASETYPE_DistributionOrder))
 			createDO();
 		else if (p_ReplenishmentCreate.equals("PRD"))
 			createProduction();
@@ -152,13 +155,13 @@ public class ReplenishReportProduction extends SvrProcess
 	/**
 	 * 	Prepare/Check Replenishment Table
 	 */
-	private void prepareTable()
+	protected void prepareTable()
 	{
 		//	Level_Max must be >= Level_Max
 		StringBuilder sql = new StringBuilder("UPDATE M_Replenish")
 			.append(" SET Level_Max = Level_Min ")
 			.append("WHERE Level_Max < Level_Min");
-		int no = DB.executeUpdate(sql.toString(), get_TrxName());
+		int no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (no != 0)
 			if (log.isLoggable(Level.FINE)) log.fine("Corrected Max_Level=" + no);
 		
@@ -166,7 +169,7 @@ public class ReplenishReportProduction extends SvrProcess
 		sql = new StringBuilder("UPDATE M_Product_PO")
 			.append(" SET Order_Min = 1 ")
 			.append("WHERE Order_Min IS NULL OR Order_Min < 1");
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (no != 0)
 			if (log.isLoggable(Level.FINE)) log.fine("Corrected Order Min=" + no);
 		
@@ -174,7 +177,7 @@ public class ReplenishReportProduction extends SvrProcess
 		sql = new StringBuilder("UPDATE M_Product_PO")
 			.append(" SET Order_Pack = 1 ")
 			.append("WHERE Order_Pack IS NULL OR Order_Pack < 1");
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (no != 0)
 			if (log.isLoggable(Level.FINE)) log.fine("Corrected Order Pack=" + no);
 
@@ -186,7 +189,7 @@ public class ReplenishReportProduction extends SvrProcess
 				.append("WHERE p.M_Product_ID=pp.M_Product_ID ")
 				.append("GROUP BY pp.M_Product_ID ")
 				.append("HAVING COUNT(*) = 1)");
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (no != 0)
 			if (log.isLoggable(Level.FINE)) log.fine("Corrected CurrentVendor(Y)=" + no);
 
@@ -198,13 +201,13 @@ public class ReplenishReportProduction extends SvrProcess
 				.append("WHERE p.M_Product_ID=pp.M_Product_ID AND pp.IsCurrentVendor='Y' ")
 				.append("GROUP BY pp.M_Product_ID ")
 				.append("HAVING COUNT(*) > 1)");
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (no != 0)
 			if (log.isLoggable(Level.FINE)) log.fine("Corrected CurrentVendor(N)=" + no);
 		
 		//	Just to be sure
 		sql = new StringBuilder("DELETE FROM T_Replenish WHERE AD_PInstance_ID=").append(getAD_PInstance_ID());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (no != 0)
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Existing Temp=" + no);
 	}	//	prepareTable
@@ -213,7 +216,7 @@ public class ReplenishReportProduction extends SvrProcess
 	 * 	Fill Table
 	 * 	@param wh warehouse
 	 */
-	private void fillTable (MWarehouse wh) throws Exception
+	protected void fillTable (MWarehouse wh) throws Exception
 	{
 		StringBuilder sql = new StringBuilder("INSERT INTO T_Replenish ");
 			sql.append("(AD_PInstance_ID, M_Warehouse_ID, M_Product_ID, AD_Client_ID, AD_Org_ID,");
@@ -239,8 +242,8 @@ public class ReplenishReportProduction extends SvrProcess
 		if ( p_M_Product_Category_ID != 0 )
 			sql.append(" AND p.M_Product_Category_ID=").append(p_M_Product_Category_ID);
 		if ( isKanban != null )
-			sql.append(" AND p.IsKanban = '").append(isKanban).append("' ");
-		int no = DB.executeUpdate(sql.toString(), get_TrxName());
+			sql.append(" AND p.IsKanban=").append(DB.TO_STRING(isKanban));
+		int no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINEST)) log.finest(sql.toString());
 		if (log.isLoggable(Level.FINE)) log.fine("Insert (1) #" + no);
 		
@@ -269,7 +272,7 @@ public class ReplenishReportProduction extends SvrProcess
 				sql.append(" AND p.M_Product_Category_ID=").append(p_M_Product_Category_ID);
 			if ( isKanban != null )
 				sql.append(" AND p.IsKanban = '").append(isKanban).append("' ");
-			no = DB.executeUpdate(sql.toString(), get_TrxName());
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine("Insert (BP) #" + no);
 		}
 		
@@ -283,7 +286,7 @@ public class ReplenishReportProduction extends SvrProcess
 		if (p_C_DocType_ID != 0)
 			sql.append(", C_DocType_ID=").append(p_C_DocType_ID);
 		sql.append(" WHERE AD_PInstance_ID=").append(getAD_PInstance_ID());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (no != 0)
 			if (log.isLoggable(Level.FINE)) log.fine("Update #" + no);
 		
@@ -296,7 +299,7 @@ public class ReplenishReportProduction extends SvrProcess
 		if (p_C_DocType_ID != 0)
 			sql.append(", C_DocType_ID=").append(p_C_DocType_ID);
 		sql.append(" WHERE AD_PInstance_ID=").append(getAD_PInstance_ID());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (no != 0)
 			if (log.isLoggable(Level.FINE)) log.fine("Update #" + no);
 		
@@ -309,17 +312,17 @@ public class ReplenishReportProduction extends SvrProcess
 				sql.append(" WHERE rr.M_Product_ID=r.M_Product_ID AND rr.IsActive='N'");
 				sql.append(" AND rr.M_Warehouse_ID=").append(p_M_Warehouse_ID).append(" ))");
 			sql.append(" AND AD_PInstance_ID=").append(getAD_PInstance_ID());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (no != 0)
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Inactive=" + no);
 	 
 		//	Ensure Data consistency
 		sql = new StringBuilder("UPDATE T_Replenish SET QtyOnHand = 0 WHERE QtyOnHand IS NULL");
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		sql = new StringBuilder("UPDATE T_Replenish SET QtyReserved = 0 WHERE QtyReserved IS NULL");
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		sql = new StringBuilder("UPDATE T_Replenish SET QtyOrdered = 0 WHERE QtyOrdered IS NULL");
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 
 		//	Set Minimum / Maximum Maintain Level
 		//	X_M_Replenish.REPLENISHTYPE_ReorderBelowMinimumLevel
@@ -329,7 +332,7 @@ public class ReplenishReportProduction extends SvrProcess
 			sql.append(" ELSE 0 END ");
 			sql.append("WHERE ReplenishType='1'"); 
 			sql.append(" AND AD_PInstance_ID=").append(getAD_PInstance_ID());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (no != 0)
 			if (log.isLoggable(Level.FINE)) log.fine("Update Type-1=" + no);
 		//
@@ -338,7 +341,7 @@ public class ReplenishReportProduction extends SvrProcess
 			sql.append(" SET QtyToOrder = Level_Max - QtyOnHand + QtyReserved - QtyOrdered ");
 			sql.append("WHERE ReplenishType='2'" );
 			sql.append(" AND AD_PInstance_ID=").append(getAD_PInstance_ID());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (no != 0)
 			if (log.isLoggable(Level.FINE)) log.fine("Update Type-2=" + no);
 	
@@ -349,7 +352,7 @@ public class ReplenishReportProduction extends SvrProcess
 			sql.append("WHERE QtyToOrder < Order_Min");
 			sql.append(" AND QtyToOrder > 0" );
 			sql.append(" AND AD_PInstance_ID=").append(getAD_PInstance_ID());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (no != 0)
 			if (log.isLoggable(Level.FINE)) log.fine("Set MinOrderQty=" + no);
 
@@ -359,7 +362,7 @@ public class ReplenishReportProduction extends SvrProcess
 			sql.append("WHERE MOD(QtyToOrder, Order_Pack) <> 0");
 			sql.append(" AND QtyToOrder > 0");
 			sql.append(" AND AD_PInstance_ID=").append(getAD_PInstance_ID());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (no != 0)
 			if (log.isLoggable(Level.FINE)) log.fine("Set OrderPackQty=" + no);
 		
@@ -369,7 +372,7 @@ public class ReplenishReportProduction extends SvrProcess
 			sql = new StringBuilder("UPDATE T_Replenish");
 				sql.append(" SET M_WarehouseSource_ID=").append(wh.getM_WarehouseSource_ID()); 
 				sql.append(" WHERE AD_PInstance_ID=").append(getAD_PInstance_ID());
-			no = DB.executeUpdate(sql.toString(), get_TrxName());
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 			if (no != 0)
 				if (log.isLoggable(Level.FINE)) log.fine("Set Source Warehouse=" + no);
 		}
@@ -378,7 +381,7 @@ public class ReplenishReportProduction extends SvrProcess
 			sql.append(" SET M_WarehouseSource_ID = NULL " );
 			sql.append("WHERE M_Warehouse_ID=M_WarehouseSource_ID");
 			sql.append(" AND AD_PInstance_ID=").append(getAD_PInstance_ID());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (no != 0)
 			if (log.isLoggable(Level.FINE)) log.fine("Set same Source Warehouse=" + no);
 		
@@ -429,7 +432,7 @@ public class ReplenishReportProduction extends SvrProcess
 		sql = new StringBuilder("DELETE FROM T_Replenish ");
 			sql.append("WHERE QtyToOrder < 1");
 		    sql.append(" AND AD_PInstance_ID=").append(getAD_PInstance_ID());
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (no != 0)
 			if (log.isLoggable(Level.FINE)) log.fine("Delete No QtyToOrder=" + no);
 			
@@ -438,7 +441,7 @@ public class ReplenishReportProduction extends SvrProcess
 	/**
 	 * 	Create PO's
 	 */
-	private void createPO()
+	protected void createPO()
 	{
 		int noOrders = 0;
 		StringBuilder info = new StringBuilder();
@@ -490,7 +493,7 @@ public class ReplenishReportProduction extends SvrProcess
 	/**
 	 * 	Create Requisition
 	 */
-	private void createRequisition()
+	protected void createRequisition()
 	{
 		int noReqs = 0;
 		StringBuilder info = new StringBuilder();
@@ -539,7 +542,7 @@ public class ReplenishReportProduction extends SvrProcess
 	/**
 	 * 	Create Inventory Movements
 	 */
-	private void createMovements()
+	protected void createMovements()
 	{
 		int noMoves = 0;
 		StringBuilder info = new StringBuilder();
@@ -643,7 +646,7 @@ public class ReplenishReportProduction extends SvrProcess
 	/**
 	 * 	Create Distribution Order
 	 */
-	private void createDO() throws Exception
+	protected void createDO() throws Exception
 	{
 		int noMoves = 0;
 		StringBuilder info = new StringBuilder();
@@ -752,7 +755,7 @@ public class ReplenishReportProduction extends SvrProcess
 	/**
 	 * 	Create Production
 	 */
-	private void createProduction()
+	protected void createProduction()
 	{
 		int noProds = 0;
 		StringBuilder info = new StringBuilder();
@@ -822,7 +825,7 @@ public class ReplenishReportProduction extends SvrProcess
 	 * 	Get Replenish Records
 	 *	@return replenish
 	 */
-	private X_T_Replenish[] getReplenish (String where)
+	protected X_T_Replenish[] getReplenish (String where)
 	{
 		StringBuilder sql = new StringBuilder("SELECT * FROM T_Replenish ");
 			sql.append("WHERE AD_PInstance_ID=? ");

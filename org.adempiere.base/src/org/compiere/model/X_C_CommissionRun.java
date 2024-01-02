@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_CommissionRun
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="C_CommissionRun")
-public class X_C_CommissionRun extends PO implements I_C_CommissionRun, I_Persistent 
+public class X_C_CommissionRun extends PO implements I_C_CommissionRun, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220317L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_C_CommissionRun (Properties ctx, int C_CommissionRun_ID, String trxName)
@@ -66,6 +66,36 @@ public class X_C_CommissionRun extends PO implements I_C_CommissionRun, I_Persis
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_CommissionRun (Properties ctx, String C_CommissionRun_UU, String trxName)
+    {
+      super (ctx, C_CommissionRun_UU, trxName);
+      /** if (C_CommissionRun_UU == null)
+        {
+			setC_Commission_ID (0);
+			setC_CommissionRun_ID (0);
+			setDocumentNo (null);
+			setGrandTotal (Env.ZERO);
+			setProcessed (false);
+			setStartDate (new Timestamp( System.currentTimeMillis() ));
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_CommissionRun (Properties ctx, String C_CommissionRun_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_CommissionRun_UU, trxName, virtualColumns);
+      /** if (C_CommissionRun_UU == null)
+        {
+			setC_Commission_ID (0);
+			setC_CommissionRun_ID (0);
+			setDocumentNo (null);
+			setGrandTotal (Env.ZERO);
+			setProcessed (false);
+			setStartDate (new Timestamp( System.currentTimeMillis() ));
+        } */
+    }
+
     /** Load Constructor */
     public X_C_CommissionRun (Properties ctx, ResultSet rs, String trxName)
     {
@@ -73,7 +103,7 @@ public class X_C_CommissionRun extends PO implements I_C_CommissionRun, I_Persis
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -187,6 +217,34 @@ public class X_C_CommissionRun extends PO implements I_C_CommissionRun, I_Persis
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Invoice)MTable.get(getCtx(), org.compiere.model.I_C_Invoice.Table_ID)
+			.getPO(getC_Invoice_ID(), get_TrxName());
+	}
+
+	/** Set Invoice.
+		@param C_Invoice_ID Invoice Identifier
+	*/
+	public void setC_Invoice_ID (int C_Invoice_ID)
+	{
+		if (C_Invoice_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_Invoice_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_Invoice_ID, Integer.valueOf(C_Invoice_ID));
+	}
+
+	/** Get Invoice.
+		@return Invoice Identifier
+	  */
+	public int getC_Invoice_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Invoice_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Description.
 		@param Description Optional short description of the record
 	*/
@@ -222,7 +280,7 @@ public class X_C_CommissionRun extends PO implements I_C_CommissionRun, I_Persis
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getDocumentNo());
     }
@@ -260,10 +318,10 @@ public class X_C_CommissionRun extends PO implements I_C_CommissionRun, I_Persis
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -282,10 +340,10 @@ public class X_C_CommissionRun extends PO implements I_C_CommissionRun, I_Persis
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

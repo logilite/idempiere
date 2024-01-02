@@ -36,6 +36,7 @@ import org.compiere.model.MAcctSchema;
 import org.compiere.model.MAcctSchemaElement;
 import org.compiere.model.MConversionRate;
 import org.compiere.model.MCostDetail;
+import org.compiere.model.MCurrency;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
@@ -43,6 +44,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MMatchInv;
 import org.compiere.model.MOrderLandedCostAllocation;
+import org.compiere.model.MTax;
 import org.compiere.model.MUOM;
 import org.compiere.model.MTable;
 import org.compiere.model.ProductCost;
@@ -94,6 +96,7 @@ public class Doc_MatchInv extends Doc
 	 *  Load Specific Document Details
 	 *  @return error message or null
 	 */
+	@Override
 	protected String loadDocumentDetails ()
 	{
 		setC_Currency_ID (Doc.NO_CURRENCY);
@@ -119,10 +122,11 @@ public class Doc_MatchInv extends Doc
 	}   //  loadDocumentDetails
 
 
-	/**************************************************************************
+	/**
 	 *  Get Source Currency Balance - subtracts line and tax amounts from total - no rounding
 	 *  @return Zero (always balanced)
 	 */
+	@Override
 	public BigDecimal getBalance()
 	{
 		return Env.ZERO;
@@ -144,6 +148,7 @@ public class Doc_MatchInv extends Doc
 	 *  @param as accounting schema
 	 *  @return Fact
 	 */
+	@Override
 	public ArrayList<Fact> createFacts (MAcctSchema as)
 	{
 		ArrayList<Fact> facts = new ArrayList<Fact>();
@@ -210,7 +215,7 @@ public class Doc_MatchInv extends Doc
 		dr.setQty(getQty());
 		BigDecimal temp = dr.getAcctBalance();
 		//	Set AmtAcctCr/Dr from Receipt (sets also Project)
-		if (m_matchInv.getReversal_ID() > 0 && m_matchInv.isReversal()) 
+		if (m_matchInv.isReversal())
 		{
 			if (!dr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
 					m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
@@ -259,10 +264,10 @@ public class Doc_MatchInv extends Doc
 				cr.setAmtSourceCr(BigDecimal.ZERO);
 			}
 			temp = cr.getAcctBalance();
-			if (m_matchInv.getReversal_ID() > 0 && m_matchInv.isReversal())
+			if (m_matchInv.isReversal())
 			{
 				if (!cr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
-						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
+						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE, dr))
 				{
 					p_Error = "Failed to create reversal entry";
 					return null;
@@ -293,10 +298,10 @@ public class Doc_MatchInv extends Doc
 					invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
 			cr = fact.createLine (null, expense,
 				as.getC_Currency_ID(), null, LineNetAmt);
-			if (m_matchInv.getReversal_ID() > 0 && m_matchInv.isReversal())
+			if (m_matchInv.isReversal())
 			{
 				if (!cr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
-						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
+						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE, dr))
 				{
 					p_Error = "Failed to create reversal entry";
 					return null;
@@ -501,8 +506,9 @@ public class Doc_MatchInv extends Doc
 		}
 	}
 
-	/** Verify if the posting involves two or more organizations
-	@return true if there are more than one org involved on the posting
+	/** 
+	 * Verify if the posting involves two or more organizations
+	 * @return true if there are more than one org involved on the posting
 	 */
 	public boolean isInterOrg(MAcctSchema as) {
 		MAcctSchemaElement elementorg = as.getAcctSchemaElement(MAcctSchemaElement.ELEMENTTYPE_Organization);
@@ -552,6 +558,56 @@ public class Doc_MatchInv extends Doc
 				}
 			}
 			tAmt = tAmt.add(LineNetAmt); //Invoice Price
+			// adjust for tax
+			MTax tax = MTax.get(getCtx(), m_invoiceLine.getC_Tax_ID());
+			int stdPrecision = MCurrency.getStdPrecision(getCtx(), m_invoiceLine.getParent().getC_Currency_ID());
+			if (m_invoiceLine.isTaxIncluded())
+			{
+				BigDecimal tAmtTax = tax.calculateTax(tAmt, true, stdPrecision);
+				if (tax.isSummary())
+				{
+					tAmt = tAmt.subtract(tAmtTax);
+					BigDecimal base = tAmt;
+					for (MTax childTax : tax.getChildTaxes(false)) 
+					{
+						if (!childTax.isZeroTax())
+						{
+							if (childTax.isDistributeTaxWithLineItem())
+							{
+								BigDecimal taxAmt = childTax.calculateTax(base, false, stdPrecision);
+								tAmt = tAmt.add(taxAmt);
+							}
+						}
+					}
+				}
+				else if (!tax.isDistributeTaxWithLineItem())
+				{
+					tAmt = tAmt.subtract(tAmtTax);
+				}
+			}
+			else
+			{
+				if (tax.isSummary())
+				{
+					BigDecimal base = tAmt;
+					for (MTax childTax : tax.getChildTaxes(false)) 
+					{
+						if (!childTax.isZeroTax())
+						{
+							if (childTax.isDistributeTaxWithLineItem())
+							{
+								BigDecimal taxAmt = childTax.calculateTax(base, false, stdPrecision);
+								tAmt = tAmt.add(taxAmt);
+							}
+						}
+					}
+				}
+				else if (tax.isDistributeTaxWithLineItem())
+				{					
+					BigDecimal taxAmt = tax.calculateTax(tAmt, false, stdPrecision);
+					tAmt = tAmt.add(taxAmt);
+				}
+			}
 			
 			// 	Different currency
 			MInvoice invoice = m_invoiceLine.getParent();
@@ -735,7 +791,7 @@ public class Doc_MatchInv extends Doc
 			if (m_matchInv.isReversal())
 			{
 				if (!cr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
-						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
+						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE, dr))
 				{
 					p_Error = "Failed to create reversal entry";
 					return null;
@@ -769,7 +825,7 @@ public class Doc_MatchInv extends Doc
 			if (m_matchInv.isReversal())
 			{
 				if (!cr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
-						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
+						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE, dr))
 				{
 					p_Error = "Failed to create reversal entry";
 					return null;
@@ -1046,7 +1102,7 @@ public class Doc_MatchInv extends Doc
 			if (m_matchInv.isReversal())
 			{
 				if (!cr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
-						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
+						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE, dr))
 				{
 					p_Error = "Failed to create reversal entry";
 					return null;
@@ -1080,7 +1136,7 @@ public class Doc_MatchInv extends Doc
 			if (m_matchInv.isReversal())
 			{
 				if (!cr.updateReverseLine (MMatchInv.Table_ID, 		//	Amt updated
-						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE))
+						m_matchInv.getReversal_ID(), 0, BigDecimal.ONE, dr))
 				{
 					p_Error = "Failed to create reversal entry";
 					return null;
@@ -1206,6 +1262,7 @@ public class Doc_MatchInv extends Doc
 	}
 	
 	/**
+	 * Update fact line with invoice line details (qty and accounting dimension)
 	 * @param factLine
 	 */
 	protected void updateFactLine(FactLine factLine) {
@@ -1335,7 +1392,7 @@ public class Doc_MatchInv extends Doc
 	}	//	createInvoiceGainLoss
 	
 	/**
-	 * Create Gain/Loss and Rounding Correction for reverse invoice 
+	 * Create Gain/Loss and Rounding Correction for reversal invoice 
 	 * @param as accounting schema
 	 * @param fact
 	 * @param acct

@@ -35,6 +35,7 @@ import org.compiere.model.MMovementLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MOrg;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MProduct;
 import org.compiere.model.MRequisition;
 import org.compiere.model.MRequisitionLine;
@@ -60,6 +61,7 @@ import org.eevolution.model.MDDOrderLine;
  *  Carlos Ruiz globalqss - integrate bug fixing from Chris Farley
  *    [ 1619517 ] Replenish report fails when no records in m_storage
  */
+@Deprecated // use ReplenishReportProduction instead
 @org.adempiere.base.annotation.Process
 public class ReplenishReport extends SvrProcess
 {
@@ -94,7 +96,7 @@ public class ReplenishReport extends SvrProcess
 			else if (name.equals("C_DocType_ID"))
 				p_C_DocType_ID = para[i].getParameterAsInt();
 			else
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 	}	//	prepare
 

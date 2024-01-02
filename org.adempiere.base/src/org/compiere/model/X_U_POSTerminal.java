@@ -22,16 +22,16 @@ import java.sql.Timestamp;
 import java.util.Properties;
 
 /** Generated Model for U_POSTerminal
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="U_POSTerminal")
-public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent 
+public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_U_POSTerminal (Properties ctx, int U_POSTerminal_ID, String trxName)
@@ -63,6 +63,51 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_U_POSTerminal (Properties ctx, int U_POSTerminal_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, U_POSTerminal_ID, trxName, virtualColumns);
+      /** if (U_POSTerminal_ID == 0)
+        {
+			setAutoLock (false);
+// N
+			setCashBookTransferType (null);
+			setC_CashBook_ID (0);
+			setC_CashBPartner_ID (0);
+			setU_POSTerminal_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_U_POSTerminal (Properties ctx, String U_POSTerminal_UU, String trxName)
+    {
+      super (ctx, U_POSTerminal_UU, trxName);
+      /** if (U_POSTerminal_UU == null)
+        {
+			setAutoLock (false);
+// N
+			setCashBookTransferType (null);
+			setC_CashBook_ID (0);
+			setC_CashBPartner_ID (0);
+			setU_POSTerminal_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_U_POSTerminal (Properties ctx, String U_POSTerminal_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, U_POSTerminal_UU, trxName, virtualColumns);
+      /** if (U_POSTerminal_UU == null)
+        {
+			setAutoLock (false);
+// N
+			setCashBookTransferType (null);
+			setC_CashBook_ID (0);
+			setC_CashBPartner_ID (0);
+			setU_POSTerminal_ID (0);
+        } */
+    }
+
     /** Load Constructor */
     public X_U_POSTerminal (Properties ctx, ResultSet rs, String trxName)
     {
@@ -70,7 +115,7 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -105,10 +150,10 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 	public boolean isAutoLock()
 	{
 		Object oo = get_Value(COLUMNNAME_AutoLock);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -389,7 +434,7 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 			.getPO(getCheckTransferBankAccount_ID(), get_TrxName());
 	}
 
-	/** Set Tranfer Check trx to.
+	/** Set Transfer Check trx to.
 		@param CheckTransferBankAccount_ID Bank account on which to transfer Check transactions
 	*/
 	public void setCheckTransferBankAccount_ID (int CheckTransferBankAccount_ID)
@@ -400,7 +445,7 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 			set_Value (COLUMNNAME_CheckTransferBankAccount_ID, Integer.valueOf(CheckTransferBankAccount_ID));
 	}
 
-	/** Get Tranfer Check trx to.
+	/** Get Transfer Check trx to.
 		@return Bank account on which to transfer Check transactions
 	  */
 	public int getCheckTransferBankAccount_ID()
@@ -551,10 +596,10 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 	public boolean isLocked()
 	{
 		Object oo = get_Value(COLUMNNAME_Locked);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -629,7 +674,7 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 			.getPO(getPO_PriceList_ID(), get_TrxName());
 	}
 
-	/** Set Purchase Pricelist.
+	/** Set Purchase Price List.
 		@param PO_PriceList_ID Price List used by this Business Partner
 	*/
 	public void setPO_PriceList_ID (int PO_PriceList_ID)
@@ -640,7 +685,7 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 			set_Value (COLUMNNAME_PO_PriceList_ID, Integer.valueOf(PO_PriceList_ID));
 	}
 
-	/** Get Purchase Pricelist.
+	/** Get Purchase Price List.
 		@return Price List used by this Business Partner
 	  */
 	public int getPO_PriceList_ID()
@@ -701,8 +746,8 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 			.getPO(getSO_PriceList_ID(), get_TrxName());
 	}
 
-	/** Set Sales Pricelist.
-		@param SO_PriceList_ID Sales Pricelist
+	/** Set Sales Price List.
+		@param SO_PriceList_ID Sales Price List
 	*/
 	public void setSO_PriceList_ID (int SO_PriceList_ID)
 	{
@@ -712,8 +757,8 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 			set_Value (COLUMNNAME_SO_PriceList_ID, Integer.valueOf(SO_PriceList_ID));
 	}
 
-	/** Get Sales Pricelist.
-		@return Sales Pricelist	  */
+	/** Get Sales Price List.
+		@return Sales Price List	  */
 	public int getSO_PriceList_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_SO_PriceList_ID);
@@ -722,7 +767,7 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set UnlockingTime.
+	/** Set Unlocking Time.
 		@param UnlockingTime Time at which the terminal should be unlocked
 	*/
 	public void setUnlockingTime (Timestamp UnlockingTime)
@@ -730,7 +775,7 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 		set_Value (COLUMNNAME_UnlockingTime, UnlockingTime);
 	}
 
-	/** Get UnlockingTime.
+	/** Get Unlocking Time.
 		@return Time at which the terminal should be unlocked
 	  */
 	public Timestamp getUnlockingTime()

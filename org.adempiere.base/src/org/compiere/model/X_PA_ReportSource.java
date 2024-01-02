@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for PA_ReportSource
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="PA_ReportSource")
-public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persistent 
+public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20231004L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_PA_ReportSource (Properties ctx, int PA_ReportSource_ID, String trxName)
@@ -109,6 +109,114 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
         } */
     }
 
+    /** Standard Constructor */
+    public X_PA_ReportSource (Properties ctx, int PA_ReportSource_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, PA_ReportSource_ID, trxName, virtualColumns);
+      /** if (PA_ReportSource_ID == 0)
+        {
+			setElementType (null);
+			setIsIncludeNullsActivity (false);
+// N
+			setIsIncludeNullsBPartner (false);
+// N
+			setIsIncludeNullsCampaign (false);
+// N
+			setIsIncludeNullsElementValue (false);
+// N
+			setIsIncludeNullsLocation (false);
+// N
+			setIsIncludeNullsOrg (false);
+// N
+			setIsIncludeNullsOrgTrx (false);
+// N
+			setIsIncludeNullsProduct (false);
+// N
+			setIsIncludeNullsProject (false);
+// N
+			setIsIncludeNullsSalesRegion (false);
+// N
+			setIsIncludeNullsUserElement1 (false);
+// N
+			setIsIncludeNullsUserElement2 (false);
+// N
+			setPA_ReportLine_ID (0);
+			setPA_ReportSource_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PA_ReportSource (Properties ctx, String PA_ReportSource_UU, String trxName)
+    {
+      super (ctx, PA_ReportSource_UU, trxName);
+      /** if (PA_ReportSource_UU == null)
+        {
+			setElementType (null);
+			setIsIncludeNullsActivity (false);
+// N
+			setIsIncludeNullsBPartner (false);
+// N
+			setIsIncludeNullsCampaign (false);
+// N
+			setIsIncludeNullsElementValue (false);
+// N
+			setIsIncludeNullsLocation (false);
+// N
+			setIsIncludeNullsOrg (false);
+// N
+			setIsIncludeNullsOrgTrx (false);
+// N
+			setIsIncludeNullsProduct (false);
+// N
+			setIsIncludeNullsProject (false);
+// N
+			setIsIncludeNullsSalesRegion (false);
+// N
+			setIsIncludeNullsUserElement1 (false);
+// N
+			setIsIncludeNullsUserElement2 (false);
+// N
+			setPA_ReportLine_ID (0);
+			setPA_ReportSource_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PA_ReportSource (Properties ctx, String PA_ReportSource_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, PA_ReportSource_UU, trxName, virtualColumns);
+      /** if (PA_ReportSource_UU == null)
+        {
+			setElementType (null);
+			setIsIncludeNullsActivity (false);
+// N
+			setIsIncludeNullsBPartner (false);
+// N
+			setIsIncludeNullsCampaign (false);
+// N
+			setIsIncludeNullsElementValue (false);
+// N
+			setIsIncludeNullsLocation (false);
+// N
+			setIsIncludeNullsOrg (false);
+// N
+			setIsIncludeNullsOrgTrx (false);
+// N
+			setIsIncludeNullsProduct (false);
+// N
+			setIsIncludeNullsProject (false);
+// N
+			setIsIncludeNullsSalesRegion (false);
+// N
+			setIsIncludeNullsUserElement1 (false);
+// N
+			setIsIncludeNullsUserElement2 (false);
+// N
+			setPA_ReportLine_ID (0);
+			setPA_ReportSource_ID (0);
+        } */
+    }
+
     /** Load Constructor */
     public X_PA_ReportSource (Properties ctx, ResultSet rs, String trxName)
     {
@@ -116,7 +224,7 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -461,7 +569,7 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getElementType()));
     }
@@ -480,10 +588,10 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
 	public boolean isIncludeNullsActivity()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsActivity);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -503,10 +611,10 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
 	public boolean isIncludeNullsBPartner()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsBPartner);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -526,10 +634,10 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
 	public boolean isIncludeNullsCampaign()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsCampaign);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -549,10 +657,10 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
 	public boolean isIncludeNullsElementValue()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsElementValue);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -572,10 +680,10 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
 	public boolean isIncludeNullsLocation()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsLocation);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -595,10 +703,10 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
 	public boolean isIncludeNullsOrg()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsOrg);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -618,10 +726,10 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
 	public boolean isIncludeNullsOrgTrx()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsOrgTrx);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -641,10 +749,10 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
 	public boolean isIncludeNullsProduct()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsProduct);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -664,10 +772,10 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
 	public boolean isIncludeNullsProject()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsProject);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -687,10 +795,10 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
 	public boolean isIncludeNullsSalesRegion()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsSalesRegion);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -710,10 +818,10 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
 	public boolean isIncludeNullsUserElement1()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsUserElement1);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -733,10 +841,10 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
 	public boolean isIncludeNullsUserElement2()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsUserElement2);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -819,7 +927,7 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
 	}
 
 	/** Set Organization.
-		@param Org_ID Organizational entity within client
+		@param Org_ID Organizational entity within tenant
 	*/
 	public void setOrg_ID (int Org_ID)
 	{
@@ -830,7 +938,7 @@ public class X_PA_ReportSource extends PO implements I_PA_ReportSource, I_Persis
 	}
 
 	/** Get Organization.
-		@return Organizational entity within client
+		@return Organizational entity within tenant
 	  */
 	public int getOrg_ID()
 	{

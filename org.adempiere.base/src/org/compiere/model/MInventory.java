@@ -39,7 +39,7 @@ import org.compiere.util.TimeUtil;
 import org.compiere.util.Util;
 
 /**
- *  Physical Inventory Model
+ *  Inventory Document Model
  *
  *  @author Jorg Janke
  *  @version $Id: MInventory.java,v 1.3 2006/07/30 00:51:05 jjanke Exp $
@@ -54,7 +54,7 @@ import org.compiere.util.Util;
 public class MInventory extends X_M_Inventory implements DocAction
 {
 	/**
-	 * 
+	 * generated serial id 
 	 */
 	private static final long serialVersionUID = 3877357565525655884L;
 	
@@ -62,7 +62,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	public static String	REVERSE_INDICATOR = "^";
 	
 	/**
-	 * 	Get Inventory
+	 * 	Get Inventory from DB
 	 *	@param M_Inventory_ID id
 	 *	@return MInventory
 	 */
@@ -72,7 +72,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	}
 	
 	/**
-	 * 	Get Inventory 
+	 * 	Get Inventory from DB
 	 *	@param ctx context
 	 *	@param M_Inventory_ID id
 	 *	@return MInventory
@@ -86,6 +86,18 @@ public class MInventory extends X_M_Inventory implements DocAction
 			return null;
 	} //	get
 
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param M_Inventory_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MInventory(Properties ctx, String M_Inventory_UU, String trxName) {
+        super(ctx, M_Inventory_UU, trxName);
+		if (Util.isEmpty(M_Inventory_UU))
+			setInitialDefaults();
+    }
+
 	/**
 	 * 	Standard Constructor
 	 *	@param ctx context 
@@ -96,16 +108,21 @@ public class MInventory extends X_M_Inventory implements DocAction
 	{
 		super (ctx, M_Inventory_ID, trxName);
 		if (M_Inventory_ID == 0)
-		{
-			setMovementDate (new Timestamp(System.currentTimeMillis()));
-			setDocAction (DOCACTION_Complete);	// CO
-			setDocStatus (DOCSTATUS_Drafted);	// DR
-			setIsApproved (false);
-			setMovementDate (new Timestamp(System.currentTimeMillis()));	// @#Date@
-			setPosted (false);
-			setProcessed (false);
-		}
+			setInitialDefaults();
 	}	//	MInventory
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setMovementDate (new Timestamp(System.currentTimeMillis()));
+		setDocAction (DOCACTION_Complete);	// CO
+		setDocStatus (DOCSTATUS_Drafted);	// DR
+		setIsApproved (false);
+		setMovementDate (new Timestamp(System.currentTimeMillis()));	// @#Date@
+		setPosted (false);
+		setProcessed (false);
+	}
 
 	/**
 	 * 	Load Constructor
@@ -123,6 +140,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 * @param wh warehouse
 	 * @deprecated since 3.5.3a . Please use {@link #MInventory(MWarehouse, String)}.
 	 */
+	@Deprecated
 	public MInventory (MWarehouse wh)
 	{
 		this(wh, wh.get_TrxName());
@@ -141,7 +159,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	}
 	
 	/**
-	 * 
+	 * Copy constructor
 	 * @param copy
 	 */
 	public MInventory(MInventory copy) 
@@ -150,7 +168,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 */
@@ -160,7 +178,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 * @param trxName
@@ -177,7 +195,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	
 	/**
 	 * 	Get Lines
-	 *	@param requery requery
+	 *	@param requery true to requery from DB
 	 *	@return array of lines
 	 */
 	public MInventoryLine[] getLines (boolean requery)
@@ -215,6 +233,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 * 	@param AD_Client_ID client
 	 * 	@param AD_Org_ID org
 	 */
+	@Override
 	public void setClientOrg (int AD_Client_ID, int AD_Org_ID)
 	{
 		super.setClientOrg(AD_Client_ID, AD_Org_ID);
@@ -224,6 +243,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MInventory[");
@@ -238,6 +258,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 * 	Get Document Info
 	 *	@return document info (untranslated)
 	 */
+	@Override
 	public String getDocumentInfo()
 	{
 		MDocType dt = MDocType.get(getC_DocType_ID());
@@ -249,6 +270,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 * 	Create PDF
 	 *	@return File or null
 	 */
+	@Override
 	public File createPDF ()
 	{
 		try
@@ -267,7 +289,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	/**
 	 * 	Create PDF file
 	 *	@param file output file
-	 *	@return file if success
+	 *	@return not implemented, always return null
 	 */
 	public File createPDF (File file)
 	{
@@ -280,6 +302,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 *	@param newRecord new
 	 *	@return true
 	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		if (getC_DocType_ID() == 0)
@@ -305,13 +328,13 @@ public class MInventory extends X_M_Inventory implements DocAction
 		
 		return true;
 	}	//	beforeSave
-	
-	
+		
 	/**
 	 * 	Set Processed.
-	 * 	Propagate to Lines/Taxes
+	 * 	Propagate to Lines.
 	 *	@param processed processed
 	 */
+	@Override
 	public void setProcessed (boolean processed)
 	{
 		super.setProcessed (processed);
@@ -323,13 +346,13 @@ public class MInventory extends X_M_Inventory implements DocAction
 		m_lines = null;
 		if (log.isLoggable(Level.FINE)) log.fine("Processed=" + processed + " - Lines=" + noLine);
 	}	//	setProcessed
-
 	
-	/**************************************************************************
+	/**
 	 * 	Process document
 	 *	@param processAction document action
 	 *	@return true if performed
 	 */
+	@Override
 	public boolean processIt (String processAction)
 	{
 		m_processMsg = null;
@@ -346,6 +369,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 * 	Unlock Document.
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean unlockIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -357,6 +381,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 * 	Invalidate Document
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean invalidateIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -368,6 +393,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 *	Prepare Document
 	 * 	@return new status (In Progress or Invalid) 
 	 */
+	@Override
 	public String prepareIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -546,6 +572,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 * 	Approve Document
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean  approveIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -557,6 +584,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 * 	Reject Approval
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean rejectIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -568,6 +596,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 * 	Complete Document
 	 * 	@return new status (Complete, In Progress, Invalid, Waiting ..)
 	 */
+	@Override
 	public String completeIt()
 	{
 		MDocType dt = MDocType.get(getC_DocType_ID());
@@ -674,6 +703,34 @@ public class MInventory extends X_M_Inventory implements DocAction
 					}
 				}
 	
+				if(MDocType.DOCSUBTYPEINV_PhysicalInventory.equals(docSubTypeInv) && !isReversal()) {
+					// We want to update Date Last Inventory on this records as well. 
+					if (line.getM_AttributeSetInstance_ID() == 0 ) {							
+						MStorageOnHand[] storages = MStorageOnHand.getWarehouse(getCtx(), getM_Warehouse_ID(), line.getM_Product_ID(), 0,
+								null, MClient.MMPOLICY_FiFo.equals(product.getMMPolicy()), true, line.getM_Locator_ID(), get_TrxName(), false);	
+						if(storages != null) {
+							for(MStorageOnHand storage: storages) {										
+								storage.setDateLastInventory(getMovementDate());
+								if (!storage.save(get_TrxName())) {
+									m_processMsg = "Storage on hand not updated for DateLastInventory";
+									return DocAction.STATUS_Invalid;
+								}		
+							}						
+						}												
+					} else {
+						MStorageOnHand[] storages = MStorageOnHand.getAll(getCtx(), line.getM_Product_ID(), 
+								line.getM_Locator_ID(),	line.getM_AttributeSetInstance_ID(), null, false, get_TrxName());						
+						if(storages != null) {
+							for(MStorageOnHand storage: storages) {										
+								storage.setDateLastInventory(getMovementDate());
+								if (!storage.save(get_TrxName())) {
+									m_processMsg = "Storage on hand not updated for DateLastInventory";
+									return DocAction.STATUS_Invalid;
+								}		
+							}						
+						}	
+					}														
+				}
 			
 				//Ignore the Material Policy when is Reverse Correction
 				if(!isReversal()){
@@ -715,24 +772,11 @@ public class MInventory extends X_M_Inventory implements DocAction
 									line.getM_Locator_ID(),
 									line.getM_Product_ID(), 
 									ma.getM_AttributeSetInstance_ID(), 
-									QtyMA.negate(),ma.getDateMaterialPolicy(), get_TrxName()))
+									QtyMA.negate(),ma.getDateMaterialPolicy(), getMovementDate(), get_TrxName()))
 							{
 								String lastError = CLogger.retrieveErrorString("");
 								m_processMsg = "Cannot correct Inventory (MA) - " + lastError;
 								return DocAction.STATUS_Invalid;
-							}
-	
-							// Only Update Date Last Inventory if is a Physical Inventory
-							if (MDocType.DOCSUBTYPEINV_PhysicalInventory.equals(docSubTypeInv))
-							{	
-								MStorageOnHand storage = MStorageOnHand.get(getCtx(), line.getM_Locator_ID(), 
-										line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),ma.getDateMaterialPolicy(),get_TrxName());						
-								storage.setDateLastInventory(getMovementDate());
-								if (!storage.save(get_TrxName()))
-								{
-									m_processMsg = "Storage not updated(2)";
-									return DocAction.STATUS_Invalid;
-								}
 							}
 	
 							String m_MovementType =null;
@@ -772,25 +816,11 @@ public class MInventory extends X_M_Inventory implements DocAction
 								line.getM_Locator_ID(),
 								line.getM_Product_ID(), 
 								line.getM_AttributeSetInstance_ID(), 
-								qtyDiff,dateMPolicy,get_TrxName()))
+								qtyDiff,dateMPolicy,getMovementDate(),get_TrxName()))
 						{
 							String lastError = CLogger.retrieveErrorString("");
 							m_processMsg = "Cannot correct Inventory OnHand (MA) - " + lastError;
 							return DocAction.STATUS_Invalid;
-						}
-	
-						// Only Update Date Last Inventory if is a Physical Inventory
-						if (MDocType.DOCSUBTYPEINV_PhysicalInventory.equals(docSubTypeInv))
-						{	
-							MStorageOnHand storage = MStorageOnHand.get(getCtx(), line.getM_Locator_ID(), 
-									line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),dateMPolicy, get_TrxName());						
-	
-							storage.setDateLastInventory(getMovementDate());
-							if (!storage.save(get_TrxName()))
-							{
-								m_processMsg = "Storage not updated(2)";
-								return DocAction.STATUS_Invalid;
-							}
 						}
 	
 						String m_MovementType = null;
@@ -857,11 +887,12 @@ public class MInventory extends X_M_Inventory implements DocAction
 	}
 
 	/**
-	 * 	Check Material Policy.
+	 * Check Material Policy and create MInventoryLineMA records (if M_AttributeSetInstance_ID==0)
+	 * @param line
+	 * @param qtyDiff qty to allocate
 	 */
 	protected void checkMaterialPolicy(MInventoryLine line, BigDecimal qtyDiff)
-	{	
-		
+	{			
 		int no = MInventoryLineMA.deleteInventoryLineMA(line.getM_InventoryLine_ID(), get_TrxName());
 		if (no > 0)
 			if (log.isLoggable(Level.CONFIG)) log.config("Delete old #" + no);		
@@ -1040,6 +1071,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 * 	Void Document.
 	 * 	@return false 
 	 */
+	@Override
 	public boolean voidIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -1113,6 +1145,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 * 	Close Document.
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean closeIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -1133,6 +1166,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 * 	Reverse Correction
 	 * 	@return false 
 	 */
+	@Override
 	public boolean reverseCorrectIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -1155,6 +1189,11 @@ public class MInventory extends X_M_Inventory implements DocAction
 		return true;
 	}	//	reverseCorrectIt
 
+	/**
+	 * Reverse this document
+	 * @param accrual true to use current date, false to use this document's movement date
+	 * @return reversal MInventory document
+	 */
 	protected MInventory reverse(boolean accrual) {
 		Timestamp reversalDate = accrual ? Env.getContextAsDate(getCtx(), Env.DATE) : getMovementDate();
 		if (reversalDate == null) {
@@ -1243,6 +1282,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 * 	Reverse Accrual
 	 * 	@return false 
 	 */
+	@Override
 	public boolean reverseAccrualIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -1269,6 +1309,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 * 	Re-activate
 	 * 	@return false 
 	 */
+	@Override
 	public boolean reActivateIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -1284,12 +1325,12 @@ public class MInventory extends X_M_Inventory implements DocAction
 		
 		return false;
 	}	//	reActivateIt
-	
-	
-	/*************************************************************************
+		
+	/**
 	 * 	Get Summary
 	 *	@return Summary of Document
 	 */
+	@Override
 	public String getSummary()
 	{
 		StringBuilder sb = new StringBuilder();
@@ -1308,6 +1349,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 * 	Get Process Message
 	 *	@return clear text error message
 	 */
+	@Override
 	public String getProcessMsg()
 	{
 		return m_processMsg;
@@ -1317,17 +1359,17 @@ public class MInventory extends X_M_Inventory implements DocAction
 	 * 	Get Document Owner (Responsible)
 	 *	@return AD_User_ID
 	 */
+	@Override
 	public int getDoc_User_ID()
 	{
 		return getUpdatedBy();
 	}	//	getDoc_User_ID
-	
-	
+		
 	/** Reversal Flag		*/
 	protected boolean m_reversal = false;
 	
 	/**
-	 * 	Set Reversal
+	 * 	Set Reversal state (instance flag)
 	 *	@param reversal reversal
 	 */
 	protected void setReversal(boolean reversal)
@@ -1336,7 +1378,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	}	//	setReversal
 	/**
 	 * 	Is Reversal
-	 *	@return reversal
+	 *	@return reversal state (instance flag)
 	 */
 	protected boolean isReversal()
 	{

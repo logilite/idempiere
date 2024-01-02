@@ -24,7 +24,7 @@ public interface ICreditManager
 	 * Check credit status as per document action
 	 * 
 	 * @param  docAction Document Action
-	 * @return           Error message
+	 * @return           Credit Status POJO
 	 */
-	public String creditCheck(String docAction);
+	public CreditStatus checkCreditStatus(String docAction);
 }

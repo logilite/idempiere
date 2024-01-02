@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.logging.Level;
 
 import org.compiere.model.MOrder;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MTable;
 
 /**
@@ -48,7 +49,7 @@ public class CopyFromOrder extends SvrProcess
 			else if (name.equals("C_Order_ID"))
 				p_C_Order_ID = ((BigDecimal)para[i].getParameter()).intValue();
 			else
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 	}	//	prepare
 

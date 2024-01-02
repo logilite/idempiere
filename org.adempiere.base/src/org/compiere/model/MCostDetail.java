@@ -28,6 +28,7 @@ import org.compiere.acct.Doc;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  * 	Cost Detail Model
@@ -48,7 +49,7 @@ import org.compiere.util.Env;
 public class MCostDetail extends X_M_CostDetail
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -3896161579785627935L;
 
@@ -59,8 +60,8 @@ public class MCostDetail extends X_M_CostDetail
 			"WHERE iol.M_InOutLine_ID=?";
 			
 	/**
-	 * 	Create New Order Cost Detail for Purchase Orders.
-	 * 	Called from Doc_MatchPO
+	 * 	Create New Cost Detail record for Purchase Orders.
+	 * 	Called from Doc_MatchPO.
 	 *	@param as accounting schema
 	 *	@param AD_Org_ID org
 	 *	@param M_Product_ID product
@@ -103,7 +104,6 @@ public class MCostDetail extends X_M_CostDetail
 		{
 			if (cd.isProcessed())
 			{
-				// MZ Goodwill
 				// set deltaAmt=Amt, deltaQty=qty, and set Cost Detail for Amt and Qty	 
 				cd.setDeltaAmt(Amt.subtract(cd.getAmt()));
 				cd.setDeltaQty(Qty.subtract(cd.getQty()));
@@ -121,7 +121,6 @@ public class MCostDetail extends X_M_CostDetail
 				cd.setAmt(Amt);
 				cd.setQty(Qty);
 			}
-			// end MZ
 			else if (cd.isProcessed())
 				return true;	//	nothing to do
 		}
@@ -133,11 +132,10 @@ public class MCostDetail extends X_M_CostDetail
 		if (s_log.isLoggable(Level.CONFIG)) s_log.config("(" + ok + ") " + cd);
 		return ok;
 	}	//	createOrder
-
 	
 	/**
-	 * 	Create New Invoice Cost Detail for AP Invoices.
-	 * 	Called from Doc_Invoice - for Invoice Adjustments
+	 * 	Create New Cost Detail record for AP Invoices.
+	 * 	Called from Doc_Invoice - for Invoice Adjustments.
 	 *	@param as accounting schema
 	 *	@param AD_Org_ID org
 	 *	@param M_Product_ID product
@@ -171,7 +169,6 @@ public class MCostDetail extends X_M_CostDetail
 		{
 			if (cd.isProcessed())
 			{
-				// MZ Goodwill
 				// set deltaAmt=Amt, deltaQty=qty, and set Cost Detail for Amt and Qty	 
 				cd.setDeltaAmt(Amt.subtract(cd.getAmt()));
 				cd.setDeltaQty(Qty.subtract(cd.getQty()));
@@ -189,7 +186,6 @@ public class MCostDetail extends X_M_CostDetail
 				cd.setAmt(Amt);
 				cd.setQty(Qty);
 			}
-			// end MZ
 			else if (cd.isProcessed())
 				return true;	//	nothing to do
 		}
@@ -203,8 +199,8 @@ public class MCostDetail extends X_M_CostDetail
 	}	//	createInvoice
 	
 	/**
-	 * 	Create New Shipment Cost Detail for SO Shipments.
-	 * 	Called from Doc_MInOut - for SO Shipments  
+	 * 	Create New Cost Detail record for SO Shipments.
+	 * 	Called from Doc_MInOut - for SO Shipments.  
 	 *	@param as accounting schema
 	 *	@param AD_Org_ID org
 	 *	@param M_Product_ID product
@@ -240,7 +236,6 @@ public class MCostDetail extends X_M_CostDetail
 		{
 			if (cd.isProcessed())
 			{
-				// MZ Goodwill
 			    // set deltaAmt=Amt, deltaQty=qty, and set Cost Detail for Amt and Qty	 
 				cd.setDeltaAmt(Amt.subtract(cd.getAmt()));
 				cd.setDeltaQty(Qty.subtract(cd.getQty()));
@@ -258,7 +253,6 @@ public class MCostDetail extends X_M_CostDetail
 				cd.setAmt(Amt);
 				cd.setQty(Qty);
 			}
-			// end MZ
 			else if (cd.isProcessed())
 				return true;	//	nothing to do
 		}
@@ -272,8 +266,8 @@ public class MCostDetail extends X_M_CostDetail
 	}	//	createShipment
 
 	/**
-	 * 	Create New Order Cost Detail for Physical Inventory.
-	 * 	Called from Doc_Inventory
+	 * 	Create New Cost Detail record for Physical Inventory.
+	 * 	Called from Doc_Inventory.
 	 *	@param as accounting schema
 	 *	@param AD_Org_ID org
 	 *	@param M_Product_ID product
@@ -307,7 +301,6 @@ public class MCostDetail extends X_M_CostDetail
 		{
 			if (cd.isProcessed())
 			{
-				// MZ Goodwill
 				// set deltaAmt=Amt, deltaQty=qty, and set Cost Detail for Amt and Qty	
 				cd.setDeltaAmt(Amt.subtract(cd.getAmt()));
 				cd.setDeltaQty(Qty.subtract(cd.getQty()));
@@ -325,7 +318,6 @@ public class MCostDetail extends X_M_CostDetail
 				cd.setAmt(Amt);
 				cd.setQty(Qty);
 			}
-			// end MZ
 			else if (cd.isProcessed())
 				return true;	//	nothing to do
 		}
@@ -339,8 +331,8 @@ public class MCostDetail extends X_M_CostDetail
 	}	//	createInventory
 	
 	/**
-	 * 	Create New Order Cost Detail for Movements.
-	 * 	Called from Doc_Movement
+	 * 	Create New Cost Detail record for Inventory Movements.
+	 * 	Called from Doc_Movement.
 	 *	@param as accounting schema
 	 *	@param AD_Org_ID org
 	 *	@param M_Product_ID product
@@ -378,7 +370,6 @@ public class MCostDetail extends X_M_CostDetail
 		{
 			if (cd.isProcessed())
 			{
-				// MZ Goodwill
 				// set deltaAmt=Amt, deltaQty=qty, and set Cost Detail for Amt and Qty	
 				cd.setDeltaAmt(Amt.subtract(cd.getAmt()));
 				cd.setDeltaQty(Qty.subtract(cd.getQty()));
@@ -396,7 +387,6 @@ public class MCostDetail extends X_M_CostDetail
 				cd.setAmt(Amt);
 				cd.setQty(Qty);
 			}
-			// end MZ
 			else if (cd.isProcessed())
 				return true;	//	nothing to do
 		}
@@ -410,8 +400,8 @@ public class MCostDetail extends X_M_CostDetail
 	}	//	createMovement
 
 	/**
-	 * 	Create New Order Cost Detail for Production.
-	 * 	Called from Doc_Production
+	 * 	Create New Cost Detail record for Production.
+	 * 	Called from Doc_Production.
 	 *	@param as accounting schema
 	 *	@param AD_Org_ID org
 	 *	@param M_Product_ID product
@@ -445,7 +435,6 @@ public class MCostDetail extends X_M_CostDetail
 		{
 			if (cd.isProcessed())
 			{
-				// MZ Goodwill
 				// set deltaAmt=Amt, deltaQty=qty, and set Cost Detail for Amt and Qty	 
 				cd.setDeltaAmt(Amt.subtract(cd.getAmt()));
 				cd.setDeltaQty(Qty.subtract(cd.getQty()));
@@ -463,7 +452,6 @@ public class MCostDetail extends X_M_CostDetail
 				cd.setAmt(Amt);
 				cd.setQty(Qty);
 			}
-			// end MZ
 			else if (cd.isProcessed())
 				return true;	//	nothing to do
 		}
@@ -477,6 +465,7 @@ public class MCostDetail extends X_M_CostDetail
 	}	//	createProduction
 	
 	/**
+	 * Create cost detail record for Match Invoice (M_MatchInv).
 	 * @param as
 	 * @param AD_Org_ID
 	 * @param M_Product_ID
@@ -539,7 +528,7 @@ public class MCostDetail extends X_M_CostDetail
 	}	//	createMatchInvoice
 	
 	/**
-	 * 	Create Cost Detail for Project Issue.
+	 * 	Create Cost Detail for Project Issue (C_ProjectIssue).
 	 * 	Called from Doc_ProjectIssue
 	 *	@param as accounting schema
 	 *	@param AD_Org_ID org
@@ -602,7 +591,7 @@ public class MCostDetail extends X_M_CostDetail
 		return ok;
 	}	//	createProjectIssue
 	
-	/**************************************************************************
+	/**
 	 * 	Get Cost Detail
 	 *	@param ctx context
 	 *	@param whereClause where clause
@@ -612,6 +601,7 @@ public class MCostDetail extends X_M_CostDetail
 	 *	@return cost detail
 	 *  @deprecated
 	 */
+	@Deprecated
 	public static MCostDetail get (Properties ctx, String whereClause,
 		int ID, int M_AttributeSetInstance_ID, String trxName)
 	{
@@ -651,12 +641,13 @@ public class MCostDetail extends X_M_CostDetail
 		return retValue;
 	}
 	
-	/**************************************************************************
+	/**
 	 * 	Get Cost Detail
 	 *	@param ctx context
-	 *	@param whereClause where clause
-	 *	@param ID 1st parameter
-	 *  @param M_AttributeSetInstance_ID ASI
+	 *	@param whereClause where clause for record id (1st parameter)
+	 *	@param ID record id (1st parameter)
+	 *  @param M_AttributeSetInstance_ID ASI (2nd parameter)
+	 *  @param C_AcctSchema_ID accounting schema (3rd parameter)
 	 *	@param trxName trx
 	 *	@return cost detail
 	 */
@@ -669,6 +660,28 @@ public class MCostDetail extends X_M_CostDetail
 		MCostDetail retValue = new Query(ctx,I_M_CostDetail.Table_Name,localWhereClause.toString(),trxName)
 		.setParameters(ID,M_AttributeSetInstance_ID,C_AcctSchema_ID)
 		.first();
+		return retValue;
+	}	//	get
+	
+	/**
+	 * 	Get Cost Detail Records
+	 *	@param ctx context
+	 *	@param whereClause where clause for record id (1st parameter)
+	 *	@param ID record id (1st parameter)
+	 *  @param M_AttributeSetInstance_ID ASI (2nd parameter)
+	 *  @param C_AcctSchema_ID accounting schema (3rd parameter)
+	 *	@param trxName trx
+	 *	@return list of cost detail record
+	 */
+	public static List<MCostDetail> list (Properties ctx, String whereClause, 
+		int ID, int M_AttributeSetInstance_ID, int C_AcctSchema_ID, String trxName)
+	{
+		StringBuilder localWhereClause = new StringBuilder(whereClause)
+			.append(" AND M_AttributeSetInstance_ID=?")
+			.append(" AND C_AcctSchema_ID=?");
+		List<MCostDetail> retValue = new Query(ctx,I_M_CostDetail.Table_Name,localWhereClause.toString(),trxName)
+		.setParameters(ID,M_AttributeSetInstance_ID,C_AcctSchema_ID)
+		.list();
 		return retValue;
 	}	//	get
 	
@@ -700,9 +713,20 @@ public class MCostDetail extends X_M_CostDetail
 	
 	/**	Logger	*/
 	private static CLogger 	s_log = CLogger.getCLogger (MCostDetail.class);
-	
-	
-	/**************************************************************************
+		
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param M_CostDetail_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MCostDetail(Properties ctx, String M_CostDetail_UU, String trxName) {
+        super(ctx, M_CostDetail_UU, trxName);
+		if (Util.isEmpty(M_CostDetail_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
 	 *	@param M_CostDetail_ID id
@@ -712,16 +736,21 @@ public class MCostDetail extends X_M_CostDetail
 	{
 		super (ctx, M_CostDetail_ID, trxName);
 		if (M_CostDetail_ID == 0)
-		{
-			setM_AttributeSetInstance_ID (0);
-			setProcessed (false);
-			setAmt (Env.ZERO);
-			setQty (Env.ZERO);
-			setIsSOTrx (false);
-			setDeltaAmt (Env.ZERO);
-			setDeltaQty (Env.ZERO);
-		}	
+			setInitialDefaults();
 	}	//	MCostDetail
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setM_AttributeSetInstance_ID (0);
+		setProcessed (false);
+		setAmt (Env.ZERO);
+		setQty (Env.ZERO);
+		setIsSOTrx (false);
+		setDeltaAmt (Env.ZERO);
+		setDeltaQty (Env.ZERO);
+	}
 
 	/**
 	 * 	Load Constructor
@@ -741,15 +770,15 @@ public class MCostDetail extends X_M_CostDetail
 	 *	@param M_Product_ID product
 	 *	@param M_AttributeSetInstance_ID asi
 	 *	@param M_CostElement_ID optional cost element for Freight
-	 *	@param Amt amt
-	 *	@param Qty qty
-	 *	@param Description optional description
+	 *	@param amt Amount
+	 *	@param qty Quantity
+	 *	@param description optional description
 	 *	@param trxName transaction
 	 */
 	public MCostDetail (MAcctSchema as, int AD_Org_ID, 
 		int M_Product_ID, int M_AttributeSetInstance_ID,
-		int M_CostElement_ID, BigDecimal Amt, BigDecimal Qty,
-		String Description, String trxName)
+		int M_CostElement_ID, BigDecimal amt, BigDecimal qty,
+		String description, String trxName)
 	{
 		this (as.getCtx(), 0, trxName);
 		setClientOrg(as.getAD_Client_ID(), AD_Org_ID);
@@ -757,17 +786,17 @@ public class MCostDetail extends X_M_CostDetail
 		setM_Product_ID (M_Product_ID);
 		setM_AttributeSetInstance_ID (M_AttributeSetInstance_ID);
 		//
-		setM_CostElement_ID(M_CostElement_ID);
-		//
-		setAmt (Amt);
-		setQty (Qty);
-		setDescription(Description);
+		setM_CostElement_ID(M_CostElement_ID);		
+		setAmt (amt);
+		setQty (qty);
+		setDescription(description);
 	}	//	MCostDetail
 	
 	/**
 	 * 	Set Amt
 	 *	@param Amt amt
 	 */
+	@Override
 	public void setAmt (BigDecimal Amt)
 	{
 		if (isProcessed())
@@ -782,6 +811,7 @@ public class MCostDetail extends X_M_CostDetail
 	 * 	Set Qty
 	 *	@param Qty qty
 	 */
+	@Override
 	public void setQty (BigDecimal Qty)
 	{
 		if (isProcessed())
@@ -794,7 +824,7 @@ public class MCostDetail extends X_M_CostDetail
 
 	/**
 	 * 	Is Order
-	 *	@return true if order line
+	 *	@return true if has order line
 	 */
 	public boolean isOrder()
 	{
@@ -803,7 +833,7 @@ public class MCostDetail extends X_M_CostDetail
 
 	/**
 	 * 	Is Invoice
-	 *	@return true if invoice line
+	 *	@return true if has invoice line
 	 */
 	public boolean isInvoice()
 	{
@@ -812,7 +842,7 @@ public class MCostDetail extends X_M_CostDetail
 
 	/**
 	 * 	Is Shipment
-	 *	@return true if sales order shipment
+	 *	@return true if has sales order shipment line
 	 */
 	public boolean isShipment()
 	{
@@ -820,7 +850,7 @@ public class MCostDetail extends X_M_CostDetail
 	}	//	isShipment
 	
 	/**
-	 * @return true if return to vendor
+	 * @return true if shipment line belongs to return to vendor (vendor RMA)
 	 */
 	public boolean isVendorRMA()
 	{
@@ -847,6 +877,7 @@ public class MCostDetail extends X_M_CostDetail
 	 * 	Before Delete
 	 *	@return false if processed
 	 */
+	@Override
 	protected boolean beforeDelete ()
 	{
 		return !isProcessed();
@@ -857,6 +888,7 @@ public class MCostDetail extends X_M_CostDetail
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MCostDetail[");
@@ -883,9 +915,8 @@ public class MCostDetail extends X_M_CostDetail
 		sb.append ("]");
 		return sb.toString ();
 	}	//	toString
-	
-	
-	/**************************************************************************
+		
+	/**
 	 * 	Process Cost Detail Record.
 	 * 	The record is saved if processed.
 	 *	@return true if processed
@@ -978,7 +1009,7 @@ public class MCostDetail extends X_M_CostDetail
 	}	//	process
 	
 	/**
-	 * 	Process cost detail for cost record
+	 * 	Process cost detail record
 	 *	@param as accounting schema
 	 *	@param product product
 	 *	@param ce cost element
@@ -1010,6 +1041,7 @@ public class MCostDetail extends X_M_CostDetail
 		history.setM_CostDetail_ID(this.getM_CostDetail_ID());
 		history.setM_CostElement_ID(ce.getM_CostElement_ID());
 		history.setM_CostType_ID(cost.getM_CostType_ID());
+		history.setM_Product_ID(cost.getM_Product_ID());
 		history.setClientOrg(cost.getAD_Client_ID(), cost.getAD_Org_ID());
 		history.setOldQty(cost.getCurrentQty());
 		history.setOldCostPrice(cost.getCurrentCostPrice());

@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_Column
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 11
  */
 public interface I_AD_Column 
 {
@@ -55,8 +55,8 @@ public interface I_AD_Column
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -116,12 +116,12 @@ public interface I_AD_Column
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -227,6 +227,21 @@ s active status or processed status. This logic Applicable only if Always Updata
 	/** Get Always Updatable Logic.
 	  * Logic to determine if field is Updatable irrespective if record&#039;
 s active status or processed status. This logic Applicable only if Always Updatable is Yes.
+	  */
+	public String getAlwaysUpdatableLogic();
+
+    /** Column name AlwaysUpdatableLogic */
+    public static final String COLUMNNAME_AlwaysUpdatableLogic = "AlwaysUpdatableLogic";
+
+	/** Set Always Updatable Logic.
+	  * Logic to determine if field is Updatable irrespective if record&#039;
+s active status or processed status. This logic Applicable only if Always Updatable is N.
+	  */
+	public void setAlwaysUpdatableLogic (String AlwaysUpdatableLogic);
+
+	/** Get Always Updatable Logic.
+	  * Logic to determine if field is Updatable irrespective if record&#039;
+s active status or processed status. This logic Applicable only if Always Updatable is N.
 	  */
 	public String getAlwaysUpdatableLogic();
 
@@ -341,6 +356,17 @@ s active status or processed status. This logic Applicable only if Always Updata
 	  */
 	public int getFieldLength();
 
+    /** Column name FKConstraintMsg_ID */
+    public static final String COLUMNNAME_FKConstraintMsg_ID = "FKConstraintMsg_ID";
+
+	/** Set Constraint Message	  */
+	public void setFKConstraintMsg_ID (int FKConstraintMsg_ID);
+
+	/** Get Constraint Message	  */
+	public int getFKConstraintMsg_ID();
+
+	public org.compiere.model.I_AD_Message getFKConstraintMsg() throws RuntimeException;
+
     /** Column name FKConstraintName */
     public static final String COLUMNNAME_FKConstraintName = "FKConstraintName";
 
@@ -440,13 +466,13 @@ s active status or processed status. This logic Applicable only if Always Updata
     /** Column name IsAutocomplete */
     public static final String COLUMNNAME_IsAutocomplete = "IsAutocomplete";
 
-	/** Set Autocomplete.
-	  * Automatic completion for textfields
+	/** Set Auto complete.
+	  * Automatic completion for text fields
 	  */
 	public void setIsAutocomplete (boolean IsAutocomplete);
 
-	/** Get Autocomplete.
-	  * Automatic completion for textfields
+	/** Get Auto complete.
+	  * Automatic completion for text fields
 	  */
 	public boolean isAutocomplete();
 
@@ -527,6 +553,19 @@ s active status or processed status. This logic Applicable only if Always Updata
 	  * This column is a link to the parent table (e.g. header from lines) - incl. Association key columns
 	  */
 	public boolean isParent();
+
+    /** Column name IsPartitionKey */
+    public static final String COLUMNNAME_IsPartitionKey = "IsPartitionKey";
+
+	/** Set Partition Key.
+	  * This is a partition key
+	  */
+	public void setIsPartitionKey (boolean IsPartitionKey);
+
+	/** Get Partition Key.
+	  * This is a partition key
+	  */
+	public boolean isPartitionKey();
 
     /** Column name IsSecure */
     public static final String COLUMNNAME_IsSecure = "IsSecure";
@@ -639,6 +678,19 @@ s active status or processed status. This logic Applicable only if Always Updata
 
 	public org.compiere.model.I_PA_DashboardContent getPA_DashboardContent() throws RuntimeException;
 
+    /** Column name PartitioningMethod */
+    public static final String COLUMNNAME_PartitioningMethod = "PartitioningMethod";
+
+	/** Set Partitioning Method.
+	  * Indicates how the Table is partitioned
+	  */
+	public void setPartitioningMethod (String PartitioningMethod);
+
+	/** Get Partitioning Method.
+	  * Indicates how the Table is partitioned
+	  */
+	public String getPartitioningMethod();
+
     /** Column name Placeholder */
     public static final String COLUMNNAME_Placeholder = "Placeholder";
 
@@ -647,6 +699,19 @@ s active status or processed status. This logic Applicable only if Always Updata
 
 	/** Get Placeholder	  */
 	public String getPlaceholder();
+
+    /** Column name RangePartitionInterval */
+    public static final String COLUMNNAME_RangePartitionInterval = "RangePartitionInterval";
+
+	/** Set Range Partition Interval.
+	  * Indicates the interval used in a range partitioning
+	  */
+	public void setRangePartitionInterval (String RangePartitionInterval);
+
+	/** Get Range Partition Interval.
+	  * Indicates the interval used in a range partitioning
+	  */
+	public String getRangePartitionInterval();
 
     /** Column name ReadOnlyLogic */
     public static final String COLUMNNAME_ReadOnlyLogic = "ReadOnlyLogic";
@@ -675,6 +740,19 @@ s active status or processed status. This logic Applicable only if Always Updata
  lowest number comes first
 	  */
 	public int getSeqNo();
+
+    /** Column name SeqNoPartition */
+    public static final String COLUMNNAME_SeqNoPartition = "SeqNoPartition";
+
+	/** Set Partition Key Sequence.
+	  * Indicates the order of partition keys
+	  */
+	public void setSeqNoPartition (int SeqNoPartition);
+
+	/** Get Partition Key Sequence.
+	  * Indicates the order of partition keys
+	  */
+	public int getSeqNoPartition();
 
     /** Column name SeqNoSelection */
     public static final String COLUMNNAME_SeqNoSelection = "SeqNoSelection";

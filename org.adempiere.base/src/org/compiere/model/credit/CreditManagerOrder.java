@@ -15,13 +15,14 @@ package org.compiere.model.credit;
 import java.math.BigDecimal;
 import java.util.Properties;
 
+import org.adempiere.base.CreditStatus;
 import org.adempiere.base.ICreditManager;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MConversionRate;
 import org.compiere.model.MDocType;
 import org.compiere.model.MOrder;
 import org.compiere.model.MSysConfig;
-import org.compiere.model.MTable;
+import org.compiere.util.Util;
 
 /**
  * Credit Manager for Order
@@ -45,49 +46,54 @@ public class CreditManagerOrder implements ICreditManager
 	}
 
 	@Override
-	public String creditCheck(String docAction)
+	public CreditStatus checkCreditStatus(String docAction)
 	{
+		String errorMsg = null;
 		if (MOrder.DOCACTION_Prepare.equals(docAction) && order.isSOTrx())
 		{
 			Properties ctx = order.getCtx();
 			MDocType dt = MDocType.get(ctx, order.getC_DocTypeTarget_ID());
-			int client_ID = order.getAD_Client_ID();
-			int org_ID = order.getAD_Org_ID();
 			if (MDocType.DOCSUBTYPESO_POSOrder.equals(dt.getDocSubTypeSO())
 				&& MOrder.PAYMENTRULE_Cash.equals(order.getPaymentRule())
-				&& !MSysConfig.getBooleanValue(MSysConfig.CHECK_CREDIT_ON_CASH_POS_ORDER, true, client_ID, org_ID))
+				&& !MSysConfig.getBooleanValue(MSysConfig.CHECK_CREDIT_ON_CASH_POS_ORDER, true, order.getAD_Client_ID(), order.getAD_Org_ID()))
 			{
 				// ignore -- don't validate for Cash POS Orders depending on sysconfig parameter
 			}
 			else if (MDocType.DOCSUBTYPESO_PrepayOrder.equals(dt.getDocSubTypeSO())
-						&& !MSysConfig.getBooleanValue(MSysConfig.CHECK_CREDIT_ON_PREPAY_ORDER, true, client_ID, org_ID))
+						&& !MSysConfig.getBooleanValue(MSysConfig.CHECK_CREDIT_ON_PREPAY_ORDER, true, order.getAD_Client_ID(), order.getAD_Org_ID()))
 			{
 				// ignore -- don't validate Prepay Orders depending on sysconfig parameter
 			}
 			else
 			{
-				MBPartner bp = (MBPartner) MTable.get(ctx, MBPartner.Table_ID).getPO(order.getBill_BPartner_ID(), order.get_TrxName());
+				// bill bp is guaranteed on beforeSave
+				MBPartner bp = new MBPartner(ctx, order.getBill_BPartner_ID(), order.get_TrxName());
 				// IDEMPIERE-365 - just check credit if is going to increase the debt
 				if (order.getGrandTotal().signum() > 0)
 				{
 					if (MBPartner.SOCREDITSTATUS_CreditStop.equals(bp.getSOCreditStatus()))
 					{
-						return "@BPartnerCreditStop@ - @TotalOpenBalance@=" + bp.getTotalOpenBalance() + ", @SO_CreditLimit@=" + bp.getSO_CreditLimit();
+						errorMsg = "@BPartnerCreditStop@ - @TotalOpenBalance@=" + bp.getTotalOpenBalance()
+								+ ", @SO_CreditLimit@=" + bp.getSO_CreditLimit();
 					}
 					if (MBPartner.SOCREDITSTATUS_CreditHold.equals(bp.getSOCreditStatus()))
 					{
-						return "@BPartnerCreditHold@ - @TotalOpenBalance@=" + bp.getTotalOpenBalance() + ", @SO_CreditLimit@=" + bp.getSO_CreditLimit();
+						errorMsg = "@BPartnerCreditHold@ - @TotalOpenBalance@=" + bp.getTotalOpenBalance()
+								+ ", @SO_CreditLimit@=" + bp.getSO_CreditLimit();
 					}
-					BigDecimal grandTotal = MConversionRate.convertBase(ctx, order.getGrandTotal(), order.getC_Currency_ID(), order.getDateOrdered(),
-																		order.getC_ConversionType_ID(), client_ID, org_ID);
+
+					BigDecimal grandTotal = MConversionRate.convertBase(ctx, order.getGrandTotal(), order.getC_Currency_ID(),
+																		order.getDateOrdered(), order.getC_ConversionType_ID(),
+																		order.getAD_Client_ID(), order.getAD_Org_ID());
 					if (MBPartner.SOCREDITSTATUS_CreditHold.equals(bp.getSOCreditStatus(grandTotal)))
 					{
-						return "@BPartnerOverOCreditHold@ - @TotalOpenBalance@="	+ bp.getTotalOpenBalance() + ", @GrandTotal@=" + grandTotal
+						errorMsg = "@BPartnerOverOCreditHold@ - @TotalOpenBalance@="	+ bp.getTotalOpenBalance()
+								+ ", @GrandTotal@=" + grandTotal
 								+ ", @SO_CreditLimit@=" + bp.getSO_CreditLimit();
 					}
 				}
 			}
 		}
-		return null;
+		return new CreditStatus(errorMsg, !Util.isEmpty(errorMsg));
 	} // creditCheck
 }

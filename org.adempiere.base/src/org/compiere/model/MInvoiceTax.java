@@ -20,6 +20,8 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -27,6 +29,7 @@ import org.adempiere.exceptions.DBException;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  *	Invoice Tax Model
@@ -40,10 +43,9 @@ import org.compiere.util.Env;
 public class MInvoiceTax extends X_C_InvoiceTax
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -5560880305482497098L;
-
 
 	/**
 	 * 	Get Tax Line for Invoice Line
@@ -104,12 +106,90 @@ public class MInvoiceTax extends X_C_InvoiceTax
 		return retValue;
 	}	//	get
 	
+	/**
+	 * 	Get Child Tax Lines for Invoice Line
+	 *	@param line invoice line
+	 *	@param precision currency precision
+	 *	@param oldTax if true old tax is returned
+	 *	@param trxName transaction name
+	 *	@return array of existing or new tax
+	 */
+	public static MInvoiceTax[] getChildTaxes(MInvoiceLine line, int precision, 
+		boolean oldTax, String trxName)
+	{
+		List<MInvoiceTax> invoiceTaxes = new ArrayList<MInvoiceTax>();
+		
+		if (line == null || line.getC_Invoice_ID() == 0)
+			return invoiceTaxes.toArray(new MInvoiceTax[0]);
+		
+		int C_Tax_ID = line.getC_Tax_ID();
+		if (oldTax)
+		{
+			Object old = line.get_ValueOld(MInvoiceLine.COLUMNNAME_C_Tax_ID);
+			if (old == null)
+				return invoiceTaxes.toArray(new MInvoiceTax[0]);
+			C_Tax_ID = ((Integer)old).intValue();
+		}
+		if (C_Tax_ID == 0)
+		{
+			return invoiceTaxes.toArray(new MInvoiceTax[0]);
+		}
+		
+		MTax tax = MTax.get(C_Tax_ID);
+		if (!tax.isSummary())
+			return invoiceTaxes.toArray(new MInvoiceTax[0]);
+			
+		MTax[] cTaxes = tax.getChildTaxes(false);
+		for(MTax cTax : cTaxes) {
+			MInvoiceTax invoiceTax = new Query(line.getCtx(), Table_Name, "C_Invoice_ID=? AND C_Tax_ID=?", trxName)
+							.setParameters(line.getC_Invoice_ID(), cTax.getC_Tax_ID())
+							.firstOnly();
+			if (invoiceTax != null)
+			{
+				invoiceTax.set_TrxName(trxName);
+				invoiceTax.setPrecision(precision);
+				invoiceTaxes.add(invoiceTax);
+			}
+			// If the old tax was required and there is no MInvoiceTax for that
+			// return null, and not create another MInvoiceTax - teo_sarca [ 1583825 ]
+			else 
+			{
+				if (oldTax)
+					continue;
+			}
+			
+			if (invoiceTax == null)
+			{
+				//	Create New
+				invoiceTax = new MInvoiceTax(line.getCtx(), 0, trxName);
+				invoiceTax.set_TrxName(trxName);
+				invoiceTax.setClientOrg(line);
+				invoiceTax.setC_Invoice_ID(line.getC_Invoice_ID());
+				invoiceTax.setC_Tax_ID(cTax.getC_Tax_ID());
+				invoiceTax.setPrecision(precision);
+				invoiceTax.setIsTaxIncluded(line.isTaxIncluded());
+				invoiceTaxes.add(invoiceTax);
+			}
+		}
+		return invoiceTaxes.toArray(new MInvoiceTax[0]); 
+	}
+	
 	/**	Static Logger	*/
 	private static CLogger	s_log	= CLogger.getCLogger (MInvoiceTax.class);
-	
-	
-	/**************************************************************************
-	 * 	Persistency Constructor
+		
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param C_InvoiceTax_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MInvoiceTax(Properties ctx, String C_InvoiceTax_UU, String trxName) {
+        super(ctx, C_InvoiceTax_UU, trxName);
+		if (Util.isEmpty(C_InvoiceTax_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 *	@param ctx context
 	 *	@param ignored ignored
 	 *	@param trxName transaction
@@ -119,14 +199,20 @@ public class MInvoiceTax extends X_C_InvoiceTax
 		super(ctx, 0, trxName);
 		if (ignored != 0)
 			throw new IllegalArgumentException("Multi-Key");
-		setTaxAmt (Env.ZERO);
-		setTaxBaseAmt (Env.ZERO);
-		setIsTaxIncluded(false);
+		setInitialDefaults();
 	}	//	MInvoiceTax
 
 	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setTaxAmt (Env.ZERO);
+		setTaxBaseAmt (Env.ZERO);
+		setIsTaxIncluded(false);
+	}
+
+	/**
 	 * 	Load Constructor.
-	 * 	Set Precision and TaxIncluded for tax calculations!
 	 *	@param ctx context
 	 *	@param rs result set
 	 *	@param trxName transaction
@@ -137,7 +223,7 @@ public class MInvoiceTax extends X_C_InvoiceTax
 	}	//	MInvoiceTax
 	
 	/**
-	 * 
+	 * Copy constructor
 	 * @param copy
 	 */
 	public MInvoiceTax(MInvoiceTax copy) 
@@ -146,7 +232,7 @@ public class MInvoiceTax extends X_C_InvoiceTax
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 */
@@ -156,7 +242,7 @@ public class MInvoiceTax extends X_C_InvoiceTax
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 * @param trxName
@@ -173,11 +259,10 @@ public class MInvoiceTax extends X_C_InvoiceTax
 	protected MTax 		m_tax = null;
 	/** Cached Precision			*/
 	protected Integer		m_precision = null;
-	
-	
+		
 	/**
 	 * 	Get Precision
-	 * 	@return Returns the precision or 2
+	 * 	@return precision set or 2
 	 */
 	public int getPrecision ()
 	{
@@ -205,10 +290,9 @@ public class MInvoiceTax extends X_C_InvoiceTax
 			m_tax = MTax.get(getCtx(), getC_Tax_ID());
 		return m_tax;
 	}	//	getTax
-	
-	
-	/**************************************************************************
-	 * 	Calculate/Set Tax Base Amt from Invoice Lines
+		
+	/**
+	 * 	Calculate/Set Tax and Tax Base Amt from Invoice Lines
 	 * 	@return true if tax calculated
 	 */
 	public boolean calculateTaxFromLines ()
@@ -218,11 +302,16 @@ public class MInvoiceTax extends X_C_InvoiceTax
 		//
 		boolean documentLevel = getTax().isDocumentLevel();
 		MTax tax = getTax();
+		int parentTaxId = tax.getParent_Tax_ID();
 		//
 		String sql = "SELECT il.LineNetAmt, COALESCE(il.TaxAmt,0), i.IsSOTrx "
 			+ "FROM C_InvoiceLine il"
 			+ " INNER JOIN C_Invoice i ON (il.C_Invoice_ID=i.C_Invoice_ID) "
-			+ "WHERE il.C_Invoice_ID=? AND il.C_Tax_ID=?";
+			+ "WHERE il.C_Invoice_ID=? ";
+		if (parentTaxId > 0) 
+			sql += "AND il.C_Tax_ID IN (?, ?) ";
+		else
+			sql += "AND il.C_Tax_ID=? ";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
@@ -230,6 +319,8 @@ public class MInvoiceTax extends X_C_InvoiceTax
 			pstmt = DB.prepareStatement (sql, get_TrxName());
 			pstmt.setInt (1, getC_Invoice_ID());
 			pstmt.setInt (2, getC_Tax_ID());
+			if (parentTaxId > 0)
+				pstmt.setInt(3, parentTaxId);
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
@@ -281,6 +372,7 @@ public class MInvoiceTax extends X_C_InvoiceTax
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MInvoiceTax[");

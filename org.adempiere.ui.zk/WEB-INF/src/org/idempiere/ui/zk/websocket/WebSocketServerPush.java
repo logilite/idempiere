@@ -47,7 +47,7 @@ import org.zkoss.zk.ui.sys.ServerPush;
 import org.zkoss.zk.ui.util.Clients;
 
 /**
- * 
+ * Server push implementation using web socket
  * @author hengsin
  *
  */
@@ -175,7 +175,8 @@ public class WebSocketServerPush implements ServerPush {
     		//has pending serverpush echo, wait for next execution piggyback trigger by the pending serverpush echo
     		return;
     	}
-    	    	
+
+    	//Process pending schedule event
     	Schedule<Event>[] pendings = null;
     	synchronized (schedules) {
     		if (!schedules.isEmpty()) {
@@ -212,7 +213,7 @@ public class WebSocketServerPush implements ServerPush {
     		scheduler.schedule(task, event);
 	        echo();
     	} else {
-    		// in event listener thread, use echo to execute async
+    		// in event listener thread, use echo to process this asynchronously in onPiggyback
     		synchronized (schedules) {
 				schedules.add(new Schedule(task, event, scheduler));
 			}
@@ -322,7 +323,6 @@ public class WebSocketServerPush implements ServerPush {
 	}
 	
 	/**
-	 * 
 	 * @param dtid desktop id
 	 * @return true if serverpush started for dtid, false otherwise
 	 */

@@ -12,17 +12,16 @@
  *****************************************************************************/
 package org.adempiere.base;
 
-import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPayment;
 import org.compiere.model.PO;
-import org.compiere.model.credit.CreditManagerAllocationHdr;
 import org.compiere.model.credit.CreditManagerInOut;
 import org.compiere.model.credit.CreditManagerInvoice;
 import org.compiere.model.credit.CreditManagerOrder;
 import org.compiere.model.credit.CreditManagerPayment;
+import org.osgi.service.component.annotations.Component;
 
 /**
  * Default Credit Manager Factory
@@ -30,8 +29,10 @@ import org.compiere.model.credit.CreditManagerPayment;
  * @author Logilite Technologies
  * @since  June 25, 2023
  */
+@Component(immediate = true, service = ICreditManagerFactory.class)
 public class DefaultCreditManagerFactory implements ICreditManagerFactory
 {
+
 	@Override
 	public ICreditManager getCreditManager(PO po)
 	{
@@ -43,8 +44,7 @@ public class DefaultCreditManagerFactory implements ICreditManagerFactory
 			return new CreditManagerPayment((MPayment) po);
 		else if (po instanceof MInOut)
 			return new CreditManagerInOut((MInOut) po);
-		else if (po instanceof MAllocationHdr)
-			return new CreditManagerAllocationHdr((MAllocationHdr) po);
 		return null;
 	}
+
 }

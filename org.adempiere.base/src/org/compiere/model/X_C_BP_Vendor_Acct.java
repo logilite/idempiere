@@ -21,16 +21,16 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 /** Generated Model for C_BP_Vendor_Acct
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="C_BP_Vendor_Acct")
-public class X_C_BP_Vendor_Acct extends PO implements I_C_BP_Vendor_Acct, I_Persistent 
+public class X_C_BP_Vendor_Acct extends PO implements I_C_BP_Vendor_Acct, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20230113L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_C_BP_Vendor_Acct (Properties ctx, int C_BP_Vendor_Acct_ID, String trxName)
@@ -59,6 +59,45 @@ public class X_C_BP_Vendor_Acct extends PO implements I_C_BP_Vendor_Acct, I_Pers
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_BP_Vendor_Acct (Properties ctx, int C_BP_Vendor_Acct_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_BP_Vendor_Acct_ID, trxName, virtualColumns);
+      /** if (C_BP_Vendor_Acct_ID == 0)
+        {
+			setC_AcctSchema_ID (0);
+			setC_BPartner_ID (0);
+			setV_Liability_Acct (0);
+			setV_Prepayment_Acct (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_BP_Vendor_Acct (Properties ctx, String C_BP_Vendor_Acct_UU, String trxName)
+    {
+      super (ctx, C_BP_Vendor_Acct_UU, trxName);
+      /** if (C_BP_Vendor_Acct_UU == null)
+        {
+			setC_AcctSchema_ID (0);
+			setC_BPartner_ID (0);
+			setV_Liability_Acct (0);
+			setV_Prepayment_Acct (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_BP_Vendor_Acct (Properties ctx, String C_BP_Vendor_Acct_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_BP_Vendor_Acct_UU, trxName, virtualColumns);
+      /** if (C_BP_Vendor_Acct_UU == null)
+        {
+			setC_AcctSchema_ID (0);
+			setC_BPartner_ID (0);
+			setV_Liability_Acct (0);
+			setV_Prepayment_Acct (0);
+        } */
+    }
+
     /** Load Constructor */
     public X_C_BP_Vendor_Acct (Properties ctx, ResultSet rs, String trxName)
     {
@@ -66,7 +105,7 @@ public class X_C_BP_Vendor_Acct extends PO implements I_C_BP_Vendor_Acct, I_Pers
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -83,7 +122,7 @@ public class X_C_BP_Vendor_Acct extends PO implements I_C_BP_Vendor_Acct, I_Pers
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_C_BP_Vendor_Acct[")
-        .append(get_ID()).append("]");
+        .append(get_UUID()).append("]");
       return sb.toString();
     }
 

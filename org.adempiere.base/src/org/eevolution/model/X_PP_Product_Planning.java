@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for PP_Product_Planning
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="PP_Product_Planning")
-public class X_PP_Product_Planning extends PO implements I_PP_Product_Planning, I_Persistent 
+public class X_PP_Product_Planning extends PO implements I_PP_Product_Planning, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_PP_Product_Planning (Properties ctx, int PP_Product_Planning_ID, String trxName)
@@ -68,6 +68,54 @@ public class X_PP_Product_Planning extends PO implements I_PP_Product_Planning, 
         } */
     }
 
+    /** Standard Constructor */
+    public X_PP_Product_Planning (Properties ctx, int PP_Product_Planning_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, PP_Product_Planning_ID, trxName, virtualColumns);
+      /** if (PP_Product_Planning_ID == 0)
+        {
+			setIsCreatePlan (true);
+// Y
+			setIsPhantom (false);
+			setIsRequiredDRP (false);
+			setIsRequiredMRP (false);
+			setM_Product_ID (0);
+			setPP_Product_Planning_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PP_Product_Planning (Properties ctx, String PP_Product_Planning_UU, String trxName)
+    {
+      super (ctx, PP_Product_Planning_UU, trxName);
+      /** if (PP_Product_Planning_UU == null)
+        {
+			setIsCreatePlan (true);
+// Y
+			setIsPhantom (false);
+			setIsRequiredDRP (false);
+			setIsRequiredMRP (false);
+			setM_Product_ID (0);
+			setPP_Product_Planning_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PP_Product_Planning (Properties ctx, String PP_Product_Planning_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, PP_Product_Planning_UU, trxName, virtualColumns);
+      /** if (PP_Product_Planning_UU == null)
+        {
+			setIsCreatePlan (true);
+// Y
+			setIsPhantom (false);
+			setIsRequiredDRP (false);
+			setIsRequiredMRP (false);
+			setM_Product_ID (0);
+			setPP_Product_Planning_ID (0);
+        } */
+    }
+
     /** Load Constructor */
     public X_PP_Product_Planning (Properties ctx, ResultSet rs, String trxName)
     {
@@ -75,7 +123,7 @@ public class X_PP_Product_Planning extends PO implements I_PP_Product_Planning, 
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -184,10 +232,10 @@ public class X_PP_Product_Planning extends PO implements I_PP_Product_Planning, 
 	public boolean isCreatePlan()
 	{
 		Object oo = get_Value(COLUMNNAME_IsCreatePlan);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -206,10 +254,10 @@ public class X_PP_Product_Planning extends PO implements I_PP_Product_Planning, 
 	public boolean isMPS()
 	{
 		Object oo = get_Value(COLUMNNAME_IsMPS);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -229,10 +277,10 @@ public class X_PP_Product_Planning extends PO implements I_PP_Product_Planning, 
 	public boolean isPhantom()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPhantom);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -251,10 +299,10 @@ public class X_PP_Product_Planning extends PO implements I_PP_Product_Planning, 
 	public boolean isRequiredDRP()
 	{
 		Object oo = get_Value(COLUMNNAME_IsRequiredDRP);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -273,10 +321,10 @@ public class X_PP_Product_Planning extends PO implements I_PP_Product_Planning, 
 	public boolean isRequiredMRP()
 	{
 		Object oo = get_Value(COLUMNNAME_IsRequiredMRP);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -313,7 +361,7 @@ public class X_PP_Product_Planning extends PO implements I_PP_Product_Planning, 
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getM_Product_ID()));
     }
@@ -619,16 +667,16 @@ public class X_PP_Product_Planning extends PO implements I_PP_Product_Planning, 
 		return bd;
 	}
 
-	/** Set Transfert Time.
-		@param TransfertTime Transfert Time
+	/** Set Transfer Time.
+		@param TransfertTime Transfer Time
 	*/
 	public void setTransfertTime (BigDecimal TransfertTime)
 	{
 		set_Value (COLUMNNAME_TransfertTime, TransfertTime);
 	}
 
-	/** Get Transfert Time.
-		@return Transfert Time	  */
+	/** Get Transfer Time.
+		@return Transfer Time	  */
 	public BigDecimal getTransfertTime()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_TransfertTime);

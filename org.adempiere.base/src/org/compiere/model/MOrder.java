@@ -23,13 +23,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
-import java.util.regex.Pattern;
 
 import org.adempiere.base.Core;
+import org.adempiere.base.CreditStatus;
 import org.adempiere.base.ICreditManager;
 import org.adempiere.base.IProductPricing;
 import org.adempiere.exceptions.AdempiereException;
@@ -56,12 +57,8 @@ import org.compiere.util.Util;
 import org.eevolution.model.MPPProductBOM;
 import org.eevolution.model.MPPProductBOMLine;
 
-
 /**
  *  Order Model.
- * 	Please do not set DocStatus and C_DocType_ID directly. 
- * 	They are set in the process() method. 
- * 	Use DocAction and C_DocTypeTarget_ID instead.
  *
  *  @author Jorg Janke
  *
@@ -70,20 +67,267 @@ import org.eevolution.model.MPPProductBOMLine;
  *			@see https://sourceforge.net/p/adempiere/feature-requests/631/
  *  @version $Id: MOrder.java,v 1.5 2006/10/06 00:42:24 jjanke Exp $
  * 
- * @author Teo Sarca, www.arhipac.ro
+ *  @author Teo Sarca, www.arhipac.ro
  * 			<li>BF [ 2419978 ] Voiding PO, requisition don't set on NULL
  * 			<li>BF [ 2892578 ] Order should autoset only active price lists
  * 				https://sourceforge.net/p/adempiere/feature-requests/873/
- * @author Michael Judd, www.akunagroup.com
+ *  @author Michael Judd, www.akunagroup.com
  *          <li>BF [ 2804888 ] Incorrect reservation of products with attributes
  */
 public class MOrder extends X_C_Order implements DocAction
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
-	private static final long serialVersionUID = -7784588474522162502L;
+	private static final long serialVersionUID = 9095740800513665542L;
 
+	/** Matching SELECT SQL template */
+	private static final String BASE_MATCHING_SQL =
+			"""
+				SELECT hdr.C_Order_ID, hdr.DocumentNo, hdr.DateOrdered, bp.Name, hdr.C_BPartner_ID,
+				lin.Line, lin.C_OrderLine_ID, p.Name, lin.M_Product_ID,
+				lin.QtyOrdered,
+				%s,
+				org.Name, hdr.AD_Org_ID 
+				 FROM C_Order hdr 
+				 INNER JOIN AD_Org org ON (hdr.AD_Org_ID=org.AD_Org_ID)
+				 INNER JOIN C_BPartner bp ON (hdr.C_BPartner_ID=bp.C_BPartner_ID)
+				 INNER JOIN C_OrderLine lin ON (hdr.C_Order_ID=lin.C_Order_ID)
+				 INNER JOIN M_Product p ON (lin.M_Product_ID=p.M_Product_ID)
+				 INNER JOIN C_DocType dt ON (hdr.C_DocType_ID=dt.C_DocType_ID AND dt.DocBaseType='POO')
+				 FULL JOIN M_MatchPO mo ON (lin.C_OrderLine_ID=mo.C_OrderLine_ID)  
+				 WHERE %s
+				 AND hdr.DocStatus IN ('CO','CL')
+			""";
+	
+	/** Matching GROUP BY template */
+	private static final String BASE_MATCHING_GROUP_BY_SQL =
+			"""
+				GROUP BY hdr.C_Order_ID,hdr.DocumentNo,hdr.DateOrdered,bp.Name,hdr.C_BPartner_ID,
+				lin.Line,lin.C_OrderLine_ID,p.Name,lin.M_Product_ID,lin.QtyOrdered, org.Name, hdr.AD_Org_ID 
+				HAVING %s <> %s
+			""";
+	
+	public static final String NOT_FULLY_MATCHED_TO_RECEIPT = BASE_MATCHING_SQL
+			.formatted("SUM(CASE WHEN (mo.M_InOutLine_ID IS NOT NULL) THEN COALESCE(mo.Qty,0) ELSE 0 END)",
+					" ( mo.M_InOutLine_ID IS NULL OR "
+							+ " (lin.QtyOrdered <>  (SELECT sum(mo1.Qty) AS Qty" 
+							+ " FROM m_matchpo mo1 WHERE "
+							+ " mo1.C_ORDERLINE_ID=lin.C_ORDERLINE_ID AND "
+							+ " hdr.C_ORDER_ID=lin.C_ORDER_ID AND "
+							+ " mo1.M_InOutLine_ID"
+							+ " IS NOT NULL group by mo1.C_ORDERLINE_ID))) ");
+	
+	public static final String NOT_FULLY_MATCHED_TO_RECEIPT_GROUP_BY = BASE_MATCHING_GROUP_BY_SQL
+			.formatted("lin.QtyOrdered", "SUM(CASE WHEN (mo.M_InOutLine_ID IS NOT NULL) THEN COALESCE(mo.Qty,0) ELSE 0 END) ");
+	
+	public static final String FULL_OR_PARTIALLY_MATCHED_TO_RECEIPT = BASE_MATCHING_SQL
+			.formatted("SUM(CASE WHEN (mo.M_InOutLine_ID IS NOT NULL) THEN COALESCE(mo.Qty,0) ELSE 0 END)", " mo.M_InOutLine_ID IS NOT NULL ");
+	
+	public static final String FULL_OR_PARTIALLY_MATCHED_TO_RECEIPT_GROUP_BY = BASE_MATCHING_GROUP_BY_SQL
+			.formatted("0", "SUM(CASE WHEN (mo.M_InOutLine_ID IS NOT NULL) THEN COALESCE(mo.Qty,0) ELSE 0 END) ");
+	
+	public static final String NOT_FULLY_MATCHED_TO_INVOICE = BASE_MATCHING_SQL
+			.formatted("SUM(CASE WHEN (mo.C_InvoiceLine_ID IS NOT NULL) THEN COALESCE(mo.Qty,0) ELSE 0 END)",
+					" ( mo.C_InvoiceLine_ID IS NULL OR "
+							+ " (lin.QtyOrdered <>  (SELECT sum(mo1.Qty) AS Qty" 
+							+ " FROM m_matchpo mo1 WHERE "
+							+ " mo1.C_ORDERLINE_ID=lin.C_ORDERLINE_ID AND "
+							+ " hdr.C_ORDER_ID=lin.C_ORDER_ID AND "
+							+ " mo1.C_InvoiceLine_ID"
+							+ " IS NOT NULL group by mo1.C_ORDERLINE_ID))) ");
+	
+	public static final String NOT_FULLY_MATCHED_TO_INVOICE_GROUP_BY = BASE_MATCHING_GROUP_BY_SQL
+			.formatted("lin.QtyOrdered", "SUM(CASE WHEN (mo.C_InvoiceLine_ID IS NOT NULL) THEN COALESCE(mo.Qty,0) ELSE 0 END) ");
+			
+	public static final String FULL_OR_PARTIALLY_MATCHED_TO_INVOICE = BASE_MATCHING_SQL
+			.formatted("SUM(CASE WHEN (mo.C_InvoiceLine_ID IS NOT NULL) THEN COALESCE(mo.Qty,0) ELSE 0 END)", " mo.C_InvoiceLine_ID IS NOT NULL ");
+	
+	public static final String FULL_OR_PARTIALLY_MATCHED_TO_INVOICE_GROUP_BY = BASE_MATCHING_GROUP_BY_SQL
+			.formatted("0", "SUM(CASE WHEN (mo.C_InvoiceLine_ID IS NOT NULL) THEN COALESCE(mo.Qty,0) ELSE 0 END) ");
+	
+	/**
+	 * @param C_BPartner_ID
+	 * @param M_Product_ID
+	 * @param M_InOutLine_ID
+	 * @param from
+	 * @param to
+	 * @param trxName
+	 * @return list of orders not fully matched to receipt
+	 */
+	public static List<MatchingRecord> getNotFullyMatchedToReceipt(int C_BPartner_ID, int M_Product_ID, int M_InOutLine_ID, Timestamp from, Timestamp to, String trxName) {
+		StringBuilder builder = new StringBuilder(NOT_FULLY_MATCHED_TO_RECEIPT);
+		if (M_InOutLine_ID > 0) {
+			builder.append(" AND mo.M_InOutLine_ID = ").append(M_InOutLine_ID);
+		}
+		if (M_Product_ID > 0) {
+			builder.append(" AND lin.M_Product_ID=").append(M_Product_ID);
+		}
+		if (C_BPartner_ID > 0) {
+			builder.append(" AND hdr.C_BPartner_ID=").append(C_BPartner_ID);
+		}
+		if (from != null) {
+			builder.append(" AND ").append("hdr.DateOrdered").append(" >= ").append(DB.TO_DATE(from));
+		}
+		if (to != null) {
+			builder.append(" AND ").append("hdr.DateOrdered").append(" <= ").append(DB.TO_DATE(to));
+		}
+		String sql = MRole.getDefault().addAccessSQL(
+				builder.toString(), "hdr", MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO)
+				+ NOT_FULLY_MATCHED_TO_RECEIPT_GROUP_BY;
+		
+		List<MatchingRecord> records = new ArrayList<>();
+		try (PreparedStatement stmt = DB.prepareStatement(sql, trxName)) {
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), 
+						rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				records.add(matchingRecord);
+			}
+		} catch (SQLException e) {
+			throw new DBException(e.getMessage(), e);
+		}
+		return records;
+	}
+	
+	/**
+	 * @param C_BPartner_ID
+	 * @param M_Product_ID
+	 * @param M_InOutLine_ID
+	 * @param from
+	 * @param to
+	 * @param trxName
+	 * @return list of orders full or partially match to receipt 
+	 */
+	public static List<MatchingRecord> getFullOrPartiallyMatchedToReceipt(int C_BPartner_ID, int M_Product_ID, int M_InOutLine_ID, Timestamp from, Timestamp to, String trxName) {
+		StringBuilder builder = new StringBuilder(FULL_OR_PARTIALLY_MATCHED_TO_RECEIPT);
+		if (M_InOutLine_ID > 0) {
+			builder.append(" AND mo.M_InOutLine_ID = ").append(M_InOutLine_ID);
+		}
+		if (M_Product_ID > 0) {
+			builder.append(" AND lin.M_Product_ID=").append(M_Product_ID);
+		}
+		if (C_BPartner_ID > 0) {
+			builder.append(" AND hdr.C_BPartner_ID=").append(C_BPartner_ID);
+		}
+		if (from != null) {
+			builder.append(" AND ").append("hdr.DateOrdered").append(" >= ").append(DB.TO_DATE(from));
+		}
+		if (to != null) {
+			builder.append(" AND ").append("hdr.DateOrdered").append(" <= ").append(DB.TO_DATE(to));
+		}
+		String sql = MRole.getDefault().addAccessSQL(
+				builder.toString(), "hdr", MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO)
+				+ FULL_OR_PARTIALLY_MATCHED_TO_RECEIPT_GROUP_BY;
+		
+		List<MatchingRecord> records = new ArrayList<>();
+		try (PreparedStatement stmt = DB.prepareStatement(sql, trxName)) {
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), 
+						rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				records.add(matchingRecord);
+			}
+		} catch (SQLException e) {
+			throw new DBException(e.getMessage(), e);
+		}
+		return records;
+	}
+	
+	/**
+	 * @param C_BPartner_ID
+	 * @param M_Product_ID
+	 * @param C_InvoiceLine_ID
+	 * @param from
+	 * @param to
+	 * @param trxName
+	 * @return list of orders not fully matched to invoice
+	 */
+	public static List<MatchingRecord> getNotFullyMatchedToInvoice(int C_BPartner_ID, int M_Product_ID, int C_InvoiceLine_ID, Timestamp from, Timestamp to, String trxName) {
+		StringBuilder builder = new StringBuilder(NOT_FULLY_MATCHED_TO_RECEIPT);
+		if (C_InvoiceLine_ID > 0) {
+			builder.append(" AND mo.C_InvoiceLine_ID = ").append(C_InvoiceLine_ID);
+		}
+		if (M_Product_ID > 0) {
+			builder.append(" AND lin.M_Product_ID=").append(M_Product_ID);
+		}
+		if (C_BPartner_ID > 0) {
+			builder.append(" AND hdr.C_BPartner_ID=").append(C_BPartner_ID);
+		}
+		if (from != null) {
+			builder.append(" AND ").append("hdr.DateOrdered").append(" >= ").append(DB.TO_DATE(from));
+		}
+		if (to != null) {
+			builder.append(" AND ").append("hdr.DateOrdered").append(" <= ").append(DB.TO_DATE(to));
+		}
+		String sql = MRole.getDefault().addAccessSQL(
+				builder.toString(), "hdr", MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO)
+				+ NOT_FULLY_MATCHED_TO_INVOICE_GROUP_BY;
+		
+		List<MatchingRecord> records = new ArrayList<>();
+		try (PreparedStatement stmt = DB.prepareStatement(sql, trxName)) {
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), 
+						rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				records.add(matchingRecord);
+			}
+		} catch (SQLException e) {
+			throw new DBException(e.getMessage(), e);
+		}
+		return records;
+	}
+	
+	/**
+	 * @param C_BPartner_ID
+	 * @param M_Product_ID
+	 * @param C_InvoiceLine_ID
+	 * @param from
+	 * @param to
+	 * @param trxName
+	 * @return list of orders full or partially match to invoice
+	 */
+	public static List<MatchingRecord> getFullOrPartiallyMatchedToInvoice(int C_BPartner_ID, int M_Product_ID, int C_InvoiceLine_ID, Timestamp from, Timestamp to, String trxName) {
+		StringBuilder builder = new StringBuilder(FULL_OR_PARTIALLY_MATCHED_TO_INVOICE);
+		if (C_InvoiceLine_ID > 0) {
+			builder.append(" AND mo.C_InvoiceLine_ID = ").append(C_InvoiceLine_ID);
+		}
+		if (M_Product_ID > 0) {
+			builder.append(" AND lin.M_Product_ID=").append(M_Product_ID);
+		}
+		if (C_BPartner_ID > 0) {
+			builder.append(" AND hdr.C_BPartner_ID=").append(C_BPartner_ID);
+		}
+		if (from != null) {
+			builder.append(" AND ").append("hdr.DateOrdered").append(" >= ").append(DB.TO_DATE(from));
+		}
+		if (to != null) {
+			builder.append(" AND ").append("hdr.DateOrdered").append(" <= ").append(DB.TO_DATE(to));
+		}
+		String sql = MRole.getDefault().addAccessSQL(
+				builder.toString(), "hdr", MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO)
+				+ FULL_OR_PARTIALLY_MATCHED_TO_INVOICE_GROUP_BY;
+		
+		List<MatchingRecord> records = new ArrayList<>();
+		try (PreparedStatement stmt = DB.prepareStatement(sql, trxName)) {
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), 
+						rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				records.add(matchingRecord);
+			}
+		} catch (SQLException e) {
+			throw new DBException(e.getMessage(), e);
+		}
+		return records;
+	}
+	
+	/**
+	 * record for matchings
+	 */
+	public static record MatchingRecord(int C_Order_ID, String documentNo, Timestamp documentDate, String businessPartnerName, int C_BPartner_ID, int line, int C_OrderLine_ID,
+			String productName, int M_Product_ID, BigDecimal qtyOrdered, BigDecimal matchedQty, String organizationName, int AD_Org_ID) {}
+	
 	/**
 	 * 	Create new Order by copying
 	 * 	@param from order
@@ -159,10 +403,20 @@ public class MOrder extends X_C_Order implements DocAction
 		
 		return to;
 	}	//	copyFrom
-	
-	
-	/**************************************************************************
-	 *  Default Constructor
+		
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param C_Order_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MOrder(Properties ctx, String C_Order_UU, String trxName) {
+        super(ctx, C_Order_UU, trxName);
+		if (Util.isEmpty(C_Order_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 *  @param ctx context
 	 *  @param  C_Order_ID    order to load, (0 create new order)
 	 *  @param trxName trx name
@@ -172,52 +426,64 @@ public class MOrder extends X_C_Order implements DocAction
 		this (ctx, C_Order_ID, trxName, (String[]) null);
 	}	//	MOrder
 
+	/**
+	 * @param ctx
+	 * @param C_Order_ID
+	 * @param trxName
+	 * @param virtualColumns
+	 */
 	public MOrder(Properties ctx, int C_Order_ID, String trxName, String... virtualColumns) {
 		super(ctx, C_Order_ID, trxName, virtualColumns);
 		//  New
 		if (C_Order_ID == 0)
-		{
-			setDocStatus(DOCSTATUS_Drafted);
-			setDocAction (DOCACTION_Prepare);
-			//
-			setDeliveryRule (DELIVERYRULE_Availability);
-			setFreightCostRule (FREIGHTCOSTRULE_FreightIncluded);
-			setInvoiceRule (INVOICERULE_Immediate);
-			setPaymentRule(PAYMENTRULE_OnCredit);
-			setPriorityRule (PRIORITYRULE_Medium);
-			setDeliveryViaRule (DELIVERYVIARULE_Pickup);
-			//
-			setIsDiscountPrinted (false);
-			setIsSelected (false);
-			setIsTaxIncluded (false);
-			setIsSOTrx (true);
-			setIsDropShip(false);
-			setSendEMail (false);
-			//
-			setIsApproved(false);
-			setIsPrinted(false);
-			setIsCreditApproved(false);
-			setIsDelivered(false);
-			setIsInvoiced(false);
-			setIsTransferred(false);
-			setIsSelfService(false);
-			//
-			super.setProcessed(false);
-			setProcessing(false);
-			setPosted(false);
-
-			setDateAcct (new Timestamp(System.currentTimeMillis()));
-			setDatePromised (new Timestamp(System.currentTimeMillis()));
-			setDateOrdered (new Timestamp(System.currentTimeMillis()));
-
-			setFreightAmt (Env.ZERO);
-			setChargeAmt (Env.ZERO);
-			setTotalLines (Env.ZERO);
-			setGrandTotal (Env.ZERO);
-		}
+			setInitialDefaults();
 	}
 
-	/**************************************************************************
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setDocStatus(DOCSTATUS_Drafted);
+		setDocAction (DOCACTION_Prepare);
+		//
+		setDeliveryRule (DELIVERYRULE_Availability);
+		setFreightCostRule (FREIGHTCOSTRULE_FreightIncluded);
+		setInvoiceRule (INVOICERULE_Immediate);
+		setPaymentRule(PAYMENTRULE_OnCredit);
+		setPriorityRule (PRIORITYRULE_Medium);
+		setDeliveryViaRule (DELIVERYVIARULE_Pickup);
+		//
+		setIsDiscountPrinted (false);
+		setIsSelected (false);
+		setIsTaxIncluded (false);
+		setIsSOTrx (true);
+		setIsDropShip(false);
+		setSendEMail (false);
+		//
+		setIsApproved(false);
+		setIsPrinted(false);
+		setIsCreditApproved(false);
+		setIsDelivered(false);
+		setIsInvoiced(false);
+		setIsTransferred(false);
+		setIsSelfService(false);
+		//
+		super.setProcessed(false);
+		setProcessing(false);
+		setPosted(false);
+
+		setDateAcct (new Timestamp(System.currentTimeMillis()));
+		setDatePromised (new Timestamp(System.currentTimeMillis()));
+		setDateOrdered (new Timestamp(System.currentTimeMillis()));
+
+		setFreightAmt (Env.ZERO);
+		setChargeAmt (Env.ZERO);
+		setTotalLines (Env.ZERO);
+		setGrandTotal (Env.ZERO);
+	}
+
+	/**
+	 *  Project Constructor
 	 *  @param  project Project to create Order from
 	 *  @param IsSOTrx sales order
 	 * 	@param	DocSubTypeSO if SO DocType Target (default DocSubTypeSO_OnCredit)
@@ -322,11 +588,11 @@ public class MOrder extends X_C_Order implements DocAction
 	 * 	@param AD_Client_ID client
 	 * 	@param AD_Org_ID org
 	 */
+	@Override
 	public void setClientOrg (int AD_Client_ID, int AD_Org_ID)
 	{
 		super.setClientOrg(AD_Client_ID, AD_Org_ID);
 	}	//	setClientOrg
-
 
 	/**
 	 * 	Add to Description
@@ -363,7 +629,7 @@ public class MOrder extends X_C_Order implements DocAction
 
 	/**
 	 * 	Set Business Partner Contact (Ship+Bill)
-	 *	@param AD_User_ID user
+	 *	@param AD_User_ID contact
 	 */
 	public void setAD_User_ID (int AD_User_ID)
 	{
@@ -391,14 +657,13 @@ public class MOrder extends X_C_Order implements DocAction
 
 	/**
 	 * 	Set Ship Business Partner Contact
-	 *	@param AD_User_ID user
+	 *	@param AD_User_ID contact
 	 */
 	public void setShip_User_ID (int AD_User_ID)
 	{
 		super.setAD_User_ID (AD_User_ID);
 	}	//	setShip_User_ID
-	
-	
+		
 	/**
 	 * 	Set Warehouse
 	 *	@param M_Warehouse_ID warehouse
@@ -417,8 +682,6 @@ public class MOrder extends X_C_Order implements DocAction
 		super.setIsDropShip (IsDropShip);
 	}	//	setIsDropShip
 	
-	/*************************************************************************/
-
 	/** Sales Order Sub Type - SO	*/
 	public static final String		DocSubTypeSO_Standard = "SO";
 	/** Sales Order Sub Type - OB	*/
@@ -461,7 +724,7 @@ public class MOrder extends X_C_Order implements DocAction
 
 	/**
 	 * 	Set Target Document Type.
-	 * 	Standard Order or PO
+	 * 	Standard Order or PO.
 	 */
 	public void setC_DocTypeTarget_ID ()
 	{
@@ -485,10 +748,9 @@ public class MOrder extends X_C_Order implements DocAction
 		}
 	}	//	setC_DocTypeTarget_ID
 
-
 	/**
 	 * 	Set Business Partner Defaults and Details.
-	 * 	SOTrx should be set.
+	 * 	SOTrx should be set prior to this call.
 	 * 	@param bp business partner
 	 */
 	public void setBPartner (MBPartner bp)
@@ -526,14 +788,13 @@ public class MOrder extends X_C_Order implements DocAction
 		if (isSOTrx())
 			ss = bp.getPaymentRule();
 		else
-			ss = bp.getPaymentRulePO();
+			ss = !Util.isEmpty(bp.getPaymentRulePO()) ? bp.getPaymentRulePO() : bp.getPaymentRule();
 		if (ss != null)
 			setPaymentRule(ss);
 		//	Sales Rep
 		ii = bp.getSalesRep_ID();
 		if (ii != 0)
 			setSalesRep_ID(ii);
-
 
 		//	Set Locations
 		MBPartnerLocation[] locs = bp.getLocations(false);
@@ -568,12 +829,11 @@ public class MOrder extends X_C_Order implements DocAction
 			setAD_User_ID(contacts[0].getAD_User_ID());
 	}	//	setBPartner
 
-
 	/**
 	 * 	Copy Lines From other Order
 	 *	@param otherOrder order
 	 *	@param counter set counter info
-	 *	@param copyASI copy line attributes Attribute Set Instance, Resaouce Assignment
+	 *	@param copyASI true to copy line Attribute Set Instance and Resource Assignment
 	 *	@return number of lines copied
 	 */
 	public int copyLinesFrom (MOrder otherOrder, boolean counter, boolean copyASI)
@@ -592,11 +852,13 @@ public class MOrder extends X_C_Order implements DocAction
 			line.setQtyInvoiced(Env.ZERO);
 			line.setQtyReserved(Env.ZERO);
 			line.setQtyLostSales(Env.ZERO);
+			line.setQty(fromLines[i].getQtyEntered());
 			line.setDateDelivered(null);
 			line.setDateInvoiced(null);
-			//
 			line.setOrder(this);
 			line.set_ValueNoCheck ("C_OrderLine_ID", I_ZERO);	//	new
+			if (!counter && MOrder.STATUS_Closed.equals(otherOrder.getDocStatus()))
+				line.setDescription(line.getDescriptionStrippingCloseTag());
 			//	References
 			if (!copyASI)
 			{
@@ -629,12 +891,12 @@ public class MOrder extends X_C_Order implements DocAction
 			log.log(Level.SEVERE, "Line difference - From=" + fromLines.length + " <> Saved=" + count);
 		return count;
 	}	//	copyLinesFrom
-
 	
-	/**************************************************************************
+	/**
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MOrder[")
@@ -650,6 +912,7 @@ public class MOrder extends X_C_Order implements DocAction
 	 * 	Get Document Info
 	 *	@return document info (untranslated)
 	 */
+	@Override
 	public String getDocumentInfo()
 	{
 		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID() > 0 ? getC_DocType_ID() : getC_DocTypeTarget_ID());
@@ -660,6 +923,7 @@ public class MOrder extends X_C_Order implements DocAction
 	 * 	Create PDF
 	 *	@return File or null
 	 */
+	@Override
 	public File createPDF ()
 	{
 		try
@@ -706,6 +970,7 @@ public class MOrder extends X_C_Order implements DocAction
 	 * 	Set Price List (and Currency, TaxIncluded) when valid
 	 * 	@param M_PriceList_ID price list
 	 */
+	@Override
 	public void setM_PriceList_ID (int M_PriceList_ID)
 	{
 		MPriceList pl = MPriceList.get(getCtx(), M_PriceList_ID, null);
@@ -716,12 +981,11 @@ public class MOrder extends X_C_Order implements DocAction
 			setIsTaxIncluded(pl.isTaxIncluded());
 		}
 	}	//	setM_PriceList_ID
-
 	
-	/**************************************************************************
+	/**
 	 * 	Get Lines of Order
-	 * 	@param whereClause where clause or null (starting with AND)
-	 * 	@param orderClause order clause
+	 * 	@param whereClause where clause or null (must start with AND)
+	 * 	@param orderClause order clause or null
 	 * 	@return lines
 	 */
 	public MOrderLine[] getLines (String whereClause, String orderClause)
@@ -730,7 +994,7 @@ public class MOrder extends X_C_Order implements DocAction
 		StringBuilder whereClauseFinal = new StringBuilder(MOrderLine.COLUMNNAME_C_Order_ID+"=? ");
 		if (!Util.isEmpty(whereClause, true))
 			whereClauseFinal.append(whereClause);
-		if (orderClause.length() == 0)
+		if (Util.isEmpty(orderClause, true))
 			orderClause = MOrderLine.COLUMNNAME_Line;
 		//
 		List<MOrderLine> list = new Query(getCtx(), I_C_OrderLine.Table_Name, whereClauseFinal.toString(), get_TrxName())
@@ -746,8 +1010,8 @@ public class MOrder extends X_C_Order implements DocAction
 
 	/**
 	 * 	Get Lines of Order
-	 * 	@param requery requery
-	 * 	@param orderBy optional order by column
+	 * 	@param requery true to re-query from DB
+	 * 	@param orderBy optional order by columns
 	 * 	@return lines
 	 */
 	public MOrderLine[] getLines (boolean requery, String orderBy)
@@ -768,7 +1032,6 @@ public class MOrder extends X_C_Order implements DocAction
 
 	/**
 	 * 	Get Lines of Order.
-	 * 	(used by web store)
 	 * 	@return lines
 	 */
 	public MOrderLine[] getLines()
@@ -811,7 +1074,7 @@ public class MOrder extends X_C_Order implements DocAction
 
 	/**
 	 * 	Get Taxes of Order
-	 *	@param requery requery
+	 *	@param requery true to re-query from DB
 	 *	@return array of taxes
 	 */
 	public MOrderTax[] getTaxes(boolean requery)
@@ -825,8 +1088,7 @@ public class MOrder extends X_C_Order implements DocAction
 		m_taxes = list.toArray(new MOrderTax[list.size()]);
 		return m_taxes;
 	}	//	getTaxes
-	
-	
+		
 	/**
 	 * 	Get Invoices of Order
 	 * 	@return invoices
@@ -856,7 +1118,6 @@ public class MOrder extends X_C_Order implements DocAction
 		int C_Invoice_ID = DB.getSQLValue(get_TrxName(), sql, get_ID());
 		return C_Invoice_ID;
 	}	//	getC_Invoice_ID
-
 
 	/**
 	 * 	Get Shipments of Order
@@ -894,8 +1155,8 @@ public class MOrder extends X_C_Order implements DocAction
 	}	//	getPrecision
 
 	/**
-	 * 	Get Document Status
-	 *	@return Document Status Clear Text
+	 * 	Get Document Status Name
+	 *	@return Document Status Name
 	 */
 	public String getDocStatusName()
 	{
@@ -904,8 +1165,9 @@ public class MOrder extends X_C_Order implements DocAction
 
 	/**
 	 * 	Set DocAction
-	 *	@param DocAction doc action
+	 *	@param DocAction DocAction.ACTION_*
 	 */
+	@Override
 	public void setDocAction (String DocAction)
 	{
 		setDocAction (DocAction, false);
@@ -913,7 +1175,7 @@ public class MOrder extends X_C_Order implements DocAction
 
 	/**
 	 * 	Set DocAction
-	 *	@param DocAction doc action
+	 *	@param DocAction DocAction.ACTION_*
 	 *	@param forceCreation force creation
 	 */
 	public void setDocAction (String DocAction, boolean forceCreation)
@@ -927,6 +1189,7 @@ public class MOrder extends X_C_Order implements DocAction
 	 * 	Propagate to Lines/Taxes
 	 *	@param processed processed
 	 */
+	@Override
 	public void setProcessed (boolean processed)
 	{
 		super.setProcessed (processed);
@@ -941,8 +1204,6 @@ public class MOrder extends X_C_Order implements DocAction
 		m_taxes = null;
 		if (log.isLoggable(Level.FINE)) log.fine("setProcessed - " + processed + " - Lines=" + noLine + ", Tax=" + noTax);
 	}	//	setProcessed
-	
-	
 	
 	/**
 	 * 	Validate Order Pay Schedule
@@ -981,14 +1242,15 @@ public class MOrder extends X_C_Order implements DocAction
 		}
 		return valid;
 	}	//	validatePaySchedule
-
+	
 	private volatile static boolean recursiveCall = false;
-
-	/**************************************************************************
+	
+	/**
 	 * 	Before Save
 	 *	@param newRecord new
 	 *	@return save
 	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		//	Client/Org Check
@@ -1031,12 +1293,6 @@ public class MOrder extends X_C_Order implements DocAction
 				log.saveWarning("WarehouseOrgConflict", "");
 		}
 
-		boolean disallowNegInv = wh.isDisallowNegativeInv();
-		String DeliveryRule = getDeliveryRule();
-		if((disallowNegInv && DELIVERYRULE_Force.equals(DeliveryRule)) ||
-				(DeliveryRule == null || DeliveryRule.length()==0))
-			setDeliveryRule(DELIVERYRULE_Availability);
-		
 		//	Reservations in Warehouse
 		if (!newRecord && is_ValueChanged("M_Warehouse_ID"))
 		{
@@ -1185,61 +1441,54 @@ public class MOrder extends X_C_Order implements DocAction
 		
 		return true;
 	}	//	beforeSave
-	
-	
+		
 	/**
 	 * 	After Save
 	 *	@param newRecord new
 	 *	@param success success
 	 *	@return true if can be saved
 	 */
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (!success || newRecord)
 			return success;
-		
-		// TODO: The changes here with UPDATE are not being saved on change log - audit problem  
-		
-		//	Propagate Description changes
-		if (is_ValueChanged("Description") || is_ValueChanged("POReference"))
-		{
-			String sql = "UPDATE C_Invoice i"
-				+ " SET (Description,POReference)="
-					+ "(SELECT Description,POReference "
-					+ "FROM C_Order o WHERE i.C_Order_ID=o.C_Order_ID) "
-				+ "WHERE DocStatus NOT IN ('RE','CL') AND C_Order_ID=" + getC_Order_ID();
-			int no = DB.executeUpdateEx(sql, get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Description -> #" + no);
+
+		// Propagate changes to not-completed/reversed/closed invoices
+		String propagateColsSysCfg = MSysConfig.getValue(MSysConfig.ORDER_COLUMNS_TO_COPY_TO_NOT_COMPLETED_INVOICES,
+				"Description,POReference,PaymentRule,C_PaymentTerm_ID,DateAcct", getAD_Client_ID(), getAD_Org_ID());
+		if (!Util.isEmpty(propagateColsSysCfg, true)) {
+			String[] propagateCols = propagateColsSysCfg.split(",");
+			boolean propagateColChanged = false;
+			for (String propagateCol : propagateCols) {
+				String trimmedCol = propagateCol.trim();
+				if (get_ColumnIndex(trimmedCol) >= 0 && is_ValueChanged(trimmedCol)) {
+					propagateColChanged = true;
+					break;
+				}
+			}
+			if (propagateColChanged) {
+				List<MInvoice> relatedInvoices = new Query(getCtx(), MInvoice.Table_Name,
+						"C_Order_ID=? AND Processed='N' AND DocStatus NOT IN ('CO','RE','CL')", get_TrxName())
+						.setParameters(getC_Order_ID())
+						.list();
+				if (relatedInvoices.size() > 0) {
+					for (String propagateCol : propagateCols) {
+						String trimmedCol = propagateCol.trim();
+						if (get_ColumnIndex(trimmedCol) >= 0 && is_ValueChanged(trimmedCol)) {
+							Object newValue = get_Value(trimmedCol);
+							for (MInvoice relatedInvoice : relatedInvoices) {
+								relatedInvoice.set_Value(trimmedCol, newValue);
+							}
+						}
+					}
+					for (MInvoice relatedInvoice : relatedInvoices) {
+						relatedInvoice.saveEx();
+					}
+				}
+			}
 		}
 
-		//	Propagate Changes of Payment Info to existing (not reversed/closed) invoices
-		if (is_ValueChanged("PaymentRule") || is_ValueChanged("C_PaymentTerm_ID")
-			|| is_ValueChanged("C_Payment_ID")
-			|| is_ValueChanged("C_CashLine_ID"))
-		{
-			String sql = "UPDATE C_Invoice i "
-				+ "SET (PaymentRule,C_PaymentTerm_ID,C_Payment_ID,C_CashLine_ID)="
-					+ "(SELECT PaymentRule,C_PaymentTerm_ID,C_Payment_ID,C_CashLine_ID "
-					+ "FROM C_Order o WHERE i.C_Order_ID=o.C_Order_ID)"
-				+ "WHERE DocStatus NOT IN ('RE','CL') AND C_Order_ID=" + getC_Order_ID();
-			//	Don't touch Closed/Reversed entries
-			int no = DB.executeUpdate(sql, get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("Payment -> #" + no);
-		}
-	      
-		//	Propagate Changes of Date Account to existing (not completed/reversed/closed) invoices
-		if (is_ValueChanged("DateAcct"))
-		{
-			String sql = "UPDATE C_Invoice i "
-				+ "SET (DateAcct)="
-					+ "(SELECT DateAcct "
-					+ "FROM C_Order o WHERE i.C_Order_ID=o.C_Order_ID)"
-				+ "WHERE DocStatus NOT IN ('CO','RE','CL') AND Processed='N' AND C_Order_ID=" + getC_Order_ID();
-			//	Don't touch Completed/Closed/Reversed entries
-			int no = DB.executeUpdate(sql, get_TrxName());
-			if (log.isLoggable(Level.FINE)) log.fine("DateAcct -> #" + no);
-		}
-	      
 		//	Sync Lines
 		if (   is_ValueChanged("AD_Org_ID")
 		    || is_ValueChanged(MOrder.COLUMNNAME_C_BPartner_ID)
@@ -1278,6 +1527,7 @@ public class MOrder extends X_C_Order implements DocAction
 	 * 	Before Delete
 	 *	@return true of it can be deleted
 	 */
+	@Override
 	protected boolean beforeDelete ()
 	{
 		if (isProcessed())
@@ -1286,11 +1536,12 @@ public class MOrder extends X_C_Order implements DocAction
 		return true;
 	}	//	beforeDelete
 	
-	/**************************************************************************
+	/**
 	 * 	Process document
 	 *	@param processAction document action
 	 *	@return true if performed
 	 */
+	@Override
 	public boolean processIt (String processAction)
 	{
 		m_processMsg = null;
@@ -1307,6 +1558,7 @@ public class MOrder extends X_C_Order implements DocAction
 	 * 	Unlock Document.
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean unlockIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("unlockIt - " + toString());
@@ -1318,18 +1570,19 @@ public class MOrder extends X_C_Order implements DocAction
 	 * 	Invalidate Document
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean invalidateIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 		setDocAction(DOCACTION_Prepare);
 		return true;
 	}	//	invalidateIt
-	
-	
-	/**************************************************************************
+		
+	/**
 	 *	Prepare Document
 	 * 	@return new status (In Progress or Invalid) 
 	 */
+	@Override
 	public String prepareIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -1482,9 +1735,12 @@ public class MOrder extends X_C_Order implements DocAction
 		ICreditManager creditManager = Core.getCreditManager(this);
 		if (creditManager != null)
 		{
-			m_processMsg = creditManager.creditCheck(DOCACTION_Prepare);
-			if (m_processMsg != null)
+			CreditStatus status = creditManager.checkCreditStatus(DOCACTION_Prepare);
+			if (status.isError())
+			{
+				m_processMsg = status.getErrorMsg();
 				return DocAction.STATUS_Invalid;
+			}
 		}
 		
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_PREPARE);
@@ -1495,12 +1751,16 @@ public class MOrder extends X_C_Order implements DocAction
 		return DocAction.STATUS_InProgress;
 	}	//	prepareIt
 	
+	/**
+	 * Calculate freight charge and create order line for freight charge (if needed).
+	 * @return true if no error
+	 */
 	protected boolean calculateFreightCharge()
 	{
 		MClientInfo ci = MClientInfo.get(getCtx(), getAD_Client_ID(), get_TrxName());
 		if (ci.getC_ChargeFreight_ID() == 0 && ci.getM_ProductFreight_ID() == 0)
 		{
-			m_processMsg = "Product or Charge for Freight is not defined at Client window > Client Info tab";
+			m_processMsg = "Product or Charge for Freight is not defined at Tenant window > Tenant Info tab";
 			return false;
 		}
 		
@@ -1548,7 +1808,7 @@ public class MOrder extends X_C_Order implements DocAction
 				else if (ci.getM_ProductFreight_ID() > 0)
 					freightLine.setM_Product_ID(ci.getM_ProductFreight_ID());
 				else
-					throw new AdempiereException("Product or Charge for Freight is not defined at Client window > Client Info tab");
+					throw new AdempiereException("Product or Charge for Freight is not defined at Tenant window > Tenant Info tab");
 			}
 			
 			freightLine.setC_BPartner_Location_ID(getC_BPartner_Location_ID());
@@ -1561,12 +1821,12 @@ public class MOrder extends X_C_Order implements DocAction
 		{
 			if (ci.getC_UOM_Weight_ID() == 0)
 			{
-				m_processMsg = "UOM for Weight is not defined at Client window > Client Info tab";
+				m_processMsg = "UOM for Weight is not defined at Tenant window > Tenant Info tab";
 				return false;
 			}
 			if (ci.getC_UOM_Length_ID() == 0)
 			{
-				m_processMsg = "UOM for Length is not defined at Client window > Client Info ta";
+				m_processMsg = "UOM for Length is not defined at Tenant window > Tenant Info ta";
 				return false;
 			}
 			
@@ -1614,7 +1874,7 @@ public class MOrder extends X_C_Order implements DocAction
 					else if (ci.getM_ProductFreight_ID() > 0)
 						freightLine.setM_Product_ID(ci.getM_ProductFreight_ID());
 					else
-						throw new AdempiereException("Product or Charge for Freight is not defined at Client window > Client Info tab");
+						throw new AdempiereException("Product or Charge for Freight is not defined at Tenant window > Tenant Info tab");
 				}
 				
 				freightLine.setC_BPartner_Location_ID(getC_BPartner_Location_ID());
@@ -1634,7 +1894,7 @@ public class MOrder extends X_C_Order implements DocAction
 	}
 	
 	/**
-	 * 	Explode non stocked BOM.
+	 * 	Explode non stocked BOM (i.e IsBOM=Y and IsStocked=N).
 	 * 	@return true if bom exploded
 	 */
 	protected boolean explodeBOM()
@@ -1701,10 +1961,9 @@ public class MOrder extends X_C_Order implements DocAction
 		return retValue;
 	}	//	explodeBOM
 
-
 	/**
 	 * 	Reserve Inventory.
-	 * 	Counterpart: MInOut.completeIt()
+	 * 	Release of reservation: MInOut.completeIt().
 	 * 	@param dt document type or null
 	 * 	@param lines order lines (ordered by M_Product_ID for deadlock prevention)
 	 * 	@return true if (un) reserved
@@ -1811,12 +2070,12 @@ public class MOrder extends X_C_Order implements DocAction
 	}	//	reserveStock
 
 	/**
-	 * 	Calculate Tax and Total
-	 * 	@return true if tax total calculated
+	 * 	Calculate Tax and Total (delete and re-create C_OrderTax records).
+	 * 	@return true if no error
 	 */
 	public boolean calculateTaxTotal()
 	{
-		log.fine("");
+		if (log.isLoggable(Level.FINE)) log.fine("");
 		//	Delete Taxes
 		DB.executeUpdateEx("DELETE FROM C_OrderTax WHERE C_Order_ID=" + getC_Order_ID(), get_TrxName());
 		m_taxes = null;
@@ -1833,8 +2092,7 @@ public class MOrder extends X_C_Order implements DocAction
 		}
 		return true;
 	}	//	calculateTaxTotal
-	
-	
+		
 	/**
 	 * 	(Re) Create Pay Schedule
 	 *	@return true if valid schedule
@@ -1863,12 +2121,12 @@ public class MOrder extends X_C_Order implements DocAction
 				return isValid;
 		}
 	}	//	createPaySchedule
-	
-	
+		
 	/**
 	 * 	Approve Document
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean  approveIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("approveIt - " + toString());
@@ -1880,18 +2138,19 @@ public class MOrder extends X_C_Order implements DocAction
 	 * 	Reject Approval
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean rejectIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("rejectIt - " + toString());
 		setIsApproved(false);
 		return true;
 	}	//	rejectIt
-	
-	
-	/**************************************************************************
+		
+	/**
 	 * 	Complete Document
 	 * 	@return new status (Complete, In Progress, Invalid, Waiting ..)
 	 */
+	@Override
 	public String completeIt()
 	{
 		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
@@ -2035,6 +2294,9 @@ public class MOrder extends X_C_Order implements DocAction
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
 	
+	/**
+	 * Update QtyOverReceipt of M_InOutLine
+	 */
 	private void updateOverReceipt() {
 		for(MOrderLine line : m_lines) {
 			if (line.getM_Product_ID() <= 0) continue;
@@ -2045,6 +2307,10 @@ public class MOrder extends X_C_Order implements DocAction
 		}
 	}
 	
+	/**
+	 * distribute landed cost.
+	 * @return error message or empty string
+	 */
 	protected String landedCostAllocation() {
 		MOrderLandedCost[] landedCosts = MOrderLandedCost.getOfOrder(getC_Order_ID(), get_TrxName());
 		for(MOrderLandedCost landedCost : landedCosts) {
@@ -2055,7 +2321,9 @@ public class MOrder extends X_C_Order implements DocAction
 		return "";
 	}
 
-
+	/**
+	 * @return error message or null
+	 */
 	protected String createPOSPayments() {
 
 		// Just for POS order with payment rule mixed
@@ -2444,6 +2712,7 @@ public class MOrder extends X_C_Order implements DocAction
 	 * 	Set Qtys to 0 - Sales: reverse all documents
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean voidIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -2458,8 +2727,13 @@ public class MOrder extends X_C_Order implements DocAction
 			so.saveEx();
 		}
 
-		if (!createReversals())
-			return false;
+		if (isSOTrx()) {
+			if (!createReversals())
+				return false;
+		} else {
+			if (!createPOReversals())
+				return false;
+		}
 
 		MOrderLine[] lines = getLines(true, MOrderLine.COLUMNNAME_M_Product_ID);
 		for (int i = 0; i < lines.length; i++)
@@ -2473,7 +2747,6 @@ public class MOrder extends X_C_Order implements DocAction
 				line.setLineNetAmt(Env.ZERO);
 				line.saveEx(get_TrxName());
 			}
-			//AZ Goodwill	
 			if (!isSOTrx())
 			{
 				deleteMatchPOCostDetail(line);
@@ -2531,7 +2804,8 @@ public class MOrder extends X_C_Order implements DocAction
 		if (!isSOTrx())
 			return true;
 		
-		log.info("createReversals");
+		if (log.isLoggable(Level.INFO))
+			log.info("createReversals");
 		StringBuilder info = new StringBuilder();
 		
 		//	Reverse All *Shipments*
@@ -2604,12 +2878,43 @@ public class MOrder extends X_C_Order implements DocAction
 		return true;
 	}	//	createReversals
 	
-	
+	/**
+	 * Create match po reversals
+	 * @return true if success
+	 */
+	protected boolean createPOReversals() {
+		if (isSOTrx())
+			return true;
+		
+		Timestamp loginDate = TimeUtil.getDay(Env.getContextAsDate(Env.getCtx(), Env.DATE));
+		for(MOrderLine line : getLines()) {
+			MMatchPO[] matchPOs = MMatchPO.getOrderLine(Env.getCtx(), line.get_ID(), get_TrxName());
+			for(MMatchPO matchPO : matchPOs) {
+				if (matchPO.getReversal_ID() > 0)
+					continue;
+				if (!matchPO.reverse(loginDate, true)) {
+					m_processMsg = "Could not Reverse " + matchPO;
+					return false;
+				}
+				if (matchPO.getM_InOutLine_ID() > 0) {
+					MInOutLine iol = new MInOutLine(Env.getCtx(), matchPO.getM_InOutLine_ID(), get_TrxName());
+					MInOut io = new MInOut(Env.getCtx(), iol.getM_InOut_ID(), get_TrxName());
+					if (io.getC_Order_ID() == this.getC_Order_ID()) {
+						io.setC_Order_ID(0);
+						io.saveEx();
+					}
+				}
+			}
+		}
+		return true;
+	}
+
 	/**
 	 * 	Close Document.
-	 * 	Cancel not delivered Quantities
+	 * 	Cancel not delivered Quantities.
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean closeIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -2688,6 +2993,7 @@ public class MOrder extends X_C_Order implements DocAction
 	 * @author: phib
 	 * re-open a closed order
 	 * (reverse steps of close())
+	 * @return error message or null
 	 */
 	public String reopenIt() {
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -2707,17 +3013,7 @@ public class MOrder extends X_C_Order implements DocAction
 				line.setQtyLostSales(Env.ZERO);
 				//	QtyEntered unchanged
 				
-				// Strip Close() tags from description
-				String desc = line.getDescription();
-				if (desc == null)
-					desc = "";
-				Pattern pattern = Pattern.compile("( \\| )?Close \\(.*\\)");
-				String[] parts = pattern.split(desc);
-				desc = "";
-				for (String s : parts) {
-					desc = desc.concat(s);
-				}
-				line.setDescription(desc);
+				line.setDescription(line.getDescriptionStrippingCloseTag());
 				if (!line.save(get_TrxName()))
 					return "Couldn't save orderline";
 			}
@@ -2736,8 +3032,9 @@ public class MOrder extends X_C_Order implements DocAction
 		else
 			return "";
 	}	//	reopenIt
+	
 	/**
-	 * 	Reverse Correction - same void
+	 * 	Reverse Correction - same as void
 	 * 	@return true if success 
 	 */
 	public boolean reverseCorrectIt()
@@ -2757,8 +3054,8 @@ public class MOrder extends X_C_Order implements DocAction
 	}	//	reverseCorrectionIt
 	
 	/**
-	 * 	Reverse Accrual - none
-	 * 	@return false 
+	 * 	Reverse Accrual
+	 * 	@return not implemented, always return false 
 	 */
 	public boolean reverseAccrualIt()
 	{
@@ -2780,6 +3077,7 @@ public class MOrder extends X_C_Order implements DocAction
 	 * 	Re-activate.
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean reActivateIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -2787,6 +3085,9 @@ public class MOrder extends X_C_Order implements DocAction
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REACTIVATE);
 		if (m_processMsg != null)
 			return false;	
+		
+		// Test period
+		MPeriod.testPeriodOpen(getCtx(), getDateAcct(), getC_DocType_ID(), getAD_Org_ID());
 		
 		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
 		String DocSubTypeSO = dt.getDocSubTypeSO();
@@ -2820,12 +3121,12 @@ public class MOrder extends X_C_Order implements DocAction
 		setProcessed(false);
 		return true;
 	}	//	reActivateIt
-	
-	
-	/*************************************************************************
+		
+	/**
 	 * 	Get Summary
 	 *	@return Summary of Document
 	 */
+	@Override
 	public String getSummary()
 	{
 		StringBuilder sb = new StringBuilder();
@@ -2845,6 +3146,7 @@ public class MOrder extends X_C_Order implements DocAction
 	 * 	Get Process Message
 	 *	@return clear text error message
 	 */
+	@Override
 	public String getProcessMsg()
 	{
 		return m_processMsg;
@@ -2854,6 +3156,7 @@ public class MOrder extends X_C_Order implements DocAction
 	 * 	Get Document Owner (Responsible)
 	 *	@return AD_User_ID
 	 */
+	@Override
 	public int getDoc_User_ID()
 	{
 		return getSalesRep_ID();
@@ -2863,12 +3166,17 @@ public class MOrder extends X_C_Order implements DocAction
 	 * 	Get Document Approval Amount
 	 *	@return amount
 	 */
+	@Override
 	public BigDecimal getApprovalAmt()
 	{
 		return getGrandTotal();
 	}	//	getApprovalAmt
 	
-	//AZ Goodwill
+	/**
+	 * Delete cost detail for order line
+	 * @param line
+	 * @return error message or null
+	 */
 	protected String deleteMatchPOCostDetail(MOrderLine line)
 	{
 		// Get Account Schemas to delete MCostDetail
@@ -2932,6 +3240,8 @@ public class MOrder extends X_C_Order implements DocAction
 		MOrderLine[] lines = getLines();
 		for (MOrderLine line : lines)
 		{
+			if (line.isDescription())
+				continue;
             MTax tax = new MTax(line.getCtx(), line.getC_Tax_ID(), line.get_TrxName());
             MTaxProvider provider = providers.get(tax.getC_TaxProvider_ID());
             if (provider == null)

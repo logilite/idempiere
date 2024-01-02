@@ -46,6 +46,7 @@ import org.compiere.process.DocumentEngine;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 /**
  *  Deposit Batch Model
@@ -56,9 +57,21 @@ import org.compiere.util.Msg;
 public class MDepositBatch extends X_C_DepositBatch implements DocAction
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -977397802747749777L;
+
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param C_DepositBatch_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MDepositBatch(Properties ctx, String C_DepositBatch_UU, String trxName) {
+        super(ctx, C_DepositBatch_UU, trxName);
+		if (Util.isEmpty(C_DepositBatch_UU))
+			setInitialDefaults();
+    }
 
 	/**
 	 *  Create and Load existing Persistent Object
@@ -70,15 +83,19 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 	{
 		super (ctx, C_DepositBatch_ID, trxName);
 		if (C_DepositBatch_ID == 0)
-		{
-			setDocStatus (DOCSTATUS_Drafted);
-			setDocAction (DOCACTION_Complete);
-			setProcessed (false);
-			setProcessing (false);
-			setDepositAmt(Env.ZERO);
-		}
+			setInitialDefaults();
 	}	//	MDepositBatch
 	
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setDocStatus (DOCSTATUS_Drafted);
+			setDocAction (DOCACTION_Complete);
+		setProcessed (false);
+		setProcessing (false);
+		setDepositAmt(Env.ZERO);
+	}
 
 	/**
 	 * 	Load Constructor
@@ -92,8 +109,8 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 	}	//	MDepositBatch
 
 	/**
-	 * 	Copy Constructor.
-	 * 	Dos not copy: Dates/Period
+	 * 	Create new deposit batch from original.<br/> 
+	 *  Copy over ad_client_id, ad_org_id, c_depositbatch_id, description, c_doctype_id, datedoc, datedeposit and depositamt.
 	 *	@param original original
 	 */
 	public MDepositBatch (MDepositBatch original)
@@ -115,14 +132,14 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 	 * 	@param AD_Client_ID client
 	 * 	@param AD_Org_ID org
 	 */
+	@Override
 	public void setClientOrg (int AD_Client_ID, int AD_Org_ID)
 	{
 		super.setClientOrg(AD_Client_ID, AD_Org_ID);
 	}	//	setClientOrg
 
 	/**
-	 * 	Set Accounting Date.
-	 * 	Set also Period if not set earlier
+	 * 	Set Date Deposit
 	 *	@param DateAcct date
 	 */
 	public void setDateAcct (Timestamp DateAcct)
@@ -132,14 +149,15 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 			return;
 	}	//	setDateAcct
 
-
 	/**	Process Message 			*/
 	private String		m_processMsg = null;
 
 	/**
 	 * 	Unlock Document.
-	 * 	@return true if success 
+	 * 	@return true if success
+	 *  @deprecated incomplete/abandon implementation of DocAction interface 
 	 */
+	@Deprecated
 	public boolean unlockIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("unlockIt - " + toString());
@@ -150,7 +168,9 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 	/**
 	 * 	Invalidate Document
 	 * 	@return true if success 
+	 *  @deprecated incomplete/abandon implementation of DocAction interface
 	 */
+	@Deprecated
 	public boolean invalidateIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("invalidateIt - " + toString());
@@ -158,12 +178,12 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 		return true;
 	}	//	invalidateIt
 	
-
-
 	/**
 	 * 	Void Document.
-	 * 	@return false 
+	 * 	@return false
+	 *  @deprecated incomplete/abandon implementation of DocAction interface 
 	 */
+	@Deprecated
 	public boolean voidIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("voidIt - " + toString());
@@ -211,11 +231,11 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 		return true;
 	}	//	voidIt
 
-
 	/**
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MDepositBatch[");
@@ -228,7 +248,9 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 	/**
 	 * 	Get Document Info
 	 *	@return document info (untranslated)
+	 *  @deprecated incomplete/abandon implementation of DocAction interface
 	 */
+	@Deprecated
 	public String getDocumentInfo()
 	{
 		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
@@ -238,7 +260,9 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 	/**
 	 * 	Create PDF
 	 *	@return File or null
+	 *  @deprecated incomplete/abandon implementation of DocAction interface
 	 */
+	@Deprecated
 	public File createPDF ()
 	{
 		try
@@ -257,7 +281,9 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 	 * 	Create PDF file
 	 *	@param file output file
 	 *	@return file if success
+	 *  @deprecated incomplete/abandon implementation of DocAction interface
 	 */
+	@Deprecated
 	public File createPDF (File file)
 	{
 		return null;
@@ -267,7 +293,9 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 	/**
 	 * 	Get Process Message
 	 *	@return clear text error message
+	 *  @deprecated incomplete/abandon implementation of DocAction interface
 	 */
+	@Deprecated
 	public String getProcessMsg()
 	{
 		return m_processMsg;
@@ -276,7 +304,9 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 	/**
 	 * 	Get Document Owner (Responsible)
 	 *	@return AD_User_ID (Created By)
+	 *  @deprecated incomplete/abandon implementation of DocAction interface
 	 */
+	@Deprecated
 	public int getDoc_User_ID()
 	{
 		return getCreatedBy();
@@ -285,19 +315,20 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 	/**
 	 * 	Get Document Approval Amount
 	 *	@return DR amount
+	 *  @deprecated incomplete/abandon implementation of DocAction interface
 	 */
+	@Deprecated	
 	public BigDecimal getApprovalAmt()
 	{
 		return getDepositAmt();
 	}	//	getApprovalAmt
-	
-	
-	
+			
 	/**
 	 * 	After Delete
 	 *	@param success success
 	 *	@return success
 	 */
+	@Override
 	protected boolean afterDelete (boolean success)
 	{
 		if (getC_DepositBatch_ID() != 0 )
@@ -308,11 +339,10 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 		
 		return success;
 	}	//	afterDelete
-	
-	
-	/**************************************************************************
+		
+	/**
 	 * 	Get Deposit Batch Lines
-	 *	@return Array of lines
+	 *	@return Array of lines (MDepositBatchLine)
 	 */
 	public MDepositBatchLine[] getLines()
 	{
@@ -346,7 +376,9 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 	/**
 	 * 	Document Status is Complete or Closed
 	 *	@return true if CO, CL or RE
+	 *  @deprecated incomplete/abandon implementation of DocAction interface
 	 */
+	@Deprecated
 	public boolean isComplete()
 	{
 		String ds = getDocStatus();

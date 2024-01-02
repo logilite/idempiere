@@ -182,7 +182,7 @@ public class ServerReportCtl {
 		
 		jasperProcessInfo.setParameter(jasperPrintParams.toArray(new ProcessInfoParameter[]{}));
 		
-		ServerProcessCtl.process(jasperProcessInfo, pi != null ? Trx.get(pi.getTransactionName(),false) : null); 		
+		ServerProcessCtl.process(jasperProcessInfo, pi != null && pi.getTransactionName() != null ? Trx.get(pi.getTransactionName(),false) : null); 		
 		
 		boolean result = !jasperProcessInfo.isError();
 		if (result && pi != null && pi.isBatch())
@@ -217,41 +217,42 @@ public class ServerReportCtl {
 	 */
 	static public boolean start (ProcessInfo pi)
 	{
+
 		MPInstance instance = new MPInstance(Env.getCtx(), pi.getAD_PInstance_ID(), null);
 		instance.setIsProcessing(true);
 		instance.saveEx();
 		
 		try {
 			/**
-			 * Order Print
+			 *	Order Print
 			 */
-			if (pi.getAD_Process_ID() == PROCESS_RPT_C_ORDER) // C_Order
+			if (pi.getAD_Process_ID() == PROCESS_RPT_C_ORDER)			//	C_Order
 				return startDocumentPrint(ReportEngine.ORDER, null, pi.getRecord_ID(), null, pi);
-			if (pi.getAD_Process_ID() == MProcess.getProcess_ID("Rpt PP_Order", null)) // C_Order
+			if (pi.getAD_Process_ID() ==  MProcess.getProcess_ID("Rpt PP_Order", null))			//	C_Order
 				return startDocumentPrint(ReportEngine.MANUFACTURING_ORDER, null, pi.getRecord_ID(), null, pi);
-			if (pi.getAD_Process_ID() == MProcess.getProcess_ID("Rpt DD_Order", null)) // C_Order
+			if (pi.getAD_Process_ID() ==  MProcess.getProcess_ID("Rpt DD_Order", null))			//	C_Order
 				return startDocumentPrint(ReportEngine.DISTRIBUTION_ORDER, null, pi.getRecord_ID(), null, pi);
-			else if (pi.getAD_Process_ID() == PROCESS_RPT_C_INVOICE) // C_Invoice
+			else if (pi.getAD_Process_ID() == PROCESS_RPT_C_INVOICE)		//	C_Invoice
 				return startDocumentPrint(ReportEngine.INVOICE, null, pi.getRecord_ID(), null, pi);
-			else if (pi.getAD_Process_ID() == PROCESS_RPT_M_INOUT) // M_InOut
+			else if (pi.getAD_Process_ID() == PROCESS_RPT_M_INOUT)		//	M_InOut
 				return startDocumentPrint(ReportEngine.SHIPMENT, null, pi.getRecord_ID(), null, pi);
-			else if (pi.getAD_Process_ID() == PROCESS_RPT_C_PROJECT) // C_Project
+			else if (pi.getAD_Process_ID() == PROCESS_RPT_C_PROJECT)		//	C_Project
 				return startDocumentPrint(ReportEngine.PROJECT, null, pi.getRecord_ID(), null, pi);
-			else if (pi.getAD_Process_ID() == PROCESS_RPT_C_RFQRESPONSE) // C_RfQResponse
+			else if (pi.getAD_Process_ID() == PROCESS_RPT_C_RFQRESPONSE)		//	C_RfQResponse
 				return startDocumentPrint(ReportEngine.RFQ, null, pi.getRecord_ID(), null, pi);
-			else if (pi.getAD_Process_ID() == PROCESS_RPT_C_DUNNING) // Dunning
+			else if (pi.getAD_Process_ID() == PROCESS_RPT_C_DUNNING)		//	Dunning
 				return startDocumentPrint(ReportEngine.DUNNING, null, pi.getRecord_ID(), null, pi);
-			else if (pi.getAD_Process_ID() == PROCESS_RPT_FINREPORT // Financial Report
-					|| pi.getAD_Process_ID() == PROCESS_RPT_FINSTATEMENT) // Financial Statement
-				return startFinReport(pi);
-			else if (pi.getAD_Process_ID() == PROCESS_RPT_M_INVENTORY) // M_Inventory
+	 	    else if (pi.getAD_Process_ID() == PROCESS_RPT_FINREPORT			//	Financial Report
+				|| pi.getAD_Process_ID() == PROCESS_RPT_FINSTATEMENT)			//	Financial Statement
+			   return startFinReport (pi);
+			else if (pi.getAD_Process_ID() == PROCESS_RPT_M_INVENTORY)			//	M_Inventory
 				return startDocumentPrint(ReportEngine.INVENTORY, null, pi.getRecord_ID(), null, pi);
-			else if (pi.getAD_Process_ID() == PROCESS_RPT_M_MOVEMENT) // M_Movement
+			else if (pi.getAD_Process_ID() == PROCESS_RPT_M_MOVEMENT)			//	M_Movement
 				return startDocumentPrint(ReportEngine.MOVEMENT, null, pi.getRecord_ID(), null, pi);
 			/********************
-			 * Standard Report
+			 *	Standard Report
 			 *******************/
-			return startStandardReport(pi);
+			return startStandardReport (pi);
 		}
 		finally {
 			instance.setIsProcessing(false);

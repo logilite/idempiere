@@ -335,6 +335,7 @@ public class CompiereService {
 			session = new MSession(getCtx(), session.getAD_Session_ID(), null);
 		}
 
+
 		session.setWebSession("WebService");
 		session.setAD_SessionType(sessionType);
 		session.setDescription(session.getDescription() + "\nUser Agent: " + getCtx().getProperty("#UserAgent"));

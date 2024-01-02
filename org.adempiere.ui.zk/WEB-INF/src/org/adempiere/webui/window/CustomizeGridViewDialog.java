@@ -1,3 +1,28 @@
+/***********************************************************************
+ * This file is part of iDempiere ERP Open Source                      *
+ * http://www.idempiere.org                                            *
+ *                                                                     *
+ * Copyright (C) Contributors                                          *
+ *                                                                     *
+ * This program is free software; you can redistribute it and/or       *
+ * modify it under the terms of the GNU General Public License         *
+ * as published by the Free Software Foundation; either version 2      *
+ * of the License, or (at your option) any later version.              *
+ *                                                                     *
+ * This program is distributed in the hope that it will be useful,     *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of      *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the        *
+ * GNU General Public License for more details.                        *
+ *                                                                     *
+ * You should have received a copy of the GNU General Public License   *
+ * along with this program; if not, write to the Free Software         *
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,          *
+ * MA 02110-1301, USA.                                                 *
+ *                                                                     *
+ * Contributors:                                                       *
+ * - deepak															   *
+ * - hengsin                         								   *
+ **********************************************************************/
 package org.adempiere.webui.window;
 
 import java.util.ArrayList;
@@ -5,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.adempiere.util.Callback;
 import org.adempiere.webui.adwindow.ADTabpanel;
 import org.adempiere.webui.adwindow.GridView;
 import org.adempiere.webui.adwindow.QuickGridView;
@@ -26,7 +52,7 @@ import org.zkoss.zul.Columns;
 public class CustomizeGridViewDialog extends Window {
 
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -138153049225192685L;
 
@@ -50,6 +76,14 @@ public class CustomizeGridViewDialog extends Window {
 		initComponent(windowNo, AD_Tab_ID, AD_User_ID, columnsWidth, gridFieldIds);
 	}
 	
+	/**
+	 * Create components and layout dialog
+	 * @param windowNo
+	 * @param AD_Tab_ID
+	 * @param AD_User_ID
+	 * @param columnsWidth
+	 * @param gridFieldIds
+	 */
 	private void initComponent(int windowNo, int AD_Tab_ID, int AD_User_ID, Map<Integer, String> columnsWidth, ArrayList<Integer> gridFieldIds) {
 		if (isQuickForm)
 		{
@@ -103,6 +137,9 @@ public class CustomizeGridViewDialog extends Window {
 			return customizePanel.isSaved();
 	}
 	
+	/**
+	 * @param gridPanel
+	 */
 	public void setGridPanel(GridView gridPanel){
 		customizePanel.setGridPanel(gridPanel);
 	}
@@ -110,9 +147,21 @@ public class CustomizeGridViewDialog extends Window {
 	/**
 	 * show grid view customization dialog for tabPanel
 	 * @param tabPanel
-	 * @return true if saved is ok
+	 * @return ignore the return value, it is not working correctly
+	 * @deprecated
 	 */
+	@Deprecated(forRemoval = true, since = "11")
 	public static boolean onCustomize(ADTabpanel tabPanel) {
+		onCustomize(tabPanel, null);
+		return true;
+	}
+
+	/**
+	 * Show grid view customization dialog for tabPanel
+	 * @param tabPanel
+	 * @param callback
+	 */
+	public static void onCustomize(ADTabpanel tabPanel, Callback<Boolean> callback) {
 		Columns columns = tabPanel.getGridView().getListbox().getColumns();
 		List<Component> columnList = columns.getChildren();
 		GridField[] fields = tabPanel.getGridView().getFields();
@@ -132,7 +181,7 @@ public class CustomizeGridViewDialog extends Window {
 			gridFieldIds.add(fields[i].getAD_Field_ID());
 
 		}
-		return showCustomize(0, tabPanel.getGridTab().getAD_Tab_ID(), columnsWidth,gridFieldIds,tabPanel.getGridView(), null, false);
+		showCustomize(0, tabPanel.getGridTab().getAD_Tab_ID(), columnsWidth,gridFieldIds,tabPanel.getGridView(), null, false, callback);
 	}
 	
 	/**
@@ -143,10 +192,31 @@ public class CustomizeGridViewDialog extends Window {
 	 * @param gridFieldIds list fieldId current display in gridview
 	 * @param gridPanel
 	 * @param isQuickForm
-	 * @param quickGridView 
+	 * @param quickGridView
+	 * @return ignore the return value, it is not working correctly
+	 * @deprecated 
 	 */
+	@Deprecated(forRemoval = true, since = "11")
 	public static boolean showCustomize(int WindowNo, int AD_Tab_ID, Map <Integer, String> columnsWidth, ArrayList <Integer> gridFieldIds, GridView gridPanel,
 		QuickGridView quickGridView, boolean isQuickForm)
+	{
+		showCustomize(WindowNo, AD_Tab_ID, columnsWidth, gridFieldIds, gridPanel, quickGridView, isQuickForm, null);
+		return true;
+	}
+	
+	/**
+	 * Show customize grid view dialog
+	 * @param WindowNo window no
+	 * @param AD_Tab_ID
+	 * @param columnsWidth 
+	 * @param gridFieldIds list of fieldId currently display in gridview
+	 * @param gridPanel
+	 * @param quickGridView
+	 * @param isQuickForm
+	 * @param callback 
+	 */
+	public static void showCustomize(int WindowNo, int AD_Tab_ID, Map <Integer, String> columnsWidth, ArrayList <Integer> gridFieldIds, GridView gridPanel,
+		QuickGridView quickGridView, boolean isQuickForm, Callback<Boolean> callback)
 	{
 		CustomizeGridViewDialog customizeWindow = new CustomizeGridViewDialog(WindowNo, AD_Tab_ID, Env.getAD_User_ID(Env.getCtx()), columnsWidth, gridFieldIds,
 				isQuickForm);
@@ -158,8 +228,11 @@ public class CustomizeGridViewDialog extends Window {
 		{
 			customizeWindow.setGridPanel(gridPanel);
 		}
+		customizeWindow.addCallback(Window.AFTER_PAGE_DETACHED, t -> {
+			if (callback != null)
+				callback.onCallback(customizeWindow.isSaved());
+		});
 		AEnv.showWindow(customizeWindow);
-		return customizeWindow.isSaved();
 	} // showCustomize
 
 	/**

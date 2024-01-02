@@ -60,7 +60,7 @@ import org.zkoss.zul.Image;
 import org.zkoss.zul.Space;
 
 /**
- * 	Document Status Indicator
+ * 	Document Status ({@link MDocumentStatus}) Indicator
  */
 public class WDocumentStatusIndicator extends Panel implements EventListener<Event> {
 	private static final long serialVersionUID = -9076405331101242792L;
@@ -71,6 +71,16 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 	 */
 	public WDocumentStatusIndicator(MDocumentStatus documentStatus)
 	{
+		this(documentStatus, false);
+	}
+	
+	/**
+	 * 	Constructor
+	 *	@param documentStatus
+	 *  @param lazy
+	 */
+	public WDocumentStatusIndicator(MDocumentStatus documentStatus, boolean lazy)
+	{
 		super();
 
 		m_documentStatus = documentStatus;
@@ -78,8 +88,11 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 		init();
 		this.setSclass("activities-box");
 		
-		refresh();
-		updateUI();
+		if (!lazy) 
+		{
+			refresh();
+			updateUI();
+		}
 	}	//	WDocumentStatusIndicator
 
 	private MDocumentStatus		m_documentStatus = null;
@@ -102,7 +115,7 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 	}	//	getGoal
 
      /**
-	 * 	Init Graph Display
+	 * 	Init Document Status Display
 	 */
 	private void init()
 	{
@@ -112,6 +125,7 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 		String label = m_documentStatus.get_Translation(MDocumentStatus.COLUMNNAME_Name);
 		helpTitle = label + " Information";
 		nameLabel.setText(label + ": ");
+		nameLabel.setTooltiptext(m_documentStatus.get_Translation(MDocumentStatus.COLUMNNAME_Description));
 		String nameColorStyle = "";
 		int Name_PrintColor_ID = m_documentStatus.getName_PrintColor_ID();
 		if (Name_PrintColor_ID > 0) {
@@ -174,7 +188,7 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 		this.addEventListener(Events.ON_CLICK, this);
 	}
 
-
+	@Override
 	public void onEvent(Event event) throws Exception {
 		String eventName = event.getName();
 
@@ -209,6 +223,9 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 		}
 	}
 		
+	/**
+	 * Load {@link #m_documentStatus}
+	 */
 	public void refresh() {
 		lastRunTime = new Timestamp(System.currentTimeMillis());
 		MDocumentStatus refresh_documentStatus = MDocumentStatus.get(Env.getCtx(), m_documentStatus.getPA_DocumentStatus_ID());
@@ -220,6 +237,9 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 		queryTime = currenutTime - lastRunTime.getTime();
 	}
 
+	/**
+	 * Update UI with data loaded in {@link #refresh()}
+	 */
 	public void updateUI() {
 		statusLabel.setText(Integer.toString(statusCount));
 

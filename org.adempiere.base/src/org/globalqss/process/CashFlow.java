@@ -30,6 +30,7 @@ import org.compiere.model.MFactAcct;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderPaySchedule;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MTable;
 import org.compiere.model.X_T_CashFlow;
 import org.compiere.process.ProcessInfoParameter;
@@ -72,7 +73,7 @@ public class CashFlow  extends SvrProcess {
 			else if (name.equals("C_ElementValue_ID"))
 				p_C_ElementValue_ID = para[i].getParameterAsInt();
 			else
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 	}	//	prepare
 

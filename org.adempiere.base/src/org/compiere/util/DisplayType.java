@@ -46,16 +46,25 @@ import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_PRINTNAME;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_PRODUCTATTRIBUTE;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_QUANTITY;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_RADIOGROUP_LIST;
+import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_RECORD_ID;
+import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_RECORD_UU;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_ROWID;
+import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_SCHEDULER_STATE;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_SEARCH;
+import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_SEARCH_UU;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_SINGLE_SELECTION_GRID;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_STRING;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_TABLE;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_TABLEDIR;
+import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_TABLEDIR_UU;
+import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_TABLE_UU;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_TEXT;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_TEXTLONG;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_TIME;
+import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_TIMESTAMP_WITH_TIMEZONE;
+import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_TIMEZONE;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_URL;
+import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_UUID;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_YES_NO;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_MULTI_SELECT_TABLE;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_MULTI_SELECT_LIST;
@@ -69,6 +78,7 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.TimeZone;
 import java.util.logging.Level;
 
 import org.adempiere.base.IDisplayTypeFactory;
@@ -100,6 +110,8 @@ public final class DisplayType
 	public static final int Amount     = REFERENCE_DATATYPE_AMOUNT;
 	/** Display Type 13	ID	*/
 	public static final int ID         = REFERENCE_DATATYPE_ID;
+	/** Display Type 200231	UUID */
+	public static final int UUID  = REFERENCE_DATATYPE_UUID;
 	/** Display Type 14	Text	*/
 	public static final int Text       = REFERENCE_DATATYPE_TEXT;
 	/** Display Type 15	Date	*/
@@ -110,8 +122,12 @@ public final class DisplayType
 	public static final int List       = REFERENCE_DATATYPE_LIST;
 	/** Display Type 18	Table	*/
 	public static final int Table      = REFERENCE_DATATYPE_TABLE;
+	/** Display Type 200233	Table	*/
+	public static final int TableUU      = REFERENCE_DATATYPE_TABLE_UU;
 	/** Display Type 19	TableDir	*/
 	public static final int TableDir   = REFERENCE_DATATYPE_TABLEDIR;
+	/** Display Type 200234	*/
+	public static final int TableDirUU   = REFERENCE_DATATYPE_TABLEDIR_UU;
 	/** Display Type 20	YN	*/
 	public static final int YesNo      = REFERENCE_DATATYPE_YES_NO;
 	/** Display Type 21	Location	*/
@@ -134,6 +150,8 @@ public final class DisplayType
 	public static final int Quantity   = REFERENCE_DATATYPE_QUANTITY;
 	/** Display Type 30	Search	*/
 	public static final int Search     = REFERENCE_DATATYPE_SEARCH;
+	/** Display Type 200235	Search	*/
+	public static final int SearchUU     = REFERENCE_DATATYPE_SEARCH_UU;
 	/** Display Type 31	Locator	*/
 	public static final int Locator    = REFERENCE_DATATYPE_LOCATOR;
 	/** Display Type 32 Image	*/
@@ -181,6 +199,17 @@ public final class DisplayType
 	public static final int ChosenMultipleSelectionTable = REFERENCE_DATATYPE_CHOSEN_MULTIPLE_SELECTION_TABLE;
 	
 	public static final int ChosenMultipleSelectionSearch = REFERENCE_DATATYPE_CHOSEN_MULTIPLE_SELECTION_SEARCH;
+	
+	public static final int SchedulerState = REFERENCE_DATATYPE_SCHEDULER_STATE;
+
+	public static final int RecordID = REFERENCE_DATATYPE_RECORD_ID;
+	
+	public static final int RecordUU = REFERENCE_DATATYPE_RECORD_UU;
+	
+
+	public static final int TimestampWithTimeZone = REFERENCE_DATATYPE_TIMESTAMP_WITH_TIMEZONE;
+	
+	public static final int TimeZoneId = REFERENCE_DATATYPE_TIMEZONE;
 
 	/**
 	 *	- New Display Type
@@ -226,7 +255,7 @@ public final class DisplayType
 		if (displayType == ID || displayType == Table || displayType == TableDir
 			|| displayType == Search || displayType == Location || displayType == Locator
 			|| displayType == Account || displayType == Assignment || displayType == PAttribute
-			|| displayType == Image || displayType == Chart)
+			|| displayType == Image || displayType == Chart	|| displayType == RecordID)
 			return true;
 		
 		//not custom type, don't have to check factory
@@ -255,6 +284,45 @@ public final class DisplayType
 		
 		return false;
 	}	//	isID
+
+	/**
+	 *	Returns true if UUID (TableUU, SearchUU, ..).
+	 *  (stored as String)
+	 *  @param displayType Display Type
+	 *  @return true if UUID
+	 */
+	public static boolean isUUID (int displayType)
+	{
+		if (displayType == UUID || displayType == TableUU || displayType == TableDirUU
+			|| displayType == SearchUU || displayType == RecordUU)
+			return true;
+
+		//not custom type, don't have to check factory
+		if (displayType <= MTable.MAX_OFFICIAL_ID)
+			return false;
+
+		IServiceReferenceHolder<IDisplayTypeFactory> cache = s_displayTypeFactoryCache.get(displayType);
+		if (cache != null) {
+			IDisplayTypeFactory service = cache.getService();
+			if (service != null)
+				return service.isUUID(displayType);
+			else
+				s_displayTypeFactoryCache.remove(displayType);
+		}
+		String customTypeKey = displayType+"|isUUID";
+		if (! s_customDisplayTypeNegativeCache.containsKey(customTypeKey)) {
+			Optional<IServiceReferenceHolder<IDisplayTypeFactory>> found = getDisplayTypeFactories().stream()
+					.filter(e -> e.getService() != null && e.getService().isUUID(displayType))
+					.findFirst();
+			if (found.isPresent()) {
+				s_displayTypeFactoryCache.put(displayType, found.get());
+				return true;
+			}
+			s_customDisplayTypeNegativeCache.put(customTypeKey, Boolean.TRUE);
+		}
+
+		return false;
+	}	//	isUUID
 
 	/**
 	 *	Returns true, if DisplayType is numeric (Amount, Number, Quantity, Integer).
@@ -358,7 +426,10 @@ public final class DisplayType
 			|| displayType == RadiogroupList
 			|| displayType == ChosenMultipleSelectionList
 			|| displayType == ChosenMultipleSelectionTable
-			|| displayType == ChosenMultipleSelectionSearch)
+			|| displayType == ChosenMultipleSelectionSearch
+			|| displayType == TimeZoneId
+			|| displayType == UUID || displayType == RecordUU
+			|| displayType == TableDirUU || displayType == TableUU || displayType == SearchUU)
 			return true;
 		
 		//not custom type, don't have to check factory
@@ -399,6 +470,8 @@ public final class DisplayType
 		if (displayType == Date || displayType == DateTime || displayType == Time)
 			return true;
 		
+		if (isTimestampWithTimeZone(displayType))
+			return true;
 		
 		//not custom type, don't have to check factory
 		if (displayType <= MTable.MAX_OFFICIAL_ID)
@@ -479,8 +552,10 @@ public final class DisplayType
 	 */
 	public static boolean isLookup(int displayType)
 	{
-		if (displayType == List || displayType == Table
-			|| displayType == TableDir || displayType == Search
+		if (displayType == List
+			|| displayType == Table || displayType == TableUU
+			|| displayType == TableDir || displayType == TableDirUU
+			|| displayType == Search || displayType == SearchUU
 			|| displayType == RadiogroupList
 			|| displayType == ChosenMultipleSelectionTable
 			|| displayType == ChosenMultipleSelectionSearch
@@ -557,6 +632,44 @@ public final class DisplayType
 		return false;
 	}	//	isLOB
 
+	/**
+	 * 
+	 * @param displayType
+	 * @return true if displayType == TimestampWithTimeZone
+	 */
+	public static boolean isTimestampWithTimeZone(int displayType)
+	{
+		if (displayType == TimestampWithTimeZone)
+			return true;
+		else
+			return false;
+	}
+	
+	/**
+	 * 
+	 * @param displayType
+	 * @return true if displayType is a ChosenMultipleSelection
+	 */
+	public static boolean isChosenMultipleSelection(int displayType)
+	{
+		return (   displayType == ChosenMultipleSelectionList
+				|| displayType == ChosenMultipleSelectionSearch
+				|| displayType == ChosenMultipleSelectionTable);
+	}
+	
+	/**
+	 * 
+	 * @param displayType
+	 * @return true if displayType is a multi ID string separated by commas
+	 */
+	public static boolean isMultiID(int displayType)
+	{
+		return (   displayType == ChosenMultipleSelectionSearch
+				|| displayType == ChosenMultipleSelectionTable
+				|| displayType == SingleSelectionGrid
+				|| displayType == MultipleSelectionGrid);
+	}
+	
 	/**************************************************************************
 	 *	Return Format for numeric DisplayType
 	 *  @param displayType Display Type (default Number)
@@ -725,8 +838,8 @@ public final class DisplayType
 		{
 			SimpleDateFormat format = (SimpleDateFormat)DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, language.getLocale());
 			try {
-			format.applyPattern(pattern);
-			return format;
+				format.applyPattern(pattern);
+				return displayType==TimeZoneId ? setTimeZone(format) : format;
 			}
 			catch (IllegalArgumentException e) {
 				s_log.log(Level.WARNING, "Invalid date pattern: " + pattern);
@@ -745,7 +858,14 @@ public final class DisplayType
 				return new SimpleDateFormat(lang.getTimePattern());
 			return myLanguage.getTimeFormat();
 		}
-
+		else if ( displayType == TimestampWithTimeZone) {
+			SimpleDateFormat format = null;
+			if (!Util.isEmpty(lang.getDatePattern()) && !Util.isEmpty(lang.getTimePattern()))
+				format = new SimpleDateFormat(lang.getDatePattern() + " " + lang.getTimePattern());
+			else
+				format = myLanguage.getDateTimeFormat();
+			return setTimeZone(format);
+		}
 		else if (displayType > MTable.MAX_OFFICIAL_ID) { //custom display type
 			IServiceReferenceHolder<IDisplayTypeFactory> cache = s_displayTypeFactoryCache.get(displayType);
 			if (cache != null) {
@@ -779,6 +899,20 @@ public final class DisplayType
 		return myLanguage.getDateFormat();		//	default
 	}	//	getDateFormat
 
+	private static SimpleDateFormat setTimeZone(SimpleDateFormat dateFormat) {
+		String timezoneId = Env.getContext(Env.getCtx(), Env.CLIENT_INFO_TIME_ZONE);
+		if (!Util.isEmpty(timezoneId, true))
+		{
+			TimeZone tz = TimeZone.getTimeZone(timezoneId);
+			if (tz != null && timezoneId.equals(tz.getID()))
+			{
+				dateFormat = new SimpleDateFormat(dateFormat.toPattern());
+				dateFormat.setTimeZone(tz);
+			}
+		}
+		return dateFormat;
+	}
+	
 	/**
 	 *	JDBC Date Format YYYY-MM-DD
 	 *  @return date format
@@ -900,6 +1034,8 @@ public final class DisplayType
 		//
 		if (displayType == DisplayType.Integer)
 			return getDatabase().getNumericDataType()+"(10)";
+		if (DisplayType.isTimestampWithTimeZone(displayType))
+			return getDatabase().getTimestampWithTimezoneDataType();
 		if (DisplayType.isDate(displayType))
 			return getDatabase().getTimestampDataType();
 		if (DisplayType.isNumeric(displayType))
@@ -925,7 +1061,7 @@ public final class DisplayType
 				return getDatabase().getNumericDataType()+"(10)";
 			else
 				return getDatabase().getCharacterDataType()+"(" + fieldLength + ")";
-		}
+		}		
 		if (displayType == DisplayType.MultiSelectTable || displayType == DisplayType.MultiSelectSearch)
 		{
 			return getDatabase().getNumericDataType()+"(10)[]";
@@ -978,76 +1114,108 @@ public final class DisplayType
 	 */
 	public static String getDescription (int displayType)
 	{
-		if (displayType == String)
-			return "String";
-		if (displayType == Integer)
-			return "Integer";
-		if (displayType == Amount)
-			return "Amount";
-		if (displayType == ID)
-			return "ID";
-		if (displayType == Text)
-			return "Text";
-		if (displayType == Date)
-			return "Date";
-		if (displayType == DateTime)
-			return "DateTime";
-		if (displayType == List)
-			return "List";
-		if (displayType == RadiogroupList)
-			return "RadiogroupList";
-		if (displayType == Table)
-			return "Table";
-		if (displayType == TableDir)
-			return "TableDir";
-		if (displayType == YesNo)
-			return "YesNo";
-		if (displayType == Location)
-			return "Location";
-		if (displayType == Number)
-			return "Number";
-		if (displayType == Binary)
-			return "Binary";
-		if (displayType == Time)
-			return "Time";
-		if (displayType == Account)
+		switch (displayType) {
+		case Account:
 			return "Account";
-		if (displayType == RowID)
-			return "RowID";
-		if (displayType == Color)
-			return "Color";
-		if (displayType == Button)
-			return "Button";
-		if (displayType == Quantity)
-			return "Quantity";
-		if (displayType == Search)
-			return "Search";
-		if (displayType == Locator)
-			return "Locator";
-		if (displayType == Image)
-			return "Image";
-		if (displayType == Assignment)
+		case Amount:
+			return "Amount";
+		case Assignment:
 			return "Assignment";
-		if (displayType == Memo)
-			return "Memo";
-		if (displayType == PAttribute)
-			return "PAttribute";
-		if (displayType == TextLong)
-			return "TextLong";
-		if (displayType == CostPrice)
-			return "CostPrice";
-		if (displayType == FilePath)
-			return "FilePath";
-		if (displayType == FileName)
-			return "FileName";
-		if (displayType == URL)
-			return "URL";
-		if (displayType == PrinterName)
-			return "PrinterName";
-		if (displayType == Payment)
-			return "Payment";
-		if (displayType == Chart)
+		case Binary:
+			return "Binary";
+		case Button:
+			return "Button";
+		case Chart:
 			return "Chart";
+		case ChosenMultipleSelectionList:
+			return "ChosenMultipleSelectionList";
+		case ChosenMultipleSelectionSearch:
+			return "ChosenMultipleSelectionSearch";
+		case ChosenMultipleSelectionTable:
+			return "ChosenMultipleSelectionTable";
+		case Color:
+			return "Color";
+		case CostPrice:
+			return "CostPrice";
+		case DashboardContent:
+			return "DashboardContent";
+		case Date:
+			return "Date";
+		case DateTime:
+			return "DateTime";
+		case FileName:
+			return "FileName";
+		case FilePath:
+			return "FilePath";
+		case ID:
+			return "ID";
+		case Image:
+			return "Image";
+		case Integer:
+			return "Integer";
+		case List:
+			return "List";
+		case Location:
+			return "Location";
+		case Locator:
+			return "Locator";
+		case Memo:
+			return "Memo";
+		case MultipleSelectionGrid:
+			return "MultipleSelectionGrid";
+		case Number:
+			return "Number";
+		case PAttribute:
+			return "PAttribute";
+		case Payment:
+			return "Payment";
+		case PrinterName:
+			return "PrinterName";
+		case Quantity:
+			return "Quantity";
+		case RadiogroupList:
+			return "RadiogroupList";
+		case RecordID:
+			return "RecordID";
+		case RecordUU:
+			return "RecordUUID";
+		case RowID:
+			return "RowID";
+		case SchedulerState:
+			return "SchedulerState";
+		case Search:
+			return "Search";
+		case SearchUU:
+			return "SearchUU";
+		case SingleSelectionGrid:
+			return "SingleSelectionGrid";
+		case String:
+			return "String";
+		case Table:
+			return "Table";
+		case TableDir:
+			return "TableDir";
+		case TableDirUU:
+			return "TableDirUU";
+		case TableUU:
+			return "TableUU";
+		case Text:
+			return "Text";
+		case TextLong:
+			return "TextLong";
+		case Time:
+			return "Time";
+		case TimestampWithTimeZone:
+			return "TimestampWithTimeZone";
+		case TimeZoneId:
+			return "TimeZoneId";
+		case URL:
+			return "URL";
+		case UUID:
+			return "UUID";
+		case YesNo:
+			return "YesNo";
+		}
 		if (displayType == MultiSelectTable)
 			return "MultiSelectTable";
 		if (displayType == MultiSelectList)

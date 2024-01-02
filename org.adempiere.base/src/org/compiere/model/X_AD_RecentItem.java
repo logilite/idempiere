@@ -21,16 +21,16 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 /** Generated Model for AD_RecentItem
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="AD_RecentItem")
-public class X_AD_RecentItem extends PO implements I_AD_RecentItem, I_Persistent 
+public class X_AD_RecentItem extends PO implements I_AD_RecentItem, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_AD_RecentItem (Properties ctx, int AD_RecentItem_ID, String trxName)
@@ -54,7 +54,42 @@ public class X_AD_RecentItem extends PO implements I_AD_RecentItem, I_Persistent
 			setAD_RecentItem_ID (0);
 			setAD_Role_ID (0);
 			setAD_Table_ID (0);
-			setRecord_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_RecentItem (Properties ctx, int AD_RecentItem_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_RecentItem_ID, trxName, virtualColumns);
+      /** if (AD_RecentItem_ID == 0)
+        {
+			setAD_RecentItem_ID (0);
+			setAD_Role_ID (0);
+			setAD_Table_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_RecentItem (Properties ctx, String AD_RecentItem_UU, String trxName)
+    {
+      super (ctx, AD_RecentItem_UU, trxName);
+      /** if (AD_RecentItem_UU == null)
+        {
+			setAD_RecentItem_ID (0);
+			setAD_Role_ID (0);
+			setAD_Table_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_RecentItem (Properties ctx, String AD_RecentItem_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_RecentItem_UU, trxName, virtualColumns);
+      /** if (AD_RecentItem_UU == null)
+        {
+			setAD_RecentItem_ID (0);
+			setAD_Role_ID (0);
+			setAD_Table_ID (0);
         } */
     }
 
@@ -65,7 +100,7 @@ public class X_AD_RecentItem extends PO implements I_AD_RecentItem, I_Persistent
     }
 
     /** AccessLevel
-      * @return 7 - System - Client - Org 
+      * @return 7 - System - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -282,5 +317,20 @@ public class X_AD_RecentItem extends PO implements I_AD_RecentItem, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Record UUID.
+		@param Record_UU Record UUID
+	*/
+	public void setRecord_UU (String Record_UU)
+	{
+		set_ValueNoCheck (COLUMNNAME_Record_UU, Record_UU);
+	}
+
+	/** Get Record UUID.
+		@return Record UUID	  */
+	public String getRecord_UU()
+	{
+		return (String)get_Value(COLUMNNAME_Record_UU);
 	}
 }

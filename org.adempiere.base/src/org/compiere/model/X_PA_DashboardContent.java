@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for PA_DashboardContent
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="PA_DashboardContent")
-public class X_PA_DashboardContent extends PO implements I_PA_DashboardContent, I_Persistent 
+public class X_PA_DashboardContent extends PO implements I_PA_DashboardContent, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20230207L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_PA_DashboardContent (Properties ctx, int PA_DashboardContent_ID, String trxName)
@@ -72,6 +72,77 @@ public class X_PA_DashboardContent extends PO implements I_PA_DashboardContent, 
 // N
 			setIsShowInDashboard (true);
 // 'Y'
+			setIsShowTitle (true);
+// Y
+			setName (null);
+			setPA_DashboardContent_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PA_DashboardContent (Properties ctx, int PA_DashboardContent_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, PA_DashboardContent_ID, trxName, virtualColumns);
+      /** if (PA_DashboardContent_ID == 0)
+        {
+			setIsCollapsedByDefault (false);
+// N
+			setIsCollapsible (true);
+// Y
+			setIsEmbedReportContent (false);
+// N
+			setIsMaximizable (true);
+// Y
+			setIsShowInDashboard (true);
+// 'Y'
+			setIsShowTitle (true);
+// Y
+			setName (null);
+			setPA_DashboardContent_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PA_DashboardContent (Properties ctx, String PA_DashboardContent_UU, String trxName)
+    {
+      super (ctx, PA_DashboardContent_UU, trxName);
+      /** if (PA_DashboardContent_UU == null)
+        {
+			setIsCollapsedByDefault (false);
+// N
+			setIsCollapsible (true);
+// Y
+			setIsEmbedReportContent (false);
+// N
+			setIsMaximizable (true);
+// Y
+			setIsShowInDashboard (true);
+// 'Y'
+			setIsShowTitle (true);
+// Y
+			setName (null);
+			setPA_DashboardContent_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PA_DashboardContent (Properties ctx, String PA_DashboardContent_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, PA_DashboardContent_UU, trxName, virtualColumns);
+      /** if (PA_DashboardContent_UU == null)
+        {
+			setIsCollapsedByDefault (false);
+// N
+			setIsCollapsible (true);
+// Y
+			setIsEmbedReportContent (false);
+// N
+			setIsMaximizable (true);
+// Y
+			setIsShowInDashboard (true);
+// 'Y'
+			setIsShowTitle (true);
+// Y
 			setName (null);
 			setPA_DashboardContent_ID (0);
         } */
@@ -84,7 +155,7 @@ public class X_PA_DashboardContent extends PO implements I_PA_DashboardContent, 
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -133,26 +204,26 @@ public class X_PA_DashboardContent extends PO implements I_PA_DashboardContent, 
 	}
 
 	public org.compiere.model.I_AD_PrintFormat getAD_PrintFormat() throws RuntimeException
-    {
-		return (org.compiere.model.I_AD_PrintFormat)MTable.get(getCtx(), org.compiere.model.I_AD_PrintFormat.Table_Name)
-			.getPO(getAD_PrintFormat_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_AD_PrintFormat)MTable.get(getCtx(), org.compiere.model.I_AD_PrintFormat.Table_ID)
+			.getPO(getAD_PrintFormat_ID(), get_TrxName());
+	}
 
 	/** Set Print Format.
-		@param AD_PrintFormat_ID 
-		Data Print Format
-	  */
+		@param AD_PrintFormat_ID Data Print Format
+	*/
 	public void setAD_PrintFormat_ID (int AD_PrintFormat_ID)
 	{
-		if (AD_PrintFormat_ID < 1) 
+		if (AD_PrintFormat_ID < 1)
 			set_Value (COLUMNNAME_AD_PrintFormat_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_AD_PrintFormat_ID, Integer.valueOf(AD_PrintFormat_ID));
 	}
 
 	/** Get Print Format.
 		@return Data Print Format
 	  */
-	public int getAD_PrintFormat_ID () 
+	public int getAD_PrintFormat_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_PrintFormat_ID);
 		if (ii == null)
@@ -217,23 +288,25 @@ public class X_PA_DashboardContent extends PO implements I_PA_DashboardContent, 
 	}
 
 	public org.compiere.model.I_AD_StatusLine getAD_StatusLine() throws RuntimeException
-    {
-		return (org.compiere.model.I_AD_StatusLine)MTable.get(getCtx(), org.compiere.model.I_AD_StatusLine.Table_Name)
-			.getPO(getAD_StatusLine_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_AD_StatusLine)MTable.get(getCtx(), org.compiere.model.I_AD_StatusLine.Table_ID)
+			.getPO(getAD_StatusLine_ID(), get_TrxName());
+	}
 
 	/** Set Status Line.
-		@param AD_StatusLine_ID Status Line	  */
+		@param AD_StatusLine_ID Status Line
+	*/
 	public void setAD_StatusLine_ID (int AD_StatusLine_ID)
 	{
-		if (AD_StatusLine_ID < 1) 
+		if (AD_StatusLine_ID < 1)
 			set_Value (COLUMNNAME_AD_StatusLine_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_AD_StatusLine_ID, Integer.valueOf(AD_StatusLine_ID));
 	}
 
 	/** Get Status Line.
 		@return Status Line	  */
-	public int getAD_StatusLine_ID () 
+	public int getAD_StatusLine_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_StatusLine_ID);
 		if (ii == null)
@@ -386,10 +459,10 @@ public class X_PA_DashboardContent extends PO implements I_PA_DashboardContent, 
 	public boolean isCollapsedByDefault()
 	{
 		Object oo = get_Value(COLUMNNAME_IsCollapsedByDefault);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -409,10 +482,10 @@ public class X_PA_DashboardContent extends PO implements I_PA_DashboardContent, 
 	public boolean isCollapsible()
 	{
 		Object oo = get_Value(COLUMNNAME_IsCollapsible);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -432,17 +505,18 @@ public class X_PA_DashboardContent extends PO implements I_PA_DashboardContent, 
 	public boolean isEmbedReportContent()
 	{
 		Object oo = get_Value(COLUMNNAME_IsEmbedReportContent);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
 	}
 
 	/** Set Maximizable.
-		@param IsMaximizable Maximizable	  */
+		@param IsMaximizable Maximizable
+	*/
 	public void setIsMaximizable (boolean IsMaximizable)
 	{
 		set_Value (COLUMNNAME_IsMaximizable, Boolean.valueOf(IsMaximizable));
@@ -450,13 +524,13 @@ public class X_PA_DashboardContent extends PO implements I_PA_DashboardContent, 
 
 	/** Get Maximizable.
 		@return Maximizable	  */
-	public boolean isMaximizable () 
+	public boolean isMaximizable()
 	{
 		Object oo = get_Value(COLUMNNAME_IsMaximizable);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -476,10 +550,10 @@ public class X_PA_DashboardContent extends PO implements I_PA_DashboardContent, 
 	public boolean isShowInDashboard()
 	{
 		Object oo = get_Value(COLUMNNAME_IsShowInDashboard);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -519,10 +593,32 @@ public class X_PA_DashboardContent extends PO implements I_PA_DashboardContent, 
 	public boolean isShowTitle () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsShowTitle);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Show Title.
+		@param IsShowTitle Show Title
+	*/
+	public void setIsShowTitle (boolean IsShowTitle)
+	{
+		set_Value (COLUMNNAME_IsShowTitle, Boolean.valueOf(IsShowTitle));
+	}
+
+	/** Get Show Title.
+		@return Show Title	  */
+	public boolean isShowTitle()
+	{
+		Object oo = get_Value(COLUMNNAME_IsShowTitle);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -566,7 +662,7 @@ public class X_PA_DashboardContent extends PO implements I_PA_DashboardContent, 
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }

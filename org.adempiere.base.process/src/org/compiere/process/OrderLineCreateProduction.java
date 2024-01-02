@@ -58,22 +58,21 @@ public class OrderLineCreateProduction extends SvrProcess
 	{
 		if (log.isLoggable(Level.INFO)) log.info("C_OrderLine_ID=" + p_C_OrderLine_ID );
 		if (p_C_OrderLine_ID == 0)
-			throw new IllegalArgumentException("No OrderLine");
+			throw new IllegalArgumentException(Msg.getMsg(Env.getCtx(), "No OrderLine"));
 		//
 		MOrderLine line = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(p_C_OrderLine_ID, get_TrxName());
 		if (line.get_ID() == 0)
-			throw new IllegalArgumentException("Order line not found");
+			throw new IllegalArgumentException(Msg.getMsg(Env.getCtx(), "Order line not found"));			
 		MOrder order = (MOrder) MTable.get(getCtx(), MOrder.Table_ID).getPO(line.getC_Order_ID(), get_TrxName());
 		if (!MOrder.DOCSTATUS_Completed.equals(order.getDocStatus()))
-			throw new IllegalArgumentException("Order not completed");
-		
+		    throw new IllegalArgumentException(Msg.getMsg(Env.getCtx(), "Order not completed"));
 		MDocType doc = new MDocType(getCtx(), order.getC_DocType_ID(), get_TrxName());
 		
 		if ( (line.getQtyOrdered().subtract(line.getQtyDelivered())).compareTo(Env.ZERO) <= 0 )
 		{
 			if (!doc.getDocSubTypeSO().equals("ON"))  //Consignment and stock orders both have subtype of ON
-			{
-			    return "Ordered quantity already shipped";
+			{			    
+			    return Msg.getMsg(Env.getCtx(), "Ordered quantity already shipped");
 			}
 		}
 		
@@ -83,7 +82,7 @@ public class OrderLineCreateProduction extends SvrProcess
 				p_C_OrderLine_ID);
 		if (docNo != null)
 		{
-		    throw new IllegalArgumentException("Production has already been created: " + docNo);
+		    throw new IllegalArgumentException(Msg.getMsg(Env.getCtx(), "ProductionHasAlreadyBeenCreated", new String[] {docNo}));
 		}
 		
 		MProduction production = MProduction.createFrom( line );

@@ -39,10 +39,13 @@ import org.adempiere.webui.editor.WPAttributeEditor;
 import org.adempiere.webui.editor.WPasswordEditor;
 import org.adempiere.webui.editor.WPaymentEditor;
 import org.adempiere.webui.editor.WRadioGroupEditor;
+import org.adempiere.webui.editor.WRecordIDEditor;
+import org.adempiere.webui.editor.WRecordUUIDEditor;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WStringEditor;
 import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.editor.WTimeEditor;
+import org.adempiere.webui.editor.WTimeZoneEditor;
 import org.adempiere.webui.editor.WUnknownEditor;
 import org.adempiere.webui.editor.WUrlEditor;
 import org.adempiere.webui.editor.WYesNoEditor;
@@ -53,7 +56,7 @@ import org.compiere.model.GridTab;
 import org.compiere.util.DisplayType;
 
 /**
- *
+ * Default implementation of {@link IEditorFactory}
  * @author hengsin
  *
  */
@@ -133,7 +136,7 @@ public class DefaultEditorFactory implements IEditorFactory {
         {
         	if (displayType == DisplayType.Time)
         		editor = new WTimeEditor(gridField, tableEditor, editorConfiguration);
-        	else if (displayType == DisplayType.DateTime)
+        	else if (displayType == DisplayType.DateTime || displayType == DisplayType.TimestampWithTimeZone)
         		editor = new WDatetimeEditor(gridField, tableEditor, editorConfiguration);
         	else
         		editor = new WDateEditor(gridField, tableEditor, editorConfiguration);
@@ -158,8 +161,9 @@ public class DefaultEditorFactory implements IEditorFactory {
         }
 
         /** Table Direct */
-        else if (displayType == DisplayType.TableDir ||
-                displayType == DisplayType.Table || displayType == DisplayType.List)
+        else if (displayType == DisplayType.TableDir || displayType == DisplayType.TableDirUU ||
+                displayType == DisplayType.Table || displayType == DisplayType.TableUU ||
+                displayType == DisplayType.List)
         {
             editor = new WTableDirEditor(gridField, tableEditor, editorConfiguration);
         }
@@ -174,7 +178,7 @@ public class DefaultEditorFactory implements IEditorFactory {
         	editor = new WUrlEditor(gridField, tableEditor, editorConfiguration);
         }
 
-        else if (displayType == DisplayType.Search)
+        else if (displayType == DisplayType.Search || displayType == DisplayType.SearchUU)
         {
         	editor = new WSearchEditor(gridField, tableEditor, editorConfiguration);
         }
@@ -226,6 +230,18 @@ public class DefaultEditorFactory implements IEditorFactory {
         else if (displayType == DisplayType.RadiogroupList)
         {
         	editor = new WRadioGroupEditor(gridField, tableEditor, editorConfiguration);
+        }
+        else if (displayType == DisplayType.TimeZoneId)
+        {
+        	editor = new WTimeZoneEditor(gridField, tableEditor);
+        }
+		else if (displayType == DisplayType.RecordID)
+        {
+        	editor = new WRecordIDEditor(gridField, tableEditor, editorConfiguration);
+        }
+		else if (displayType == DisplayType.RecordUU)
+        {
+        	editor = new WRecordUUIDEditor(gridField, tableEditor, editorConfiguration);
         }
 		else if (displayType == DisplayType.MultiSelectSearch)
 		{

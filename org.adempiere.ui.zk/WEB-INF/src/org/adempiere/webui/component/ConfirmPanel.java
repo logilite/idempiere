@@ -33,17 +33,16 @@ import org.zkoss.zul.Div;
 import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Messagebox;
 /**
- * Application Confirm Panel
- * Web UI port of the rich client's ConfirmPanel by Jorg Janke
+ * Confirm Panel for window, form and dialog
  * @author Sendy Yagambrum
  * @date July 25, 2007
  **/
 public final class ConfirmPanel extends Div
 {
 	/**
-	 * 
+	 * generated serial id 
 	 */
-	private static final long serialVersionUID = -5522843675498634948L;
+	private static final long serialVersionUID = -2054986459098954685L;
 
 	private static final String SMALL_SCREEN_BUTTON_CLASS = "btn-small small-img-btn";
 	/** Action String OK.        */
@@ -78,6 +77,7 @@ public final class ConfirmPanel extends Div
 
     private boolean  m_withText = false;
 
+    /** Name:Button */
     private Map<String, Button> buttonMap = new HashMap<String, Button>();
 	private boolean m_withImage = true;
 	
@@ -115,6 +115,12 @@ public final class ConfirmPanel extends Div
         return button;
     }
     
+    /**
+     * @param name
+     * @param image
+     * @param tooltip
+     * @return Button
+     */
     public Button createButton(String name, String image, String tooltip)
     {
         Button button = ButtonFactory.createButton(name, image, tooltip);        
@@ -175,7 +181,7 @@ public final class ConfirmPanel extends Div
      * @param withHistoryButton      with history
      * @param withZoomButton         with zoom
      * @param withText
-     * @param withImage Incude image for button. Note that image always included if withText is false
+     * @param withImage Include image for button. Note that image always included if withText is false
      */
     public ConfirmPanel(boolean withCancelButton,
             boolean withRefreshButton,
@@ -201,10 +207,6 @@ public final class ConfirmPanel extends Div
         {
              addComponentsLeft(createButton(A_REFRESH));
         }
-        if (withResetButton)
-        {
-            addComponentsLeft(createButton(A_RESET));
-        }
         if (withCustomizeButton)
         {
             addComponentsLeft(createButton(A_CUSTOMIZE));
@@ -216,6 +218,10 @@ public final class ConfirmPanel extends Div
         if (withZoomButton)
         {
             addComponentsLeft(createButton(A_ZOOM));
+        }
+        if (withResetButton)
+        {
+            addComponentsLeft(createButton(A_RESET));
         }
     }
 
@@ -229,25 +235,29 @@ public final class ConfirmPanel extends Div
 
     /**
      * Create confirm panel with Ok and Cancel button
-     * @param withCancel with cancel
+     * @param withCancel true to include cancel button, false otherwise
      *
      */
     public ConfirmPanel(boolean withCancel)
     {
         this(withCancel,false,false,false,false,false);
     }
-    //
+    
+    /** Right buttons area */
     private Hlayout pnlBtnRight;
+    /** Left buttons area */
     private Hlayout pnlBtnLeft;
     // IDEMPIERE-1334 center panel, contain all process button
     private Hlayout pnlBtnCenter;
 
+    /** Extra sclass for button */
 	private String extraButtonSClass;
 
+	/** true to use {@link #SMALL_SCREEN_BUTTON_CLASS} for compact screen */
 	private boolean useSmallButtonClassForSmallScreen;
 
     /**
-     * initialise components
+     * Layout panel
      */
     private void init()
     {
@@ -256,13 +266,10 @@ public final class ConfirmPanel extends Div
         pnlBtnRight = new Hlayout();
         pnlBtnRight.setSclass("confirm-panel-right");
 
-        // IDEMPIERE-1334 start
         pnlBtnCenter = new Hlayout();
         pnlBtnCenter.setSclass("confirm-panel-center");
-        // IDEMPIERE-1334 end
         
         this.appendChild(pnlBtnLeft);
-        // IDEMPIERE-1334
         this.appendChild(pnlBtnCenter);
         this.appendChild(pnlBtnRight);
         this.setSclass("confirm-panel");
@@ -271,38 +278,43 @@ public final class ConfirmPanel extends Div
     }
 
     /**
-     * IDEMPIERE-1334
-     * add a process button into center panel
+     * add button to center area of panel
      * @param btName
      * @param imgName
      * @return
      */
     public Button addButton (String btName, String imgName){
-    	 Button btProcess = createButton(btName);
+    	 Button button = createButton(btName);
     	 // replace default image with image set at info process
     	 if (m_withImage && imgName != null && imgName.trim().length() > 0)
     	 {
     		 if (ThemeManager.isUseFontIconForImage())
-    			 btProcess.setIconSclass(ThemeManager.getIconSclass(imgName));
+    			 button.setIconSclass(ThemeManager.getIconSclass(imgName));
     		 else
-    			 btProcess.setImage(ThemeManager.getThemeResource("images/" + imgName));
+    			 button.setImage(ThemeManager.getThemeResource("images/" + imgName));
     	 }
-    	 addComponentsCenter(btProcess);
-    	 return btProcess;     	
+    	 addComponentsCenter(button);
+    	 return button;     	
     }
     
+    /**
+     * add process button to center area of panel
+     * @param btName
+     * @param imgName
+     * @return Button
+     */
     public Button addProcessButton (String btName, String imgName){
-   	 Button btProcess = createButton(btName, imgName, null);
-   	 // replace default image with image set at info process
-   	 if (m_withImage && imgName != null && imgName.trim().length() > 0)
-   	 {
-		 if (ThemeManager.isUseFontIconForImage())
-			 btProcess.setIconSclass(ThemeManager.getIconSclass(imgName));
-		 else
-			 btProcess.setImage(ThemeManager.getThemeResource("images/" + imgName));
-	 }
-   	 addComponentsCenter(btProcess);
-   	 return btProcess;     	
+    	Button btProcess = createButton(btName, imgName, null);
+    	// replace default image with image set at info process
+    	if (m_withImage && imgName != null && imgName.trim().length() > 0)
+    	{
+    		if (ThemeManager.isUseFontIconForImage())
+    			btProcess.setIconSclass(ThemeManager.getIconSclass(imgName));
+    		else
+    			btProcess.setImage(ThemeManager.getThemeResource("images/" + imgName));
+    	}
+    	addComponentsCenter(btProcess);
+    	return btProcess;     	
    }
    
     /**
@@ -345,8 +357,20 @@ public final class ConfirmPanel extends Div
     }
     
     /**
-     * IDEMPIERE-1334
-     * add button to the center side of the confirm panel
+     * add button to the front of right area of the confirm panel
+     * @param button button
+     */
+    public void addComponentsBeforeRight(Button button)
+    {
+    	if (!buttonMap.containsKey(button.getId()))
+    		buttonMap.put(button.getId(), button);
+    	pnlBtnRight.insertBefore(button, pnlBtnRight.getFirstChild());
+        if (useSmallButtonClassForSmallScreen)
+        	LayoutUtils.addSclass(SMALL_SCREEN_BUTTON_CLASS, button);
+    }
+    
+    /**
+     * add button to the center area of the confirm panel
      * @param button button
      */
     public void addComponentsCenter(Button button)
@@ -359,7 +383,7 @@ public final class ConfirmPanel extends Div
     }
 
     /**
-     * Add combobox to center panel
+     * Add combobox to center area of panel
      * @param cbb
      */
     public void addComponentsCenter(Combobox cbb){
@@ -367,7 +391,7 @@ public final class ConfirmPanel extends Div
     }
     
     /**
-     * Add checkbox to center panel
+     * Add checkbox to center area of panel
      * @param cb
      */
     public void addComponentsCenter(Checkbox cb){
@@ -428,6 +452,7 @@ public final class ConfirmPanel extends Div
             btn.setVisible(visible);
         }
     }
+    
     /**
      * returns whether the specified button is visible or not
      * @param btnName
@@ -468,6 +493,7 @@ public final class ConfirmPanel extends Div
             return false;
         }
     }
+    
     /**
      * enable specific button
      * @param id   button id
@@ -499,8 +525,8 @@ public final class ConfirmPanel extends Div
     }
 
     /**
-     * enable all components
-     * @param enabled enabled
+     * enable/disable all buttons
+     * @param enabled true to enable, false otherwise
      */
     public void setEnabledAll(boolean enabled)
     {
@@ -523,18 +549,16 @@ public final class ConfirmPanel extends Div
             Button button = (Button)iter2.next();
             button.setEnabled(enabled);
         }
-        // IDEMPIERE-1334 start
         while (iter3.hasNext())
         {
             Button button = (Button)iter3.next();
             button.setEnabled(enabled);
         }
-        // IDEMPIERE-1334 end
     }
     /**
-     * add action listener on the existing buttons
-     * @param event event
-     * @param listener listener
+     * add event listener on existing buttons
+     * @param event event name
+     * @param listener EventListener
      */
     public void addActionListener(String event, EventListener<?> listener)
     {
@@ -557,7 +581,6 @@ public final class ConfirmPanel extends Div
             Button button = (Button)iter2.next();
             button.addEventListener(event, listener);
         }
-        // IDEMPIERE-1334 start
         while (iter3.hasNext())
         {
         	Object element = iter3.next();
@@ -566,12 +589,11 @@ public final class ConfirmPanel extends Div
 	            ((Button)element).addEventListener(event, listener);
         	}
         }
-        // IDEMPIERE-1334 start
     }
 
     /**
-     * added to ease porting of swing form
-     * @param listener
+     * add ON_CLICK listener for all buttons
+     * @param listener EventListener
      */
 	public void addActionListener(EventListener<?> listener) {
 		addActionListener(Events.ON_CLICK, listener);
@@ -593,6 +615,11 @@ public final class ConfirmPanel extends Div
 		return getButton(A_OK);
 	}
 
+	/**
+	 * Add cls to sclass property of all buttons.
+	 * Keep as {@link #extraButtonSClass} for new button created.
+	 * @param cls
+	 */
 	public void addButtonSclass(String cls) {
 		for(Button btn : buttonMap.values()) {
 			LayoutUtils.addSclass(cls, btn);
@@ -600,14 +627,29 @@ public final class ConfirmPanel extends Div
 		extraButtonSClass = cls;
 	}
 	
+	/**
+	 * Remove cls from sclass property of all buttons
+	 * @param cls
+	 */
 	public void removeButtonSclass(String cls) {
 		for(Button btn : buttonMap.values()) {
 			LayoutUtils.removeSclass(cls, btn);
 		}
 	}
 
+	/**
+	 * Enable the use of {@link #SMALL_SCREEN_BUTTON_CLASS} for all buttons.
+	 */
 	public void useSmallButtonClassForSmallScreen() {
 		useSmallButtonClassForSmallScreen = true;
 		addButtonSclass(SMALL_SCREEN_BUTTON_CLASS);
 	}
+
+	/**
+	 * @return map containing all buttons attached to ConfirmPanel
+	 */
+	public Map<String, Button> getMap() {
+		return buttonMap;
+	}
+
 }   //  ConfirmPanel

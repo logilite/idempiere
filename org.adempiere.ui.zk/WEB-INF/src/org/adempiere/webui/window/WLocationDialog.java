@@ -45,6 +45,7 @@ import org.adempiere.webui.component.Row;
 import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Window;
+import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.GridField;
@@ -71,10 +72,9 @@ import org.zkoss.zul.South;
 import org.zkoss.zul.Vbox;
 
 /**
+ * Dialog to view and edit location address
  * @author Sendy Yagambrum
  * @date July 16, 2007
- * Location Dialog Box
- * This class is based upon VLocationDialog, written by Jorg Janke
  * @author Cristina Ghita, www.arhipac.ro
  * 			<li>FR [ 2794312 ] Location AutoComplete
  * @author Teo Sarca, teo.sarca@gmail.com
@@ -90,7 +90,7 @@ import org.zkoss.zul.Vbox;
 public class WLocationDialog extends Window implements EventListener<Event>
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -9116270523919373406L;
 	/** Logger          */
@@ -155,13 +155,23 @@ public class WLocationDialog extends Window implements EventListener<Event>
 	
 	protected GridField m_GridField = null;
 	protected boolean onSaveError = false;
-	//END
-
+	/* SysConfig USE_ESC_FOR_TAB_CLOSING */
+	private boolean isUseEscForTabClosing = MSysConfig.getBooleanValue(MSysConfig.USE_ESC_FOR_TAB_CLOSING, false, Env.getAD_Client_ID(Env.getCtx()));
+	
+	/**
+	 * @param title
+	 * @param location
+	 */
 	public WLocationDialog(String title, MLocation location)
 	{
 		this (title, location, null);
 	}
 
+	/**
+	 * @param title
+	 * @param location
+	 * @param gridField
+	 */
 	public WLocationDialog(String title, MLocation location, GridField gridField) {
 		m_GridField  = gridField;
 		m_location = location;
@@ -224,6 +234,9 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		this.setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
 	}
 
+	/**
+	 * Create components
+	 */
 	public void initComponents()
 	{
 		lblAddress1     = new Label(Msg.getElement(Env.getCtx(), "Address1"));
@@ -335,6 +348,9 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		}
 	}
 
+	/**
+	 * Layout dialog
+	 */
 	public void init()
 	{
 		Columns columns = new Columns();
@@ -514,10 +530,10 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		addEventListener("onSaveError", this);
 		addEventListener(Events.ON_CANCEL, e -> onCancel());
 	}
+	
 	/**
-	 * Dynamically add fields to the Location dialog box
-	 * @param panel panel to add
-	 *
+	 * Add a new row of components to {@link #mainPanel}
+	 * @param row Row of components
 	 */
 	public void addComponents(Row row)
 	{
@@ -527,6 +543,9 @@ public class WLocationDialog extends Window implements EventListener<Event>
 			mainPanel.newRows().appendChild(row);
 	}
 
+	/**
+	 * Load location details
+	 */
 	public void initLocation()
 	{
 		if (mainPanel.getRows() != null)
@@ -658,6 +677,10 @@ public class WLocationDialog extends Window implements EventListener<Event>
 			setCountry();
 		}
 	}
+	
+	/**
+	 * Set selected country from {@link #m_location}
+	 */
 	public void setCountry()
 	{
 		List<?> listCountry = lstCountry.getChildren();
@@ -672,6 +695,9 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		}
 	}
 
+	/**
+	 * Set selected region from {@link #m_location}
+	 */
 	public void setRegion()
 	{
 		if (m_location.getRegion() != null) 
@@ -692,16 +718,16 @@ public class WLocationDialog extends Window implements EventListener<Event>
 			lstRegion.setSelectedItem(null);
 		}        
 	}
+	
 	/**
-	 *  Get result
-	 *  @return true, if changed
+	 *  @return true if changed
 	 */
 	public boolean isChanged()
 	{
 		return m_change;
-	}   //  getChange
+	}   //  isChanged
+	
 	/**
-	 *  Get edited Value (MLocation)
 	 *  @return location
 	 */
 	public MLocation getValue()
@@ -709,6 +735,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		return m_location;
 	}   
 
+	@Override
 	public void onEvent(Event event) throws Exception
 	{
 		if (event.getTarget() == confirmPanel.getButton(ConfirmPanel.A_OK)) 
@@ -727,7 +754,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 			String msg = validate_OK();
 			if (msg != null) {
 				onSaveError = true;
-				FDialog.error(0, this, "FillMandatory", Msg.parseTranslation(Env.getCtx(), msg), new Callback<Integer>() {					
+				Dialog.error(0, "FillMandatory", Msg.parseTranslation(Env.getCtx(), msg), new Callback<Integer>() {					
 					@Override
 					public void onCallback(Integer result) {
 						Events.echoEvent("onSaveError", WLocationDialog.this, null);
@@ -746,7 +773,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 			else
 			{
 				onSaveError = true;
-				FDialog.error(0, this, "CityNotFound", (String)null, new Callback<Integer>() {					
+				Dialog.error(0, "CityNotFound", (String)null, new Callback<Integer>() {					
 					@Override
 					public void onCallback(Integer result) {
 						Events.echoEvent("onSaveError", WLocationDialog.this, null);
@@ -768,7 +795,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 			}
 			catch (Exception e) {
 				message = e.getMessage();
-				FDialog.warn(0, this, "URLnotValid", message);
+				Dialog.warn(0, "URLnotValid", message, null);
 			}
 		}
 		else if (toRoute.equals(event.getTarget()))
@@ -787,7 +814,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 				}
 				catch (Exception e) {
 					message = e.getMessage();
-					FDialog.warn(0, this, "URLnotValid", message);
+					Dialog.warn(0, "URLnotValid", message, null);
 				}
 			}
 		}
@@ -809,7 +836,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 			String msg = validate_OK();
 			if (msg != null) {
 				onSaveError = true;
-				FDialog.error(0, this, "FillMandatory", Msg.parseTranslation(Env.getCtx(), msg), new Callback<Integer>() {					
+				Dialog.error(0, "FillMandatory", Msg.parseTranslation(Env.getCtx(), msg), new Callback<Integer>() {					
 					@Override
 					public void onCallback(Integer result) {
 						Events.echoEvent("onSaveError", WLocationDialog.this, null);
@@ -866,7 +893,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 				if (!ok)
 				{
 					onSaveError = true;
-					FDialog.error(0, this, "Error", m_location.getErrorMessage(), new Callback<Integer>() {					
+					Dialog.error(0, "Error", m_location.getErrorMessage(), new Callback<Integer>() {					
 						@Override
 						public void onCallback(Integer result) {
 							Events.echoEvent("onSaveError", WLocationDialog.this, null);
@@ -930,13 +957,23 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		}
 	}
 
+	/**
+	 * Handle onCancel event
+	 */
 	private void onCancel() {
+		// do not allow to close tab for Events.ON_CTRL_KEY event
+		if(isUseEscForTabClosing)
+			SessionManager.getAppDesktop().setCloseTabWithShortcut(false);
+
 		m_change = false;
 		this.dispose();
 	}
-
 	
-	// LCO - address 1, region and city required
+	/**
+	 * Validate mandatory fields.<br/>
+	 * LCO - address 1, region and city required
+	 * @return error messages or null
+	 */	
 	public String validate_OK() {
 		String fields = "";
 		if (isAddress1Mandatory && txtAddress1.getText().trim().length() == 0) {
@@ -977,7 +1014,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 	}
 
 	/**
-	 *  OK - check for changes (save them) & Exit
+	 * Handle OK button event - check for changes (save them) & Exit
 	 */
 	public boolean action_OK()
 	{
@@ -1063,6 +1100,9 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		return success;
 	}   //  actionOK
 
+	/**
+	 * @return true if there's error saving changes
+	 */
 	public boolean isOnSaveError() {
 		return onSaveError;
 	}
@@ -1077,7 +1117,9 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		super.dispose();
 	}
 	
-	/** returns a string that contains all fields of current form */
+	/**
+	 * @return string that contains all fields of current form  
+	 */
 	public String getFullAdress()
 	{
 		MRegion region = null;
@@ -1545,7 +1587,10 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		this.onSaveError = onSaveError;
 	}	
 
-	void setPlaceholders() {
+	/**
+	 * set place holder text for fields
+	 */
+	protected void setPlaceholders() {
 		txtAddress1.setPlaceholder(MCountry.get(Env.getCtx(), s_oldCountry_ID).get_Translation("PlaceholderAddress1"));
 		txtAddress2.setPlaceholder(MCountry.get(Env.getCtx(), s_oldCountry_ID).get_Translation("PlaceholderAddress2"));
 		txtAddress3.setPlaceholder(MCountry.get(Env.getCtx(), s_oldCountry_ID).get_Translation("PlaceholderAddress3"));

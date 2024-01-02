@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_UserDef_Field
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="AD_UserDef_Field")
-public class X_AD_UserDef_Field extends PO implements I_AD_UserDef_Field, I_Persistent 
+public class X_AD_UserDef_Field extends PO implements I_AD_UserDef_Field, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220719L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_AD_UserDef_Field (Properties ctx, int AD_UserDef_Field_ID, String trxName)
@@ -65,6 +65,38 @@ public class X_AD_UserDef_Field extends PO implements I_AD_UserDef_Field, I_Pers
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_UserDef_Field (Properties ctx, String AD_UserDef_Field_UU, String trxName)
+    {
+      super (ctx, AD_UserDef_Field_UU, trxName);
+      /** if (AD_UserDef_Field_UU == null)
+        {
+			setAD_Field_ID (0);
+			setAD_UserDef_Field_ID (0);
+			setAD_UserDef_Tab_ID (0);
+			setSeqNo (0);
+// 0
+			setSeqNoGrid (0);
+// 0
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_UserDef_Field (Properties ctx, String AD_UserDef_Field_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_UserDef_Field_UU, trxName, virtualColumns);
+      /** if (AD_UserDef_Field_UU == null)
+        {
+			setAD_Field_ID (0);
+			setAD_UserDef_Field_ID (0);
+			setAD_UserDef_Tab_ID (0);
+			setSeqNo (0);
+// 0
+			setSeqNoGrid (0);
+// 0
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_UserDef_Field (Properties ctx, ResultSet rs, String trxName)
     {
@@ -72,7 +104,7 @@ public class X_AD_UserDef_Field extends PO implements I_AD_UserDef_Field, I_Pers
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -92,6 +124,33 @@ public class X_AD_UserDef_Field extends PO implements I_AD_UserDef_Field, I_Pers
         .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
+
+	public org.compiere.model.I_AD_Chart getAD_Chart() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_Chart)MTable.get(getCtx(), org.compiere.model.I_AD_Chart.Table_ID)
+			.getPO(getAD_Chart_ID(), get_TrxName());
+	}
+
+	/** Set Chart.
+		@param AD_Chart_ID Chart
+	*/
+	public void setAD_Chart_ID (int AD_Chart_ID)
+	{
+		if (AD_Chart_ID < 1)
+			set_Value (COLUMNNAME_AD_Chart_ID, null);
+		else
+			set_Value (COLUMNNAME_AD_Chart_ID, Integer.valueOf(AD_Chart_ID));
+	}
+
+	/** Get Chart.
+		@return Chart	  */
+	public int getAD_Chart_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Chart_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
 
 	public org.compiere.model.I_AD_FieldGroup getAD_FieldGroup() throws RuntimeException
 	{
@@ -152,7 +211,7 @@ public class X_AD_UserDef_Field extends PO implements I_AD_UserDef_Field, I_Pers
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getAD_Field_ID()));
     }
@@ -404,6 +463,22 @@ public class X_AD_UserDef_Field extends PO implements I_AD_UserDef_Field, I_Pers
 		return (String)get_Value(COLUMNNAME_AlwaysUpdatableLogic);
 	}
 
+	/** Set Always Updatable Logic.
+		@param AlwaysUpdatableLogic Logic to determine if field is Updatable irrespective if record&#039;s active status or processed status. This logic Applicable only if Always Updatable is N.
+	*/
+	public void setAlwaysUpdatableLogic (String AlwaysUpdatableLogic)
+	{
+		set_Value (COLUMNNAME_AlwaysUpdatableLogic, AlwaysUpdatableLogic);
+	}
+
+	/** Get Always Updatable Logic.
+		@return Logic to determine if field is Updatable irrespective if record&#039;s active status or processed status. This logic Applicable only if Always Updatable is N.
+	  */
+	public String getAlwaysUpdatableLogic()
+	{
+		return (String)get_Value(COLUMNNAME_AlwaysUpdatableLogic);
+	}
+
 	/** Set Column Span.
 		@param ColumnSpan Number of column for a box of field
 	*/
@@ -535,8 +610,8 @@ public class X_AD_UserDef_Field extends PO implements I_AD_UserDef_Field, I_Pers
 	public static final String ISAUTOCOMPLETE_No = "N";
 	/** Yes = Y */
 	public static final String ISAUTOCOMPLETE_Yes = "Y";
-	/** Set Autocomplete.
-		@param IsAutocomplete Automatic completion for textfields
+	/** Set Auto complete.
+		@param IsAutocomplete Automatic completion for text fields
 	*/
 	public void setIsAutocomplete (String IsAutocomplete)
 	{
@@ -544,8 +619,8 @@ public class X_AD_UserDef_Field extends PO implements I_AD_UserDef_Field, I_Pers
 		set_Value (COLUMNNAME_IsAutocomplete, IsAutocomplete);
 	}
 
-	/** Get Autocomplete.
-		@return Automatic completion for textfields
+	/** Get Auto complete.
+		@return Automatic completion for text fields
 	  */
 	public String getIsAutocomplete()
 	{

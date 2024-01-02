@@ -30,14 +30,13 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.DBException;
 import org.compiere.model.FactsValidator;
 import org.compiere.model.I_C_AllocationHdr;
-import org.compiere.model.I_C_BankStatement;
 import org.compiere.model.I_C_Cash;
 import org.compiere.model.I_C_ProjectIssue;
 import org.compiere.model.I_M_MatchInv;
 import org.compiere.model.I_M_MatchPO;
-import org.compiere.model.I_M_Production;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MConversionRate;
@@ -65,7 +64,7 @@ import org.compiere.util.Trx;
 import org.compiere.util.Util;
 
 /**
- *  Posting Document Root.
+ *  Abstract base class for posting document.
  *
  *  <pre>
  *  Table               Base Document Types (C_DocType.DocBaseType and AD_Reference_ID=183)
@@ -219,7 +218,7 @@ public abstract class Doc
 	 *  @param AD_Table_ID Table ID of Documents
 	 *  @param Record_ID record ID to load
 	 *  @param trxName transaction name
-	 *  @return Document or null
+	 *  @return new Posting Document instance or null
 	 */
 	public static Doc get (MAcctSchema as, int AD_Table_ID, int Record_ID, String trxName)
 	{
@@ -232,8 +231,8 @@ public abstract class Doc
 	 *  @param AD_Table_ID Table ID of Documents
 	 *  @param rs ResultSet
 	 *  @param trxName transaction name
-	 *  @return Document
-	 * @throws AdempiereUserError
+	 *  @return new Posting Document instance or null
+	 *  @throws AdempiereUserError
 	 */
 	public static Doc get (MAcctSchema as, int AD_Table_ID, ResultSet rs, String trxName)
 	{
@@ -241,12 +240,12 @@ public abstract class Doc
 	}   //  get
 
 	/**
-	 *  Post Document
-	 * 	@param ass accounting schemata
-	 * 	@param 	AD_Table_ID		Transaction table
-	 *  @param  Record_ID       Record ID of this document
-	 *  @param  force           force posting
-	 *  @param trxName			transaction
+	 *  Post document immediately
+	 * 	@param ass accounting schema
+	 * 	@param AD_Table_ID	Transaction table
+	 *  @param Record_ID    Record ID of this document
+	 *  @param force        force posting
+	 *  @param trxName	    transaction
 	 *  @return null if the document was posted or error message
 	 */
 	public static String postImmediate (MAcctSchema[] ass,
@@ -346,6 +345,11 @@ public abstract class Doc
 		catch (Throwable t)
 		{
 			trx.rollback();
+			if(t instanceof SQLException sqlEx) {
+				String messageError = DBException.getDefaultDBExceptionMessage(sqlEx);
+				   if (messageError != null) 
+				      return Msg.getMsg(Env.getCtx(), messageError);
+			}
 			return "@Error@ " + t.getLocalizedMessage();
 		}
 		finally
@@ -365,7 +369,7 @@ public abstract class Doc
 	private boolean m_manageLocalTrx;
 
 
-	/**************************************************************************
+	/**
 	 *  Constructor
 	 * 	@param as accounting schema
 	 * 	@param clazz Document Class
@@ -483,7 +487,6 @@ public abstract class Doc
 	/** Error Message			*/
 	protected String			p_Error = null;
 
-
 	/**
 	 * 	Get Context
 	 *	@return context
@@ -533,7 +536,7 @@ public abstract class Doc
 	 *  Post Document.
 	 *  <pre>
 	 *  - try to lock document (Processed='Y' (AND Processing='N' AND Posted='N'))
-	 * 		- if not ok - return false
+	 *       - if not ok - return false
 	 *          - postlogic (for all Accounting Schema)
 	 *              - create Fact lines
 	 *          - postCommit
@@ -542,7 +545,7 @@ public abstract class Doc
 	 *  </pre>
 	 *  @param force if true ignore that locked
 	 *  @param repost if true ignore that already posted
-	 *  @return null if posted error otherwise
+	 *  @return error message or null
 	 */
 	public final String post (boolean force, boolean repost)
 	{
@@ -712,7 +715,7 @@ public abstract class Doc
 			String AD_MessageValue = "PostingError-" + p_Status;
 			int AD_User_ID = p_po.getUpdatedBy();
 			MNote note = new MNote (getCtx(), AD_MessageValue, AD_User_ID,
-				getAD_Client_ID(), getAD_Org_ID(), null);
+				getAD_Client_ID(), getAD_Org_ID(), p_po.get_TrxName());
 			note.setRecord(p_po.get_Table_ID(), p_po.get_ID());
 			//  Reference
 			note.setReference(toString());	//	Document
@@ -750,8 +753,8 @@ public abstract class Doc
 	}   //  post
 
 	/**
-	 * 	Delete Accounting
-	 *	@return number of records
+	 * 	Delete fact records
+	 *	@return number of records deleted
 	 */
 	protected int deleteAcct()
 	{
@@ -766,7 +769,7 @@ public abstract class Doc
 	}	//	deleteAcct
 
 	/**
-	 *  Posting logic for Accounting Schema index
+	 *  Posting logic for Accounting Schema
 	 *  @return posting status/error code
 	 */
 	private final String postLogic ()
@@ -848,7 +851,7 @@ public abstract class Doc
 	}   //  postLogic
 
 	/**
-	 *  Post Commit.
+	 *  Post Commit. <br/>
 	 *  Save Facts & Document
 	 *  @param status status
 	 *  @return Posting Status
@@ -918,7 +921,7 @@ public abstract class Doc
 	}   //  postCommit
 
 	/**
-	 * 	Get Trx Name and create Transaction
+	 * 	Get Trx Name
 	 *	@return Trx Name
 	 */
 	public String getTrxName()
@@ -941,7 +944,7 @@ public abstract class Doc
 	}   //  unlock
 
 
-	/**************************************************************************
+	/**
 	 *  Load Document Type and GL Info.
 	 * 	Set p_DocumentType and p_GL_Category_ID
 	 * 	@return document type (i.e. C_DocType.DocBaseType)
@@ -1060,7 +1063,7 @@ public abstract class Doc
 	}	//	setDocumentType
 
 
-	/**************************************************************************
+	/**
 	 *  Is the Source Document Balanced
 	 *  @return true if (source) balanced
 	 */
@@ -1142,7 +1145,7 @@ public abstract class Doc
 
 	/**
 	 *  Calculate Period from DateAcct.
-	 *  m_C_Period_ID is set to -1 of not open to 0 if not found
+	 *  m_C_Period_ID is set to -1 if not open, to 0 if not found
 	 */
 	public void setPeriod()
 	{
@@ -1161,7 +1164,7 @@ public abstract class Doc
 			m_period = MPeriod.get(getCtx(), getDateAcct(), getAD_Org_ID(), (String)null);
 		//	Is Period Open?
 		if (m_period != null
-			&& m_period.isOpen(getDocumentType(), getDateAcct()))
+			&& m_period.isOpen(getDocumentType(), getDateAcct(), true))
 			m_C_Period_ID = m_period.getC_Period_ID();
 		else
 			m_C_Period_ID = -1;
@@ -1172,7 +1175,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get C_Period_ID
-	 *	@return period
+	 *	@return C_Period_ID
 	 */
 	public int getC_Period_ID()
 	{
@@ -1341,9 +1344,8 @@ public abstract class Doc
 	/** GL Accounts - Commitment Offset	Sales */
 	public static final int     ACCTTYPE_CommitmentOffsetSales = 112;
 
-
 	/**
-	 *	Get the Valid Combination id for Accounting Schema
+	 *	Get valid combination id by account type and accounting schema
 	 *  @param AcctType see ACCTTYPE_*
 	 *  @param as accounting schema
 	 *  @return C_ValidCombination_ID
@@ -1537,7 +1539,7 @@ public abstract class Doc
 		ResultSet rs = null;
 		try
 		{
-			pstmt = DB.prepareStatement(sql, null);
+			pstmt = DB.prepareStatement(sql, getTrxName());
 			if (para_1 == -1)   //  GL Accounts
 				pstmt.setInt (1, as.getC_AcctSchema_ID());
 			else
@@ -1569,10 +1571,10 @@ public abstract class Doc
 	}	//	getAccount_ID
 
 	/**
-	 *	Get the account for Accounting Schema
+	 *	Get account record by accounting schema and account type
 	 *  @param AcctType see ACCTTYPE_*
 	 *  @param as accounting schema
-	 *  @return Account
+	 *  @return MAccount
 	 */
 	public final MAccount getAccount (int AcctType, MAcctSchema as)
 	{
@@ -1611,10 +1613,9 @@ public abstract class Doc
 		return p_po.toString();
 	}   //  toString
 
-
 	/**
 	 * 	Get AD_Client_ID
-	 *	@return client
+	 *	@return AD_Client_ID
 	 */
 	public int getAD_Client_ID()
 	{
@@ -1623,7 +1624,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get AD_Org_ID
-	 *	@return org
+	 *	@return AD_Org_ID
 	 */
 	public int getAD_Org_ID()
 	{
@@ -1666,7 +1667,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get C_Currency_ID
-	 *	@return currency
+	 *	@return C_Currency_ID
 	 */
 	public int getC_Currency_ID()
 	{
@@ -1732,7 +1733,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get C_ConversionType_ID
-	 *	@return ConversionType
+	 *	@return C_ConversionType_ID
 	 */
 	public int getC_ConversionType_ID()
 	{
@@ -1746,6 +1747,9 @@ public abstract class Doc
 		return 0;
 	}	//	getC_ConversionType_ID
 
+	/**
+	 * @return currency rate or null
+	 */
 	public BigDecimal getCurrencyRate()
 	{		
 		return null;
@@ -1753,7 +1757,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get GL_Category_ID
-	 *	@return category
+	 *	@return GL_Category_ID
 	 */
 	public int getGL_Category_ID()
 	{
@@ -1769,7 +1773,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get getGL_Budget_ID
-	 *	@return budget
+	 *	@return GL_Budget_ID or 0
 	 */
 	public int getGL_Budget_ID()
 	{
@@ -1785,7 +1789,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get Accounting Date
-	 *	@return currency
+	 *	@return DateAcct or null
 	 */
 	public Timestamp getDateAcct()
 	{
@@ -1812,7 +1816,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get Document Date
-	 *	@return currency
+	 *	@return document date
 	 */
 	public Timestamp getDateDoc()
 	{
@@ -1859,7 +1863,7 @@ public abstract class Doc
 
 	/**
 	 * 	Is Sales Trx
-	 *	@return true if posted
+	 *	@return true if it is sales trx
 	 */
 	public boolean isSOTrx()
 	{
@@ -1879,7 +1883,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get C_DocType_ID
-	 *	@return DocType
+	 *	@return C_DocType_ID or 0
 	 */
 	public int getC_DocType_ID()
 	{
@@ -1920,13 +1924,6 @@ public abstract class Doc
 				if (docTypeId > 0)
 					return docTypeId;
 			}
-			else if (p_po.get_TableName().equals(I_C_BankStatement.Table_Name)) 
-			{				
-				int docTypeId = DB.getSQLValue((String)null, DOC_TYPE_BY_DOC_BASE_TYPE_SQL, 
-						p_po.getAD_Client_ID(), Doc.DOCTYPE_BankStatement);
-				if (docTypeId > 0)
-					return docTypeId;
-			}
 			else if (p_po.get_TableName().equals(I_C_Cash.Table_Name)) 
 			{				
 				int docTypeId = DB.getSQLValue((String)null, DOC_TYPE_BY_DOC_BASE_TYPE_SQL, 
@@ -1941,20 +1938,13 @@ public abstract class Doc
 				if (docTypeId > 0)
 					return docTypeId;
 			}
-			else if (p_po.get_TableName().equals(I_M_Production.Table_Name)) 
-			{				
-				int docTypeId = DB.getSQLValue((String)null, DOC_TYPE_BY_DOC_BASE_TYPE_SQL, 
-						p_po.getAD_Client_ID(), Doc.DOCTYPE_MatProduction);
-				if (docTypeId > 0)
-					return docTypeId;
-			}
 		}
 		return 0;
 	}	//	getC_DocType_ID
 
 	/**
 	 * 	Get header level C_Charge_ID
-	 *	@return Charge
+	 *	@return C_Charge_ID or 0
 	 */
 	public int getC_Charge_ID()
 	{
@@ -1970,7 +1960,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get SalesRep_ID
-	 *	@return SalesRep
+	 *	@return SalesRep_ID or 0
 	 */
 	public int getSalesRep_ID()
 	{
@@ -1986,7 +1976,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get C_BankAccount_ID
-	 *	@return BankAccount
+	 *	@return C_BankAccount_ID or 0
 	 */
 	public int getC_BankAccount_ID()
 	{
@@ -2016,7 +2006,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get C_CashBook_ID
-	 *	@return CashBook
+	 *	@return C_CashBook_ID or 0
 	 */
 	public int getC_CashBook_ID()
 	{
@@ -2046,7 +2036,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get M_Warehouse_ID
-	 *	@return Warehouse
+	 *	@return M_Warehouse_ID or 0
 	 */
 	public int getM_Warehouse_ID()
 	{
@@ -2063,7 +2053,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get C_BPartner_ID
-	 *	@return BPartner
+	 *	@return C_BPartner_ID or 0
 	 */
 	public int getC_BPartner_ID()
 	{
@@ -2093,7 +2083,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get C_BPartner_Location_ID
-	 *	@return BPartner Location
+	 *	@return C_BPartner_Location_ID or 0
 	 */
 	public int getC_BPartner_Location_ID()
 	{
@@ -2109,7 +2099,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get C_Project_ID
-	 *	@return Project
+	 *	@return C_Project_ID or 0
 	 */
 	public int getC_Project_ID()
 	{
@@ -2125,7 +2115,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get C_ProjectPhase_ID
-	 *	@return Project Phase
+	 *	@return C_ProjectPhase_ID or 0
 	 */
 	public int getC_ProjectPhase_ID()
 	{
@@ -2141,7 +2131,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get C_ProjectTask_ID
-	 *	@return Project Task
+	 *	@return C_ProjectTask_ID or 0
 	 */
 	public int getC_ProjectTask_ID()
 	{
@@ -2157,7 +2147,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get C_SalesRegion_ID
-	 *	@return Sales Region
+	 *	@return C_SalesRegion_ID or 0
 	 */
 	public int getC_SalesRegion_ID()
 	{
@@ -2173,7 +2163,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get C_SalesRegion_ID
-	 *	@return Sales Region
+	 *	@return C_SalesRegion_ID or 0
 	 */
 	public int getBP_C_SalesRegion_ID()
 	{
@@ -2203,7 +2193,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get C_Activity_ID
-	 *	@return Activity
+	 *	@return C_Activity_ID or 0
 	 */
 	public int getC_Activity_ID()
 	{
@@ -2219,7 +2209,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get C_Campaign_ID
-	 *	@return Campaign
+	 *	@return C_Campaign_ID or 0
 	 */
 	public int getC_Campaign_ID()
 	{
@@ -2235,7 +2225,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get M_Product_ID
-	 *	@return Product
+	 *	@return M_Product_ID or 0
 	 */
 	public int getM_Product_ID()
 	{
@@ -2251,7 +2241,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get AD_OrgTrx_ID
-	 *	@return Trx Org
+	 *	@return AD_OrgTrx_ID or 0
 	 */
 	public int getAD_OrgTrx_ID()
 	{
@@ -2267,7 +2257,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get C_LocFrom_ID
-	 *	@return loc from
+	 *	@return from C_Location_ID or 0
 	 */
 	public int getC_LocFrom_ID()
 	{
@@ -2285,7 +2275,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get C_LocTo_ID
-	 *	@return loc to
+	 *	@return to C_Location_ID or 0
 	 */
 	public int getC_LocTo_ID()
 	{
@@ -2303,7 +2293,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get User1_ID
-	 *	@return Campaign
+	 *	@return User1_ID or 0
 	 */
 	public int getUser1_ID()
 	{
@@ -2319,7 +2309,7 @@ public abstract class Doc
 
 	/**
 	 * 	Get User2_ID
-	 *	@return Campaign
+	 *	@return User2_ID or 0
 	 */
 	public int getUser2_ID()
 	{
@@ -2333,9 +2323,10 @@ public abstract class Doc
 		return 0;
 	}	//	getUser2_ID
 
-        	/**
-	 * 	Get User Defined value
-	 *	@return User defined
+    /**
+	 * Get value by column name
+	 * @param ColumnName
+	 * @return column value or 0 (if column doesn't exists)
 	 */
 	public int getValue (String ColumnName)
 	{
@@ -2388,7 +2379,7 @@ public abstract class Doc
 	}
 	
 	/**
-	 * Return document whether need to defer posting or not
+	 * @return true if posting of document should be deferred to next run of accounting posting
 	 */
 	public boolean isDeferPosting() {
 		return false;

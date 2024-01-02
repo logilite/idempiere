@@ -15,6 +15,7 @@ package org.compiere.model.credit;
 import java.math.BigDecimal;
 import java.util.Properties;
 
+import org.adempiere.base.CreditStatus;
 import org.adempiere.base.ICreditManager;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MClient;
@@ -22,9 +23,9 @@ import org.compiere.model.MConversionRate;
 import org.compiere.model.MConversionRateUtil;
 import org.compiere.model.MPayment;
 import org.compiere.model.MPaymentAllocate;
-import org.compiere.model.MTable;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  * Credit Manager for Payment
@@ -47,19 +48,20 @@ public class CreditManagerPayment implements ICreditManager
 	}
 
 	@Override
-	public String creditCheck(String docAction)
+	public CreditStatus checkCreditStatus(String docAction)
 	{
+		String errorMsg = null;
 		if (MPayment.DOCACTION_Prepare.equals(docAction) && !payment.isReceipt())
-		{ // Do not pay when Credit Stop/Hold and issue refund to customer
+		{ //	Do not pay when Credit Stop/Hold and issue refund to customer
 			MBPartner bp = new MBPartner(payment.getCtx(), payment.getC_BPartner_ID(), payment.get_TrxName());
 			if (MBPartner.SOCREDITSTATUS_CreditStop.equals(bp.getSOCreditStatus()))
 			{
-				return "@BPartnerCreditStop@ - @TotalOpenBalance@=" + bp.getTotalOpenBalance()
+				errorMsg = "@BPartnerCreditStop@ - @TotalOpenBalance@=" + bp.getTotalOpenBalance()
 						+ ", @SO_CreditLimit@=" + bp.getSO_CreditLimit();
 			}
 			if (MBPartner.SOCREDITSTATUS_CreditHold.equals(bp.getSOCreditStatus()))
 			{
-				return "@BPartnerCreditHold@ - @TotalOpenBalance@=" + bp.getTotalOpenBalance()
+				errorMsg = "@BPartnerCreditHold@ - @TotalOpenBalance@=" + bp.getTotalOpenBalance()
 						+ ", @SO_CreditLimit@=" + bp.getSO_CreditLimit();
 			}
 		}
@@ -72,14 +74,15 @@ public class CreditManagerPayment implements ICreditManager
 				createdAllocationRecords = payment.allocateIt(); // Create Allocation Records
 				payment.testAllocation();
 			}
-
 			// Update BP for Prepayments
-			if (payment.getC_BPartner_ID() != 0 && payment.getC_Invoice_ID() == 0 && payment.getC_Charge_ID() == 0 && MPaymentAllocate.get(payment).length == 0
+			if (payment.getC_BPartner_ID() != 0
+				&& payment.getC_Invoice_ID() == 0
+				&& payment.getC_Charge_ID() == 0
+				&& MPaymentAllocate.get(payment).length == 0
 				&& !createdAllocationRecords)
 			{
 				Properties ctx = payment.getCtx();
-				String trxName = payment.get_TrxName();
-				MBPartner bp = (MBPartner) MTable.get(ctx, MBPartner.Table_ID).getPO(payment.getC_BPartner_ID(), trxName);
+				MBPartner bp = new MBPartner(ctx, payment.getC_BPartner_ID(), payment.get_TrxName());
 				DB.getDatabase().forUpdate(bp, 0);
 				// Update total balance to include this payment
 				BigDecimal payAmt = null;
@@ -90,14 +93,20 @@ public class CreditManagerPayment implements ICreditManager
 				}
 				else
 				{
-					payAmt = MConversionRate.convertBase(ctx, payment.getPayAmt(), payment.getC_Currency_ID(),
-							payment.getDateAcct(), payment.getC_ConversionType_ID(), payment.getAD_Client_ID(),
-							payment.getAD_Org_ID());
+					payAmt = MConversionRate.convertBase(	ctx, payment.getPayAmt(),
+															payment.getC_Currency_ID(),
+															payment.getDateAcct(),
+															payment.getC_ConversionType_ID(),
+															payment.getAD_Client_ID(),
+															payment.getAD_Org_ID());
+
 					if (payAmt == null)
 					{
-						return MConversionRateUtil.getErrorMessage(ctx, "ErrorConvertingCurrencyToBaseCurrency",
-								payment.getC_Currency_ID(), MClient.get(ctx).getC_Currency_ID(),
-								payment.getC_ConversionType_ID(), payment.getDateAcct(), trxName);
+						errorMsg = MConversionRateUtil.getErrorMessage(	ctx, "ErrorConvertingCurrencyToBaseCurrency",
+																	payment.getC_Currency_ID(),
+																	MClient.get(ctx).getC_Currency_ID(),
+																	payment.getC_ConversionType_ID(),
+																	payment.getDateAcct(), payment.get_TrxName());
 					}
 				}
 				// Total Balance
@@ -123,6 +132,6 @@ public class CreditManagerPayment implements ICreditManager
 				bp.saveEx(payment.get_TrxName());
 			}
 		}
-		return null;
+		return new CreditStatus(errorMsg, !Util.isEmpty(errorMsg));
 	} // creditCheck
 }

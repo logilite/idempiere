@@ -38,7 +38,7 @@ import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.SimpleListModel;
 import org.adempiere.webui.factory.ButtonFactory;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.I_AD_Field;
 import org.compiere.model.MField;
 import org.compiere.model.MRole;
@@ -69,15 +69,15 @@ import org.zkoss.zul.Vbox;
  */
 public class QuickCustomizeGridViewPanel extends Panel {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 7566420005952940208L;
 
 	static CLogger					log					= CLogger.getCLogger(QuickCustomizeGridViewPanel.class);
 
 	private Map <Integer, String>	m_columnsWidth;
-	ArrayList <Integer>				tableSeqs;
-	QuickGridView					gridview			= null;
+	protected ArrayList <Integer>	tableSeqs;
+	protected QuickGridView			gridview			= null;
 	MTabCustomization m_tabcust;
 
 	private int						m_WindowNo;
@@ -92,15 +92,14 @@ public class QuickCustomizeGridViewPanel extends Panel {
 
 	private Checkbox				chkSaveWidth		= new Checkbox();
 
-	SimpleListModel					yesModel			= new SimpleListModel();
-	Listbox							yesList				= new Listbox();
+	protected SimpleListModel		yesModel			= new SimpleListModel();
+	protected Listbox				yesList				= new Listbox();
 
 	private boolean					uiCreated;
 	private boolean					m_saved				= false;
 	private ConfirmPanel			confirmPanel		= new ConfirmPanel(true, false, true, false, false, false);
 
 	/**
-	 * Sort Tab Constructor
 	 * @param WindowNo Window No
 	 * @param AD_Tab_ID
 	 * @param AD_User_ID
@@ -118,7 +117,7 @@ public class QuickCustomizeGridViewPanel extends Panel {
 	}
 
 	/**
-	 * Static Layout
+	 * Layout dialog
 	 * 
 	 * @throws Exception
 	 */
@@ -224,6 +223,9 @@ public class QuickCustomizeGridViewPanel extends Panel {
 
 	} // init
 
+	/**
+	 * Load fields
+	 */
 	public void loadData() {
 		MTabCustomization tabCust = MTabCustomization.get(Env.getCtx(), m_AD_User_ID, m_AD_Tab_ID, null,true);
 		boolean baseLanguage = Env.isBaseLanguage(Env.getCtx(), "AD_Field");
@@ -281,7 +283,13 @@ public class QuickCustomizeGridViewPanel extends Panel {
 			chkSaveWidth.setChecked(true);
 	} // loadData
 
-	void migrateLists(Listbox listFrom, Listbox listTo, int endIndex) {
+	/**
+	 * Move selected items from listFrom to listTo
+	 * @param listFrom
+	 * @param listTo
+	 * @param endIndex
+	 */
+	protected void migrateLists(Listbox listFrom, Listbox listTo, int endIndex) {
 		int index = 0;
 		SimpleListModel lmFrom = (SimpleListModel) listFrom.getModel();
 		SimpleListModel lmTo = (SimpleListModel) listTo.getModel();
@@ -310,7 +318,7 @@ public class QuickCustomizeGridViewPanel extends Panel {
 	 * 
 	 * @param event event
 	 */
-	void migrateValueWithinYesList(int endIndex, List<ListElement> selObjects) {
+	protected void migrateValueWithinYesList(int endIndex, List<ListElement> selObjects) {
 		int iniIndex = 0;
 		Arrays.sort(selObjects.toArray());
 		ListElement endObject = (ListElement) yesModel.getElementAt(endIndex);
@@ -328,7 +336,7 @@ public class QuickCustomizeGridViewPanel extends Panel {
 	 * 
 	 * @param event event
 	 */
-	void migrateValueWithinYesList(Event event) {
+	protected void migrateValueWithinYesList(Event event) {
 		Object[] selObjects = yesList.getSelectedItems().toArray();
 
 		if (selObjects == null)
@@ -386,6 +394,9 @@ public class QuickCustomizeGridViewPanel extends Panel {
 		}
 	} // migrateValueWithinYesList
 
+	/**
+	 * Save changes
+	 */
 	public void saveData() {
 		// yesList
 		// int index = 0;
@@ -426,15 +437,22 @@ public class QuickCustomizeGridViewPanel extends Panel {
 			}
 			getParent().detach();
 		} else {
-			FDialog.error(m_WindowNo, null, "SaveError", custom.toString());
+			Dialog.error(m_WindowNo, "SaveError", custom.toString());
 		}
 	} // saveData
 
+	/**
+	 * Activate dialog. Layout dialog during first activation.
+	 * @param b
+	 */
 	public void activate(boolean b) {
 		if (b && !uiCreated)
 			createUI();
 	}
 
+	/**
+	 * Layout dialog
+	 */
 	public void createUI() {
 		if (uiCreated)
 			return;
@@ -446,10 +464,16 @@ public class QuickCustomizeGridViewPanel extends Panel {
 		uiCreated = true;
 	}
 
+	/**
+	 * @return true if changes have been saved
+	 */
 	public boolean isSaved() {
 		return m_saved;
 	}
 
+	/**
+	 * @param quickGridView
+	 */
 	public void setGridPanel(QuickGridView quickGridView) {
 		this.gridview = quickGridView;
 	}

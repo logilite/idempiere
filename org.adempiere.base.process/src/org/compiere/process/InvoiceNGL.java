@@ -31,6 +31,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MJournal;
 import org.compiere.model.MJournalLine;
 import org.compiere.model.MOrg;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MTable;
 import org.compiere.model.Query;
 import org.compiere.model.X_T_InvoiceGL;
@@ -91,7 +92,7 @@ public class InvoiceNGL extends SvrProcess
 			else if (name.equals("C_DocTypeReval_ID"))
 				p_C_DocTypeReval_ID = para[i].getParameterAsInt();
 			else
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 	}	//	prepare
 

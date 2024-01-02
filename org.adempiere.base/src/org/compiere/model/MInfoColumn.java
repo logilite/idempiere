@@ -45,7 +45,7 @@ import org.idempiere.cache.ImmutablePOSupport;
 public class MInfoColumn extends X_AD_InfoColumn implements IInfoColumn, ImmutablePOSupport
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 3909164419255524834L;
 
@@ -60,6 +60,16 @@ public class MInfoColumn extends X_AD_InfoColumn implements IInfoColumn, Immutab
 																	add(QUERYOPERATOR_EXCLUDE);
 																}
 															};
+
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param AD_InfoColumn_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MInfoColumn(Properties ctx, String AD_InfoColumn_UU, String trxName) {
+        super(ctx, AD_InfoColumn_UU, trxName);
+    }
 
 	/**
 	 * 	Stanfard Constructor
@@ -83,6 +93,9 @@ public class MInfoColumn extends X_AD_InfoColumn implements IInfoColumn, Immutab
 		super (ctx, rs, trxName);
 	}	//	MInfoColumn
 
+	/**
+	 * @param targetInfoWindow
+	 */
 	public MInfoColumn(MInfoWindow targetInfoWindow) {
 		this(targetInfoWindow.getCtx(), 0, targetInfoWindow.get_TrxName());
 		m_parent = targetInfoWindow;
@@ -117,7 +130,7 @@ public class MInfoColumn extends X_AD_InfoColumn implements IInfoColumn, Immutab
 	/**
 	 * check column read access
 	 * @param tableInfos
-	 * @return false if current role don't have read access to the column, false otherwise
+	 * @return false if current role don't have read access to the column, true otherwise
 	 */
 	public boolean isColumnAccess(TableInfo[] tableInfos)
 	{
@@ -162,7 +175,7 @@ public class MInfoColumn extends X_AD_InfoColumn implements IInfoColumn, Immutab
 	/**
 	 * @param ctx
 	 * @param windowNo
-	 * @return boolean
+	 * @return true if visible, false otherwise
 	 */
 	public boolean isDisplayed(final Properties ctx, final int windowNo) {
 		if (!isDisplayed())
@@ -285,9 +298,11 @@ public class MInfoColumn extends X_AD_InfoColumn implements IInfoColumn, Immutab
 	}
 	
 	/**
+	 * <pre>
 	 * when delete record, call valid from parent to set state
 	 * when delete all, valid state is false
 	 * when delete a wrong column can make valid state to true
+	 * </pre>
 	 */
 	@Override
 	protected boolean afterDelete(boolean success) {

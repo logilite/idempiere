@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_Tax
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="C_Tax")
-public class X_C_Tax extends PO implements I_C_Tax, I_Persistent 
+public class X_C_Tax extends PO implements I_C_Tax, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_C_Tax (Properties ctx, int C_Tax_ID, String trxName)
@@ -82,6 +82,75 @@ public class X_C_Tax extends PO implements I_C_Tax, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_Tax (Properties ctx, int C_Tax_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_Tax_ID, trxName, virtualColumns);
+      /** if (C_Tax_ID == 0)
+        {
+			setC_TaxCategory_ID (0);
+			setC_Tax_ID (0);
+			setIsDefault (false);
+			setIsDocumentLevel (false);
+			setIsSalesTax (false);
+// N
+			setIsSummary (false);
+			setIsTaxExempt (false);
+			setName (null);
+			setRate (Env.ZERO);
+			setRequiresTaxCertificate (false);
+			setSOPOType (null);
+// B
+			setValidFrom (new Timestamp( System.currentTimeMillis() ));
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_Tax (Properties ctx, String C_Tax_UU, String trxName)
+    {
+      super (ctx, C_Tax_UU, trxName);
+      /** if (C_Tax_UU == null)
+        {
+			setC_TaxCategory_ID (0);
+			setC_Tax_ID (0);
+			setIsDefault (false);
+			setIsDocumentLevel (false);
+			setIsSalesTax (false);
+// N
+			setIsSummary (false);
+			setIsTaxExempt (false);
+			setName (null);
+			setRate (Env.ZERO);
+			setRequiresTaxCertificate (false);
+			setSOPOType (null);
+// B
+			setValidFrom (new Timestamp( System.currentTimeMillis() ));
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_Tax (Properties ctx, String C_Tax_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_Tax_UU, trxName, virtualColumns);
+      /** if (C_Tax_UU == null)
+        {
+			setC_TaxCategory_ID (0);
+			setC_Tax_ID (0);
+			setIsDefault (false);
+			setIsDocumentLevel (false);
+			setIsSalesTax (false);
+// N
+			setIsSummary (false);
+			setIsTaxExempt (false);
+			setName (null);
+			setRate (Env.ZERO);
+			setRequiresTaxCertificate (false);
+			setSOPOType (null);
+// B
+			setValidFrom (new Timestamp( System.currentTimeMillis() ));
+        } */
+    }
+
     /** Load Constructor */
     public X_C_Tax (Properties ctx, ResultSet rs, String trxName)
     {
@@ -89,7 +158,7 @@ public class X_C_Tax extends PO implements I_C_Tax, I_Persistent
     }
 
     /** AccessLevel
-      * @return 2 - Client 
+      * @return 2 - Client
       */
     protected int get_AccessLevel()
     {
@@ -363,10 +432,10 @@ public class X_C_Tax extends PO implements I_C_Tax, I_Persistent
 	public boolean isDefault()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDefault);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -386,10 +455,10 @@ public class X_C_Tax extends PO implements I_C_Tax, I_Persistent
 	public boolean isDocumentLevel()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDocumentLevel);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -409,10 +478,10 @@ public class X_C_Tax extends PO implements I_C_Tax, I_Persistent
 	public boolean isSalesTax()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSalesTax);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -432,10 +501,10 @@ public class X_C_Tax extends PO implements I_C_Tax, I_Persistent
 	public boolean isSummary()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSummary);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -455,10 +524,10 @@ public class X_C_Tax extends PO implements I_C_Tax, I_Persistent
 	public boolean isTaxExempt()
 	{
 		Object oo = get_Value(COLUMNNAME_IsTaxExempt);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -483,7 +552,7 @@ public class X_C_Tax extends PO implements I_C_Tax, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -549,10 +618,10 @@ public class X_C_Tax extends PO implements I_C_Tax, I_Persistent
 	public boolean isRequiresTaxCertificate()
 	{
 		Object oo = get_Value(COLUMNNAME_RequiresTaxCertificate);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -597,6 +666,29 @@ public class X_C_Tax extends PO implements I_C_Tax, I_Persistent
 	public String getTaxIndicator()
 	{
 		return (String)get_Value(COLUMNNAME_TaxIndicator);
+	}
+
+	/** TaxPostingIndicator AD_Reference_ID=200160 */
+	public static final int TAXPOSTINGINDICATOR_AD_Reference_ID=200160;
+	/** Separate Tax Posting = 0 */
+	public static final String TAXPOSTINGINDICATOR_SeparateTaxPosting = "0";
+	/** Distribute Tax with Relevant Expense = 1 */
+	public static final String TAXPOSTINGINDICATOR_DistributeTaxWithRelevantExpense = "1";
+	/** Set Posting Indicator.
+		@param TaxPostingIndicator Type of input tax (deductible and non deductible)
+	*/
+	public void setTaxPostingIndicator (String TaxPostingIndicator)
+	{
+
+		set_Value (COLUMNNAME_TaxPostingIndicator, TaxPostingIndicator);
+	}
+
+	/** Get Posting Indicator.
+		@return Type of input tax (deductible and non deductible)
+	  */
+	public String getTaxPostingIndicator()
+	{
+		return (String)get_Value(COLUMNNAME_TaxPostingIndicator);
 	}
 
 	/** Set To.

@@ -28,7 +28,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.Consumer;
 import java.util.logging.Level;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.adempiere.exceptions.DBException;
 import org.compiere.util.CLogger;
@@ -283,6 +288,19 @@ public class Query
 	{
 		joinClauseList.add(joinClause);
 		return this;
+	}
+	
+	/**
+	 * Convenient method to add table direct type of joint.<br/>
+	 * For e.g, if foreignTableName is C_BPartner and TableName for Query is AD_User,<br/>
+	 * this will add join clause of <br/>
+	 * "INNER JOIN C_BPartner ON (AD_User.C_BPartner_ID=C_BPartner.C_BParner_ID)".
+	 * @param foreignTableName
+	 */
+	public void addTableDirectJoin(String foreignTableName) {
+		String foreignId = foreignTableName + "_ID";
+		addJoinClause("INNER JOIN " + foreignTableName + " ON (" + table.getTableName() + "." + foreignId 
+				+ "=" + foreignTableName + "." + foreignId + ")");
 	}
 	
 	/**
@@ -645,6 +663,62 @@ public class Query
 	}
 	
 	/**
+	 * Return an Stream implementation to fetch one PO at a time. This method will only create POs on-demand and
+	 * they will become eligible for garbage collection once they have been consumed by the stream, so unlike
+	 * {@link #list()} it doesn't have to hold a copy of all the POs in the result set in memory at one time.
+	 * And unlike {#link #iterate()}, it only creates one ResultSet and iterates over it, creating a PO for each
+	 * row ({@link #iterate()}, on the other hand, has to re-run the query for each element).<br/>
+	 * 
+	 * For situations where you need to iterate over a result set and operate on the results one-at-a-time rather
+	 * than operate on the group as a whole, this method is likely to give better performance than <code>list()</code>
+	 * or <code>iterate()</code>.<br/>
+	 * 
+	 * <strong>However</strong>, because it keeps the underlying {@code ResultSet} open, you need to make sure that the
+	 * stream is properly disposed of using {@code close()} or else you will get resource leaks. As {@link Stream}
+	 * extends {@link AutoCloseable}, you can use it in a try-with-resources statement to automatically close it when
+	 * you are done.
+	 * 
+	 * @return Stream of POs.
+	 * @throws DBException 
+	 */
+	public <T extends PO> Stream<T> stream() throws DBException
+	{
+		String sql = buildSQL(null, true);
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try {
+			pstmt = DB.prepareStatement (sql, trxName);
+			final PreparedStatement finalPstmt = pstmt;
+			rs = createResultSet(pstmt);
+			final ResultSet finalRS = rs;
+			
+			return StreamSupport.stream(new Spliterators.AbstractSpliterator<T>(
+						Long.MAX_VALUE,Spliterator.ORDERED) {
+					@Override
+					public boolean tryAdvance(Consumer<? super T> action) {
+						try {
+							if(!finalRS.next()) return false;
+							@SuppressWarnings("unchecked")
+							final T newRec = (T)table.getPO(finalRS, trxName);
+							action.accept(newRec);
+							return true;
+						} catch(SQLException ex) {
+							log.log(Level.SEVERE, sql, ex);
+							throw new DBException(ex, sql);
+						}
+					}
+				}, false).onClose(() -> DB.close(finalRS, finalPstmt));
+		}
+		catch (SQLException e)
+		{
+			DB.close(rs, pstmt);
+			log.log(Level.SEVERE, sql, e);
+			throw new DBException(e, sql);
+		}
+	}
+
+	/**
 	 * Return an Iterator implementation to fetch one PO at a time. The implementation first retrieve
 	 * all IDS that match the query criteria and issue sql query to fetch the PO when caller want to
 	 * fetch the next PO. This minimize memory usage but it is slower than the list method.
@@ -788,8 +862,12 @@ public class Query
 			//
 			if (whereBuffer.length() > 0)
 				whereBuffer.append(" AND ");
-			whereBuffer.append(" EXISTS (SELECT 1 FROM T_Selection s WHERE s.AD_PInstance_ID=?"
-					+" AND s.T_Selection_ID="+table.getTableName()+"."+keys[0]+")");
+			whereBuffer.append(" EXISTS (SELECT 1 FROM T_Selection s WHERE s.AD_PInstance_ID=? AND s.");
+			if (table.isUUIDKeyTable())
+				whereBuffer.append("T_Selection_UU=");
+			else
+				whereBuffer.append("T_Selection_ID=");
+			whereBuffer.append(table.getTableName()).append(".").append(keys[0]).append(")");
 		}
 		
 		StringBuilder sqlBuffer = new StringBuilder(selectClause);
@@ -965,11 +1043,7 @@ public class Query
 			rs = null; pstmt = null;
 		}
 		//	Convert to array
-		int[] retValue = new int[list.size()];
-		for (int i = 0; i < retValue.length; i++)
-		{
-			retValue[i] = list.get(i);
-		}
+		int[] retValue = list.stream().mapToInt(Integer::intValue).toArray();
 		return retValue;
 	}	//	get_IDs
 

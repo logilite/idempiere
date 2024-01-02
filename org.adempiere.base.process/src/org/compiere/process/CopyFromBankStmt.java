@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MBankStatementLine;
 import org.compiere.model.MPayment;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MTable;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -52,7 +53,7 @@ public class CopyFromBankStmt extends SvrProcess
 			else if (name.equals("C_BankStatement_ID"))
 				m_C_BankStatement_ID = ((BigDecimal)para[i].getParameter()).intValue();
 			else
-				log.log(Level.SEVERE, "prepare - Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 	}	//	prepare
 

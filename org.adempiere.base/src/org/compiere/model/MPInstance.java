@@ -30,11 +30,13 @@ import java.util.logging.Level;
 
 import org.adempiere.base.Core;
 import org.adempiere.base.event.EventManager;
+import org.compiere.print.MPrintFormat;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Language;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 import org.idempiere.distributed.IMessageService;
 import org.idempiere.distributed.ITopic;
 import org.osgi.service.event.Event;
@@ -52,13 +54,25 @@ import org.osgi.service.event.Event;
 public class MPInstance extends X_AD_PInstance
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
-	private static final long serialVersionUID = 3756494717528301224L;
+	private static final long serialVersionUID = -6414730734415159480L;
 
 	public static final String ON_RUNNING_JOB_CHANGED_TOPIC = "onRunningJobChanged";
 
 	private static CLogger		s_log = CLogger.getCLogger (MPInstance.class);
+
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param AD_PInstance_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MPInstance(Properties ctx, String AD_PInstance_UU, String trxName) {
+        super(ctx, AD_PInstance_UU, trxName);
+		if (Util.isEmpty(AD_PInstance_UU))
+			setInitialDefaults();
+    }
 
 	/**
 	 * 	Standard Constructor
@@ -71,10 +85,15 @@ public class MPInstance extends X_AD_PInstance
 		super (ctx, AD_PInstance_ID, null);
 		//	New Process
 		if (AD_PInstance_ID == 0)
-		{
-			setIsProcessing (false);
-		}
+			setInitialDefaults();
 	}	//	MPInstance
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setIsProcessing (false);
+	}
 
 	/**
 	 * 	Load Constructor
@@ -91,12 +110,28 @@ public class MPInstance extends X_AD_PInstance
 	 * 	Create Process Instance from Process and create parameters
 	 *	@param process process
 	 *	@param Record_ID Record
+	 *  @deprecated Please use {@link #MPInstance(MProcess, int, int, String)}
 	 */
+	@Deprecated
 	public MPInstance (MProcess process, int Record_ID)
+	{
+		this(process, -1, Record_ID, null);
+	}
+
+	/**
+	 * 	Create and save new Process Instance from Process and record parameters
+	 *	@param process process
+	 *  @param Table_ID
+	 *	@param Record_ID Record id
+	 *  @param Record_UU Record uuid
+	 */
+	public MPInstance (MProcess process, int Table_ID, int Record_ID, String Record_UU)
 	{
 		this (process.getCtx(), 0, null);
 		setAD_Process_ID (process.getAD_Process_ID());
+		setAD_Table_ID(Table_ID);
 		setRecord_ID (Record_ID);
+		setRecord_UU(Record_UU);
 		setAD_User_ID(Env.getAD_User_ID(process.getCtx()));
 		if (!save())		//	need to save for parameters
 			throw new IllegalArgumentException ("Cannot Save");
@@ -116,23 +151,39 @@ public class MPInstance extends X_AD_PInstance
 	 *	@param ctx context
 	 *	@param AD_Process_ID Process ID
 	 *	@param Record_ID record
+	 *  @deprecated Please use {@link #MPInstance(Properties, int, int, int, String)}
 	 */
+	@Deprecated
 	public MPInstance (Properties ctx, int AD_Process_ID, int Record_ID)
+	{
+		this(ctx, AD_Process_ID, -1, Record_ID, null);
+	}
+
+	/**
+	 * 	New Constructor
+	 *	@param ctx context
+	 *	@param AD_Process_ID Process ID
+	 *  @param Table_ID
+	 *	@param Record_ID record id
+	 *  @param Record_UU record uuid
+	 */
+	public MPInstance (Properties ctx, int AD_Process_ID, int Table_ID, int Record_ID, String Record_UU)
 	{
 		this(ctx, 0, null);
 		setAD_Process_ID (AD_Process_ID);
+		setAD_Table_ID(Table_ID);
 		setRecord_ID (Record_ID);
+		setRecord_UU(Record_UU);
 		setAD_User_ID(Env.getAD_User_ID(ctx));
 		setIsProcessing (false);
 	}	//	MPInstance
 	
-
 	/**	Parameters						*/
 	private MPInstancePara[]		m_parameters = null;
 
 	/**
-	 * 	Get Parameters
-	 *	@return parameter array
+	 * 	Get Instance Parameters
+	 *	@return instance parameter array
 	 */
 	public MPInstancePara[] getParameters()
 	{
@@ -152,10 +203,29 @@ public class MPInstance extends X_AD_PInstance
 	}	//	getParameters
 	
 	/**
-	 * Validate that a set of process instance parameters are equal or not
-	 * to the current instance parameter
-	 * @param params array of parameters to compare
-	 * @return true if the process instance parameters are the same as the  array ones
+	 * 	Get Process Parameters
+	 *	@return process parameters array
+	 */
+	public MProcessPara[] getProcessParameters()
+	{
+		final String whereClause = "AD_Process_ID=?";
+		List <MProcessPara> list = new Query(getCtx(), MProcessPara.Table_Name, whereClause, get_TrxName())
+		.setParameters(getAD_Process_ID())
+		.setOnlyActiveRecords(true)
+		.setOrderBy("SeqNo")
+		.list();
+
+		//
+		MProcessPara[] processParameters = new MProcessPara[list.size()];
+		list.toArray(processParameters);
+		return processParameters;
+	}	//	getParameters
+	
+	/**
+	 * Check whether a set of process instance parameters are equal
+	 * to the current instance parameters.
+	 * @param params array of instance parameters to compare
+	 * @return true if the process instance parameters equals to this instance's instance parameters
 	 */
 	public boolean equalParameters(MPInstancePara[] params) {		
 		
@@ -183,12 +253,12 @@ public class MPInstance extends X_AD_PInstance
 		return comparedParams == getParameters().length; //all the compared parameters have the same name and value 
 	}
 
-	/**	Log Entries					*/
+	/**	Instance Log Entries					*/
 	private ArrayList<MPInstanceLog>	m_log	= new ArrayList<MPInstanceLog>();
 
 	/**
-	 *	Get Logs
-	 *	@return array of logs
+	 *	Get Instance Logs
+	 *	@return array of instance logs
 	 */
 	public MPInstanceLog[] getLog()
 	{
@@ -223,10 +293,12 @@ public class MPInstance extends X_AD_PInstance
 	}	//	getLog
 
 	/**
+	 *  Add instance log
 	 *	@param P_Date date
 	 *	@param P_ID id
 	 *	@param P_Number number
 	 *	@param P_Msg msg
+	 *  @return added instance log
 	 */
 	public MPInstanceLog addLog (Timestamp P_Date, int P_ID, BigDecimal P_Number, String P_Msg)
 	{
@@ -234,13 +306,14 @@ public class MPInstance extends X_AD_PInstance
 	}	//	addLog
 
 	/**
+	 * Add instance log
 	 * @param P_Date date
 	 * @param P_ID id
 	 * @param P_Number number
 	 * @param P_Msg msg
 	 * @param AD_Table_ID tableID
 	 * @param Record_ID recordID
-	 * @return
+	 * @return added instance log
 	 */
 	public MPInstanceLog addLog (Timestamp P_Date, int P_ID, BigDecimal P_Number, String P_Msg, int AD_Table_ID, int Record_ID)
 	{
@@ -253,7 +326,7 @@ public class MPInstance extends X_AD_PInstance
 
 	/**
 	 * 	Set AD_Process_ID.
-	 * 	Check Role if process can be performed
+	 * 	Throw exception if current role has no permission to run the process.
 	 *	@param AD_Process_ID process
 	 */
 	public void setAD_Process_ID (int AD_Process_ID)
@@ -278,7 +351,6 @@ public class MPInstance extends X_AD_PInstance
 
 	/**
 	 * 	Set Record ID.
-	 * 	direct internal record ID
 	 * 	@param Record_ID record
 	 **/
 	public void setRecord_ID (int Record_ID)
@@ -296,6 +368,7 @@ public class MPInstance extends X_AD_PInstance
 	 *	@see java.lang.Object#toString()
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MPInstance[")
@@ -309,7 +382,7 @@ public class MPInstance extends X_AD_PInstance
 	}	//	toString
 
 	/**
-	 * 	Dump Log
+	 * 	Dump Instance Logs to server log
 	 */
 	public void log()
 	{
@@ -328,7 +401,7 @@ public class MPInstance extends X_AD_PInstance
 
 	/**
 	 * 	Is it OK
-	 *	@return Result == OK
+	 *	@return true if Result == OK
 	 */
 	public boolean isOK()
 	{
@@ -350,6 +423,7 @@ public class MPInstance extends X_AD_PInstance
 	 *	@param success success
 	 *	@return success
 	 */
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (!success)
@@ -379,7 +453,7 @@ public class MPInstance extends X_AD_PInstance
 	 * @param seqNo parameter sequence#
 	 * @param parameterName parameter name
 	 * @param value parameter value
-	 * @return
+	 * @return instance parameter
 	 */
 	public MPInstancePara createParameter(int seqNo, String parameterName, Object value)
 	{
@@ -419,6 +493,11 @@ public class MPInstance extends X_AD_PInstance
 		return MProcess.get(getAD_Process_ID());
 	}
 
+	/**
+	 * Publish ON_RUNNING_JOB_CHANGED_TOPIC message to message service.<br/>
+	 * If message service is not available, post as OSGi event instead. 
+	 * @param AD_User_ID
+	 */
 	public static void publishChangedEvent(int AD_User_ID) {
 		IMessageService service = Core.getMessageService();
 		if (service != null) {
@@ -429,13 +508,24 @@ public class MPInstance extends X_AD_PInstance
 		}
 	}
 
+	/**
+	 * Post ON_RUNNING_JOB_CHANGED_TOPIC OSGi event.
+	 * @param AD_User_ID
+	 */
 	public static void postOnChangedEvent(int AD_User_ID) {
 		Map<String, Integer> properties = new HashMap<String, Integer>();
 		properties.put("AD_User_ID", AD_User_ID);
-		Event event = new Event(ON_RUNNING_JOB_CHANGED_TOPIC, properties);
+		Event event = EventManager.newEvent(ON_RUNNING_JOB_CHANGED_TOPIC, properties, true);
 		EventManager.getInstance().postEvent(event);
 	}
 	
+	/**
+	 * Get list of process instance via AD_Process_ID and AD_User_ID
+	 * @param ctx
+	 * @param AD_Process_ID
+	 * @param AD_User_ID
+	 * @return process instance list
+	 */
 	public static List<MPInstance> get(Properties ctx, int AD_Process_ID, int AD_User_ID) {
 		List<MPInstance> list = new ArrayList<MPInstance>();
 		List<String> paramsStrAdded = new ArrayList<String>();
@@ -497,6 +587,9 @@ public class MPInstance extends X_AD_PInstance
 		return list;
 	}
 
+	/**
+	 * @return String concatenate all instance parameter values
+	 */
 	private String getParamsStr() {
 		StringBuilder cksum = new StringBuilder();
 		for (MPInstancePara ip : getParameters()) {
@@ -523,21 +616,7 @@ public class MPInstance extends X_AD_PInstance
 	}
 	
 	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
-	protected boolean beforeSave (boolean newRecord)
-	{
-		if (newRecord) {
-			setAD_Session_ID(Env.getContextAsInt(Env.getCtx(), "#AD_Session_ID"));
-		}
-		
-		return true;
-	}	//	beforeSave
-
-	/**
-	 * 
+	 * Get instance info
 	 * @param AD_PInstance_ID
 	 * @return {@link PInstanceInfo}
 	 * @throws SQLException
@@ -549,19 +628,19 @@ public class MPInstance extends X_AD_PInstance
 		String sql = "SELECT p.Name, p.ProcedureName,p.ClassName, p.AD_Process_ID,"		//	1..4
 			+ " p.isReport,p.IsDirectPrint,p.AD_ReportView_ID,p.AD_Workflow_ID,"		//	5..8
 			+ " CASE WHEN COALESCE(p.Statistic_Count,0)=0 THEN 0 ELSE p.Statistic_Seconds/p.Statistic_Count END," 	//	9
-			+ " p.JasperReport, p.AD_Process_UU, p.isPrinterPreview "  	//	10..12
+			+ " p.JasperReport, p.AD_Process_UU "  	//	10..11
 			+ "FROM AD_Process p"
 			+ " INNER JOIN AD_PInstance i ON (p.AD_Process_ID=i.AD_Process_ID) "
 			+ "WHERE p.IsActive='Y'"
 			+ " AND i.AD_PInstance_ID=?";
 		if (!Env.isBaseLanguage(Env.getCtx(), "AD_Process"))
-			sql = "SELECT COALESCE(t.Name, p.Name), p.ProcedureName,p.ClassName, p.AD_Process_ID,"		//	1..4
+			sql = "SELECT t.Name, p.ProcedureName,p.ClassName, p.AD_Process_ID,"		//	1..4
 				+ " p.isReport, p.IsDirectPrint,p.AD_ReportView_ID,p.AD_Workflow_ID,"	//	5..8
 				+ " CASE WHEN COALESCE(p.Statistic_Count,0)=0 THEN 0 ELSE p.Statistic_Seconds/p.Statistic_Count END," 	//	9
-				+ " p.JasperReport, p.AD_Process_UU, p.isPrinterPreview " 	//	10..12
+				+ " p.JasperReport, p.AD_Process_UU " 	//	10..11
 				+ "FROM AD_Process p"
 				+ " INNER JOIN AD_PInstance i ON (p.AD_Process_ID=i.AD_Process_ID) "
-				+ " LEFT OUTER JOIN AD_Process_Trl t ON (p.AD_Process_ID=t.AD_Process_ID"
+				+ " INNER JOIN AD_Process_Trl t ON (p.AD_Process_ID=t.AD_Process_ID"
 					+ " AND t.AD_Language='" + Env.getAD_Language(Env.getCtx()) + "') "
 				+ "WHERE p.IsActive='Y'"
 				+ " AND i.AD_PInstance_ID=?";
@@ -586,7 +665,6 @@ public class MPInstance extends X_AD_PInstance
 				if ("Y".equals(rs.getString(5)))
 				{
 					info.isReport = true;
-					info.isPrinterPreview = rs.getBoolean(12);
 				}
 				if ("Y".equals(rs.getString(6)))
 				{
@@ -608,9 +686,8 @@ public class MPInstance extends X_AD_PInstance
 	}
 	
 	/**
-	 * Record class with fields from AD_PInstance+AD_Process
+	 * Instance info record class with fields from AD_PInstance+AD_Process
 	 * @author hengsin
-	 *
 	 */
 	public static class PInstanceInfo {
 		public int AD_Process_ID;
@@ -625,6 +702,37 @@ public class MPInstance extends X_AD_PInstance
 		public boolean isReport = false;
 		public boolean isDirectPrint = false;
 		public int estimate;
-		public boolean isPrinterPreview = false;
+	}
+	
+	/**
+	 * 	Before Save
+	 *	@param newRecord new
+	 *	@return true
+	 */
+	@Override
+	protected boolean beforeSave (boolean newRecord)
+	{
+		if (newRecord) {
+			int sessionId = Env.getContextAsInt(Env.getCtx(), Env.AD_SESSION_ID);
+			if (sessionId > 0)
+				setAD_Session_ID(sessionId);
+		}
+		
+		return true;
+	}	//	beforeSave
+	
+	/**
+	 * Set AD_PrintFormat_ID if empty, AD_Language_ID if empty and save the record.
+	 * @param pf
+	 */
+	public void updatePrintFormatAndLanguageIfEmpty(MPrintFormat format) {
+		if(getAD_PrintFormat_ID() <= 0 && format.getAD_PrintFormat_ID() > 0) {
+			setAD_PrintFormat_ID(format.getAD_PrintFormat_ID());
+			saveEx();
+		}
+		if(getAD_Language_ID() <= 0 && format.getLanguage() != null) {
+			setAD_Language_ID(MLanguage.get(Env.getCtx(), format.getLanguage()).getAD_Language_ID());
+			saveEx();
+		}
 	}
 }	//	MPInstance

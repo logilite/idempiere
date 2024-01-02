@@ -61,9 +61,9 @@ import org.compiere.util.Env;
 public final class FactLine extends X_Fact_Acct
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
-	private static final long serialVersionUID = -533308106857819424L;
+	private static final long serialVersionUID = -601720541421664784L;
 
 	/**
 	 *	Constructor
@@ -133,9 +133,9 @@ public final class FactLine extends X_Fact_Acct
 	}	//	reverse
 
 	/**
-	 * 	Create Accrual (flip CR/DR) of the line
+	 * 	Create reverse accrual (flip CR/DR) of the line
 	 *	@param description new description
-	 *	@return accrual line
+	 *	@return reverse accrual line
 	 */
 	public FactLine accrue (String description)
 	{
@@ -243,7 +243,7 @@ public final class FactLine extends X_Fact_Acct
 	 *  @param C_Currency_ID currency
 	 *  @param AmtSourceDr source amount dr
 	 *  @param AmtSourceCr source amount cr
-	 *  @return true, if any if the amount is not zero
+	 *  @return true, if any of the amount is not zero
 	 */
 	public boolean setAmtSource (int C_Currency_ID, BigDecimal AmtSourceDr, BigDecimal AmtSourceCr)
 	{
@@ -323,7 +323,7 @@ public final class FactLine extends X_Fact_Acct
 	}   //  setAmtAcct
 
 	/**
-	 *  Set Accounted Amounts rounded by currency
+	 *  Set Accounted Amounts rounded by standard precision of currency
 	 *  @param C_Currency_ID currency
 	 *  @param AmtAcctDr acct amount dr
 	 *  @param AmtAcctCr acct amount cr
@@ -531,8 +531,8 @@ public final class FactLine extends X_Fact_Acct
 	}	//	addDescription
 	
 	/**
-	 *  Set Warehouse Locator.
-	 *  - will overwrite Organization -
+	 *  Set Warehouse Locator.<br/>
+	 *  - will reset Organization to 0 -
 	 *  @param M_Locator_ID locator
 	 */
 	public void setM_Locator_ID (int M_Locator_ID)
@@ -545,7 +545,7 @@ public final class FactLine extends X_Fact_Acct
 	/**************************************************************************
 	 *  Set Location
 	 *  @param C_Location_ID location
-	 *  @param isFrom from
+	 *  @param isFrom true - from, false - to.
 	 */
 	public void setLocation (int C_Location_ID, boolean isFrom)
 	{
@@ -556,9 +556,9 @@ public final class FactLine extends X_Fact_Acct
 	}   //  setLocator
 
 	/**
-	 *  Set Location from Locator
+	 *  Set Location from Locator (M_Warehouse)
 	 *  @param M_Locator_ID locator
-	 *  @param isFrom from
+	 *  @param isFrom true - from, false - to.
 	 */
 	public void setLocationFromLocator (int M_Locator_ID, boolean isFrom)
 	{
@@ -591,7 +591,7 @@ public final class FactLine extends X_Fact_Acct
 	}   //  setLocationFromLocator
 
 	/**
-	 *  Set Location from Busoness Partner Location
+	 *  Set Location from Business Partner Location
 	 *  @param C_BPartner_Location_ID bp location
 	 *  @param isFrom from
 	 */
@@ -625,9 +625,9 @@ public final class FactLine extends X_Fact_Acct
 	}   //  setLocationFromBPartner
 
 	/**
-	 *  Set Location from Organization
+	 *  Set Location from Organization (AD_OrgInfo)
 	 *  @param AD_Org_ID org
-	 *  @param isFrom from
+	 *  @param isFrom true - from, false - to.
 	 */
 	public void setLocationFromOrg (int AD_Org_ID, boolean isFrom)
 	{
@@ -659,7 +659,7 @@ public final class FactLine extends X_Fact_Acct
 	}   //  setLocationFromOrg
 
 	
-	/**************************************************************************
+	/**
 	 *  Returns Source Balance of line
 	 *  @return source balance
 	 */
@@ -705,7 +705,7 @@ public final class FactLine extends X_Fact_Acct
 	}	//	isBalanceSheet
 
 	/**
-	 *	Currect Accounting Amount.
+	 *	Adjust Accounting Amount.
 	 *  <pre>
 	 *  Example:    1       -1      1       -1
 	 *  Old         100/0   100/0   0/100   0/100
@@ -840,7 +840,7 @@ public final class FactLine extends X_Fact_Acct
 
 	
 	/**
-	 *  Get AD_Org_ID (balancing segment).
+	 *  Get AD_Org_ID (balancing segment). <br/>
 	 *  (if not set directly - from document line, document, account, locator)
 	 *  <p>
 	 *  Note that Locator needs to be set before - otherwise
@@ -918,10 +918,9 @@ public final class FactLine extends X_Fact_Acct
 		return super.getAD_Org_ID();
 	}   //  setAD_Org_ID
 
-
 	/**
 	 *	Get/derive Sales Region
-	 *	@return Sales Region
+	 *	@return C_SalesRegion_ID
 	 */
 	public int getC_SalesRegion_ID ()
 	{
@@ -936,11 +935,10 @@ public final class FactLine extends X_Fact_Acct
 				setC_SalesRegion_ID (m_doc.getC_SalesRegion_ID());
 			if (super.getC_SalesRegion_ID() == 0 && m_doc.getBP_C_SalesRegion_ID() > 0)
 				setC_SalesRegion_ID (m_doc.getBP_C_SalesRegion_ID());
-			//	derive SalesRegion if AcctSegment
+			//	derive SalesRegion from AcctSegment
 			if (super.getC_SalesRegion_ID() == 0
 				&& m_doc.getC_BPartner_Location_ID() != 0
 				&& m_doc.getBP_C_SalesRegion_ID() == -1)	//	never tried
-			//	&& m_acctSchema.isAcctSchemaElement(MAcctSchemaElement.ELEMENTTYPE_SalesRegion))
 			{
 				String sql = "SELECT COALESCE(C_SalesRegion_ID,0) FROM C_BPartner_Location WHERE C_BPartner_Location_ID=?";
 				setC_SalesRegion_ID (DB.getSQLValue(null,
@@ -1028,9 +1026,8 @@ public final class FactLine extends X_Fact_Acct
 		}
 		return true;
 	}	//	beforeSave
-	
-	
-	/**************************************************************************
+		
+	/**
 	 *  Revenue Recognition.
 	 *  Called from FactLine.save
 	 *  <p>
@@ -1155,8 +1152,7 @@ public final class FactLine extends X_Fact_Acct
 		return new_Account_ID;
 	}   //  createRevenueRecognition
 
-
-	/**************************************************************************
+	/**
 	 * 	Update Line with reversed Original Amount in Accounting Currency.
 	 * 	Also copies original dimensions like Project, etc.
 	 * 	Called from Doc_MatchInv
@@ -1168,6 +1164,26 @@ public final class FactLine extends X_Fact_Acct
 	 */
 	public boolean updateReverseLine (int AD_Table_ID, int Record_ID, int Line_ID,
 		BigDecimal multiplier)
+	{
+		return updateReverseLine(AD_Table_ID, Record_ID, Line_ID, multiplier, null);
+	}
+
+	/**
+	 * 	Update Line with reversed Original Amount in Accounting Currency.
+	 * 	Also copies original dimensions like Project, etc.
+	 * 	Called from Doc_MatchInv
+	 * 	@param AD_Table_ID table
+	 * 	@param Record_ID record
+	 * 	@param Line_ID line
+	 * 	@param multiplier targetQty/documentQty
+	 *  @param otherLine reversal line created before this. if not null, this reversal should reverse the opposite sign.
+	 * 	@return true if success
+	 * <p>
+	 * NOTE: otherLine is required in cases where the original DR/CR postings are done in the same account.
+	 * In this case looking just for the first posting is wrong and results in a non-balanced reversal posting
+	 */
+	public boolean updateReverseLine (int AD_Table_ID, int Record_ID, int Line_ID,
+		BigDecimal multiplier, FactLine otherLine)
 	{
 		boolean success = false;
 
@@ -1188,8 +1204,16 @@ public final class FactLine extends X_Fact_Acct
 		if (MMovement.Table_ID == AD_Table_ID)
 			sql.append(" AND M_Locator_ID=?");
 		// end MZ
-		sql.append(" ORDER BY Fact_Acct_ID ");
+		if (otherLine != null) 
+		{
+			if (otherLine.getAmtAcctDr().signum() == 0 && otherLine.getAmtAcctCr().signum() != 0)
+				sql.append(" AND AmtAcctDr = 0 AND AmtAcctCr != 0 ");
+			else if (otherLine.getAmtAcctDr().signum() != 0 && otherLine.getAmtAcctCr().signum() == 0)
+				sql.append(" AND AmtAcctCr = 0 AND AmtAcctDr != 0 ");
+		}
 		
+		sql.append(" ORDER BY Fact_Acct_ID");
+				
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try

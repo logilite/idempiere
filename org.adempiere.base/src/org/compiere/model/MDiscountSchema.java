@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.TimeUtil;
+import org.compiere.util.Util;
 import org.idempiere.cache.ImmutableIntPOCache;
 import org.idempiere.cache.ImmutablePOSupport;
 
@@ -40,7 +41,7 @@ import org.idempiere.cache.ImmutablePOSupport;
 public class MDiscountSchema extends X_M_DiscountSchema implements ImmutablePOSupport
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 4916780751688051566L;
 
@@ -78,9 +79,20 @@ public class MDiscountSchema extends X_M_DiscountSchema implements ImmutablePOSu
 	/**	Cache						*/
 	private static ImmutableIntPOCache<Integer,MDiscountSchema>	s_cache
 		= new ImmutableIntPOCache<Integer,MDiscountSchema>(Table_Name, 20);
-
 	
-	/**************************************************************************
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param M_DiscountSchema_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MDiscountSchema(Properties ctx, String M_DiscountSchema_UU, String trxName) {
+        super(ctx, M_DiscountSchema_UU, trxName);
+		if (Util.isEmpty(M_DiscountSchema_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
 	 *	@param M_DiscountSchema_ID id
@@ -90,14 +102,19 @@ public class MDiscountSchema extends X_M_DiscountSchema implements ImmutablePOSu
 	{
 		super (ctx, M_DiscountSchema_ID, trxName);
 		if (M_DiscountSchema_ID == 0)
-		{
-			setDiscountType (DISCOUNTTYPE_FlatPercent);
-			setFlatDiscount(Env.ZERO);
-			setIsBPartnerFlatDiscount (false);
-			setIsQuantityBased (true);	// Y
-			setCumulativeLevel(CUMULATIVELEVEL_Line);
-		}	
+			setInitialDefaults();
 	}	//	MDiscountSchema
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setDiscountType (DISCOUNTTYPE_FlatPercent);
+		setFlatDiscount(Env.ZERO);
+		setIsBPartnerFlatDiscount (false);
+		setIsQuantityBased (true);	// Y
+		setCumulativeLevel(CUMULATIVELEVEL_Line);
+	}
 
 	/**
 	 * 	Load Constructor
@@ -111,7 +128,7 @@ public class MDiscountSchema extends X_M_DiscountSchema implements ImmutablePOSu
 	}	//	MDiscountSchema
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param copy
 	 */
 	public MDiscountSchema(MDiscountSchema copy) 
@@ -120,7 +137,7 @@ public class MDiscountSchema extends X_M_DiscountSchema implements ImmutablePOSu
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 */
@@ -130,7 +147,7 @@ public class MDiscountSchema extends X_M_DiscountSchema implements ImmutablePOSu
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 * @param trxName
@@ -150,7 +167,7 @@ public class MDiscountSchema extends X_M_DiscountSchema implements ImmutablePOSu
 	
 	/**
 	 * 	Get Breaks
-	 *	@param reload reload
+	 *	@param reload true to reload from DB
 	 *	@return breaks
 	 */
 	public MDiscountSchemaBreak[] getBreaks(boolean reload)
@@ -241,7 +258,7 @@ public class MDiscountSchema extends X_M_DiscountSchema implements ImmutablePOSu
 	 *	@param M_Product_ID product
 	 *	@param M_Product_Category_ID category
 	 *	@param BPartnerFlatDiscount flat discount
-	 *	@return discount or zero
+	 *	@return Discounted Price
 	 */
 	public BigDecimal calculatePrice (BigDecimal Qty, BigDecimal Price,  
 		int M_Product_ID, int M_Product_Category_ID,  
@@ -255,15 +272,32 @@ public class MDiscountSchema extends X_M_DiscountSchema implements ImmutablePOSu
 			M_Product_ID, M_Product_Category_ID, BPartnerFlatDiscount);
 		//	nothing to calculate
 		if (discount == null || discount.signum() == 0)
-			return Price;
+		{
+			BigDecimal fixedPrice = calculateFixedPrice(Qty, Price, M_Product_ID, M_Product_Category_ID);
+			if (fixedPrice != null)
+				return fixedPrice;
+			else
+				return Price;
+		}
 		//
-		BigDecimal onehundred = Env.ONEHUNDRED;
-		BigDecimal multiplier = (onehundred).subtract(discount);
-		multiplier = multiplier.divide(onehundred, 6, RoundingMode.HALF_UP);
-		BigDecimal newPrice = Price.multiply(multiplier);
+		BigDecimal newPrice = calculateDiscountedPrice(Price, discount);
 		if (log.isLoggable(Level.FINE)) log.fine("=>" + newPrice);
 		return newPrice;
 	}	//	calculatePrice
+
+	/**
+	 * Calculate discounted price
+	 * @param price input price
+	 * @param discount discount percentage, for e.g 5.00 for 5%
+	 * @return discounted price
+	 */
+	public static BigDecimal calculateDiscountedPrice(BigDecimal price, BigDecimal discount) {
+		BigDecimal onehundred = Env.ONEHUNDRED;
+		BigDecimal multiplier = (onehundred).subtract(discount);
+		multiplier = multiplier.divide(onehundred, 6, RoundingMode.HALF_UP);
+		BigDecimal newPrice = price.multiply(multiplier);
+		return newPrice;
+	}
 
 	/**
 	 * 	Calculate Discount Percentage
@@ -342,12 +376,63 @@ public class MDiscountSchema extends X_M_DiscountSchema implements ImmutablePOSu
 		return Env.ZERO;
 	}	//	calculateDiscount
 	
+	/**
+	 * 	Get fix discounted price
+	 *	@param Qty quantity
+	 *	@param Price price
+	 *	@param M_Product_ID product
+	 *	@param M_Product_Category_ID category
+	 *	@return fix discounted price or null
+	 */
+	private BigDecimal calculateFixedPrice (BigDecimal Qty, BigDecimal Price,  
+		int M_Product_ID, int M_Product_Category_ID)
+	{
+		if (DISCOUNTTYPE_FlatPercent.equals(getDiscountType()) || DISCOUNTTYPE_Formula.equals(getDiscountType())
+			|| DISCOUNTTYPE_Pricelist.equals(getDiscountType()))
+		{
+			return null;
+		}
+		
+		//	Price Breaks
+		getBreaks(false);
+		BigDecimal Amt = Price.multiply(Qty);
+		for (int i = 0; i < m_breaks.length; i++)
+		{
+			MDiscountSchemaBreak br = m_breaks[i];
+			if (!br.isActive())
+				continue;
+			
+			if (isQuantityBased())
+			{
+				if (!br.applies(Qty, M_Product_ID, M_Product_Category_ID))
+					continue;
+			}
+			else
+			{
+				if (!br.applies(Amt, M_Product_ID, M_Product_Category_ID))
+					continue;
+			}
+			
+			//	Line applies
+			if (!br.isBPartnerFlatDiscount())
+			{
+				if (br.getFixedPrice() != null && br.getFixedPrice().signum() > 0)
+				{
+					return br.getFixedPrice();
+				}
+			}
+			return null;
+		}	//	for all breaks
+		
+		return null;
+	}	//	calculateDiscount
 	
 	/**
 	 * 	Before Save
 	 *	@param newRecord new
 	 *	@return true
 	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		if (getValidFrom() == null)
@@ -357,7 +442,7 @@ public class MDiscountSchema extends X_M_DiscountSchema implements ImmutablePOSu
 	}	//	beforeSave
 	
 	/**
-	 * 	Renumber
+	 * 	Renumber SeqNo
 	 *	@return lines updated
 	 */
 	public int reSeq()

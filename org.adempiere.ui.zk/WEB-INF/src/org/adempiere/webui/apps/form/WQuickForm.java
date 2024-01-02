@@ -34,12 +34,13 @@ import org.adempiere.webui.component.ZkCssHelper;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.CustomizeGridViewDialog;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.adempiere.webui.window.QuickFormPasteData;
 import org.compiere.model.DataStatusEvent;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MRole;
+import org.compiere.model.MSysConfig;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
@@ -52,7 +53,7 @@ import org.zkoss.zul.Column;
 import org.zkoss.zul.Columns;
 
 /**
- * Quick entry form
+ * Quick entry form.
  * 
  * @author Logilite Technologies
  * @since Nov 03, 2017
@@ -60,19 +61,22 @@ import org.zkoss.zul.Columns;
 public class WQuickForm extends Window implements IQuickForm
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -5363771364595732977L;
 
 		public Trx						trx					= null;
-
+	/** Main layout of form */
 	private Borderlayout			mainLayout			= new Borderlayout();
+	/** Calling ADWindowContent instance */
 	private AbstractADWindowContent	adWinContent		= null;
+	/** Center of {@link #mainLayout}. Grid/List view for multi record entry. */
 	private QuickGridView			quickGridView		= null;
+	/** Current selected grid tab of {@link #adWinContent} */
 	private GridTab					gridTab;
 
+	/** Action buttons panel. South of {@link #mainLayout} */
 	private ConfirmPanel			confirmPanel		= new ConfirmPanel(true, true, false, false, false, false);
-
 	private Button					bDelete				= confirmPanel.createButton(ConfirmPanel.A_DELETE);
 	private Button					bSave				= confirmPanel.createButton("Save");
 	private Button					bIgnore				= confirmPanel.createButton("Ignore");
@@ -84,12 +88,19 @@ public class WQuickForm extends Window implements IQuickForm
 
 	private int						onlyCurrentDays		= 0;
 
-	QuickGridView					prevQGV				= null;
+	protected QuickGridView			prevQGV				= null;
 
 	private int						windowNo;
 
 	private boolean stayInParent;
+	/* SysConfig USE_ESC_FOR_TAB_CLOSING */
+	private boolean isUseEscForTabClosing = MSysConfig.getBooleanValue(MSysConfig.USE_ESC_FOR_TAB_CLOSING, false, Env.getAD_Client_ID(Env.getCtx()));
 
+	/**
+	 * @param winContent
+	 * @param m_onlyCurrentRows
+	 * @param m_onlyCurrentDays
+	 */
 	public WQuickForm(AbstractADWindowContent winContent, boolean m_onlyCurrentRows, int m_onlyCurrentDays)
 	{
 		super();
@@ -110,8 +121,13 @@ public class WQuickForm extends Window implements IQuickForm
 		// To maintain parent-child Quick Form
 		prevQGV = adWinContent.getCurrQGV();
 		adWinContent.setCurrQGV(quickGridView);
+		
+		addCallback(AFTER_PAGE_DETACHED, t -> adWinContent.focusToLastFocusEditor());
 	}
 
+	/**
+	 * Initialize form.
+	 */
 	protected void initForm( )
 	{
 		initZk();
@@ -119,6 +135,9 @@ public class WQuickForm extends Window implements IQuickForm
 		quickGridView.refresh(gridTab);
 	}
 
+	/**
+	 * Layout form.
+	 */
 	private void initZk( )
 	{
 		// Center
@@ -223,11 +242,14 @@ public class WQuickForm extends Window implements IQuickForm
 		event.stopPropagation();
 	} // onEvent
 
+	/**
+	 * Cancel/Close form.
+	 */
 	public void onCancel( )
 	{
 		if (gridTab.getTableModel().getRowChanged() > -1)
 		{
-			FDialog.ask(windowNo, this, "SaveChanges?", new Callback <Boolean>() {
+			Dialog.ask(windowNo, "SaveChanges?", new Callback <Boolean>() {
 
 				@Override
 				public void onCallback(Boolean result)
@@ -244,6 +266,9 @@ public class WQuickForm extends Window implements IQuickForm
 		}
 	} // onCancel
 
+	/**
+	 * Reset sort state
+	 */
 	public void onUnSort( )
 	{
 		adWinContent.getActiveGridTab().getTableModel().resetCacheSortState();
@@ -257,6 +282,9 @@ public class WQuickForm extends Window implements IQuickForm
 		adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "UnSort"), false);
 	} // onUnSort
 
+	/**
+	 * Open {@link CustomizeGridViewDialog} for {@link #quickGridView}.
+	 */
 	public void onCustomize( )
 	{
 		onSave();
@@ -278,9 +306,12 @@ public class WQuickForm extends Window implements IQuickForm
 		ZKUpdateUtil.setWidth(quickGridView, getWidth());
 		ZKUpdateUtil.setHeight(quickGridView, getHeight());
 
-		CustomizeGridViewDialog.showCustomize(0, gridTab.getAD_Tab_ID(), columnsWidth, gridFieldIds, null, quickGridView, true);
+		CustomizeGridViewDialog.showCustomize(0, gridTab.getAD_Tab_ID(), columnsWidth, gridFieldIds, null, quickGridView, true, null);
 	} // onCustomize
 
+	/**
+	 * Ignore/Undo changes
+	 */
 	public void onIgnore( )
 	{
 		gridTab.dataIgnore();
@@ -294,6 +325,9 @@ public class WQuickForm extends Window implements IQuickForm
 		Events.echoEvent(QuickGridView.EVENT_ON_SET_FOCUS_TO_FIRST_CELL, quickGridView, null);
 	} // onIgnore
 
+	/**
+	 * Delete selected rows.
+	 */
 	public void onDelete( )
 	{
 		if (gridTab == null || !quickGridView.isNewLineSaved)
@@ -306,7 +340,7 @@ public class WQuickForm extends Window implements IQuickForm
 		final int[] indices = gridTab.getSelection();
 		if (indices.length > 0)
 		{
-			FDialog.ask(windowNo, this, "DeleteRecord?", new Callback <Boolean>() {
+			Dialog.ask(windowNo, "DeleteRecord?", new Callback <Boolean>() {
 
 				@Override
 				public void onCallback(Boolean result)
@@ -356,6 +390,9 @@ public class WQuickForm extends Window implements IQuickForm
 		}
 	} // onDelete
 
+	/**
+	 * Save {@link #quickGridView} changes.
+	 */
 	public void onSave( )
 	{
 		if (gridTab.getTableModel().getRowChanged() == gridTab.getCurrentRow())
@@ -373,6 +410,9 @@ public class WQuickForm extends Window implements IQuickForm
 		}
 	} // onSave
 
+	/**
+	 * Refresh {@link #gridTab} and {@link #quickGridView}.
+	 */
 	public void onRefresh( )
 	{
 		gridTab.dataRefreshAll();
@@ -385,6 +425,9 @@ public class WQuickForm extends Window implements IQuickForm
 			createNewRow();
 	} // onRefresh
 
+	/**
+	 * Close form.
+	 */
 	@Override
 	public void onPasteData()
 	{
@@ -398,6 +441,10 @@ public class WQuickForm extends Window implements IQuickForm
 	{
 		super.dispose();
 
+		// do not allow to close tab for Events.ON_CTRL_KEY event
+		if(isUseEscForTabClosing)
+			SessionManager.getAppDesktop().setCloseTabWithShortcut(false);
+		
 		gridTab.setQuickForm(false);
 		onIgnore();
 		gridTab.removeDataStatusListener(this);
@@ -431,6 +478,9 @@ public class WQuickForm extends Window implements IQuickForm
 		}
 	} // dispose
 
+	/**
+	 * Add new row to {@link #quickGridView}.
+	 */
 	private void createNewRow( )
 	{
 		int row = gridTab.getRowCount();
@@ -463,11 +513,10 @@ public class WQuickForm extends Window implements IQuickForm
 	} // dataStatusChanged
 
 	/**
-	 * Return to parent when closing the quick form
+	 * If stayInParent is true, {@link #adWinContent} should navigate to parent record after closing this form instance.
 	 * @param stayInParent
 	 */
 	public void setStayInParent(boolean stayInParent) {
 		this.stayInParent = stayInParent;
 	}
-
 }

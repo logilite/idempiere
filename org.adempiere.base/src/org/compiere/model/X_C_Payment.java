@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_Payment
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="C_Payment")
-public class X_C_Payment extends PO implements I_C_Payment, I_Persistent 
+public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_C_Payment (Properties ctx, int C_Payment_ID, String trxName)
@@ -128,6 +128,144 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_Payment (Properties ctx, int C_Payment_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_Payment_ID, trxName, virtualColumns);
+      /** if (C_Payment_ID == 0)
+        {
+			setC_BPartner_ID (0);
+			setC_Currency_ID (0);
+			setC_DocType_ID (0);
+			setC_Payment_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDateTrx (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setIsAllocated (false);
+			setIsApproved (false);
+// N
+			setIsDelayedCapture (false);
+			setIsOnline (false);
+			setIsOverrideCurrencyRate (false);
+// N
+			setIsOverUnderPayment (true);
+// Y
+			setIsPrepayment (false);
+			setIsReceipt (false);
+			setIsReconciled (false);
+			setIsSelfService (false);
+			setIsVoided (false);
+// N
+			setPayAmt (Env.ZERO);
+// 0
+			setPosted (false);
+// N
+			setProcessed (false);
+			setTenderType (null);
+// K
+			setTrxType (null);
+// S
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_Payment (Properties ctx, String C_Payment_UU, String trxName)
+    {
+      super (ctx, C_Payment_UU, trxName);
+      /** if (C_Payment_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_Currency_ID (0);
+			setC_DocType_ID (0);
+			setC_Payment_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDateTrx (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setIsAllocated (false);
+			setIsApproved (false);
+// N
+			setIsDelayedCapture (false);
+			setIsOnline (false);
+			setIsOverrideCurrencyRate (false);
+// N
+			setIsOverUnderPayment (true);
+// Y
+			setIsPrepayment (false);
+			setIsReceipt (false);
+			setIsReconciled (false);
+			setIsSelfService (false);
+			setIsVoided (false);
+// N
+			setPayAmt (Env.ZERO);
+// 0
+			setPosted (false);
+// N
+			setProcessed (false);
+			setTenderType (null);
+// K
+			setTrxType (null);
+// S
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_Payment (Properties ctx, String C_Payment_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_Payment_UU, trxName, virtualColumns);
+      /** if (C_Payment_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_Currency_ID (0);
+			setC_DocType_ID (0);
+			setC_Payment_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDateTrx (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setIsAllocated (false);
+			setIsApproved (false);
+// N
+			setIsDelayedCapture (false);
+			setIsOnline (false);
+			setIsOverrideCurrencyRate (false);
+// N
+			setIsOverUnderPayment (true);
+// Y
+			setIsPrepayment (false);
+			setIsReceipt (false);
+			setIsReconciled (false);
+			setIsSelfService (false);
+			setIsVoided (false);
+// N
+			setPayAmt (Env.ZERO);
+// 0
+			setPosted (false);
+// N
+			setProcessed (false);
+			setTenderType (null);
+// K
+			setTrxType (null);
+// S
+        } */
+    }
+
     /** Load Constructor */
     public X_C_Payment (Properties ctx, ResultSet rs, String trxName)
     {
@@ -135,7 +273,7 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -389,6 +527,34 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public int getC_BankAccount_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BankAccount_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_BankTransfer getC_BankTransfer() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_BankTransfer)MTable.get(getCtx(), org.compiere.model.I_C_BankTransfer.Table_ID)
+			.getPO(getC_BankTransfer_ID(), get_TrxName());
+	}
+
+	/** Set Bank Transfer.
+		@param C_BankTransfer_ID Bank Transfer
+	*/
+	public void setC_BankTransfer_ID (int C_BankTransfer_ID)
+	{
+		if (C_BankTransfer_ID < 1)
+			set_Value (COLUMNNAME_C_BankTransfer_ID, null);
+		else
+			set_Value (COLUMNNAME_C_BankTransfer_ID, Integer.valueOf(C_BankTransfer_ID));
+	}
+
+	/** Get Bank Transfer.
+		@return Bank Transfer
+	  */
+	public int getC_BankTransfer_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_BankTransfer_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -1246,7 +1412,7 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getDocumentNo());
     }
@@ -1281,10 +1447,10 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public boolean isAllocated()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAllocated);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1304,10 +1470,10 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public boolean isApproved()
 	{
 		Object oo = get_Value(COLUMNNAME_IsApproved);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1327,10 +1493,10 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public boolean isDelayedCapture()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDelayedCapture);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1350,10 +1516,10 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public boolean isOnline()
 	{
 		Object oo = get_Value(COLUMNNAME_IsOnline);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1373,10 +1539,10 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public boolean isOverrideCurrencyRate()
 	{
 		Object oo = get_Value(COLUMNNAME_IsOverrideCurrencyRate);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1396,10 +1562,10 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public boolean isOverUnderPayment()
 	{
 		Object oo = get_Value(COLUMNNAME_IsOverUnderPayment);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1419,10 +1585,10 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public boolean isPrepayment()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPrepayment);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1442,10 +1608,10 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public boolean isReceipt()
 	{
 		Object oo = get_Value(COLUMNNAME_IsReceipt);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1465,10 +1631,10 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public boolean isReconciled()
 	{
 		Object oo = get_Value(COLUMNNAME_IsReconciled);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1488,10 +1654,10 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public boolean isSelfService()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSelfService);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1510,10 +1676,10 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public boolean isVoided()
 	{
 		Object oo = get_Value(COLUMNNAME_IsVoided);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1635,10 +1801,10 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public boolean isPosted()
 	{
 		Object oo = get_Value(COLUMNNAME_Posted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1658,10 +1824,10 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1699,10 +1865,10 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1804,10 +1970,10 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public boolean isR_CVV2Match()
 	{
 		Object oo = get_Value(COLUMNNAME_R_CVV2Match);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

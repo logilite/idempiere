@@ -23,16 +23,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for I_BPartner
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="I_BPartner")
-public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent 
+public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_I_BPartner (Properties ctx, int I_BPartner_ID, String trxName)
@@ -58,6 +58,42 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_I_BPartner (Properties ctx, int I_BPartner_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, I_BPartner_ID, trxName, virtualColumns);
+      /** if (I_BPartner_ID == 0)
+        {
+			setI_BPartner_ID (0);
+			setI_IsImported (false);
+// N
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_I_BPartner (Properties ctx, String I_BPartner_UU, String trxName)
+    {
+      super (ctx, I_BPartner_UU, trxName);
+      /** if (I_BPartner_UU == null)
+        {
+			setI_BPartner_ID (0);
+			setI_IsImported (false);
+// N
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_I_BPartner (Properties ctx, String I_BPartner_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, I_BPartner_UU, trxName, virtualColumns);
+      /** if (I_BPartner_UU == null)
+        {
+			setI_BPartner_ID (0);
+			setI_IsImported (false);
+// N
+        } */
+    }
+
     /** Load Constructor */
     public X_I_BPartner (Properties ctx, ResultSet rs, String trxName)
     {
@@ -65,7 +101,7 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
     }
 
     /** AccessLevel
-      * @return 2 - Client 
+      * @return 2 - Client
       */
     protected int get_AccessLevel()
     {
@@ -572,10 +608,10 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 	public boolean isI_IsImported()
 	{
 		Object oo = get_Value(COLUMNNAME_I_IsImported);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -611,10 +647,10 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 	public boolean isCustomer()
 	{
 		Object oo = get_Value(COLUMNNAME_IsCustomer);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -634,10 +670,10 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 	public boolean isEmployee()
 	{
 		Object oo = get_Value(COLUMNNAME_IsEmployee);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -657,10 +693,10 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 	public boolean isVendor()
 	{
 		Object oo = get_Value(COLUMNNAME_IsVendor);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -808,10 +844,10 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -830,10 +866,10 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -934,7 +970,7 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getValue());
     }

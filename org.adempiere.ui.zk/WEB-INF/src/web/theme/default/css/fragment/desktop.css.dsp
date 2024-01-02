@@ -275,6 +275,7 @@
 	color: white;
 	border-radius: 5px;
 }
+
 .z-menuitem.selected .z-menuitem-text {
 	font-weight: bold;
 }

@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_Field
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="AD_Field")
-public class X_AD_Field extends PO implements I_AD_Field, I_Persistent 
+public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_AD_Field (Properties ctx, int AD_Field_ID, String trxName)
@@ -95,6 +95,66 @@ public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_Field (Properties ctx, String AD_Field_UU, String trxName)
+    {
+      super (ctx, AD_Field_UU, trxName);
+      /** if (AD_Field_UU == null)
+        {
+			setAD_Column_ID (0);
+			setAD_Field_ID (0);
+			setAD_Tab_ID (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setIsCentrallyMaintained (true);
+// Y
+			setIsDefaultFocus (false);
+// N
+			setIsDisplayed (true);
+// Y
+			setIsEncrypted (false);
+			setIsFieldOnly (false);
+			setIsHeading (false);
+			setIsQuickEntry (false);
+// N
+			setIsQuickForm (false);
+// N
+			setIsReadOnly (false);
+			setIsSameLine (false);
+			setName (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_Field (Properties ctx, String AD_Field_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_Field_UU, trxName, virtualColumns);
+      /** if (AD_Field_UU == null)
+        {
+			setAD_Column_ID (0);
+			setAD_Field_ID (0);
+			setAD_Tab_ID (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setIsCentrallyMaintained (true);
+// Y
+			setIsDefaultFocus (false);
+// N
+			setIsDisplayed (true);
+// Y
+			setIsEncrypted (false);
+			setIsFieldOnly (false);
+			setIsHeading (false);
+			setIsQuickEntry (false);
+// N
+			setIsQuickForm (false);
+// N
+			setIsReadOnly (false);
+			setIsSameLine (false);
+			setName (null);
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_Field (Properties ctx, ResultSet rs, String trxName)
     {
@@ -102,7 +162,7 @@ public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
     }
 
     /** AccessLevel
-      * @return 4 - System 
+      * @return 4 - System
       */
     protected int get_AccessLevel()
     {
@@ -122,6 +182,33 @@ public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
         .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
+
+	public org.compiere.model.I_AD_Chart getAD_Chart() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_Chart)MTable.get(getCtx(), org.compiere.model.I_AD_Chart.Table_ID)
+			.getPO(getAD_Chart_ID(), get_TrxName());
+	}
+
+	/** Set Chart.
+		@param AD_Chart_ID Chart
+	*/
+	public void setAD_Chart_ID (int AD_Chart_ID)
+	{
+		if (AD_Chart_ID < 1)
+			set_Value (COLUMNNAME_AD_Chart_ID, null);
+		else
+			set_Value (COLUMNNAME_AD_Chart_ID, Integer.valueOf(AD_Chart_ID));
+	}
+
+	/** Get Chart.
+		@return Chart	  */
+	public int getAD_Chart_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Chart_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
 
 	public org.compiere.model.I_AD_Column getAD_Column() throws RuntimeException
 	{
@@ -428,6 +515,22 @@ public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
 		return (String)get_Value(COLUMNNAME_AlwaysUpdatableLogic);
 	}
 
+	/** Set Always Updatable Logic.
+		@param AlwaysUpdatableLogic Logic to determine if field is Updatable irrespective if record&#039;s active status or processed status. This logic Applicable only if Always Updatable is N.
+	*/
+	public void setAlwaysUpdatableLogic (String AlwaysUpdatableLogic)
+	{
+		set_Value (COLUMNNAME_AlwaysUpdatableLogic, AlwaysUpdatableLogic);
+	}
+
+	/** Get Always Updatable Logic.
+		@return Logic to determine if field is Updatable irrespective if record&#039;s active status or processed status. This logic Applicable only if Always Updatable is N.
+	  */
+	public String getAlwaysUpdatableLogic()
+	{
+		return (String)get_Value(COLUMNNAME_AlwaysUpdatableLogic);
+	}
+
 	/** Set Column Span.
 		@param ColumnSpan Number of column for a box of field
 	*/
@@ -606,10 +709,10 @@ public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
 	public boolean isAdvancedField()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAdvancedField);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -675,10 +778,10 @@ public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
 	public boolean isCentrallyMaintained()
 	{
 		Object oo = get_Value(COLUMNNAME_IsCentrallyMaintained);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -697,10 +800,10 @@ public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
 	public boolean isDefaultFocus()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDefaultFocus);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -720,10 +823,10 @@ public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
 	public boolean isDisplayed()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDisplayed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -742,10 +845,10 @@ public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
 	public boolean isDisplayedGrid()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDisplayedGrid);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -765,10 +868,10 @@ public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
 	public boolean isEncrypted()
 	{
 		Object oo = get_Value(COLUMNNAME_IsEncrypted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -788,10 +891,10 @@ public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
 	public boolean isFieldOnly()
 	{
 		Object oo = get_Value(COLUMNNAME_IsFieldOnly);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -811,10 +914,10 @@ public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
 	public boolean isHeading()
 	{
 		Object oo = get_Value(COLUMNNAME_IsHeading);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -856,10 +959,10 @@ public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
 	public boolean isQuickEntry()
 	{
 		Object oo = get_Value(COLUMNNAME_IsQuickEntry);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -879,10 +982,10 @@ public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
 	public boolean isQuickForm()
 	{
 		Object oo = get_Value(COLUMNNAME_IsQuickForm);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -902,10 +1005,10 @@ public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
 	public boolean isReadOnly()
 	{
 		Object oo = get_Value(COLUMNNAME_IsReadOnly);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -925,10 +1028,10 @@ public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
 	public boolean isSameLine()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSameLine);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1039,7 +1142,7 @@ public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }

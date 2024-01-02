@@ -26,6 +26,7 @@ import org.compiere.model.MBPartner;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MOrgInfo;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MTable;
 import org.compiere.util.AdempiereUserError;
 import org.compiere.util.DB;
@@ -81,7 +82,7 @@ public class OrderPOCreate extends SvrProcess
 			else if (name.equals("IsDropShip"))
 				p_IsDropShip = ((String) para[i].getParameter()).equals("Y");
 			else
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 		
 		// called from order window w/o parameters

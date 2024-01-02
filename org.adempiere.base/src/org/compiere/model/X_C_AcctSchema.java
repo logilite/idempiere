@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_AcctSchema
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="C_AcctSchema")
-public class X_C_AcctSchema extends PO implements I_C_AcctSchema, I_Persistent 
+public class X_C_AcctSchema extends PO implements I_C_AcctSchema, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_C_AcctSchema (Properties ctx, int C_AcctSchema_ID, String trxName)
@@ -103,6 +103,111 @@ public class X_C_AcctSchema extends PO implements I_C_AcctSchema, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_AcctSchema (Properties ctx, int C_AcctSchema_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_AcctSchema_ID, trxName, virtualColumns);
+      /** if (C_AcctSchema_ID == 0)
+        {
+			setAutoPeriodControl (false);
+			setC_AcctSchema_ID (0);
+			setC_Currency_ID (0);
+			setCommitmentType (null);
+// N
+			setCostingLevel (null);
+// C
+			setCostingMethod (null);
+// S
+			setGAAP (null);
+			setHasAlias (false);
+			setHasCombination (false);
+			setIsAccrual (true);
+// Y
+			setIsAdjustCOGS (false);
+			setIsDiscountCorrectsTax (false);
+			setIsExplicitCostAdjustment (false);
+// N
+			setIsPostServices (false);
+// N
+			setIsTradeDiscountPosted (false);
+			setM_CostType_ID (0);
+			setName (null);
+			setSeparator (null);
+// -
+			setTaxCorrectionType (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_AcctSchema (Properties ctx, String C_AcctSchema_UU, String trxName)
+    {
+      super (ctx, C_AcctSchema_UU, trxName);
+      /** if (C_AcctSchema_UU == null)
+        {
+			setAutoPeriodControl (false);
+			setC_AcctSchema_ID (0);
+			setC_Currency_ID (0);
+			setCommitmentType (null);
+// N
+			setCostingLevel (null);
+// C
+			setCostingMethod (null);
+// S
+			setGAAP (null);
+			setHasAlias (false);
+			setHasCombination (false);
+			setIsAccrual (true);
+// Y
+			setIsAdjustCOGS (false);
+			setIsDiscountCorrectsTax (false);
+			setIsExplicitCostAdjustment (false);
+// N
+			setIsPostServices (false);
+// N
+			setIsTradeDiscountPosted (false);
+			setM_CostType_ID (0);
+			setName (null);
+			setSeparator (null);
+// -
+			setTaxCorrectionType (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_AcctSchema (Properties ctx, String C_AcctSchema_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_AcctSchema_UU, trxName, virtualColumns);
+      /** if (C_AcctSchema_UU == null)
+        {
+			setAutoPeriodControl (false);
+			setC_AcctSchema_ID (0);
+			setC_Currency_ID (0);
+			setCommitmentType (null);
+// N
+			setCostingLevel (null);
+// C
+			setCostingMethod (null);
+// S
+			setGAAP (null);
+			setHasAlias (false);
+			setHasCombination (false);
+			setIsAccrual (true);
+// Y
+			setIsAdjustCOGS (false);
+			setIsDiscountCorrectsTax (false);
+			setIsExplicitCostAdjustment (false);
+// N
+			setIsPostServices (false);
+// N
+			setIsTradeDiscountPosted (false);
+			setM_CostType_ID (0);
+			setName (null);
+			setSeparator (null);
+// -
+			setTaxCorrectionType (null);
+        } */
+    }
+
     /** Load Constructor */
     public X_C_AcctSchema (Properties ctx, ResultSet rs, String trxName)
     {
@@ -110,7 +215,7 @@ public class X_C_AcctSchema extends PO implements I_C_AcctSchema, I_Persistent
     }
 
     /** AccessLevel
-      * @return 2 - Client 
+      * @return 2 - Client
       */
     protected int get_AccessLevel()
     {
@@ -167,10 +272,10 @@ public class X_C_AcctSchema extends PO implements I_C_AcctSchema, I_Persistent
 	public boolean isAutoPeriodControl()
 	{
 		Object oo = get_Value(COLUMNNAME_AutoPeriodControl);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -421,10 +526,10 @@ public class X_C_AcctSchema extends PO implements I_C_AcctSchema, I_Persistent
 	public boolean isHasAlias()
 	{
 		Object oo = get_Value(COLUMNNAME_HasAlias);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -444,10 +549,10 @@ public class X_C_AcctSchema extends PO implements I_C_AcctSchema, I_Persistent
 	public boolean isHasCombination()
 	{
 		Object oo = get_Value(COLUMNNAME_HasCombination);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -467,10 +572,10 @@ public class X_C_AcctSchema extends PO implements I_C_AcctSchema, I_Persistent
 	public boolean isAccrual()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAccrual);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -490,10 +595,10 @@ public class X_C_AcctSchema extends PO implements I_C_AcctSchema, I_Persistent
 	public boolean isAdjustCOGS()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAdjustCOGS);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -513,10 +618,10 @@ public class X_C_AcctSchema extends PO implements I_C_AcctSchema, I_Persistent
 	public boolean isAllowNegativePosting()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAllowNegativePosting);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -536,10 +641,10 @@ public class X_C_AcctSchema extends PO implements I_C_AcctSchema, I_Persistent
 	public boolean isDiscountCorrectsTax()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDiscountCorrectsTax);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -559,10 +664,10 @@ public class X_C_AcctSchema extends PO implements I_C_AcctSchema, I_Persistent
 	public boolean isExplicitCostAdjustment()
 	{
 		Object oo = get_Value(COLUMNNAME_IsExplicitCostAdjustment);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -582,10 +687,10 @@ public class X_C_AcctSchema extends PO implements I_C_AcctSchema, I_Persistent
 	public boolean isPostIfClearingEqual()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPostIfClearingEqual);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -605,10 +710,10 @@ public class X_C_AcctSchema extends PO implements I_C_AcctSchema, I_Persistent
 	public boolean isPostServices()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPostServices);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -628,10 +733,10 @@ public class X_C_AcctSchema extends PO implements I_C_AcctSchema, I_Persistent
 	public boolean isTradeDiscountPosted()
 	{
 		Object oo = get_Value(COLUMNNAME_IsTradeDiscountPosted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -684,7 +789,7 @@ public class X_C_AcctSchema extends PO implements I_C_AcctSchema, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -740,10 +845,10 @@ public class X_C_AcctSchema extends PO implements I_C_AcctSchema, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

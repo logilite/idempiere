@@ -39,6 +39,7 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MOrg;
 import org.compiere.model.MRMA;
 import org.compiere.model.MWarehouse;
+import org.compiere.model.SystemIDs;
 import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
@@ -53,7 +54,7 @@ import org.zkoss.zul.North;
 
 /**
  * Generate Shipment (manual) view class
- *
+ * @deprecated ticket IDEMPIERE-1963 replaced this with an Info Window
  */
 @org.idempiere.ui.zk.annotation.Form(name = "org.compiere.apps.form.VInOutGen")
 public class WInOutGen extends InOutGen implements IFormController, EventListener<Event>, ValueChangeListener
@@ -199,7 +200,7 @@ public class WInOutGen extends InOutGen implements IFormController, EventListene
 		docAction.setValue(DocAction.ACTION_Complete);
 		// docAction.addValueChangeListener(this); // IDEMPIERE-768
 		//	C_Order.C_BPartner_ID
-		MLookup bpL = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, 2762, DisplayType.Search);
+		MLookup bpL = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, SystemIDs.COLUMN_C_ORDER_C_BPARTNER_ID, DisplayType.Search);
 		fBPartner = new WSearchEditor("C_BPartner_ID", false, false, true, bpL);
 		lBPartner.setText(Msg.translate(Env.getCtx(), "C_BPartner_ID"));
 		fBPartner.addValueChangeListener(this);

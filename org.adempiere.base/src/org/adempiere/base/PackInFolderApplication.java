@@ -30,6 +30,8 @@ import java.util.logging.Level;
 
 import org.compiere.Adempiere;
 import org.compiere.model.MPInstance;
+import org.compiere.model.SystemIDs;
+import org.compiere.model.SystemProperties;
 import org.compiere.process.ProcessCall;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoUtil;
@@ -50,7 +52,7 @@ public class PackInFolderApplication implements IApplication {
 	@Override
 	public Object start(IApplicationContext context) throws Exception {
 		Adempiere.startup(false);
-		String logLevel = System.getProperty("LogLevel");
+		String logLevel = SystemProperties.getLogLevel();
 		if (logLevel == null)
 			logLevel = "INFO";
 		switch (logLevel) {
@@ -71,8 +73,8 @@ public class PackInFolderApplication implements IApplication {
 			String directory = commandlineArgs[0];
 			ProcessInfo pi = new ProcessInfo("PackInFolder", 200099);
 			pi.setAD_Client_ID(0);
-			pi.setAD_User_ID(100);
-			MPInstance instance = new MPInstance(ctx, 200099, 0);
+			pi.setAD_User_ID(SystemIDs.USER_SUPERUSER);
+			MPInstance instance = new MPInstance(ctx, 200099, 0, 0, null);
 			instance.saveEx();
 			instance.createParameter(10, "Folder", directory);
 			pi.setAD_PInstance_ID(instance.getAD_PInstance_ID());

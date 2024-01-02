@@ -33,10 +33,10 @@ import org.compiere.util.Language;
 import org.compiere.util.Util;
 
 /**
- *  Create MLookups
+ * Factory to create MLookup instance.
  *
- *  @author Jorg Janke
- *  @version  $Id: MLookupFactory.java,v 1.3 2006/07/30 00:58:04 jjanke Exp $
+ * @author Jorg Janke
+ * @version  $Id: MLookupFactory.java,v 1.3 2006/07/30 00:58:04 jjanke Exp $
  *
  * @author Teo Sarca, SC ARHIPAC SERVICE SRL
  *		<li>BF [ 1734394 ] MLookupFactory.getLookup_TableDirEmbed is not translated
@@ -60,19 +60,18 @@ public class MLookupFactory
 	/** List Reference Cache				*/
 	private static CCache<String,MLookupInfo> s_cacheRefList = new CCache<String,MLookupInfo>(I_AD_Ref_List.Table_Name, 30, CCache.DEFAULT_EXPIRE_MINUTE);	//	1h
 
-
 	/**
 	 *  Create MLookup
 	 *
 	 *  @param ctx context for access
 	 *  @param WindowNo window no
-	 * 	@param AD_Reference_ID display type
+	 * 	@param AD_Reference_ID lookup display type
 	 *  @param Column_ID AD_Column_ID or AD_Process_Para_ID
-	 *  @param language report language
+	 *  @param language language
 	 * 	@param ColumnName key column name
-	 * 	@param AD_Reference_Value_ID AD_Reference (List, Table)
+	 * 	@param AD_Reference_Value_ID AD_Reference (List - AD_Ref_List, Table - AD_Ref_Table)
 	 * 	@param IsParent parent (prevents query to directly access value)
-	 * 	@param ValidationCode optional SQL validation
+	 * 	@param ValidationCode optional SQL validation/filter
 	 *  @throws Exception if Lookup could not be created
 	 *  @return MLookup
 	 */
@@ -88,11 +87,26 @@ public class MLookupFactory
 		return new MLookup(info, 0);
 	}   //  create
 
+	/**
+	 * @param ctx
+	 * @param WindowNo
+	 * @param Column_ID
+	 * @param AD_Reference_ID
+	 * @return MLookupInfo
+	 */
 	public static MLookupInfo getLookupInfo(Properties ctx, int WindowNo, int Column_ID, int AD_Reference_ID)
 	{
 		return 	getLookupInfo(ctx, WindowNo, 0, Column_ID, AD_Reference_ID);
 	}
 	
+	/**
+	 * @param ctx
+	 * @param WindowNo
+	 * @param TabNo
+	 * @param Column_ID
+	 * @param AD_Reference_ID
+	 * @return MLookupInfo
+	 */
 	public static MLookupInfo getLookupInfo(Properties ctx, int WindowNo, int TabNo, int Column_ID, int AD_Reference_ID)
 	{
 		MColumn column = MColumn.get(ctx, Column_ID);
@@ -132,14 +146,8 @@ public class MLookupFactory
 		return new MLookup(info, TabNo);
 	}   //  get
 
-
-	/**************************************************************************
+	/**
 	 *  Get Information for Lookups based on Column_ID for Table Columns or Process Parameters.
-	 *
-	 *	The SQL returns three columns:
-	 *  <pre>
-	 *		Key, Value, Name, IsActive	(where either key or value is null)
-	 *  </pre>
 	 *  @param ctx context for access
 	 *  @param language report language
 	 *  @param WindowNo window no
@@ -162,13 +170,8 @@ public class MLookupFactory
 				          IsParent, ValidationCode);
 	}	//	getLookupInfo
 	
-	/**************************************************************************
+	/**
 	 *  Get Information for Lookups based on Column_ID for Table Columns or Process Parameters.
-	 *
-	 *	The SQL returns three columns:
-	 *  <pre>
-	 *		Key, Value, Name, IsActive	(where either key or value is null)
-	 *  </pre>
 	 *  @param ctx context for access
 	 *  @param language report language
 	 *  @param WindowNo window no
@@ -195,7 +198,8 @@ public class MLookupFactory
 			needToAddSecurity = false;
 		}
 		//	Table or Search or MultiSelectTable with Reference_Value
-		else if ((AD_Reference_ID == DisplayType.Table || AD_Reference_ID == DisplayType.Search
+		else if ((AD_Reference_ID == DisplayType.Table || AD_Reference_ID == DisplayType.TableUU
+			|| AD_Reference_ID == DisplayType.Search || AD_Reference_ID == DisplayType.SearchUU
 			|| AD_Reference_ID == DisplayType.ChosenMultipleSelectionTable || AD_Reference_ID == DisplayType.ChosenMultipleSelectionSearch || AD_Reference_ID == DisplayType.MultiSelectTable || AD_Reference_ID == DisplayType.MultiSelectSearch)
 			&& AD_Reference_Value_ID != 0)
 		{
@@ -275,12 +279,11 @@ public class MLookupFactory
 		return info;
 	}	//	getLookupInfo
 
-
-	/**************************************************************************
-	 *	Get Lookup SQL for Lists
-	 *  @param language report language
-	 *  @param AD_Reference_Value_ID reference value
-	 *	@return SELECT NULL, Value, Name, IsActive FROM AD_Ref_List
+	/**
+	 *	Get Lookup Info for List display type
+	 *  @param language language
+	 *  @param AD_Reference_Value_ID list reference id (AD_Ref_List)
+	 *	@return MLookupInfo
 	 */
 	static public MLookupInfo getLookup_List(Language language, int AD_Reference_Value_ID)
 	{
@@ -346,9 +349,9 @@ public class MLookupFactory
 	}	//	getLookup_List
 
 	/**
-	 * Get Lookup SQL for List
-	 * @param language report Language
-	 * @param AD_Reference_Value_ID reference value
+	 * Get Lookup SQL for List (for use as embedded query in SELECT)
+	 * @param language Language
+	 * @param AD_Reference_Value_ID list reference id (AD_Ref_List)
 	 * @param linkColumnName link column name
 	 * @return SELECT Name FROM AD_Ref_List WHERE AD_Reference_ID=x AND Value=linkColumn
 	 */
@@ -370,14 +373,13 @@ public class MLookupFactory
 		return realSQL.toString();
 	}	//	getLookup_ListEmbed
 
-	/***************************************************************************
-	 *	Get Lookup SQL for Table Lookup
+	/**
+	 *	Get Lookup Info for Table Lookup display type
 	 *  @param ctx context for access and dynamic access
 	 *  @param language report language
 	 *  @param WindowNo window no
-	 *  @param AD_Reference_Value_ID reference value
-	 *	@return	SELECT Key, NULL, Name, IsActive FROM Table - if KeyColumn end with _ID
-	 *	  otherwise	SELECT NULL, Key, Name, IsActive FROM Table
+	 *  @param AD_Reference_Value_ID table reference id (AD_Ref_Table)
+	 *	@return	MLookupInfo
 	 */
 	static private MLookupInfo getLookup_Table (Properties ctx, Language language,
 		int WindowNo, int AD_Reference_Value_ID)
@@ -478,10 +480,10 @@ public class MLookupFactory
 		}
 
 		StringBuilder realSQL = new StringBuilder("SELECT ");
-		if (!KeyColumn.endsWith("_ID"))
+		if (!KeyColumn.endsWith("_ID") && !KeyColumn.endsWith("_UU"))
 			realSQL.append("NULL,");
 		
-		boolean showID = DisplayColumn.equals(TableName+"_ID");
+		boolean showID = DisplayColumn.equals(TableName+"_ID") || DisplayColumn.equals(PO.getUUIDColumnName(TableName));
 		
 		ArrayList<LookupDisplayColumn> list = null;
 		if (showID) {
@@ -513,7 +515,7 @@ public class MLookupFactory
 		if (IsTranslated && !Env.isBaseLanguage(language, TableName))
 		{
 			realSQL.append(TableName).append(".").append(KeyColumn).append(",");
-			if (KeyColumn.endsWith("_ID"))
+			if (KeyColumn.endsWith("_ID") || KeyColumn.endsWith("_UU"))
 				realSQL.append("NULL,");
 			if (!Util.isEmpty(displaySQL, true)) {
 				realSQL.append("NVL(").append(displaySQL).append(",").append(TableName).append("_Trl.").append(DisplayColumn).append(",'-1')");
@@ -545,7 +547,7 @@ public class MLookupFactory
 		else
 		{
 			realSQL.append(TableName).append(".").append(KeyColumn).append(",");
-			if (KeyColumn.endsWith("_ID"))
+			if (KeyColumn.endsWith("_ID") || KeyColumn.endsWith("_UU"))
 				realSQL.append("NULL,");
 			if (!Util.isEmpty(displaySQL, true)) {
 				realSQL.append("NVL(").append(displaySQL).append(",").append(TableName).append(".").append(DisplayColumn).append(",'-1')");
@@ -625,8 +627,18 @@ public class MLookupFactory
 		if (isValueDisplayed)
 			lookupDisplayColumns.add("Value");
 		lookupDisplayColumns.add(lookupDisplayColumn != null ? lookupDisplayColumn : DisplayColumn);
-		s_cacheRefTable.put(key.toString(), retValue.cloneIt());
 		retValue.lookupDisplayColumns = lookupDisplayColumns;
+		if(list != null) {
+			retValue.lookupDisplayColumnNames = new ArrayList<>();
+			if (isValueDisplayed)
+				retValue.lookupDisplayColumnNames.add("Value");
+			for (LookupDisplayColumn ldc : list) {
+				retValue.lookupDisplayColumnNames.add(ldc.ColumnName);
+			}
+		} else {
+			retValue.lookupDisplayColumnNames = new ArrayList<>(retValue.lookupDisplayColumns); 
+		}
+		s_cacheRefTable.put(key.toString(), retValue.cloneIt());
 		return retValue;
 	}	//	getLookup_Table
 	
@@ -646,14 +658,13 @@ public class MLookupFactory
 
 	/**
 	 *	Get Embedded Lookup SQL for Table Lookup
-	 *  @param language report language
 	 * 	@param BaseColumn base column name
 	 * 	@param BaseTable base table name
-	 *  @param AD_Reference_Value_ID reference value
+	 *  @param AD_Reference_Value_ID table reference id (AD_Ref_Table)
 	 *  @param IsDisplaySQL - true, add reference displaySQL in query.
 	 *	@return	SELECT Name FROM Table
 	 */
-	static public String getLookup_TableEmbed (Language language,
+	public static String getLookup_TableEmbed (Language language,
 		String BaseColumn, String BaseTable, int AD_Reference_Value_ID, boolean IsDisplaySQL)
 	{
 		String sql = "SELECT t.TableName,ck.ColumnName AS KeyColumn," // 1..2
@@ -705,9 +716,14 @@ public class MLookupFactory
 			pstmt = null;
 		}
 
-		boolean showID = DisplayColumn.equals(TableName+"_ID");
+		int Column_ID = MColumn.getColumn_ID(BaseTable, BaseColumn);
+		MColumn column = MColumn.get(Env.getCtx(), Column_ID);
+		boolean showID = DisplayColumn.equals(TableName+"_ID") || DisplayColumn.equals(PO.getUUIDColumnName(TableName));
 		if (showID) {
-			return getLookup_TableDirEmbed(language, DisplayColumn, BaseTable, BaseColumn);
+			if (column.isVirtualColumn())
+				return getLookup_TableDirEmbed(language, DisplayColumn, BaseTable, column.getColumnSQL());
+			else
+				return getLookup_TableDirEmbed(language, DisplayColumn, BaseTable, BaseColumn);
 		}
 
 		// If it's self referencing then use other alias - teo_sarca [ 1739544 ]
@@ -770,8 +786,6 @@ public class MLookupFactory
 
 		embedSQL.append(" WHERE ");
 		
-		int Column_ID = MColumn.getColumn_ID(BaseTable, BaseColumn);
-		MColumn column = MColumn.get(Env.getCtx(), Column_ID);
 		// If is not virtual column - teo_sarca [ 1739530 ]
 		if (!column.isVirtualColumn())
 		{
@@ -780,7 +794,7 @@ public class MLookupFactory
 		} else if (translated) {
 			embedSQL.append(TableNameAlias).append(".").append(KeyColumn).append("=").append(column.getColumnSQL(true));
 		} else {
-			embedSQL.append(KeyColumn).append("=").append(column.getColumnSQL(true));
+			embedSQL.append(TableNameAlias).append(".").append(KeyColumn).append("=").append(column.getColumnSQL(true));
 		}
 
 		return embedSQL.toString();
@@ -940,17 +954,17 @@ public class MLookupFactory
 	/**************************************************************************
 	 * Get Lookup SQL for direct Table Lookup
 	 * @param ctx context for access
-	 * @param language report language
+	 * @param language language
 	 * @param ColumnName column name
-	 * @param WindowNo Window (for SOTrx)
-	 * @return SELECT Key, NULL, Name, IsActive from Table (fully qualified)
+	 * @param WindowNo Window number
+	 * @return MLookupInfo
 	 */
 	static private MLookupInfo getLookup_TableDir (Properties ctx, Language language,
 		int WindowNo, String ColumnName)
 	{
-		if (!ColumnName.endsWith("_ID"))
+		if (!ColumnName.endsWith("_ID") && !ColumnName.endsWith("_UU"))
 		{
-			String error = "Key does not end with '_ID': " + ColumnName;
+			String error = "Key does not end with '_ID' or '_UU': " + ColumnName;
 			s_log.log(Level.SEVERE, error, new Exception(error));
 			return null;
 		}
@@ -1041,10 +1055,22 @@ public class MLookupFactory
 			lookupDisplayColumns.add(ldc.ColumnName);
 		}
 		lInfo.lookupDisplayColumns = lookupDisplayColumns;
+		if(list != null) {
+			lInfo.lookupDisplayColumnNames = new ArrayList<>();
+			for (LookupDisplayColumn ldc : list) {
+				lInfo.lookupDisplayColumnNames.add(ldc.ColumnName);
+			}
+		}
 		s_cacheRefTable.put(cacheKey.toString(), lInfo.cloneIt());
 		return lInfo;
 	}	//	getLookup_TableDir
 
+	/**
+	 * @param language
+	 * @param tableName
+	 * @param list
+	 * @return display columns
+	 */
 	private static StringBuilder getDisplayColumn(Language language,
 			String tableName, ArrayList<LookupDisplayColumn> list) {
 		return getDisplayColumn(language, tableName, list, tableName);
@@ -1056,6 +1082,13 @@ public class MLookupFactory
 		return getDisplayColumn(language, TableName, list, baseTable, false);
 	} // getDisplayColumn
 
+	/**
+	 * @param language
+	 * @param TableName
+	 * @param list
+	 * @param baseTable
+	 * @return display columns
+	 */
 	private static StringBuilder getDisplayColumn(Language language,
 			String TableName, ArrayList<LookupDisplayColumn> list,
 			String baseTable, boolean IsDisplaySQL) {
@@ -1088,7 +1121,8 @@ public class MLookupFactory
 				displayColumn.append(DB.TO_CHAR(columnSQL, ldc.DisplayType, language.getAD_Language()));
 			}
 			//	Table
-			else if ((ldc.DisplayType == DisplayType.Table || ldc.DisplayType == DisplayType.Search) && ldc.AD_Reference_ID != 0)
+			else if ((ldc.DisplayType == DisplayType.Table || ldc.DisplayType == DisplayType.TableUU
+					|| ldc.DisplayType == DisplayType.Search || ldc.DisplayType == DisplayType.SearchUU) && ldc.AD_Reference_ID != 0)
 			{
 				String embeddedSQL;
 				if (ldc.IsVirtual)
@@ -1099,8 +1133,8 @@ public class MLookupFactory
 					displayColumn.append("(").append(embeddedSQL).append(")");
 			}
 			//  TableDir
-			else if ((ldc.DisplayType == DisplayType.TableDir || ldc.DisplayType == DisplayType.Search)
-				&& ldc.ColumnName.endsWith("_ID"))
+			else if ((ldc.DisplayType == DisplayType.TableDir || ldc.DisplayType == DisplayType.Search) && ldc.ColumnName.endsWith("_ID")
+				  || (ldc.DisplayType == DisplayType.TableDirUU || ldc.DisplayType == DisplayType.SearchUU) && ldc.ColumnName.endsWith("_UU"))
 			{
 				String embeddedSQL;
 				if (ldc.IsVirtual)
@@ -1142,9 +1176,9 @@ public class MLookupFactory
 	}
 
 	/**
-	 *  Get embedded SQL for TableDir Lookup
+	 *  Get embedded SQL for TableDir Lookup display type
 	 *
-	 *  @param language report language
+	 *  @param language language
 	 *  @param ColumnName column name
 	 *  @param BaseTable base table
 	 *  @return SELECT Column FROM TableName WHERE BaseTable.ColumnName=TableName.ColumnName
@@ -1156,9 +1190,9 @@ public class MLookupFactory
 	}   //  getLookup_TableDirEmbed
 
 	/**
-	 *  Get embedded SQL for TableDir Lookup
+	 *  Get embedded SQL for TableDir Lookup display type
 	 *
-	 *  @param language report language
+	 *  @param language language
 	 *  @param ColumnName column name
 	 *  @param BaseTable base table
 	 *  @param BaseColumn base column
@@ -1240,8 +1274,7 @@ public class MLookupFactory
 		// If is not virtual column - teo_sarca [ 1739530 ]
 		if (! BaseColumn.trim().startsWith("(")) {
 			embedSQL.append(BaseTable).append(".").append(BaseColumn);
-		}
-		else {
+		} else {
 			embedSQL.append(BaseColumn);
 		}
 		embedSQL.append("=").append(TableName).append(".").append(ColumnName);
@@ -1249,6 +1282,10 @@ public class MLookupFactory
 		return embedSQL.toString();
 	}	//  getLookup_TableDirEmbed
 
+	/**
+	 * @param TableName
+	 * @return identifier list for a table
+	 */
 	private static ArrayList<LookupDisplayColumn> getListIdentifiers(String TableName) {
 		ArrayList<LookupDisplayColumn> list = new ArrayList<LookupDisplayColumn>();
 		MTable table = MTable.get(Env.getCtx(), TableName);

@@ -45,9 +45,6 @@ import org.zkoss.zul.West;
 import org.zkoss.zul.Borderlayout;
 
 /**
- * This class is based on org.compiere.apps.StatusBar written by Jorg Janke.
- * @author Jorg Janke
- *
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date    Mar 12, 2007
  * @version $Revision: 0.10 $
@@ -55,7 +52,7 @@ import org.zkoss.zul.Borderlayout;
 public class StatusBarPanel extends Panel implements EventListener<Event>, IStatusBar
 {
 	/**
-	 *
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 1217160210065925924L;
 
@@ -75,19 +72,25 @@ public class StatusBarPanel extends Panel implements EventListener<Event>, IStat
 
 	private String m_text;
 
-	private Div east;
+	private East east;
 
 	private Div popup;
 
 	private Div popupContent;
 	private String popupStyle;
 
+	/**
+	 * Default constructor
+	 */
 	public StatusBarPanel()
 	{
         super();
         init();
     }
 
+	/**
+	 * Layout panel
+	 */
     private void init()
     {
     	setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "statusBar");
@@ -109,7 +112,7 @@ public class StatusBarPanel extends Panel implements EventListener<Event>, IStat
         Center center = new Center();
         statusBar.appendChild(center);
 
-        East east = new East();
+        east = new East();
         statusBar.appendChild(east);
 
         LayoutUtils.addSclass("status-selected", selectedLine);
@@ -239,6 +242,9 @@ public class StatusBarPanel extends Panel implements EventListener<Event>, IStat
    		return statusLine.getValue();
    	}
 
+    /**
+     * Create popup for status line
+     */
 	private void createPopup() {
 		popupContent = new Div();
 
@@ -250,22 +256,26 @@ public class StatusBarPanel extends Panel implements EventListener<Event>, IStat
         popup.setStyle("position: absolute; display: none");
 	}
 
+	/**
+	 * Show status line popup
+	 */
 	private void showPopup() {
 		popup.setVisible(true);
 		popup.setStyle(popupStyle);
 		if (getRoot() == null || !getRoot().isVisible() ) return;
 
-		String script = "var d = zk.Widget.$('" + popup.getUuid() + "').$n();";
+		//client side script to position popup
+		String script = "(function(){let d = zk.Widget.$('" + popup.getUuid() + "').$n();";
 		script += "d.style.display='block';d.style.visibility='hidden';";
-		script += "var dhs = document.defaultView.getComputedStyle(d, null).getPropertyValue('height');";
-		script += "var dh = parseInt(dhs, 10);";
-		script += "var r = zk.Widget.$('" + getRoot().getUuid() + "').$n();";
-		script += "var rhs = document.defaultView.getComputedStyle(r, null).getPropertyValue('height');";
-		script += "var rh = parseInt(rhs, 10);";
-		script += "var p = jq('#"+getRoot().getUuid()+"').zk.cmOffset();";
+		script += "let dhs = document.defaultView.getComputedStyle(d, null).getPropertyValue('height');";
+		script += "let dh = parseInt(dhs, 10);";
+		script += "let r = zk.Widget.$('" + getRoot().getUuid() + "').$n();";
+		script += "let rhs = document.defaultView.getComputedStyle(r, null).getPropertyValue('height');";
+		script += "let rh = parseInt(rhs, 10);";
+		script += "let p = jq('#"+getRoot().getUuid()+"').zk.cmOffset();";
 		script += "d.style.top=(rh-dh-5)+'px';";
 		script += "d.style.left=(p[0]+1)+'px';";
-		script += "d.style.visibility='visible';";
+		script += "d.style.visibility='visible';})()";
 
 		AuScript aus = new AuScript(popup, script);
 		Clients.response(aus);
@@ -297,6 +307,9 @@ public class StatusBarPanel extends Panel implements EventListener<Event>, IStat
         invalidate();
 	}	//	setInfo
 
+	/**
+	 * @param rowNum
+	 */
 	public void setSelectedRowNumber (String rowNum){
 		selectedLine.setVisible(rowNum != null);
 		if (rowNum != null){
@@ -305,6 +318,7 @@ public class StatusBarPanel extends Panel implements EventListener<Event>, IStat
         invalidate();
 	}
 	
+	@Override
 	public void onEvent(Event event) throws Exception {
 		if (Events.ON_CLICK.equals(event.getName()) && event.getTarget() == statusDB)
 		{

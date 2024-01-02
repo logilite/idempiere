@@ -76,44 +76,58 @@ import org.zkoss.zul.Label;
 import org.zkoss.zul.impl.LabelImageElement;
 
 /**
- * Dashboard item: ZK calendar
+ * Dashboard gadget: Zk Calendar. <br/>
+ * Content created from "zul/calendar/calendar_mini.zul".
  * 
  * @author Elaine
  * @date November 20, 2008
  */
-public class DPCalendar extends DashboardPanel implements EventListener<Event>, EventHandler {
-
-	
+public class DPCalendar extends DashboardPanel implements EventListener<Event>, EventHandler {		
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -224914882522997787L;
 	private static final String ON_MOBILE_SET_SELECTED_TAB_ECHO = "onMobileSetSelectedTabEcho";
+	private static final String ON_EVENT_EDIT_EVENT = "onEventEdit";
+	private static final String ON_EVENT_CREATE_EVENT = "onEventCreate";
+	private static final String ON_MOVE_DATE_EVENT = "onMoveDate";
+	private static final String ON_REQUEST_CHANGED_TOPIC = "onRequestChanged";
+	
+	/** Zk Calendar instance */
 	private Calendars calendars;
+	/** Model for {@link #calendars} */
 	private SimpleCalendarModel scm;
+	/** Button to open Calendar window, to Refresh Calendar */
 	private LabelImageElement btnCal, btnRefresh;	
 
 	private LabelImageElement btnCurrentDate;
+	/** Label for start and end date of current Calendar view */
 	private Label lblDate;
+	/** button to move Calendar to previous or next page */
 	private Component divArrowLeft, divArrowRight;
 	
-	private static final String ON_REQUEST_CHANGED_TOPIC = "onRequestChanged";
-	
+	/** Window for event */
 	private EventWindow eventWin;
 	private ActivityWindow activityWin;
 	private AssignmentWindow assignmentWin;
 	private WeakReference<Desktop> desktop;
+	/** List of Calendar (Request) events */
 	private ArrayList<ADCalendarEvent> events;
 	private ArrayList<ADCalendarContactActivity> activities;
 	private ArrayList<ADCalendarResourceAssignment> assignments;
+	/** Desktop cleanup listener to call {@link #cleanup()} */
 	private DesktopCleanup listener;
-	
+	/** Event handler for R_Request model */
 	private static RequestEventHandler eventHandler;
+	/** Subscriber to {@link IMessageService} for "onRequestChanged" topic */
 	private static TopicSubscriber subscriber;
 	public static ValueNamePair SALES_REPRESENTATIVE_ALL = new ValueNamePair("0", "All");
 	
 	private static final CLogger log = CLogger.getCLogger(DPCalendar.class);
 	
+	/**
+	 * Default constructor
+	 */
 	public DPCalendar() {
 		super();
 
@@ -136,15 +150,15 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		lblDate.addEventListener(Events.ON_CREATE, this);
 		
 		divArrowLeft = component.getFellow("divArrowLeft");
-		divArrowLeft.addEventListener("onMoveDate", this);
+		divArrowLeft.addEventListener(ON_MOVE_DATE_EVENT, this);
 		
 		divArrowRight = component.getFellow("divArrowRight");
-		divArrowRight.addEventListener("onMoveDate", this);
+		divArrowRight.addEventListener(ON_MOVE_DATE_EVENT, this);
 		
 		this.appendChild(component);
 
-		calendars.addEventListener("onEventCreate", this);
-		calendars.addEventListener("onEventEdit", this);	
+		calendars.addEventListener(ON_EVENT_CREATE_EVENT, this);
+		calendars.addEventListener(ON_EVENT_EDIT_EVENT, this);	
 				
 		createStaticListeners();
 		
@@ -164,6 +178,10 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		Extensions.doZulCustomAction(component, zulPath);
 	}
 
+	/**
+	 * After page attached callback for mobile client. <br/>
+	 * Setup listener for {@link WindowContainer#ON_MOBILE_SET_SELECTED_TAB} event.
+	 */
 	private void afterPageAttached() {
 		Component p = getParent();
 		while (p != null) {
@@ -175,10 +193,17 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		}
 	}
 
+	/**
+	 * {@link WindowContainer#ON_MOBILE_SET_SELECTED_TAB} event.<br/>
+	 * Echo {@link #ON_MOBILE_SET_SELECTED_TAB_ECHO} event to redraw {@link #calendars}.
+	 */
 	private void onMobileSelected() {
 		Events.echoEvent(ON_MOBILE_SET_SELECTED_TAB_ECHO, this, null);
 	}
 
+	/**
+	 * Setup {@link #eventHandler} and {@link #subscriber}
+	 */
 	private synchronized void createStaticListeners() {
 		if (eventHandler == null) {
 			eventHandler = new RequestEventHandler();
@@ -195,6 +220,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		}
 	}
 
+	@Override
 	public void onEvent(Event e) throws Exception {
 		String type = e.getName();
 
@@ -210,18 +236,18 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 			if (e.getTarget() == lblDate)
 				updateDateLabel();
 		}
-		else if (type.equals("onMoveDate")) {
+		else if (type.equals(ON_MOVE_DATE_EVENT)) {
 			if (e.getTarget() == divArrowLeft)
 				divArrowClicked(false);
 			else if (e.getTarget() == divArrowRight)
 				divArrowClicked(true);
 		}
-		else if (type.equals("onEventCreate")) {
+		else if (type.equals(ON_EVENT_CREATE_EVENT)) {
 				CalendarsEvent calendarsEvent = (CalendarsEvent) e;
 				DecisionWindow decisionWin = new DecisionWindow(calendarsEvent, this);
 				SessionManager.getAppDesktop().showWindow(decisionWin);
 		}	
-		else if (type.equals("onEventEdit")) {
+		else if (type.equals(ON_EVENT_EDIT_EVENT)) {
 			if (e instanceof CalendarsEvent) {
 				CalendarsEvent calendarsEvent = (CalendarsEvent) e;
 				CalendarEvent calendarEvent = calendarsEvent.getCalendarEvent();
@@ -256,6 +282,13 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		}		
 	}
 	
+	/**
+	 * TODO move this and ADCalendarEvent to org.adempiere.ui and create unit test for it
+	 * Retrieve events (request) from DB
+	 * @param RequestTypeID
+	 * @param ctx
+	 * @return ADCalendarEvent list
+	 */
 	public static ArrayList<ADCalendarEvent> getEvents(int RequestTypeID, Properties ctx, ArrayList<ValueNamePair> users) {
 		String mode = MSysConfig.getValue(MSysConfig.ZK_DASHBOARD_CALENDAR_REQUEST_DISPLAY_MODE, "CSU", Env.getAD_Client_ID(ctx));
 		
@@ -385,7 +418,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 
 		return events;
 	}
-	
+
 	public static ArrayList<X_AD_User> getUserList(Properties ctx, int AD_User_ID)
 	{
 		ArrayList<X_AD_User> types = new ArrayList<X_AD_User>();
@@ -749,6 +782,9 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		return types;
 	}
 	
+	/**
+	 * Refresh model and UI
+	 */
 	public void onRefresh() {
 		btnRefreshClicked();
 	}
@@ -765,7 +801,8 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 			}
 		} else {
 			desktop = new WeakReference<Desktop>(getDesktop());
-			desktop.get().addListener(listener);
+			if (desktop.get() != null)
+				desktop.get().addListener(listener);
 		}
 		
 	}
@@ -791,17 +828,26 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		calendars.invalidate();
 	}
 
+	/**
+	 * Refresh model and UI
+	 */
 	private void btnRefreshClicked() {
 		refreshModel();
 		updateUI();
 	}
 
+	/**
+	 * Refresh model
+	 */
 	private void refreshModel() {		
 		events = getEvents(0, Env.getCtx(), null);
 		activities = getContactActivities("", Env.getCtx(), null);
 		assignments = getResourceAssignments(0, Env.getCtx());
 	}
 	
+	/**
+	 * Update {@link #lblDate}
+	 */
 	private void updateDateLabel() {
 		Date b = calendars.getBeginDate();
 		Date e = calendars.getEndDate();
@@ -811,12 +857,19 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		log.info("DPCALENDAR VALIDATOR IS NOW INITIALIZED");
 	}
 	
+	/**
+	 * Set {@link #calendars} to current date
+	 */
 	private void btnCurrentDateClicked() {
 		calendars.setCurrentDate(Calendar.getInstance(calendars.getDefaultTimeZone()).getTime());
 		updateDateLabel();
 		updateUI();
 	}
 
+	/**
+	 * Move {@link #calendars} to next or previous page
+	 * @param isNext true for next page, false for previous page
+	 */
 	private void divArrowClicked(boolean isNext) {
 		if (isNext)
 			calendars.nextPage();
@@ -873,23 +926,29 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 	}
 
 	/**
-	 * 
+	 * Perform clean up
 	 */
 	protected void cleanup() {
 		EventManager.getInstance().unregister(this);
 		desktop = null;
 	}
 	
+	/**
+	 * ITopicSubscriber to post OSGi event from "onRequestChanged" topic
+	 */
 	static class TopicSubscriber implements ITopicSubscriber<Map<String, String>> {		
 
 		@Override
 		public void onMessage(Map<String, String> message) {
-			org.osgi.service.event.Event requestChangedEvent = new org.osgi.service.event.Event(ON_REQUEST_CHANGED_TOPIC, message);
+			org.osgi.service.event.Event requestChangedEvent = EventManager.newEvent(ON_REQUEST_CHANGED_TOPIC, message, true);
 			EventManager.getInstance().postEvent(requestChangedEvent);
 		}
 		
 	}
 	
+	/**
+	 * Event handler for R_Request model  
+	 */
 	static class RequestEventHandler extends AbstractEventHandler {
 		@Override
 		protected void doHandleEvent(org.osgi.service.event.Event event) {
@@ -917,6 +976,9 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		}		
 	}
 	
+	/**
+	 * Runnable to post "onRequestChanged" message ({@link IMessageService}) or OSGi event (if {@link IMessageService} not available)
+	 */
 	static class RequestRunnable implements Runnable {
 		
 		private Map<String, String> message;
@@ -932,16 +994,22 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 				ITopic<Map<String,String>> topic = service.getTopic(ON_REQUEST_CHANGED_TOPIC);				
 				topic.publish(message);
 			} else {
-				org.osgi.service.event.Event requestChangedEvent = new org.osgi.service.event.Event(ON_REQUEST_CHANGED_TOPIC, message);
+				org.osgi.service.event.Event requestChangedEvent = EventManager.newEvent(ON_REQUEST_CHANGED_TOPIC, message, true);
 				EventManager.getInstance().postEvent(requestChangedEvent);
 			}
 		}	
 	}
 	
+	/**
+	 * TrxEventListener to call a {@link Runnable} after successful commit of transaction.
+	 */
 	static class TrxListener implements TrxEventListener {
 
 		private Runnable runnable;
 
+		/**
+		 * @param runnable
+		 */
 		protected TrxListener(Runnable runnable) {
 			this.runnable = runnable;
 		}
@@ -963,6 +1031,10 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		}		
 	}
 
+	@Override
+	public boolean isLazy() {
+		return true;
+	}
 	public static String getTimeFormat()
 	{
 		return MSysConfig.getValue("CALENDAR_TIME_FORMAT", "HH:mm", Env.getAD_Client_ID(Env.getCtx()));

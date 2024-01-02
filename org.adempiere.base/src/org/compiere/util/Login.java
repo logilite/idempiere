@@ -22,6 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -31,6 +32,8 @@ import java.util.logging.Level;
 
 import javax.swing.JOptionPane;
 
+import org.adempiere.base.sso.ISSOPrincipalService;
+import org.adempiere.base.sso.SSOUtils;
 import org.adempiere.exceptions.DBException;
 import org.adempiere.base.Core;
 import org.adempiere.base.ILogin;
@@ -53,6 +56,7 @@ import org.compiere.model.MUserPreference;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
+import org.compiere.model.SystemIDs;
 
 
 /**
@@ -71,6 +75,7 @@ public class Login implements ILogin
 {
 	protected String loginErrMsg;
 	protected boolean isPasswordExpired;
+	private boolean isSSOLogin = false;
 
 	public String getLoginErrMsg() {
 		return loginErrMsg;
@@ -85,6 +90,7 @@ public class Login implements ILogin
 	 *	@param isClient client session
 	 *	@return Context
 	 */
+	@Deprecated
 	public static Properties initTest (boolean isClient)
 	{
 	//	logger.entering("Env", "initTest");
@@ -94,7 +100,7 @@ public class Login implements ILogin
 		Properties ctx = Env.getCtx();
 		ILogin login = Core.getLogin(ctx);
 		KeyNamePair[] roles = login.getRoles(CConnection.get(),
-			"System", "System", true);
+			"SuperUser", "System", true);
 		//  load role
 		if (roles != null && roles.length > 0)
 		{
@@ -380,9 +386,9 @@ public class Login implements ILogin
 				if (!rs.next())		//	no record found
 					if (force)
 					{
-						Env.setContext(m_ctx, Env.AD_USER_NAME, "System");
-						Env.setContext(m_ctx, Env.AD_USER_ID, "0");
-						Env.setContext(m_ctx, "#AD_User_Description", "System Forced Login");
+						Env.setContext(m_ctx, Env.AD_USER_NAME, "SuperUser");
+						Env.setContext(m_ctx, Env.AD_USER_ID, SystemIDs.USER_SUPERUSER);
+						Env.setContext(m_ctx, "#AD_User_Description", "SuperUser Forced Login");
 						Env.setContext(m_ctx, Env.USER_LEVEL, "S  ");  	//	Format 'SCO'
 						Env.setContext(m_ctx, "#User_Client", "0");		//	Format c1, c2, ...
 						Env.setContext(m_ctx, "#User_Org", "0"); 		//	Format o1, o2, ...
@@ -420,7 +426,7 @@ public class Login implements ILogin
 					}
 					if (valid) { 
 						int AD_Role_ID = rs.getInt(2);
-						if (AD_Role_ID == 0)
+						if (AD_Role_ID == SystemIDs.ROLE_SYSTEM)
 							Env.setContext(m_ctx, "#SysAdmin", "Y");
 						String Name = rs.getString(3);
 						KeyNamePair p = new KeyNamePair(AD_Role_ID, Name);
@@ -789,6 +795,8 @@ public class Login implements ILogin
 			if (AD_Client_ID != 0 && MSysConfig.getBooleanValue(MSysConfig.SYSTEM_IN_MAINTENANCE_MODE, false, AD_Client_ID))
 				return Msg.getMsg(m_ctx, "SystemInMaintenance");
 		}
+		
+		Env.setPredefinedVariables(Env.getCtx(), -1, MRole.getDefault().getPredefinedContextVariables());
 
 		return null;
 	}	//	validateLogin
@@ -872,6 +880,7 @@ public class Login implements ILogin
 
 		//	Other Settings
 		Env.setContext(m_ctx, "#YYYY", "Y");
+		Env.setContext(m_ctx, Env.DEVELOPER_MODE, Util.isDeveloperMode() ? "Y" : "N");
 		Env.setContext(m_ctx, Env.STANDARD_PRECISION, 2);
 
 		//	AccountSchema Info (first)
@@ -1260,15 +1269,28 @@ public class Login implements ILogin
 	}
 
 	/**
-	 * Validate Client Login.
-	 * Sets Context with login info
-	 * @param app_user user id
-	 * @param app_pwd password
-	 * @param roleTypes comma separated list of the role types allowed to login (NULL can be added)
-	 * @param isSSOLogin check only base on user Name
+	 * Validate Client Login. Sets Context with login info
+	 * 
+	 * @param app_user  user id
+	 * @param app_pwd   password
+	 * @param roleTypes comma separated list of the role types allowed to login
+	 *                  (NULL can be added)
 	 * @return client array or null if in error.
 	 */
-	public KeyNamePair[] getClients(String app_user, String app_pwd, String roleTypes, boolean isSSOLogin) {
+	public KeyNamePair[] getClients(String app_user, String app_pwd, String roleTypes) {
+		return getClients(app_user, app_pwd, roleTypes, null);
+	}
+
+	/**
+	 *  Validate Client Login.
+	 *  Sets Context with login info
+	 *  @param app_user user id
+	 *  @param app_pwd password
+	 *  @param roleTypes comma separated list of the role types allowed to login (NULL can be added)
+	 *  @param token validate the user with a token for SSO login.
+	 *  @return client array or null if in error.
+	 */
+	public KeyNamePair[] getClients(String app_user, String app_pwd, String roleTypes, Object token) {
 		if (log.isLoggable(Level.INFO)) log.info("User=" + app_user);
 
 		if (Util.isEmpty(app_user))
@@ -1279,11 +1301,21 @@ public class Login implements ILogin
 
 		//	Authentication
 		boolean authenticated = false;
+		try
+		{
+			isSSOLogin = token != null && SSOUtils.getSSOPrincipalService() != null && SSOUtils.getSSOPrincipalService().getUserName(token).equalsIgnoreCase(app_user);
+		}
+		catch (ParseException e)
+		{
+			log.warning("Parsing failed: " + e.getLocalizedMessage());
+			isSSOLogin = false;
+		}
+
 		MSystem system = MSystem.get(m_ctx);
 		if (system == null)
 			throw new IllegalStateException("No System Info");
 
-		if (!isSSOLogin  && (app_pwd == null || app_pwd.length() == 0))
+		if (!isSSOLogin && (app_pwd == null || app_pwd.length() == 0))
 		{
 			log.warning("No Apps Password");
 			return null;
@@ -1334,6 +1366,16 @@ public class Login implements ILogin
 			where.append("EMail=?");
 		else
 			where.append("COALESCE(LDAPUser,Name)=?");
+
+		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
+		ISSOPrincipalService ssoPrincipal = SSOUtils.getSSOPrincipalService();
+		where.append("	AND EXISTS (SELECT * FROM AD_User u ")
+						.append("	INNER JOIN	AD_Client c ON (u.AD_Client_ID = c.AD_Client_ID)	")
+						.append("	WHERE (COALESCE(u.AuthenticationType, c.AuthenticationType) IN ");
+		//If Enable_SSO=N then don't allow SSO only users. 
+		where.append((isSSOEnable && ssoPrincipal != null && isSSOLogin) ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
+		where.append("	OR COALESCE(u.AuthenticationType, c.AuthenticationType) IS NULL) AND u.AD_User_ID = AD_User.AD_User_ID) ");
+
 		String whereRoleType = MRole.getWhereRoleType(roleTypes, "r");
 		where.append(" AND")
 				.append(" EXISTS (SELECT * FROM AD_User_Roles ur")
@@ -1364,7 +1406,8 @@ public class Login implements ILogin
 			log.saveError(isSSOLogin ? "UserNotFoundError": "UserPwdError", app_user, false);
 			return null;
 		}
-		log.log(Level.FINE, users.size() + " matched user found for :" + app_user);
+		
+		log.log(Level.FINE ,users.size() + " matched user found for :" + app_user);
 		int MAX_ACCOUNT_LOCK_MINUTES = MSysConfig.getIntValue(MSysConfig.USER_LOCKING_MAX_ACCOUNT_LOCK_MINUTES, 0);
 		int MAX_INACTIVE_PERIOD_DAY = MSysConfig.getIntValue(MSysConfig.USER_LOCKING_MAX_INACTIVE_PERIOD_DAY, 0);
 		int MAX_PASSWORD_AGE = MSysConfig.getIntValue(MSysConfig.USER_LOCKING_MAX_PASSWORD_AGE_DAY, 0);
@@ -1432,6 +1475,7 @@ public class Login implements ILogin
 				if (! Util.isEmpty(whereRoleType)) {
 					sql.append(" AND ").append(whereRoleType);
 				}
+				sql.append(" AND  cli.AuthenticationType IN ").append((isSSOEnable && ssoPrincipal != null && isSSOLogin) ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
 				sql.append(" AND ur.AD_User_ID=? ORDER BY cli.Name");
 			      PreparedStatement pstmt=null;
 			      ResultSet rs=null;
@@ -1636,7 +1680,7 @@ public class Login implements ILogin
 	 */
 	public KeyNamePair[] getRoles(String app_user, KeyNamePair client, String roleTypes) {
 		if (client == null)
-			throw new IllegalArgumentException("Client missing");
+			throw new IllegalArgumentException("Tenant missing");
 
 		String whereRoleType = MRole.getWhereRoleType(roleTypes, "r");
 		ArrayList<KeyNamePair> rolesList = new ArrayList<KeyNamePair>();
@@ -1645,7 +1689,7 @@ public class Login implements ILogin
 			.append("FROM AD_User u")
 			.append(" INNER JOIN AD_User_Roles ur ON (u.AD_User_ID=ur.AD_User_ID AND ur.IsActive='Y')")
 			.append(" INNER JOIN AD_Role r ON (ur.AD_Role_ID=r.AD_Role_ID AND r.IsActive='Y') ");
-		sql.append("WHERE ur.AD_Client_ID=? AND u.Password IS NOT NULL AND ");
+		sql.append("WHERE u.Password IS NOT NULL AND ur.AD_Client_ID=? AND ");		
 		boolean email_login = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
 		if (email_login)
 			sql.append("u.EMail=?");
@@ -1720,7 +1764,7 @@ public class Login implements ILogin
 		
 		loginErrMsg = null;
 		isPasswordExpired = false;
-		
+		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
 		int AD_User_ID = Env.getContextAsInt(m_ctx, Env.AD_USER_ID);
 		KeyNamePair[] retValue = null;
 		ArrayList<KeyNamePair> clientList = new ArrayList<KeyNamePair>();
@@ -1731,7 +1775,9 @@ public class Login implements ILogin
                          .append(" WHERE ur.IsActive='Y'")
                          .append(" AND cli.IsActive='Y'")
                          .append(" AND u.IsActive='Y'")
-                         .append(" AND u.AD_User_ID=? ORDER BY cli.Name");
+                         .append(" AND u.AD_User_ID=? ")
+						 .append(" AND cli.AuthenticationType IN ").append((isSSOEnable && SSOUtils.getSSOPrincipalService() != null && isSSOLogin) ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ")
+						 .append(" ORDER BY cli.Name");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try {

@@ -31,6 +31,7 @@ import org.compiere.model.MCharge;
 import org.compiere.model.MConversionType;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProductPO;
 import org.compiere.model.MRequisition;
@@ -147,7 +148,7 @@ public class RequisitionPOCreate extends SvrProcess
 			else if (name.equals("C_Charge_ID"))
 				p_C_Charge_ID = para[i].getParameterAsInt();
 			else
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 	}	//	prepare
 	

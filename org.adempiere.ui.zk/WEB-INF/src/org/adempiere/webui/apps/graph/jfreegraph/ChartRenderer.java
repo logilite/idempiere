@@ -32,8 +32,9 @@ import org.zkoss.zul.Imagemap;
 /**
  * @author Paul Bowden, Adaxa Pty Ltd
  * @author hengsin
- *
+ * @deprecated replace by billboard based implementation
  */
+@Deprecated
 /* package */ class ChartRenderer {
 
 	private static final CLogger log = CLogger.getCLogger(ChartRenderer.class);
@@ -56,8 +57,7 @@ import org.zkoss.zul.Imagemap;
 	 * @param height
 	 * @param showTitle
 	 */
-	public void render(Component parent, int width, int height,
-			boolean showTitle) {
+	public void render(Component parent, int width, int height, boolean showTitle) {
 		chartBuilder = new ChartBuilder(chartModel);
 		JFreeChart chart = chartBuilder.createChart();
 		if (!showTitle)

@@ -29,6 +29,7 @@ import org.adempiere.util.ShippingUtil;
 import org.compiere.model.MClientInfo;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MProduct;
 import org.compiere.model.MShipper;
 import org.compiere.model.MShipperLabels;
@@ -45,7 +46,7 @@ import org.compiere.process.SvrProcess;
 import org.compiere.util.DisplayType;
 
 /**
- * 
+ * Shipping rate inquiry for sales order
  * @author Elaine
  *
  */
@@ -66,7 +67,7 @@ public class SalesOrderRateInquiryProcess extends SvrProcess
 			else if (name.equals(MShippingTransaction.COLUMNNAME_IsPriviledgedRate))
 				p_IsPriviledgedRate = ((String)para[i].getParameter()).equals("Y");
 			else
-				log.log(Level.SEVERE, "prepare - Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
     }
 	
@@ -80,11 +81,11 @@ public class SalesOrderRateInquiryProcess extends SvrProcess
 		
 		MClientInfo ci = MClientInfo.get(getCtx(), getAD_Client_ID(), get_TrxName());
 		if (ci.getC_ChargeFreight_ID() == 0 && ci.getM_ProductFreight_ID() == 0)
-			throw new AdempiereException("Product or Charge for Freight is not defined at Client window > Client Info tab");
+			throw new AdempiereException("Product or Charge for Freight is not defined at Tenant window > Tenant Info tab");
 		if (ci.getC_UOM_Weight_ID() == 0)
-			throw new AdempiereException("UOM for Weight is not defined at Client window > Client Info tab");
+			throw new AdempiereException("UOM for Weight is not defined at Tenant window > Tenant Info tab");
 		if (ci.getC_UOM_Length_ID() == 0)
-			throw new AdempiereException("UOM for Length is not defined at Client window > Client Info tab");
+			throw new AdempiereException("UOM for Length is not defined at Tenant window > Tenant Info tab");
 		
 		MOrderLine[] ols = m_order.getLines(false, MOrderLine.COLUMNNAME_Line);
 		if (ols.length == 0)
@@ -159,7 +160,7 @@ public class SalesOrderRateInquiryProcess extends SvrProcess
 					else if (ci.getM_ProductFreight_ID() > 0)
 						freightLine.setM_Product_ID(ci.getM_ProductFreight_ID());
 					else
-						throw new AdempiereException("Product or Charge for Freight is not defined at Client window > Client Info tab");
+						throw new AdempiereException("Product or Charge for Freight is not defined at Tenant window > Tenant Info tab");
 				}
 				
 				freightLine.setC_BPartner_Location_ID(m_order.getC_BPartner_Location_ID());
@@ -188,6 +189,15 @@ public class SalesOrderRateInquiryProcess extends SvrProcess
 		return "@OK@";
 	}
 	
+	/**
+	 * Create MShippingTransaction record for order.
+	 * @param ctx
+	 * @param m_order
+	 * @param action
+	 * @param isPriviledgedRate
+	 * @param trxName
+	 * @return MShippingTransaction
+	 */
 	public static MShippingTransaction createShippingTransaction(Properties ctx, MOrder m_order, String action, boolean isPriviledgedRate, String trxName)
 	{
 		MShipper shipper = new MShipper(ctx, m_order.getM_Shipper_ID(), trxName);

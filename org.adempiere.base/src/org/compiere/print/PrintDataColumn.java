@@ -70,7 +70,8 @@ public class PrintDataColumn
 	private String		m_alias;
 	private boolean		m_pageBreak;
 	private String      m_FormatPattern;
-	private int			m_SortNo;
+	private String		m_PrintFormatType;
+	private int		m_SortNo;
 
 	/*************************************************************************/
 
@@ -174,6 +175,14 @@ public class PrintDataColumn
 	
 	public String getFormatPattern() {
 		return m_FormatPattern;
+	}
+	
+	public String getPrintFormatType() {
+		return m_PrintFormatType;
+	}
+
+	public void setPrintFormatType(String m_PrintFormatType) {
+		this.m_PrintFormatType = m_PrintFormatType;
 	}
 	
 	public int getM_SortNo( )

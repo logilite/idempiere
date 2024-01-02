@@ -34,7 +34,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 /**
- *  Post Invoice Documents.
+ *  Post {@link MMovement} Documents. DOCTYPE_MatMovement.
  *  <pre>
  *  Table:              M_Movement (323)
  *  Document Types:     MMM
@@ -64,6 +64,7 @@ public class Doc_Movement extends Doc
 	 *  Load Document Details
 	 *  @return error message or null
 	 */
+	@Override
 	protected String loadDocumentDetails()
 	{
 		setC_Currency_ID(NO_CURRENCY);
@@ -79,7 +80,7 @@ public class Doc_Movement extends Doc
 	}   //  loadDocumentDetails
 
 	/**
-	 *	Load Invoice Line
+	 *	Load inventory movement lines
 	 *	@param move move
 	 *  @return document lines (DocLine_Material)
 	 */
@@ -156,6 +157,7 @@ public class Doc_Movement extends Doc
 	 *  Get Balance
 	 *  @return balance (ZERO) - always balanced
 	 */
+	@Override
 	public BigDecimal getBalance()
 	{
 		BigDecimal retValue = Env.ZERO;
@@ -172,7 +174,8 @@ public class Doc_Movement extends Doc
 	 *  </pre>
 	 *  @param as account schema
 	 *  @return Fact
-	 */
+	 */	
+	@Override
 	public ArrayList<Fact> createFacts (MAcctSchema as)
 	{
 		//  create Fact Header
@@ -278,7 +281,7 @@ public class Doc_Movement extends Doc
 			{
 				//	Set AmtAcctCr from Original Movement
 				if (!cr.updateReverseLine (MMovement.Table_ID,
-						m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
+						m_Reversal_ID, line.getReversalLine_ID(),Env.ONE, dr))
 				{
 					p_Error = "Original Inventory Move not posted yet";
 					return null;
@@ -328,7 +331,11 @@ public class Doc_Movement extends Doc
 		facts.add(fact);
 		return facts;
 	}   //  createFact
-
+	
+	/**
+	 * @param line
+	 * @return true if line is for reversal
+	 */
 	protected boolean isReversal(DocLine line) {
 		return m_Reversal_ID !=0 && line.getReversalLine_ID() != 0;
 	}

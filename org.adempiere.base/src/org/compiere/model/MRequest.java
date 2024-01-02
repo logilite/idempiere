@@ -17,15 +17,19 @@
 package org.compiere.model;
 
 import java.io.File;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.util.CLogger;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.TimeUtil;
+import org.compiere.util.Util;
 
 /**
  * 	Request Model
@@ -36,14 +40,14 @@ import org.compiere.util.TimeUtil;
 public class MRequest extends X_R_Request
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
-	private static final long serialVersionUID = -6049674214655497548L;
-	
+	private static final long serialVersionUID = -3807801381988066060L;
+
 	/**
 	 * 	Get Request ID from mail text
 	 *	@param mailText mail text
-	 *	@return ID if it contains request tag otherwise 0
+	 *	@return R_Request_ID if mailText has request id tag ([Req#R_Request_ID#ID]), otherwise 0
 	 */
 	public static int getR_Request_ID (String mailText)
 	{
@@ -77,9 +81,19 @@ public class MRequest extends X_R_Request
 	/** Request Tag End					*/
 	protected static final String		TAG_END = "#ID]";
 
-	
-	
-	/**************************************************************************
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param R_Request_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MRequest(Properties ctx, String R_Request_UU, String trxName) {
+        super(ctx, R_Request_UU, trxName);
+		if (Util.isEmpty(R_Request_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 * 	Constructor
 	 * 	@param ctx context
 	 * 	@param R_Request_ID request or 0 for new
@@ -90,20 +104,31 @@ public class MRequest extends X_R_Request
 		this (ctx, R_Request_ID, trxName, (String[]) null);
 	}	//	MRequest
 
+	/**
+	 * @param ctx
+	 * @param R_Request_ID
+	 * @param trxName
+	 * @param virtualColumns
+	 */
 	public MRequest(Properties ctx, int R_Request_ID, String trxName, String... virtualColumns) {
 		super(ctx, R_Request_ID, trxName, virtualColumns);
 		if (R_Request_ID == 0)
-		{
-			setDueType (DUETYPE_Due);
-			setConfidentialType (CONFIDENTIALTYPE_PublicInformation);	// A
-			setConfidentialTypeEntry (CONFIDENTIALTYPEENTRY_PublicInformation);	// A
-			setProcessed (false);
-			setRequestAmt (Env.ZERO);
-			setPriorityUser (PRIORITY_Low);
-			setIsEscalated (false);
-			setIsSelfService (false);
-			setIsInvoiced (false);
-		}
+			setInitialDefaults();
+	}
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setDueType (DUETYPE_Due);
+		setConfidentialType (CONFIDENTIALTYPE_PublicInformation);	// A
+		setConfidentialTypeEntry (CONFIDENTIALTYPEENTRY_PublicInformation);	// A
+		setProcessed (false);
+		setRequestAmt (Env.ZERO);
+		setPriorityUser (PRIORITY_Low);
+		setIsEscalated (false);
+		setIsSelfService (false);
+		setIsInvoiced (false);
 	}
 
 	/**
@@ -159,8 +184,8 @@ public class MRequest extends X_R_Request
 	public static final String	SEPARATOR = 
 		"\n---------.----------.----------.----------.----------.----------\n";
 	
-	/**************************************************************************
-	 * 	Set Default Request Type.
+	/**
+	 * 	Find and Set Default Request Type.
 	 */
 	public void setR_RequestType_ID ()
 	{
@@ -172,7 +197,7 @@ public class MRequest extends X_R_Request
 	}	//	setR_RequestType_ID
 
 	/**
-	 * 	Set Default Request Status.
+	 * Find and Set Default Request Status.
 	 */
 	public void setR_Status_ID ()
 	{
@@ -189,7 +214,7 @@ public class MRequest extends X_R_Request
 	
 	/**
 	 * 	Add To Result
-	 * 	@param Result
+	 * 	@param Result text to append
 	 */
 	public void addToResult (String Result)
 	{
@@ -203,7 +228,7 @@ public class MRequest extends X_R_Request
 	}	//	addToResult
 
 	/**
-	 * 	Set DueType based on Date Next Action
+	 * 	Set DueType (DUETYPE_*) based on Date Next Action
 	 */
 	public void setDueType()
 	{
@@ -221,11 +246,10 @@ public class MRequest extends X_R_Request
 			DueType = DUETYPE_Overdue;
 		super.setDueType(DueType);
 	}	//	setDueType
-
 	
-	/**************************************************************************
+	/**
 	 * 	Get Action History
-	 *	@return array of actions
+	 *	@return array of MRequestAction
 	 */
 	public MRequestAction[] getActions()
 	{
@@ -238,9 +262,9 @@ public class MRequest extends X_R_Request
 	}	//	getActions
 
 	/**
-	 * 	Get Updates
-	 * 	@param confidentialType maximum confidential type - null = all
-	 *	@return updates
+	 * 	Get Request Updates that should be visible for the given confidentialType
+	 * 	@param confidentialType confidential type (CONFIDENTIALTYPEENTRY_*) or null for all
+	 *	@return array of MRequestUpdate
 	 */
 	public MRequestUpdate[] getUpdates(String confidentialType)
 	{
@@ -321,11 +345,10 @@ public class MRequest extends X_R_Request
 		}
 		return m_requestType;
 	}	//	getRequestType
-
 	
 	/**
-	 *	Get Request Type Text (for jsp)
-	 *	@return Request Type Text	
+	 *	Get Request Type Name
+	 *	@return Request Type Name
 	 */
 	public String getRequestTypeName()
 	{
@@ -338,7 +361,7 @@ public class MRequest extends X_R_Request
 
 	/**
 	 * 	Get Request Category
-	 *	@return category
+	 *	@return MRequestCategory
 	 */
 	public MRequestCategory getCategory()
 	{
@@ -349,7 +372,7 @@ public class MRequest extends X_R_Request
 
 	/**
 	 * 	Get Request Category Name
-	 *	@return name
+	 *	@return Request Category Name
 	 */
 	public String getCategoryName()
 	{
@@ -361,7 +384,7 @@ public class MRequest extends X_R_Request
 
 	/**
 	 * 	Get Request Group
-	 *	@return group
+	 *	@return MGroup
 	 */
 	public MGroup getGroup()
 	{
@@ -372,7 +395,7 @@ public class MRequest extends X_R_Request
 
 	/**
 	 * 	Get Request Group Name
-	 *	@return name
+	 *	@return Request Group Name
 	 */
 	public String getGroupName()
 	{
@@ -384,7 +407,7 @@ public class MRequest extends X_R_Request
 	
 	/**
 	 * 	Get Status
-	 *	@return status
+	 *	@return MStatus
 	 */
 	public MStatus getStatus()
 	{
@@ -395,7 +418,7 @@ public class MRequest extends X_R_Request
 	
 	/**
 	 * 	Get Request Status Name
-	 *	@return name
+	 *	@return Request Status Name
 	 */
 	public String getStatusName()
 	{
@@ -407,7 +430,7 @@ public class MRequest extends X_R_Request
 	
 	/**
 	 * 	Get Request Resolution
-	 *	@return resolution
+	 *	@return MResolution
 	 */
 	public MResolution getResolution()
 	{
@@ -418,7 +441,7 @@ public class MRequest extends X_R_Request
 	
 	/**
 	 * 	Get Request Resolution Name
-	 *	@return name
+	 *	@return Request Resolution Name
 	 */
 	public String getResolutionName()
 	{
@@ -447,8 +470,8 @@ public class MRequest extends X_R_Request
 	}	//	isDue
 
 	/**
-	 * 	Get DueType Text (for jsp)
-	 *	@return text
+	 * 	Get DueType Name
+	 *	@return DueType Name
 	 */
 	public String getDueTypeText()
 	{
@@ -456,8 +479,8 @@ public class MRequest extends X_R_Request
 	}	//	getDueTypeText
 	
 	/**
-	 * 	Get Priority Text (for jsp)
-	 *	@return text
+	 * 	Get Priority Name
+	 *	@return Priority Name
 	 */
 	public String getPriorityText()
 	{
@@ -465,8 +488,8 @@ public class MRequest extends X_R_Request
 	}	//	getPriorityText
 
 	/**
-	 * 	Get Importance Text (for jsp)
-	 *	@return text
+	 * 	Get Importance Name
+	 *	@return Importance Name
 	 */
 	public String getPriorityUserText()
 	{
@@ -474,8 +497,8 @@ public class MRequest extends X_R_Request
 	}	//	getPriorityUserText
 
 	/**
-	 * 	Get Confidential Text (for jsp)
-	 *	@return text
+	 * 	Get Confidential Type Name
+	 *	@return Confidential Type Name
 	 */
 	public String getConfidentialText()
 	{
@@ -483,8 +506,8 @@ public class MRequest extends X_R_Request
 	}	//	getConfidentialText
 
 	/**
-	 * 	Get Confidential Entry Text (for jsp)
-	 *	@return text
+	 * 	Get Confidential Type Entry Name
+	 *	@return Confidential Type Entry Name
 	 */
 	public String getConfidentialEntryText()
 	{
@@ -512,7 +535,7 @@ public class MRequest extends X_R_Request
 	
 	/**
 	 * 	Get Sales Rep Name
-	 *	@return Sales Rep User
+	 *	@return Sales Rep Name
 	 */
 	public String getSalesRepName()
 	{
@@ -523,8 +546,8 @@ public class MRequest extends X_R_Request
 	}	//	getSalesRepName
 
 	/**
-	 * 	Get Name of creator
-	 *	@return name
+	 * 	Get Created By Name
+	 *	@return Created By Name
 	 */
 	public String getCreatedByName()
 	{
@@ -534,7 +557,7 @@ public class MRequest extends X_R_Request
 
 	/**
 	 * 	Get Contact (may be not defined)
-	 *	@return Sales Rep User
+	 *	@return Contact User or null
 	 */
 	public MUser getUser()
 	{
@@ -549,7 +572,7 @@ public class MRequest extends X_R_Request
 	
 	/**
 	 * 	Get BPartner (may be not defined)
-	 *	@return Sales Rep User
+	 *	@return BPartner or null
 	 */
 	public MBPartner getBPartner()
 	{
@@ -580,7 +603,6 @@ public class MRequest extends X_R_Request
 		return status.isWebCanUpdate();
 	}	//	isWebCanUpdate
 	
-
 	/**
 	 * 	Set Priority
 	 */
@@ -622,6 +644,7 @@ public class MRequest extends X_R_Request
 	 * 	Set Confidential Type Entry
 	 *	@param ConfidentialTypeEntry confidentiality
 	 */
+	@Override
 	public void setConfidentialTypeEntry (String ConfidentialTypeEntry)
 	{
 		if (ConfidentialTypeEntry == null)
@@ -651,8 +674,8 @@ public class MRequest extends X_R_Request
 	}	//	setConfidentialTypeEntry
 	
 	/**
-	 * 	Web Update
-	 *	@param result result
+	 * 	Web Update of result
+	 *	@param result result text
 	 *	@return true if updated
 	 */
 	public boolean webUpdate (String result)
@@ -670,6 +693,7 @@ public class MRequest extends X_R_Request
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MRequest[");
@@ -679,7 +703,7 @@ public class MRequest extends X_R_Request
 
 	/**
 	 * 	Create PDF
-	 *	@return pdf or null
+	 *	@return not implemented, always return null
 	 */
 	public File createPDF ()
 	{
@@ -689,18 +713,19 @@ public class MRequest extends X_R_Request
 	/**
 	 * 	Create PDF file
 	 *	@param file output file
-	 *	@return file if success
+	 *	@return not implemented, always return null
 	 */
 	public File createPDF (File file)
 	{
 		return null;
 	}	//	createPDF
 	
-	/**************************************************************************
+	/**
 	 * 	Before Save
 	 *	@param newRecord new
 	 *	@return true
 	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		//	Request Type
@@ -768,7 +793,14 @@ public class MRequest extends X_R_Request
 
 		//	Importance / Priority
 		setPriority();
-				
+
+		if (getRecord_ID() > 0 && getAD_Table_ID() > 0 && Util.isEmpty(getRecord_UU())) {
+			MTable table = MTable.get(getAD_Table_ID());
+			PO po = table.getPO(getRecord_ID(), get_TrxName());
+			if (po != null)
+				setRecord_UU(po.get_UUID());
+		}
+
 		return true;
 	}	//	beforeSave
 
@@ -776,6 +808,7 @@ public class MRequest extends X_R_Request
 	 * 	Set SalesRep_ID
 	 *	@param SalesRep_ID id
 	 */
+	@Override
 	public void setSalesRep_ID (int SalesRep_ID)
 	{
 		if (SalesRep_ID != 0)
@@ -790,6 +823,7 @@ public class MRequest extends X_R_Request
 	 *	@param success success
 	 *	@return success
 	 */
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (!success)
@@ -835,7 +869,7 @@ public class MRequest extends X_R_Request
 
 	/**
 	 * 	Get Mail Tag
-	 *	@return [Req@{id}@]
+	 *	@return [Req#@{id}@#ID]
 	 */
 	public String getMailTag()
 	{
@@ -844,7 +878,7 @@ public class MRequest extends X_R_Request
 	
 	/**
 	 * 	(Soft) Close request.
-	 * 	Must be called after webUpdate
+	 * 	Must be called after webUpdate.
 	 */
 	public void doClose()
 	{
@@ -870,7 +904,7 @@ public class MRequest extends X_R_Request
 	
 	/**
 	 * 	Escalate request
-	 * 	@param user true if user escalated - otherwise system
+	 * 	@param user true if user escalated (PriorityUser), otherwise system (Priority)
 	 */
 	public void doEscalate(boolean user)
 	{
@@ -904,14 +938,175 @@ public class MRequest extends X_R_Request
 		}
 	}	//	doEscalate
 	
+	/**
+	 * @return changed flag
+	 */
 	public boolean isChanged()
 	{
 		return m_changed;
 	}
 	
+	/**
+	 * Set changed flag
+	 * @param changed
+	 */
 	public void setIsChanged(boolean changed)
 	{
 		this.m_changed = changed;
 	}
 	
+	/**
+	 * Get number of active and inactive request
+	 * @param AD_Table_ID
+	 * @param Record_ID
+	 * @param whereClause
+	 * @param trxName
+	 * @return int[], [0] = inactive request count and [1] = active request count
+	 * @deprecated - use {@link #getRequestCount(int, int, String, StringBuilder, String)} instead
+	 */
+	@Deprecated
+	public static int[] getRequestCount(int AD_Table_ID, int Record_ID, StringBuilder whereClause, String trxName) {
+		return getRequestCount(AD_Table_ID, Record_ID, null, whereClause, trxName);
+	}
+
+	/**
+	 * Get number of active and inactive request
+	 * @param AD_Table_ID
+	 * @param Record_ID Record ID - used when Record_UU is null, and also to compare with User, BPartner, Order, Invoice, Payment, Project, Campaign and Asset
+	 * @param Record_UU Record UUID
+	 * @param whereClause
+	 * @param trxName
+	 * @return int[], [0] = inactive request count (Processed=Y) and [1] = active request count (Processed=N)
+	 */
+	public static int[] getRequestCount(int AD_Table_ID, int Record_ID, String Record_UU, StringBuilder whereClause, String trxName) {
+		int[] counts = new int[] {0, 0};
+
+		whereClause.append("(AD_Table_ID=").append(AD_Table_ID);
+		if (Util.isEmpty(Record_UU)) {
+			whereClause.append(" AND Record_ID=").append(Record_ID);
+		} else {
+			whereClause.append(" AND Record_UU=").append(DB.TO_STRING(Record_UU));
+		}
+		whereClause.append(")");
+		//
+		if (AD_Table_ID == MUser.Table_ID)
+			whereClause.append(" OR AD_User_ID=").append(Record_ID)
+				.append(" OR SalesRep_ID=").append(Record_ID);
+		else if (AD_Table_ID == MBPartner.Table_ID)
+			whereClause.append(" OR C_BPartner_ID=").append(Record_ID);
+		else if (AD_Table_ID == MOrder.Table_ID)
+			whereClause.append(" OR C_Order_ID=").append(Record_ID);
+		else if (AD_Table_ID == MInvoice.Table_ID)
+			whereClause.append(" OR C_Invoice_ID=").append(Record_ID);
+		else if (AD_Table_ID == MPayment.Table_ID)
+			whereClause.append(" OR C_Payment_ID=").append(Record_ID);
+		else if (AD_Table_ID == MProduct.Table_ID)
+			whereClause.append(" OR M_Product_ID=").append(Record_ID);
+		else if (AD_Table_ID == MProject.Table_ID)
+			whereClause.append(" OR C_Project_ID=").append(Record_ID);
+		else if (AD_Table_ID == MCampaign.Table_ID)
+			whereClause.append(" OR C_Campaign_ID=").append(Record_ID);
+		else if (AD_Table_ID == MAsset.Table_ID)
+			whereClause.append(" OR A_Asset_ID=").append(Record_ID);
+		//
+		String sql = "SELECT Processed, COUNT(*) "
+			+ "FROM R_Request WHERE " + whereClause 
+			+ " GROUP BY Processed "
+			+ "ORDER BY Processed DESC";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement (sql, trxName);
+			rs = pstmt.executeQuery ();
+			while (rs.next ())
+			{
+				if ("Y".equals(rs.getString(1)))
+					counts[0] += rs.getInt(2);
+				else
+					counts[1] += rs.getInt(2);
+			}
+		}
+		catch (Exception e)
+		{
+			throw new AdempiereException(e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+		}
+		
+		return counts;
+	}
+	
+	/**
+	 * Create new request
+	 * @param tab Grid Tab for request
+	 * @param AD_Table_ID
+	 * @param Record_ID
+	 * @param C_BPartner_ID
+	 * @deprecated - use {@link #newRequest(GridTab, int, int, String, int)} instead
+	 */
+	@Deprecated
+	public static void newRequest(GridTab tab, int AD_Table_ID, int Record_ID, int C_BPartner_ID) {
+		newRequest(tab, AD_Table_ID, Record_ID, null, C_BPartner_ID);
+	}
+
+	/**
+	 * Create new request
+	 * @param tab Grid Tab for request
+	 * @param AD_Table_ID
+	 * @param Record_ID Record ID - to fill Record_ID and also to fill with BPartner, User, Project, Asset,
+	 *   Order (also from OrderLine), Invoice, Product, Payment, InOut, RMA, RequestRelated (when from Request)
+	 * @param Record_UU Record UUID
+	 * @param C_BPartner_ID
+	 */
+	public static void newRequest(GridTab tab, int AD_Table_ID, int Record_ID, String Record_UU, int C_BPartner_ID) {
+		tab.dataNew (false);
+		tab.setValue("AD_Table_ID", Integer.valueOf(AD_Table_ID));
+		tab.setValue("Record_ID", Integer.valueOf(Record_ID));
+		tab.setValue("Record_UU", Record_UU);
+		//
+		if (C_BPartner_ID != 0)
+			tab.setValue("C_BPartner_ID", Integer.valueOf(C_BPartner_ID));
+		//
+		if (AD_Table_ID == MBPartner.Table_ID)
+			tab.setValue("C_BPartner_ID", Integer.valueOf(Record_ID));
+		else if (AD_Table_ID == MUser.Table_ID)
+			tab.setValue("AD_User_ID", Integer.valueOf(Record_ID));
+		//
+		else if (AD_Table_ID == MProject.Table_ID)
+			tab.setValue("C_Project_ID", Integer.valueOf(Record_ID));
+		else if (AD_Table_ID == MAsset.Table_ID)
+			tab.setValue("A_Asset_ID", Integer.valueOf(Record_ID));
+		//
+		else if (AD_Table_ID == MOrder.Table_ID)
+			tab.setValue("C_Order_ID", Integer.valueOf(Record_ID));
+		else if (AD_Table_ID == MInvoice.Table_ID)
+			tab.setValue("C_Invoice_ID", Integer.valueOf(Record_ID));
+		//
+		else if (AD_Table_ID == MProduct.Table_ID)
+			tab.setValue("M_Product_ID", Integer.valueOf(Record_ID));
+		else if (AD_Table_ID == MPayment.Table_ID)
+			tab.setValue("C_Payment_ID", Integer.valueOf(Record_ID));
+		//
+		else if (AD_Table_ID == MInOut.Table_ID)
+			tab.setValue("M_InOut_ID", Integer.valueOf(Record_ID));
+		else if (AD_Table_ID == MRMA.Table_ID)
+			tab.setValue("M_RMA_ID", Integer.valueOf(Record_ID));
+		//
+		else if (AD_Table_ID == MCampaign.Table_ID)
+			tab.setValue("C_Campaign_ID", Integer.valueOf(Record_ID));
+		//
+		else if (AD_Table_ID == MRequest.Table_ID)
+			tab.setValue(MRequest.COLUMNNAME_R_RequestRelated_ID, Integer.valueOf(Record_ID));
+		// FR [2842165] - Order Ref link from SO line creating new request
+		else if (AD_Table_ID == MOrderLine.Table_ID) {
+			MOrderLine oLine = new MOrderLine(Env.getCtx(), Record_ID, null);
+			if (oLine != null) {
+				tab.setValue(MOrderLine.COLUMNNAME_C_Order_ID, Integer.valueOf(oLine.getC_Order_ID()));
+			}
+		}
+	}
+
 }	//	MRequest

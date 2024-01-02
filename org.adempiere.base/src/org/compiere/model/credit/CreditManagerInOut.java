@@ -14,14 +14,15 @@ package org.compiere.model.credit;
 
 import java.math.BigDecimal;
 
+import org.adempiere.base.CreditStatus;
 import org.adempiere.base.ICreditManager;
 import org.compiere.model.I_C_Order;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MSysConfig;
-import org.compiere.model.MTable;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  * Credit Manager for InOut
@@ -44,8 +45,9 @@ public class CreditManagerInOut implements ICreditManager
 	}
 
 	@Override
-	public String creditCheck(String docAction)
+	public CreditStatus checkCreditStatus(String docAction)
 	{
+		String errorMsg = null;
 		if (MInOut.DOCACTION_Prepare.equals(docAction) && mInOut.isSOTrx() && !mInOut.isReversal() && !mInOut.isCustomerReturn())
 		{
 			I_C_Order order = mInOut.getC_Order();
@@ -57,26 +59,31 @@ public class CreditManagerInOut implements ICreditManager
 			}
 			else
 			{
-				MBPartner bp = (MBPartner) MTable.get(mInOut.getCtx(), MBPartner.Table_ID).getPO(mInOut.getC_BPartner_ID(), mInOut.get_TrxName());
+				MBPartner bp = new MBPartner(mInOut.getCtx(), mInOut.getC_BPartner_ID(), mInOut.get_TrxName());
 				if (MBPartner.SOCREDITSTATUS_CreditStop.equals(bp.getSOCreditStatus()))
 				{
-					return "@BPartnerCreditStop@ - @TotalOpenBalance@=" + bp.getTotalOpenBalance() + ", @SO_CreditLimit@=" + bp.getSO_CreditLimit();
+					errorMsg = "@BPartnerCreditStop@ - @TotalOpenBalance@=" + bp.getTotalOpenBalance()
+							+ ", @SO_CreditLimit@=" + bp.getSO_CreditLimit();
 				}
 				if (MBPartner.SOCREDITSTATUS_CreditHold.equals(bp.getSOCreditStatus()))
 				{
-					return "@BPartnerCreditHold@ - @TotalOpenBalance@=" + bp.getTotalOpenBalance() + ", @SO_CreditLimit@=" + bp.getSO_CreditLimit();
+					errorMsg = "@BPartnerCreditHold@ - @TotalOpenBalance@=" + bp.getTotalOpenBalance()
+							+ ", @SO_CreditLimit@=" + bp.getSO_CreditLimit();
 				}
-				if (!MBPartner.SOCREDITSTATUS_NoCreditCheck.equals(bp.getSOCreditStatus()) && Env.ZERO.compareTo(bp.getSO_CreditLimit()) != 0)
+				if (!MBPartner.SOCREDITSTATUS_NoCreditCheck.equals(bp.getSOCreditStatus())
+					&& Env.ZERO.compareTo(bp.getSO_CreditLimit()) != 0)
 				{
 					BigDecimal notInvoicedAmt = MBPartner.getNotInvoicedAmt(mInOut.getC_BPartner_ID());
 					if (MBPartner.SOCREDITSTATUS_CreditHold.equals(bp.getSOCreditStatus(notInvoicedAmt)))
 					{
-						return "@BPartnerOverSCreditHold@ - @TotalOpenBalance@="	+ bp.getTotalOpenBalance() + ", @NotInvoicedAmt@="
-								+ notInvoicedAmt + ", @SO_CreditLimit@=" + bp.getSO_CreditLimit();
+						errorMsg = "@BPartnerOverSCreditHold@ - @TotalOpenBalance@="	+ bp.getTotalOpenBalance()
+								+ ", @NotInvoicedAmt@=" + notInvoicedAmt
+								+ ", @SO_CreditLimit@=" + bp.getSO_CreditLimit();
 					}
 				}
 			}
 		}
-		return null;
+		
+		return new CreditStatus(errorMsg, !Util.isEmpty(errorMsg));
 	} // creditCheck
 }

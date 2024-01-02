@@ -65,9 +65,11 @@ import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.pdf.Document;
 import org.adempiere.print.export.PrintDataExcelExporter;
 import org.adempiere.print.export.PrintDataXLSXExporter;
+import org.apache.ecs.MultiPartElement;
 import org.apache.ecs.XhtmlDocument;
 import org.apache.ecs.xhtml.a;
 import org.apache.ecs.xhtml.script;
+import org.apache.ecs.xhtml.span;
 import org.apache.ecs.xhtml.style;
 import org.apache.ecs.xhtml.table;
 import org.apache.ecs.xhtml.tbody;
@@ -84,6 +86,7 @@ import org.compiere.model.MFactAcct;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInventory;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MLanguage;
 import org.compiere.model.MLocation;
 import org.compiere.model.MMovement;
 import org.compiere.model.MOrder;
@@ -95,9 +98,12 @@ import org.compiere.model.MQuery;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRfQResponse;
 import org.compiere.model.MRole;
+import org.compiere.model.MStyle;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
+import org.compiere.model.PO;
 import org.compiere.model.PrintInfo;
+import org.compiere.model.X_AD_StyleLine;
 import org.compiere.print.layout.InstanceAttributeColumn;
 import org.compiere.print.layout.InstanceAttributeData;
 import org.compiere.print.layout.LayoutEngine;
@@ -119,6 +125,8 @@ import org.compiere.util.Trx;
 import org.compiere.util.Util;
 import org.eevolution.model.MDDOrder;
 import org.eevolution.model.X_PP_Order;
+
+import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
 
 /**
  *	Report Engine.
@@ -276,6 +284,8 @@ public class ReportEngine implements PrintServiceAttributeListener
 	
 	private String m_name = null;
 	
+	private boolean m_isReplaceTabContent = false;
+	
 	/**
 	 * store all column has same css rule into a list
 	 * for IDEMPIERE-2640
@@ -420,7 +430,7 @@ public class ReportEngine implements PrintServiceAttributeListener
 	public void initName()
 	{
 		Language language = m_printFormat.getLanguage();
-		String processFileNamePattern = m_printFormat.get_Translation("FileNamePattern", language.getAD_Language());
+		String processFileNamePattern = m_printFormat.get_Translation(MPrintFormat.COLUMNNAME_FileNamePattern, language.getAD_Language());
 	 	if (m_info.getAD_Process_ID()>0) {
 			MProcess process = new MProcess(Env.getCtx(), m_info.getAD_Process_ID(), m_trxName);
 			if (process !=null && !Util.isEmpty(process.getFileNamePattern())) {
@@ -800,9 +810,10 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			table.setNeedClosingTag(false);
 			PrintWriter w = new PrintWriter(writer);
 			XhtmlDocument doc = null;
-					
+			boolean minify = MSysConfig.getBooleanValue(MSysConfig.HTML_REPORT_MINIFY, true, Env.getAD_Client_ID(getCtx()));
+						
 			if (onlyTable)
-				table.output(w);
+				w.print(compress(table.toString(), minify));
 			else
 			{
 				doc = new XhtmlDocument();
@@ -811,6 +822,12 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				doc.appendHead("<meta charset=\"UTF-8\" />");
 				if (!Util.isEmpty(headerCSS))
 					doc.appendHead(new style(style.css).addElement(".floatThead-table {" + headerCSS + "}"));
+					
+				if (extension != null && !Util.isEmpty(extension.getWebFontLinks(), true))
+				{
+					doc.appendHead(extension.getWebFontLinks());
+				}
+
 				if (extension != null && extension.getStyleURL() != null)
 				{
 					// maybe cache style content with key is path
@@ -881,21 +898,19 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				
 				styleBuild = new StringBuilder(styleBuild.toString().replaceAll(";", "!important;"));
 				appendInlineCss (doc, styleBuild);
-							
-				doc.output(w);
 				
-				w.println("<div class='"+cssPrefix+"-flex-container'>");
+				w.print(compress(doc.toString(), minify));
+				
+				w.print("<div class='"+cssPrefix+"-flex-container'>");
 				String paraWrapId = null;
 				if (parameterTable != null) {
 					paraWrapId = cssPrefix + "-para-table-wrap";
-					w.println("<div id='" + paraWrapId + "'>");
-					parameterTable.output(w);
+					w.print("<details id='" + paraWrapId + "' open=true style='cursor:pointer'>");
+					w.print("<summary style='cursor:pointer'>"+Msg.getMsg(getCtx(), "Parameter")+"</summary>");
+					w.print(compress(parameterTable.toString(), minify));
 					
 					tr tr = new tr();
 					tr.setClass("tr-parameter");
-					th th = new th();
-					tr.addElement(th);
-					th.addElement(Msg.getMsg(getCtx(), "Parameter") + ":");
 					
 					MQuery query = m_query;
 					if (m_query.getReportProcessQuery() != null)
@@ -905,9 +920,6 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 						if (r > 0) {
 							tr = new tr();
 							tr.setClass("tr-parameter");
-							td td = new td();
-							tr.addElement(td);
-							td.addElement("&nbsp;");
 						}
 						
 						td td = new td();
@@ -922,25 +934,25 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 						tr.addElement(td);
 						td.addElement(query.getInfoDisplayAll(r));
 						
-						tr.output(w);
+						w.print(compress(tr.toString(), minify));
 					}
-					
-					w.println();					
-					w.println("</table>");
-					w.println("</div>");
+										
+					w.print("</table>");
+					w.print("</details>");
 				}
 				
 				StringBuilder tableWrapDiv = new StringBuilder();
 				tableWrapDiv.append("<div class='").append(cssPrefix).append("-table-wrap' ");
 				if (paraWrapId != null) {
-					tableWrapDiv.append("onscroll=\"if (this.scrollTop > 0) document.getElementById('")
-						.append(paraWrapId).append("').style.display='none'; ")
-						.append("else document.getElementById('").append(paraWrapId).append("').style.display='block';\"");
+					String paraWrapGet = "document.getElementById(\""+paraWrapId+"\")";
+					tableWrapDiv.append("onscroll='setTimeout(() => {if (this.scrollTop > 0) ")
+						.append(" if(").append(paraWrapGet).append(".open) ")
+						.append(paraWrapGet).append(".open=false;}, 100)'");
 				}
 				tableWrapDiv.append(" >");
 				
-				w.println(tableWrapDiv.toString());
-				table.output(w);
+				w.print(compress(tableWrapDiv.toString(), minify));
+				w.print(compress(table.toString(), minify));
 			}
 			
 			thead thead = new thead();
@@ -1156,13 +1168,29 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 											if (cssPrefix != null)
 												href.setClass(cssPrefix + "-href");
 										}
-
+										
+										// Set Style
+										if(style != null && style.isWrapWithSpan())
+											setStyle(href, style);
+										else
+											setStyle(td, style);
+											
 										if (isDirectZoom)
 											href.addAttribute("onclick", "parent.window.idempiere.zoom('" + extension.getComponentId() + "','" + pde.getForeignColumnName() + "','" + pde.getValueAsString() + "')");
 										else
 											extension.extendIDColumn(row, td, href, pde);
 									} else {
-										td.addElement(Util.maskHTML(value));
+										// Set Style
+										if(style != null && style.isWrapWithSpan()) {
+											span span = new span();
+											setStyle(span, style);
+											span.addElement(Util.maskHTML(value));
+											td.addElement(span);
+										}
+										else {
+											setStyle(td, style);
+											td.addElement(Util.maskHTML(value));
+										}
 									}
 
 								}
@@ -1195,7 +1223,17 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 								}
 								else
 								{
-									td.addElement(Util.maskHTML(value));
+									// Set Style
+									if(style != null && style.isWrapWithSpan()) {
+										span span = new span();
+										setStyle(span, style);
+										span.addElement(Util.maskHTML(value));
+										td.addElement(span);
+									}
+									else {
+										setStyle(td, style);
+										td.addElement(Util.maskHTML(value));
+									}
 								}
 								if (cssPrefix != null)
 								{
@@ -1219,19 +1257,18 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				
 				/* output table header */
 				if (row == -1){
-					thead.output(w);
+					w.print(compress(thead.toString(), minify));
 					// output open of tbody
-					tbody.output(w);
+					w.print(compress(tbody.toString(), minify));
 				}else{
 					// output row by row 
-					tr.output(w);
+					w.print(compress(tr.toString(), minify));
 				}
 				
 			}	//	for all rows
 			
-			w.println();
-			w.println("</tbody>");
-			w.println("</table>");
+			w.print("</tbody>");
+			w.print("</table>");
 			if (suppressMap.size() > 0) 
 			{
 				StringBuilder st = new StringBuilder();
@@ -1244,15 +1281,14 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				st.append(" {\n\t\tdisplay:none;\n\t}");
 				style styleTag = new style();
 				styleTag.addElement(st.toString());
-				styleTag.output(w);
-				w.println();
+				w.print(compress(styleTag.toString(), minify));
 			}
 			if (!onlyTable)
 			{
-				w.println("</div>");
-				w.println("</div>");
-				w.println("</body>");
-				w.println("</html>");
+				w.print("</div>");
+				w.print("</div>");
+				w.print("</body>");
+				w.print("</html>");
 			}
 			w.flush();
 			w.close();
@@ -1265,7 +1301,90 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return true;
 	}	//	createHTML
 
-
+	/**
+	 * Get record identifier string
+	 * @param mTable
+	 * @param tableName
+	 * @param recordID
+	 * @return String identifier
+	 */
+	private String getIdentifier(MTable mTable, String tableName, int recordID) {
+		ArrayList<MColumn> list = new ArrayList<MColumn>();
+		// get translation table - null if not exists
+		MTable mTableTrl = MTable.get(getCtx(), tableName+"_Trl");
+		String tableNameTrl = "";
+		// get report language
+		String reportLang = getLanguageID() > 0 ? new MLanguage(getCtx(), getLanguageID(), null).getAD_Language() : Language.getLoginLanguage().getAD_Language();
+		
+		// use Trl table or base table
+		boolean isTrl = !Env.isBaseLanguage(Language.getLanguage(reportLang), tableName);
+		
+		if(isTrl && mTableTrl != null)
+			tableNameTrl = mTableTrl.getTableName();
+		else
+			isTrl = false;
+		
+		// load identifier columns
+		for (String idColumnName : mTable.getIdentifierColumns()) {
+			MColumn column = mTable.getColumn(idColumnName);
+			list.add (column);
+		}
+		if(list.size() <= 0) {
+			return String.valueOf(recordID);
+		}
+		
+		StringBuilder displayColumn = new StringBuilder();
+		String separator = MSysConfig.getValue(MSysConfig.IDENTIFIER_SEPARATOR, "_", Env.getAD_Client_ID(Env.getCtx()));
+		
+		// get record identifier from SQL
+		for(int i = 0; i < list.size(); i++) {
+			MColumn identifierColumn = list.get(i);
+			if(i > 0)
+				displayColumn.append("||'").append(separator).append("'||");
+			
+			displayColumn.append("COALESCE(")
+						.append(DB.TO_CHAR(addTrlSuffix(identifierColumn, tableName, isTrl)+"."+identifierColumn.getColumnName(), 
+											identifierColumn.getAD_Reference_ID(), 
+											Env.getAD_Language(Env.getCtx())))
+						.append(",")
+						.append(DB.TO_CHAR(tableName+"."+identifierColumn.getColumnName(), 
+								identifierColumn.getAD_Reference_ID(), 
+								Env.getAD_Language(Env.getCtx())))
+						.append(",'')");
+		}
+		ArrayList<Object> params = new ArrayList<Object>();
+		StringBuilder sql = new StringBuilder("SELECT ");
+		sql.append(displayColumn.toString());
+		sql.append(" FROM ").append(tableName);
+		if(isTrl) {
+			sql.append(" LEFT JOIN ").append(tableNameTrl).append(" ON ")
+				.append(tableName).append(".").append(tableName).append("_ID = ")
+				.append(tableNameTrl).append(".").append(tableName).append("_ID AND ")
+				.append(tableNameTrl).append(".AD_Language=?");
+			
+			params.add(reportLang);
+		}
+		sql.append(" WHERE ")
+			.append(tableName).append(".").append(tableName).append("_ID=?");
+		
+		params.add(recordID);		
+		return DB.getSQLValueStringEx(null, sql.toString(), params);
+	} // getIdentifier
+	
+	/**
+	 * Add "_Trl" suffix to table name, if the column is translated
+	 * @param column
+	 * @param tableName
+	 * @param isTrl - is translated
+	 * @return String tableName
+	 */
+	private String addTrlSuffix(MColumn column, String tableName, boolean isTrl) {
+		if(column.isTranslated() && isTrl)
+			return tableName + "_Trl";
+		else
+			return tableName;
+	} // addTrlSuffix
+	
 	private String getCSSFontFamily(String fontFamily)
 	{
 		if ("Dialog".equalsIgnoreCase(fontFamily))
@@ -1953,7 +2072,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				IsForm = "Y".equals(rs.getString(6));	//	required
 				Client_ID = rs.getInt(7);
 				instance = new MPInstance(ctx, pi.getAD_PInstance_ID(), null);
-				if (instance.getAD_PrintFormat_ID() <= 0)
+				if(instance.getAD_PrintFormat_ID() <= 0)
 					instance.setAD_PrintFormat_ID(AD_PrintFormat_ID);
 				else
 					AD_PrintFormat_ID = instance.getAD_PrintFormat_ID();
@@ -2018,10 +2137,13 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 
 		//  Create Query from Parameters
 		MQuery query = null;
-		if (IsForm && pi.getRecord_ID() != 0		//	Form = one record
+		if (IsForm && (pi.getRecord_ID() > 0 || !Util.isEmpty(pi.getRecord_UU()))		//	Form = one record
 				&& !TableName.startsWith("T_") )	//	Not temporary table - teo_sarca, BF [ 2828886 ]
 		{
-			query = MQuery.getEqualQuery(TableName + "_ID", pi.getRecord_ID());
+			if (pi.getRecord_ID() > 0)
+				query = MQuery.getEqualQuery(TableName + "_ID", pi.getRecord_ID());
+			else
+				query = MQuery.getEqualQuery(PO.getUUIDColumnName(TableName), pi.getRecord_UU());
 		}
 		else
 		{
@@ -2553,6 +2675,36 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	}
 	
 	/**
+	 * Determines, if current tab content should be replaced, or a new tab should be opened
+	 * @return
+	 */
+	public boolean isReplaceTabContent() {
+		return m_isReplaceTabContent;
+	}
+
+	/**
+	 * Sets, if current tab content should be replaced, or a new tab should be opened
+	 * @param m_isReplaceTabContent
+	 */
+	public void setIsReplaceTabContent(boolean m_isReplaceTabContent) {
+		this.m_isReplaceTabContent = m_isReplaceTabContent;
+	}
+	
+	/**
+	 * Get Report Engine Type from Table_ID
+	 * @param tableID
+	 * @return Report Engine Type 
+	 * -1 if Report Engine Type was not found
+	 */
+	public static int getReportEngineType(int tableID) {
+		for(int i = 0; i < DOC_TABLE_ID.length; i++) {
+			if(DOC_TABLE_ID[i] == tableID)
+				return i;
+		}
+		return -1;
+	}
+	
+	/**
 	 * build css for table from mapCssInfo
 	 * @param doc
 	 */
@@ -2827,18 +2979,6 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		}
 	}
 	
-	public static void setDefaultReportTypeToPInstance(Properties ctx, MPInstance instance, int printFormatID) {
-		if (Util.isEmpty(instance.getReportType())) {
-			MPrintFormat pf = new MPrintFormat(ctx, printFormatID, null);
-			String type = pf.isForm()
-					// a42niem - provide explicit default and check on client/org specifics
-					? MSysConfig.getValue(MSysConfig.ZK_REPORT_FORM_OUTPUT_TYPE, "PDF", Env.getAD_Client_ID(ctx),
-							Env.getAD_Org_ID(ctx))
-					: MSysConfig.getValue(MSysConfig.ZK_REPORT_TABLE_OUTPUT_TYPE, "PDF", Env.getAD_Client_ID(ctx),
-							Env.getAD_Org_ID(ctx));
-			instance.setReportType(type);
-		}
-	}
 
 	public MPrintFormat getTranPrintFormat()
 	{
@@ -2848,5 +2988,86 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	public void setTranPrintFormat(MPrintFormat m_tranPrintFormat)
 	{
 		this.m_tranPrintFormat = m_tranPrintFormat;
+	}
+	public String compress(String src, boolean minify) {
+		
+		if(minify) {
+			HtmlCompressor compressor = new HtmlCompressor();
+		    compressor.setEnabled(true);
+		    compressor.setCompressCss(true);
+		    compressor.setCompressJavaScript(true);
+		    compressor.setRemoveComments(true);
+		    compressor.setRemoveMultiSpaces(true);
+		    compressor.setRemoveIntertagSpaces(true);
+//		    compressor.setGenerateStatistics(false);
+//		    compressor.setRemoveQuotes(false);
+//		    compressor.setSimpleDoctype(false);
+//		    compressor.setRemoveScriptAttributes(false);
+//		    compressor.setRemoveStyleAttributes(false);
+//		    compressor.setRemoveLinkAttributes(false);
+//		    compressor.setRemoveFormAttributes(false);
+//		    compressor.setRemoveInputAttributes(false);
+//		    compressor.setSimpleBooleanAttributes(false);
+//		    compressor.setRemoveJavaScriptProtocol(false);
+//		    compressor.setRemoveHttpProtocol(false);
+//		    compressor.setRemoveHttpsProtocol(false);
+//		    compressor.setPreserveLineBreaks(false);
+		    
+		    return compressor.compress(src);
+		}
+		else {
+			return src;
+		}
+	}
+	
+	public static void setDefaultReportTypeToPInstance(Properties ctx, MPInstance instance, int printFormatID) {
+		if(Util.isEmpty(instance.getReportType())) {
+			MPrintFormat pf = new MPrintFormat(ctx, printFormatID, null);
+			String type = pf.isForm()
+				// a42niem - provide explicit default and check on client/org specifics
+				? MSysConfig.getValue(MSysConfig.ZK_REPORT_FORM_OUTPUT_TYPE,"PDF",Env.getAD_Client_ID(ctx),Env.getAD_Org_ID(ctx))
+				: MSysConfig.getValue(MSysConfig.ZK_REPORT_TABLE_OUTPUT_TYPE,"PDF",Env.getAD_Client_ID(ctx),Env.getAD_Org_ID(ctx));
+			instance.setReportType(type);
+		}
+	}
+	
+	private void setStyle(MultiPartElement element, MStyle style) {
+		if (style == null || style.getAD_Style_ID() == 0)
+			return;
+
+		X_AD_StyleLine[] lines = style.getStyleLines();
+		StringBuilder styleBuilder = new StringBuilder();
+		for (X_AD_StyleLine line : lines)
+		{
+			String inlineStyle = line.getInlineStyle().trim();
+			String displayLogic = line.getDisplayLogic();
+			if (!Util.isEmpty(displayLogic))
+			{
+				if (!Evaluator.evaluateLogic(new PrintDataEvaluatee(null, m_printData), displayLogic))
+					continue;
+			}
+			if (styleBuilder.length() > 0 && !(styleBuilder.charAt(styleBuilder.length()-1)==';'))
+				styleBuilder.append("; ");
+			styleBuilder.append(inlineStyle);
+		}
+		if(styleBuilder.length() > 0)
+			element.setStyle(styleBuilder.toString());
+		//
+	}
+
+	private ProcessInfo m_pi = null;
+	
+	/**
+	 * @param pi
+	 */
+	public void setProcessInfo(ProcessInfo pi) {
+		m_pi = pi;
+	}
+	
+	/**
+	 * @return ProcessInfo
+	 */
+	public ProcessInfo getProcessInfo() {
+		return m_pi;
 	}
 }	//	ReportEngine

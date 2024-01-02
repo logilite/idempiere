@@ -33,6 +33,7 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.TimeUtil;
+import org.compiere.util.Util;
 
 /**
  *	Inventory Movement Model
@@ -52,9 +53,21 @@ import org.compiere.util.TimeUtil;
 public class MMovement extends X_M_Movement implements DocAction
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 5415969431202357692L;
+
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param M_Movement_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MMovement(Properties ctx, String M_Movement_UU, String trxName) {
+        super(ctx, M_Movement_UU, trxName);
+		if (Util.isEmpty(M_Movement_UU))
+			setInitialDefaults();
+    }
 
 	/**
 	 * 	Standard Constructor
@@ -66,16 +79,21 @@ public class MMovement extends X_M_Movement implements DocAction
 	{
 		super (ctx, M_Movement_ID, trxName);
 		if (M_Movement_ID == 0)
-		{
-			setDocAction (DOCACTION_Complete);	// CO
-			setDocStatus (DOCSTATUS_Drafted);	// DR
-			setIsApproved (false);
-			setIsInTransit (false);
-			setMovementDate (new Timestamp(System.currentTimeMillis()));	// @#Date@
-			setPosted (false);
-			super.setProcessed (false);
-		}	
+			setInitialDefaults();
 	}	//	MMovement
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setDocAction (DOCACTION_Complete);	// CO
+		setDocStatus (DOCSTATUS_Drafted);	// DR
+		setIsApproved (false);
+		setIsInTransit (false);
+		setMovementDate (new Timestamp(System.currentTimeMillis()));	// @#Date@
+		setPosted (false);
+		super.setProcessed (false);
+	}
 
 	/**
 	 * 	Load Constructor
@@ -151,6 +169,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	 * 	Get Document Info
 	 *	@return document info (untranslated)
 	 */
+	@Override
 	public String getDocumentInfo()
 	{
 		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
@@ -161,6 +180,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	 * 	Create PDF
 	 *	@return File or null
 	 */
+	@Override
 	public File createPDF ()
 	{
 		try
@@ -178,19 +198,19 @@ public class MMovement extends X_M_Movement implements DocAction
 	/**
 	 * 	Create PDF file
 	 *	@param file output file
-	 *	@return file if success
+	 *	@return not implemented, always return null
 	 */
 	public File createPDF (File file)
 	{
 		return null;
 	}	//	createPDF
-
 	
 	/**
 	 * 	Before Save
 	 *	@param newRecord new
 	 *	@return true
 	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		if (getC_DocType_ID() == 0)
@@ -209,7 +229,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	
 	/**
 	 * 	Set Processed.
-	 * 	Propergate to Lines/Taxes
+	 * 	Propagate to Lines.
 	 *	@param processed processed
 	 */
 	@Override
@@ -223,13 +243,13 @@ public class MMovement extends X_M_Movement implements DocAction
 		m_lines = null;
 		if (log.isLoggable(Level.FINE)) log.fine("Processed=" + processed + " - Lines=" + noLine);
 	}	//	setProcessed
-	
-	
-	/**************************************************************************
+		
+	/**
 	 * 	Process document
 	 *	@param processAction document action
-	 *	@return true if performed
+	 *	@return true if success
 	 */
+	@Override
 	public boolean processIt (String processAction)
 	{
 		m_processMsg = null;
@@ -246,6 +266,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	 * 	Unlock Document.
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean unlockIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -257,6 +278,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	 * 	Invalidate Document
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean invalidateIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -268,6 +290,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	 *	Prepare Document
 	 * 	@return new status (In Progress or Invalid) 
 	 */
+	@Override
 	public String prepareIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -346,6 +369,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	 * 	Approve Document
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean  approveIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -357,6 +381,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	 * 	Reject Approval
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean rejectIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -368,6 +393,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	 * 	Complete Document
 	 * 	@return new status (Complete, In Progress, Invalid, Waiting ..)
 	 */
+	@Override
 	public String completeIt()
 	{
 		//	Re-Check
@@ -606,7 +632,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	}	//	completeIt
 
 	/**
-	 * Outstanding (not processed) Incoming Confirmations ?
+	 * Outstanding (not processed) movement Confirmations ?
 	 * @return true if there are pending Confirmations
 	 */
 	public boolean pendingConfirmations() {
@@ -636,8 +662,9 @@ public class MMovement extends X_M_Movement implements DocAction
 	}
 
 	/**
-	 * 	Check Material Policy
-	 * 	Sets line ASI
+	 * 	Check Material Policy. Create MMovementLineMA records (if line M_AttributeSetInstance_ID is 0).
+	 *  @param line
+	 *  @param qtyToDeliver
 	 */
 	protected void checkMaterialPolicy(MMovementLine line,BigDecimal qtyToDeliver)
 	{
@@ -698,6 +725,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	 * 	Void Document.
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean voidIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -767,6 +795,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	 * 	Close Document.
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean closeIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -789,6 +818,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	 * 	Reverse Correction
 	 * 	@return false 
 	 */
+	@Override
 	public boolean reverseCorrectIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -811,6 +841,11 @@ public class MMovement extends X_M_Movement implements DocAction
 		return true;
 	}	//	reverseCorrectionIt
 	
+	/**
+	 * Reverse this movement document 
+	 * @param accrual true to use current date, false to use movement date of this document
+	 * @return reversal movement document
+	 */
 	protected MMovement reverse(boolean accrual)
 	{
 		Timestamp reversalDate = accrual ? Env.getContextAsDate(getCtx(), Env.DATE) : getMovementDate();
@@ -853,7 +888,6 @@ public class MMovement extends X_M_Movement implements DocAction
 			MMovementLine rLine = new MMovementLine(getCtx(), 0, get_TrxName());
 			copyValues(oLine, rLine, oLine.getAD_Client_ID(), oLine.getAD_Org_ID());
 			rLine.setM_Movement_ID(reversal.getM_Movement_ID());
-			//AZ Goodwill			
 			// store original (voided/reversed) document line
 			rLine.setReversalLine_ID(oLine.getM_MovementLine_ID());
 			//
@@ -905,9 +939,10 @@ public class MMovement extends X_M_Movement implements DocAction
 	}
 	
 	/**
-	 * 	Reverse Accrual - none
+	 * 	Reverse Accrual - use current date
 	 * 	@return false 
 	 */
+	@Override
 	public boolean reverseAccrualIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -934,6 +969,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	 * 	Re-activate
 	 * 	@return false 
 	 */
+	@Override
 	public boolean reActivateIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -949,12 +985,12 @@ public class MMovement extends X_M_Movement implements DocAction
 		
 		return false;
 	}	//	reActivateIt
-	
-	
-	/*************************************************************************
+		
+	/**
 	 * 	Get Summary
 	 *	@return Summary of Document
 	 */
+	@Override
 	public String getSummary()
 	{
 		StringBuilder sb = new StringBuilder();
@@ -973,6 +1009,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	 * 	Get Process Message
 	 *	@return clear text error message
 	 */
+	@Override
 	public String getProcessMsg()
 	{
 		return m_processMsg;
@@ -982,6 +1019,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	 * 	Get Document Owner (Responsible)
 	 *	@return AD_User_ID
 	 */
+	@Override
 	public int getDoc_User_ID()
 	{
 		return getCreatedBy();
@@ -991,6 +1029,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	 * 	Get Document Currency
 	 *	@return C_Currency_ID
 	 */
+	@Override
 	public int getC_Currency_ID()
 	{
 		return 0;
@@ -1000,7 +1039,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	protected boolean m_reversal = false;
 	
 	/**
-	 * 	Set Reversal
+	 * 	Set Reversal state (in memory flag)
 	 *	@param reversal reversal
 	 */
 	protected void setReversal(boolean reversal)
@@ -1009,7 +1048,7 @@ public class MMovement extends X_M_Movement implements DocAction
 	}	//	setReversal
 	/**
 	 * 	Is Reversal
-	 *	@return reversal
+	 *	@return reversal state (in memory flag)
 	 */
 	protected boolean isReversal()
 	{

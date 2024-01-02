@@ -16,12 +16,15 @@ package org.compiere.model;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  * 
@@ -31,7 +34,7 @@ import org.compiere.util.Env;
 public class MRMATax extends X_M_RMATax 
 {	
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -8702466449639865049L;
 
@@ -39,9 +42,9 @@ public class MRMATax extends X_M_RMATax
 	 * 	Get Tax Line for RMA Line
 	 *	@param line RMA line
 	 *	@param precision currency precision
-	 *	@param oldTax get old tax
+	 *	@param oldTax true to use old tax (get_ValueOld("C_Tax_ID"))
 	 *	@param trxName transaction
-	 *	@return existing or new tax
+	 *	@return existing or new MRMATax record
 	 */
 	public static MRMATax get (MRMALine line, int precision, 
 		boolean oldTax, String trxName)
@@ -118,11 +121,112 @@ public class MRMATax extends X_M_RMATax
 		return retValue;
 	}
     
+	/**
+	 * 	Get Child Tax Lines for RMA Line
+	 *	@param line RMA line
+	 *	@param precision currency precision
+	 *	@param oldTax true to use old tax (get_ValueOld("C_Tax_ID"))
+	 *	@param trxName transaction
+	 *	@return existing or new MRMATax record or empty MRMATax array if line MTax has no child taxes
+	 */
+	public static MRMATax[] getChildTaxes(MRMALine line, int precision, 
+		boolean oldTax, String trxName)
+	{
+		List<MRMATax> rmaTaxes = new ArrayList<MRMATax>();
+		if (line == null || line.getM_RMA_ID() == 0)
+		{
+			return rmaTaxes.toArray(new MRMATax[0]);
+		}
+		int C_Tax_ID = line.getC_Tax_ID();
+		if (oldTax)
+		{
+			Object old = line.get_ValueOld(MRMATax.COLUMNNAME_C_Tax_ID);
+			if (old == null)
+			{
+				return rmaTaxes.toArray(new MRMATax[0]);
+			}
+			C_Tax_ID = ((Integer)old).intValue();
+		}
+		if (C_Tax_ID == 0)
+		{
+			return rmaTaxes.toArray(new MRMATax[0]);
+		}
+		
+		MTax tax = MTax.get(C_Tax_ID);
+		if (!tax.isSummary())
+			return rmaTaxes.toArray(new MRMATax[0]);
+		
+		MTax[] cTaxes = tax.getChildTaxes(false);
+		for(MTax cTax : cTaxes) {
+			MRMATax rmaTax = null;
+			String sql = "SELECT * FROM M_RMATax WHERE M_RMA_ID=? AND C_Tax_ID=?";
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			try
+			{
+				pstmt = DB.prepareStatement (sql, trxName);
+				pstmt.setInt (1, line.getM_RMA_ID());
+				pstmt.setInt (2, cTax.getC_Tax_ID());
+				rs = pstmt.executeQuery ();
+				if (rs.next ())
+					rmaTax = new MRMATax (line.getCtx(), rs, trxName);
+			}
+			catch (Exception e)
+			{
+				s_log.log(Level.SEVERE, sql, e);
+			}
+			finally
+			{
+				DB.close(rs, pstmt);
+				rs = null;
+				pstmt = null;
+			}
+			if (rmaTax != null)
+			{
+				rmaTax.setPrecision(precision);
+				rmaTax.set_TrxName(trxName);
+				rmaTaxes.add(rmaTax);
+			}
+			// If the old tax was required and there is no MOrderTax for that
+			// return null, and not create another MOrderTax - teo_sarca [ 1583825 ]
+			else 
+			{
+				if (oldTax)
+					continue;
+			}
+			
+			if (rmaTax == null)
+			{
+				//	Create New
+				rmaTax = new MRMATax(line.getCtx(), 0, trxName);
+				rmaTax.set_TrxName(trxName);
+				rmaTax.setClientOrg(line);
+				rmaTax.setM_RMA_ID(line.getM_RMA_ID());
+				rmaTax.setC_Tax_ID(cTax.getC_Tax_ID());
+				rmaTax.setPrecision(precision);
+				rmaTax.setIsTaxIncluded(line.getParent().isTaxIncluded());
+				rmaTaxes.add(rmaTax);
+			}
+		}
+		return rmaTaxes.toArray(new MRMATax[0]);
+	}
+	
 	/**	Static Logger	*/
 	private static CLogger	s_log	= CLogger.getCLogger (MRMATax.class);
 	
-	/**************************************************************************
-	 * 	Persistence Constructor
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param M_RMATax_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MRMATax(Properties ctx, String M_RMATax_UU, String trxName) {
+        super(ctx, M_RMATax_UU, trxName);
+		if (Util.isEmpty(M_RMATax_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 *	@param ctx context
 	 *	@param ignored ignored
 	 *	@param trxName transaction
@@ -132,6 +236,13 @@ public class MRMATax extends X_M_RMATax
 		super(ctx, 0, trxName);
 		if (ignored != 0)
 			throw new IllegalArgumentException("Multi-Key");
+		setInitialDefaults();
+	}
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
 		setTaxAmt (Env.ZERO);
 		setTaxBaseAmt (Env.ZERO);
 		setIsTaxIncluded(false);
@@ -139,7 +250,6 @@ public class MRMATax extends X_M_RMATax
 
 	/**
 	 * 	Load Constructor.
-	 * 	Set Precision and TaxIncluded for tax calculations!
 	 *	@param ctx context
 	 *	@param rs result set
 	 *	@param trxName transaction
@@ -156,7 +266,7 @@ public class MRMATax extends X_M_RMATax
 
 	/**
 	 * 	Get Precision
-	 * 	@return Returns the precision or 2
+	 * 	@return Returns set precision or 2
 	 */
 	public int getPrecision ()
 	{
@@ -185,8 +295,8 @@ public class MRMATax extends X_M_RMATax
 		return m_tax;
 	}	//	getTax
 	
-	/**************************************************************************
-	 * 	Calculate/Set Tax Amt from Order Lines
+	/**
+	 * 	Calculate/Set Tax Amt from RMA Lines
 	 * 	@return true if calculated
 	 */
 	public boolean calculateTaxFromLines ()
@@ -196,8 +306,13 @@ public class MRMATax extends X_M_RMATax
 		//
 		boolean documentLevel = getTax().isDocumentLevel();
 		MTax tax = getTax();
+		int parentTaxId = tax.getParent_Tax_ID();
 		//
-		String sql = "SELECT LineNetAmt FROM M_RMALine WHERE M_RMA_ID=? AND C_Tax_ID=?";
+		String sql = "SELECT LineNetAmt FROM M_RMALine WHERE M_RMA_ID=? ";
+		if (parentTaxId > 0)
+			sql += "AND C_Tax_ID IN (?, ?) ";
+		else
+			sql += "AND C_Tax_ID=? ";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
@@ -205,6 +320,8 @@ public class MRMATax extends X_M_RMATax
 			pstmt = DB.prepareStatement (sql, get_TrxName());
 			pstmt.setInt (1, getM_RMA_ID());
 			pstmt.setInt (2, getC_Tax_ID());
+			if (parentTaxId > 0)
+				pstmt.setInt(3,  parentTaxId);
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
@@ -248,6 +365,7 @@ public class MRMATax extends X_M_RMATax
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MRMATax[")

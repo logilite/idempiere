@@ -23,16 +23,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_User
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="AD_User")
-public class X_AD_User extends PO implements I_AD_User, I_Persistent 
+public class X_AD_User extends PO implements I_AD_User, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20231222L;
 
     /** Standard Constructor */
     public X_AD_User (Properties ctx, int AD_User_ID, String trxName)
@@ -114,6 +114,123 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_User (Properties ctx, int AD_User_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_User_ID, trxName, virtualColumns);
+      /** if (AD_User_ID == 0)
+        {
+			setAD_User_ID (0);
+			setFailedLoginCount (0);
+// 0
+			setIsAddMailTextAutomatically (false);
+// N
+			setIsBillTo (false);
+// N
+			setIsExpired (false);
+// N
+			setIsFullBPAccess (true);
+// Y
+			setIsInPayroll (false);
+// N
+			setIsLocked (false);
+// 'N'
+			setIsNoExpire (false);
+// N
+			setIsNoPasswordReset (false);
+// 'N'
+			setIsSalesLead (false);
+// N
+			setIsShipTo (false);
+// N
+			setIsSupportUser (false);
+// N
+			setIsVendorLead (false);
+// N
+			setName (null);
+			setNotificationType (null);
+// X
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_User (Properties ctx, String AD_User_UU, String trxName)
+    {
+      super (ctx, AD_User_UU, trxName);
+      /** if (AD_User_UU == null)
+        {
+			setAD_User_ID (0);
+			setFailedLoginCount (0);
+// 0
+			setIsAddMailTextAutomatically (false);
+// N
+			setIsBillTo (false);
+// N
+			setIsExpired (false);
+// N
+			setIsFullBPAccess (true);
+// Y
+			setIsInPayroll (false);
+// N
+			setIsLocked (false);
+// 'N'
+			setIsNoExpire (false);
+// N
+			setIsNoPasswordReset (false);
+// 'N'
+			setIsSalesLead (false);
+// N
+			setIsShipTo (false);
+// N
+			setIsSupportUser (false);
+// N
+			setIsVendorLead (false);
+// N
+			setName (null);
+			setNotificationType (null);
+// X
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_User (Properties ctx, String AD_User_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_User_UU, trxName, virtualColumns);
+      /** if (AD_User_UU == null)
+        {
+			setAD_User_ID (0);
+			setFailedLoginCount (0);
+// 0
+			setIsAddMailTextAutomatically (false);
+// N
+			setIsBillTo (false);
+// N
+			setIsExpired (false);
+// N
+			setIsFullBPAccess (true);
+// Y
+			setIsInPayroll (false);
+// N
+			setIsLocked (false);
+// 'N'
+			setIsNoExpire (false);
+// N
+			setIsNoPasswordReset (false);
+// 'N'
+			setIsSalesLead (false);
+// N
+			setIsShipTo (false);
+// N
+			setIsSupportUser (false);
+// N
+			setIsVendorLead (false);
+// N
+			setName (null);
+			setNotificationType (null);
+// X
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_User (Properties ctx, ResultSet rs, String trxName)
     {
@@ -121,7 +238,7 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
     }
 
     /** AccessLevel
-      * @return 7 - System - Client - Org 
+      * @return 7 - System - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -236,6 +353,30 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 	public String getAnswer()
 	{
 		return (String)get_Value(COLUMNNAME_Answer);
+	}
+
+	/** AuthenticationType AD_Reference_ID=200239 */
+	public static final int AUTHENTICATIONTYPE_AD_Reference_ID=200239;
+	/** Application and SSO = AAS */
+	public static final String AUTHENTICATIONTYPE_ApplicationAndSSO = "AAS";
+	/** Application Only = APO */
+	public static final String AUTHENTICATIONTYPE_ApplicationOnly = "APO";
+	/** SSO Only = SSO */
+	public static final String AUTHENTICATIONTYPE_SSOOnly = "SSO";
+	/** Set Authentication Type.
+		@param AuthenticationType Authentication Type
+	*/
+	public void setAuthenticationType (String AuthenticationType)
+	{
+
+		set_Value (COLUMNNAME_AuthenticationType, AuthenticationType);
+	}
+
+	/** Get Authentication Type.
+		@return Authentication Type	  */
+	public String getAuthenticationType()
+	{
+		return (String)get_Value(COLUMNNAME_AuthenticationType);
 	}
 
 	/** Set Birthday.
@@ -670,10 +811,10 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 	public boolean isAddMailTextAutomatically()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAddMailTextAutomatically);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -718,10 +859,10 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 	public boolean isBillTo () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsBillTo);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -740,10 +881,10 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 	public boolean isExpired()
 	{
 		Object oo = get_Value(COLUMNNAME_IsExpired);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -763,10 +904,10 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 	public boolean isFullBPAccess()
 	{
 		Object oo = get_Value(COLUMNNAME_IsFullBPAccess);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -786,10 +927,10 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 	public boolean isInPayroll()
 	{
 		Object oo = get_Value(COLUMNNAME_IsInPayroll);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -808,10 +949,10 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 	public boolean isLocked()
 	{
 		Object oo = get_Value(COLUMNNAME_IsLocked);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -853,10 +994,10 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 	public boolean isNoExpire()
 	{
 		Object oo = get_Value(COLUMNNAME_IsNoExpire);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -875,10 +1016,10 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 	public boolean isNoPasswordReset()
 	{
 		Object oo = get_Value(COLUMNNAME_IsNoPasswordReset);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -898,10 +1039,10 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 	public boolean isSalesLead()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSalesLead);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -921,10 +1062,10 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 	public boolean isShipTo()
 	{
 		Object oo = get_Value(COLUMNNAME_IsShipTo);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -943,10 +1084,10 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 	public boolean isSupportUser()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSupportUser);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -966,10 +1107,10 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 	public boolean isVendorLead()
 	{
 		Object oo = get_Value(COLUMNNAME_IsVendorLead);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1140,7 +1281,7 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -1233,10 +1374,10 @@ public class X_AD_User extends PO implements I_AD_User, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
