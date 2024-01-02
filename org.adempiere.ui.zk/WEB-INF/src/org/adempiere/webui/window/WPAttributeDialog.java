@@ -957,7 +957,6 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 
 	/**
 	 * 	Instance Selection Button
-	 * 	@return true if selected
 	 */
 	public void cmd_select()
 	{

@@ -929,7 +929,7 @@ public class ModelValidationEngine
 	 * @param ctx context
 	 * @return errMsg - Error Message if any
 	 * @see org.compiere.util.Login#loadPreferences(KeyNamePair, KeyNamePair, java.sql.Timestamp, String)
-	 * @author Teo Sarca - FR [ 1670025 ] - https://sourceforge.net/p/adempiere/feature-requests/78/
+	 * author Teo Sarca - FR [ 1670025 ] - https://sourceforge.net/p/adempiere/feature-requests/78/
 	 */
 	public String afterLoadPreferences (Properties ctx)
 	{

@@ -182,7 +182,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 	
 	/**
 	 * Maintain hierarchical Quick form by its parent-child tab while open leaf
-	 * tab once & dispose and doing same action
+	 * tab once and dispose and doing same action
 	 */
 	private int	quickFormTabHrchyLevel		= 0;
 	/** show more button for mobile client **/
@@ -872,7 +872,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 	
 	/**
      * Turn on/off Lock button (Pressed=On, Not Pressed=Off)
-     * @param enabled
+     * @param locked
      */
     public void lock(boolean locked)
     {
@@ -1124,8 +1124,8 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 
 	/**
      * Enable/disable Process button
-     * @param enabled
-     */
+	 * @param b boolean
+	 */
 	public void enableProcessButton(boolean b) {
 		if (btnProcess != null) {
 			btnProcess.setDisabled(!b);

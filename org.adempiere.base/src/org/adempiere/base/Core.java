@@ -1152,7 +1152,7 @@ public class Core {
 	/**
 	 * get Credit Manager
 	 * 
-	 * @param  PO
+	 * @param  po
 	 * @return    instance of the ICreditManager
 	 */
 	public static ICreditManager getCreditManager(PO po)

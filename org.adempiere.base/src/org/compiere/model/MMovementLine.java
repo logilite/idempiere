@@ -334,7 +334,7 @@ public class MMovementLine extends X_M_MovementLine
 	}       //      setOrderLine 
 
 	/** 
-	 * Set M_Locator_ID. Throw exception if M_Locator_ID < 0. 
+	 * Set M_Locator_ID. Throw exception if M_Locator_ID &lt; 0. 
 	 * @param M_Locator_ID id 
 	 */
 	@Override
@@ -347,7 +347,7 @@ public class MMovementLine extends X_M_MovementLine
 	}       //      setM_Locator_ID 
 
 	/** 
-	 * Set M_LocatorTo_ID. Throw exception if M_LocatorTo_ID < 0. 
+	 * Set M_LocatorTo_ID. Throw exception if M_LocatorTo_ID &lt; 0. 
 	 * @param M_LocatorTo_ID id 
 	 */ 
 	@Override

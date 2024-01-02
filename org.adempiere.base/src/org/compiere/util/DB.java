@@ -716,8 +716,8 @@ public final class DB
 
 	/**
 	 *	Prepare Statement
+	 *  @param connection
 	 *  @param sql
-	 * 	@param trxName transaction
 	 *  @return Prepared Statement
 	 */
 	public static CPreparedStatement prepareStatement (Connection connection, String sql)
@@ -758,10 +758,10 @@ public final class DB
 
 	/**
 	 *	Prepare Statement.
+	 *  @param connection
 	 *  @param sql sql statement
 	 *  @param resultSetType - ResultSet.TYPE_FORWARD_ONLY, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.TYPE_SCROLL_SENSITIVE
 	 *  @param resultSetConcurrency - ResultSet.CONCUR_READ_ONLY or ResultSet.CONCUR_UPDATABLE
-	 * 	@param trxName transaction name
 	 *  @return Prepared Statement r/o or r/w depending on concur
 	 */
 	public static CPreparedStatement prepareStatement(Connection connection, String sql,
