@@ -57,18 +57,6 @@ public class X_ASP_ClientException extends PO implements I_ASP_ClientException, 
     }
 
     /** Standard Constructor */
-    public X_ASP_ClientException (Properties ctx, int ASP_ClientException_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, ASP_ClientException_ID, trxName, virtualColumns);
-      /** if (ASP_ClientException_ID == 0)
-        {
-			setASP_ClientException_ID (0);
-			setASP_Status (null);
-// S
-        } */
-    }
-
-    /** Standard Constructor */
     public X_ASP_ClientException (Properties ctx, String ASP_ClientException_UU, String trxName)
     {
       super (ctx, ASP_ClientException_UU, trxName);

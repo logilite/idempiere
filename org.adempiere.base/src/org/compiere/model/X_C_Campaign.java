@@ -65,20 +65,6 @@ public class X_C_Campaign extends PO implements I_C_Campaign, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_Campaign (Properties ctx, int C_Campaign_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Campaign_ID, trxName, virtualColumns);
-      /** if (C_Campaign_ID == 0)
-        {
-			setC_Campaign_ID (0);
-			setCosts (Env.ZERO);
-			setIsSummary (false);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Campaign (Properties ctx, String C_Campaign_UU, String trxName)
     {
       super (ctx, C_Campaign_UU, trxName);

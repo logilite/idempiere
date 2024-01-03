@@ -60,19 +60,6 @@ public class X_ASP_Level extends PO implements I_ASP_Level, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_ASP_Level (Properties ctx, int ASP_Level_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, ASP_Level_ID, trxName, virtualColumns);
-      /** if (ASP_Level_ID == 0)
-        {
-			setASP_Level_ID (0);
-			setASP_Module_ID (0);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_ASP_Level (Properties ctx, String ASP_Level_UU, String trxName)
     {
       super (ctx, ASP_Level_UU, trxName);

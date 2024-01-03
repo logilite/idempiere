@@ -68,22 +68,6 @@ public class X_M_Product_PO extends PO implements I_M_Product_PO, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_Product_PO (Properties ctx, int M_Product_PO_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_Product_PO_ID, trxName, virtualColumns);
-      /** if (M_Product_PO_ID == 0)
-        {
-			setC_BPartner_ID (0);
-			setIsCurrentVendor (true);
-// Y
-			setM_Product_ID (0);
-// @M_Product_ID@
-			setVendorProductNo (null);
-// @Value@
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_Product_PO (Properties ctx, String M_Product_PO_UU, String trxName)
     {
       super (ctx, M_Product_PO_UU, trxName);

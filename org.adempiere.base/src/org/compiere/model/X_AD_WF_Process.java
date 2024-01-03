@@ -66,22 +66,6 @@ public class X_AD_WF_Process extends PO implements I_AD_WF_Process, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_WF_Process (Properties ctx, int AD_WF_Process_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_WF_Process_ID, trxName, virtualColumns);
-      /** if (AD_WF_Process_ID == 0)
-        {
-			setAD_Table_ID (0);
-			setAD_WF_Process_ID (0);
-			setAD_WF_Responsible_ID (0);
-			setAD_Workflow_ID (0);
-			setProcessed (false);
-			setRecord_ID (0);
-			setWFState (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_WF_Process (Properties ctx, String AD_WF_Process_UU, String trxName)
     {
       super (ctx, AD_WF_Process_UU, trxName);

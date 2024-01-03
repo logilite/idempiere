@@ -61,20 +61,6 @@ public class X_A_Asset_Class extends PO implements I_A_Asset_Class, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_A_Asset_Class (Properties ctx, int A_Asset_Class_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_Asset_Class_ID, trxName, virtualColumns);
-      /** if (A_Asset_Class_ID == 0)
-        {
-			setA_Asset_Class_ID (0);
-			setA_Life_Period_Max (0);
-			setA_Life_Period_Min (0);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_Asset_Class (Properties ctx, String A_Asset_Class_UU, String trxName)
     {
       super (ctx, A_Asset_Class_UU, trxName);

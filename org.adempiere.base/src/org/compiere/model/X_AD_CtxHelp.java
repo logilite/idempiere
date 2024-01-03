@@ -55,17 +55,6 @@ public class X_AD_CtxHelp extends PO implements I_AD_CtxHelp, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_CtxHelp (Properties ctx, int AD_CtxHelp_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_CtxHelp_ID, trxName, virtualColumns);
-      /** if (AD_CtxHelp_ID == 0)
-        {
-			setAD_CtxHelp_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_CtxHelp (Properties ctx, String AD_CtxHelp_UU, String trxName)
     {
       super (ctx, AD_CtxHelp_UU, trxName);

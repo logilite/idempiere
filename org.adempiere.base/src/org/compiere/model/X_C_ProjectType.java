@@ -60,19 +60,6 @@ public class X_C_ProjectType extends PO implements I_C_ProjectType, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_ProjectType (Properties ctx, int C_ProjectType_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_ProjectType_ID, trxName, virtualColumns);
-      /** if (C_ProjectType_ID == 0)
-        {
-			setC_ProjectType_ID (0);
-			setName (null);
-			setProjectCategory (null);
-// N
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_ProjectType (Properties ctx, String C_ProjectType_UU, String trxName)
     {
       super (ctx, C_ProjectType_UU, trxName);

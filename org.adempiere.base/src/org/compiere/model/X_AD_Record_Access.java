@@ -68,23 +68,6 @@ public class X_AD_Record_Access extends PO implements I_AD_Record_Access, I_Pers
     }
 
     /** Standard Constructor */
-    public X_AD_Record_Access (Properties ctx, int AD_Record_Access_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Record_Access_ID, trxName, virtualColumns);
-      /** if (AD_Record_Access_ID == 0)
-        {
-			setAD_Role_ID (0);
-			setAD_Table_ID (0);
-			setIsDependentEntities (false);
-// N
-			setIsExclude (true);
-// Y
-			setIsReadOnly (false);
-			setRecord_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Record_Access (Properties ctx, String AD_Record_Access_UU, String trxName)
     {
       super (ctx, AD_Record_Access_UU, trxName);

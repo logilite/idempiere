@@ -56,17 +56,6 @@ public class X_C_RfQ_TopicSubscriberOnly extends PO implements I_C_RfQ_TopicSubs
     }
 
     /** Standard Constructor */
-    public X_C_RfQ_TopicSubscriberOnly (Properties ctx, int C_RfQ_TopicSubscriberOnly_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_RfQ_TopicSubscriberOnly_ID, trxName, virtualColumns);
-      /** if (C_RfQ_TopicSubscriberOnly_ID == 0)
-        {
-			setC_RfQ_TopicSubscriber_ID (0);
-			setC_RfQ_TopicSubscriberOnly_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_RfQ_TopicSubscriberOnly (Properties ctx, String C_RfQ_TopicSubscriberOnly_UU, String trxName)
     {
       super (ctx, C_RfQ_TopicSubscriberOnly_UU, trxName);

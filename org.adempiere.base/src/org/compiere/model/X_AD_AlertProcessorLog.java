@@ -57,18 +57,6 @@ public class X_AD_AlertProcessorLog extends PO implements I_AD_AlertProcessorLog
     }
 
     /** Standard Constructor */
-    public X_AD_AlertProcessorLog (Properties ctx, int AD_AlertProcessorLog_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_AlertProcessorLog_ID, trxName, virtualColumns);
-      /** if (AD_AlertProcessorLog_ID == 0)
-        {
-			setAD_AlertProcessor_ID (0);
-			setAD_AlertProcessorLog_ID (0);
-			setIsError (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_AlertProcessorLog (Properties ctx, String AD_AlertProcessorLog_UU, String trxName)
     {
       super (ctx, AD_AlertProcessorLog_UU, trxName);

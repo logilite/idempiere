@@ -60,19 +60,6 @@ public class X_C_BP_Withholding extends PO implements I_C_BP_Withholding, I_Pers
     }
 
     /** Standard Constructor */
-    public X_C_BP_Withholding (Properties ctx, int C_BP_Withholding_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_BP_Withholding_ID, trxName, virtualColumns);
-      /** if (C_BP_Withholding_ID == 0)
-        {
-			setC_BPartner_ID (0);
-			setC_Withholding_ID (0);
-			setIsMandatoryWithholding (false);
-			setIsTemporaryExempt (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_BP_Withholding (Properties ctx, String C_BP_Withholding_UU, String trxName)
     {
       super (ctx, C_BP_Withholding_UU, trxName);

@@ -55,17 +55,6 @@ public class X_C_BP_Employee_Acct extends PO implements I_C_BP_Employee_Acct, I_
     }
 
     /** Standard Constructor */
-    public X_C_BP_Employee_Acct (Properties ctx, int C_BP_Employee_Acct_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_BP_Employee_Acct_ID, trxName, virtualColumns);
-      /** if (C_BP_Employee_Acct_ID == 0)
-        {
-			setC_AcctSchema_ID (0);
-			setC_BPartner_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_BP_Employee_Acct (Properties ctx, String C_BP_Employee_Acct_UU, String trxName)
     {
       super (ctx, C_BP_Employee_Acct_UU, trxName);

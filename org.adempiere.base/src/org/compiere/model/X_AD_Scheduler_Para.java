@@ -55,17 +55,6 @@ public class X_AD_Scheduler_Para extends PO implements I_AD_Scheduler_Para, I_Pe
     }
 
     /** Standard Constructor */
-    public X_AD_Scheduler_Para (Properties ctx, int AD_Scheduler_Para_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Scheduler_Para_ID, trxName, virtualColumns);
-      /** if (AD_Scheduler_Para_ID == 0)
-        {
-			setAD_Process_Para_ID (0);
-			setAD_Scheduler_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Scheduler_Para (Properties ctx, String AD_Scheduler_Para_UU, String trxName)
     {
       super (ctx, AD_Scheduler_Para_UU, trxName);

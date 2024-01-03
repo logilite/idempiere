@@ -68,22 +68,6 @@ public class X_PP_Order_BOM extends PO implements I_PP_Order_BOM, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_PP_Order_BOM (Properties ctx, int PP_Order_BOM_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, PP_Order_BOM_ID, trxName, virtualColumns);
-      /** if (PP_Order_BOM_ID == 0)
-        {
-			setC_UOM_ID (0);
-			setM_Product_ID (0);
-			setName (null);
-			setPP_Order_BOM_ID (0);
-			setPP_Order_ID (0);
-			setValidFrom (new Timestamp( System.currentTimeMillis() ));
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_PP_Order_BOM (Properties ctx, String PP_Order_BOM_UU, String trxName)
     {
       super (ctx, PP_Order_BOM_UU, trxName);

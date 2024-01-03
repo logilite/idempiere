@@ -67,22 +67,6 @@ public class X_AD_LdapProcessor extends PO implements I_AD_LdapProcessor, I_Pers
     }
 
     /** Standard Constructor */
-    public X_AD_LdapProcessor (Properties ctx, int AD_LdapProcessor_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_LdapProcessor_ID, trxName, virtualColumns);
-      /** if (AD_LdapProcessor_ID == 0)
-        {
-			setAD_LdapProcessor_ID (0);
-			setKeepLogDays (0);
-// 7
-			setLdapPort (0);
-// 389
-			setName (null);
-			setSupervisor_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_LdapProcessor (Properties ctx, String AD_LdapProcessor_UU, String trxName)
     {
       super (ctx, AD_LdapProcessor_UU, trxName);

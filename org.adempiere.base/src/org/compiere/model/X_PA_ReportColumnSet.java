@@ -58,18 +58,6 @@ public class X_PA_ReportColumnSet extends PO implements I_PA_ReportColumnSet, I_
     }
 
     /** Standard Constructor */
-    public X_PA_ReportColumnSet (Properties ctx, int PA_ReportColumnSet_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, PA_ReportColumnSet_ID, trxName, virtualColumns);
-      /** if (PA_ReportColumnSet_ID == 0)
-        {
-			setName (null);
-			setPA_ReportColumnSet_ID (0);
-			setProcessing (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_PA_ReportColumnSet (Properties ctx, String PA_ReportColumnSet_UU, String trxName)
     {
       super (ctx, PA_ReportColumnSet_UU, trxName);

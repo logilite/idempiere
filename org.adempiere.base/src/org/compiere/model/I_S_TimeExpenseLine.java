@@ -386,19 +386,6 @@ public interface I_S_TimeExpenseLine
 	  */
 	public BigDecimal getPriceEntered();
 
-    /** Column name PriceEntered */
-    public static final String COLUMNNAME_PriceEntered = "PriceEntered";
-
-	/** Set Price.
-	  * Price Entered - the price based on the selected price list on header
-	  */
-	public void setPriceEntered (BigDecimal PriceEntered);
-
-	/** Get Price.
-	  * Price Entered - the price based on the selected price list on header
-	  */
-	public BigDecimal getPriceEntered();
-
     /** Column name PriceInvoiced */
     public static final String COLUMNNAME_PriceInvoiced = "PriceInvoiced";
 

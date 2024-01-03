@@ -70,24 +70,6 @@ public class X_M_PriceList extends PO implements I_M_PriceList, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_PriceList (Properties ctx, int M_PriceList_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_PriceList_ID, trxName, virtualColumns);
-      /** if (M_PriceList_ID == 0)
-        {
-			setC_Currency_ID (0);
-			setEnforcePriceLimit (false);
-			setIsDefault (false);
-			setIsSOPriceList (false);
-			setIsTaxIncluded (false);
-			setM_PriceList_ID (0);
-			setName (null);
-			setPricePrecision (0);
-// 2
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_PriceList (Properties ctx, String M_PriceList_UU, String trxName)
     {
       super (ctx, M_PriceList_UU, trxName);

@@ -65,22 +65,6 @@ public class X_C_OnlineTrxHistory extends PO implements I_C_OnlineTrxHistory, I_
     }
 
     /** Standard Constructor */
-    public X_C_OnlineTrxHistory (Properties ctx, int C_OnlineTrxHistory_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_OnlineTrxHistory_ID, trxName, virtualColumns);
-      /** if (C_OnlineTrxHistory_ID == 0)
-        {
-			setAD_Table_ID (0);
-			setC_OnlineTrxHistory_ID (0);
-			setIsError (false);
-// N
-			setProcessed (false);
-// N
-			setRecord_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_OnlineTrxHistory (Properties ctx, String C_OnlineTrxHistory_UU, String trxName)
     {
       super (ctx, C_OnlineTrxHistory_UU, trxName);

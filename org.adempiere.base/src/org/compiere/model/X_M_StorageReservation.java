@@ -66,21 +66,6 @@ public class X_M_StorageReservation extends PO implements I_M_StorageReservation
     }
 
     /** Standard Constructor */
-    public X_M_StorageReservation (Properties ctx, int M_StorageReservation_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_StorageReservation_ID, trxName, virtualColumns);
-      /** if (M_StorageReservation_ID == 0)
-        {
-			setIsSOTrx (true);
-// Y
-			setM_AttributeSetInstance_ID (0);
-			setM_Product_ID (0);
-			setM_Warehouse_ID (0);
-			setQty (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_StorageReservation (Properties ctx, String M_StorageReservation_UU, String trxName)
     {
       super (ctx, M_StorageReservation_UU, trxName);

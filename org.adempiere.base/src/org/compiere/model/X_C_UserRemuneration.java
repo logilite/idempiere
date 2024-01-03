@@ -71,23 +71,6 @@ public class X_C_UserRemuneration extends PO implements I_C_UserRemuneration, I_
     }
 
     /** Standard Constructor */
-    public X_C_UserRemuneration (Properties ctx, int C_UserRemuneration_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_UserRemuneration_ID, trxName, virtualColumns);
-      /** if (C_UserRemuneration_ID == 0)
-        {
-			setAD_User_ID (0);
-			setC_Remuneration_ID (0);
-			setC_UserRemuneration_ID (0);
-			setGrossRAmt (Env.ZERO);
-			setGrossRCost (Env.ZERO);
-			setOvertimeAmt (Env.ZERO);
-			setOvertimeCost (Env.ZERO);
-			setValidFrom (new Timestamp( System.currentTimeMillis() ));
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_UserRemuneration (Properties ctx, String C_UserRemuneration_UU, String trxName)
     {
       super (ctx, C_UserRemuneration_UU, trxName);

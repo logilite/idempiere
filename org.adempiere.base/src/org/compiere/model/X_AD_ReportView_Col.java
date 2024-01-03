@@ -60,19 +60,6 @@ public class X_AD_ReportView_Col extends PO implements I_AD_ReportView_Col, I_Pe
     }
 
     /** Standard Constructor */
-    public X_AD_ReportView_Col (Properties ctx, int AD_ReportView_Col_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_ReportView_Col_ID, trxName, virtualColumns);
-      /** if (AD_ReportView_Col_ID == 0)
-        {
-			setAD_ReportView_Col_ID (0);
-			setAD_ReportView_ID (0);
-			setFunctionColumn (null);
-			setIsGroupFunction (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_ReportView_Col (Properties ctx, String AD_ReportView_Col_UU, String trxName)
     {
       super (ctx, AD_ReportView_Col_UU, trxName);

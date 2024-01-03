@@ -145,32 +145,6 @@ public class X_AD_Client extends PO implements I_AD_Client, I_Persistent
         } */
     }
 
-    /** Standard Constructor */
-    public X_AD_Client (Properties ctx, int AD_Client_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Client_ID, trxName, virtualColumns);
-      /** if (AD_Client_ID == 0)
-        {
-			setAutoArchive (null);
-// N
-			setIsMultiLingualDocument (false);
-			setIsPostImmediate (false);
-// N
-			setIsSecureSMTP (false);
-// N
-			setIsSmtpAuthorization (false);
-// N
-			setIsUseASP (false);
-// N
-			setIsUseBetaFunctions (true);
-// Y
-			setMMPolicy (null);
-// F
-			setName (null);
-			setValue (null);
-        } */
-    }
-
     /** Load Constructor */
     public X_AD_Client (Properties ctx, ResultSet rs, String trxName)
     {
@@ -522,21 +496,6 @@ public class X_AD_Client extends PO implements I_AD_Client, I_Persistent
 			return "Y".equals(oo);
 		}
 		return false;
-	}
-
-	/** Set Login Prefix.
-		@param LoginPrefix Login Prefix
-	*/
-	public void setLoginPrefix (String LoginPrefix)
-	{
-		set_Value (COLUMNNAME_LoginPrefix, LoginPrefix);
-	}
-
-	/** Get Login Prefix.
-		@return Login Prefix	  */
-	public String getLoginPrefix()
-	{
-		return (String)get_Value(COLUMNNAME_LoginPrefix);
 	}
 
 	/** Set Login Prefix.

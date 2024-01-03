@@ -60,19 +60,6 @@ public class X_M_ProductDownload extends PO implements I_M_ProductDownload, I_Pe
     }
 
     /** Standard Constructor */
-    public X_M_ProductDownload (Properties ctx, int M_ProductDownload_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_ProductDownload_ID, trxName, virtualColumns);
-      /** if (M_ProductDownload_ID == 0)
-        {
-			setDownloadURL (null);
-			setM_ProductDownload_ID (0);
-			setM_Product_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_ProductDownload (Properties ctx, String M_ProductDownload_UU, String trxName)
     {
       super (ctx, M_ProductDownload_UU, trxName);

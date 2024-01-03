@@ -701,29 +701,6 @@ public class X_AD_Tab extends PO implements I_AD_Tab, I_Persistent
 		return (String)get_Value(COLUMNNAME_IsHighVolume);
 	}
 
-	/** IsHighVolume AD_Reference_ID=319 */
-	public static final int ISHIGHVOLUME_AD_Reference_ID=319;
-	/** No = N */
-	public static final String ISHIGHVOLUME_No = "N";
-	/** Yes = Y */
-	public static final String ISHIGHVOLUME_Yes = "Y";
-	/** Set High Volume.
-		@param IsHighVolume Use Search instead of Pick list
-	*/
-	public void setIsHighVolume (String IsHighVolume)
-	{
-
-		set_Value (COLUMNNAME_IsHighVolume, IsHighVolume);
-	}
-
-	/** Get High Volume.
-		@return Use Search instead of Pick list
-	  */
-	public String getIsHighVolume()
-	{
-		return (String)get_Value(COLUMNNAME_IsHighVolume);
-	}
-
 	/** Set Accounting Tab.
 		@param IsInfoTab This Tab contains accounting information
 	*/

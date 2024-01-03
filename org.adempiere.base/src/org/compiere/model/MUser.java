@@ -199,11 +199,6 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 		return user;
 	}
 	
-	public static MUser get (Properties ctx, String name, String password)
-	{
-		return MUser.get(ctx, name, password, false);
-	}
-	
 	/**
 	 * 	Get User
 	 *	@param ctx context

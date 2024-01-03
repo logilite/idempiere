@@ -68,23 +68,6 @@ public class X_M_Warehouse extends PO implements I_M_Warehouse, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_Warehouse (Properties ctx, int M_Warehouse_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_Warehouse_ID, trxName, virtualColumns);
-      /** if (M_Warehouse_ID == 0)
-        {
-			setC_Location_ID (0);
-			setIsDisallowNegativeInv (false);
-// N
-			setM_Warehouse_ID (0);
-			setName (null);
-			setSeparator (null);
-// *
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_Warehouse (Properties ctx, String M_Warehouse_UU, String trxName)
     {
       super (ctx, M_Warehouse_UU, trxName);

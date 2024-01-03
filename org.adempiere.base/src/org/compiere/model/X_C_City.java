@@ -56,17 +56,6 @@ public class X_C_City extends PO implements I_C_City, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_City (Properties ctx, int C_City_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_City_ID, trxName, virtualColumns);
-      /** if (C_City_ID == 0)
-        {
-			setC_City_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_City (Properties ctx, String C_City_UU, String trxName)
     {
       super (ctx, C_City_UU, trxName);

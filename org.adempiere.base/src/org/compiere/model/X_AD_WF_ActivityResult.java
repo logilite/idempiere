@@ -58,18 +58,6 @@ public class X_AD_WF_ActivityResult extends PO implements I_AD_WF_ActivityResult
     }
 
     /** Standard Constructor */
-    public X_AD_WF_ActivityResult (Properties ctx, int AD_WF_ActivityResult_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_WF_ActivityResult_ID, trxName, virtualColumns);
-      /** if (AD_WF_ActivityResult_ID == 0)
-        {
-			setAD_WF_Activity_ID (0);
-			setAD_WF_ActivityResult_ID (0);
-			setAttributeName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_WF_ActivityResult (Properties ctx, String AD_WF_ActivityResult_UU, String trxName)
     {
       super (ctx, AD_WF_ActivityResult_UU, trxName);

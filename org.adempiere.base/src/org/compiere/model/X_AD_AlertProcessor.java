@@ -65,21 +65,6 @@ public class X_AD_AlertProcessor extends PO implements I_AD_AlertProcessor, I_Pe
     }
 
     /** Standard Constructor */
-    public X_AD_AlertProcessor (Properties ctx, int AD_AlertProcessor_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_AlertProcessor_ID, trxName, virtualColumns);
-      /** if (AD_AlertProcessor_ID == 0)
-        {
-			setAD_AlertProcessor_ID (0);
-			setAD_Schedule_ID (0);
-			setKeepLogDays (0);
-// 7
-			setName (null);
-			setSupervisor_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_AlertProcessor (Properties ctx, String AD_AlertProcessor_UU, String trxName)
     {
       super (ctx, AD_AlertProcessor_UU, trxName);

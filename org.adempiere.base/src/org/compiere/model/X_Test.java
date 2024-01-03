@@ -646,24 +646,6 @@ public class X_Test extends PO implements I_Test, I_Persistent
 		return bd;
 	}
 
-	/** Set Virtual Quantity.
-		@param TestVirtualQty Used only for testing purposes
-	*/
-	public void setTestVirtualQty (BigDecimal TestVirtualQty)
-	{
-		throw new IllegalArgumentException ("TestVirtualQty is virtual column");	}
-
-	/** Get Virtual Quantity.
-		@return Used only for testing purposes
-	  */
-	public BigDecimal getTestVirtualQty()
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_TestVirtualQty);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
-	}
-
 	/** Set Integer.
 		@param T_Integer Integer
 	*/

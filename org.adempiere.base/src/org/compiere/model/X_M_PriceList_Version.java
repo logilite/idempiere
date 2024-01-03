@@ -67,22 +67,6 @@ public class X_M_PriceList_Version extends PO implements I_M_PriceList_Version, 
     }
 
     /** Standard Constructor */
-    public X_M_PriceList_Version (Properties ctx, int M_PriceList_Version_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_PriceList_Version_ID, trxName, virtualColumns);
-      /** if (M_PriceList_Version_ID == 0)
-        {
-			setM_DiscountSchema_ID (0);
-			setM_PriceList_ID (0);
-			setM_PriceList_Version_ID (0);
-			setName (null);
-// @#Date@
-			setValidFrom (new Timestamp( System.currentTimeMillis() ));
-// @#Date@
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_PriceList_Version (Properties ctx, String M_PriceList_Version_UU, String trxName)
     {
       super (ctx, M_PriceList_Version_UU, trxName);

@@ -78,27 +78,6 @@ public class X_C_DunningRunLine extends PO implements I_C_DunningRunLine, I_Pers
     }
 
     /** Standard Constructor */
-    public X_C_DunningRunLine (Properties ctx, int C_DunningRunLine_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_DunningRunLine_ID, trxName, virtualColumns);
-      /** if (C_DunningRunLine_ID == 0)
-        {
-			setAmt (Env.ZERO);
-			setC_DunningRunEntry_ID (0);
-			setC_DunningRunLine_ID (0);
-			setConvertedAmt (Env.ZERO);
-			setDaysDue (0);
-			setFeeAmt (Env.ZERO);
-			setInterestAmt (Env.ZERO);
-			setIsInDispute (false);
-			setOpenAmt (Env.ZERO);
-			setProcessed (false);
-			setTimesDunned (0);
-			setTotalAmt (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_DunningRunLine (Properties ctx, String C_DunningRunLine_UU, String trxName)
     {
       super (ctx, C_DunningRunLine_UU, trxName);

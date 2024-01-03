@@ -56,17 +56,6 @@ public class X_S_TimeType extends PO implements I_S_TimeType, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_S_TimeType (Properties ctx, int S_TimeType_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, S_TimeType_ID, trxName, virtualColumns);
-      /** if (S_TimeType_ID == 0)
-        {
-			setName (null);
-			setS_TimeType_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_S_TimeType (Properties ctx, String S_TimeType_UU, String trxName)
     {
       super (ctx, S_TimeType_UU, trxName);

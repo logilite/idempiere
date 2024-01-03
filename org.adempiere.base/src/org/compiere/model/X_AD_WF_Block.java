@@ -58,18 +58,6 @@ public class X_AD_WF_Block extends PO implements I_AD_WF_Block, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_WF_Block (Properties ctx, int AD_WF_Block_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_WF_Block_ID, trxName, virtualColumns);
-      /** if (AD_WF_Block_ID == 0)
-        {
-			setAD_WF_Block_ID (0);
-			setAD_Workflow_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_WF_Block (Properties ctx, String AD_WF_Block_UU, String trxName)
     {
       super (ctx, AD_WF_Block_UU, trxName);

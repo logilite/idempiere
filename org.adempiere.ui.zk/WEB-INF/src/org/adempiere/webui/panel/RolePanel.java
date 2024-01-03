@@ -337,42 +337,6 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
         	languageChanged(validLstLanguage);
 	}
 
-	private void languageChanged(String langName)
-	{
-		Language language = findLanguage(langName);
-		lblClient.setValue(Msg.getMsg(language, "Client"));
-		lblRole.setValue(Msg.getMsg(language, "Role"));
-		lblDef.setValue(Msg.getMsg(language, "Defaults"));
-		lblOrganisation.setValue(Msg.getMsg(language, "Organization"));
-		lblWarehouse.setValue(Msg.getMsg(language, "Warehouse"));
-		lblLanguage.setValue(Msg.getMsg(language, "Language"));
-		lblDate.setValue(Msg.getMsg(language, "Date"));
-	}
-
-	private Language findLanguage(String langName)
-	{
-		Language tmp = Language.getLanguage(langName);
-		Language language = new Language(tmp.getName(), tmp.getAD_Language(), tmp.getLocale(), tmp.isDecimalPoint(),
-						tmp.getDateFormat().toPattern(), tmp.getMediaSize());
-		Env.verifyLanguage(m_ctx, language);
-		Env.setContext(m_ctx, Env.LANGUAGE, language.getAD_Language());
-		Env.setContext(m_ctx, AEnv.LOCALE, language.getLocale().toString());
-
-		// cph::erp added this in order to get the processing dialog in the correct language
-		Locale locale = language.getLocale();
-		try
-		{
-			Clients.reloadMessages(locale);
-		}
-		catch (IOException e)
-		{
-			FDialog.warn(0, e.getLocalizedMessage(), e.getMessage());
-		}
-		Locales.setThreadLocal(locale);
-		// cph::erp end
-		return language;
-	}
-	
 	/**
 	 * Create components
 	 */

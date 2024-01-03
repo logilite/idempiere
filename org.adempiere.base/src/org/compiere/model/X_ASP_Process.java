@@ -60,19 +60,6 @@ public class X_ASP_Process extends PO implements I_ASP_Process, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_ASP_Process (Properties ctx, int ASP_Process_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, ASP_Process_ID, trxName, virtualColumns);
-      /** if (ASP_Process_ID == 0)
-        {
-			setAD_Process_ID (0);
-			setASP_Level_ID (0);
-			setASP_Status (null);
-// S
-        } */
-    }
-
-    /** Standard Constructor */
     public X_ASP_Process (Properties ctx, String ASP_Process_UU, String trxName)
     {
       super (ctx, ASP_Process_UU, trxName);

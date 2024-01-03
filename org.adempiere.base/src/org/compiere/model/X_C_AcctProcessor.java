@@ -65,21 +65,6 @@ public class X_C_AcctProcessor extends PO implements I_C_AcctProcessor, I_Persis
     }
 
     /** Standard Constructor */
-    public X_C_AcctProcessor (Properties ctx, int C_AcctProcessor_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_AcctProcessor_ID, trxName, virtualColumns);
-      /** if (C_AcctProcessor_ID == 0)
-        {
-			setAD_Schedule_ID (0);
-			setC_AcctProcessor_ID (0);
-			setKeepLogDays (0);
-// 7
-			setName (null);
-			setSupervisor_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_AcctProcessor (Properties ctx, String C_AcctProcessor_UU, String trxName)
     {
       super (ctx, C_AcctProcessor_UU, trxName);

@@ -57,16 +57,6 @@ public class X_I_Conversion_Rate extends PO implements I_I_Conversion_Rate, I_Pe
     }
 
     /** Standard Constructor */
-    public X_I_Conversion_Rate (Properties ctx, int I_Conversion_Rate_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, I_Conversion_Rate_ID, trxName, virtualColumns);
-      /** if (I_Conversion_Rate_ID == 0)
-        {
-			setI_Conversion_Rate_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_I_Conversion_Rate (Properties ctx, String I_Conversion_Rate_UU, String trxName)
     {
       super (ctx, I_Conversion_Rate_UU, trxName);

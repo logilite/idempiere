@@ -60,19 +60,6 @@ public class X_C_CashBook extends PO implements I_C_CashBook, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_CashBook (Properties ctx, int C_CashBook_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_CashBook_ID, trxName, virtualColumns);
-      /** if (C_CashBook_ID == 0)
-        {
-			setC_CashBook_ID (0);
-			setC_Currency_ID (0);
-			setIsDefault (false);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_CashBook (Properties ctx, String C_CashBook_UU, String trxName)
     {
       super (ctx, C_CashBook_UU, trxName);

@@ -66,22 +66,6 @@ public class X_AD_MigrationScript extends PO implements I_AD_MigrationScript, I_
     }
 
     /** Standard Constructor */
-    public X_AD_MigrationScript (Properties ctx, int AD_MigrationScript_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_MigrationScript_ID, trxName, virtualColumns);
-      /** if (AD_MigrationScript_ID == 0)
-        {
-			setAD_MigrationScript_ID (0);
-			setFileName (null);
-			setisApply (false);
-			setName (null);
-			setProjectName (null);
-			setReleaseNo (null);
-			setStatus (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_MigrationScript (Properties ctx, String AD_MigrationScript_UU, String trxName)
     {
       super (ctx, AD_MigrationScript_UU, trxName);

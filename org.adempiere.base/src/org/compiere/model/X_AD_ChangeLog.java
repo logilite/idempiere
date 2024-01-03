@@ -63,20 +63,6 @@ public class X_AD_ChangeLog extends PO implements I_AD_ChangeLog, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_ChangeLog (Properties ctx, int AD_ChangeLog_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_ChangeLog_ID, trxName, virtualColumns);
-      /** if (AD_ChangeLog_ID == 0)
-        {
-			setAD_ChangeLog_ID (0);
-			setAD_Column_ID (0);
-			setAD_Session_ID (0);
-			setAD_Table_ID (0);
-			setIsCustomization (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_ChangeLog (Properties ctx, String AD_ChangeLog_UU, String trxName)
     {
       super (ctx, AD_ChangeLog_UU, trxName);

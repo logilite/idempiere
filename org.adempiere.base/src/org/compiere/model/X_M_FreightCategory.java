@@ -58,18 +58,6 @@ public class X_M_FreightCategory extends PO implements I_M_FreightCategory, I_Pe
     }
 
     /** Standard Constructor */
-    public X_M_FreightCategory (Properties ctx, int M_FreightCategory_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_FreightCategory_ID, trxName, virtualColumns);
-      /** if (M_FreightCategory_ID == 0)
-        {
-			setM_FreightCategory_ID (0);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_FreightCategory (Properties ctx, String M_FreightCategory_UU, String trxName)
     {
       super (ctx, M_FreightCategory_UU, trxName);

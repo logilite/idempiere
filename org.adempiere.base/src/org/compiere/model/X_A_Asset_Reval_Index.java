@@ -65,20 +65,6 @@ public class X_A_Asset_Reval_Index extends PO implements I_A_Asset_Reval_Index, 
     }
 
     /** Standard Constructor */
-    public X_A_Asset_Reval_Index (Properties ctx, int A_Asset_Reval_Index_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_Asset_Reval_Index_ID, trxName, virtualColumns);
-      /** if (A_Asset_Reval_Index_ID == 0)
-        {
-			setA_Asset_Reval_Index_ID (0);
-			setA_Effective_Date (new Timestamp( System.currentTimeMillis() ));
-			setA_Reval_Code (null);
-			setA_Reval_Multiplier (null);
-			setA_Reval_Rate (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_Asset_Reval_Index (Properties ctx, String A_Asset_Reval_Index_UU, String trxName)
     {
       super (ctx, A_Asset_Reval_Index_UU, trxName);

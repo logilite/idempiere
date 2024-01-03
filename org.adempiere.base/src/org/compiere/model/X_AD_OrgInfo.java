@@ -59,19 +59,6 @@ public class X_AD_OrgInfo extends PO implements I_AD_OrgInfo, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_OrgInfo (Properties ctx, int AD_OrgInfo_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_OrgInfo_ID, trxName, virtualColumns);
-      /** if (AD_OrgInfo_ID == 0)
-        {
-			setDUNS (null);
-			setReceiptFooterMsg (null);
-// 1
-			setTaxID (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_OrgInfo (Properties ctx, String AD_OrgInfo_UU, String trxName)
     {
       super (ctx, AD_OrgInfo_UU, trxName);

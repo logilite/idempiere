@@ -61,19 +61,6 @@ public class X_CM_Chat extends PO implements I_CM_Chat, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_CM_Chat (Properties ctx, int CM_Chat_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, CM_Chat_ID, trxName, virtualColumns);
-      /** if (CM_Chat_ID == 0)
-        {
-			setAD_Table_ID (0);
-			setCM_Chat_ID (0);
-			setConfidentialType (null);
-			setDescription (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_CM_Chat (Properties ctx, String CM_Chat_UU, String trxName)
     {
       super (ctx, CM_Chat_UU, trxName);

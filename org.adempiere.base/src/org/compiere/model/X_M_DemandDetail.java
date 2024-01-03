@@ -56,17 +56,6 @@ public class X_M_DemandDetail extends PO implements I_M_DemandDetail, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_M_DemandDetail (Properties ctx, int M_DemandDetail_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_DemandDetail_ID, trxName, virtualColumns);
-      /** if (M_DemandDetail_ID == 0)
-        {
-			setM_DemandDetail_ID (0);
-			setM_DemandLine_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_DemandDetail (Properties ctx, String M_DemandDetail_UU, String trxName)
     {
       super (ctx, M_DemandDetail_UU, trxName);

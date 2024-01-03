@@ -59,19 +59,6 @@ public class X_AD_UserDef_Info_Related extends PO implements I_AD_UserDef_Info_R
     }
 
     /** Standard Constructor */
-    public X_AD_UserDef_Info_Related (Properties ctx, int AD_UserDef_Info_Related_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_UserDef_Info_Related_ID, trxName, virtualColumns);
-      /** if (AD_UserDef_Info_Related_ID == 0)
-        {
-			setAD_InfoRelated_ID (0);
-			setAD_UserDef_Info_ID (0);
-// @AD_UserDef_Info_ID@
-			setAD_UserDef_Info_Related_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_UserDef_Info_Related (Properties ctx, String AD_UserDef_Info_Related_UU, String trxName)
     {
       super (ctx, AD_UserDef_Info_Related_UU, trxName);

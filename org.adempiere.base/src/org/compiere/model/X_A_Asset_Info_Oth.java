@@ -56,17 +56,6 @@ public class X_A_Asset_Info_Oth extends PO implements I_A_Asset_Info_Oth, I_Pers
     }
 
     /** Standard Constructor */
-    public X_A_Asset_Info_Oth (Properties ctx, int A_Asset_Info_Oth_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_Asset_Info_Oth_ID, trxName, virtualColumns);
-      /** if (A_Asset_Info_Oth_ID == 0)
-        {
-			setA_Asset_ID (0);
-			setA_Asset_Info_Oth_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_Asset_Info_Oth (Properties ctx, String A_Asset_Info_Oth_UU, String trxName)
     {
       super (ctx, A_Asset_Info_Oth_UU, trxName);

@@ -56,17 +56,6 @@ public class X_AD_Note extends PO implements I_AD_Note, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_Note (Properties ctx, int AD_Note_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Note_ID, trxName, virtualColumns);
-      /** if (AD_Note_ID == 0)
-        {
-			setAD_Message_ID (0);
-			setAD_Note_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Note (Properties ctx, String AD_Note_UU, String trxName)
     {
       super (ctx, AD_Note_UU, trxName);

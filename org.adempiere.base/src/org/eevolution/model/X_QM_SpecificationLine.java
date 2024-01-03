@@ -61,19 +61,6 @@ public class X_QM_SpecificationLine extends PO implements I_QM_SpecificationLine
     }
 
     /** Standard Constructor */
-    public X_QM_SpecificationLine (Properties ctx, int QM_SpecificationLine_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, QM_SpecificationLine_ID, trxName, virtualColumns);
-      /** if (QM_SpecificationLine_ID == 0)
-        {
-			setAndOr (null);
-			setM_Attribute_ID (0);
-			setOperation (null);
-			setQM_SpecificationLine_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_QM_SpecificationLine (Properties ctx, String QM_SpecificationLine_UU, String trxName)
     {
       super (ctx, QM_SpecificationLine_UU, trxName);

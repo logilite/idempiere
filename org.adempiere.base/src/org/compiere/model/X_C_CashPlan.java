@@ -73,24 +73,6 @@ public class X_C_CashPlan extends PO implements I_C_CashPlan, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_CashPlan (Properties ctx, int C_CashPlan_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_CashPlan_ID, trxName, virtualColumns);
-      /** if (C_CashPlan_ID == 0)
-        {
-			setC_CashPlan_ID (0);
-			setDateDoc (new Timestamp( System.currentTimeMillis() ));
-// @#Date@
-			setDocumentNo (null);
-			setGrandTotal (Env.ZERO);
-			setIsApproved (false);
-// N
-			setIsSOTrx (false);
-			setProcessed (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_CashPlan (Properties ctx, String C_CashPlan_UU, String trxName)
     {
       super (ctx, C_CashPlan_UU, trxName);

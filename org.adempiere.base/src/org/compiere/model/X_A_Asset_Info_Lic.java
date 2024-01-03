@@ -59,17 +59,6 @@ public class X_A_Asset_Info_Lic extends PO implements I_A_Asset_Info_Lic, I_Pers
     }
 
     /** Standard Constructor */
-    public X_A_Asset_Info_Lic (Properties ctx, int A_Asset_Info_Lic_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_Asset_Info_Lic_ID, trxName, virtualColumns);
-      /** if (A_Asset_Info_Lic_ID == 0)
-        {
-			setA_Asset_ID (0);
-			setA_Asset_Info_Lic_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_Asset_Info_Lic (Properties ctx, String A_Asset_Info_Lic_UU, String trxName)
     {
       super (ctx, A_Asset_Info_Lic_UU, trxName);

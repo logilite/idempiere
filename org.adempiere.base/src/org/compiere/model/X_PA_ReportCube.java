@@ -63,20 +63,6 @@ public class X_PA_ReportCube extends PO implements I_PA_ReportCube, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_PA_ReportCube (Properties ctx, int PA_ReportCube_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, PA_ReportCube_ID, trxName, virtualColumns);
-      /** if (PA_ReportCube_ID == 0)
-        {
-			setC_Calendar_ID (0);
-			setName (null);
-			setPA_ReportCube_ID (0);
-			setProcessing (false);
-// N
-        } */
-    }
-
-    /** Standard Constructor */
     public X_PA_ReportCube (Properties ctx, String PA_ReportCube_UU, String trxName)
     {
       super (ctx, PA_ReportCube_UU, trxName);

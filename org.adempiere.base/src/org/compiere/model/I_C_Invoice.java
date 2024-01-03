@@ -516,19 +516,6 @@ public interface I_C_Invoice
 	  */
 	public String getDocBaseType();
 
-    /** Column name DocBaseType */
-    public static final String COLUMNNAME_DocBaseType = "DocBaseType";
-
-	/** Set Document Base Type.
-	  * Logical type of document
-	  */
-	public void setDocBaseType (String DocBaseType);
-
-	/** Get Document Base Type.
-	  * Logical type of document
-	  */
-	public String getDocBaseType();
-
     /** Column name DocStatus */
     public static final String COLUMNNAME_DocStatus = "DocStatus";
 

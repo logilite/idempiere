@@ -62,20 +62,6 @@ public class X_C_Bank extends PO implements I_C_Bank, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_Bank (Properties ctx, int C_Bank_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Bank_ID, trxName, virtualColumns);
-      /** if (C_Bank_ID == 0)
-        {
-			setC_Bank_ID (0);
-			setIsOwnBank (true);
-// Y
-			setName (null);
-			setRoutingNo (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Bank (Properties ctx, String C_Bank_UU, String trxName)
     {
       super (ctx, C_Bank_UU, trxName);

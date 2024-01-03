@@ -60,19 +60,6 @@ public class X_R_RequestProcessor_Route extends PO implements I_R_RequestProcess
     }
 
     /** Standard Constructor */
-    public X_R_RequestProcessor_Route (Properties ctx, int R_RequestProcessor_Route_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, R_RequestProcessor_Route_ID, trxName, virtualColumns);
-      /** if (R_RequestProcessor_Route_ID == 0)
-        {
-			setAD_User_ID (0);
-			setR_RequestProcessor_ID (0);
-			setR_RequestProcessor_Route_ID (0);
-			setSeqNo (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_R_RequestProcessor_Route (Properties ctx, String R_RequestProcessor_Route_UU, String trxName)
     {
       super (ctx, R_RequestProcessor_Route_UU, trxName);

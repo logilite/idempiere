@@ -53,16 +53,6 @@ public class X_AD_ImportTemplateAccess extends PO implements I_AD_ImportTemplate
     }
 
     /** Standard Constructor */
-    public X_AD_ImportTemplateAccess (Properties ctx, int AD_ImportTemplateAccess_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_ImportTemplateAccess_ID, trxName, virtualColumns);
-      /** if (AD_ImportTemplateAccess_ID == 0)
-        {
-			setAD_ImportTemplateAccess_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_ImportTemplateAccess (Properties ctx, String AD_ImportTemplateAccess_UU, String trxName)
     {
       super (ctx, AD_ImportTemplateAccess_UU, trxName);

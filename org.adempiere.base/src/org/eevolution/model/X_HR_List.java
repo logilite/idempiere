@@ -58,17 +58,6 @@ public class X_HR_List extends PO implements I_HR_List, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_HR_List (Properties ctx, int HR_List_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, HR_List_ID, trxName, virtualColumns);
-      /** if (HR_List_ID == 0)
-        {
-			setHR_List_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_HR_List (Properties ctx, String HR_List_UU, String trxName)
     {
       super (ctx, HR_List_UU, trxName);

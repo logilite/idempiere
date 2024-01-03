@@ -56,17 +56,6 @@ public class X_M_CostType extends PO implements I_M_CostType, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_CostType (Properties ctx, int M_CostType_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_CostType_ID, trxName, virtualColumns);
-      /** if (M_CostType_ID == 0)
-        {
-			setM_CostType_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_CostType (Properties ctx, String M_CostType_UU, String trxName)
     {
       super (ctx, M_CostType_UU, trxName);

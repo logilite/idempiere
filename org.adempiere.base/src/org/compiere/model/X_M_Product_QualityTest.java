@@ -60,19 +60,6 @@ public class X_M_Product_QualityTest extends PO implements I_M_Product_QualityTe
     }
 
     /** Standard Constructor */
-    public X_M_Product_QualityTest (Properties ctx, int M_Product_QualityTest_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_Product_QualityTest_ID, trxName, virtualColumns);
-      /** if (M_Product_QualityTest_ID == 0)
-        {
-			setExpectedResult (null);
-			setM_Product_ID (0);
-			setM_Product_QualityTest_ID (0);
-			setM_QualityTest_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_Product_QualityTest (Properties ctx, String M_Product_QualityTest_UU, String trxName)
     {
       super (ctx, M_Product_QualityTest_UU, trxName);

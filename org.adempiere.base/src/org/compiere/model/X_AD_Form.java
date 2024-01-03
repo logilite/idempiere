@@ -64,21 +64,6 @@ public class X_AD_Form extends PO implements I_AD_Form, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_Form (Properties ctx, int AD_Form_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Form_ID, trxName, virtualColumns);
-      /** if (AD_Form_ID == 0)
-        {
-			setAccessLevel (null);
-			setAD_Form_ID (0);
-			setEntityType (null);
-// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
-			setIsBetaFunctionality (false);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Form (Properties ctx, String AD_Form_UU, String trxName)
     {
       super (ctx, AD_Form_UU, trxName);

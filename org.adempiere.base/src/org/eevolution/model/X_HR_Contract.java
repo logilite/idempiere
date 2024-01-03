@@ -58,17 +58,6 @@ public class X_HR_Contract extends PO implements I_HR_Contract, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_HR_Contract (Properties ctx, int HR_Contract_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, HR_Contract_ID, trxName, virtualColumns);
-      /** if (HR_Contract_ID == 0)
-        {
-			setHR_Contract_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_HR_Contract (Properties ctx, String HR_Contract_UU, String trxName)
     {
       super (ctx, HR_Contract_UU, trxName);

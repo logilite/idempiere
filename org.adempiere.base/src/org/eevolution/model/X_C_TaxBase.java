@@ -59,18 +59,6 @@ public class X_C_TaxBase extends PO implements I_C_TaxBase, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_TaxBase (Properties ctx, int C_TaxBase_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_TaxBase_ID, trxName, virtualColumns);
-      /** if (C_TaxBase_ID == 0)
-        {
-			setC_TaxBase_ID (0);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_TaxBase (Properties ctx, String C_TaxBase_UU, String trxName)
     {
       super (ctx, C_TaxBase_UU, trxName);

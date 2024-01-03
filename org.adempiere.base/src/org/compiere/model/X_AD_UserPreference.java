@@ -59,19 +59,6 @@ public class X_AD_UserPreference extends PO implements I_AD_UserPreference, I_Pe
     }
 
     /** Standard Constructor */
-    public X_AD_UserPreference (Properties ctx, int AD_UserPreference_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_UserPreference_ID, trxName, virtualColumns);
-      /** if (AD_UserPreference_ID == 0)
-        {
-			setAD_User_ID (0);
-			setAD_UserPreference_ID (0);
-			setViewFindResult (null);
-// 0
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_UserPreference (Properties ctx, String AD_UserPreference_UU, String trxName)
     {
       super (ctx, AD_UserPreference_UU, trxName);

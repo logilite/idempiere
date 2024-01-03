@@ -61,20 +61,6 @@ public class X_C_Tax_Acct extends PO implements I_C_Tax_Acct, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_Tax_Acct (Properties ctx, int C_Tax_Acct_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Tax_Acct_ID, trxName, virtualColumns);
-      /** if (C_Tax_Acct_ID == 0)
-        {
-			setC_AcctSchema_ID (0);
-			setC_Tax_ID (0);
-			setT_Credit_Acct (0);
-			setT_Due_Acct (0);
-			setT_Expense_Acct (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Tax_Acct (Properties ctx, String C_Tax_Acct_UU, String trxName)
     {
       super (ctx, C_Tax_Acct_UU, trxName);

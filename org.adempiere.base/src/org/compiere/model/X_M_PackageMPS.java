@@ -62,19 +62,6 @@ public class X_M_PackageMPS extends PO implements I_M_PackageMPS, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_PackageMPS (Properties ctx, int M_PackageMPS_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_PackageMPS_ID, trxName, virtualColumns);
-      /** if (M_PackageMPS_ID == 0)
-        {
-			setM_Package_ID (0);
-			setM_PackageMPS_ID (0);
-			setProcessed (false);
-// N
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_PackageMPS (Properties ctx, String M_PackageMPS_UU, String trxName)
     {
       super (ctx, M_PackageMPS_UU, trxName);

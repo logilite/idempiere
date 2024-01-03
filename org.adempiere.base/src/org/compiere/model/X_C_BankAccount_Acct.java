@@ -67,23 +67,6 @@ public class X_C_BankAccount_Acct extends PO implements I_C_BankAccount_Acct, I_
     }
 
     /** Standard Constructor */
-    public X_C_BankAccount_Acct (Properties ctx, int C_BankAccount_Acct_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_BankAccount_Acct_ID, trxName, virtualColumns);
-      /** if (C_BankAccount_Acct_ID == 0)
-        {
-			setB_Asset_Acct (0);
-			setB_InterestExp_Acct (0);
-			setB_InterestRev_Acct (0);
-			setB_InTransit_Acct (0);
-			setB_PaymentSelect_Acct (0);
-			setB_UnallocatedCash_Acct (0);
-			setC_AcctSchema_ID (0);
-			setC_BankAccount_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_BankAccount_Acct (Properties ctx, String C_BankAccount_Acct_UU, String trxName)
     {
       super (ctx, C_BankAccount_Acct_UU, trxName);

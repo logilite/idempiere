@@ -55,17 +55,6 @@ public class X_C_CashBook_Acct extends PO implements I_C_CashBook_Acct, I_Persis
     }
 
     /** Standard Constructor */
-    public X_C_CashBook_Acct (Properties ctx, int C_CashBook_Acct_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_CashBook_Acct_ID, trxName, virtualColumns);
-      /** if (C_CashBook_Acct_ID == 0)
-        {
-			setC_AcctSchema_ID (0);
-			setC_CashBook_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_CashBook_Acct (Properties ctx, String C_CashBook_Acct_UU, String trxName)
     {
       super (ctx, C_CashBook_Acct_UU, trxName);

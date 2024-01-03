@@ -58,17 +58,6 @@ public class X_T_BOMLine extends PO implements I_T_BOMLine, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_T_BOMLine (Properties ctx, int T_BOMLine_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, T_BOMLine_ID, trxName, virtualColumns);
-      /** if (T_BOMLine_ID == 0)
-        {
-			setSel_Product_ID (0);
-			setT_BOMLine_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_T_BOMLine (Properties ctx, String T_BOMLine_UU, String trxName)
     {
       super (ctx, T_BOMLine_UU, trxName);

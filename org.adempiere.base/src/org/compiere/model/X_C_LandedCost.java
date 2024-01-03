@@ -62,20 +62,6 @@ public class X_C_LandedCost extends PO implements I_C_LandedCost, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_LandedCost (Properties ctx, int C_LandedCost_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_LandedCost_ID, trxName, virtualColumns);
-      /** if (C_LandedCost_ID == 0)
-        {
-			setC_InvoiceLine_ID (0);
-			setC_LandedCost_ID (0);
-			setLandedCostDistribution (null);
-// Q
-			setM_CostElement_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_LandedCost (Properties ctx, String C_LandedCost_UU, String trxName)
     {
       super (ctx, C_LandedCost_UU, trxName);

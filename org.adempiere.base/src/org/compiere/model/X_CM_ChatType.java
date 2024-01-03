@@ -58,18 +58,6 @@ public class X_CM_ChatType extends PO implements I_CM_ChatType, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_CM_ChatType (Properties ctx, int CM_ChatType_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, CM_ChatType_ID, trxName, virtualColumns);
-      /** if (CM_ChatType_ID == 0)
-        {
-			setAD_Table_ID (0);
-			setCM_ChatType_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_CM_ChatType (Properties ctx, String CM_ChatType_UU, String trxName)
     {
       super (ctx, CM_ChatType_UU, trxName);

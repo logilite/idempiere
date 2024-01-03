@@ -57,18 +57,6 @@ public class X_R_RequestProcessorLog extends PO implements I_R_RequestProcessorL
     }
 
     /** Standard Constructor */
-    public X_R_RequestProcessorLog (Properties ctx, int R_RequestProcessorLog_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, R_RequestProcessorLog_ID, trxName, virtualColumns);
-      /** if (R_RequestProcessorLog_ID == 0)
-        {
-			setIsError (false);
-			setR_RequestProcessor_ID (0);
-			setR_RequestProcessorLog_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_R_RequestProcessorLog (Properties ctx, String R_RequestProcessorLog_UU, String trxName)
     {
       super (ctx, R_RequestProcessorLog_UU, trxName);

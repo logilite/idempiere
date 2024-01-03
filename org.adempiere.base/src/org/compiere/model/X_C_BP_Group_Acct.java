@@ -76,26 +76,6 @@ public class X_C_BP_Group_Acct extends PO implements I_C_BP_Group_Acct, I_Persis
     }
 
     /** Standard Constructor */
-    public X_C_BP_Group_Acct (Properties ctx, int C_BP_Group_Acct_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_BP_Group_Acct_ID, trxName, virtualColumns);
-      /** if (C_BP_Group_Acct_ID == 0)
-        {
-			setC_AcctSchema_ID (0);
-			setC_BP_Group_ID (0);
-			setC_Prepayment_Acct (0);
-			setC_Receivable_Acct (0);
-			setC_Receivable_Services_Acct (0);
-			setNotInvoicedReceipts_Acct (0);
-			setPayDiscount_Exp_Acct (0);
-			setPayDiscount_Rev_Acct (0);
-			setV_Liability_Acct (0);
-			setV_Prepayment_Acct (0);
-			setWriteOff_Acct (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_BP_Group_Acct (Properties ctx, String C_BP_Group_Acct_UU, String trxName)
     {
       super (ctx, C_BP_Group_Acct_UU, trxName);

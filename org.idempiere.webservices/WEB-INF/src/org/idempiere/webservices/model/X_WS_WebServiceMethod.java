@@ -59,18 +59,6 @@ public class X_WS_WebServiceMethod extends PO implements I_WS_WebServiceMethod, 
     }
 
     /** Standard Constructor */
-    public X_WS_WebServiceMethod (Properties ctx, int WS_WebServiceMethod_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, WS_WebServiceMethod_ID, trxName, virtualColumns);
-      /** if (WS_WebServiceMethod_ID == 0)
-        {
-			setName (null);
-			setValue (null);
-			setWS_WebServiceMethod_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_WS_WebServiceMethod (Properties ctx, String WS_WebServiceMethod_UU, String trxName)
     {
       super (ctx, WS_WebServiceMethod_UU, trxName);

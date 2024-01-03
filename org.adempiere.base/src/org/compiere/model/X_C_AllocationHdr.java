@@ -83,29 +83,6 @@ public class X_C_AllocationHdr extends PO implements I_C_AllocationHdr, I_Persis
     }
 
     /** Standard Constructor */
-    public X_C_AllocationHdr (Properties ctx, int C_AllocationHdr_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_AllocationHdr_ID, trxName, virtualColumns);
-      /** if (C_AllocationHdr_ID == 0)
-        {
-			setApprovalAmt (Env.ZERO);
-			setC_AllocationHdr_ID (0);
-			setC_Currency_ID (0);
-			setDateAcct (new Timestamp( System.currentTimeMillis() ));
-			setDateTrx (new Timestamp( System.currentTimeMillis() ));
-			setDocAction (null);
-// CO
-			setDocStatus (null);
-// DR
-			setDocumentNo (null);
-			setIsApproved (false);
-			setIsManual (false);
-			setPosted (false);
-			setProcessed (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_AllocationHdr (Properties ctx, String C_AllocationHdr_UU, String trxName)
     {
       super (ctx, C_AllocationHdr_UU, trxName);

@@ -61,20 +61,6 @@ public class X_EXP_Format extends PO implements I_EXP_Format, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_EXP_Format (Properties ctx, int EXP_Format_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, EXP_Format_ID, trxName, virtualColumns);
-      /** if (EXP_Format_ID == 0)
-        {
-			setAD_Table_ID (0);
-			setEXP_Format_ID (0);
-			setName (null);
-			setValue (null);
-			setVersion (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_EXP_Format (Properties ctx, String EXP_Format_UU, String trxName)
     {
       super (ctx, EXP_Format_UU, trxName);

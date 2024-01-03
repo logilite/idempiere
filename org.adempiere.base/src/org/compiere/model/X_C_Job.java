@@ -62,20 +62,6 @@ public class X_C_Job extends PO implements I_C_Job, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_Job (Properties ctx, int C_Job_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Job_ID, trxName, virtualColumns);
-      /** if (C_Job_ID == 0)
-        {
-			setC_JobCategory_ID (0);
-			setC_Job_ID (0);
-			setIsEmployee (true);
-// Y
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Job (Properties ctx, String C_Job_UU, String trxName)
     {
       super (ctx, C_Job_UU, trxName);

@@ -74,25 +74,6 @@ public class X_C_CommissionLine extends PO implements I_C_CommissionLine, I_Pers
     }
 
     /** Standard Constructor */
-    public X_C_CommissionLine (Properties ctx, int C_CommissionLine_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_CommissionLine_ID, trxName, virtualColumns);
-      /** if (C_CommissionLine_ID == 0)
-        {
-			setAmtMultiplier (Env.ZERO);
-			setAmtSubtract (Env.ZERO);
-			setC_Commission_ID (0);
-			setC_CommissionLine_ID (0);
-			setCommissionOrders (false);
-			setIsPositiveOnly (false);
-			setLine (0);
-// @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM C_CommissionLine WHERE C_Commission_ID=@C_Commission_ID@
-			setQtyMultiplier (Env.ZERO);
-			setQtySubtract (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_CommissionLine (Properties ctx, String C_CommissionLine_UU, String trxName)
     {
       super (ctx, C_CommissionLine_UU, trxName);

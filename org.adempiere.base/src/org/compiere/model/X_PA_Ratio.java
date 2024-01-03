@@ -58,18 +58,6 @@ public class X_PA_Ratio extends PO implements I_PA_Ratio, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_PA_Ratio (Properties ctx, int PA_Ratio_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, PA_Ratio_ID, trxName, virtualColumns);
-      /** if (PA_Ratio_ID == 0)
-        {
-			setC_AcctSchema_ID (0);
-			setName (null);
-			setPA_Ratio_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_PA_Ratio (Properties ctx, String PA_Ratio_UU, String trxName)
     {
       super (ctx, PA_Ratio_UU, trxName);

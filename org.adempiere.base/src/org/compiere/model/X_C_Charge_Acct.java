@@ -57,18 +57,6 @@ public class X_C_Charge_Acct extends PO implements I_C_Charge_Acct, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_Charge_Acct (Properties ctx, int C_Charge_Acct_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Charge_Acct_ID, trxName, virtualColumns);
-      /** if (C_Charge_Acct_ID == 0)
-        {
-			setC_AcctSchema_ID (0);
-			setC_Charge_ID (0);
-			setCh_Expense_Acct (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Charge_Acct (Properties ctx, String C_Charge_Acct_UU, String trxName)
     {
       super (ctx, C_Charge_Acct_UU, trxName);

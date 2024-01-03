@@ -58,18 +58,6 @@ public class X_A_RegistrationValue extends PO implements I_A_RegistrationValue, 
     }
 
     /** Standard Constructor */
-    public X_A_RegistrationValue (Properties ctx, int A_RegistrationValue_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_RegistrationValue_ID, trxName, virtualColumns);
-      /** if (A_RegistrationValue_ID == 0)
-        {
-			setA_RegistrationAttribute_ID (0);
-			setA_Registration_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_RegistrationValue (Properties ctx, String A_RegistrationValue_UU, String trxName)
     {
       super (ctx, A_RegistrationValue_UU, trxName);

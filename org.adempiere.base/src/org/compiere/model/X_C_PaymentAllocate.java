@@ -68,22 +68,6 @@ public class X_C_PaymentAllocate extends PO implements I_C_PaymentAllocate, I_Pe
     }
 
     /** Standard Constructor */
-    public X_C_PaymentAllocate (Properties ctx, int C_PaymentAllocate_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_PaymentAllocate_ID, trxName, virtualColumns);
-      /** if (C_PaymentAllocate_ID == 0)
-        {
-			setAmount (Env.ZERO);
-			setC_Invoice_ID (0);
-			setC_PaymentAllocate_ID (0);
-			setC_Payment_ID (0);
-			setDiscountAmt (Env.ZERO);
-			setOverUnderAmt (Env.ZERO);
-			setWriteOffAmt (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_PaymentAllocate (Properties ctx, String C_PaymentAllocate_UU, String trxName)
     {
       super (ctx, C_PaymentAllocate_UU, trxName);

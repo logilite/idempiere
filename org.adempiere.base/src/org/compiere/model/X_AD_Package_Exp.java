@@ -65,21 +65,6 @@ public class X_AD_Package_Exp extends PO implements I_AD_Package_Exp, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_AD_Package_Exp (Properties ctx, int AD_Package_Exp_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Package_Exp_ID, trxName, virtualColumns);
-      /** if (AD_Package_Exp_ID == 0)
-        {
-			setAD_Package_Exp_ID (0);
-			setIsExportDictionaryEntity (false);
-// N
-			setName (null);
-			setPK_Version (null);
-			setProcessing (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Package_Exp (Properties ctx, String AD_Package_Exp_UU, String trxName)
     {
       super (ctx, AD_Package_Exp_UU, trxName);

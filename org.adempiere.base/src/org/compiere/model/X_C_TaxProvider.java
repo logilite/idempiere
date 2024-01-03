@@ -61,20 +61,6 @@ public class X_C_TaxProvider extends PO implements I_C_TaxProvider, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_TaxProvider (Properties ctx, int C_TaxProvider_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_TaxProvider_ID, trxName, virtualColumns);
-      /** if (C_TaxProvider_ID == 0)
-        {
-			setC_TaxProviderCfg_ID (0);
-			setC_TaxProvider_ID (0);
-			setName (null);
-			setSeqNo (0);
-// 0
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_TaxProvider (Properties ctx, String C_TaxProvider_UU, String trxName)
     {
       super (ctx, C_TaxProvider_UU, trxName);

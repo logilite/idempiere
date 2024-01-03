@@ -79,27 +79,6 @@ public class X_C_RfQResponse extends PO implements I_C_RfQResponse, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_RfQResponse (Properties ctx, int C_RfQResponse_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_RfQResponse_ID, trxName, virtualColumns);
-      /** if (C_RfQResponse_ID == 0)
-        {
-			setC_BPartner_ID (0);
-			setC_BPartner_Location_ID (0);
-			setC_Currency_ID (0);
-// @C_Currency_ID@
-			setC_RfQ_ID (0);
-			setC_RfQResponse_ID (0);
-			setIsComplete (false);
-			setIsSelectedWinner (false);
-			setIsSelfService (false);
-			setName (null);
-			setPrice (Env.ZERO);
-			setProcessed (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_RfQResponse (Properties ctx, String C_RfQResponse_UU, String trxName)
     {
       super (ctx, C_RfQResponse_UU, trxName);

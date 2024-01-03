@@ -65,20 +65,6 @@ public class X_C_AllocationLine extends PO implements I_C_AllocationLine, I_Pers
     }
 
     /** Standard Constructor */
-    public X_C_AllocationLine (Properties ctx, int C_AllocationLine_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_AllocationLine_ID, trxName, virtualColumns);
-      /** if (C_AllocationLine_ID == 0)
-        {
-			setAmount (Env.ZERO);
-			setC_AllocationHdr_ID (0);
-			setC_AllocationLine_ID (0);
-			setDiscountAmt (Env.ZERO);
-			setWriteOffAmt (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_AllocationLine (Properties ctx, String C_AllocationLine_UU, String trxName)
     {
       super (ctx, C_AllocationLine_UU, trxName);

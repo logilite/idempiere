@@ -74,25 +74,6 @@ public class X_T_DistributionRunDetail extends PO implements I_T_DistributionRun
     }
 
     /** Standard Constructor */
-    public X_T_DistributionRunDetail (Properties ctx, int T_DistributionRunDetail_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, T_DistributionRunDetail_ID, trxName, virtualColumns);
-      /** if (T_DistributionRunDetail_ID == 0)
-        {
-			setC_BPartner_ID (0);
-			setC_BPartner_Location_ID (0);
-			setM_DistributionList_ID (0);
-			setM_DistributionListLine_ID (0);
-			setM_DistributionRun_ID (0);
-			setM_DistributionRunLine_ID (0);
-			setMinQty (Env.ZERO);
-			setM_Product_ID (0);
-			setQty (Env.ZERO);
-			setRatio (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_T_DistributionRunDetail (Properties ctx, String T_DistributionRunDetail_UU, String trxName)
     {
       super (ctx, T_DistributionRunDetail_UU, trxName);

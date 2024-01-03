@@ -56,17 +56,6 @@ public class X_I_ElementValue extends PO implements I_I_ElementValue, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_I_ElementValue (Properties ctx, int I_ElementValue_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, I_ElementValue_ID, trxName, virtualColumns);
-      /** if (I_ElementValue_ID == 0)
-        {
-			setI_ElementValue_ID (0);
-			setI_IsImported (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_I_ElementValue (Properties ctx, String I_ElementValue_UU, String trxName)
     {
       super (ctx, I_ElementValue_UU, trxName);

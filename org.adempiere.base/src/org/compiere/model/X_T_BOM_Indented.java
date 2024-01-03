@@ -55,16 +55,6 @@ public class X_T_BOM_Indented extends PO implements I_T_BOM_Indented, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_T_BOM_Indented (Properties ctx, int T_BOM_Indented_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, T_BOM_Indented_ID, trxName, virtualColumns);
-      /** if (T_BOM_Indented_ID == 0)
-        {
-			setT_BOM_Indented_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_T_BOM_Indented (Properties ctx, String T_BOM_Indented_UU, String trxName)
     {
       super (ctx, T_BOM_Indented_UU, trxName);

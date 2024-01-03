@@ -60,19 +60,6 @@ public class X_AD_EntityType extends PO implements I_AD_EntityType, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_EntityType (Properties ctx, int AD_EntityType_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_EntityType_ID, trxName, virtualColumns);
-      /** if (AD_EntityType_ID == 0)
-        {
-			setAD_EntityType_ID (0);
-			setEntityType (null);
-// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_EntityType (Properties ctx, String AD_EntityType_UU, String trxName)
     {
       super (ctx, AD_EntityType_UU, trxName);

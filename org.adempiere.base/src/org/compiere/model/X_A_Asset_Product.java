@@ -65,21 +65,6 @@ public class X_A_Asset_Product extends PO implements I_A_Asset_Product, I_Persis
     }
 
     /** Standard Constructor */
-    public X_A_Asset_Product (Properties ctx, int A_Asset_Product_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_Asset_Product_ID, trxName, virtualColumns);
-      /** if (A_Asset_Product_ID == 0)
-        {
-			setA_Asset_ID (0);
-			setA_Asset_Product_ID (0);
-			setA_QTY_Current (Env.ZERO);
-// 0
-			setM_AttributeSetInstance_ID (0);
-			setM_Product_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_Asset_Product (Properties ctx, String A_Asset_Product_UU, String trxName)
     {
       super (ctx, A_Asset_Product_UU, trxName);

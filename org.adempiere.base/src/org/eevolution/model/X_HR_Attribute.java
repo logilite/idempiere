@@ -61,18 +61,6 @@ public class X_HR_Attribute extends PO implements I_HR_Attribute, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_HR_Attribute (Properties ctx, int HR_Attribute_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, HR_Attribute_ID, trxName, virtualColumns);
-      /** if (HR_Attribute_ID == 0)
-        {
-			setHR_Attribute_ID (0);
-			setHR_Concept_ID (0);
-			setValidFrom (new Timestamp( System.currentTimeMillis() ));
-        } */
-    }
-
-    /** Standard Constructor */
     public X_HR_Attribute (Properties ctx, String HR_Attribute_UU, String trxName)
     {
       super (ctx, HR_Attribute_UU, trxName);

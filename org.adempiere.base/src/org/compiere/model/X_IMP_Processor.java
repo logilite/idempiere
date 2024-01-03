@@ -68,23 +68,6 @@ public class X_IMP_Processor extends PO implements I_IMP_Processor, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_IMP_Processor (Properties ctx, int IMP_Processor_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, IMP_Processor_ID, trxName, virtualColumns);
-      /** if (IMP_Processor_ID == 0)
-        {
-			setFrequency (0);
-			setFrequencyType (null);
-			setIMP_Processor_ID (0);
-			setIMP_Processor_Type_ID (0);
-			setKeepLogDays (0);
-// 7
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_IMP_Processor (Properties ctx, String IMP_Processor_UU, String trxName)
     {
       super (ctx, IMP_Processor_UU, trxName);

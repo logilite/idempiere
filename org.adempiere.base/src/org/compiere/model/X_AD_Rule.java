@@ -66,22 +66,6 @@ public class X_AD_Rule extends PO implements I_AD_Rule, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_Rule (Properties ctx, int AD_Rule_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Rule_ID, trxName, virtualColumns);
-      /** if (AD_Rule_ID == 0)
-        {
-			setAD_Rule_ID (0);
-			setEntityType (null);
-// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
-			setEventType (null);
-			setName (null);
-			setRuleType (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Rule (Properties ctx, String AD_Rule_UU, String trxName)
     {
       super (ctx, AD_Rule_UU, trxName);

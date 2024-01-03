@@ -58,18 +58,6 @@ public class X_A_FundingMode extends PO implements I_A_FundingMode, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_A_FundingMode (Properties ctx, int A_FundingMode_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_FundingMode_ID, trxName, virtualColumns);
-      /** if (A_FundingMode_ID == 0)
-        {
-			setA_FundingMode_ID (0);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_FundingMode (Properties ctx, String A_FundingMode_UU, String trxName)
     {
       super (ctx, A_FundingMode_UU, trxName);

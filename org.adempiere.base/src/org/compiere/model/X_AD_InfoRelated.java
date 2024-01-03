@@ -72,25 +72,6 @@ public class X_AD_InfoRelated extends PO implements I_AD_InfoRelated, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_AD_InfoRelated (Properties ctx, int AD_InfoRelated_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_InfoRelated_ID, trxName, virtualColumns);
-      /** if (AD_InfoRelated_ID == 0)
-        {
-			setAD_InfoRelated_ID (0);
-			setAD_InfoWindow_ID (0);
-			setEntityType (null);
-// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
-			setName (null);
-			setRelatedColumn_ID (0);
-// 0
-			setRelatedInfo_ID (0);
-// 0
-			setSeqNo (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_InfoRelated (Properties ctx, String AD_InfoRelated_UU, String trxName)
     {
       super (ctx, AD_InfoRelated_UU, trxName);

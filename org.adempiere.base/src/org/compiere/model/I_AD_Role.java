@@ -421,19 +421,6 @@ public interface I_AD_Role
 	  */
 	public void setIsClientAdministrator (boolean IsClientAdministrator);
 
-	/** Get Client Administrator.
-	  * This role is a client administrator
-	  */
-	public boolean isClientAdministrator();
-
-    /** Column name IsClientAdministrator */
-    public static final String COLUMNNAME_IsClientAdministrator = "IsClientAdministrator";
-
-	/** Set Tenant Administrator.
-	  * This role is a tenant administrator
-	  */
-	public void setIsClientAdministrator (boolean IsClientAdministrator);
-
 	/** Get Tenant Administrator.
 	  * This role is a tenant administrator
 	  */

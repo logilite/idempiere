@@ -58,18 +58,6 @@ public class X_C_RecurringGroup extends PO implements I_C_RecurringGroup, I_Pers
     }
 
     /** Standard Constructor */
-    public X_C_RecurringGroup (Properties ctx, int C_RecurringGroup_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_RecurringGroup_ID, trxName, virtualColumns);
-      /** if (C_RecurringGroup_ID == 0)
-        {
-			setC_RecurringGroup_ID (0);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_RecurringGroup (Properties ctx, String C_RecurringGroup_UU, String trxName)
     {
       super (ctx, C_RecurringGroup_UU, trxName);

@@ -689,13 +689,6 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	}
 
 	/**
-	 * Handle onSize event
-	 */
-	private void onSize() {
-		fMessage.invalidate();
-	}
-
-	/**
 	 * @param dataSource
 	 * @param isRemoveable
 	 */

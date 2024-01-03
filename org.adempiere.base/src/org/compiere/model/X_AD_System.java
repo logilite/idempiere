@@ -91,33 +91,6 @@ public class X_AD_System extends PO implements I_AD_System, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_System (Properties ctx, int AD_System_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_System_ID, trxName, virtualColumns);
-      /** if (AD_System_ID == 0)
-        {
-			setAD_System_ID (0);
-// 0
-			setInfo (null);
-			setIsAllowStatistics (false);
-			setIsAutoErrorReport (true);
-// Y
-			setIsFailOnBuildDiffer (false);
-// N
-			setIsFailOnMissingModelValidator (true);
-// Y
-			setName (null);
-			setPassword (null);
-			setReplicationType (null);
-// L
-			setSystemStatus (null);
-// E
-			setUserName (null);
-			setVersion (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_System (Properties ctx, String AD_System_UU, String trxName)
     {
       super (ctx, AD_System_UU, trxName);

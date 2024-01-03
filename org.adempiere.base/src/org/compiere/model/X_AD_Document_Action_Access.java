@@ -57,18 +57,6 @@ public class X_AD_Document_Action_Access extends PO implements I_AD_Document_Act
     }
 
     /** Standard Constructor */
-    public X_AD_Document_Action_Access (Properties ctx, int AD_Document_Action_Access_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Document_Action_Access_ID, trxName, virtualColumns);
-      /** if (AD_Document_Action_Access_ID == 0)
-        {
-			setAD_Ref_List_ID (0);
-			setAD_Role_ID (0);
-			setC_DocType_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Document_Action_Access (Properties ctx, String AD_Document_Action_Access_UU, String trxName)
     {
       super (ctx, AD_Document_Action_Access_UU, trxName);

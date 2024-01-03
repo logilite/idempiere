@@ -63,20 +63,6 @@ public class X_GL_JournalGeneratorSource extends PO implements I_GL_JournalGener
     }
 
     /** Standard Constructor */
-    public X_GL_JournalGeneratorSource (Properties ctx, int GL_JournalGeneratorSource_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, GL_JournalGeneratorSource_ID, trxName, virtualColumns);
-      /** if (GL_JournalGeneratorSource_ID == 0)
-        {
-			setAmtMultiplier (Env.ZERO);
-// 1
-			setC_ElementValue_ID (0);
-			setGL_JournalGeneratorLine_ID (0);
-			setGL_JournalGeneratorSource_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_GL_JournalGeneratorSource (Properties ctx, String GL_JournalGeneratorSource_UU, String trxName)
     {
       super (ctx, GL_JournalGeneratorSource_UU, trxName);

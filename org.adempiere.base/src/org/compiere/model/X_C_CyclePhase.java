@@ -55,17 +55,6 @@ public class X_C_CyclePhase extends PO implements I_C_CyclePhase, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_CyclePhase (Properties ctx, int C_CyclePhase_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_CyclePhase_ID, trxName, virtualColumns);
-      /** if (C_CyclePhase_ID == 0)
-        {
-			setC_CycleStep_ID (0);
-			setC_Phase_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_CyclePhase (Properties ctx, String C_CyclePhase_UU, String trxName)
     {
       super (ctx, C_CyclePhase_UU, trxName);

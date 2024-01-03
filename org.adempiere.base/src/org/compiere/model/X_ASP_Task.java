@@ -59,19 +59,6 @@ public class X_ASP_Task extends PO implements I_ASP_Task, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_ASP_Task (Properties ctx, int ASP_Task_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, ASP_Task_ID, trxName, virtualColumns);
-      /** if (ASP_Task_ID == 0)
-        {
-			setAD_Task_ID (0);
-			setASP_Level_ID (0);
-			setASP_Status (null);
-// S
-        } */
-    }
-
-    /** Standard Constructor */
     public X_ASP_Task (Properties ctx, String ASP_Task_UU, String trxName)
     {
       super (ctx, ASP_Task_UU, trxName);

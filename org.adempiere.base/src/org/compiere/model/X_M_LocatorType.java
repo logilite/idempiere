@@ -68,23 +68,6 @@ public class X_M_LocatorType extends PO implements I_M_LocatorType, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_LocatorType (Properties ctx, int M_LocatorType_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_LocatorType_ID, trxName, virtualColumns);
-      /** if (M_LocatorType_ID == 0)
-        {
-			setIsAvailableForReplenishment (true);
-// Y
-			setIsAvailableForReservation (true);
-// Y
-			setIsAvailableForShipping (true);
-// Y
-			setM_LocatorType_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_LocatorType (Properties ctx, String M_LocatorType_UU, String trxName)
     {
       super (ctx, M_LocatorType_UU, trxName);

@@ -78,26 +78,6 @@ public class X_HR_Process extends PO implements I_HR_Process, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_HR_Process (Properties ctx, int HR_Process_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, HR_Process_ID, trxName, virtualColumns);
-      /** if (HR_Process_ID == 0)
-        {
-			setC_DocTypeTarget_ID (0);
-			setDateAcct (new Timestamp( System.currentTimeMillis() ));
-			setDocAction (null);
-// CO
-			setDocStatus (null);
-// DR
-			setHR_Payroll_ID (0);
-			setName (null);
-			setPosted (false);
-// N
-			setProcessed (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_HR_Process (Properties ctx, String HR_Process_UU, String trxName)
     {
       super (ctx, HR_Process_UU, trxName);

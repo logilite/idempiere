@@ -59,19 +59,6 @@ public class X_IMP_Processor_Type extends PO implements I_IMP_Processor_Type, I_
     }
 
     /** Standard Constructor */
-    public X_IMP_Processor_Type (Properties ctx, int IMP_Processor_Type_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, IMP_Processor_Type_ID, trxName, virtualColumns);
-      /** if (IMP_Processor_Type_ID == 0)
-        {
-			setIMP_Processor_Type_ID (0);
-			setJavaClass (null);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_IMP_Processor_Type (Properties ctx, String IMP_Processor_Type_UU, String trxName)
     {
       super (ctx, IMP_Processor_Type_UU, trxName);

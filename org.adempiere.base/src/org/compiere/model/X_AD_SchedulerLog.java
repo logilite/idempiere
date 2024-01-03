@@ -57,18 +57,6 @@ public class X_AD_SchedulerLog extends PO implements I_AD_SchedulerLog, I_Persis
     }
 
     /** Standard Constructor */
-    public X_AD_SchedulerLog (Properties ctx, int AD_SchedulerLog_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_SchedulerLog_ID, trxName, virtualColumns);
-      /** if (AD_SchedulerLog_ID == 0)
-        {
-			setAD_Scheduler_ID (0);
-			setAD_SchedulerLog_ID (0);
-			setIsError (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_SchedulerLog (Properties ctx, String AD_SchedulerLog_UU, String trxName)
     {
       super (ctx, AD_SchedulerLog_UU, trxName);

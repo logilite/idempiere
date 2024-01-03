@@ -93,34 +93,6 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_BPartner (Properties ctx, int C_BPartner_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_BPartner_ID, trxName, virtualColumns);
-      /** if (C_BPartner_ID == 0)
-        {
-			setC_BPartner_ID (0);
-			setC_BP_Group_ID (0);
-			setIs1099Vendor (false);
-// N
-			setIsCustomer (false);
-			setIsEmployee (false);
-			setIsOneTime (false);
-			setIsPOTaxExempt (false);
-// N
-			setIsProspect (false);
-// N
-			setIsSalesRep (false);
-			setIsSummary (false);
-			setIsVendor (false);
-			setName (null);
-			setSendEMail (false);
-			setSO_CreditLimit (Env.ZERO);
-			setSO_CreditUsed (Env.ZERO);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_BPartner (Properties ctx, String C_BPartner_UU, String trxName)
     {
       super (ctx, C_BPartner_UU, trxName);

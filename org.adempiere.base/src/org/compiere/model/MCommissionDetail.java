@@ -88,10 +88,6 @@ public class MCommissionDetail extends X_C_CommissionDetail
 		super(ctx, rs, trxName);
 	}	//	MCommissionDetail
 
-	public MCommissionDetail(Properties ctx, int C_CommissionDetail_ID, String trxName, String... virtualColumns) {
-		super(ctx, C_CommissionDetail_ID, trxName, virtualColumns);
-	}
-
 	/**
 	 * @param ctx
 	 * @param C_CommissionDetail_ID

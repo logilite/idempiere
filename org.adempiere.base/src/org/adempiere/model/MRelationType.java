@@ -128,10 +128,6 @@ public class MRelationType extends X_AD_RelationType implements IZoomProvider {
 		super(ctx, rs, trxName);
 	}
 
-	public MRelationType(Properties ctx, int AD_RelationType_ID, String trxName, String... virtualColumns) {
-		super(ctx, AD_RelationType_ID, trxName, virtualColumns);
-	}
-
 	/**
 	 * @param ctx
 	 * @param AD_RelationType_ID

@@ -62,19 +62,6 @@ public class X_B_BuyerFunds extends PO implements I_B_BuyerFunds, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_B_BuyerFunds (Properties ctx, int B_BuyerFunds_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, B_BuyerFunds_ID, trxName, virtualColumns);
-      /** if (B_BuyerFunds_ID == 0)
-        {
-			setAD_User_ID (0);
-			setB_BuyerFunds_ID (0);
-			setCommittedAmt (Env.ZERO);
-			setNonCommittedAmt (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_B_BuyerFunds (Properties ctx, String B_BuyerFunds_UU, String trxName)
     {
       super (ctx, B_BuyerFunds_UU, trxName);

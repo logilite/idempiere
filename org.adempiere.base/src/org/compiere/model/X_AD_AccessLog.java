@@ -54,16 +54,6 @@ public class X_AD_AccessLog extends PO implements I_AD_AccessLog, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_AccessLog (Properties ctx, int AD_AccessLog_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_AccessLog_ID, trxName, virtualColumns);
-      /** if (AD_AccessLog_ID == 0)
-        {
-			setAD_AccessLog_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_AccessLog (Properties ctx, String AD_AccessLog_UU, String trxName)
     {
       super (ctx, AD_AccessLog_UU, trxName);

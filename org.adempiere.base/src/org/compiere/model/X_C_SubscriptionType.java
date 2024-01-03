@@ -60,19 +60,6 @@ public class X_C_SubscriptionType extends PO implements I_C_SubscriptionType, I_
     }
 
     /** Standard Constructor */
-    public X_C_SubscriptionType (Properties ctx, int C_SubscriptionType_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_SubscriptionType_ID, trxName, virtualColumns);
-      /** if (C_SubscriptionType_ID == 0)
-        {
-			setC_SubscriptionType_ID (0);
-			setFrequency (0);
-			setFrequencyType (null);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_SubscriptionType (Properties ctx, String C_SubscriptionType_UU, String trxName)
     {
       super (ctx, C_SubscriptionType_UU, trxName);

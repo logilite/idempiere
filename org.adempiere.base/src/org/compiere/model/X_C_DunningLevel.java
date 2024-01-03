@@ -82,29 +82,6 @@ public class X_C_DunningLevel extends PO implements I_C_DunningLevel, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_C_DunningLevel (Properties ctx, int C_DunningLevel_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_DunningLevel_ID, trxName, virtualColumns);
-      /** if (C_DunningLevel_ID == 0)
-        {
-			setC_Dunning_ID (0);
-			setC_DunningLevel_ID (0);
-			setChargeFee (false);
-			setChargeInterest (false);
-			setDaysAfterDue (Env.ZERO);
-			setDaysBetweenDunning (0);
-			setIsSetCreditStop (false);
-			setIsSetPaymentTerm (false);
-			setIsShowAllDue (false);
-			setIsShowNotDue (false);
-			setIsStatement (false);
-// N
-			setName (null);
-			setPrintName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_DunningLevel (Properties ctx, String C_DunningLevel_UU, String trxName)
     {
       super (ctx, C_DunningLevel_UU, trxName);

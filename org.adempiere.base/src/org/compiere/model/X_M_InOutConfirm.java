@@ -80,28 +80,6 @@ public class X_M_InOutConfirm extends PO implements I_M_InOutConfirm, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_M_InOutConfirm (Properties ctx, int M_InOutConfirm_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_InOutConfirm_ID, trxName, virtualColumns);
-      /** if (M_InOutConfirm_ID == 0)
-        {
-			setConfirmType (null);
-			setDocAction (null);
-// CO
-			setDocStatus (null);
-// DR
-			setDocumentNo (null);
-			setIsApproved (false);
-			setIsCancelled (false);
-			setIsInDispute (false);
-// N
-			setM_InOutConfirm_ID (0);
-			setM_InOut_ID (0);
-			setProcessed (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_InOutConfirm (Properties ctx, String M_InOutConfirm_UU, String trxName)
     {
       super (ctx, M_InOutConfirm_UU, trxName);

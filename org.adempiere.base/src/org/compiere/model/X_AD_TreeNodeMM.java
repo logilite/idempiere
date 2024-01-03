@@ -55,17 +55,6 @@ public class X_AD_TreeNodeMM extends PO implements I_AD_TreeNodeMM, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_TreeNodeMM (Properties ctx, int AD_TreeNodeMM_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_TreeNodeMM_ID, trxName, virtualColumns);
-      /** if (AD_TreeNodeMM_ID == 0)
-        {
-			setAD_Tree_ID (0);
-			setNode_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_TreeNodeMM (Properties ctx, String AD_TreeNodeMM_UU, String trxName)
     {
       super (ctx, AD_TreeNodeMM_UU, trxName);

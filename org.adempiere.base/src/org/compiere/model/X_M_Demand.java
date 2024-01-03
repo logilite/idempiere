@@ -62,20 +62,6 @@ public class X_M_Demand extends PO implements I_M_Demand, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_Demand (Properties ctx, int M_Demand_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_Demand_ID, trxName, virtualColumns);
-      /** if (M_Demand_ID == 0)
-        {
-			setC_Calendar_ID (0);
-			setC_Year_ID (0);
-			setIsDefault (false);
-			setM_Demand_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_Demand (Properties ctx, String M_Demand_UU, String trxName)
     {
       super (ctx, M_Demand_UU, trxName);

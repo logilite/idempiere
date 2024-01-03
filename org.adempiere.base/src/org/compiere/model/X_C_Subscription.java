@@ -71,24 +71,6 @@ public class X_C_Subscription extends PO implements I_C_Subscription, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_C_Subscription (Properties ctx, int C_Subscription_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Subscription_ID, trxName, virtualColumns);
-      /** if (C_Subscription_ID == 0)
-        {
-			setC_BPartner_ID (0);
-			setC_Subscription_ID (0);
-			setC_SubscriptionType_ID (0);
-			setIsDue (false);
-			setM_Product_ID (0);
-			setName (null);
-			setPaidUntilDate (new Timestamp( System.currentTimeMillis() ));
-			setRenewalDate (new Timestamp( System.currentTimeMillis() ));
-			setStartDate (new Timestamp( System.currentTimeMillis() ));
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Subscription (Properties ctx, String C_Subscription_UU, String trxName)
     {
       super (ctx, C_Subscription_UU, trxName);

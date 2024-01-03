@@ -100,38 +100,6 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_DocType (Properties ctx, int C_DocType_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_DocType_ID, trxName, virtualColumns);
-      /** if (C_DocType_ID == 0)
-        {
-			setC_DocType_ID (0);
-			setDocBaseType (null);
-			setDocumentCopies (0);
-// 1
-			setGL_Category_ID (0);
-			setHasCharges (false);
-			setIsCreateCounter (true);
-// Y
-			setIsDefault (false);
-			setIsDefaultCounterDoc (false);
-			setIsDocNoControlled (true);
-// Y
-			setIsIndexed (false);
-			setIsInTransit (false);
-			setIsPickQAConfirm (false);
-			setIsPrepareSplitDocument (true);
-// Y
-			setIsShipConfirm (false);
-			setIsSOTrx (false);
-			setIsSplitWhenDifference (false);
-// N
-			setName (null);
-			setPrintName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_DocType (Properties ctx, String C_DocType_UU, String trxName)
     {
       super (ctx, C_DocType_UU, trxName);

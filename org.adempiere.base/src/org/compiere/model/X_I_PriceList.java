@@ -60,18 +60,6 @@ public class X_I_PriceList extends PO implements I_I_PriceList, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_I_PriceList (Properties ctx, int I_PriceList_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, I_PriceList_ID, trxName, virtualColumns);
-      /** if (I_PriceList_ID == 0)
-        {
-			setI_IsImported (false);
-// N
-			setI_PriceList_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_I_PriceList (Properties ctx, String I_PriceList_UU, String trxName)
     {
       super (ctx, I_PriceList_UU, trxName);

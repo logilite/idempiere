@@ -66,21 +66,6 @@ public class X_C_BP_Group extends PO implements I_C_BP_Group, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_BP_Group (Properties ctx, int C_BP_Group_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_BP_Group_ID, trxName, virtualColumns);
-      /** if (C_BP_Group_ID == 0)
-        {
-			setC_BP_Group_ID (0);
-			setIsConfidentialInfo (false);
-// N
-			setIsDefault (false);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_BP_Group (Properties ctx, String C_BP_Group_UU, String trxName)
     {
       super (ctx, C_BP_Group_UU, trxName);

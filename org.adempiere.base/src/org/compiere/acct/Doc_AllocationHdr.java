@@ -1874,19 +1874,6 @@ public class Doc_AllocationHdr extends Doc
 				|| (!invoice.isSOTrx() && invoice.getGrandTotal().signum() >= 0 && invoice.isCreditMemo())
 				|| (!invoice.isSOTrx() && invoice.getGrandTotal().signum() < 0 && !invoice.isCreditMemo());
 	}
-	
-	/**
-	 * Has Debit Receivables/Payables Trade Amount
-	 * @param invoice
-	 * @return
-	 */
-	private boolean hasDebitTradeAmt(MInvoice invoice)
-	{
-		return (invoice.isSOTrx() && invoice.getGrandTotal().signum() >= 0 && !invoice.isCreditMemo()) 
-				|| (invoice.isSOTrx() && invoice.getGrandTotal().signum() < 0 && invoice.isCreditMemo())
-				|| (!invoice.isSOTrx() && invoice.getGrandTotal().signum() >= 0 && invoice.isCreditMemo())
-				|| (!invoice.isSOTrx() && invoice.getGrandTotal().signum() < 0 && !invoice.isCreditMemo());
-	}
 }   //  Doc_Allocation
 
 /**

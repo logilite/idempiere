@@ -60,19 +60,6 @@ public class X_C_Greeting extends PO implements I_C_Greeting, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_Greeting (Properties ctx, int C_Greeting_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Greeting_ID, trxName, virtualColumns);
-      /** if (C_Greeting_ID == 0)
-        {
-			setC_Greeting_ID (0);
-			setIsDefault (false);
-			setIsFirstNameOnly (false);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Greeting (Properties ctx, String C_Greeting_UU, String trxName)
     {
       super (ctx, C_Greeting_UU, trxName);

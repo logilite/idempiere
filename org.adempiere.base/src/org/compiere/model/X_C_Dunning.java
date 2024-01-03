@@ -62,20 +62,6 @@ public class X_C_Dunning extends PO implements I_C_Dunning, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_Dunning (Properties ctx, int C_Dunning_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Dunning_ID, trxName, virtualColumns);
-      /** if (C_Dunning_ID == 0)
-        {
-			setC_Dunning_ID (0);
-			setCreateLevelsSequentially (false);
-			setIsDefault (false);
-			setName (null);
-			setSendDunningLetter (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Dunning (Properties ctx, String C_Dunning_UU, String trxName)
     {
       super (ctx, C_Dunning_UU, trxName);

@@ -56,17 +56,6 @@ public class X_C_Channel extends PO implements I_C_Channel, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_Channel (Properties ctx, int C_Channel_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Channel_ID, trxName, virtualColumns);
-      /** if (C_Channel_ID == 0)
-        {
-			setC_Channel_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Channel (Properties ctx, String C_Channel_UU, String trxName)
     {
       super (ctx, C_Channel_UU, trxName);

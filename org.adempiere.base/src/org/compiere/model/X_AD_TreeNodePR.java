@@ -55,17 +55,6 @@ public class X_AD_TreeNodePR extends PO implements I_AD_TreeNodePR, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_TreeNodePR (Properties ctx, int AD_TreeNodePR_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_TreeNodePR_ID, trxName, virtualColumns);
-      /** if (AD_TreeNodePR_ID == 0)
-        {
-			setAD_Tree_ID (0);
-			setNode_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_TreeNodePR (Properties ctx, String AD_TreeNodePR_UU, String trxName)
     {
       super (ctx, AD_TreeNodePR_UU, trxName);

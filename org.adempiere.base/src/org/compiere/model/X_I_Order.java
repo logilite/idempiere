@@ -58,17 +58,6 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_I_Order (Properties ctx, int I_Order_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, I_Order_ID, trxName, virtualColumns);
-      /** if (I_Order_ID == 0)
-        {
-			setI_IsImported (false);
-			setI_Order_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_I_Order (Properties ctx, String I_Order_UU, String trxName)
     {
       super (ctx, I_Order_UU, trxName);

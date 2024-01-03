@@ -72,25 +72,6 @@ public class X_C_BP_Relation extends PO implements I_C_BP_Relation, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_BP_Relation (Properties ctx, int C_BP_Relation_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_BP_Relation_ID, trxName, virtualColumns);
-      /** if (C_BP_Relation_ID == 0)
-        {
-			setC_BPartner_ID (0);
-			setC_BPartnerRelation_ID (0);
-			setC_BPartnerRelation_Location_ID (0);
-			setC_BP_Relation_ID (0);
-			setIsBillTo (false);
-			setIsPayFrom (false);
-			setIsRemitTo (false);
-			setIsShipTo (false);
-// N
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_BP_Relation (Properties ctx, String C_BP_Relation_UU, String trxName)
     {
       super (ctx, C_BP_Relation_UU, trxName);

@@ -66,21 +66,6 @@ public class X_M_ShipperLabelsCfg extends PO implements I_M_ShipperLabelsCfg, I_
     }
 
     /** Standard Constructor */
-    public X_M_ShipperLabelsCfg (Properties ctx, int M_ShipperLabelsCfg_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_ShipperLabelsCfg_ID, trxName, virtualColumns);
-      /** if (M_ShipperLabelsCfg_ID == 0)
-        {
-			setIsDefault (false);
-// N
-			setM_ShipperCfg_ID (0);
-			setM_ShipperLabelsCfg_ID (0);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_ShipperLabelsCfg (Properties ctx, String M_ShipperLabelsCfg_UU, String trxName)
     {
       super (ctx, M_ShipperLabelsCfg_UU, trxName);

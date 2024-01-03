@@ -66,21 +66,6 @@ public class X_C_CommissionDetail extends PO implements I_C_CommissionDetail, I_
     }
 
     /** Standard Constructor */
-    public X_C_CommissionDetail (Properties ctx, int C_CommissionDetail_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_CommissionDetail_ID, trxName, virtualColumns);
-      /** if (C_CommissionDetail_ID == 0)
-        {
-			setActualAmt (Env.ZERO);
-			setActualQty (Env.ZERO);
-			setC_CommissionAmt_ID (0);
-			setC_CommissionDetail_ID (0);
-			setC_Currency_ID (0);
-			setConvertedAmt (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_CommissionDetail (Properties ctx, String C_CommissionDetail_UU, String trxName)
     {
       super (ctx, C_CommissionDetail_UU, trxName);

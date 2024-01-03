@@ -59,19 +59,6 @@ public class X_EXP_Processor extends PO implements I_EXP_Processor, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_EXP_Processor (Properties ctx, int EXP_Processor_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, EXP_Processor_ID, trxName, virtualColumns);
-      /** if (EXP_Processor_ID == 0)
-        {
-			setEXP_Processor_ID (0);
-			setEXP_Processor_Type_ID (0);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_EXP_Processor (Properties ctx, String EXP_Processor_UU, String trxName)
     {
       super (ctx, EXP_Processor_UU, trxName);

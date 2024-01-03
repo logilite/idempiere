@@ -59,19 +59,6 @@ public class X_IMP_ProcessorParameter extends PO implements I_IMP_ProcessorParam
     }
 
     /** Standard Constructor */
-    public X_IMP_ProcessorParameter (Properties ctx, int IMP_ProcessorParameter_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, IMP_ProcessorParameter_ID, trxName, virtualColumns);
-      /** if (IMP_ProcessorParameter_ID == 0)
-        {
-			setIMP_Processor_ID (0);
-			setIMP_ProcessorParameter_ID (0);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_IMP_ProcessorParameter (Properties ctx, String IMP_ProcessorParameter_UU, String trxName)
     {
       super (ctx, IMP_ProcessorParameter_UU, trxName);

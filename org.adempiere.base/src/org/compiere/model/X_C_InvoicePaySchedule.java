@@ -71,23 +71,6 @@ public class X_C_InvoicePaySchedule extends PO implements I_C_InvoicePaySchedule
     }
 
     /** Standard Constructor */
-    public X_C_InvoicePaySchedule (Properties ctx, int C_InvoicePaySchedule_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_InvoicePaySchedule_ID, trxName, virtualColumns);
-      /** if (C_InvoicePaySchedule_ID == 0)
-        {
-			setC_Invoice_ID (0);
-			setC_InvoicePaySchedule_ID (0);
-			setDiscountAmt (Env.ZERO);
-			setDiscountDate (new Timestamp( System.currentTimeMillis() ));
-			setDueAmt (Env.ZERO);
-			setDueDate (new Timestamp( System.currentTimeMillis() ));
-			setIsValid (false);
-			setProcessed (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_InvoicePaySchedule (Properties ctx, String C_InvoicePaySchedule_UU, String trxName)
     {
       super (ctx, C_InvoicePaySchedule_UU, trxName);

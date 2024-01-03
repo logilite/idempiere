@@ -83,29 +83,6 @@ public class X_GL_JournalBatch extends PO implements I_GL_JournalBatch, I_Persis
     }
 
     /** Standard Constructor */
-    public X_GL_JournalBatch (Properties ctx, int GL_JournalBatch_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, GL_JournalBatch_ID, trxName, virtualColumns);
-      /** if (GL_JournalBatch_ID == 0)
-        {
-			setC_DocType_ID (0);
-			setDescription (null);
-			setDocAction (null);
-// CO
-			setDocStatus (null);
-// DR
-			setDocumentNo (null);
-			setGL_JournalBatch_ID (0);
-			setPostingType (null);
-// A
-			setProcessed (false);
-			setProcessing (false);
-			setTotalCr (Env.ZERO);
-			setTotalDr (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_GL_JournalBatch (Properties ctx, String GL_JournalBatch_UU, String trxName)
     {
       super (ctx, GL_JournalBatch_UU, trxName);

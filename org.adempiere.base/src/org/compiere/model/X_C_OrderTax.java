@@ -65,21 +65,6 @@ public class X_C_OrderTax extends PO implements I_C_OrderTax, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_OrderTax (Properties ctx, int C_OrderTax_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_OrderTax_ID, trxName, virtualColumns);
-      /** if (C_OrderTax_ID == 0)
-        {
-			setC_Order_ID (0);
-			setC_Tax_ID (0);
-			setIsTaxIncluded (false);
-			setProcessed (false);
-			setTaxAmt (Env.ZERO);
-			setTaxBaseAmt (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_OrderTax (Properties ctx, String C_OrderTax_UU, String trxName)
     {
       super (ctx, C_OrderTax_UU, trxName);

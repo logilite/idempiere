@@ -60,19 +60,6 @@ public class X_PA_SLA_Criteria extends PO implements I_PA_SLA_Criteria, I_Persis
     }
 
     /** Standard Constructor */
-    public X_PA_SLA_Criteria (Properties ctx, int PA_SLA_Criteria_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, PA_SLA_Criteria_ID, trxName, virtualColumns);
-      /** if (PA_SLA_Criteria_ID == 0)
-        {
-			setIsManual (true);
-// Y
-			setName (null);
-			setPA_SLA_Criteria_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_PA_SLA_Criteria (Properties ctx, String PA_SLA_Criteria_UU, String trxName)
     {
       super (ctx, PA_SLA_Criteria_UU, trxName);

@@ -66,22 +66,6 @@ public class X_C_Element extends PO implements I_C_Element, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_Element (Properties ctx, int C_Element_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Element_ID, trxName, virtualColumns);
-      /** if (C_Element_ID == 0)
-        {
-			setAD_Tree_ID (0);
-			setC_Element_ID (0);
-			setElementType (null);
-// A
-			setIsBalancing (false);
-			setIsNaturalAccount (false);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Element (Properties ctx, String C_Element_UU, String trxName)
     {
       super (ctx, C_Element_UU, trxName);

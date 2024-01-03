@@ -56,17 +56,6 @@ public class X_C_Location extends PO implements I_C_Location, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_Location (Properties ctx, int C_Location_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Location_ID, trxName, virtualColumns);
-      /** if (C_Location_ID == 0)
-        {
-			setC_Country_ID (0);
-			setC_Location_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Location (Properties ctx, String C_Location_UU, String trxName)
     {
       super (ctx, C_Location_UU, trxName);

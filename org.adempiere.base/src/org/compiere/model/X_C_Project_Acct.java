@@ -59,19 +59,6 @@ public class X_C_Project_Acct extends PO implements I_C_Project_Acct, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_C_Project_Acct (Properties ctx, int C_Project_Acct_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Project_Acct_ID, trxName, virtualColumns);
-      /** if (C_Project_Acct_ID == 0)
-        {
-			setC_AcctSchema_ID (0);
-			setC_Project_ID (0);
-			setPJ_Asset_Acct (0);
-			setPJ_WIP_Acct (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Project_Acct (Properties ctx, String C_Project_Acct_UU, String trxName)
     {
       super (ctx, C_Project_Acct_UU, trxName);

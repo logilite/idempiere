@@ -56,17 +56,6 @@ public class X_AD_OrgType extends PO implements I_AD_OrgType, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_OrgType (Properties ctx, int AD_OrgType_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_OrgType_ID, trxName, virtualColumns);
-      /** if (AD_OrgType_ID == 0)
-        {
-			setAD_OrgType_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_OrgType (Properties ctx, String AD_OrgType_UU, String trxName)
     {
       super (ctx, AD_OrgType_UU, trxName);

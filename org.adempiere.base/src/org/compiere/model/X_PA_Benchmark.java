@@ -58,18 +58,6 @@ public class X_PA_Benchmark extends PO implements I_PA_Benchmark, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_PA_Benchmark (Properties ctx, int PA_Benchmark_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, PA_Benchmark_ID, trxName, virtualColumns);
-      /** if (PA_Benchmark_ID == 0)
-        {
-			setAccumulationType (null);
-			setName (null);
-			setPA_Benchmark_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_PA_Benchmark (Properties ctx, String PA_Benchmark_UU, String trxName)
     {
       super (ctx, PA_Benchmark_UU, trxName);

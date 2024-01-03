@@ -59,18 +59,6 @@ public class X_A_Asset_Delivery extends PO implements I_A_Asset_Delivery, I_Pers
     }
 
     /** Standard Constructor */
-    public X_A_Asset_Delivery (Properties ctx, int A_Asset_Delivery_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_Asset_Delivery_ID, trxName, virtualColumns);
-      /** if (A_Asset_Delivery_ID == 0)
-        {
-			setA_Asset_Delivery_ID (0);
-			setA_Asset_ID (0);
-			setMovementDate (new Timestamp( System.currentTimeMillis() ));
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_Asset_Delivery (Properties ctx, String A_Asset_Delivery_UU, String trxName)
     {
       super (ctx, A_Asset_Delivery_UU, trxName);

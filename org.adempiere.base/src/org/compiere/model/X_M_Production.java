@@ -80,28 +80,6 @@ public class X_M_Production extends PO implements I_M_Production, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_Production (Properties ctx, int M_Production_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_Production_ID, trxName, virtualColumns);
-      /** if (M_Production_ID == 0)
-        {
-			setC_DocType_ID (0);
-			setDocumentNo (null);
-			setIsCreated (null);
-// N
-			setIsUseProductionPlan (false);
-// N
-			setMovementDate (new Timestamp( System.currentTimeMillis() ));
-// @#Date@
-			setM_Production_ID (0);
-			setPosted (false);
-			setProcessed (false);
-			setProductionQty (Env.ZERO);
-// 0
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_Production (Properties ctx, String M_Production_UU, String trxName)
     {
       super (ctx, M_Production_UU, trxName);

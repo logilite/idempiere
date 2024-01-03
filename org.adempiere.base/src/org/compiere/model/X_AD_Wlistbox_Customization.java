@@ -59,19 +59,6 @@ public class X_AD_Wlistbox_Customization extends PO implements I_AD_Wlistbox_Cus
     }
 
     /** Standard Constructor */
-    public X_AD_Wlistbox_Customization (Properties ctx, int AD_Wlistbox_Customization_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Wlistbox_Customization_ID, trxName, virtualColumns);
-      /** if (AD_Wlistbox_Customization_ID == 0)
-        {
-			setAD_User_ID (0);
-			setAD_Wlistbox_Customization_ID (0);
-			setCustom (null);
-			setWlistboxName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Wlistbox_Customization (Properties ctx, String AD_Wlistbox_Customization_UU, String trxName)
     {
       super (ctx, AD_Wlistbox_Customization_UU, trxName);

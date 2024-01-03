@@ -58,17 +58,6 @@ public class X_R_RequestAction extends PO implements I_R_RequestAction, I_Persis
     }
 
     /** Standard Constructor */
-    public X_R_RequestAction (Properties ctx, int R_RequestAction_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, R_RequestAction_ID, trxName, virtualColumns);
-      /** if (R_RequestAction_ID == 0)
-        {
-			setR_RequestAction_ID (0);
-			setR_Request_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_R_RequestAction (Properties ctx, String R_RequestAction_UU, String trxName)
     {
       super (ctx, R_RequestAction_UU, trxName);

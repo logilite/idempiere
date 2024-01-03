@@ -73,25 +73,6 @@ public class X_B_Topic extends PO implements I_B_Topic, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_B_Topic (Properties ctx, int B_Topic_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, B_Topic_ID, trxName, virtualColumns);
-      /** if (B_Topic_ID == 0)
-        {
-			setB_TopicCategory_ID (0);
-			setB_Topic_ID (0);
-			setB_TopicType_ID (0);
-			setDecisionDate (new Timestamp( System.currentTimeMillis() ));
-			setDocumentNo (null);
-			setIsPublished (false);
-			setName (null);
-			setProcessed (false);
-			setTopicAction (null);
-			setTopicStatus (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_B_Topic (Properties ctx, String B_Topic_UU, String trxName)
     {
       super (ctx, B_Topic_UU, trxName);

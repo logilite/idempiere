@@ -59,18 +59,6 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_I_BPartner (Properties ctx, int I_BPartner_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, I_BPartner_ID, trxName, virtualColumns);
-      /** if (I_BPartner_ID == 0)
-        {
-			setI_BPartner_ID (0);
-			setI_IsImported (false);
-// N
-        } */
-    }
-
-    /** Standard Constructor */
     public X_I_BPartner (Properties ctx, String I_BPartner_UU, String trxName)
     {
       super (ctx, I_BPartner_UU, trxName);

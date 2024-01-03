@@ -58,18 +58,6 @@ public class X_A_Depreciation_Method extends PO implements I_A_Depreciation_Meth
     }
 
     /** Standard Constructor */
-    public X_A_Depreciation_Method (Properties ctx, int A_Depreciation_Method_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_Depreciation_Method_ID, trxName, virtualColumns);
-      /** if (A_Depreciation_Method_ID == 0)
-        {
-			setA_Depreciation_Method_ID (0);
-			setProcessed (false);
-// N
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_Depreciation_Method (Properties ctx, String A_Depreciation_Method_UU, String trxName)
     {
       super (ctx, A_Depreciation_Method_UU, trxName);

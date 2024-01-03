@@ -81,28 +81,6 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_Movement (Properties ctx, int M_Movement_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_Movement_ID, trxName, virtualColumns);
-      /** if (M_Movement_ID == 0)
-        {
-			setC_DocType_ID (0);
-			setDocAction (null);
-// CO
-			setDocStatus (null);
-// DR
-			setDocumentNo (null);
-			setIsApproved (false);
-			setIsInTransit (false);
-			setM_Movement_ID (0);
-			setMovementDate (new Timestamp( System.currentTimeMillis() ));
-// @#Date@
-			setPosted (false);
-			setProcessed (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_Movement (Properties ctx, String M_Movement_UU, String trxName)
     {
       super (ctx, M_Movement_UU, trxName);

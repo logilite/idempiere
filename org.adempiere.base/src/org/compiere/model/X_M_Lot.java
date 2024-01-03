@@ -59,18 +59,6 @@ public class X_M_Lot extends PO implements I_M_Lot, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_Lot (Properties ctx, int M_Lot_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_Lot_ID, trxName, virtualColumns);
-      /** if (M_Lot_ID == 0)
-        {
-			setM_Lot_ID (0);
-			setM_Product_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_Lot (Properties ctx, String M_Lot_UU, String trxName)
     {
       super (ctx, M_Lot_UU, trxName);

@@ -56,17 +56,6 @@ public class X_M_AttributeSearch extends PO implements I_M_AttributeSearch, I_Pe
     }
 
     /** Standard Constructor */
-    public X_M_AttributeSearch (Properties ctx, int M_AttributeSearch_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_AttributeSearch_ID, trxName, virtualColumns);
-      /** if (M_AttributeSearch_ID == 0)
-        {
-			setM_AttributeSearch_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_AttributeSearch (Properties ctx, String M_AttributeSearch_UU, String trxName)
     {
       super (ctx, M_AttributeSearch_UU, trxName);

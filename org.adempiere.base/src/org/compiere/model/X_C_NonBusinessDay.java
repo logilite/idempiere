@@ -59,18 +59,6 @@ public class X_C_NonBusinessDay extends PO implements I_C_NonBusinessDay, I_Pers
     }
 
     /** Standard Constructor */
-    public X_C_NonBusinessDay (Properties ctx, int C_NonBusinessDay_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_NonBusinessDay_ID, trxName, virtualColumns);
-      /** if (C_NonBusinessDay_ID == 0)
-        {
-			setC_Calendar_ID (0);
-			setC_NonBusinessDay_ID (0);
-			setDate1 (new Timestamp( System.currentTimeMillis() ));
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_NonBusinessDay (Properties ctx, String C_NonBusinessDay_UU, String trxName)
     {
       super (ctx, C_NonBusinessDay_UU, trxName);

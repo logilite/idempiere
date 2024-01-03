@@ -65,21 +65,6 @@ public class X_M_ShipperPackaging extends PO implements I_M_ShipperPackaging, I_
     }
 
     /** Standard Constructor */
-    public X_M_ShipperPackaging (Properties ctx, int M_ShipperPackaging_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_ShipperPackaging_ID, trxName, virtualColumns);
-      /** if (M_ShipperPackaging_ID == 0)
-        {
-			setIsDefault (false);
-// N
-			setM_Shipper_ID (0);
-			setM_ShipperPackagingCfg_ID (0);
-			setM_ShipperPackaging_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_ShipperPackaging (Properties ctx, String M_ShipperPackaging_UU, String trxName)
     {
       super (ctx, M_ShipperPackaging_UU, trxName);

@@ -71,24 +71,6 @@ public class X_M_Cost extends PO implements I_M_Cost, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_Cost (Properties ctx, int M_Cost_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_Cost_ID, trxName, virtualColumns);
-      /** if (M_Cost_ID == 0)
-        {
-			setC_AcctSchema_ID (0);
-			setCurrentCostPrice (Env.ZERO);
-			setCurrentCostPriceLL (Env.ZERO);
-			setCurrentQty (Env.ZERO);
-			setFutureCostPrice (Env.ZERO);
-			setM_AttributeSetInstance_ID (0);
-			setM_CostElement_ID (0);
-			setM_CostType_ID (0);
-			setM_Product_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_Cost (Properties ctx, String M_Cost_UU, String trxName)
     {
       super (ctx, M_Cost_UU, trxName);

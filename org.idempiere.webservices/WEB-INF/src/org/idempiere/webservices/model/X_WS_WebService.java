@@ -59,18 +59,6 @@ public class X_WS_WebService extends PO implements I_WS_WebService, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_WS_WebService (Properties ctx, int WS_WebService_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, WS_WebService_ID, trxName, virtualColumns);
-      /** if (WS_WebService_ID == 0)
-        {
-			setName (null);
-			setValue (null);
-			setWS_WebService_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_WS_WebService (Properties ctx, String WS_WebService_UU, String trxName)
     {
       super (ctx, WS_WebService_UU, trxName);

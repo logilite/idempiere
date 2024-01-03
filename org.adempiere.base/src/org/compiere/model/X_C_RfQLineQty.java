@@ -74,25 +74,6 @@ public class X_C_RfQLineQty extends PO implements I_C_RfQLineQty, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_RfQLineQty (Properties ctx, int C_RfQLineQty_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_RfQLineQty_ID, trxName, virtualColumns);
-      /** if (C_RfQLineQty_ID == 0)
-        {
-			setBenchmarkPrice (Env.ZERO);
-			setC_RfQLine_ID (0);
-			setC_RfQLineQty_ID (0);
-			setC_UOM_ID (0);
-			setIsOfferQty (false);
-			setIsPurchaseQty (false);
-			setIsRfQQty (true);
-// Y
-			setQty (Env.ZERO);
-// 1
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_RfQLineQty (Properties ctx, String C_RfQLineQty_UU, String trxName)
     {
       super (ctx, C_RfQLineQty_UU, trxName);

@@ -71,22 +71,6 @@ public class X_C_Commission extends PO implements I_C_Commission, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_Commission (Properties ctx, int C_Commission_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Commission_ID, trxName, virtualColumns);
-      /** if (C_Commission_ID == 0)
-        {
-			setC_BPartner_ID (0);
-			setC_Commission_ID (0);
-			setC_Currency_ID (0);
-			setDocBasisType (null);
-// I
-			setFrequencyType (null);
-// M
-			setListDetails (false);
-			setName (null);
-        } */
-    }
 
     /** Standard Constructor */
     public X_C_Commission (Properties ctx, String C_Commission_UU, String trxName)

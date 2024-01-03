@@ -58,18 +58,6 @@ public class X_AD_WF_ProcessData extends PO implements I_AD_WF_ProcessData, I_Pe
     }
 
     /** Standard Constructor */
-    public X_AD_WF_ProcessData (Properties ctx, int AD_WF_ProcessData_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_WF_ProcessData_ID, trxName, virtualColumns);
-      /** if (AD_WF_ProcessData_ID == 0)
-        {
-			setAD_WF_ProcessData_ID (0);
-			setAD_WF_Process_ID (0);
-			setAttributeName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_WF_ProcessData (Properties ctx, String AD_WF_ProcessData_UU, String trxName)
     {
       super (ctx, AD_WF_ProcessData_UU, trxName);

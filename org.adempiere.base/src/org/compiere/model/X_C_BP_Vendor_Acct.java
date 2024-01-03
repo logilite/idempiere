@@ -60,19 +60,6 @@ public class X_C_BP_Vendor_Acct extends PO implements I_C_BP_Vendor_Acct, I_Pers
     }
 
     /** Standard Constructor */
-    public X_C_BP_Vendor_Acct (Properties ctx, int C_BP_Vendor_Acct_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_BP_Vendor_Acct_ID, trxName, virtualColumns);
-      /** if (C_BP_Vendor_Acct_ID == 0)
-        {
-			setC_AcctSchema_ID (0);
-			setC_BPartner_ID (0);
-			setV_Liability_Acct (0);
-			setV_Prepayment_Acct (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_BP_Vendor_Acct (Properties ctx, String C_BP_Vendor_Acct_UU, String trxName)
     {
       super (ctx, C_BP_Vendor_Acct_UU, trxName);

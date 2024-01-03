@@ -59,19 +59,6 @@ public class X_ASP_Workflow extends PO implements I_ASP_Workflow, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_ASP_Workflow (Properties ctx, int ASP_Workflow_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, ASP_Workflow_ID, trxName, virtualColumns);
-      /** if (ASP_Workflow_ID == 0)
-        {
-			setAD_Workflow_ID (0);
-			setASP_Level_ID (0);
-			setASP_Status (null);
-// S
-        } */
-    }
-
-    /** Standard Constructor */
     public X_ASP_Workflow (Properties ctx, String ASP_Workflow_UU, String trxName)
     {
       super (ctx, ASP_Workflow_UU, trxName);

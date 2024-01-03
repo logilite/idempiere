@@ -66,21 +66,6 @@ public class X_C_CommissionAmt extends PO implements I_C_CommissionAmt, I_Persis
     }
 
     /** Standard Constructor */
-    public X_C_CommissionAmt (Properties ctx, int C_CommissionAmt_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_CommissionAmt_ID, trxName, virtualColumns);
-      /** if (C_CommissionAmt_ID == 0)
-        {
-			setActualQty (Env.ZERO);
-			setC_CommissionAmt_ID (0);
-			setC_CommissionLine_ID (0);
-			setC_CommissionRun_ID (0);
-			setCommissionAmt (Env.ZERO);
-			setConvertedAmt (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_CommissionAmt (Properties ctx, String C_CommissionAmt_UU, String trxName)
     {
       super (ctx, C_CommissionAmt_UU, trxName);

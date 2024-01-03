@@ -65,8 +65,4 @@ public class MPromotionGroup extends X_M_PromotionGroup {
 		super(ctx, M_PromotionGroup_ID, trxName, virtualColumns);
 	}
 
-	public MPromotionGroup(Properties ctx, int M_PromotionGroup_ID, String trxName, String... virtualColumns) {
-		super(ctx, M_PromotionGroup_ID, trxName, virtualColumns);
-	}
-
 }

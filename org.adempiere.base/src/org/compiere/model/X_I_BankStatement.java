@@ -58,17 +58,6 @@ public class X_I_BankStatement extends PO implements I_I_BankStatement, I_Persis
     }
 
     /** Standard Constructor */
-    public X_I_BankStatement (Properties ctx, int I_BankStatement_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, I_BankStatement_ID, trxName, virtualColumns);
-      /** if (I_BankStatement_ID == 0)
-        {
-			setI_BankStatement_ID (0);
-			setI_IsImported (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_I_BankStatement (Properties ctx, String I_BankStatement_UU, String trxName)
     {
       super (ctx, I_BankStatement_UU, trxName);

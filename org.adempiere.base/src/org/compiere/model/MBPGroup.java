@@ -275,10 +275,6 @@ public class MBPGroup extends X_C_BP_Group implements ImmutablePOSupport
 		copyPO(copy);
 	}
 
-	public MBPGroup(Properties ctx, int C_BP_Group_ID, String trxName, String... virtualColumns) {
-		super(ctx, C_BP_Group_ID, trxName, virtualColumns);
-	}
-
 	/**
 	 * @param ctx
 	 * @param C_BP_Group_ID

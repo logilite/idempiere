@@ -61,19 +61,6 @@ public class X_AD_User_Substitute extends PO implements I_AD_User_Substitute, I_
     }
 
     /** Standard Constructor */
-    public X_AD_User_Substitute (Properties ctx, int AD_User_Substitute_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_User_Substitute_ID, trxName, virtualColumns);
-      /** if (AD_User_Substitute_ID == 0)
-        {
-			setAD_User_ID (0);
-			setAD_User_Substitute_ID (0);
-			setName (null);
-			setSubstitute_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_User_Substitute (Properties ctx, String AD_User_Substitute_UU, String trxName)
     {
       super (ctx, AD_User_Substitute_UU, trxName);

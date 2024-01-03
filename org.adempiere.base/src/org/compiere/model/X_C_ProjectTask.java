@@ -72,24 +72,6 @@ public class X_C_ProjectTask extends PO implements I_C_ProjectTask, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_ProjectTask (Properties ctx, int C_ProjectTask_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_ProjectTask_ID, trxName, virtualColumns);
-      /** if (C_ProjectTask_ID == 0)
-        {
-			setCommittedAmt (Env.ZERO);
-			setC_ProjectPhase_ID (0);
-			setC_ProjectTask_ID (0);
-			setName (null);
-			setPlannedAmt (Env.ZERO);
-			setProjInvoiceRule (null);
-// @ProjInvoiceRule@
-			setSeqNo (0);
-// @SQL=SELECT NVL(MAX(SeqNo),0)+10 AS DefaultValue FROM C_ProjectTask WHERE C_ProjectPhase_ID=@C_ProjectPhase_ID@
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_ProjectTask (Properties ctx, String C_ProjectTask_UU, String trxName)
     {
       super (ctx, C_ProjectTask_UU, trxName);

@@ -65,20 +65,6 @@ public class X_S_ResourceAssignment extends PO implements I_S_ResourceAssignment
     }
 
     /** Standard Constructor */
-    public X_S_ResourceAssignment (Properties ctx, int S_ResourceAssignment_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, S_ResourceAssignment_ID, trxName, virtualColumns);
-      /** if (S_ResourceAssignment_ID == 0)
-        {
-			setAssignDateFrom (new Timestamp( System.currentTimeMillis() ));
-			setIsConfirmed (false);
-			setName (null);
-			setS_ResourceAssignment_ID (0);
-			setS_Resource_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_S_ResourceAssignment (Properties ctx, String S_ResourceAssignment_UU, String trxName)
     {
       super (ctx, S_ResourceAssignment_UU, trxName);

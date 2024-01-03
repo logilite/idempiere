@@ -60,19 +60,6 @@ public class X_AD_PrintColor extends PO implements I_AD_PrintColor, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_PrintColor (Properties ctx, int AD_PrintColor_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_PrintColor_ID, trxName, virtualColumns);
-      /** if (AD_PrintColor_ID == 0)
-        {
-			setAD_PrintColor_ID (0);
-			setCode (null);
-			setIsDefault (false);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_PrintColor (Properties ctx, String AD_PrintColor_UU, String trxName)
     {
       super (ctx, AD_PrintColor_UU, trxName);

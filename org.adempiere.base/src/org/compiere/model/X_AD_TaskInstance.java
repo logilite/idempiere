@@ -56,17 +56,6 @@ public class X_AD_TaskInstance extends PO implements I_AD_TaskInstance, I_Persis
     }
 
     /** Standard Constructor */
-    public X_AD_TaskInstance (Properties ctx, int AD_TaskInstance_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_TaskInstance_ID, trxName, virtualColumns);
-      /** if (AD_TaskInstance_ID == 0)
-        {
-			setAD_Task_ID (0);
-			setAD_TaskInstance_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_TaskInstance (Properties ctx, String AD_TaskInstance_UU, String trxName)
     {
       super (ctx, AD_TaskInstance_UU, trxName);

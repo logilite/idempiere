@@ -56,17 +56,6 @@ public class X_AD_UserMail extends PO implements I_AD_UserMail, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_UserMail (Properties ctx, int AD_UserMail_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_UserMail_ID, trxName, virtualColumns);
-      /** if (AD_UserMail_ID == 0)
-        {
-			setAD_User_ID (0);
-			setAD_UserMail_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_UserMail (Properties ctx, String AD_UserMail_UU, String trxName)
     {
       super (ctx, AD_UserMail_UU, trxName);

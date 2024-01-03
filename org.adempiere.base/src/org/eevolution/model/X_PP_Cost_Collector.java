@@ -92,33 +92,6 @@ public class X_PP_Cost_Collector extends PO implements I_PP_Cost_Collector, I_Pe
     }
 
     /** Standard Constructor */
-    public X_PP_Cost_Collector (Properties ctx, int PP_Cost_Collector_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, PP_Cost_Collector_ID, trxName, virtualColumns);
-      /** if (PP_Cost_Collector_ID == 0)
-        {
-			setC_DocType_ID (0);
-// 0
-			setC_DocTypeTarget_ID (0);
-			setCostCollectorType (null);
-			setDateAcct (new Timestamp( System.currentTimeMillis() ));
-// @#Date@
-			setM_Locator_ID (0);
-			setMovementDate (new Timestamp( System.currentTimeMillis() ));
-// @#Date@
-			setMovementQty (Env.ZERO);
-// 0
-			setM_Product_ID (0);
-			setM_Warehouse_ID (0);
-			setPosted (false);
-			setPP_Cost_Collector_ID (0);
-			setPP_Order_ID (0);
-			setProcessed (false);
-			setS_Resource_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_PP_Cost_Collector (Properties ctx, String PP_Cost_Collector_UU, String trxName)
     {
       super (ctx, PP_Cost_Collector_UU, trxName);

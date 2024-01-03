@@ -54,16 +54,6 @@ public class X_T_MRP_CRP extends PO implements I_T_MRP_CRP, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_T_MRP_CRP (Properties ctx, int T_MRP_CRP_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, T_MRP_CRP_ID, trxName, virtualColumns);
-      /** if (T_MRP_CRP_ID == 0)
-        {
-			setT_MRP_CRP_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_T_MRP_CRP (Properties ctx, String T_MRP_CRP_UU, String trxName)
     {
       super (ctx, T_MRP_CRP_UU, trxName);

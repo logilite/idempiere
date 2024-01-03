@@ -64,20 +64,6 @@ public class X_HR_Employee extends PO implements I_HR_Employee, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_HR_Employee (Properties ctx, int HR_Employee_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, HR_Employee_ID, trxName, virtualColumns);
-      /** if (HR_Employee_ID == 0)
-        {
-			setC_BPartner_ID (0);
-			setHR_Department_ID (0);
-			setHR_Employee_ID (0);
-			setHR_Job_ID (0);
-			setStartDate (new Timestamp( System.currentTimeMillis() ));
-        } */
-    }
-
-    /** Standard Constructor */
     public X_HR_Employee (Properties ctx, String HR_Employee_UU, String trxName)
     {
       super (ctx, HR_Employee_UU, trxName);

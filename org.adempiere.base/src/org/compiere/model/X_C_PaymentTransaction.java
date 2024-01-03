@@ -96,36 +96,6 @@ public class X_C_PaymentTransaction extends PO implements I_C_PaymentTransaction
     }
 
     /** Standard Constructor */
-    public X_C_PaymentTransaction (Properties ctx, int C_PaymentTransaction_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_PaymentTransaction_ID, trxName, virtualColumns);
-      /** if (C_PaymentTransaction_ID == 0)
-        {
-			setC_BPartner_ID (0);
-			setC_Currency_ID (0);
-			setC_PaymentTransaction_ID (0);
-			setDateTrx (new Timestamp( System.currentTimeMillis() ));
-// @#Date@
-			setIsApproved (false);
-// N
-			setIsDelayedCapture (false);
-			setIsOnline (false);
-			setIsReceipt (false);
-			setIsSelfService (false);
-			setIsVoided (false);
-// N
-			setPayAmt (Env.ZERO);
-// 0
-			setProcessed (false);
-// N
-			setTenderType (null);
-// K
-			setTrxType (null);
-// S
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_PaymentTransaction (Properties ctx, String C_PaymentTransaction_UU, String trxName)
     {
       super (ctx, C_PaymentTransaction_UU, trxName);

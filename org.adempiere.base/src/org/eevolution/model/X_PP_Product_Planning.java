@@ -69,22 +69,6 @@ public class X_PP_Product_Planning extends PO implements I_PP_Product_Planning, 
     }
 
     /** Standard Constructor */
-    public X_PP_Product_Planning (Properties ctx, int PP_Product_Planning_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, PP_Product_Planning_ID, trxName, virtualColumns);
-      /** if (PP_Product_Planning_ID == 0)
-        {
-			setIsCreatePlan (true);
-// Y
-			setIsPhantom (false);
-			setIsRequiredDRP (false);
-			setIsRequiredMRP (false);
-			setM_Product_ID (0);
-			setPP_Product_Planning_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_PP_Product_Planning (Properties ctx, String PP_Product_Planning_UU, String trxName)
     {
       super (ctx, PP_Product_Planning_UU, trxName);

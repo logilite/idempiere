@@ -58,18 +58,6 @@ public class X_C_Cycle extends PO implements I_C_Cycle, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_Cycle (Properties ctx, int C_Cycle_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Cycle_ID, trxName, virtualColumns);
-      /** if (C_Cycle_ID == 0)
-        {
-			setC_Currency_ID (0);
-			setC_Cycle_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Cycle (Properties ctx, String C_Cycle_UU, String trxName)
     {
       super (ctx, C_Cycle_UU, trxName);

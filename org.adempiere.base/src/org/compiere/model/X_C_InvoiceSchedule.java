@@ -72,24 +72,6 @@ public class X_C_InvoiceSchedule extends PO implements I_C_InvoiceSchedule, I_Pe
     }
 
     /** Standard Constructor */
-    public X_C_InvoiceSchedule (Properties ctx, int C_InvoiceSchedule_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_InvoiceSchedule_ID, trxName, virtualColumns);
-      /** if (C_InvoiceSchedule_ID == 0)
-        {
-			setAmt (Env.ZERO);
-			setC_InvoiceSchedule_ID (0);
-			setInvoiceDay (0);
-// 1
-			setInvoiceFrequency (null);
-			setInvoiceWeekDay (null);
-			setIsAmount (false);
-			setIsDefault (false);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_InvoiceSchedule (Properties ctx, String C_InvoiceSchedule_UU, String trxName)
     {
       super (ctx, C_InvoiceSchedule_UU, trxName);

@@ -66,20 +66,6 @@ public class X_PP_MRP extends PO implements I_PP_MRP, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_PP_MRP (Properties ctx, int PP_MRP_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, PP_MRP_ID, trxName, virtualColumns);
-      /** if (PP_MRP_ID == 0)
-        {
-			setDateOrdered (new Timestamp( System.currentTimeMillis() ));
-			setDatePromised (new Timestamp( System.currentTimeMillis() ));
-			setM_Warehouse_ID (0);
-			setPP_MRP_ID (0);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_PP_MRP (Properties ctx, String PP_MRP_UU, String trxName)
     {
       super (ctx, PP_MRP_UU, trxName);

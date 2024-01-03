@@ -57,18 +57,6 @@ public class X_AD_User_OrgAccess extends PO implements I_AD_User_OrgAccess, I_Pe
     }
 
     /** Standard Constructor */
-    public X_AD_User_OrgAccess (Properties ctx, int AD_User_OrgAccess_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_User_OrgAccess_ID, trxName, virtualColumns);
-      /** if (AD_User_OrgAccess_ID == 0)
-        {
-			setAD_User_ID (0);
-			setIsReadOnly (false);
-// N
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_User_OrgAccess (Properties ctx, String AD_User_OrgAccess_UU, String trxName)
     {
       super (ctx, AD_User_OrgAccess_UU, trxName);

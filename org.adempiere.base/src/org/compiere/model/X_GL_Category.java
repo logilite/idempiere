@@ -63,21 +63,6 @@ public class X_GL_Category extends PO implements I_GL_Category, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_GL_Category (Properties ctx, int GL_Category_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, GL_Category_ID, trxName, virtualColumns);
-      /** if (GL_Category_ID == 0)
-        {
-			setCategoryType (null);
-// M
-			setGL_Category_ID (0);
-			setIsDefault (false);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_GL_Category (Properties ctx, String GL_Category_UU, String trxName)
     {
       super (ctx, GL_Category_UU, trxName);

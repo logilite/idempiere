@@ -61,20 +61,6 @@ public class X_A_Depreciation extends PO implements I_A_Depreciation, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_A_Depreciation (Properties ctx, int A_Depreciation_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_Depreciation_ID, trxName, virtualColumns);
-      /** if (A_Depreciation_ID == 0)
-        {
-			setA_Depreciation_ID (0);
-			setDepreciationType (null);
-			setName (null);
-			setProcessed (false);
-// N
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_Depreciation (Properties ctx, String A_Depreciation_UU, String trxName)
     {
       super (ctx, A_Depreciation_UU, trxName);

@@ -69,24 +69,6 @@ public class X_AD_Tree_Favorite_Node extends PO implements I_AD_Tree_Favorite_No
     }
 
     /** Standard Constructor */
-    public X_AD_Tree_Favorite_Node (Properties ctx, int AD_Tree_Favorite_Node_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Tree_Favorite_Node_ID, trxName, virtualColumns);
-      /** if (AD_Tree_Favorite_Node_ID == 0)
-        {
-			setAD_Tree_Favorite_ID (0);
-			setAD_Tree_Favorite_Node_ID (0);
-			setIsCollapsible (true);
-// Y
-			setIsFavourite (false);
-// N
-			setIsSummary (false);
-// N
-			setSeqNo (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Tree_Favorite_Node (Properties ctx, String AD_Tree_Favorite_Node_UU, String trxName)
     {
       super (ctx, AD_Tree_Favorite_Node_UU, trxName);

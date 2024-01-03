@@ -101,38 +101,6 @@ public class X_A_Depreciation_Entry extends PO implements I_A_Depreciation_Entry
     }
 
     /** Standard Constructor */
-    public X_A_Depreciation_Entry (Properties ctx, int A_Depreciation_Entry_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_Depreciation_Entry_ID, trxName, virtualColumns);
-      /** if (A_Depreciation_Entry_ID == 0)
-        {
-			setA_Depreciation_Entry_ID (0);
-			setC_AcctSchema_ID (0);
-			setC_Currency_ID (0);
-// @$C_Currency_ID@
-			setC_DocType_ID (0);
-			setC_Period_ID (0);
-			setDateAcct (new Timestamp( System.currentTimeMillis() ));
-// @Date@
-			setDateDoc (new Timestamp( System.currentTimeMillis() ));
-// @#Date@
-			setDocAction (null);
-// 'CO'
-			setDocStatus (null);
-// 'DR'
-			setDocumentNo (null);
-			setIsApproved (false);
-// @#IsCanApproveOwnDoc@
-			setPosted (false);
-// 'N'
-			setPostingType (null);
-// 'A'
-			setProcessed (false);
-			setProcessing (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_Depreciation_Entry (Properties ctx, String A_Depreciation_Entry_UU, String trxName)
     {
       super (ctx, A_Depreciation_Entry_UU, trxName);

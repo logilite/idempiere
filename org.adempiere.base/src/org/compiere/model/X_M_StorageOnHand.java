@@ -64,20 +64,6 @@ public class X_M_StorageOnHand extends PO implements I_M_StorageOnHand, I_Persis
     }
 
     /** Standard Constructor */
-    public X_M_StorageOnHand (Properties ctx, int M_StorageOnHand_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_StorageOnHand_ID, trxName, virtualColumns);
-      /** if (M_StorageOnHand_ID == 0)
-        {
-			setDateMaterialPolicy (new Timestamp( System.currentTimeMillis() ));
-			setM_AttributeSetInstance_ID (0);
-			setM_Locator_ID (0);
-			setM_Product_ID (0);
-			setQtyOnHand (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_StorageOnHand (Properties ctx, String M_StorageOnHand_UU, String trxName)
     {
       super (ctx, M_StorageOnHand_UU, trxName);

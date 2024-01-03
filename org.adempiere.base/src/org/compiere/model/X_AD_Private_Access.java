@@ -57,18 +57,6 @@ public class X_AD_Private_Access extends PO implements I_AD_Private_Access, I_Pe
     }
 
     /** Standard Constructor */
-    public X_AD_Private_Access (Properties ctx, int AD_Private_Access_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Private_Access_ID, trxName, virtualColumns);
-      /** if (AD_Private_Access_ID == 0)
-        {
-			setAD_Table_ID (0);
-			setAD_User_ID (0);
-			setRecord_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Private_Access (Properties ctx, String AD_Private_Access_UU, String trxName)
     {
       super (ctx, AD_Private_Access_UU, trxName);

@@ -72,24 +72,6 @@ public class X_AD_Color extends PO implements I_AD_Color, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_Color (Properties ctx, int AD_Color_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Color_ID, trxName, virtualColumns);
-      /** if (AD_Color_ID == 0)
-        {
-			setAD_Color_ID (0);
-			setAlpha (0);
-			setBlue (0);
-			setColorType (null);
-			setGreen (0);
-			setImageAlpha (Env.ZERO);
-			setIsDefault (false);
-			setName (null);
-			setRed (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Color (Properties ctx, String AD_Color_UU, String trxName)
     {
       super (ctx, AD_Color_UU, trxName);

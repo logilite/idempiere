@@ -55,17 +55,6 @@ public class X_AD_WizardProcess extends PO implements I_AD_WizardProcess, I_Pers
     }
 
     /** Standard Constructor */
-    public X_AD_WizardProcess (Properties ctx, int AD_WizardProcess_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_WizardProcess_ID, trxName, virtualColumns);
-      /** if (AD_WizardProcess_ID == 0)
-        {
-			setAD_WF_Node_ID (0);
-			setAD_WizardProcess_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_WizardProcess (Properties ctx, String AD_WizardProcess_UU, String trxName)
     {
       super (ctx, AD_WizardProcess_UU, trxName);

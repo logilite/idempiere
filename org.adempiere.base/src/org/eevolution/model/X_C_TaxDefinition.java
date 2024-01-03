@@ -60,18 +60,6 @@ public class X_C_TaxDefinition extends PO implements I_C_TaxDefinition, I_Persis
     }
 
     /** Standard Constructor */
-    public X_C_TaxDefinition (Properties ctx, int C_TaxDefinition_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_TaxDefinition_ID, trxName, virtualColumns);
-      /** if (C_TaxDefinition_ID == 0)
-        {
-			setC_TaxDefinition_ID (0);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_TaxDefinition (Properties ctx, String C_TaxDefinition_UU, String trxName)
     {
       super (ctx, C_TaxDefinition_UU, trxName);

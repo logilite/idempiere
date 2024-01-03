@@ -64,21 +64,6 @@ public class X_AD_Modification extends PO implements I_AD_Modification, I_Persis
     }
 
     /** Standard Constructor */
-    public X_AD_Modification (Properties ctx, int AD_Modification_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Modification_ID, trxName, virtualColumns);
-      /** if (AD_Modification_ID == 0)
-        {
-			setAD_Modification_ID (0);
-			setEntityType (null);
-// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
-			setName (null);
-			setSeqNo (0);
-// @SQL=SELECT COALESCE(MAX(SeqNo),0)+10 AS DefaultValue FROM AD_Modification WHERE EntityType='@EntityType@'
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Modification (Properties ctx, String AD_Modification_UU, String trxName)
     {
       super (ctx, AD_Modification_UU, trxName);

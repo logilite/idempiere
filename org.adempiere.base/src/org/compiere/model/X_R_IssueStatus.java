@@ -56,17 +56,6 @@ public class X_R_IssueStatus extends PO implements I_R_IssueStatus, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_R_IssueStatus (Properties ctx, int R_IssueStatus_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, R_IssueStatus_ID, trxName, virtualColumns);
-      /** if (R_IssueStatus_ID == 0)
-        {
-			setName (null);
-			setR_IssueStatus_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_R_IssueStatus (Properties ctx, String R_IssueStatus_UU, String trxName)
     {
       super (ctx, R_IssueStatus_UU, trxName);

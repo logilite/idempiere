@@ -56,17 +56,6 @@ public class X_C_POSKeyLayout extends PO implements I_C_POSKeyLayout, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_C_POSKeyLayout (Properties ctx, int C_POSKeyLayout_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_POSKeyLayout_ID, trxName, virtualColumns);
-      /** if (C_POSKeyLayout_ID == 0)
-        {
-			setC_POSKeyLayout_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_POSKeyLayout (Properties ctx, String C_POSKeyLayout_UU, String trxName)
     {
       super (ctx, C_POSKeyLayout_UU, trxName);

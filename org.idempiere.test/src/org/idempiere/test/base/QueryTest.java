@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 
 import org.adempiere.exceptions.DBException;
 import org.adempiere.model.POWrapper;
-import org.compiere.model.I_Test;
+import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.compiere.model.I_Test;
@@ -434,34 +434,4 @@ public class QueryTest extends AbstractTestCase {
 		String sql = query.getSQL();
 		assertTrue(sql.toLowerCase().contains("inner join c_bpartner on (ad_user.c_bpartner_id=c_bpartner.c_bpartner_id)"), "Unexpected SQL clause generated from query");
 	}
-
-	@Test
-	public void testVirtualColumnLoad() {
-		// create bogus record
-		PO testPo = new MTest(Env.getCtx(), getClass().getName(), 1);
-		testPo.save();
-
-		BigDecimal expected = new BigDecimal("123.45");
-
-		// virtual column lazy loading
-		Query query = new Query(Env.getCtx(), MTest.Table_Name, MTest.COLUMNNAME_Test_ID + "=?", getTrxName());
-		testPo = query.setParameters(testPo.get_ID()).first();
-		I_Test testRecord = POWrapper.create(testPo, I_Test.class);
-		assertTrue(null == testPo.get_ValueOld(MTest.COLUMNNAME_TestVirtualQty));
-		assertEquals(expected, testRecord.getTestVirtualQty().setScale(2, RoundingMode.HALF_UP), "Wrong value returned");
-
-		// without virtual column lazy loading
-		testPo = query.setNoVirtualColumn(false).setParameters(testPo.get_ID()).first();
-		assertTrue(null != testPo.get_ValueOld(MTest.COLUMNNAME_TestVirtualQty));
-		testRecord = POWrapper.create(testPo, I_Test.class);
-		assertEquals(expected, testRecord.getTestVirtualQty().setScale(2, RoundingMode.HALF_UP), "Wrong value returned");
-
-		// single virtual column without lazy loading
-		testPo = query.setVirtualColumns(I_Test.COLUMNNAME_TestVirtualQty)
-				.setParameters(testPo.get_ID()).first();
-		assertTrue(null != testPo.get_ValueOld(MTest.COLUMNNAME_TestVirtualQty));
-		testRecord = POWrapper.create(testPo, I_Test.class);
-		assertEquals(expected, testRecord.getTestVirtualQty().setScale(2, RoundingMode.HALF_UP), "Wrong value returned");
-	}
-
 }

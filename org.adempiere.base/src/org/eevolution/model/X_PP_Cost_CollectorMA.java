@@ -62,19 +62,6 @@ public class X_PP_Cost_CollectorMA extends PO implements I_PP_Cost_CollectorMA, 
     }
 
     /** Standard Constructor */
-    public X_PP_Cost_CollectorMA (Properties ctx, int PP_Cost_CollectorMA_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, PP_Cost_CollectorMA_ID, trxName, virtualColumns);
-      /** if (PP_Cost_CollectorMA_ID == 0)
-        {
-			setM_AttributeSetInstance_ID (0);
-			setMovementQty (Env.ZERO);
-			setPP_Cost_Collector_ID (0);
-			setPP_Cost_CollectorMA_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_PP_Cost_CollectorMA (Properties ctx, String PP_Cost_CollectorMA_UU, String trxName)
     {
       super (ctx, PP_Cost_CollectorMA_UU, trxName);

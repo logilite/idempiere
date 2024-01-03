@@ -57,18 +57,6 @@ public class X_R_RequestTypeUpdates extends PO implements I_R_RequestTypeUpdates
     }
 
     /** Standard Constructor */
-    public X_R_RequestTypeUpdates (Properties ctx, int R_RequestTypeUpdates_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, R_RequestTypeUpdates_ID, trxName, virtualColumns);
-      /** if (R_RequestTypeUpdates_ID == 0)
-        {
-			setAD_User_ID (0);
-			setIsSelfService (false);
-			setR_RequestType_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_R_RequestTypeUpdates (Properties ctx, String R_RequestTypeUpdates_UU, String trxName)
     {
       super (ctx, R_RequestTypeUpdates_UU, trxName);

@@ -74,25 +74,6 @@ public class X_M_InventoryLine extends PO implements I_M_InventoryLine, I_Persis
     }
 
     /** Standard Constructor */
-    public X_M_InventoryLine (Properties ctx, int M_InventoryLine_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_InventoryLine_ID, trxName, virtualColumns);
-      /** if (M_InventoryLine_ID == 0)
-        {
-			setInventoryType (null);
-// D
-			setM_AttributeSetInstance_ID (0);
-			setM_Inventory_ID (0);
-			setM_InventoryLine_ID (0);
-			setM_Product_ID (0);
-			setProcessed (false);
-			setQtyBook (Env.ZERO);
-			setQtyCount (Env.ZERO);
-			setQtyCsv (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_InventoryLine (Properties ctx, String M_InventoryLine_UU, String trxName)
     {
       super (ctx, M_InventoryLine_UU, trxName);

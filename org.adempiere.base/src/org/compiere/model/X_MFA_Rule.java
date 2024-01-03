@@ -55,17 +55,6 @@ public class X_MFA_Rule extends PO implements I_MFA_Rule, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_MFA_Rule (Properties ctx, int MFA_Rule_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, MFA_Rule_ID, trxName, virtualColumns);
-      /** if (MFA_Rule_ID == 0)
-        {
-			setMFA_Method_ID (0);
-			setMFA_Rule_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_MFA_Rule (Properties ctx, String MFA_Rule_UU, String trxName)
     {
       super (ctx, MFA_Rule_UU, trxName);

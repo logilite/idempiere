@@ -604,22 +604,6 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 		return (String)get_Value(COLUMNNAME_CreateLinesFrom);
 	}
 
-	/** Set Create lines from.
-		@param CreateLinesFrom Process which will generate a new document lines based on an existing document
-	*/
-	public void setCreateLinesFrom (String CreateLinesFrom)
-	{
-		set_Value (COLUMNNAME_CreateLinesFrom, CreateLinesFrom);
-	}
-
-	/** Get Create lines from.
-		@return Process which will generate a new document lines based on an existing document
-	  */
-	public String getCreateLinesFrom()
-	{
-		return (String)get_Value(COLUMNNAME_CreateLinesFrom);
-	}
-
 	/** Set Create Package.
 		@param CreatePackage Create Package
 	*/

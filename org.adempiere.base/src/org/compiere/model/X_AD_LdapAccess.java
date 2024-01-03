@@ -58,18 +58,6 @@ public class X_AD_LdapAccess extends PO implements I_AD_LdapAccess, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_LdapAccess (Properties ctx, int AD_LdapAccess_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_LdapAccess_ID, trxName, virtualColumns);
-      /** if (AD_LdapAccess_ID == 0)
-        {
-			setAD_LdapAccess_ID (0);
-			setAD_LdapProcessor_ID (0);
-			setIsError (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_LdapAccess (Properties ctx, String AD_LdapAccess_UU, String trxName)
     {
       super (ctx, AD_LdapAccess_UU, trxName);

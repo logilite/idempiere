@@ -64,21 +64,6 @@ public class X_M_ChangeRequest extends PO implements I_M_ChangeRequest, I_Persis
     }
 
     /** Standard Constructor */
-    public X_M_ChangeRequest (Properties ctx, int M_ChangeRequest_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_ChangeRequest_ID, trxName, virtualColumns);
-      /** if (M_ChangeRequest_ID == 0)
-        {
-			setDocumentNo (null);
-			setIsApproved (false);
-// N
-			setM_ChangeRequest_ID (0);
-			setName (null);
-			setProcessed (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_ChangeRequest (Properties ctx, String M_ChangeRequest_UU, String trxName)
     {
       super (ctx, M_ChangeRequest_UU, trxName);

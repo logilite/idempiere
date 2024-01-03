@@ -70,24 +70,6 @@ public class X_C_AcctSchema_GL extends PO implements I_C_AcctSchema_GL, I_Persis
     }
 
     /** Standard Constructor */
-    public X_C_AcctSchema_GL (Properties ctx, int C_AcctSchema_GL_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_AcctSchema_GL_ID, trxName, virtualColumns);
-      /** if (C_AcctSchema_GL_ID == 0)
-        {
-			setC_AcctSchema_ID (0);
-			setCommitmentOffset_Acct (0);
-			setCommitmentOffsetSales_Acct (0);
-			setIntercompanyDueFrom_Acct (0);
-			setIntercompanyDueTo_Acct (0);
-			setPPVOffset_Acct (0);
-			setUseCurrencyBalancing (false);
-			setUseSuspenseBalancing (false);
-			setUseSuspenseError (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_AcctSchema_GL (Properties ctx, String C_AcctSchema_GL_UU, String trxName)
     {
       super (ctx, C_AcctSchema_GL_UU, trxName);

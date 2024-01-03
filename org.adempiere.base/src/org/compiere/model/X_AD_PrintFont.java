@@ -60,19 +60,6 @@ public class X_AD_PrintFont extends PO implements I_AD_PrintFont, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_PrintFont (Properties ctx, int AD_PrintFont_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_PrintFont_ID, trxName, virtualColumns);
-      /** if (AD_PrintFont_ID == 0)
-        {
-			setAD_PrintFont_ID (0);
-			setCode (null);
-			setIsDefault (false);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_PrintFont (Properties ctx, String AD_PrintFont_UU, String trxName)
     {
       super (ctx, AD_PrintFont_UU, trxName);

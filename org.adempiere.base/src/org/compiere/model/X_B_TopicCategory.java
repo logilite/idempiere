@@ -58,18 +58,6 @@ public class X_B_TopicCategory extends PO implements I_B_TopicCategory, I_Persis
     }
 
     /** Standard Constructor */
-    public X_B_TopicCategory (Properties ctx, int B_TopicCategory_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, B_TopicCategory_ID, trxName, virtualColumns);
-      /** if (B_TopicCategory_ID == 0)
-        {
-			setB_TopicCategory_ID (0);
-			setB_TopicType_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_B_TopicCategory (Properties ctx, String B_TopicCategory_UU, String trxName)
     {
       super (ctx, B_TopicCategory_UU, trxName);

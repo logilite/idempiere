@@ -66,22 +66,6 @@ public class X_AD_Table_Access extends PO implements I_AD_Table_Access, I_Persis
     }
 
     /** Standard Constructor */
-    public X_AD_Table_Access (Properties ctx, int AD_Table_Access_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Table_Access_ID, trxName, virtualColumns);
-      /** if (AD_Table_Access_ID == 0)
-        {
-			setAccessTypeRule (null);
-// A
-			setAD_Role_ID (0);
-			setAD_Table_ID (0);
-			setIsExclude (true);
-// Y
-			setIsReadOnly (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Table_Access (Properties ctx, String AD_Table_Access_UU, String trxName)
     {
       super (ctx, AD_Table_Access_UU, trxName);

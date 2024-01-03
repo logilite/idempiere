@@ -51,15 +51,6 @@ public class X_AD_AllClients_V extends PO implements I_AD_AllClients_V, I_Persis
     }
 
     /** Standard Constructor */
-    public X_AD_AllClients_V (Properties ctx, int AD_AllClients_V_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_AllClients_V_ID, trxName, virtualColumns);
-      /** if (AD_AllClients_V_ID == 0)
-        {
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_AllClients_V (Properties ctx, String AD_AllClients_V_UU, String trxName)
     {
       super (ctx, AD_AllClients_V_UU, trxName);

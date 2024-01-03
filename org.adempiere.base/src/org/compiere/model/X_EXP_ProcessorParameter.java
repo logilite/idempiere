@@ -59,19 +59,6 @@ public class X_EXP_ProcessorParameter extends PO implements I_EXP_ProcessorParam
     }
 
     /** Standard Constructor */
-    public X_EXP_ProcessorParameter (Properties ctx, int EXP_ProcessorParameter_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, EXP_ProcessorParameter_ID, trxName, virtualColumns);
-      /** if (EXP_ProcessorParameter_ID == 0)
-        {
-			setEXP_Processor_ID (0);
-			setEXP_ProcessorParameter_ID (0);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_EXP_ProcessorParameter (Properties ctx, String EXP_ProcessorParameter_UU, String trxName)
     {
       super (ctx, EXP_ProcessorParameter_UU, trxName);

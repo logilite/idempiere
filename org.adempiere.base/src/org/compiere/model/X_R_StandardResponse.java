@@ -58,18 +58,6 @@ public class X_R_StandardResponse extends PO implements I_R_StandardResponse, I_
     }
 
     /** Standard Constructor */
-    public X_R_StandardResponse (Properties ctx, int R_StandardResponse_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, R_StandardResponse_ID, trxName, virtualColumns);
-      /** if (R_StandardResponse_ID == 0)
-        {
-			setName (null);
-			setResponseText (null);
-			setR_StandardResponse_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_R_StandardResponse (Properties ctx, String R_StandardResponse_UU, String trxName)
     {
       super (ctx, R_StandardResponse_UU, trxName);

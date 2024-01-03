@@ -56,17 +56,6 @@ public class X_A_Asset_Info_Tax extends PO implements I_A_Asset_Info_Tax, I_Pers
     }
 
     /** Standard Constructor */
-    public X_A_Asset_Info_Tax (Properties ctx, int A_Asset_Info_Tax_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_Asset_Info_Tax_ID, trxName, virtualColumns);
-      /** if (A_Asset_Info_Tax_ID == 0)
-        {
-			setA_Asset_ID (0);
-			setA_Asset_Info_Tax_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_Asset_Info_Tax (Properties ctx, String A_Asset_Info_Tax_UU, String trxName)
     {
       super (ctx, A_Asset_Info_Tax_UU, trxName);

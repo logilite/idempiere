@@ -61,18 +61,6 @@ public class X_R_RequestUpdate extends PO implements I_R_RequestUpdate, I_Persis
     }
 
     /** Standard Constructor */
-    public X_R_RequestUpdate (Properties ctx, int R_RequestUpdate_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, R_RequestUpdate_ID, trxName, virtualColumns);
-      /** if (R_RequestUpdate_ID == 0)
-        {
-			setConfidentialTypeEntry (null);
-			setR_Request_ID (0);
-			setR_RequestUpdate_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_R_RequestUpdate (Properties ctx, String R_RequestUpdate_UU, String trxName)
     {
       super (ctx, R_RequestUpdate_UU, trxName);

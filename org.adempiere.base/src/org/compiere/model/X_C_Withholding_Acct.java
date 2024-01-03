@@ -57,18 +57,6 @@ public class X_C_Withholding_Acct extends PO implements I_C_Withholding_Acct, I_
     }
 
     /** Standard Constructor */
-    public X_C_Withholding_Acct (Properties ctx, int C_Withholding_Acct_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Withholding_Acct_ID, trxName, virtualColumns);
-      /** if (C_Withholding_Acct_ID == 0)
-        {
-			setC_AcctSchema_ID (0);
-			setC_Withholding_ID (0);
-			setWithholding_Acct (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Withholding_Acct (Properties ctx, String C_Withholding_Acct_UU, String trxName)
     {
       super (ctx, C_Withholding_Acct_UU, trxName);

@@ -58,17 +58,6 @@ public class X_M_DistributionList extends PO implements I_M_DistributionList, I_
     }
 
     /** Standard Constructor */
-    public X_M_DistributionList (Properties ctx, int M_DistributionList_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_DistributionList_ID, trxName, virtualColumns);
-      /** if (M_DistributionList_ID == 0)
-        {
-			setM_DistributionList_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_DistributionList (Properties ctx, String M_DistributionList_UU, String trxName)
     {
       super (ctx, M_DistributionList_UU, trxName);

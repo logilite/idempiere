@@ -64,21 +64,6 @@ public class X_AD_SMTP extends PO implements I_AD_SMTP, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_SMTP (Properties ctx, int AD_SMTP_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_SMTP_ID, trxName, virtualColumns);
-      /** if (AD_SMTP_ID == 0)
-        {
-			setAD_SMTP_ID (0);
-			setIsSecureSMTP (false);
-// N
-			setIsSmtpAuthorization (false);
-// N
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_SMTP (Properties ctx, String AD_SMTP_UU, String trxName)
     {
       super (ctx, AD_SMTP_UU, trxName);

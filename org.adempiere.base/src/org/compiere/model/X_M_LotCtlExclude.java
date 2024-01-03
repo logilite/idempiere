@@ -59,19 +59,6 @@ public class X_M_LotCtlExclude extends PO implements I_M_LotCtlExclude, I_Persis
     }
 
     /** Standard Constructor */
-    public X_M_LotCtlExclude (Properties ctx, int M_LotCtlExclude_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_LotCtlExclude_ID, trxName, virtualColumns);
-      /** if (M_LotCtlExclude_ID == 0)
-        {
-			setAD_Table_ID (0);
-			setIsSOTrx (false);
-			setM_LotCtlExclude_ID (0);
-			setM_LotCtl_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_LotCtlExclude (Properties ctx, String M_LotCtlExclude_UU, String trxName)
     {
       super (ctx, M_LotCtlExclude_UU, trxName);

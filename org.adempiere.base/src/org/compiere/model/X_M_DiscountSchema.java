@@ -69,22 +69,6 @@ public class X_M_DiscountSchema extends PO implements I_M_DiscountSchema, I_Pers
     }
 
     /** Standard Constructor */
-    public X_M_DiscountSchema (Properties ctx, int M_DiscountSchema_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_DiscountSchema_ID, trxName, virtualColumns);
-      /** if (M_DiscountSchema_ID == 0)
-        {
-			setDiscountType (null);
-			setIsBPartnerFlatDiscount (false);
-			setIsQuantityBased (true);
-// Y
-			setM_DiscountSchema_ID (0);
-			setName (null);
-			setValidFrom (new Timestamp( System.currentTimeMillis() ));
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_DiscountSchema (Properties ctx, String M_DiscountSchema_UU, String trxName)
     {
       super (ctx, M_DiscountSchema_UU, trxName);

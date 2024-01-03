@@ -69,22 +69,6 @@ public class X_M_Transaction extends PO implements I_M_Transaction, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_Transaction (Properties ctx, int M_Transaction_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_Transaction_ID, trxName, virtualColumns);
-      /** if (M_Transaction_ID == 0)
-        {
-			setM_AttributeSetInstance_ID (0);
-			setM_Locator_ID (0);
-			setMovementDate (new Timestamp( System.currentTimeMillis() ));
-			setMovementQty (Env.ZERO);
-			setMovementType (null);
-			setM_Product_ID (0);
-			setM_Transaction_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_Transaction (Properties ctx, String M_Transaction_UU, String trxName)
     {
       super (ctx, M_Transaction_UU, trxName);

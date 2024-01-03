@@ -62,19 +62,6 @@ public class X_HR_Concept extends PO implements I_HR_Concept, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_HR_Concept (Properties ctx, int HR_Concept_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, HR_Concept_ID, trxName, virtualColumns);
-      /** if (HR_Concept_ID == 0)
-        {
-			setColumnType (null);
-			setHR_Concept_ID (0);
-			setName (null);
-			setType (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_HR_Concept (Properties ctx, String HR_Concept_UU, String trxName)
     {
       super (ctx, HR_Concept_UU, trxName);

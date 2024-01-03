@@ -56,17 +56,6 @@ public class X_AD_UserDef_Proc extends PO implements I_AD_UserDef_Proc, I_Persis
     }
 
     /** Standard Constructor */
-    public X_AD_UserDef_Proc (Properties ctx, int AD_UserDef_Proc_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_UserDef_Proc_ID, trxName, virtualColumns);
-      /** if (AD_UserDef_Proc_ID == 0)
-        {
-			setAD_Process_ID (0);
-			setAD_UserDef_Proc_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_UserDef_Proc (Properties ctx, String AD_UserDef_Proc_UU, String trxName)
     {
       super (ctx, AD_UserDef_Proc_UU, trxName);

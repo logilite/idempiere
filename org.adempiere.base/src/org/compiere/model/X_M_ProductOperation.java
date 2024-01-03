@@ -60,18 +60,6 @@ public class X_M_ProductOperation extends PO implements I_M_ProductOperation, I_
     }
 
     /** Standard Constructor */
-    public X_M_ProductOperation (Properties ctx, int M_ProductOperation_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_ProductOperation_ID, trxName, virtualColumns);
-      /** if (M_ProductOperation_ID == 0)
-        {
-			setM_Product_ID (0);
-			setM_ProductOperation_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_ProductOperation (Properties ctx, String M_ProductOperation_UU, String trxName)
     {
       super (ctx, M_ProductOperation_UU, trxName);

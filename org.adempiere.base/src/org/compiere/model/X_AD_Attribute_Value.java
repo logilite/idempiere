@@ -56,17 +56,6 @@ public class X_AD_Attribute_Value extends PO implements I_AD_Attribute_Value, I_
     }
 
     /** Standard Constructor */
-    public X_AD_Attribute_Value (Properties ctx, int AD_Attribute_Value_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Attribute_Value_ID, trxName, virtualColumns);
-      /** if (AD_Attribute_Value_ID == 0)
-        {
-			setAD_Attribute_ID (0);
-			setRecord_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Attribute_Value (Properties ctx, String AD_Attribute_Value_UU, String trxName)
     {
       super (ctx, AD_Attribute_Value_UU, trxName);

@@ -62,20 +62,6 @@ public class X_AD_UserQuery extends PO implements I_AD_UserQuery, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_UserQuery (Properties ctx, int AD_UserQuery_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_UserQuery_ID, trxName, virtualColumns);
-      /** if (AD_UserQuery_ID == 0)
-        {
-			setAD_Tab_ID (0);
-			setAD_Table_ID (0);
-			setAD_UserQuery_ID (0);
-			setAD_Window_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_UserQuery (Properties ctx, String AD_UserQuery_UU, String trxName)
     {
       super (ctx, AD_UserQuery_UU, trxName);

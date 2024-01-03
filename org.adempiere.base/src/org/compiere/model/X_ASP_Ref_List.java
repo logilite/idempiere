@@ -59,19 +59,6 @@ public class X_ASP_Ref_List extends PO implements I_ASP_Ref_List, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_ASP_Ref_List (Properties ctx, int ASP_Ref_List_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, ASP_Ref_List_ID, trxName, virtualColumns);
-      /** if (ASP_Ref_List_ID == 0)
-        {
-			setAD_Reference_ID (0);
-			setAD_Ref_List_ID (0);
-			setASP_Level_ID (0);
-			setASP_Ref_List_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_ASP_Ref_List (Properties ctx, String ASP_Ref_List_UU, String trxName)
     {
       super (ctx, ASP_Ref_List_UU, trxName);

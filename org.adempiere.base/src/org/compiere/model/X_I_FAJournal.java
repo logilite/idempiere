@@ -59,17 +59,6 @@ public class X_I_FAJournal extends PO implements I_I_FAJournal, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_I_FAJournal (Properties ctx, int I_FAJournal_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, I_FAJournal_ID, trxName, virtualColumns);
-      /** if (I_FAJournal_ID == 0)
-        {
-			setI_FAJournal_ID (0);
-			setI_IsImported (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_I_FAJournal (Properties ctx, String I_FAJournal_UU, String trxName)
     {
       super (ctx, I_FAJournal_UU, trxName);

@@ -61,20 +61,6 @@ public class X_AD_ReplicationDocument extends PO implements I_AD_ReplicationDocu
     }
 
     /** Standard Constructor */
-    public X_AD_ReplicationDocument (Properties ctx, int AD_ReplicationDocument_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_ReplicationDocument_ID, trxName, virtualColumns);
-      /** if (AD_ReplicationDocument_ID == 0)
-        {
-			setAD_ReplicationDocument_ID (0);
-			setAD_ReplicationStrategy_ID (0);
-			setAD_Table_ID (0);
-			setC_DocType_ID (0);
-			setReplicationType (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_ReplicationDocument (Properties ctx, String AD_ReplicationDocument_UU, String trxName)
     {
       super (ctx, AD_ReplicationDocument_UU, trxName);

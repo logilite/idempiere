@@ -59,19 +59,6 @@ public class X_AD_IndexColumn extends PO implements I_AD_IndexColumn, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_AD_IndexColumn (Properties ctx, int AD_IndexColumn_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_IndexColumn_ID, trxName, virtualColumns);
-      /** if (AD_IndexColumn_ID == 0)
-        {
-			setAD_IndexColumn_ID (0);
-			setAD_TableIndex_ID (0);
-			setEntityType (null);
-// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_IndexColumn (Properties ctx, String AD_IndexColumn_UU, String trxName)
     {
       super (ctx, AD_IndexColumn_UU, trxName);

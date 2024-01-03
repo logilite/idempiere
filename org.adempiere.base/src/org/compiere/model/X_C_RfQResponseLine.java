@@ -62,20 +62,6 @@ public class X_C_RfQResponseLine extends PO implements I_C_RfQResponseLine, I_Pe
     }
 
     /** Standard Constructor */
-    public X_C_RfQResponseLine (Properties ctx, int C_RfQResponseLine_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_RfQResponseLine_ID, trxName, virtualColumns);
-      /** if (C_RfQResponseLine_ID == 0)
-        {
-			setC_RfQLine_ID (0);
-			setC_RfQResponse_ID (0);
-			setC_RfQResponseLine_ID (0);
-			setIsSelectedWinner (false);
-			setIsSelfService (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_RfQResponseLine (Properties ctx, String C_RfQResponseLine_UU, String trxName)
     {
       super (ctx, C_RfQResponseLine_UU, trxName);

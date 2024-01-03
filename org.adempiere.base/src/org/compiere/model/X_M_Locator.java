@@ -70,24 +70,6 @@ public class X_M_Locator extends PO implements I_M_Locator, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_Locator (Properties ctx, int M_Locator_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_Locator_ID, trxName, virtualColumns);
-      /** if (M_Locator_ID == 0)
-        {
-			setIsDefault (false);
-			setM_Locator_ID (0);
-			setM_Warehouse_ID (0);
-			setPriorityNo (0);
-// 50
-			setValue (null);
-			setX (null);
-			setY (null);
-			setZ (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_Locator (Properties ctx, String M_Locator_UU, String trxName)
     {
       super (ctx, M_Locator_UU, trxName);

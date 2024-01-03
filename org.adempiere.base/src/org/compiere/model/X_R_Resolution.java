@@ -56,17 +56,6 @@ public class X_R_Resolution extends PO implements I_R_Resolution, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_R_Resolution (Properties ctx, int R_Resolution_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, R_Resolution_ID, trxName, virtualColumns);
-      /** if (R_Resolution_ID == 0)
-        {
-			setName (null);
-			setR_Resolution_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_R_Resolution (Properties ctx, String R_Resolution_UU, String trxName)
     {
       super (ctx, R_Resolution_UU, trxName);

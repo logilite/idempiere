@@ -172,73 +172,6 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_Role (Properties ctx, int AD_Role_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Role_ID, trxName, virtualColumns);
-      /** if (AD_Role_ID == 0)
-        {
-			setAD_Role_ID (0);
-			setAllow_Info_Account (true);
-// Y
-			setAllow_Info_Asset (true);
-// Y
-			setAllow_Info_BPartner (true);
-// Y
-			setAllow_Info_InOut (true);
-// Y
-			setAllow_Info_Invoice (true);
-// Y
-			setAllow_Info_Order (true);
-// Y
-			setAllow_Info_Payment (true);
-// Y
-			setAllow_Info_Product (true);
-// Y
-			setAllow_Info_Resource (true);
-// Y
-			setAllow_Info_Schedule (true);
-// Y
-			setConfirmQueryRecords (0);
-// 0
-			setIsAccessAllOrgs (false);
-// N
-			setIsCanApproveOwnDoc (false);
-			setIsCanExport (true);
-// Y
-			setIsCanReport (true);
-// Y
-			setIsChangeLog (false);
-// N
-			setIsClientAdministrator (false);
-// N
-			setIsDiscountAllowedOnTotal (false);
-			setIsDiscountUptoLimitPrice (false);
-			setIsManual (true);
-// Y
-			setIsMasterRole (false);
-// N
-			setIsMenuAutoExpand (false);
-// N
-			setIsPersonalAccess (false);
-// N
-			setIsPersonalLock (false);
-// N
-			setIsShowAcct (false);
-// N
-			setIsUseUserOrgAccess (false);
-// N
-			setMaxQueryRecords (0);
-// 0
-			setName (null);
-			setOverwritePriceLimit (false);
-// N
-			setPreferenceType (null);
-// O
-			setUserLevel (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Role (Properties ctx, String AD_Role_UU, String trxName)
     {
       super (ctx, AD_Role_UU, trxName);
@@ -1028,29 +961,6 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 
 	/** Get Client Administrator.
 		@return This role is a client administrator
-	  */
-	public boolean isClientAdministrator()
-	{
-		Object oo = get_Value(COLUMNNAME_IsClientAdministrator);
-		if (oo != null)
-		{
-			 if (oo instanceof Boolean)
-				 return ((Boolean)oo).booleanValue();
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
-	/** Set Tenant Administrator.
-		@param IsClientAdministrator This role is a tenant administrator
-	*/
-	public void setIsClientAdministrator (boolean IsClientAdministrator)
-	{
-		set_Value (COLUMNNAME_IsClientAdministrator, Boolean.valueOf(IsClientAdministrator));
-	}
-
-	/** Get Tenant Administrator.
-		@return This role is a tenant administrator
 	  */
 	public boolean isClientAdministrator()
 	{

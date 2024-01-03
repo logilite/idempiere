@@ -58,18 +58,6 @@ public class X_WS_WebService_Para extends PO implements I_WS_WebService_Para, I_
     }
 
     /** Standard Constructor */
-    public X_WS_WebService_Para (Properties ctx, int WS_WebService_Para_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, WS_WebService_Para_ID, trxName, virtualColumns);
-      /** if (WS_WebService_Para_ID == 0)
-        {
-			setParameterType (null);
-			setWS_WebService_Para_ID (0);
-			setWS_WebServiceType_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_WS_WebService_Para (Properties ctx, String WS_WebService_Para_UU, String trxName)
     {
       super (ctx, WS_WebService_Para_UU, trxName);

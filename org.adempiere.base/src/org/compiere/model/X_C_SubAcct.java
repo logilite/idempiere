@@ -60,19 +60,6 @@ public class X_C_SubAcct extends PO implements I_C_SubAcct, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_SubAcct (Properties ctx, int C_SubAcct_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_SubAcct_ID, trxName, virtualColumns);
-      /** if (C_SubAcct_ID == 0)
-        {
-			setC_ElementValue_ID (0);
-			setC_SubAcct_ID (0);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_SubAcct (Properties ctx, String C_SubAcct_UU, String trxName)
     {
       super (ctx, C_SubAcct_UU, trxName);

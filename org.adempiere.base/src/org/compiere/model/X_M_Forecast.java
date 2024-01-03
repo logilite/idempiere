@@ -62,20 +62,6 @@ public class X_M_Forecast extends PO implements I_M_Forecast, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_Forecast (Properties ctx, int M_Forecast_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_Forecast_ID, trxName, virtualColumns);
-      /** if (M_Forecast_ID == 0)
-        {
-			setC_Calendar_ID (0);
-			setC_Year_ID (0);
-			setIsDefault (false);
-			setM_Forecast_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_Forecast (Properties ctx, String M_Forecast_UU, String trxName)
     {
       super (ctx, M_Forecast_UU, trxName);

@@ -60,19 +60,6 @@ public class X_C_1099Box extends PO implements I_C_1099Box, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_1099Box (Properties ctx, int C_1099Box_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_1099Box_ID, trxName, virtualColumns);
-      /** if (C_1099Box_ID == 0)
-        {
-			setBucket (0);
-			setC_1099Box_ID (0);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_1099Box (Properties ctx, String C_1099Box_UU, String trxName)
     {
       super (ctx, C_1099Box_UU, trxName);

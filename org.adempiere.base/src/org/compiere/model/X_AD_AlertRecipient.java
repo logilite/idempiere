@@ -56,17 +56,6 @@ public class X_AD_AlertRecipient extends PO implements I_AD_AlertRecipient, I_Pe
     }
 
     /** Standard Constructor */
-    public X_AD_AlertRecipient (Properties ctx, int AD_AlertRecipient_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_AlertRecipient_ID, trxName, virtualColumns);
-      /** if (AD_AlertRecipient_ID == 0)
-        {
-			setAD_Alert_ID (0);
-			setAD_AlertRecipient_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_AlertRecipient (Properties ctx, String AD_AlertRecipient_UU, String trxName)
     {
       super (ctx, AD_AlertRecipient_UU, trxName);

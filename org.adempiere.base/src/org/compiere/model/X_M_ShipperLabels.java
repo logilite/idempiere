@@ -63,21 +63,6 @@ public class X_M_ShipperLabels extends PO implements I_M_ShipperLabels, I_Persis
     }
 
     /** Standard Constructor */
-    public X_M_ShipperLabels (Properties ctx, int M_ShipperLabels_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_ShipperLabels_ID, trxName, virtualColumns);
-      /** if (M_ShipperLabels_ID == 0)
-        {
-			setIsDefault (false);
-// N
-			setM_Shipper_ID (0);
-			setM_ShipperLabelsCfg_ID (0);
-			setM_ShipperLabels_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_ShipperLabels (Properties ctx, String M_ShipperLabels_UU, String trxName)
     {
       super (ctx, M_ShipperLabels_UU, trxName);

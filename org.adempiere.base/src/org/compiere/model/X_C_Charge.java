@@ -70,23 +70,6 @@ public class X_C_Charge extends PO implements I_C_Charge, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_Charge (Properties ctx, int C_Charge_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Charge_ID, trxName, virtualColumns);
-      /** if (C_Charge_ID == 0)
-        {
-			setC_Charge_ID (0);
-			setChargeAmt (Env.ZERO);
-			setC_TaxCategory_ID (0);
-			setIsSameCurrency (false);
-			setIsSameTax (false);
-			setIsTaxIncluded (false);
-// N
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Charge (Properties ctx, String C_Charge_UU, String trxName)
     {
       super (ctx, C_Charge_UU, trxName);

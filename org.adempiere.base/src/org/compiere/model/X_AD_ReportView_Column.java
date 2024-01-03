@@ -55,17 +55,6 @@ public class X_AD_ReportView_Column extends PO implements I_AD_ReportView_Column
     }
 
     /** Standard Constructor */
-    public X_AD_ReportView_Column (Properties ctx, int AD_ReportView_Column_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_ReportView_Column_ID, trxName, virtualColumns);
-      /** if (AD_ReportView_Column_ID == 0)
-        {
-			setAD_Column_ID (0);
-			setAD_ReportView_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_ReportView_Column (Properties ctx, String AD_ReportView_Column_UU, String trxName)
     {
       super (ctx, AD_ReportView_Column_UU, trxName);

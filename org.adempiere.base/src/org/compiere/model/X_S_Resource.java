@@ -72,24 +72,6 @@ public class X_S_Resource extends PO implements I_S_Resource, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_S_Resource (Properties ctx, int S_Resource_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, S_Resource_ID, trxName, virtualColumns);
-      /** if (S_Resource_ID == 0)
-        {
-			setIsAvailable (true);
-// Y
-			setM_Warehouse_ID (0);
-			setName (null);
-			setPercentUtilization (Env.ZERO);
-// 100
-			setS_Resource_ID (0);
-			setS_ResourceType_ID (0);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_S_Resource (Properties ctx, String S_Resource_UU, String trxName)
     {
       super (ctx, S_Resource_UU, trxName);

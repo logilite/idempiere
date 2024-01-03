@@ -70,23 +70,6 @@ public class X_M_MovementConfirm extends PO implements I_M_MovementConfirm, I_Pe
     }
 
     /** Standard Constructor */
-    public X_M_MovementConfirm (Properties ctx, int M_MovementConfirm_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_MovementConfirm_ID, trxName, virtualColumns);
-      /** if (M_MovementConfirm_ID == 0)
-        {
-			setDocAction (null);
-			setDocStatus (null);
-			setDocumentNo (null);
-			setIsApproved (false);
-// N
-			setM_MovementConfirm_ID (0);
-			setM_Movement_ID (0);
-			setProcessed (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_MovementConfirm (Properties ctx, String M_MovementConfirm_UU, String trxName)
     {
       super (ctx, M_MovementConfirm_UU, trxName);

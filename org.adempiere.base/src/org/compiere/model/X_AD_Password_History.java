@@ -54,16 +54,6 @@ public class X_AD_Password_History extends PO implements I_AD_Password_History, 
     }
 
     /** Standard Constructor */
-    public X_AD_Password_History (Properties ctx, int AD_Password_History_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Password_History_ID, trxName, virtualColumns);
-      /** if (AD_Password_History_ID == 0)
-        {
-			setAD_Password_History_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Password_History (Properties ctx, String AD_Password_History_UU, String trxName)
     {
       super (ctx, AD_Password_History_UU, trxName);

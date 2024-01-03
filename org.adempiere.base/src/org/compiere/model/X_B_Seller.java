@@ -61,19 +61,6 @@ public class X_B_Seller extends PO implements I_B_Seller, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_B_Seller (Properties ctx, int B_Seller_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, B_Seller_ID, trxName, virtualColumns);
-      /** if (B_Seller_ID == 0)
-        {
-			setAD_User_ID (0);
-			setIsInternal (false);
-			setName (null);
-			setValidTo (new Timestamp( System.currentTimeMillis() ));
-        } */
-    }
-
-    /** Standard Constructor */
     public X_B_Seller (Properties ctx, String B_Seller_UU, String trxName)
     {
       super (ctx, B_Seller_UU, trxName);

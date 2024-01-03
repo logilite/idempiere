@@ -60,19 +60,6 @@ public class X_AD_Package_Imp_Proc extends PO implements I_AD_Package_Imp_Proc, 
     }
 
     /** Standard Constructor */
-    public X_AD_Package_Imp_Proc (Properties ctx, int AD_Package_Imp_Proc_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Package_Imp_Proc_ID, trxName, virtualColumns);
-      /** if (AD_Package_Imp_Proc_ID == 0)
-        {
-			setAD_Package_Imp_Proc_ID (0);
-			setAD_Package_Source_Type (null);
-// 'File'
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Package_Imp_Proc (Properties ctx, String AD_Package_Imp_Proc_UU, String trxName)
     {
       super (ctx, AD_Package_Imp_Proc_UU, trxName);

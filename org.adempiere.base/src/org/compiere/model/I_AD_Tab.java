@@ -394,19 +394,6 @@ public interface I_AD_Tab
 	  */
 	public String getIsHighVolume();
 
-    /** Column name IsHighVolume */
-    public static final String COLUMNNAME_IsHighVolume = "IsHighVolume";
-
-	/** Set High Volume.
-	  * Use Search instead of Pick list
-	  */
-	public void setIsHighVolume (String IsHighVolume);
-
-	/** Get High Volume.
-	  * Use Search instead of Pick list
-	  */
-	public String getIsHighVolume();
-
     /** Column name IsInfoTab */
     public static final String COLUMNNAME_IsInfoTab = "IsInfoTab";
 

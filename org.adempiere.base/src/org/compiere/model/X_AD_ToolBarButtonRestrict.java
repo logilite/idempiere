@@ -59,19 +59,6 @@ public class X_AD_ToolBarButtonRestrict extends PO implements I_AD_ToolBarButton
     }
 
     /** Standard Constructor */
-    public X_AD_ToolBarButtonRestrict (Properties ctx, int AD_ToolBarButtonRestrict_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_ToolBarButtonRestrict_ID, trxName, virtualColumns);
-      /** if (AD_ToolBarButtonRestrict_ID == 0)
-        {
-			setAction (null);
-			setAD_ToolBarButtonRestrict_ID (0);
-			setIsExclude (true);
-// Y
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_ToolBarButtonRestrict (Properties ctx, String AD_ToolBarButtonRestrict_UU, String trxName)
     {
       super (ctx, AD_ToolBarButtonRestrict_UU, trxName);

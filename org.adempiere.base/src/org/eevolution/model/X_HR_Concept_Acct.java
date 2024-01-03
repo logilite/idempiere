@@ -62,20 +62,6 @@ public class X_HR_Concept_Acct extends PO implements I_HR_Concept_Acct, I_Persis
     }
 
     /** Standard Constructor */
-    public X_HR_Concept_Acct (Properties ctx, int HR_Concept_Acct_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, HR_Concept_Acct_ID, trxName, virtualColumns);
-      /** if (HR_Concept_Acct_ID == 0)
-        {
-			setC_AcctSchema_ID (0);
-			setHR_Concept_Acct_ID (0);
-			setHR_Concept_ID (0);
-			setHR_Expense_Acct (0);
-			setHR_Revenue_Acct (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_HR_Concept_Acct (Properties ctx, String HR_Concept_Acct_UU, String trxName)
     {
       super (ctx, HR_Concept_Acct_UU, trxName);

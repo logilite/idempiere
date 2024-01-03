@@ -57,17 +57,6 @@ public class X_WS_WebServiceFieldInput extends PO implements I_WS_WebServiceFiel
     }
 
     /** Standard Constructor */
-    public X_WS_WebServiceFieldInput (Properties ctx, int WS_WebServiceFieldInput_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, WS_WebServiceFieldInput_ID, trxName, virtualColumns);
-      /** if (WS_WebServiceFieldInput_ID == 0)
-        {
-			setWS_WebServiceFieldInput_ID (0);
-			setWS_WebServiceType_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_WS_WebServiceFieldInput (Properties ctx, String WS_WebServiceFieldInput_UU, String trxName)
     {
       super (ctx, WS_WebServiceFieldInput_UU, trxName);

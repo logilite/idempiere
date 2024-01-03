@@ -74,26 +74,6 @@ public class X_A_Asset_Group extends PO implements I_A_Asset_Group, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_A_Asset_Group (Properties ctx, int A_Asset_Group_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_Asset_Group_ID, trxName, virtualColumns);
-      /** if (A_Asset_Group_ID == 0)
-        {
-			setA_Asset_Group_ID (0);
-			setIsCreateAsActive (true);
-// Y
-			setIsDefault (false);
-// 'N'
-			setIsDepreciated (false);
-			setIsOneAssetPerUOM (false);
-			setIsOwned (false);
-			setIsTrackIssues (false);
-// N
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_Asset_Group (Properties ctx, String A_Asset_Group_UU, String trxName)
     {
       super (ctx, A_Asset_Group_UU, trxName);

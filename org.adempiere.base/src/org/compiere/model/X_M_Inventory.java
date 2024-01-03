@@ -79,27 +79,6 @@ public class X_M_Inventory extends PO implements I_M_Inventory, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_Inventory (Properties ctx, int M_Inventory_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_Inventory_ID, trxName, virtualColumns);
-      /** if (M_Inventory_ID == 0)
-        {
-			setC_DocType_ID (0);
-			setDocAction (null);
-// CO
-			setDocStatus (null);
-// DR
-			setDocumentNo (null);
-			setIsApproved (false);
-			setM_Inventory_ID (0);
-			setMovementDate (new Timestamp( System.currentTimeMillis() ));
-// @#Date@
-			setPosted (false);
-			setProcessed (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_Inventory (Properties ctx, String M_Inventory_UU, String trxName)
     {
       super (ctx, M_Inventory_UU, trxName);

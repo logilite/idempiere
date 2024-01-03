@@ -56,17 +56,6 @@ public class X_R_Category extends PO implements I_R_Category, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_R_Category (Properties ctx, int R_Category_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, R_Category_ID, trxName, virtualColumns);
-      /** if (R_Category_ID == 0)
-        {
-			setName (null);
-			setR_Category_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_R_Category (Properties ctx, String R_Category_UU, String trxName)
     {
       super (ctx, R_Category_UU, trxName);

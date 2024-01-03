@@ -66,22 +66,6 @@ public class X_AD_PrintLabel extends PO implements I_AD_PrintLabel, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_PrintLabel (Properties ctx, int AD_PrintLabel_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_PrintLabel_ID, trxName, virtualColumns);
-      /** if (AD_PrintLabel_ID == 0)
-        {
-			setAD_LabelPrinter_ID (0);
-			setAD_PrintLabel_ID (0);
-			setAD_Table_ID (0);
-			setIsLandscape (false);
-			setLabelHeight (0);
-			setLabelWidth (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_PrintLabel (Properties ctx, String AD_PrintLabel_UU, String trxName)
     {
       super (ctx, AD_PrintLabel_UU, trxName);

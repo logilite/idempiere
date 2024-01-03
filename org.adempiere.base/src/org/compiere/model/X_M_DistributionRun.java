@@ -60,19 +60,6 @@ public class X_M_DistributionRun extends PO implements I_M_DistributionRun, I_Pe
     }
 
     /** Standard Constructor */
-    public X_M_DistributionRun (Properties ctx, int M_DistributionRun_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_DistributionRun_ID, trxName, virtualColumns);
-      /** if (M_DistributionRun_ID == 0)
-        {
-			setIsCreateSingleOrder (false);
-// N
-			setM_DistributionRun_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_DistributionRun (Properties ctx, String M_DistributionRun_UU, String trxName)
     {
       super (ctx, M_DistributionRun_UU, trxName);

@@ -826,44 +826,6 @@ public class Core {
 		}
 		return null;
 	}
-	
-	/**
-	 * get Credit Manager
-	 * 
-	 * @param  PO
-	 * @return    instance of the ICreditManager
-	 */
-	public static ICreditManager getCreditManager(PO po)
-	{
-		if (po == null)
-		{
-			s_log.log(Level.SEVERE, "Invalid PO");
-			return null;
-		}
-
-		ICreditManager myCreditManager = null;
-
-		List<ICreditManagerFactory> factoryList = Service.locator().list(ICreditManagerFactory.class).getServices();
-		if (factoryList != null)
-		{
-			for (ICreditManagerFactory factory : factoryList)
-			{
-				myCreditManager = factory.getCreditManager(po);
-				if (myCreditManager != null)
-				{
-					break;
-				}
-			}
-		}
-
-		if (myCreditManager == null)
-		{
-			s_log.log(Level.CONFIG, "For " + po.get_TableName() + " not found any service/extension registry.");
-			return null;
-		}
-
-		return myCreditManager;
-	} // getCreditManager
 
 	private static IServiceReferenceHolder<IMessageService> s_messageServiceReference = null;
 	

@@ -56,17 +56,6 @@ public class X_M_QualityTest extends PO implements I_M_QualityTest, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_QualityTest (Properties ctx, int M_QualityTest_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_QualityTest_ID, trxName, virtualColumns);
-      /** if (M_QualityTest_ID == 0)
-        {
-			setM_QualityTest_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_QualityTest (Properties ctx, String M_QualityTest_UU, String trxName)
     {
       super (ctx, M_QualityTest_UU, trxName);

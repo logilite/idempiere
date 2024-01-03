@@ -64,22 +64,6 @@ public class X_AD_Reference extends PO implements I_AD_Reference, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_Reference (Properties ctx, int AD_Reference_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Reference_ID, trxName, virtualColumns);
-      /** if (AD_Reference_ID == 0)
-        {
-			setAD_Reference_ID (0);
-			setEntityType (null);
-// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
-			setName (null);
-			setShowInactive (null);
-// N
-			setValidationType (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Reference (Properties ctx, String AD_Reference_UU, String trxName)
     {
       super (ctx, AD_Reference_UU, trxName);

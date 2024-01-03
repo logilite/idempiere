@@ -63,20 +63,6 @@ public class X_A_Depreciation_Forecast extends PO implements I_A_Depreciation_Fo
     }
 
     /** Standard Constructor */
-    public X_A_Depreciation_Forecast (Properties ctx, int A_Depreciation_Forecast_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_Depreciation_Forecast_ID, trxName, virtualColumns);
-      /** if (A_Depreciation_Forecast_ID == 0)
-        {
-			setA_Depreciation_Forecast_ID (0);
-			setA_End_Asset_ID (0);
-			setA_Start_Asset_ID (0);
-			setDateDoc (new Timestamp( System.currentTimeMillis() ));
-			setPostingType (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_Depreciation_Forecast (Properties ctx, String A_Depreciation_Forecast_UU, String trxName)
     {
       super (ctx, A_Depreciation_Forecast_UU, trxName);

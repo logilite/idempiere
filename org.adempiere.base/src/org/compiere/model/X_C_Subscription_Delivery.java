@@ -56,17 +56,6 @@ public class X_C_Subscription_Delivery extends PO implements I_C_Subscription_De
     }
 
     /** Standard Constructor */
-    public X_C_Subscription_Delivery (Properties ctx, int C_Subscription_Delivery_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Subscription_Delivery_ID, trxName, virtualColumns);
-      /** if (C_Subscription_Delivery_ID == 0)
-        {
-			setC_Subscription_Delivery_ID (0);
-			setC_Subscription_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Subscription_Delivery (Properties ctx, String C_Subscription_Delivery_UU, String trxName)
     {
       super (ctx, C_Subscription_Delivery_UU, trxName);

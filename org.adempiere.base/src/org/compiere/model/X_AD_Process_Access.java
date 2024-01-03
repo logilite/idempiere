@@ -57,18 +57,6 @@ public class X_AD_Process_Access extends PO implements I_AD_Process_Access, I_Pe
     }
 
     /** Standard Constructor */
-    public X_AD_Process_Access (Properties ctx, int AD_Process_Access_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Process_Access_ID, trxName, virtualColumns);
-      /** if (AD_Process_Access_ID == 0)
-        {
-			setAD_Process_ID (0);
-			setAD_Role_ID (0);
-			setIsReadWrite (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Process_Access (Properties ctx, String AD_Process_Access_UU, String trxName)
     {
       super (ctx, AD_Process_Access_UU, trxName);

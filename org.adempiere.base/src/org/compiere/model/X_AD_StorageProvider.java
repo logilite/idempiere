@@ -60,19 +60,6 @@ public class X_AD_StorageProvider extends PO implements I_AD_StorageProvider, I_
     }
 
     /** Standard Constructor */
-    public X_AD_StorageProvider (Properties ctx, int AD_StorageProvider_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_StorageProvider_ID, trxName, virtualColumns);
-      /** if (AD_StorageProvider_ID == 0)
-        {
-			setAD_StorageProvider_ID (0);
-			setIsDefault (false);
-// N
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_StorageProvider (Properties ctx, String AD_StorageProvider_UU, String trxName)
     {
       super (ctx, AD_StorageProvider_UU, trxName);

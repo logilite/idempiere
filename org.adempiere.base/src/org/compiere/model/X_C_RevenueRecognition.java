@@ -60,19 +60,6 @@ public class X_C_RevenueRecognition extends PO implements I_C_RevenueRecognition
     }
 
     /** Standard Constructor */
-    public X_C_RevenueRecognition (Properties ctx, int C_RevenueRecognition_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_RevenueRecognition_ID, trxName, virtualColumns);
-      /** if (C_RevenueRecognition_ID == 0)
-        {
-			setC_RevenueRecognition_ID (0);
-			setIsTimeBased (false);
-			setName (null);
-			setRecognitionFrequency (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_RevenueRecognition (Properties ctx, String C_RevenueRecognition_UU, String trxName)
     {
       super (ctx, C_RevenueRecognition_UU, trxName);

@@ -60,19 +60,6 @@ public class X_PP_WF_Node_Asset extends PO implements I_PP_WF_Node_Asset, I_Pers
     }
 
     /** Standard Constructor */
-    public X_PP_WF_Node_Asset (Properties ctx, int PP_WF_Node_Asset_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, PP_WF_Node_Asset_ID, trxName, virtualColumns);
-      /** if (PP_WF_Node_Asset_ID == 0)
-        {
-			setA_Asset_ID (0);
-			setAD_WF_Node_ID (0);
-			setPP_WF_Node_Asset_ID (0);
-			setSeqNo (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_PP_WF_Node_Asset (Properties ctx, String PP_WF_Node_Asset_UU, String trxName)
     {
       super (ctx, PP_WF_Node_Asset_UU, trxName);

@@ -59,19 +59,6 @@ public class X_M_SerNoCtlExclude extends PO implements I_M_SerNoCtlExclude, I_Pe
     }
 
     /** Standard Constructor */
-    public X_M_SerNoCtlExclude (Properties ctx, int M_SerNoCtlExclude_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_SerNoCtlExclude_ID, trxName, virtualColumns);
-      /** if (M_SerNoCtlExclude_ID == 0)
-        {
-			setAD_Table_ID (0);
-			setIsSOTrx (false);
-			setM_SerNoCtlExclude_ID (0);
-			setM_SerNoCtl_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_SerNoCtlExclude (Properties ctx, String M_SerNoCtlExclude_UU, String trxName)
     {
       super (ctx, M_SerNoCtlExclude_UU, trxName);

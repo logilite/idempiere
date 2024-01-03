@@ -56,17 +56,6 @@ public class X_AD_Error extends PO implements I_AD_Error, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_Error (Properties ctx, int AD_Error_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Error_ID, trxName, virtualColumns);
-      /** if (AD_Error_ID == 0)
-        {
-			setAD_Error_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Error (Properties ctx, String AD_Error_UU, String trxName)
     {
       super (ctx, AD_Error_UU, trxName);

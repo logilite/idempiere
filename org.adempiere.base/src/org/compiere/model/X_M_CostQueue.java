@@ -69,23 +69,6 @@ public class X_M_CostQueue extends PO implements I_M_CostQueue, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_CostQueue (Properties ctx, int M_CostQueue_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_CostQueue_ID, trxName, virtualColumns);
-      /** if (M_CostQueue_ID == 0)
-        {
-			setC_AcctSchema_ID (0);
-			setCurrentCostPrice (Env.ZERO);
-			setCurrentQty (Env.ZERO);
-			setM_AttributeSetInstance_ID (0);
-			setM_CostElement_ID (0);
-			setM_CostQueue_ID (0);
-			setM_CostType_ID (0);
-			setM_Product_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_CostQueue (Properties ctx, String M_CostQueue_UU, String trxName)
     {
       super (ctx, M_CostQueue_UU, trxName);

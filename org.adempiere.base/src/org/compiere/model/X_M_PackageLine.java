@@ -62,19 +62,6 @@ public class X_M_PackageLine extends PO implements I_M_PackageLine, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_PackageLine (Properties ctx, int M_PackageLine_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_PackageLine_ID, trxName, virtualColumns);
-      /** if (M_PackageLine_ID == 0)
-        {
-			setM_InOutLine_ID (0);
-			setM_Package_ID (0);
-			setM_PackageLine_ID (0);
-			setQty (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_PackageLine (Properties ctx, String M_PackageLine_UU, String trxName)
     {
       super (ctx, M_PackageLine_UU, trxName);

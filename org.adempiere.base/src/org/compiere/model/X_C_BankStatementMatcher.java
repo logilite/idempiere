@@ -60,19 +60,6 @@ public class X_C_BankStatementMatcher extends PO implements I_C_BankStatementMat
     }
 
     /** Standard Constructor */
-    public X_C_BankStatementMatcher (Properties ctx, int C_BankStatementMatcher_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_BankStatementMatcher_ID, trxName, virtualColumns);
-      /** if (C_BankStatementMatcher_ID == 0)
-        {
-			setC_BankStatementMatcher_ID (0);
-			setClassname (null);
-			setName (null);
-			setSeqNo (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_BankStatementMatcher (Properties ctx, String C_BankStatementMatcher_UU, String trxName)
     {
       super (ctx, C_BankStatementMatcher_UU, trxName);

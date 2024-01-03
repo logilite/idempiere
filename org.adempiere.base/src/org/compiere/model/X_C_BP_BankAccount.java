@@ -60,19 +60,6 @@ public class X_C_BP_BankAccount extends PO implements I_C_BP_BankAccount, I_Pers
     }
 
     /** Standard Constructor */
-    public X_C_BP_BankAccount (Properties ctx, int C_BP_BankAccount_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_BP_BankAccount_ID, trxName, virtualColumns);
-      /** if (C_BP_BankAccount_ID == 0)
-        {
-			setA_Name (null);
-			setC_BPartner_ID (0);
-			setC_BP_BankAccount_ID (0);
-			setIsACH (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_BP_BankAccount (Properties ctx, String C_BP_BankAccount_UU, String trxName)
     {
       super (ctx, C_BP_BankAccount_UU, trxName);

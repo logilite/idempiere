@@ -59,17 +59,6 @@ public class X_I_GLJournal extends PO implements I_I_GLJournal, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_I_GLJournal (Properties ctx, int I_GLJournal_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, I_GLJournal_ID, trxName, virtualColumns);
-      /** if (I_GLJournal_ID == 0)
-        {
-			setI_GLJournal_ID (0);
-			setI_IsImported (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_I_GLJournal (Properties ctx, String I_GLJournal_UU, String trxName)
     {
       super (ctx, I_GLJournal_UU, trxName);

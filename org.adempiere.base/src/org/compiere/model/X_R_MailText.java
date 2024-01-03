@@ -60,19 +60,6 @@ public class X_R_MailText extends PO implements I_R_MailText, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_R_MailText (Properties ctx, int R_MailText_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, R_MailText_ID, trxName, virtualColumns);
-      /** if (R_MailText_ID == 0)
-        {
-			setIsHtml (false);
-			setMailText (null);
-			setName (null);
-			setR_MailText_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_R_MailText (Properties ctx, String R_MailText_UU, String trxName)
     {
       super (ctx, R_MailText_UU, trxName);

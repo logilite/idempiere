@@ -525,16 +525,6 @@ public class MMeasureCalc extends X_PA_MeasureCalc implements ImmutablePOSupport
 		makeImmutable();
 		return this;
 	}
-	/**
-	 * Get the Where clause adding the WHERE keyword when needed
-	 */
-	@Override
-	public String getWhereClause() {
-		String whereClause = super.getWhereClause();
-		if (!whereClause.toLowerCase().startsWith("where "))
-			whereClause = "WHERE " + whereClause;
-		return whereClause;
-	}
 
 	/**
 	 * Get where clause, add WHERE keyword if where clause not started with it

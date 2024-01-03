@@ -56,17 +56,6 @@ public class X_R_Group extends PO implements I_R_Group, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_R_Group (Properties ctx, int R_Group_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, R_Group_ID, trxName, virtualColumns);
-      /** if (R_Group_ID == 0)
-        {
-			setName (null);
-			setR_Group_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_R_Group (Properties ctx, String R_Group_UU, String trxName)
     {
       super (ctx, R_Group_UU, trxName);

@@ -64,21 +64,6 @@ public class X_C_AddressTransaction extends PO implements I_C_AddressTransaction
     }
 
     /** Standard Constructor */
-    public X_C_AddressTransaction (Properties ctx, int C_AddressTransaction_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_AddressTransaction_ID, trxName, virtualColumns);
-      /** if (C_AddressTransaction_ID == 0)
-        {
-			setC_AddressTransaction_ID (0);
-			setC_AddressValidation_ID (0);
-			setIsValid (false);
-// N
-			setProcessed (false);
-// N
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_AddressTransaction (Properties ctx, String C_AddressTransaction_UU, String trxName)
     {
       super (ctx, C_AddressTransaction_UU, trxName);

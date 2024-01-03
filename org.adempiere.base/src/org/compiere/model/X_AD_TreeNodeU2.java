@@ -59,19 +59,6 @@ public class X_AD_TreeNodeU2 extends PO implements I_AD_TreeNodeU2, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_TreeNodeU2 (Properties ctx, int AD_TreeNodeU2_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_TreeNodeU2_ID, trxName, virtualColumns);
-      /** if (AD_TreeNodeU2_ID == 0)
-        {
-			setAD_Tree_ID (0);
-			setNode_ID (0);
-			setParent_ID (0);
-			setSeqNo (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_TreeNodeU2 (Properties ctx, String AD_TreeNodeU2_UU, String trxName)
     {
       super (ctx, AD_TreeNodeU2_UU, trxName);

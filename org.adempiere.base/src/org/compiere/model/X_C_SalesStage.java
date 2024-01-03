@@ -66,21 +66,6 @@ public class X_C_SalesStage extends PO implements I_C_SalesStage, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_SalesStage (Properties ctx, int C_SalesStage_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_SalesStage_ID, trxName, virtualColumns);
-      /** if (C_SalesStage_ID == 0)
-        {
-			setC_SalesStage_ID (0);
-			setIsClosed (false);
-// N
-			setName (null);
-			setProbability (Env.ZERO);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_SalesStage (Properties ctx, String C_SalesStage_UU, String trxName)
     {
       super (ctx, C_SalesStage_UU, trxName);

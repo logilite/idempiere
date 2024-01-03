@@ -62,20 +62,6 @@ public class X_AD_Schedule extends PO implements I_AD_Schedule, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_Schedule (Properties ctx, int AD_Schedule_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Schedule_ID, trxName, virtualColumns);
-      /** if (AD_Schedule_ID == 0)
-        {
-			setIsIgnoreProcessingTime (false);
-// N
-			setIsSystemSchedule (false);
-// N
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Schedule (Properties ctx, String AD_Schedule_UU, String trxName)
     {
       super (ctx, AD_Schedule_UU, trxName);

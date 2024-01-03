@@ -58,18 +58,6 @@ public class X_ASP_Tab extends PO implements I_ASP_Tab, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_ASP_Tab (Properties ctx, int ASP_Tab_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, ASP_Tab_ID, trxName, virtualColumns);
-      /** if (ASP_Tab_ID == 0)
-        {
-			setAD_Tab_ID (0);
-			setASP_Status (null);
-// S
-        } */
-    }
-
-    /** Standard Constructor */
     public X_ASP_Tab (Properties ctx, String ASP_Tab_UU, String trxName)
     {
       super (ctx, ASP_Tab_UU, trxName);

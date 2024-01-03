@@ -72,24 +72,6 @@ public class X_M_Product_Category extends PO implements I_M_Product_Category, I_
     }
 
     /** Standard Constructor */
-    public X_M_Product_Category (Properties ctx, int M_Product_Category_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_Product_Category_ID, trxName, virtualColumns);
-      /** if (M_Product_Category_ID == 0)
-        {
-			setIsDefault (false);
-			setIsSelfService (true);
-// Y
-			setMMPolicy (null);
-// F
-			setM_Product_Category_ID (0);
-			setName (null);
-			setPlannedMargin (Env.ZERO);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_Product_Category (Properties ctx, String M_Product_Category_UU, String trxName)
     {
       super (ctx, M_Product_Category_UU, trxName);

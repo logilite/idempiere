@@ -89,32 +89,6 @@ public class X_A_Depreciation_Exp extends PO implements I_A_Depreciation_Exp, I_
     }
 
     /** Standard Constructor */
-    public X_A_Depreciation_Exp (Properties ctx, int A_Depreciation_Exp_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_Depreciation_Exp_ID, trxName, virtualColumns);
-      /** if (A_Depreciation_Exp_ID == 0)
-        {
-			setA_Accumulated_Depr_Delta (Env.ZERO);
-// 0
-			setA_Accumulated_Depr_F_Delta (Env.ZERO);
-// 0
-			setA_Asset_Cost_Delta (Env.ZERO);
-// 0
-			setA_Asset_ID (0);
-			setA_Depreciation_Exp_ID (0);
-			setA_Entry_Type (null);
-			setA_Period (0);
-			setDescription (null);
-			setExpense (Env.ZERO);
-// 0
-			setExpense_F (Env.ZERO);
-// 0
-			setIsDepreciated (false);
-			setProcessed (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_Depreciation_Exp (Properties ctx, String A_Depreciation_Exp_UU, String trxName)
     {
       super (ctx, A_Depreciation_Exp_UU, trxName);

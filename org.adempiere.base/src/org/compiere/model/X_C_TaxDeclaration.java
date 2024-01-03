@@ -65,21 +65,6 @@ public class X_C_TaxDeclaration extends PO implements I_C_TaxDeclaration, I_Pers
     }
 
     /** Standard Constructor */
-    public X_C_TaxDeclaration (Properties ctx, int C_TaxDeclaration_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_TaxDeclaration_ID, trxName, virtualColumns);
-      /** if (C_TaxDeclaration_ID == 0)
-        {
-			setC_TaxDeclaration_ID (0);
-			setDateFrom (new Timestamp( System.currentTimeMillis() ));
-			setDateTo (new Timestamp( System.currentTimeMillis() ));
-			setDateTrx (new Timestamp( System.currentTimeMillis() ));
-			setName (null);
-			setProcessed (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_TaxDeclaration (Properties ctx, String C_TaxDeclaration_UU, String trxName)
     {
       super (ctx, C_TaxDeclaration_UU, trxName);

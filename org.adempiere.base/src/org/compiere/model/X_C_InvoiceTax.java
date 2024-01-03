@@ -65,21 +65,6 @@ public class X_C_InvoiceTax extends PO implements I_C_InvoiceTax, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_InvoiceTax (Properties ctx, int C_InvoiceTax_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_InvoiceTax_ID, trxName, virtualColumns);
-      /** if (C_InvoiceTax_ID == 0)
-        {
-			setC_Invoice_ID (0);
-			setC_Tax_ID (0);
-			setIsTaxIncluded (false);
-			setProcessed (false);
-			setTaxAmt (Env.ZERO);
-			setTaxBaseAmt (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_InvoiceTax (Properties ctx, String C_InvoiceTax_UU, String trxName)
     {
       super (ctx, C_InvoiceTax_UU, trxName);

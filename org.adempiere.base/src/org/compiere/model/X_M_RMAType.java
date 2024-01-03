@@ -56,17 +56,6 @@ public class X_M_RMAType extends PO implements I_M_RMAType, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_RMAType (Properties ctx, int M_RMAType_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_RMAType_ID, trxName, virtualColumns);
-      /** if (M_RMAType_ID == 0)
-        {
-			setM_RMAType_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_RMAType (Properties ctx, String M_RMAType_UU, String trxName)
     {
       super (ctx, M_RMAType_UU, trxName);

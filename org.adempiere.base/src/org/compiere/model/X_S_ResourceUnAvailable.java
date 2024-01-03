@@ -59,18 +59,6 @@ public class X_S_ResourceUnAvailable extends PO implements I_S_ResourceUnAvailab
     }
 
     /** Standard Constructor */
-    public X_S_ResourceUnAvailable (Properties ctx, int S_ResourceUnAvailable_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, S_ResourceUnAvailable_ID, trxName, virtualColumns);
-      /** if (S_ResourceUnAvailable_ID == 0)
-        {
-			setDateFrom (new Timestamp( System.currentTimeMillis() ));
-			setS_Resource_ID (0);
-			setS_ResourceUnAvailable_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_S_ResourceUnAvailable (Properties ctx, String S_ResourceUnAvailable_UU, String trxName)
     {
       super (ctx, S_ResourceUnAvailable_UU, trxName);

@@ -64,20 +64,6 @@ public class X_A_Depreciation_Table_Detail extends PO implements I_A_Depreciatio
     }
 
     /** Standard Constructor */
-    public X_A_Depreciation_Table_Detail (Properties ctx, int A_Depreciation_Table_Detail_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_Depreciation_Table_Detail_ID, trxName, virtualColumns);
-      /** if (A_Depreciation_Table_Detail_ID == 0)
-        {
-			setA_Depreciation_Rate (Env.ZERO);
-			setA_Depreciation_Table_Code (null);
-			setA_Depreciation_Table_Detail_ID (0);
-			setA_Period (0);
-			setProcessed (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_Depreciation_Table_Detail (Properties ctx, String A_Depreciation_Table_Detail_UU, String trxName)
     {
       super (ctx, A_Depreciation_Table_Detail_UU, trxName);

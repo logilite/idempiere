@@ -58,18 +58,6 @@ public class X_AD_PrintHeaderFooter extends PO implements I_AD_PrintHeaderFooter
     }
 
     /** Standard Constructor */
-    public X_AD_PrintHeaderFooter (Properties ctx, int AD_PrintHeaderFooter_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_PrintHeaderFooter_ID, trxName, virtualColumns);
-      /** if (AD_PrintHeaderFooter_ID == 0)
-        {
-			setAD_PrintHeaderFooter_ID (0);
-			setName (null);
-			setSourceClassName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_PrintHeaderFooter (Properties ctx, String AD_PrintHeaderFooter_UU, String trxName)
     {
       super (ctx, AD_PrintHeaderFooter_UU, trxName);

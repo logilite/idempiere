@@ -68,22 +68,6 @@ public class X_C_CycleStep extends PO implements I_C_CycleStep, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_CycleStep (Properties ctx, int C_CycleStep_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_CycleStep_ID, trxName, virtualColumns);
-      /** if (C_CycleStep_ID == 0)
-        {
-			setC_Cycle_ID (0);
-			setC_CycleStep_ID (0);
-			setName (null);
-			setRelativeWeight (Env.ZERO);
-// 1
-			setSeqNo (0);
-// @SQL=SELECT NVL(MAX(SeqNo),0)+10 AS DefaultValue FROM C_CycleStep WHERE C_Cycle_ID=@C_Cycle_ID@
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_CycleStep (Properties ctx, String C_CycleStep_UU, String trxName)
     {
       super (ctx, C_CycleStep_UU, trxName);

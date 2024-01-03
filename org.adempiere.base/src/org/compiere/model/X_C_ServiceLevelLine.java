@@ -63,19 +63,6 @@ public class X_C_ServiceLevelLine extends PO implements I_C_ServiceLevelLine, I_
     }
 
     /** Standard Constructor */
-    public X_C_ServiceLevelLine (Properties ctx, int C_ServiceLevelLine_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_ServiceLevelLine_ID, trxName, virtualColumns);
-      /** if (C_ServiceLevelLine_ID == 0)
-        {
-			setC_ServiceLevel_ID (0);
-			setC_ServiceLevelLine_ID (0);
-			setServiceDate (new Timestamp( System.currentTimeMillis() ));
-			setServiceLevelProvided (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_ServiceLevelLine (Properties ctx, String C_ServiceLevelLine_UU, String trxName)
     {
       super (ctx, C_ServiceLevelLine_UU, trxName);

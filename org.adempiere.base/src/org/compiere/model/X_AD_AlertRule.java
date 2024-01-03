@@ -66,22 +66,6 @@ public class X_AD_AlertRule extends PO implements I_AD_AlertRule, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_AlertRule (Properties ctx, int AD_AlertRule_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_AlertRule_ID, trxName, virtualColumns);
-      /** if (AD_AlertRule_ID == 0)
-        {
-			setAD_Alert_ID (0);
-			setAD_AlertRule_ID (0);
-			setFromClause (null);
-			setIsValid (true);
-// Y
-			setName (null);
-			setSelectClause (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_AlertRule (Properties ctx, String AD_AlertRule_UU, String trxName)
     {
       super (ctx, AD_AlertRule_UU, trxName);

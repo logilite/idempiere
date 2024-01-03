@@ -68,23 +68,6 @@ public class X_M_SerNoCtl extends PO implements I_M_SerNoCtl, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_SerNoCtl (Properties ctx, int M_SerNoCtl_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_SerNoCtl_ID, trxName, virtualColumns);
-      /** if (M_SerNoCtl_ID == 0)
-        {
-			setCurrentNext (0);
-// 100
-			setIncrementNo (0);
-// 1
-			setM_SerNoCtl_ID (0);
-			setName (null);
-			setStartNo (0);
-// 100
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_SerNoCtl (Properties ctx, String M_SerNoCtl_UU, String trxName)
     {
       super (ctx, M_SerNoCtl_UU, trxName);

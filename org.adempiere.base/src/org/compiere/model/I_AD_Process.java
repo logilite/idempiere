@@ -273,15 +273,6 @@ public interface I_AD_Process
 	/** Get File Name Pattern	  */
 	public String getFileNamePattern();
 
-    /** Column name FileNamePattern */
-    public static final String COLUMNNAME_FileNamePattern = "FileNamePattern";
-
-	/** Set File Name Pattern	  */
-	public void setFileNamePattern (String FileNamePattern);
-
-	/** Get File Name Pattern	  */
-	public String getFileNamePattern();
-
     /** Column name Help */
     public static final String COLUMNNAME_Help = "Help";
 

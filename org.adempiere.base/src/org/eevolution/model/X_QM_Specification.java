@@ -59,18 +59,6 @@ public class X_QM_Specification extends PO implements I_QM_Specification, I_Pers
     }
 
     /** Standard Constructor */
-    public X_QM_Specification (Properties ctx, int QM_Specification_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, QM_Specification_ID, trxName, virtualColumns);
-      /** if (QM_Specification_ID == 0)
-        {
-			setM_AttributeSet_ID (0);
-			setM_Product_ID (0);
-			setQM_Specification_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_QM_Specification (Properties ctx, String QM_Specification_UU, String trxName)
     {
       super (ctx, QM_Specification_UU, trxName);

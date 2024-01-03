@@ -67,22 +67,6 @@ public class X_MFA_Registration extends PO implements I_MFA_Registration, I_Pers
     }
 
     /** Standard Constructor */
-    public X_MFA_Registration (Properties ctx, int MFA_Registration_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, MFA_Registration_ID, trxName, virtualColumns);
-      /** if (MFA_Registration_ID == 0)
-        {
-			setAD_User_ID (0);
-			setIsUserMFAPreferred (false);
-// N
-			setIsValid (false);
-// N
-			setMFA_Method_ID (0);
-			setMFA_Registration_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_MFA_Registration (Properties ctx, String MFA_Registration_UU, String trxName)
     {
       super (ctx, MFA_Registration_UU, trxName);

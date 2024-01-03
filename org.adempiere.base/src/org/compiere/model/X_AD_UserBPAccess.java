@@ -57,18 +57,6 @@ public class X_AD_UserBPAccess extends PO implements I_AD_UserBPAccess, I_Persis
     }
 
     /** Standard Constructor */
-    public X_AD_UserBPAccess (Properties ctx, int AD_UserBPAccess_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_UserBPAccess_ID, trxName, virtualColumns);
-      /** if (AD_UserBPAccess_ID == 0)
-        {
-			setAD_UserBPAccess_ID (0);
-			setAD_User_ID (0);
-			setBPAccessType (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_UserBPAccess (Properties ctx, String AD_UserBPAccess_UU, String trxName)
     {
       super (ctx, AD_UserBPAccess_UU, trxName);

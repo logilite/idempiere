@@ -60,19 +60,6 @@ public class X_AD_Archive extends PO implements I_AD_Archive, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_Archive (Properties ctx, int AD_Archive_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Archive_ID, trxName, virtualColumns);
-      /** if (AD_Archive_ID == 0)
-        {
-			setAD_Archive_ID (0);
-			setBinaryData (null);
-			setIsReport (false);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Archive (Properties ctx, String AD_Archive_UU, String trxName)
     {
       super (ctx, AD_Archive_UU, trxName);

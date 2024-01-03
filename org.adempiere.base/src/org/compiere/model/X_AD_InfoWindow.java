@@ -608,34 +608,6 @@ public class X_AD_InfoWindow extends PO implements I_AD_InfoWindow, I_Persistent
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_AD_Window getPO_Window() throws RuntimeException
-	{
-		return (org.compiere.model.I_AD_Window)MTable.get(getCtx(), org.compiere.model.I_AD_Window.Table_ID)
-			.getPO(getPO_Window_ID(), get_TrxName());
-	}
-
-	/** Set PO Window.
-		@param PO_Window_ID Purchase Order Window
-	*/
-	public void setPO_Window_ID (int PO_Window_ID)
-	{
-		if (PO_Window_ID < 1)
-			set_Value (COLUMNNAME_PO_Window_ID, null);
-		else
-			set_Value (COLUMNNAME_PO_Window_ID, Integer.valueOf(PO_Window_ID));
-	}
-
-	/** Get PO Window.
-		@return Purchase Order Window
-	  */
-	public int getPO_Window_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_PO_Window_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	/** Set Process Now.
 		@param Processing Process Now
 	*/

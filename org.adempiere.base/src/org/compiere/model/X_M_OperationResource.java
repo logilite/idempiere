@@ -66,21 +66,6 @@ public class X_M_OperationResource extends PO implements I_M_OperationResource, 
     }
 
     /** Standard Constructor */
-    public X_M_OperationResource (Properties ctx, int M_OperationResource_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_OperationResource_ID, trxName, virtualColumns);
-      /** if (M_OperationResource_ID == 0)
-        {
-			setM_OperationResource_ID (0);
-			setM_ProductOperation_ID (0);
-			setName (null);
-			setSetupTime (Env.ZERO);
-			setTeardownTime (Env.ZERO);
-			setUnitRuntime (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_OperationResource (Properties ctx, String M_OperationResource_UU, String trxName)
     {
       super (ctx, M_OperationResource_UU, trxName);

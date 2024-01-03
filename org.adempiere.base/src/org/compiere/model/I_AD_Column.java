@@ -230,21 +230,6 @@ s active status or processed status. This logic Applicable only if Always Updata
 	  */
 	public String getAlwaysUpdatableLogic();
 
-    /** Column name AlwaysUpdatableLogic */
-    public static final String COLUMNNAME_AlwaysUpdatableLogic = "AlwaysUpdatableLogic";
-
-	/** Set Always Updatable Logic.
-	  * Logic to determine if field is Updatable irrespective if record&#039;
-s active status or processed status. This logic Applicable only if Always Updatable is N.
-	  */
-	public void setAlwaysUpdatableLogic (String AlwaysUpdatableLogic);
-
-	/** Get Always Updatable Logic.
-	  * Logic to determine if field is Updatable irrespective if record&#039;
-s active status or processed status. This logic Applicable only if Always Updatable is N.
-	  */
-	public String getAlwaysUpdatableLogic();
-
     /** Column name Callout */
     public static final String COLUMNNAME_Callout = "Callout";
 

@@ -69,23 +69,6 @@ public class X_C_Recurring extends PO implements I_C_Recurring, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_Recurring (Properties ctx, int C_Recurring_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Recurring_ID, trxName, virtualColumns);
-      /** if (C_Recurring_ID == 0)
-        {
-			setC_Recurring_ID (0);
-			setDateNextRun (new Timestamp( System.currentTimeMillis() ));
-			setFrequencyType (null);
-// M
-			setName (null);
-			setRecurringType (null);
-			setRunsMax (0);
-			setRunsRemaining (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Recurring (Properties ctx, String C_Recurring_UU, String trxName)
     {
       super (ctx, C_Recurring_UU, trxName);

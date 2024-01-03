@@ -58,18 +58,6 @@ public class X_R_IssueKnown extends PO implements I_R_IssueKnown, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_R_IssueKnown (Properties ctx, int R_IssueKnown_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, R_IssueKnown_ID, trxName, virtualColumns);
-      /** if (R_IssueKnown_ID == 0)
-        {
-			setIssueSummary (null);
-			setReleaseNo (null);
-			setR_IssueKnown_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_R_IssueKnown (Properties ctx, String R_IssueKnown_UU, String trxName)
     {
       super (ctx, R_IssueKnown_UU, trxName);

@@ -53,16 +53,6 @@ public class X_PA_DashboardContent_Access extends PO implements I_PA_DashboardCo
     }
 
     /** Standard Constructor */
-    public X_PA_DashboardContent_Access (Properties ctx, int PA_DashboardContent_Access_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, PA_DashboardContent_Access_ID, trxName, virtualColumns);
-      /** if (PA_DashboardContent_Access_ID == 0)
-        {
-			setPA_DashboardContent_Access_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_PA_DashboardContent_Access (Properties ctx, String PA_DashboardContent_Access_UU, String trxName)
     {
       super (ctx, PA_DashboardContent_Access_UU, trxName);

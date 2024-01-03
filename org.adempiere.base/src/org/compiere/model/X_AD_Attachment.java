@@ -59,18 +59,6 @@ public class X_AD_Attachment extends PO implements I_AD_Attachment, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_Attachment (Properties ctx, int AD_Attachment_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Attachment_ID, trxName, virtualColumns);
-      /** if (AD_Attachment_ID == 0)
-        {
-			setAD_Attachment_ID (0);
-			setAD_Table_ID (0);
-			setTitle (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Attachment (Properties ctx, String AD_Attachment_UU, String trxName)
     {
       super (ctx, AD_Attachment_UU, trxName);

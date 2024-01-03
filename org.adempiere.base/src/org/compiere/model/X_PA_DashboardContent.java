@@ -80,29 +80,6 @@ public class X_PA_DashboardContent extends PO implements I_PA_DashboardContent, 
     }
 
     /** Standard Constructor */
-    public X_PA_DashboardContent (Properties ctx, int PA_DashboardContent_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, PA_DashboardContent_ID, trxName, virtualColumns);
-      /** if (PA_DashboardContent_ID == 0)
-        {
-			setIsCollapsedByDefault (false);
-// N
-			setIsCollapsible (true);
-// Y
-			setIsEmbedReportContent (false);
-// N
-			setIsMaximizable (true);
-// Y
-			setIsShowInDashboard (true);
-// 'Y'
-			setIsShowTitle (true);
-// Y
-			setName (null);
-			setPA_DashboardContent_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_PA_DashboardContent (Properties ctx, String PA_DashboardContent_UU, String trxName)
     {
       super (ctx, PA_DashboardContent_UU, trxName);
@@ -591,28 +568,6 @@ public class X_PA_DashboardContent extends PO implements I_PA_DashboardContent, 
 	/** Get Show Title.
 		@return Show Title	  */
 	public boolean isShowTitle () 
-	{
-		Object oo = get_Value(COLUMNNAME_IsShowTitle);
-		if (oo != null)
-		{
-			 if (oo instanceof Boolean)
-				 return ((Boolean)oo).booleanValue();
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
-	/** Set Show Title.
-		@param IsShowTitle Show Title
-	*/
-	public void setIsShowTitle (boolean IsShowTitle)
-	{
-		set_Value (COLUMNNAME_IsShowTitle, Boolean.valueOf(IsShowTitle));
-	}
-
-	/** Get Show Title.
-		@return Show Title	  */
-	public boolean isShowTitle()
 	{
 		Object oo = get_Value(COLUMNNAME_IsShowTitle);
 		if (oo != null)

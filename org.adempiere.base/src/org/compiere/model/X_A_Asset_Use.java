@@ -63,20 +63,6 @@ public class X_A_Asset_Use extends PO implements I_A_Asset_Use, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_A_Asset_Use (Properties ctx, int A_Asset_Use_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_Asset_Use_ID, trxName, virtualColumns);
-      /** if (A_Asset_Use_ID == 0)
-        {
-			setA_Asset_ID (0);
-// @A_Asset_ID@
-			setA_Asset_Use_ID (0);
-			setUseDate (new Timestamp( System.currentTimeMillis() ));
-			setUseUnits (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_Asset_Use (Properties ctx, String A_Asset_Use_UU, String trxName)
     {
       super (ctx, A_Asset_Use_UU, trxName);

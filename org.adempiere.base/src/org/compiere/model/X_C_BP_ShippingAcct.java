@@ -55,17 +55,6 @@ public class X_C_BP_ShippingAcct extends PO implements I_C_BP_ShippingAcct, I_Pe
     }
 
     /** Standard Constructor */
-    public X_C_BP_ShippingAcct (Properties ctx, int C_BP_ShippingAcct_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_BP_ShippingAcct_ID, trxName, virtualColumns);
-      /** if (C_BP_ShippingAcct_ID == 0)
-        {
-			setC_BPartner_ID (0);
-			setC_BP_ShippingAcct_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_BP_ShippingAcct (Properties ctx, String C_BP_ShippingAcct_UU, String trxName)
     {
       super (ctx, C_BP_ShippingAcct_UU, trxName);

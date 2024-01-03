@@ -60,19 +60,6 @@ public class X_M_AttributeValue extends PO implements I_M_AttributeValue, I_Pers
     }
 
     /** Standard Constructor */
-    public X_M_AttributeValue (Properties ctx, int M_AttributeValue_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_AttributeValue_ID, trxName, virtualColumns);
-      /** if (M_AttributeValue_ID == 0)
-        {
-			setM_Attribute_ID (0);
-			setM_AttributeValue_ID (0);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_AttributeValue (Properties ctx, String M_AttributeValue_UU, String trxName)
     {
       super (ctx, M_AttributeValue_UU, trxName);

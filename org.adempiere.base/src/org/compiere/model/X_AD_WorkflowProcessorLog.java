@@ -57,18 +57,6 @@ public class X_AD_WorkflowProcessorLog extends PO implements I_AD_WorkflowProces
     }
 
     /** Standard Constructor */
-    public X_AD_WorkflowProcessorLog (Properties ctx, int AD_WorkflowProcessorLog_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_WorkflowProcessorLog_ID, trxName, virtualColumns);
-      /** if (AD_WorkflowProcessorLog_ID == 0)
-        {
-			setAD_WorkflowProcessor_ID (0);
-			setAD_WorkflowProcessorLog_ID (0);
-			setIsError (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_WorkflowProcessorLog (Properties ctx, String AD_WorkflowProcessorLog_UU, String trxName)
     {
       super (ctx, AD_WorkflowProcessorLog_UU, trxName);

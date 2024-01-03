@@ -62,20 +62,6 @@ public class X_PP_Order_Node_Asset extends PO implements I_PP_Order_Node_Asset, 
     }
 
     /** Standard Constructor */
-    public X_PP_Order_Node_Asset (Properties ctx, int PP_Order_Node_Asset_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, PP_Order_Node_Asset_ID, trxName, virtualColumns);
-      /** if (PP_Order_Node_Asset_ID == 0)
-        {
-			setA_Asset_ID (0);
-			setPP_Order_ID (0);
-			setPP_Order_Node_Asset_ID (0);
-			setPP_Order_Node_ID (0);
-			setPP_Order_Workflow_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_PP_Order_Node_Asset (Properties ctx, String PP_Order_Node_Asset_UU, String trxName)
     {
       super (ctx, PP_Order_Node_Asset_UU, trxName);

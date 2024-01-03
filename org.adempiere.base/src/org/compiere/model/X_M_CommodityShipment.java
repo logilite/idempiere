@@ -57,18 +57,6 @@ public class X_M_CommodityShipment extends PO implements I_M_CommodityShipment, 
     }
 
     /** Standard Constructor */
-    public X_M_CommodityShipment (Properties ctx, int M_CommodityShipment_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_CommodityShipment_ID, trxName, virtualColumns);
-      /** if (M_CommodityShipment_ID == 0)
-        {
-			setCountryOfManufacture_ID (0);
-			setHarmonizedCode (null);
-			setM_CommodityShipment_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_CommodityShipment (Properties ctx, String M_CommodityShipment_UU, String trxName)
     {
       super (ctx, M_CommodityShipment_UU, trxName);

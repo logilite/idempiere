@@ -62,20 +62,6 @@ public class X_C_PeriodControl extends PO implements I_C_PeriodControl, I_Persis
     }
 
     /** Standard Constructor */
-    public X_C_PeriodControl (Properties ctx, int C_PeriodControl_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_PeriodControl_ID, trxName, virtualColumns);
-      /** if (C_PeriodControl_ID == 0)
-        {
-			setC_PeriodControl_ID (0);
-			setC_Period_ID (0);
-			setDocBaseType (null);
-			setPeriodAction (null);
-// N
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_PeriodControl (Properties ctx, String C_PeriodControl_UU, String trxName)
     {
       super (ctx, C_PeriodControl_UU, trxName);

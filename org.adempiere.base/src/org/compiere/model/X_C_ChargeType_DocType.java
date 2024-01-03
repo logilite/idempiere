@@ -63,21 +63,6 @@ public class X_C_ChargeType_DocType extends PO implements I_C_ChargeType_DocType
     }
 
     /** Standard Constructor */
-    public X_C_ChargeType_DocType (Properties ctx, int C_ChargeType_DocType_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_ChargeType_DocType_ID, trxName, virtualColumns);
-      /** if (C_ChargeType_DocType_ID == 0)
-        {
-			setC_ChargeType_ID (0);
-			setC_DocType_ID (0);
-			setIsAllowNegative (true);
-// Y
-			setIsAllowPositive (true);
-// Y
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_ChargeType_DocType (Properties ctx, String C_ChargeType_DocType_UU, String trxName)
     {
       super (ctx, C_ChargeType_DocType_UU, trxName);

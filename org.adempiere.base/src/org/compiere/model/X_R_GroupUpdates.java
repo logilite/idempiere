@@ -57,18 +57,6 @@ public class X_R_GroupUpdates extends PO implements I_R_GroupUpdates, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_R_GroupUpdates (Properties ctx, int R_GroupUpdates_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, R_GroupUpdates_ID, trxName, virtualColumns);
-      /** if (R_GroupUpdates_ID == 0)
-        {
-			setAD_User_ID (0);
-			setIsSelfService (false);
-			setR_Group_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_R_GroupUpdates (Properties ctx, String R_GroupUpdates_UU, String trxName)
     {
       super (ctx, R_GroupUpdates_UU, trxName);

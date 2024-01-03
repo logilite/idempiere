@@ -68,23 +68,6 @@ public class X_AD_Language extends PO implements I_AD_Language, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_Language (Properties ctx, int AD_Language_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Language_ID, trxName, virtualColumns);
-      /** if (AD_Language_ID == 0)
-        {
-			setAD_Language (null);
-			setAD_Language_ID (0);
-// @SQL=SELECT NVL(MAX(AD_Language_ID),0)+1 AS DefaultValue FROM AD_Language
-			setIsBaseLanguage (false);
-// N
-			setIsSystemLanguage (false);
-			setName (null);
-			setPrintName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Language (Properties ctx, String AD_Language_UU, String trxName)
     {
       super (ctx, AD_Language_UU, trxName);

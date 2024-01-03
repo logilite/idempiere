@@ -72,24 +72,6 @@ public class X_C_RevenueRecognition_Plan extends PO implements I_C_RevenueRecogn
     }
 
     /** Standard Constructor */
-    public X_C_RevenueRecognition_Plan (Properties ctx, int C_RevenueRecognition_Plan_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_RevenueRecognition_Plan_ID, trxName, virtualColumns);
-      /** if (C_RevenueRecognition_Plan_ID == 0)
-        {
-			setC_AcctSchema_ID (0);
-			setC_Currency_ID (0);
-			setC_InvoiceLine_ID (0);
-			setC_RevenueRecognition_ID (0);
-			setC_RevenueRecognition_Plan_ID (0);
-			setP_Revenue_Acct (0);
-			setRecognizedAmt (Env.ZERO);
-			setTotalAmt (Env.ZERO);
-			setUnEarnedRevenue_Acct (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_RevenueRecognition_Plan (Properties ctx, String C_RevenueRecognition_Plan_UU, String trxName)
     {
       super (ctx, C_RevenueRecognition_Plan_UU, trxName);

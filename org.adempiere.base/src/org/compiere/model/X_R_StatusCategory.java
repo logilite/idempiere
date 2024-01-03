@@ -58,18 +58,6 @@ public class X_R_StatusCategory extends PO implements I_R_StatusCategory, I_Pers
     }
 
     /** Standard Constructor */
-    public X_R_StatusCategory (Properties ctx, int R_StatusCategory_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, R_StatusCategory_ID, trxName, virtualColumns);
-      /** if (R_StatusCategory_ID == 0)
-        {
-			setIsDefault (false);
-			setName (null);
-			setR_StatusCategory_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_R_StatusCategory (Properties ctx, String R_StatusCategory_UU, String trxName)
     {
       super (ctx, R_StatusCategory_UU, trxName);

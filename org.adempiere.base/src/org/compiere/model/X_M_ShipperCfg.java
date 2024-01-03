@@ -72,25 +72,6 @@ public class X_M_ShipperCfg extends PO implements I_M_ShipperCfg, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_ShipperCfg (Properties ctx, int M_ShipperCfg_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_ShipperCfg_ID, trxName, virtualColumns);
-      /** if (M_ShipperCfg_ID == 0)
-        {
-			setIsInternational (false);
-// N
-			setIsOnline (false);
-// N
-			setIsResidential (false);
-// N
-			setIsSaturdayDelivery (false);
-// N
-			setM_ShipperCfg_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_ShipperCfg (Properties ctx, String M_ShipperCfg_UU, String trxName)
     {
       super (ctx, M_ShipperCfg_UU, trxName);

@@ -60,19 +60,6 @@ public class X_AD_SchedulerRecipient extends PO implements I_AD_SchedulerRecipie
     }
 
     /** Standard Constructor */
-    public X_AD_SchedulerRecipient (Properties ctx, int AD_SchedulerRecipient_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_SchedulerRecipient_ID, trxName, virtualColumns);
-      /** if (AD_SchedulerRecipient_ID == 0)
-        {
-			setAD_Scheduler_ID (0);
-			setAD_SchedulerRecipient_ID (0);
-			setIsUpload (false);
-// N
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_SchedulerRecipient (Properties ctx, String AD_SchedulerRecipient_UU, String trxName)
     {
       super (ctx, AD_SchedulerRecipient_UU, trxName);

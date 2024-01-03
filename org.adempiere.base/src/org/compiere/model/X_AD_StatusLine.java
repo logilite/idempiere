@@ -64,21 +64,6 @@ public class X_AD_StatusLine extends PO implements I_AD_StatusLine, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_StatusLine (Properties ctx, int AD_StatusLine_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_StatusLine_ID, trxName, virtualColumns);
-      /** if (AD_StatusLine_ID == 0)
-        {
-			setAD_Message_ID (0);
-			setAD_StatusLine_ID (0);
-			setEntityType (null);
-// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
-			setName (null);
-			setSQLStatement (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_StatusLine (Properties ctx, String AD_StatusLine_UU, String trxName)
     {
       super (ctx, AD_StatusLine_UU, trxName);

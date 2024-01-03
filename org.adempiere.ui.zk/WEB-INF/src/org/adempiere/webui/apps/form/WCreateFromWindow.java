@@ -58,7 +58,6 @@ public class WCreateFromWindow extends Window implements EventListener<Event>, W
 	
 	/** Parameter panel. North of window. */
 	protected Panel parameterPanel = new Panel();
-	protected ConfirmPanel confirmPanel = new ConfirmPanel(true);
 	/** Action buttons panel. South of window. */
 	protected ConfirmPanel confirmPanel = new ConfirmPanel(true);
 	/** Status bar. South of window. */

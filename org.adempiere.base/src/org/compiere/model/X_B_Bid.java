@@ -64,21 +64,6 @@ public class X_B_Bid extends PO implements I_B_Bid, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_B_Bid (Properties ctx, int B_Bid_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, B_Bid_ID, trxName, virtualColumns);
-      /** if (B_Bid_ID == 0)
-        {
-			setAD_User_ID (0);
-			setB_Bid_ID (0);
-			setB_BuyerFunds_ID (0);
-			setB_Topic_ID (0);
-			setIsWillingToCommit (false);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_B_Bid (Properties ctx, String B_Bid_UU, String trxName)
     {
       super (ctx, B_Bid_UU, trxName);

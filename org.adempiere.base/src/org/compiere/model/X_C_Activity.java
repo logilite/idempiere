@@ -60,19 +60,6 @@ public class X_C_Activity extends PO implements I_C_Activity, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_Activity (Properties ctx, int C_Activity_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Activity_ID, trxName, virtualColumns);
-      /** if (C_Activity_ID == 0)
-        {
-			setC_Activity_ID (0);
-			setIsSummary (false);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Activity (Properties ctx, String C_Activity_UU, String trxName)
     {
       super (ctx, C_Activity_UU, trxName);

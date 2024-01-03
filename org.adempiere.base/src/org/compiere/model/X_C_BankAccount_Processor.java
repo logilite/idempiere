@@ -105,41 +105,6 @@ public class X_C_BankAccount_Processor extends PO implements I_C_BankAccount_Pro
     }
 
     /** Standard Constructor */
-    public X_C_BankAccount_Processor (Properties ctx, int C_BankAccount_Processor_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_BankAccount_Processor_ID, trxName, virtualColumns);
-      /** if (C_BankAccount_Processor_ID == 0)
-        {
-			setAcceptAMEX (false);
-// N
-			setAcceptATM (false);
-// N
-			setAcceptCheck (false);
-// N
-			setAcceptCorporate (false);
-// N
-			setAcceptDiners (false);
-// N
-			setAcceptDirectDebit (false);
-// N
-			setAcceptDirectDeposit (false);
-// N
-			setAcceptDiscover (false);
-// N
-			setAcceptMC (false);
-// N
-			setAcceptVisa (false);
-// N
-			setC_BankAccount_ID (0);
-			setC_PaymentProcessor_ID (0);
-			setPassword (null);
-			setRequireVV (false);
-// N
-			setUserID (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_BankAccount_Processor (Properties ctx, String C_BankAccount_Processor_UU, String trxName)
     {
       super (ctx, C_BankAccount_Processor_UU, trxName);

@@ -60,19 +60,6 @@ public class X_AD_Replication_Log extends PO implements I_AD_Replication_Log, I_
     }
 
     /** Standard Constructor */
-    public X_AD_Replication_Log (Properties ctx, int AD_Replication_Log_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Replication_Log_ID, trxName, virtualColumns);
-      /** if (AD_Replication_Log_ID == 0)
-        {
-			setAD_Replication_Log_ID (0);
-			setAD_Replication_Run_ID (0);
-			setIsReplicated (false);
-// N
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Replication_Log (Properties ctx, String AD_Replication_Log_UU, String trxName)
     {
       super (ctx, AD_Replication_Log_UU, trxName);

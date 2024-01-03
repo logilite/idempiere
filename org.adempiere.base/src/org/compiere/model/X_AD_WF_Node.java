@@ -97,37 +97,6 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_WF_Node (Properties ctx, int AD_WF_Node_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_WF_Node_ID, trxName, virtualColumns);
-      /** if (AD_WF_Node_ID == 0)
-        {
-			setAction (null);
-// Z
-			setAD_WF_Node_ID (0);
-			setAD_Workflow_ID (0);
-			setCost (Env.ZERO);
-			setDuration (0);
-			setEntityType (null);
-// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
-			setIsAttachedDocumentToEmail (true);
-// Y
-			setIsCentrallyMaintained (true);
-// Y
-			setJoinElement (null);
-// X
-			setLimit (0);
-			setName (null);
-			setSplitElement (null);
-// X
-			setValue (null);
-			setWaitingTime (0);
-			setXPosition (0);
-			setYPosition (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_WF_Node (Properties ctx, String AD_WF_Node_UU, String trxName)
     {
       super (ctx, AD_WF_Node_UU, trxName);

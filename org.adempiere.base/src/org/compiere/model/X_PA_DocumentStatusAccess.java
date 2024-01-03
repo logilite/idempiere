@@ -53,16 +53,6 @@ public class X_PA_DocumentStatusAccess extends PO implements I_PA_DocumentStatus
     }
 
     /** Standard Constructor */
-    public X_PA_DocumentStatusAccess (Properties ctx, int PA_DocumentStatusAccess_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, PA_DocumentStatusAccess_ID, trxName, virtualColumns);
-      /** if (PA_DocumentStatusAccess_ID == 0)
-        {
-			setPA_DocumentStatusAccess_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_PA_DocumentStatusAccess (Properties ctx, String PA_DocumentStatusAccess_UU, String trxName)
     {
       super (ctx, PA_DocumentStatusAccess_UU, trxName);

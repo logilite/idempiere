@@ -55,17 +55,6 @@ public class X_AD_Role_OrgAccess extends PO implements I_AD_Role_OrgAccess, I_Pe
     }
 
     /** Standard Constructor */
-    public X_AD_Role_OrgAccess (Properties ctx, int AD_Role_OrgAccess_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Role_OrgAccess_ID, trxName, virtualColumns);
-      /** if (AD_Role_OrgAccess_ID == 0)
-        {
-			setAD_Role_ID (0);
-			setIsReadOnly (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Role_OrgAccess (Properties ctx, String AD_Role_OrgAccess_UU, String trxName)
     {
       super (ctx, AD_Role_OrgAccess_UU, trxName);

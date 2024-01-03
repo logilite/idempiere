@@ -64,21 +64,6 @@ public class X_C_UOM extends PO implements I_C_UOM, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_UOM (Properties ctx, int C_UOM_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_UOM_ID, trxName, virtualColumns);
-      /** if (C_UOM_ID == 0)
-        {
-			setCostingPrecision (0);
-			setC_UOM_ID (0);
-			setIsDefault (false);
-			setName (null);
-			setStdPrecision (0);
-			setX12DE355 (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_UOM (Properties ctx, String C_UOM_UU, String trxName)
     {
       super (ctx, C_UOM_UU, trxName);

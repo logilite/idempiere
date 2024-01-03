@@ -62,19 +62,6 @@ public class X_M_ShippingTransactionLine extends PO implements I_M_ShippingTrans
     }
 
     /** Standard Constructor */
-    public X_M_ShippingTransactionLine (Properties ctx, int M_ShippingTransactionLine_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_ShippingTransactionLine_ID, trxName, virtualColumns);
-      /** if (M_ShippingTransactionLine_ID == 0)
-        {
-			setM_ShippingTransaction_ID (0);
-			setM_ShippingTransactionLine_ID (0);
-			setProcessed (false);
-// N
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_ShippingTransactionLine (Properties ctx, String M_ShippingTransactionLine_UU, String trxName)
     {
       super (ctx, M_ShippingTransactionLine_UU, trxName);

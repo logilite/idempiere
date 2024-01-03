@@ -58,17 +58,6 @@ public class X_AD_PInstance_Log extends PO implements I_AD_PInstance_Log, I_Pers
     }
 
     /** Standard Constructor */
-    public X_AD_PInstance_Log (Properties ctx, int AD_PInstance_Log_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_PInstance_Log_ID, trxName, virtualColumns);
-      /** if (AD_PInstance_Log_ID == 0)
-        {
-			setAD_PInstance_ID (0);
-			setLog_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_PInstance_Log (Properties ctx, String AD_PInstance_Log_UU, String trxName)
     {
       super (ctx, AD_PInstance_Log_UU, trxName);

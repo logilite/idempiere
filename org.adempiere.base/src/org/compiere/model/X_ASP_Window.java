@@ -60,19 +60,6 @@ public class X_ASP_Window extends PO implements I_ASP_Window, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_ASP_Window (Properties ctx, int ASP_Window_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, ASP_Window_ID, trxName, virtualColumns);
-      /** if (ASP_Window_ID == 0)
-        {
-			setAD_Window_ID (0);
-			setASP_Level_ID (0);
-			setASP_Status (null);
-// S
-        } */
-    }
-
-    /** Standard Constructor */
     public X_ASP_Window (Properties ctx, String ASP_Window_UU, String trxName)
     {
       super (ctx, ASP_Window_UU, trxName);

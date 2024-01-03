@@ -67,9 +67,4 @@ public class MPromotionPreCondition extends X_M_PromotionPreCondition {
 		super(ctx, M_PromotionPreCondition_ID, trxName, virtualColumns);
 	}
 
-	public MPromotionPreCondition(Properties ctx, int M_PromotionPreCondition_ID, String trxName,
-			String... virtualColumns) {
-		super(ctx, M_PromotionPreCondition_ID, trxName, virtualColumns);
-	}
-
 }

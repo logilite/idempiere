@@ -62,20 +62,6 @@ public class X_C_BankAccountDoc extends PO implements I_C_BankAccountDoc, I_Pers
     }
 
     /** Standard Constructor */
-    public X_C_BankAccountDoc (Properties ctx, int C_BankAccountDoc_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_BankAccountDoc_ID, trxName, virtualColumns);
-      /** if (C_BankAccountDoc_ID == 0)
-        {
-			setC_BankAccountDoc_ID (0);
-			setC_BankAccount_ID (0);
-			setCurrentNext (0);
-			setName (null);
-			setPaymentRule (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_BankAccountDoc (Properties ctx, String C_BankAccountDoc_UU, String trxName)
     {
       super (ctx, C_BankAccountDoc_UU, trxName);

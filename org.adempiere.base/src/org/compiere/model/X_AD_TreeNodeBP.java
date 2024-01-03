@@ -55,17 +55,6 @@ public class X_AD_TreeNodeBP extends PO implements I_AD_TreeNodeBP, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_TreeNodeBP (Properties ctx, int AD_TreeNodeBP_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_TreeNodeBP_ID, trxName, virtualColumns);
-      /** if (AD_TreeNodeBP_ID == 0)
-        {
-			setAD_Tree_ID (0);
-			setNode_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_TreeNodeBP (Properties ctx, String AD_TreeNodeBP_UU, String trxName)
     {
       super (ctx, AD_TreeNodeBP_UU, trxName);

@@ -57,18 +57,6 @@ public class X_CM_ChatUpdate extends PO implements I_CM_ChatUpdate, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_CM_ChatUpdate (Properties ctx, int CM_ChatUpdate_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, CM_ChatUpdate_ID, trxName, virtualColumns);
-      /** if (CM_ChatUpdate_ID == 0)
-        {
-			setAD_User_ID (0);
-			setCM_Chat_ID (0);
-			setIsSelfService (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_CM_ChatUpdate (Properties ctx, String CM_ChatUpdate_UU, String trxName)
     {
       super (ctx, CM_ChatUpdate_UU, trxName);

@@ -58,18 +58,6 @@ public class X_AD_Package_Imp extends PO implements I_AD_Package_Imp, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_AD_Package_Imp (Properties ctx, int AD_Package_Imp_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Package_Imp_ID, trxName, virtualColumns);
-      /** if (AD_Package_Imp_ID == 0)
-        {
-			setAD_Package_Imp_ID (0);
-			setName (null);
-			setProcessing (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Package_Imp (Properties ctx, String AD_Package_Imp_UU, String trxName)
     {
       super (ctx, AD_Package_Imp_UU, trxName);

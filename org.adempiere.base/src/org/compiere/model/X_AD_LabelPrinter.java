@@ -56,17 +56,6 @@ public class X_AD_LabelPrinter extends PO implements I_AD_LabelPrinter, I_Persis
     }
 
     /** Standard Constructor */
-    public X_AD_LabelPrinter (Properties ctx, int AD_LabelPrinter_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_LabelPrinter_ID, trxName, virtualColumns);
-      /** if (AD_LabelPrinter_ID == 0)
-        {
-			setAD_LabelPrinter_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_LabelPrinter (Properties ctx, String AD_LabelPrinter_UU, String trxName)
     {
       super (ctx, AD_LabelPrinter_UU, trxName);

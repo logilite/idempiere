@@ -69,23 +69,6 @@ public class X_C_OrderLandedCostAllocation extends PO implements I_C_OrderLanded
     }
 
     /** Standard Constructor */
-    public X_C_OrderLandedCostAllocation (Properties ctx, int C_OrderLandedCostAllocation_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_OrderLandedCostAllocation_ID, trxName, virtualColumns);
-      /** if (C_OrderLandedCostAllocation_ID == 0)
-        {
-			setAmt (Env.ZERO);
-			setBase (Env.ZERO);
-			setC_OrderLandedCostAllocation_ID (0);
-			setC_OrderLandedCost_ID (0);
-			setC_OrderLine_ID (0);
-			setProcessed (false);
-// N
-			setQty (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_OrderLandedCostAllocation (Properties ctx, String C_OrderLandedCostAllocation_UU, String trxName)
     {
       super (ctx, C_OrderLandedCostAllocation_UU, trxName);

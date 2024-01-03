@@ -62,20 +62,6 @@ public class X_AD_SysConfig extends PO implements I_AD_SysConfig, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_SysConfig (Properties ctx, int AD_SysConfig_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_SysConfig_ID, trxName, virtualColumns);
-      /** if (AD_SysConfig_ID == 0)
-        {
-			setAD_SysConfig_ID (0);
-			setEntityType (null);
-// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_SysConfig (Properties ctx, String AD_SysConfig_UU, String trxName)
     {
       super (ctx, AD_SysConfig_UU, trxName);

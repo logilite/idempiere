@@ -58,17 +58,6 @@ public class X_I_Invoice extends PO implements I_I_Invoice, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_I_Invoice (Properties ctx, int I_Invoice_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, I_Invoice_ID, trxName, virtualColumns);
-      /** if (I_Invoice_ID == 0)
-        {
-			setI_Invoice_ID (0);
-			setI_IsImported (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_I_Invoice (Properties ctx, String I_Invoice_UU, String trxName)
     {
       super (ctx, I_Invoice_UU, trxName);

@@ -55,17 +55,6 @@ public class X_ASP_Process_Para extends PO implements I_ASP_Process_Para, I_Pers
     }
 
     /** Standard Constructor */
-    public X_ASP_Process_Para (Properties ctx, int ASP_Process_Para_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, ASP_Process_Para_ID, trxName, virtualColumns);
-      /** if (ASP_Process_Para_ID == 0)
-        {
-			setASP_Status (null);
-// S
-        } */
-    }
-
-    /** Standard Constructor */
     public X_ASP_Process_Para (Properties ctx, String ASP_Process_Para_UU, String trxName)
     {
       super (ctx, ASP_Process_Para_UU, trxName);

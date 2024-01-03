@@ -82,29 +82,6 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_I_FixedAsset (Properties ctx, int I_FixedAsset_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, I_FixedAsset_ID, trxName, virtualColumns);
-      /** if (I_FixedAsset_ID == 0)
-        {
-			setA_Asset_Cost (Env.ZERO);
-// 0
-			setA_Remaining_Period (0);
-// 0
-			setAssetAmtEntered (Env.ZERO);
-// 0
-			setAssetPeriodDepreciationAmt (Env.ZERO);
-// 0
-			setAssetSourceAmt (Env.ZERO);
-// 0
-			setDocAction (null);
-// 'CO'
-			setI_IsImported (false);
-// 'N'
-        } */
-    }
-
-    /** Standard Constructor */
     public X_I_FixedAsset (Properties ctx, String I_FixedAsset_UU, String trxName)
     {
       super (ctx, I_FixedAsset_UU, trxName);

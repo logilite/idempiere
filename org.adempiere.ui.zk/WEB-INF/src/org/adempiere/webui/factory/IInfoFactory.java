@@ -98,16 +98,6 @@ public interface IInfoFactory {
 	public default InfoWindow create (int AD_InfoWindow_ID, String predefinedContextVariables) {
 		return create (AD_InfoWindow_ID, predefinedContextVariables);
 	}
-	
-	/**
-	 * 
-	 * @param AD_InfoWindow_ID
-	 * @param predefinedContextVariables
-	 * @return {@link InfoWindow}
-	 */
-	public default InfoWindow create (int AD_InfoWindow_ID, String predefinedContextVariables) {
-		return create (AD_InfoWindow_ID, predefinedContextVariables);
-	}
 
 	/**
 	 * 

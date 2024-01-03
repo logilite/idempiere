@@ -66,22 +66,6 @@ public class X_PP_Order_NodeNext extends PO implements I_PP_Order_NodeNext, I_Pe
     }
 
     /** Standard Constructor */
-    public X_PP_Order_NodeNext (Properties ctx, int PP_Order_NodeNext_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, PP_Order_NodeNext_ID, trxName, virtualColumns);
-      /** if (PP_Order_NodeNext_ID == 0)
-        {
-			setAD_WF_Node_ID (0);
-			setEntityType (null);
-// @SQL=select get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) from dual
-			setPP_Order_ID (0);
-			setPP_Order_Node_ID (0);
-			setSeqNo (0);
-// 10
-        } */
-    }
-
-    /** Standard Constructor */
     public X_PP_Order_NodeNext (Properties ctx, String PP_Order_NodeNext_UU, String trxName)
     {
       super (ctx, PP_Order_NodeNext_UU, trxName);

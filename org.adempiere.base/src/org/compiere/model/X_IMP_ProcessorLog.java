@@ -59,19 +59,6 @@ public class X_IMP_ProcessorLog extends PO implements I_IMP_ProcessorLog, I_Pers
     }
 
     /** Standard Constructor */
-    public X_IMP_ProcessorLog (Properties ctx, int IMP_ProcessorLog_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, IMP_ProcessorLog_ID, trxName, virtualColumns);
-      /** if (IMP_ProcessorLog_ID == 0)
-        {
-			setIMP_Processor_ID (0);
-			setIMP_ProcessorLog_ID (0);
-			setIsError (true);
-// 'Y'
-        } */
-    }
-
-    /** Standard Constructor */
     public X_IMP_ProcessorLog (Properties ctx, String IMP_ProcessorLog_UU, String trxName)
     {
       super (ctx, IMP_ProcessorLog_UU, trxName);

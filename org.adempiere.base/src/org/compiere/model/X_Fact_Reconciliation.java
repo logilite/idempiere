@@ -59,17 +59,6 @@ public class X_Fact_Reconciliation extends PO implements I_Fact_Reconciliation, 
     }
 
     /** Standard Constructor */
-    public X_Fact_Reconciliation (Properties ctx, int Fact_Reconciliation_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, Fact_Reconciliation_ID, trxName, virtualColumns);
-      /** if (Fact_Reconciliation_ID == 0)
-        {
-			setFact_Acct_ID (0);
-			setFact_Reconciliation_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_Fact_Reconciliation (Properties ctx, String Fact_Reconciliation_UU, String trxName)
     {
       super (ctx, Fact_Reconciliation_UU, trxName);

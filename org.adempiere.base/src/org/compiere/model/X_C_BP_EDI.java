@@ -82,30 +82,6 @@ public class X_C_BP_EDI extends PO implements I_C_BP_EDI, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_BP_EDI (Properties ctx, int C_BP_EDI_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_BP_EDI_ID, trxName, virtualColumns);
-      /** if (C_BP_EDI_ID == 0)
-        {
-			setAD_Sequence_ID (0);
-			setC_BPartner_ID (0);
-			setC_BP_EDI_ID (0);
-			setCustomerNo (null);
-			setEDIType (null);
-			setEMail_Error_To (null);
-			setEMail_Info_To (null);
-			setIsAudited (false);
-			setIsInfoSent (false);
-			setM_Warehouse_ID (0);
-			setName (null);
-			setReceiveInquiryReply (false);
-			setReceiveOrderReply (false);
-			setSendInquiry (false);
-			setSendOrder (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_BP_EDI (Properties ctx, String C_BP_EDI_UU, String trxName)
     {
       super (ctx, C_BP_EDI_UU, trxName);

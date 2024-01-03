@@ -62,20 +62,6 @@ public class X_AD_Replication_Run extends PO implements I_AD_Replication_Run, I_
     }
 
     /** Standard Constructor */
-    public X_AD_Replication_Run (Properties ctx, int AD_Replication_Run_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Replication_Run_ID, trxName, virtualColumns);
-      /** if (AD_Replication_Run_ID == 0)
-        {
-			setAD_Replication_ID (0);
-			setAD_Replication_Run_ID (0);
-			setIsReplicated (false);
-// N
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Replication_Run (Properties ctx, String AD_Replication_Run_UU, String trxName)
     {
       super (ctx, AD_Replication_Run_UU, trxName);

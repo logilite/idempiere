@@ -59,19 +59,6 @@ public class X_EXP_Processor_Type extends PO implements I_EXP_Processor_Type, I_
     }
 
     /** Standard Constructor */
-    public X_EXP_Processor_Type (Properties ctx, int EXP_Processor_Type_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, EXP_Processor_Type_ID, trxName, virtualColumns);
-      /** if (EXP_Processor_Type_ID == 0)
-        {
-			setEXP_Processor_Type_ID (0);
-			setJavaClass (null);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_EXP_Processor_Type (Properties ctx, String EXP_Processor_Type_UU, String trxName)
     {
       super (ctx, EXP_Processor_Type_UU, trxName);

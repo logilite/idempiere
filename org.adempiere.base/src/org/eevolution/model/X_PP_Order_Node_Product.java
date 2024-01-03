@@ -64,20 +64,6 @@ public class X_PP_Order_Node_Product extends PO implements I_PP_Order_Node_Produ
     }
 
     /** Standard Constructor */
-    public X_PP_Order_Node_Product (Properties ctx, int PP_Order_Node_Product_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, PP_Order_Node_Product_ID, trxName, virtualColumns);
-      /** if (PP_Order_Node_Product_ID == 0)
-        {
-			setM_Product_ID (0);
-			setPP_Order_ID (0);
-			setPP_Order_Node_ID (0);
-			setPP_Order_Node_Product_ID (0);
-			setPP_Order_Workflow_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_PP_Order_Node_Product (Properties ctx, String PP_Order_Node_Product_UU, String trxName)
     {
       super (ctx, PP_Order_Node_Product_UU, trxName);

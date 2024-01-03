@@ -60,19 +60,6 @@ public class X_AD_ClientShare extends PO implements I_AD_ClientShare, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_AD_ClientShare (Properties ctx, int AD_ClientShare_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_ClientShare_ID, trxName, virtualColumns);
-      /** if (AD_ClientShare_ID == 0)
-        {
-			setAD_ClientShare_ID (0);
-			setAD_Table_ID (0);
-			setName (null);
-			setShareType (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_ClientShare (Properties ctx, String AD_ClientShare_UU, String trxName)
     {
       super (ctx, AD_ClientShare_UU, trxName);

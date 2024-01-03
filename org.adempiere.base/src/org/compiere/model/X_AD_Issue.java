@@ -80,29 +80,6 @@ public class X_AD_Issue extends PO implements I_AD_Issue, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_Issue (Properties ctx, int AD_Issue_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Issue_ID, trxName, virtualColumns);
-      /** if (AD_Issue_ID == 0)
-        {
-			setAD_Issue_ID (0);
-			setIssueSummary (null);
-			setName (null);
-// .
-			setProcessed (false);
-// N
-			setReleaseNo (null);
-// .
-			setSystemStatus (null);
-// E
-			setUserName (null);
-// .
-			setVersion (null);
-// .
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Issue (Properties ctx, String AD_Issue_UU, String trxName)
     {
       super (ctx, AD_Issue_UU, trxName);

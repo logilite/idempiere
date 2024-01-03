@@ -58,18 +58,6 @@ public class X_GL_Budget extends PO implements I_GL_Budget, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_GL_Budget (Properties ctx, int GL_Budget_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, GL_Budget_ID, trxName, virtualColumns);
-      /** if (GL_Budget_ID == 0)
-        {
-			setGL_Budget_ID (0);
-			setIsPrimary (false);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_GL_Budget (Properties ctx, String GL_Budget_UU, String trxName)
     {
       super (ctx, GL_Budget_UU, trxName);

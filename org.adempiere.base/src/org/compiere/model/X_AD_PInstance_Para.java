@@ -50,19 +50,6 @@ public class X_AD_PInstance_Para extends PO implements I_AD_PInstance_Para, I_Pe
     }
 
     /** Standard Constructor */
-    public X_AD_PInstance_Para (Properties ctx, int AD_PInstance_Para_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_PInstance_Para_ID, trxName, virtualColumns);
-      /** if (AD_PInstance_Para_ID == 0)
-        {
-			setAD_PInstance_ID (0);
-			setIsNotClause (false);
-// N
-			setSeqNo (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_PInstance_Para (Properties ctx, String AD_PInstance_Para_UU, String trxName)
     {
       super (ctx, AD_PInstance_Para_UU, trxName);

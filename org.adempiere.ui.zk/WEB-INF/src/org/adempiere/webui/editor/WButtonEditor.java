@@ -145,16 +145,7 @@ public class WButtonEditor extends WEditor implements IProcessButton
 	{
 		return AD_InfoWindow_ID;
 	}	//	getInfoWindow_ID
-	
-	/* (non-Javadoc)
-	 * @see org.adempiere.webui.editor.IProcessButton#getInfoWindow_ID()
-	 */
-	@Override
-	public int getInfoWindow_ID()
-	{
-		return AD_InfoWindow_ID;
-	}	//	getInfoWindow_ID
-	
+
 	/**
 	 * @return GridField
 	 */

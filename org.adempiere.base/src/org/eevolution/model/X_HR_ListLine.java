@@ -61,18 +61,6 @@ public class X_HR_ListLine extends PO implements I_HR_ListLine, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_HR_ListLine (Properties ctx, int HR_ListLine_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, HR_ListLine_ID, trxName, virtualColumns);
-      /** if (HR_ListLine_ID == 0)
-        {
-			setHR_ListLine_ID (0);
-			setMaxValue (Env.ZERO);
-			setMinValue (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_HR_ListLine (Properties ctx, String HR_ListLine_UU, String trxName)
     {
       super (ctx, HR_ListLine_UU, trxName);

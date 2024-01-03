@@ -58,18 +58,6 @@ public class X_C_OrgAssignment extends PO implements I_C_OrgAssignment, I_Persis
     }
 
     /** Standard Constructor */
-    public X_C_OrgAssignment (Properties ctx, int C_OrgAssignment_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_OrgAssignment_ID, trxName, virtualColumns);
-      /** if (C_OrgAssignment_ID == 0)
-        {
-			setAD_User_ID (0);
-			setC_OrgAssignment_ID (0);
-			setValidFrom (new Timestamp( System.currentTimeMillis() ));
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_OrgAssignment (Properties ctx, String C_OrgAssignment_UU, String trxName)
     {
       super (ctx, C_OrgAssignment_UU, trxName);

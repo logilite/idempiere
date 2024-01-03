@@ -63,19 +63,6 @@ public class X_GL_Fund extends PO implements I_GL_Fund, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_GL_Fund (Properties ctx, int GL_Fund_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, GL_Fund_ID, trxName, virtualColumns);
-      /** if (GL_Fund_ID == 0)
-        {
-			setAmt (Env.ZERO);
-			setC_AcctSchema_ID (0);
-			setGL_Fund_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_GL_Fund (Properties ctx, String GL_Fund_UU, String trxName)
     {
       super (ctx, GL_Fund_UU, trxName);

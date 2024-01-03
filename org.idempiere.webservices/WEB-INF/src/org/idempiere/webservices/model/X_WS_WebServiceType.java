@@ -63,20 +63,6 @@ public class X_WS_WebServiceType extends PO implements I_WS_WebServiceType, I_Pe
     }
 
     /** Standard Constructor */
-    public X_WS_WebServiceType (Properties ctx, int WS_WebServiceType_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, WS_WebServiceType_ID, trxName, virtualColumns);
-      /** if (WS_WebServiceType_ID == 0)
-        {
-			setName (null);
-			setValue (null);
-			setWS_WebService_ID (0);
-			setWS_WebServiceMethod_ID (0);
-			setWS_WebServiceType_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_WS_WebServiceType (Properties ctx, String WS_WebServiceType_UU, String trxName)
     {
       super (ctx, WS_WebServiceType_UU, trxName);

@@ -74,26 +74,6 @@ public class X_AD_Alert extends PO implements I_AD_Alert, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_Alert (Properties ctx, int AD_Alert_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Alert_ID, trxName, virtualColumns);
-      /** if (AD_Alert_ID == 0)
-        {
-			setAD_Alert_ID (0);
-			setAD_AlertProcessor_ID (0);
-			setAlertMessage (null);
-			setAlertSubject (null);
-			setEnforceClientSecurity (true);
-// Y
-			setEnforceRoleSecurity (true);
-// Y
-			setIsValid (true);
-// Y
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Alert (Properties ctx, String AD_Alert_UU, String trxName)
     {
       super (ctx, AD_Alert_UU, trxName);

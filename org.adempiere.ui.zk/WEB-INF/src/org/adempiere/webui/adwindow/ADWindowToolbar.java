@@ -1218,22 +1218,6 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 			toolbarCustomBtn.readOnlyLogic();
 		}
 	}
-	
-	public void pressedLogic()
-	{
-		for (ToolbarCustomButton toolbarCustomBtn : toolbarCustomButtons)
-		{
-			toolbarCustomBtn.pressedLogic();
-		}
-	}
-
-	public void readOnlyLogic()
-	{
-		for (ToolbarCustomButton toolbarCustomBtn : toolbarCustomButtons)
-		{
-			toolbarCustomBtn.readOnlyLogic();
-		}
-	}
 
 	@Override
 	public void onPageDetached(Page page) {

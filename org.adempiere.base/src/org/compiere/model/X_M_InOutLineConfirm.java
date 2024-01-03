@@ -66,21 +66,6 @@ public class X_M_InOutLineConfirm extends PO implements I_M_InOutLineConfirm, I_
     }
 
     /** Standard Constructor */
-    public X_M_InOutLineConfirm (Properties ctx, int M_InOutLineConfirm_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_InOutLineConfirm_ID, trxName, virtualColumns);
-      /** if (M_InOutLineConfirm_ID == 0)
-        {
-			setConfirmedQty (Env.ZERO);
-			setM_InOutConfirm_ID (0);
-			setM_InOutLineConfirm_ID (0);
-			setM_InOutLine_ID (0);
-			setProcessed (false);
-			setTargetQty (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_InOutLineConfirm (Properties ctx, String M_InOutLineConfirm_UU, String trxName)
     {
       super (ctx, M_InOutLineConfirm_UU, trxName);

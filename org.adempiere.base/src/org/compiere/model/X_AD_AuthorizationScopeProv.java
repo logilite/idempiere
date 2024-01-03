@@ -57,18 +57,6 @@ public class X_AD_AuthorizationScopeProv extends PO implements I_AD_Authorizatio
     }
 
     /** Standard Constructor */
-    public X_AD_AuthorizationScopeProv (Properties ctx, int AD_AuthorizationScopeProv_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_AuthorizationScopeProv_ID, trxName, virtualColumns);
-      /** if (AD_AuthorizationScopeProv_ID == 0)
-        {
-			setAD_AuthorizationScope (null);
-			setAD_AuthorizationScopeProv_ID (0);
-			setScopeURL (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_AuthorizationScopeProv (Properties ctx, String AD_AuthorizationScopeProv_UU, String trxName)
     {
       super (ctx, AD_AuthorizationScopeProv_UU, trxName);

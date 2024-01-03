@@ -59,18 +59,6 @@ public class X_AD_HouseKeeping extends PO implements I_AD_HouseKeeping, I_Persis
     }
 
     /** Standard Constructor */
-    public X_AD_HouseKeeping (Properties ctx, int AD_HouseKeeping_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_HouseKeeping_ID, trxName, virtualColumns);
-      /** if (AD_HouseKeeping_ID == 0)
-        {
-			setAD_HouseKeeping_ID (0);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_HouseKeeping (Properties ctx, String AD_HouseKeeping_UU, String trxName)
     {
       super (ctx, AD_HouseKeeping_UU, trxName);

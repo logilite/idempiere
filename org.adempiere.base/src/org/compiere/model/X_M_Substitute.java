@@ -58,18 +58,6 @@ public class X_M_Substitute extends PO implements I_M_Substitute, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_Substitute (Properties ctx, int M_Substitute_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_Substitute_ID, trxName, virtualColumns);
-      /** if (M_Substitute_ID == 0)
-        {
-			setM_Product_ID (0);
-			setName (null);
-			setSubstitute_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_Substitute (Properties ctx, String M_Substitute_UU, String trxName)
     {
       super (ctx, M_Substitute_UU, trxName);

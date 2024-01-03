@@ -60,19 +60,6 @@ public class X_WS_WebServiceTypeAccess extends PO implements I_WS_WebServiceType
     }
 
     /** Standard Constructor */
-    public X_WS_WebServiceTypeAccess (Properties ctx, int WS_WebServiceTypeAccess_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, WS_WebServiceTypeAccess_ID, trxName, virtualColumns);
-      /** if (WS_WebServiceTypeAccess_ID == 0)
-        {
-			setAD_Role_ID (0);
-			setIsReadWrite (true);
-// Y
-			setWS_WebServiceType_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_WS_WebServiceTypeAccess (Properties ctx, String WS_WebServiceTypeAccess_UU, String trxName)
     {
       super (ctx, WS_WebServiceTypeAccess_UU, trxName);

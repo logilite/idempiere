@@ -65,22 +65,6 @@ public class X_M_QualityTestResult extends PO implements I_M_QualityTestResult, 
     }
 
     /** Standard Constructor */
-    public X_M_QualityTestResult (Properties ctx, int M_QualityTestResult_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_QualityTestResult_ID, trxName, virtualColumns);
-      /** if (M_QualityTestResult_ID == 0)
-        {
-			setIsQCPass (false);
-// N
-			setM_AttributeSetInstance_ID (0);
-			setM_QualityTest_ID (0);
-			setM_QualityTestResult_ID (0);
-			setProcessed (false);
-// N
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_QualityTestResult (Properties ctx, String M_QualityTestResult_UU, String trxName)
     {
       super (ctx, M_QualityTestResult_UU, trxName);

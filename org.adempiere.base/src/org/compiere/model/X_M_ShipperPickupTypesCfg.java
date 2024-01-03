@@ -64,21 +64,6 @@ public class X_M_ShipperPickupTypesCfg extends PO implements I_M_ShipperPickupTy
     }
 
     /** Standard Constructor */
-    public X_M_ShipperPickupTypesCfg (Properties ctx, int M_ShipperPickupTypesCfg_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_ShipperPickupTypesCfg_ID, trxName, virtualColumns);
-      /** if (M_ShipperPickupTypesCfg_ID == 0)
-        {
-			setIsDefault (false);
-// N
-			setM_ShipperCfg_ID (0);
-			setM_ShipperPickupTypesCfg_ID (0);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_ShipperPickupTypesCfg (Properties ctx, String M_ShipperPickupTypesCfg_UU, String trxName)
     {
       super (ctx, M_ShipperPickupTypesCfg_UU, trxName);

@@ -65,21 +65,6 @@ public class X_U_WebMenu extends PO implements I_U_WebMenu, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_U_WebMenu (Properties ctx, int U_WebMenu_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, U_WebMenu_ID, trxName, virtualColumns);
-      /** if (U_WebMenu_ID == 0)
-        {
-			setHasSubMenu (false);
-// 'N'
-			setMenuLink (null);
-			setModule (null);
-			setName (null);
-			setU_WebMenu_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_U_WebMenu (Properties ctx, String U_WebMenu_UU, String trxName)
     {
       super (ctx, U_WebMenu_UU, trxName);

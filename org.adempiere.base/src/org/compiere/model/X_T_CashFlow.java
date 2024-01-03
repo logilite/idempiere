@@ -60,18 +60,6 @@ public class X_T_CashFlow extends PO implements I_T_CashFlow, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_T_CashFlow (Properties ctx, int T_CashFlow_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, T_CashFlow_ID, trxName, virtualColumns);
-      /** if (T_CashFlow_ID == 0)
-        {
-			setAD_PInstance_ID (0);
-			setDateTrx (new Timestamp( System.currentTimeMillis() ));
-			setIsSOTrx (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_T_CashFlow (Properties ctx, String T_CashFlow_UU, String trxName)
     {
       super (ctx, T_CashFlow_UU, trxName);

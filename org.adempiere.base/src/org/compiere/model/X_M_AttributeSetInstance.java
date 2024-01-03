@@ -57,17 +57,6 @@ public class X_M_AttributeSetInstance extends PO implements I_M_AttributeSetInst
     }
 
     /** Standard Constructor */
-    public X_M_AttributeSetInstance (Properties ctx, int M_AttributeSetInstance_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_AttributeSetInstance_ID, trxName, virtualColumns);
-      /** if (M_AttributeSetInstance_ID == 0)
-        {
-			setM_AttributeSet_ID (0);
-			setM_AttributeSetInstance_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_AttributeSetInstance (Properties ctx, String M_AttributeSetInstance_UU, String trxName)
     {
       super (ctx, M_AttributeSetInstance_UU, trxName);

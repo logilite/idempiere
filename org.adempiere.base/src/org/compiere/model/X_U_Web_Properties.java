@@ -57,18 +57,6 @@ public class X_U_Web_Properties extends PO implements I_U_Web_Properties, I_Pers
     }
 
     /** Standard Constructor */
-    public X_U_Web_Properties (Properties ctx, int U_Web_Properties_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, U_Web_Properties_ID, trxName, virtualColumns);
-      /** if (U_Web_Properties_ID == 0)
-        {
-			setU_Key (null);
-			setU_Value (null);
-			setU_Web_Properties_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_U_Web_Properties (Properties ctx, String U_Web_Properties_UU, String trxName)
     {
       super (ctx, U_Web_Properties_UU, trxName);

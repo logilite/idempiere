@@ -57,18 +57,6 @@ public class X_AD_Task_Access extends PO implements I_AD_Task_Access, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_AD_Task_Access (Properties ctx, int AD_Task_Access_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Task_Access_ID, trxName, virtualColumns);
-      /** if (AD_Task_Access_ID == 0)
-        {
-			setAD_Role_ID (0);
-			setAD_Task_ID (0);
-			setIsReadWrite (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Task_Access (Properties ctx, String AD_Task_Access_UU, String trxName)
     {
       super (ctx, AD_Task_Access_UU, trxName);

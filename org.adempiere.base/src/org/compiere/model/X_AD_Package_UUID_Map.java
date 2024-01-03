@@ -62,20 +62,6 @@ public class X_AD_Package_UUID_Map extends PO implements I_AD_Package_UUID_Map, 
     }
 
     /** Standard Constructor */
-    public X_AD_Package_UUID_Map (Properties ctx, int AD_Package_UUID_Map_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Package_UUID_Map_ID, trxName, virtualColumns);
-      /** if (AD_Package_UUID_Map_ID == 0)
-        {
-			setAD_Package_UUID_Map_ID (0);
-			setAD_Package_UUID_Map_UU (null);
-			setAD_Table_ID (0);
-			setSource_UUID (null);
-			setTarget_UUID (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Package_UUID_Map (Properties ctx, String AD_Package_UUID_Map_UU, String trxName)
     {
       super (ctx, AD_Package_UUID_Map_UU, trxName);

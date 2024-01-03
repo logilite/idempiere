@@ -60,18 +60,6 @@ public class X_DD_NetworkDistribution extends PO implements I_DD_NetworkDistribu
     }
 
     /** Standard Constructor */
-    public X_DD_NetworkDistribution (Properties ctx, int DD_NetworkDistribution_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, DD_NetworkDistribution_ID, trxName, virtualColumns);
-      /** if (DD_NetworkDistribution_ID == 0)
-        {
-			setDD_NetworkDistribution_ID (0);
-			setName (null);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_DD_NetworkDistribution (Properties ctx, String DD_NetworkDistribution_UU, String trxName)
     {
       super (ctx, DD_NetworkDistribution_UU, trxName);

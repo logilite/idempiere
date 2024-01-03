@@ -65,21 +65,6 @@ public class X_A_Registration extends PO implements I_A_Registration, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_A_Registration (Properties ctx, int A_Registration_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_Registration_ID, trxName, virtualColumns);
-      /** if (A_Registration_ID == 0)
-        {
-			setA_Registration_ID (0);
-			setAssetServiceDate (new Timestamp( System.currentTimeMillis() ));
-			setIsAllowPublish (false);
-			setIsInProduction (false);
-			setIsRegistered (false);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_Registration (Properties ctx, String A_Registration_UU, String trxName)
     {
       super (ctx, A_Registration_UU, trxName);

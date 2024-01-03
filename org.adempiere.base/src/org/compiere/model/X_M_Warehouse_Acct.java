@@ -57,18 +57,6 @@ public class X_M_Warehouse_Acct extends PO implements I_M_Warehouse_Acct, I_Pers
     }
 
     /** Standard Constructor */
-    public X_M_Warehouse_Acct (Properties ctx, int M_Warehouse_Acct_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_Warehouse_Acct_ID, trxName, virtualColumns);
-      /** if (M_Warehouse_Acct_ID == 0)
-        {
-			setC_AcctSchema_ID (0);
-			setM_Warehouse_ID (0);
-			setW_Differences_Acct (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_Warehouse_Acct (Properties ctx, String M_Warehouse_Acct_UU, String trxName)
     {
       super (ctx, M_Warehouse_Acct_UU, trxName);

@@ -70,24 +70,6 @@ public class X_C_Country extends PO implements I_C_Country, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_Country (Properties ctx, int C_Country_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Country_ID, trxName, virtualColumns);
-      /** if (C_Country_ID == 0)
-        {
-			setC_Country_ID (0);
-			setCountryCode (null);
-			setDisplaySequence (null);
-// @C@, @R@ @P@
-			setHasPostal_Add (false);
-			setHasRegion (false);
-			setIsAddressLinesLocalReverse (false);
-			setIsAddressLinesReverse (false);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Country (Properties ctx, String C_Country_UU, String trxName)
     {
       super (ctx, C_Country_UU, trxName);

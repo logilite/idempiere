@@ -70,23 +70,6 @@ public class X_AD_Find extends PO implements I_AD_Find, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_Find (Properties ctx, int AD_Find_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Find_ID, trxName, virtualColumns);
-      /** if (AD_Find_ID == 0)
-        {
-			setAD_Column_ID (0);
-			setAD_Find_ID (0);
-			setAndOr (null);
-// A
-			setFind_ID (Env.ZERO);
-			setOperation (null);
-// ==
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Find (Properties ctx, String AD_Find_UU, String trxName)
     {
       super (ctx, AD_Find_UU, trxName);

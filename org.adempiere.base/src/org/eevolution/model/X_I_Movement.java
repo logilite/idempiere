@@ -67,21 +67,6 @@ public class X_I_Movement extends PO implements I_I_Movement, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_I_Movement (Properties ctx, int I_Movement_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, I_Movement_ID, trxName, virtualColumns);
-      /** if (I_Movement_ID == 0)
-        {
-			setI_IsImported (false);
-// N
-			setI_Movement_ID (0);
-			setProcessed (false);
-// N
-			setProcessing (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_I_Movement (Properties ctx, String I_Movement_UU, String trxName)
     {
       super (ctx, I_Movement_UU, trxName);

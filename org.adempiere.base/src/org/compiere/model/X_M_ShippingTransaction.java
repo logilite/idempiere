@@ -136,56 +136,6 @@ public class X_M_ShippingTransaction extends PO implements I_M_ShippingTransacti
     }
 
     /** Standard Constructor */
-    public X_M_ShippingTransaction (Properties ctx, int M_ShippingTransaction_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_ShippingTransaction_ID, trxName, virtualColumns);
-      /** if (M_ShippingTransaction_ID == 0)
-        {
-			setAction (null);
-			setCashOnDelivery (false);
-// N
-			setDeliveryConfirmation (false);
-// N
-			setIsAccessible (false);
-// N
-			setIsAddedHandling (false);
-// N
-			setIsAlternateReturnAddress (false);
-// N
-			setIsCargoAircraftOnly (false);
-// N
-			setIsDryIce (false);
-// N
-			setIsDutiable (false);
-// N
-			setIsFutureDayShipment (false);
-// N
-			setIsHazMat (false);
-// N
-			setIsHoldAtLocation (false);
-// N
-			setIsIgnoreZipNotFound (false);
-// N
-			setIsIgnoreZipStateNotMatch (false);
-// N
-			setIsPriviledgedRate (false);
-// N
-			setIsResidential (true);
-// Y
-			setIsSaturdayDelivery (false);
-// N
-			setIsSaturdayPickup (false);
-// N
-			setIsVerbalConfirmation (false);
-// N
-			setM_Shipper_ID (0);
-			setM_ShippingTransaction_ID (0);
-			setProcessed (false);
-// N
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_ShippingTransaction (Properties ctx, String M_ShippingTransaction_UU, String trxName)
     {
       super (ctx, M_ShippingTransaction_UU, trxName);

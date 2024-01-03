@@ -60,19 +60,6 @@ public class X_GL_FundRestriction extends PO implements I_GL_FundRestriction, I_
     }
 
     /** Standard Constructor */
-    public X_GL_FundRestriction (Properties ctx, int GL_FundRestriction_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, GL_FundRestriction_ID, trxName, virtualColumns);
-      /** if (GL_FundRestriction_ID == 0)
-        {
-			setC_ElementValue_ID (0);
-			setGL_Fund_ID (0);
-			setGL_FundRestriction_ID (0);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_GL_FundRestriction (Properties ctx, String GL_FundRestriction_UU, String trxName)
     {
       super (ctx, GL_FundRestriction_UU, trxName);

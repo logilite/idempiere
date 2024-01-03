@@ -355,20 +355,7 @@ public final class ConfirmPanel extends Div
         if (useSmallButtonClassForSmallScreen)
         	LayoutUtils.addSclass(SMALL_SCREEN_BUTTON_CLASS, button);
     }
-    
-    /**
-     * add button to the front of right area of the confirm panel
-     * @param button button
-     */
-    public void addComponentsBeforeRight(Button button)
-    {
-    	if (!buttonMap.containsKey(button.getId()))
-    		buttonMap.put(button.getId(), button);
-    	pnlBtnRight.insertBefore(button, pnlBtnRight.getFirstChild());
-        if (useSmallButtonClassForSmallScreen)
-        	LayoutUtils.addSclass(SMALL_SCREEN_BUTTON_CLASS, button);
-    }
-    
+
     /**
      * add button to the center area of the confirm panel
      * @param button button

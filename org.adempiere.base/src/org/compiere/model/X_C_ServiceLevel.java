@@ -64,20 +64,6 @@ public class X_C_ServiceLevel extends PO implements I_C_ServiceLevel, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_C_ServiceLevel (Properties ctx, int C_ServiceLevel_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_ServiceLevel_ID, trxName, virtualColumns);
-      /** if (C_ServiceLevel_ID == 0)
-        {
-			setC_RevenueRecognition_Plan_ID (0);
-			setC_ServiceLevel_ID (0);
-			setM_Product_ID (0);
-			setServiceLevelInvoiced (Env.ZERO);
-			setServiceLevelProvided (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_ServiceLevel (Properties ctx, String C_ServiceLevel_UU, String trxName)
     {
       super (ctx, C_ServiceLevel_UU, trxName);

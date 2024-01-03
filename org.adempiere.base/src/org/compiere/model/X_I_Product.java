@@ -59,17 +59,6 @@ public class X_I_Product extends PO implements I_I_Product, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_I_Product (Properties ctx, int I_Product_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, I_Product_ID, trxName, virtualColumns);
-      /** if (I_Product_ID == 0)
-        {
-			setI_IsImported (false);
-			setI_Product_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_I_Product (Properties ctx, String I_Product_UU, String trxName)
     {
       super (ctx, I_Product_UU, trxName);

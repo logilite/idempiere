@@ -313,11 +313,7 @@ public class WTextEditorDialog extends Window implements EventListener<Event>{
 		cancelled = true;
 		detach();
 	}
-	
-	private void onSize() {
-		editor.invalidate();
-	}
-	
+
 	/**
 	 * Handle onSize event
 	 */

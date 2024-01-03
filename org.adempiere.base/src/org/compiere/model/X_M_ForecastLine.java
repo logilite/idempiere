@@ -73,24 +73,6 @@ public class X_M_ForecastLine extends PO implements I_M_ForecastLine, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_M_ForecastLine (Properties ctx, int M_ForecastLine_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_ForecastLine_ID, trxName, virtualColumns);
-      /** if (M_ForecastLine_ID == 0)
-        {
-			setC_Period_ID (0);
-			setDatePromised (new Timestamp( System.currentTimeMillis() ));
-			setM_Forecast_ID (0);
-			setM_ForecastLine_ID (0);
-			setM_Product_ID (0);
-			setM_Warehouse_ID (0);
-// @M_Warehouse_ID@
-			setQty (Env.ZERO);
-			setQtyCalculated (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_ForecastLine (Properties ctx, String M_ForecastLine_UU, String trxName)
     {
       super (ctx, M_ForecastLine_UU, trxName);

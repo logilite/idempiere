@@ -195,44 +195,6 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
         } */
     }
 
-    /** Standard Constructor */
-    public X_AD_Column (Properties ctx, int AD_Column_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Column_ID, trxName, virtualColumns);
-      /** if (AD_Column_ID == 0)
-        {
-			setAD_Column_ID (0);
-			setAD_Element_ID (0);
-			setAD_Reference_ID (0);
-			setAD_Table_ID (0);
-			setColumnName (null);
-			setEntityType (null);
-// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
-			setIsAllowCopy (true);
-// Y
-			setIsAlwaysUpdateable (false);
-// N
-			setIsAutocomplete (false);
-// N
-			setIsEncrypted (null);
-// N
-			setIsIdentifier (false);
-			setIsKey (false);
-			setIsMandatory (false);
-			setIsParent (false);
-			setIsSecure (false);
-// N
-			setIsSelectionColumn (false);
-			setIsToolbarButton (null);
-// Y
-			setIsTranslated (false);
-			setIsUpdateable (true);
-// Y
-			setName (null);
-			setVersion (Env.ZERO);
-        } */
-    }
-
     /** Load Constructor */
     public X_AD_Column (Properties ctx, ResultSet rs, String trxName)
     {
@@ -547,22 +509,6 @@ public class X_AD_Column extends PO implements I_AD_Column, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** Set Always Updatable Logic.
-		@param AlwaysUpdatableLogic Logic to determine if field is Updatable irrespective if record&#039;s active status or processed status. This logic Applicable only if Always Updatable is Yes.
-	*/
-	public void setAlwaysUpdatableLogic (String AlwaysUpdatableLogic)
-	{
-		set_Value (COLUMNNAME_AlwaysUpdatableLogic, AlwaysUpdatableLogic);
-	}
-
-	/** Get Always Updatable Logic.
-		@return Logic to determine if field is Updatable irrespective if record&#039;s active status or processed status. This logic Applicable only if Always Updatable is Yes.
-	  */
-	public String getAlwaysUpdatableLogic()
-	{
-		return (String)get_Value(COLUMNNAME_AlwaysUpdatableLogic);
 	}
 
 	/** Set Always Updatable Logic.

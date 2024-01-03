@@ -1262,12 +1262,6 @@ public class Login implements ILogin
 		return getClients(app_user, app_pwd, null);
 	}
 
-	@Override
-	public KeyNamePair[] getClients(String userId, String userPassword, String roleTypes)
-	{
-		return getClients(userId, userPassword, roleTypes, false);
-	}
-
 	/**
 	 * Validate Client Login. Sets Context with login info
 	 * 

@@ -74,25 +74,6 @@ public class X_M_BOMProduct extends PO implements I_M_BOMProduct, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_BOMProduct (Properties ctx, int M_BOMProduct_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_BOMProduct_ID, trxName, virtualColumns);
-      /** if (M_BOMProduct_ID == 0)
-        {
-			setBOMProductType (null);
-// S
-			setBOMQty (Env.ZERO);
-// 1
-			setIsPhantom (false);
-			setLeadTimeOffset (0);
-			setLine (0);
-// @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM M_BOMProduct WHERE M_BOM_ID=@M_BOM_ID@
-			setM_BOM_ID (0);
-			setM_BOMProduct_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_BOMProduct (Properties ctx, String M_BOMProduct_UU, String trxName)
     {
       super (ctx, M_BOMProduct_UU, trxName);

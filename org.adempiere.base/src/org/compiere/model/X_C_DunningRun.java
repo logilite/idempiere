@@ -63,20 +63,6 @@ public class X_C_DunningRun extends PO implements I_C_DunningRun, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_DunningRun (Properties ctx, int C_DunningRun_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_DunningRun_ID, trxName, virtualColumns);
-      /** if (C_DunningRun_ID == 0)
-        {
-			setC_Dunning_ID (0);
-			setC_DunningRun_ID (0);
-			setDunningDate (new Timestamp( System.currentTimeMillis() ));
-// @#Date@
-			setProcessed (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_DunningRun (Properties ctx, String C_DunningRun_UU, String trxName)
     {
       super (ctx, C_DunningRun_UU, trxName);

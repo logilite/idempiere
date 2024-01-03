@@ -57,18 +57,6 @@ public class X_AD_Workflow_Access extends PO implements I_AD_Workflow_Access, I_
     }
 
     /** Standard Constructor */
-    public X_AD_Workflow_Access (Properties ctx, int AD_Workflow_Access_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Workflow_Access_ID, trxName, virtualColumns);
-      /** if (AD_Workflow_Access_ID == 0)
-        {
-			setAD_Role_ID (0);
-			setAD_Workflow_ID (0);
-			setIsReadWrite (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Workflow_Access (Properties ctx, String AD_Workflow_Access_UU, String trxName)
     {
       super (ctx, AD_Workflow_Access_UU, trxName);

@@ -66,22 +66,6 @@ public class X_AD_Message extends PO implements I_AD_Message, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_Message (Properties ctx, int AD_Message_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Message_ID, trxName, virtualColumns);
-      /** if (AD_Message_ID == 0)
-        {
-			setAD_Message_ID (0);
-			setEntityType (null);
-// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
-			setMsgText (null);
-			setMsgType (null);
-// I
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Message (Properties ctx, String AD_Message_UU, String trxName)
     {
       super (ctx, AD_Message_UU, trxName);

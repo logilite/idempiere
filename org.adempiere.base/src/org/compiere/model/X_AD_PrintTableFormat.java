@@ -76,26 +76,6 @@ public class X_AD_PrintTableFormat extends PO implements I_AD_PrintTableFormat, 
     }
 
     /** Standard Constructor */
-    public X_AD_PrintTableFormat (Properties ctx, int AD_PrintTableFormat_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_PrintTableFormat_ID, trxName, virtualColumns);
-      /** if (AD_PrintTableFormat_ID == 0)
-        {
-			setAD_PrintTableFormat_ID (0);
-			setIsDefault (false);
-			setIsMultiLineHeader (false);
-// N
-			setIsPaintBoundaryLines (false);
-			setIsPaintHeaderLines (true);
-// Y
-			setIsPaintHLines (false);
-			setIsPaintVLines (false);
-			setIsPrintFunctionSymbols (false);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_PrintTableFormat (Properties ctx, String AD_PrintTableFormat_UU, String trxName)
     {
       super (ctx, AD_PrintTableFormat_UU, trxName);

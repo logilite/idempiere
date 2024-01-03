@@ -64,20 +64,6 @@ public class X_PP_WF_Node_Product extends PO implements I_PP_WF_Node_Product, I_
     }
 
     /** Standard Constructor */
-    public X_PP_WF_Node_Product (Properties ctx, int PP_WF_Node_Product_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, PP_WF_Node_Product_ID, trxName, virtualColumns);
-      /** if (PP_WF_Node_Product_ID == 0)
-        {
-			setAD_WF_Node_ID (0);
-			setEntityType (null);
-// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
-			setM_Product_ID (0);
-			setPP_WF_Node_Product_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_PP_WF_Node_Product (Properties ctx, String PP_WF_Node_Product_UU, String trxName)
     {
       super (ctx, PP_WF_Node_Product_UU, trxName);

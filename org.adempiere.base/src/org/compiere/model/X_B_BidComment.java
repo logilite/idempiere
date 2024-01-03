@@ -59,19 +59,6 @@ public class X_B_BidComment extends PO implements I_B_BidComment, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_B_BidComment (Properties ctx, int B_BidComment_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, B_BidComment_ID, trxName, virtualColumns);
-      /** if (B_BidComment_ID == 0)
-        {
-			setAD_User_ID (0);
-			setB_BidComment_ID (0);
-			setB_Topic_ID (0);
-			setTextMsg (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_B_BidComment (Properties ctx, String B_BidComment_UU, String trxName)
     {
       super (ctx, B_BidComment_UU, trxName);

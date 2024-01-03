@@ -72,25 +72,6 @@ public class X_AD_Window extends PO implements I_AD_Window, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_Window (Properties ctx, int AD_Window_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Window_ID, trxName, virtualColumns);
-      /** if (AD_Window_ID == 0)
-        {
-			setAD_Window_ID (0);
-			setEntityType (null);
-// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
-			setIsBetaFunctionality (false);
-			setIsDefault (false);
-			setIsSOTrx (true);
-// Y
-			setName (null);
-			setWindowType (null);
-// M
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Window (Properties ctx, String AD_Window_UU, String trxName)
     {
       super (ctx, AD_Window_UU, trxName);

@@ -60,19 +60,6 @@ public class X_M_Promotion extends PO implements I_M_Promotion, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_M_Promotion (Properties ctx, int M_Promotion_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_Promotion_ID, trxName, virtualColumns);
-      /** if (M_Promotion_ID == 0)
-        {
-			setM_Promotion_ID (0);
-			setName (null);
-			setPromotionPriority (0);
-// 0
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_Promotion (Properties ctx, String M_Promotion_UU, String trxName)
     {
       super (ctx, M_Promotion_UU, trxName);

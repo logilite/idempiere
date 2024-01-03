@@ -53,16 +53,6 @@ public class X_AD_PostIt extends PO implements I_AD_PostIt, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_PostIt (Properties ctx, int AD_PostIt_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_PostIt_ID, trxName, virtualColumns);
-      /** if (AD_PostIt_ID == 0)
-        {
-			setAD_PostIt_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_PostIt (Properties ctx, String AD_PostIt_UU, String trxName)
     {
       super (ctx, AD_PostIt_UU, trxName);

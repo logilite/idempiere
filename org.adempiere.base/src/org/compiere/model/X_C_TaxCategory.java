@@ -58,18 +58,6 @@ public class X_C_TaxCategory extends PO implements I_C_TaxCategory, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_C_TaxCategory (Properties ctx, int C_TaxCategory_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_TaxCategory_ID, trxName, virtualColumns);
-      /** if (C_TaxCategory_ID == 0)
-        {
-			setC_TaxCategory_ID (0);
-			setIsDefault (false);
-			setName (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_TaxCategory (Properties ctx, String C_TaxCategory_UU, String trxName)
     {
       super (ctx, C_TaxCategory_UU, trxName);

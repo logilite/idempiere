@@ -62,20 +62,6 @@ public class X_AD_Preference extends PO implements I_AD_Preference, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_AD_Preference (Properties ctx, int AD_Preference_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Preference_ID, trxName, virtualColumns);
-      /** if (AD_Preference_ID == 0)
-        {
-			setAD_Preference_ID (0);
-			setAttribute (null);
-			setPreferenceFor (null);
-// W
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Preference (Properties ctx, String AD_Preference_UU, String trxName)
     {
       super (ctx, AD_Preference_UU, trxName);

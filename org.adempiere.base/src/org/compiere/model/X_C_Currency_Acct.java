@@ -55,17 +55,6 @@ public class X_C_Currency_Acct extends PO implements I_C_Currency_Acct, I_Persis
     }
 
     /** Standard Constructor */
-    public X_C_Currency_Acct (Properties ctx, int C_Currency_Acct_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_Currency_Acct_ID, trxName, virtualColumns);
-      /** if (C_Currency_Acct_ID == 0)
-        {
-			setC_AcctSchema_ID (0);
-			setC_Currency_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_Currency_Acct (Properties ctx, String C_Currency_Acct_UU, String trxName)
     {
       super (ctx, C_Currency_Acct_UU, trxName);

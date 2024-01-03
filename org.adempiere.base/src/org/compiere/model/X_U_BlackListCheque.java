@@ -57,18 +57,6 @@ public class X_U_BlackListCheque extends PO implements I_U_BlackListCheque, I_Pe
     }
 
     /** Standard Constructor */
-    public X_U_BlackListCheque (Properties ctx, int U_BlackListCheque_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, U_BlackListCheque_ID, trxName, virtualColumns);
-      /** if (U_BlackListCheque_ID == 0)
-        {
-			setBankName (null);
-			setChequeNo (null);
-			setU_BlackListCheque_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_U_BlackListCheque (Properties ctx, String U_BlackListCheque_UU, String trxName)
     {
       super (ctx, U_BlackListCheque_UU, trxName);

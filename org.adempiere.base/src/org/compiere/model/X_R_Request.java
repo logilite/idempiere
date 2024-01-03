@@ -91,33 +91,6 @@ public class X_R_Request extends PO implements I_R_Request, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_R_Request (Properties ctx, int R_Request_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, R_Request_ID, trxName, virtualColumns);
-      /** if (R_Request_ID == 0)
-        {
-			setConfidentialType (null);
-// C
-			setConfidentialTypeEntry (null);
-// C
-			setDocumentNo (null);
-			setDueType (null);
-// 5
-			setIsEscalated (false);
-			setIsInvoiced (false);
-			setIsSelfService (false);
-// N
-			setPriority (null);
-// 5
-			setProcessed (false);
-			setRequestAmt (Env.ZERO);
-			setR_Request_ID (0);
-			setR_RequestType_ID (0);
-			setSummary (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_R_Request (Properties ctx, String R_Request_UU, String trxName)
     {
       super (ctx, R_Request_UU, trxName);

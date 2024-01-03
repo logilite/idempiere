@@ -59,19 +59,6 @@ public class X_M_AttributeSetExclude extends PO implements I_M_AttributeSetExclu
     }
 
     /** Standard Constructor */
-    public X_M_AttributeSetExclude (Properties ctx, int M_AttributeSetExclude_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, M_AttributeSetExclude_ID, trxName, virtualColumns);
-      /** if (M_AttributeSetExclude_ID == 0)
-        {
-			setAD_Table_ID (0);
-			setIsSOTrx (false);
-			setM_AttributeSetExclude_ID (0);
-			setM_AttributeSet_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_M_AttributeSetExclude (Properties ctx, String M_AttributeSetExclude_UU, String trxName)
     {
       super (ctx, M_AttributeSetExclude_UU, trxName);

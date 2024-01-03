@@ -62,20 +62,6 @@ public class X_R_InterestArea extends PO implements I_R_InterestArea, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_R_InterestArea (Properties ctx, int R_InterestArea_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, R_InterestArea_ID, trxName, virtualColumns);
-      /** if (R_InterestArea_ID == 0)
-        {
-			setIsSelfService (true);
-// Y
-			setName (null);
-			setR_InterestArea_ID (0);
-			setValue (null);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_R_InterestArea (Properties ctx, String R_InterestArea_UU, String trxName)
     {
       super (ctx, R_InterestArea_UU, trxName);

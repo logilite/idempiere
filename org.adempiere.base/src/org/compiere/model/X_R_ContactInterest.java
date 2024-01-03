@@ -59,18 +59,6 @@ public class X_R_ContactInterest extends PO implements I_R_ContactInterest, I_Pe
     }
 
     /** Standard Constructor */
-    public X_R_ContactInterest (Properties ctx, int R_ContactInterest_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, R_ContactInterest_ID, trxName, virtualColumns);
-      /** if (R_ContactInterest_ID == 0)
-        {
-			setAD_User_ID (0);
-// @AD_User_ID@
-			setR_InterestArea_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_R_ContactInterest (Properties ctx, String R_ContactInterest_UU, String trxName)
     {
       super (ctx, R_ContactInterest_UU, trxName);

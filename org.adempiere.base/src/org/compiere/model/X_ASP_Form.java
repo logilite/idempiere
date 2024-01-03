@@ -59,19 +59,6 @@ public class X_ASP_Form extends PO implements I_ASP_Form, I_Persistent
     }
 
     /** Standard Constructor */
-    public X_ASP_Form (Properties ctx, int ASP_Form_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, ASP_Form_ID, trxName, virtualColumns);
-      /** if (ASP_Form_ID == 0)
-        {
-			setAD_Form_ID (0);
-			setASP_Level_ID (0);
-			setASP_Status (null);
-// S
-        } */
-    }
-
-    /** Standard Constructor */
     public X_ASP_Form (Properties ctx, String ASP_Form_UU, String trxName)
     {
       super (ctx, ASP_Form_UU, trxName);

@@ -57,18 +57,6 @@ public class X_C_AcctProcessorLog extends PO implements I_C_AcctProcessorLog, I_
     }
 
     /** Standard Constructor */
-    public X_C_AcctProcessorLog (Properties ctx, int C_AcctProcessorLog_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_AcctProcessorLog_ID, trxName, virtualColumns);
-      /** if (C_AcctProcessorLog_ID == 0)
-        {
-			setC_AcctProcessor_ID (0);
-			setC_AcctProcessorLog_ID (0);
-			setIsError (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_AcctProcessorLog (Properties ctx, String C_AcctProcessorLog_UU, String trxName)
     {
       super (ctx, C_AcctProcessorLog_UU, trxName);

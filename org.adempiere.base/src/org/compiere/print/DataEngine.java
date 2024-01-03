@@ -95,11 +95,11 @@ public class DataEngine
 	 * Constructor
 	 * @param language
 	 * @param trxName
-	 * @param windowNo
 	 */
-	public DataEngine (Language language, String trxName, int windowNo){
-		this(language,trxName,0);
+	public DataEngine (Language language, String trxName){
+		this(language, trxName, 0);
 	}
+
 	/**
 	 *	Constructor
 	 *	@param language Language of the data (for translation)

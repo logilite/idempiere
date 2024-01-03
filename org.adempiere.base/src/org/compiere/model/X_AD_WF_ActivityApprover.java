@@ -57,18 +57,6 @@ public class X_AD_WF_ActivityApprover extends PO implements I_AD_WF_ActivityAppr
     }
 
     /** Standard Constructor */
-    public X_AD_WF_ActivityApprover (Properties ctx, int AD_WF_ActivityApprover_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_WF_ActivityApprover_ID, trxName, virtualColumns);
-      /** if (AD_WF_ActivityApprover_ID == 0)
-        {
-			setAD_User_ID (0);
-			setAD_WF_ActivityApprover_ID (0);
-			setAD_WF_Activity_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_WF_ActivityApprover (Properties ctx, String AD_WF_ActivityApprover_UU, String trxName)
     {
       super (ctx, AD_WF_ActivityApprover_UU, trxName);

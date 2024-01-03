@@ -59,17 +59,6 @@ public class X_A_Asset_Info_Fin extends PO implements I_A_Asset_Info_Fin, I_Pers
     }
 
     /** Standard Constructor */
-    public X_A_Asset_Info_Fin (Properties ctx, int A_Asset_Info_Fin_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, A_Asset_Info_Fin_ID, trxName, virtualColumns);
-      /** if (A_Asset_Info_Fin_ID == 0)
-        {
-			setA_Asset_ID (0);
-			setA_Asset_Info_Fin_ID (0);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_A_Asset_Info_Fin (Properties ctx, String A_Asset_Info_Fin_UU, String trxName)
     {
       super (ctx, A_Asset_Info_Fin_UU, trxName);

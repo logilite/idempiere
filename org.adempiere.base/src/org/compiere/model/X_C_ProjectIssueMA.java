@@ -60,18 +60,6 @@ public class X_C_ProjectIssueMA extends PO implements I_C_ProjectIssueMA, I_Pers
     }
 
     /** Standard Constructor */
-    public X_C_ProjectIssueMA (Properties ctx, int C_ProjectIssueMA_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, C_ProjectIssueMA_ID, trxName, virtualColumns);
-      /** if (C_ProjectIssueMA_ID == 0)
-        {
-			setC_ProjectIssue_ID (0);
-			setM_AttributeSetInstance_ID (0);
-			setMovementQty (Env.ZERO);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_C_ProjectIssueMA (Properties ctx, String C_ProjectIssueMA_UU, String trxName)
     {
       super (ctx, C_ProjectIssueMA_UU, trxName);

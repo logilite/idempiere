@@ -57,18 +57,6 @@ public class X_AD_Window_Access extends PO implements I_AD_Window_Access, I_Pers
     }
 
     /** Standard Constructor */
-    public X_AD_Window_Access (Properties ctx, int AD_Window_Access_ID, String trxName, String ... virtualColumns)
-    {
-      super (ctx, AD_Window_Access_ID, trxName, virtualColumns);
-      /** if (AD_Window_Access_ID == 0)
-        {
-			setAD_Role_ID (0);
-			setAD_Window_ID (0);
-			setIsReadWrite (false);
-        } */
-    }
-
-    /** Standard Constructor */
     public X_AD_Window_Access (Properties ctx, String AD_Window_Access_UU, String trxName)
     {
       super (ctx, AD_Window_Access_UU, trxName);
