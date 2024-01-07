@@ -411,11 +411,11 @@ public class AcctSchemaDefaultCopy extends SvrProcess
 			.append(" x.AD_Client_ID, x.AD_Org_ID, 'Y', SysDate, 0, SysDate, 0,")
 			.append(" acct.B_InTransit_Acct, acct.B_Asset_Acct, acct.B_InterestRev_Acct, acct.B_InterestExp_Acct")
 //			.append(" acct.B_UnallocatedCash_Acct, acct.B_PaymentSelect_Acct ")
-			.append("FROM C_BankAccount x")
-			.append(" INNER JOIN C_AcctSchema_Default acct ON (x.AD_Client_ID=acct.AD_Client_ID) ")
-			.append("WHERE acct.C_AcctSchema_ID=").append(p_C_AcctSchema_ID)
+			.append(" FROM C_BankAccount x")
+			.append(" INNER JOIN C_AcctSchema_Default acct ON (x.AD_Client_ID=acct.AD_Client_ID)")
+			.append(" WHERE acct.C_AcctSchema_ID=").append(p_C_AcctSchema_ID)
 			.append(" AND NOT EXISTS (SELECT * FROM C_BankAccount_Acct a ")
-				.append("WHERE a.C_BankAccount_ID=x.C_BankAccount_ID")
+				.append(" WHERE a.C_BankAccount_ID=x.C_BankAccount_ID")
 				.append(" AND a.C_AcctSchema_ID=acct.C_AcctSchema_ID)");
 		created = DB.executeUpdate(sql.toString(), get_TrxName());
 		addLog(0, null, new BigDecimal(created), "@Created@ @C_BankAccount_ID@");
