@@ -361,12 +361,12 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 
 		String sql = "SELECT c.ColumnName, t.AD_Table_ID, t.TableName, c.ColumnSql "
 			+ "FROM AD_Table t"
-			+ " INNER JOIN AD_Column c ON (t.AD_Table_ID=c.AD_Table_ID)"
+			+ " INNER JOIN AD_Column c ON (t.AD_Table_ID=c.AD_Table_ID AND c.IsActive = 'Y' )"
 			+ "WHERE c.AD_Reference_ID IN (10,14)"
 			+ " AND t.TableName=?"	//	#1
 			//	Displayed in Window
-			+ " AND EXISTS (SELECT * FROM AD_Field f "
-				+ "WHERE f.AD_Column_ID=c.AD_Column_ID"
+			+ " AND EXISTS (SELECT 1 FROM AD_Field f "
+				+ "WHERE f.AD_Column_ID=c.AD_Column_ID AND f.IsActive = 'Y'"
 				+ " AND f.IsDisplayed='Y' AND f.IsEncrypted='N' AND f.ObscureType IS NULL) "
 			+ "ORDER BY c.IsIdentifier DESC, c.IsSelectionColumn Desc, c.AD_Reference_ID, c.SeqNoSelection, c.SeqNo";
 
@@ -414,7 +414,7 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 			pstmt = null;
 		}
 
-		//	Miminum check
+		//	Minimum check
 		if (m_queryColumns.size() == 0)
 		{
 			FDialog.error(p_WindowNo, this, "Error", Msg.getMsg(Env.getCtx(),"NoQueryColumnsFound"));
@@ -447,10 +447,16 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 			+ "FROM AD_Column c"
 			+ " INNER JOIN AD_Table t ON (c.AD_Table_ID=t.AD_Table_ID)"
 			+ " INNER JOIN AD_Tab tab ON (t.AD_Window_ID=tab.AD_Window_ID)"
-			+ " INNER JOIN AD_Field f ON (tab.AD_Tab_ID=f.AD_Tab_ID AND f.AD_Column_ID=c.AD_Column_ID) "
+			+ " INNER JOIN AD_Field f ON (tab.AD_Tab_ID=f.AD_Tab_ID AND f.AD_Column_ID=c.AD_Column_ID AND f.IsActive='Y') "
 			+ "WHERE t.AD_Table_ID=? "
-			+ " AND (c.IsKey='Y' OR "
-				+ " (f.IsEncrypted='N' AND f.ObscureType IS NULL)) "
+			+ " AND (c.IsKey='Y' "
+			+ "			OR c.IsIdentifier='Y' "
+			+ "			OR c.IsParent='Y' "
+			+ "			OR c.IsSelectionColumn='Y' "
+			+ "			OR Upper(c.ColumnName) IN ('NAME','VALUE','DESCRIPTION','DOCUMENTNO') "
+			+ "			OR Upper(c.ColumnName) Like '%_NAME' "
+			+ "			OR Upper(c.ColumnName) Like '%_Value') "
+			+ " AND c.IsActive = 'Y' "
 			+ "ORDER BY c.IsKey DESC, f.SeqNo";
 
 		try
@@ -466,7 +472,7 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 				boolean isDisplayed = rs.getString(4).equals("Y");
 				int AD_Reference_Value_ID = rs.getInt(5);
 				String columnSql = rs.getString(6);
-				if (columnSql != null && columnSql.length() > 0 && columnSql.contains("@"))
+				if (columnSql != null && columnSql.length() > 0 && (columnSql.startsWith("@SQL=") || columnSql.startsWith("@SQLFIND=")))
 					columnSql = "NULL";
 				if (columnSql != null && columnSql.contains("@"))
 					columnSql = Env.parseContext(Env.getCtx(), -1, columnSql, false, true);
@@ -640,12 +646,17 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 		
 		MTable table = MTable.get(Env.getCtx(), p_tableName);
 		MColumn column = table.getColumn(columnName);
-		String baseColumn = column.isVirtualColumn() ? columnSql : columnName;
-
-		String embedded = AD_Reference_Value_ID > 0 ? MLookupFactory.getLookup_TableEmbed(Env.getLanguage(Env.getCtx()), columnName, p_tableName, AD_Reference_Value_ID)
-				: MLookupFactory.getLookup_TableDirEmbed(Env.getLanguage(Env.getCtx()), columnName, p_tableName, baseColumn);
+		String embedded;
+		if (AD_Reference_Value_ID > 0) {
+			embedded = MLookupFactory.getLookup_TableEmbed(Env.getLanguage(Env.getCtx()), columnName, p_tableName, AD_Reference_Value_ID);
+		} else {
+			if (column.isVirtualColumn())
+				embedded = MLookupFactory.getLookup_TableDirEmbed(Env.getLanguage(Env.getCtx()), columnName, p_tableName, column.getColumnSQL());
+			else
+				embedded = MLookupFactory.getLookup_TableDirEmbed(Env.getLanguage(Env.getCtx()), columnName, p_tableName, columnName);
+		}
 		embedded = "(" + embedded + ")";
-	
+
 		if (embedded.contains("@"))
 			embedded = "NULL";
 		

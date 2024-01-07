@@ -442,14 +442,15 @@ public class MInfoWindow extends X_AD_InfoWindow
 		
 		// try run sql
 		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 		try {
 			pstmt = DB.prepareStatement(builder.toString(), get_TrxName());
-			pstmt.executeQuery();
+			rs = pstmt.executeQuery();
 		}catch (Exception ex){
 			log.log(Level.WARNING, ex.getMessage());
 			throw new AdempiereException(ex);
 		} finally {
-			DB.close(pstmt);
+			DB.close(rs, pstmt);
 		}
 		
 		// valid state
