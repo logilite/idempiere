@@ -34,6 +34,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
  
@@ -139,6 +140,12 @@ import org.compiere.util.Env;
 			MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(getC_Payment_ID(),get_TrxName());
 			setPayment(payment);	// set payment amount
 		}
+
+		String sql = "SELECT COUNT(DISTINCT C_Currency_ID) FROM C_Payment WHERE C_DepositBatch_ID = ? ";
+		int currencyCount = DB.getSQLValue (get_TrxName(), sql, getC_DepositBatch_ID());
+		
+		if (currencyCount > 1)
+			throw new AdempiereException("Payments in different currencies cannot be included in the same deposit batch");
 		
 		return true;
 	}	//	beforeSave

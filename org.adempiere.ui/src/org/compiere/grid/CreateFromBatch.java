@@ -98,14 +98,14 @@ public abstract class CreateFromBatch extends CreateFrom
 		return sql.toString();
 	}
 	
-	protected void setParameters(PreparedStatement pstmt, Object BankAccount, Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
+	protected int setParameters(PreparedStatement pstmt, Object BankAccount, Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
 			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode)
 	throws SQLException
 	{
-		setParameters(pstmt, BankAccount, BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, 0);
+		return setParameters(pstmt, BankAccount, BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, 0);
 	}
 	
-	protected void setParameters(PreparedStatement pstmt, Object BankAccount, Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
+	protected int setParameters(PreparedStatement pstmt, Object BankAccount, Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
 			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode, int AD_Org_ID)
 	throws SQLException
 	{
@@ -168,6 +168,8 @@ public abstract class CreateFromBatch extends CreateFrom
 		
 		if(AD_Org_ID > 0)
 			pstmt.setInt(index++, (Integer) AD_Org_ID);
+		
+		return index;
 	}
 	
 	protected String getSQLText(String text)
