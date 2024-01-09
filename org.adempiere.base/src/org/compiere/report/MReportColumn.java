@@ -25,6 +25,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.MAcctSchemaElement;
 import org.compiere.model.X_PA_ReportColumn;
+import org.compiere.util.DB;
 import org.compiere.util.Util;
 
 /**
@@ -63,6 +64,10 @@ public class MReportColumn extends X_PA_ReportColumn
 		super (ctx, PA_ReportColumn_ID, trxName);
 		if (PA_ReportColumn_ID == 0)
 			setInitialDefaults();
+		else
+		{
+			loadSources();
+		}
 	}	//	MReportColumn
 
 	/**
@@ -72,11 +77,6 @@ public class MReportColumn extends X_PA_ReportColumn
 		setIsPrinted (true);
 		setSeqNo (0);
 	}
-		else
-		{
-			loadSources();
-		}
-
 
 	/**	Contained Sources				*/
 	private MReportSource[]		m_sources = null;

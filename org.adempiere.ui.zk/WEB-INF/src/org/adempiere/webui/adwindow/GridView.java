@@ -705,7 +705,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 					column.setLabel("");
 				else {
 					column.setLabel(gridFields[i].getHeader());
-					column.setTooltiptext(gridField[i].getDescription());
+					column.setTooltiptext(gridFields[i].getDescription());
 				}
 				if (columnWidthMap != null && columnWidthMap.get(gridFields[i].getAD_Field_ID()) != null && !columnWidthMap.get(gridFields[i].getAD_Field_ID()).equals("")) {
 					ZKUpdateUtil.setWidth(column, columnWidthMap.get(gridFields[i].getAD_Field_ID()));

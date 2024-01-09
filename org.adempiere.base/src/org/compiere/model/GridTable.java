@@ -25,7 +25,6 @@ import java.math.BigDecimal;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -48,7 +47,6 @@ import java.util.logging.Level;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 
-import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.DBException;
 import org.adempiere.util.ServerContext;
 import org.compiere.Adempiere;
@@ -1369,6 +1367,7 @@ public class GridTable extends AbstractTableModel
 			if (log.isLoggable(Level.FINEST)) log.finest("r=" + row + " c=" + col + " - R/O=" + m_readOnly + ", Rows=" + m_rowCount + " - Ignored");
 			return;
 		}
+
 		dataSave(row, false);
 
 		//	Has anything changed?
@@ -1630,62 +1629,6 @@ public class GridTable extends AbstractTableModel
 				log.log(Level.SEVERE, "Persistency Issue - " 
 					+ m_tableName + ": " + e.getLocalizedMessage(), e);
 				log.saveError("Error", e.getLocalizedMessage());
-						else if (field.getDisplayType() == DisplayType.MultiSelectTable || field.getDisplayType() == DisplayType.MultiSelectSearch)
-						{
-							Integer[] ids = (Integer[]) rowData[col];
-							if (manualUpdate)
-								createUpdateSql(columnName, Util.convertArrayToStringForDB(ids));
-							else
-							{
-								Connection conn = null;
-								
-								try {
-									conn = DB.getConnectionRW();
-									if ( conn != null )
-									{
-										Array array = conn.createArrayOf("numeric", (Integer[]) ids);
-										rs.updateArray(colRs, array);
-									}
-									else
-										throw new AdempiereException("Unable to create multi-select table array, no DB connection");
-								} catch (SQLException e) {
-									throw new AdempiereException("Error updating multi-select table array", e);
-								}
-								finally {
-									if ( conn != null )
-										conn.close();
-								}
-							}
-							type = "NUMBER[]";
-						}
-						else if (field.getDisplayType() == DisplayType.MultiSelectList)
-						{
-							String[] ids = (String[]) rowData[col];
-							if (manualUpdate)
-								createUpdateSql(columnName, Util.convertArrayToStringForDB(ids));
-							else
-							{
-								Connection conn = null;
-
-								try {
-									conn = DB.getConnectionRW();
-									if ( conn != null )
-									{
-										Array array = DB.getConnectionRW().createArrayOf("text", (String[]) ids);
-										rs.updateArray(colRs, array);
-									}
-									else
-										throw new AdempiereException("Unable to create multi-select list array, no DB connection");
-								} catch (SQLException e) {
-									throw new AdempiereException("Error updating multi-select list array", e);
-								}
-								finally {
-									if ( conn != null )
-										conn.close();
-								}
-							}
-							type = "String[]";
-						}
 			}
 		}
 		return SAVE_ERROR;

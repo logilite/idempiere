@@ -365,21 +365,8 @@ public interface I_AD_InfoColumn
 	  */
 	public boolean isHideInfoColumn();
 
-    /** Column name IsReadOnly */
-    public static final String COLUMNNAME_IsReadOnly = "IsReadOnly";
-
-	/** Set Read Only.
-	  * Determines, if this field is Read Only
-	  */
-	public void setIsReadOnly (boolean IsReadOnly);
-
-	/** Get Read Only.
-	  * Determines, if this field is Read Only
-	  */
-	public boolean isReadOnly();
-	  
-	/** Column name IsIdentifier */
-	public static final String COLUMNNAME_IsIdentifier = "IsIdentifier";
+    /** Column name IsIdentifier */
+    public static final String COLUMNNAME_IsIdentifier = "IsIdentifier";
 
 	/** Set Identifier.
 	  * This column is part of the record identifier
@@ -442,7 +429,7 @@ public interface I_AD_InfoColumn
 	  * Issues a query request after the user has made changes to the field
 	  */
 	public boolean isQueryAfterChange();
-	
+
     /** Column name IsQueryCriteria */
     public static final String COLUMNNAME_IsQueryCriteria = "IsQueryCriteria";
 
@@ -468,6 +455,19 @@ public interface I_AD_InfoColumn
 	  * The parameter is a range of values
 	  */
 	public boolean isRange();
+
+    /** Column name IsReadOnly */
+    public static final String COLUMNNAME_IsReadOnly = "IsReadOnly";
+
+	/** Set Read Only.
+	  * Field is read only
+	  */
+	public void setIsReadOnly (boolean IsReadOnly);
+
+	/** Get Read Only.
+	  * Field is read only
+	  */
+	public boolean isReadOnly();
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";

@@ -626,24 +626,25 @@ public class MPInstance extends X_AD_PInstance
 		
 		//	Get Process Information: Name, Procedure Name, ClassName, IsReport, IsDirectPrint
 		String sql = "SELECT p.Name, p.ProcedureName,p.ClassName, p.AD_Process_ID,"		//	1..4
-			+ " p.isReport,p.IsDirectPrint,p.AD_ReportView_ID,p.AD_Workflow_ID,"		//	5..8
-			+ " CASE WHEN COALESCE(p.Statistic_Count,0)=0 THEN 0 ELSE p.Statistic_Seconds/p.Statistic_Count END," 	//	9
-			+ " p.JasperReport, p.AD_Process_UU "  	//	10..11
-			+ "FROM AD_Process p"
-			+ " INNER JOIN AD_PInstance i ON (p.AD_Process_ID=i.AD_Process_ID) "
-			+ "WHERE p.IsActive='Y'"
-			+ " AND i.AD_PInstance_ID=?";
-		if (!Env.isBaseLanguage(Env.getCtx(), "AD_Process"))
-			sql = "SELECT t.Name, p.ProcedureName,p.ClassName, p.AD_Process_ID,"		//	1..4
-				+ " p.isReport, p.IsDirectPrint,p.AD_ReportView_ID,p.AD_Workflow_ID,"	//	5..8
+				+ " p.isReport,p.IsDirectPrint,p.AD_ReportView_ID,p.AD_Workflow_ID,"		//	5..8
 				+ " CASE WHEN COALESCE(p.Statistic_Count,0)=0 THEN 0 ELSE p.Statistic_Seconds/p.Statistic_Count END," 	//	9
-				+ " p.JasperReport, p.AD_Process_UU " 	//	10..11
+				+ " p.JasperReport, p.AD_Process_UU, p.isPrinterPreview "  	//	10..12
 				+ "FROM AD_Process p"
 				+ " INNER JOIN AD_PInstance i ON (p.AD_Process_ID=i.AD_Process_ID) "
-				+ " INNER JOIN AD_Process_Trl t ON (p.AD_Process_ID=t.AD_Process_ID"
-					+ " AND t.AD_Language='" + Env.getAD_Language(Env.getCtx()) + "') "
 				+ "WHERE p.IsActive='Y'"
 				+ " AND i.AD_PInstance_ID=?";
+			if (!Env.isBaseLanguage(Env.getCtx(), "AD_Process"))
+				sql = "SELECT t.Name, p.ProcedureName,p.ClassName, p.AD_Process_ID,"		//	1..4
+					+ " p.isReport, p.IsDirectPrint,p.AD_ReportView_ID,p.AD_Workflow_ID,"	//	5..8
+					+ " CASE WHEN COALESCE(p.Statistic_Count,0)=0 THEN 0 ELSE p.Statistic_Seconds/p.Statistic_Count END," 	//	9
+					+ " p.JasperReport, p.AD_Process_UU, p.isPrinterPreview  " 	//	10..12
+					+ "FROM AD_Process p"
+					+ " INNER JOIN AD_PInstance i ON (p.AD_Process_ID=i.AD_Process_ID) "
+					+ " INNER JOIN AD_Process_Trl t ON (p.AD_Process_ID=t.AD_Process_ID"
+						+ " AND t.AD_Language='" + Env.getAD_Language(Env.getCtx()) + "') "
+					+ "WHERE p.IsActive='Y'"
+					+ " AND i.AD_PInstance_ID=?";
+					
 		//
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -665,6 +666,7 @@ public class MPInstance extends X_AD_PInstance
 				if ("Y".equals(rs.getString(5)))
 				{
 					info.isReport = true;
+					info.isPrinterPreview = "Y".equals(rs.getString(12));
 				}
 				if ("Y".equals(rs.getString(6)))
 				{
@@ -701,6 +703,7 @@ public class MPInstance extends X_AD_PInstance
 		public String jasperReport = "";
 		public boolean isReport = false;
 		public boolean isDirectPrint = false;
+		public boolean isPrinterPreview = false;
 		public int estimate;
 	}
 	

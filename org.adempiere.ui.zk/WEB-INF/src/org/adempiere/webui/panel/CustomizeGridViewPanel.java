@@ -26,8 +26,8 @@ import java.util.logging.Level;
 
 import org.adempiere.exceptions.DBException;
 import org.adempiere.model.MTabCustomization;
-import org.adempiere.webui.ClientInfo;
 import org.adempiere.util.Callback;
+import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.adwindow.GridView;
 import org.adempiere.webui.component.Button;
@@ -42,7 +42,6 @@ import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.SimpleListModel;
 import org.adempiere.webui.factory.ButtonFactory;
 import org.adempiere.webui.session.SessionManager;
-import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.Dialog;
 import org.compiere.model.I_AD_Field;
@@ -310,7 +309,7 @@ public class CustomizeGridViewPanel extends Panel
 					MRole currRole = MRole.get(Env.getCtx(), Env.getAD_Role_ID(Env.getCtx()));
 					if (currRole.isCanSaveGridCustPrefEveryone())
 					{
-						FDialog.ask(m_WindowNo, null, "GRIDVIEW_RESET_SUPERUSER_CUSTOM_PREF", new Callback<Boolean>() {
+						Dialog.ask(m_WindowNo, null, "GRIDVIEW_RESET_SUPERUSER_CUSTOM_PREF", new Callback<Boolean>() {
 
 							@Override
 							public void onCallback(Boolean result)
@@ -640,10 +639,10 @@ public class CustomizeGridViewPanel extends Panel
 			isAutoHide = chkAutoHideEmptyColumn.isChecked() ? "Y" : "N";
 		}
 		
-		boolean ok = MTabCustomization.saveData(Env.getCtx(), m_AD_Tab_ID, m_AD_User_ID, custom.toString(), dView, null, false);
+		boolean ok = MTabCustomization.saveData(Env.getCtx(), m_AD_Tab_ID, m_AD_User_ID, custom.toString(), dView, null, false, isAutoHide);
 		if (!ok)
 		{
-			FDialog.error(m_WindowNo, null, "SaveError", custom.toString());
+			Dialog.error(m_WindowNo, null, "SaveError", custom.toString());
 			return;
 		}
 
@@ -651,7 +650,7 @@ public class CustomizeGridViewPanel extends Panel
 		if (currRole.isCanSaveGridCustPrefEveryone() && MTabCustomization.SUPERUSER != m_AD_User_ID)
 		{
 			// Save default preference for every user.
-			FDialog.ask(m_WindowNo, this, "GRIDVIEW_APPLY_CUSTOM_PREF_EVERYONE", new Callback<Boolean>() {
+			Dialog.ask(m_WindowNo, "GRIDVIEW_APPLY_CUSTOM_PREF_EVERYONE", new Callback<Boolean>() {
 
 				@Override
 				public void onCallback(Boolean result)
@@ -661,7 +660,7 @@ public class CustomizeGridViewPanel extends Panel
 						boolean isSave = MTabCustomization.saveData(Env.getCtx(), m_AD_Tab_ID, MTabCustomization.SUPERUSER, custom.toString(), dView, null, false);
 						if (!isSave)
 						{
-							FDialog.error(m_WindowNo, null, "SaveError", custom.toString());
+							Dialog.error(m_WindowNo, null, "SaveError", custom.toString());
 							return;
 						}
 					}

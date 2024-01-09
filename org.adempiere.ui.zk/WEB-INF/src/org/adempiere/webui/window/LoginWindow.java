@@ -27,18 +27,18 @@ import java.sql.Timestamp;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.logging.Level;
-import org.adempiere.base.Core;
-import org.adempiere.base.ILogin;
+
 import javax.servlet.http.HttpSession;
 
+import org.adempiere.base.Core;
+import org.adempiere.base.ILogin;
 import org.adempiere.base.sso.ISSOPrincipalService;
 import org.adempiere.base.sso.SSOUtils;
 import org.adempiere.exceptions.AdempiereException;
-import org.adempiere.webui.Extensions;
 import org.adempiere.util.Callback;
 import org.adempiere.webui.AdempiereWebUI;
+import org.adempiere.webui.Extensions;
 import org.adempiere.webui.IWebClient;
-import org.adempiere.webui.component.Window;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.panel.ChangePasswordPanel;
 import org.adempiere.webui.panel.LoginPanel;
@@ -47,7 +47,6 @@ import org.adempiere.webui.panel.RolePanel;
 import org.adempiere.webui.panel.ValidateMFAPanel;
 import org.adempiere.webui.session.SessionContextListener;
 import org.adempiere.webui.session.SessionManager;
-import org.adempiere.webui.sso.filter.SSOWebuiFilter;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.UserPreference;
 import org.adempiere.webui.util.ZkSSOUtils;
@@ -244,7 +243,7 @@ public class LoginWindow extends Window implements EventListener<Event>
      */
 	public void showRolePanel(String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isClientDefined, boolean isMFAValidated) {
         this.getChildren().clear();
-        if (pnlRole.isShow()) {
+        if (pnlRole.show()) {
         	this.appendChild(pnlRole);
         } else if (isMFAValidated) {
         	pnlRole.validateRoles(isMFAValidated);

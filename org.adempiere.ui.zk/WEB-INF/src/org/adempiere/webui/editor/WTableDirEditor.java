@@ -116,6 +116,8 @@ ContextMenuListener, IZoomableEditor
     private Lookup  lookup;
     /** ID, UUID or AD_RefList Value */
     private Object oldValue;
+	
+	private ADWindow adwindow;
     /** Reference/target table name */
     private String m_tableName = null;
     /** Reference/target key column name */

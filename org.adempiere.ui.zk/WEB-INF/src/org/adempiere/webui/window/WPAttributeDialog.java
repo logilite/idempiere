@@ -193,7 +193,6 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	protected Textbox fieldLotString = new Textbox();
 	protected Listbox fieldLot = new Listbox();
 	protected Button bLot = new Button(Msg.getMsg (Env.getCtx(), "New"));
-	protected Button				bLot				= new Button(Msg.getMsg(Env.getCtx(), "New"));
 	// Lot Popup
 	protected Menupopup 		popupMenu = new Menupopup();
 	protected Menuitem 			mZoom;

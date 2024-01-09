@@ -61,6 +61,8 @@ public class WPAttributeEditor extends WEditor implements ContextMenuListener
 	/** M_AttributeSetInstance_ID */
 	protected Object m_value;
 
+	protected GridTab				m_GridTab;
+
 	/** No Instance Key */
 	public static Integer			NO_INSTANCE		= Integer.valueOf(0);
 

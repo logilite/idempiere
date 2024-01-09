@@ -144,13 +144,10 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	private static final long serialVersionUID = 8253708190979803268L;
 
 	protected static final String ON_USER_QUERY_ATTR = "ON_USER_QUERY";
-	protected static final String ROW_CTX_VARIABLE_PREFIX = "_IWInfo_";
-	protected static final String ROW_ID_CTX_VARIABLE_NAME = "_IWInfoIDs_Selected";
-	
-
-	protected static final String ON_USER_QUERY_ATTR = "ON_USER_QUERY";
 	protected static final String INFO_QUERY_TIME_OUT_ERROR = "InfoQueryTimeOutError";
 	protected static final String COLUMN_VISIBLE_ORIGINAL = "column.visible.original";
+	protected static final String ROW_CTX_VARIABLE_PREFIX = "_IWInfo_";
+	protected static final String ROW_ID_CTX_VARIABLE_NAME = "_IWInfoIDs_Selected";
 	
 	protected final static int DEFAULT_PAGE_SIZE = 100;
 	protected final static int DEFAULT_PAGE_PRELOAD = 4;
@@ -243,9 +240,6 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	/** AD_InfoWindow_ID */
 	protected int m_infoWindowID;
 	private boolean m_closeAfterExecutionOfProcess = false;
-
-	private Button btnSelectAll;
-	private Button btnDeSelectAll;
 
 	private Button btnSelectAll;
 	private Button btnDeSelectAll;
@@ -1156,6 +1150,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	 * @param end
 	 * @return rows read
 	 */
+    private List<Object> readLine(int start, int end) {
     	if (useQueryTimeoutFromSysConfig)
     		queryTimeout = MSysConfig.getIntValue(MSysConfig.ZK_INFO_QUERY_TIME_OUT, 0, Env.getAD_Client_ID(Env.getCtx()));
     	
@@ -2586,7 +2581,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 			Events.postEvent(new SelectEvent<WListbox, Object>(Events.ON_SELECT, contentPanel, null));
 			contentPanel.getModel().addToSelection(contentPanel.getModel().get(0));
 			if (p_multipleSelection) {
-				Integer keyCandidate = getColumnValue(0);
+				Integer keyCandidate = (Integer) getColumnValue(0);
 				@SuppressWarnings("unchecked")
 				List<Object> candidateRecord = (List<Object>) contentPanel.getModel().get(0);
 				recordSelectedData.put(keyCandidate, candidateRecord);
@@ -2835,7 +2830,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		insert.append(" VIEWID, COLUMNNAME , VALUE_STRING, VALUE_NUMBER , VALUE_DATE, VALUE_NUMBER_ARRAY, VALUE_STRING_ARRAY) VALUES ( ");
 		for (Entry<NamePair,LinkedHashMap<String, Object>> records : m_values.entrySet()) {
 			// set Record ID
-			KeyNamePair knPair = records.getKey();
+			NamePair knPair = records.getKey();
 			LinkedHashMap<String, Object> fields = records.getValue();
 			for (Entry<String, Object> field : fields.entrySet())
 			{
@@ -2844,7 +2839,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 					select.append(" , ( ");
 
 				select.append(AD_PInstance_ID).append(","); // AD_PINSTANCE_ID
-				select.append(knPair.getKey()).append(","); // T_SELECTION_ID
+				select.append(knPair.getID()).append(","); // T_SELECTION_ID
 				if (knPair.getName() == null) // VIEWID
 					select.append("NULL,");
 				else
@@ -2865,13 +2860,14 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
 					select.append(", NULL, NULL");
 				}
-					else if (data instanceof UUIDColumn)
-					{
-						UUIDColumn id = (UUIDColumn) data;
-						parameters.add(null);
-						parameters.add(id.getRecord_UU());
-						parameters.add(null);
-					}					
+				else if (data instanceof UUIDColumn)
+				{
+					UUIDColumn id = (UUIDColumn) data;
+					select.append("NULL,");
+					select.append(id.getRecord_UU());
+					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+					select.append(", NULL, NULL");
+				}					
 				else if (data instanceof String)
 				{
 					select.append("'").append(data).append("'");
@@ -2941,13 +2937,14 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
 					select.append(", NULL, NULL");
 				}
-					else if(data instanceof ValueNamePair)
-					{
-						ValueNamePair vnp = (ValueNamePair)data;
-						parameters.add(vnp.getValue());
-						parameters.add(null);
-						parameters.add(null);
-					}
+				else if(data instanceof ValueNamePair)
+				{
+					ValueNamePair vnp = (ValueNamePair)data;
+					select.append("NULL,");
+					select.append(vnp.getValue());
+					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
+					select.append(", NULL, NULL");
+				}
 				else
 				{
 					if (data == null)
@@ -3691,29 +3688,4 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		
 		return this.infoWindow.getPagingSize();
 	}
-
-	/**
-	 * 
-	 * @return true if dialog should auto close after successful execution of process
-	 */
-	public boolean isCloseAfterExecutionOfProcess() {
-		return m_closeAfterExecutionOfProcess;
-	}
-
-	/**
-	 * Set whether dialog should auto close after successful execution of process
-	 * @param closeAfterExecutionOfProcess
-	 */
-	public void setCloseAfterExecutionOfProcess(boolean closeAfterExecutionOfProcess) {
-		this.m_closeAfterExecutionOfProcess = closeAfterExecutionOfProcess;
-	}
-
-	public void setMultipleSelection(boolean multipleSelection) {
-		p_multipleSelection = multipleSelection;
-		if (btnSelectAll != null)
-			btnSelectAll.setVisible(multipleSelection);
-		if (btnDeSelectAll != null)
-			btnDeSelectAll.setVisible(multipleSelection);
-	}
-
 }	//	Info

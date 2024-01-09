@@ -118,13 +118,14 @@ public class AbstractService {
 		m_cs.connect();
 
 		if (m_cs.isLoggedIn()
-				&& ((loginRequest.getToken() != null && loginRequest.getUser().equals(m_cs.getUserName()) && loginRequest
-						.getToken().equals(m_cs.getToken())) || (m_cs.getAD_Client_ID() == loginRequest.getClientID()
+				&& ((loginRequest.getToken() != null && loginRequest.getUser().equals(m_cs.getUserName()) 
+						&& loginRequest.getToken().equals(m_cs.getToken()))
+					|| (m_cs.getAD_Client_ID() == loginRequest.getClientID()
 						&& loginRequest.getClientID() == Env.getAD_Client_ID(Env.getCtx())
 						&& m_cs.getAD_Org_ID() == loginRequest.getOrgID()
 						&& m_cs.getAD_Role_ID() == loginRequest.getRoleID()
-						&& m_cs.getM_Warehouse_ID() == loginRequest.getWarehouseID() && loginRequest.getUser().equals(
-						m_cs.getUserName()))))
+						&& m_cs.getM_Warehouse_ID() == loginRequest.getWarehouseID() 
+						&& loginRequest.getUser().equals(m_cs.getUserName()))))
 			return authenticate(webService, method, serviceType, m_cs);
 
 		isTokenSupported = MSysConfig.getBooleanValue(MSysConfig.WEBSERVICE_SUPPORT_AUTH_TOKEN, true);
@@ -132,7 +133,7 @@ public class AbstractService {
 		if (loginRequest.getToken() == null)
 		{
 
-		String ret =invokeLoginValidator(loginRequest, m_cs.getCtx(), null, IWSValidator.TIMING_BEFORE_LOGIN);
+		String ret = invokeLoginValidator(loginRequest, m_cs.getCtx(), null, IWSValidator.TIMING_BEFORE_LOGIN);
 		if(ret!=null && ret.length()>0)
 			return ret;
 		

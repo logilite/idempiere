@@ -19,6 +19,7 @@ import org.adempiere.webui.window.Dialog;
 import org.compiere.model.MTable;
 import org.compiere.model.MTreeFavoriteNode;
 import org.compiere.model.MTreeNode;
+import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;

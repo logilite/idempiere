@@ -768,58 +768,6 @@ public class MProduct extends X_M_Product implements ImmutablePOSupport
 		return errMsg.toString();
 	}
 
-	private void removeStorageRecords() {
-		int cnt = 0;
-		//safe to remove if not using lot or serial
-		if (isLot() || isSerial()) {
-			//for lot/serial, make sure everything is zero
-			cnt = DB.executeUpdateEx("UPDATE M_StorageOnHand SET QtyOnHand=0 WHERE M_Product_ID=? AND QtyOnHand != 0", new Object[] {getM_Product_ID()}, get_TrxName());
-			if (log.isLoggable(Level.INFO)) {
-				log.log(Level.INFO, toString()+" #M_StorageOnHand Updated=" + cnt);
-			}
-		} else {
-			cnt = DB.executeUpdateEx("DELETE FROM M_StorageOnHand WHERE M_Product_ID=?", new Object[] {getM_Product_ID()}, get_TrxName());
-			if (log.isLoggable(Level.INFO)) {
-				log.log(Level.INFO, toString()+" #M_StorageOnHand Deleted=" + cnt);
-			}
-		}		
-		
-		//clear all reservation data
-		cnt = DB.executeUpdateEx("DELETE FROM M_StorageReservation WHERE M_Product_ID=?", new Object[] {getM_Product_ID()}, get_TrxName());
-		if (log.isLoggable(Level.INFO)) {
-			log.log(Level.INFO, toString()+" #M_StorageReservation Deleted=" + cnt);
-		}
-		cnt = DB.executeUpdateEx("DELETE FROM M_StorageReservationLog WHERE M_Product_ID=?", new Object[] {getM_Product_ID()}, get_TrxName());
-		if (log.isLoggable(Level.INFO)) {
-			log.log(Level.INFO, toString()+" #M_StorageReservationLog Deleted=" + cnt);
-		}
-	}
-
-	private String verifyBOM() {
-		Query query = new Query(getCtx(), MPPProductBOMLine.Table_Name, MPPProductBOMLine.COLUMNNAME_M_Product_ID+"=?", get_TrxName());
-		List<MPPProductBOMLine> list = query.setOnlyActiveRecords(true)
-											.setClient_ID()
-											.setParameters(getM_Product_ID())
-											.list();
-		for(MPPProductBOMLine line : list) {
-			MPPProductBOM bom = line.getParent();
-			if (bom.isActive()) {
-				StringBuilder errMsg = new StringBuilder();
-				errMsg.append(Msg.getMsg(Env.getCtx(), "DeActivateProductInActiveBOM"));
-				String bomName = bom.getName();
-				errMsg.append(" (BOM: ")
-					.append(bomName);
-				String parentValue = MProduct.get(bom.getM_Product_ID()).getValue();
-				if (!parentValue.equals(bomName))
-					errMsg.append(", ").append(parentValue);
-				errMsg.append(")");
-				return errMsg.toString();
-			}
-		}
-		
-		return null;
-	}
-	
 	/**
 	 * Delete storage on hand and reservation records.<br/>
 	 * For product that's using Lot or Serial, on hand is update to zero instead of delete.

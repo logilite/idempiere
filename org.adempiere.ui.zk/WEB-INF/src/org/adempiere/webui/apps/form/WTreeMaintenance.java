@@ -472,8 +472,6 @@ public class WTreeMaintenance extends TreeMaintenance implements IFormController
 				model.addNode(stn);
 				//	May cause Error if in tree
 				addNode(item);
-			}
-			
 			}			
 		}
 	}	//	action_treeAdd

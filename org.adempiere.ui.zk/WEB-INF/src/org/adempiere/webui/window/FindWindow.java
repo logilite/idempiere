@@ -217,6 +217,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     
     /** List of WEditors for simple search tab */
     protected ArrayList<WEditor>          m_sEditors = new ArrayList<WEditor>();
+	protected ArrayList<ToolBarButton>    m_sEditorsFlag = new ArrayList<ToolBarButton>();
     /** List of button to toggle visibility of to editor. For date and numeric field in simple search tab. */
     protected ArrayList<WEditor>          m_sEditorsTo = new ArrayList<WEditor>();
     /** List of to editor. For date and numeric field in simple search tab. */
@@ -229,7 +230,6 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     /** AD_Tab_UU of calling tab */
     private String m_AD_Tab_UU = null;
     /** User queries for target tab ({@link #m_AD_Tab_ID}) */
-    protected MUserQuery[] userQueries;
 	protected MUserQuery[] userQueries;
 	/** Rows of {@link #contentSimple} */
 	protected Rows contentSimpleRows;
@@ -1877,10 +1877,10 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
    	                	addRowEditor(componentTo,(ListCell)row.getFellow("cellQueryTo"+row.getId()));   		               
    	                }
                 } else {
-                	WEditor editorFrom = getEditor(row, false);
+                	WEditor editorFrom = getEditor(row, false, false);
 	                Component componentFrom = editorFrom != null ? editorFrom.getComponent() : new Label("");
 	                componentFrom.setId("searchFieldFrom"+row.getId());
-	                WEditor editorTo = getEditor(row, true);
+	                WEditor editorTo = getEditor(row, true, false);
 	                Component componentTo = editorTo != null ? editorTo.getComponent() : new Label("");
 	                componentTo.setId("searchFieldTo"+row.getId());
 	                Combobox listOp = (Combobox) row.getFellow("listOperator"+row.getId());
@@ -2177,7 +2177,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	 *  @param to
 	 * 	@return WEditor
 	 */
-	public Component parseString(GridField field, String in, ListItem listItem, boolean to)
+	public WEditor parseString(GridField field, String in, ListItem listItem, boolean to)
 	{
 		return parseString(field, in, listItem, to, false);
 	}
@@ -2192,7 +2192,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	 * @param  isMulti
 	 * @return          data type corrected value
 	 */
-	public Component parseString(GridField field, String in, ListItem listItem, boolean to, boolean isMulti)
+	public WEditor parseString(GridField field, String in, ListItem listItem, boolean to, boolean isMulti)
 	{
 		if (in == null)
 			return null;
@@ -3208,9 +3208,9 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
      *  @param to
      *  @return Editor component
      */
-    public Component getEditorComponent(ListItem row, boolean to)
+    public Component getEditorComponent(ListItem row, boolean to, boolean isMultiSelect)
     {
-		WEditor editor = getEditor(row, to);
+		WEditor editor = getEditor(row, to, isMultiSelect);
 		return editor != null ? editor.getComponent() : new Label("");
     }
 
@@ -4356,3 +4356,4 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 				|| DisplayType.ID == displayType
 				|| DisplayType.isNumeric(displayType);
 	} // isAddInOperator
+}

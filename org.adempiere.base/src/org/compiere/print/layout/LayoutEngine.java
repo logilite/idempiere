@@ -139,10 +139,11 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	 * @param info
 	 * @param trxName
 	 */
-	public LayoutEngine (MPrintFormat format, PrintData data, MQuery query, PrintInfo info ,  String trxName)
+	public LayoutEngine (MPrintFormat format, PrintData data, MQuery query, PrintInfo info, String trxName)
 	{
-		this(format,data,query,info,trxName,0);
+		this(format,data,query,info,trxName,null,0);
 	}
+
 	/**
 	 *	Detail Constructor
 	 *  @param format Print Format
@@ -153,7 +154,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	 *  @param parentLayout
 	 *  @param windowNo
 	 */
-	public LayoutEngine (MPrintFormat format, PrintData data, MQuery query, PrintInfo info ,  String trxName, LayoutEngine parentLayout, int windowNo)
+	public LayoutEngine (MPrintFormat format, PrintData data, MQuery query, PrintInfo info, String trxName, LayoutEngine parentLayout, int windowNo)
 	{
 		m_windowNo = windowNo;
 		m_TrxName = trxName;

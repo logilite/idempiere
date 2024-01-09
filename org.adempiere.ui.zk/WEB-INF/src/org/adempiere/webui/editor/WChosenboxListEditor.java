@@ -13,10 +13,10 @@
  *****************************************************************************/
 package org.adempiere.webui.editor;
 
+import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -32,7 +32,6 @@ import org.adempiere.webui.component.ListHead;
 import org.adempiere.webui.component.ListHeader;
 import org.adempiere.webui.component.ListItem;
 import org.adempiere.webui.component.Listbox;
-import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.SimpleListModel;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.event.ContextMenuEvent;
@@ -621,10 +620,14 @@ public class WChosenboxListEditor extends WEditor implements ContextMenuListener
 
 			AEnv.showWindow(wdc);
 		}
-				}
-			});
-
-			AEnv.showWindow(wdc);
+	}
+	
+    @Override
+	public  void propertyChange(PropertyChangeEvent evt)
+	{
+		if ("FieldValue".equals(evt.getPropertyName()))
+		{
+			setValue(evt.getNewValue());
 		}
 	}
 	
@@ -849,10 +852,8 @@ public class WChosenboxListEditor extends WEditor implements ContextMenuListener
 			bDown = createButton("MoveDown16", actionListenerUpDown);
 			bAdd = createButton("MoveRight16", actionListenerAddRemove);
 			bRemove = createButton("MoveLeft16", actionListenerAddRemove);
-
-			Hlayout yesButtonLayout;
-			yesButtonLayout = createHlayoutBtn(new Button[] {bUp, bDown});
 			
+			Hlayout yesButtonLayout = createHlayoutBtn(new Button[] {bUp, bDown});
 			Hlayout noButtonLayout = createHlayoutBtn(new Button[] {bRemove, bAdd});
 			boolean isEditable = gridField.isEditable(true);
 			

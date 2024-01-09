@@ -17,6 +17,7 @@ import org.compiere.model.MAttachmentEntry;
 import org.compiere.model.MColumn;
 import org.compiere.model.MImage;
 import org.compiere.model.MTable;
+import org.compiere.model.MTree;
 import org.compiere.model.PO;
 import org.compiere.model.POInfo;
 import org.compiere.util.DB;
@@ -184,8 +185,29 @@ public class PoFiller{
 
 		String value = e.contents.toString();
 		String columnName = qName;
+		POInfo info = POInfo.getPOInfo(po.getCtx(), po.get_Table_ID());
 		if (value != null && value.trim().length() > 0) {
-			if (po.get_ColumnIndex(columnName) >= 0) {
+			int index = po.get_ColumnIndex(columnName);
+			if (info != null && (info.getColumnDisplayType(index) == DisplayType.MultiSelectTable 
+					|| info.getColumnDisplayType(index) == DisplayType.MultiSelectSearch)) {
+				// Get Array of UUIDs from element.
+				Object[] uuids = (Object[]) Util.getArrayObjectFromString(DisplayType.MultiSelectList, e.contents.toString());
+				Integer ids[] = new Integer[uuids.length];
+				Element elm;
+				for (int i = 0; i < uuids.length; i++) {
+					elm = new Element(e.uri, e.localName, e.qName, e.attributes);
+					elm.contents.append(uuids[i]);
+					ids[i] = ReferenceUtils.resolveReferenceAsInt(ctx.ctx, elm, po.get_TrxName());
+				}
+				if (index >= 0) {
+					if (!Arrays.deepEquals((Object[]) po.get_Value(columnName), ids))
+						po.set_ValueNoCheck(columnName, ids);
+					return 0;
+				}
+				else {
+					return -1;
+				}
+			} else if (index >= 0) {
 				MColumn col = MColumn.get(ctx.ctx, po.get_TableName(), columnName, po.get_TrxName());
 				if (col == null) {
 					POInfo poInfo = POInfo.getPOInfo(ctx.ctx, po.get_Table_ID(), po.get_TrxName());
@@ -231,6 +253,20 @@ public class PoFiller{
 							foreignTable = MTable.get(Env.getCtx(), tableID, po.get_TrxName());
 							refTableName = foreignTable.getTableName();
 						}
+					} else if ("Node_ID".equalsIgnoreCase(columnName) || "Parent_ID".equalsIgnoreCase(columnName)) {
+						refTableName = e.attributes.getValue("reference-key");
+						if (refTableName != null) {
+							foreignTable = MTable.get(Env.getCtx(), refTableName);
+						} else if (po.get_ColumnIndex(MTree.COLUMNNAME_AD_Tree_ID) > 0) {
+							MTree tree = new MTree(Env.getCtx(), po.get_ValueAsInt(MTree.COLUMNNAME_AD_Tree_ID), po.get_TrxName());
+							if (MTree.TREETYPE_CustomTable.equals(tree.getTreeType())) {
+								foreignTable = MTable.get(Env.getCtx(), tree.getAD_Table_ID());
+								refTableName = foreignTable.getTableName();
+							} else {
+								refTableName = MTree.getSourceTableName(po.get_ValueAsString(MTree.COLUMNNAME_TreeType));
+								foreignTable = MTable.get(Env.getCtx(), refTableName);
+							}
+						}
 					}
 				}
 				if (id != null && refTableName != null) {
@@ -261,14 +297,13 @@ public class PoFiller{
 						po.set_ValueNoCheck(columnName, id);
 						return id;
 					}
-				}				
+				}
 				return -1;
 			} else {
 				return 0;
 			}
 		} else {
-			if (info != null && !info.isColumnMandatory(po.get_ColumnIndex(columnName)))
-				po.set_ValueNoCheck(columnName, null);
+			po.set_ValueNoCheck(columnName, null);
 			return 0;
 		}
 	}

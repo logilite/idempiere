@@ -139,7 +139,7 @@ public class DefaultFeedbackService implements IFeedbackService {
 					Msg.getMsg(Env.getCtx(), "EMailSupport"),
 					MUser.get(Env.getCtx()),"",
 					MSystem.get(Env.getCtx()).getName() + " " + Msg.getMsg(Env.getCtx(), "TraceInfo"),
-					"", file, 0, 0, 0, null);
+					"", file, 0, 0, 0, null, null);
 				if(dialog instanceof Window)
 					((Window)dialog).setAttribute(Window.MODE_KEY, Mode.OVERLAPPED);			
 				

@@ -869,7 +869,6 @@ public class WMatch extends Match
 		statusBar.setStatusDB(noRows + "");
 	}   //  tableChanged
 
-	@Override
 	private boolean isCreateMatchInvHDR()
 	{
 		if(!isCreateMatchInvHDR || !isMatchInvHdrEnabled)

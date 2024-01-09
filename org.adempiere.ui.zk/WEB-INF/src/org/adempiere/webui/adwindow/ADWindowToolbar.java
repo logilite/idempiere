@@ -1200,7 +1200,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 	/**
 	 * Call {@link ToolbarCustomButton#pressedLogic()}
 	 */
-	private void pressedLogic()
+	public void pressedLogic()
 	{
 		for (ToolbarCustomButton toolbarCustomBtn : toolbarCustomButtons)
 		{
@@ -1211,7 +1211,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 	/**
 	 * Call {@link ToolbarCustomButton#readOnlyLogic()}
 	 */
-	private void readOnlyLogic()
+	public void readOnlyLogic()
 	{
 		for (ToolbarCustomButton toolbarCustomBtn : toolbarCustomButtons)
 		{

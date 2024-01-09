@@ -859,6 +859,15 @@ public class X_AD_InfoColumn extends PO implements I_AD_InfoColumn, I_Persistent
 	public static final String QUERYOPERATOR_Like = "Like";
 	/** Full Like = LIKE */
 	public static final String QUERYOPERATOR_FullLike = "LIKE";
+	/** HAVE = >>> */
+	public static final String QUERYOPERATOR_HAVE = ">>>";
+	/** IN = <<< */
+	public static final String QUERYOPERATOR_IN = "<<<";
+	/** OVERLAP = && */
+	public static final String QUERYOPERATOR_OVERLAP = "&&";
+	/** EXCLUDE = -&& */
+	public static final String QUERYOPERATOR_EXCLUDE = "-&&";
+
 	/** Set Query Operator.
 		@param QueryOperator Operator for database query
 	*/
@@ -928,5 +937,61 @@ public class X_AD_InfoColumn extends PO implements I_AD_InfoColumn, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	@Override
+	public void setIsHideInfoColumn(boolean IsHideInfoColumn) {
+		set_Value (COLUMNNAME_IsHideInfoColumn, Boolean.valueOf(IsHideInfoColumn));
+	}
+
+	@Override
+	public boolean isHideInfoColumn() {
+		Object oo = get_Value(COLUMNNAME_IsHideInfoColumn);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	@Override
+	public void setIsMultiSelectCriteria(boolean IsMultiSelectCriteria) {
+		set_Value (COLUMNNAME_IsMultiSelectCriteria, Boolean.valueOf(IsMultiSelectCriteria));
+	}
+
+	@Override
+	public boolean isMultiSelectCriteria() {
+		Object oo = get_Value(COLUMNNAME_IsMultiSelectCriteria);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	@Override
+	public void setTooltip_InfoColumn_ID(int Tooltip_InfoColumn_ID) {
+		if (Tooltip_InfoColumn_ID < 1)
+			set_Value (COLUMNNAME_Tooltip_InfoColumn_ID, null);
+		else
+			set_Value (COLUMNNAME_Tooltip_InfoColumn_ID, Integer.valueOf(Tooltip_InfoColumn_ID));
+	}
+
+	@Override
+	public int getTooltip_InfoColumn_ID() {
+		Integer ii = (Integer)get_Value(COLUMNNAME_Tooltip_InfoColumn_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	@Override
+	public I_AD_InfoColumn getTooltip_InfoColumn() throws RuntimeException {
+		return (org.compiere.model.I_AD_InfoColumn)MTable.get(getCtx(), org.compiere.model.I_AD_InfoColumn.Table_ID)
+				.getPO(getTooltip_InfoColumn_ID(), get_TrxName());
 	}
 }

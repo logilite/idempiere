@@ -73,7 +73,7 @@ public class MatchFormTest extends AbstractTestCase {
 		order.saveEx();
 		
 		BigDecimal orderQty = new BigDecimal("1");
-		MOrderLine orderLine = new MOrderLine(order);
+		MOrderLine orderLine = MOrderLine.createFrom(order);
 		orderLine.setLine(10);
 		orderLine.setProduct(product);
 		orderLine.setQty(orderQty);
@@ -96,7 +96,7 @@ public class MatchFormTest extends AbstractTestCase {
 		MWarehouse wh = MWarehouse.get(Env.getCtx(), receipt.getM_Warehouse_ID());
 		int M_Locator_ID = wh.getDefaultLocator().getM_Locator_ID();		
 		BigDecimal receiptQty = new BigDecimal("1");
-		MInOutLine receiptLine = new MInOutLine(receipt);
+		MInOutLine receiptLine = MInOutLine.createFrom(receipt);
 		receiptLine.setProduct(product);
 		receiptLine.setM_Locator_ID(M_Locator_ID);
 		receiptLine.setLine(10);
@@ -120,7 +120,7 @@ public class MatchFormTest extends AbstractTestCase {
 		toTable.prepareTable(columnLayout, null, null, false, null);
 		
 		//load not matched shipments
-		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false);
+		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false, 0);
 		assertTrue(fromTable.getRowCount()>0, "Unexpected number of records for not matched Material Receipt: " + fromTable.getRowCount());
 		int selectedRow = -1;
 		for(int i = 0; i < fromTable.getRowCount(); i++) {
@@ -157,7 +157,7 @@ public class MatchFormTest extends AbstractTestCase {
 		//select and process matching
 		IDColumn idColumn = (IDColumn)toTable.getValueAt(selectedOrderRow, Match.I_ID);
 		idColumn.setSelected(true);
-		match.cmd_process(fromTable, toTable, Match.MODE_NOTMATCHED, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), new BigDecimal(1));
+		match.cmd_process(fromTable, toTable, Match.MODE_NOTMATCHED, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), new BigDecimal(1), false);
 		
 		orderLine.load(getTrxName());
 		assertEquals(0, orderLine.getQtyReserved().intValue(), "Unexpected order line qty ordered value");
@@ -182,7 +182,7 @@ public class MatchFormTest extends AbstractTestCase {
 		order.saveEx();
 		
 		BigDecimal orderQty = new BigDecimal("1");
-		MOrderLine orderLine = new MOrderLine(order);
+		MOrderLine orderLine = MOrderLine.createFrom(order);
 		orderLine.setLine(10);
 		orderLine.setProduct(product);
 		orderLine.setQty(orderQty);
@@ -196,10 +196,10 @@ public class MatchFormTest extends AbstractTestCase {
 		assertEquals(1, orderLine.getQtyReserved().intValue(), "Unexpected order line qty ordered value");
 		assertEquals(0, orderLine.getQtyDelivered().intValue(), "Unexpected order line qty delivered value");
 		
-		MInOut receipt = new MInOut(order, DictionaryIDs.C_DocType.MM_RECEIPT.id, order.getDateOrdered()); // MM Receipt
+		MInOut receipt = MInOut.createFrom(order, DictionaryIDs.C_DocType.MM_RECEIPT.id, order.getDateOrdered()); // MM Receipt
 		receipt.saveEx();
 		
-		MInOutLine receiptLine = new MInOutLine(receipt);
+		MInOutLine receiptLine = MInOutLine.createFrom(receipt);
 		receiptLine.setC_OrderLine_ID(orderLine.get_ID());
 		receiptLine.setLine(10);
 		receiptLine.setProduct(product);
@@ -231,7 +231,7 @@ public class MatchFormTest extends AbstractTestCase {
 		invoice.saveEx();
 		
 		BigDecimal qtyInvoiced = new BigDecimal(1);
-		MInvoiceLine invoiceLine = new MInvoiceLine(invoice);
+		MInvoiceLine invoiceLine = MInvoiceLine.createFrom(invoice);
 		invoiceLine.setProduct(product);
 		invoiceLine.setLine(10);
 		invoiceLine.setQty(qtyInvoiced);
@@ -256,7 +256,7 @@ public class MatchFormTest extends AbstractTestCase {
 		MiniTableImpl toTable = new MiniTableImpl(columnLayout);
 		
 		//load not match invoice
-		match.cmd_search(fromTable, Match.MATCH_INVOICE, match.getMatchTypeText(Match.MATCH_SHIPMENT), product.get_ID(), bpartner.get_ID(), null, null, false);
+		match.cmd_search(fromTable, Match.MATCH_INVOICE, match.getMatchTypeText(Match.MATCH_SHIPMENT), product.get_ID(), bpartner.get_ID(), null, null, false, 0);
 		assertTrue(fromTable.getRowCount()>0, "Unexpected number of records for not matched vendor invoice: " + fromTable.getRowCount());
 		int selectedRow = -1;
 		for(int i = 0; i < fromTable.getRowCount(); i++) {
@@ -293,7 +293,7 @@ public class MatchFormTest extends AbstractTestCase {
 		//select and process matching
 		IDColumn idColumn = (IDColumn)toTable.getValueAt(selectedReceiptRow, Match.I_ID);
 		idColumn.setSelected(true);
-		match.cmd_process(fromTable, toTable, Match.MODE_NOTMATCHED, Match.MATCH_INVOICE, match.getMatchTypeText(Match.MATCH_SHIPMENT), new BigDecimal(1));
+		match.cmd_process(fromTable, toTable, Match.MODE_NOTMATCHED, Match.MATCH_INVOICE, match.getMatchTypeText(Match.MATCH_SHIPMENT), new BigDecimal(1), false);
 		
 		orderLine.load(getTrxName());
 		assertEquals(1, orderLine.getQtyInvoiced().intValue(), "Unexpected order line qty invoiced value");
@@ -316,7 +316,7 @@ public class MatchFormTest extends AbstractTestCase {
 		order.saveEx();
 		
 		BigDecimal orderQty = new BigDecimal("1");
-		MOrderLine orderLine = new MOrderLine(order);
+		MOrderLine orderLine = MOrderLine.createFrom(order);
 		orderLine.setLine(10);
 		orderLine.setProduct(product);
 		orderLine.setQty(orderQty);
@@ -330,10 +330,10 @@ public class MatchFormTest extends AbstractTestCase {
 		assertEquals(1, orderLine.getQtyReserved().intValue(), "Unexpected order line qty ordered value");
 		assertEquals(0, orderLine.getQtyDelivered().intValue(), "Unexpected order line qty delivered value");
 		
-		MInOut receipt = new MInOut(order, DictionaryIDs.C_DocType.MM_RECEIPT.id, order.getDateOrdered()); // MM Receipt
+		MInOut receipt = MInOut.createFrom(order, DictionaryIDs.C_DocType.MM_RECEIPT.id, order.getDateOrdered()); // MM Receipt
 		receipt.saveEx();
 		
-		MInOutLine receiptLine = new MInOutLine(receipt);
+		MInOutLine receiptLine = MInOutLine.createFrom(receipt);
 		receiptLine.setC_OrderLine_ID(orderLine.get_ID());
 		receiptLine.setLine(10);
 		receiptLine.setProduct(product);
@@ -370,7 +370,7 @@ public class MatchFormTest extends AbstractTestCase {
 		invoice.saveEx();
 		
 		BigDecimal qtyInvoiced = new BigDecimal(1);
-		MInvoiceLine invoiceLine = new MInvoiceLine(invoice);
+		MInvoiceLine invoiceLine = MInvoiceLine.createFrom(invoice);
 		invoiceLine.setProduct(product);
 		invoiceLine.setLine(10);
 		invoiceLine.setQty(qtyInvoiced);
@@ -395,7 +395,7 @@ public class MatchFormTest extends AbstractTestCase {
 		MiniTableImpl toTable = new MiniTableImpl(columnLayout);
 		
 		//load not match receipt
-		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_INVOICE), product.get_ID(), bpartner.get_ID(), null, null, false);
+		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_INVOICE), product.get_ID(), bpartner.get_ID(), null, null, false, 0);
 		assertTrue(fromTable.getRowCount()>0, "Unexpected number of records for not matched material receipt: " + fromTable.getRowCount());
 		int selectedRow = -1;
 		for(int i = 0; i < fromTable.getRowCount(); i++) {
@@ -432,7 +432,7 @@ public class MatchFormTest extends AbstractTestCase {
 		//select and process matching
 		IDColumn idColumn = (IDColumn)toTable.getValueAt(selectedInvoiceRow, Match.I_ID);
 		idColumn.setSelected(true);
-		match.cmd_process(fromTable, toTable, Match.MODE_NOTMATCHED, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_INVOICE), new BigDecimal(1));
+		match.cmd_process(fromTable, toTable, Match.MODE_NOTMATCHED, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_INVOICE), new BigDecimal(1), false);
 		
 		orderLine.load(getTrxName());
 		assertEquals(1, orderLine.getQtyInvoiced().intValue(), "Unexpected order line qty invoiced value");

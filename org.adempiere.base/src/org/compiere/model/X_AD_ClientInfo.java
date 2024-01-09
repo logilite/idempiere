@@ -886,6 +886,8 @@ public class X_AD_ClientInfo extends PO implements I_AD_ClientInfo, I_Persistent
 	public String getTimeZone()
 	{
 		return (String)get_Value(COLUMNNAME_TimeZone);
+	}
+
 	/** Set ZK Hostname.
 		@param ZKHostname 
 		Hostname of the ZK webui server

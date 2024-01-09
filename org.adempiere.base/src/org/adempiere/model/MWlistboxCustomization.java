@@ -164,9 +164,6 @@ public class MWlistboxCustomization extends X_AD_Wlistbox_Customization {
 				}
 
 				WlistBoxCust.setCustom(custom);
-				}
-
-				WlistBoxCust.setCustom(custom);
 			}
 		}
 		else if (!Util.isEmpty(Custom))

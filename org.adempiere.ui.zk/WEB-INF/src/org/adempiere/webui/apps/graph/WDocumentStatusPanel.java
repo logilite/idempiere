@@ -126,7 +126,7 @@ public class WDocumentStatusPanel extends Panel {
 				lastRefreshCount += indicator.getStatusCount();
 		}
 		EventQueue<Event> queue = EventQueues.lookup(IDesktop.ACTIVITIES_EVENT_QUEUE, true);
-		Event event = new Event(IDesktop.ON_ACTIVITIES_CHANGED_EVENT, null, count);
+		Event event = new Event(IDesktop.ON_ACTIVITIES_CHANGED_EVENT, null, lastRefreshCount);
 		queue.publish(event);
 	}
 

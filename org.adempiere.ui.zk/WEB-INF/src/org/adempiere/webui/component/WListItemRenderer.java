@@ -47,7 +47,6 @@ import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.minigrid.IDColumn;
 import org.compiere.minigrid.MultiSelectColumn;
-import org.compiere.minigrid.SelectableIDColumn;
 import org.compiere.minigrid.UUIDColumn;
 import org.compiere.model.MImage;
 import org.compiere.util.DisplayType;
@@ -71,8 +70,8 @@ import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.ListitemRendererExt;
 import org.zkoss.zul.event.ZulEvents;
-import org.zkoss.zul.impl.InputElement;
 import org.zkoss.zul.ext.SelectionControl;
+import org.zkoss.zul.impl.InputElement;
 
 /**
  * Renderer for {@link org.adempiere.webui.component.ListItem}
@@ -428,9 +427,9 @@ public class WListItemRenderer implements ListitemRenderer<Object>, EventListene
 					table.addEventListener(Events.ON_SELECT, this);
 				}
 			}
-			else if (field instanceof MultiSelectColumn)
+			else if (value instanceof MultiSelectColumn)
 			{
-				MultiSelectColumn multeSelectField = (MultiSelectColumn) field;
+				MultiSelectColumn multeSelectField = (MultiSelectColumn) value;
 				listcell.setValue(multeSelectField.getValue());
 				if (isCellEditable)
 				{

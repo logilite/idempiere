@@ -24,8 +24,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
@@ -3382,7 +3382,7 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
 	public void createLineFrom(int C_OrderLine_ID, int M_InOutLine_ID, int M_RMALine_ID, 
 			int M_Product_ID, int C_UOM_ID, BigDecimal Qty)
 	{
-		MInvoiceLine invoiceLine = new MInvoiceLine (this);
+		MInvoiceLine invoiceLine = MInvoiceLine.createFrom(this);
 		invoiceLine.setM_Product_ID(M_Product_ID, C_UOM_ID);	//	Line UOM
 		invoiceLine.setQty(Qty);							//	Invoiced/Entered
 		BigDecimal QtyInvoiced = null;

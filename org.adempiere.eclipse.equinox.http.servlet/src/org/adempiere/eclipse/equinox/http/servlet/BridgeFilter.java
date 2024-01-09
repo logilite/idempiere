@@ -56,7 +56,6 @@ public class BridgeFilter extends BridgeServlet implements Filter {
 	protected static CLogger		log					= CLogger.getCLogger(BridgeFilter.class);
 
 	private ServletConfigAdaptor	servletConfig;
-	private static ISSOPrinciple	m_SSOPrinciple		= null;
 	
 	public void init(FilterConfig filterConfig) throws ServletException {
 		this.servletConfig = new ServletConfigAdaptor(filterConfig);

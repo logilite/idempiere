@@ -1244,6 +1244,8 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public static final String PAPERIODTYPE_Total = "T";
 	/** Year = Y */
 	public static final String PAPERIODTYPE_Year = "Y";
+	/** Natural Year opening = O */
+	public static final String PAPERIODTYPE_NaturalYearOpening = "O";
 	/** Set Period Type.
 		@param PAPeriodType PA Period Type
 	*/

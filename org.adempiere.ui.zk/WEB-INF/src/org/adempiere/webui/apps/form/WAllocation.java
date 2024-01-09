@@ -119,7 +119,6 @@ public class WAllocation extends Allocation
 	//Parameter
 	/** Parameter panel. North of {@link #mainLayout} */
 	protected Panel parameterPanel = new Panel();
-	protected Panel allocationPanel = new Panel(); //footer
 	/** Grid layout of {@link #parameterPanel} */
 	protected Grid parameterLayout = GridFactory.newGridLayout();		
 	protected Label bpartnerLabel = new Label();

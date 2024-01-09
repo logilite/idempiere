@@ -111,8 +111,8 @@ import org.compiere.print.layout.PrintDataEvaluatee;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.ServerProcessCtl;
-import org.compiere.util.CCache;
 import org.compiere.tools.FileUtil;
+import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
@@ -1042,23 +1042,24 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 						{
 							td td = new td();
 							tr.addElement(td);
-							String style = "";
-							if (item.isFixedWidth() && item.getMaxWidth() > 0)
-							{
-								// convert to pixels assuming 96dpi
-								int pxs = (item.getMaxWidth() * 96);
-								pxs = pxs / 72;
-								style = "min-width:" + pxs + ";max-width:" + pxs + "; overflow: hidden";
-							}
+							MStyle style = item.getAD_FieldStyle_ID() > 0 ? MStyle.get(Env.getCtx(), item.getAD_FieldStyle_ID()) : null;
 
-							if (item.isHeightOneLine())
-							{
-								if (style.length() > 0)
-									style += ";";
-								style += "white-space: nowrap;";
-							}
-
-							td.setStyle(style);
+//							if (item.isFixedWidth() && item.getMaxWidth() > 0)
+//							{
+//								// convert to pixels assuming 96dpi
+//								int pxs = (item.getMaxWidth() * 96);
+//								pxs = pxs / 72;
+//								style = "min-width:" + pxs + ";max-width:" + pxs + "; overflow: hidden";
+//							}
+//
+//							if (item.isHeightOneLine())
+//							{
+//								if (style.length() > 0)
+//									style += ";";
+//								style += "white-space: nowrap;";
+//							}
+//
+//							td.setStyle(style);
 
 							Object obj = instanceAttributeColumn != null ? instanceAttributeColumn.getPrintDataElement(row)
 									: m_printData.getNodeByPrintFormatItemId(item.getAD_PrintFormatItem_ID());

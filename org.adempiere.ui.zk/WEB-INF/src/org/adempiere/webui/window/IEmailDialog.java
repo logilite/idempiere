@@ -28,8 +28,8 @@ import org.compiere.model.PrintInfo;
 public interface IEmailDialog
 {
 
-	public void init(String title, MUser from, String to, String subject, String message,
-			File attachment, int m_WindowNo,int ad_Table_ID, int record_ID, PrintInfo printInfo);
+	public void init(String title, MUser from, String to, String subject, String message, 
+			File attachment, int m_WindowNo, int ad_Table_ID, int record_ID, String record_UU, PrintInfo printInfo);
 
 	public void addTo(String supportEMail, boolean isShowEmailFirst);
 	public String getTo();
@@ -41,4 +41,5 @@ public interface IEmailDialog
 	public IEmailDialog createInstance();
 
 	public void setAD_PInstance_ID(int pInstance_ID);
+
 }

@@ -68,8 +68,8 @@ import org.zkoss.zhtml.Td;
 import org.zkoss.zhtml.Tr;
 import org.zkoss.zk.au.out.AuFocus;
 import org.zkoss.zk.au.out.AuScript;
-import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.AbstractComponent;
+import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zk.ui.event.Deferrable;
@@ -890,7 +890,6 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     	Comboitem lstItemClient = lstClient.getSelectedItem();
     	Comboitem lstItemOrg = lstOrganisation.getSelectedItem();
     	Comboitem lstItemWarehouse = lstWarehouse.getSelectedItem();
-    	Comboitem lstItemLanguage = lstLanguage.getSelectedItem();
 
         if(lstItemRole == null || lstItemRole.getValue() == null)
         {
@@ -984,14 +983,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 			Dialog.warn(0, e.getLocalizedMessage(), e.getMessage());
 		}
 		Locales.setThreadLocal(locale);
-
-		if (m_isClientDefined || isMFAValidated)
-			wndLogin.loginCompleted(login, orgKNPair, this);
-		else
-			wndLogin.validateMFA(orgKNPair, m_isClientDefined, m_userName, m_showRolePanel, m_clientKNPairs);
-		
-		desktop.getSession().setAttribute(SSOUtils.ISCHANGEROLE_REQUEST, false);
-    }
+	}
 
     @Override
 	public boolean isDeferrable() {

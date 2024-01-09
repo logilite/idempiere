@@ -266,26 +266,6 @@ public final class AEnv
 		}
 	} // zoom
 
-	/**
-	 * Call {@link #zoom(int, int, MQuery, int)}
-	 * @param AD_Table_ID
-	 * @param Record_ID
-	 * @param query
-	 */
-				if (AD_Table_ID > 0)
-					table = MTable.get(Env.getCtx(), AD_Table_ID);
-				else
-					table = MTable.get(Env.getCtx(), window.getTabs(false, null)[0].getAD_Table_ID());
-				MQuery query = MQuery.getEqualQuery(table.getKeyColumns()[0], Record_ID);
-				query.setTableName(table.getTableName());
-				query.setZoomTableName(table.getTableName());
-				query.setZoomColumnName(table.getKeyColumns()[0]);
-				query.setZoomValue(Record_ID);
-				AEnv.zoom(AD_Window_ID, query);
-			}
-		}
-	} // zoom
-
 	public static void zoom (int AD_Table_ID, int Record_ID, MQuery query) {
 		zoom (AD_Table_ID, Record_ID, query, 0);
 	}

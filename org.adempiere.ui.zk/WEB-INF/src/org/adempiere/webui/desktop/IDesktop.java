@@ -265,6 +265,12 @@ public interface IDesktop extends UIPart {
 	public void updateHelpQuickInfo(InfoPanel infoPanel);
 
 	/**
+	 * update quick info (detail status line) in help/info panel
+	 * @param gridTab
+	 */
+	public void updateHelpDetailQuickInfo(GridTab gridTab);
+
+	/**
 	 * 
 	 * @return true if there are changes not save yet
 	 */

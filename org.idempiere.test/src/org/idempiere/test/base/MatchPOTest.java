@@ -574,7 +574,7 @@ public class MatchPOTest extends AbstractTestCase {
 		ColumnInfo[] layout = match.getColumnLayout();
 		MiniTableImpl fromTable = new MiniTableImpl(layout);
 		MiniTableImpl toTable = new MiniTableImpl(layout);		
-		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false);
+		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false, 0);
 		assertTrue(fromTable.getRowCount()>0, "Unexpected number of records for not matched Material Receipt: " + fromTable.getRowCount());
 		int selectedRow = -1;
 		for(int i = 0; i < fromTable.getRowCount(); i++) {
@@ -760,7 +760,7 @@ public class MatchPOTest extends AbstractTestCase {
 		ColumnInfo[] layout = match.getColumnLayout();
 		MiniTableImpl fromTable = new MiniTableImpl(layout);
 		MiniTableImpl toTable = new MiniTableImpl(layout);		
-		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false);
+		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false, 0);
 		assertTrue(fromTable.getRowCount()>0, "Unexpected number of records for not matched Material Receipt: " + fromTable.getRowCount());
 		int selectedRow = -1;
 		for(int i = 0; i < fromTable.getRowCount(); i++) {
@@ -938,7 +938,7 @@ public class MatchPOTest extends AbstractTestCase {
 		match.setTrxName(getTrxName());
 		ColumnInfo[] layout = match.getColumnLayout();
 		MiniTableImpl fromTable = new MiniTableImpl(layout);
-		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false);
+		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false, 0);
 		assertTrue(fromTable.getRowCount()>0, "Unexpected number of records for not matched Material Receipt: " + fromTable.getRowCount());
 		int selectedRow = -1;
 		for(int i = 0; i < fromTable.getRowCount(); i++) {

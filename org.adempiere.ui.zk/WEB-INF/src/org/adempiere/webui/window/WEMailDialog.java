@@ -67,8 +67,8 @@ import org.compiere.model.MClient;
 import org.compiere.model.MDocType;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MMailText;
-import org.compiere.model.MTable;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.MUserMail;
 import org.compiere.model.PO;
@@ -136,7 +136,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	 * @param record_ID
 	 * @param printInfo
 	 */
-	public WEMailDialog(String title, MUser from, String to, String subject, String message, DataSource attachment,
+	public WEMailDialog(String title, MUser from, String to, String subject, String message, File attachment,
 			int m_WindowNo, int ad_Table_ID, int record_ID, PrintInfo printInfo) {
 		this(title, from, to, subject, message, attachment, m_WindowNo, ad_Table_ID, record_ID, null, printInfo);
 	}
@@ -155,16 +155,16 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	 * @param record_UU
 	 * @param printInfo
 	 */
-	public WEMailDialog(String title, MUser from, String to, String subject, String message, DataSource attachment,
+	public WEMailDialog(String title, MUser from, String to, String subject, String message, File attachment,
 			int m_WindowNo, int ad_Table_ID, int record_ID, String record_UU, PrintInfo printInfo) {
 		super();
-		init(title, from, to, subject, message, null, m_WindowNo, ad_Table_ID, record_ID, printInfo);
+		init(title, from, to, subject, message, attachment, m_WindowNo, ad_Table_ID, record_ID, null, printInfo);
 	}	//	EmailDialog
 	
 	@Override
 	public void init(String title, MUser from, String to, String subject, String message, File attachment,
-			int m_WindowNo, int ad_Table_ID, int record_ID, PrintInfo printInfo)
-	{
+			int m_WindowNo, int ad_Table_ID, int record_ID, String record_UU, PrintInfo printInfo)
+	{	
 		Components.removeAllChildren(this);
 		this.m_AD_Table_ID = ad_Table_ID;
 		this.m_Record_ID = record_ID;

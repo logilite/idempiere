@@ -484,7 +484,7 @@ public abstract class PaymentFormCreditCard extends PaymentForm {
 		if (isCreditMemo)
 			payAmount = m_Amount.negate();
 		
-		MPaymentTransaction mpt=(MPaymentTransaction) MTable.get(Env.getCtx(), MPaymentTransaction.Table_ID).getPO(0,getTrxName());
+		MPaymentTransaction mpt=(MPaymentTransaction) MTable.get(Env.getCtx(), MPaymentTransaction.Table_ID).getPO(0, trxName);
 		mpt.setAD_Org_ID(m_AD_Org_ID);
 		mpt.setCreditCard(MPayment.TRXTYPE_Sales, CCType, CCNumber, CCVV != null ? CCVV : "", CCExp);
 		mpt.setAmount(m_C_Currency_ID, payAmount);
@@ -538,7 +538,7 @@ public abstract class PaymentFormCreditCard extends PaymentForm {
 				m_needSave = true;
 				if (mpt.getC_Payment_ID() > 0)
 				{
-					m_mPayment=(MPayment) MTable.get(mpt.getCtx(), MPayment.Table_ID).getPO(mpt.getC_Payment_ID(),getTrxName());
+					m_mPayment=(MPayment) MTable.get(mpt.getCtx(), MPayment.Table_ID).getPO(mpt.getC_Payment_ID(), trxName);
 					String info = m_mPayment.getR_RespMsg() + " (" + m_mPayment.getR_AuthCode() + ") ID=" + m_mPayment.getR_PnRef();
 					processMsg = info + "\n" + m_mPayment.getDocumentNo();
 					saveChanges();

@@ -173,8 +173,10 @@ public class ReferenceUtils {
 			return uuid.trim();
 		}
 	}
+
 	public static String getTableReferenceMultiSelect(String tableName, Integer[] ids, AttributesImpl atts)
-			if (ids == null || ids.length == 0)
+	{
+		if (ids == null || ids.length == 0)
 		{
 			// no id, -1 indicates it was read a null
 			atts.addAttribute("", "", "reference", "CDATA", "uuid");
@@ -211,7 +213,6 @@ public class ReferenceUtils {
 		
 		return "";
 	}
-}
 
 	public static String getTableReferenceMulti(String tableName, String values, AttributesImpl atts, String trxName)
 	{

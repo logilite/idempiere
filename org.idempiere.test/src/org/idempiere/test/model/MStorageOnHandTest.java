@@ -203,21 +203,21 @@ public class MStorageOnHandTest extends AbstractTestCase {
 	public void testStorageCleanUp() {
 		MProduct product = new MProduct(Env.getCtx(), 0, getTrxName());
 		product.setName("testStorageCleanUp");
-		product.setM_AttributeSet_ID(FERTILIZER_LOT_ATTRIBUTESET_ID);
+		product.setM_AttributeSet_ID(DictionaryIDs.M_AttributeSet.FERTILIZER_LOT.id);
 		product.setIsStocked(true);
 		product.setProductType(MProduct.PRODUCTTYPE_Item);
-		product.setC_UOM_ID(UOM_EACH_ID);
-		product.setM_Product_Category_ID(CHEMICALS_CATEGORY_ID);
-		product.setC_TaxCategory_ID(TAX_CATEGORY_STANDARD_ID);
+		product.setC_UOM_ID(DictionaryIDs.C_UOM.EACH.id);
+		product.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.CHEMICALS.id);
+		product.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 		product.saveEx();
 		
 		Timestamp today = TimeUtil.getDay(null);
-		MStorageOnHand.add(Env.getCtx(), HQ_LOCATOR_ID, product.get_ID(), 0, new BigDecimal("2"), today, getTrxName());
+		MStorageOnHand.add(Env.getCtx(), DictionaryIDs.M_Locator.HQ.id, product.get_ID(), 0, new BigDecimal("2"), today, getTrxName());
 		Query query = new Query(Env.getCtx(), MStorageOnHand.Table_Name, "M_Product_ID=?", getTrxName());
 		int count = query.setParameters(product.get_ID()).count();
 		assertEquals(1, count);
 		
-		MStorageOnHand.add(Env.getCtx(), HQ_LOCATOR_ID, product.get_ID(), 0, new BigDecimal("-2"), today, getTrxName());
+		MStorageOnHand.add(Env.getCtx(), DictionaryIDs.M_Locator.HQ.id, product.get_ID(), 0, new BigDecimal("-2"), today, getTrxName());
 		DB.executeUpdateEx("UPDATE M_StorageOnHand SET Created=? WHERE M_Product_ID=?", new Object[] {TimeUtil.addDays(today, -7), product.get_ID()}, getTrxName());
 		query = new Query(Env.getCtx(), MStorageOnHand.Table_Name, "M_Product_ID=?", getTrxName());
 		count = query.setParameters(product.get_ID()).count();
@@ -227,21 +227,21 @@ public class MStorageOnHandTest extends AbstractTestCase {
 		MProduct product1 = new MProduct(Env.getCtx(), 0, null);
 		product1.setName("testStorageCleanUp#1");
 		product1.setValue(product1.getName());
-		product1.setM_AttributeSet_ID(FERTILIZER_LOT_ATTRIBUTESET_ID);
+		product1.setM_AttributeSet_ID(DictionaryIDs.M_AttributeSet.FERTILIZER_LOT.id);
 		product1.setIsStocked(true);
 		product1.setProductType(MProduct.PRODUCTTYPE_Item);
-		product1.setC_UOM_ID(UOM_EACH_ID);
-		product1.setM_Product_Category_ID(CHEMICALS_CATEGORY_ID);
-		product1.setC_TaxCategory_ID(TAX_CATEGORY_STANDARD_ID);
+		product1.setC_UOM_ID(DictionaryIDs.C_UOM.EACH.id);
+		product1.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.CHEMICALS.id);
+		product1.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 		product1.saveEx();
 		
 		try {
 			MAttributeSetInstance asi1 = new MAttributeSetInstance(Env.getCtx(), 0, getTrxName());
-			asi1.setM_AttributeSet_ID(FERTILIZER_LOT_ATTRIBUTESET_ID);
+			asi1.setM_AttributeSet_ID(DictionaryIDs.M_AttributeSet.FERTILIZER_LOT.id);
 			asi1.setLot("Lot1");
 			asi1.saveEx();		
-			MStorageOnHand.add(Env.getCtx(), HQ_LOCATOR_ID, product1.get_ID(), asi1.get_ID(), new BigDecimal("-1"), today, getTrxName());		
-			MStorageOnHand.add(Env.getCtx(), HQ_LOCATOR_ID, product1.get_ID(), 0, new BigDecimal("1"), today, getTrxName());
+			MStorageOnHand.add(Env.getCtx(), DictionaryIDs.M_Locator.HQ.id, product1.get_ID(), asi1.get_ID(), new BigDecimal("-1"), today, getTrxName());		
+			MStorageOnHand.add(Env.getCtx(), DictionaryIDs.M_Locator.HQ.id, product1.get_ID(), 0, new BigDecimal("1"), today, getTrxName());
 			
 			query = new Query(Env.getCtx(), MStorageOnHand.Table_Name, "M_Product_ID=? AND M_AttributeSetInstance_ID=?", getTrxName());
 			MStorageOnHand onhand = query.setParameters(product1.get_ID(), asi1.get_ID()).first();
@@ -256,25 +256,25 @@ public class MStorageOnHandTest extends AbstractTestCase {
 			MProduct product2 = new MProduct(Env.getCtx(), 0, getTrxName());
 			product2.setName("testStorageCleanUp#2");
 			product2.setValue(product2.getName());
-			product2.setM_AttributeSet_ID(FERTILIZER_LOT_ATTRIBUTESET_ID);
+			product2.setM_AttributeSet_ID(DictionaryIDs.M_AttributeSet.FERTILIZER_LOT.id);
 			product2.setIsStocked(true);
 			product2.setProductType(MProduct.PRODUCTTYPE_Item);
-			product2.setC_UOM_ID(UOM_EACH_ID);
-			product2.setM_Product_Category_ID(CHEMICALS_CATEGORY_ID);
-			product2.setC_TaxCategory_ID(TAX_CATEGORY_STANDARD_ID);
+			product2.setC_UOM_ID(DictionaryIDs.C_UOM.EACH.id);
+			product2.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.CHEMICALS.id);
+			product2.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			product2.saveEx();
 			
 			MAttributeSetInstance asi2 = new MAttributeSetInstance(Env.getCtx(), 0, getTrxName());
-			asi2.setM_AttributeSet_ID(FERTILIZER_LOT_ATTRIBUTESET_ID);
+			asi2.setM_AttributeSet_ID(DictionaryIDs.M_AttributeSet.FERTILIZER_LOT.id);
 			asi2.setLot("LotX");
 			asi2.saveEx();		
-			MStorageOnHand.add(Env.getCtx(), HQ_LOCATOR_ID, product2.get_ID(), asi2.get_ID(), new BigDecimal("-1"), today, getTrxName());
+			MStorageOnHand.add(Env.getCtx(), DictionaryIDs.M_Locator.HQ.id, product2.get_ID(), asi2.get_ID(), new BigDecimal("-1"), today, getTrxName());
 			
 			MAttributeSetInstance asi3 = new MAttributeSetInstance(Env.getCtx(), 0, getTrxName());
-			asi3.setM_AttributeSet_ID(FERTILIZER_LOT_ATTRIBUTESET_ID);
+			asi3.setM_AttributeSet_ID(DictionaryIDs.M_AttributeSet.FERTILIZER_LOT.id);
 			asi3.setLot("LotY");
 			asi3.saveEx();
-			MStorageOnHand.add(Env.getCtx(), HQ_LOCATOR_ID, product2.get_ID(), asi3.get_ID(), new BigDecimal("1"), today, getTrxName());
+			MStorageOnHand.add(Env.getCtx(), DictionaryIDs.M_Locator.HQ.id, product2.get_ID(), asi3.get_ID(), new BigDecimal("1"), today, getTrxName());
 			
 			query = new Query(Env.getCtx(), MStorageOnHand.Table_Name, "M_Product_ID=? AND M_AttributeSetInstance_ID=?", getTrxName());
 			onhand = query.setParameters(product2.get_ID(), asi2.get_ID()).first();
@@ -288,30 +288,30 @@ public class MStorageOnHandTest extends AbstractTestCase {
 			
 			MProduct product3 = new MProduct(Env.getCtx(), 0, getTrxName());
 			product3.setName("testStorageCleanUp#3");
-			product3.setM_AttributeSet_ID(FERTILIZER_LOT_ATTRIBUTESET_ID);
+			product3.setM_AttributeSet_ID(DictionaryIDs.M_AttributeSet.FERTILIZER_LOT.id);
 			product3.setIsStocked(true);
 			product3.setProductType(MProduct.PRODUCTTYPE_Item);
-			product3.setC_UOM_ID(UOM_EACH_ID);
-			product3.setM_Product_Category_ID(CHEMICALS_CATEGORY_ID);
-			product3.setC_TaxCategory_ID(TAX_CATEGORY_STANDARD_ID);
+			product3.setC_UOM_ID(DictionaryIDs.C_UOM.EACH.id);
+			product3.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.CHEMICALS.id);
+			product3.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			product3.saveEx();
 			
 			MAttributeSetInstance asi4 = new MAttributeSetInstance(Env.getCtx(), 0, getTrxName());
-			asi4.setM_AttributeSet_ID(FERTILIZER_LOT_ATTRIBUTESET_ID);
+			asi4.setM_AttributeSet_ID(DictionaryIDs.M_AttributeSet.FERTILIZER_LOT.id);
 			asi4.setSerNo(product3.getName()+"SerialNo#1");
 			asi4.saveEx();
-			MStorageOnHand.add(Env.getCtx(), HQ_LOCATOR_ID, product3.get_ID(), asi4.get_ID(), new BigDecimal("1"), today, getTrxName());
+			MStorageOnHand.add(Env.getCtx(), DictionaryIDs.M_Locator.HQ.id, product3.get_ID(), asi4.get_ID(), new BigDecimal("1"), today, getTrxName());
 			query = new Query(Env.getCtx(), MStorageOnHand.Table_Name, "M_Product_ID=?", getTrxName());
 			count = query.setParameters(product3.get_ID()).count();
 			assertEquals(1, count);
 			
-			MStorageOnHand.add(Env.getCtx(), HQ_LOCATOR_ID, product3.get_ID(), asi4.get_ID(), new BigDecimal("-1"), today, getTrxName());
+			MStorageOnHand.add(Env.getCtx(), DictionaryIDs.M_Locator.HQ.id, product3.get_ID(), asi4.get_ID(), new BigDecimal("-1"), today, getTrxName());
 			DB.executeUpdateEx("UPDATE M_StorageOnHand SET Created=? WHERE M_Product_ID=?", new Object[] {TimeUtil.addDays(today, -7), product3.get_ID()}, getTrxName());
 			query = new Query(Env.getCtx(), MStorageOnHand.Table_Name, "M_Product_ID=?", getTrxName());
 			count = query.setParameters(product3.get_ID()).count();
 			assertEquals(1, count);
 			
-			MPInstance instance = new MPInstance(Env.getCtx(), STORAGE_CLEANUP_PROCESS_ID, 0);
+			MPInstance instance = new MPInstance(Env.getCtx(), STORAGE_CLEANUP_PROCESS_ID, -1, 0, null);
 			instance.saveEx();
 			MPInstancePara para = new MPInstancePara(instance, 10);
 			para.setParameterName("C_DocType_ID");

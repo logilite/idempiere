@@ -124,8 +124,6 @@ public class Allocation
 	 * @return list of payment record
 	 */
 	public Vector<Vector<Object>> getPaymentData(boolean isMultiCurrency, Object date, IMiniTable paymentTable)
-			+ " INNER JOIN C_DocType dt ON (dt.C_DocType_ID = p.C_DocType_ID) "
-				line.add(rs.getString(9)); 			//  9-Document Type
 	{
 		return getPaymentData(isMultiCurrency, (Timestamp) date, (String)null);
 	}

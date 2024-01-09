@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.adempiere.base.CreditStatus;
 import org.adempiere.base.ICreditManager;
 import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MAllocationLine;
@@ -28,6 +29,7 @@ import org.compiere.model.MPayment;
 import org.compiere.model.MTable;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  * Credit Manager for Payment
@@ -50,24 +52,25 @@ public class CreditManagerAllocationHdr implements ICreditManager
 	}
 
 	@Override
-	public String creditCheck(String docAction)
+	public CreditStatus checkCreditStatus(String docAction)
 	{
+		String errorMsg = null;
 		if (MPayment.DOCACTION_Complete.equals(docAction))
 		{
 			updateOpenBalForMultipleBP(false);
-			return updateBP();
+			errorMsg = updateBP();
 		}
 		else if (MPayment.DOCACTION_Reverse_Accrual.equals(docAction) || MPayment.DOCACTION_Reverse_Correct.equals(docAction))
 		{
 			// Unlink Invoices
 			updateOpenBalForMultipleBP(true);
-			return updateBP();
+			errorMsg = updateBP();
 		}
 		else if (MPayment.DOCACTION_Void.equals(docAction))
 		{
-			return updateBP();
+			errorMsg = updateBP();
 		}
-		return null;
+		return new CreditStatus(errorMsg, !Util.isEmpty(errorMsg));
 	}
 
 	/**

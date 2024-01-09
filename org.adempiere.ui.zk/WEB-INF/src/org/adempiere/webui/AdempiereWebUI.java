@@ -186,6 +186,8 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 	        return;
 		}
 		
+		this.getPage().setTitle(ThemeManager.getBrowserTitle());
+        
         Executions.getCurrent().getDesktop().enableServerPush(true);
         
         SessionManager.setSessionApplication(this);
@@ -208,8 +210,6 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 				ctx.setProperty("#AD_Client_ID", String.valueOf(clientID));
 			}
 		}
-
-		this.getPage().setTitle(ThemeManager.getBrowserTitle());
 
         if (session.getAttribute(SessionContextListener.SESSION_CTX) == null || !SessionManager.isUserLoggedIn(ctx))
         {
@@ -293,8 +293,6 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
     		loginDesktop.detach();
     		loginDesktop = null;
     	}
-    	
-    	this.getPage().setTitle(ThemeManager.getBrowserTitle());
 
         Properties ctx = Env.getCtx();
         String langLogin = Env.getContext(ctx, Env.LANGUAGE);
@@ -342,7 +340,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
         String x_Forward_IP = Executions.getCurrent().getHeader("X-Forwarded-For");
         
 		MSession mSession = MSession.get (ctx, x_Forward_IP!=null ? x_Forward_IP : Executions.getCurrent().getRemoteAddr(),
-			Executions.getCurrent().getRemoteHost(), httpSess.getId());
+			Executions.getCurrent().getRemoteHost(), httpSess.getId(), MSession.AD_SESSIONTYPE_Webui);
 		if (clientInfo.userAgent != null) {
 			mSession.setDescription(mSession.getDescription() + "\n" + clientInfo.toString());
 			mSession.saveEx();
@@ -443,8 +441,6 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
     		}
     		if (table != null) {
         		String recordUU = getPrmString("Record_UU");
-        		int AD_Window_ID = getPrmInt("AD_Window_ID");
-        		
         		if (!Util.isEmpty(recordUU)) {
         			AEnv.zoomUU(tableID, recordUU);
         		} else {

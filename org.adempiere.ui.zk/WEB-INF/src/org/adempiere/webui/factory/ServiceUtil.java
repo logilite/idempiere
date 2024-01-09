@@ -16,7 +16,6 @@ package org.adempiere.webui.factory;
 import java.util.List;
 
 import org.adempiere.base.Service;
-import org.adempiere.webui.adwindow.IADTabpanel;
 import org.adempiere.webui.component.Window;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;

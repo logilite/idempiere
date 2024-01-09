@@ -1415,44 +1415,46 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 						columnClause = columnName;
 					}
 
-				String queryOperator = InfoColumnVO.getQueryOperator();
-				if (X_AD_InfoColumn.QUERYOPERATOR_IN.equals(queryOperator) && InfoColumnVO.isMultiSelectCriteria())
-				{
-					builder.append(columnClause).append(" IN ");
-					// Convert the multi select array value to string for use IN condition
-					String value = Util.convertArrayToStringForDB(editor.getValue(), true);
-					if (!Util.isEmpty(value, true))
-						value = value.replaceAll("([{}])", "");
-					builder.append(" ( " + value + " ) ");
-				}
-				else
-				{
-					if (MInfoColumn.OPERATORS_MULTISELECT.contains(queryOperator) && DisplayType.isMultiSelect(editor.getGridField().getDisplayType()))
-					{
-						if (DisplayType.MultiSelectList == editor.getGridField().getDisplayType())
-							columnClause = columnName + " :: text []";
-						else
-							columnClause = columnName + " :: numeric []";
-					}
-
-					if (MInfoColumn.QUERYOPERATOR_EXCLUDE.equals(queryOperator))
-					{
-						builder.append("(");
-					}
-						builder.append(columnClause)
-							   .append(" ")
-						   .append(queryOperator);
-						if (columnClause.toUpperCase().startsWith("UPPER(")) {
-							builder.append(" UPPER(?)");
-						} else {
-						builder.append(" ? ");
+					if(!isRange) {
+						String queryOperator = InfoColumnVO.getQueryOperator();
+						if (X_AD_InfoColumn.QUERYOPERATOR_IN.equals(queryOperator) && InfoColumnVO.isMultiSelectCriteria())
+						{
+							builder.append(columnClause).append(" IN ");
+							// Convert the multi select array value to string for use IN condition
+							String value = Util.convertArrayToStringForDB(editor.getValue(), true);
+							if (!Util.isEmpty(value, true))
+								value = value.replaceAll("([{}])", "");
+							builder.append(" ( " + value + " ) ");
 						}
-
-					if (MInfoColumn.QUERYOPERATOR_EXCLUDE.equals(queryOperator))
-					{
-						builder.append(")").append(MQuery.EXCLUDE_OP2);
-					}
-				}
+						else
+						{
+							if (MInfoColumn.OPERATORS_MULTISELECT.contains(queryOperator) && DisplayType.isMultiSelect(editor.getGridField().getDisplayType()))
+							{
+								if (DisplayType.MultiSelectList == editor.getGridField().getDisplayType())
+									columnClause = columnName + " :: text []";
+								else
+									columnClause = columnName + " :: numeric []";
+							}
+		
+							if (MInfoColumn.QUERYOPERATOR_EXCLUDE.equals(queryOperator))
+							{
+								builder.append("(");
+							}
+							
+							builder.append(columnClause)
+								   .append(" ")
+								   .append(queryOperator);
+							if (columnClause.toUpperCase().startsWith("UPPER(")) {
+								builder.append(" UPPER(?)");
+							} else {
+								builder.append(" ? ");
+							}
+		
+							if (MInfoColumn.QUERYOPERATOR_EXCLUDE.equals(queryOperator))
+							{
+								builder.append(")").append(MQuery.EXCLUDE_OP2);
+							}
+						}
 					}
 					else {
 						if(editor.getValue() != null && editor.getValue().toString().trim().length() > 0) {
@@ -1615,7 +1617,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			return parameterIndex;
 		
 		if (editor.getGridField() != null && editor.getValue() != null && editor.getValue().toString().trim().length() > 0) {
-			if (infoColumnVO == null || infoColumnVO.getSelectClause().equals("0") || InfoColumnVO.isMultiSelectCriteria()) {
+			if (infoColumnVO == null || infoColumnVO.getSelectClause().equals("0") || infoColumnVO.isMultiSelectCriteria()) {
 				return parameterIndex;
 			}
 			if (infoColumnVO.getAD_Reference_ID()==DisplayType.ChosenMultipleSelectionList || infoColumnVO.getAD_Reference_ID()==DisplayType.ChosenMultipleSelectionSearch

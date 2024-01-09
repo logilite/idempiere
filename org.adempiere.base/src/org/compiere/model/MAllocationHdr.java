@@ -27,6 +27,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.adempiere.base.Core;
+import org.adempiere.base.CreditStatus;
 import org.adempiere.base.ICreditManager;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.PeriodClosedException;
@@ -581,9 +582,12 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 		ICreditManager creditManager = Core.getCreditManager(this);
 		if (creditManager != null)
 		{
-			m_processMsg = creditManager.creditCheck(DOCACTION_Complete);
-			if (m_processMsg != null)
+			CreditStatus status = creditManager.checkCreditStatus(DOCACTION_Complete);
+			if (status.isError())
+			{
+				m_processMsg = status.getErrorMsg();
 				return DocAction.STATUS_Invalid;
+			}
 		}
 		
 		for (int i = 0; i < m_lines.length; i++)
@@ -641,9 +645,12 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 			ICreditManager creditManager = Core.getCreditManager(this);
 			if (creditManager != null)
 			{
-				m_processMsg = creditManager.creditCheck(DOCACTION_Void);
-				if (m_processMsg != null)
+				CreditStatus status = creditManager.checkCreditStatus(DOCACTION_Void);
+				if (status.isError())
+				{
+					m_processMsg = status.getErrorMsg();
 					return false;
+				}
 			}
 			
 			for (int i = 0; i < lines.length; i++)
@@ -975,9 +982,12 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 			ICreditManager creditManager = Core.getCreditManager(this);
 			if (creditManager != null)
 			{
-				m_processMsg = creditManager.creditCheck(accrual ? DOCACTION_Reverse_Accrual : DOCACTION_Reverse_Correct);
-				if (m_processMsg != null)
+				CreditStatus status = creditManager.checkCreditStatus(accrual ? DOCACTION_Reverse_Accrual : DOCACTION_Reverse_Correct);
+				if (status.isError())
+				{
+					m_processMsg = status.getErrorMsg();
 					return false;
+				}
 			}
 
 			for (int i = 0; i < m_lines.length; i++)
@@ -1000,26 +1010,6 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 		setDocAction(DOCACTION_None);
 		return true;
 	}	//	reverse
-
-	/**
-	 * Update open balance of BP 
-	 * @return true if updated successfully
-	 */
-	private boolean updateBP()
-	{
-		List<Integer> bps = new ArrayList<Integer>();
-		getLines(false);
-		for (MAllocationLine line : m_lines) {
-			int C_BPartner_ID = line.getC_BPartner_ID();
-			if (! bps.contains(C_BPartner_ID)) {
-				bps.add(C_BPartner_ID);
-				MBPartner bpartner = (MBPartner) MTable.get(Env.getCtx(), MBPartner.Table_ID).getPO( C_BPartner_ID, get_TrxName());
-				bpartner.setTotalOpenBalance();
-				bpartner.saveEx();
-			}
-		} // for all lines
-		return true;
-	}	//	updateBP
 
 	/**
 	 * 	Document Status is Complete, Closed or Reversed

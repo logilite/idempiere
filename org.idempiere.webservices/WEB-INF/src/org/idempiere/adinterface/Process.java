@@ -353,11 +353,7 @@ public class Process {
 				standardRes.setError(ex.getMessage());
 				rpResp.setLogInfo(pi.getLogInfo(true) );
 				standardRes.setIsError( true );
-				return resDoc;				
-			}
-			finally {
-				pInstance.setIsProcessing(false);
-				pInstance.saveEx();
+				return resDoc;
 			}
 			finally {
 				pInstance.setIsProcessing(false);

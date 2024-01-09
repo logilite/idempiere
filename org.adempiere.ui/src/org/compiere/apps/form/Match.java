@@ -23,22 +23,32 @@ import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.logging.Level;
 
+import org.adempiere.base.Core;
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.util.IReservationTracer;
+import org.adempiere.util.IReservationTracerFactory;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
 import org.compiere.minigrid.IMiniTable;
 import org.compiere.model.MAcctSchema;
-import org.compiere.model.MInOut;
+import org.compiere.model.MClient;
 import org.compiere.model.MClientInfo;
 import org.compiere.model.MConversionRate;
+import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
-import org.compiere.model.MOrder;
+import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MMatchInv;
 import org.compiere.model.MMatchInvHdr;
+import org.compiere.model.MMatchPO;
+import org.compiere.model.MOrder;
+import org.compiere.model.MOrderLine;
 import org.compiere.model.MRole;
+import org.compiere.model.MStorageReservation;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.process.DocAction;
+import org.compiere.process.DocumentEngine;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -46,6 +56,7 @@ import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.compiere.util.TimeUtil;
 import org.compiere.util.Trx;
+import org.compiere.util.ValueNamePair;
 
 public class Match
 {
@@ -134,7 +145,7 @@ public class Match
 		else if (matchToString.equals(m_matchOptions[MATCH_ORDER]))
 			matchToType = MATCH_ORDER;
 		//
-		tableInit(display, matchToType, matched, C_InvoiceLine_ID);	//	sets m_sql
+		tableInit(display, matchToType, matched, null, C_InvoiceLine_ID);	//	sets m_sql
 
 		//  ** Add Where Clause **
 		//  Product
@@ -516,13 +527,14 @@ public class Match
 			display = MATCH_SHIPMENT;
 		else if (displayString.equals(m_matchOptions[MATCH_ORDER]))
 			display = MATCH_ORDER;
+		
+		KeyNamePair lineMatched = (KeyNamePair)xMatchedTable.getValueAt(row, I_Line);
+		
+		tableInit (display, matchToType, matched, lineMatched, 0);	//	sets m_sql
 		//  ** Add Where Clause **
 		KeyNamePair BPartner = (KeyNamePair)xMatchedTable.getValueAt(row, I_BPartner);
 		KeyNamePair Product = (KeyNamePair)xMatchedTable.getValueAt(row, I_Product);
 		if (log.isLoggable(Level.FINE)) log.fine("BPartner=" + BPartner + " - Product=" + Product);
-
-		//int matchToType = matchFrom.getSelectedIndex();
-		tableInit (display, matchToType, matched, 0);	//	sets m_sql
 		//
 		if (sameBPartner)
 			m_sql.append(" AND hdr.C_BPartner_ID=").append(BPartner.getKey());
@@ -562,6 +574,11 @@ public class Match
 			+ ", Matched=" + matched);
 
 		m_sql = new StringBuffer ();
+		int Line_ID = 0;
+		if (matched && lineMatched != null )
+		{
+			Line_ID = lineMatched.getKey();
+		}
 		if (display == MATCH_INVOICE)
 		{
 			//invoice matched with material receipt (m_matchinv)

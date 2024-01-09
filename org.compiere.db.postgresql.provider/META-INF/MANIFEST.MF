@@ -5,7 +5,10 @@ Bundle-SymbolicName: org.compiere.db.postgresql.provider;singleton:=true
 Bundle-Version: 11.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version>=17))"
-Bundle-ClassPath: .
+Bundle-ClassPath: .,
+ lib/c3p0.jar,
+ lib/mchange-commons-java.jar,
+ lib/postgresql.jar
 Require-Bundle: org.adempiere.base;bundle-version="0.0.0",
  org.adempiere.install;bundle-version="0.0.0";resolution:=optional,
  com.zaxxer.HikariCP;bundle-version="5.1.0",

@@ -101,7 +101,7 @@ public class WEditorPopupMenu extends Menupopup implements EventListener<Event>
      */
     public WEditorPopupMenu(boolean zoom, boolean requery, boolean preferences)
     {
-        this(zoom, requery, preferences, false, false, false, false, null);
+        this(zoom, requery, preferences, false, false, false, null);
     }
     
     @Deprecated
@@ -122,11 +122,6 @@ public class WEditorPopupMenu extends Menupopup implements EventListener<Event>
     	this(zoom, requery, preferences, newRecord, updateRecord, false, null);
     }
     
-    public WEditorPopupMenu(boolean zoom, boolean requery, boolean preferences, boolean newRecord, boolean updateRecord, boolean showLocation, Lookup lookup)
-    {
-    	this(zoom, requery, preferences, newRecord, updateRecord, showLocation, false, lookup);
-    }
-
     /**
      * @param zoom
      * @param requery
@@ -138,9 +133,24 @@ public class WEditorPopupMenu extends Menupopup implements EventListener<Event>
      */
     public WEditorPopupMenu(boolean zoom, boolean requery, boolean preferences, boolean newRecord, boolean updateRecord, boolean showLocation, Lookup lookup)
     {
-    	this(zoom, requery, preferences, newRecord, updateRecord, showLocation, false, lookup);
+    	this(zoom, requery, preferences, newRecord, updateRecord, showLocation, false, false, lookup);
     }
-    
+
+    /**
+     * @param zoom - enable zoom in menu - disabled if the lookup cannot zoom
+     * @param requery - enable requery in menu
+     * @param preferences - enable preferences in menu
+     * @param newRecord - enable new record (ignored and recalculated if lookup is received)
+     * @param updateRecord - enable update record (ignored and recalculated if lookup is received)
+     * @param showLocation - enable show location in menu
+     * @param drillEnabled - enable drill assistant menu
+     * @param lookup - when this parameter is received then new and update are calculated based on the zoom and quickentry
+     */
+    public WEditorPopupMenu(boolean zoom, boolean requery, boolean preferences, boolean newRecord, boolean updateRecord, boolean showLocation, boolean drillEnabled, Lookup lookup)
+    {
+    	this (zoom, requery, preferences, newRecord, updateRecord, showLocation, drillEnabled, false, lookup);
+    }
+
     /**
      * @param zoom - enable zoom in menu - disabled if the lookup cannot zoom
      * @param requery - enable requery in menu

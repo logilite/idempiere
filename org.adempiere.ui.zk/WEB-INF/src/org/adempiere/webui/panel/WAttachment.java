@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import javax.activation.FileDataSource;
 import javax.servlet.http.HttpSession;
 
 import org.adempiere.exceptions.AdempiereException;
@@ -116,9 +115,6 @@ public class WAttachment extends Window implements EventListener<Event>
 	protected AMedia media;
 	private int mediaVersion = 0;
 
-	protected AMedia media;
-	private int mediaVersion = 0;
-
 	private Textbox text = new Textbox();
 
 	protected Label sizeLabel = new Label();
@@ -136,7 +132,6 @@ public class WAttachment extends Window implements EventListener<Event>
 	private Button bPreview = new Button();
 	private Button bEmail = new Button();
 
-	protected Progressmeter progress = new Progressmeter(0);
 	protected Panel previewPanel = new Panel();
 
 	protected Borderlayout mainPanel = new Borderlayout();
@@ -1009,7 +1004,7 @@ public class WAttachment extends Window implements EventListener<Event>
 		m_attachment.getEntryFile(index, attachment);
 
 		WEMailDialog dialog = new WEMailDialog (Msg.getMsg(Env.getCtx(), "SendMail"),
-			from, "", "", "", new FileDataSource(attachment),
+			from, "", "", "", attachment,
 			m_WindowNo, m_attachment.getAD_Table_ID(), m_attachment.getRecord_ID(), m_attachment.getRecord_UU(), null);
 
 		AEnv.showWindow(dialog);
