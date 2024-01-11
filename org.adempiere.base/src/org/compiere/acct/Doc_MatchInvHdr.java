@@ -29,6 +29,7 @@ import org.compiere.model.ProductCost;
 import org.compiere.model.X_M_Cost;
 import org.compiere.util.Env;
 import org.compiere.util.Trx;
+import org.compiere.util.Util;
 
 /**
  * @author Logilite
@@ -107,10 +108,20 @@ public class Doc_MatchInvHdr extends Doc
 	@Override
 	public ArrayList<Fact> createFacts(MAcctSchema as)
 	{
+		ArrayList<Fact> facts = new ArrayList<Fact>();
+
+		if (as.isDeleteReverseCorrectPosting()
+			// check is date of both allocation same
+			&& (m_matchInvHdr.getReversal_ID() > 0
+				&& Util.compareDate(m_matchInvHdr.getDateAcct(), m_matchInvHdr.getReversal().getDateAcct()) == 0))
+		{
+			//TODO reversal cost detail creation is missing
+			return facts;
+		}
+
 		// create Fact Header
 		Fact fact = new Fact(this, as, Fact.POST_Actual);
 		setC_Currency_ID(as.getC_Currency_ID());
-		ArrayList<Fact> facts = new ArrayList<Fact>();
 
 		for (DocLine line : p_lines)
 		{

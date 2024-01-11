@@ -22,9 +22,11 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Properties;
 
+import org.compiere.acct.Doc;
 import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
+import org.compiere.util.Util;
 
 /**
  *	Match Invoice (Receipt<>Invoice) Model.
@@ -427,6 +429,14 @@ public class MMatchInv extends X_M_MatchInv
 			this.setDescription("(" + reversal.getDocumentNo() + "<-)");
 			this.setReversal_ID(reversal.getM_MatchInv_ID());
 			this.saveEx();
+
+			
+			if (Util.compareDate(getDateAcct(), reversalDate) == 0)
+			{
+				// delete the fact line of the Match Invoice after reverse Correct
+				Doc.deleteReverseCorrectPosting(getCtx(),getAD_Client_ID(), MMatchInv.Table_ID , getM_MatchInv_ID() ,get_TrxName());
+			}
+
 			return true;
 		}
 		return false;

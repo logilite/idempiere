@@ -47,6 +47,7 @@ import org.compiere.model.X_M_Cost;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Trx;
+import org.compiere.util.Util;
 
 /**
  *  Post MatchInv Documents.
@@ -143,6 +144,19 @@ public class Doc_MatchInv extends Doc
 	public ArrayList<Fact> createFacts (MAcctSchema as)
 	{
 		ArrayList<Fact> facts = new ArrayList<Fact>();
+		
+		if (as.isDeleteReverseCorrectPosting()
+			&& m_matchInv.getReversal_ID() > 0
+				&& Util.compareDate(m_matchInv.getDateAcct(), m_matchInv.getReversal().getDateAcct()) == 0)
+		{
+			String error = createMatchInvCostDetail(as);
+			if (error != null && error.trim().length() > 0)
+			{
+				p_Error = error;
+				return null;
+			}
+			return facts;
+		}
 		
 		// Do not post if Match invoice header is set.
 		if(m_matchInv.getM_MatchInvHdr_ID() > 0)
