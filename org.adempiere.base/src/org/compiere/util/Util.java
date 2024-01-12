@@ -712,6 +712,11 @@ public class Util
         return new Timestamp(cal.getTimeInMillis());
     }
 
+	public static int compareDate(Timestamp ts1, Timestamp ts2)
+	{
+		return Util.removeTime(ts1).compareTo(Util.removeTime(ts2));
+	}
+	
 	/**
 	 * Convert BigDecimal array to Integer array ( IDEMPIERE-3413 )
 	 * 
