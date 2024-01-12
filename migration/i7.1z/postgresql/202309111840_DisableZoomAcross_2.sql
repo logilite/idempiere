@@ -5,3 +5,4 @@ ALTER TABLE AD_Column ADD COLUMN IsDisableZoomAcross CHAR(1) DEFAULT 'N' CHECK (
 ;
 
 SELECT register_migration_script('202309111840_DisableZoomAcross_2.sql') FROM dual
+;
