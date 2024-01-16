@@ -691,7 +691,7 @@ public class MCost extends X_M_Cost
 	 * 	Create standard Costing records for Product
 	 *	@param product product
 	 */
-	protected static void create (MProduct product)
+	public static void create (MProduct product)
 	{
 		s_log.config(product.getName());
 
