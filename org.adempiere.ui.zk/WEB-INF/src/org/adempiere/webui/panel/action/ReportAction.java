@@ -54,6 +54,7 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.zkoss.util.media.AMedia;
+import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -383,8 +384,20 @@ public class ReportAction implements EventListener<Event>
 	{
 		winReport.onClose();		
 		ReportCtl.preview(re);
-		Tabpanel tabPanel = (Tabpanel) panel.getComponent().getParent();
+		Tabpanel tabPanel = (Tabpanel) findTabPanel();
 		tabPanel.getLinkedTab().setSelected(true);
+	}
+
+	private Component findTabPanel()
+	{
+		Component component = panel.getComponent();
+		while (component != null)
+		{
+			if (component.getParent() instanceof Tabpanel)
+				return component.getParent();
+			component = component.getParent();
+		}
+		return null;
 	}
 	
 	private void export(ReportEngine re) 

@@ -187,3 +187,12 @@ input[type="checkbox"]:focus
     color: #252525 !important;
     opacity: .8;
 }
+
+<%-- Included Tab --%>
+
+.adtab-grid-panel {
+	position: absolute;
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
+}

@@ -281,7 +281,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 	public void onIgnore()
 	{
 		gridTab.dataIgnore();
-		gridTab.dataRefreshAll();
+		dataRefreshAll();
 		adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "Ignored"), false);
 		quickGridView.isNewLineSaved = true;
 		// Create new record if no record present.
@@ -359,7 +359,7 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		{
 			if (quickGridView.dataSave(0))
 			{
-				gridTab.dataRefreshAll();
+				dataRefreshAll();
 				adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "Saved"), false);
 				Events.echoEvent(QuickGridView.EVENT_ON_SET_FOCUS_TO_FIRST_CELL, quickGridView, null);
 			}
@@ -370,9 +370,16 @@ public class WQuickForm extends Window implements EventListener<Event>, DataStat
 		}
 	} // onSave
 
-	public void onRefresh()
+	private void dataRefreshAll()
 	{
 		gridTab.dataRefreshAll();
+		if (gridTab.isIncluded())
+			gridTab.getParentTab().dataRefreshAll();
+	}
+
+	public void onRefresh()
+	{
+		dataRefreshAll();
 		adWinContent.getStatusBarQF().setStatusLine(Msg.getMsg(Env.getCtx(), "Refresh"), false);
 		quickGridView.isNewLineSaved = true;
 		quickGridView.updateListIndex();

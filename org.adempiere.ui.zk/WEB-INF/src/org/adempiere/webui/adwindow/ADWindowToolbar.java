@@ -96,6 +96,8 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 
 	public static final String BTNPREFIX = "Btn";
 	
+    private static final String EMBEDDED_TOOLBAR_BUTTON_STYLE = "background-color: transparent; display:inline-block; margin-left: 1px; margin-right: 1px; width: 20px; height: 22px;";
+	
 	public static final String MNITMPREFIX = "Mnitm";
 
     private static final CLogger log = CLogger.getCLogger(ADWindowToolbar.class);
@@ -151,6 +153,8 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 
     private List<ToolbarCustomButton> toolbarCustomButtons = new ArrayList<ToolbarCustomButton>();
 
+    private boolean embedded;
+    
 	// Elaine 2008/12/04
 	/** Show Personal Lock								*/
 	public boolean isPersonalLock = MRole.getDefault().isPersonalLock();
@@ -184,8 +188,14 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
     	this(null, 0);
     }
 
-    public ADWindowToolbar(AbstractADWindowContent adWinContent, int windowNo) {
+	public ADWindowToolbar(AbstractADWindowContent adWinContent, int windowNo)
+	{
+		this(adWinContent, windowNo, false);
+	}
+    
+    public ADWindowToolbar(AbstractADWindowContent adWinContent, int windowNo, boolean embedded) {
     	this.adWinContent = adWinContent;
+		this.embedded = embedded;
     	setWindowNo(windowNo);
         init();
         if (ClientInfo.isMobile()) {
@@ -201,7 +211,8 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
         fQueryName = new Combobox();
         fQueryName.setTooltiptext(Msg.getMsg(Env.getCtx(),"QueryName"));
         fQueryName.setPlaceholder(Msg.getMsg(Env.getCtx(),"QueryName"));
-        fQueryName.setId(BTNPREFIX + "SearchQuery");
+		if (!embedded)
+			fQueryName.setId(BTNPREFIX + "SearchQuery");
         fQueryName.addEventListener(Events.ON_SELECT, this);
         LayoutUtils.addSclass("toolbar-searchbox", fQueryName);
 				
@@ -309,7 +320,8 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
         				}
         				ToolBarButton btn = createButton(button.getComponentName(), null, tooltipKey);
         				btn.removeEventListener(Events.ON_CLICK, this);
-        				btn.setId(button.getName());
+						if (!embedded)
+							btn.setId(button.getName());
         				btn.setDisabled(false);
 
         				if (ThemeManager.isUseFontIconForImage()) {
@@ -356,7 +368,20 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 
     	configureKeyMap();
 
-        ZKUpdateUtil.setWidth(this, "100%");
+        if (embedded)
+        {
+            btnParentRecord.setVisible(false);
+            btnDetailRecord.setVisible(false);
+            btnActiveWorkflows.setVisible(false);
+            btnProductInfo.setVisible(false);
+            setAlign("end");
+            ZKUpdateUtil.setWidth(this, "100%");
+            setStyle("background: transparent none; ");
+        }
+        else
+        {
+        	ZKUpdateUtil.setWidth(this, "100%");
+        }
     }
 
 
@@ -364,7 +389,8 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
     {
     	ToolBarButton btn = new ToolBarButton("");
         btn.setName(BTNPREFIX+name);
-        btn.setId(btn.getName());
+		if (!embedded)
+			btn.setId(btn.getName());
         if (image != null) 
         {
         	if (ThemeManager.isUseFontIconForImage()) 
@@ -377,7 +403,7 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
         	{
 	        	Executions.createComponents(ThemeManager.getPreference(), this, null);
 	        	String size = Env.getContext(Env.getCtx(), ITheme.ZK_TOOLBAR_BUTTON_SIZE);
-	        	String suffix = "24.png";
+	        	String suffix = (embedded ? "16.png" : "24.png");
 	        	if (!Util.isEmpty(size)) 
 	        	{
 	        		suffix = size + ".png";
@@ -386,7 +412,15 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
         	}
         }
         btn.setTooltiptext(Msg.getMsg(Env.getCtx(),tooltip));
-        LayoutUtils.addSclass("toolbar-button", btn);
+        if (embedded)
+        {
+            btn.setStyle(EMBEDDED_TOOLBAR_BUTTON_STYLE);
+            LayoutUtils.addSclass("embedded-toolbar-button",btn);
+        }
+        else
+        {
+        	LayoutUtils.addSclass("toolbar-button", btn);
+        }
         
         buttons.put(name, btn);
         //make toolbar button last to receive focus
@@ -458,7 +492,10 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 	protected void addSeparator()
     {
 		Space s = new Space();
-		s.setSpacing("6px");
+        if (embedded)
+            s.setSpacing("3px");
+        else
+            s.setSpacing("6px");
 		s.setOrient("vertical");
 		this.appendChild(s);
     }
@@ -481,7 +518,7 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
         {
             if(event.getTarget() instanceof ToolBarButton)
             {
-            	if (!event.getTarget().getId().contentEquals(BTNPREFIX+"ShowMore"))
+            	if (!event.getTarget().equals(btnShowMore))
             		doOnClick(event);
 				else
 					onShowMore();
@@ -708,7 +745,7 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
       	else
       	{
       		String size = Env.getContext(Env.getCtx(), ITheme.ZK_TOOLBAR_BUTTON_SIZE);
-      		String suffix = "24.png";
+      		String suffix = (embedded ? "16.png" : "24.png");
       		if (!Util.isEmpty(size))
       		{
       			suffix = size + ".png";

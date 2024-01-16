@@ -27,12 +27,14 @@ import java.util.Properties;
 
 import org.adempiere.util.Callback;
 import org.adempiere.webui.LayoutUtils;
+import org.adempiere.webui.component.Row;
 import org.adempiere.webui.component.Tabpanel;
 import org.adempiere.webui.panel.IHelpContext;
 import org.adempiere.webui.panel.ITabOnCloseHandler;
 import org.adempiere.webui.part.WindowContainer;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.compiere.model.GridWindow;
 import org.compiere.model.X_AD_CtxHelp;
 import org.compiere.util.CLogger;
 import org.zkoss.zk.ui.Component;
@@ -41,6 +43,7 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.KeyEvent;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Tab;
 import org.zkoss.zul.Vlayout;
@@ -68,35 +71,47 @@ public class ADWindowContent extends AbstractADWindowContent
     {
         super(ctx, windowNo, adWindowId);
     }
+	
+	public ADWindowContent(Properties ctx, int windowNo, int adWindowId, GridWindow gridWindow, int tabIndex, IADTabpanel tabPanel)
+	{
+		super(ctx, windowNo, adWindowId, gridWindow, tabIndex, tabPanel);
+	}
 
    	protected Component doCreatePart(Component parent)
     {
    		layout = new ADWindowVlayout(this);
         if (parent != null) {
-	        layout.setParent(parent);
+			// For Embedded Tab the parent will be Row so set the colspan
+			if (parent instanceof Row)
+				((Row) parent).appendCellChild(layout, 5);
+			else
+				layout.setParent(parent);
 	        layout.setSclass("adwindow-layout");
         } else {
         	layout.setPage(page);
         }
         layout.setSpacing("0px");
 
-        //toolbar
-        Div north = new Div();
-        north.setParent(layout);        
-        north.setSclass("adwindow-north");
-        Div div = new Div();
-        div.setStyle("height: 100%; width: 100%");
-        north.appendChild(div);
-        ZKUpdateUtil.setVflex(north, "0");
-        toolbar.setParent(div);
-        toolbar.setWindowNo(getWindowNo());
-        breadCrumb = new BreadCrumb(this, getWindowNo());
-        breadCrumb.setToolbarListener(this);
-        breadCrumb.setId("breadCrumb");
-        div.appendChild(breadCrumb);
-        
-        //status bar
-        div.appendChild(statusBar);
+
+		// toolbar
+		Div north = new Div();
+		north.setParent(layout);
+		north.setSclass("adwindow-north");
+		Div div = new Div();
+		div.setStyle("height: 100%; width: 100%");
+		north.appendChild(div);
+		breadCrumb = new BreadCrumb(this, getWindowNo(), isEmbedded());
+		breadCrumb.setToolbarListener(this);
+		if (!isEmbedded())
+		{
+			ZKUpdateUtil.setVflex(north, "0");
+			toolbar.setParent(div);
+			toolbar.setWindowNo(getWindowNo());
+			breadCrumb.setId("breadCrumb");
+		}
+		div.appendChild(breadCrumb);
+		// status bar
+		div.appendChild(statusBar);
 
         LayoutUtils.addSclass("adwindow-status", statusBar);
 
@@ -112,8 +127,9 @@ public class ADWindowContent extends AbstractADWindowContent
         	((Tabpanel)parent).setOnCloseHandler(handler);
         }
 
-        SessionManager.getSessionApplication().getKeylistener().addEventListener(Events.ON_CTRL_KEY, this);
-        
+		if (!isEmbedded())
+			SessionManager.getSessionApplication().getKeylistener().addEventListener(Events.ON_CTRL_KEY, this);
+
         layout.addEventListener(WindowContainer.ON_WINDOW_CONTAINER_SELECTION_CHANGED_EVENT, this);
         
         return layout;
@@ -147,6 +163,8 @@ public class ADWindowContent extends AbstractADWindowContent
     		}
     	}
     	else if (event.getName().equals(WindowContainer.ON_WINDOW_CONTAINER_SELECTION_CHANGED_EVENT)) {
+    		// Close all the toolbar popups when a window is changed
+    		Clients.evalJavaScript("const elements = document.querySelectorAll('.toolbar-overflow-popup-vertical'); elements.forEach(element => { element.style.display = 'none'; });");
     		SessionManager.getAppDesktop().updateHelpContext(X_AD_CtxHelp.CTXTYPE_Tab, adTabbox.getSelectedGridTab().getAD_Tab_ID());
     	}
     	else {

@@ -138,7 +138,7 @@ public abstract class AbstractADTabbox extends AbstractUIPart implements IADTabb
 		{
 			List<Integer> parents = new ArrayList<Integer>();
 			//get parent list, always include first tab (0)
-			if (newIndex > 0)
+	        if (newTab != null && (adWindowPanel == null || !adWindowPanel.isEmbedded()))
 			{
 				int currentLevel = newTab.getTabLevel();
 				for (int i = newIndex - 1; i > 0; i--)

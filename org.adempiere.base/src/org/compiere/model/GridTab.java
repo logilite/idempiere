@@ -1092,7 +1092,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 				GridTab parentTab = m_window.getTab(i);
 				if (parentTab.m_vo.TabLevel == level-1) {
 					// this is parent tab
-					parentTab.dataRefresh(false);
+					parentTab.dataRefresh(isIncluded());
 					// search for the next parent
 					if (parentTab.isDetail()) {
 						level = parentTab.m_vo.TabLevel;

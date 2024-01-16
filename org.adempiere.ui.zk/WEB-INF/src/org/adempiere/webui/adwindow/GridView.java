@@ -1052,8 +1052,17 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
         {
             return;
         }
-		
-		if (renderer.getEditors().isEmpty())
+
+		if (gridTab.isIncluded() && renderer.getCurrentRowIndex() != gridTab.getCurrentRow())
+			return;
+			
+		List<WEditor> editors = renderer.getEditors();
+		if (gridTab.isIncluded())
+		{
+			if (editors == null || editors.isEmpty())
+				return;
+		}
+		else if (editors.isEmpty())
 			listbox.onInitRender();
 
         //  Selective
@@ -1071,8 +1080,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
         	
 
         boolean noData = gridTab.getRowCount() == 0;
-        List<WEditor> list =  renderer.getEditors();
-        dynamicDisplayEditors(noData, list);   //  all components
+        dynamicDisplayEditors(noData, editors);   //  all components
         
         if (gridTab.getRowCount() == 0 && selectAll.isChecked())
 			selectAll.setChecked(false);        
@@ -1082,7 +1090,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 		for (WEditor comp : list)
         {
             GridField mField = comp.getGridField();
-            if (mField != null)
+            if (mField != null && mField.getIncluded_Tab_ID() <= 0)
             {
             	Properties ctx = isDetailPane() ? new GridRowCtx(Env.getCtx(), gridTab) 
                 		: mField.getVO().ctx;

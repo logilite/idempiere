@@ -76,6 +76,8 @@ public class BreadCrumb extends Div implements EventListener<Event> {
 	@SuppressWarnings("unused")
 	private int windowNo;
 	
+	private boolean isEmbedded = false;
+	
 	private HashMap<String, ToolBarButton> buttons = new HashMap<String, ToolBarButton>();
 
 	private DataStatusEvent m_dse;
@@ -94,10 +96,12 @@ public class BreadCrumb extends Div implements EventListener<Event> {
 	/**
 	 * @param adWindowContent 
 	 * @param windowNo
+	 * @param isEmbedded 
 	 */
-	public BreadCrumb(AbstractADWindowContent adWinContent, int windowNo) {
+	public BreadCrumb(AbstractADWindowContent adWinContent, int windowNo, boolean isEmbedded) {
 		this.adWinContent = adWinContent;
 		this.windowNo = windowNo;
+		this.isEmbedded = isEmbedded;
 		layout = new Hlayout();
 		layout.setValign("middle");
 		this.appendChild(layout);
@@ -123,7 +127,8 @@ public class BreadCrumb extends Div implements EventListener<Event> {
         btnRecordInfo.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Who")));
         btnRecordInfo.addEventListener(Events.ON_CLICK, this);
         btnRecordInfo.setSclass("breadcrumb-record-info link");
-        btnRecordInfo.setId("recordInfo");
+		if (!isEmbedded)
+			btnRecordInfo.setId("recordInfo");
         toolbar.appendChild(btnRecordInfo);
         btnNext = createButton("Next", "Next", "Next");
         btnNext.setTooltiptext(btnNext.getTooltiptext()+"    Alt+Right");
@@ -155,7 +160,8 @@ public class BreadCrumb extends Div implements EventListener<Event> {
 		if (clickable) {
 			BreadCrumbLink a = new BreadCrumbLink();
 			a.setLabel(label);
-			a.setId("breadcrumb-"+label);
+			if (!isEmbedded)
+				a.setId("breadcrumb-"+label);
 			a.setPathId(id);
 			a.addEventListener(Events.ON_CLICK, this);
 			if (layout.getChildren().size() > 0) {
@@ -166,7 +172,8 @@ public class BreadCrumb extends Div implements EventListener<Event> {
 			layout.appendChild(a);
 		} else {
 			Label pathLabel = new Label();
-			pathLabel.setId("breadcrumb-"+label);
+			if (!isEmbedded)
+				pathLabel.setId("breadcrumb-" + label);
 			pathLabel.setValue(label);
 			if (layout.getChildren().size() > 0) {
 				Label symbol = new Label();
@@ -385,7 +392,8 @@ public class BreadCrumb extends Div implements EventListener<Event> {
     {
     	ToolBarButton btn = new ToolBarButton("");
         btn.setName(BTNPREFIX+name);
-        btn.setId(name);
+		if (!isEmbedded)
+			btn.setId(name);
         Executions.createComponents(ThemeManager.getPreference(), this, null);
         String size = Env.getContext(Env.getCtx(), ITheme.ZK_TOOLBAR_BUTTON_SIZE);
     	String suffix = "24.png";

@@ -74,14 +74,17 @@ public class StatusBar extends Panel implements EventListener<Event>
 	private Window msgPopup;
 
 	private Div msgPopupCnt;
+	
+	private boolean isEmbedded = false;
 
 	private Hlayout messageContainer;
 
 	private Caption msgPopupCaption;
 	
-	public StatusBar()
+	public StatusBar(boolean isEmbedded)
 	{
         super();
+        this.isEmbedded = isEmbedded;
         init();
         
         createPopup();
@@ -101,7 +104,8 @@ public class StatusBar extends Panel implements EventListener<Event>
         west.setSclass("adwindow-status-docstatus");
         
         messageContainer = new Hlayout();
-        messageContainer.setId("messages");
+		if (!isEmbedded)
+			messageContainer.setId("messages");
         west.appendChild(messageContainer);
         
         appendChild(west);
