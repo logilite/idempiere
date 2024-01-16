@@ -441,4 +441,17 @@ public class MMatchInv extends X_M_MatchInv
 		}
 		return false;
 	}
+
+	public MCostDetail getInvoiceCostDetail(MAcctSchema as, int M_CostElement_ID)
+	{
+		return MCostDetail
+						.get(as.getCtx(), "C_InvoiceLine_ID=? AND Coalesce(M_CostElement_ID,0)="+M_CostElement_ID+" AND M_Product_ID=" + getM_Product_ID(), getC_InvoiceLine_ID(), getM_AttributeSetInstance_ID(), as.getC_AcctSchema_ID(), get_TableName());
+	}
+	
+	public MCostDetail getInOutLineCostDetail(MAcctSchema as, int M_CostElement_ID)
+	{
+		return MCostDetail.get(as.getCtx(),  "M_InOutLine_ID=? AND Coalesce(M_CostElement_ID,0)="+M_CostElement_ID, getM_InOutLine_ID(), getM_AttributeSetInstance_ID(), as.getC_AcctSchema_ID(), get_TableName());
+	}
+	
+	
 }	//	MMatchInv

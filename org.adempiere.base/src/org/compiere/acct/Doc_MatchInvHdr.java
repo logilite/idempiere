@@ -115,7 +115,35 @@ public class Doc_MatchInvHdr extends Doc
 			&& (m_matchInvHdr.getReversal_ID() > 0
 				&& Util.compareDate(m_matchInvHdr.getDateAcct(), m_matchInvHdr.getReversal().getDateAcct()) == 0))
 		{
-			//TODO reversal cost detail creation is missing
+			
+			for (DocLine line : p_lines)
+			{
+				MMatchInv m_matchInv = (MMatchInv) line.getPO();
+				MInvoiceLine m_invoiceLine = (MInvoiceLine) m_matchInv.getC_InvoiceLine();
+
+				MInOutLine m_receiptLine = null;
+				if (m_matchInv.getM_InOutLine_ID() > 0)
+					m_receiptLine = (MInOutLine) m_matchInv.getM_InOutLine();
+				// Nothing to do
+				if (isNoProductQtyLine(line, m_matchInv, m_receiptLine)) // Qty = 0
+				{
+					if (log.isLoggable(Level.FINE))
+						log.fine("No Product/Qty - M_Product_ID=" + line.getM_Product_ID() + ",Qty=" + line.getQty()
+													+ ",InOutQty=" + m_receiptLine.getMovementQty());
+					continue;
+				}
+
+				if (m_receiptLine != null)
+				{
+					// Check if the original document has created costing then only created costing.
+					String error = createMatchInvCostDetail(line, as, m_invoiceLine, m_receiptLine, true);
+					if (error != null && error.trim().length() > 0)
+					{
+						p_Error = error;
+						return null;
+					}
+				}
+			}
 			return facts;
 		}
 
@@ -148,10 +176,7 @@ public class Doc_MatchInvHdr extends Doc
 			}
 
 			// Nothing to do
-			if (line.getM_Product_ID() == 0 // no Product
-					|| line.getQty().signum() == 0
-					|| (m_receiptLine != null && m_receiptLine.getMovementQty().signum() == 0)
-					|| m_matchInv.getM_MatchInvHdr_ID() != get_ID()) // Qty = 0
+			if (isNoProductQtyLine(line, m_matchInv, m_receiptLine)) // Qty = 0
 			{
 				if (log.isLoggable(Level.FINE))
 					log.fine("No Product/Qty - M_Product_ID=" + line.getM_Product_ID() + ",Qty=" + line.getQty()
@@ -381,7 +406,7 @@ public class Doc_MatchInvHdr extends Doc
 				if (log.isLoggable(Level.FINE))
 					log.fine("IPV=" + ipv + "; Balance=" + fact.getSourceBalance());
 	
-				String error = createMatchInvCostDetail(line, as, m_invoiceLine, m_receiptLine);
+				String error = createMatchInvCostDetail(line, as, m_invoiceLine, m_receiptLine, false);
 				if (error != null && error.trim().length() > 0)
 				{
 					p_Error = error;
@@ -404,6 +429,14 @@ public class Doc_MatchInvHdr extends Doc
 
 		facts.add(fact);
 		return facts;
+	}
+
+	private boolean isNoProductQtyLine(DocLine line, MMatchInv m_matchInv, MInOutLine m_receiptLine)
+	{
+		return line.getM_Product_ID() == 0 // no Product
+			|| line.getQty().signum() == 0
+				|| (m_receiptLine != null && m_receiptLine.getMovementQty().signum() == 0)
+				|| m_matchInv.getM_MatchInvHdr_ID() != get_ID();
 	}
 
 	/**
@@ -534,7 +567,7 @@ public class Doc_MatchInvHdr extends Doc
 
 	// Elaine 2008/6/20
 	public String createMatchInvCostDetail(DocLine line, MAcctSchema as, MInvoiceLine m_invoiceLine,
-			MInOutLine m_receiptLine)
+			MInOutLine m_receiptLine, boolean isCheckCost)
 	{
 		if (m_invoiceLine != null && m_invoiceLine.get_ID() > 0 && m_receiptLine != null && m_receiptLine.get_ID() > 0)
 		{
@@ -586,14 +619,15 @@ public class Doc_MatchInvHdr extends Doc
 			else
 				tQty = tQty.add(line.getQty());
 
-			// Set Total Amount and Total Quantity from Matched Invoice
-			if (!MCostDetail.createInvoice(as, getAD_Org_ID(), line.getM_Product_ID(),
-					matchInv.getM_AttributeSetInstance_ID(), m_invoiceLine.getC_InvoiceLine_ID(), 0, // No
-																										// cost
-																										// element
-					tAmt, tQty, getDescription(), getTrxName()))
-			{
-				return "Failed to create cost detail record";
+			if(!isCheckCost || (((MMatchInv) matchInv.getReversal()).getInvoiceCostDetail(as, 0) != null))
+			{ //TODO Test
+				// Set Total Amount and Total Quantity from Matched Invoice
+				if (!MCostDetail.createInvoice(as, getAD_Org_ID(), line.getM_Product_ID(),
+						matchInv.getM_AttributeSetInstance_ID(), m_invoiceLine.getC_InvoiceLine_ID(), 0, // No cost element
+						tAmt, tQty, getDescription(), getTrxName()))
+				{
+					return "Failed to create cost detail record";
+				}
 			}
 
 			Map<Integer, BigDecimal> landedCostMap = new LinkedHashMap<Integer, BigDecimal>();
@@ -639,12 +673,15 @@ public class Doc_MatchInvHdr extends Doc
 
 			for (Integer elementId : landedCostMap.keySet())
 			{
-				BigDecimal amt = landedCostMap.get(elementId);
-				if (!MCostDetail.createShipment(as, getAD_Org_ID(), line.getM_Product_ID(),
-						matchInv.getM_AttributeSetInstance_ID(), m_receiptLine.getM_InOutLine_ID(), elementId, amt,
-						tQty, getDescription(), false, getTrxName()))
-				{
-					return "Failed to create cost detail record";
+				if(!isCheckCost || (((MMatchInv) matchInv.getReversal()).getInOutLineCostDetail(as, elementId) != null))
+				{ //TODO test
+					BigDecimal amt = landedCostMap.get(elementId);
+					if (!MCostDetail.createShipment(as, getAD_Org_ID(), line.getM_Product_ID(),
+							matchInv.getM_AttributeSetInstance_ID(), m_receiptLine.getM_InOutLine_ID(), elementId, amt,
+							tQty, getDescription(), false, getTrxName()))
+					{
+						return "Failed to create cost detail record";
+					}
 				}
 			}
 			// end MZ
