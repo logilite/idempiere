@@ -176,9 +176,9 @@ public class Doc_AllocationHdr extends Doc
 		MAllocationHdr alloc = (MAllocationHdr) getPO();
 		if (as.isDeleteReverseCorrectPosting()
 			// check is date of both allocation same
-			&& (alloc.getReversal_ID() > 0 && Util.compareDate(alloc.getDateAcct(), alloc.getReversal().getDateAcct()) == 0)
+			&& ((alloc.getReversal_ID() > 0 && Util.compareDate(alloc.getDateAcct(), alloc.getReversal().getDateAcct()) == 0)
 			//Case of Alocation for original and reveresed invoice allocated to each other.
-			|| (p_lines.length == 2 && isReversalCorrectDocument((DocLine_Allocation) p_lines[0], (DocLine_Allocation) p_lines[1])))
+			|| (p_lines.length == 2 && isReversalCorrectDocument((DocLine_Allocation) p_lines[0], (DocLine_Allocation) p_lines[1]))))
 		{
 			return m_facts;
 		}
