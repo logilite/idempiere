@@ -718,7 +718,8 @@ public class MPayment extends X_C_Payment
 			             || is_ValueChanged(COLUMNNAME_DateTrx)
 			             || is_ValueChanged(COLUMNNAME_DiscountAmt)
 			             || is_ValueChanged(COLUMNNAME_PayAmt)
-			             || is_ValueChanged(COLUMNNAME_WriteOffAmt)))
+			             || is_ValueChanged(COLUMNNAME_WriteOffAmt)
+			             || is_ValueChanged(COLUMNNAME_C_Charge_ID)))
 		{ //Repost if accounting related columns changes
 			String error = DocumentEngine.postImmediate(Env.getCtx(), getAD_Client_ID(), get_Table_ID(), get_ID(),
 					true, get_TrxName());
@@ -753,7 +754,7 @@ public class MPayment extends X_C_Payment
 		}
 		//Not allow to set charge when no charge set and user setting charge
 		if (isComplete() && ! is_ValueChanged(COLUMNNAME_Processed) &&
-				is_ValueChanged(COLUMNNAME_C_Charge_ID) && get_ValueOld(COLUMNNAME_C_Charge_ID)==null) {
+				is_ValueChanged(COLUMNNAME_C_Charge_ID) && (get_ValueOld(COLUMNNAME_C_Charge_ID)==null && (getC_Invoice_ID()>0 || getC_Order_ID()>0))) {
 			log.saveError("PaymentAlreadyProcessed", Msg.translate(getCtx(), "C_Payment_ID"));
 			return false;
 		}
