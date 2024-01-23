@@ -206,9 +206,12 @@ public class MMatchInvHdr extends X_M_MatchInvHdr implements DocAction
 		if (m_processMsg != null)
 			return false;
 
-		MMatchInvHdr reversal = reverse(true);
+		MMatchInvHdr reversal = reverse(false);
 		if (reversal == null)
 			return false;
+		
+		// delete the fact line of the Match Invoice Hdr after reverse Correct
+		Doc.deleteReverseCorrectPosting(getCtx(),getAD_Client_ID(), MMatchInvHdr.Table_ID , getM_MatchInvHdr_ID() ,get_TrxName());
 
 		// After reverseAccrual
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_REVERSEACCRUAL);
@@ -418,5 +421,10 @@ public class MMatchInvHdr extends X_M_MatchInvHdr implements DocAction
 	public String getDocAction()
 	{
 		return super.getDocAction();
+	}
+
+	public MMatchInvHdr getReversal()
+	{
+		return (MMatchInvHdr) MTable.get(getCtx(), MMatchInvHdr.Table_Name).getPO(getReversal_ID(), get_TrxName());
 	}
 }

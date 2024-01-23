@@ -34,6 +34,7 @@ import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.PeriodClosedException;
 import org.adempiere.util.IProcessUI;
 import org.adempiere.util.PaymentUtil;
+import org.compiere.acct.Doc;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
 import org.compiere.process.IDocsPostProcess;
@@ -709,7 +710,8 @@ public class MPayment extends X_C_Payment
 			             || is_ValueChanged(COLUMNNAME_DateTrx)
 			             || is_ValueChanged(COLUMNNAME_DiscountAmt)
 			             || is_ValueChanged(COLUMNNAME_PayAmt)
-			             || is_ValueChanged(COLUMNNAME_WriteOffAmt)))
+			             || is_ValueChanged(COLUMNNAME_WriteOffAmt)
+			             || is_ValueChanged(COLUMNNAME_C_Charge_ID)))
 		{ //Repost if accounting related columns changes
 			String error = DocumentEngine.postImmediate(Env.getCtx(), getAD_Client_ID(), get_Table_ID(), get_ID(),
 					true, get_TrxName());
@@ -744,7 +746,7 @@ public class MPayment extends X_C_Payment
 		}
 		//Not allow to set charge when no charge set and user setting charge
 		if (isComplete() && ! is_ValueChanged(COLUMNNAME_Processed) &&
-				is_ValueChanged(COLUMNNAME_C_Charge_ID) && get_ValueOld(COLUMNNAME_C_Charge_ID)==null) {
+				is_ValueChanged(COLUMNNAME_C_Charge_ID) && (get_ValueOld(COLUMNNAME_C_Charge_ID)==null && (getC_Invoice_ID()>0 || getC_Order_ID()>0))) {
 			log.saveError("PaymentAlreadyProcessed", Msg.translate(getCtx(), "C_Payment_ID"));
 			return false;
 		}
@@ -2734,6 +2736,9 @@ public class MPayment extends X_C_Payment
 			return false;
 		}
 		
+		// delete the fact line of the payment after reverse Correct
+		Doc.deleteReverseCorrectPosting(getCtx(),getAD_Client_ID(), MPayment.Table_ID , getC_Payment_ID() ,get_TrxName());
+
 		// After reverseCorrect
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSECORRECT);
 		if (m_processMsg != null)

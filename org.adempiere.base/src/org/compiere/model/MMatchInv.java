@@ -22,10 +22,12 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Properties;
 
+import org.compiere.acct.Doc;
 import org.compiere.process.DocAction;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  *	Match Invoice (Receipt&lt;&gt;Invoice) Model.
@@ -423,6 +425,14 @@ public class MMatchInv extends X_M_MatchInv
 			this.setDescription("(" + reversal.getDocumentNo() + "<-)");
 			this.setReversal_ID(reversal.getM_MatchInv_ID());
 			this.saveEx();
+
+			
+			if (Util.compareDate(getDateAcct(), reversalDate) == 0)
+			{
+				// delete the fact line of the Match Invoice after reverse Correct
+				Doc.deleteReverseCorrectPosting(getCtx(),getAD_Client_ID(), MMatchInv.Table_ID , getM_MatchInv_ID() ,get_TrxName());
+			}
+
 			return true;
 		}
 		return false;
@@ -445,4 +455,17 @@ public class MMatchInv extends X_M_MatchInv
 		}
 		return false;
 	}
+
+	public MCostDetail getInvoiceCostDetail(MAcctSchema as, int M_CostElement_ID)
+	{
+		return MCostDetail
+						.get(as.getCtx(), "C_InvoiceLine_ID=? AND Coalesce(M_CostElement_ID,0)="+M_CostElement_ID+" AND M_Product_ID=" + getM_Product_ID(), getC_InvoiceLine_ID(), getM_AttributeSetInstance_ID(), as.getC_AcctSchema_ID(), get_TableName());
+	}
+	
+	public MCostDetail getInOutLineCostDetail(MAcctSchema as, int M_CostElement_ID)
+	{
+		return MCostDetail.get(as.getCtx(),  "M_InOutLine_ID=? AND Coalesce(M_CostElement_ID,0)="+M_CostElement_ID, getM_InOutLine_ID(), getM_AttributeSetInstance_ID(), as.getC_AcctSchema_ID(), get_TableName());
+	}
+	
+	
 }	//	MMatchInv
