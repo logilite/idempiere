@@ -168,8 +168,8 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	protected AbstractWQuickEntry vqe;
 	
 	protected List<GridField> gridFields;
-	private TreeMap<Integer, List<Object[]>> parameterTree;
-	private Checkbox checkAND;
+	protected TreeMap<Integer, List<Object[]>> parameterTree;
+	protected Checkbox checkAND;
 		
 	// F3P: Keep original values: when a row is unselected, restore original values
 		
