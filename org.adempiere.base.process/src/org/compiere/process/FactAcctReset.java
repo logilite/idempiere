@@ -240,6 +240,9 @@ public class FactAcctReset extends SvrProcess
 			docBaseType = "= '" + MPeriodControl.DOCBASETYPE_Payroll+ "'";
 		else if (AD_Table_ID == X_PP_Cost_Collector.Table_ID)
 			docBaseType = "= '" + MPeriodControl.DOCBASETYPE_ManufacturingCostCollector+ "'";
+		else if (TableName.equalsIgnoreCase("GAAS_AssetJournal"))
+			docBaseType = "= '" + MPeriodControl.DOCBASETYPE_GLJournal + "'";
+
 		//
 		if (docBaseType == null)
 		{
