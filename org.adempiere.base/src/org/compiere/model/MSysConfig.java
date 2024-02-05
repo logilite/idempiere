@@ -223,6 +223,7 @@ public class MSysConfig extends X_AD_SysConfig
 	public static final String ZK_DASHBOARD_SLOW_QUERY_TIME_INTERVAL = "ZK_DASHBOARD_SLOW_QUERY_TIME_INTERVAL";
 	public static final String ZK_LOGIN_LEFTPANEL_SHOWN = "ZK_LOGIN_LEFTPANEL_SHOWN";
 	public static final String ZK_SEARCH_AUTO_COMPLETE_MAX_ROWS = "ZK_SEARCH_AUTO_COMPLETE_MAX_ROWS";
+	public static final String BANKSTATEMENT_MANUAL_OPENING = "BANKSTATEMENT_MANUAL_OPENING";
 
 	/**
 	 * 	Standard Constructor
