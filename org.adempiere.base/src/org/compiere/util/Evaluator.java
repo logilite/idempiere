@@ -33,7 +33,6 @@ import java.util.regex.Pattern;
 
 import org.idempiere.expression.logic.LogicEvaluator;
 
-
 /**
  *	Expression Evaluator	
  *	
@@ -47,6 +46,7 @@ public class Evaluator
 	
 	private static final Map<String, SQLLogicResult> sqlLogicCache = new ConcurrentHashMap<>();
 
+	/** Value object for SQL logic result */
 	public static class SQLLogicResult {
 		long timestamp;
 		boolean value;
@@ -87,10 +87,10 @@ public class Evaluator
 	}	//	isAllVariablesDefined
 	
 	/**
-	 *	Evaluate Logic.
+	 *	Evaluate logic expression
 	 *  @see LogicEvaluator#evaluateLogic(Evaluatee, String)
 	 *  @param source class implementing get_ValueAsString(variable)
-	 *  @param logic logic string
+	 *  @param logic logic expression
 	 *  @return logic result
 	 */
 	public static boolean evaluateLogic (Evaluatee source, String logic)
@@ -310,7 +310,6 @@ public class Evaluator
 	{
 		if (parseString == null || parseString.length() == 0)
 			return;
-	//	log.fine( "MField.parseDepends", parseString);
 		String s = parseString;
 
 		// Parse string if sql query having context based variables
@@ -327,7 +326,6 @@ public class Evaluator
 				continue;	//	error number of @@ not correct
 			String variable = s.substring(0, pos);
 			s = s.substring(pos+1);
-		//	log.fine( variable);
 			if (variable.startsWith("~")) 
 				variable = variable.substring(1);
 			// strip also @tabno|
@@ -341,13 +339,13 @@ public class Evaluator
 	}   //  parseDepends
 
 	/**
-	 * evaluator a expression logic base on sql
+	 * Evaluate a logic expression base on SQL
 	 * @param sqlLogic
 	 * @param ctx
 	 * @param windowNo
 	 * @param tabNo
 	 * @param targetObjectName expression logic is evaluated for, that target object (purpose for logging) can be field name, toolbar button name,..
-	 * @return
+	 * @return result of logic expression
 	 */
 	public static boolean parseSQLLogic(String sqlLogic, Properties ctx, int windowNo, int tabNo, String targetObjectName) {
 		String sql = sqlLogic.substring(5); // remove @SQL=

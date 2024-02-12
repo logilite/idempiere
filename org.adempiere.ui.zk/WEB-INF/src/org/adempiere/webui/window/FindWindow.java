@@ -223,7 +223,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     /** List of to editor. For date and numeric field in simple search tab. */
     /** Tab number for lookup and context */
     public static final int     TABNO = 99;
-    /** Max display lenght of Fields on simple search tab   */
+    /** Max display length of Fields on simple search tab   */
     public static final int     FIELDLENGTH = 20;
     /** AD_Tab_ID of calling tab */
     protected int m_AD_Tab_ID = 0;
@@ -2475,7 +2475,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            if (parsedValue == null)
 	                continue;
 	            String infoDisplay = (value == null ? "" : value.toString());
-	            // When Atribute is set Field is null
+	            // When Attribute is set Field is null
 	            if(table.getSelectedItem() != null && !table.getSelectedItem().getValue().toString().equals(MAttribute.COLUMNNAME_M_Attribute_ID))
 	            {
 					if (isInOperator(Operator))

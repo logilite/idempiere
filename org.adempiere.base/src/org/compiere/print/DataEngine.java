@@ -58,7 +58,7 @@ import bsh.Interpreter;
 
 /**
  * Data Engine.
- * Creates SQL and laods data into PrintData (including totals/etc.)
+ * Creates SQL and loads data into PrintData (including totals/etc.)
  *
  * @author 	Jorg Janke
  * @version 	$Id: DataEngine.java,v 1.3 2006/07/30 00:53:02 jjanke Exp $
@@ -783,8 +783,8 @@ public class DataEngine
 
 		if (columns.size() == 0)
 		{
-			log.log(Level.SEVERE, "No Colums - Delete Report Format " + reportName + " and start again");
-			if (log.isLoggable(Level.FINEST)) log.finest("No Colums - SQL=" + sql + " - ID=" + format.get_ID());
+			log.log(Level.SEVERE, "No Columns - Delete Report Format " + reportName + " and start again");
+			if (log.isLoggable(Level.FINEST)) log.finest("No Columns - SQL=" + sql + " - ID=" + format.get_ID());
 			return null;
 		}
 
@@ -1621,7 +1621,11 @@ public class DataEngine
 				Object tokenPDE = pd.getNode(token);
 				if (tokenPDE == null)
 					return "\"Item not found: " + token + "\"";
-				Object value = ((PrintDataElement)tokenPDE).getValue();
+				Object value;
+				if (token.endsWith("_ID") || token.endsWith("_UU"))
+					value = ((PrintDataElement)tokenPDE).getValueKey();
+				else
+					value = ((PrintDataElement)tokenPDE).getValue();
 				outStr.append(value);
 			}
 			else if (token.equals("LINE"))

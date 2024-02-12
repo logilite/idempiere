@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION adempiere.altercolumn(tablename name, columnname name, datatype name, nullclause character varying, defaultclause character varying, namespace name, usingclause character varying)
+CREATE OR REPLACE FUNCTION altercolumn(tablename name, columnname name, datatype name, nullclause character varying, defaultclause character varying)
  RETURNS void
  LANGUAGE plpgsql
 AS $function$
@@ -15,18 +15,20 @@ declare
    sqltype       text;
    sqltype_short text;
    typename name;
+   namespace text;
 begin
+   namespace := 'adempiere';
    if datatype is not null then
 	select pg_type.typname, format_type(pg_type.oid, pg_attribute.atttypmod)
             into typename, sqltype
             from pg_class, pg_attribute, pg_type, pg_namespace
             where relname = lower(tablename)
-                and relkind = 'r'
+                and relkind in ('r','p')
                 and pg_class.oid = pg_attribute.attrelid
                 and attname = lower(columnname)
                 and atttypid = pg_type.oid
                 and pg_class.relnamespace = pg_namespace.oid
-                and pg_namespace.nspname = lower(namespace);
+                and pg_namespace.nspname = namespace;
         sqltype_short := sqltype;
         if typename = 'numeric' then
 	   sqltype_short := replace(sqltype, ',0', '');
@@ -44,16 +46,15 @@ begin
 		        where a.oid = b.refobjid
 			    and b.objid = c.objid
 			    and b.refobjid <> c.refobjid
-			    and b.deptype = 'n'
 			    and c.refobjid = d.oid
 			    and d.relname = lower(tablename)
-			    and d.relkind = 'r'
+			    and d.relkind in ('r','p')
 			    and d.oid = e.attrelid
 			    and e.attname = lower(columnname)
 			    and c.refobjsubid = e.attnum
 			    and a.relkind = 'v'
 			    and a.relnamespace = pg_namespace.oid
-			    and pg_namespace.nspname = lower(namespace)
+			    and pg_namespace.nspname = namespace
 	          union all
 		    select distinct dependee.relname, dependee.oid, depv.depth+1
 		        from pg_depend 
@@ -62,8 +63,6 @@ begin
 			    join pg_class as dependent on pg_depend.refobjid = dependent.oid 
 			    join pg_attribute ON pg_depend.refobjid = pg_attribute.attrelid and pg_depend.refobjsubid = pg_attribute.attnum and pg_attribute.attnum > 0
 			    join depv on dependent.relname = depv.relname
-			    join pg_namespace on dependee.relnamespace = pg_namespace.oid
-			where pg_namespace.nspname = lower(namespace)
 	        )
 	        select relname, viewoid, max(depth) from depv group by relname, viewoid order by 3 desc
 		loop
@@ -75,13 +74,13 @@ begin
 		if i > 0 then
 		   begin
 		     for j in 1 .. i loop
-			SELECT String_agg('grant ' || privilege_type || ' on ' || viewname[j] || ' to "' || grantee || '"', '; ')
+		        SELECT String_agg('grant ' || privilege_type || ' on ' || viewname[j] || ' to "' || grantee || '"', '; ')
 				into privs
 				FROM information_schema.role_table_grants 
 				WHERE table_name=viewname[j];
-			perms[j] := privs;
+			    perms[j] := privs;
 		        command := 'drop view ' || viewname[j];
-			raise notice 'executing -> %', command;
+			    raise notice 'executing -> %', command;
 		        execute command;
 		        dropviews[j] := viewname[j];
 		     end loop;
@@ -91,7 +90,7 @@ begin
                           if i > 0 then
                              for j in reverse i .. 1 loop
                                 command := 'create or replace view ' || dropviews[j] || ' as ' || viewtext[j];
-			        raise notice 'executing -> %', 'create view ' || dropviews[j];
+			        raise notice 'executing -> %', 'create or replace view ' || dropviews[j] || '...';
 		                execute command;
                              end loop;
                           end if;
@@ -99,19 +98,16 @@ begin
                    end;
 		end if;
 		command := 'alter table ' || lower(tablename) || ' alter column ' || lower(columnname) || ' type ' || lower(datatype);
-		if usingclause is not null then
-		   command := command || ' ' || usingclause;
-		end if;
 		raise notice 'executing -> %', command;
 		execute command;
                 i := array_upper(dropviews, 1);
 		if i > 0 then
 		   for j in reverse i .. 1 loop
 		     command := 'create or replace view ' || dropviews[j] || ' as ' || viewtext[j];
-		     raise notice 'executing -> %', 'create view ' || dropviews[j];
+		     raise notice 'executing -> %', 'create or replace view ' || dropviews[j] || '...';
 		     execute command;
 		     command := perms[j];
-		     raise notice 'executing -> %', 'grant ' || perms[j];
+		     raise notice 'executing -> %', command;
 		     execute command;
 		   end loop;
 		end if;
@@ -148,9 +144,9 @@ $function$
 
 /*
 create table t_alter_column
-( tablename name, columnname name, datatype name, nullclause varchar(10), defaultclause varchar(200), usingclause  varchar(200));
+( tablename name, columnname name, datatype name, nullclause varchar(10), defaultclause varchar(200));
 
 create rule alter_column_rule as on insert to t_alter_column
 do instead select altercolumn(new.tablename, new.columnname, new.datatype, new.nullclause,
-new.defaultclause, new.usingclause);
+new.defaultclause);
 */

@@ -1729,7 +1729,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		//	Get Color/ Font
 		Color color = getColor();	//	default
 		if (ID != null && !isForm)
-			;									//	link color/underline handeled in PrintElement classes
+			;									//	link color/underline handled in PrintElement classes
 		else if (item.getAD_PrintColor_ID() != 0 && m_printColor.get_ID() != item.getAD_PrintColor_ID())
 		{
 			MPrintColor c = MPrintColor.get (getCtx(), item.getAD_PrintColor_ID());
@@ -1911,11 +1911,10 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		firstPage.width -= xOffset;
 		int yOffset = (int)m_position[AREA_CONTENT].y - m_content.y;
 		firstPage.y += yOffset;
-		firstPage.height -= yOffset+m_content.y;
+		firstPage.height -= yOffset;
 		Rectangle nextPages = calcTableNextPageSize();
 		nextPages.x += xOffset;
 		nextPages.width -= xOffset;
-		nextPages.height -= yOffset;
 		//	Column count
 		List<Integer> instanceAttributeList = new ArrayList<>();
 		List<MPrintFormatItem> instanceAttributeItems = new ArrayList<>();

@@ -235,7 +235,7 @@ public class GridTabCSVImporter implements IGridTabImporter
 						m_isDataError = true;
 						continue;		 
 					}else if(isMasterok && isDetail && !isDetailok){
-						rawLine = rawLine + delimiter + quoteChar + "Record not proccesed due to detail record failure" + quoteChar + "\n";
+						rawLine = rawLine + delimiter + quoteChar + "Record not processed due to detail record failure" + quoteChar + "\n";
 						rowsTmpResult.add(rawLine);
 						m_isDataError = true;
 						continue;	 
@@ -855,7 +855,7 @@ public class GridTabCSVImporter implements IGridTabImporter
 			wfProcess.setTransactionName(document.get_TrxName());  
 			MWFProcess wdPro = ProcessUtil.startWorkFlow(Env.getCtx(),wfProcess, AD_Workflow_ID);
 			if(wdPro == null) 
-			   return "Document action could not be proccesed"; 
+			   return "Document action could not be processed"; 
 			else if (wfProcess.isError())
 			   return "Document action error: "+wfProcess.getSummary();
 			else  	

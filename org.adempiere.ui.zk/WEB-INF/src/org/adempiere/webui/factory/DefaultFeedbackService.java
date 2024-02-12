@@ -102,7 +102,7 @@ public class DefaultFeedbackService implements IFeedbackService {
 			if (dataUrl != null && dataUrl.startsWith("data:image/png;base64,"))
 			{
 				try {
-		            // remove data:image/png;base64, and then take rest sting
+		            // remove data:image/png;base64, and then take rest string
 		            String img64 = dataUrl.substring("data:image/png;base64,".length()).trim();
 			        imageBytes = DatatypeConverter.parseBase64Binary(img64 );			        
 			    } catch(Exception e) {  			              
@@ -206,7 +206,7 @@ public class DefaultFeedbackService implements IFeedbackService {
 			if (dataUrl != null && dataUrl.startsWith("data:image/png;base64,"))
 			{
 				try {
-		            // remove data:image/png;base64, and then take rest sting
+		            // remove data:image/png;base64, and then take rest string
 		            String img64 = dataUrl.substring("data:image/png;base64,".length()).trim();
 			        imageBytes = DatatypeConverter.parseBase64Binary(img64 );			        
 			    } catch(Exception e) {  			              

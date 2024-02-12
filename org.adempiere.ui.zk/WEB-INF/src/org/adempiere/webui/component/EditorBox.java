@@ -107,7 +107,7 @@ public class EditorBox extends Div {
 
 	/**
 	 * Enable/disable component.
-	 * Hide button when component is diable/readonly. 
+	 * Hide button when component is disabled/readonly. 
 	 * @param enabled
 	 */
 	public void setEnabled(boolean enabled) {

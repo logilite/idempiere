@@ -1294,7 +1294,7 @@ public class MInvoiceLine extends X_C_InvoiceLine
 				MInOutLine[] lines = ship.getLines();
 				for (int i = 0; i < lines.length; i++)
 				{
-					if (lines[i].isDescription()		//	decription or no product
+					if (lines[i].isDescription()		//	description or no product
 						|| lines[i].getM_Product_ID() == 0)
 						continue;
 					if (lc.getM_Product_ID() == 0		//	no restriction or product match

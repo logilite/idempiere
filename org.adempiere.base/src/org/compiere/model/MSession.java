@@ -172,7 +172,7 @@ public class MSession extends X_AD_Session implements ImmutablePOSupport
 	}
 
 	/**
-	 * 	Load Costructor
+	 * 	Load Constructor
 	 *	@param ctx context
 	 *	@param rs result set
 	 *	@param trxName transaction

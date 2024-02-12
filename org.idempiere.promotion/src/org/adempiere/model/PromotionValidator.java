@@ -27,9 +27,8 @@ import org.compiere.model.PO;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 /**
- *
+ * Model validator for {@link MOrder} for application of promotion rules.
  * @author hengsin
- *
  */
 public class PromotionValidator implements ModelValidator {
 
