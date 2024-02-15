@@ -96,9 +96,9 @@ public class AboutWindow extends Window implements EventListener<Event> {
 	 */
 	private static final long serialVersionUID = 7922577248288156723L;
 
-	private Checkbox bErrorsOnly;
-	private Listbox logTable;
-	private Tabbox tabbox;
+	protected Checkbox bErrorsOnly;
+	protected Listbox logTable;
+	protected Tabbox tabbox;
 	protected Tabpanels tabPanels;
 	protected Button btnDownload;
 	protected Button btnErrorEmail;
@@ -109,27 +109,27 @@ public class AboutWindow extends Window implements EventListener<Event> {
 	protected Button btnAdempiereLog;
 	protected Button btnReloadLogProps;
 
-	private Listbox levelListBox;
+	protected Listbox levelListBox;
 
-	private WListbox pluginsTable;
-	private Listbox pluginActions;
-	private Button pluginProcess;
-	private Vector<Vector<Object>> pluginData;
-	private Vector<String> pluginColumnNames;
+	protected WListbox pluginsTable;
+	protected Listbox pluginActions;
+	protected Button pluginProcess;
+	protected Vector<Vector<Object>> pluginData;
+	protected Vector<String> pluginColumnNames;
 
-	private static final int PLUGIN_ACTION_NONE = 0;
-	private static final int PLUGIN_ACTION_STOP = 1;
-	private static final int PLUGIN_ACTION_START = 2;
-	private static final int PLUGIN_ACTION_UPDATE = 3;
-	private static final int PLUGIN_ACTION_UNINSTALL = 4;
-	private static final int PLUGIN_ACTION_INSTALL = 5;
+	protected static final int PLUGIN_ACTION_NONE = 0;
+	protected static final int PLUGIN_ACTION_STOP = 1;
+	protected static final int PLUGIN_ACTION_START = 2;
+	protected static final int PLUGIN_ACTION_UPDATE = 3;
+	protected static final int PLUGIN_ACTION_UNINSTALL = 4;
+	protected static final int PLUGIN_ACTION_INSTALL = 5;
 
 	public AboutWindow() {
 		super();
 		init();
 	}
 
-	private void init() {
+	protected void init() {
 
 		System.runFinalization();
 		System.gc();
@@ -343,7 +343,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 		return tabPanel;
 	}
 
-	private void updateLogTable() {
+	protected void updateLogTable() {
 		Vector<Vector<Object>> data = CLogErrorBuffer.get(true).getLogData(bErrorsOnly.isChecked());
 		SimpleListModel model = new SimpleListModel(data);
 		model.setMaxLength(new int[]{0, 0, 0, 200, 0, 200});
@@ -416,7 +416,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 		return tabPanel;
 	}
 
-	private String state(int state) {
+	protected String state(int state) {
 		switch (state) {
 		case Bundle.ACTIVE:
 			return "ACTIVE";
@@ -435,7 +435,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 		}
 	}
 
-	private void refreshActionList() {
+	protected void refreshActionList() {
 		pluginActions.getItemAtIndex(PLUGIN_ACTION_UPDATE).setVisible(false); // not implemented yet
 		pluginActions.getItemAtIndex(PLUGIN_ACTION_UNINSTALL).setVisible(false); // not implemented yet
 		pluginActions.getItemAtIndex(PLUGIN_ACTION_INSTALL).setVisible(false); // not implemented yet
@@ -484,7 +484,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 		}
 	}
 
-	private Bundle getSelectedBundle() {
+	protected Bundle getSelectedBundle() {
 		Bundle retValue = null;
 		int idx = pluginsTable.getSelectedIndex();
 		if (idx >= 0) {
@@ -496,7 +496,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 		return retValue;
 	}
 
-	private void processPlugin() {
+	protected void processPlugin() {
 		Listitem actionItem = pluginActions.getSelectedItem();
 		if (actionItem != null && actionItem.getValue() instanceof Integer) {
 			int action = (Integer)actionItem.getValue();
@@ -525,7 +525,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 		refreshActionList();
 	}
 
-	private void refreshPluginTable() {
+	protected void refreshPluginTable() {
 		int idx = pluginsTable.getSelectedIndex();
 		pluginsTable.getModel().removeAll(pluginData);
 		pluginData.removeAllElements();
@@ -662,7 +662,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 		return tabPanel;
 	}
 
-	private ToolBarButton addLink(String label, String href) {
+	protected ToolBarButton addLink(String label, String href) {
 		ToolBarButton link = new ToolBarButton();
 		link.setLabel(label);
 		link.setHref(href);
@@ -762,7 +762,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 		}
 	}
 
-	private void reloadLogProps() {
+	protected void reloadLogProps() {
 		Properties props = new Properties();
 		String propertyFileName = Ini.getFileName(false);
 		FileInputStream fis = null;
@@ -809,7 +809,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 		}
 	}
 
-	private void setTraceLevel() {
+	protected void setTraceLevel() {
 		Listitem item = levelListBox.getSelectedItem();
 		if (item != null && item.getValue() != null) {
 			Level level = (Level) item.getValue();
@@ -819,7 +819,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 		}
 	}
 
-	private void downloadAdempiereLogFile() {
+	protected void downloadAdempiereLogFile() {
 		String path = Ini.getAdempiereHome() + File.separator + "log";
 		final FolderBrowser fileBrowser = new FolderBrowser(path, false);
 		fileBrowser.addEventListener(DialogEvents.ON_WINDOW_CLOSE, new EventListener<Event>() {
@@ -840,13 +840,13 @@ public class AboutWindow extends Window implements EventListener<Event> {
 		});
 	}
 
-	private void downloadLog() {
+	protected void downloadLog() {
 		String log = CLogErrorBuffer.get(true).getErrorInfo(Env.getCtx(), bErrorsOnly.isChecked());
 		AMedia media = new AMedia("trace.log", null, "text/plain", log.getBytes());
 		Filedownload.save(media);
 	}
 
-	private void viewLog() {
+	protected void viewLog() {
 		String log = CLogErrorBuffer.get(true).getErrorInfo(Env.getCtx(), bErrorsOnly.isChecked());
 		Window w = new Window();
 		w.setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
@@ -868,7 +868,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 	/**
 	 * 	EMail Errors
 	 */
-	private void cmd_errorEMail()
+	protected void cmd_errorEMail()
 	{
 		this.detach();
 		FeedbackManager.emailSupport(bErrorsOnly.isSelected());
