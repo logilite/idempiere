@@ -17,10 +17,6 @@ UPDATE AD_TableIndex SET IsKey='N',Updated=TO_TIMESTAMP('2023-12-14 13:55:41','Y
 ALTER TABLE AD_PInstance_Log DROP CONSTRAINT ad_pinstance_log_uu CASCADE
 ;
 
--- Dec 14, 2023, 1:55:49 PM CET
-ALTER TABLE AD_PInstance_Log ADD CONSTRAINT ad_pinstance_log_uu_idx UNIQUE (AD_PInstance_Log_UU)
-;
-
 -- Dec 14, 2023, 1:56:20 PM CET
 INSERT INTO t_alter_column values('ad_pinstance_log','AD_PInstance_Log_UU','VARCHAR(36)',null,'NULL')
 ;
