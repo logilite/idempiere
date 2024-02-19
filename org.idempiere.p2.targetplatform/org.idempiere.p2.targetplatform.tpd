@@ -1,5 +1,5 @@
 
-target "idempiere-220824"
+target "idempiere-9"
 
 with source configurePhase allEnvironments
 
@@ -138,7 +138,7 @@ location "https://download.eclipse.org/tools/orbit/downloads/drops/R202106020316
 	org.apache.commons.discovery	
 }	
 
-location "https://sourceforge.net/projects/jasperstudio/files/updatesite/6.17.0" {
+location jasperstudio "https://idempiere.github.io/binary.file/p2.repackaged/jasperstudio/6.17.0" {
     com.jaspersoft.studio.bundles.barbecue
     com.jaspersoft.studio.bundles.itext
     org.w3c.dom.svg.patch
