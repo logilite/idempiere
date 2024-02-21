@@ -132,6 +132,10 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < acts.length; i++)
 		{
+			//When activity is Suspended, Allow user to continue workflow on doc action
+			if( WFSTATE_Suspended.compareTo(acts[i].getWFState())==0)
+				return null;
+				
 			if (i > 0)
 				sb.append("\n");
 			MWFActivity activity = acts[i];

@@ -260,7 +260,11 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 	 */
 	protected boolean beforeSave (boolean newRecord)
 	{
-		if (! isProcessed() && getBeginningBalance().compareTo(Env.ZERO) == 0)
+		boolean isManualOpening = MSysConfig.getBooleanValue(MSysConfig.BANKSTATEMENT_MANUAL_OPENING, false,
+				getAD_Client_ID(), getAD_Org_ID());
+		
+		if (!isProcessed() && getBeginningBalance().compareTo(Env.ZERO) == 0
+				&& (!isManualOpening || (isManualOpening && newRecord)))
 		{
 			MBankAccount ba = getBankAccount();
 			ba.load(get_TrxName());
