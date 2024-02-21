@@ -107,7 +107,6 @@ public class AboutWindow extends Window implements EventListener<Event> {
 
 	protected Listbox levelListBox;
 
-	protected WListbox pluginsTable;
 	protected Listbox pluginActions;
 	protected Button pluginProcess;
 	protected Vector<Vector<Object>> pluginData;

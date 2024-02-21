@@ -727,6 +727,8 @@ public class ProcessInfo implements Serializable
 				logEntry.getP_ID(), 
 				logEntry.getP_Number(), 
 				logEntry.getP_Msg(),
+				logEntry.getAD_Table_ID(), 
+				logEntry.getRecord_ID(),
 				logEntry.getPInstanceLogType());
 		il.saveEx();
 		return il.getAD_PInstance_Log_UU();
@@ -762,6 +764,8 @@ public class ProcessInfo implements Serializable
 				logEntry.getP_ID(), 
 				logEntry.getP_Number(), 
 				logEntry.getP_Msg(),
+				logEntry.getAD_Table_ID(), 
+				logEntry.getRecord_ID(),
 				logEntry.getPInstanceLogType());
 		return il.update();
 	}	//	saveLog

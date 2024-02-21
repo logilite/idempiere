@@ -37,7 +37,6 @@ import org.compiere.util.Util;
 public class MPInstanceLog
 {
 	/**
-	 * 	Constructor without Table/Record
 	 *	@param AD_PInstance_ID instance
 	 *	@param Log_ID log sequence
 	 *	@param P_Date date
@@ -52,7 +51,6 @@ public class MPInstanceLog
 	}	//	MPInstance_Log
 
 	/**
-	 * Constructor without AD_PInstance_Log_UU
 	 * @param AD_PInstance_ID
 	 * @param Log_ID
 	 * @param P_Date
@@ -61,15 +59,45 @@ public class MPInstanceLog
 	 * @param P_Msg
 	 * @param AD_Table_ID
 	 * @param Record_ID
-	 * @param PInstanceLogType Log Type
+	 */
+	public MPInstanceLog (int AD_PInstance_ID, int Log_ID, Timestamp P_Date,
+			int P_ID, BigDecimal P_Number, String P_Msg, int AD_Table_ID, int Record_ID)
+	{
+		this(AD_PInstance_ID, Log_ID, P_Date, P_ID, P_Number, P_Msg, AD_Table_ID, Record_ID, X_AD_PInstance_Log.PINSTANCELOGTYPE_Result);
+	}	//	MPInstance_Log
+	
+	/**
+	 * @param AD_PInstance_ID
+	 * @param Log_ID
+	 * @param P_Date
+	 * @param P_ID
+	 * @param P_Number
+	 * @param P_Msg
+	 * @param AD_Table_ID
+	 * @param Record_ID
+	 * @param PInstanceLogType Log Type X_AD_PInstance_Log.PINSTANCELOGTYPE_*
 	 */
 	public MPInstanceLog (int AD_PInstance_ID, int Log_ID, Timestamp P_Date,
 			int P_ID, BigDecimal P_Number, String P_Msg, int AD_Table_ID, int Record_ID, String PInstanceLogType)
 	{
-		this("", AD_PInstance_ID, Log_ID, P_Date, P_ID, P_Number, P_Msg, PInstanceLogType);
+		this("", AD_PInstance_ID, Log_ID, P_Date, P_ID, P_Number, P_Msg, AD_Table_ID, Record_ID, PInstanceLogType);
 	}
+	
+	/**
+	 * Full Constructor
+	 * @param AD_PInstance_Log_UU
+	 * @param AD_PInstance_ID
+	 * @param Log_ID
+	 * @param P_Date
+	 * @param P_ID
+	 * @param P_Number
+	 * @param P_Msg
+	 * @param AD_Table_ID
+	 * @param Record_ID
+	 * @param PInstanceLogType Log Type X_AD_PInstance_Log.PINSTANCELOGTYPE_*
+	 */
 	public MPInstanceLog (String AD_PInstance_Log_UU, int AD_PInstance_ID, int Log_ID, Timestamp P_Date,
-	                	  int P_ID, BigDecimal P_Number, String P_Msg, int AD_Table_ID, int Record_ID, String PInstanceLogType)
+			int P_ID, BigDecimal P_Number, String P_Msg, int AD_Table_ID, int Record_ID, String PInstanceLogType)
 	{
 		setAD_PInstance_ID(AD_PInstance_ID);
 		setLog_ID(Log_ID);
@@ -82,8 +110,8 @@ public class MPInstanceLog
 		setPInstanceLogType(PInstanceLogType);
 		if(!Util.isEmpty(AD_PInstance_Log_UU))
 			setAD_PInstance_Log_UU(AD_PInstance_Log_UU);
-
-	}
+	}	//	MPInstance_Log
+	
 	/**
 	 * 	Load Constructor
 	 * 	@param rs Result Set
@@ -133,20 +161,18 @@ public class MPInstanceLog
 	}	//	toString
 
 	private final static String insertSql = "INSERT INTO AD_PInstance_Log "
-					+ "(AD_PInstance_ID, Log_ID, P_Date, P_ID, P_Number, P_Msg, AD_PInstance_Log_UU, PInstanceLogType)"
-					+ " VALUES (?,?,?,?,?,?,?,?) ";
-			
+			+ "(AD_PInstance_ID, Log_ID, P_Date, P_ID, P_Number, P_Msg, AD_Table_ID, Record_ID, AD_PInstance_Log_UU, PInstanceLogType)"
+			+ " VALUES (?,?,?,?,?,?,?,?,?,?) ";
+	
 	private final static String updateSql = "UPDATE AD_PInstance_Log "
-					+ " SET P_Date = ?, "
-					+ " 	P_ID = ?, "
-					+ " 	P_Number = ?, "
-					+ " 	P_Msg = ?, "
-					+ " 	PInstanceLogType = ? "
-					+ " WHERE AD_PInstance_Log_UU = ? ";
-
-	private final static String insertSql = "INSERT INTO AD_PInstance_Log "
-			+ "(AD_PInstance_ID, Log_ID, P_Date, P_ID, P_Number, P_Msg, AD_Table_ID, Record_ID, AD_PInstance_Log_UU)"
-			+ " VALUES (?,?,?,?,?,?,?,?,?)";
+			+ " SET P_Date = ?, "
+			+ " 	P_ID = ?, "
+			+ " 	P_Number = ?, "
+			+ " 	P_Msg = ?, "
+			+ " 	AD_Table_ID = ?, "
+			+ " 	Record_ID = ?, "
+			+ " 	PInstanceLogType = ? "
+			+ " WHERE AD_PInstance_Log_UU = ? ";
 
 	/**
 	 *	Save to Database
