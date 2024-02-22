@@ -422,4 +422,13 @@ public interface I_M_Product_PO
 	  * Product Key of the Business Partner
 	  */
 	public String getVendorProductNo();
+	
+	/** Column name M_Product_PO_ID */
+	public static final String COLUMNNAME_M_Product_PO_ID = "M_Product_PO_ID";
+
+	/** Set Product Purchasing	  */
+	public void setM_Product_PO_ID(int M_Product_PO_ID);
+
+	/** Get Product Purchasing	  */
+	public int getM_Product_PO_ID();
 }
