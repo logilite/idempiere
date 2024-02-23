@@ -226,6 +226,10 @@ public class MPInstanceLog
 			params.add(null);
 		}
 		
+		params.add(m_AD_Table_ID != 0 ? m_AD_Table_ID : null);
+		
+		params.add(m_Record_ID != 0 ? m_Record_ID : null);
+		
 		if(isInsert)
 			params.add(getAD_PInstance_Log_UU());
 		
