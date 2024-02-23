@@ -157,7 +157,8 @@ public class DesktopWatchDog {
 
 	private final static void printLog(String info, String msg)
 	{
-		log.log(Level.WARNING, info + " --- " + msg);
+		if (log.isLoggable(Level.INFO))
+			log.log(Level.INFO, info + " --- " + msg);
 	}
 
 	public static DesktopWatchDog getINSTANCE()
