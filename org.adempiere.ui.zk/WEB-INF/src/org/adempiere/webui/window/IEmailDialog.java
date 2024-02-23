@@ -32,6 +32,7 @@ public interface IEmailDialog
 			File attachment, int m_WindowNo,int ad_Table_ID, int record_ID, PrintInfo printInfo);
 
 	public void addTo(String supportEMail, boolean isShowEmailFirst);
+	public void addCC(String supportEMail, boolean isShowEmailFirst);
 
 	public void addAttachment(DataSource screenShot, boolean isRemoveable);
 	public void setPO(PO m_po);

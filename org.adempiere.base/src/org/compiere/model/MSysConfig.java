@@ -224,6 +224,7 @@ public class MSysConfig extends X_AD_SysConfig
 	public static final String ZK_LOGIN_LEFTPANEL_SHOWN = "ZK_LOGIN_LEFTPANEL_SHOWN";
 	public static final String ZK_SEARCH_AUTO_COMPLETE_MAX_ROWS = "ZK_SEARCH_AUTO_COMPLETE_MAX_ROWS";
 	public static final String BANKSTATEMENT_MANUAL_OPENING = "BANKSTATEMENT_MANUAL_OPENING";
+	public static final String MAIL_SEND_COMMENTS = "MAIL_SEND_COMMENTS";
 
 	/**
 	 * 	Standard Constructor
