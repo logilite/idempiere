@@ -43,5 +43,9 @@ UPDATE AD_Column SET FKConstraintName='ApprovalColumn_ADWFNode', FKConstraintTyp
 ALTER TABLE AD_WF_Node ADD CONSTRAINT ApprovalColumn_ADWFNode FOREIGN KEY (ApprovalColumn_ID) REFERENCES ad_column(ad_column_id) DEFERRABLE INITIALLY DEFERRED
 ;
 
+-- Feb 23, 2024, 12:17:28 PM IST
+UPDATE AD_Ref_Table SET WhereClause=NULL, DisplaySQL='COALESCE(AD_Column.ColumnName,''-1'') || ''_'' || COALESCE(AD_Column.Name,''-1'')',Updated=TO_TIMESTAMP('2024-02-23 12:17:28','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Reference_ID=200266
+;
+
 SELECT register_migration_script('202402211128_Adding_Approval_Column_WF_Node.sql') FROM dual
 ;
