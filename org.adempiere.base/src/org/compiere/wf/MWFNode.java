@@ -723,12 +723,11 @@ public class MWFNode extends X_AD_WF_Node
 			return AD_WF_Responsible_ID;
 		}
 
-		MWFResponsible resp = MWFResponsible.get(p_ctx, AD_WF_Responsible_ID);
 
 		final String sql = " SELECT AD_WF_Responsible_ID FROM AD_WF_Responsible "
-				+ " WHERE AD_Client_ID=? AND Name=? AND Override_ID = ? AND IsActive='Y' ";
+				+ " WHERE AD_Client_ID=? AND Override_ID = ? AND IsActive='Y' ";
 
-		int id = DB.getSQLValue(get_TrxName(), sql, AD_Client_ID, resp.getName(), AD_WF_Responsible_ID);
+		int id = DB.getSQLValue(get_TrxName(), sql, AD_Client_ID, AD_WF_Responsible_ID);
 
 		if (id > 0)
 		{
