@@ -134,6 +134,15 @@ import org.compiere.util.Env;
 		//	Set DepositBatch_ID into C_Payment table
 		if (getC_Payment_ID() != 0 && !getC_DepositBatch().getDocAction().equals(MDepositBatch.ACTION_Void))
 		{
+			//if payment is changed then clear reference of deposit batch from old payment and mark reconciled flag as N
+			if (!newRecord && is_ValueChanged(COLUMNNAME_C_Payment_ID))
+			{
+				String sql = "UPDATE C_Payment p SET C_DepositBatch_ID=Null, IsReconciled='N' WHERE p.C_Payment_ID=? AND C_DepositBatch_ID=?";
+				DB.executeUpdateEx(sql,
+						new Object[] { get_ValueOldAsInt(COLUMNNAME_C_Payment_ID), getC_DepositBatch_ID() },
+						get_TrxName());
+			}
+			
 			String sql = "UPDATE C_Payment p SET C_DepositBatch_ID=? WHERE p.C_Payment_ID=?";			
 			DB.executeUpdateEx(sql, new Object[] {getC_DepositBatch_ID(), getC_Payment_ID()}, get_TrxName());
 			
