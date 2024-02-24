@@ -199,12 +199,11 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	
 	//From and to grid fields
 	protected List<GridField> gridFields;
-	private List<GridField> gridFields2;
+	protected List<GridField> gridFields2;
 	/** Selection Column Sequence:[InfoColumnVO, GridField] */
-	private TreeMap<Integer, List<Object[]>> parameterTree;
+	protected TreeMap<Integer, List<Object[]>> parameterTree;
 	/** To grid field of {@link #parameterTree} */
-	private TreeMap<Integer, List<Object[]>> parameterTree2;
-	private Checkbox checkAND;
+	protected TreeMap<Integer, List<Object[]>> parameterTree2;
 		
 	// F3P: Keep original values: when a row is unselected, restore original values
 		

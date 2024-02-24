@@ -114,11 +114,11 @@ public abstract class CreateFromBatch extends CreateFrom
 	}
 	
 	@Deprecated
-	void setParameters(PreparedStatement pstmt, Object BankAccount, Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
+	protected int setParameters(PreparedStatement pstmt, Object BankAccount, Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
 			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode)
 	throws SQLException
 	{
-		setParameters(pstmt, (Integer)BankAccount, (Integer)BPartner, DocumentNo, (Timestamp)DateFrom, (Timestamp)DateTo, 
+		return setParameters(pstmt, (Integer)BankAccount, (Integer)BPartner, DocumentNo, (Timestamp)DateFrom, (Timestamp)DateTo, 
 				(BigDecimal)AmtFrom, (BigDecimal)AmtTo, (Integer)DocType, (String)TenderType, AuthCode);
 	}
 	
@@ -137,7 +137,7 @@ public abstract class CreateFromBatch extends CreateFrom
 	 * @param AuthCode
 	 * @throws SQLException
 	 */
-	protected void setParameters(PreparedStatement pstmt, Integer BankAccount, Integer BPartner, String DocumentNo, Timestamp DateFrom, Timestamp DateTo, 
+	protected int setParameters(PreparedStatement pstmt, Integer BankAccount, Integer BPartner, String DocumentNo, Timestamp DateFrom, Timestamp DateTo, 
 			BigDecimal AmtFrom, BigDecimal AmtTo, Integer DocType, String TenderType, String AuthCode, int AD_Org_ID)
 	throws SQLException
 	{
@@ -190,6 +190,8 @@ public abstract class CreateFromBatch extends CreateFrom
 		
 		if(AD_Org_ID > 0)
 			pstmt.setInt(index++, (Integer) AD_Org_ID);
+		
+		return index;
 	}
 	
 	protected String getSQLText(String text)

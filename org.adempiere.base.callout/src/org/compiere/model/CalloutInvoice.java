@@ -401,32 +401,38 @@ public class CalloutInvoice extends CalloutEngine
 		mTab.setValue("C_UOM_ID", Integer.valueOf(SystemIDs.C_UOM_EACH));	//	EA
 
 		Env.setContext(ctx, WindowNo, "DiscountSchema", "N");
-		String sql = "SELECT ChargeAmt FROM C_Charge WHERE C_Charge_ID=?";
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
+		if (!mTab.getValueAsBoolean("Processed"))
 		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, C_Charge_ID.intValue());
-			rs = pstmt.executeQuery();
-			if (rs.next())
+			String sql = "SELECT ChargeAmt FROM C_Charge WHERE C_Charge_ID=?";
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			try
 			{
-				mTab.setValue ("PriceEntered", rs.getBigDecimal (1));
-				mTab.setValue ("PriceActual", rs.getBigDecimal (1));
-				mTab.setValue ("PriceLimit", Env.ZERO);
-				mTab.setValue ("PriceList", Env.ZERO);
-				mTab.setValue ("Discount", Env.ZERO);
+				pstmt = DB.prepareStatement(sql, null);
+				pstmt.setInt(1, C_Charge_ID.intValue());
+				rs = pstmt.executeQuery();
+				if (rs.next())
+				{
+					if(rs.getBigDecimal(1)!=null && Env.ZERO.compareTo(rs.getBigDecimal(1))!=0) {
+						mTab.setValue("PriceEntered", rs.getBigDecimal(1));
+						mTab.setValue("PriceActual", rs.getBigDecimal(1));
+						mTab.setValue("PriceLimit", Env.ZERO);
+						mTab.setValue("PriceList", Env.ZERO);
+						mTab.setValue("Discount", Env.ZERO);
+					}
+				}
 			}
-		}
-		catch (SQLException e)
-		{
-			log.log(Level.SEVERE, sql + e);
-			return e.getLocalizedMessage();
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
+			catch (SQLException e)
+			{
+				log.log(Level.SEVERE, sql + e);
+				return e.getLocalizedMessage();
+			}
+			finally
+			{
+				DB.close(rs, pstmt);
+				rs = null;
+				pstmt = null;
+			}
 		}
 		//
 		return tax (ctx, WindowNo, mTab, mField, value);

@@ -772,7 +772,37 @@ public class MWFNode extends X_AD_WF_Node implements ImmutablePOSupport
 	{
 		return success;
 	}	//	afterDelete
+	
+	/**
+	 * Get Overridden Workflow Responsible from client
+	 */
+	@Override
+	public int getAD_WF_Responsible_ID()
+	{
+		int AD_Client_ID = Env.getAD_Client_ID(p_ctx);
+		int AD_WF_Responsible_ID = super.getAD_WF_Responsible_ID();
 
+		// If Logged in Client is system then default WF Responsible will return
+		if (AD_Client_ID == 0)
+		{
+			return AD_WF_Responsible_ID;
+		}
+
+		MWFResponsible resp = MWFResponsible.get(p_ctx, AD_WF_Responsible_ID);
+
+		final String sql = " SELECT AD_WF_Responsible_ID FROM AD_WF_Responsible "
+				+ " WHERE AD_Client_ID=? AND Name=? AND Override_ID = ? AND IsActive='Y' ";
+
+		int id = DB.getSQLValue(get_TrxName(), sql, AD_Client_ID, resp.getName(), AD_WF_Responsible_ID);
+
+		if (id > 0)
+		{
+			AD_WF_Responsible_ID = id;
+		}
+
+		return AD_WF_Responsible_ID;
+	}
+	
 	/**
 	 * Check if the workflow node is valid for given date
 	 * @param date

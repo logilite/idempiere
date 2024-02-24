@@ -695,7 +695,7 @@ public class Doc_InOut extends Doc
 					if (costs == null || costs.signum() == 0)
 					{
 						//ok if purchase price is actually zero 
-						if (orderLine != null && orderLine.getPriceActual().signum() == 0)
+						if ((orderLine != null && orderLine.getPriceActual().signum() == 0) || (invoiceLine != null && invoiceLine.getPriceActual().signum() == 0))
                     	{
 							costs = BigDecimal.ZERO;
                     	}

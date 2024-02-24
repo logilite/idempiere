@@ -92,9 +92,9 @@ public class AboutWindow extends Window implements EventListener<Event> {
 	/**	Logger			*/
 	private static final CLogger log = CLogger.getCLogger(AboutWindow.class);
 
-	private Checkbox bErrorsOnly;
-	private Listbox logTable;
-	private Tabbox tabbox;
+	protected Checkbox bErrorsOnly;
+	protected Listbox logTable;
+	protected Tabbox tabbox;
 	protected Tabpanels tabPanels;
 	protected Button btnDownload;
 	protected Button btnErrorEmail;
@@ -105,8 +105,8 @@ public class AboutWindow extends Window implements EventListener<Event> {
 	protected Button btnAdempiereLog;
 	protected Button btnReloadLogProps;
 
-	private Listbox levelListBox;
-
+	protected Listbox levelListBox;
+	
 	/**
 	 * Default constructor
 	 */
@@ -118,7 +118,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 	/**
 	 * Layout dialog
 	 */
-	private void init() {
+	protected void init() {
 
 		System.runFinalization();
 		System.gc();
@@ -334,7 +334,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 	/**
 	 * Update log messages table for trace tab.
 	 */
-	private void updateLogTable() {
+	protected void updateLogTable() {
 		Vector<Vector<Object>> data = CLogErrorBuffer.get(true).getLogData(bErrorsOnly.isChecked());
 		SimpleListModel model = new SimpleListModel(data);
 		model.setMaxLength(new int[]{0, 0, 0, 200, 0, 200});
@@ -509,7 +509,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 	/**
 	 * Reload log properties
 	 */
-	private void reloadLogProps() {
+	protected void reloadLogProps() {
 		Properties props = new Properties();
 		String propertyFileName = Ini.getFileName(false);
 		FileInputStream fis = null;
@@ -559,7 +559,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 	/**
 	 * Change trace/log level
 	 */
-	private void setTraceLevel() {
+	protected void setTraceLevel() {
 		Listitem item = levelListBox.getSelectedItem();
 		if (item != null && item.getValue() != null) {
 			Level level = (Level) item.getValue();
@@ -572,7 +572,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 	/**
 	 * Download iDempiere log file
 	 */
-	private void downloadAdempiereLogFile() {
+	protected void downloadAdempiereLogFile() {
 		String path = Ini.getAdempiereHome() + File.separator + "log";
 		final FolderBrowser fileBrowser = new FolderBrowser(path, false);
 		fileBrowser.addEventListener(DialogEvents.ON_WINDOW_CLOSE, new EventListener<Event>() {
@@ -596,7 +596,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 	/**
 	 * Download current log messages
 	 */
-	private void downloadLog() {
+	protected void downloadLog() {
 		String log = CLogErrorBuffer.get(true).getErrorInfo(Env.getCtx(), bErrorsOnly.isChecked());
 		AMedia media = new AMedia("trace.log", null, "text/plain", log.getBytes());
 		Filedownload.save(media);
@@ -605,7 +605,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 	/**
 	 * View current log messages
 	 */
-	private void viewLog() {
+	protected void viewLog() {
 		String log = CLogErrorBuffer.get(true).getErrorInfo(Env.getCtx(), bErrorsOnly.isChecked());
 		Window w = new Window();
 		w.setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
@@ -627,7 +627,7 @@ public class AboutWindow extends Window implements EventListener<Event> {
 	/**
 	 * 	EMail errors to support
 	 */
-	private void cmd_errorEMail()
+	protected void cmd_errorEMail()
 	{
 		this.detach();
 		FeedbackManager.emailSupport(bErrorsOnly.isSelected());

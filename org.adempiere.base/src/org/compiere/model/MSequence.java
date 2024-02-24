@@ -63,6 +63,8 @@ public class MSequence extends X_AD_Sequence
 	
 	/**  Control the sequence based on fiscal year */
 	private static final String FISCAL_YEAR = "@FY@";
+	
+	private static final String [] DateFormats = {"yy","yyyy","MM","MMM","MMMM","dd"};
 
 	/**
 	 * @param AD_Client_ID
@@ -566,11 +568,35 @@ public class MSequence extends X_AD_Sequence
 		if (next < 0)
 			return null;
 
+		Date docDate=null;
+		if(isStartNewMonth || isStartNewYear) {
+			if (po != null && dateColumn != null && dateColumn.length() > 0)
+			{
+				Object dt = po.get_Value(dateColumn);
+				if (dt != null && dt instanceof Date)
+				{
+					docDate= (Date)dt;
+				}
+				else if (dt != null)
+				{
+					errorMsg = "DateColumnInvalid";
+				}
+			}
+			else
+			{
+				docDate= new Date();
+			}
+		}
+		
 		//	create DocumentNo
 		StringBuilder doc = new StringBuilder();
 		if (prefix != null && prefix.length() > 0) {
 			if(isStartNewYear && IsUseFiscalYear && !isStartNewMonth)
 				prefix = prefix.replace(FISCAL_YEAR, calendarYearMonth);
+			
+			
+			if(docDate!=null)
+				prefix = replaceDateItem(prefix, docDate);
 			
 			//Supporting to support Period and year related columns in prefix
 			if(period!=null)
@@ -590,6 +616,8 @@ public class MSequence extends X_AD_Sequence
 			if(isStartNewYear && IsUseFiscalYear && !isStartNewMonth)
 				suffix = suffix.replace(FISCAL_YEAR, calendarYearMonth);
 			
+			if(docDate!=null)
+				suffix = replaceDateItem(suffix, docDate);
 			//Supporting to support Period and year related columns in suffix
 			if(period!=null)
 				suffix = Env.parseVariable(suffix, period, trxName, true);
@@ -1310,6 +1338,21 @@ public class MSequence extends X_AD_Sequence
 			return COLUMNNAME_AD_Org_ID;
 		else
 			return super.getOrgColumn();
+	}
+	
+	public static String replaceDateItem(String prefix, Date date) {
+		
+		if (date != null && date instanceof Date)
+		{
+			for(String format:DateFormats) {
+				String token = "@"+ format+"@";
+				
+				SimpleDateFormat sdf = new SimpleDateFormat(format);
+				String val =sdf.format(date);
+				prefix = prefix.replace(token, val);
+			}
+		}
+		return prefix;
 	}
 
 }	//	MSequence

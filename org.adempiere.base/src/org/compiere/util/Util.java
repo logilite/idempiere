@@ -752,6 +752,11 @@ public class Util
 		}
 	}
 
+	public static int compareDate(Timestamp ts1, Timestamp ts2)
+	{
+		return Util.removeTime(ts1).compareTo(Util.removeTime(ts2));
+	}
+	
 	/**
 	 * Make filename safe (updating all unauthorized characters to safe ones)
 	 * @param input the filename to check

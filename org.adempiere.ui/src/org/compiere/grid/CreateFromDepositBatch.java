@@ -167,8 +167,7 @@ public abstract class CreateFromDepositBatch extends CreateFromBatch
 				//	
 				MDepositBatchLine dbl = new MDepositBatchLine(db);
 				dbl.setPayment((MPayment) MTable.get(Env.getCtx(), MPayment.Table_ID).getPO(C_Payment_ID,trxName));
-				if(!dbl.save())
-					log.log(Level.SEVERE, "Line not created #" + i);
+				dbl.saveEx();
 			}   //   if selected
 		}   //  for all rows
 		return true;
