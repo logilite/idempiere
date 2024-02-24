@@ -591,6 +591,23 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 			 return Env.ZERO;
 		return bd;
 	}
+	
+	/** Set Due > 121.
+	@param Due120_Plus Due > 121	  */
+	public void setDue121_Plus (BigDecimal Due121_Plus)
+	{
+		set_Value (COLUMNNAME_Due121_Plus, Due121_Plus);
+	}
+
+	/** Get Due > 121.
+	@return Due > 121	  */
+	public BigDecimal getDue121_Plus () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Due121_Plus);
+		if (bd == null)
+			return Env.ZERO;
+		return bd;
+	}
 
 	/** Set Amount due.
 		@param DueAmt 
@@ -850,6 +867,23 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PastDue91_Plus);
 		if (bd == null)
 			 return Env.ZERO;
+		return bd;
+	}
+	
+	/** Set Past Due > 121.
+	@param PastDue121_Plus Past Due > 121	  */
+	public void setPastDue121_Plus (BigDecimal PastDue121_Plus)
+	{	
+		set_Value (COLUMNNAME_PastDue121_Plus, PastDue121_Plus);
+	}
+
+	/** Get Past Due > 121.
+	@return Past Due > 121	  */
+	public BigDecimal getPastDue121_Plus () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PastDue121_Plus);
+		if (bd == null)
+			return Env.ZERO;
 		return bd;
 	}
 

@@ -333,6 +333,9 @@ public interface I_T_Aging
 
     /** Column name Due91_Plus */
     public static final String COLUMNNAME_Due91_Plus = "Due91_Plus";
+    
+    /** Column name Due121_Plus */
+    public static final String COLUMNNAME_Due121_Plus = "Due121_Plus";
 
 	/** Set Due > 91	  */
 	public void setDue91_Plus (BigDecimal Due91_Plus);
@@ -497,6 +500,9 @@ public interface I_T_Aging
     /** Column name PastDue91_Plus */
     public static final String COLUMNNAME_PastDue91_Plus = "PastDue91_Plus";
 
+    /** Column name PastDue121_Plus */
+    public static final String COLUMNNAME_PastDue121_Plus = "PastDue121_Plus";
+    
 	/** Set Past Due > 91	  */
 	public void setPastDue91_Plus (BigDecimal PastDue91_Plus);
 
