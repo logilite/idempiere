@@ -598,6 +598,9 @@ public class Doc_AllocationHdr extends Doc
 		return false;
 	} // isReversalCorrectDocument
 	
+    /** 
+     * Verify if the posting involves two or more organizations
+     * @return true if there are more than one org involved on the posting
 	 */
 	protected boolean isInterOrg(MAcctSchema as) {
 		MAcctSchemaElement elementorg = as.getAcctSchemaElement(MAcctSchemaElement.ELEMENTTYPE_Organization);

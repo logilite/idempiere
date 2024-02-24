@@ -204,6 +204,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	protected TreeMap<Integer, List<Object[]>> parameterTree;
 	/** To grid field of {@link #parameterTree} */
 	protected TreeMap<Integer, List<Object[]>> parameterTree2;
+	protected Checkbox checkAND;
 		
 	// F3P: Keep original values: when a row is unselected, restore original values
 		
