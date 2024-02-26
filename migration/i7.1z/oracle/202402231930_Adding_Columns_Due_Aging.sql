@@ -16,6 +16,10 @@ INSERT INTO AD_Column (AD_Column_ID,Version,Name,AD_Table_ID,ColumnName,DefaultV
 ;
 
 -- 23-Feb-2024, 7:21:20 PM IST
+ALTER TABLE T_Aging ADD PastDue121_Plus NUMBER DEFAULT 0 NOT NULL
+;
+
+-- 23-Feb-2024, 7:21:20 PM IST
 ALTER TABLE T_Aging MODIFY PastDue121_Plus NUMBER DEFAULT 0
 ;
 
@@ -25,5 +29,8 @@ INSERT INTO AD_Column (AD_Column_ID,Version,Name,AD_Table_ID,ColumnName,DefaultV
 
 -- 23-Feb-2024, 7:21:46 PM IST
 ALTER TABLE T_Aging ADD Due121_Plus NUMBER DEFAULT 0 NOT NULL
+;
+
+SELECT register_migration_script('202402231930_Adding_Columns_Due_Aging.sql') FROM dual
 ;
 

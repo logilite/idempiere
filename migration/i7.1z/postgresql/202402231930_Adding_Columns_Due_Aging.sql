@@ -12,6 +12,9 @@ INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,Cr
 INSERT INTO AD_Column (AD_Column_ID,Version,Name,AD_Table_ID,ColumnName,DefaultValue,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,FKConstraintType,IsHtml,IsDisableZoomAcross) VALUES (216567,0,'Past Due > 121',631,'PastDue121_Plus','0',22,'N','N','Y','N','N',0,'N',12,0,0,'Y',TO_TIMESTAMP('2024-02-23 19:21:16','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2024-02-23 19:21:16','YYYY-MM-DD HH24:MI:SS'),100,203921,'Y','N','D','N','N','N','Y','2d89ceef-3c80-45ce-9b3c-60d3b95f3b4b','Y',0,'N','N','N','N','N')
 ;
 
+-- 23-Feb-2024, 7:21:46 PM IST
+ALTER TABLE T_Aging ADD COLUMN PastDue121_Plus NUMERIC DEFAULT '0' NOT NULL
+;
 -- 23-Feb-2024, 7:21:20 PM IST
 INSERT INTO t_alter_column values('t_aging','PastDue121_Plus','NUMERIC',null,'0',null)
 ;
@@ -24,3 +27,5 @@ INSERT INTO AD_Column (AD_Column_ID,Version,Name,AD_Table_ID,ColumnName,DefaultV
 ALTER TABLE T_Aging ADD COLUMN Due121_Plus NUMERIC DEFAULT '0' NOT NULL
 ;
 
+SELECT register_migration_script('202402231930_Adding_Columns_Due_Aging.sql') FROM dual
+;
