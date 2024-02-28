@@ -2819,7 +2819,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 			insert.append("T_SELECTION_UU");
 		else
 			insert.append("T_SELECTION_ID");
-		insert.append(" VIEWID, COLUMNNAME , VALUE_STRING, VALUE_NUMBER , VALUE_DATE, VALUE_NUMBER_ARRAY, VALUE_STRING_ARRAY) VALUES ( ");
+		insert.append(", VIEWID, COLUMNNAME , VALUE_STRING, VALUE_NUMBER , VALUE_DATE, VALUE_NUMBER_ARRAY, VALUE_STRING_ARRAY) VALUES ( ");
 		for (Entry<NamePair,LinkedHashMap<String, Object>> records : m_values.entrySet()) {
 			// set Record ID
 			NamePair knPair = records.getKey();

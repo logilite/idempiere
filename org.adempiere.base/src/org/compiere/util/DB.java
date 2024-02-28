@@ -2512,7 +2512,8 @@ public final class DB
 				throw new AdempiereException("NamePair type not allowed in DB.createT_SelectionNewNP, just KeyNamePair or ValueNamePair are allowed");
 			counter++;
 			if (counter > 1)
-				insert.append(", (");
+				insert.append(" UNION ");
+			insert.append("SELECT ");
 			insert.append(AD_PInstance_ID);
 			insert.append(", ");
 			if (selectedId instanceof Integer) {
@@ -2532,7 +2533,7 @@ public final class DB
 				insert.append(DB.TO_STRING(viewIDValue));
 			}
 			
-			insert.append(" ) ");
+			insert.append(" FROM DUAL ");
 
 			if (counter >= 1000)
 			{
