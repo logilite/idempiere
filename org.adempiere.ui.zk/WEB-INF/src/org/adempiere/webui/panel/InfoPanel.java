@@ -2811,158 +2811,148 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	public void createT_Selection_InfoWindow(int AD_PInstance_ID)
 	{
 		MTable table = MTable.get(infoWindow.getAD_Table_ID());
-		int counter = 0;
-		StringBuilder select = new StringBuilder();
 		StringBuilder insert = new StringBuilder();
 		insert.append("INSERT INTO T_Selection_InfoWindow (AD_PINSTANCE_ID, ");
 		if (table != null && table.isUUIDKeyTable())
 			insert.append("T_SELECTION_UU");
 		else
 			insert.append("T_SELECTION_ID");
-		insert.append(", VIEWID, COLUMNNAME , VALUE_STRING, VALUE_NUMBER , VALUE_DATE, VALUE_NUMBER_ARRAY, VALUE_STRING_ARRAY) VALUES ( ");
+		insert.append(", COLUMNNAME, VALUE_STRING, VALUE_NUMBER, VALUE_DATE, VALUE_NUMBER_ARRAY, VALUE_STRING_ARRAY ) VALUES(?,?,?,?,?,?,?,?) ");
 		for (Entry<NamePair,LinkedHashMap<String, Object>> records : m_values.entrySet()) {
-			// set Record ID
-			NamePair knPair = records.getKey();
-			LinkedHashMap<String, Object> fields = records.getValue();
-			for (Entry<String, Object> field : fields.entrySet())
-			{
-				counter++;
-				if (counter > 1)
-					select.append(" , ( ");
-
-				select.append(AD_PInstance_ID).append(","); // AD_PINSTANCE_ID
-				select.append(knPair.getID()).append(","); // T_SELECTION_ID
-				if (knPair.getName() == null) // VIEWID
-					select.append("NULL,");
-				else
-					select.append("'").append(knPair.getName()).append("',");
-
-				if (field.getKey() == null)// COLUMNNAME
-					select.append("NULL,");
-				else
-					select.append("'").append(field.getKey()).append("',");
-
-				// set Values as Like VALUE_STRING, VALUE_NUMBER, VALUE_DATE
-				Object data = field.getValue();
-				if (data instanceof IDColumn)
+			//set Record ID
+			
+				LinkedHashMap<String, Object> fields = records.getValue();
+				for(Entry<String, Object> field : fields.entrySet())
 				{
-					IDColumn id = (IDColumn) data;
-					select.append("NULL,");
-					select.append(id.getRecord_ID());
-					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
-					select.append(", NULL, NULL");
-				}
-				else if (data instanceof UUIDColumn)
-				{
-					UUIDColumn id = (UUIDColumn) data;
-					select.append("NULL,");
-					select.append(id.getRecord_UU());
-					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
-					select.append(", NULL, NULL");
-				}					
-				else if (data instanceof String)
-				{
-					select.append("'").append(data).append("'");
-					select.append(",NULL");
-					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
-					select.append(", NULL, NULL");
-				}
-				else if (data instanceof MultiSelectColumn)
-				{
-					select.append("NULL, ");
-					select.append("NULL, ");
-					select.append("NULL::TIMESTAMP WITHOUT TIME ZONE, ");
-					Object multiValue = ((MultiSelectColumn)data).getValue();
-					if (multiValue instanceof Integer[])
+					List<Object> parameters = new ArrayList<Object>();
+					parameters.add(AD_PInstance_ID);
+					
+					Object key = records.getKey();
+					
+					if(key instanceof KeyNamePair)
 					{
-						select.append("'").append(Util.convertArrayToStringForDB(multiValue)).append("', ");
-						select.append("NULL");
+						KeyNamePair knp = (KeyNamePair)key;
+						parameters.add(knp.getKey());
+					}
+					else if(key instanceof ValueNamePair)
+					{
+						ValueNamePair vnp = (ValueNamePair)key;
+						parameters.add(vnp.getValue());
 					}
 					else
 					{
-						select.append("NULL, ");
-						select.append("'").append(Util.convertArrayToStringForDB(multiValue)).append("'");
+						parameters.add(key);
 					}
-				}
-				else if (data instanceof BigDecimal || data instanceof Integer || data instanceof Double)
-				{
-					select.append("NULL,");
-					if (data instanceof Double)
-					{
-						BigDecimal value = BigDecimal.valueOf((Double) data);
-						select.append(value);
-					}
-					else
-						select.append(data);
-					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
-					select.append(", NULL, NULL");
-				}
-				else if (data instanceof Integer)
-				{
-					select.append("NULL,");
-					select.append((Integer) data);
-					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
-					select.append(", NULL, NULL");
-				}
-				else if (data instanceof Timestamp || data instanceof Date)
-				{
-					select.append("NULL,");
-					select.append("NULL,");
-					select.append("'");
-					if (data instanceof Timestamp)
-					{
-						Timestamp value = new Timestamp(((Date) data).getTime());
-						select.append(value);
-					}
-					else
-					{
-						select.append(data);
-					}
-					select.append("'");
-					select.append(", NULL, NULL");
-				}
-				else if (data instanceof KeyNamePair) 
-				{
-					KeyNamePair knpData = (KeyNamePair) data;
-					select.append("NULL,");
-					select.append(knpData.getKey());
-					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
-					select.append(", NULL, NULL");
-				}
-				else if(data instanceof ValueNamePair)
-				{
-					ValueNamePair vnp = (ValueNamePair)data;
-					select.append("NULL,");
-					select.append(vnp.getValue());
-					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
-					select.append(", NULL, NULL");
-				}
-				else
-				{
-					if (data == null)
-						select.append("NULL");
-					else
-						select.append("'").append(data).append("'");
-					select.append(",NULL");
-					select.append(",NULL::TIMESTAMP WITHOUT TIME ZONE");
-					select.append(", NULL, NULL");
-				}
 
-				select.append(" ) ");
-			}
-
-			if (counter >= 1000)
-			{
-				DB.executeUpdateEx(insert + select.toString(), null);
-				select = new StringBuilder();
-				counter = 0;
-			}
+					parameters.add(field.getKey());
+					
+					Object data = field.getValue();
+					// set Values					
+					if (data instanceof IDColumn)
+					{
+						IDColumn id = (IDColumn) data;
+						parameters.add(null);
+						parameters.add(id.getRecord_ID());
+						parameters.add(null);
+						parameters.add(null);
+						parameters.add(null);
+					}					
+					else if (data instanceof UUIDColumn)
+					{
+						UUIDColumn id = (UUIDColumn) data;
+						parameters.add(null);
+						parameters.add(id.getRecord_UU());
+						parameters.add(null);
+						parameters.add(null);
+						parameters.add(null);
+					}					
+					else if (data instanceof String)
+					{
+						parameters.add(data);
+						parameters.add(null);
+						parameters.add(null);
+						parameters.add(null);
+						parameters.add(null);
+					}
+					else if (data instanceof Integer[] || data instanceof String[] )
+					{
+						parameters.add(null);
+						parameters.add(null);
+						parameters.add(null);
+						if (data instanceof Integer[]) {
+							parameters.add(data);
+							parameters.add(null);
+						} else {
+							parameters.add(null);
+							parameters.add(data);
+						}
+					}
+					else if (data instanceof BigDecimal || data instanceof Integer || data instanceof Double)
+					{
+						parameters.add(null);
+						if(data instanceof Double)
+						{	
+							BigDecimal value = BigDecimal.valueOf((Double)data);
+							parameters.add(value);
+						}	
+						else	
+							parameters.add(data);
+						parameters.add(null);
+						parameters.add(null);
+						parameters.add(null);
+					}
+					else if (data instanceof Integer)
+					{
+						parameters.add(null);
+						parameters.add((Integer)data);
+						parameters.add(null);
+						parameters.add(null);
+						parameters.add(null);
+					}
+					else if (data instanceof Timestamp || data instanceof Date)
+					{
+						parameters.add(null);
+						parameters.add(null);
+						if(data instanceof Date)
+						{
+							Timestamp value = new Timestamp(((Date)data).getTime());
+							parameters.add(value);
+						}
+						else 
+							parameters.add(data);
+						parameters.add(null);
+						parameters.add(null);
+					}
+					else if(data instanceof KeyNamePair)
+					{
+						KeyNamePair knpData = (KeyNamePair)data;
+						
+						parameters.add(null);
+						parameters.add(knpData.getKey());
+						parameters.add(null);
+						parameters.add(null);
+						parameters.add(null);
+					}
+					else if(data instanceof ValueNamePair)
+					{
+						ValueNamePair vnp = (ValueNamePair)data;
+						parameters.add(vnp.getValue());
+						parameters.add(null);
+						parameters.add(null);
+						parameters.add(null);
+						parameters.add(null);
+					}
+					else
+					{
+						parameters.add(data);
+						parameters.add(null);
+						parameters.add(null);
+						parameters.add(null);
+						parameters.add(null);
+					}
+					DB.executeUpdateEx(insert.toString(),parameters.toArray() , null);
+				}
 		}
-		if (counter > 0)
-		{
-			DB.executeUpdateEx(insert + select.toString(), null);
-		}
-
 	} // createT_Selection_InfoWindow
 	
     /**

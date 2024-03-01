@@ -855,47 +855,9 @@ public final class DB
 		else if (param.getClass().getName().equals("oracle.sql.BLOB"))
 			pstmt.setObject(index, param);
 		else if (param instanceof Integer[])
-		{
-			Connection conn = null;
-			
-			try {
-				conn = DB.getConnectionRW();
-				if ( conn != null )
-				{
-					Array array = conn.createArrayOf("numeric", (Integer[]) param);
-					pstmt.setArray(index, array);
-				}
-				else
-					throw new AdempiereException("Unable to create multi-select table array, no DB connection");
-			} catch (SQLException e) {
-				throw new AdempiereException("Error setting multi-select table array parameter", e);
-			}
-			finally {
-				if ( conn != null )
-					conn.close();
-			}
-		}
+			pstmt.setArray(index, buildDBArray(param));
 		else if (param instanceof String[])
-		{
-			Connection conn = null;
-			
-			try {
-				conn = DB.getConnectionRW();
-				if ( conn != null )
-				{
-					Array array = conn.createArrayOf("text", (String[]) param);
-					pstmt.setArray(index, array);
-				}
-				else
-					throw new AdempiereException("Unable to create multi-select list array, no DB connection");
-			} catch (SQLException e) {
-				throw new AdempiereException("Error setting multi-select list array parameter", e);
-			}
-			finally {
-				if ( conn != null )
-					conn.close();
-			}
-		}
+			pstmt.setArray(index, buildDBArray(param));
 		else
 			throw new DBException("Unknown parameter type "+index+" - "+param);
 	}
@@ -2866,6 +2828,35 @@ public final class DB
 		return retValue;
 	} // getSQLValueBooleanEx
 
+	public static Array buildDBArray(Object param) {
+		Connection conn = null;
+		try {
+			conn = DB.getConnection();
+			if ( conn != null )
+			{
+				if (param instanceof Integer[])
+					return conn.createArrayOf("numeric", (Integer[]) param);
+				else if (param instanceof String[])
+					return conn.createArrayOf("text", (String[]) param);
+			}
+			else
+			{
+				throw new AdempiereException("Unable to create multi-select table array, no DB connection");
+			}
+		} catch (SQLException e) {
+			throw new AdempiereException("Error setting multi-select table/list array parameter", e);
+		}
+		finally {
+			if (conn != null)
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+		}
+		return null;
+	} // buildDBArray
+	
 	/**
 	 * Create IN clause for cs
 	 * @param columnName
