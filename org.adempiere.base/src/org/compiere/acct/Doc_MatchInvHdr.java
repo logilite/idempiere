@@ -1,6 +1,7 @@
 package org.compiere.acct;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
@@ -17,7 +18,9 @@ import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MAcctSchemaElement;
 import org.compiere.model.MConversionRate;
+import org.compiere.model.MCost;
 import org.compiere.model.MCostDetail;
+import org.compiere.model.MCostElement;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
@@ -154,15 +157,19 @@ public class Doc_MatchInvHdr extends Doc
 		for (DocLine line : p_lines)
 		{
 			MMatchInv m_matchInv = (MMatchInv) line.getPO();
-			MInvoiceLine m_invoiceLine = (MInvoiceLine) m_matchInv.getC_InvoiceLine();
-			
-			MInvoice invoice = m_invoiceLine.getParent();
-			if(as.isAccrual() && m_matchInv.getReversal_ID() <= 0 && !invoice.isPosted())
-			{
-				p_Error = "Invoice not posted yet";
-				return null;
-			}
+			MInvoiceLine m_invoiceLine = null;
+			MInvoice invoice = null;
+			if (m_matchInv.getM_InOutLine_ID() > 0)
+			{//Handling MR line to MR line matching.
+				m_invoiceLine = (MInvoiceLine) m_matchInv.getC_InvoiceLine();
 
+				invoice = m_invoiceLine.getParent();
+				if (as.isAccrual() && m_matchInv.getReversal_ID() <= 0 && !invoice.isPosted())
+				{
+					p_Error = "Invoice not posted yet";
+					return null;
+				}
+			}
 			MInOutLine m_receiptLine = null;
 			if (m_matchInv.getM_InOutLine_ID() > 0)
 			{
@@ -193,7 +200,7 @@ public class Doc_MatchInvHdr extends Doc
 				// NotInvoicedReceipt DR
 				// From Receipt
 				BigDecimal multiplier = line.getQty()
-						.divide(m_receiptLine.getMovementQty(), 12, BigDecimal.ROUND_HALF_UP).abs();
+						.divide(m_receiptLine.getMovementQty(), 12, RoundingMode.HALF_UP).abs();
 				dr = fact.createLine(line, getAccount(Doc.ACCTTYPE_NotInvoicedReceipts, as), as.getC_Currency_ID(),
 						Env.ONE, null); // updated below
 				if (dr == null)
@@ -216,6 +223,7 @@ public class Doc_MatchInvHdr extends Doc
 				else
 				{
 					BigDecimal effMultiplier = multiplier;
+					//TODO this needs to test as it different from match invoice
 					if (getQty().signum() < 0)
 						effMultiplier = effMultiplier.negate();
 					
@@ -241,7 +249,7 @@ public class Doc_MatchInvHdr extends Doc
 			if (m_pc.isService())
 				expense = m_pc.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
 			BigDecimal LineNetAmt = m_invoiceLine.getLineNetAmt();
-			BigDecimal multiplier = line.getQty().divide(m_invoiceLine.getQtyInvoiced(), 12, BigDecimal.ROUND_HALF_UP)
+			BigDecimal multiplier = line.getQty().divide(m_invoiceLine.getQtyInvoiced(), 12, RoundingMode.HALF_UP)
 					.abs();
 			if (multiplier.compareTo(Env.ONE) != 0)
 				LineNetAmt = LineNetAmt.multiply(multiplier);
@@ -276,6 +284,7 @@ public class Doc_MatchInvHdr extends Doc
 				{
 					cr.setQty(getQty().negate());
 					BigDecimal effMultiplier = multiplier;
+					//TODO this needs to test as it different from match invoice
 					if (getQty().signum() < 0)
 						effMultiplier = effMultiplier.negate();
 					
@@ -312,6 +321,7 @@ public class Doc_MatchInvHdr extends Doc
 					cr.setQty(line.getQty().multiply(multiplier).negate());
 				}
 			}
+			//TODO Rounding correction logic missing here, do we needs to add it?
 			if (m_matchInv.getReversal_ID() == 0)
 			{
 				cr.setC_Activity_ID(m_invoiceLine.getC_Activity_ID());
@@ -394,7 +404,6 @@ public class Doc_MatchInvHdr extends Doc
 					fact.remove(dr);
 					fact.remove(cr);
 				}
-
 			}
 			// End Avoid usage of clearing accounts
 
@@ -402,7 +411,8 @@ public class Doc_MatchInvHdr extends Doc
 			{
 				// Invoice Price Variance difference
 				BigDecimal ipv = cr.getAcctBalance().add(dr.getAcctBalance()).negate();
-				processInvoicePriceVariance(line, as, fact, ipv, m_invoiceLine, m_pc);
+				BigDecimal ipvSource = dr.getAmtSourceDr().subtract(cr.getAmtSourceCr()).negate();
+				processInvoicePriceVariance(line, as, fact, ipv, m_invoiceLine, m_receiptLine, m_pc, ipvSource);
 				if (log.isLoggable(Level.FINE))
 					log.fine("IPV=" + ipv + "; Balance=" + fact.getSourceBalance());
 	
@@ -477,6 +487,29 @@ public class Doc_MatchInvHdr extends Doc
 		factLine.setM_Product_ID(m_invoiceLine.getM_Product_ID());
 		factLine.setQty(factLine.getQty());
 	}
+	
+	/**
+	 * Invoice currency & acct schema currency are not same then update AmtSource value
+	 * to avoid source not balanced error/ignore suspense balancing.
+	 * 
+	 * @param factLine
+	 * @param ipvSource
+	 */
+	protected void updateFactLineAmtSource(FactLine factLine, BigDecimal ipvSource)
+	{
+		// When only Rate differ then set Dr & Cr Source amount as zero.
+		factLine.setAmtSourceCr(Env.ZERO);
+		factLine.setAmtSourceDr(Env.ZERO);
+
+		// Price is vary then set Source amount according to source variance
+		if (ipvSource.compareTo(Env.ZERO) != 0)
+		{
+			if (ipvSource.signum() < 0)
+				factLine.setAmtSourceCr(ipvSource);
+			else
+				factLine.setAmtSourceDr(ipvSource);
+		}
+	}
 
 	/**
 	 * @param as
@@ -484,16 +517,62 @@ public class Doc_MatchInvHdr extends Doc
 	 * @param ipv
 	 */
 	protected void processInvoicePriceVariance(DocLine line, MAcctSchema as, Fact fact, BigDecimal ipv,
-			MInvoiceLine m_invoiceLine, ProductCost m_pc)
+			MInvoiceLine m_invoiceLine,MInOutLine m_receiptLine, ProductCost m_pc, BigDecimal ipvSource)
 	{
 		if (ipv.signum() == 0)
 			return;
 
-		FactLine pv = fact
-				.createLine(line, m_pc.getAccount(ProductCost.ACCTTYPE_P_IPV, as), as.getC_Currency_ID(), ipv);
-		updateFactLine(pv, m_invoiceLine);
-
 		MMatchInv matchInv = (MMatchInv) line.getPO();
+		String costingMethod = m_pc.getProduct().getCostingMethod(as);
+		BigDecimal amtVariance = Env.ZERO;
+		BigDecimal amtAsset = Env.ZERO;
+		BigDecimal qtyInv = m_invoiceLine.getQtyInvoiced();
+		BigDecimal qtyCost = null;
+		Boolean isStockCoverage = false;
+		
+		if (X_M_Cost.COSTINGMETHOD_AveragePO.equals(costingMethod)  && m_invoiceLine.getM_Product_ID() > 0)
+		{
+
+			int AD_Org_ID = m_receiptLine.getAD_Org_ID();
+			int M_AttributeSetInstance_ID = matchInv.getM_AttributeSetInstance_ID();
+
+			if (MAcctSchema.COSTINGLEVEL_Client.equals(as.getCostingLevel()))
+			{
+				AD_Org_ID = 0;
+				M_AttributeSetInstance_ID = 0;
+			}
+			else if (MAcctSchema.COSTINGLEVEL_Organization.equals(as.getCostingLevel()))
+				M_AttributeSetInstance_ID = 0;
+			else if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(as.getCostingLevel()))
+				AD_Org_ID = 0;
+
+			MCostElement ce = MCostElement.getMaterialCostElement(getCtx(), costingMethod, AD_Org_ID);
+			
+			MCostDetail cd = MCostDetail.get (as.getCtx(), "M_MatchInv_ID=? AND Coalesce(M_CostElement_ID,0)=0", 
+					matchInv.getM_MatchInv_ID(), M_AttributeSetInstance_ID, as.getC_AcctSchema_ID(), getTrxName());
+			if(cd!=null){
+				qtyCost = cd.getCurrentQty();
+			}else{
+				MCost c = MCost.get(getCtx(), getAD_Client_ID(), AD_Org_ID, m_invoiceLine.getM_Product_ID(),
+					as.getM_CostType_ID(), as.getC_AcctSchema_ID(), ce.getM_CostElement_ID(),
+					M_AttributeSetInstance_ID, null);
+				qtyCost = (c!=null? c.getCurrentQty():Env.ZERO);
+			}
+			
+			isStockCoverage = true;
+			if (qtyCost != null && qtyCost.compareTo(qtyInv) < 0 )
+			{
+				//If current cost qty < invoice qty
+				amtAsset = qtyCost.multiply(ipv).divide(qtyInv);
+				amtVariance = ipv.subtract(amtAsset);
+				
+			}else{
+				//If current qty >= invoice qty
+				amtAsset = ipv;
+			}
+			
+		}
+		
 		Trx trx = Trx.get(getTrxName(), false);
 		Savepoint savepoint = null;
 		boolean zeroQty = false;
@@ -502,7 +581,8 @@ public class Doc_MatchInvHdr extends Doc
 			savepoint = trx.setSavepoint(null);
 
 			if (!MCostDetail.createMatchInvoice(as, m_invoiceLine.getAD_Org_ID(), m_invoiceLine.getM_Product_ID(),
-					m_invoiceLine.getM_AttributeSetInstance_ID(), matchInv.getM_MatchInv_ID(), 0, ipv, BigDecimal.ZERO,
+					m_invoiceLine.getM_AttributeSetInstance_ID(), matchInv.getM_MatchInv_ID(), 0, 
+					isStockCoverage ? amtAsset: ipv, BigDecimal.ZERO,
 					"Invoice Price Variance", getTrxName()))
 			{
 				throw new RuntimeException("Failed to create cost detail record.");
@@ -539,29 +619,56 @@ public class Doc_MatchInvHdr extends Doc
 			}
 		}
 
-		String costingMethod = m_pc.getProduct().getCostingMethod(as);
+		//TODO Test for Expense type product?
 		MAccount account = m_pc.getAccount(ProductCost.ACCTTYPE_P_Asset, as);
 		if (m_pc.isService())
 			account = m_pc.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
 		if (X_M_Cost.COSTINGMETHOD_AveragePO.equals(costingMethod))
 		{
-			if (zeroQty)
-				account = m_pc.getAccount(ProductCost.ACCTTYPE_P_AverageCostVariance, as);
-			FactLine factLine = fact.createLine(line, m_pc.getAccount(ProductCost.ACCTTYPE_P_IPV, as),
-					as.getC_Currency_ID(), ipv.negate());
-			updateFactLine(factLine, m_invoiceLine);
+			FactLine varianceLine = null;
+			if (amtVariance.compareTo(Env.ZERO) != 0)
+			{
+				varianceLine = fact.createLine(null,
+						m_pc.getAccount(ProductCost.ACCTTYPE_P_AverageCostVariance, as), as.getC_Currency_ID(),
+						amtVariance);
+				updateFactLine(varianceLine,m_invoiceLine);
+				
+				if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
+				{
+					updateFactLineAmtSource(varianceLine, ipvSource.multiply(amtVariance).divide(ipv));
+				}
+			}
+			if (amtAsset.compareTo(Env.ZERO) != 0)
+			{
+				FactLine factLine = fact.createLine(null, account, as.getC_Currency_ID(), amtAsset);
+				updateFactLine(factLine,m_invoiceLine);
 
-			factLine = fact.createLine(line, account, as.getC_Currency_ID(), ipv);
-			updateFactLine(factLine, m_invoiceLine);
+				if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
+				{
+					updateFactLineAmtSource(factLine, ipvSource.multiply(amtAsset).divide(ipv));
+				}
+			}
 		}
 		else if (X_M_Cost.COSTINGMETHOD_AverageInvoice.equals(costingMethod) && !zeroQty)
 		{
-			FactLine factLine = fact.createLine(line, m_pc.getAccount(ProductCost.ACCTTYPE_P_IPV, as),
-					as.getC_Currency_ID(), ipv.negate());
-			updateFactLine(factLine, m_invoiceLine);
-
-			factLine = fact.createLine(line, account, as.getC_Currency_ID(), ipv);
-			updateFactLine(factLine, m_invoiceLine);
+			//TODO test for avg Invoice costing method as here dropped posting of posting to IPV account
+			FactLine factLine = fact.createLine(null, account, as.getC_Currency_ID(), ipv);
+			updateFactLine(factLine,m_invoiceLine);
+			
+			if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
+			{
+				updateFactLineAmtSource(factLine, ipvSource);
+			}
+		}else{
+			//For standard costing post to IPV account
+			FactLine pv = fact.createLine(null,
+				m_pc.getAccount(ProductCost.ACCTTYPE_P_IPV, as),
+					as.getC_Currency_ID(), ipv);
+			updateFactLine(pv,m_invoiceLine);
+			if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
+			{
+				updateFactLineAmtSource(pv, ipvSource);
+			}
 		}
 	}
 
@@ -574,7 +681,7 @@ public class Doc_MatchInvHdr extends Doc
 			MMatchInv matchInv = (MMatchInv) line.getPO();
 
 			BigDecimal LineNetAmt = m_invoiceLine.getLineNetAmt();
-			BigDecimal multiplier = line.getQty().divide(m_invoiceLine.getQtyInvoiced(), 12, BigDecimal.ROUND_HALF_UP)
+			BigDecimal multiplier = line.getQty().divide(m_invoiceLine.getQtyInvoiced(), 12, RoundingMode.HALF_UP)
 					.abs();
 			if (multiplier.compareTo(Env.ONE) != 0)
 				LineNetAmt = LineNetAmt.multiply(multiplier);
@@ -591,7 +698,7 @@ public class Doc_MatchInvHdr extends Doc
 						&& mInv[i].getM_AttributeSetInstance_ID() == matchInv.getM_AttributeSetInstance_ID())
 				{
 					tQty = tQty.add(mInv[i].getQty());
-					multiplier = mInv[i].getQty().divide(m_invoiceLine.getQtyInvoiced(), 12, BigDecimal.ROUND_HALF_UP)
+					multiplier = mInv[i].getQty().divide(m_invoiceLine.getQtyInvoiced(), 12, RoundingMode.HALF_UP)
 							.abs();
 					tAmt = tAmt.add(m_invoiceLine.getLineNetAmt().multiply(multiplier));
 				}
@@ -642,13 +749,12 @@ public class Doc_MatchInvHdr extends Doc
 			{
 				BigDecimal totalAmt = allocation.getAmt();
 				BigDecimal totalQty = allocation.getQty();
-				BigDecimal amt = totalAmt.multiply(tQty).divide(totalQty, 12, BigDecimal.ROUND_HALF_UP);
+				BigDecimal amt = totalAmt.multiply(tQty).divide(totalQty, 12, RoundingMode.HALF_UP);
 				if (orderLine.getC_Currency_ID() != as.getC_Currency_ID())
 				{
 					I_C_Order order = orderLine.getC_Order();
-					Timestamp dateAcct = order.getDateAcct();
 					BigDecimal rate = MConversionRate.getRate(order.getC_Currency_ID(), as.getC_Currency_ID(),
-							dateAcct, order.getC_ConversionType_ID(), order.getAD_Client_ID(), order.getAD_Org_ID());
+							getDateAcct(), order.getC_ConversionType_ID(), order.getAD_Client_ID(), order.getAD_Org_ID());
 					if (rate == null)
 					{
 						p_Error = "Purchase Order not convertible - " + as.getName();
@@ -656,7 +762,7 @@ public class Doc_MatchInvHdr extends Doc
 					}
 					amt = amt.multiply(rate);
 					if (amt.scale() > as.getCostingPrecision())
-						amt = amt.setScale(as.getCostingPrecision(), BigDecimal.ROUND_HALF_UP);
+						amt = amt.setScale(as.getCostingPrecision(), RoundingMode.HALF_UP);
 				}
 				int elementId = allocation.getC_OrderLandedCost().getM_CostElement_ID();
 				BigDecimal elementAmt = landedCostMap.get(elementId);
