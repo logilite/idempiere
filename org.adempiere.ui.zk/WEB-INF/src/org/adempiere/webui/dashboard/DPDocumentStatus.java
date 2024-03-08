@@ -29,23 +29,16 @@
 
 package org.adempiere.webui.dashboard;
 
-import java.sql.Timestamp;
 import org.adempiere.webui.apps.BusyDialog;
-
-import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.apps.graph.WDocumentStatusPanel;
-import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.ToolBarButton;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ServerPushTemplate;
 import org.adempiere.webui.util.ZkContextRunnable;
-import org.compiere.util.DisplayType;
 import org.compiere.Adempiere;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
-import org.zkoss.zk.ui.Desktop;
-import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -61,29 +54,16 @@ public class DPDocumentStatus extends DashboardPanel implements EventListener<Ev
 	 */
 	private static final long serialVersionUID = 7904122964566112177L;
 	private WDocumentStatusPanel statusPanel;
-	private Label statusLabel;
 
 	@Override
 	public void refresh(ServerPushTemplate template) {
-		
-		final DPDocumentStatus documentStatus = this;
-		// An Async task
-		AEnv.executeAsyncDesktopTask(new Runnable() {
-			@Override
-			public void run() {
-				statusPanel.refresh();
-				template.executeAsync(documentStatus);
-			}
-		});
+		statusPanel.refresh();
+		template.executeAsync(this);
 	}
 
 	@Override
 	public void updateUI() {
 		statusPanel.updateUI();
-		// show last run time
-		String lastRunTime = DisplayType.getDateFormat(DisplayType.DateTime, Env.getLanguage(Env.getCtx()))
-				.format(new Timestamp(System.currentTimeMillis()));
-		statusLabel.setText(lastRunTime);
 	}
 
 	/**
@@ -100,7 +80,7 @@ public class DPDocumentStatus extends DashboardPanel implements EventListener<Ev
 
 		Toolbar documentStatusToolbar = new Toolbar();
 		this.appendChild(documentStatusToolbar);
-		
+
 		if (ThemeManager.isUseFontIconForImage())
 		{
 			ToolBarButton btn = new ToolBarButton();
@@ -118,9 +98,6 @@ public class DPDocumentStatus extends DashboardPanel implements EventListener<Ev
 			imgr.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Refresh")));
 			imgr.addEventListener(Events.ON_CLICK, this);
 		}
-		
-		statusLabel = new Label();
-		documentStatusToolbar.appendChild(statusLabel);
 	}
 
 	@Override

@@ -118,7 +118,6 @@ import org.zkoss.zul.Iframe;
 import org.zkoss.zul.Include;
 import org.zkoss.zul.Panel;
 import org.zkoss.zul.Panelchildren;
-import org.zkoss.zul.Popup;
 import org.zkoss.zul.Separator;
 import org.zkoss.zul.Timer;
 import org.zkoss.zul.Toolbar;
@@ -248,12 +247,7 @@ public class DashboardController implements EventListener<Event> {
         			dps = MDashboardPreference.getForSession(AD_User_ID, AD_Role_ID, true);
         		}
         	}
-
-			String[] size = null;
-			String height = "100%";
-			String proportion = MSysConfig.getValue(MSysConfig.DP_COLUMN_WIDTH_PROPORTION,
-					Env.getAD_Client_ID(Env.getCtx()));
-
+        	               
         	noOfCols = MDashboardPreference.getForSessionColumnCount(isShowInDashboard, AD_User_ID, AD_Role_ID);        	
         	if (ClientInfo.isMobile() && isShowInDashboard) {
 	        	if (ClientInfo.maxWidth(ClientInfo.MEDIUM_WIDTH-1)) {
@@ -265,38 +259,10 @@ public class DashboardController implements EventListener<Event> {
 	        	}
         	}
         	this.noOfCols = noOfCols;
-
+            
         	int dashboardWidth = isShowInDashboard ? DEFAULT_DASHBOARD_WIDTH : 100;
             width = noOfCols <= 0 ? dashboardWidth : dashboardWidth / noOfCols;
             int extraWidth = 100 - (noOfCols <= 0 ? dashboardWidth : width * noOfCols) - (100 - dashboardWidth - 1);
-
-			if (!Util.isEmpty(proportion, true))
-			{
-				size = proportion.split(",");
-				try
-				{
-					int totalwidth = 0;
-					for (int i = 0; i < size.length; i++)
-					{
-						if (!Util.isEmpty(size[i], true))
-							totalwidth += Integer.parseInt(size[i].trim());
-						else
-							totalwidth += width;
-					}
-					// Panels get overlap if width is greater than 100.
-					if (totalwidth > 100)
-					{
-						height = "";
-					}
-				}
-				catch (NumberFormatException e)
-				{
-					size = null;
-					logger.log(Level.SEVERE, "Invalid data of DP column width proportion in SysConfig", e);
-				}
-			}
-
-            int currentColumn = 0;
             for (final MDashboardPreference dp : dps)            	
 			{            	            	            	
             	if(!dp.isActive())
@@ -307,44 +273,36 @@ public class DashboardController implements EventListener<Event> {
             	
             	MDashboardContent dc = new MDashboardContent(dp.getCtx(), dp.getPA_DashboardContent_ID(), dp.get_TrxName());
             	
-				int currentWidth = width;
 	        	int columnNo = dp.getColumnNo();
 	        	int effColumn = columnNo;
 	        	if (effColumn+1 > noOfCols)
 	        		effColumn = noOfCols-1;
 	        	if(dashboardColumnLayout == null || currentColumnNo != effColumn)
-				{
-					if (isShowInDashboard && size != null && size.length > 0 && size.length >= noOfCols
-							&& size.length > currentColumn && !Util.isEmpty(size[currentColumn], true))
-					{
-						currentWidth = Integer.parseInt(size[currentColumn].trim());
-					}
-					dashboardColumnLayout = new Vlayout();
+	        	{
+	        		dashboardColumnLayout = new Vlayout();
 	        		dashboardColumnLayout.setSclass("dashboard-column");
 					dashboardColumnLayout.setAttribute(COLUMN_NO_ATTRIBUTE, columnNo);
 					dashboardColumnLayout.setAttribute(IS_SHOW_IN_DASHBOARD_ATTRIBUTE, isShowInDashboard);
 					dashboardColumnLayout.setAttribute(IS_ADDITIONAL_COLUMN_ATTRIBUTE, false);
-	
-					Anchorchildren dashboardColumn = new Anchorchildren();
-					dashboardColumn.setAnchor(currentWidth + "% " + height);
+	        		Anchorchildren dashboardColumn = new Anchorchildren();
+	        		dashboardColumn.setAnchor(width + "%" + " 100%");
 	        		if (!ClientInfo.isMobile())
 	        		{
 		        		dashboardColumn.setDroppable("true");
 		        		dashboardColumn.addEventListener(Events.ON_DROP, this);
 	        		}
-					dashboardColumn.appendChild(dashboardColumnLayout);
-					columnList.add(dashboardColumn);
-					dashboardLayout.appendChild(dashboardColumn);
+	        		dashboardColumn.appendChild(dashboardColumnLayout);
+	        		columnList.add(dashboardColumn);
+	                dashboardLayout.appendChild(dashboardColumn);
 	                ZKUpdateUtil.setHflex(dashboardColumnLayout, "1");
 
 	                currentColumnNo = effColumn;
 	        	}
 
-				Panel panel = null;
-				if (update) {
-					panel = findPanel(dp.getPA_DashboardContent_ID(),
-							dp.getPA_DashboardPreference_ID());
-				} else {
+	        	Panel panel = null;
+	        	if (update) {
+	        		panel = findPanel(dp.getPA_DashboardContent_ID(), dp.getPA_DashboardPreference_ID());
+	        	} else {
 				panel = newGadgetPanel(dp, dc);
 	        	}
 	        	if (panel != null && panel.getAttribute(PANEL_EMPTY_ATTRIBUTE) == null)
@@ -784,7 +742,6 @@ public class DashboardController implements EventListener<Event> {
         String htmlContent = dashboardContent.get_ID() > 0 ? dashboardContent.get_Translation(MDashboardContent.COLUMNNAME_HTML) : null;
         if(htmlContent != null)
         {
-        	htmlContent = Env.parseContext(Env.getCtx(), 0, htmlContent, true);
             StringBuilder result = new StringBuilder("<html><head>");
 
     		URL url = getClass().getClassLoader().getResource("org/compiere/css/PAPanel.css");
@@ -1865,22 +1822,9 @@ public class DashboardController implements EventListener<Event> {
 							 iPara.setP_Number(new BigDecimal (value.toString()));
 							 iPara.setInfo(getDisplay(pInstance, iPara, id));
 						 }
-						
-					} 
-					else if (iPara.getDisplayType() == DisplayType.Search
-							|| iPara.getDisplayType() == DisplayType.Table
-							|| iPara.getDisplayType() == DisplayType.TableDir) {
-						int id = new BigDecimal(value.toString()).intValue();
-						if (isTo) {
-							iPara.setP_Number_To(
-									new BigDecimal(value.toString()));
-							iPara.setInfo_To(getDisplay(pInstance, iPara, id));
-						} else {
-							iPara.setP_Number(new BigDecimal(value.toString()));
-							iPara.setInfo(getDisplay(pInstance, iPara, id));
-						}
-					}
-					else if (DisplayType.isDate(iPara.getDisplayType())) {
+					 }
+					 else if (DisplayType.isDate(iPara.getDisplayType()))
+					 {
 						 Timestamp ts = null;
 						 if (value instanceof Timestamp)
 							 ts = (Timestamp)value;
@@ -1945,8 +1889,7 @@ public class DashboardController implements EventListener<Event> {
 
 			if (pp != null) {
 				MLookupInfo mli = MLookupFactory.getLookupInfo(Env.getCtx(), 0, 0, pp.getAD_Reference_ID(), Env.getLanguage(Env.getCtx()), pp.getColumnName(), pp.getAD_Reference_Value_ID(), false, "");
-				// custom logic for branch logilite-7.1 - to handle NPE
-				if (mli != null) {
+
 				PreparedStatement pstmt = null;
 				ResultSet rs = null;
 				StringBuilder name = new StringBuilder("");
@@ -1979,7 +1922,6 @@ public class DashboardController implements EventListener<Event> {
 				}
 
 				return name.toString();
-			}
 			}
 		}
 		catch (Exception e) {

@@ -29,35 +29,22 @@
 
 package org.adempiere.webui.apps.graph;
 
-import java.sql.Timestamp;
-
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.Panel;
-import org.adempiere.webui.component.ToolBarButton;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.component.ZkCssHelper;
-import org.adempiere.webui.desktop.AbstractDesktop;
-import org.adempiere.webui.desktop.IDesktop;
 import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.session.SessionManager;
-import org.adempiere.webui.theme.ThemeManager;
-import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MDocumentStatus;
 import org.compiere.model.MQuery;
-import org.compiere.model.MSysConfig;
 import org.compiere.print.MPrintColor;
 import org.compiere.print.MPrintFont;
-import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
-import org.compiere.util.Msg;
-import org.compiere.util.Util;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Div;
-import org.zkoss.zul.Image;
-import org.zkoss.zul.Space;
 
 /**
  * 	Document Status ({@link MDocumentStatus}) Indicator
@@ -98,12 +85,6 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 	private MDocumentStatus		m_documentStatus = null;
 	private int statusCount;
 	private Label statusLabel;
-	private ToolBarButton btnHelp;
-	private Image imgrHelp;
-	private String helpTitle;
-	private Label helpLabel;
-	private Timestamp lastRunTime;
-	private long queryTime;
 
 	/**
 	 * 	Get Document Status
@@ -122,9 +103,7 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 		Div div = new Div();
 		appendChild(div);
 		Label nameLabel = new Label();
-		String label = m_documentStatus.get_Translation(MDocumentStatus.COLUMNNAME_Name);
-		helpTitle = label + " Information";
-		nameLabel.setText(label + ": ");
+		nameLabel.setText(m_documentStatus.get_Translation(MDocumentStatus.COLUMNNAME_Name) + ": ");
 		nameLabel.setTooltiptext(m_documentStatus.get_Translation(MDocumentStatus.COLUMNNAME_Description));
 		String nameColorStyle = "";
 		int Name_PrintColor_ID = m_documentStatus.getName_PrintColor_ID();
@@ -146,8 +125,7 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 		nameLabel.setStyle(nameColorStyle+nameFontStyle);
 		div.appendChild(nameLabel);
 
-		statusLabel = new Label();
-		helpLabel = new Label();
+		statusLabel = new Label();		
 		String numberColorStyle = "";
 		int Number_PrintColor_ID = m_documentStatus.getNumber_PrintColor_ID();
 		if (Number_PrintColor_ID > 0) {
@@ -169,106 +147,52 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 		}
 		statusLabel.setStyle(numberColorStyle+numberFontStyle);
 		div.appendChild(statusLabel);
-		
-		if (ThemeManager.isUseFontIconForImage()) {
-			btnHelp = new ToolBarButton();
-			btnHelp.setIconSclass("z-icon-Help");
-			div.appendChild(btnHelp);
-			btnHelp.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Help")));
-			btnHelp.addEventListener(Events.ON_CLICK, this);
-		} else {
-			imgrHelp = new Image(ThemeManager.getThemeResource("images/Help16.png"));
-			imgrHelp.setStyle("text-align: right; cursor: pointer; width:12px; height:12px;");
-			div.appendChild(new Space());
-			div.appendChild(imgrHelp);
-			imgrHelp.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Help")));
-			imgrHelp.addEventListener(Events.ON_CLICK, this);
-		}
 
 		this.addEventListener(Events.ON_CLICK, this);
 	}
 
 	@Override
-	public void onEvent(Event event) throws Exception {
-		String eventName = event.getName();
-
-		if (eventName.equals(Events.ON_CLICK)) {
-			if (event.getTarget() == this) {
-				int AD_Window_ID = m_documentStatus.getAD_Window_ID();
-				int AD_Form_ID = m_documentStatus.getAD_Form_ID();
-				if (AD_Window_ID > 0) {
-					MQuery query = new MQuery(m_documentStatus.getAD_Table_ID());
-					query.addRestriction(MDocumentStatus.getWhereClause(m_documentStatus));
-					
-					// Apply PredefinedContextVariables from Document Status
-					String predefinedVariables = m_documentStatus.getPredefinedContextVariables();
-					if (predefinedVariables != null && !Util.isEmpty(predefinedVariables))
-					{
-						IDesktop desktop = SessionManager.getAppDesktop();
-						if (desktop instanceof AbstractDesktop)
-							((AbstractDesktop) desktop)
-									.setPredefinedContextVariables(predefinedVariables);
-					}
-					
-					AEnv.zoom(AD_Window_ID, query);
-				} else if (AD_Form_ID > 0) {
-					ADForm form = ADForm.openForm(AD_Form_ID);
-
-					form.setAttribute(Window.MODE_KEY, Window.MODE_EMBEDDED);
-					SessionManager.getAppDesktop().showWindow(form);
-				}
-			} else if (event.getTarget() == btnHelp || event.getTarget() == imgrHelp) {
-				FDialog.info(0, this, helpLabel.getValue());
-			}
+	public void onEvent(Event event) throws Exception
+	{
+		int AD_Window_ID = m_documentStatus.getAD_Window_ID();
+		int AD_Form_ID = m_documentStatus.getAD_Form_ID();
+		if (AD_Window_ID > 0)
+		{
+			MQuery query = new MQuery(m_documentStatus.getAD_Table_ID());
+			query.addRestriction(MDocumentStatus.getWhereClause(m_documentStatus));
+			AEnv.zoom(AD_Window_ID, query);
 		}
-	}
+		else if ( AD_Form_ID > 0 )
+		{
+			ADForm form = ADForm.openForm(AD_Form_ID);
+
+			form.setAttribute(Window.MODE_KEY, Window.MODE_EMBEDDED);
+			SessionManager.getAppDesktop().showWindow(form);
+		}
 		
+	}
+
 	/**
 	 * Load {@link #m_documentStatus}
 	 */
 	public void refresh() {
-		lastRunTime = new Timestamp(System.currentTimeMillis());
 		MDocumentStatus refresh_documentStatus = MDocumentStatus.get(Env.getCtx(), m_documentStatus.getPA_DocumentStatus_ID());
 		if(refresh_documentStatus != null) {
 			m_documentStatus = 	refresh_documentStatus;
 		}
-		statusCount = MDocumentStatus.evaluate(m_documentStatus);
-		long currenutTime = new Timestamp(System.currentTimeMillis()).getTime();
-		queryTime = currenutTime - lastRunTime.getTime();
+		statusCount = MDocumentStatus.evaluate(m_documentStatus);		
 	}
 
 	/**
 	 * Update UI with data loaded in {@link #refresh()}
 	 */
 	public void updateUI() {
-		statusLabel.setText(Integer.toString(statusCount));
-
-		// default 500 milliseconds
-		int interval = MSysConfig.getIntValue(MSysConfig.ZK_DASHBOARD_SLOW_QUERY_TIME_INTERVAL, 500,
-				Env.getAD_Client_ID(Env.getCtx()));
-
-		if (queryTime > interval) {
-			if (ThemeManager.isUseFontIconForImage())
-				btnHelp.setVisible(true);
-			else
-				imgrHelp.setVisible(true);
-			
-			String runTime = DisplayType.getDateFormat(DisplayType.DateTime, Env.getLanguage(Env.getCtx()))
-					.format(lastRunTime);
-			helpLabel.setText("<b>" + helpTitle + "</b> \n\n Records Count : " + statusCount + "\n Last Run Time : "
-					+ runTime + "\n Last Query Run Time : " + queryTime + " ms");
-
-		} else {
-			if (ThemeManager.isUseFontIconForImage())
-				btnHelp.setVisible(false);
-			else
-				imgrHelp.setVisible(false);
-		}
+		statusLabel.setText(Integer.toString(statusCount));		
 	}
 
 	/**
 	 * Return the count for this indicator
-	 * @return
+	 * @return status count
 	 */
 	public int getStatusCount() {
 		return statusCount;
