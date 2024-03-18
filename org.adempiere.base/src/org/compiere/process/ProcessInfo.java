@@ -194,6 +194,8 @@ public class ProcessInfo implements Serializable
 
 	private int m_AD_Scheduler_ID = 0;
 	
+	private Serializable internalReportObject = null;
+	
 	/** For scheduler: true to notify scheduler recipients with process execution result using AD_Scheduler.R_MailTexT_ID mail template (if define). Default is true. **/
 	private boolean isNotifyRecipients = true;
 	
@@ -1175,5 +1177,22 @@ public class ProcessInfo implements Serializable
 	 */
 	public void setNotifyRecipients(boolean isNotifyRecipients) {
 		this.isNotifyRecipients = isNotifyRecipients;
+	}
+	
+	/**
+	 * Get internal report object.<br/>
+	 * For Jasper Report, to get JasperPrint, set export to true and ExportFileExtension to "JasperPrint".
+	 * @return internal report object (for e.g JasperPrint)
+	 */
+	public Serializable getInternalReportObject() {
+		return internalReportObject;
+	}
+	
+	/**
+	 * Set internal report object (for e.g JasperPrint)
+	 * @param reportObject
+	 */
+	public void setInternalReportObject(Serializable reportObject) {
+		internalReportObject = reportObject;
 	}
 }   //  ProcessInfo
