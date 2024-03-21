@@ -33,6 +33,8 @@ import java.util.Properties;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 
+import javax.activation.FileDataSource;
+
 import org.adempiere.base.upload.IUploadService;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.report.jasper.ReportStarter;
@@ -717,7 +719,7 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 				dialog.setPO(po);
 			}
 			dialog.init(Msg.getMsg(Env.getCtx(), "SendMail"),
-				from, to, subject, "", attachment,m_WindowNo,m_printInfo.getAD_Table_ID(),m_printInfo.getRecord_ID(),
+				from, to, subject, "", new FileDataSource(attachment),m_WindowNo,m_printInfo.getAD_Table_ID(),m_printInfo.getRecord_ID(),
 				null, m_printInfo);
 			dialog.show();
 		}

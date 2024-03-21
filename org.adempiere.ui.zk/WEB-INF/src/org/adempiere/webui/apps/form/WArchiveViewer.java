@@ -35,7 +35,6 @@ import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.Callback;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.LayoutUtils;
-import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Button;
 import org.adempiere.webui.component.Checkbox;
 import org.adempiere.webui.component.Column;
@@ -744,7 +743,7 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 		IEmailDialog dialog = EMailDialogUtil.getEmailDialog();
 		if (dialog != null)
 		{
-			dialog.init(Msg.getMsg(Env.getCtx(), "SendMail"), from, "", "", "", attachment, m_WindowNo, ar.getAD_Table_ID(),
+			dialog.init(Msg.getMsg(Env.getCtx(), "SendMail"), from, "", "", "", new FileDataSource(attachment), m_WindowNo, ar.getAD_Table_ID(),
 					ar.getRecord_ID(), ar.getRecord_UU(), null);
 			dialog.show();
 		}

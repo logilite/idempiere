@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.xml.bind.DatatypeConverter;
 
 import org.adempiere.webui.apps.AEnv;
@@ -139,7 +140,7 @@ public class DefaultFeedbackService implements IFeedbackService {
 					Msg.getMsg(Env.getCtx(), "EMailSupport"),
 					MUser.get(Env.getCtx()),"",
 					MSystem.get(Env.getCtx()).getName() + " " + Msg.getMsg(Env.getCtx(), "TraceInfo"),
-					"", file, 0, 0, 0, null, null);
+					"", new FileDataSource(file), 0, 0, 0, null, null);
 				if(dialog instanceof Window)
 					((Window)dialog).setAttribute(Window.MODE_KEY, Mode.OVERLAPPED);			
 				
@@ -160,13 +161,12 @@ public class DefaultFeedbackService implements IFeedbackService {
 					dialog.addCC(s.trim(), false);
 			}
 
-			
+			dialog.show();
 			if (imageBytes != null && imageBytes.length > 0) {
 				ByteArrayDataSource screenShot = new ByteArrayDataSource(imageBytes, "image/png");
 				screenShot.setName("screenshot.png");
 				dialog.addAttachment(screenShot, true);
 			}
-			dialog.show();
 		}
 			}
 		

@@ -63,7 +63,6 @@ import org.compiere.model.MRole;
 import org.compiere.model.MSession;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
-import org.compiere.model.MWindow;
 import org.compiere.model.MZoomCondition;
 import org.compiere.model.PO;
 import org.compiere.util.CCache;
@@ -192,6 +191,7 @@ public final class AEnv
 		MTable table = MTable.get(Env.getCtx(), AD_Table_ID);
 		String uuColName = PO.getUUIDColumnName(table.getTableName());
 		MQuery query = MQuery.getEqualQuery(uuColName, Record_UU);
+		query.setTableName(table.getTableName());
 		query.setZoomTableName(table.getTableName());
 		query.setZoomColumnName(uuColName);
 		query.setZoomValue(Record_UU);
@@ -230,42 +230,12 @@ public final class AEnv
 		zoom(AD_Window_ID, query);
 	}	//	zoom
 
-	/*************************************************************************
-	 * Zoom
-	 * 
-	 * @param AD_Window_ID
+	/**
+	 * Call {@link #zoom(int, int, MQuery, int)}
 	 * @param AD_Table_ID
 	 * @param Record_ID
+	 * @param query
 	 */
-	public static void zoom(int AD_Window_ID, int AD_Table_ID, int Record_ID)
-	{
-
-		// No window to Zoom to
-		if (AD_Window_ID == 0)
-		{
-			zoom(AD_Table_ID, Record_ID);
-		}
-		else
-		{
-			MWindow window = MWindow.get(Env.getCtx(), AD_Window_ID);
-			if (window != null && window.getTabs(false, null).length > 0)
-			{
-
-				MTable table = null;
-				if (AD_Table_ID > 0)
-					table = MTable.get(Env.getCtx(), AD_Table_ID);
-				else
-					table = MTable.get(Env.getCtx(), window.getTabs(false, null)[0].getAD_Table_ID());
-				MQuery query = MQuery.getEqualQuery(table.getKeyColumns()[0], Record_ID);
-				query.setTableName(table.getTableName());
-				query.setZoomTableName(table.getTableName());
-				query.setZoomColumnName(table.getKeyColumns()[0]);
-				query.setZoomValue(Record_ID);
-				AEnv.zoom(AD_Window_ID, query);
-			}
-		}
-	} // zoom
-
 	public static void zoom (int AD_Table_ID, int Record_ID, MQuery query) {
 		zoom (AD_Table_ID, Record_ID, query, 0);
 	}

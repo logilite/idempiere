@@ -13,8 +13,6 @@
 package org.adempiere.webui.window;
 
 
-import java.io.File;
-
 import javax.activation.DataSource;
 
 import org.compiere.model.MUser;
@@ -28,8 +26,21 @@ import org.compiere.model.PrintInfo;
 public interface IEmailDialog
 {
 
+	/**
+	 * @param title
+	 * @param from
+	 * @param to
+	 * @param subject
+	 * @param message
+	 * @param attachment
+	 * @param m_WindowNo
+	 * @param ad_Table_ID
+	 * @param record_ID
+	 * @param record_UU
+	 * @param printInfo
+	 */
 	public void init(String title, MUser from, String to, String subject, String message, 
-			File attachment, int m_WindowNo, int ad_Table_ID, int record_ID, String record_UU, PrintInfo printInfo);
+			DataSource attachment, int m_WindowNo, int ad_Table_ID, int record_ID, String record_UU, PrintInfo printInfo);
 
 	public void addTo(String supportEMail, boolean isShowEmailFirst);
 	public String getTo();

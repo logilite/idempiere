@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import javax.servlet.http.HttpSession;
+import javax.activation.FileDataSource;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.Callback;
@@ -53,7 +53,6 @@ import org.adempiere.webui.window.WEMailDialog;
 import org.adempiere.webui.window.WTextEditorDialog;
 import org.compiere.model.MAttachment;
 import org.compiere.model.MAttachmentEntry;
-import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.MUser;
@@ -67,7 +66,6 @@ import org.zkoss.util.media.AMedia;
 import org.zkoss.util.media.Media;
 import org.zkoss.zk.au.out.AuEcho;
 import org.zkoss.zk.ui.Component;
-import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -123,14 +121,14 @@ public class WAttachment extends Window implements EventListener<Event>
 
 	protected Button bDelete = ButtonFactory.createNamedButton(ConfirmPanel.A_DELETE, false, true);
 	protected Button bSave = new Button();
-	private Button bSaveAllAsZip = new Button();
+	protected Button bSaveAllAsZip = new Button();
 	protected Button bDeleteAll = new Button();
 	protected Button bLoad = new Button();
 	protected Button bCancel = ButtonFactory.createNamedButton(ConfirmPanel.A_CANCEL, false, true);
-	private boolean bCancelClicked = false;
-	private Button bOk = ButtonFactory.createNamedButton(ConfirmPanel.A_OK, false, true);
-	private Button bPreview = new Button();
-	private Button bEmail = new Button();
+	protected boolean bCancelClicked = false;
+	protected Button bOk = ButtonFactory.createNamedButton(ConfirmPanel.A_OK, false, true);
+	protected Button bPreview = new Button();
+	protected Button bEmail = new Button();
 
 	protected Panel previewPanel = new Panel();
 
@@ -142,19 +140,18 @@ public class WAttachment extends Window implements EventListener<Event>
 
 	protected int displayIndex;
 
-	private String orientation;
-	protected boolean isAllowDeleteAttachment; 
+	protected String orientation;
 
-	private int maxPreviewSize;
+	protected int maxPreviewSize;
 
-	private Component customPreviewComponent;
+	protected Component customPreviewComponent;
 	
-	private Progressmeter progress = new Progressmeter(0);
+	protected Progressmeter progress = new Progressmeter(0);
 
-	private static List<String> autoPreviewList;
+	protected static List<String> autoPreviewList;
 	
 	/* SysConfig USE_ESC_FOR_TAB_CLOSING */
-	private boolean isUseEscForTabClosing = MSysConfig.getBooleanValue(MSysConfig.USE_ESC_FOR_TAB_CLOSING, false, Env.getAD_Client_ID(Env.getCtx()));
+	protected boolean isUseEscForTabClosing = MSysConfig.getBooleanValue(MSysConfig.USE_ESC_FOR_TAB_CLOSING, false, Env.getAD_Client_ID(Env.getCtx()));
 
 	static {
 		autoPreviewList = new ArrayList<String>();
@@ -217,11 +214,8 @@ public class WAttachment extends Window implements EventListener<Event>
 	{
 		super();
 		maxPreviewSize = MSysConfig.getIntValue(MSysConfig.ZK_MAX_ATTACHMENT_PREVIEW_SIZE, 1048576, Env.getAD_Client_ID(Env.getCtx()));
-		
-		if (log.isLoggable(Level.CONFIG)) log.config("ID=" + AD_Attachment_ID + ", Table=" + AD_Table_ID + ", Record=" + Record_ID + ", RecordUU=" + Record_UU);
-		MRole role = MRole.get(Env.getCtx(), Env.getAD_Role_ID(Env.getCtx()));
-		isAllowDeleteAttachment = role.isAllowDeleteAttachment();
 
+		if (log.isLoggable(Level.CONFIG)) log.config("ID=" + AD_Attachment_ID + ", Table=" + AD_Table_ID + ", Record=" + Record_ID + ", RecordUU=" + Record_UU);
 
 		m_WindowNo = WindowNo;
 		this.addEventListener(DialogEvents.ON_WINDOW_CLOSE, this);
@@ -263,11 +257,9 @@ public class WAttachment extends Window implements EventListener<Event>
 		if (size > 0)
 			maxUploadSize = "" + size;
 
-		String sessionID = ((HttpSession) Executions.getCurrent().getSession().getNativeSession()).getId();
-
-		Clients.evalJavaScript("dropToAttachFiles.init('" + this.getUuid() + "','" + mainPanel.getUuid() + "','"
+		Clients.evalJavaScript("idempiere.dropToAttachFiles('" + this.getUuid() + "','" + mainPanel.getUuid() + "','"
 				+ this.getDesktop().getId() + "','" + progress.getUuid() + "','" + sizeLabel.getUuid() + "','"
-				+ maxUploadSize + "','" + sessionID + "');");
+				+ maxUploadSize + "');");
 
 	} // WAttachment
 
@@ -319,7 +311,6 @@ public class WAttachment extends Window implements EventListener<Event>
 
 		cbContent.setMold("select");
 		cbContent.setRows(0);
-		cbContent.setWidth("100%");
 		cbContent.addEventListener(Events.ON_SELECT, this);
 
 		toolBar.setAlign("center");
@@ -342,7 +333,6 @@ public class WAttachment extends Window implements EventListener<Event>
 		ZKUpdateUtil.setHflex(text, "1");
 		
 		div.appendChild(text);
-
 		northPanel.appendChild(div);
 		mainPanel.appendChild(northPanel);
 
@@ -374,7 +364,6 @@ public class WAttachment extends Window implements EventListener<Event>
 		bLoad.setUpload("multiple=true," + AdempiereWebUI.getUploadSetting());
 		bLoad.addEventListener(Events.ON_UPLOAD, this);
 
-		bDelete.setEnabled(isAllowDeleteAttachment);
 		bDelete.addEventListener(Events.ON_CLICK, this);
 
 		bEmail.setEnabled(false);
@@ -414,7 +403,6 @@ public class WAttachment extends Window implements EventListener<Event>
 		bDeleteAll.setSclass("img-btn");
 		bDeleteAll.addEventListener(Events.ON_CLICK, this);
 		bDeleteAll.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "DeleteAll")));
-		bDeleteAll.setEnabled(isAllowDeleteAttachment);
 
 		if (ThemeManager.isUseFontIconForImage())
 			bPreview.setIconSclass("z-icon-Find");
@@ -529,7 +517,7 @@ public class WAttachment extends Window implements EventListener<Event>
 
 			bSave.setEnabled(true);
 			bSaveAllAsZip.setEnabled(true);
-			bDelete.setEnabled(isAllowDeleteAttachment);
+			bDelete.setEnabled(true);
 			bEmail.setEnabled(true);
 
 			if (autoPreviewList.contains(mimeType))
@@ -784,53 +772,23 @@ public class WAttachment extends Window implements EventListener<Event>
 		log.config(fileName);
 		int cnt = m_attachment.getEntryCount();
 
-		if (!MSysConfig.getBooleanValue(MSysConfig.ATTACHMENT_AUTO_VERSION_ENABLED, false,
-				Env.getAD_Client_ID(Env.getCtx())))
+		//update
+		for (int i = 0; i < cnt; i++)
 		{
-			// update
-			for (int i = 0; i < cnt; i++)
+			if (m_attachment.getEntryName(i).equals(fileName))
 			{
-				if (m_attachment.getEntryName(i).equals(fileName))
-				{
-					m_attachment.updateEntry(i, getMediaData(media));
-					cbContent.setSelectedIndex(i);
-					m_change = true;
-					return;
-				}
+				m_attachment.updateEntry(i, getMediaData(media));
+				cbContent.setSelectedIndex(i);
+				m_change = true;
+				return;
 			}
-		}
-		else
-		{
-			// Retrieve filename version
-			int fileVersion = getFileVersion(fileName);
-			String compareFilename = removeSuffix(fileName);
-
-			for (int i = 0; i < cnt; i++)
-			{
-				if (removeSuffix(m_attachment.getEntryName(i)).equals(compareFilename))
-				{
-					int version = getFileVersion(m_attachment.getEntryName(i));
-					if (fileVersion <= version)
-					{
-						fileVersion = version + 1;
-					}
-				}
-			}
-
-			if (fileVersion != 0)
-			{
-				String[] fileParts = getFileParts(fileName);
-				fileName = fileParts[0] + "(" + fileVersion + ")" + fileParts[1];
-			}
-
-			log.config("After versioning " + fileName);
 		}
 
 		//new
 		if (m_attachment.addEntry(fileName, getMediaData(media)))
 		{
-			cbContent.appendItem(fileName, fileName);
-			cbContent.setSelectedIndex(cbContent.getItemCount() - 1);
+			cbContent.appendItem(media.getName(), media.getName());
+			cbContent.setSelectedIndex(cbContent.getItemCount()-1);
 			m_change = true;
 		}
 	}
@@ -1004,7 +962,7 @@ public class WAttachment extends Window implements EventListener<Event>
 		m_attachment.getEntryFile(index, attachment);
 
 		WEMailDialog dialog = new WEMailDialog (Msg.getMsg(Env.getCtx(), "SendMail"),
-			from, "", "", "", attachment,
+			from, "", "", "", new FileDataSource(attachment),
 			m_WindowNo, m_attachment.getAD_Table_ID(), m_attachment.getRecord_ID(), m_attachment.getRecord_UU(), null);
 
 		AEnv.showWindow(dialog);
@@ -1025,76 +983,4 @@ public class WAttachment extends Window implements EventListener<Event>
 		}
 	}
 
-
-	/**
-	 * Remove suffix before comparing name
-	 * 
-	 * @param fileName
-	 * @return Filename by removing (version)
-	 */
-	public String removeSuffix(String fileName)
-	{
-		String[] fileParts = getFileParts(fileName);
-
-		return fileParts[0] + fileParts[1];
-	} // removeSuffix
-
-	/**
-	 * Get file version
-	 * 
-	 * @param fileName
-	 * @return version of file
-	 */
-	protected int getFileVersion(String fileName)
-	{
-		String[] fileParts = getFileParts(fileName);
-
-		int version = 0;
-		try
-		{
-			version = Integer.parseInt(fileParts[2]);
-		}
-		catch (Exception e)
-		{
-		}
-
-		return version;
-	} // getFileVersion
-
-	/**
-	 * Get file parts
-	 * 
-	 * @param fileName
-	 * @return File parts (file, type, version)
-	 */
-	public String[] getFileParts(String fileName)
-	{
-		String[] fileParts = new String[3];
-
-		String format = "";
-		String version = "0";
-		String file = fileName;
-		int lastIndex = fileName.lastIndexOf(".");
-
-		if (lastIndex != -1)
-		{
-			file = fileName.substring(0, lastIndex);
-			format = fileName.substring(lastIndex);
-		}
-
-		if (file.lastIndexOf("(") != -1 && file.lastIndexOf(")") != -1)
-		{
-			version = file.substring(file.lastIndexOf("(") + 1, file.lastIndexOf(")"));
-			if (version.length() == 0 || version.matches(".*[a-zA-Z$&+,:;=?@#|'<>-^*()%!\\.+\\s+].*"))
-				version = "0";
-			else
-				file = file.substring(0, file.lastIndexOf("("));
-		}
-
-		fileParts[0] = file;
-		fileParts[1] = format;
-		fileParts[2] = version;
-
-		return fileParts;
-	} // getFilecomponent
 }
