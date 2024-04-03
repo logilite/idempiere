@@ -857,7 +857,7 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 		{
 			pstmt = DB.prepareStatement(sql, get_TrxName());
 			pstmt.setInt(1, getAD_User_ID());
-			pstmt.setInt(2, Env.getAD_Client_ID(getCtx()));
+			pstmt.setInt(2, getAD_Client_ID());
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{
@@ -889,7 +889,7 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 		{
 			pstmt = DB.prepareStatement(sql, get_TrxName());
 			pstmt.setInt(1, getAD_Role_ID());
-			pstmt.setInt(2, Env.getAD_Client_ID(getCtx()));
+			pstmt.setInt(2, getAD_Client_ID());
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{

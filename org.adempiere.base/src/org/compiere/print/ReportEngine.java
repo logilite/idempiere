@@ -19,22 +19,17 @@ package org.compiere.print;
 import static org.compiere.model.SystemIDs.PROCESS_RPT_M_INVENTORY;
 import static org.compiere.model.SystemIDs.PROCESS_RPT_M_MOVEMENT;
 
-import java.awt.Color;
-import java.awt.Font;
 import java.awt.print.PrinterJob;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -42,41 +37,18 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import javax.print.DocFlavor;
-import javax.print.StreamPrintService;
-import javax.print.StreamPrintServiceFactory;
-import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.Copies;
 import javax.print.attribute.standard.JobName;
 import javax.print.event.PrintServiceAttributeEvent;
 import javax.print.event.PrintServiceAttributeListener;
-import javax.xml.transform.stream.StreamResult;
 
 import org.adempiere.exceptions.AdempiereException;
-import org.adempiere.pdf.Document;
-import org.adempiere.print.export.PrintDataExcelExporter;
-import org.adempiere.print.export.PrintDataXLSXExporter;
-import org.apache.ecs.MultiPartElement;
-import org.apache.ecs.XhtmlDocument;
-import org.apache.ecs.xhtml.a;
-import org.apache.ecs.xhtml.script;
-import org.apache.ecs.xhtml.span;
-import org.apache.ecs.xhtml.style;
-import org.apache.ecs.xhtml.table;
-import org.apache.ecs.xhtml.tbody;
-import org.apache.ecs.xhtml.td;
-import org.apache.ecs.xhtml.th;
-import org.apache.ecs.xhtml.thead;
-import org.apache.ecs.xhtml.tr;
 import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MAllocationLine;
 import org.compiere.model.MClient;
@@ -97,15 +69,10 @@ import org.compiere.model.MProject;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRfQResponse;
-import org.compiere.model.MRole;
-import org.compiere.model.MStyle;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.model.PrintInfo;
-import org.compiere.model.X_AD_StyleLine;
-import org.compiere.print.layout.InstanceAttributeColumn;
-import org.compiere.print.layout.InstanceAttributeData;
 import org.compiere.print.layout.LayoutEngine;
 import org.compiere.print.layout.PrintDataEvaluatee;
 import org.compiere.process.ProcessInfo;
@@ -115,18 +82,32 @@ import org.compiere.tools.FileUtil;
 import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
-import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Evaluator;
 import org.compiere.util.Ini;
 import org.compiere.util.Language;
-import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
 import org.eevolution.model.MDDOrder;
 import org.eevolution.model.X_PP_Order;
-
-import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
+import org.idempiere.print.renderer.CSVReportRenderer;
+import org.idempiere.print.renderer.CSVReportRendererConfiguration;
+import org.idempiere.print.renderer.HTMLReportRenderer;
+import org.idempiere.print.renderer.HTMLReportRendererConfiguration;
+import org.idempiere.print.renderer.PDFReportRenderer;
+import org.idempiere.print.renderer.PDFReportRendererConfiguration;
+import org.idempiere.print.renderer.PSReportRenderer;
+import org.idempiere.print.renderer.PSReportRendererConfiguration;
+import org.idempiere.print.renderer.SSVReportRenderer;
+import org.idempiere.print.renderer.SSVReportRendererConfiguration;
+import org.idempiere.print.renderer.TabDelimitedReportRenderer;
+import org.idempiere.print.renderer.TabDelimitedReportRendererConfiguration;
+import org.idempiere.print.renderer.XLSReportRenderer;
+import org.idempiere.print.renderer.XLSReportRendererConfiguration;
+import org.idempiere.print.renderer.XLSXReportRenderer;
+import org.idempiere.print.renderer.XLSXReportRendererConfiguration;
+import org.idempiere.print.renderer.XMLReportRenderer;
+import org.idempiere.print.renderer.XMLReportRendererConfiguration;
 
 /**
  *	Report Engine.
@@ -285,12 +266,6 @@ public class ReportEngine implements PrintServiceAttributeListener
 	private String m_name = null;
 	
 	private boolean m_isReplaceTabContent = false;
-	
-	/**
-	 * store all column has same css rule into a list
-	 * for IDEMPIERE-2640
-	 */
-	private Map<CSSInfo, List<ColumnInfo>> mapCssInfo = new HashMap<CSSInfo, List<ColumnInfo>>();
 	
 	private List<IReportEngineEventListener> eventListeners = new ArrayList<IReportEngineEventListener>();
 
@@ -642,7 +617,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return m_printerName;
 	}	//	getPrinterName
 
-	/**************************************************************************
+	/**
 	 * 	Create HTML File
 	 * 	@param file file
 	 *  @param onlyTable if false create complete HTML document
@@ -654,7 +629,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return createHTML(file, onlyTable, language, null);
 	}
 	
-	/**************************************************************************
+	/**
 	 * 	Create HTML File
 	 * 	@param file file
 	 *  @param onlyTable if false create complete HTML document
@@ -1309,7 +1284,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	 * @param recordID
 	 * @return String identifier
 	 */
-	private String getIdentifier(MTable mTable, String tableName, int recordID) {
+	public String getIdentifier(MTable mTable, String tableName, int recordID) {
 		ArrayList<MColumn> list = new ArrayList<MColumn>();
 		// get translation table - null if not exists
 		MTable mTableTrl = MTable.get(getCtx(), tableName+"_Trl");
@@ -1411,8 +1386,8 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return null;
 	}
 
-	/**************************************************************************
-	 * 	Create CSV File
+	/**
+	 * 	Create delimited text file
 	 * 	@param file file
 	 *  @param delimiter delimiter, e.g. comma, tab
 	 *  @param language translation language
@@ -1437,7 +1412,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	}	//	createCSV
 
 	/**
-	 * 	Write CSV to writer
+	 * 	Write delimited content to writer
 	 * 	@param writer writer
 	 *  @param delimiter delimiter, e.g. comma, tab
 	 *  @param language translation language
@@ -1445,200 +1420,35 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	 */
 	public boolean createCSV (Writer writer, char delimiter, Language language)
 	{
-		if (delimiter == 0)
-			delimiter = '\t';
-		try
-		{
-			//collect columns to be printed
-			ArrayList<Object> columns = new ArrayList<>();
-			List<InstanceAttributeData> asiElements = new ArrayList<>();
-			int columnCount = 0;
-			for (int col = 0; col < m_printFormat.getItemCount(); col++)
-			{
-				MPrintFormatItem item = m_printFormat.getItem(col);
-				if (item.isPrinted())
-				{
-					if (item.isTypeField() && item.isPrintInstanceAttributes())
-					{
-						InstanceAttributeData asiElement = new InstanceAttributeData(item, columnCount);
-						asiElement.readAttributesData(m_printData);
-						asiElements.add(asiElement);						
-						continue;
-					}
-					else 
-					{
-						columns.add(item);
-						columnCount++;
-					}
-				}
+		switch (delimiter) {
+			case ',' -> {
+				CSVReportRendererConfiguration config = new CSVReportRendererConfiguration().setLanguage(language).setOutputWriter(writer);
+				new CSVReportRenderer().renderReport(this, config);
 			}
-			if (asiElements.size() > 0)
-			{
-				int columnCreated = 0;
-				for(InstanceAttributeData data : asiElements)
-				{
-					List<InstanceAttributeColumn> instanceColumns = data.getColumns();
-					int index = data.getColumnIndex() + columnCreated;
-					for(InstanceAttributeColumn c : instanceColumns)
-					{
-						columns.add(index, c);
-						index++;
-						columnCreated++;
-					}
-				}
+			case ';' -> {
+				SSVReportRendererConfiguration config = new SSVReportRendererConfiguration().setLanguage(language).setOutputWriter(writer);
+				new SSVReportRenderer().renderReport(this, config);
 			}
-						
-			Boolean [] colSuppressRepeats = m_layout == null || m_layout.colSuppressRepeats == null? LayoutEngine.getColSuppressRepeats(m_printFormat):m_layout.colSuppressRepeats;
-			Object [] preValues = null;
-			if (colSuppressRepeats != null){
-				preValues = new Object [colSuppressRepeats.length];
+			case '\t' -> {
+				TabDelimitedReportRendererConfiguration config = new TabDelimitedReportRendererConfiguration().setLanguage(language).setOutputWriter(writer);
+				new TabDelimitedReportRenderer().renderReport(this, config);
 			}
-			int printColIndex = -1;
-			//	for all rows (-1 = header row)
-			for (int row = -1; row < m_printData.getRowCount(); row++)
-			{
-				printColIndex = -1;
-				StringBuffer sb = new StringBuffer();
-				if (row != -1)
-					m_printData.setRowIndex(row);
-
-				//	for all columns
-				boolean first = true;	//	first column to print
-				for (int col = 0; col < columns.size(); col++)
-				{
-					Object colObj = columns.get(col);
-					MPrintFormatItem item = null;
-					InstanceAttributeColumn iaColumn = null;
-					if (colObj instanceof InstanceAttributeColumn)
-					{
-						iaColumn = (InstanceAttributeColumn) colObj;
-						item = iaColumn.getPrintFormatItem();
-					} 
-					else if (colObj instanceof MPrintFormatItem)
-					{
-						item = (MPrintFormatItem)colObj;
-					}
-					if (item != null)
-					{
-						//	column delimiter (comma or tab)
-						if (first)
-							first = false;
-						else
-							sb.append(delimiter);
-						//	header row
-						if (row == -1)
-						{
-							String printName = iaColumn != null ? iaColumn.getName() : item.getPrintName(language);
-							createCSVvalue (sb, delimiter, printName);
-						}
-						else
-						{
-							printColIndex++;
-							Object obj = iaColumn != null ? iaColumn.getPrintDataElement(row) : m_printData.getNodeByPrintFormatItemId(item.getAD_PrintFormatItem_ID());
-							String data = "";
-							if (obj == null || !isDisplayPFItem(item)){
-								if (colSuppressRepeats != null && colSuppressRepeats[printColIndex]){
-									preValues[printColIndex] = null;
-								}
-							}
-							else if (obj instanceof PrintDataElement)
-							{
-								PrintDataElement pde = (PrintDataElement)obj;
-								if (pde.isPKey())
-									data = pde.getValueAsString();
-								else
-									data = pde.getValueDisplay(language);	//	formatted
-								
-								if (colSuppressRepeats != null && colSuppressRepeats[printColIndex]){
-									if (data.equals(preValues[printColIndex])){
-										continue;
-									}else{
-										preValues[printColIndex] = data;
-									}
-								}
-							}
-							else if (obj instanceof PrintData)
-							{
-							}
-							else
-								log.log(Level.SEVERE, "Element not PrintData(Element) " + obj.getClass());
-							createCSVvalue (sb, delimiter, data);
-						}
-					}	//	printed
-				}	//	for all columns
-				writer.write(sb.toString());
-				writer.write(Env.NL);
-			}	//	for all rows
-			//
-			writer.flush();
-			writer.close();
+			default -> throw new IllegalArgumentException("Unexpected value: " + delimiter);
 		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, "(w)", e);
-			return false;
-		}
+		
 		return true;
 	}	//	createCSV
 
 	/**
-	 * 	Add Content to CSV string.
-	 *  Encapsulate/mask content in " if required
-	 * 	@param sb StringBuffer to add to
-	 * 	@param delimiter delimiter
-	 * 	@param content column value
-	 */
-	private void createCSVvalue (StringBuffer sb, char delimiter, String content)
-	{
-		//	nothing to add
-		if (content == null || content.length() == 0)
-			return;
-		//
-		boolean needMask = false;
-		StringBuilder buff = new StringBuilder();
-		char chars[] = content.toCharArray();
-		for (int i = 0; i < chars.length; i++)
-		{
-			char c = chars[i];
-			if (c == '"')
-			{
-				needMask = true;
-				buff.append(c);		//	repeat twice
-			}	//	mask if any control character
-			else if (!needMask && (c == delimiter || !Character.isLetterOrDigit(c)))
-				needMask = true;
-			buff.append(c);
-		}
-
-		//	Optionally mask value
-		if (needMask)
-			sb.append('"').append(buff).append('"');
-		else
-			sb.append(buff);
-	}	//	addCSVColumnValue
-
-	
-	/**************************************************************************
 	 * 	Create XML File
 	 * 	@param file file
 	 * 	@return true if success
 	 */
 	public boolean createXML (File file)
 	{
-		try
-		{
-			Writer fw = new OutputStreamWriter(new FileOutputStream(file, false), Ini.getCharset()); // teo_sarca: save using adempiere charset [ 1658127 ]
-			return createXML (new BufferedWriter(fw));
-		}
-		catch (FileNotFoundException fnfe)
-		{
-			log.log(Level.SEVERE, "(f) - " + fnfe.toString());
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, "(f)", e);
-		}
-		return false;
+		XMLReportRendererConfiguration config = new XMLReportRendererConfiguration().setOutputFile(file);
+		new XMLReportRenderer().renderReport(this, config);
+		return true;
 	}	//	createXML
 
 	/**
@@ -1648,22 +1458,12 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	 */
 	public boolean createXML (Writer writer)
 	{
-		try
-		{
-			m_printData.createXML(new StreamResult(writer));
-			writer.flush();
-			writer.close();
-			return true;
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, "(w)", e);
-		}
-		return false;
+		XMLReportRendererConfiguration config = new XMLReportRendererConfiguration().setOutputWriter(writer);
+		new XMLReportRenderer().renderReport(this, config);
+		return true;
 	}	//	createXML
-
 	
-	/**************************************************************************
+	/**
 	 * 	Create PDF file.
 	 * 	(created in temporary storage)
 	 *	@return PDF file
@@ -1694,7 +1494,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return null;
 	}	//	getPDF
 
-	/**************************************************************************
+	/**
 	 * 	Create HTML file.
 	 * 	(created in temporary storage)
 	 *	@return HTML file
@@ -1725,7 +1525,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return null;
 	}	//	getHTML
 	
-	/**************************************************************************
+	/**
 	 * 	Create CSV file.
 	 * 	(created in temporary storage)
 	 *	@return CSV file
@@ -1756,7 +1556,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return null;
 	}	//	getCSV
 	
-	/**************************************************************************
+	/**
 	 * 	Create XLS file.
 	 * 	(created in temporary storage)
 	 *	@return XLS file
@@ -1794,7 +1594,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		}
 	}	//	getXLS
 	
-	/**************************************************************************
+	/**
 	 * 	Create XLSX file.
 	 * 	(created in temporary storage)
 	 *	@return XLSX file
@@ -1844,13 +1644,16 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 
 		try
 		{
-			if (file == null)
+			if (file == null) {
 				file = FileUtil.createTempFile ("ReportEngine", ".pdf");
-			fileName = file.getAbsolutePath();
+			} else {
+				if (file.exists()) {
+					file.delete();
+					file = new File(file.getAbsolutePath());
+				}
+			}
 			uri = file.toURI();
-			if (file.exists())
-				file.delete();
-
+			fileName = file.getAbsolutePath();
 		}
 		catch (Exception e)
 		{
@@ -1872,10 +1675,8 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				pi.setPDFFileName(fileName);
 				ServerProcessCtl.process(pi, (m_trxName == null ? null : Trx.get(m_trxName, false)));
 			} else {
-				if (m_layout == null)
-					layout ();
-				Document.getPDFAsFile(fileName, m_layout.getPageable(false));
-				ArchiveEngine.get().archive(new File(fileName), m_info);
+				PDFReportRendererConfiguration config = new PDFReportRendererConfiguration().setOutputFile(file);
+				new PDFReportRenderer().renderReport(this, config);
 			}
 		}
 		catch (Exception e)
@@ -1908,17 +1709,10 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	 */
 	public byte[] createPDFData ()
 	{
-		try
-		{
-			if (m_layout == null)
-				layout ();
-			return Document.getPDFAsArray(m_layout.getPageable(false));
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, "PDF", e);
-		}
-		return null;
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		PDFReportRendererConfiguration config = new PDFReportRendererConfiguration().setOutputStream(os);
+		new PDFReportRenderer().renderReport(this, config);
+		return os.toByteArray();
 	}	//	createPDFData
 	
 	/**************************************************************************
@@ -1928,19 +1722,9 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	 */
 	public boolean createPS (File file)
 	{
-		try
-		{
-			return createPS (new FileOutputStream(file));
-		}
-		catch (FileNotFoundException fnfe)
-		{
-			log.log(Level.SEVERE, "(f) - " + fnfe.toString());
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, "(f)", e);
-		}
-		return false;
+		PSReportRendererConfiguration config = new PSReportRendererConfiguration().setOutputFile(file);
+		new PSReportRenderer().renderReport(this, config);
+		return true;
 	}	//	createPS
 
 	/**
@@ -1950,37 +1734,9 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	 */
 	public boolean createPS (OutputStream os)
 	{
-		try
-		{
-			String outputMimeType = DocFlavor.BYTE_ARRAY.POSTSCRIPT.getMimeType();
-			DocFlavor docFlavor = DocFlavor.SERVICE_FORMATTED.PAGEABLE;
-			StreamPrintServiceFactory[] spsfactories =
-				StreamPrintServiceFactory.lookupStreamPrintServiceFactories(docFlavor, outputMimeType);
-			if (spsfactories.length == 0)
-			{
-				log.log(Level.SEVERE, "(fos) - No StreamPrintService");
-				return false;
-			}
-			//	just use first one - sun.print.PSStreamPrinterFactory
-			//	System.out.println("- " + spsfactories[0]);
-			StreamPrintService sps = spsfactories[0].getPrintService(os);
-			//	get format
-			if (m_layout == null)
-				layout();
-			//	print it
-			sps.createPrintJob().print(m_layout.getPageable(false), 
-				new HashPrintRequestAttributeSet());
-			//
-			os.flush();
-			//following 2 line for backward compatibility
-			if (os instanceof FileOutputStream)
-				((FileOutputStream)os).close();
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, "(fos)", e);
-		}
-		return false;
+		PSReportRendererConfiguration config = new PSReportRendererConfiguration().setOutputStream(os);
+		new PSReportRenderer().renderReport(this, config);
+		return true;
 	}	//	createPS
 
 	/**
@@ -1992,10 +1748,8 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	public void createXLS(File outFile, Language language)
 	throws Exception
 	{
-		Boolean [] colSuppressRepeats = m_layout == null || m_layout.colSuppressRepeats == null? LayoutEngine.getColSuppressRepeats(m_printFormat):m_layout.colSuppressRepeats;
-		Map<MPrintFormatItem, PrintData> childFormats = m_layout != null ? m_layout.getChildPrintFormatDetails() : null;
-		PrintDataExcelExporter exp = new PrintDataExcelExporter(getPrintData(), getPrintFormat(), childFormats, colSuppressRepeats, m_query);
-		exp.export(outFile, language);
+		XLSReportRendererConfiguration config = new XLSReportRendererConfiguration().setOutputFile(outFile).setLanguage(language);
+		new XLSReportRenderer().renderReport(this, config);
 	}
 
 	/**
@@ -2007,10 +1761,8 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	public void createXLSX(File outFile, Language language)
 	throws Exception
 	{
-		Boolean [] colSuppressRepeats = m_layout == null || m_layout.colSuppressRepeats == null? LayoutEngine.getColSuppressRepeats(m_printFormat):m_layout.colSuppressRepeats;
-		Map<MPrintFormatItem, PrintData> childFormats = m_layout != null ? m_layout.getChildPrintFormatDetails() : null;
-		PrintDataXLSXExporter exp = new PrintDataXLSXExporter(getPrintData(), getPrintFormat(), childFormats, colSuppressRepeats, m_query);
-		exp.export(outFile, language);
+		XLSXReportRendererConfiguration config = new XLSXReportRendererConfiguration().setOutputFile(outFile).setLanguage(language);
+		new XLSXReportRenderer().renderReport(this, config);
 	}
 	
 	/**************************************************************************
@@ -2990,37 +2742,6 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	{
 		this.m_tranPrintFormat = m_tranPrintFormat;
 	}
-	public String compress(String src, boolean minify) {
-		
-		if(minify) {
-			HtmlCompressor compressor = new HtmlCompressor();
-		    compressor.setEnabled(true);
-		    compressor.setCompressCss(true);
-		    compressor.setCompressJavaScript(true);
-		    compressor.setRemoveComments(true);
-		    compressor.setRemoveMultiSpaces(true);
-		    compressor.setRemoveIntertagSpaces(true);
-//		    compressor.setGenerateStatistics(false);
-//		    compressor.setRemoveQuotes(false);
-//		    compressor.setSimpleDoctype(false);
-//		    compressor.setRemoveScriptAttributes(false);
-//		    compressor.setRemoveStyleAttributes(false);
-//		    compressor.setRemoveLinkAttributes(false);
-//		    compressor.setRemoveFormAttributes(false);
-//		    compressor.setRemoveInputAttributes(false);
-//		    compressor.setSimpleBooleanAttributes(false);
-//		    compressor.setRemoveJavaScriptProtocol(false);
-//		    compressor.setRemoveHttpProtocol(false);
-//		    compressor.setRemoveHttpsProtocol(false);
-//		    compressor.setPreserveLineBreaks(false);
-		    
-		    return compressor.compress(src);
-		}
-		else {
-			return src;
-		}
-	}
-	
 	public static void setDefaultReportTypeToPInstance(Properties ctx, MPInstance instance, int printFormatID) {
 		if(Util.isEmpty(instance.getReportType())) {
 			MPrintFormat pf = new MPrintFormat(ctx, printFormatID, null);
@@ -3032,30 +2753,6 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		}
 	}
 	
-	private void setStyle(MultiPartElement element, MStyle style) {
-		if (style == null || style.getAD_Style_ID() == 0)
-			return;
-
-		X_AD_StyleLine[] lines = style.getStyleLines();
-		StringBuilder styleBuilder = new StringBuilder();
-		for (X_AD_StyleLine line : lines)
-		{
-			String inlineStyle = line.getInlineStyle().trim();
-			String displayLogic = line.getDisplayLogic();
-			if (!Util.isEmpty(displayLogic))
-			{
-				if (!Evaluator.evaluateLogic(new PrintDataEvaluatee(null, m_printData), displayLogic))
-					continue;
-			}
-			if (styleBuilder.length() > 0 && !(styleBuilder.charAt(styleBuilder.length()-1)==';'))
-				styleBuilder.append("; ");
-			styleBuilder.append(inlineStyle);
-		}
-		if(styleBuilder.length() > 0)
-			element.setStyle(styleBuilder.toString());
-		//
-	}
-
 	private ProcessInfo m_pi = null;
 	
 	/**
@@ -3070,5 +2767,19 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	 */
 	public ProcessInfo getProcessInfo() {
 		return m_pi;
+	}
+	
+	/**
+	 * Evaluate display logic of a print format item
+	 * @param printData data for display logic evaluation
+	 * @param item print format item
+	 * @return true if item has no display logic or display logic evaluate to true
+	 */
+	public static boolean isDisplayPFItem(PrintData printData, MPrintFormatItem item)
+	{
+		if(Util.isEmpty(item.getDisplayLogic()))
+			return true;
+		
+		return Evaluator.evaluateLogic(new PrintDataEvaluatee(null, printData), item.getDisplayLogic());
 	}
 }	//	ReportEngine

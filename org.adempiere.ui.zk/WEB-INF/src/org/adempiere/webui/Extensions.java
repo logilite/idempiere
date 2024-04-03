@@ -53,6 +53,7 @@ import org.compiere.util.CCache;
 import org.compiere.util.KeyNamePair;
 import org.idempiere.ui.zk.media.IMediaView;
 import org.idempiere.ui.zk.media.IMediaViewProvider;
+import org.idempiere.ui.zk.report.IReportViewerRenderer;
 import org.zkoss.zk.ui.Component;
 
 /**
@@ -424,6 +425,12 @@ public class Extensions {
 	} // getADTabPanel
 	
 	/**
+	 * @return list of {@link IReportViewerRenderer}
+	 */
+	public static List<IReportViewerRenderer> getReportViewerRenderers() {
+		List<IServiceReferenceHolder<IReportViewerRenderer>> references = Service.locator().list(IReportViewerRenderer.class, null, null).getServiceReferences();
+		return references.stream().filter(e -> e.getService() != null).map(e -> e.getService()).collect(Collectors.toCollection(ArrayList::new));
+	}
 	 * Do zul component any customize action and its handling
 	 * 
 	 * @param page        - Component

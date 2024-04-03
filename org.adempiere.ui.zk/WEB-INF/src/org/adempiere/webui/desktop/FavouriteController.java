@@ -86,7 +86,7 @@ public class FavouriteController
 			vTree.setAD_Role_ID(m_AD_Role_ID);
 			// Support for System user
 			vTree.set_ValueNoCheck(MTreeFavorite.COLUMNNAME_AD_User_ID, Integer.valueOf(m_AD_User_ID));
-			if (!vTree.save())
+			if (!vTree.saveCrossTenantSafe())
 				throw new AdempiereException(Msg.getMsg(Env.getCtx(), "FavTreeNotCreate"));
 
 			m_AD_Tree_Favorite_ID = vTree.getAD_Tree_Favorite_ID();

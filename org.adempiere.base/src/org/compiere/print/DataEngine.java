@@ -25,6 +25,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,6 +37,7 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.MColumn;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MQuery;
 import org.compiere.model.MReportView;
@@ -370,9 +373,9 @@ public class DataEngine
 				int AD_PrintFormatItem_ID = rs.getInt("AD_PrintFormatItem_ID");
 				String ColumnName = rs.getString(2);
 				String ColumnSQL = rs.getString(24);
-				if (ColumnSQL != null && ColumnSQL.length() > 0 && ColumnSQL.startsWith("@SQLFIND="))
+				if (ColumnSQL != null && ColumnSQL.length() > 0 && ColumnSQL.startsWith(MColumn.VIRTUAL_SEARCH_COLUMN_PREFIX))
 					ColumnSQL = ColumnSQL.substring(9);
-				if (ColumnSQL != null && ColumnSQL.length() > 0 && ColumnSQL.startsWith("@SQL="))
+				if (ColumnSQL != null && ColumnSQL.length() > 0 && ColumnSQL.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX))
 					ColumnSQL = "NULL";
 				if (ColumnSQL != null && ColumnSQL.contains("@"))
 					ColumnSQL = Env.parseContext(Env.getCtx(), m_windowNo, ColumnSQL, false, true);
@@ -461,9 +464,9 @@ public class DataEngine
 					//	=> (..) AS AName, Table.ID,
 					if (script != null && !script.isEmpty())
 					{
-						if (script.startsWith("@SQL="))
+						if (script.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX))
 						{
-							script = "(" + script.replace("@SQL=", "").trim() + ")";
+							script = "(" + script.replace(MColumn.VIRTUAL_UI_COLUMN_PREFIX, "").trim() + ")";
 							script = Env.parseContext(Env.getCtx(), m_windowNo, script, false);
 						}
 						else
@@ -479,7 +482,8 @@ public class DataEngine
 					// Warning here: Oracle treats empty strings '' as NULL and the code below checks for wasNull on this column
 					.append("' '").append(" AS \"").append(pfiName).append("\",");
 					//
-					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, -1, pfiName, DisplayType.Text, FieldLength, orderName, isPageBreak,SortNo);
+					int scriptDisplayType = getDisplayTypeFromPattern(formatPattern);
+					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, -1, pfiName, scriptDisplayType, FieldLength, orderName, isPageBreak,SortNo);
 					synonymNext();
 				}
 				//	-- Parent, TableDir (and unqualified Search) --
@@ -909,6 +913,31 @@ public class DataEngine
 		}
 		return pd;
 	}	//	getPrintDataInfo
+
+	/**
+	 * Try to determine the display type from a pattern
+	 * - try a DecimalFormat if the pattern contains any of the characters # 0
+	 * - try a SimpleDateFormat if the pattern contains any of the characters y M d h H m s S
+	 * - otherwise (or if the format is not valid) return Text
+	 * @param pattern
+	 * @return DateTime for a SimpleDateFormat, Number for a DecimalFormat, otherwise Text
+	 */
+	private int getDisplayTypeFromPattern(String pattern) {
+		if (! Util.isEmpty(pattern, true)) {
+ 			if (pattern.matches(".*[#0].*")) {
+ 		        try {
+ 	                new DecimalFormat(pattern);
+ 	                return DisplayType.Number;
+	            } catch (Exception ex) {}
+ 			} else if (pattern.matches(".*[yMdhHmsS].*")) {
+	            try {
+		            new SimpleDateFormat(pattern);
+		            return DisplayType.DateTime;
+	            } catch (Exception ex) {}
+	        }
+		}
+        return DisplayType.Text;
+    }
 
 	/**
 	 * @param format

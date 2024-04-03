@@ -68,6 +68,8 @@ import org.idempiere.fa.service.api.IDepreciationMethod;
 import org.idempiere.fa.service.api.IDepreciationMethodFactory;
 import org.idempiere.model.IMappedModelFactory;
 import org.idempiere.print.IPrintHeaderFooter;
+import org.idempiere.print.renderer.IReportRenderer;
+import org.idempiere.print.renderer.IReportRendererConfiguration;
 import org.idempiere.process.IMappedProcessFactory;
 
 /**
@@ -1148,4 +1150,18 @@ public class Core {
 
 		return myCreditManager;
 	} // getCreditManager
+	
+	@SuppressWarnings("unchecked")
+	public static IReportRenderer<IReportRendererConfiguration> getReportRenderer(String id) {
+		IReportRenderer<IReportRendererConfiguration> renderer = null;
+		@SuppressWarnings("rawtypes")
+		List<IServiceReferenceHolder<IReportRenderer>> rendererReferences = Service.locator().list(IReportRenderer.class).getServiceReferences();
+		for(var holder : rendererReferences) {
+			renderer = holder.getService();
+			if (renderer.getId().equals(id)) {
+				return renderer;
+			}
+		}
+		return null;
+	}
 }

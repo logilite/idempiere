@@ -64,6 +64,7 @@ import org.adempiere.webui.window.ZkReportViewerProvider;
 import org.compiere.Adempiere;
 import org.compiere.model.I_AD_Menu;
 import org.compiere.model.MChart;
+import org.compiere.model.MColumn;
 import org.compiere.model.MDashboardContent;
 import org.compiere.model.MDashboardContentAccess;
 import org.compiere.model.MDashboardPreference;
@@ -81,7 +82,6 @@ import org.compiere.model.MRole;
 import org.compiere.model.MStatusLine;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
-import org.compiere.model.PO;
 import org.compiere.print.ReportEngine;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ServerProcessCtl;
@@ -1240,13 +1240,8 @@ public class DashboardController implements EventListener<Event> {
     				int PA_DashboardPreference_ID = Integer.parseInt(value.toString());
     				MDashboardPreference preference = new MDashboardPreference(Env.getCtx(), PA_DashboardPreference_ID, null);
     				preference.setIsCollapsedByDefault(!panel.isOpen());
-    				try {
-    					PO.setCrossTenantSafe();
-    					if (!preference.save())
-    						logger.log(Level.SEVERE, "Failed to save dashboard preference " + preference.toString());
-    				} finally {
-    					PO.clearCrossTenantSafe();
-    				}
+    				if (!preference.saveCrossTenantSafe())
+    					logger.log(Level.SEVERE, "Failed to save dashboard preference " + preference.toString());
     			}
     			
     			//notify panel content component
@@ -1738,7 +1733,7 @@ public class DashboardController implements EventListener<Event> {
 					 if (paramValue == null
 							 || (paramValue != null && paramValue.length() == 0))
 						 value = null;
-					 else if (paramValue.startsWith("@SQL=")) {
+					 else if (paramValue.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX)) {
 						 String sql = paramValue.substring(5);
 						 sql = Env.parseContext(Env.getCtx(), 0, sql, false, false);	//	replace variables
 						 if (!Util.isEmpty(sql)) {

@@ -306,7 +306,7 @@ public class GridField
 		if(m_vo.IsAlwaysUpdateable)
 			Evaluator.parseDepends(list, m_vo.AlwaysUpdatableLogic);
 		// Virtual UI Column
-		if (m_vo.ColumnSQL != null && m_vo.ColumnSQL.length() > 0 && m_vo.ColumnSQL.startsWith("@SQL="))
+		if (m_vo.ColumnSQL != null && m_vo.ColumnSQL.length() > 0 && m_vo.ColumnSQL.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX))
 			Evaluator.parseDepends(list, m_vo.ColumnSQL.substring(5));
 		//  Lookup
 		if (m_lookup != null)
@@ -351,7 +351,7 @@ public class GridField
 		if (checkContext && m_vo.MandatoryLogic.length() > 0)
 		{
 			boolean retValue  = false;
-			if (m_vo.MandatoryLogic != null && m_vo.MandatoryLogic.startsWith("@SQL=")) {
+			if (m_vo.MandatoryLogic != null && m_vo.MandatoryLogic.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX)) {
 				retValue = Evaluator.parseSQLLogic(m_vo.MandatoryLogic, m_vo.ctx, m_vo.WindowNo, m_vo.TabNo, m_vo.ColumnName);
 
 			} else{
@@ -392,7 +392,7 @@ public class GridField
 	public boolean isEditablePara(boolean checkContext) {
 		if (checkContext && m_vo.ReadOnlyLogic.length() > 0)
 		{
-			if (m_vo.ReadOnlyLogic.startsWith("@SQL="))
+			if (m_vo.ReadOnlyLogic.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX))
 			{
 				boolean retValue = !Evaluator.parseSQLLogic(m_vo.ReadOnlyLogic, m_vo.ctx, m_vo.WindowNo, m_vo.TabNo, m_vo.ColumnName);
 				if (!retValue)
@@ -464,7 +464,7 @@ public class GridField
 		if (checkContext && m_vo.AlwaysUpdatableLogic.length() > 0)
 		{
 			boolean isAlwaysUpdatable = false;
-			if (m_vo.AlwaysUpdatableLogic.startsWith("@SQL=")) {
+			if (m_vo.AlwaysUpdatableLogic.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX)) {
 				isAlwaysUpdatable = Evaluator.parseSQLLogic(m_vo.AlwaysUpdatableLogic, ctx, m_vo.WindowNo,
 						m_vo.TabNo, m_vo.ColumnName);
 			} else {
@@ -545,7 +545,7 @@ public class GridField
 		//  Do we have a readonly rule
 		if (checkContext && m_vo.ReadOnlyLogic.length() > 0)
 		{
-			if (m_vo.ReadOnlyLogic.startsWith("@SQL="))
+			if (m_vo.ReadOnlyLogic.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX))
 			{
 				boolean retValue = !Evaluator.parseSQLLogic(m_vo.ReadOnlyLogic, ctx, m_vo.WindowNo, m_vo.TabNo, m_vo.ColumnName);
 				if (!retValue)
@@ -823,7 +823,7 @@ public class GridField
 		 *  (b) SQL Statement (for data integity & consistency)
 		 */
 		String	defStr = "";
-		if (m_vo.DefaultValue != null && m_vo.DefaultValue.startsWith("@SQL="))
+		if (m_vo.DefaultValue != null && m_vo.DefaultValue.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX))
 		{
 			String sql = m_vo.DefaultValue.substring(5);			//	w/o tag
 			//hengsin, capture unparseable error to avoid subsequent sql exception
@@ -880,7 +880,7 @@ public class GridField
 		/**
 		 * 	(c) Field DefaultValue		=== similar code in AStartRPDialog.getDefault ===
 		 */
-		if (m_vo.DefaultValue != null && !m_vo.DefaultValue.equals("") && !m_vo.DefaultValue.startsWith("@SQL="))
+		if (m_vo.DefaultValue != null && !m_vo.DefaultValue.equals("") && !m_vo.DefaultValue.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX))
 		{
 			String defStr = "";		//	problem is with texts like 'sss;sss'
 			//	It is one or more variables/constants
@@ -1303,7 +1303,7 @@ public class GridField
 		//  ** dynamic content **
 		if (checkContext)
 		{
-			if (m_vo.DisplayLogic.startsWith("@SQL=")) {
+			if (m_vo.DisplayLogic.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX)) {
 				return Evaluator.parseSQLLogic(m_vo.DisplayLogic, m_vo.ctx, m_vo.WindowNo, m_vo.TabNo, m_vo.ColumnName);
 			}
 			Evaluatee evaluatee = new Evaluatee() {
@@ -1348,7 +1348,7 @@ public class GridField
 		//  ** dynamic content **
 		if (checkContext)
 		{
-			if (m_vo.DisplayLogic.startsWith("@SQL=")) {
+			if (m_vo.DisplayLogic.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX)) {
 				return Evaluator.parseSQLLogic(m_vo.DisplayLogic, ctx, m_vo.WindowNo, m_vo.TabNo, m_vo.ColumnName);
 			}
 			Evaluatee evaluatee = new Evaluatee() {
@@ -1440,7 +1440,7 @@ public class GridField
 		if (m_vo.ColumnSQL != null && m_vo.ColumnSQL.length() > 0)
 		{
 			String query;
-			if (m_vo.ColumnSQL.startsWith("@SQL=") || m_vo.ColumnSQL.startsWith("@SQLFIND="))
+			if (m_vo.ColumnSQL.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX) || m_vo.ColumnSQL.startsWith(MColumn.VIRTUAL_SEARCH_COLUMN_PREFIX))
 				query = "NULL";
 			else
 				query = m_vo.ColumnSQL;
@@ -1461,9 +1461,9 @@ public class GridField
 		if (m_vo.ColumnSQL != null && m_vo.ColumnSQL.length() > 0)
 		{
 			String query;
-			if (m_vo.ColumnSQL.startsWith("@SQL="))
+			if (m_vo.ColumnSQL.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX))
 				query = "NULL";
-			else if (m_vo.ColumnSQL.startsWith("@SQLFIND="))
+			else if (m_vo.ColumnSQL.startsWith(MColumn.VIRTUAL_SEARCH_COLUMN_PREFIX))
 				query = m_vo.ColumnSQL.substring(9);
 			else
 				query = m_vo.ColumnSQL;
@@ -1487,7 +1487,7 @@ public class GridField
 	 */
 	public boolean isVirtualDBColumn()
 	{
-		return (m_vo.ColumnSQL != null && m_vo.ColumnSQL.length() > 0 && !m_vo.ColumnSQL.startsWith("@SQL="));
+		return (m_vo.ColumnSQL != null && m_vo.ColumnSQL.length() > 0 && !m_vo.ColumnSQL.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX));
 	}	//	isVirtualDBColumn
 	
 	/**
@@ -1496,7 +1496,7 @@ public class GridField
 	 */
 	public boolean isVirtualUIColumn()
 	{
-		return (m_vo.ColumnSQL != null && m_vo.ColumnSQL.length() > 0 && m_vo.ColumnSQL.startsWith("@SQL="));
+		return (m_vo.ColumnSQL != null && m_vo.ColumnSQL.length() > 0 && m_vo.ColumnSQL.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX));
 	}	//	isVirtualUIColumn
 	
 	/**
@@ -1505,7 +1505,7 @@ public class GridField
 	 */
 	public boolean isVirtualSearchColumn()
 	{
-		return (m_vo.ColumnSQL != null && m_vo.ColumnSQL.length() > 0 && m_vo.ColumnSQL.startsWith("@SQLFIND="));
+		return (m_vo.ColumnSQL != null && m_vo.ColumnSQL.length() > 0 && m_vo.ColumnSQL.startsWith(MColumn.VIRTUAL_SEARCH_COLUMN_PREFIX));
 	}	//	isVirtualDBColumn
 	
 	/**

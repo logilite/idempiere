@@ -300,11 +300,11 @@ public class ProcessTest extends AbstractTestCase {
 	public void testGetInstanceLog() {
 		// Run the validate business partner process
 		MProcess process = MProcess.get(SystemIDs.PROCESS_C_BPARTNER_VALIDATE);
-		MPInstance pinstance = new MPInstance(process, 0);
+		MPInstance pinstance = new MPInstance(process, 0, 0, null);
 		MPInstancePara[] paras = pinstance.getParameters();
 		for (MPInstancePara para : paras) {
 			if (para.getParameterName().equals("C_BPartner_ID")) {
-				para.setP_Number(118);
+				para.setP_Number(DictionaryIDs.C_BPartner.JOE_BLOCK.id);
 				para.saveEx();
 				break;
 			}
