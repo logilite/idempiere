@@ -527,6 +527,9 @@ public class Doc_InOut extends Doc
 				MInOutLine inoutLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(line.get_ID(),
 						getTrxName());
 				MInvoiceLine invoiceLine = MInvoiceLine.getOfInOutLine(inoutLine);
+				if(invoiceLine==null) {
+					invoiceLine=MInvoiceLine.getOfInOutLineFromMatchInv(inoutLine);
+				}
 				String costingMethod = product.getCostingMethod(as);
 				if (!isReversal(line))
 				{					
