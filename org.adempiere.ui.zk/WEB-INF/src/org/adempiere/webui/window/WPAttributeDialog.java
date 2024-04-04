@@ -67,8 +67,8 @@ import org.compiere.model.MLot;
 import org.compiere.model.MLotCtl;
 import org.compiere.model.MRole;
 import org.compiere.model.MSerNoCtl;
-import org.compiere.model.SystemIDs;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.SystemIDs;
 import org.compiere.model.X_M_MovementLine;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -1483,26 +1483,6 @@ public class WPAttributeDialog extends Window implements EventListener<Event>
 	public void setbLot(Button bLot)
 	{
 		this.bLot = bLot;
-	}
-
-	public Menupopup getPopupMenu()
-	{
-		return popupMenu;
-	}
-
-	public void setPopupMenu(Menupopup popupMenu)
-	{
-		this.popupMenu = popupMenu;
-	}
-
-	public Menuitem getmZoom()
-	{
-		return mZoom;
-	}
-
-	public void setmZoom(Menuitem mZoom)
-	{
-		this.mZoom = mZoom;
 	}
 
 	public Textbox getFieldSerNo()

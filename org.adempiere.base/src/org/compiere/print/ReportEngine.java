@@ -19,6 +19,8 @@ package org.compiere.print;
 import static org.compiere.model.SystemIDs.PROCESS_RPT_M_INVENTORY;
 import static org.compiere.model.SystemIDs.PROCESS_RPT_M_MOVEMENT;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.print.PrinterJob;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -28,8 +30,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,8 +43,11 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -49,6 +58,18 @@ import javax.print.event.PrintServiceAttributeEvent;
 import javax.print.event.PrintServiceAttributeListener;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.apache.ecs.MultiPartElement;
+import org.apache.ecs.XhtmlDocument;
+import org.apache.ecs.xhtml.a;
+import org.apache.ecs.xhtml.script;
+import org.apache.ecs.xhtml.span;
+import org.apache.ecs.xhtml.style;
+import org.apache.ecs.xhtml.table;
+import org.apache.ecs.xhtml.tbody;
+import org.apache.ecs.xhtml.td;
+import org.apache.ecs.xhtml.th;
+import org.apache.ecs.xhtml.thead;
+import org.apache.ecs.xhtml.tr;
 import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MAllocationLine;
 import org.compiere.model.MClient;
@@ -69,10 +90,15 @@ import org.compiere.model.MProject;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRfQResponse;
+import org.compiere.model.MRole;
+import org.compiere.model.MStyle;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.model.PrintInfo;
+import org.compiere.model.X_AD_StyleLine;
+import org.compiere.print.layout.InstanceAttributeColumn;
+import org.compiere.print.layout.InstanceAttributeData;
 import org.compiere.print.layout.LayoutEngine;
 import org.compiere.print.layout.PrintDataEvaluatee;
 import org.compiere.process.ProcessInfo;
@@ -82,18 +108,18 @@ import org.compiere.tools.FileUtil;
 import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Evaluator;
 import org.compiere.util.Ini;
 import org.compiere.util.Language;
+import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
 import org.eevolution.model.MDDOrder;
 import org.eevolution.model.X_PP_Order;
 import org.idempiere.print.renderer.CSVReportRenderer;
 import org.idempiere.print.renderer.CSVReportRendererConfiguration;
-import org.idempiere.print.renderer.HTMLReportRenderer;
-import org.idempiere.print.renderer.HTMLReportRendererConfiguration;
 import org.idempiere.print.renderer.PDFReportRenderer;
 import org.idempiere.print.renderer.PDFReportRendererConfiguration;
 import org.idempiere.print.renderer.PSReportRenderer;
@@ -108,6 +134,8 @@ import org.idempiere.print.renderer.XLSXReportRenderer;
 import org.idempiere.print.renderer.XLSXReportRendererConfiguration;
 import org.idempiere.print.renderer.XMLReportRenderer;
 import org.idempiere.print.renderer.XMLReportRendererConfiguration;
+
+import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
 
 /**
  *	Report Engine.
@@ -266,6 +294,12 @@ public class ReportEngine implements PrintServiceAttributeListener
 	private String m_name = null;
 	
 	private boolean m_isReplaceTabContent = false;
+	
+	/**
+	 * store all column has same css rule into a list
+	 * for IDEMPIERE-2640
+	 */
+	private Map<CSSInfo, List<ColumnInfo>> mapCssInfo = new HashMap<CSSInfo, List<ColumnInfo>>();
 	
 	private List<IReportEngineEventListener> eventListeners = new ArrayList<IReportEngineEventListener>();
 
@@ -2742,6 +2776,37 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	{
 		this.m_tranPrintFormat = m_tranPrintFormat;
 	}
+	
+public String compress(String src, boolean minify) {
+		
+		if(minify) {
+			HtmlCompressor compressor = new HtmlCompressor();
+		    compressor.setEnabled(true);
+		    compressor.setCompressCss(true);
+		    compressor.setCompressJavaScript(true);
+		    compressor.setRemoveComments(true);
+		    compressor.setRemoveMultiSpaces(true);
+		    compressor.setRemoveIntertagSpaces(true);
+//		    compressor.setGenerateStatistics(false);
+//		    compressor.setRemoveQuotes(false);
+//		    compressor.setSimpleDoctype(false);
+//		    compressor.setRemoveScriptAttributes(false);
+//		    compressor.setRemoveStyleAttributes(false);
+//		    compressor.setRemoveLinkAttributes(false);
+//		    compressor.setRemoveFormAttributes(false);
+//		    compressor.setRemoveInputAttributes(false);
+//		    compressor.setSimpleBooleanAttributes(false);
+//		    compressor.setRemoveJavaScriptProtocol(false);
+//		    compressor.setRemoveHttpProtocol(false);
+//		    compressor.setRemoveHttpsProtocol(false);
+//		    compressor.setPreserveLineBreaks(false);
+		    
+		    return compressor.compress(src);
+		}
+		else {
+			return src;
+		}
+	}
 	public static void setDefaultReportTypeToPInstance(Properties ctx, MPInstance instance, int printFormatID) {
 		if(Util.isEmpty(instance.getReportType())) {
 			MPrintFormat pf = new MPrintFormat(ctx, printFormatID, null);
@@ -2751,6 +2816,30 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				: MSysConfig.getValue(MSysConfig.ZK_REPORT_TABLE_OUTPUT_TYPE,"PDF",Env.getAD_Client_ID(ctx),Env.getAD_Org_ID(ctx));
 			instance.setReportType(type);
 		}
+	}
+	
+	private void setStyle(MultiPartElement element, MStyle style) {
+		if (style == null || style.getAD_Style_ID() == 0)
+			return;
+
+		X_AD_StyleLine[] lines = style.getStyleLines();
+		StringBuilder styleBuilder = new StringBuilder();
+		for (X_AD_StyleLine line : lines)
+		{
+			String inlineStyle = line.getInlineStyle().trim();
+			String displayLogic = line.getDisplayLogic();
+			if (!Util.isEmpty(displayLogic))
+			{
+				if (!Evaluator.evaluateLogic(new PrintDataEvaluatee(null, m_printData), displayLogic))
+					continue;
+			}
+			if (styleBuilder.length() > 0 && !(styleBuilder.charAt(styleBuilder.length()-1)==';'))
+				styleBuilder.append("; ");
+			styleBuilder.append(inlineStyle);
+		}
+		if(styleBuilder.length() > 0)
+			element.setStyle(styleBuilder.toString());
+		//
 	}
 	
 	private ProcessInfo m_pi = null;
