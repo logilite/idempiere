@@ -330,6 +330,15 @@ public interface I_T_Aging
 
 	/** Get Due 8-30	  */
 	public BigDecimal getDue8_30();
+	
+	/** Column name Due91_120 */
+    public static final String COLUMNNAME_Due91_120 = "Due91_120";
+    
+    /** Set Due 91_120	  */
+	public void setDue91_120 (BigDecimal Due91_120);
+
+	/** Get Due 91_120	  */
+	public BigDecimal getDue91_120();
 
     /** Column name Due91_Plus */
     public static final String COLUMNNAME_Due91_Plus = "Due91_Plus";
@@ -472,12 +481,21 @@ public interface I_T_Aging
 
     /** Column name PastDue61_90 */
     public static final String COLUMNNAME_PastDue61_90 = "PastDue61_90";
+    
+    /** Column name PastDue91_120 */
+    public static final String COLUMNNAME_PastDue91_120 = "PastDue91_120";
 
 	/** Set Past Due 61-90	  */
 	public void setPastDue61_90 (BigDecimal PastDue61_90);
 
 	/** Get Past Due 61-90	  */
 	public BigDecimal getPastDue61_90();
+	
+	/** Set Past Due 91-120 */
+	public void setPastDue91_120(BigDecimal PastDue91_120);
+
+	/** Get Past Due 91-120 */
+	public BigDecimal getPastDue91_120();
 
     /** Column name PastDue61_Plus */
     public static final String COLUMNNAME_PastDue61_Plus = "PastDue61_Plus";

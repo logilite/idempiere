@@ -63,6 +63,7 @@ public class MAging extends X_T_Aging
 			setDue61_Plus (Env.ZERO);
 			setDue8_30 (Env.ZERO);
 			setDue91_Plus (Env.ZERO);
+			setDue91_120 (Env.ZERO);
 			setDue121_Plus (Env.ZERO);
 			//
 			setPastDueAmt (Env.ZERO);
@@ -74,6 +75,7 @@ public class MAging extends X_T_Aging
 			setPastDue61_Plus (Env.ZERO);
 			setPastDue8_30 (Env.ZERO);
 			setPastDue91_Plus (Env.ZERO);
+			setPastDue91_120 (Env.ZERO);
 			setPastDue121_Plus (Env.ZERO);
 			//
 			setOpenAmt(Env.ZERO);
@@ -240,6 +242,9 @@ public class MAging extends X_T_Aging
 			if (daysDue <= -91)
 				setDue91_Plus (getDue91_Plus().add(amt));
 			
+			if (daysDue <= -91 && daysDue >= -120)
+				setDue91_120 (getDue91_120().add(amt));
+			
 			if (daysDue <= -121)
 				setDue121_Plus (getDue121_Plus().add(amt));
 		}
@@ -269,6 +274,9 @@ public class MAging extends X_T_Aging
 				
 			if (daysDue >= 91)
 				setPastDue91_Plus (getPastDue91_Plus().add(amt));
+			
+			if (daysDue >= 91 && daysDue <= 120)
+				setPastDue91_120 (getPastDue91_120().add(amt));
 			
 			if (daysDue >= 121)
 				setPastDue121_Plus (getPastDue121_Plus().add(amt));
