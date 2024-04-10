@@ -160,6 +160,9 @@ public class MPrintFormat extends X_AD_PrintFormat implements ImmutablePOSupport
 		copyPO(copy);
 		this.m_translationViewLanguage = copy.m_translationViewLanguage;
 		this.m_items = copy.m_items != null ? Arrays.stream(copy.m_items).map(e -> {return new MPrintFormatItem(ctx, e, trxName);}).toArray(MPrintFormatItem[]::new) : null;
+		this.listHeaderItems = copy.listHeaderItems;
+		this.listContentItems = copy.listContentItems;
+		this.listFooterItems = copy.listFooterItems;
 		this.m_language = copy.m_language != null ? new Language(copy.m_language) : null;
 		this.m_tFormat = copy.m_tFormat != null ? new MPrintTableFormat(ctx, copy.m_tFormat, trxName) : null;
 	}
@@ -173,11 +176,11 @@ public class MPrintFormat extends X_AD_PrintFormat implements ImmutablePOSupport
 	/** Table Format					*/
 	private MPrintTableFormat 		m_tFormat;
 
-	private ArrayList<MPrintFormatItem>	listHeaderItems				= null;
+	private ArrayList<MPrintFormatItem>	listHeaderItems				= new ArrayList<MPrintFormatItem>();
 
-	private ArrayList<MPrintFormatItem>	listFooterItems				= null;
+	private ArrayList<MPrintFormatItem>	listFooterItems				= new ArrayList<MPrintFormatItem>();
 
-	private ArrayList<MPrintFormatItem>	listContentItems			= null;
+	private ArrayList<MPrintFormatItem>	listContentItems			= new ArrayList<MPrintFormatItem>();
 	/** Transient Object Child Print Format */
 	private Map<Integer, MPrintFormat>	tranPFChildMap				= new HashMap<Integer, MPrintFormat>();
 
@@ -273,14 +276,14 @@ public class MPrintFormat extends X_AD_PrintFormat implements ImmutablePOSupport
 			return m_items;
 		ArrayList<MPrintFormatItem> list = new ArrayList<MPrintFormatItem>();
 
-		listHeaderItems = new ArrayList<MPrintFormatItem>();
-		listContentItems = new ArrayList<MPrintFormatItem>();
-		listFooterItems = new ArrayList<MPrintFormatItem>();
+		listHeaderItems.clear();
+		listContentItems.clear();
+		listFooterItems.clear();
 
 		list.addAll(getItemsList(SQL_GET_PF_ITEMS + ORDER_BY_CLAUSE));
 		//
 		MPrintFormatItem[] retValue = new MPrintFormatItem[list.size()];
-		list.toArray(retValue);
+		m_items = list.toArray(retValue);	
 		return retValue;
 	} // getItems
 
@@ -336,11 +339,6 @@ public class MPrintFormat extends X_AD_PrintFormat implements ImmutablePOSupport
 	 */
 	public ArrayList<MPrintFormatItem> getHeaderItems()
 	{
-		if (listHeaderItems == null || listHeaderItems.isEmpty())
-		{
-			String sql = SQL_GET_PF_ITEMS + " AND pfi.PrintAreaType = '" + MPrintFormatItem.PRINTAREATYPE_Header + "' " + ORDER_BY_CLAUSE;
-			getItemsList(sql);
-		}
 		return listHeaderItems;
 	} // getHeaderItems
 
@@ -349,11 +347,6 @@ public class MPrintFormat extends X_AD_PrintFormat implements ImmutablePOSupport
 	 */
 	public ArrayList<MPrintFormatItem> getContentItems()
 	{
-		if (listContentItems == null || listContentItems.isEmpty())
-		{
-			String sql = SQL_GET_PF_ITEMS + " AND pfi.PrintAreaType = '" + MPrintFormatItem.PRINTAREATYPE_Content + "' " + ORDER_BY_CLAUSE;
-			getItemsList(sql);
-		}
 		return listContentItems;
 	}// getContentItems
 
@@ -362,11 +355,6 @@ public class MPrintFormat extends X_AD_PrintFormat implements ImmutablePOSupport
 	 */
 	public ArrayList<MPrintFormatItem> getFooterItems()
 	{
-		if (listFooterItems == null || listFooterItems.isEmpty())
-		{
-			String sql = SQL_GET_PF_ITEMS + " AND pfi.PrintAreaType = '" + MPrintFormatItem.PRINTAREATYPE_Footer + "' " + ORDER_BY_CLAUSE;
-			getItemsList(sql);
-		}
 		return listFooterItems;
 	} // getFooterItems
 
