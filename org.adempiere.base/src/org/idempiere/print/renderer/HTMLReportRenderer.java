@@ -52,7 +52,11 @@ import org.apache.ecs.xhtml.td;
 import org.apache.ecs.xhtml.th;
 import org.apache.ecs.xhtml.thead;
 import org.apache.ecs.xhtml.tr;
+import org.compiere.model.MAllocationHdr;
+import org.compiere.model.MAllocationLine;
 import org.compiere.model.MColumn;
+import org.compiere.model.MLocation;
+import org.compiere.model.MFactAcct;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRole;
 import org.compiere.model.MStyle;
@@ -72,6 +76,8 @@ import org.compiere.print.layout.InstanceAttributeColumn;
 import org.compiere.print.layout.InstanceAttributeData;
 import org.compiere.print.layout.LayoutEngine;
 import org.compiere.print.layout.PrintDataEvaluatee;
+import org.compiere.util.DB;
+import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -92,6 +98,10 @@ import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
 public class HTMLReportRenderer implements IReportRenderer<HTMLReportRendererConfiguration> {
 
 	private static final CLogger log = CLogger.getCLogger(HTMLReportRenderer.class);
+	
+	/** Cache TableName, Child table Line_ID reference */
+	private static CCache <String, String>		cacheLineIDTableRef	= new CCache<String, String>("LINE_ID_COLUMN_TABLE_REF", 10);
+	
 	
 	public HTMLReportRenderer() {
 	}
@@ -223,6 +233,29 @@ public class HTMLReportRenderer implements IReportRenderer<HTMLReportRendererCon
 			}
 			
 			table table = new table();
+			String headerCSS = "";
+			if (printFormat.getAD_PrintFont_ID() != 0)
+			{
+				MPrintFont pFont = (MPrintFont) printFormat.getAD_PrintFont();
+				Font font = pFont.getFont();
+				if (!Util.isEmpty(getCSSFontFamily(font.getName())))
+					headerCSS = "font-family: " + getCSSFontFamily(font.getName()) + ";";
+				if (font.isBold())
+					headerCSS = headerCSS + "font-weight: bold;";
+				if (font.isItalic())
+					headerCSS = headerCSS + "font-style: italic;";
+				headerCSS = headerCSS + "font-size: " + font.getSize() + "pt;";
+			}
+
+			if (printFormat.getAD_PrintColor_ID() != 0)
+			{
+				MPrintColor color = (MPrintColor) printFormat.getAD_PrintColor();
+				headerCSS = headerCSS + "color: #" + color.getRRGGBB() + ";";
+			}
+			
+			table.setStyle(headerCSS);
+
+
 			if (cssPrefix != null)
 				table.setClass(cssPrefix + "-table");
 			//
@@ -240,6 +273,8 @@ public class HTMLReportRenderer implements IReportRenderer<HTMLReportRendererCon
 				doc.getHtml().setNeedClosingTag(false);
 				doc.getBody().setNeedClosingTag(false);
 				doc.appendHead("<meta charset=\"UTF-8\" />");
+				if (!Util.isEmpty(headerCSS))
+					doc.appendHead(new style(style.css).addElement(".floatThead-table {" + headerCSS + "}"));
 				
 				if (extension != null && !Util.isEmpty(extension.getWebFontLinks(), true))
 				{
@@ -266,6 +301,7 @@ public class HTMLReportRenderer implements IReportRenderer<HTMLReportRendererCon
 					jslink.setSrc(extension.getScriptURL());
 					doc.appendHead(jslink);
 				}
+				appendInlineCss(doc, mapCssInfo);
 				
 				if (extension != null && !isExport){
 					extension.setWebAttribute(doc.getBody());
@@ -274,6 +310,8 @@ public class HTMLReportRenderer implements IReportRenderer<HTMLReportRendererCon
 			
 			if (doc != null)
 			{
+				//IDEMPIERE-4113
+				mapCssInfo.clear();
 				MPrintFormatItem item = null;
 				int printColIndex = -1;
 				for(int col = 0; col < columns.size(); col++)
@@ -397,6 +435,9 @@ public class HTMLReportRenderer implements IReportRenderer<HTMLReportRendererCon
 			for (int row = -1; row < printData.getRowCount(); row++)
 			{
 				tr tr = new tr();
+				String cssclass = "";
+				if (cssPrefix != null && row % 2 == 0)
+					cssclass = cssPrefix + "-odd";
 				if (row != -1)
 				{
 					printData.setRowIndex(row);					
@@ -415,6 +456,7 @@ public class HTMLReportRenderer implements IReportRenderer<HTMLReportRendererCon
 					// add row to table header
 					thead.addElement(tr);
 				}
+				tr.setClass(cssclass);
 				
 				printColIndex = -1;
 				//	for all columns
@@ -491,11 +533,14 @@ public class HTMLReportRenderer implements IReportRenderer<HTMLReportRendererCon
 								if (item.isSuppressNull() && obj != null && suppressMap.containsKey(printColIndex))
 									suppressMap.remove(printColIndex);
 								
-								if (pde.getColumnName().endsWith("_ID") && extension != null && !isExport)
+									if (pde.getColumnName().endsWith("_ID") && extension != null && !isExport && !DisplayType.isMultiSelect(pde.getDisplayType()))
 								{
 									boolean isZoom = false;
-									if (item.getColumnName().equals("Record_ID")) {
-										Object tablePDE = printData.getNode("AD_Table_ID");
+									boolean isDirectZoom = false;
+
+									if (item.getColumnName().equals(MFactAcct.COLUMNNAME_Record_ID) || item.getColumnName().equals(MFactAcct.COLUMNNAME_Line_ID))
+									{
+										Object tablePDE = printData.getNode(MFactAcct.COLUMNNAME_AD_Table_ID);
 										if (tablePDE != null && tablePDE instanceof PrintDataElement) {
 											int tableID = -1;
 											try {
@@ -508,16 +553,37 @@ public class HTMLReportRenderer implements IReportRenderer<HTMLReportRendererCon
 												String tableName = mTable.getTableName();
 												
 												value = reportEngine.getIdentifier(mTable, tableName, Integer.parseInt(value));
-												
-												String foreignColumnName = tableName + "_ID";
-												pde.setForeignColumnName(foreignColumnName);
-												isZoom = true;
+
+												String foreignColumnName = null;
+												if (item.getColumnName().equals(MFactAcct.COLUMNNAME_Record_ID)) {
+													foreignColumnName = mTable.getTableName() + "_ID";
+												} else { // for Line_ID
+													if (mTable.getTableName().equals(MAllocationHdr.Table_Name)) {
+														foreignColumnName = MAllocationLine.COLUMNNAME_C_AllocationLine_ID;
+													} else {
+														if (cacheLineIDTableRef.containsKey(mTable.getTableName())) {
+															foreignColumnName = cacheLineIDTableRef.get(mTable.getTableName());
+														} else {
+															foreignColumnName = mTable.getTableName() + "Line_ID";
+															if (!DB.getSQLValueBooleanEx(null, "SELECT COUNT(1)>0 FROM AD_Column WHERE ColumnName=?", foreignColumnName))
+																foreignColumnName = "";
+															cacheLineIDTableRef.put(mTable.getTableName(), foreignColumnName);
+														}
+													}
+												}
+
+												if (!Util.isEmpty(foreignColumnName, true)) 
+												{
+													pde.setForeignColumnName(foreignColumnName);
+													isZoom = true;
+													isDirectZoom = true;
+												}
 											}
 										}
 									} else {
 										isZoom = true;
 									}
-									if (isZoom) {
+									if (isZoom || isDirectZoom) {
 										// check permission on the zoomed window
 										MTable mTable = MTable.get(Env.getCtx(), pde.getForeignColumnName().substring(0, pde.getForeignColumnName().length()-3));
 										int Record_ID = -1;
@@ -533,22 +599,34 @@ public class HTMLReportRenderer implements IReportRenderer<HTMLReportRendererCon
 										}
 							    		if (canAccess == null) {
 							    			isZoom = false;
+							    			isDirectZoom = false;
 							    		}
 									}
-									if (isZoom) {
-										//link for column
+
+									if (isDirectZoom || isZoom) {
+										// link for column
 										a href = new a("javascript:void(0)");
 										href.setID(pde.getColumnName() + "_" + row + "_a");									
 										td.addElement(href);
-										href.addElement(Util.maskHTML(value));
-										if (cssPrefix != null)
-											href.setClass(cssPrefix + "-href");
+										if (item.getColumnName().equals(MFactAcct.COLUMNNAME_Record_ID) || isDirectZoom) {
+											if (cssPrefix != null)
+												href.setClass(cssPrefix + "-image");
+											href.setStyle("	background: url(" + extension.getZoomIconURL() + ") no-repeat center;");
+										} else {
+											href.addElement(Util.maskHTML(value));
+											if (cssPrefix != null)
+												href.setClass(cssPrefix + "-href");
+										}
+										
 										// Set Style
 										if(style != null && style.isWrapWithSpan())
 											setStyle(printData, href, style);
 										else
 											setStyle(printData, td, style);
-										extension.extendIDColumn(row, td, href, pde);
+										if (isDirectZoom)
+											href.addAttribute("onclick", "parent.idempiere.zoom('" + extension.getComponentId() + "','" + pde.getForeignColumnName() + "','" + pde.getValueAsString() + "')");
+										else
+											extension.extendIDColumn(row, td, href, pde);
 									} else {
 										// Set Style
 										if(style != null && style.isWrapWithSpan()) {
@@ -563,6 +641,33 @@ public class HTMLReportRenderer implements IReportRenderer<HTMLReportRendererCon
 										}
 									}
 
+								}
+								else if (pde.getColumnName().equalsIgnoreCase(MLocation.COLUMNNAME_LATITUDE)
+											|| pde.getColumnName().equalsIgnoreCase(MLocation.COLUMNNAME_LONGITUDE))
+								{
+									PrintDataElement latitude = (PrintDataElement) printData.getNode(MLocation.COLUMNNAME_LATITUDE);
+									PrintDataElement longitude = (PrintDataElement) printData.getNode(MLocation.COLUMNNAME_LONGITUDE);
+									//
+									if (latitude != null && longitude != null)
+									{
+										a href = new a("javascript:void(0)");
+										href.setID(pde.getColumnName() + "_" + row + "_a");
+										td.addElement(href);
+
+										if (cssPrefix != null)
+										{
+											href.setClass(cssPrefix + "-image");
+										}
+
+										String mapURL = MLocation.LOCATION_MAPS_URL_LAT_LONG.replaceAll("<LAT>", latitude.getValue().toString());
+										mapURL = mapURL.replaceAll("<LNG>", longitude.getValue().toString());
+										href.setHref(mapURL);
+										href.setTarget("_blank");
+									}
+									else
+									{
+										td.addElement(Util.maskHTML(value));
+									}
 								}
 								else
 								{
@@ -884,13 +989,23 @@ public class HTMLReportRenderer implements IReportRenderer<HTMLReportRendererCon
 	 * @return CSS font family
 	 */
 	private static String getCSSFontFamily(String fontFamily) {
-		if ("Dialog".equals(fontFamily) || "DialogInput".equals(fontFamily) || 	"Monospaced".equals(fontFamily))
+		if ("Dialog".equalsIgnoreCase(fontFamily))
+		{
+			return "cursive";
+		}
+		else if ("DialogInput".equalsIgnoreCase(fontFamily))
+		{
+			return "fantasy";
+		}
+		else if ("Monospaced".equalsIgnoreCase(fontFamily))
 		{
 			return "monospace";
-		} else if ("SansSerif".equals(fontFamily))
+		}
+		else if ("SansSerif".equalsIgnoreCase(fontFamily))
 		{
 			return "sans-serif";
-		} else if ("Serif".equals(fontFamily))
+		}
+		else if ("Serif".equalsIgnoreCase(fontFamily))
 		{
 			return "serif";
 		}

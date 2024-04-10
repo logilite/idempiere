@@ -19,8 +19,6 @@ package org.compiere.print;
 import static org.compiere.model.SystemIDs.PROCESS_RPT_M_INVENTORY;
 import static org.compiere.model.SystemIDs.PROCESS_RPT_M_MOVEMENT;
 
-import java.awt.Color;
-import java.awt.Font;
 import java.awt.print.PrinterJob;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -30,12 +28,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -43,11 +37,8 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -58,29 +49,13 @@ import javax.print.event.PrintServiceAttributeEvent;
 import javax.print.event.PrintServiceAttributeListener;
 
 import org.adempiere.exceptions.AdempiereException;
-import org.apache.ecs.MultiPartElement;
-import org.apache.ecs.XhtmlDocument;
-import org.apache.ecs.xhtml.a;
-import org.apache.ecs.xhtml.script;
-import org.apache.ecs.xhtml.span;
-import org.apache.ecs.xhtml.style;
-import org.apache.ecs.xhtml.table;
-import org.apache.ecs.xhtml.tbody;
-import org.apache.ecs.xhtml.td;
-import org.apache.ecs.xhtml.th;
-import org.apache.ecs.xhtml.thead;
-import org.apache.ecs.xhtml.tr;
-import org.compiere.model.MAllocationHdr;
-import org.compiere.model.MAllocationLine;
 import org.compiere.model.MClient;
 import org.compiere.model.MColumn;
 import org.compiere.model.MDunningRunEntry;
-import org.compiere.model.MFactAcct;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInventory;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MLanguage;
-import org.compiere.model.MLocation;
 import org.compiere.model.MMovement;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPInstance;
@@ -90,36 +65,30 @@ import org.compiere.model.MProject;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRfQResponse;
-import org.compiere.model.MRole;
-import org.compiere.model.MStyle;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.model.PrintInfo;
-import org.compiere.model.X_AD_StyleLine;
-import org.compiere.print.layout.InstanceAttributeColumn;
-import org.compiere.print.layout.InstanceAttributeData;
 import org.compiere.print.layout.LayoutEngine;
 import org.compiere.print.layout.PrintDataEvaluatee;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.ServerProcessCtl;
 import org.compiere.tools.FileUtil;
-import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
-import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Evaluator;
 import org.compiere.util.Ini;
 import org.compiere.util.Language;
-import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
 import org.eevolution.model.MDDOrder;
 import org.eevolution.model.X_PP_Order;
 import org.idempiere.print.renderer.CSVReportRenderer;
 import org.idempiere.print.renderer.CSVReportRendererConfiguration;
+import org.idempiere.print.renderer.HTMLReportRenderer;
+import org.idempiere.print.renderer.HTMLReportRendererConfiguration;
 import org.idempiere.print.renderer.PDFReportRenderer;
 import org.idempiere.print.renderer.PDFReportRendererConfiguration;
 import org.idempiere.print.renderer.PSReportRenderer;
@@ -135,8 +104,6 @@ import org.idempiere.print.renderer.XLSXReportRendererConfiguration;
 import org.idempiere.print.renderer.XMLReportRenderer;
 import org.idempiere.print.renderer.XMLReportRendererConfiguration;
 
-import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
-
 /**
  *	Report Engine.
  *  For a given PrintFormat,
@@ -144,8 +111,7 @@ import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
  *  <p>
  *  Change log:
  *  <ul>
- *  <li>2007-02-12 - teo_sarca - [ 1658127 ] Select charset encoding on import
- *  <li>2007-02-10 - teo_sarca - [ 1652660 ] Save XML,HTML,CSV should have utf8 charset
+ *  <li>2007-02-12 - teo_sarca - [ 1658127 ] S[ 1652660 ] Save XML,HTML,CSV should have utf8 charset
  *  <li>2009-02-06 - globalqss - [ 2574162 ] Priority to choose invoice print format not working
  *  <li>2009-07-10 - trifonnt - [ 2819637 ] Wrong print format on non completed order
  *  </ul>
@@ -260,9 +226,6 @@ public class ReportEngine implements PrintServiceAttributeListener
 	/**	Static Logger	*/
 	private static CLogger	log	= CLogger.getCLogger (ReportEngine.class);
 
-	/** Cache TableName, Child table Line_ID reference */
-	private static CCache <String, String>		cacheLineIDTableRef	= new CCache <String, String>("LINE_ID_COLUMN_TABLE_REF", 10);
-	
 	/**	Context					*/
 	private Properties		m_ctx;
 
@@ -294,12 +257,6 @@ public class ReportEngine implements PrintServiceAttributeListener
 	private String m_name = null;
 	
 	private boolean m_isReplaceTabContent = false;
-	
-	/**
-	 * store all column has same css rule into a list
-	 * for IDEMPIERE-2640
-	 */
-	private Map<CSSInfo, List<ColumnInfo>> mapCssInfo = new HashMap<CSSInfo, List<ColumnInfo>>();
 	
 	private List<IReportEngineEventListener> eventListeners = new ArrayList<IReportEngineEventListener>();
 
@@ -729,589 +686,13 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	 * 	@return true if success
 	 */
 	public boolean createHTML (Writer writer, boolean onlyTable, Language language, IHTMLExtension extension, boolean isExport)
-	{
-		try
-		{
-			//collect column to print
-			List<Object> columns = new ArrayList<>();
-			List<InstanceAttributeData> asiElements = new ArrayList<>();
-			int columnCount = 0;
-			for (int col = 0; col < m_printFormat.getItemCount(); col++)
-			{
-				MPrintFormatItem item = m_printFormat.getItem(col);
-				if (item.isPrinted())
-				{
-					if (item.isTypeField() && item.isPrintInstanceAttributes())
-					{
-						InstanceAttributeData asiElement = new InstanceAttributeData(item, columnCount);
-						asiElement.readAttributesData(m_printData);
-						asiElements.add(asiElement);						
-						continue;
-					}
-					else 
-					{
-						columns.add(item);
-						columnCount++;
-					}
-				}
-			}
-			if (asiElements.size() > 0)
-			{
-				int columnCreated = 0;
-				for(InstanceAttributeData data : asiElements)
-				{
-					List<InstanceAttributeColumn> instanceColumns = data.getColumns();
-					int index = data.getColumnIndex() + columnCreated;
-					for(InstanceAttributeColumn c : instanceColumns)
-					{
-						columns.add(index, c);
-						index++;
-						columnCreated++;
-					}
-				}
-			}
-			
-			String cssPrefix = extension != null ? extension.getClassPrefix() : null;
-			if (cssPrefix != null && cssPrefix.trim().length() == 0)
-				cssPrefix = null;
-			
-			table parameterTable = null;
-			if (!m_printFormat.isForm()) {
-				if (m_query != null && m_query.isActive()) {
-					int rows = m_query.getReportProcessQuery() != null ? m_query.getReportProcessQuery().getRestrictionCount() : m_query.getRestrictionCount();
-					if (rows > 0) {
-						parameterTable = new table();
-						if (cssPrefix != null)
-							parameterTable.setClass(cssPrefix + "-parameter-table");
-						else
-							parameterTable.setClass("parameter-table");
-						parameterTable.setNeedClosingTag(false);
-					}
-				}
-			}
-			
-			table table = new table();
-			String headerCSS = "";
-			if (m_printFormat.getAD_PrintFont_ID() != 0)
-			{
-				MPrintFont pFont = (MPrintFont) m_printFormat.getAD_PrintFont();
-				Font font = pFont.getFont();
-				if (!Util.isEmpty(getCSSFontFamily(font.getName())))
-					headerCSS = "font-family: " + getCSSFontFamily(font.getName()) + ";";
-				if (font.isBold())
-					headerCSS = headerCSS + "font-weight: bold;";
-				if (font.isItalic())
-					headerCSS = headerCSS + "font-style: italic;";
-				headerCSS = headerCSS + "font-size: " + font.getSize() + "pt;";
-			}
-
-			if (m_printFormat.getAD_PrintColor_ID() != 0)
-			{
-				MPrintColor color = (MPrintColor) m_printFormat.getAD_PrintColor();
-				headerCSS = headerCSS + "color: #" + color.getRRGGBB() + ";";
-			}
-			
-			table.setStyle(headerCSS);
-
-
-			if (cssPrefix != null)
-				table.setClass(cssPrefix + "-table");
-			//
-			//
-			table.setNeedClosingTag(false);
-			PrintWriter w = new PrintWriter(writer);
-			XhtmlDocument doc = null;
-			boolean minify = MSysConfig.getBooleanValue(MSysConfig.HTML_REPORT_MINIFY, true, Env.getAD_Client_ID(getCtx()));
-						
-			if (onlyTable)
-				w.print(compress(table.toString(), minify));
-			else
-			{
-				doc = new XhtmlDocument();
-				doc.getHtml().setNeedClosingTag(false);
-				doc.getBody().setNeedClosingTag(false);
-				doc.appendHead("<meta charset=\"UTF-8\" />");
-				if (!Util.isEmpty(headerCSS))
-					doc.appendHead(new style(style.css).addElement(".floatThead-table {" + headerCSS + "}"));
-					
-				if (extension != null && !Util.isEmpty(extension.getWebFontLinks(), true))
-				{
-					doc.appendHead(extension.getWebFontLinks());
-				}
-
-				if (extension != null && extension.getStyleURL() != null)
-				{
-					// maybe cache style content with key is path
-					String pathStyleFile = extension.getFullPathStyle(); // creates a temp file - delete below
-					appendInlineCss(doc, readResourceFile(pathStyleFile));
-				}
-				if (extension != null && extension.getScriptURL() != null && !isExport)
-				{
-					embedExtendScript(doc, extension.getScriptURL());
-				}
-				appendInlineCss(doc);
-				
-				if (extension != null && !isExport){
-					extension.setWebAttribute(doc.getBody());
-				}				
-			}
-			
-			if (doc != null)
-			{
-				//IDEMPIERE-4113
-				mapCssInfo.clear();
-				MPrintFormatItem item = null;
-				int printColIndex = -1;
-				for(int col = 0; col < columns.size(); col++)
-				{
-					Object colobj = columns.get(col);
-					if (colobj instanceof MPrintFormatItem)
-						item = (MPrintFormatItem) colobj;
-					else if (colobj instanceof InstanceAttributeColumn)
-						item = ((InstanceAttributeColumn) colobj).getPrintFormatItem();
-					if(item != null)
-					{
-						printColIndex++;
-						addCssInfo(item, printColIndex);
-					}
-				}//IDEMPIERE-4113
-				appendInlineCss(doc);
-				
-				StringBuilder styleBuild = new StringBuilder();
-				MPrintTableFormat tf = m_printFormat.getTableFormat();
-				CSSInfo cssInfo = new CSSInfo(tf.getPageHeader_Font(), tf.getPageHeaderFG_Color());
-				if (cssPrefix != null) {
-					if (parameterTable != null)
-						styleBuild.append("."+cssPrefix + "-parameter-table th").append(cssInfo.getCssRule());						
-					styleBuild.append("."+cssPrefix + "-table th").append(cssInfo.getCssRule());
-				}
-				else {
-					if (parameterTable != null)						
-						styleBuild.append("parameter-table th").append(cssInfo.getCssRule());
-					styleBuild.append("table th").append(cssInfo.getCssRule());
-				}
-				
-				cssInfo = new CSSInfo(tf.getParameter_Font(), tf.getParameter_Color());
-				styleBuild.append(".tr-parameter td").append(cssInfo.getCssRule());
-				
-				cssInfo = new CSSInfo(tf.getFunct_Font(), tf.getFunctFG_Color());
-				styleBuild.append(".tr-function td").append(cssInfo.getCssRule());
-				
-				MPrintFont printFont = MPrintFont.get(m_printFormat.getAD_PrintFont_ID());
-				Font base = printFont.getFont();
-				Font newFont = new Font(base.getName(), Font.PLAIN, base.getSize()-1);
-				cssInfo = new CSSInfo(newFont, null);
-				styleBuild.append(".tr-level-1 td").append(cssInfo.getCssRule());
-				
-				newFont = new Font(base.getName(), Font.PLAIN, base.getSize()-2);
-				cssInfo = new CSSInfo(newFont, null);
-				styleBuild.append(".tr-level-2 td").append(cssInfo.getCssRule());
-				
-				styleBuild = new StringBuilder(styleBuild.toString().replaceAll(";", "!important;"));
-				appendInlineCss (doc, styleBuild);
-				
-				w.print(compress(doc.toString(), minify));
-				
-				w.print("<div class='"+cssPrefix+"-flex-container'>");
-				String paraWrapId = null;
-				if (parameterTable != null) {
-					paraWrapId = cssPrefix + "-para-table-wrap";
-					w.print("<details id='" + paraWrapId + "' open=true style='cursor:pointer'>");
-					w.print("<summary style='cursor:pointer'>"+Msg.getMsg(getCtx(), "Parameter")+"</summary>");
-					w.print(compress(parameterTable.toString(), minify));
-					
-					tr tr = new tr();
-					tr.setClass("tr-parameter");
-					
-					MQuery query = m_query;
-					if (m_query.getReportProcessQuery() != null)
-						query = m_query.getReportProcessQuery();
-					for (int r = 0; r < query.getRestrictionCount(); r++)
-					{
-						if (r > 0) {
-							tr = new tr();
-							tr.setClass("tr-parameter");
-						}
-						
-						td td = new td();
-						tr.addElement(td);
-						td.addElement(query.getInfoName(r));
-						
-						td = new td();
-						tr.addElement(td);
-						td.addElement(query.getInfoOperator(r));
-						
-						td = new td();
-						tr.addElement(td);
-						td.addElement(query.getInfoDisplayAll(r));
-						
-						w.print(compress(tr.toString(), minify));
-					}
-										
-					w.print("</table>");
-					w.print("</details>");
-				}
-				
-				StringBuilder tableWrapDiv = new StringBuilder();
-				tableWrapDiv.append("<div class='").append(cssPrefix).append("-table-wrap' ");
-				if (paraWrapId != null) {
-					String paraWrapGet = "document.getElementById(\""+paraWrapId+"\")";
-					tableWrapDiv.append("onscroll='setTimeout(() => {if (this.scrollTop > 0) ")
-						.append(" if(").append(paraWrapGet).append(".open) ")
-						.append(paraWrapGet).append(".open=false;}, 100)'");
-				}
-				tableWrapDiv.append(" >");
-				
-				w.print(compress(tableWrapDiv.toString(), minify));
-				w.print(compress(table.toString(), minify));
-			}
-			
-			thead thead = new thead();
-			tbody tbody = new tbody();
-			tbody.setNeedClosingTag(false);
-			
-			Boolean [] colSuppressRepeats = m_layout == null || m_layout.colSuppressRepeats == null? LayoutEngine.getColSuppressRepeats(m_printFormat):m_layout.colSuppressRepeats;
-			Object [] preValues = null;
-			if (colSuppressRepeats != null){
-				preValues = new Object [colSuppressRepeats.length];
-			}
-
-			int printColIndex = -1;
-			HashMap<Integer, th> suppressMap = new HashMap<>();
-			
-			//	for all rows (-1 = header row)
-			for (int row = -1; row < m_printData.getRowCount(); row++)
-			{
-				tr tr = new tr();
-				String cssclass = "";
-				if (cssPrefix != null && row % 2 == 0)
-					cssclass = cssPrefix + "-odd";
-				if (row != -1)
-				{
-					m_printData.setRowIndex(row);					
-					if (extension != null && !isExport)
-					{
-						extension.extendRowElement(tr, m_printData);
-					}
-					if (m_printData.isFunctionRow()) {
-						cssclass = cssclass + " " + cssPrefix + "-functionrow";
-					} else if ( row < m_printData.getRowCount() && m_printData.isFunctionRow(row+1)) {
-						cssclass = cssclass + " " + cssPrefix + "-lastgrouprow";
-					}
-					// add row to table body
-					//tbody.addElement(tr);
-				} else {
-					// add row to table header
-					thead.addElement(tr);
-				}
-				tr.setClass(cssclass);
-				
-				printColIndex = -1;
-				//	for all columns
-				for (int col = 0; col < columns.size(); col++)
-				{
-					Object colObj = columns.get(col);
-					MPrintFormatItem item = null;
-					InstanceAttributeColumn instanceAttributeColumn = null;
-					if (colObj instanceof MPrintFormatItem)
-					{
-						item = (MPrintFormatItem) colObj;
-					}
-					else if (colObj instanceof InstanceAttributeColumn)
-					{
-						instanceAttributeColumn = (InstanceAttributeColumn) colObj;
-						item = instanceAttributeColumn.getPrintFormatItem();
-					}
-					if (item != null)
-					{
-						printColIndex++;
-						//	header row
-						if (row == -1)
-						{
-							th th = new th();
-							tr.addElement(th);
-							String columnHeader = instanceAttributeColumn != null ? instanceAttributeColumn.getName() : item.getPrintName(language);
-							th.addElement(Util.maskHTML(columnHeader));
-							if (cssPrefix != null && instanceAttributeColumn == null) 
-							{
-								MColumn column = MColumn.get(getCtx(), item.getAD_Column_ID());
-								if (column != null && column.getAD_Column_ID() > 0)
-								{
-									if (DisplayType.isNumeric(column.getAD_Reference_ID()))
-									{
-										th.setClass(cssPrefix + "-number");
-									}
-								}
-							}
-							if (item.isSuppressNull()) 
-							{
-								suppressMap.put(printColIndex, th);
-								th.setID("report-th-"+printColIndex);
-							}
-						}
-						else
-						{
-							td td = new td();
-							tr.addElement(td);
-							MStyle style = item.getAD_FieldStyle_ID() > 0 ? MStyle.get(Env.getCtx(), item.getAD_FieldStyle_ID()) : null;
-
-//							if (item.isFixedWidth() && item.getMaxWidth() > 0)
-//							{
-//								// convert to pixels assuming 96dpi
-//								int pxs = (item.getMaxWidth() * 96);
-//								pxs = pxs / 72;
-//								style = "min-width:" + pxs + ";max-width:" + pxs + "; overflow: hidden";
-//							}
-//
-//							if (item.isHeightOneLine())
-//							{
-//								if (style.length() > 0)
-//									style += ";";
-//								style += "white-space: nowrap;";
-//							}
-//
-//							td.setStyle(style);
-
-							Object obj = instanceAttributeColumn != null ? instanceAttributeColumn.getPrintDataElement(row)
-									: m_printData.getNodeByPrintFormatItemId(item.getAD_PrintFormatItem_ID());
-							if (obj == null || !isDisplayPFItem(item))
-							{
-								td.addElement("&nbsp;");
-								if (colSuppressRepeats != null && colSuppressRepeats[printColIndex]){
-									preValues[printColIndex] = null;
-								}
-								if (item.isSuppressNull() && obj != null && suppressMap.containsKey(printColIndex))
-									suppressMap.remove(printColIndex);
-							}
-							else if (obj instanceof PrintDataElement)
-							{
-								PrintDataElement pde = (PrintDataElement) obj;
-								String value = pde.getValueDisplay(language);	//	formatted
-
-								if (colSuppressRepeats != null && colSuppressRepeats[printColIndex]){
-									if (value.equals(preValues[printColIndex])){
-										td.addElement("&nbsp;");
-										continue;
-									}else{
-										preValues[printColIndex] = value;
-									}
-								}
-
-								if (item.isSuppressNull() && obj != null && suppressMap.containsKey(printColIndex))
-									suppressMap.remove(printColIndex);
-								
-									if (pde.getColumnName().endsWith("_ID") && extension != null && !isExport && !DisplayType.isMultiSelect(pde.getDisplayType()))
-								{
-									boolean isZoom = false;
-									boolean isDirectZoom = false;
-
-									if (item.getColumnName().equals(MFactAcct.COLUMNNAME_Record_ID) || item.getColumnName().equals(MFactAcct.COLUMNNAME_Line_ID))
-									{
-										Object tablePDE = m_printData.getNode(MFactAcct.COLUMNNAME_AD_Table_ID);
-										if (tablePDE != null && tablePDE instanceof PrintDataElement) {
-											int tableID = -1;
-											try {
-												tableID = Integer.parseInt(((PrintDataElement)tablePDE).getValueAsString());
-											} catch (Exception e) {
-												tableID = -1;
-											}
-											if (tableID > 0) {
-												MTable mTable = MTable.get(getCtx(), tableID);
-												String foreignColumnName;
-												if (item.getColumnName().equals(MFactAcct.COLUMNNAME_Record_ID)) {
-													foreignColumnName = mTable.getTableName() + "_ID";
-												} else { // for Line_ID
-													if (mTable.getTableName().equals(MAllocationHdr.Table_Name)) {
-														foreignColumnName = MAllocationLine.COLUMNNAME_C_AllocationLine_ID;
-													} else {
-														if (cacheLineIDTableRef.containsKey(mTable.getTableName())) {
-															foreignColumnName = cacheLineIDTableRef.get(mTable.getTableName());
-														} else {
-															foreignColumnName = mTable.getTableName() + "Line_ID";
-															if (!DB.getSQLValueBooleanEx(null, "SELECT COUNT(1)>0 FROM AD_Column WHERE ColumnName=?", foreignColumnName))
-																foreignColumnName = "";
-															cacheLineIDTableRef.put(mTable.getTableName(), foreignColumnName);
-														}
-													}
-												}
-
-												if (!Util.isEmpty(foreignColumnName, true))
-												{
-													pde.setForeignColumnName(foreignColumnName);
-													isDirectZoom = true;
-													isZoom = true;
-												}
-											}
-										}
-									} else {
-										isZoom = true;
-									}
-									if (isZoom || isDirectZoom) {
-										// check permission on the zoomed window
-										MTable mTable = MTable.get(getCtx(), pde.getForeignColumnName().substring(0, pde.getForeignColumnName().length()-3));
-										int Record_ID = -1;
-										try {
-											Record_ID = Integer.parseInt(pde.getValueAsString());
-										} catch (Exception e) {
-											Record_ID = -1;
-										}
-							    		Boolean canAccess = null;
-										if (Record_ID >= 0 && mTable != null) {
-											int AD_Window_ID = Env.getZoomWindowID(mTable.get_ID(), Record_ID);
-								    		canAccess = MRole.getDefault().getWindowAccess(AD_Window_ID);
-										}
-							    		if (canAccess == null) {
-							    			isZoom = false;
-							    			isDirectZoom = false;
-							    		}
-									}
-
-									if (isDirectZoom || isZoom) {
-										// link for column
-										a href = new a("javascript:void(0)");
-										href.setID(pde.getColumnName() + "_" + row + "_a");
-										td.addElement(href);
-										if (item.getColumnName().equals(MFactAcct.COLUMNNAME_Record_ID) || isDirectZoom) {
-											if (cssPrefix != null)
-												href.setClass(cssPrefix + "-image");
-											href.setStyle("	background: url(" + extension.getZoomIconURL() + ") no-repeat center;");
-										} else {
-											href.addElement(Util.maskHTML(value));
-											if (cssPrefix != null)
-												href.setClass(cssPrefix + "-href");
-										}
-										
-										// Set Style
-										if(style != null && style.isWrapWithSpan())
-											setStyle(href, style);
-										else
-											setStyle(td, style);
-											
-										if (isDirectZoom)
-											href.addAttribute("onclick", "parent.window.idempiere.zoom('" + extension.getComponentId() + "','" + pde.getForeignColumnName() + "','" + pde.getValueAsString() + "')");
-										else
-											extension.extendIDColumn(row, td, href, pde);
-									} else {
-										// Set Style
-										if(style != null && style.isWrapWithSpan()) {
-											span span = new span();
-											setStyle(span, style);
-											span.addElement(Util.maskHTML(value));
-											td.addElement(span);
-										}
-										else {
-											setStyle(td, style);
-											td.addElement(Util.maskHTML(value));
-										}
-									}
-
-								}
-								else if (pde.getColumnName().equalsIgnoreCase(MLocation.COLUMNNAME_LATITUDE)
-											|| pde.getColumnName().equalsIgnoreCase(MLocation.COLUMNNAME_LONGITUDE))
-								{
-									PrintDataElement latitude = (PrintDataElement) m_printData.getNode(MLocation.COLUMNNAME_LATITUDE);
-									PrintDataElement longitude = (PrintDataElement) m_printData.getNode(MLocation.COLUMNNAME_LONGITUDE);
-									//
-									if (latitude != null && longitude != null)
-									{
-										a href = new a("javascript:void(0)");
-										href.setID(pde.getColumnName() + "_" + row + "_a");
-										td.addElement(href);
-
-										if (cssPrefix != null)
-										{
-											href.setClass(cssPrefix + "-image");
-										}
-
-										String mapURL = MLocation.LOCATION_MAPS_URL_LAT_LONG.replaceAll("<LAT>", latitude.getValue().toString());
-										mapURL = mapURL.replaceAll("<LNG>", longitude.getValue().toString());
-										href.setHref(mapURL);
-										href.setTarget("_blank");
-									}
-									else
-									{
-										td.addElement(Util.maskHTML(value));
-									}
-								}
-								else
-								{
-									// Set Style
-									if(style != null && style.isWrapWithSpan()) {
-										span span = new span();
-										setStyle(span, style);
-										span.addElement(Util.maskHTML(value));
-										td.addElement(span);
-									}
-									else {
-										setStyle(td, style);
-										td.addElement(Util.maskHTML(value));
-									}
-								}
-								if (cssPrefix != null)
-								{
-									if (DisplayType.isNumeric(pde.getDisplayType()))
-										td.setClass(cssPrefix + "-number");
-									else if (DisplayType.isDate(pde.getDisplayType()))
-										td.setClass(cssPrefix + "-date");
-									else
-										td.setClass(cssPrefix + "-text");
-								}											
-							}
-							else if (obj instanceof PrintData)
-							{
-								//	ignore contained Data
-							}
-							else
-								log.log(Level.SEVERE, "Element not PrintData(Element) " + obj.getClass());
-						}
-					}	//	printed
-				}	//	for all columns
-				
-				/* output table header */
-				if (row == -1){
-					w.print(compress(thead.toString(), minify));
-					// output open of tbody
-					w.print(compress(tbody.toString(), minify));
-				}else{
-					// output row by row 
-					w.print(compress(tr.toString(), minify));
-				}
-				
-			}	//	for all rows
-			
-			w.print("</tbody>");
-			w.print("</table>");
-			if (suppressMap.size() > 0) 
-			{
-				StringBuilder st = new StringBuilder();
-				for(th t : suppressMap.values()) 
-				{
-					if (st.length() > 0)
-						st.append(",");
-					st.append("#").append(t.getAttribute("id"));
-				}
-				st.append(" {\n\t\tdisplay:none;\n\t}");
-				style styleTag = new style();
-				styleTag.addElement(st.toString());
-				w.print(compress(styleTag.toString(), minify));
-			}
-			if (!onlyTable)
-			{
-				w.print("</div>");
-				w.print("</div>");
-				w.print("</body>");
-				w.print("</html>");
-			}
-			w.flush();
-			w.close();
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, "(w)", e);
-			throw new AdempiereException(e);
-		}
+	{		
+		HTMLReportRendererConfiguration config = new HTMLReportRendererConfiguration()
+				.setOutputWriter(writer).setOnlyTable(onlyTable).setExport(isExport).setExtension(extension)
+				.setLanguage(language);
+		new HTMLReportRenderer().renderReport(this, config);
 		return true;
-	}	//	createHTML
+}	//	createHTML
 
 	/**
 	 * Get record identifier string
@@ -1397,31 +778,6 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			return tableName;
 	} // addTrlSuffix
 	
-	private String getCSSFontFamily(String fontFamily)
-	{
-		if ("Dialog".equalsIgnoreCase(fontFamily))
-		{
-			return "cursive";
-		}
-		else if ("DialogInput".equalsIgnoreCase(fontFamily))
-		{
-			return "fantasy";
-		}
-		else if ("Monospaced".equalsIgnoreCase(fontFamily))
-		{
-			return "monospace";
-		}
-		else if ("SansSerif".equalsIgnoreCase(fontFamily))
-		{
-			return "sans-serif";
-		}
-		else if ("Serif".equalsIgnoreCase(fontFamily))
-		{
-			return "serif";
-		}
-		return null;
-	}
-
 	/**
 	 * 	Create delimited text file
 	 * 	@param file file
@@ -2493,282 +1849,6 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return -1;
 	}
 	
-	/**
-	 * build css for table from mapCssInfo
-	 * @param doc
-	 */
-	public void appendInlineCss (XhtmlDocument doc){
-		StringBuilder buildCssInline = new StringBuilder();
-		
-		// each entry is a css class
-		for (Entry<CSSInfo, List<ColumnInfo>> cssClassInfo : mapCssInfo.entrySet()){
-			// each column is a css name.
-			for (int i = 0; i < cssClassInfo.getValue().size(); i++){
-				if (i > 0)
-					buildCssInline.append (",");
-				
-				buildCssInline.append(cssClassInfo.getValue().get(i).getCssSelector());
-			}
-			
-			buildCssInline.append(cssClassInfo.getKey().getCssRule());
-			buildCssInline.append("\n");
-		}
-		
-		appendInlineCss (doc, buildCssInline);
-	}
-	
-	public void appendInlineCss (XhtmlDocument doc, StringBuilder buildCssInline){
-		if (buildCssInline.length() > 0){
-			buildCssInline.insert(0, "<style>");
-			buildCssInline.append("</style>");
-			buildCssInline.insert(0, "<style type=\"text/css\" rel=\"stylesheet\">\n");
-			buildCssInline.append("\n</style>");
-			doc.appendHead(buildCssInline.toString());
-		}
-	}
-	
-	/**
-	 * create css info from formatItem, add all column has same formatItem in a list
-	 * @param formatItem
-	 * @param index
-	 */
-	public void addCssInfo (MPrintFormatItem formatItem, int index){
-		CSSInfo cadidateCss = new CSSInfo(formatItem);
-		if (mapCssInfo.containsKey(cadidateCss)){
-			mapCssInfo.get(cadidateCss).add(new ColumnInfo(index, formatItem));
-		}else{
-			List<ColumnInfo> newColumnList = new ArrayList<ColumnInfo>();
-			newColumnList.add(new ColumnInfo(index, formatItem));
-			mapCssInfo.put(cadidateCss, newColumnList);
-		}
-	}
-	
-	/**
-	 * Store info for make css rule
-	 * @author hieplq
-	 *
-	 */
-	public class CSSInfo {
-		private Font font;		
-		private Color color;
-		private String cssStr;
-		public CSSInfo (MPrintFormatItem item){
-			MPrintFont mPrintFont = null;
-			
-			if (item.getAD_PrintFont_ID() > 0) 
-			{
-				mPrintFont = MPrintFont.get(item.getAD_PrintFont_ID());
-			}			
-			else if (m_printFormat.getAD_PrintFont_ID() > 0)
-			{
-				mPrintFont = MPrintFont.get(m_printFormat.getAD_PrintFont_ID());
-			}
-			if (mPrintFont != null && mPrintFont.getAD_PrintFont_ID() > 0)
-			{
-				font = mPrintFont.getFont();				
-			}
-			
-			MPrintColor mPrintColor = null;
-			if (item.getAD_PrintColor_ID() > 0) 
-			{
-				mPrintColor = MPrintColor.get(m_ctx, item.getAD_PrintColor_ID());
-			}
-			else if (m_printFormat.getAD_PrintColor_ID() > 0)
-			{
-				mPrintColor = MPrintColor.get(m_ctx, m_printFormat.getAD_PrintColor_ID());
-			}
-			if (mPrintColor != null && mPrintColor.getAD_PrintColor_ID() > 0)
-			{
-				color = mPrintColor.getColor();
-				
-			}
-		}
-		
-		public CSSInfo (Font font, Color color) {
-			this.font = font;
-			this.color = color;
-		}
-		
-		/**
-		 * sum hashCode of partial
-		 */
-		@Override
-		public int hashCode() {
-			return (color == null ? 0 : color.hashCode()) + (font == null ? 0 : font.hashCode());
-		}
-		
-		/**
-		 * equal only when same color and font
-		 */
-		@Override
-		public boolean equals(Object obj) {
-			if (obj == null || !(obj instanceof CSSInfo) || obj.hashCode() != this.hashCode())
-				return false;
-			
-			CSSInfo compareObj = (CSSInfo)obj;
-			
-			return compareObj (compareObj.color, color) && compareObj (compareObj.font, font);			
-		}
-		
-		/**
-		 * compare two object equal when both is null or result of equal
-		 * @param obj1
-		 * @param obj2
-		 * @return
-		 */
-		protected boolean compareObj(Object obj1, Object obj2) {
-			if (obj1 == null && obj2 != null)
-				return false;
-			
-			if (obj1 == null && obj2 == null){
-				return true;
-			}
-			
-			return obj1.equals(obj2);
-		}
-		
-		/**
-		 * append a css rule to css class
-		 * @param cssBuild
-		 * @param ruleName
-		 * @param ruleValue
-		 */
-		protected void addCssRule(StringBuilder cssBuild, String ruleName, String ruleValue) {
-			cssBuild.append (ruleName);
-			cssBuild.append (":");
-			cssBuild.append (ruleValue);
-			cssBuild.append (";");
-		}
-		
-		/**
-		 * build css rule
-		 * @return
-		 */
-		public String getCssRule (){
-			if (cssStr != null)
-				return cssStr;
-			
-			StringBuilder cssBuild = new StringBuilder();
-			cssBuild.append ("{");
-			
-			if (font != null){
-				
-				String fontFamily = font.getFamily();
-				fontFamily = getCSSFontFamily(fontFamily);
-				if (fontFamily != null){
-					addCssRule(cssBuild, "font-family", fontFamily);
-				}
-				
-				if (font.isBold())
-				{
-					addCssRule(cssBuild, "font-weight", "bold");					
-				}
-				
-				if (font.isItalic())
-				{
-					addCssRule(cssBuild, "font-style", "italic");
-				}									
-				
-				int size = font.getSize();
-				addCssRule(cssBuild, "font-size", size + "pt");
-			}
-			
-			if (color != null)
-			{
-				cssBuild.append("color:rgb(");
-				cssBuild.append(color.getRed()); 
-				cssBuild.append(",");
-				cssBuild.append(color.getGreen());
-				cssBuild.append(",");
-				cssBuild.append(color.getBlue());
-				cssBuild.append(");");
-			}
-			cssBuild.append ("}");
-			cssStr = cssBuild.toString();
-			
-			return cssStr;
-		}
-	}
-	
-	/**
-	 * store info of report column,
-	 * now just use index to create css selector, but for later maybe will construct a complex class name
-	 * @author hieplq
-	 *
-	 */
-	public static class ColumnInfo {
-		protected static String CSS_SELECTOR_TEMPLATE = "table > tbody > tr > td:nth-child(%1$s)";
-		int index = -1;
-		public ColumnInfo (int index, MPrintFormatItem formatItem){
-			this.index = index;
-			
-		}
-		
-		public String getCssSelector(){
-			return String.format(CSS_SELECTOR_TEMPLATE, index + 1);
-		}
-	}
-	
-	private boolean isDisplayPFItem(MPrintFormatItem item)
-	{
-		if(Util.isEmpty(item.getDisplayLogic()))
-			return true;
-		
-		return Evaluator.evaluateLogic(new PrintDataEvaluatee(null, m_printData), item.getDisplayLogic());
-	}
-
-	/**
-	 * read all content from file into StringBuilder
-	 * 
-	 * @param pathStyleFile
-	 * @return
-	 * @throws IOException
-	 */
-	protected StringBuilder readResourceFile(String pathStyleFile) throws IOException
-	{
-		Path path = Paths.get(pathStyleFile);
-		List<String> styleLines = Files.readAllLines(path, Ini.getCharset());
-		StringBuilder styleBuild = new StringBuilder();
-		for (String styleLine : styleLines)
-		{
-			styleBuild.append(styleLine);
-			styleBuild.append("\n");
-		}
-
-		return styleBuild;
-	}
-
-	/**
-	 * embed script url into head tag
-	 * 
-	 * @param doc
-	 * @param scriptUrl
-	 */
-	protected void embedExtendScript(XhtmlDocument doc, String scriptUrl)
-	{
-		script jslink = new script();
-		jslink.setLanguage("javascript");
-		jslink.setSrc(scriptUrl);
-		doc.appendHead(jslink);
-	}
-
-	/**
-	 * embed script content into head tag
-	 * 
-	 * @param doc
-	 * @param buildScriptContent
-	 */
-	public void appendInlineScriptContent(XhtmlDocument doc, StringBuilder buildScriptContent)
-	{
-		if (buildScriptContent.length() > 0)
-		{
-			buildScriptContent.insert(0, "<script type=\"text/javascript\">\n");
-			buildScriptContent.append("\n</script>");
-			doc.appendHead(buildScriptContent.toString());
-		}
-	}
-	
-
 	public MPrintFormat getTranPrintFormat()
 	{
 		return this.m_tranPrintFormat;
@@ -2779,36 +1859,6 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		this.m_tranPrintFormat = m_tranPrintFormat;
 	}
 	
-public String compress(String src, boolean minify) {
-		
-		if(minify) {
-			HtmlCompressor compressor = new HtmlCompressor();
-		    compressor.setEnabled(true);
-		    compressor.setCompressCss(true);
-		    compressor.setCompressJavaScript(true);
-		    compressor.setRemoveComments(true);
-		    compressor.setRemoveMultiSpaces(true);
-		    compressor.setRemoveIntertagSpaces(true);
-//		    compressor.setGenerateStatistics(false);
-//		    compressor.setRemoveQuotes(false);
-//		    compressor.setSimpleDoctype(false);
-//		    compressor.setRemoveScriptAttributes(false);
-//		    compressor.setRemoveStyleAttributes(false);
-//		    compressor.setRemoveLinkAttributes(false);
-//		    compressor.setRemoveFormAttributes(false);
-//		    compressor.setRemoveInputAttributes(false);
-//		    compressor.setSimpleBooleanAttributes(false);
-//		    compressor.setRemoveJavaScriptProtocol(false);
-//		    compressor.setRemoveHttpProtocol(false);
-//		    compressor.setRemoveHttpsProtocol(false);
-//		    compressor.setPreserveLineBreaks(false);
-		    
-		    return compressor.compress(src);
-		}
-		else {
-			return src;
-		}
-	}
 	public static void setDefaultReportTypeToPInstance(Properties ctx, MPInstance instance, int printFormatID) {
 		if(Util.isEmpty(instance.getReportType())) {
 			MPrintFormat pf = new MPrintFormat(ctx, printFormatID, null);
@@ -2819,31 +1869,7 @@ public String compress(String src, boolean minify) {
 			instance.setReportType(type);
 		}
 	}
-	
-	private void setStyle(MultiPartElement element, MStyle style) {
-		if (style == null || style.getAD_Style_ID() == 0)
-			return;
-
-		X_AD_StyleLine[] lines = style.getStyleLines();
-		StringBuilder styleBuilder = new StringBuilder();
-		for (X_AD_StyleLine line : lines)
-		{
-			String inlineStyle = line.getInlineStyle().trim();
-			String displayLogic = line.getDisplayLogic();
-			if (!Util.isEmpty(displayLogic))
-			{
-				if (!Evaluator.evaluateLogic(new PrintDataEvaluatee(null, m_printData), displayLogic))
-					continue;
-			}
-			if (styleBuilder.length() > 0 && !(styleBuilder.charAt(styleBuilder.length()-1)==';'))
-				styleBuilder.append("; ");
-			styleBuilder.append(inlineStyle);
-		}
-		if(styleBuilder.length() > 0)
-			element.setStyle(styleBuilder.toString());
-		//
-	}
-	
+		
 	private ProcessInfo m_pi = null;
 	
 	/**
