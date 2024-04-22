@@ -33,6 +33,9 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 
+import org.adempiere.base.IWFActivityForwardDlg;
+import org.adempiere.base.IWFActivityForwardFactory;
+import org.adempiere.base.Service;
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MAttachment;
 import org.compiere.model.MBPartner;
@@ -1345,16 +1348,60 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 							}
 						}
 					}
-					else if(resp.isManual()) {
-					    MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(getCtx(), getAD_WF_Activity_ID(), get_TrxName());
-                        for (int i = 0; i < approvers.length; i++)
-                        {
-                            if(approvers[i].getAD_User_ID() == Env.getAD_User_ID(getCtx()))
-                            {
-                                autoApproval = true;
-                                break;
-                            }
-                        }
+					else if (resp.isManual())
+					{
+
+						MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(getCtx(),
+								getAD_WF_Activity_ID(), get_TrxName());
+						for (int i = 0; i < approvers.length; i++)
+						{
+							if (approvers[i].getAD_User_ID() == Env.getAD_User_ID(getCtx()))
+							{
+								autoApproval = true;
+								break;
+							}
+						}
+						if (autoApproval == false)
+						{
+							// Invoke WF Approver Factory
+							List<IWFActivityForwardFactory> factoryList = Service.locator()
+									.list(IWFActivityForwardFactory.class).getServices();
+
+							if (factoryList != null)
+							{
+								IWFActivityForwardDlg forwardDlg = null;
+								for (IWFActivityForwardFactory factory : factoryList)
+								{
+									forwardDlg = factory.getWFActivityForwardDlg();
+									if(forwardDlg!=null)
+										break;
+									
+								}
+								if (forwardDlg != null)
+								{
+									forwardDlg.AskApprover();
+									int userId = forwardDlg.getActivityApprover();
+									if(userId==-1) {
+										throw new AdempiereException("Cancelled");
+									}
+									if (userId > 0)
+									{
+										String msg = forwardDlg.getMsg();
+										if (!forwardTo(userId, msg))
+										{
+
+											throw new AdempiereException("CannotForward");
+										}
+									}
+									else
+									{
+										throw new AdempiereException("ApproverNotSet");
+									}
+								}else {
+									throw new AdempiereException("CantShowApproveDialog");
+								}
+							}
+						}
 					}
 					else if(resp.isOrganization())
 					{
@@ -1693,7 +1740,8 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		m_audit.setAD_User_ID(oldUser.getAD_User_ID());
 		m_audit.setTextMsg(getTextMsg());
 		m_audit.setAttributeName("AD_User_ID");
-		m_audit.setOldValue(oldUser.getName()+ "("+oldUser.getAD_User_ID()+")");
+		if(oldUser.getAD_User_ID()!=0)
+				m_audit.setOldValue(oldUser.getName()+ "("+oldUser.getAD_User_ID()+")");
 		m_audit.setNewValue(user.getName()+ "("+user.getAD_User_ID()+")");
 		//
 		m_audit.setWFState(getWFState());
