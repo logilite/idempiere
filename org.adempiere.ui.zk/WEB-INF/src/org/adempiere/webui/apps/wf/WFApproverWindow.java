@@ -24,7 +24,6 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Space;
-import org.zkoss.zul.Vbox;
 import org.zkoss.zul.Vlayout;
 
 public class WFApproverWindow extends Window implements EventListener<Event>,IWFActivityForwardDlg

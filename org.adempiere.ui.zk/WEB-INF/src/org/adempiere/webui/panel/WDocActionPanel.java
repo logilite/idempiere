@@ -50,7 +50,6 @@ import org.compiere.model.MLookupFactory;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MProduction;
 import org.compiere.model.MTable;
-import org.compiere.model.MUser;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
@@ -516,9 +515,11 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 				if (value == null || value.length() == 0)
 				{
-					FDialog.error(m_WindowNo, this, "FillMandatory", Msg.getMsg(Env.getCtx(), "Answer"));
 					trx.rollback();
 					trx.close();
+					FDialog.error(m_WindowNo, this, "FillMandatory", Msg.getMsg(Env.getCtx(), "Answer"));
+					if(callback!=null)
+						callback.onCallback(false);
 					return;
 				}
 				//
@@ -534,10 +535,14 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 					FDialog.error(m_WindowNo, this, "Error", e.toString());
 					trx.rollback();
 					trx.close();
+					if(callback!=null)
+						callback.onCallback(false);
 					return;
 				}
-
 				trx.commit();
+				if(callback!=null)
+					callback.onCallback(true);
+
 			}
 			finally
 			{
@@ -547,6 +552,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			}
 
 			detach();
+			gridTab.dataRefresh();
 		}
 		else
 		{
@@ -740,10 +746,5 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	{
 		return (m_activity != null && m_AD_User_ID == m_activity.getAD_User_ID())
 				|| (resp != null && m_AD_Role_ID == resp.getAD_Role_ID());
-	}
-
-	private boolean isInvoker()
-	{
-		return m_WFProcess != null && m_AD_User_ID == m_WFProcess.getAD_User_ID();
 	}
 }
