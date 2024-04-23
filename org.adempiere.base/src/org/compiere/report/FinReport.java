@@ -1521,7 +1521,7 @@ public class FinReport extends SvrProcess
 			// No calculation
 			if (m_columns[col].isColumnTypeCalculation())
 			{
-				insert.append("Cast(NULL AS ").append(numericType).append(")");
+				insert.append(", Cast(NULL AS ").append(numericType).append(")");
 				continue;
 			}
 
@@ -1533,7 +1533,7 @@ public class FinReport extends SvrProcess
 				select.append (m_columns[col].getSelectClause(true));
 			else
 			{
-				insert.append("Cast(NULL AS ").append(numericType).append(")");
+				insert.append(", Cast(NULL AS ").append(numericType).append(")");
 				continue;
 			}
 
@@ -1708,10 +1708,10 @@ public class FinReport extends SvrProcess
 			}
 
 		}
-			if (where.length() > 0 && !isCombination)
-				where.append(" AND ");
-			if (!isCombination)
-				where.append(variable).append(" IS NOT NULL");
+		if (where.length() > 0 && !isCombination)
+			where.append(" AND ");
+		if (!isCombination)
+			where.append(variable).append(" IS NOT NULL");
 		if (!Util.isEmpty(dimGroupVariable) && isDimensionLine)
 		{
 			if (where.length() > 0)
@@ -1771,7 +1771,7 @@ public class FinReport extends SvrProcess
 			insert.append(unionInsert);
 		}
 
-			int no = DB.executeUpdateEx(insert.toString(), get_TrxName());
+		int no = DB.executeUpdateEx(insert.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Source #=" + no + " - " + insert);
 		if (no == 0)
 			return;
