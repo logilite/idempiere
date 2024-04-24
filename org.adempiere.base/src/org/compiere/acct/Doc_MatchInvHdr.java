@@ -5,7 +5,6 @@ import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -159,7 +158,7 @@ public class Doc_MatchInvHdr extends Doc
 			MMatchInv m_matchInv = (MMatchInv) line.getPO();
 			MInvoiceLine m_invoiceLine = null;
 			MInvoice invoice = null;
-			if (m_matchInv.getM_InOutLine_ID() > 0)
+			if (m_matchInv.getC_InvoiceLine_ID() > 0)
 			{//Handling MR line to MR line matching.
 				m_invoiceLine = (MInvoiceLine) m_matchInv.getC_InvoiceLine();
 
