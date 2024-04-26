@@ -1,7 +1,7 @@
 -- Oracle Data Migration from AD_TreeBar to AD_Tree_Favorite and AD_Tree_Favorite_Node table
 -- Insert TreeBar data to Tree Favorite
-INSERT INTO AD_Tree_Favorite (AD_Tree_Favorite_ID, AD_Client_ID, AD_Org_ID, AD_User_ID, Created, CreatedBy, Updated, UpdatedBy, AD_Tree_Favorite_UU)
-SELECT 	(row_number() OVER (ORDER BY AD_Client_ID, AD_User_ID))	+ 999999 AS AD_Tree_Favorite_ID, AD_Client_ID, 0, AD_User_ID, SYSDATE, 100, SYSDATE, 100, Generate_UUID()
+INSERT INTO AD_Tree_Favorite (AD_Tree_Favorite_ID, AD_Client_ID, AD_Org_ID, AD_User_ID, AD_Role_ID, Created, CreatedBy, Updated, UpdatedBy, AD_Tree_Favorite_UU)
+SELECT 	(row_number() OVER (ORDER BY AD_Client_ID, AD_User_ID))	+ 999999 AS AD_Tree_Favorite_ID, AD_Client_ID, 0, AD_User_ID, 0, SYSDATE, 100, SYSDATE, 100, Generate_UUID()
 FROM AD_TreeBar
 WHERE AD_User_ID NOT IN (SELECT DISTINCT AD_User_ID FROM AD_Tree_Favorite)
 GROUP BY AD_Client_ID, AD_User_ID
