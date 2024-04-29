@@ -537,8 +537,8 @@ public class Doc_MatchInv extends Doc
 				varianceLine = fact.createLine(null,
 						m_pc.getAccount(ProductCost.ACCTTYPE_P_AverageCostVariance, as), as.getC_Currency_ID(),
 						amtVariance);
-			updateFactLine(varianceLine);
-			line.setQty(getQty().negate());
+				updateFactLine(varianceLine);
+				varianceLine.setQty(getQty().negate());
 				
 				if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
 				{
