@@ -3204,7 +3204,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		if (col.equals("DocAction"))
 		{
 			final WDocActionPanel win = new WDocActionPanel(adtabPanel.getGridTab());
-			if (win.getNumberOfOptions() == 0)
+			if (win.getNumberOfOptions() == 0 && !win.isApprover())
 			{
 				logger.info("DocAction - No Options");
 				return;

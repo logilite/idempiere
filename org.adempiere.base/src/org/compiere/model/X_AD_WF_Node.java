@@ -511,6 +511,34 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_AD_Column getApprovalColumn() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_Column)MTable.get(getCtx(), org.compiere.model.I_AD_Column.Table_Name)
+			.getPO(getApprovalColumn_ID(), get_TrxName());	}
+
+	/** Set Approval Column.
+		@param ApprovalColumn_ID 
+		Specify the boolean type column which marked on approval
+	  */
+	public void setApprovalColumn_ID (int ApprovalColumn_ID)
+	{
+		if (ApprovalColumn_ID < 1) 
+			set_Value (COLUMNNAME_ApprovalColumn_ID, null);
+		else 
+			set_Value (COLUMNNAME_ApprovalColumn_ID, Integer.valueOf(ApprovalColumn_ID));
+	}
+
+	/** Get Approval Column.
+		@return Specify the boolean type column which marked on approval
+	  */
+	public int getApprovalColumn_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ApprovalColumn_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Attribute Name.
 		@param AttributeName Name of the Attribute
 	*/

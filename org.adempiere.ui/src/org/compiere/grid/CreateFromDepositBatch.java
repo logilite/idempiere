@@ -18,6 +18,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Hashtable;
 import java.util.Vector;
 import java.util.logging.Level;
 
@@ -63,7 +64,7 @@ public abstract class CreateFromDepositBatch extends CreateFromBatch
 	}
 	
 	protected Vector<Vector<Object>> getBankAccountData(Object BankAccount, Object BPartner, String DocumentNo, 
-			Object DateFrom, Object DateTo, Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode)
+			Object DateFrom, Object DateTo, Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode, Object Currency)
 	{
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 		
@@ -75,12 +76,13 @@ public abstract class CreateFromDepositBatch extends CreateFromBatch
 		sql.append(" INNER JOIN C_Currency c ON (p.C_Currency_ID=c.C_Currency_ID)");
 		sql.append(" INNER JOIN C_Payment py ON (py.C_Payment_ID=p.C_Payment_ID)");
 		sql.append(" LEFT OUTER JOIN C_BPartner bp ON (p.C_BPartner_ID=bp.C_BPartner_ID) ");
-		sql.append(getSQLWhere(BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, AD_Org_ID));
-		
+		sql.append(getSQLWhere(BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, Currency, AD_Org_ID));
 		sql.append(" AND py.IsReconciled = 'N'");
+		sql.append(" AND p.DocStatus IN ('CO','CL') AND p.PayAmt<>0");
 		sql.append(" AND py.TrxType <> 'X'");
 		sql.append(" AND (py.C_DepositBatch_ID = 0 OR py.C_DepositBatch_ID IS NULL)");
-		
+	    sql.append(" AND NOT EXISTS (SELECT 1 FROM C_BankStatementLine l WHERE p.C_Payment_ID=l.C_Payment_ID AND l.StmtAmt <> 0)");
+
 		sql.append(" ORDER BY p.DateTrx");
 		
 		PreparedStatement pstmt = null;
@@ -88,7 +90,7 @@ public abstract class CreateFromDepositBatch extends CreateFromBatch
 		try
 		{
 			pstmt = DB.prepareStatement(sql.toString(), null);
-			setParameters(pstmt, BankAccount, BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, AD_Org_ID);
+			setParameters(pstmt, BankAccount, BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, Currency, AD_Org_ID);
 			rs = pstmt.executeQuery();
 			while(rs.next())
 			{

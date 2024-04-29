@@ -294,7 +294,7 @@ public class WCreateFromStatementUI extends CreateFromStatement implements Event
 		loadTableOIS(getBankAccountData(bankAccountField.getValue(), bPartnerLookup.getValue(), 
 				documentNoField.getValue().toString(), dateFromField.getValue(), dateToField.getValue(),
 				amtFromField.getValue(), amtToField.getValue(), 
-				documentTypeField.getValue(), tenderTypeField.getValue(), authorizationField.getValue().toString()));
+				documentTypeField.getValue(), tenderTypeField.getValue(), authorizationField.getValue().toString(), null));
 	}
 	
 	protected void loadTableOIS (Vector<?> data)

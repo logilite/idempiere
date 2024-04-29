@@ -38,7 +38,7 @@ public class Merge
 	public StringBuffer	m_errorLog = new StringBuffer();
 	/**	Connection			*/
 	//private Connection		m_con = null;
-	private Trx 			m_trx = null;         
+	public Trx 			m_trx = null;         
 	/**	Logger			*/
 	public static final CLogger log = CLogger.getCLogger(Merge.class);
 

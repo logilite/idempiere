@@ -122,17 +122,17 @@ public class WPAttributeInstance extends Window implements EventListener<Event>
 	private Borderlayout mainLayout = new Borderlayout();
 	private Panel northPanel = new Panel();
 	private ConfirmPanel confirmPanel = new ConfirmPanel (true);
-	private Checkbox showAll = new Checkbox();
+	protected Checkbox showAll = new Checkbox();
 	//
 	private WListbox 			m_table = new WListbox();
 	//	Parameter
-	private int			 		m_M_Warehouse_ID;
+	protected int			 		m_M_Warehouse_ID;
 	private int			 		m_M_Locator_ID;
 	private int			 		m_M_Product_ID;
 	//
 	private int					m_M_AttributeSetInstance_ID = -1;
 	private String				m_M_AttributeSetInstanceName = null;
-	private String				m_sql;
+	protected String				m_sql;
 	/**	Logger			*/
 	private static final CLogger log = CLogger.getCLogger(WPAttributeInstance.class);
 
@@ -173,7 +173,7 @@ public class WPAttributeInstance extends Window implements EventListener<Event>
 	}	//	jbInit
 
 	/**	Table Column Layout Info			*/
-	private static ColumnInfo[] s_layout = new ColumnInfo[] 
+	protected static ColumnInfo[] s_layout = new ColumnInfo[] 
 	{
 		new ColumnInfo(" ", "s.M_AttributeSetInstance_ID", IDColumn.class),
 		new ColumnInfo(Msg.translate(Env.getCtx(), "Description"), "asi.Description", String.class),
@@ -191,16 +191,16 @@ public class WPAttributeInstance extends Window implements EventListener<Event>
 		new ColumnInfo(Msg.translate(Env.getCtx(), "ShelfLifeRemainingPct"), "CASE WHEN p.GuaranteeDays > 0 THEN TRUNC(((daysbetween(asi.GuaranteeDate, getDate()))/p.GuaranteeDays)*100) ELSE 0 END", Integer.class),
 	};
 	/**	From Clause							*/
-	private static String s_sqlFrom = "M_Storage s"
+	protected static String s_sqlFrom = "M_Storage s"
 		+ " INNER JOIN M_Locator l ON (s.M_Locator_ID=l.M_Locator_ID)"
 		+ " INNER JOIN M_Product p ON (s.M_Product_ID=p.M_Product_ID)"
 		+ " LEFT OUTER JOIN M_AttributeSetInstance asi ON (s.M_AttributeSetInstance_ID=asi.M_AttributeSetInstance_ID)";
 	/** Where Clause						*/
-	private static String s_sqlWhere = "s.M_Product_ID=? AND l.M_Warehouse_ID=?"; 
-	private static String s_sqlWhereWithoutWarehouse = " s.M_Product_ID=?"; 
+	protected static String s_sqlWhere = "s.M_Product_ID=? AND l.M_Warehouse_ID=?"; 
+	protected static String s_sqlWhereWithoutWarehouse = " s.M_Product_ID=?"; 
 
 	protected String	m_sqlNonZero = " AND (s.QtyOnHand<>0 OR s.QtyReserved<>0 OR s.QtyOrdered<>0)";
-	private String	m_sqlMinLife = "";
+	protected String	m_sqlMinLife = "";
 
 	/**
 	 * 	Dynamic Init

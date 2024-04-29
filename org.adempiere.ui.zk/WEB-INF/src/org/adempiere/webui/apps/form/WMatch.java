@@ -21,6 +21,7 @@ import static org.adempiere.webui.ClientInfo.SMALL_WIDTH;
 import static org.adempiere.webui.ClientInfo.maxWidth;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -57,6 +58,7 @@ import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.apps.form.Match;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
+import org.compiere.model.MProduct;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -526,6 +528,7 @@ public class WMatch extends Match
 		{
 			if(isCreateMatchInvHDR())
 			{
+				isMatchInvHdrEnabled = true;
 				ArrayList<Integer> matchedRows = new ArrayList<Integer>();
 				for (int row = 0; row < xMatchedTable.getRowCount(); row++)
 				{
@@ -620,7 +623,8 @@ public class WMatch extends Match
 			cmd_searchTo();
 		else if (AEnv.contains(xMatchedTable, e.getTarget()))
 		{
-			if(!isCreateMatchInvHDR && matchFrom.getSelectedIndex() == MATCH_INVOICE && matchTo.getSelectedIndex() == 0 && isMatchInvHdrEnabled)
+			// && isMatchInvHdrEnabled
+			if(!isCreateMatchInvHDR && matchFrom.getSelectedIndex() == MATCH_INVOICE && matchTo.getSelectedIndex() == 0)
 			{
 				isCreateMatchInvHDR = true;
 				
@@ -628,11 +632,11 @@ public class WMatch extends Match
 
 				//Set Only Product
 				KeyNamePair productKNP = (KeyNamePair) xMatchedTable.getValueAt(row, I_Product);
-				product = new Integer(productKNP.getKey());
+				product = productKNP.getKey();
 				
 				//Set Only Vendor
 				KeyNamePair bpartnerKNP = (KeyNamePair) xMatchedTable.getValueAt(row, I_BPartner);
-				vendor = new Integer(bpartnerKNP.getKey());
+				vendor = bpartnerKNP.getKey();
 				
 				// Set selected invoiceLine
 				KeyNamePair C_InvoiceLine_ID = (KeyNamePair) xMatchedTable.getValueAt(row, I_Line);
@@ -776,7 +780,7 @@ public class WMatch extends Match
 			int matchedRow = xMatchedTable.getSelectedRow();
 			if(matchedRow < 0)
 				return;
-			Product = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, 5);
+			Product = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, I_Product);
 			
 			// make same Product and same BP as Read Only
 			sameProduct.setEnabled(true);
@@ -830,9 +834,15 @@ public class WMatch extends Match
 			}
 		}
 		
+		int precision = 5;
+		if(Product!=null) {
+			int productID = Product.getKey();
+			MProduct p  = MProduct.get(Env.getCtx(), productID);
+			precision = p.getUOMPrecision();
+		}
 		//  update qualtities
-		m_xMatchedTo = BigDecimal.valueOf(matchedToQty);
-		m_xMatched = BigDecimal.valueOf(matchedQty);
+		m_xMatchedTo = BigDecimal.valueOf(matchedToQty).setScale(precision, RoundingMode.HALF_UP);
+		m_xMatched = BigDecimal.valueOf(matchedQty).setScale(precision, RoundingMode.HALF_UP);
 		xMatched.setValue(m_xMatched);
 		xMatchedTo.setValue(m_xMatchedTo);
 		difference.setValue(m_xMatched.subtract(m_xMatchedTo));
@@ -851,7 +861,8 @@ public class WMatch extends Match
 
 	private boolean isCreateMatchInvHDR()
 	{
-		if(!isCreateMatchInvHDR || !isMatchInvHdrEnabled)
+		// || !isMatchInvHdrEnabled
+		if(!isCreateMatchInvHDR)
 		{
 			return false;
 		}

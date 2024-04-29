@@ -55,22 +55,17 @@ public class MProductPO extends X_M_Product_PO
 		return list.toArray(new MProductPO[list.size()]);
 	}	//	getOfProduct
 
-	/**
-	 * 	Persistency Constructor
-	 *	@param ctx context
-	 *	@param ignored ignored
-	 *	@param trxName transaction
+	/**************************************************************************
+	 *  Default Constructor
+	 *  @param ctx context
+	 *  @param  M_Product_PO_ID Purchasing to load, (0 create new Purchasing)
+	 *  @param trxName trx name
 	 */
-	public MProductPO (Properties ctx, int ignored, String trxName)
+	public MProductPO(Properties ctx, int M_Product_PO_ID, String trxName)
 	{
-		super(ctx, 0, trxName);
-		if (ignored != 0)
-			throw new IllegalArgumentException("Multi-Key");
-		else
-		{
-			setIsCurrentVendor (true);	// Y
-		}
-	}	//	MProduct_PO
+		super(ctx, M_Product_PO_ID, trxName);
+		setIsCurrentVendor(true); // Y
+	} // MProduct_PO
 	
 	
 	/**

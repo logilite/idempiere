@@ -37,6 +37,7 @@ import org.compiere.grid.ed.VLookup;
 import org.compiere.grid.ed.VNumber;
 import org.compiere.grid.ed.VString;
 import org.compiere.model.GridTab;
+import org.compiere.model.MBankAccount;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
@@ -93,6 +94,9 @@ public class VCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 	
 	private JLabel bankAccountLabel = new JLabel();
 	protected VLookup bankAccountField;
+	
+	private JLabel currencyLabel = new JLabel();
+	protected VLookup currencyField;
 	
 	private CLabel documentNoLabel = new CLabel(Msg.translate(Env.getCtx(), "DocumentNo"));
 	protected CTextField documentNoField = new CTextField(10);
@@ -154,6 +158,11 @@ public class VCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 		int C_BankAccount_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_BankAccount_ID");
 		bankAccountField.setValue(Integer.valueOf(C_BankAccount_ID));
 		bankAccountField.addActionListener(this);
+		
+		int C_Currency_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_Currency_ID");
+		bankAccountField.setValue(Integer.valueOf(C_Currency_ID));
+		bankAccountField.addActionListener(this);
+		
 		//  initial Loading
 		authorizationField = new VString ("authorization", false, false, true, 10, 30, null, null);
 		authorizationField.addActionListener(this);
@@ -232,6 +241,12 @@ public class VCreateFromDepositBatchUI extends CreateFromDepositBatch implements
     		parameterBankPanel.add(bankAccountField, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0
     				,GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(5, 0, 5, 5), 0, 0));
     	
+    	parameterBankPanel.add(currencyLabel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0
+    			,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+    	if (currencyField != null)
+    		parameterBankPanel.add(currencyField, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0
+    				,GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(5, 0, 5, 5), 0, 0));
+    	
     	parameterBankPanel.add(documentTypeLabel, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0
     			,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
     	if(documentTypeField!= null)
@@ -303,7 +318,7 @@ public class VCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 		loadTableOIS(getBankAccountData(bankAccountField.getValue(), bPartnerLookup.getValue(), 
 				documentNoField.getText(), dateFromField.getValue(), dateToField.getValue(),
 				amtFromField.getValue(), amtToField.getValue(), 
-				documentTypeField.getValue(), tenderTypeField.getValue(), authorizationField.getText()));
+				documentTypeField.getValue(), tenderTypeField.getValue(), authorizationField.getText(), currencyField.getValue()));
 	}
 	
 	protected void loadTableOIS (Vector<? extends Vector> data)
