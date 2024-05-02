@@ -34,12 +34,6 @@ INSERT INTO t_alter_column values('ad_wf_nextcondition','AD_Column_ID','NUMERIC(
 INSERT INTO t_alter_column values('ad_wf_nextcondition','AD_Column_ID',null,'NULL',null)
 ;
 
-INSERT INTO AD_Message 
-(MsgType,MsgText,AD_Message_ID,EntityType,AD_Message_UU,Value,IsActive,Updated,CreatedBy,UpdatedBy,Created,AD_Client_ID,AD_Org_ID) 
-VALUES ('E','Please enter read-only SQL expression or statement',200259,'D','49c3be7e-16de-46ff-a2a9-f9411a6a4982','SQLReadOnly','Y',
-TO_TIMESTAMP('2021-11-14 17:45:57','YYYY-MM-DD HH24:MI:SS'),100,100,TO_TIMESTAMP('2021-11-14 17:45:57','YYYY-MM-DD HH24:MI:SS'),0,0)
-;
-
 UPDATE AD_Column SET IsMandatory='N', 
 MandatoryLogic='@Operation@!''SQ''&@SQLStatement@=''''',Updated=TO_TIMESTAMP('2021-11-14 17:47:52','YYYY-MM-DD HH24:MI:SS'),
 UpdatedBy=100 WHERE AD_Column_ID=11579

@@ -1431,18 +1431,6 @@ c_validcombination vc WHERE gl.c_validcombination_id = vc.c_validcombination_id
 ;
 
 -- Nov 28, 2021, 11:19:18 PM CET
-CREATE OR REPLACE VIEW M_InOut_Candidate_v(AD_Client_ID, AD_Org_ID, C_BPartner_ID, C_Order_ID, DocumentNo, DateOrdered, C_DocType_ID, POReference, Description, SalesRep_ID, M_Warehouse_ID, TotalLines) AS SELECT o.ad_client_id AS AD_Client_ID, o.ad_org_id AS AD_Org_ID, o.c_bpartner_id AS C_BPartner_ID, o.c_order_id AS C_Order_ID, o.documentno AS DocumentNo, o.dateordered AS DateOrdered, o.c_doctype_id AS C_DocType_ID, o.poreference AS POReference, o.description AS Description, o.salesrep_id AS SalesRep_ID, l.m_warehouse_id AS M_Warehouse_ID, sum((l.qtyordered - l.qtydelivered) * l.priceactual) AS TotalLines FROM c_order o
-JOIN c_orderline l ON o.c_order_id = l.c_order_id WHERE o.docstatus = 'CO' AND o.isdelivered = 'N' AND (o.c_doctype_id IN ( SELECT c_doctype.c_doctype_id
-           FROM c_doctype
-          WHERE c_doctype.docbasetype = 'SOO' AND (c_doctype.docsubtypeso NOT IN ('ON', 'OB', 'WR')))) AND o.deliveryrule <> 'M' AND (l.m_product_id IS NULL OR (EXISTS ( SELECT 1
-           FROM m_product p
-          WHERE l.m_product_id = p.m_product_id AND p.isexcludeautodelivery = 'N'))) AND l.qtyordered <> l.qtydelivered AND (l.m_product_id IS NOT NULL OR l.c_charge_id IS NOT NULL) AND NOT (EXISTS ( SELECT 1
-           FROM m_inoutline iol
-             JOIN m_inout io ON iol.m_inout_id = io.m_inout_id
-          WHERE iol.c_orderline_id = l.c_orderline_id AND (io.docstatus IN ('DR', 'IN', 'IP', 'WC')))) GROUP BY o.ad_client_id, o.ad_org_id, o.c_bpartner_id, o.c_order_id, o.documentno, o.dateordered, o.c_doctype_id, o.poreference, o.description, o.salesrep_id, l.m_warehouse_id
-;
-
--- Nov 28, 2021, 11:19:18 PM CET
 CREATE OR REPLACE VIEW M_InOutConfirm_vt(AD_Client_ID, AD_Org_ID, IsActive, Created, CreatedBy, Updated, UpdatedBy, AD_Language, M_InOutConfirm_ID, DocumentNo, ConfirmType, IsApproved, IsCancelled, Description, M_InOut_ID, ShipDescription, C_BPartner_ID, C_BPartner_Location_ID, AD_User_ID, SalesRep_ID, C_DocType_ID, DocumentType, C_Order_ID, DateOrdered, MovementDate, MovementType, M_Warehouse_ID, POReference, DeliveryRule, FreightCostRule, DeliveryViaRule, M_Shipper_ID, PriorityRule, Processed) AS SELECT ioc.ad_client_id AS AD_Client_ID, ioc.ad_org_id AS AD_Org_ID, ioc.isactive AS IsActive, ioc.created AS Created, ioc.createdby AS CreatedBy, ioc.updated AS Updated, ioc.updatedby AS UpdatedBy, dt.ad_language AS AD_Language, ioc.m_inoutconfirm_id AS M_InOutConfirm_ID, ioc.documentno AS DocumentNo, ioc.confirmtype AS ConfirmType, ioc.isapproved AS IsApproved, ioc.iscancelled AS IsCancelled, ioc.description AS Description, io.m_inout_id AS M_InOut_ID, io.description AS ShipDescription, io.c_bpartner_id AS C_BPartner_ID, io.c_bpartner_location_id AS C_BPartner_Location_ID, io.ad_user_id AS AD_User_ID, io.salesrep_id AS SalesRep_ID, io.c_doctype_id AS C_DocType_ID, dt.printname AS DocumentType, io.c_order_id AS C_Order_ID, io.dateordered AS DateOrdered, io.movementdate AS MovementDate, io.movementtype AS MovementType, io.m_warehouse_id AS M_Warehouse_ID, io.poreference AS POReference, io.deliveryrule AS DeliveryRule, io.freightcostrule AS FreightCostRule, io.deliveryviarule AS DeliveryViaRule, io.m_shipper_id AS M_Shipper_ID, io.priorityrule AS PriorityRule, ioc.processed AS Processed FROM m_inoutconfirm ioc
 JOIN m_inout io ON ioc.m_inout_id = io.m_inout_id
 JOIN c_doctype_trl dt ON io.c_doctype_id = dt.c_doctype_id
