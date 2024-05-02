@@ -7,6 +7,10 @@ INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,Cr
 INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,AD_Table_ID,ColumnName,DefaultValue,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,FKConstraintType,IsHtml) VALUES (215910,0,'Disable Zoom Across','Used to disable Zoom Across.',101,'IsDisableZoomAcross','N',1,'N','N','N','N','N',0,'N',20,0,0,'Y',TO_TIMESTAMP('2023-09-11 16:33:55','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2023-09-11 16:33:55','YYYY-MM-DD HH24:MI:SS'),100,203831,'Y','N','D','N','N','N','Y','e5956dc5-95bd-4e67-bb45-313f3ef8f78d','Y',0,'N','N','N','N')
 ;
 
+-- Sep 11, 2023, 4:33:58 PM IST
+ALTER TABLE AD_Column ADD COLUMN IsDisableZoomAcross CHAR(1) DEFAULT 'N' CHECK (IsDisableZoomAcross IN ('Y','N'))
+;
+
 -- Sep 11, 2023, 4:34:15 PM IST
 INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,AD_Table_ID,ColumnName,DefaultValue,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,FKConstraintType,IsHtml) VALUES (215911,0,'Disable Zoom Across','Used to disable Zoom Across.',107,'IsDisableZoomAcross','N',1,'N','N','N','N','N',0,'N',20,0,0,'Y',TO_TIMESTAMP('2023-09-11 16:34:14','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2023-09-11 16:34:14','YYYY-MM-DD HH24:MI:SS'),100,203831,'Y','N','D','N','N','N','Y','f393f02b-b375-4e2f-a6d3-06b3a031b50a','Y',0,'N','N','N','N')
 ;

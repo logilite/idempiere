@@ -44,6 +44,7 @@ import javax.mail.Folder;
 import javax.mail.FolderClosedException;
 import javax.mail.Header;
 import javax.mail.Message;
+import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -413,6 +414,8 @@ public class EmailSrv {
 		
 		emailInfo.subject = msg.getSubject();
 		emailInfo.sentDate = msg.getSentDate();
+		emailInfo.ccAddress = msg.getRecipients(RecipientType.CC);
+		emailInfo.allHeaders = msg.getAllHeaders();
 		
 		if (evaluateEmailHead != null){
 			if (evaluateEmailHead.checkEmailHeader(emailInfo, msg)){
@@ -931,6 +934,16 @@ public class EmailSrv {
 		 */
 		public List<String> fromAddress = new ArrayList<String>();
 		
+		/*
+		 * contain list CC address.
+		 */
+		public Address[] ccAddress;
+
+		/*
+		 * contain all mail header parts
+		 */
+		public Enumeration<Header> allHeaders;
+
 		/**
 		 * unique value. has max length is 998 charater
 		 * http://tools.ietf.org/html/rfc4130#section-5.3.3

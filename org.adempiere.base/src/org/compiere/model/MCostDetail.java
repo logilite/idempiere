@@ -1240,7 +1240,13 @@ public class MCostDetail extends X_M_CostDetail
 			boolean addition = (isDelta() && getQty().signum()>0) || qty.signum() > 0;
 			boolean adjustment = getM_InventoryLine_ID() > 0 && qty.signum() == 0 && amt.signum() != 0;
 			boolean isVendorRMA = isVendorRMA();
-			//
+			if(addition && getPP_Cost_Collector_ID() >0)
+			{
+				String  ccType=DB.getSQLValueString(get_TrxName(), "Select costcollectortype from PP_Cost_Collector where PP_Cost_Collector_ID=?", getPP_Cost_Collector_ID());
+				if(ccType.equals("110")) {
+					addition = false;
+				}
+			}
 			if (ce.isAverageInvoice())
 			{
 				if (!isVendorRMA)

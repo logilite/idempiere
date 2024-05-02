@@ -454,13 +454,24 @@ public class MWFNode extends X_AD_WF_Node implements ImmutablePOSupport
 	@Override
 	public String getAttributeName ()
 	{
-		if (getAD_Column_ID() == 0)
+		String colName = null;
+		String action = getAction();
+		
+		if (getAD_Column_ID() == 0 || (ACTION_UserChoice.equals(action) && getApprovalColumn_ID() == 0))//TODO
 			return super.getAttributeName();
+
+		//for backward compitability we assume that isApproved column may configured
+		if (ACTION_UserChoice.equals(action) && getApprovalColumn_ID() >0)
+			colName = getApprovalColumn().getColumnName();
+		else
+			colName = getColumn().getColumnName();
+		
 		//	We have a column
 		String attribute = super.getAttributeName();
 		if (attribute != null && attribute.length() > 0)
 			return attribute;
-		setAttributeName(getColumn().getColumnName());
+		
+		setAttributeName(colName);
 		return super.getAttributeName ();
 	}	//	getAttributeName
 		
@@ -490,8 +501,8 @@ public class MWFNode extends X_AD_WF_Node implements ImmutablePOSupport
 	{
 		if (!ACTION_UserChoice.equals(getAction()))
 			return false;
-		return getColumn() != null 
-			&& "IsApproved".equals(getColumn().getColumnName());
+		return getApprovalColumn() != null || (getColumn() != null 
+			&& "IsApproved".equals(getColumn().getColumnName()));
 	}	//	isApproval
 
 	/**
@@ -714,9 +725,9 @@ public class MWFNode extends X_AD_WF_Node implements ImmutablePOSupport
 		}
 		else if (action.equals(ACTION_UserChoice)) 
 		{
-			if (getAD_Column_ID() == 0)
+			if (getAD_Column_ID() == 0 && getApprovalColumn_ID() == 0)
 			{
-				log.saveError("FillMandatory", Msg.getElement(getCtx(), "AD_Column_ID"));
+				log.saveError("FillMandatory", Msg.getElement(getCtx(), "ApprovalColumn_ID"));
 				return false;
 			}
 		}
@@ -788,12 +799,11 @@ public class MWFNode extends X_AD_WF_Node implements ImmutablePOSupport
 			return AD_WF_Responsible_ID;
 		}
 
-		MWFResponsible resp = MWFResponsible.get(p_ctx, AD_WF_Responsible_ID);
 
 		final String sql = " SELECT AD_WF_Responsible_ID FROM AD_WF_Responsible "
-				+ " WHERE AD_Client_ID=? AND Name=? AND Override_ID = ? AND IsActive='Y' ";
+				+ " WHERE AD_Client_ID=? AND Override_ID = ? AND IsActive='Y' ";
 
-		int id = DB.getSQLValue(get_TrxName(), sql, AD_Client_ID, resp.getName(), AD_WF_Responsible_ID);
+		int id = DB.getSQLValue(get_TrxName(), sql, AD_Client_ID, AD_WF_Responsible_ID);
 
 		if (id > 0)
 		{

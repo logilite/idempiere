@@ -126,6 +126,26 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 		setDateDeposit(original.getDateDeposit());
 		setDepositAmt(original.getDepositAmt());
 	}	//	MDepositBatch
+	
+	
+	
+	@Override
+	protected boolean beforeSave(boolean newRecord)
+	{
+		if (!newRecord && is_ValueChanged(COLUMNNAME_C_Currency_ID))
+		{
+			String sql = "SELECT COUNT(1) FROM C_DepositBatchLine WHERE C_DepositBatch_ID=?";
+			int ii = DB.getSQLValue (get_TrxName(), sql, getC_DepositBatch_ID());
+			
+			if (ii > 0)
+			{
+				log.saveError("SaveError", Msg.translate(getCtx(), "ErrorCurrencyCouldNotModify"));
+				return false;
+			}
+		}
+
+		return true;
+	}
 
 	/**
 	 * 	Overwrite Client/Org if required
@@ -470,6 +490,17 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
 		
+		String sql = "SELECT COUNT(DISTINCT C_Currency_ID) FROM C_Payment p "
+				+ "INNER JOIN C_DepositBatchLine dbl ON dbl.C_Payment_ID = p.C_Payment_ID "
+				+ "WHERE dbl.C_DepositBatch_ID = ? ";
+		
+		int currencyCount = DB.getSQLValue (get_TrxName(), sql, getC_DepositBatch_ID());
+		if (currencyCount > 1)
+		{
+			m_processMsg = Msg.getMsg(getCtx(), "ErrorMultipleCurrencyPaymentsRestricted", new Object[] { getC_Currency().getISO_Code()} ); 
+			return DocAction.STATUS_Invalid;
+		}
+		
 		if (log.isLoggable(Level.INFO)) log.info("completeIt - " + toString());
 		
 		MDepositBatchLine[] depositbatchLines = getLines();
@@ -602,13 +633,6 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 		if (getDescription() != null && getDescription().length() > 0)
 			sb.append(" - ").append(getDescription());
 		return sb.toString();
-	}
-
-
-	@Override
-	public int getC_Currency_ID() {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 }	//	MDepositBatch

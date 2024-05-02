@@ -410,7 +410,7 @@ public final class EMail implements Serializable
 			}
 			//
 			m_msg.setSentDate(new java.util.Date());
-			m_msg.setHeader("Comments", "iDempiereMail");
+			m_msg.setHeader("Comments", MSysConfig.getValue(MSysConfig.MAIL_SEND_COMMENTS, "iDempiereMail"));
 			if (m_acknowledgementReceipt)
 				m_msg.setHeader("Disposition-Notification-To", m_from.getAddress());
 			//	Bounce only header

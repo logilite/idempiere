@@ -42,9 +42,9 @@ public interface IEmailDialog
 	public void init(String title, MUser from, String to, String subject, String message, 
 			DataSource attachment, int m_WindowNo, int ad_Table_ID, int record_ID, String record_UU, PrintInfo printInfo);
 
-	public void addTo(String supportEMail, boolean isShowEmailFirst);
 	public String getTo();
-	public void addCC(String email, boolean first);
+	public void addTo(String supportEMail, boolean isShowEmailFirst);
+	public void addCC(String supportEMail, boolean isShowEmailFirst);
 	public void addAttachment(DataSource screenShot, boolean isRemoveable);
 	public void setPO(PO m_po);
 	

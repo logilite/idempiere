@@ -421,7 +421,7 @@ public class AcctSchemaDefaultCopy extends SvrProcess
 			.append(" AD_Client_ID, AD_Org_ID, IsActive, Created, CreatedBy, Updated, UpdatedBy,")
 			.append(" B_InTransit_Acct, B_Asset_Acct, B_InterestRev_Acct, B_InterestExp_Acct)")
 //			.append(" B_UnallocatedCash_Acct, B_PaymentSelect_Acct) ")
-			.append("SELECT x.C_BankAccount_ID, acct.C_AcctSchema_ID,")
+			.append(" SELECT x.C_BankAccount_ID, acct.C_AcctSchema_ID,")
 			.append(" x.AD_Client_ID, x.AD_Org_ID, 'Y', getDate(), 0, getDate(), 0,")
 			.append(" acct.B_InTransit_Acct, acct.B_Asset_Acct, acct.B_InterestRev_Acct, acct.B_InterestExp_Acct")
 //			.append(" acct.B_UnallocatedCash_Acct, acct.B_PaymentSelect_Acct ")

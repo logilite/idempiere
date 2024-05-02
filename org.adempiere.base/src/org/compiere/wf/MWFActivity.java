@@ -33,6 +33,9 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 
+import org.adempiere.base.IWFActivityForwardDlg;
+import org.adempiere.base.IWFActivityForwardFactory;
+import org.adempiere.base.Service;
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MAttachment;
 import org.compiere.model.MBPartner;
@@ -439,7 +442,18 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		MWFNode node = getNode();
 		if (node == null)
 			return null;
-		int AD_Column_ID = node.getAD_Column_ID();
+		int AD_Column_ID = 0;
+		
+		// get Approval Column
+		if (node.getApprovalColumn_ID() > 0)
+		{
+			AD_Column_ID = node.getApprovalColumn_ID();
+		}
+		else
+		{
+			AD_Column_ID = node.getAD_Column_ID();
+		}
+		 
 		if (AD_Column_ID == 0)
 			return null;
 		PO po = getPO();
@@ -1338,6 +1352,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		else if (MWFNode.ACTION_UserChoice.equals(action))
 		{
 			if (log.isLoggable(Level.FINE)) log.fine("UserChoice:AD_Column_ID=" + m_node.getAD_Column_ID());
+			if (log.isLoggable(Level.FINE)) log.fine("UserChoice:ApprovalColumn_ID=" + m_node.getApprovalColumn_ID());
 			//	Approval
 			if (m_node.isUserApproval()
 				&& getPO(trx) instanceof DocAction)
@@ -1387,16 +1402,60 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 							}
 						}
 					}
-					else if(resp.isManual()) {
-					    MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(getCtx(), getAD_WF_Activity_ID(), get_TrxName());
-                        for (int i = 0; i < approvers.length; i++)
-                        {
-                            if(approvers[i].getAD_User_ID() == Env.getAD_User_ID(getCtx()))
-                            {
-                                autoApproval = true;
-                                break;
-                            }
-                        }
+					else if (resp.isManual())
+					{
+
+						MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(getCtx(),
+								getAD_WF_Activity_ID(), get_TrxName());
+						for (int i = 0; i < approvers.length; i++)
+						{
+							if (approvers[i].getAD_User_ID() == Env.getAD_User_ID(getCtx()))
+							{
+								autoApproval = true;
+								break;
+							}
+						}
+						if (autoApproval == false)
+						{
+							// Invoke WF Approver Factory
+							List<IWFActivityForwardFactory> factoryList = Service.locator()
+									.list(IWFActivityForwardFactory.class).getServices();
+
+							if (factoryList != null)
+							{
+								IWFActivityForwardDlg forwardDlg = null;
+								for (IWFActivityForwardFactory factory : factoryList)
+								{
+									forwardDlg = factory.getWFActivityForwardDlg();
+									if(forwardDlg!=null)
+										break;
+									
+								}
+								if (forwardDlg != null)
+								{
+									forwardDlg.AskApprover();
+									int userId = forwardDlg.getActivityApprover();
+									if(userId==-1) {
+										throw new AdempiereException("Cancelled");
+									}
+									if (userId > 0)
+									{
+										String msg = forwardDlg.getMsg();
+										if (!forwardTo(userId, msg))
+										{
+
+											throw new AdempiereException("CannotForward");
+										}
+									}
+									else
+									{
+										throw new AdempiereException("ApproverNotSet");
+									}
+								}else {
+									throw new AdempiereException("CantShowApproveDialog");
+								}
+							}
+						}
 					}
 					else if(resp.isOrganization())
 					{
@@ -1457,6 +1516,17 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				+ getAD_Table_ID() + ", Record_ID=" + getRecord_ID());
 		//	Set Value
 		Object dbValue = null;
+		int AD_Column_ID = 0;
+		
+		if (getNode().getApprovalColumn_ID() > 0)
+		{
+			AD_Column_ID = getNode().getApprovalColumn_ID();
+		}
+		else
+		{
+			AD_Column_ID = getNode().getAD_Column_ID();
+		}
+		
 		if (value == null)
 			;
 		else if (displayType == DisplayType.YesNo)
@@ -1464,7 +1534,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		else if (DisplayType.isNumeric(displayType))
 			dbValue = new BigDecimal (value);
 		else if (DisplayType.isID(displayType)) {
-			MColumn column = MColumn.get(Env.getCtx(), getNode().getAD_Column_ID());
+			MColumn column =  MColumn.get(Env.getCtx(), AD_Column_ID);
 			String referenceTableName = column.getReferenceTableName();
 			if (referenceTableName != null) {
 				MTable refTable = MTable.get(Env.getCtx(), referenceTableName);
@@ -1525,16 +1595,16 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		}
 		else
 			dbValue = value;
-		if (!m_po.set_ValueOfColumnReturningBoolean(getNode().getAD_Column_ID(), dbValue)) {
+		if (!m_po.set_ValueOfColumnReturningBoolean(AD_Column_ID, dbValue)) {
 			throw new Exception("Persistent Object not updated - AD_Table_ID="
 					+ getAD_Table_ID() + ", Record_ID=" + getRecord_ID()
 					+ " - Value=" + value + " error : " + CLogger.retrieveErrorString("check logs"));
 		}
 		m_po.saveEx();
-		if (dbValue != null && !dbValue.equals(m_po.get_ValueOfColumn(getNode().getAD_Column_ID())))
+		if (dbValue != null && !dbValue.equals(m_po.get_ValueOfColumn(AD_Column_ID)))
 			throw new Exception("Persistent Object not updated - AD_Table_ID="
 				+ getAD_Table_ID() + ", Record_ID=" + getRecord_ID()
-				+ " - Should=" + value + ", Is=" + m_po.get_ValueOfColumn(m_node.getAD_Column_ID()));
+				+ " - Should=" + value + ", Is=" + m_po.get_ValueOfColumn(AD_Column_ID));
 		//	Info
 		String msg = getNode().getAttributeName() + "=" + value;
 		if (textMsg != null && textMsg.length() > 0)
@@ -1687,7 +1757,8 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		m_audit.setAD_User_ID(oldUser.getAD_User_ID());
 		m_audit.setTextMsg(getTextMsg());
 		m_audit.setAttributeName("AD_User_ID");
-		m_audit.setOldValue(oldUser.getName()+ "("+oldUser.getAD_User_ID()+")");
+		if(oldUser.getAD_User_ID()!=0)
+				m_audit.setOldValue(oldUser.getName()+ "("+oldUser.getAD_User_ID()+")");
 		m_audit.setNewValue(user.getName()+ "("+user.getAD_User_ID()+")");
 		//
 		m_audit.setWFState(getWFState());

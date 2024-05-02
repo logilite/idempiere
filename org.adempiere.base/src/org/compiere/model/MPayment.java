@@ -75,6 +75,7 @@ public class MPayment extends X_C_Payment
 	 * generated serial id
 	 */
 	private static final long serialVersionUID = -1581098289090430363L;
+	protected BigDecimal		payAllocatesAmt = Env.ZERO;
 
 	/**
 	 * 	Get Payments Of BPartner
@@ -1840,6 +1841,7 @@ public class MPayment extends X_C_Payment
 		if (pAllocs.length > 0) {
 			for (MPaymentAllocate pAlloc : pAllocs)
 				sumPaymentAllocates = sumPaymentAllocates.add(pAlloc.getAmount());
+			setPayAllocatesAmt(sumPaymentAllocates);
 			if (getPayAmt().compareTo(sumPaymentAllocates) != 0) {
 				if (isReceipt() && getPayAmt().compareTo(sumPaymentAllocates) < 0) {
 					if (MSysConfig.getBooleanValue(MSysConfig.ALLOW_OVER_APPLIED_PAYMENT, false, Env.getAD_Client_ID(Env.getCtx()))) {
@@ -1850,6 +1852,23 @@ public class MPayment extends X_C_Payment
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * @param amt
+	 */
+	public void setPayAllocatesAmt(BigDecimal amt)
+	{
+		payAllocatesAmt = amt;
+	}
+	
+	/**
+	 * @param amt
+	 * @return
+	 */
+	public BigDecimal getPayAllocatesAmt()
+	{
+		return payAllocatesAmt;
 	}
 
 	/**
@@ -3058,6 +3077,7 @@ public class MPayment extends X_C_Payment
 		//	: Total Lines = 123.00 (#1)
 		sb.append(": ")
 			.append(Msg.translate(getCtx(),"PayAmt")).append("=").append(getPayAmt())
+			.append(",").append(Msg.translate(getCtx(), "Allocate Amount")).append("=").append(getPayAllocatesAmt())
 			.append(",").append(Msg.translate(getCtx(),"WriteOffAmt")).append("=").append(getWriteOffAmt());
 		//	 - Description
 		if (getDescription() != null && getDescription().length() > 0)

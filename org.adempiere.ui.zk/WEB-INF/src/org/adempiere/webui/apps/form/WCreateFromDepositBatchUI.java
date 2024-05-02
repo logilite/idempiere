@@ -41,8 +41,10 @@ import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.Dialog;
 import org.compiere.grid.CreateFromDepositBatch;
 import org.compiere.model.GridTab;
+import org.compiere.model.MBankAccount;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MColumn;
+import org.compiere.model.MCurrency;
 import org.compiere.model.MDepositBatch;
 import org.compiere.model.MDepositBatchLine;
 import org.compiere.model.MLookup;
@@ -104,6 +106,9 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 	protected Label bankAccountLabel = new Label();
 	protected WTableDirEditor bankAccountField;
 	
+	protected Label currencyLabel = new Label(Msg.translate(Env.getCtx(), "C_Currency_ID"));
+	protected WTableDirEditor currencyField;
+	
 	protected Label documentNoLabel = new Label(Msg.translate(Env.getCtx(), "DocumentNo"));
 	protected WStringEditor documentNoField = new WStringEditor();
 
@@ -159,6 +164,12 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 		bankAccountField.setValue(Integer.valueOf(C_BankAccount_ID));
 		bankAccountField.setReadWrite(false);
 		
+		lookup = MLookupFactory.get(Env.getCtx(), p_WindowNo, 0, MColumn.getColumn_ID(MCurrency.Table_Name, MCurrency.COLUMNNAME_C_Currency_ID), DisplayType.TableDir);
+		currencyField = new WTableDirEditor(MCurrency.COLUMNNAME_C_Currency_ID, false, false, true, lookup);
+		int C_Currency_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_Currency_ID");
+		currencyField.setValue(C_Currency_ID);
+		currencyField.setReadWrite(false);
+		
 		//  initial Loading
 		authorizationField = new WStringEditor ("authorization", false, false, true, 10, 30, null, null);
 
@@ -195,7 +206,7 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 	 */
 	protected void zkInit() throws Exception
 	{
-		window.setWidth("1100px");
+		window.setWidth("1200px");
 		bankAccountLabel.setText(Msg.translate(Env.getCtx(), "C_BankAccount_ID"));
     	authorizationLabel.setText(Msg.translate(Env.getCtx(), "R_AuthCode"));
     	
@@ -231,16 +242,16 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 		columns.appendChild(column);
 		ZKUpdateUtil.setWidth(column, "19%");
 		column = new Column();
-		ZKUpdateUtil.setWidth(column, "13%");
+		ZKUpdateUtil.setWidth(column, "12%");
 		columns.appendChild(column);
 		column = new Column();
-		ZKUpdateUtil.setWidth(column, "27%");
+		ZKUpdateUtil.setWidth(column, "22%");
 		columns.appendChild(column);
 		column = new Column();
-		ZKUpdateUtil.setWidth(column, "10%");
+		ZKUpdateUtil.setWidth(column, "12%");
 		columns.appendChild(column);
 		column = new Column();
-		ZKUpdateUtil.setWidth(column, "19%");
+		ZKUpdateUtil.setWidth(column, "23%");
 		columns.appendChild(column);
 		
 		Rows rows = (Rows) parameterBankLayout.newRows();
@@ -249,18 +260,22 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 		row.appendChild(bankAccountField.getComponent());
 		row.appendChild(documentTypeLabel.rightAlign());
 		row.appendChild(documentTypeField.getComponent());
-		row.appendChild(documentNoLabel.rightAlign());
-		row.appendChild(documentNoField.getComponent());
+		row.appendChild(currencyLabel.rightAlign());
+		row.appendChild(currencyField.getComponent());
+		
 		
 		row = rows.newRow();
+		row.appendChild(documentNoLabel.rightAlign());
+		row.appendChild(documentNoField.getComponent());
 		row.appendChild(BPartner_idLabel.rightAlign());
 		row.appendChild(bPartnerLookup.getComponent());
 		row.appendChild(authorizationLabel.rightAlign());
 		row.appendChild(authorizationField.getComponent());
-		row.appendChild(tenderTypeLabel.rightAlign());
-		row.appendChild(tenderTypeField.getComponent());
+
 		
 		row = rows.newRow();
+		row.appendChild(tenderTypeLabel.rightAlign());
+		row.appendChild(tenderTypeField.getComponent());
 		row.appendChild(amtFromLabel.rightAlign());
 		Hbox hbox = new Hbox();
 		hbox.appendChild(amtFromField.getComponent());
@@ -299,7 +314,7 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 		loadTableOIS(getBankAccountData((Integer)bankAccountField.getValue(), (Integer)bPartnerLookup.getValue(), 
 				documentNoField.getValue().toString(), dateFromField.getValue(), dateToField.getValue(),
 				amtFromField.getValue(), amtToField.getValue(), 
-				(Integer)documentTypeField.getValue(), (String)tenderTypeField.getValue(), authorizationField.getValue().toString()));
+				(Integer)documentTypeField.getValue(), (Integer)tenderTypeField.getValue(), authorizationField.getValue().toString(), currencyField.getValue()));
 	}
 	
 	/**

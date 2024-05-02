@@ -46,10 +46,10 @@ public abstract class CreateFromBatch extends CreateFrom
 	
 	@Deprecated
 	public String getSQLWhere(Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
-			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode)
+			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode, Object Currency)
 	{
 		return getSQLWhere((Integer)BPartner, DocumentNo, (Timestamp)DateFrom, (Timestamp)DateTo, 
-				(BigDecimal)AmtFrom, (BigDecimal)AmtTo, (Integer)DocType, (String)TenderType, AuthCode, 0);
+				(BigDecimal)AmtFrom, (BigDecimal)AmtTo, (Integer)DocType, (String)TenderType, AuthCode, Currency, 0);
 	}
 	
 	/**
@@ -66,13 +66,10 @@ public abstract class CreateFromBatch extends CreateFrom
 	 * @return where clause
 	 */
 	protected String getSQLWhere(Integer BPartner, String DocumentNo, Timestamp DateFrom, Timestamp DateTo, 
-			BigDecimal AmtFrom, BigDecimal AmtTo, Integer DocType, String TenderType, String AuthCode, int AD_Org_ID)
+			BigDecimal AmtFrom, BigDecimal AmtTo, Integer DocType, String TenderType, String AuthCode, Object Currency, int AD_Org_ID)
 	{
 		StringBuilder sql = new StringBuilder();
-		sql.append("WHERE p.Processed='Y' AND p.IsReconciled='N'");
-		sql.append(" AND p.DocStatus IN ('CO','CL','RE','VO') AND p.PayAmt<>0"); 
-		sql.append(" AND p.C_BankAccount_ID = ?");
-	    sql.append(" AND NOT EXISTS (SELECT * FROM C_BankStatementLine l WHERE p.C_Payment_ID=l.C_Payment_ID AND l.StmtAmt <> 0)");
+		sql.append("WHERE p.Processed='Y' AND p.C_BankAccount_ID = ? ");
 	    	    
 	    if(DocType != null)
 			sql.append(" AND p.C_DocType_ID=?");
@@ -81,10 +78,13 @@ public abstract class CreateFromBatch extends CreateFrom
 		if(BPartner != null)
 			sql.append(" AND p.C_BPartner_ID=?");
 		
+		if (Currency != null && Currency.toString().length() > 0 )
+			sql.append(" AND p.C_Currency_ID=?");
+		
 		if(DocumentNo != null && DocumentNo.length() > 0)
 			sql.append(" AND UPPER(p.DocumentNo) LIKE ?");
 		if(AuthCode != null && AuthCode.length() > 0)
-			sql.append(" AND p.R_AuthCode LIKE ?");
+			sql.append(" AND UPPER(p.R_AuthCode) LIKE ?");
 		
 		if(AmtFrom != null || AmtTo != null)
 		{
@@ -115,11 +115,11 @@ public abstract class CreateFromBatch extends CreateFrom
 	
 	@Deprecated
 	protected int setParameters(PreparedStatement pstmt, Object BankAccount, Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
-			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode)
+			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode, Object Currency)
 	throws SQLException
 	{
 		return setParameters(pstmt, (Integer)BankAccount, (Integer)BPartner, DocumentNo, (Timestamp)DateFrom, (Timestamp)DateTo, 
-				(BigDecimal)AmtFrom, (BigDecimal)AmtTo, (Integer)DocType, (String)TenderType, AuthCode,0);
+				(BigDecimal)AmtFrom, (BigDecimal)AmtTo, (Integer)DocType, (String)TenderType, AuthCode, Currency,0);
 	}
 	
 	/**
@@ -138,7 +138,7 @@ public abstract class CreateFromBatch extends CreateFrom
 	 * @throws SQLException
 	 */
 	protected int setParameters(PreparedStatement pstmt, Integer BankAccount, Integer BPartner, String DocumentNo, Timestamp DateFrom, Timestamp DateTo, 
-			BigDecimal AmtFrom, BigDecimal AmtTo, Integer DocType, String TenderType, String AuthCode, int AD_Org_ID)
+			BigDecimal AmtFrom, BigDecimal AmtTo, Integer DocType, String TenderType, String AuthCode, Object Currency, int AD_Org_ID)
 	throws SQLException
 	{
 		int index = 1;
@@ -153,6 +153,9 @@ public abstract class CreateFromBatch extends CreateFrom
 		
 		if(BPartner != null)
 			pstmt.setInt(index++, BPartner);
+		
+		if(Currency != null)
+			pstmt.setInt(index++, (Integer) Currency);
 		
 		if(DocumentNo != null && DocumentNo.length() > 0)
 			pstmt.setString(index++, getSQLText(DocumentNo));
@@ -191,7 +194,6 @@ public abstract class CreateFromBatch extends CreateFrom
 		if(AD_Org_ID > 0)
 			pstmt.setInt(index++, (Integer) AD_Org_ID);
 		
-		return index;
 	}
 	
 	protected String getSQLText(String text)
@@ -205,10 +207,10 @@ public abstract class CreateFromBatch extends CreateFrom
 	
 	@Deprecated
 	protected Vector<Vector<Object>> getBankAccountData(Object BankAccount, Object BPartner, String DocumentNo, 
-			Object DateFrom, Object DateTo, Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode)
+			Object DateFrom, Object DateTo, Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode, Object CurrencyType)
 	{
 		return getBankAccountData((Integer)BankAccount, (Integer)BPartner, DocumentNo, (Timestamp)DateFrom, (Timestamp)DateTo, 
-				(BigDecimal)AmtFrom, (BigDecimal)AmtTo, (Integer)DocType, (String)TenderType, AuthCode);
+				(BigDecimal)AmtFrom, (BigDecimal)AmtTo, (Integer)DocType, (String)TenderType, AuthCode,CurrencyType);
 	}
 	
 	/**

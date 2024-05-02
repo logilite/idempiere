@@ -36,7 +36,7 @@ public class Merge
 	protected int				m_totalCount = 0;
 	/** Error Log			*/
 	protected StringBuffer	m_errorLog = new StringBuffer();
-	private Trx 			m_trx = null;         
+	public Trx 			m_trx = null;         
 	/**	Logger			*/
 	protected static final CLogger log = CLogger.getCLogger(Merge.class);
 
