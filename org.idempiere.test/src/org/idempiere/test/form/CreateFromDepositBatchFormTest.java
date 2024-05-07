@@ -65,6 +65,7 @@ public class CreateFromDepositBatchFormTest extends AbstractTestCase {
 
 	@Test
 	public void testCreateFromDepositBatch() {
+		int currencyID = Env.getContextAsInt(Env.getCtx(), Env.C_CURRENCY_ID);
 		MPayment payment = new MPayment(Env.getCtx(), 0, getTrxName());
 		payment.setC_DocType_ID(true);
 		payment.setC_BPartner_ID(DictionaryIDs.C_BPartner.JOE_BLOCK.id);
@@ -72,7 +73,7 @@ public class CreateFromDepositBatchFormTest extends AbstractTestCase {
 		int C_BankAccount_ID = DB.getSQLValueEx(getTrxName(), "SELECT C_BankAccount_ID FROM C_BankAccount WHERE IsActive='Y' AND AD_Client_ID=? "
 				+ "AND IsDefault='Y' ORDER BY C_BankAccount_ID", getAD_Client_ID());
 		payment.setC_BankAccount_ID(C_BankAccount_ID);
-		payment.setC_Currency_ID(Env.getContextAsInt(Env.getCtx(), Env.C_CURRENCY_ID));
+		payment.setC_Currency_ID(currencyID);
 		payment.setPayAmt(new BigDecimal("10.00"));
 		payment.saveEx();
 
@@ -108,7 +109,7 @@ public class CreateFromDepositBatchFormTest extends AbstractTestCase {
 		form.setTrxName(getTrxName());
 		Timestamp dateFrom = TimeUtil.addDays(today, -1);
 		Timestamp dateTo = TimeUtil.addDays(today, 1);
-		form.loadPayments(C_BankAccount_ID, null, null, dateFrom, dateTo, null, null, payment.getC_DocType_ID(), null, null);
+		form.loadPayments(C_BankAccount_ID, null, null, dateFrom, dateTo, null, null, payment.getC_DocType_ID(), null, null, currencyID);
 		assertTrue(form.minitable.getRowCount() > 0, "Failed to load data from DB");
 		
 		form.minitable.setSelectedRow(-1);
@@ -163,9 +164,9 @@ public class CreateFromDepositBatchFormTest extends AbstractTestCase {
 
 		public void loadPayments(Integer BankAccount, Integer BPartner, String DocumentNo,
 				Timestamp DateFrom, Timestamp DateTo, BigDecimal AmtFrom, BigDecimal AmtTo, Integer DocType,
-				String TenderType, String AuthCode) {
+				String TenderType, String AuthCode, Integer currencyID) {
 			Vector<Vector<Object>> datas = super.getBankAccountData(BankAccount, BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType,
-					TenderType, AuthCode);
+					TenderType, AuthCode, currencyID);
 			
 			for(int i = 0; i < datas.size(); i++) {
 				minitable.setRowCount(i+1);

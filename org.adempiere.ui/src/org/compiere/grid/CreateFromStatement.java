@@ -66,7 +66,7 @@ public abstract class CreateFromStatement extends CreateFromBatch
 	 */
 	@Override
 	protected Vector<Vector<Object>> getBankAccountData(Integer BankAccount, Integer BPartner, String DocumentNo, 
-			Timestamp DateFrom, Timestamp DateTo, BigDecimal AmtFrom, BigDecimal AmtTo, Integer DocType, String TenderType, String AuthCode, Object Currency)
+			Timestamp DateFrom, Timestamp DateTo, BigDecimal AmtFrom, BigDecimal AmtTo, Integer DocType, String TenderType, String AuthCode, Integer Currency)
 	{
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 		
@@ -99,14 +99,14 @@ public abstract class CreateFromStatement extends CreateFromBatch
 		sql.append(" GROUP BY db.C_DepositBatch_ID,db.DocumentNo,p.C_Currency_ID, c.ISO_Code, db.DateDeposit, p.Processed, p.C_BankAccount_ID, p.C_DocType_ID ");
 		
 		sql.append(") SELECT DateTrx, C_Payment_ID, C_DepositBatch_ID, DocumentNo, C_Currency_ID, ISO_Code, PayAmt, ConvAmount, Name FROM Payments p ");
-		sql.append(getSQLWhere(BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, Currency));
+		sql.append(getSQLWhere(BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, Currency, 0));
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
 		{
 			pstmt = DB.prepareStatement(sql.toString(), getTrxName());
-			setParameters(pstmt, BankAccount, BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, Currency);
+			setParameters(pstmt, BankAccount, BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, Currency, 0);
 			
 			rs = pstmt.executeQuery();
 			while(rs.next())

@@ -161,8 +161,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		loadActivity();
 		if (!isValidApprover()) {
 			// If Activity already suspended then show error
-			FDialog.error(gridTab.getWindowNo(), this, "WFActiveForRecord",
-					m_activity.toStringX());
+			Dialog.error(gridTab.getWindowNo(), "WFActiveForRecord", m_activity.toStringX());
 			return;
 		}
 		readReference();
@@ -546,7 +545,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				{
 					trx.rollback();
 					trx.close();
-					FDialog.error(m_WindowNo, this, "FillMandatory", Msg.getMsg(Env.getCtx(), "Answer"));
+					Dialog.error(m_WindowNo, "FillMandatory", Msg.getMsg(Env.getCtx(), "Answer"));
 					if(callback!=null)
 						callback.onCallback(false);
 					return;
@@ -561,7 +560,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				catch (Exception e)
 				{
 					logger.log(Level.SEVERE, node.getName(), e);
-					FDialog.error(m_WindowNo, this, "Error", e.toString());
+					Dialog.error(m_WindowNo, "Error", e.toString());
 					trx.rollback();
 					trx.close();
 					if(callback!=null)

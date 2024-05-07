@@ -314,7 +314,7 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 		loadTableOIS(getBankAccountData((Integer)bankAccountField.getValue(), (Integer)bPartnerLookup.getValue(), 
 				documentNoField.getValue().toString(), dateFromField.getValue(), dateToField.getValue(),
 				amtFromField.getValue(), amtToField.getValue(), 
-				(Integer)documentTypeField.getValue(), (Integer)tenderTypeField.getValue(), authorizationField.getValue().toString(), currencyField.getValue()));
+				(Integer)documentTypeField.getValue(), (String)tenderTypeField.getValue(), authorizationField.getValue().toString(), (Integer)currencyField.getValue()));
 	}
 	
 	/**

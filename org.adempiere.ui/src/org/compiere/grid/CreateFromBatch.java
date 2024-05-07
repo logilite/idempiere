@@ -114,12 +114,12 @@ public abstract class CreateFromBatch extends CreateFrom
 	}
 	
 	@Deprecated
-	protected int setParameters(PreparedStatement pstmt, Object BankAccount, Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
+	protected void setParameters(PreparedStatement pstmt, Object BankAccount, Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
 			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode, Object Currency)
 	throws SQLException
 	{
-		return setParameters(pstmt, (Integer)BankAccount, (Integer)BPartner, DocumentNo, (Timestamp)DateFrom, (Timestamp)DateTo, 
-				(BigDecimal)AmtFrom, (BigDecimal)AmtTo, (Integer)DocType, (String)TenderType, AuthCode, Currency,0);
+		setParameters(pstmt, (Integer)BankAccount, (Integer)BPartner, DocumentNo, (Timestamp)DateFrom, (Timestamp)DateTo, 
+				(BigDecimal)AmtFrom, (BigDecimal)AmtTo, (Integer)DocType, (String)TenderType, AuthCode, Currency, 0);
 	}
 	
 	/**
@@ -137,7 +137,7 @@ public abstract class CreateFromBatch extends CreateFrom
 	 * @param AuthCode
 	 * @throws SQLException
 	 */
-	protected int setParameters(PreparedStatement pstmt, Integer BankAccount, Integer BPartner, String DocumentNo, Timestamp DateFrom, Timestamp DateTo, 
+	protected void setParameters(PreparedStatement pstmt, Integer BankAccount, Integer BPartner, String DocumentNo, Timestamp DateFrom, Timestamp DateTo, 
 			BigDecimal AmtFrom, BigDecimal AmtTo, Integer DocType, String TenderType, String AuthCode, Object Currency, int AD_Org_ID)
 	throws SQLException
 	{
@@ -205,14 +205,6 @@ public abstract class CreateFromBatch extends CreateFrom
 		return s;
 	}
 	
-	@Deprecated
-	protected Vector<Vector<Object>> getBankAccountData(Object BankAccount, Object BPartner, String DocumentNo, 
-			Object DateFrom, Object DateTo, Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode, Object CurrencyType)
-	{
-		return getBankAccountData((Integer)BankAccount, (Integer)BPartner, DocumentNo, (Timestamp)DateFrom, (Timestamp)DateTo, 
-				(BigDecimal)AmtFrom, (BigDecimal)AmtTo, (Integer)DocType, (String)TenderType, AuthCode,CurrencyType);
-	}
-	
 	/**
 	 * 
 	 * @param BankAccount
@@ -228,7 +220,7 @@ public abstract class CreateFromBatch extends CreateFrom
 	 * @return list of transaction records (usually payments) for bank account
 	 */
 	protected abstract Vector<Vector<Object>> getBankAccountData(Integer BankAccount, Integer BPartner, String DocumentNo, 
-			Timestamp DateFrom, Timestamp DateTo, BigDecimal AmtFrom, BigDecimal AmtTo, Integer DocType, String TenderType, String AuthCode);
+			Timestamp DateFrom, Timestamp DateTo, BigDecimal AmtFrom, BigDecimal AmtTo, Integer DocType, String TenderType, String AuthCode, Integer Currency);
 	
 	@Override
 	public void info(IMiniTable miniTable, IStatusBar statusBar)

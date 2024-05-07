@@ -18,7 +18,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Hashtable;
 import java.util.Vector;
 import java.util.logging.Level;
 
@@ -69,7 +68,7 @@ public abstract class CreateFromDepositBatch extends CreateFromBatch
 	 */
 	@Override
 	protected Vector<Vector<Object>> getBankAccountData(Integer BankAccount, Integer BPartner, String DocumentNo, 
-			Timestamp DateFrom, Timestamp DateTo, BigDecimal AmtFrom, BigDecimal AmtTo, Integer DocType, String TenderType, String AuthCode, Object Currency)
+			Timestamp DateFrom, Timestamp DateTo, BigDecimal AmtFrom, BigDecimal AmtTo, Integer DocType, String TenderType, String AuthCode, Integer Currency)
 	{
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 		
