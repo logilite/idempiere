@@ -641,7 +641,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 				// Product requires ASI
 				if (line.getM_AttributeSetInstance_ID() == 0)
 				{
-					if (product != null && product.isASIMandatory(line.isSOTrx()))
+					if (product != null && product.isASIMandatoryFor(null, line.isSOTrx()))
 					{
 						if (!product.getAttributeSet().excludeTableEntry(MInventoryLine.Table_ID, line.isSOTrx()))
 						{

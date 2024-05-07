@@ -24,14 +24,11 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.compiere.model.PO;
+import org.compiere.model.X_AD_WF_NextCondition;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
 import org.idempiere.cache.ImmutablePOSupport;
-import org.compiere.model.X_AD_WF_NextCondition;
-import org.compiere.util.DB;
-import org.compiere.util.Env;
-import org.compiere.util.Msg;
 
 /**
  *	Extended Workflow Transition Condition model for AD_WF_NextCondition

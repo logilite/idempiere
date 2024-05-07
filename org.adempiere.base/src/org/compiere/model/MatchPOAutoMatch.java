@@ -205,7 +205,7 @@ public class MatchPOAutoMatch {
 
 								MInvoiceLine iLine = (MInvoiceLine) MTable.get(ctx, MInvoiceLine.Table_ID)
 										.getPO(matchPO.getC_InvoiceLine_ID(), trxName);
-								MMatchPO po = new MMatchPO(iLine, iLine.getC_Invoice().getDateInvoiced(), creditMemoQty);
+								MMatchPO po = MMatchPO.createFrom(iLine, iLine.getC_Invoice().getDateInvoiced(), creditMemoQty);
 								po.setC_OrderLine_ID(C_OrderLine_ID);
 								po.setRef_MatchPO_ID(matchPOCreditMemo.getM_MatchPO_ID());
 								po.setPosted(true);
@@ -264,7 +264,7 @@ public class MatchPOAutoMatch {
 
 								MInvoiceLine iLine = (MInvoiceLine) MTable.get(ctx, MInvoiceLine.Table_ID)
 										.getPO(matchPOCreditMemo.getC_InvoiceLine_ID(), trxName);
-								MMatchPO po = new MMatchPO(iLine, iLine.getC_Invoice().getDateInvoiced(), matchPO.getQty().negate());
+								MMatchPO po = MMatchPO.createFrom(iLine, iLine.getC_Invoice().getDateInvoiced(), matchPO.getQty().negate());
 								po.setC_OrderLine_ID(C_OrderLine_ID);
 								po.setRef_MatchPO_ID(matchPO.getM_MatchPO_ID());
 								po.setPosted(true);
@@ -314,7 +314,7 @@ public class MatchPOAutoMatch {
 
 							MInvoiceLine iLine = (MInvoiceLine) MTable.get(ctx, MInvoiceLine.Table_ID)
 									.getPO(matchPO.getC_InvoiceLine_ID(), trxName);
-							MMatchPO po = new MMatchPO(iLine, iLine.getC_Invoice().getDateInvoiced(), creditMemoQty);
+							MMatchPO po = MMatchPO.createFrom(iLine, iLine.getC_Invoice().getDateInvoiced(), creditMemoQty);
 							po.setC_OrderLine_ID(C_OrderLine_ID);
 							po.setRef_MatchPO_ID(matchPOCreditMemo.getM_MatchPO_ID());
 							po.setPosted(true);
@@ -373,7 +373,7 @@ public class MatchPOAutoMatch {
 
 							MInvoiceLine iLine = (MInvoiceLine) MTable.get(ctx, MInvoiceLine.Table_ID)
 									.getPO(matchPOCreditMemo.getC_InvoiceLine_ID(), trxName);
-							MMatchPO po = new MMatchPO(iLine, iLine.getC_Invoice().getDateInvoiced(), matchPO.getQty().negate());
+							MMatchPO po = MMatchPO.createFrom(iLine, iLine.getC_Invoice().getDateInvoiced(), matchPO.getQty().negate());
 							po.setC_OrderLine_ID(C_OrderLine_ID);
 							po.setRef_MatchPO_ID(matchPO.getM_MatchPO_ID());
 							po.setPosted(true);

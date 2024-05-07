@@ -54,7 +54,6 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProject;
 import org.compiere.process.ProcessInfo;
-import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;

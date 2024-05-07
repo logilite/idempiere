@@ -334,7 +334,7 @@ public class MMovementLineMA extends X_M_MovementLineMA
 		
 		if(getM_AttributeSetInstance_ID() == 0 && line.getM_AttributeSetInstance_ID() == 0)
 		{
-			if (product.getM_Product_ID() > 0 && product.isASIMandatory(true))
+			if (product.getM_Product_ID() > 0 && product.isASIMandatoryFor(null, true))
 			{
 				if (product.getAttributeSet() == null)
 				{

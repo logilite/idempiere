@@ -67,6 +67,7 @@ public class CreateFromStatementFormTest extends AbstractTestCase {
 
 	@Test
 	public void testCreateFromPayments() {
+		int currencyID = Env.getContextAsInt(Env.getCtx(), Env.C_CURRENCY_ID);
 		MPayment payment = new MPayment(Env.getCtx(), 0, getTrxName());
 		payment.setC_DocType_ID(true);
 		payment.setC_BPartner_ID(DictionaryIDs.C_BPartner.JOE_BLOCK.id);
@@ -74,7 +75,6 @@ public class CreateFromStatementFormTest extends AbstractTestCase {
 		int C_BankAccount_ID = DB.getSQLValueEx(getTrxName(), "SELECT C_BankAccount_ID FROM C_BankAccount WHERE IsActive='Y' AND AD_Client_ID=? "
 				+ "AND IsDefault='Y' ORDER BY C_BankAccount_ID", getAD_Client_ID());
 		payment.setC_BankAccount_ID(C_BankAccount_ID);
-		int currencyID = Env.getContextAsInt(Env.getCtx(), Env.C_CURRENCY_ID);
 		payment.setC_Currency_ID(currencyID);
 		payment.setPayAmt(new BigDecimal("10.00"));
 		payment.saveEx();

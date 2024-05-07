@@ -41,7 +41,6 @@ import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.Dialog;
 import org.compiere.grid.CreateFromDepositBatch;
 import org.compiere.model.GridTab;
-import org.compiere.model.MBankAccount;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MColumn;
 import org.compiere.model.MCurrency;

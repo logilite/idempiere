@@ -27,7 +27,6 @@ import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAttributeSetInstance;
 import org.compiere.model.MChart;
-import org.compiere.model.MImage;
 import org.compiere.model.MColumn;
 import org.compiere.model.MImage;
 import org.compiere.model.MLocation;

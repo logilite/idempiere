@@ -15,7 +15,6 @@ package org.adempiere.base;
 
 import java.util.Properties;
 
-import org.adempiere.base.ILoginFactory;
 import org.compiere.util.Login;
 
 public class DefaultLoginFactory implements ILoginFactory

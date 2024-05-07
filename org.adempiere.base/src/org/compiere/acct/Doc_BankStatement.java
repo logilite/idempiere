@@ -29,7 +29,6 @@ import org.compiere.model.MBankStatementLine;
 import org.compiere.model.MDepositBatch;
 import org.compiere.model.MDepositBatchLine;
 import org.compiere.model.MPayment;
-import org.compiere.model.MTable;
 import org.compiere.util.Env;
 
 /**

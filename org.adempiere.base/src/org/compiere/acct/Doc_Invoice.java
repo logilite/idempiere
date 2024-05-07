@@ -1195,7 +1195,6 @@ public class Doc_Invoice extends Doc
 					{
 						estimatedAmt = estimatedAmt.setScale(as.getStdPrecision(), RoundingMode.HALF_UP);
 					}
-					int compare = allocationAmt.compareTo(estimatedAmt);
 					if (allocationAmt.compareTo(estimatedAmt)!=0)
 					{
 						// TODO test more order allocation then landed costing
