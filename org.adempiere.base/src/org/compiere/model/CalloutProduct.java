@@ -35,7 +35,7 @@ public class CalloutProduct extends CalloutEngine
 		String productType = (String)value;
 		
 		if(MProduct.PRODUCTTYPE_ExpenseType.equalsIgnoreCase(productType)) {
-			mTab.setValue(MProduct.COLUMNNAME_IsStocked, 'N');
+			mTab.setValue(MProduct.COLUMNNAME_IsStocked, "N");
 		}
 		
 		return "";

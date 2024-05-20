@@ -522,6 +522,11 @@ public class Doc_InOut extends Doc
 				DocLine line = p_lines[i];
 				BigDecimal costs = null;
 				MProduct product = line.getProduct();
+				//If expense type stocked product, no impact on inventory
+	            if(MProduct.PRODUCTTYPE_ExpenseType.equals(product.getProductType()) && product.isStocked()) {
+	                continue;
+	            }
+				
 				MOrderLine orderLine = null;
 				BigDecimal landedCost = BigDecimal.ZERO;
 				MInOutLine inoutLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(line.get_ID(),
@@ -770,6 +775,11 @@ public class Doc_InOut extends Doc
 				DocLine line = p_lines[i];
 				BigDecimal costs = null;
 				MProduct product = line.getProduct();
+				//If expense type stocked product, no impact on inventory
+	            if(MProduct.PRODUCTTYPE_ExpenseType.equals(product.getProductType()) && product.isStocked()) {
+	                continue;
+	            }
+				
 				MInOutLine ioLine = (MInOutLine) line.getPO();
 				
 				String costingMethod = product.getCostingMethod(as);

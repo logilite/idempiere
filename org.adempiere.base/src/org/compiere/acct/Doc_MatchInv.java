@@ -43,6 +43,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MMatchInv;
 import org.compiere.model.MOrderLandedCostAllocation;
+import org.compiere.model.MProduct;
 import org.compiere.model.MTable;
 import org.compiere.model.ProductCost;
 import org.compiere.model.X_M_Cost;
@@ -176,6 +177,12 @@ public class Doc_MatchInv extends Doc
 				+ ",Qty=" + getQty() + ",InOutQty=" + m_receiptLine.getMovementQty());
 			return facts;
 		}
+		MProduct product = MProduct.get(getCtx(), getM_Product_ID());
+		//If expense type stocked product, no impact on inventory
+        if(MProduct.PRODUCTTYPE_ExpenseType.equals(product.getProductType()) && product.isStocked()) {
+        	//reversing commitment
+        	return createCommitmentFacts(as,facts);
+        }
 		
 		if (m_receiptLine.getM_InOutLine_ID() == 0)
 		{
@@ -390,19 +397,22 @@ public class Doc_MatchInv extends Doc
 		//
 		facts.add(fact);
 
+		
+		return createCommitmentFacts(as,facts);
+	}   //  createFact
+
+	public ArrayList<Fact> createCommitmentFacts (MAcctSchema as,ArrayList<Fact> facts){
 		/** Commitment release										****/
 		if (as.isAccrual() && as.isCreatePOCommitment())
 		{
-			fact = Doc_Order.getCommitmentRelease(as, this,
+			Fact fact = Doc_Order.getCommitmentRelease(as, this,
 				getQty(), m_invoiceLine.getC_InvoiceLine_ID(), Env.ONE);
 			if (fact == null)
 				return null;
 			facts.add(fact);
 		}	//	Commitment
-
 		return facts;
-	}   //  createFact
-
+	}
 
 	/**
 	 * @param as
@@ -573,6 +583,11 @@ public class Doc_MatchInv extends Doc
 			&& m_receiptLine != null && m_receiptLine.get_ID() > 0)
 		{
 			MMatchInv matchInv = (MMatchInv)getPO();
+			//If expense type stocked product, don't create cost
+			MProduct product = MProduct.get(getCtx(), matchInv.getM_Product_ID());
+			if(MProduct.PRODUCTTYPE_ExpenseType.equals(product.getProductType())) {
+				 return "";
+			 }
 			
 			BigDecimal LineNetAmt = m_invoiceLine.getLineNetAmt();
 			BigDecimal multiplier = getQty()
