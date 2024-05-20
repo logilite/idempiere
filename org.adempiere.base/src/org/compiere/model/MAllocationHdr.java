@@ -913,6 +913,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 			reversal.saveEx();
 			m_processMsg = reversal.getDocumentNo();
 			addDescription("(" + reversal.getDocumentNo() + "<-)");
+			setReversal_ID(reversal.getC_AllocationHdr_ID());
 			
 		}
 		else
