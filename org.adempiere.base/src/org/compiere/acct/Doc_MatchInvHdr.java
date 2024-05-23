@@ -27,6 +27,7 @@ import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MMatchInv;
 import org.compiere.model.MMatchInvHdr;
 import org.compiere.model.MOrderLandedCostAllocation;
+import org.compiere.model.MProduct;
 import org.compiere.model.ProductCost;
 import org.compiere.model.X_M_Cost;
 import org.compiere.util.Env;
@@ -423,15 +424,10 @@ public class Doc_MatchInvHdr extends Doc
 				}
 				//
 
-				/** Commitment release ****/
-				if (as.isAccrual() && as.isCreatePOCommitment())
-				{
-					fact = Doc_Order.getCommitmentRelease(as, this, line.getQty(), m_invoiceLine.getC_InvoiceLine_ID(),
-							Env.ONE);
-					if (fact == null)
-						return null;
-					facts.add(fact);
-				} // Commitment
+				if(createCommitmentFacts(as,facts,line,m_invoiceLine)==null) {
+					return null;
+				}
+				
 			}
 
 		}
@@ -440,6 +436,19 @@ public class Doc_MatchInvHdr extends Doc
 		return facts;
 	}
 
+	public ArrayList<Fact> createCommitmentFacts (MAcctSchema as,ArrayList<Fact> facts,DocLine line,MInvoiceLine m_invoiceLine){
+		/** Commitment release ****/
+		if (as.isAccrual() && as.isCreatePOCommitment())
+		{
+			Fact fact = Doc_Order.getCommitmentRelease(as, this, line.getQty(), m_invoiceLine.getC_InvoiceLine_ID(),
+					Env.ONE);
+			if (fact == null)
+				return null;
+			facts.add(fact);
+		} // Commitment
+		return facts;
+	}
+	
 	private boolean isNoProductQtyLine(DocLine line, MMatchInv m_matchInv, MInOutLine m_receiptLine)
 	{
 		return line.getM_Product_ID() == 0 // no Product
@@ -678,6 +687,10 @@ public class Doc_MatchInvHdr extends Doc
 		if (m_invoiceLine != null && m_invoiceLine.get_ID() > 0 && m_receiptLine != null && m_receiptLine.get_ID() > 0)
 		{
 			MMatchInv matchInv = (MMatchInv) line.getPO();
+			MProduct product = MProduct.get(getCtx(), matchInv.getM_Product_ID());
+			 if(MProduct.PRODUCTTYPE_ExpenseType.equals(product.getProductType())) {
+				 return "";
+			 }
 
 			BigDecimal LineNetAmt = m_invoiceLine.getLineNetAmt();
 			BigDecimal multiplier = line.getQty().divide(m_invoiceLine.getQtyInvoiced(), 12, RoundingMode.HALF_UP)
