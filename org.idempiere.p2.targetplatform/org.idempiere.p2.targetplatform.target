@@ -1350,7 +1350,7 @@ Export-Package:        *;version="${version}";-noimport:=true
 	<location includeSource="true" missingManifest="generate" type="Maven">
       <groupId>org.mortbay.jasper</groupId>
       <artifactId>apache-jsp</artifactId>
-      <version>9.0.52</version>
+      <version>9.0.83.1</version>
       <type>jar</type>
 	</location>
 	<location includeDependencyScope="compile" includeSource="true" missingManifest="generate" type="Maven">
@@ -1362,7 +1362,7 @@ Export-Package:        *;version="${version}";-noimport:=true
 	<location includeSource="true" missingManifest="generate" type="Maven">
       <groupId>org.mortbay.jasper</groupId>
       <artifactId>apache-el</artifactId>
-      <version>9.0.52</version>
+      <version>9.0.83.1</version>
 	  <type>jar</type>
 	</location>
 	<location includeDependencyScope="compile" includeSource="true" missingManifest="generate" type="Maven">
