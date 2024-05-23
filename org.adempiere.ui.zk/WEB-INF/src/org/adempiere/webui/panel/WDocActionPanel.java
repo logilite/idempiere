@@ -160,8 +160,24 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 		loadActivity();
 		if (!isValidApprover()) {
+			
+			StringBuilder msg = new StringBuilder("Approval Assigned to ");
+
+			if (resp.isRole())
+			{
+				msg.append(resp.getRole().getName());
+			}
+			else if (resp.isHuman())
+			{
+				msg.append(resp.getAD_User().getName());
+			}
+			else
+			{
+				msg.append(m_activity.getAD_User().getName());
+			}
+			
 			// If Activity already suspended then show error
-			Dialog.error(gridTab.getWindowNo(), "WFActiveForRecord", m_activity.toStringX());
+			Dialog.error(gridTab.getWindowNo(), this, msg.toString(), m_activity.toStringX());
 			return;
 		}
 		readReference();
@@ -740,7 +756,16 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		if (m_activity != null)
 		{
 			m_WFProcess = (MWFProcess) m_activity.getAD_WF_Process();
-			resp = MWFResponsible.get(Env.getCtx(), m_activity.getAD_WF_Responsible_ID());
+			
+			int AD_WF_Resp_ID = m_activity.getAD_WF_Responsible_ID();
+			final String sql = "SELECT AD_WF_Responsible_ID FROM AD_WF_Responsible WHERE AD_Client_ID=? AND Override_ID = ? AND IsActive='Y' ";
+
+			int id = DB.getSQLValue(m_activity.get_TrxName(), sql, Env.getAD_Client_ID(Env.getCtx()), AD_WF_Resp_ID);
+
+			if (id > 0)
+				AD_WF_Resp_ID = id;
+
+			resp = MWFResponsible.get(Env.getCtx(), AD_WF_Resp_ID);
 		}
 	}
 
@@ -749,13 +774,6 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		if (resp != null && m_activity != null)
 		{
 			String respType = resp.getResponsibleType();
-
-			// Current User is invoker and Approval type is not a manual
-			if (!MWFResponsible.RESPONSIBLETYPE_Manual.equals(respType) && m_activity.getAD_User_ID() > 0
-					&& m_AD_User_ID != m_activity.getAD_User_ID())
-			{
-				return false;
-			}
 
 			// Current User is not Approver and Approval type is manual
 			if (MWFResponsible.RESPONSIBLETYPE_Manual.equals(respType))
@@ -774,13 +792,14 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 				return true;
 			}
-
-			// Current User Role is not Approval Role
-			if (MWFResponsible.RESPONSIBLETYPE_Role.equals(respType) && m_AD_Role_ID != resp.getAD_Role_ID())
+			else
 			{
-				return false;
+				// Current User Role is not Approval Role
+				if (MWFResponsible.RESPONSIBLETYPE_Role.equals(respType) && m_AD_Role_ID != resp.getAD_Role_ID())
+				{
+					return false;
+				}
 			}
-
 		}
 		return true;
 	}

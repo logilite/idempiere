@@ -57,9 +57,28 @@ public class DocLine
 		if (p_po.getAD_Org_ID() == 0)
 			p_po.setAD_Org_ID(m_doc.getAD_Org_ID());
 	}	//	DocLine
+	
+	/**
+	 * All getter methods will give first preference to childPO is passed here
+	 * for finding values
+	 *
+	 * @param po line persistent object
+	 * @param doc header
+	 * @param childPO line - should not be null
+	 */
+	public DocLine(PO po, Doc doc, PO childPO)
+	{
+		this(po, doc);
+
+		if (childPO == null)
+			throw new IllegalArgumentException("Child PO is null");
+		p_child_po = childPO;
+
+	} // DocLine
 
 	/** Persistent Object		*/
-	protected PO				p_po = null;
+	protected PO				p_po 		= null;
+	protected PO 				p_child_po	= null;
 	/** Parent					*/
 	protected Doc					m_doc = null;
 	/**	 Log					*/
@@ -130,13 +149,8 @@ public class DocLine
 	{
 		if (m_C_Currency_ID == -1)
 		{
-			int index = p_po.get_ColumnIndex("C_Currency_ID");
-			if (index != -1)
-			{
-				Integer ii = (Integer)p_po.get_Value(index);
-				if (ii != null)
-					m_C_Currency_ID = ii.intValue();
-			}
+			m_C_Currency_ID = getValue("C_Currency_ID");
+
 			if (m_C_Currency_ID <= 0)
 				m_C_Currency_ID = m_doc.getC_Currency_ID();
 		}
@@ -151,13 +165,8 @@ public class DocLine
 	{
 		if (m_C_ConversionType_ID == -1)
 		{
-			int index = p_po.get_ColumnIndex("C_ConversionType_ID");
-			if (index != -1)
-			{
-				Integer ii = (Integer)p_po.get_Value(index);
-				if (ii != null)
-					m_C_ConversionType_ID = ii.intValue();
-			}
+			m_C_ConversionType_ID = getValue("C_ConversionType_ID");
+			
 			if (m_C_ConversionType_ID <= 0)
 				m_C_ConversionType_ID = m_doc.getC_ConversionType_ID();
 		}
@@ -274,7 +283,19 @@ public class DocLine
 	 */
 	public BigDecimal getChargeAmt()
 	{
-		int index = p_po.get_ColumnIndex("ChargeAmt");
+		int index = -1;
+		if (p_child_po != null)
+		{
+			index = p_child_po.get_ColumnIndex("ChargeAmt");
+			if (index != -1)
+			{
+				BigDecimal bd = (BigDecimal)p_child_po.get_Value(index);
+				if (bd != null)
+					return bd;
+			}
+		}
+		
+		index = p_po.get_ColumnIndex("ChargeAmt");
 		if (index != -1)
 		{
 			BigDecimal bd = (BigDecimal)p_po.get_Value(index);
@@ -353,13 +374,30 @@ public class DocLine
 	{
 		if (m_DateAcct != null)
 			return m_DateAcct;
-		int index = p_po.get_ColumnIndex("DateAcct");
+		
+		int index = -1;
+		// From ChildPO
+		if (p_child_po != null)
+		{
+			index = p_child_po.get_ColumnIndex("DateAcct");
+			if (index != -1)
+			{
+				m_DateAcct = (Timestamp)p_child_po.get_Value(index);
+				if (m_DateAcct != null)
+					return m_DateAcct;
+			}
+		}
+		
+		//From PO
+		index = p_po.get_ColumnIndex("DateAcct");
 		if (index != -1)
 		{
 			m_DateAcct = (Timestamp)p_po.get_Value(index);
 			if (m_DateAcct != null)
 				return m_DateAcct;
 		}
+		
+		//From Doc
 		m_DateAcct = m_doc.getDateAcct();
 		return m_DateAcct;
 	}   //  getDateAcct
@@ -373,14 +411,30 @@ public class DocLine
 	 */
 	public Timestamp getDateConv ()
 	{
+		
+		int index = -1;
 		Timestamp dateConv = null;
-		int index = p_po.get_ColumnIndex("DateAcct");
-		if (index != -1)
+
+		// 	From ChildPO
+		if (p_child_po != null)
 		{
-			dateConv = (Timestamp)p_po.get_Value(index);
+			index = p_child_po.get_ColumnIndex("DateAcct");
+			if (index != -1)
+			{
+				dateConv = (Timestamp)p_child_po.get_Value(index);
+			}
+		}
+		//	From PO
+		if(dateConv == null)
+		{
+			index = p_po.get_ColumnIndex("DateAcct");
+			if (index != -1)
+			{
+				dateConv = (Timestamp)p_po.get_Value(index);
+			}
 		}
 		
-
+		//DateAcct
 		if (dateConv == null)
 			dateConv = getDateAcct();
 		
@@ -404,7 +458,21 @@ public class DocLine
 	{
 		if (m_DateDoc != null)
 			return m_DateDoc;
-		int index = p_po.get_ColumnIndex("DateDoc");
+		int index = -1; 
+		
+		// From ChildPO
+		if (p_child_po != null)
+		{
+			index = p_child_po.get_ColumnIndex("DateDoc");
+			if (index != -1)
+			{
+				m_DateAcct = (Timestamp)p_child_po.get_Value(index);
+				if (m_DateAcct != null)
+					return m_DateAcct;
+			}
+		}
+		
+		index = p_po.get_ColumnIndex("DateDoc");
 		if (index != -1)
 		{
 			m_DateDoc = (Timestamp)p_po.get_Value(index);
@@ -463,14 +531,7 @@ public class DocLine
 	 */
 	public int getC_Charge_ID()
 	{
-		int index = p_po.get_ColumnIndex("C_Charge_ID");
-		if (index != -1)
-		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
-		}
-		return 0;
+		return getValue("C_Charge_ID");
 	}	//	getC_Charge_ID
 
 	/**
@@ -495,14 +556,9 @@ public class DocLine
 	{
 		if (m_C_Period_ID == -1)
 		{
-			int index = p_po.get_ColumnIndex("C_Period_ID");
-			if (index != -1)
-			{
-				Integer ii = (Integer)p_po.get_Value(index);
-				if (ii != null)
-					m_C_Period_ID = ii.intValue();
-			}
-			if (m_C_Period_ID == -1)
+			m_C_Period_ID = getValue("C_Period_ID");
+			
+			if (m_C_Period_ID < 0)
 				m_C_Period_ID = 0;
 		}
 		return m_C_Period_ID;
@@ -567,14 +623,7 @@ public class DocLine
 	 */
 	public int getM_Product_ID()
 	{
-		int index = p_po.get_ColumnIndex("M_Product_ID");
-		if (index != -1)
-		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
-		}
-		return 0;
+		return getValue("M_Product_ID");
 	}   //  getM_Product_ID
 
 	/**
@@ -607,18 +656,8 @@ public class DocLine
 		{
 			return m_AttributeSetInstance_ID;
 		}
-		else
-		{
-
-			int index = p_po.get_ColumnIndex("M_AttributeSetInstance_ID");
-			if (index != -1)
-			{
-				Integer ii = (Integer) p_po.get_Value(index);
-				if (ii != null)
-					return ii.intValue();
-			}
-			return 0;
-		}
+		
+		return getValue("M_AttributeSetInstance_ID");
 	}   //  getM_AttributeSetInstance_ID
 	
 	public void setM_AttributeSetInstance_ID(int m_AttributeSetInstance_ID)
@@ -636,18 +675,8 @@ public class DocLine
 		{
 			return m_AttributeSetInstanceTo_ID;
 		}
-		else
-		{
 
-			int index = p_po.get_ColumnIndex("M_AttributeSetInstanceTo_ID");
-			if (index != -1)
-			{
-				Integer ii = (Integer) p_po.get_Value(index);
-				if (ii != null)
-					return ii.intValue();
-			}
-			return 0;
-		}
+		return getValue("M_AttributeSetInstanceTo_ID");
 	}
 
 	/**
@@ -662,14 +691,7 @@ public class DocLine
 	 */
 	public int getM_Locator_ID()
 	{
-		int index = p_po.get_ColumnIndex("M_Locator_ID");
-		if (index != -1)
-		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
-		}
-		return 0;
+		return getValue("M_Locator_ID");
 	}   //  getM_Locator_ID
 
 	/**
@@ -678,14 +700,7 @@ public class DocLine
 	 */
 	public int getM_LocatorTo_ID()
 	{
-		int index = p_po.get_ColumnIndex("M_LocatorTo_ID");
-		if (index != -1)
-		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
-		}
-		return 0;
+		return getValue("M_LocatorTo_ID");
 	}   //  getM_LocatorTo_ID
 
 	/**
@@ -712,14 +727,7 @@ public class DocLine
 	 */
 	public int getM_Production_ID()
 	{
-		int index = p_po.get_ColumnIndex("M_Production_ID");
-		if (index != -1)
-		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
-		}
-		return 0;
+		return getValue("M_Production_ID");
 	}   //  getM_Production_ID
 
 	/**
@@ -728,14 +736,7 @@ public class DocLine
 	 */
 	public int getC_OrderLine_ID()
 	{
-		int index = p_po.get_ColumnIndex("C_OrderLine_ID");
-		if (index != -1)
-		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
-		}
-		return 0;
+		return getValue("C_OrderLine_ID");
 	}   //  getC_OrderLine_ID
 
 	/**
@@ -884,14 +885,11 @@ public class DocLine
 	 */
 	public int getC_UOM_ID()
 	{
-		//	Trx UOM
-		int index = p_po.get_ColumnIndex("C_UOM_ID");
-		if (index != -1)
-		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
-		}
+		// 	Trx UOM
+		int retVal = getValue("C_UOM_ID");
+		if(retVal > 0)
+			return retVal;
+
 		//  Storage UOM
 		MProduct product = getProduct();
 		if (product != null)
@@ -933,9 +931,19 @@ public class DocLine
 	 */
 	public String getDescription()
 	{
-		int index = p_po.get_ColumnIndex("Description");
+		int index = -1;
+		//	From ChildPO
+		if (p_child_po != null)
+		{
+			index = p_child_po.get_ColumnIndex("Description");
+			if (index != -1)
+				return (String)p_child_po.get_Value(index);
+		}
+		//	From PO
+		index = p_po.get_ColumnIndex("Description");
 		if (index != -1)
 			return (String)p_po.get_Value(index);
+		
 		return null;
 	}	//	getDescription
 
@@ -945,14 +953,7 @@ public class DocLine
 	 */
 	public int getC_Tax_ID()
 	{
-		int index = p_po.get_ColumnIndex("C_Tax_ID");
-		if (index != -1)
-		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
-		}
-		return 0;
+		return getValue("C_Tax_ID");
 	}	//	getC_Tax_ID
 
 	/**
@@ -961,14 +962,7 @@ public class DocLine
 	 */
 	public int getLine()
 	{
-		int index = p_po.get_ColumnIndex("Line");
-		if (index != -1)
-		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
-		}
-		return 0;
+		return getValue("Line");
 	}   //  getLine
 
 	/**
@@ -979,13 +973,8 @@ public class DocLine
 	{
 		if (m_C_BPartner_ID == -1)
 		{
-			int index = p_po.get_ColumnIndex("C_BPartner_ID");
-			if (index != -1)
-			{
-				Integer ii = (Integer)p_po.get_Value(index);
-				if (ii != null)
-					m_C_BPartner_ID = ii.intValue();
-			}
+			m_C_BPartner_ID = getValue("C_BPartner_ID");
+			
 			if (m_C_BPartner_ID <= 0)
 				m_C_BPartner_ID = m_doc.getC_BPartner_ID();
 		}
@@ -1008,14 +997,7 @@ public class DocLine
 	 */
 	public int getC_BPartner_Location_ID()
 	{
-		int index = p_po.get_ColumnIndex("C_BPartner_Location_ID");
-		if (index != -1)
-		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
-		}
-		return m_doc.getC_BPartner_Location_ID();
+		return getValue("C_BPartner_Location_ID");
 	}	//	getC_BPartner_Location_ID
 	
 	/**
@@ -1024,14 +1006,7 @@ public class DocLine
 	 */
 	public int getAD_OrgTrx_ID()
 	{
-		int index = p_po.get_ColumnIndex("AD_OrgTrx_ID");
-		if (index != -1)
-		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
-		}
-		return 0;
+		return getValue("AD_OrgTrx_ID");
 	}   //  getAD_OrgTrx_ID
 
 	/**
@@ -1067,14 +1042,7 @@ public class DocLine
 	 */
 	public int getC_Project_ID()
 	{
-		int index = p_po.get_ColumnIndex("C_Project_ID");
-		if (index != -1)
-		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
-		}
-		return 0;
+		return getValue("C_Project_ID");
 	}   //  getC_Project_ID
 
 	/**
@@ -1083,14 +1051,7 @@ public class DocLine
 	 */
 	public int getC_ProjectPhase_ID()
 	{
-		int index = p_po.get_ColumnIndex("C_ProjectPhase_ID");
-		if (index != -1)
-		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
-		}
-		return 0;
+		return getValue("C_ProjectPhase_ID");
 	}   //  getC_ProjectPhase_ID
 	
 	/**
@@ -1099,14 +1060,7 @@ public class DocLine
 	 */
 	public int getC_ProjectTask_ID()
 	{
-		int index = p_po.get_ColumnIndex("C_ProjectTask_ID");
-		if (index != -1)
-		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
-		}
-		return 0;
+		return getValue("C_ProjectTask_ID");
 	}   //  getC_ProjectTask_ID
 	
 	/**
@@ -1115,14 +1069,7 @@ public class DocLine
 	 */
 	public int getC_Campaign_ID()
 	{
-		int index = p_po.get_ColumnIndex("C_Campaign_ID");
-		if (index != -1)
-		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
-		}
-		return 0;
+		return getValue("C_Campaign_ID");
 	}   //  getC_Campaign_ID
 
 	/**
@@ -1131,14 +1078,7 @@ public class DocLine
 	 */
 	public int getC_Activity_ID()
 	{
-		int index = p_po.get_ColumnIndex("C_Activity_ID");
-		if (index != -1)
-		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
-		}
-		return 0;
+		return getValue("C_Activity_ID");
 	}   //  getC_Activity_ID
 
 	/**
@@ -1147,14 +1087,7 @@ public class DocLine
 	 */
 	public int getUser1_ID()
 	{
-		int index = p_po.get_ColumnIndex("User1_ID");
-		if (index != -1)
-		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
-		}
-		return 0;
+		return getValue("User1_ID");
 	}   //  getUser1_ID
 
 	/**
@@ -1163,14 +1096,7 @@ public class DocLine
 	 */
 	public int getUser2_ID()
 	{
-		int index = p_po.get_ColumnIndex("User2_ID");
-		if (index != -1)
-		{
-			Integer ii = (Integer)p_po.get_Value(index);
-			if (ii != null)
-				return ii.intValue();
-		}
-		return 0;
+		return getValue("User2_ID");
 	}   //  getUser2_ID
         
     /**
@@ -1180,7 +1106,21 @@ public class DocLine
 	 */
 	public int getValue(String ColumnName)
 	{
-		int index = p_po.get_ColumnIndex(ColumnName);
+		int index = -1;
+		//	From ChildPO
+		if (p_child_po != null)
+		{
+			index = p_child_po.get_ColumnIndex(ColumnName);
+			if (index != -1)
+			{
+				Integer ii = (Integer)p_child_po.get_Value(index);
+				if (ii != null)
+					return ii.intValue();
+			}
+		}
+		
+		//	From PO
+		index = p_po.get_ColumnIndex(ColumnName);
 		if (index != -1)
 		{
 			Integer ii = (Integer)p_po.get_Value(index);
@@ -1220,6 +1160,11 @@ public class DocLine
 	public PO getPO() 
 	{
 		return p_po;
+	}
+	
+	public PO getChildPO() 
+	{
+		return p_child_po;
 	}
 	
 	/**
