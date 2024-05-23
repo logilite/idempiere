@@ -41,7 +41,19 @@ public class DocLine_InOut extends DocLine
 	{
 		super(po, doc);
 	}
-	
+
+	/**
+	 * Constructor
+	 *
+	 * @param po line persistent object
+	 * @param doc header
+	 * @param childPO line - should not be null
+	 */
+	public DocLine_InOut(PO po, Doc doc, PO childPO)
+	{
+		super(po, doc, childPO);
+	} // DocLine_InOut
+
 	@Override
 	public int getC_Currency_ID()
 	{
