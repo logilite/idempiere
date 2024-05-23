@@ -836,6 +836,11 @@ public class CalloutOrder extends CalloutEngine
 			MProduct product = MProduct.get (ctx, M_Product_ID.intValue());
 			if (product.isStocked() && Env.getContext(ctx, WindowNo, "IsDropShip").equals("N"))
 			{
+				int docTypeID = Env.getContextAsInt(ctx, WindowNo, "C_DocTypeTarget_ID");
+				MDocType docType = MDocType.get(ctx, docTypeID);
+				Boolean isStockAvailabilityCheck = docType.get_ValueAsBoolean("isStockAvailabilityCheck");
+				if (isStockAvailabilityCheck)
+				{
 				BigDecimal QtyOrdered = (BigDecimal)mTab.getValue("QtyOrdered");
 				if (QtyOrdered == null)
 					QtyOrdered = Env.ZERO;
@@ -868,6 +873,7 @@ public class CalloutOrder extends CalloutEngine
 							info, false);
 					}
 				}
+			}
 			}
 		}
 		//
@@ -1331,6 +1337,11 @@ public class CalloutOrder extends CalloutEngine
 			MProduct product = MProduct.get (ctx, M_Product_ID);
 			if (product.isStocked() && Env.getContext(ctx, WindowNo, "IsDropShip").equals("N"))
 			{
+				int docTypeID = Env.getContextAsInt(ctx, WindowNo, "C_DocTypeTarget_ID");
+				MDocType docType = MDocType.get(ctx, docTypeID);
+				Boolean isStockAvailabilityCheck = docType.get_ValueAsBoolean("isStockAvailabilityCheck");
+				if (isStockAvailabilityCheck)
+				{
 				int M_Warehouse_ID = Env.getContextAsInt(ctx, WindowNo, "M_Warehouse_ID");
 				int M_AttributeSetInstance_ID = Env.getContextAsInt(ctx, WindowNo, mTab.getTabNo(), "M_AttributeSetInstance_ID");
 				BigDecimal available = MStorageReservation.getQtyAvailable
@@ -1361,6 +1372,7 @@ public class CalloutOrder extends CalloutEngine
 							info, false);
 					}
 				}
+			}
 			}
 		}
 		//
