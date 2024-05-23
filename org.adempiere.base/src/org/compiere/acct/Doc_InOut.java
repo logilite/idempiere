@@ -145,7 +145,7 @@ public class Doc_InOut extends Doc
 			{
 				MInOutLineMA[] lineMAs = MInOutLineMA.get(getCtx(), line.get_ID(), getTrxName());
 
-				HashMap<Integer, DocLine> map = new HashMap<Integer, DocLine>();
+				HashMap<Integer, DocLine_InOut> map = new HashMap<Integer, DocLine_InOut>();
 
 				for (MInOutLineMA lineMA : lineMAs)
 				{
@@ -154,7 +154,7 @@ public class Doc_InOut extends Doc
 					
 					if (!map.containsKey(lineMA.getM_AttributeSetInstance_ID()))
 					{
-						DocLine docLine = new DocLine(line, this, lineMA);
+						DocLine_InOut docLine = new DocLine_InOut(line, this, lineMA);
 						docLine.setM_AttributeSetInstance_ID(lineMA.getM_AttributeSetInstance_ID());
 						docLine.setQty(lineMA.getMovementQty(), getDocumentType().equals(DOCTYPE_MatShipment));
 						docLine.setReversalLine_ID(line.getReversalLine_ID());
@@ -165,7 +165,7 @@ public class Doc_InOut extends Doc
 					}
 					else
 					{
-						DocLine docLine = map.get(lineMA.getM_AttributeSetInstance_ID());
+						DocLine_InOut docLine = map.get(lineMA.getM_AttributeSetInstance_ID());
 						
 						BigDecimal lineQty = docLine.getQty();
 						lineQty = lineQty == null ? Env.ZERO : lineQty;
