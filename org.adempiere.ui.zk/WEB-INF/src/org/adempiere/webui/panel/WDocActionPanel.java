@@ -177,7 +177,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			}
 			
 			// If Activity already suspended then show error
-			Dialog.error(gridTab.getWindowNo(), this, msg.toString(), m_activity.toStringX());
+			Dialog.error(gridTab.getWindowNo(), msg.toString(), m_activity.toStringX());
 			return;
 		}
 		readReference();
