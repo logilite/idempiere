@@ -62,7 +62,7 @@ public class WMerge extends Merge implements IFormController, EventListener<Even
 	/** Editor to pick source/from record */
 	protected WEditor[]	m_from = null;
 	/** Editor to pick target/to record */
-	private WEditor[] m_to = null;
+	protected WEditor[] m_to = null;
 
 	/** Main layout of {@link #form} */
 	protected Borderlayout mainLayout = new Borderlayout();

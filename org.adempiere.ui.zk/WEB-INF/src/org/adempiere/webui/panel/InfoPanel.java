@@ -1150,7 +1150,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	 * @param end
 	 * @return rows read
 	 */
-    private List<Object> readLine(int start, int end) {
+    protected List<Object> readLine(int start, int end) {
     	if (useQueryTimeoutFromSysConfig)
     		queryTimeout = MSysConfig.getIntValue(MSysConfig.ZK_INFO_QUERY_TIME_OUT, 0, Env.getAD_Client_ID(Env.getCtx()));
     	
