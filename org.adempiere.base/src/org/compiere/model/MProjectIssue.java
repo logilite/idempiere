@@ -24,6 +24,7 @@ import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.NegativeInventoryDisallowedException;
+import org.adempiere.util.ProjectIssueUtil;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -153,6 +154,7 @@ public class MProjectIssue extends X_C_ProjectIssue
 		if (!product.isStocked())
 		{
 			setProcessed(true);
+			updateBalanceAmt();
 			return save();
 		}
 
@@ -230,6 +232,7 @@ public class MProjectIssue extends X_C_ProjectIssue
 			if (mTrx.save(get_TrxName()))
 			{
 				setProcessed (true);
+				updateBalanceAmt();
 				if (save())
 					return true;
 				else
@@ -243,5 +246,32 @@ public class MProjectIssue extends X_C_ProjectIssue
 		//
 		return false;
 	}	//	process
+
+	/**
+	 * Update Project Balance on Project issue posted
+	 */
+	private void updateBalanceAmt()
+	{
+		MProject proj = (MProject) getC_Project();
+		BigDecimal cost = Env.ZERO;
+		if (getM_InOutLine_ID() > 0)
+		{
+			cost = ProjectIssueUtil.getPOCost(MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID(), get_TrxName())[0], getM_InOutLine_ID(), getMovementQty());
+		}
+		else if (getS_TimeExpenseLine_ID() > 0)
+		{
+			cost = ProjectIssueUtil.getLaborCost(MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID(), get_TrxName())[0], getS_TimeExpenseLine_ID());
+		}
+		else
+		{
+			cost = ProjectIssueUtil.getProductCosts(MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID(), get_TrxName())[0], (MProduct) getM_Product(),
+													getM_AttributeSetInstance_ID(), getAD_Org_ID(), getMovementQty(), true);
+		}
+		if(cost!=null)
+		{
+			proj.setProjectBalanceAmt(proj.getProjectBalanceAmt().add(cost));
+			proj.saveEx(get_TrxName());
+		}
+	} // updateBalanceAmt
 
 }	//	MProjectIssue
