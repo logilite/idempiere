@@ -182,6 +182,7 @@ public class MUser extends X_AD_User
 		}
 		boolean hash_password = MSysConfig.getBooleanValue(MSysConfig.USER_PASSWORD_HASH, false);
 		boolean email_login = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
+		boolean searhkey_login = MSysConfig.getBooleanValue(MSysConfig.USE_SEARCH_KEY_FOR_LOGIN, false);
 //		ArrayList<KeyNamePair> clientList = new ArrayList<KeyNamePair>();
 		ArrayList<Integer> clientsValidated = new ArrayList<Integer>();
 		MUser retValue = null;
@@ -190,7 +191,16 @@ public class MUser extends X_AD_User
 		if (email_login)
 			where.append("EMail=?");
 		else
-			where.append("COALESCE(LDAPUser,Name)=?");
+		{
+			if (searhkey_login)
+			{
+				where.append("(COALESCE(LDAPUser,Name)=? OR Value =?)");
+			}
+			else
+			{
+				where.append("COALESCE(LDAPUser,Name)=?");
+			}
+		}
 		where.append(" AND")
 				.append(" EXISTS (SELECT * FROM AD_User_Roles ur")
 				.append("         INNER JOIN AD_Role r ON (ur.AD_Role_ID=r.AD_Role_ID)")
@@ -200,8 +210,15 @@ public class MUser extends X_AD_User
 				.append("         AND c.IsActive='Y') AND ")
 				.append(" AD_User.IsActive='Y'");
 		
+		List<Object> parms= new ArrayList<>();
+		if (searhkey_login)
+		{
+			parms.add(name);
+		}
+		parms.add(name);
+		
 		List<MUser> users = new Query(ctx, MUser.Table_Name, where.toString(), null)
-			.setParameters(name)
+			.setParameters(parms)
 			.setOrderBy("AD_Client_ID, AD_User_ID") // prefer first user on System
 			.list();
 		
@@ -1010,10 +1027,20 @@ public class MUser extends X_AD_User
 			.append(" INNER JOIN AD_Role r ON (ur.AD_Role_ID=r.AD_Role_ID AND r.IsActive='Y') ");
 		sql.append("WHERE ur.AD_Client_ID=? AND u.Password IS NOT NULL AND ");
 		boolean email_login = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
+		boolean searhkey_login = MSysConfig.getBooleanValue(MSysConfig.USE_SEARCH_KEY_FOR_LOGIN, false);
 		if (email_login)
 			sql.append("u.EMail=?");
 		else
-			sql.append("COALESCE(u.LDAPUser,u.Name)=?");
+		{
+			if (searhkey_login)
+			{
+				sql.append("(COALESCE(u.LDAPUser,u.Name)=? OR Value =?)");
+			}
+			else
+			{
+				sql.append("COALESCE(u.LDAPUser,u.Name)=?");
+			}
+		}
 		sql.append(" AND u.IsActive='Y'").append(" AND EXISTS (SELECT * FROM AD_Client c WHERE u.AD_Client_ID=c.AD_Client_ID AND c.IsActive='Y')");
 
 		PreparedStatement pstmt = null;
@@ -1023,6 +1050,8 @@ public class MUser extends X_AD_User
 			pstmt = DB.prepareStatement (sql.toString(), null);
 			pstmt.setInt(1, AD_Client_ID);
 			pstmt.setString (2, name);
+			if (searhkey_login)
+				pstmt.setString(3, name);
 			rs = pstmt.executeQuery ();
 			if (rs.next())
 			{

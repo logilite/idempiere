@@ -1298,6 +1298,7 @@ public class Login implements ILogin
 
 		boolean hash_password = MSysConfig.getBooleanValue(MSysConfig.USER_PASSWORD_HASH, false);
 		boolean email_login = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
+		boolean searhkey_login = MSysConfig.getBooleanValue(MSysConfig.USE_SEARCH_KEY_FOR_LOGIN, false);
 		KeyNamePair[] retValue = null;
 		ArrayList<KeyNamePair> clientList = new ArrayList<KeyNamePair>();
 		ArrayList<Integer> clientsValidated = new ArrayList<Integer>();
@@ -1306,7 +1307,16 @@ public class Login implements ILogin
 		if (email_login)
 			where.append("EMail=?");
 		else
-			where.append("COALESCE(LDAPUser,Name)=?");
+		{
+			if (searhkey_login)
+			{
+				where.append("(COALESCE(LDAPUser,Name)=? OR Value = ?)");
+			}
+			else
+			{
+				where.append("COALESCE(LDAPUser,Name)=?");
+			}
+		}
 		String whereRoleType = MRole.getWhereRoleType(roleTypes, "r");
 		where.append(" AND")
 				.append(" EXISTS (SELECT * FROM AD_User_Roles ur")
@@ -1322,10 +1332,16 @@ public class Login implements ILogin
 				.append(" AD_User.IsActive='Y'");
 		
 		List<MUser> users = null;
+		List<Object> parms= new ArrayList<>();
+		if(searhkey_login)
+		{
+			parms.add(app_user);
+		}
+		parms.add(app_user);
 		try {
 			PO.setCrossTenantSafe();
 			users = new Query(m_ctx, MUser.Table_Name, where.toString(), null)
-					.setParameters(app_user)
+					.setParameters(parms)
 					.setOrderBy(MUser.COLUMNNAME_AD_User_ID)
 					.list();
 		} finally {
@@ -1573,10 +1589,20 @@ public class Login implements ILogin
 			.append(" INNER JOIN AD_Role r ON (ur.AD_Role_ID=r.AD_Role_ID AND r.IsActive='Y') ");
 		sql.append("WHERE ur.AD_Client_ID=? AND u.Password IS NOT NULL AND ");
 		boolean email_login = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
+		boolean searhkey_login = MSysConfig.getBooleanValue(MSysConfig.USE_SEARCH_KEY_FOR_LOGIN, false);
 		if (email_login)
 			sql.append("u.EMail=?");
 		else
-			sql.append("COALESCE(u.LDAPUser,u.Name)=?");
+		{
+			if (searhkey_login)
+			{
+				sql.append("(COALESCE(u.LDAPUser,u.Name)=? OR Value =?)");
+			}
+			else
+			{
+				sql.append("COALESCE(u.LDAPUser,u.Name)=?");
+			}
+		}
 		sql.append(" AND r.IsMasterRole='N'");
 		if (! Util.isEmpty(whereRoleType)) {
 			sql.append(" AND ").append(whereRoleType);
@@ -1599,6 +1625,8 @@ public class Login implements ILogin
 			pstmt = DB.prepareStatement(sql.toString(), null);
 			pstmt.setInt(1, client.getKey());
 			pstmt.setString(2, app_user);
+			if(searhkey_login)
+				pstmt.setString(3, app_user);
 			rs = pstmt.executeQuery();
 
 			if (!rs.next())
