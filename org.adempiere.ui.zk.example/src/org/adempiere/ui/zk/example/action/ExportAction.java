@@ -16,9 +16,11 @@ package org.adempiere.ui.zk.example.action;
 import org.adempiere.webui.action.IAction;
 import org.adempiere.webui.adwindow.ADWindow;
 import org.adempiere.webui.adwindow.ADWindowContent;
+import org.adempiere.webui.adwindow.IADTabpanel;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MRole;
+import org.zkoss.zul.Toolbarbutton;
 
 /**
  * @author hengsin
@@ -53,5 +55,13 @@ public class ExportAction implements IAction {
 		window.init(panel);
 		
 		AEnv.showWindow(window);
+	}
+
+	@Override
+	public void updateToolbarCustomBtn(Toolbarbutton toolbarButton, IADTabpanel tabPanel, boolean changed,
+			boolean readOnly)
+	{
+		// TODO Auto-generated method stub
+		
 	}	
 }
