@@ -138,6 +138,8 @@ public class Doc_ProjectIssue extends Doc
 			cost = ProjectIssueUtil.getPOCost(as, m_issue.getM_InOutLine_ID(), m_line.getQty());
 		else if (m_issue.getS_TimeExpenseLine_ID() != 0)
 			cost = ProjectIssueUtil.getLaborCost(as, m_issue.getS_TimeExpenseLine_ID());
+		else if (m_issue.getC_InvoiceLine_ID() > 0)
+			cost = m_issue.getAmt();
 		if (cost == null)	//	standard Product Costs
 		{
 			cost = m_line.getProductCosts(as, getAD_Org_ID(), false);
@@ -152,9 +154,16 @@ public class Doc_ProjectIssue extends Doc
 		dr.setQty(m_line.getQty().negate());
 
 		//  Inventory               CR
-		acctType = ProductCost.ACCTTYPE_P_Asset;
-		if (product.isService())
-			acctType = ProductCost.ACCTTYPE_P_Expense;
+		if (m_issue.getM_Product_ID() > 0)
+		{
+			acctType = ProductCost.ACCTTYPE_P_Asset;
+			if (product.isService())
+				acctType = ProductCost.ACCTTYPE_P_Expense;
+		}
+		else if (m_issue.getC_Charge_ID() > 0)
+		{
+			acctType = Doc.ACCTTYPE_Charge;
+		}
 		cr = fact.createLine(m_line,
 			m_line.getAccount(acctType, as),
 			as.getC_Currency_ID(), null, cost);

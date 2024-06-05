@@ -49,6 +49,7 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.TimeUtil;
+import org.compiere.util.Util;
 
 
 /**
@@ -2503,6 +2504,24 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	}	//	voidIt
 
 	/**
+	 * Check Invoice Line reference is not Present in Issue Project
+	 */
+	private boolean hasProjectIssueLine()
+	{
+		MInvoiceLine[] invLines = getLines();
+		for (MInvoiceLine invLine : invLines)
+		{
+			String prjName = MProjectIssue.getInvLineIssue(invLine.get_ID(), get_TrxName()).getC_Project().getName();
+			if (!Util.isEmpty(prjName))
+			{
+				m_processMsg = "Invoice Line:" + invLine.getLine() + " Reference Present in Project: " + prjName;
+				return false;
+			}
+		}
+		return true;
+	} // hasIssueInvoiceLine
+	
+	/**
 	 * 	Close Document.
 	 * 	@return true if success
 	 */
@@ -2531,6 +2550,10 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	public boolean reverseCorrectIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
+		
+		if (!hasProjectIssueLine())
+			return false;
+		
 		// Before reverseCorrect
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REVERSECORRECT);
 		if (m_processMsg != null)
@@ -2784,6 +2807,10 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	public boolean reverseAccrualIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
+		
+		if (!hasProjectIssueLine())
+			return false;
+		
 		// Before reverseAccrual
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REVERSEACCRUAL);
 		if (m_processMsg != null)
