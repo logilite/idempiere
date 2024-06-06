@@ -136,5 +136,10 @@ UPDATE AD_Field SET SeqNo=360,IsDisplayed='Y', Updated=statement_timestamp(), Up
 UPDATE AD_Field SET SeqNo=135, AD_Reference_Value_ID=NULL, AD_Val_Rule_ID=NULL, SeqNoGrid=135, IsToolbarButton=NULL,Updated=TO_TIMESTAMP('2024-05-28 18:13:17','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=8212
 ;
 
+-- Update Reference Id for Invoice Parameter of Issue Project Process
+-- Jun 5, 2024, 7:03:56 PM IST
+UPDATE AD_Process_Para SET AD_Reference_ID=30,Updated=TO_TIMESTAMP('2024-06-05 19:03:56','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Process_Para_ID=1000058
+;
+
 SELECT register_migration_script('202405231900_IDEMPIERE-6155.sql') FROM dual
 ;

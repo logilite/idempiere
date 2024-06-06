@@ -21,6 +21,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
@@ -315,8 +316,11 @@ public class ProjectIssue extends SvrProcess
 		// Project Issue
 		MProjectIssue pi = new MProjectIssue(m_project);
 		pi.setMandatory(invLine.getC_Charge_ID(), invLine.getQtyInvoiced());
-		pi.setAmt(invLine.getLineNetAmt());
 		
+		if (MDocType.DOCBASETYPE_APCreditMemo.equals((invLine.getC_Invoice().getC_DocType().getDocBaseType())))
+			pi.setAmt(invLine.getLineNetAmt().negate());
+		else
+			pi.setAmt(invLine.getLineNetAmt());
 		if (m_MovementDate != null) // default today
 			pi.setMovementDate(m_MovementDate);
 		if (!Util.isEmpty(m_Description))
@@ -325,6 +329,7 @@ public class ProjectIssue extends SvrProcess
 			pi.setDescription(invLine.getDescription());
 		else if (!Util.isEmpty(invLine.getC_Invoice().getDescription()))
 			pi.setDescription(invLine.getC_Invoice().getDescription());
+
 		pi.setC_InvoiceLine_ID(m_C_InvoiceLine_ID);
 		// TODO Need to check in other methods also
 		if (!pi.process())
