@@ -138,9 +138,17 @@ public class MProjectIssue extends X_C_ProjectIssue
 	protected boolean beforeSave(boolean newRecord)
 	{
 		if (getM_Product_ID() <= 0 && getC_Charge_ID() <= 0)
+		{
+			log.saveError("Error", "Product or Charge is not present in Invoice :"	+ getC_InvoiceLine().getC_Invoice().getDocumentNo()
+									+ " Invoice Line No.: " + getC_InvoiceLine().getLine());
 			return false;
+		}
 		if (getM_Product_ID() > 0 && getM_Locator_ID() <= 0)
+		{
+			log.saveError("Error", "Locator is not present in Invoice :"	+ getC_InvoiceLine().getC_Invoice().getDocumentNo()
+									+ " Invoice Line No.: " + getC_InvoiceLine().getLine());
 			return false;
+		}
 		return super.beforeSave(newRecord);
 	}
 
