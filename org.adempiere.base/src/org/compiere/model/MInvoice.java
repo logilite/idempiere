@@ -2510,11 +2510,17 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		MInvoiceLine[] invLines = getLines();
 		for (MInvoiceLine invLine : invLines)
 		{
-			String prjName = MProjectIssue.getInvLineIssue(invLine.get_ID(), get_TrxName()).getC_Project().getName();
-			if (!Util.isEmpty(prjName))
+			MProjectIssue prjIssue = MProjectIssue.getInvLineIssue(invLine.get_ID(), get_TrxName());
+
+			if (prjIssue != null)
 			{
-				m_processMsg = "Invoice Line:" + invLine.getLine() + " Reference Present in Project: " + prjName;
-				return false;
+				String prjName = prjIssue.getC_Project().getName();
+				if (!Util.isEmpty(prjName))
+				{
+					m_processMsg = "Invoice Line:" + invLine.getLine() + " Reference Present in Project: " + prjName;
+					return false;
+
+				}
 			}
 		}
 		return true;

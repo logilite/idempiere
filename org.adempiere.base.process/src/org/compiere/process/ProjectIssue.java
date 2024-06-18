@@ -238,7 +238,7 @@ public class ProjectIssue extends SvrProcess
 			if (expenseLines[i].getQty() == null || expenseLines[i].getQty().signum() == 0)
 				continue;
 			//	Need to the same project
-			if (expenseLines[i].getC_Project_ID() != m_project.getC_Project_ID())
+			if (expenseLines[i].getC_Project_ID() > 0 && expenseLines[i].getC_Project_ID() != m_project.getC_Project_ID())
 				continue;
 			//	not issued yet
 			if (projectIssueHasExpense(expenseLines[i].getS_TimeExpenseLine_ID()))
