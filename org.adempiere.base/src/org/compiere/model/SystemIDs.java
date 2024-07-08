@@ -164,6 +164,7 @@ public class SystemIDs
 	public final static int REFERENCE_DATATYPE_TABLEDIR_UU = 200234;
 	public final static int REFERENCE_DATATYPE_TEXT = 14;
 	public final static int REFERENCE_DATATYPE_TEXTLONG = 36;
+	public final static int REFERENCE_DATATYPE_JSON = 200267;
 	public final static int REFERENCE_DATATYPE_TIME = 24;
 	public final static int REFERENCE_DATATYPE_TIMESTAMP_WITH_TIMEZONE = 200133;
 	public final static int REFERENCE_DATATYPE_TIMEZONE = 200135;
@@ -222,6 +223,7 @@ public class SystemIDs
 	public final static int WINDOW_LOT = 257;
 	public final static int WINDOW_MATERIAL_RECEIPT = 184;
 	public final static int WINDOW_MATERIALTRANSACTIONS_INDIRECTUSER = 223;
+	public final static int WINDOW_MENU = 105;
 	public final static int WINDOW_MY_REQUESTS = 237;
 	public final static int WINDOW_NOTICE = 193;
 	public final static int WINDOW_PAYMENTS_INTO_BATCH = 200031;

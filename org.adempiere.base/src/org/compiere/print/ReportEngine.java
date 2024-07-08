@@ -875,7 +875,8 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		try
 		{
 			if (file == null)
-				file = FileUtil.createTempFile (makePrefix(getName()), ".pdf");
+				file = (m_pi != null && !Util.isEmpty(m_pi.getPDFFileName(),true)) ? FileUtil.createFile(m_pi.getPDFFileName()) :
+					FileUtil.createTempFile (FileUtil.makePrefix(getName()), ".pdf");
 		}
 		catch (IOException e)
 		{
@@ -906,7 +907,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		try
 		{
 			if (file == null)
-				file = FileUtil.createTempFile (makePrefix(getName()), ".html");
+				file = FileUtil.createTempFile (FileUtil.makePrefix(getName()), ".html");
 		}
 		catch (IOException e)
 		{
@@ -937,7 +938,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		try
 		{
 			if (file == null)
-				file = FileUtil.createTempFile (makePrefix(getName()), ".csv");
+				file = FileUtil.createTempFile (FileUtil.makePrefix(getName()), ".csv");
 		}
 		catch (IOException e)
 		{
@@ -968,7 +969,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		try
 		{
 			if (file == null)
-				file = FileUtil.createTempFile (makePrefix(getName()), ".xls");
+				file = FileUtil.createTempFile (FileUtil.makePrefix(getName()), ".xls");
 		}
 		catch (IOException e)
 		{
@@ -1006,7 +1007,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		try
 		{
 			if (file == null)
-				file = FileUtil.createTempFile (makePrefix(getName()), ".xlsx");
+				file = FileUtil.createTempFile (FileUtil.makePrefix(getName()), ".xlsx");
 		}
 		catch (IOException e)
 		{
@@ -1065,7 +1066,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				}
 				pi.setIsBatch(true);
 				pi.setPDFFileName(fileName);
-				ServerProcessCtl.process(pi, (m_trxName == null ? null : Trx.get(m_trxName, false)));
+				ServerProcessCtl.process(pi, (m_trxName == null ? null : Trx.get(m_trxName, false)), false);
 			} else {
 				PDFReportRendererConfiguration config = new PDFReportRendererConfiguration().setOutputFile(file);
 				new PDFReportRenderer().renderReport(this, config);
@@ -1082,19 +1083,6 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return file2.exists();
 	}	//	createPDF
 
-	private String makePrefix(String name) {
-		StringBuilder prefix = new StringBuilder();
-		char[] nameArray = name.toCharArray();
-		for (char ch : nameArray) {
-			if (Character.isLetterOrDigit(ch)) {
-				prefix.append(ch);
-			} else {
-				prefix.append("_");
-			}
-		}
-		return prefix.toString();
-	}
-	
 	/**
 	 * 	Create PDF as Data array
 	 *	@return pdf data
@@ -1707,10 +1695,10 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		if (DocSubTypeSO == null)
 			DocSubTypeSO = "";
 		//	WalkIn Receipt, WalkIn Invoice,
-		if (DocSubTypeSO.equals("WR") || DocSubTypeSO.equals("WI"))
+		if (DocSubTypeSO.equals(MOrder.DocSubTypeSO_POS) || DocSubTypeSO.equals(MOrder.DocSubTypeSO_OnCredit))
 			what[0] = INVOICE;
 		//	WalkIn Pickup,
-		else if (DocSubTypeSO.equals("WP"))
+		else if (DocSubTypeSO.equals(MOrder.DocSubTypeSO_Warehouse))
 			what[0] = SHIPMENT;
 		//	Offer Binding, Offer Nonbinding, Standard Order
 		else

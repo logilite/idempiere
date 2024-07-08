@@ -380,7 +380,7 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 		}
 
 		int displayType = getAD_Reference_ID();
-		if (DisplayType.isLOB(displayType))	//	LOBs are 0
+		if (DisplayType.isLOB(displayType) || displayType == DisplayType.JSON)	//	LOBs are 0
 		{
 			if (getFieldLength() != 0)
 				setFieldLength(0);
@@ -592,11 +592,12 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 			setSeqNoPartition(ii);
 		}
 		
-		if (is_ValueChanged(COLUMNNAME_IsPartitionKey) 
+		// Validate partition column changes
+		if (!newRecord && (is_ValueChanged(COLUMNNAME_IsPartitionKey) 
 				|| is_ValueChanged(COLUMNNAME_PartitioningMethod)
 				|| (isPartitionKey() && is_ValueChanged(COLUMNNAME_IsActive))
 				|| (isPartitionKey() && is_ValueChanged(COLUMNNAME_SeqNoPartition))
-				|| (isPartitionKey() && is_ValueChanged(COLUMNNAME_RangePartitionInterval))) {
+				|| (isPartitionKey() && is_ValueChanged(COLUMNNAME_RangePartitionInterval)))) {
 			ITablePartitionService service = DB.getDatabase().getTablePartitionService();
 			if (service == null) {
 				log.saveError("Error", Msg.getMsg(getCtx(), "DBAdapterNoTablePartitionSupport"));
@@ -608,6 +609,9 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 				return false;				
 			}
 		}
+
+		if (getAD_Reference_ID() == DisplayType.Payment)
+			setAD_Reference_Value_ID(SystemIDs.REFERENCE_PAYMENTRULE);
 
 		return true;
 	}	//	beforeSave
@@ -1031,6 +1035,10 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 				String referenceTableName = column.getReferenceTableName();
 				if (referenceTableName != null)
 				{
+					// Fk doesn't work for partitioned PostgreSQL table
+					if (DB.isPostgreSQL() && MTable.get(Env.getCtx(), referenceTableName) != null && MTable.get(Env.getCtx(), referenceTableName).isPartition())
+						return null;
+					
 					Hashtable<String, DatabaseKey> htForeignKeys = new Hashtable<String, DatabaseKey>();
 
 					if (md.storesUpperCaseIdentifiers()) {

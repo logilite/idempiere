@@ -350,6 +350,7 @@ public class RequisitionPOCreate extends SvrProcess
 			|| rLine.getM_AttributeSetInstance_ID() != m_M_AttributeSetInstance_ID
 			|| rLine.getC_Charge_ID() != 0		//	single line per charge
 			|| m_order == null
+			|| (rLine.getC_BPartner_ID() > 0 && m_order.getC_BPartner_ID() != rLine.getC_BPartner_ID())
 			|| m_order.getDatePromised().compareTo(rLine.getDateRequired()) != 0
 			|| m_orderLine.getC_Project_ID() != rLine.getC_Project_ID()
 			|| m_orderLine.getC_Campaign_ID() != rLine.getC_Campaign_ID()

@@ -106,6 +106,8 @@ public class GridTabCSVExporter implements IGridTabExporter
 				   specialHDispayType = DisplayType.Location;
 				   continue;
 				} else if (! (field.isDisplayed() || field.isDisplayedGrid())) {
+				   continue;
+				} else if (DisplayType.Binary == field.getDisplayType()) {
 				   continue;	
 				}
 				String headName = resolveColumnName(table, column);
@@ -463,6 +465,8 @@ public class GridTabCSVExporter implements IGridTabExporter
 						value = MRefList.getListName(Env.getCtx(), column.getAD_Reference_Value_ID(), ref);
 					}
 				} else {
+					MTable forTab = MTable.get(Env.getCtx(), foreignTable);
+					String foreignKeyCol = forTab.getKeyColumns()[0];
 					int start = headName.indexOf("[") + 1;
 					int end = headName.length() - 1;
 					String foreignColumn = headName.substring(start, end);
@@ -475,7 +479,8 @@ public class GridTabCSVExporter implements IGridTabExporter
 							s = s.replaceAll("\"", "");
 							StringBuilder select = new StringBuilder("SELECT '\"' || STRING_AGG(").append(foreignColumn)
 									.append(DB.isPostgreSQL() ? ",', ')" : ")").append(" || '\"' FROM ")
-									.append(foreignTable).append(" WHERE ").append(foreignTable).append("_ID IN (")
+									.append(foreignTable).append(" WHERE ")
+									.append(foreignKeyCol).append(" IN (")
 									.append(s).append(")");
 							value = DB.getSQLValueStringEx(null, select.toString());
 						}
@@ -486,7 +491,7 @@ public class GridTabCSVExporter implements IGridTabExporter
 						StringBuilder select = new StringBuilder("SELECT ")
 								.append(foreignColumn).append(" FROM ")
 								.append(foreignTable).append(" WHERE ")
-								.append(foreignTable).append("_ID=?");
+								.append(foreignKeyCol).append("=?");
 						value = DB.getSQLValueStringEx(null, select.toString(), id);
 					}
 				}
@@ -527,7 +532,7 @@ public class GridTabCSVExporter implements IGridTabExporter
 	 */
 	private String resolveColumnName(MTable table, MColumn column) {
 		StringBuilder name = new StringBuilder(column.getColumnName());
-		if (DisplayType.isLookup(column.getAD_Reference_ID())) {
+		if (DisplayType.isLookup(column.getAD_Reference_ID()) && !DisplayType.isMultiID(column.getAD_Reference_ID())) {
 			// resolve to identifier - search for value first, if not search for name - if not use the ID
 			String foreignTable = column.getReferenceTableName();
 			if ("AD_EntityType".equals(foreignTable) && I_AD_EntityType.COLUMNNAME_AD_EntityType_ID.equals(column.getColumnName())){
@@ -628,7 +633,8 @@ public class GridTabCSVExporter implements IGridTabExporter
 						if (   gridField.isEncrypted()
 							|| gridField.isEncryptedColumn()
 							|| !(gridField.isDisplayed() || gridField.isDisplayedGrid())
-							|| (DisplayType.Button == MColumn.get(Env.getCtx(),gridField.getAD_Column_ID()).getAD_Reference_ID())
+							|| DisplayType.Button == gridField.getDisplayType()
+							|| DisplayType.Binary == gridField.getDisplayType()
 						   )
 							continue;
 
@@ -647,7 +653,8 @@ public class GridTabCSVExporter implements IGridTabExporter
 			{
 				if ("AD_Client_ID".equals(field.getColumnName()))
 					continue;
-				if (DisplayType.Button == MColumn.get(Env.getCtx(),field.getAD_Column_ID()).getAD_Reference_ID())
+				if (   DisplayType.Button == field.getDisplayType()
+					|| DisplayType.Binary == field.getDisplayType())
 					continue;
 				if (   field.isVirtualColumn()
 						|| field.isEncrypted()

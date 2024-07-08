@@ -1051,17 +1051,16 @@ public class GridTabCSVImporter implements IGridTabImporter
 			
 			if (isForeing && value != null && !"(null)".equals(value)){
 				String foreignTable = column.getReferenceTableName();
-				String idS = null;
-				int id = -1;
+				Object idS = null;
 				if("AD_Ref_List".equals(foreignTable))
-				   idS= resolveForeignList(column,foreignColumn,value,null);
+				   idS = resolveForeignList(column,foreignColumn,value,null);
 				else 
-				   id = resolveForeign(foreignTable,foreignColumn,value,field,null);
+				   idS = resolveForeign(foreignTable,foreignColumn,value,field,null);
 				
-				if(idS == null && id < 0){	
+				if(idS == null){	
 				   //it could be that record still doesn't exist if import mode is inserting or merging   	
 				   if(isUpdateMode())
-				     return new StringBuilder(Msg.getMsg(Env.getCtx(),id==-2?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{header.get(i),value}));
+				     return new StringBuilder(Msg.getMsg(Env.getCtx(),(idS instanceof Integer && (int)idS==-2)?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{header.get(i),value}));
 				}
 			} else {
 				// TODO: we could validate length of string or min/max
@@ -1124,9 +1123,9 @@ public class GridTabCSVImporter implements IGridTabImporter
 			   
 			   if(isForeing && !"(null)".equals(value)){ 
 			      String foreignTable = columnName.substring(0,columnName.length()-3);
-			      int id = resolveForeign(foreignTable,foreignColumn,value,field,null);
-				  if (id < 0)
-					  return new StringBuilder(Msg.getMsg(Env.getCtx(), id==-2?"ForeignMultipleResolved":"ForeignNotResolved" ,new Object[]{header.get(j),value}));   
+			      Object id = resolveForeign(foreignTable,foreignColumn,value,field,null);
+				  if (id == null || (id instanceof Integer && (int)id < 0))
+					  return new StringBuilder(Msg.getMsg(Env.getCtx(),(id instanceof Integer && (int)id==-2)?"ForeignMultipleResolved":"ForeignNotResolved" ,new Object[]{header.get(j),value}));   
 			   }	   
 			   isEmptyRow=false;
 	      }	   
@@ -1234,19 +1233,18 @@ public class GridTabCSVImporter implements IGridTabImporter
 					}else if (masterRecord==null && isDetail){
 						MColumn column = MColumn.get(Env.getCtx(),field.getAD_Column_ID());
 						String foreignTable = column.getReferenceTableName();
-						String idS = null;
-						int id = -1;
+						Object idS = null;
 						
 						if ("AD_Ref_List".equals(foreignTable)) 
-							idS= resolveForeignList(column, foreignColumn, value,trx);
+							idS = resolveForeignList(column, foreignColumn, value,trx);
 						else 
-							id = resolveForeign(foreignTable,foreignColumn,value, field, trx);
+							idS = resolveForeign(foreignTable,foreignColumn,value, field, trx);
 						
-						if(idS == null && id < 0)	
-						   return Msg.getMsg(Env.getCtx(),id==-2?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{header.get(i),value});
+					    if (idS == null || (idS instanceof Integer && (int)idS < 0))
+						   return Msg.getMsg(Env.getCtx(),(idS instanceof Integer && (int)idS==-2)?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{header.get(i),value});
 						
-						if(id >= 0)
-						   logMsg = gridTab.setValue(field,id);
+						if (idS instanceof Integer && (int)idS >= 0)
+						   logMsg = gridTab.setValue(field,idS);
 						else if (idS != null)
 						   logMsg = gridTab.setValue(field,idS);
 						
@@ -1281,19 +1279,21 @@ public class GridTabCSVImporter implements IGridTabImporter
 						}
 						else if (DisplayType.isMultiSelect(field.getDisplayType()))
 						{
+							//TODO may needs to handle UU type key
 							setValue = resolveMultiSelect(foreignTable, foreignColumn, value, trx,
 									(field.getDisplayType() == DisplayType.MultiSelectList));
 						}
 						else
 						{
-							int id = resolveForeign(foreignTable, foreignColumn, value,field,trx);
-							if(id < 0)	
-								return Msg.getMsg(Env.getCtx(),id==-2?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{header.get(i),value});
+							Object id = resolveForeign(foreignTable, foreignColumn, value,field,trx);
+						    if (id == null || (id instanceof Integer && (int)id < 0))
+								return Msg.getMsg(Env.getCtx(),(id instanceof Integer && (int)id==-2)?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{header.get(i),value});
+
 
 							setValue = id;
 							if (field.isParentValue()) {
-								int actualId = (Integer) field.getValue();
-								if (actualId != id) {
+								Object actualId = field.getValue();
+								if (actualId != null && ! actualId.equals(id)) {
 									logMsg = Msg.getMsg(Env.getCtx(), "ParentCannotChange",new Object[]{header.get(i)});
 									break;
 								}
@@ -1420,9 +1420,9 @@ public class GridTabCSVImporter implements IGridTabImporter
 								
 								setValue = idS;
 							} else {
-								int id = resolveForeign(foreignTable, foreignColumn, setValue, field, trx);
-								if (id < 0)
-								   return Msg.getMsg(Env.getCtx(),id==-2?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{columnName,setValue});
+								Object id = resolveForeign(foreignTable, foreignColumn, setValue, field, trx);
+							    if (id == null || (id instanceof Integer && (int)id < 0))
+								   return Msg.getMsg(Env.getCtx(),(id instanceof Integer && (int)id==-2)?"ForeignMultipleResolved":"ForeignNotResolved",new Object[]{columnName,setValue});
 								
 								setValue = id;
 							}
@@ -1463,7 +1463,7 @@ public class GridTabCSVImporter implements IGridTabImporter
 			return (new Optional(new ParseBigDecimal(new DecimalFormatSymbols(Language.getLoginLanguage().getLocale()))));
 		} else if (DisplayType.YesNo == field.getDisplayType()) {
 			return (new Optional(new ParseBool("y", "n")));
-		} else if (DisplayType.TextLong == field.getDisplayType()) {
+		} else if (DisplayType.TextLong == field.getDisplayType() || DisplayType.JSON == field.getDisplayType()) {
 			return (new Optional(new StrMinMax(1, Long.MAX_VALUE)));
 		} else if (DisplayType.isText(field.getDisplayType())) {
 			return (new Optional(new StrMinMax(1, field.getFieldLength())));
@@ -1518,7 +1518,7 @@ public class GridTabCSVImporter implements IGridTabImporter
 					  String idS = resolveForeignList(column, foreignColumn, tmpValue,trx);
 					  setValue = idS;
 				  }else {
-					  int id = resolveForeign(foreignTable, foreignColumn, tmpValue,field,trx);
+					  Object id = resolveForeign(foreignTable, foreignColumn, tmpValue,field,trx);
 					  setValue = id;
 	             }
 			   }else{
@@ -1559,8 +1559,7 @@ public class GridTabCSVImporter implements IGridTabImporter
 									  String idS = resolveForeignList(column,foreignColumn,value,trx);
 									  value = idS;
 								  }else {
-									  int id = resolveForeign(foreignTable,foreignColumn,value,field,trx);
-									  value = id;
+									  value = resolveForeign(foreignTable,foreignColumn,value,field,trx);
 					             }
 							   }
 				           }else{ //mandatory key not found 
@@ -1627,7 +1626,7 @@ public class GridTabCSVImporter implements IGridTabImporter
 	 * @param trx
 	 * @return -3 for not found, -2 for more than 1 match and > 0 for foreign id
 	 */
-	private int resolveForeign(String foreignTable, String foreignColumn, Object value, GridField field, Trx trx) {
+	private Object resolveForeign(String foreignTable, String foreignColumn, Object value, GridField field, Trx trx) {
 		boolean systemAccess = false;
 		if (!"AD_Client".equals(foreignTable)) {
 			MTable ft = MTable.get(Env.getCtx(), foreignTable);
@@ -1672,10 +1671,14 @@ public class GridTabCSVImporter implements IGridTabImporter
 		}
 	  }
 		StringBuilder selectCount = new StringBuilder("SELECT COUNT(*)").append(postSelect);
-		StringBuilder selectId = new StringBuilder("SELECT ").append(foreignTable).append("_ID").append(postSelect);
+		MTable forTab = MTable.get(Env.getCtx(), foreignTable);
+		StringBuilder selectId = new StringBuilder("SELECT ").append(forTab.getKeyColumns()[0]).append(postSelect);
 		int count = DB.getSQLValueEx(trxName, selectCount.toString(), value, thisClientId);
 		if (count == 1) { // single value found, OK
-			return DB.getSQLValueEx(trxName, selectId.toString(), value, thisClientId);
+			if (forTab.isUUIDKeyTable())
+				return DB.getSQLValueStringEx(trxName, selectId.toString(), value, thisClientId);
+			else
+				return DB.getSQLValueEx(trxName, selectId.toString(), value, thisClientId);
 		} else if (count > 1) { // multiple values found, error ForeignMultipleResolved
 			return -2;
 		} else if (count == 0) { // no values found, error ForeignNotResolved
@@ -1683,7 +1686,10 @@ public class GridTabCSVImporter implements IGridTabImporter
 				// not found in client, try with System
 				count = DB.getSQLValueEx(trxName, selectCount.toString(), value, 0 /* System */);
 				if (count == 1) { // single value found, OK
-					return DB.getSQLValueEx(trxName, selectId.toString(), value,  0 /* System */);
+					if (forTab.isUUIDKeyTable())
+						return DB.getSQLValueStringEx(trxName, selectId.toString(), value,  0 /* System */);
+					else
+						return DB.getSQLValueEx(trxName, selectId.toString(), value,  0 /* System */);
 				} else if (count > 1) { // multiple values found, error ForeignMultipleResolved
 					return -2;
 				}

@@ -151,6 +151,19 @@
 	}
 }
 
+.global-search-tabpanel .window-name.z-label {
+	padding: 3px; 
+	font-weight: bold; 
+	display: inline-block;
+}
+.global-search-tabpanel .search-result.z-a {
+	padding-left: 3px; 
+	display: inline-block;
+}
+.global-search-tabpanel .highlight {
+  background-color: #FFFF00;
+}
+
 .menu-href [class^="z-icon-"] {
 	color: #333;	
 	margin-right: 4px;

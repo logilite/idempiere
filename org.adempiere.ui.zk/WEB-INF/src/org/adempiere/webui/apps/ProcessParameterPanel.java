@@ -104,7 +104,7 @@ public class ProcessParameterPanel extends Panel implements
 	/**
 	 * generated serial id
 	 */
-	private static final long serialVersionUID = -8847249274740131848L;
+	private static final long serialVersionUID = -8476698839617674953L;
 
 	/** Event post from {@link #valueChange(ValueChangeEvent)} **/
 	private static final String ON_POST_EDITOR_VALUE_CHANGE_EVENT = "onPostEditorValueChange";
@@ -1356,6 +1356,11 @@ public class ProcessParameterPanel extends Panel implements
 		m_processInfo = processInfo;
 	}
 	
+	
+	public ProcessInfo getProcessInfo() {
+		return m_processInfo;
+	}
+	
 	/**
 	 * focus to first visible field editor.
 	 * @return true if there is at least one visible field editor.
@@ -1471,6 +1476,7 @@ public class ProcessParameterPanel extends Panel implements
 				if (displayType == DisplayType.Text 
 					|| displayType == DisplayType.Memo
 					|| displayType == DisplayType.TextLong
+					|| displayType == DisplayType.JSON
 					|| displayType == DisplayType.Binary
 					|| displayType == DisplayType.RowID
 					|| editor.getGridField().isEncrypted())

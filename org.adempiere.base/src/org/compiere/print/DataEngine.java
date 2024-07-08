@@ -42,6 +42,7 @@ import org.compiere.model.MLookupFactory;
 import org.compiere.model.MQuery;
 import org.compiere.model.MReportView;
 import org.compiere.model.MRole;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.SystemIDs;
 import org.compiere.util.CLogMgt;
@@ -144,6 +145,10 @@ public class DataEngine
 	/** Window No 						*/
 	private int				m_windowNo = 0;
 	private Map<Object, Object> m_summarized = new HashMap<Object, Object>();
+
+	public static final int DEFAULT_REPORT_LOAD_TIMEOUT_IN_SECONDS = 120;
+
+	public static final int DEFAULT_GLOBAL_MAX_REPORT_RECORDS = 100000;
 
 	/**************************************************************************
 	 * 	Load Data
@@ -1068,11 +1073,20 @@ public class DataEngine
 		int reportLineID = 0;
 		ArrayList<PrintDataColumn> scriptColumns = new ArrayList<PrintDataColumn>();
 		//
+		int timeout = MSysConfig.getIntValue(MSysConfig.REPORT_LOAD_TIMEOUT_IN_SECONDS, DEFAULT_REPORT_LOAD_TIMEOUT_IN_SECONDS, Env.getAD_Client_ID(Env.getCtx()));
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		String sql = pd.getSQL();
 		try
 		{
-			pstmt = DB.prepareNormalReadReplicaStatement(pd.getSQL(), m_trxName);
+			int maxRows = MSysConfig.getIntValue(MSysConfig.GLOBAL_MAX_REPORT_RECORDS, DEFAULT_GLOBAL_MAX_REPORT_RECORDS, Env.getAD_Client_ID(Env.getCtx()));
+			if (maxRows > 0 && DB.getDatabase().isPagingSupported())
+				sql = DB.getDatabase().addPagingSQL(sql, 1, maxRows+1);
+			pstmt = DB.prepareNormalReadReplicaStatement(sql, m_trxName);
+			if (maxRows > 0 && ! DB.getDatabase().isPagingSupported())
+				pstmt.setMaxRows(maxRows+1);
+			if (timeout > 0)
+				pstmt.setQueryTimeout(timeout);
 			rs = pstmt.executeQuery();
 
 			boolean isExistsT_Report_PA_ReportLine_ID = false;
@@ -1089,6 +1103,7 @@ public class DataEngine
 				}
 			}
 
+			int cnt = 0;
 			// First group start with zero row
 			for (int i = 0; i < pd.getColumnInfo().length; i++)
 			{
@@ -1101,6 +1116,9 @@ public class DataEngine
 			//	Row Loop
 			while (rs.next())
 			{
+				cnt++;
+				if (maxRows > 0 && cnt > maxRows)
+					throw new AdempiereException(Msg.getMsg(Env.getCtx(), "ReportMaxRowsReached", new Object[] {maxRows}));
 				if (hasLevelNo)
 				{
 					levelNo = rs.getInt("LevelNo");
@@ -1298,7 +1316,7 @@ public class DataEngine
 									pde = new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), Boolean.valueOf(b), pdc.getDisplayType(), pdc.getFormatPattern());
 								}
 							}
-							else if (pdc.getDisplayType() == DisplayType.TextLong)
+							else if (pdc.getDisplayType() == DisplayType.TextLong || (pdc.getDisplayType() == DisplayType.JSON && DB.isOracle()))
 							{
 								String value = "";
 								if ("java.lang.String".equals(rs.getMetaData().getColumnClassName(counter)))
@@ -1376,7 +1394,9 @@ public class DataEngine
 		}
 		catch (SQLException e)
 		{
-			log.log(Level.SEVERE, pdc + " - " + e.getMessage() + "\nSQL=" + pd.getSQL());
+			if (DB.getDatabase().isQueryTimeout(e))
+				throw new AdempiereException(Msg.getMsg(Env.getCtx(), "ReportQueryTimeout", new Object[] {timeout}));
+			log.log(Level.SEVERE, pdc + " - " + e.getMessage() + "\nSQL=" + sql);
 			throw new AdempiereException(e);
 		}
 		finally
@@ -1526,7 +1546,7 @@ public class DataEngine
 		{
 			if (CLogMgt.isLevelFiner())
 				log.finer("NO Rows - ms=" + (System.currentTimeMillis()-m_startTime) 
-					+ " - " + pd.getSQL());
+					+ " - " + sql);
 			else
 				log.info("NO Rows - ms=" + (System.currentTimeMillis()-m_startTime)); 
 		}
