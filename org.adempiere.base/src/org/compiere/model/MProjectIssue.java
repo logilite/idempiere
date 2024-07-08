@@ -226,111 +226,92 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		
 		if (productID > 0)
 		{
-			MProduct product = MProduct.get (getCtx(), productID);
-			
-			//	If not a stocked Item nothing to do
-			if (!product.isStocked())
-			{
+			MProduct product = MProduct.get(getCtx(), productID);
+
+			// If not a stocked Item nothing to do
+			if (!product.isStocked()) {
 				setProcessed(true);
 				updateBalanceAmt();
 				saveEx();
-			return null;
+				return null;
 			}
-			
-			//	**	Create Material Transactions **
-			mTrx = new MTransaction (getCtx(), getAD_Org_ID(), 
-				MTransaction.MOVEMENTTYPE_WorkOrderPlus,
-				getM_Locator_ID(), productID, getM_AttributeSetInstance_ID(),
-				getMovementQty().negate(), getMovementDate(), get_TrxName());
+
+			// ** Create Material Transactions **
+			mTrx = new MTransaction(getCtx(), getAD_Org_ID(), MTransaction.MOVEMENTTYPE_WorkOrderPlus,
+					getM_Locator_ID(), productID, getM_AttributeSetInstance_ID(), getMovementQty().negate(),
+					getMovementDate(), get_TrxName());
 			mTrx.setC_ProjectIssue_ID(getC_ProjectIssue_ID());
-			//
-			MLocator loc = MLocator.get(getCtx(), getM_Locator_ID());
-			
+
 			Timestamp dateMPolicy = getMovementDate();
-			
-			if(getM_AttributeSetInstance_ID()>0){
-				Timestamp t = MStorageOnHand.getDateMaterialPolicy(productID, getM_AttributeSetInstance_ID(), get_TrxName());
+
+			if (getM_AttributeSetInstance_ID() > 0) {
+				Timestamp t = MStorageOnHand.getDateMaterialPolicy(productID, getM_AttributeSetInstance_ID(),
+						get_TrxName());
 				if (t != null)
 					dateMPolicy = t;
 			}
-			
+
 			boolean ok = true;
-			try
-			{
-				if (getMovementQty().negate().signum() < 0)
-				{
+			try {
+				if (getMovementQty().negate().signum() < 0) {
 					String MMPolicy = product.getMMPolicy();
 					Timestamp minGuaranteeDate = getMovementDate();
-					int M_Warehouse_ID = getM_Locator_ID() > 0 ? getM_Locator().getM_Warehouse_ID() : getC_Project().getM_Warehouse_ID();
-					MStorageOnHand[] storages = MStorageOnHand.getWarehouse(getCtx(), M_Warehouse_ID, productID, getM_AttributeSetInstance_ID(),
-							minGuaranteeDate, MClient.MMPOLICY_FiFo.equals(MMPolicy), true, getM_Locator_ID(), get_TrxName(), true);
+					int M_Warehouse_ID = getM_Locator_ID() > 0 ? getM_Locator().getM_Warehouse_ID()
+							: getC_Project().getM_Warehouse_ID();
+					MStorageOnHand[] storages = MStorageOnHand.getWarehouse(getCtx(), M_Warehouse_ID, productID,
+							getM_AttributeSetInstance_ID(), minGuaranteeDate, MClient.MMPOLICY_FiFo.equals(MMPolicy),
+							true, getM_Locator_ID(), get_TrxName(), true);
 					BigDecimal qtyToIssue = getMovementQty();
-					for (MStorageOnHand storage: storages)
-					{
-						if (storage.getQtyOnHand().compareTo(qtyToIssue) >= 0)
-						{
+					for (MStorageOnHand storage : storages) {
+						if (storage.getQtyOnHand().compareTo(qtyToIssue) >= 0) {
 							storage.addQtyOnHand(qtyToIssue.negate());
 							qtyToIssue = BigDecimal.ZERO;
-						}
-						else
-						{
+						} else {
 							qtyToIssue = qtyToIssue.subtract(storage.getQtyOnHand());
 							storage.addQtyOnHand(storage.getQtyOnHand().negate());
 						}
-	
+
 						if (qtyToIssue.signum() == 0)
 							break;
 					}
-					if (qtyToIssue.signum() > 0)
-					{
-					ok = MStorageOnHand.add(getCtx(), getM_Locator_ID(), 
-								productID, getM_AttributeSetInstance_ID(),
-								qtyToIssue.negate(),dateMPolicy, get_TrxName());
+					if (qtyToIssue.signum() > 0) {
+						ok = MStorageOnHand.add(getCtx(), getM_Locator_ID(), productID, getM_AttributeSetInstance_ID(),
+								qtyToIssue.negate(), dateMPolicy, get_TrxName());
 					}
-				} 
-				else 
-				{
-				ok = MStorageOnHand.add(getCtx(), getM_Locator_ID(), 
-							productID, getM_AttributeSetInstance_ID(),
-							getMovementQty().negate(),dateMPolicy, get_TrxName());				
+				} else {
+					ok = MStorageOnHand.add(getCtx(), getM_Locator_ID(), productID, getM_AttributeSetInstance_ID(),
+							getMovementQty().negate(), dateMPolicy, get_TrxName());
 				}
-			}
-			catch (NegativeInventoryDisallowedException e)
-			{
+			} catch (NegativeInventoryDisallowedException e) {
 				log.severe(e.getMessage());
 				StringBuilder error = new StringBuilder();
 				error.append(Msg.getElement(getCtx(), "Line")).append(" ").append(getLine()).append(": ");
 				error.append(e.getMessage()).append("\n");
 				throw new AdempiereException(error.toString());
 			}
-		
-			if (ok)
-			{
-				if (mTrx != null && mTrx.save(get_TrxName()))
-				{
+
+			if (ok) {
+				if (mTrx != null && mTrx.save(get_TrxName())) {
 					setProcessed(true);
 					updateBalanceAmt();
 					if (save())
-						return true;
+						return null;
 					else
 						log.log(Level.SEVERE, "Issue not saved");
-				}
-				else
+				} else
 					log.log(Level.SEVERE, "Transaction not saved"); // requires trx !!
+			} else {
+				log.log(Level.SEVERE, "Storage not updated");
+				return "Storage not updated";
+			}
+
 		}
-		else
-		{
-			log.log(Level.SEVERE, "Storage not updated");
-			return "Storage not updated";
-		}
-		
-				}
 		else if (chargeID > 0)
 		{
 			setProcessed(true);
 			updateBalanceAmt();
 			if (save())
-				return true;
+				return null;
 			else
 				log.log(Level.SEVERE, "Issue not saved"); // requires trx !!
 		}
