@@ -24,6 +24,10 @@ public class LoginEventData {
 	private int AD_Org_ID;
 	private int AD_Role_ID;
 	private int AD_User_ID;
+	private String UserName;
+	private String X_Forward_IP;
+	private String LoginErrMsg;
+	private String Context;
 
 	/**
 	 * @param aD_Client_ID
@@ -38,6 +42,21 @@ public class LoginEventData {
 		AD_Org_ID = aD_Org_ID;
 		AD_Role_ID = aD_Role_ID;
 		AD_User_ID = aD_User_ID;
+	}
+	
+	/**
+	 * 
+	 * @param username
+	 * @param x_Forward_IP
+	 * @param loginErrMsg
+	 * @param context
+	 */
+	public LoginEventData(String username, String x_Forward_IP, String loginErrMsg, String context) {
+		super();
+		UserName = username;
+		X_Forward_IP = x_Forward_IP;
+		LoginErrMsg = loginErrMsg;
+		Context = context;
 	}
 
 	/**
@@ -66,6 +85,34 @@ public class LoginEventData {
 	 */
 	public int getAD_User_ID() {
 		return AD_User_ID;
+	}
+
+	/**
+	 * @return UserName
+	 */
+	public String getUserName() {
+		return UserName;
+	}
+
+	/**
+	 * @return X_Forward_IP
+	 */
+	public String getX_Forward_IP() {
+		return X_Forward_IP;
+	}
+
+	/**
+	 * @return LoginErrMsg
+	 */
+	public String getLoginErrMsg() {
+		return LoginErrMsg;
+	}
+
+	/**
+	 * @return Context
+	 */
+	public String getContext() {
+		return Context;
 	}
 
 }

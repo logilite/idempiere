@@ -74,6 +74,8 @@ public interface IEventTopics {
 	public static final String DOC_ALL = DOC_EVENT_PREFIX+"*";
 
 	public static final String AFTER_LOGIN = "adempiere/afterLogin";
+	/** Called when login failed */
+	public static final String EVENT_LOGIN_FAILED = "adempiere/loginFailed";
 
 	public static final String ACCT_FACTS_VALIDATE = "adempiere/acct/factsValidate";
 

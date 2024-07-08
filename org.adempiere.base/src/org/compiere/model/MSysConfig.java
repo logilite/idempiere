@@ -286,6 +286,7 @@ public class MSysConfig extends X_AD_SysConfig
 	public static final String ZK_LOGIN_LEFTPANEL_SHOWN = "ZK_LOGIN_LEFTPANEL_SHOWN";
 	public static final String BANKSTATEMENT_MANUAL_OPENING = "BANKSTATEMENT_MANUAL_OPENING";
 	public static final String MAIL_SEND_COMMENTS = "MAIL_SEND_COMMENTS";
+	public static final String USE_SEARCH_KEY_FOR_LOGIN = "USE_SEARCH_KEY_FOR_LOGIN";
 
     /**
      * UUID based Constructor
