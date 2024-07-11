@@ -580,6 +580,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 			approveIt();
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 
+		getLines(false);
 		ICreditManager creditManager = Core.getCreditManager(this);
 		if (creditManager != null)
 		{
@@ -984,6 +985,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 			//	Delete Posting
 			MFactAcct.deleteEx(MAllocationHdr.Table_ID, getC_AllocationHdr_ID(), get_TrxName());
 			
+			getLines(true);			
 			ICreditManager creditManager = Core.getCreditManager(this);
 			if (creditManager != null)
 			{
