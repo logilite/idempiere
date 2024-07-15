@@ -7,7 +7,7 @@ public class BaseUtil
 	 * @param msg
 	 * @return
 	 */
-	public String cleanMessage(String msg) {
+	public static String cleanMessage(String msg) {
 		String cleanMsg=msg;
 		if(cleanMsg!=null) {
 			cleanMsg =cleanMsg.replaceAll("org.adempiere.exceptions.AdempiereException:", "");
