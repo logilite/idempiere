@@ -112,7 +112,7 @@ public abstract class PO
 	/**
 	 * 
 	 */
-    private static final long serialVersionUID = 1160981281447452309L;
+	private static final long serialVersionUID = 4321136420839515029L;
 
 	public static final String LOCAL_TRX_PREFIX = "POSave";
 
@@ -5173,6 +5173,31 @@ public abstract class PO
 		return retValue;
 	}
 	
+	/**
+	 * Verify if a column exists
+	 * 
+	 * @param  columnName
+	 * @param  throwException - must throw an exception when the column doesn't exist
+	 * @return
+	 */
+	public boolean columnExists(String columnName, boolean throwException)
+	{
+		int idx = get_ColumnIndex(columnName);
+		if (idx < 0 && throwException)
+			throw new AdempiereException("Column " + get_TableName() + "." + columnName + " not found");
+		return (idx >= 0);
+	}
+
+	/**
+	 * Verify if a column exists
+	 * 
+	 * @param  columnName
+	 * @return            boolean
+	 */
+	public boolean columnExists(String columnName)
+	{
+		return columnExists(columnName, false);
+	}
 	
 	public boolean getAttributeAsBoolean(String attributeName)
 	{
