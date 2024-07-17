@@ -179,8 +179,8 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	protected String  m_cc;
 	protected String  m_subject;
 	protected String  m_message;
-	private int m_Record_ID;
-	private int m_AD_Table_ID;
+	protected int m_Record_ID;
+	protected int m_AD_Table_ID;
 	/**	File to be optionally attached	*/
 	protected DataSource	m_attachment;
 	
