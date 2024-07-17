@@ -36,6 +36,7 @@ import org.compiere.model.MTimeExpenseLine;
 import org.compiere.model.Query;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
+import org.compiere.wf.MWorkflow;
 
 /**
  *  Issue to Project.
@@ -187,7 +188,12 @@ public class ProjectIssue extends SvrProcess
 			else if (inOut.getDescription() != null)
 				pi.setDescription(inOut.getDescription());
 			pi.setM_InOutLine_ID(inOutLines[i].getM_InOutLine_ID());
-			pi.process();
+			pi.saveEx();
+			
+			ProcessInfo processInfo = MWorkflow.runDocumentActionWorkflow(pi, DocAction.ACTION_Complete);
+			if (processInfo.isError())
+				throw new RuntimeException(processInfo.getSummary());
+			pi.saveEx();
 
 			//	Find/Create Project Line
 			MProjectLine pl = null;
@@ -264,7 +270,13 @@ public class ProjectIssue extends SvrProcess
 			else if (expenseLines[i].getDescription() != null)
 				pi.setDescription(expenseLines[i].getDescription());
 			pi.setS_TimeExpenseLine_ID(expenseLines[i].getS_TimeExpenseLine_ID());
-			pi.process();
+			pi.saveEx();
+			
+			ProcessInfo processInfo = MWorkflow.runDocumentActionWorkflow(pi, DocAction.ACTION_Complete);
+			if (processInfo.isError())
+				throw new RuntimeException(processInfo.getSummary());
+			pi.saveEx();
+			
 			//	Find/Create Project Line
 			MProjectLine pl = new MProjectLine(m_project);
 			pl.setMProjectIssue(pi);		//	setIssue
@@ -331,11 +343,12 @@ public class ProjectIssue extends SvrProcess
 			pi.setDescription(invLine.getC_Invoice().getDescription());
 
 		pi.setC_InvoiceLine_ID(m_C_InvoiceLine_ID);
-		// TODO Need to check in other methods also
-		if (!pi.process())
-		{
-			return "Project Issue is not Created";
-		}
+		pi.saveEx();
+		
+		ProcessInfo processInfo = MWorkflow.runDocumentActionWorkflow(pi, DocAction.ACTION_Complete);
+		if (processInfo.isError())
+			throw new RuntimeException(processInfo.getSummary());
+		pi.saveEx();
 
 		// Create Project Line
 		MProjectLine pl = new MProjectLine(m_project);
@@ -371,7 +384,12 @@ public class ProjectIssue extends SvrProcess
 			pi.setDescription(m_Description);
 		else if (pl.getDescription() != null)
 			pi.setDescription(pl.getDescription());
-		pi.process();
+		pi.saveEx();
+		
+		ProcessInfo processInfo = MWorkflow.runDocumentActionWorkflow(pi, DocAction.ACTION_Complete);
+		if (processInfo.isError())
+			throw new RuntimeException(processInfo.getSummary());
+		pi.saveEx();
 
 		//	Update Line
 		pl.setMProjectIssue(pi);
@@ -401,7 +419,12 @@ public class ProjectIssue extends SvrProcess
 			pi.setMovementDate(m_MovementDate);
 		if (m_Description != null && m_Description.length() > 0)
 			pi.setDescription(m_Description);
-		pi.process();
+		pi.saveEx();
+		
+		ProcessInfo processInfo = MWorkflow.runDocumentActionWorkflow(pi, DocAction.ACTION_Complete);
+		if (processInfo.isError())
+			throw new RuntimeException(processInfo.getSummary());
+		pi.saveEx();
 
 		//	Create Project Line
 		MProjectLine pl = new MProjectLine(m_project);

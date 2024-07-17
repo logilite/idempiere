@@ -3,7 +3,10 @@ package org.adempiere.model;
 import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
@@ -32,9 +35,21 @@ public class DocActionDelegate <T extends PO & DocAction> implements DocAction
 	/** Logger */
 	protected transient CLogger	log				= CLogger.getCLogger(getClass());
 
+	private Map<String, Callable<String>>	actionCallables	= new HashMap<String, Callable<String>>();
+
 	public DocActionDelegate(T po)
 	{
 		this.po = po;
+	}
+
+	/**
+	 * set callable for docaction
+	 * @param docAction
+	 * @param callable
+	 */
+	public void setActionCallable(String docAction, Callable<String> callable)
+	{
+		actionCallables.put(docAction, callable);
 	}
 
 	@Override
@@ -113,6 +128,21 @@ public class DocActionDelegate <T extends PO & DocAction> implements DocAction
 			MPeriod.testPeriodOpen(getCtx(), date, doctype, getAD_Org_ID());
 		}
 
+		Callable<String> callable = actionCallables.get(DocAction.ACTION_Prepare);
+		if (callable != null)
+		{
+			try
+			{
+				m_processMsg = callable.call();
+				if (m_processMsg != null)
+					return DocAction.STATUS_Invalid;
+			}
+			catch (Exception e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(po, ModelValidator.TIMING_AFTER_PREPARE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
@@ -161,6 +191,21 @@ public class DocActionDelegate <T extends PO & DocAction> implements DocAction
 
 		// Set the definite document number after completed (if needed)
 		setDefiniteDocumentNo();
+
+		Callable<String> callable = actionCallables.get(DocAction.ACTION_Complete);
+		if (callable != null)
+		{
+			try
+			{
+				m_processMsg = callable.call();
+				if (m_processMsg != null)
+					return DocAction.STATUS_Invalid;
+			}
+			catch (Exception e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
 
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(po, ModelValidator.TIMING_BEFORE_COMPLETE);
 		if (m_processMsg != null)
@@ -212,6 +257,20 @@ public class DocActionDelegate <T extends PO & DocAction> implements DocAction
 			m_processMsg = ModelValidationEngine.get().fireDocValidate(po, ModelValidator.TIMING_BEFORE_VOID);
 			if (m_processMsg != null)
 				return false;
+			Callable<String> callable = actionCallables.get(DocAction.ACTION_Void);
+			if (callable != null)
+			{
+				try
+				{
+					m_processMsg = callable.call();
+					if (m_processMsg != null)
+						return false;
+				}
+				catch (Exception e)
+				{
+					throw new RuntimeException(e);
+				}
+			}
 		}
 		else
 		{
@@ -276,6 +335,21 @@ public class DocActionDelegate <T extends PO & DocAction> implements DocAction
 		if (m_processMsg != null)
 			return false;
 
+		Callable<String> callable = actionCallables.get(DocAction.ACTION_Close);
+		if (callable != null)
+		{
+			try
+			{
+				m_processMsg = callable.call();
+				if (m_processMsg != null)
+					return false;
+			}
+			catch (Exception e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+
 		setProcessed(true);
 		setDocAction(DocAction.ACTION_None);
 
@@ -296,12 +370,28 @@ public class DocActionDelegate <T extends PO & DocAction> implements DocAction
 		if (m_processMsg != null)
 			return false;
 
+		Callable<String> callable = actionCallables.get(DocAction.ACTION_Reverse_Correct);
+		if (callable != null)
+		{
+			try
+			{
+				m_processMsg = callable.call();
+			}
+			catch (Exception e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+		
 		// After reverseCorrect
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(po, ModelValidator.TIMING_AFTER_REVERSECORRECT);
 		if (m_processMsg != null)
 			return false;
 
-		return false; // reverse needs to be implemented to create a negative document
+		if (callable != null)
+			return m_processMsg == null;
+		else
+			return false; // reverse needs to be implemented to create a negative document
 	}
 
 	@Override
@@ -314,12 +404,28 @@ public class DocActionDelegate <T extends PO & DocAction> implements DocAction
 		if (m_processMsg != null)
 			return false;
 
+		Callable<String> callable = actionCallables.get(DocAction.ACTION_Reverse_Accrual);
+		if (callable != null)
+		{
+			try
+			{
+				m_processMsg = callable.call();
+			}
+			catch (Exception e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+		
 		// After reverseAccrual
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(po, ModelValidator.TIMING_AFTER_REVERSEACCRUAL);
 		if (m_processMsg != null)
 			return false;
 
-		return false; // reverse needs to be implemented to create a negative document
+		if (callable != null)
+			return m_processMsg == null;
+		else
+			return false; 			// reverse needs to be implemented to create a negative document
 	}
 
 	@Override
@@ -332,6 +438,19 @@ public class DocActionDelegate <T extends PO & DocAction> implements DocAction
 		if (m_processMsg != null)
 			return false;
 
+		Callable<String> callable = actionCallables.get(DocAction.ACTION_ReActivate);
+		if (callable != null)
+		{
+			try
+			{
+				m_processMsg = callable.call();
+			}
+			catch (Exception e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+
 		// After reActivate
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(po, ModelValidator.TIMING_AFTER_REACTIVATE);
 		if (m_processMsg != null)
@@ -339,8 +458,11 @@ public class DocActionDelegate <T extends PO & DocAction> implements DocAction
 
 		setDocAction(DocAction.ACTION_Complete);
 		setProcessed(false);
-		return false; // reactivate needs to be implemented to reverse the effect of complete and
-						// post
+
+		if (callable != null)
+			return m_processMsg == null;
+		else
+			return false; // reactivate needs to be implemented to reverse the effect of complete and post
 	}
 
 	@Override
