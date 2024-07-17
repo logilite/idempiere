@@ -221,7 +221,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 			if (!product.isStocked())
 			{
 				setProcessed(true);
-				updateBalanceAmt();
+				updateBalanceAmt(false);
 				saveEx();
 				return null;
 			}
@@ -297,7 +297,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 			{
 				if (mTrx != null && mTrx.save(get_TrxName()))
 				{
-					updateBalanceAmt();
+					updateBalanceAmt(false);
 					if (save())
 					{
 						return null;
@@ -322,7 +322,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		}
 		else if (chargeID > 0)
 		{
-			updateBalanceAmt();
+			updateBalanceAmt(false);
 			if (save())
 				return null;
 			else
@@ -441,14 +441,18 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 	@Override
 	public boolean reverseCorrectIt()
 	{
-		docActionDelegate.reverseCorrectIt();
+		if (!docActionDelegate.reverseCorrectIt())
+			return false;
+		updateBalanceAmt(true);
 		return true;
 	}
 
 	@Override
 	public boolean reverseAccrualIt()
 	{
-		docActionDelegate.reverseAccrualIt();
+		if (!docActionDelegate.reverseAccrualIt())
+			return false;
+		updateBalanceAmt(true);
 		return true;
 	}
 
@@ -522,8 +526,11 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 	
 	/**
 	 * Update Project Balance on Project issue posted
+	 * 
+	 * @param isCreaditAmt true than Reduce Project Balance Amt otherwise Project Balance Amt is Add
+	 *                     cost of Project Issue
 	 */
-	private void updateBalanceAmt()
+	private void updateBalanceAmt(boolean isCredit)
 	{
 		MProject proj = (MProject) getC_Project();
 		BigDecimal cost = Env.ZERO;
@@ -535,18 +542,21 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		{
 			cost = ProjectIssueUtil.getLaborCost(MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID(), get_TrxName())[0], getS_TimeExpenseLine_ID());
 		}
-		else if (getC_InvoiceLine_ID()>0)
+		else if (getC_InvoiceLine_ID() > 0)
 		{
-			cost = getAmt(); 
+			cost = getAmt();
 		}
 		else
 		{
 			cost = ProjectIssueUtil.getProductCosts(MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID(), get_TrxName())[0], (MProduct) getM_Product(),
 													getM_AttributeSetInstance_ID(), getAD_Org_ID(), getMovementQty(), true);
 		}
-		if(cost!=null)
+		if (cost != null)
 		{
-			proj.setProjectBalanceAmt(proj.getProjectBalanceAmt().add(cost));
+			if (isCredit)
+				proj.setProjectBalanceAmt(proj.getProjectBalanceAmt().subtract(cost));
+			else
+				proj.setProjectBalanceAmt(proj.getProjectBalanceAmt().add(cost));
 			proj.saveEx(get_TrxName());
 		}
 	} // updateBalanceAmt
