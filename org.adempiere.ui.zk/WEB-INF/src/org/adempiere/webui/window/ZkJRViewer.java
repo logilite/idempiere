@@ -301,7 +301,7 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 		MUser from = MUser.get(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()));
 		String subject = m_title;
 
-		IEmailDialog dialog = EMailDialogUtil.getEmailDialog(); 
+		IEmailDialog dialog = EMailDialogUtil.getEmailDialog(m_printInfo.getAD_Table_ID()); 
 		if(dialog!=null){
 			
 			PO po = null;
@@ -312,7 +312,7 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 				dialog.setPO(po);
 			}
 			dialog.init(Msg.getMsg(Env.getCtx(), "SendMail"),
-				from, to, subject, "", attachment,m_WindowNo,m_printInfo.getAD_Table_ID(),m_printInfo.getRecord_ID(),m_printInfo);
+				from, to, subject, "", attachment,m_WindowNo, m_printInfo.getRecord_ID(),m_printInfo);
 			dialog.show();
 		}
 		else
