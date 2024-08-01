@@ -468,8 +468,6 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 		
 		if(rResp==null){
 			rResp=retDocument.addNewRunProcessResponse();
-		}else{
-			retDocument.setRunProcessResponse(rResp);
 		}
 		
 		if(rResp!=null && rResp.getADLoginResponse()==null)
@@ -482,6 +480,8 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 			rResp.setError(stndResp.getError());
 		if(stndResp.isSetIsError())
 			rResp.setIsError(stndResp.getIsError());
+		
+		retDocument.setRunProcessResponse(rResp);
 		
 		return retDocument;
 	}

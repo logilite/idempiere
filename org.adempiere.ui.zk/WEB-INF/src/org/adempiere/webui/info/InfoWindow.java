@@ -1217,10 +1217,15 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 					}
 
 				String queryOperator = InfoColumnVO.getQueryOperator();
-				if (X_AD_InfoColumn.QUERYOPERATOR_IN.equals(queryOperator) && InfoColumnVO.isMultiSelectCriteria())
+				if (mInfoColumn.isMultiSelectCriteria())
 				{
-					builder.append(columnClause).append(" IN ");
-					// Convert the multi select array value to string for use IN condition
+					builder.append(columnClause);
+					if (MInfoColumn.QUERYOPERATOR_IN.equals(queryOperator))
+						builder.append(" IN ");
+					else if (MInfoColumn.QUERYOPERATOR_NOT_IN.equals(queryOperator))
+						builder.append(" NOT IN ");
+
+					// Convert the multi select array value to string
 					String value = Util.convertArrayToStringForDB(editor.getValue(), true);
 					if (!Util.isEmpty(value, true))
 						value = value.replaceAll("([{}])", "");
@@ -1770,7 +1775,8 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
         		infoColumn.getQueryOperator().equals(X_AD_InfoColumn.QUERYOPERATOR_NotEq )) {
         		label.setValue(label.getValue() + " " + infoColumn.getQueryOperator());
         	}
-			else if (infoColumn.getQueryOperator().equals(X_AD_InfoColumn.QUERYOPERATOR_IN)
+			else if (infoColumn.getQueryOperator().equals(X_AD_InfoColumn.QUERYOPERATOR_NOT_IN)
+					|| infoColumn.getQueryOperator().equals(X_AD_InfoColumn.QUERYOPERATOR_IN)
 					|| infoColumn.getQueryOperator().equals(X_AD_InfoColumn.QUERYOPERATOR_HAVE)
 					|| infoColumn.getQueryOperator().equals(X_AD_InfoColumn.QUERYOPERATOR_EXCLUDE)
 					|| infoColumn.getQueryOperator().equals(X_AD_InfoColumn.QUERYOPERATOR_OVERLAP))

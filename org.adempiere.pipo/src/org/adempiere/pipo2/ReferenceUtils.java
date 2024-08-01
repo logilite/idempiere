@@ -7,6 +7,7 @@ import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 import org.xml.sax.helpers.AttributesImpl;
 
 public class ReferenceUtils {
@@ -111,44 +112,49 @@ public class ReferenceUtils {
 		return "";
 	}
 	
-	public static String getTableReferenceMultiSelect(String tableName, Integer[] ids, AttributesImpl atts)
+	public static String getTableReferenceMulti(String tableName, Object key, AttributesImpl atts, String trxName)
 	{
-		if (ids == null || ids.length == 0)
+		atts.addAttribute("", "", "reference", "CDATA", "uuid");
+		if (key == null || Util.isEmpty(key.toString()))
 		{
-			// no id, -1 indicates it was read a null
-			atts.addAttribute("", "", "reference", "CDATA", "uuid");
 			return "";
 		}
-		else
-		{
-			String keyColumn = tableName + "_ID";
+		MTable table = MTable.get(Env.getCtx(), tableName, trxName);
+		if (table == null)
+			throw new RuntimeException("Table Not Found. TableName=" + tableName);
 
-			MTable table = MTable.get(Env.getCtx(), tableName);
-			if (table == null)
-				throw new RuntimeException("Table Not Found. TableName=" + tableName);
-			String uuidColumnName = PO.getUUIDColumnName(tableName);
+		Object[] values = null;
+		if (key instanceof Object[])
+			values = (Object[]) key;
+		else
+			values = key.toString().split("[,]");
+
+		// convert multi-IDs to multi-UUIDs
+		String target_values = "";
+		String keyColumn = tableName + "_ID";
+		String uuidColumnName = PO.getUUIDColumnName(tableName);
+		for (Object value : values)
+		{
+			int id = Integer.valueOf(value.toString());
+			// Translate always IDs to UUIDs, even for official IDs,
+			// because it would be more complex to manage a combination of
+			// official IDs and UUIDs
 			if (table.getColumn(uuidColumnName) != null)
 			{
 				// uuid
-				StringBuilder sb = new StringBuilder();
 				String sql = "SELECT " + uuidColumnName + " FROM " + tableName + " WHERE " + keyColumn + " = ?";
-				for (int i = 0;; i++)
+				String valuePartial = DB.getSQLValueString(null, sql, id);
+				if (!Util.isEmpty(valuePartial, true))
 				{
-					sb.append(DB.getSQLValueString(null, sql, ids[i]));
-					if (i == ids.length - 1)
-						break;
-					sb.append(",");
-				}
-				if (sb != null && sb.toString().trim().length() > 0)
-				{
-					atts.addAttribute("", "", "reference", "CDATA", "uuid");
-					atts.addAttribute("", "", "reference-key", "CDATA", tableName);
-					return sb.toString().trim();
+					if (target_values.length() == 0)
+						target_values = valuePartial;
+					else
+						target_values += "," + valuePartial;
 				}
 			}
 		}
-		
-		return "";
+		atts.addAttribute("", "", "reference-key", "CDATA", tableName);
+		return target_values;
 	}
 }
 

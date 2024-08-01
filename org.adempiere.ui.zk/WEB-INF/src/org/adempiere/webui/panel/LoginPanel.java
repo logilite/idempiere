@@ -53,6 +53,9 @@ import org.adempiere.webui.window.FDialog;
 import org.adempiere.webui.window.LoginWindow;
 import org.compiere.Adempiere;
 import org.adempiere.base.ILogin;
+import org.adempiere.base.event.EventManager;
+import org.adempiere.base.event.IEventTopics;
+import org.adempiere.base.event.LoginEventData;
 import org.compiere.model.MClient;
 import org.compiere.model.MSession;
 import org.compiere.model.MSysConfig;
@@ -608,6 +611,11 @@ public class LoginPanel extends Window implements EventListener<Event>
             	 x_Forward_IP = Executions.getCurrent().getRemoteAddr();
             }
         	logAuthFailure.log(x_Forward_IP, "/webui", userId, loginErrMsg);
+        	
+			// Process osgi event handler
+			LoginEventData eventData = new LoginEventData(userId, x_Forward_IP, loginErrMsg, "webui");
+			org.osgi.service.event.Event event = EventManager.newEvent(IEventTopics.EVENT_LOGIN_FAILED, eventData);
+			EventManager.getInstance().sendEvent(event);
 
 			// Incremental delay to avoid brute-force attack on testing codes
 			try {

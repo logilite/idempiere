@@ -18,10 +18,14 @@ package org.compiere.process;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.logging.Level;
 
+import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
+import org.compiere.model.MInvoice;
+import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MProject;
 import org.compiere.model.MProjectIssue;
 import org.compiere.model.MProjectLine;
@@ -29,7 +33,9 @@ import org.compiere.model.MStorageOnHand;
 import org.compiere.model.MTable;
 import org.compiere.model.MTimeExpense;
 import org.compiere.model.MTimeExpenseLine;
+import org.compiere.model.Query;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 import org.compiere.wf.MWorkflow;
 
 /**
@@ -47,16 +53,18 @@ public class ProjectIssue extends SvrProcess
 	private int 		m_M_InOut_ID = 0;
 	/**	Expenses - Option 2					*/
 	private int 		m_S_TimeExpense_ID = 0;
-	/** Locator - Option 3,4				*/
+	/** Invoice Line - Option 3 			*/
+	private int			m_C_InvoiceLine_ID = 0;
+	/** Locator - Option 4,5				*/
 	private int			m_M_Locator_ID = 0;
-	/** Project Line - Option 3				*/
+	/** Project Line - Option 4				*/
 	private int 		m_C_ProjectLine_ID = 0;
-	/** Product - Option 4					*/
+	/** Product - Option 5					*/
 	private int 		m_M_Product_ID = 0;
-	/** Attribute - Option 4				*/
+	/** Attribute - Option 5				*/
 	@SuppressWarnings("unused")
 	private int 		m_M_AttributeSetInstance_ID = 0;
-	/** Qty - Option 4						*/
+	/** Qty - Option 5						*/
 	private BigDecimal	m_MovementQty = null;
 	/** Date - Option						*/
 	private Timestamp	m_MovementDate = null;
@@ -86,6 +94,8 @@ public class ProjectIssue extends SvrProcess
 				m_M_InOut_ID = ((BigDecimal)para[i].getParameter()).intValue();
 			else if (name.equals("S_TimeExpense_ID"))
 				m_S_TimeExpense_ID = ((BigDecimal)para[i].getParameter()).intValue();
+			else if (name.equals("C_InvoiceLine_ID"))
+				m_C_InvoiceLine_ID = ((BigDecimal) para[i].getParameter()).intValue();
 			else if (name.equals("M_Locator_ID"))
 				m_M_Locator_ID = ((BigDecimal)para[i].getParameter()).intValue();
 			else if (name.equals("C_ProjectLine_ID"))
@@ -124,6 +134,8 @@ public class ProjectIssue extends SvrProcess
 			return issueReceipt();
 		if (m_S_TimeExpense_ID != 0)
 			return issueExpense();
+		if (m_C_InvoiceLine_ID != 0)
+			return issueInvoiceLine();
 		if (m_M_Locator_ID == 0)
 			throw new IllegalArgumentException("Locator missing");
 		if (m_C_ProjectLine_ID != 0)
@@ -232,7 +244,7 @@ public class ProjectIssue extends SvrProcess
 			if (expenseLines[i].getQty() == null || expenseLines[i].getQty().signum() == 0)
 				continue;
 			//	Need to the same project
-			if (expenseLines[i].getC_Project_ID() != m_project.getC_Project_ID())
+			if (expenseLines[i].getC_Project_ID() > 0 && expenseLines[i].getC_Project_ID() != m_project.getC_Project_ID())
 				continue;
 			//	not issued yet
 			if (projectIssueHasExpense(expenseLines[i].getS_TimeExpenseLine_ID()))
@@ -274,7 +286,76 @@ public class ProjectIssue extends SvrProcess
 		return msgreturn.toString();
 	}	//	issueExpense
 
+	/**
+	 * Issue Invoice Line
+	 * @return Message (clear text)
+	 */
+	private String issueInvoiceLine()
+	{
+		MInvoiceLine invLine = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(m_C_InvoiceLine_ID, get_TrxName());
 
+		if (invLine.getC_Invoice().isSOTrx())
+			throw new IllegalArgumentException("Invoice Line is invalid - " + invLine);
+		if (!(MInvoice.DOCSTATUS_Completed.equals(invLine.getC_Invoice().getDocStatus())
+				|| MInvoice.DOCSTATUS_Closed.equals(invLine.getC_Invoice().getDocStatus())))
+			throw new IllegalArgumentException("Invoice Line is invalid (" + invLine + ") Invoice Line Must be Closed or Completed");
+		
+		  //Line On Invoice line set Project
+		if (invLine.getC_Project_ID() == 0)
+		{
+			invLine.setC_Project_ID(m_C_Project_ID);
+			invLine.saveEx(get_TrxName());
+		}
+		else if (invLine.getC_Project_ID() != m_C_Project_ID)
+			throw new IllegalArgumentException(
+					"Invoice Line is created for another Project (" + invLine.getC_Project_ID() + ")");
+		 
+
+		// Need to have Charge
+		if (invLine.getC_Charge_ID() <= 0)
+			throw new IllegalArgumentException("Invoice line (" + invLine + ") missing charge.");
+		// Need to have Invoice Qty
+		if (invLine.getM_Product_ID() > 0	&&
+			(invLine.getQtyInvoiced() == null || invLine.getQtyInvoiced().signum() <= 0))
+			throw new IllegalArgumentException("Invoice line (" + invLine + ") missing Invoice Quantity.");
+		// Checked not any issued yet
+		if (projectIssueHasInvoiceLine(m_C_InvoiceLine_ID))
+			return "Project Issue is already created for this Invoice Line";
+
+		// Project Issue
+		MProjectIssue pi = new MProjectIssue(m_project);
+		pi.setMandatory(invLine.getC_Charge_ID(), invLine.getQtyInvoiced());
+		
+		if (MDocType.DOCBASETYPE_APCreditMemo.equals((invLine.getC_Invoice().getC_DocType().getDocBaseType())))
+			pi.setAmt(invLine.getLineNetAmt().negate());
+		else
+			pi.setAmt(invLine.getLineNetAmt());
+		if (m_MovementDate != null) // default today
+			pi.setMovementDate(m_MovementDate);
+		if (!Util.isEmpty(m_Description))
+			pi.setDescription(m_Description);
+		else if (!Util.isEmpty(invLine.getDescription()))
+			pi.setDescription(invLine.getDescription());
+		else if (!Util.isEmpty(invLine.getC_Invoice().getDescription()))
+			pi.setDescription(invLine.getC_Invoice().getDescription());
+
+		pi.setC_InvoiceLine_ID(m_C_InvoiceLine_ID);
+		pi.saveEx();
+		
+		ProcessInfo processInfo = MWorkflow.runDocumentActionWorkflow(pi, DocAction.ACTION_Complete);
+		if (processInfo.isError())
+			throw new RuntimeException(processInfo.getSummary());
+		pi.saveEx();
+
+		// Create Project Line
+		MProjectLine pl = new MProjectLine(m_project);
+		pl.setC_ProjectIssue_ID(pi.get_ID());
+		pl.saveEx();
+
+		addLog(pi.getLine(), pi.getMovementDate(), pi.getMovementQty(), "Created Project Issue Line: " + pi.getLine());
+		return "@Created@ 1";
+	} 	// 	issueInvoiceLine
+	
 	/**
 	 *	Issue Project Line
 	 *	@return Message (clear text)
@@ -384,4 +465,18 @@ public class ProjectIssue extends SvrProcess
 		return false;
 	}	//	projectIssueHasReceipt
 
+	/**
+	 * Check if Project Issue already has Expense
+	 * @param  S_TimeExpenseLine_ID line
+	 * @return true if exists
+	 */
+	private boolean projectIssueHasInvoiceLine(int invoiceLineID)
+	{
+		//TODO add check that voided and reversed project issue ignored
+		List<MProjectIssue> list = new Query(getCtx(), MProjectIssue.Table_Name, "C_InvoiceLine_ID= ? ", get_TrxName())
+						.setParameters(invoiceLineID)
+						.list();
+
+		return list.size() > 0;
+	} // projectIssueHasExpense
 }	//	ProjectIssue

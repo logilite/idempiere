@@ -37,6 +37,7 @@ import org.adempiere.base.IWFActivityForwardDlg;
 import org.adempiere.base.IWFActivityForwardFactory;
 import org.adempiere.base.Service;
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.util.BaseUtil;
 import org.compiere.model.MAttachment;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MClient;
@@ -989,7 +990,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				}				
 			}
 			msg.append(processMsg);
-			setTextMsg(msg.toString());
+			setTextMsg(BaseUtil.cleanMessage(msg.toString()));
 			// addTextMsg(e); // do not add the exception text
 			boolean contextLost = false;
 			if (e instanceof AdempiereException && "Context lost".equals(e.getMessage()))
@@ -1101,7 +1102,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				}
 				catch (Exception e) {
 					if (m_process != null)
-						m_process.setProcessMsg(e.getLocalizedMessage());
+						m_process.setProcessMsg(BaseUtil.cleanMessage(e.getLocalizedMessage()));
 					throw e;
 				}
 				finally

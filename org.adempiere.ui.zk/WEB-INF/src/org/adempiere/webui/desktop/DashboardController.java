@@ -268,7 +268,6 @@ public class DashboardController implements EventListener<Event> {
 				}
 			}
 
-            int currentColumn = 0;
             for (final MDashboardPreference dp : dps)            	
 			{            	            	            	
             	if(!dp.isActive())
@@ -287,9 +286,9 @@ public class DashboardController implements EventListener<Event> {
 	        	if(dashboardColumnLayout == null || currentColumnNo != effColumn)
 				{
 					if (isShowInDashboard && size != null && size.length > 0 && size.length >= noOfCols
-							&& size.length > currentColumn && !Util.isEmpty(size[currentColumn], true))
+							&& size.length > effColumn && !Util.isEmpty(size[effColumn], true))
 					{
-						currentWidth = Integer.parseInt(size[currentColumn].trim());
+						currentWidth = Integer.parseInt(size[effColumn].trim());
 					}
 					dashboardColumnLayout = new Vlayout();
 	        		dashboardColumnLayout.setSclass("dashboard-column");

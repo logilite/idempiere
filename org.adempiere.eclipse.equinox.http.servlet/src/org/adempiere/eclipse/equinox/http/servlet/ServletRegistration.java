@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.adempiere.base.sso.ISSOPrinciple;
 import org.adempiere.base.sso.SSOUtils;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
@@ -69,7 +70,8 @@ public class ServletRegistration extends Registration {
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(registeredContextClassLoader);
-			if (SSOUtils.getSSOPrinciple() != null)
+			boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
+			if (SSOUtils.getSSOPrinciple() != null && isSSOEnable)
 			{
 				Object principle = req.getSession().getAttribute(ISSOPrinciple.SSO_PRINCIPLE_SESSION_NAME);
 				if (checkSSOAuthorization(principle))

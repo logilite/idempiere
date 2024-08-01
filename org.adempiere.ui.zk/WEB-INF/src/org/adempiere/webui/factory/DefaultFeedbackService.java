@@ -117,14 +117,14 @@ public class DefaultFeedbackService implements IFeedbackService {
 				ByteArrayDataSource arrayBytes = (ByteArrayDataSource)ds;
 				FileUtils.copyInputStreamToFile(arrayBytes.getInputStream(), file);
 			}	
-			IEmailDialog dialog = EMailDialogUtil.getEmailDialog();
+			IEmailDialog dialog = EMailDialogUtil.getEmailDialog(0);
 			if(dialog != null)
 			{
 				dialog.init(
 					Msg.getMsg(Env.getCtx(), "EMailSupport"),
 					MUser.get(Env.getCtx()),"",
 					MSystem.get(Env.getCtx()).getName() + " " + Msg.getMsg(Env.getCtx(), "TraceInfo"),
-					"", file, 0, 0, 0, null);
+					"", file, 0, 0, null);
 				if(dialog instanceof Window)
 					((Window)dialog).setAttribute(Window.MODE_KEY, Mode.OVERLAPPED);			
 				

@@ -55,6 +55,7 @@ public class MInfoColumn extends X_AD_InfoColumn implements IInfoColumn, Immutab
 																	add(QUERYOPERATOR_Eq);
 																	add(QUERYOPERATOR_NotEq);
 																	add(QUERYOPERATOR_IN);
+																	add(QUERYOPERATOR_NOT_IN);
 																	add(QUERYOPERATOR_HAVE);
 																	add(QUERYOPERATOR_OVERLAP);
 																	add(QUERYOPERATOR_EXCLUDE);
