@@ -247,13 +247,22 @@ public final class MLookup extends Lookup implements Serializable
 	{
 		if (key == null)
 			return "";		
-		//		
-		if (m_info.DisplayType==DisplayType.ChosenMultipleSelectionList || m_info.DisplayType==DisplayType.ChosenMultipleSelectionSearch
-			|| m_info.DisplayType==DisplayType.ChosenMultipleSelectionTable)
+		//
+		if (m_info.DisplayType == DisplayType.ChosenMultipleSelectionList
+				|| m_info.DisplayType == DisplayType.ChosenMultipleSelectionSearch
+				|| m_info.DisplayType == DisplayType.ChosenMultipleSelectionTable
+				|| m_info.DisplayType == DisplayType.MultiSelectList
+				|| m_info.DisplayType == DisplayType.MultiSelectSearch
+				|| m_info.DisplayType == DisplayType.MultiSelectTable)
 		{
 			StringBuilder builder = new StringBuilder();
-			String[] keys = key.toString().split("[,]");
-			for(String k : keys)
+			Object[] keys = null;
+			if (DisplayType.isMultiSelect(m_info.DisplayType) && key instanceof Object[])
+				keys = (Object[]) key;
+			else
+				keys = key.toString().split("[,]");
+
+			for (Object k : keys)
 			{
 				if (builder.length() > 0)
 					builder.append(", ");
