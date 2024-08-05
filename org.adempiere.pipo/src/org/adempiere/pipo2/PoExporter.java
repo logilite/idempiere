@@ -183,29 +183,9 @@ public class PoExporter {
 				String uuid = (String)po.get_Value(columnName);
 				addTableReferenceUUID(columnName, tableName, uuid, atts);
 			} else {
-				int id = -1;
-		if (po.get_Value(columnName) != null)
-		{
-			if (po.get_Value(columnName) instanceof Integer[])
-			{
-				String value = ReferenceUtils.getTableReferenceMultiSelect(tableName, (Integer[])po.get_Value(columnName), atts);
-				addString(columnName, value, atts);	
-				return;
-			}
-			else
-			{
-				id = (Integer) po.get_Value(columnName);
-			}
-		}		
+				int id = po.get_Value(columnName) != null ? (Integer) po.get_Value(columnName) : -1;
 				addTableReference(columnName, tableName, id, atts);
 			}
-		}
-	}
-
-	public void addTableReferenceMulti(String columnName, String tableName, AttributesImpl atts) {
-		if (tableName != null) {
-			String values = (String)po.get_Value(columnName);
-			addTableReferenceMulti(columnName, tableName, values, atts);
 		}
 	}
 

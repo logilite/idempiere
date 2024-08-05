@@ -42,7 +42,7 @@ public interface IEmailDialog
 	 * @param printInfo
 	 */
 	public void init(String title, MUser from, String to, String subject, String message, 
-			DataSource attachment, int m_WindowNo, int ad_Table_ID, int record_ID, String record_UU, PrintInfo printInfo);
+			DataSource attachment, int m_WindowNo, int record_ID, String record_UU, PrintInfo printInfo);
 
 	public String getTo();
 	public void addTo(String supportEMail, boolean isShowEmailFirst);

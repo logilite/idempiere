@@ -414,7 +414,7 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 				dialog.setPO(po);
 			}
 			dialog.init(Msg.getMsg(Env.getCtx(), "SendMail"),
-				from, to, subject, "", new FileDataSource(attachment),m_WindowNo,m_printInfo.getAD_Table_ID(),m_printInfo.getRecord_ID(),
+				from, to, subject, "", new FileDataSource(attachment),m_WindowNo,m_printInfo.getRecord_ID(),
 				null, m_printInfo);
 			dialog.show();
 		}

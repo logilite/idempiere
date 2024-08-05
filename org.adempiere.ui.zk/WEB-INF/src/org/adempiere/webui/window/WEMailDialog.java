@@ -172,6 +172,25 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 			int m_WindowNo, int ad_Table_ID, int record_ID, String record_UU, PrintInfo printInfo) {
 		super();
 		this.m_AD_Table_ID = ad_Table_ID;
+		init(title, from, to, subject, message, attachment, m_WindowNo, record_ID, record_UU, printInfo);
+	}
+
+	/**
+	 * EMail Dialog
+	 * @param title title
+	 * @param from from
+	 * @param to to 
+	 * @param subject subject
+	 * @param message message
+	 * @param attachment optional attachment
+	 * @param m_WindowNo
+	 * @param record_ID
+	 * @param record_UU
+	 * @param printInfo
+	 */
+	public void init(String title, MUser from, String to, String subject, String message, DataSource attachment,
+			int m_WindowNo, int record_ID, String record_UU, PrintInfo printInfo) {
+		Components.removeAllChildren(this);
 		this.m_Record_ID = record_ID;
 		this.m_Record_UU = record_UU;
         this.setTitle(title);
@@ -186,7 +205,13 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		this.setShadow(true);
 		this.setMaximizable(true);
 		this.setSizable(true);
-		        
+
+		if (fCc.getValue() != null)
+			fCc.setValue(null);
+
+		confirmPanel = new ConfirmPanel(true);
+		attachments.clear();
+
 		fMessage = new CKeditor();
 		if (ClientInfo.isMobile())
 			fMessage.setCustomConfigurationsPath("/js/ckeditor/config-min.js");
@@ -257,8 +282,8 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	protected String  m_subject;
 	protected String  m_message;
 	protected int m_Record_ID;
-	private String m_Record_UU;
-	private int m_AD_Table_ID;
+	protected String m_Record_UU;
+	protected int m_AD_Table_ID;
 	/**	File to be optionally attached	*/
 	protected DataSource	m_attachment;
 	
@@ -590,6 +615,11 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 			attachments.add(attachment);
 	}	//	setAttachment
 
+	public List<DataSource> getAttachments()
+	{
+		return attachments;
+	}
+
 	/**
 	 *  Get Attachment
 	 *  @return attachment data source
@@ -700,9 +730,9 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		{
 			AttachmentItem item = new AttachmentItem(dataSource, attachments, removeable);
 			attachmentBox.appendChild(item);
-
-			getFirstChild().invalidate();
 		}
+		if(getFirstChild() != null)
+			getFirstChild().invalidate();
 	}
 
 	/**
@@ -1018,50 +1048,32 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 				fSubject.setValue(subj);
 		}
 	}
-	@Override
-	public void init(String title, MUser from, String to, String subject, String message, File attachment,
-			int m_WindowNo, int record_ID, PrintInfo printInfo)
+
+
+	public void setPO(PO m_po)
 	{
-		Components.removeAllChildren(this);
-
-		this.m_Record_ID = record_ID;
-		this.setTitle(title);
-		this.setSclass("popup-dialog");
-		this.setClosable(true);
-		this.setBorder("normal");
-		this.setWidth("80%");
-		this.setHeight("80%");
-		this.setShadow(true);
-		this.setMaximizable(true);
-		this.setSizable(true);
-		
-		if (fCc.getValue() != null)
-			fCc.setValue(null);
-		
-		confirmPanel = new ConfirmPanel(true);
-		attachments.clear();
-
-		fMessage = new CKeditor();
-		fMessage.setCustomConfigurationsPath("/js/ckeditor/config.js");
-		fMessage.setToolbar("MyToolbar");
-		Map<String, Object> lang = new HashMap<String, Object>();
-		lang.put("language", Language.getLoginLanguage().getAD_Language());
-		fMessage.setConfig(lang);
-		
-		commonInit(from, to, subject, message, new FileDataSource(attachment));
-		
-		clearEMailContext(m_WindowNo);
-		sendEvent(m_WindowNo, m_AD_Table_ID, m_Record_ID, null, "");
-		setValuesFromContext(m_WindowNo);
+		this.m_po = m_po;
 	}
 
+	@Override
+	public void setAD_PInstance_ID(int pInstance_ID)
+	{
+		this.pInstance_ID = pInstance_ID;
+	}
+
+	@Override
+	public void show() {
+		AEnv.showWindow(this);
+		this.focus();
+	}
+
+	@Override
 	public IEmailDialog createInstance(int ad_Table_ID)
 	{
 		WEMailDialog mailDialog = new WEMailDialog();
 		mailDialog.m_AD_Table_ID = ad_Table_ID;
 		return mailDialog;
 	}
-
 
 	@Override
 	public void focus() {
@@ -1140,88 +1152,5 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		if (!Util.isEmpty(newMessage))
 			setMessage(newMessage);
 	}
-
-	/**
-	 * @param title
-	 * @param from
-	 * @param to
-	 * @param subject
-	 * @param message
-	 * @param attachment
-	 * @param m_WindowNo
-	 * @param ad_Table_ID
-	 * @param record_ID
-	 * @param record_UU
-	 * @param printInfo
-	 */
-	@Override
-	public void init(	String title, MUser from, String to, String subject, String message, DataSource attachment,
-						int m_WindowNo, int ad_Table_ID, int record_ID, String record_UU, PrintInfo printInfo)
-	{
-		Components.removeAllChildren(this);
-		this.m_AD_Table_ID = ad_Table_ID;
-		this.m_Record_ID = record_ID;
-		this.m_Record_UU = record_UU;
-		this.setTitle(title);
-		this.setSclass("popup-dialog email-dialog");
-		this.setClosable(true);
-		this.setBorder("normal");
-		if (!ThemeManager.isUseCSSForWindowSize())
-		{
-			ZKUpdateUtil.setWidth(this, "80%");
-			ZKUpdateUtil.setHeight(this, "80%");
-		}
-		this.setShadow(true);
-		this.setMaximizable(true);
-		this.setSizable(true);
-
-		if (fCc.getValue() != null)
-			fCc.setValue(null);
-
-		confirmPanel = new ConfirmPanel(true);
-		attachments.clear();
-
-		fMessage = new CKeditor();
-		if (ClientInfo.isMobile())
-			fMessage.setCustomConfigurationsPath("/js/ckeditor/config-min.js");
-		else
-			fMessage.setCustomConfigurationsPath("/js/ckeditor/config.js");
-		fMessage.setToolbar("MyToolbar");
-		Map<String, Object> lang = new HashMap<String, Object>();
-		lang.put("language", Language.getLoginLanguage().getAD_Language());
-		fMessage.setConfig(lang);
-
-		commonInit(from, to, subject, message, attachment);
-
-		clearEMailContext(m_WindowNo);
-		sendEvent(m_WindowNo, m_AD_Table_ID, m_Record_ID, m_Record_UU, null, "");
-		setValuesFromContext(m_WindowNo);
-	}
-
-	@Override
-	public void setPO(PO m_po)
-	{
-		this.m_po = m_po;
-	}
-
-
-	@Override
-	public void show() {
-		AEnv.showWindow(this);
-		this.focus();
-	}
-
-	@Override
-	public IEmailDialog createInstance() {
-		return new WEMailDialog();
-	}
-
-	@Override
-	public void setAD_PInstance_ID(int pInstance_ID)
-	{
-		this.pInstance_ID = pInstance_ID;
-	}
-
-	
 
 }	//	WEMailDialog

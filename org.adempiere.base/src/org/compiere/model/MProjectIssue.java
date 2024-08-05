@@ -608,18 +608,4 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		}
 	} // updateBalanceAmt
 
-	/**
-	 * Filter project issues by matching invoice line and project
-	 *
-	 * @param  invLineID - Invoice Line ID
-	 * @param  trxName   - Trx Name
-	 * @return           {@link MProjectIssue} class {@link PO}
-	 */
-	public static MProjectIssue getInvLineIssue(int invLineID, String trxName)
-	{
-		String whereClause = " AD_Client_ID = ? And C_InvoiceLine_ID = ? And IsActive='Y'";
-		Query query = new Query(Env.getCtx(), Table_Name, whereClause, trxName);
-		MProjectIssue issuePrj = query.setParameters(Env.getAD_Client_ID(Env.getCtx()), invLineID).first();
-		return issuePrj;
-	} // getInvLineIssue
 }	//	MProjectIssue

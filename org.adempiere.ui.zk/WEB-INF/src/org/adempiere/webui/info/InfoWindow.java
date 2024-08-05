@@ -1440,15 +1440,15 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 
 					if(!isRange) {
 						String queryOperator = InfoColumnVO.getQueryOperator();
-				if (mInfoColumn.isMultiSelectCriteria())
+						if (InfoColumnVO.isMultiSelectCriteria())
 						{
-					builder.append(columnClause);
-					if (MInfoColumn.QUERYOPERATOR_IN.equals(queryOperator))
-						builder.append(" IN ");
-					else if (MInfoColumn.QUERYOPERATOR_NOT_IN.equals(queryOperator))
-						builder.append(" NOT IN ");
-
-					// Convert the multi select array value to string
+							builder.append(columnClause);
+							if (MInfoColumn.QUERYOPERATOR_IN.equals(queryOperator))
+								builder.append(" IN ");
+							else if (MInfoColumn.QUERYOPERATOR_NOT_IN.equals(queryOperator))
+								builder.append(" NOT IN ");
+		
+							// Convert the multi select array value to string
 							String value = Util.convertArrayToStringForDB(editor.getValue(), true);
 							if (!Util.isEmpty(value, true))
 								value = value.replaceAll("([{}])", "");
