@@ -46,7 +46,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 	/**
 	 * generated serial id 
 	 */
-	private static final long serialVersionUID = 1653681817205265764L;
+	private static final long serialVersionUID = -4271899123559555181L;
 	
 	private DocActionDelegate<MProjectIssue> docActionDelegate = null;
 	
@@ -231,7 +231,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 			// If not a stocked Item nothing to do
 			if (!product.isStocked()) {
 				setProcessed(true);
-				updateBalanceAmt();
+				updateBalanceAmt(false);
 				saveEx();
 				return null;
 			}
@@ -292,33 +292,42 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 
 			if (ok) {
 				if (mTrx != null && mTrx.save(get_TrxName())) {
-					setProcessed(true);
-					updateBalanceAmt();
+					updateBalanceAmt(false);
 					if (save())
+					{
 						return null;
+					}
 					else
-						log.log(Level.SEVERE, "Issue not saved");
-				} else
+					{
+						log.log(Level.SEVERE, "Issue not saved");	// Update Balance
+						return "Issue not saved";
+					}
+				}
+				else
+				{
 					log.log(Level.SEVERE, "Transaction not saved"); // requires trx !!
-			} else {
-				log.log(Level.SEVERE, "Storage not updated");
+					return "Transaction not saved";
+				}
+			}
+			else
+			{
+				log.log(Level.SEVERE, "Storage not updated"); 		// OK
 				return "Storage not updated";
 			}
-
 		}
 		else if (chargeID > 0)
 		{
-			setProcessed(true);
-			updateBalanceAmt();
+			updateBalanceAmt(false);
 			if (save())
 				return null;
 			else
 				log.log(Level.SEVERE, "Issue not saved"); // requires trx !!
 		}
 		//
-		return null;		
-	}
-	
+		log.log(Level.SEVERE, "Product Or Charge is not Present");
+		return "Product or Charge is not present";
+	}	//	process
+
 	/**
 	 * Handle reverse accrual and reverse correct document action
 	 * @param accrual true to use current date, false to use this record's movement date
@@ -429,13 +438,21 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 	}
 
 	@Override
-	public boolean reverseCorrectIt() {
-		return docActionDelegate.reverseCorrectIt();
+	public boolean reverseCorrectIt()
+	{
+		if (!docActionDelegate.reverseCorrectIt())
+			return false;
+		updateBalanceAmt(true);
+		return true;
 	}
 
 	@Override
-	public boolean reverseAccrualIt() {
-		return docActionDelegate.reverseAccrualIt();
+	public boolean reverseAccrualIt()
+	{
+		if (!docActionDelegate.reverseAccrualIt())
+			return false;
+		updateBalanceAmt(true);
+		return true;
 	}
 
 	/**
@@ -495,7 +512,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 	public String getSummary() {
 		String summary = getDocumentInfo();
 		if (getM_Product_ID() > 0) {
-			summary = summary + "|" + MProduct.get(getM_Product_ID()).getValue() + "|" + getMovementQty().toPlainString(); 
+			summary = summary + "|" + MProduct.get(Env.getCtx(), getM_Product_ID()).getValue() + "|" + getMovementQty().toPlainString(); 
 		}
 		return summary;
 	}
@@ -553,4 +570,56 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		}
 		return index;
 	}
+	
+	/**
+	 * Update Project Balance on Project issue posted
+	 * 
+	 * @param isCreaditAmt true than Reduce Project Balance Amt otherwise Project Balance Amt is Add
+	 *                     cost of Project Issue
+	 */
+	private void updateBalanceAmt(boolean isCredit)
+	{
+		MProject proj = (MProject) getC_Project();
+		BigDecimal cost = Env.ZERO;
+		if (getM_InOutLine_ID() > 0)
+		{
+			cost = ProjectIssueUtil.getPOCost(MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID(), get_TrxName())[0], getM_InOutLine_ID(), getMovementQty());
+		}
+		else if (getS_TimeExpenseLine_ID() > 0)
+		{
+			cost = ProjectIssueUtil.getLaborCost(MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID(), get_TrxName())[0], getS_TimeExpenseLine_ID());
+		}
+		else if (getC_InvoiceLine_ID() > 0)
+		{
+			cost = getAmt();
+		}
+		else
+		{
+			cost = ProjectIssueUtil.getProductCosts(MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID(), get_TrxName())[0], (MProduct) getM_Product(),
+													getM_AttributeSetInstance_ID(), getAD_Org_ID(), getMovementQty(), true);
+		}
+		if (cost != null)
+		{
+			if (isCredit)
+				proj.setProjectBalanceAmt(proj.getProjectBalanceAmt().subtract(cost));
+			else
+				proj.setProjectBalanceAmt(proj.getProjectBalanceAmt().add(cost));
+			proj.saveEx(get_TrxName());
+		}
+	} // updateBalanceAmt
+
+	/**
+	 * Filter project issues by matching invoice line and project
+	 *
+	 * @param  invLineID - Invoice Line ID
+	 * @param  trxName   - Trx Name
+	 * @return           {@link MProjectIssue} class {@link PO}
+	 */
+	public static MProjectIssue getInvLineIssue(int invLineID, String trxName)
+	{
+		String whereClause = " AD_Client_ID = ? And C_InvoiceLine_ID = ? And IsActive='Y'";
+		Query query = new Query(Env.getCtx(), Table_Name, whereClause, trxName);
+		MProjectIssue issuePrj = query.setParameters(Env.getAD_Client_ID(Env.getCtx()), invLineID).first();
+		return issuePrj;
+	} // getInvLineIssue
 }	//	MProjectIssue

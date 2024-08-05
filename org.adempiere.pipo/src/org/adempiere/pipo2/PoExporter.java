@@ -218,8 +218,15 @@ public class PoExporter {
 		String value = ReferenceUtils.getTableReferenceUUID(tableName, uuid, atts);
 		addString(columnName, value, atts);
 	}
-
-	public void addTableReferenceMulti(String columnName, String tableName, String values, AttributesImpl atts) {
+	
+	public void addTableReferenceMulti(String columnName, String tableName, AttributesImpl atts) {
+		if (tableName != null) {
+			Object values = po.get_Value(columnName);
+			addTableReferenceMulti(columnName, tableName, values, atts);
+		}
+	}
+	
+	public void addTableReferenceMulti(String columnName, String tableName, Object values, AttributesImpl atts) {
 		String target_values = ReferenceUtils.getTableReferenceMulti(tableName, values, atts, po.get_TrxName());
 		addString(columnName, target_values, atts);
 	}
@@ -335,7 +342,7 @@ public class PoExporter {
 				} else {
 					addTableReference(columnName, tableName, new AttributesImpl());
 				}
-			} else if (DisplayType.Account == displayType) {
+			}  else if (DisplayType.Account == displayType) {
 				String tableName = "C_ValidCombination";
 				addTableReference(columnName, tableName, new AttributesImpl());
 			} else if (DisplayType.isLOB(displayType)) {

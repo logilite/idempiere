@@ -24,6 +24,9 @@ import java.util.Properties;
 import org.adempiere.exceptions.DBException;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
+import org.compiere.util.CCache;
+import org.compiere.util.Env;
+
 
 /**
  *	Lot Control Model
@@ -36,8 +39,9 @@ public class MLotCtl extends X_M_LotCtl
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -5538987472159034317L;
+	private static final long serialVersionUID = 915382326315907170L;
 
+	public static CCache<Integer, MLotCtl>s_cache	= new CCache<Integer, MLotCtl>(Table_Name, 5,30);
     /**
      * UUID based Constructor
      * @param ctx  Context
@@ -153,4 +157,18 @@ public class MLotCtl extends X_M_LotCtl
 		return null;
 	}	//	createLot
 
+	public static MLotCtl get(int mLotCtlId)
+	{
+		MLotCtl lotCtl = null;
+
+		if (s_cache.isEmpty() || s_cache.get(mLotCtlId) == null)
+		{
+			lotCtl = (MLotCtl) MTable.get(Env.getCtx(), MLotCtl.Table_ID).getPO(mLotCtlId, null);
+
+			if (lotCtl != null)
+				s_cache.put(mLotCtlId, lotCtl);
+		}
+
+		return s_cache.get(mLotCtlId);
+	}
 }	//	MLotCtl

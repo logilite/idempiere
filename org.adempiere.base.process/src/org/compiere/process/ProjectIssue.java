@@ -341,11 +341,12 @@ public class ProjectIssue extends SvrProcess
 			pi.setDescription(invLine.getC_Invoice().getDescription());
 
 		pi.setC_InvoiceLine_ID(m_C_InvoiceLine_ID);
-		// TODO Need to check in other methods also
-		if (!pi.process())
-		{
-			return "Project Issue is not Created";
-		}
+		pi.saveEx();
+		
+		ProcessInfo processInfo = MWorkflow.runDocumentActionWorkflow(pi, DocAction.ACTION_Complete);
+		if (processInfo.isError())
+			throw new RuntimeException(processInfo.getSummary());
+		pi.saveEx();
 
 		// Create Project Line
 		MProjectLine pl = new MProjectLine(m_project);

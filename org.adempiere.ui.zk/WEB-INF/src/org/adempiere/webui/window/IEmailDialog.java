@@ -26,6 +26,8 @@ import org.compiere.model.PrintInfo;
 public interface IEmailDialog
 {
 
+	public IEmailDialog createInstance(int ad_Table_ID);
+
 	/**
 	 * @param title
 	 * @param from
@@ -49,7 +51,6 @@ public interface IEmailDialog
 	public void setPO(PO m_po);
 	
 	public void show();
-	public IEmailDialog createInstance();
 
 	public void setAD_PInstance_ID(int pInstance_ID);
 

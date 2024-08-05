@@ -256,7 +256,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	protected String  m_cc;
 	protected String  m_subject;
 	protected String  m_message;
-	private int m_Record_ID;
+	protected int m_Record_ID;
 	private String m_Record_UU;
 	private int m_AD_Table_ID;
 	/**	File to be optionally attached	*/
@@ -1018,6 +1018,50 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 				fSubject.setValue(subj);
 		}
 	}
+	@Override
+	public void init(String title, MUser from, String to, String subject, String message, File attachment,
+			int m_WindowNo, int record_ID, PrintInfo printInfo)
+	{
+		Components.removeAllChildren(this);
+
+		this.m_Record_ID = record_ID;
+		this.setTitle(title);
+		this.setSclass("popup-dialog");
+		this.setClosable(true);
+		this.setBorder("normal");
+		this.setWidth("80%");
+		this.setHeight("80%");
+		this.setShadow(true);
+		this.setMaximizable(true);
+		this.setSizable(true);
+		
+		if (fCc.getValue() != null)
+			fCc.setValue(null);
+		
+		confirmPanel = new ConfirmPanel(true);
+		attachments.clear();
+
+		fMessage = new CKeditor();
+		fMessage.setCustomConfigurationsPath("/js/ckeditor/config.js");
+		fMessage.setToolbar("MyToolbar");
+		Map<String, Object> lang = new HashMap<String, Object>();
+		lang.put("language", Language.getLoginLanguage().getAD_Language());
+		fMessage.setConfig(lang);
+		
+		commonInit(from, to, subject, message, new FileDataSource(attachment));
+		
+		clearEMailContext(m_WindowNo);
+		sendEvent(m_WindowNo, m_AD_Table_ID, m_Record_ID, null, "");
+		setValuesFromContext(m_WindowNo);
+	}
+
+	public IEmailDialog createInstance(int ad_Table_ID)
+	{
+		WEMailDialog mailDialog = new WEMailDialog();
+		mailDialog.m_AD_Table_ID = ad_Table_ID;
+		return mailDialog;
+	}
+
 
 	@Override
 	public void focus() {

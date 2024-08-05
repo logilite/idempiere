@@ -133,7 +133,7 @@ public class DefaultFeedbackService implements IFeedbackService {
 				ByteArrayDataSource arrayBytes = (ByteArrayDataSource)ds;
 				FileUtils.copyInputStreamToFile(arrayBytes.getInputStream(), file);
 			}	
-			IEmailDialog dialog = EMailDialogUtil.getEmailDialog();
+			IEmailDialog dialog = EMailDialogUtil.getEmailDialog(0);
 			if(dialog != null)
 			{
 				dialog.init(

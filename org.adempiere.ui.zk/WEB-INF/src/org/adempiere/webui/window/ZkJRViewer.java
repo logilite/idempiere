@@ -403,7 +403,7 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 		MUser from = MUser.get(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()));
 		String subject = m_title;
 
-		IEmailDialog dialog = EMailDialogUtil.getEmailDialog(); 
+		IEmailDialog dialog = EMailDialogUtil.getEmailDialog(m_printInfo.getAD_Table_ID()); 
 		if(dialog!=null){
 			
 			PO po = null;

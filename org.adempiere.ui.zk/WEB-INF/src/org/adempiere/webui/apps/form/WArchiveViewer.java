@@ -744,7 +744,7 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 			throw new AdempiereException(e);
 		}
 
-		IEmailDialog dialog = EMailDialogUtil.getEmailDialog();
+		IEmailDialog dialog = EMailDialogUtil.getEmailDialog(m_AD_Table_ID);
 		if (dialog != null)
 		{
 			dialog.init(Msg.getMsg(Env.getCtx(), "SendMail"), from, "", "", "", new FileDataSource(attachment), m_WindowNo, ar.getAD_Table_ID(),

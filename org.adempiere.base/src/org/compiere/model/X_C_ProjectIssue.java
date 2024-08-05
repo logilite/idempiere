@@ -34,9 +34,8 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20231222L;
-
-    /** Standard Constructor */
+    private static final long serialVersionUID = -289270779977733399L;
+	/** Standard Constructor */
     public X_C_ProjectIssue (Properties ctx, int C_ProjectIssue_ID, String trxName)
     {
       super (ctx, C_ProjectIssue_ID, trxName);

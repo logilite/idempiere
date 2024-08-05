@@ -117,7 +117,7 @@ public abstract class PO
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 6591172659109078284L;
+	private static final long serialVersionUID = 4321136420839515029L;
 
 	/* String key to create a new record based in UUID constructor */
 	public static final String UUID_NEW_RECORD = "";
