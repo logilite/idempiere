@@ -365,6 +365,28 @@ public class WMultiSelectSearchEditor extends WEditor implements ContextMenuList
 			if (gridField != null)
 				gridField.setLookupEditorSettingValue(true);
 
+			// convert the value of object to integer.
+			if (value != null && value instanceof Object[])
+			{
+				boolean isIntegerOnly = true;
+				Integer newValues[] = new Integer[((Object[]) value).length];
+				for (int idx = 0; idx < ((Object[]) value).length; idx++)
+				{
+					if (((Object[]) value)[idx] instanceof Integer)
+					{
+						newValues[idx] = (Integer) ((Object[]) value)[idx];
+					}
+					else
+					{
+						isIntegerOnly = false;
+						break;
+					}
+				}
+
+				if (isIntegerOnly)
+					value = newValues;
+			}
+			
 			Object newValue = this.value;
 			if (newValue == null)
 			{
