@@ -475,13 +475,13 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 			addLoginResponse(m_cs,rResp);
 		}
 
-		if(stndResp.isSetError())
-			rResp.setError(stndResp.getError());
-		if(stndResp.isSetIsError())
+		if(stndResp.getIsError()){
 			rResp.setIsError(stndResp.getIsError());
-		
+			rResp.setError(stndResp.getError());
+		}
+
 		retDocument.setRunProcessResponse(rResp);
-		
+
 		return retDocument;
 	}
 
