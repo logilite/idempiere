@@ -27,7 +27,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -49,9 +51,9 @@ import org.idempiere.cache.ImmutablePOSupport;
 public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSupport
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
-	private static final long serialVersionUID = 1772365359514185604L;
+	private static final long serialVersionUID = -6477844604059539239L;
 
 	/**
 	 *	Convert qty to target UOM and round.
@@ -96,7 +98,6 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 		BigDecimal retValue = getRate (ctx, p);
 		return retValue;
 	}	//	convert
-
 	
 	/**
 	 *	Convert qty to target UOM and round.
@@ -140,7 +141,7 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 		return retValue;
 	}	//	startDate
 	
-	/**************************************************************************
+	/**
 	 * 	Get Conversion Multiplier Rate, try to derive it if not found directly
 	 * 	@param ctx context
 	 * 	@param p Point with from(x) - to(y) C_UOM_ID
@@ -164,7 +165,7 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 	}	//	getConversion
 
 	/**
-	 * 	Create Conversion Matrix (Client)
+	 * 	Load conversion rate into cache
 	 * 	@param ctx context
 	 */
 	protected static void createRates (Properties ctx)
@@ -373,7 +374,7 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 		return null;
 	}	//	deriveRate
 
-	/**************************************************************************
+	/**
 	 * 	Get Conversion Multiplier Rate from Server
 	 *  @param C_UOM_ID from UOM
 	 *  @param C_UOM_To_ID to UOM
@@ -432,10 +433,47 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
 		}
+
 		if (retValue == null)
 		{
-			if (s_log.isLoggable(Level.INFO)) s_log.info ("NOT found - FromUOM=" + C_UOM_From_ID + ", ToUOM=" + C_UOM_To_ID);
-			return null;
+			sql = "SELECT c.DivideRate, uom.StdPrecision, uom.CostingPrecision "
+					+ "FROM	C_UOM_Conversion c"
+					+ " INNER JOIN C_UOM uom ON (c.C_UOM_ID=uom.C_UOM_ID) "
+					+ "WHERE c.IsActive='Y' AND c.C_UOM_ID=? AND c.C_UOM_TO_ID=? "		//	#1/2
+					+ " AND c.M_Product_ID IS NULL"
+					+ " ORDER BY c.AD_Client_ID DESC, c.AD_Org_ID DESC";
+				try
+				{
+					pstmt = DB.prepareStatement(sql, null);
+					pstmt.setInt(1, C_UOM_To_ID);
+					pstmt.setInt(2, C_UOM_From_ID);
+					rs = pstmt.executeQuery();
+					if (rs.next())
+					{
+						retValue = rs.getBigDecimal(1);
+						precision = rs.getInt(StdPrecision ? 2 : 3);
+					}
+				}
+				catch (SQLException e)
+				{
+					throw new DBException(e, sql);
+				}
+				finally
+				{
+					DB.close(rs, pstmt);
+					rs = null; pstmt = null;
+				}
+				
+				if (retValue == null)
+				{
+					retValue = getRateUsingCommonUOM(Env.getCtx(), C_UOM_From_ID, C_UOM_To_ID, -1);
+				}
+				
+				if (retValue == null)
+				{
+					if (s_log.isLoggable(Level.INFO)) s_log.info ("NOT found - FromUOM=" + C_UOM_From_ID + ", ToUOM=" + C_UOM_To_ID);
+					return null;
+				}
 		}
 			
 		//	Just get Rate
@@ -520,41 +558,97 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 	static public BigDecimal getProductRateTo (Properties ctx,
 		int M_Product_ID, int C_UOM_To_ID)
 	{
+		return getProductRateTo(ctx, M_Product_ID, C_UOM_To_ID, -1);
+	}	//	getProductRateTo
+
+	/**
+	 *	Get multiply rate to convert PRICE from price in entered UOM to price in product UOM <br/>
+	 *  OR multiply rate to convert QTY from product UOM to entered UOM
+	 *  @param ctx context
+	 *  @param M_Product_ID product
+	 *  @param C_UOM_To_ID entered UOM
+	 *  @param precision
+	 *  @return multiplier or null
+	 */
+	static public BigDecimal getProductRateTo (Properties ctx,
+		int M_Product_ID, int C_UOM_To_ID, int precision)
+	{
 		if (M_Product_ID == 0)
 			return null;
-		
+
+		int prodUOMId = MProduct.get(ctx, M_Product_ID).getC_UOM_ID();
+		if (prodUOMId == C_UOM_To_ID)
+		{
+			return Env.ONE;
+		}
+
+		if(precision < 0)
+		{
+			precision = 50;// get it with many decimals to minimize rounding issues
+		}
+
 		//first check product specific conversion
 		MUOMConversion[] rates = getProductConversions(ctx, M_Product_ID);
-		
+
 		for (int i = 0; i < rates.length; i++)
 		{
 			MUOMConversion rate = rates[i];
-			if (rate.getC_UOM_To_ID() == C_UOM_To_ID)
-				return rate.getMultiplyRate();
+			if (rate.getC_UOM_To_ID() == C_UOM_To_ID) {
+				if (rate.getMultiplyRate().compareTo(Env.ONE) >= 0)
+					return rate.getMultiplyRate();
+				else
+					return getOppositeRate(rate.getDivideRate(), precision);
+			}
+			else {
+				if (rate.getC_UOM_ID() == C_UOM_To_ID) {
+					if (rate.getDivideRate().compareTo(Env.ONE) >= 0)
+						return rate.getDivideRate();
+					else
+						return getOppositeRate(rate.getMultiplyRate(), precision);
+				}
+			}
 		}
-		
+
+		BigDecimal retValue = getRateUsingCommonUOM(Env.getCtx(), prodUOMId, C_UOM_To_ID, M_Product_ID);
+		if (retValue != null)
+		{
+			return retValue;
+		}
+
 		//fall back to generic conversion
-		List<MUOMConversion> conversions = new Query(ctx, Table_Name, "C_UOM_ID=? AND C_UOM_TO_ID=? AND M_Product_ID IS NULL AND AD_Client_ID IN (0, ?)", null)
-				.setParameters(MProduct.get(ctx, M_Product_ID).getC_UOM_ID(), C_UOM_To_ID, Env.getAD_Client_ID(ctx))
+		List<MUOMConversion> conversions = new Query(ctx, Table_Name, "((C_UOM_ID=? AND C_UOM_TO_ID=?) OR (C_UOM_TO_ID=? AND C_UOM_ID=?)) AND M_Product_ID IS NULL AND AD_Client_ID IN (0, ?)", null)
+				.setParameters(prodUOMId, C_UOM_To_ID, prodUOMId, C_UOM_To_ID, Env.getAD_Client_ID(ctx))
 				.setOrderBy("AD_Client_ID Desc")
 				.setOnlyActiveRecords(true)
 				.list();
 		for (int i = 0; i < conversions.size(); i++)
 		{
 			MUOMConversion rate = conversions.get(i);
-			if (rate.getC_UOM_To_ID() == C_UOM_To_ID)
-				return rate.getMultiplyRate();
+			if (rate.getC_UOM_To_ID() == C_UOM_To_ID) {
+				if (rate.getMultiplyRate().compareTo(Env.ONE) >= 0)
+					return rate.getMultiplyRate();
+				else
+					return getOppositeRate(rate.getDivideRate(), precision);
+			}
+			else {
+				if (rate.getC_UOM_ID() == C_UOM_To_ID) {
+					if (rate.getDivideRate().compareTo(Env.ONE) >= 0)
+						return rate.getDivideRate();
+					else
+						return getOppositeRate(rate.getMultiplyRate(), precision);
+				}
+			}
 		}
 		return null;
 	}	//	getProductRateTo
 
-	/**************************************************************************
+	/**
 	 *	Convert PRICE expressed in product UoM to equivalent price in entered UoM and round. <br/>
 	 *  OR Convert QTY in entered UOM to qty in product UoM and round.  <br/>
-	 *  
+	 *
 	 *   eg: $1/ea =&gt; $6/6pk <br/>
 	 *   OR 1 X 6pk =&gt; 6 X ea
-	 *   
+	 *
 	 *  @param ctx context
 	 *  @param M_Product_ID product
 	 *  @param C_UOM_To_ID entered UOM
@@ -624,22 +718,66 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 	static public BigDecimal getProductRateFrom (Properties ctx,
 		int M_Product_ID, int C_UOM_To_ID)
 	{
+		return getProductRateFrom(ctx, M_Product_ID, C_UOM_To_ID, -1);
+	}	//	getProductRateFrom
+
+	/**
+	 *	Get multiply rate to convert PRICE from price in entered UOM to price in product UOM <br/>
+	 *  OR multiply rate to convert QTY from product UOM to entered UOM.
+	 *  @param ctx context
+	 *  @param M_Product_ID product
+	 *  @param C_UOM_To_ID entered UOM
+	 *  @param precision
+	 *  @return multiplier or null
+	 */
+	static public BigDecimal getProductRateFrom (Properties ctx,
+		int M_Product_ID, int C_UOM_To_ID, int precision)
+	{
 		if (M_Product_ID == 0)
 			return null;
-				
+		
+		int prodUOMId = MProduct.get(ctx, M_Product_ID).getC_UOM_ID();
+		if (prodUOMId == C_UOM_To_ID)
+		{
+			return Env.ONE;
+		}
+
+		if(precision < 0)
+		{
+			precision = 50;// get it with many decimals to minimize rounding issues
+		}
+
 		//first, check product specific conversion
 		MUOMConversion[] rates = getProductConversions(ctx, M_Product_ID);
 		
 		for (int i = 0; i < rates.length; i++)
 		{
 			MUOMConversion rate = rates[i];
-			if (rate.getC_UOM_To_ID() == C_UOM_To_ID)
-				return rate.getDivideRate();
+			if (rate.getC_UOM_To_ID() == C_UOM_To_ID) {
+				if (rate.getDivideRate().compareTo(Env.ONE) >= 0)
+					return rate.getDivideRate();
+				else
+					return getOppositeRate(rate.getMultiplyRate(), precision);
+			}
+			else {
+				if (rate.getC_UOM_ID() == C_UOM_To_ID) {
+					if (rate.getMultiplyRate().compareTo(Env.ONE) >= 0)
+						return rate.getMultiplyRate();
+					else
+						return getOppositeRate(rate.getDivideRate(), precision);
+				}
+			}
 		}
 	
+		BigDecimal retValue = getRateUsingCommonUOM(Env.getCtx(), C_UOM_To_ID, prodUOMId, M_Product_ID);
+		if (retValue != null)
+		{
+			return retValue;
+		}
+
 		//fall back to generic conversion
-		List<MUOMConversion> conversions = new Query(ctx, Table_Name, "C_UOM_ID=? AND C_UOM_TO_ID=? AND M_Product_ID IS NULL AND AD_Client_ID IN (0, ?)", null)
-				.setParameters(MProduct.get(ctx, M_Product_ID).getC_UOM_ID(), C_UOM_To_ID, Env.getAD_Client_ID(ctx))
+		List<MUOMConversion> conversions = new Query(ctx, Table_Name, "((C_UOM_ID=? AND C_UOM_TO_ID=?) OR (C_UOM_TO_ID=? AND C_UOM_ID=?)) AND M_Product_ID IS NULL AND AD_Client_ID IN (0, ?)", null)
+				.setParameters(C_UOM_To_ID, prodUOMId, C_UOM_To_ID, prodUOMId, Env.getAD_Client_ID(ctx))
 				.setOrderBy("AD_Client_ID Desc")
 				.setOnlyActiveRecords(true)
 				.list();
@@ -648,11 +786,25 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 			MUOMConversion rate = conversions.get(i);
 			if (rate.getC_UOM_To_ID() == C_UOM_To_ID)
 				return rate.getDivideRate();
+
+			if (rate.getC_UOM_To_ID() == C_UOM_To_ID) {
+				if (rate.getDivideRate().compareTo(Env.ONE) >= 0)
+					return rate.getDivideRate();
+				else
+					return getOppositeRate(rate.getMultiplyRate(), precision);
+			}
+			else {
+				if (rate.getC_UOM_ID() == C_UOM_To_ID) {
+					if (rate.getMultiplyRate().compareTo(Env.ONE) >= 0)
+						return rate.getMultiplyRate();
+					else
+						return getOppositeRate(rate.getDivideRate(), precision);
+				}
+			}
 		}
-		
+
 		return null;
 	}	//	getProductRateFrom
-
 
 	/**
 	 * 	Get Product Conversions (cached)
@@ -681,14 +833,14 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 		//
 		final String whereClause = "M_Product_ID=?"
 			+ " AND EXISTS (SELECT 1 FROM M_Product p "
-				+ "WHERE C_UOM_Conversion.M_Product_ID=p.M_Product_ID AND C_UOM_Conversion.C_UOM_ID=p.C_UOM_ID)";
+				+ "WHERE C_UOM_Conversion.M_Product_ID=p.M_Product_ID AND (C_UOM_Conversion.C_UOM_ID=p.C_UOM_ID OR C_UOM_Conversion.C_UOM_To_ID=p.C_UOM_ID))";
 		List<MUOMConversion> conversions = new Query(ctx, Table_Name, whereClause, null)
 		.setParameters(M_Product_ID)
 		.setOnlyActiveRecords(true)
 		.list();
 		list.addAll(conversions);
 		list.stream().forEach(e -> e.markImmutable());
-		
+
 		//	Convert & save
 		result = new MUOMConversion[list.size ()];
 		list.toArray (result);
@@ -766,74 +918,70 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 	}	//	MUOMConversion
 	
 	/**
-	 * 
+	 * Copy constructor
 	 * @param copy
 	 */
-	public MUOMConversion(MUOMConversion copy) 
+	public MUOMConversion(MUOMConversion copy)
 	{
 		this(Env.getCtx(), copy);
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 */
-	public MUOMConversion(Properties ctx, MUOMConversion copy) 
+	public MUOMConversion(Properties ctx, MUOMConversion copy)
 	{
 		this(ctx, copy, (String) null);
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 * @param trxName
 	 */
-	public MUOMConversion(Properties ctx, MUOMConversion copy, String trxName) 
+	public MUOMConversion(Properties ctx, MUOMConversion copy, String trxName)
 	{
 		this(ctx, 0, trxName);
-		copyPO(copy);
 	}
-	
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true if can be saved
-	 */
+
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
-		//	From - To is the same
+		// Validate From UOM and To UOM is not the same
 		if (getC_UOM_ID() == getC_UOM_To_ID())
 		{
 			log.saveError("Error", Msg.parseTranslation(getCtx(), "@C_UOM_ID@ = @C_UOM_To_ID@"));
 			return false;
 		}
-		
+
 		if (getMultiplyRate() != null && getMultiplyRate().signum() != 0)
 		{
+			// Calculate divide rate from multiply rate
 			if (getDivideRate() == null || getDivideRate().signum() == 0)
 				setDivideRate(getOppositeRate(getMultiplyRate()));
 		}
 		else if (getDivideRate() != null && getDivideRate().signum() != 0)
 		{
+			// Calculate multiply rate from divide rate
 			if (getMultiplyRate() == null || getMultiplyRate().signum() == 0)
 				setMultiplyRate(getOppositeRate(getDivideRate()));
 		}
-		
-		//	Nothing to convert
+
+		// Error if there's no conversion rate
 		if (getMultiplyRate().compareTo(Env.ZERO) <= 0)
 		{
 			log.saveError("Error", Msg.parseTranslation(getCtx(), "@MultiplyRate@ <= 0"));
 			return false;
 		}
-		//	Enforce Product UOM
+		//	Enforce Product UOM = Conversion UOM
 		if (MSysConfig.getBooleanValue(MSysConfig.ProductUOMConversionUOMValidate, true, getAD_Client_ID()))
 		{
 			if (getM_Product_ID() != 0 
 				&& (newRecord || is_ValueChanged("M_Product_ID") || is_ValueChanged("C_UOM_ID")))
 			{
-				// Check of product must be in the same transaction as the conversion being saved
 				MProduct product = new MProduct(getCtx(), getM_Product_ID(), get_TrxName());
 				if (product.getC_UOM_ID() != getC_UOM_ID())
 				{
@@ -844,7 +992,7 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 			}
 		}
 
-		//	The Product UoM needs to be the smallest UoM - Multiplier must be < 0; Divider must be > 0
+		//	The Product UOM needs to be the smallest UOM - Multiply rate must be < 0; Divide rate must be > 0
 		if (MSysConfig.getBooleanValue(MSysConfig.ProductUOMConversionRateValidate, true, getAD_Client_ID()))
 		{
 			if (getM_Product_ID() != 0 && getDivideRate().compareTo(Env.ONE) < 0)
@@ -853,14 +1001,15 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 				return false;
 			}
 		}
-		
+
 		return true;
 	}	//	beforeSave
-	
+
 	/**
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MUOMConversion[");
@@ -881,13 +1030,95 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 		makeImmutable();
 		return this;
 	}
+	
+	/**
+	 * Calculate opposite conversion rate, i.e calculate divide rate from multiply rate and vice versa.
+	 * @param rate
+	 * @return opposite conversion rate
+	 */
+	public static BigDecimal getOppositeRate(BigDecimal rate) {
+		return getOppositeRate(rate, 12);
+	}
 
 	/**
 	 * Calculate opposite conversion rate, i.e calculate divide rate for multiply rate and vice versa.
 	 * @param rate
 	 * @return {@link BigDecimal}
 	 */
-	public static BigDecimal getOppositeRate(BigDecimal rate) {
-		return Env.ONE.divide(rate, 12, RoundingMode.HALF_UP);
+	public static BigDecimal getOppositeRate(BigDecimal rate, int scale) {
+		return Env.ONE.divide(rate, scale, RoundingMode.HALF_UP);
 	}
+
+	/**
+	 * Get conversion rate using common UOM between FromUOM and ToUOM
+	 * 
+	 * @param ctx
+	 * @param C_UOM_ID
+	 * @param C_UOM_To_ID
+	 * @param M_Product_ID
+	 * @return conversion rate or null
+	 */
+	public static BigDecimal getRateUsingCommonUOM(Properties ctx, int C_UOM_ID, int C_UOM_To_ID, int M_Product_ID)
+	{
+		if (C_UOM_ID == C_UOM_To_ID)
+		{
+			return Env.ONE;
+		}
+
+		Map<Integer, BigDecimal> fromUOMRelatedUOMsWithRate = new HashMap<Integer, BigDecimal>();
+		List<MUOMConversion> conversions = new Query(ctx, Table_Name,
+				"(C_UOM_ID=? OR C_UOM_TO_ID=?) AND (M_Product_ID IS NULL OR M_Product_ID=?)", null)
+						.setParameters(C_UOM_ID, C_UOM_ID, M_Product_ID).setOnlyActiveRecords(true)
+						.setOrderBy("M_Product_ID DESC").list();
+		for (int i = 0; i < conversions.size(); i++)
+		{
+			MUOMConversion conversion = conversions.get(i);
+			if (conversion.getC_UOM_ID() == C_UOM_ID)
+			{
+				fromUOMRelatedUOMsWithRate.put(conversion.getC_UOM_To_ID(), conversion.getMultiplyRate());
+			}
+			else
+			{
+				fromUOMRelatedUOMsWithRate.put(conversion.getC_UOM_ID(), conversion.getDivideRate());
+			}
+		}
+
+		if (fromUOMRelatedUOMsWithRate.size() > 0)
+		{
+			int precision = 50;
+			MUOM toUOM = MUOM.get(ctx, C_UOM_To_ID);
+			if(toUOM != null && toUOM.getStdPrecision() >= 0)
+			{
+				precision = toUOM.getStdPrecision();
+			}
+
+			conversions = new Query(ctx, Table_Name,
+					"(C_UOM_ID=? OR C_UOM_TO_ID=?) AND (M_Product_ID IS NULL OR M_Product_ID=?)", null)
+							.setParameters(C_UOM_To_ID, C_UOM_To_ID, M_Product_ID).setOnlyActiveRecords(true)
+							.setOrderBy("M_Product_ID").list();
+			for (int i = 0; i < conversions.size(); i++)
+			{
+				MUOMConversion conversion = conversions.get(i);
+				if (conversion.getC_UOM_ID() == C_UOM_To_ID)
+				{
+					if (fromUOMRelatedUOMsWithRate.containsKey(conversion.getC_UOM_To_ID()))
+					{
+						return fromUOMRelatedUOMsWithRate.get(conversion.getC_UOM_To_ID())
+								.divide(conversion.getMultiplyRate(), precision, RoundingMode.HALF_UP);
+					}
+				}
+				else
+				{
+					if (fromUOMRelatedUOMsWithRate.containsKey(conversion.getC_UOM_ID()))
+					{
+						return fromUOMRelatedUOMsWithRate.get(conversion.getC_UOM_ID())
+								.divide(conversion.getDivideRate(), precision, RoundingMode.HALF_UP);
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
 }	//	UOMConversion
