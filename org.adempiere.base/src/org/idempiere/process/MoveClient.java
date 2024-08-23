@@ -964,7 +964,7 @@ public class MoveClient extends SvrProcess {
 								}
 								else
 								{
-									idArray = new Integer[] { (Integer) objVal };
+									idArray = new Integer[] { Integer.parseInt(String.valueOf(objVal)) };
 								}
 
 								Integer[] convertedIdArray = new Integer[idArray.length];
