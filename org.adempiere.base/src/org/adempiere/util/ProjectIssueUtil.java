@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCost;
 import org.compiere.model.MProduct;
+import org.compiere.model.ProductCost;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -120,4 +121,25 @@ public class ProjectIssueUtil
 			return costs;
 		return Env.ZERO;
 	} // getProductCosts
+	
+	/**
+	 * Get Product Standard Cost
+	 * 
+	 * @param  as        Accounting Schema
+	 * @param  AD_Org_ID
+	 * @param  productID
+	 * @param  asiID
+	 * @param  trxName
+	 * @return           Product Standard Price
+	 */
+	public static BigDecimal getProductStdCost(MAcctSchema as, int AD_Org_ID, int productID, int asiID, String trxName, BigDecimal qty)
+	{
+		ProductCost pc = new ProductCost(Env.getCtx(), productID, asiID, trxName);
+		String costingMethod = null;
+		pc.setQty(qty);
+		BigDecimal costs = pc.getProductCosts(as, AD_Org_ID, costingMethod, 0, true);
+		if (costs != null)
+			return costs;
+		return Env.ZERO;
+	} // getProductStdCost
 }
