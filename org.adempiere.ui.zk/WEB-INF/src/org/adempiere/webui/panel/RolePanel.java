@@ -863,9 +863,10 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 				public void onEvent(Event ev) throws Exception
 				{
 					updatePerference();
+					Clients.clearBusy();
 				}
 			});
-
+			Clients.showBusy(null);
 			Events.echoEvent(SSOUtils.EVENT_ON_AFTER_SSOLOGIN, this, null);
 		}
 		else
