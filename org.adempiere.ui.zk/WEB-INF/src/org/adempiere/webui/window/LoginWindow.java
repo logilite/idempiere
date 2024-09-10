@@ -50,7 +50,6 @@ import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Language;
-import org.compiere.util.Login;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
@@ -137,14 +136,15 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 			Locale locale = language.getLocale();
 			getDesktop().getSession().setAttribute(Attributes.PREFERRED_LOCALE, locale);
 
-			Login login = new Login(ctx);
+			ILogin login = Core.getLogin(ctx);
+			login.setIsSSOLogin(true);
 			boolean isShowRolePanel = MSysConfig.getBooleanValue(MSysConfig.SSO_SELECT_ROLE, true);
 			
 			// show role panel when change role
 			if (getDesktop().getSession().hasAttribute(SSOUtils.ISCHANGEROLE_REQUEST))
 				isShowRolePanel = isShowRolePanel || (boolean) getDesktop().getSession().getAttribute(SSOUtils.ISCHANGEROLE_REQUEST);
 
-			KeyNamePair[] clients = login.getClients(username, null, null, true);
+			KeyNamePair[] clients = login.getClients(username, null, null);
 			if (clients != null)
 				loginOk(username, isShowRolePanel, clients, true);
 			else
@@ -186,8 +186,7 @@ public class LoginWindow extends FWindow implements EventListener<Event>
     }
 
 	protected void createRolePanel(String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isSSOLogin) {
-		pnlRole = Extensions.getRolePanel(ctx, this, userName, show, clientsKNPairs);
-		pnlRole.setIsSSOLogin(isSSOLogin);
+		pnlRole = Extensions.getRolePanel(ctx, this, userName, show, clientsKNPairs,isSSOLogin);
 		if (!pnlRole.isShow())
 			pnlRole.validateRoles();
 	}

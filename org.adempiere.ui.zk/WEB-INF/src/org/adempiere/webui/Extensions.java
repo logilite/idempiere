@@ -157,17 +157,18 @@ public class Extensions {
 	 * @param userName
 	 * @param show
 	 * @param clientsKNPairs
+	 * @param isSSOLogin 
 	 * @return
 	 */
 	public static RolePanel getRolePanel(Properties ctx, LoginWindow loginWindow, String userName, boolean show,
-			KeyNamePair[] clientsKNPairs)
+			KeyNamePair[] clientsKNPairs, boolean isSSOLogin)
 	{
 		List<IRolePanelFactory> factories = Service.locator().list(IRolePanelFactory.class).getServices();
 		if (factories != null && !factories.isEmpty())
 		{
 			for (IRolePanelFactory factory : factories)
 			{
-				RolePanel rolePanel = factory.newInstance(ctx, loginWindow, userName, show, clientsKNPairs);
+				RolePanel rolePanel = factory.newInstance(ctx, loginWindow, userName, show, clientsKNPairs, isSSOLogin);
 				if (rolePanel != null)
 					return rolePanel;
 			}
