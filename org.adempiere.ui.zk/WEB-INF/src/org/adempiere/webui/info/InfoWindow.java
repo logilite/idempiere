@@ -987,17 +987,11 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 
 				/** Info window Other Clause */
 				String otherClause = getInfoWindowOtherClause(embedInfo);
-				if (!Util.isEmpty(otherClause, true))
-					s_sqlWhere = s_sqlWhere +" "+ otherClause;
 
-				/** Info window Order By Clause */
-				String orderByClause = getInfoWindowOrderByClause(embedInfo);
-
-				String s_sqlCount = "SELECT COUNT(*) FROM " + s_sqlFrom + " WHERE " + s_sqlWhere;
+				String s_sqlCount = "SELECT COUNT(1) FROM " + s_sqlFrom + " WHERE " + s_sqlWhere + (Util.isEmpty(otherClause, true) ? "" : otherClause);
 
 				// prepare embedded info window
-				m_sqlEmbedded = prepareEmbeddedInfoWindowTable(embedInfo, embeddedTbl, s_layoutEmbedded, s_sqlWhere,
-						orderByClause, tableName);
+				m_sqlEmbedded = prepareEmbeddedInfoWindowTable(embedInfo, embeddedTbl, s_layoutEmbedded, s_sqlWhere, tableName);
 
 				embeddedTbl.setMultiSelection(false);
 
@@ -1044,7 +1038,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	}
 
 	protected String prepareEmbeddedInfoWindowTable(MInfoWindow embedInfo, WListbox embeddedTbl, ColumnInfo[] layout,
-			String where, String orderBy, String tableName)
+			String where, String tableName)
 	{
 
 		String m_sqlEmbedded = embeddedTbl.prepareTable(layout, embedInfo.getFromClause(), where, false, tableName);
@@ -1064,13 +1058,10 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			m_sqlEmbedded = "SELECT DISTINCT " + m_sqlEmbedded;
 		}
 
-		if (m_sqlEmbedded.length() > 0 && !Util.isEmpty(orderBy, true))
-			m_sqlEmbedded = m_sqlEmbedded + " ORDER BY " + orderBy;
-
 		return m_sqlEmbedded;
 	}
 
-	protected String getInfoWindowOrderByClause(MInfoWindow infoWindow)
+	public String getInfoWindowOrderByClause(MInfoWindow infoWindow)
 	{
 		String orderBy = "";
 		if (infoWindow != null && !Util.isEmpty(infoWindow.getOrderByClause(), true))
@@ -1086,7 +1077,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		return orderBy;
 	}
 
-	protected String getInfoWindowOtherClause(MInfoWindow infoWindow)
+	public String getInfoWindowOtherClause(MInfoWindow infoWindow)
 	{
 		String otherClause = "";
 		if (infoWindow != null && !Util.isEmpty(infoWindow.getOtherClause(), true))

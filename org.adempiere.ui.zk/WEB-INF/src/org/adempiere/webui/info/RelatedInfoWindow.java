@@ -479,8 +479,9 @@ public class RelatedInfoWindow implements EventListener<Event>, Sortable<Object>
         dataSql = info.getInfoSql();
         
         // Other Clause and Order By clause
-        String otherClause = info.getInfowin().getOtherClause();
-        String orderByClause = info.getInfowin().getOrderByClause();
+        String otherClause = parentInfoWindow.getInfoWindowOtherClause(info.getInfowin());
+        String orderByClause = parentInfoWindow.getInfoWindowOrderByClause(info.getInfowin());
+
         if (!Util.isEmpty(otherClause)) {
         	dataSql = dataSql + " " + otherClause;
         }
