@@ -553,6 +553,7 @@ public class Process {
 			{
 				valueString = "";
 				iPara.setInfo("binary");
+				iPara.saveEx();
 			}
 			
 			String valueString2 = null;
