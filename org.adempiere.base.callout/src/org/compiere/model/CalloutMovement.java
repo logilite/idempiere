@@ -52,6 +52,8 @@ public class CalloutMovement extends CalloutEngine
 			return "";
 		
 		MProduct p =  MProduct.get(ctx, M_Product_ID);
+		mTab.setValue("C_UOM_ID", p.getC_UOM_ID()); 
+
 		//	Set Attribute
 		if (Env.getContextAsInt(ctx, WindowNo, Env.TAB_INFO, "M_Product_ID") == M_Product_ID.intValue()
 			&& Env.getContextAsInt(ctx, WindowNo, Env.TAB_INFO, "M_AttributeSetInstance_ID") != 0)
@@ -60,8 +62,6 @@ public class CalloutMovement extends CalloutEngine
 			mTab.setValue("M_AttributeSetInstance_ID", 0);
 		
 		mTab.setValue("M_AttributeSetInstanceTo_ID", null);
-		
-		mTab.setValue("C_UOM_ID", p.getC_UOM_ID()); 
 		checkQtyAvailable(ctx, mTab, WindowNo, M_Product_ID, null);
 		return "";
 	}   //  product
