@@ -23,7 +23,9 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.GridField;
+import org.compiere.model.MPrintFormatAccess;
 import org.compiere.model.X_AD_PrintFormatItem;
 import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
@@ -31,6 +33,7 @@ import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Language;
+import org.compiere.util.Msg;
 
 /**
  *	Print Format Item Model.
@@ -646,6 +649,8 @@ public class MPrintFormatItem extends X_AD_PrintFormatItem
 	 */
 	protected boolean beforeSave (boolean newRecord)
 	{
+		if (!MPrintFormatAccess.isWriteAccessPrintFormat(getAD_PrintFormat_ID(), get_TrxName()))
+			throw new AdempiereException(Msg.getMsg(getCtx(), MPrintFormatAccess.Msg_PF_Access_Update, true));
 		//	Order
 		if (!isOrderBy())
 		{
@@ -728,6 +733,14 @@ public class MPrintFormatItem extends X_AD_PrintFormatItem
 		if (m_translationLabelChanged)
 			return true;
 		return super.is_Changed();
+	}
+	
+	@Override
+	protected boolean beforeDelete()
+	{
+		if (!MPrintFormatAccess.isWriteAccessPrintFormat(getAD_PrintFormat_ID(), get_TrxName()))
+			throw new AdempiereException(Msg.getMsg(getCtx(),MPrintFormatAccess.Msg_PF_Access_Delete, true));
+		return super.beforeDelete();
 	}
 	
 }	//	MPrintFormatItem
