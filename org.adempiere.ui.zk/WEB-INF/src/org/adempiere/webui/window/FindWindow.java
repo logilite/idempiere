@@ -2333,6 +2333,14 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            	column.setSelectedIndex(0);
 	            	continue;
 	            }
+
+	            //  Op
+				Combobox op = (Combobox)row.getFellow("listOperator"+row.getId());
+	            if (op == null)
+	                continue;
+	            String Operator = op.getSelectedItem() != null ? op.getSelectedItem().getValue().toString() : "";
+
+	            //
 	            ValueNamePair vnp = column.getSelectedItem().getValue();
 	            String ColumnName = vnp.getValue();
 	            String tableUID = table.getSelectedItem() != null ? table.getSelectedItem().getValue().toString() : "";
@@ -2355,7 +2363,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 					{       
 						if (!isCompositeExists) {
 							MTable refTable = MTable.get(Env.getCtx(), m_tableName);
-							exists.append("SELECT 1 FROM ").append(m_gridTab.getTableName())
+							exists.append("SELECT ").append(DB.isOracle() ? "1" : "1=1").append(" FROM ").append(m_gridTab.getTableName())
 							.append(" WHERE ").append(m_gridTab.getTableName()).append(".").append(m_gridTab.getLinkColumnName())
 							.append(" = ").append(m_tableName).append(".");
 							if (refTable.isUUIDKeyTable())
@@ -2364,8 +2372,11 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 								exists.append(m_tableName).append("_ID ");
 							
 							exists.append(" AND ")
-								.append(getLeftBracketValue(row))
-								.append(ColumnSQL);
+								.append(getLeftBracketValue(row));
+								if (MQuery.OPERATORS[MQuery.LIKE_INDEX].getValue().equals(Operator))
+									exists.append("UPPER(").append(m_gridTab.getTableName()).append(".").append(ColumnSQL).append(")");
+								else
+									exists.append(ColumnSQL);
 							ColumnSQL = exists.toString();
 						}         
 
@@ -2404,11 +2415,6 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 				if (andOr.contains("NOT")) {
 					not = true;
 				}
-	            //  Op
-				Combobox op = (Combobox)row.getFellow("listOperator"+row.getId());
-	            if (op == null)
-	                continue;
-	            String Operator = op.getSelectedItem() != null ? op.getSelectedItem().getValue().toString() : "";
 
 	            //  Value   ******
 	            ListCell cellQueryFrom = (ListCell)row.getFellow("cellQueryFrom"+row.getId());
@@ -2592,7 +2598,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            	else
 	            		m_query.addRestriction("NOT (" + clause + ")", openBrackets, andOr);
 	            } else if (MQuery.OPERATORS[MQuery.LIKE_INDEX].getValue().equals(Operator))
-	            	m_query.addRestriction(ColumnSQL, Operator, parsedValue, infoName, infoDisplay, and, openBrackets, true);
+	            	m_query.addRestriction(ColumnSQL, Operator, parsedValue, infoName, infoDisplay, and, openBrackets, !isExists);
 	            else {
 	            	if (table.getSelectedItem() != null && table.getSelectedItem().getValue().toString().equals(MAttribute.COLUMNNAME_M_Attribute_ID)
 	               			|| isExists) {

@@ -1839,7 +1839,7 @@ class Restriction  implements Serializable
 			int pos = ColumnName.lastIndexOf('(')+1;	//	including (
 			int end = ColumnName.indexOf(')');
 			//	We have a Function in the ColumnName
-			if (pos != -1 && end != -1 && !(pos-1==ColumnName.indexOf('(') && ColumnName.trim().startsWith("(")))
+			if (pos != -1 && end != -1 && !(pos-1==ColumnName.indexOf('(') && (ColumnName.trim().startsWith("(") || ColumnName.trim().toUpperCase().startsWith("SELECT"))))
 				sb.append(ColumnName.substring(0, pos))
 					.append(tableName).append(".").append(DB.getDatabase().quoteColumnName(ColumnName.substring(pos, end)))
 					.append(ColumnName.substring(end));
@@ -1866,7 +1866,7 @@ class Restriction  implements Serializable
 		if ( ! (Operator.equals(MQuery.NULL) || Operator.equals(MQuery.NOT_NULL)))
 		{
 			if (Code instanceof String) {
-				if ((IsAdvanceSearch && Operator.equals(MQuery.LIKE)) || ColumnName.toUpperCase().startsWith("UPPER("))
+				if (Operator.equals(MQuery.LIKE) || ColumnName.toUpperCase().startsWith("UPPER("))
 					sb.append("UPPER(").append(DB.TO_STRING(Code.toString())).append(")");
 				else
 					sb.append(DB.TO_STRING(Code.toString()));
@@ -1891,6 +1891,10 @@ class Restriction  implements Serializable
 			else if (MQuery.EXCLUDE_OP.equals(Operator))
 			{
 				sb.append(")").append(MQuery.EXCLUDE_OP2);
+			}
+			else if (!IsAdvanceSearch && MQuery.LIKE.equals(Operator))
+			{
+				sb.insert(0, "(").append(")");
 			}
 		}
 		return sb.toString();
