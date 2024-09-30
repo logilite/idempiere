@@ -80,6 +80,7 @@ public class SSOWebuiFilter implements Filter
 					{
 						// Use authentication code get get token
 						m_SSOPrinciple.getAuthenticationToken(httpRequest, httpResponse, SSOUtils.SSO_MODE_WEBUI);
+						return;
 					}
 					else if (!m_SSOPrinciple.isAuthenticated(httpRequest, httpResponse))
 					{

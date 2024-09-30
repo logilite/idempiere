@@ -71,6 +71,7 @@ public class Login implements ILogin
 {
 	protected String loginErrMsg;
 	protected boolean isPasswordExpired;
+	protected boolean isSSOLogin = false;
 
 	public String getLoginErrMsg() {
 		return loginErrMsg;
@@ -1253,22 +1254,17 @@ public class Login implements ILogin
 		return getClients(app_user, app_pwd, null);
 	}
 
-	@Override
-	public KeyNamePair[] getClients(String userId, String userPassword, String roleTypes)
-	{
-		return getClients(userId, userPassword, roleTypes, false);
-	}
-
+	
 	/**
 	 * Validate Client Login.
 	 * Sets Context with login info
 	 * @param app_user user id
 	 * @param app_pwd password
 	 * @param roleTypes comma separated list of the role types allowed to login (NULL can be added)
-	 * @param isSSOLogin check only base on user Name
 	 * @return client array or null if in error.
 	 */
-	public KeyNamePair[] getClients(String app_user, String app_pwd, String roleTypes, boolean isSSOLogin) {
+	@Override
+	public KeyNamePair[] getClients(String app_user, String app_pwd, String roleTypes) {
 		if (log.isLoggable(Level.INFO)) log.info("User=" + app_user);
 
 		if (Util.isEmpty(app_user))
@@ -1330,7 +1326,7 @@ public class Login implements ILogin
 		ArrayList<KeyNamePair> clientList = new ArrayList<KeyNamePair>();
 		ArrayList<Integer> clientsValidated = new ArrayList<Integer>();
 
-		StringBuilder where = new StringBuilder("Password IS NOT NULL AND ");
+		StringBuilder where = new StringBuilder(isSSOLogin ? "" : "Password IS NOT NULL AND ");
 		if (email_login)
 			where.append("EMail=?");
 		else
@@ -1661,7 +1657,9 @@ public class Login implements ILogin
 			.append("FROM AD_User u")
 			.append(" INNER JOIN AD_User_Roles ur ON (u.AD_User_ID=ur.AD_User_ID AND ur.IsActive='Y')")
 			.append(" INNER JOIN AD_Role r ON (ur.AD_Role_ID=r.AD_Role_ID AND r.IsActive='Y') ");
-		sql.append("WHERE ur.AD_Client_ID=? AND u.Password IS NOT NULL AND ");
+		sql.append("WHERE ur.AD_Client_ID=? AND ");
+		if(!isSSOLogin)
+			sql.append(" u.Password IS NOT NULL AND ");
 		boolean email_login = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
 		boolean searhkey_login = MSysConfig.getBooleanValue(MSysConfig.USE_SEARCH_KEY_FOR_LOGIN, false);
 		if (email_login)
@@ -1784,6 +1782,12 @@ public class Login implements ILogin
 			rs = null; pstmt = null;
 		}
 		return retValue;		
+	}
+
+	@Override
+	public void setIsSSOLogin(boolean isSSOLogin)
+	{
+		this.isSSOLogin = isSSOLogin;
 	}
 
 	/**

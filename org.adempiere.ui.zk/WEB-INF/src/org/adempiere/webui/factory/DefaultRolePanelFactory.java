@@ -11,9 +11,9 @@ public class DefaultRolePanelFactory implements IRolePanelFactory
 
 	@Override
 	public RolePanel newInstance(Properties ctx, LoginWindow loginWindow, String userName, boolean show,
-			KeyNamePair[] clientsKNPairs, boolean isClientDefined) 
+			KeyNamePair[] clientsKNPairs, boolean isSSOLogin)
 	{
-		return new RolePanel(ctx, loginWindow, userName, show, clientsKNPairs, isClientDefined);
+		return new RolePanel(ctx, loginWindow, userName, show, clientsKNPairs, isSSOLogin);
 	}
 
 }

@@ -730,6 +730,7 @@ public class GridTabCSVImporter implements IGridTabImporter
 								currentGridTab.dataRefresh(true); 
 						}
 					} else {
+						setError(true);
 						m_isDataError = true;
 						ValueNamePair ppE = CLogger.retrieveWarning();
 						if (ppE==null)   

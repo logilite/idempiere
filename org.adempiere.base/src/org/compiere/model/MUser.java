@@ -219,7 +219,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 		ArrayList<Integer> clientsValidated = new ArrayList<Integer>();
 		MUser retValue = null;
 		
-		StringBuilder where = new StringBuilder("Password IS NOT NULL AND ");
+		StringBuilder where = new StringBuilder(isSSOLogin ? "" : "Password IS NOT NULL AND ");
 		if (email_login)
 			where.append("EMail=?");
 		else
@@ -1062,6 +1062,17 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	 *	@return user or null
 	 */
 	public static MUser get(Properties ctx, String name) {
+		return get(ctx, name, false);
+	}
+
+	/**
+	 * 	Get User that has roles (already authenticated)
+	 *	@param ctx context
+	 *	@param name name
+	 *  @param isSSOLogin if true do not check for Password
+	 *	@return user or null
+	 */
+	public static MUser get(Properties ctx, String name, boolean isSSOLogin) {
 		if (name == null || name.length() == 0)
 		{
 			s_log.warning ("Invalid Name = " + name);
@@ -1074,7 +1085,9 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 			.append("FROM AD_User u")
 			.append(" INNER JOIN AD_User_Roles ur ON (u.AD_User_ID=ur.AD_User_ID AND ur.IsActive='Y')")
 			.append(" INNER JOIN AD_Role r ON (ur.AD_Role_ID=r.AD_Role_ID AND r.IsActive='Y') ");
-		sql.append("WHERE ur.AD_Client_ID=? AND u.Password IS NOT NULL AND ");
+		sql.append("WHERE ur.AD_Client_ID=? AND ");
+		if(!isSSOLogin)
+			sql.append(" u.Password IS NOT NULL AND ");
 		boolean email_login = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
 		boolean searhkey_login = MSysConfig.getBooleanValue(MSysConfig.USE_SEARCH_KEY_FOR_LOGIN, false);
 		if (email_login)

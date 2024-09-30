@@ -113,6 +113,8 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 
 	protected boolean m_showRolePanel = true;
 
+	protected boolean m_isSSOLogin = false;
+	
 	protected RolePanel component;
 
 	private boolean isChangeRole = false;
@@ -132,7 +134,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 
 	protected static final String ON_DEFER_LOGOUT = "onDeferLogout";
 
-	public RolePanel(Properties ctx, LoginWindow loginWindow, String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isClientDefined) {
+	public RolePanel(Properties ctx, LoginWindow loginWindow, String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isClientDefined, boolean isSSOLogin) {
     	this.wndLogin = loginWindow;
     	m_ctx = ctx;
     	m_userName = userName;    	
@@ -140,10 +142,12 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     	m_showRolePanel = show;
     	m_isClientDefined = isClientDefined;
         m_clientKNPairs = clientsKNPairs;
+        m_isSSOLogin = isSSOLogin;
+        login.setIsSSOLogin(m_isSSOLogin);
         
         if( m_clientKNPairs.length == 1  &&  !m_showRolePanel ){
         	Env.setContext(m_ctx, Env.AD_CLIENT_ID, (String) m_clientKNPairs[0].getID());
-        	MUser user = MUser.get (m_ctx, Login.getAppUser(m_userName));
+        	MUser user = MUser.get (m_ctx, Login.getAppUser(m_userName), m_isSSOLogin);
         	m_userpreference=new UserPreference();
         	m_userpreference.loadPreference(user.get_ID());        	
         }
@@ -749,7 +753,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     	} else {
         	Env.setContext(m_ctx, Env.AD_CLIENT_ID, (String) null);
     	}
-    	MUser user = MUser.get (m_ctx, Login.getAppUser(m_userName));
+    	MUser user = MUser.get (m_ctx, Login.getAppUser(m_userName), m_isSSOLogin);
     	if (user != null) {
     		Env.setContext(m_ctx, Env.AD_USER_ID, user.getAD_User_ID() );
     		Env.setContext(m_ctx, Env.AD_USER_NAME, user.getName() );
