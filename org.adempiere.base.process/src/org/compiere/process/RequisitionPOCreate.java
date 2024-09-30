@@ -359,6 +359,8 @@ public class RequisitionPOCreate extends SvrProcess
 				return;
 		}
 
+		// Update Order Line
+		m_orderLine.setQty(m_orderLine.getQtyOrdered().add(rLine.getQty()));
 		//	Update Requisition Line
 		rLine.setC_OrderLine_ID(m_orderLine.getC_OrderLine_ID());
 		rLine.saveEx();
@@ -552,8 +554,6 @@ public class RequisitionPOCreate extends SvrProcess
 		m_orderLine.setC_Campaign_ID(C_Campaign_ID);
 		m_orderLine.setDescription(rLine.getDescription());
 		m_orderLine.setC_UOM_ID(rLine.getC_UOM_ID());
-		m_orderLine.setQty((BigDecimal) rLine.getQty());
-		m_orderLine.setQtyOrdered((BigDecimal) rLine.getQtyOrdered());
 
 		m_orderLine.setPrice((BigDecimal) rLine.getPriceEntered());
 		m_orderLine.setPriceActual(rLine.getPriceActual());
