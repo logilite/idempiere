@@ -333,6 +333,19 @@ public interface I_C_DocType
 	  */
 	public boolean isActive();
 
+    /** Column name IsAlwaysPosted */
+    public static final String COLUMNNAME_IsAlwaysPosted = "IsAlwaysPosted";
+
+	/** Set Always Posted.
+	  * Always set document status to posted.
+	  */
+	public void setIsAlwaysPosted (boolean IsAlwaysPosted);
+
+	/** Get Always Posted.
+	  * Always set document status to posted.
+	  */
+	public boolean isAlwaysPosted();
+
     /** Column name IsChargeOrProductMandatory */
     public static final String COLUMNNAME_IsChargeOrProductMandatory = "IsChargeOrProductMandatory";
 

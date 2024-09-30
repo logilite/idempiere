@@ -31,7 +31,7 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 	/**
 	 *
 	 */
- 	private static final long serialVersionUID = 20231222L;
+	private static final long serialVersionUID = 20240924L;
 
     /** Standard Constructor */
     public X_C_DocType (Properties ctx, int C_DocType_ID, String trxName)
@@ -45,6 +45,8 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 // 1
 			setGL_Category_ID (0);
 			setHasCharges (false);
+			setIsAlwaysPosted (false);
+// N
 			setIsCreateCounter (true);
 // Y
 			setIsDefault (false);
@@ -79,6 +81,8 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 // 1
 			setGL_Category_ID (0);
 			setHasCharges (false);
+			setIsAlwaysPosted (false);
+// N
 			setIsCreateCounter (true);
 // Y
 			setIsDefault (false);
@@ -111,6 +115,8 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 // 1
 			setGL_Category_ID (0);
 			setHasCharges (false);
+			setIsAlwaysPosted (false);
+// N
 			setIsCreateCounter (true);
 // Y
 			setIsDefault (false);
@@ -143,6 +149,8 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 // 1
 			setGL_Category_ID (0);
 			setHasCharges (false);
+			setIsAlwaysPosted (false);
+// N
 			setIsCreateCounter (true);
 // Y
 			setIsDefault (false);
@@ -684,6 +692,29 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 	public boolean isHasProforma()
 	{
 		Object oo = get_Value(COLUMNNAME_HasProforma);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Always Posted.
+		@param IsAlwaysPosted Always set document status to posted.
+	*/
+	public void setIsAlwaysPosted (boolean IsAlwaysPosted)
+	{
+		set_Value (COLUMNNAME_IsAlwaysPosted, Boolean.valueOf(IsAlwaysPosted));
+	}
+
+	/** Get Always Posted.
+		@return Always set document status to posted.
+	  */
+	public boolean isAlwaysPosted()
+	{
+		Object oo = get_Value(COLUMNNAME_IsAlwaysPosted);
 		if (oo != null)
 		{
 			 if (oo instanceof Boolean)

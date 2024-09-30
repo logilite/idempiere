@@ -17,6 +17,7 @@
 package org.compiere.model;
 
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -769,6 +770,19 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 		if (m_default != null)
 			m_default.markImmutable();
 		return this;
+	}
+
+	/**
+	 * Checks if the given accounting date falls within the valid date range (start and end date)
+	 * of the accounting schema.
+	 * 
+	 * @param  dateAcct the accounting date to check
+	 * @return          true if the accounting date is within the range, false otherwise
+	 */
+	public boolean isAccDateInRange(Timestamp dateAcct)
+	{
+		return (getStartDate() == null || dateAcct.equals(getStartDate()) || dateAcct.after(getStartDate()))
+				&& (getEndDate() == null || dateAcct.equals(getEndDate()) || dateAcct.before(getEndDate()));
 	}
 
 }	//	MAcctSchema

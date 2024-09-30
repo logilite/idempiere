@@ -208,6 +208,19 @@ public interface I_C_AcctSchema
 	  */
 	public String getDescription();
 
+    /** Column name EndDate */
+    public static final String COLUMNNAME_EndDate = "EndDate";
+
+	/** Set End Date.
+	  * Last effective date (inclusive)
+	  */
+	public void setEndDate (Timestamp EndDate);
+
+	/** Get End Date.
+	  * Last effective date (inclusive)
+	  */
+	public Timestamp getEndDate();
+
     /** Column name GAAP */
     public static final String COLUMNNAME_GAAP = "GAAP";
 
@@ -452,6 +465,19 @@ public interface I_C_AcctSchema
 	  * Element Separator
 	  */
 	public String getSeparator();
+
+    /** Column name StartDate */
+    public static final String COLUMNNAME_StartDate = "StartDate";
+
+	/** Set Start Date.
+	  * First effective day (inclusive)
+	  */
+	public void setStartDate (Timestamp StartDate);
+
+	/** Get Start Date.
+	  * First effective day (inclusive)
+	  */
+	public Timestamp getStartDate();
 
     /** Column name TaxCorrectionType */
     public static final String COLUMNNAME_TaxCorrectionType = "TaxCorrectionType";
