@@ -9,5 +9,5 @@ import org.compiere.util.KeyNamePair;
 public interface IRolePanelFactory
 {
 	public RolePanel newInstance(Properties ctx, LoginWindow loginWindow, String userName, boolean show,
-			KeyNamePair[] clientsKNPairs, boolean isClientDefined);
+			KeyNamePair[] clientsKNPairs, boolean isClientDefined, boolean isSSOLogin);
 }

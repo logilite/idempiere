@@ -75,7 +75,7 @@ public class Doc_ProjectIssue extends Doc
 		m_line.setQty (m_issue.getMovementQty(), true);    //  sets Trx and Storage Qty
 
 		//	Pseudo Line Check
-		if (m_line.getM_Product_ID() == 0)
+		if (m_line.getM_Product_ID() == 0 && m_line.getC_Charge_ID() <= 0)
 			log.warning(m_line.toString() + " - No Product");
 		if (log.isLoggable(Level.FINE)) log.fine(m_line.toString());
 		return null;
@@ -135,7 +135,7 @@ public class Doc_ProjectIssue extends Doc
 		//  Line pointers
 		FactLine dr = null;
 		FactLine cr = null;
-
+		//TODO if cost detail exists then cost must taken from cost details only
 		//  Issue Cost
 		BigDecimal cost = null;
 		if (m_issue.getM_InOutLine_ID() != 0)
@@ -148,6 +148,7 @@ public class Doc_ProjectIssue extends Doc
 		{
 			cost = m_line.getProductCosts(as, getAD_Org_ID(), false);
 		}
+		//TODO There is missing no cost check. 
 		
 		//  Project         DR
 		int acctType = ACCTTYPE_ProjectWIP;

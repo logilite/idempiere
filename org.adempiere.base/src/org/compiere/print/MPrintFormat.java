@@ -31,13 +31,17 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.model.MTabCustomization;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.GridTable;
 import org.compiere.model.MColumn;
+import org.compiere.model.MPrintFormatAccess;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRole;
+import org.compiere.model.MSysConfig;
+import org.compiere.model.MUser;
 import org.compiere.model.Query;
 import org.compiere.model.X_AD_PrintFormat;
 import org.compiere.util.CLogger;
@@ -1392,10 +1396,15 @@ public class MPrintFormat extends X_AD_PrintFormat implements ImmutablePOSupport
 		StringBuilder sqlWhereB = new StringBuilder(constantForRoleAccess)
 			.append("AD_Table_ID=? AND IsTableBased='Y' ");
 		if (AD_Window_ID > 0)
-			sqlWhereB.append("AND (AD_Window_ID=? OR AD_Window_ID IS NULL)");		
+			sqlWhereB.append("AND (AD_Window_ID=? OR AD_Window_ID IS NULL)");
+		
+		//TODO check for if user is one who created Print format than it should be accessible.
+		MUser user = MUser.get(Env.getCtx());
+		if (!user.isSupportUser())
+			sqlWhereB.append(" AND AD_PrintFormat_ID IN (SELECT DISTINCT AD_PrintFormat_ID FROM AD_PrintFormat_Access WHERE ((AD_User_ID IS NULL AND AD_Role_ID = ?) OR (AD_Role_ID IS NULL AND AD_User_ID = ?) OR (AD_Role_ID = ? AND AD_User_ID = ?)))");
+
 		//
-		String sqlWhere = MRole.getDefault().addAccessSQL (
-				sqlWhereB.toString(), "AD_PrintFormat", MRole.SQL_NOTQUALIFIED, MRole.SQL_RO);
+		String sqlWhere = MRole.getDefault().addAccessSQL(sqlWhereB.toString(), "AD_PrintFormat", MRole.SQL_NOTQUALIFIED, MRole.SQL_RO);
 
 		// remove " WHERE " to use in Query
 		sqlWhere = sqlWhere.substring(constantForRoleAccess.length());
@@ -1405,7 +1414,14 @@ public class MPrintFormat extends X_AD_PrintFormat implements ImmutablePOSupport
 
 		lsParameter.add(Integer.valueOf(AD_Table_ID));
 		if (AD_Window_ID > 0)
-			lsParameter.add(Integer.valueOf(AD_Window_ID));		
+			lsParameter.add(Integer.valueOf(AD_Window_ID));	
+		if (!user.isSupportUser())
+		{
+			lsParameter.add(Integer.valueOf(Env.getAD_Role_ID(Env.getCtx())));
+			lsParameter.add(Integer.valueOf(Env.getAD_User_ID(Env.getCtx())));
+			lsParameter.add(Integer.valueOf(Env.getAD_Role_ID(Env.getCtx())));
+			lsParameter.add(Integer.valueOf(Env.getAD_User_ID(Env.getCtx())));
+		}
 		
 		// init query
 		Query query = new Query(Env.getCtx(), MPrintFormat.Table_Name, sqlWhere, trxName);
@@ -1475,6 +1491,38 @@ public class MPrintFormat extends X_AD_PrintFormat implements ImmutablePOSupport
 		if (tranPFChildMap.containsKey(pfID))
 			return tranPFChildMap.get(pfID);
 		return null;
+	}
+	
+	@Override
+	protected boolean beforeSave(boolean newRecord)
+	{
+		if (!newRecord && !MPrintFormatAccess.isWriteAccessPrintFormat(getAD_PrintFormat_ID(), get_TrxName()))
+			throw new AdempiereException(Msg.getMsg(getCtx(), MPrintFormatAccess.Msg_PF_Access_Update, true));
+		return super.beforeSave(newRecord);
+	}
+	
+	@Override
+	protected boolean afterSave(boolean newRecord, boolean success)
+	{
+		//TODO should we keep this configurable?
+		boolean isAutoGenrateAccess = MSysConfig.getBooleanValue(MSysConfig.PRINTFORMAT_AUTOGENERATE_ACCESS, false, Env.getAD_Client_ID(getCtx()));
+		if (isAutoGenrateAccess && newRecord && success)
+		{
+			MPrintFormatAccess access = new MPrintFormatAccess(getCtx(), 0, get_TrxName());
+			access.setAD_PrintFormat_ID(getAD_PrintFormat_ID());
+			access.setAD_User_ID(Env.getAD_User_ID(getCtx()));
+			access.setIsReadWrite(true);
+			access.saveEx();
+		}
+		return super.afterSave(newRecord, success);
+	}
+	
+	@Override
+	protected boolean beforeDelete()
+	{
+		if (!MPrintFormatAccess.isWriteAccessPrintFormat(getAD_PrintFormat_ID(), get_TrxName()))
+			throw new AdempiereException(Msg.getMsg(getCtx(),MPrintFormatAccess.Msg_PF_Access_Delete, true));
+		return super.beforeDelete();
 	}
 
 	@Override

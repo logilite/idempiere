@@ -85,6 +85,7 @@ import org.compiere.model.MAttachment;
 import org.compiere.model.MAuthorizationAccount;
 import org.compiere.model.MClient;
 import org.compiere.model.MLanguage;
+import org.compiere.model.MPrintFormatAccess;
 import org.compiere.model.MProcess;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRole;
@@ -1054,7 +1055,10 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{
-				MPrintFormat printFormat = new MPrintFormat (Env.getCtx(), rs, null);
+				MPrintFormat printFormat = new MPrintFormat(Env.getCtx(), rs, null);
+
+				if (!MPrintFormatAccess.isReadAccessPrintFormat(printFormat.getAD_PrintFormat_ID(), null))
+					continue;
 				
 				KeyNamePair pp = new KeyNamePair(printFormat.get_ID(), printFormat.get_Translation(MPrintFormat.COLUMNNAME_Name, Env.getAD_Language(Env.getCtx()), true));
 				Listitem li = comboReport.appendItem(pp.getName(), pp.getKey());
@@ -1111,7 +1115,9 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 		bWizard.setDisabled(
 				(   m_reportEngine.getPrintFormat() == null
 				 || (m_reportEngine.getPrintFormat().getAD_Client_ID() == 0 && Env.getAD_Client_ID(Env.getCtx()) != 0)
-				 || m_reportEngine.getPrintFormat().isForm()));
+				 || m_reportEngine.getPrintFormat().isForm()
+                 || !(MRole.getDefault().getWindowAccess(240)== true)//Print format
+                 || !MPrintFormatAccess.isWriteAccessPrintFormat(m_reportEngine.getPrintFormat().getAD_PrintFormat_ID(), m_reportEngine.getPrintFormat().get_TrxName())));
 		
 		updateRowCount();
 		

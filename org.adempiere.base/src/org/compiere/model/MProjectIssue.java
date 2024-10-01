@@ -20,6 +20,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -125,7 +126,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		docActionDelegate.setActionCallable(DocAction.ACTION_Complete, () -> { return doComplete(); });
 		docActionDelegate.setActionCallable(DocAction.ACTION_Reverse_Correct, () -> { return doReverse(false); });
 		docActionDelegate.setActionCallable(DocAction.ACTION_Reverse_Accrual, () -> { return doReverse(true); });
-	}
+	} // init
 
 	/**	Parent				*/
 	private MProject	m_parent = null;
@@ -167,20 +168,146 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		// Check Product or Charge is Present
 		if (getM_Product_ID() <= 0 && getC_Charge_ID() <= 0)
 		{
 			log.saveError("Error", "Product or Charge is not present in Invoice :"	+ getC_InvoiceLine().getC_Invoice().getDocumentNo()
 									+ " Invoice Line No.: " + getC_InvoiceLine().getLine());
 			return false;
 		}
-		if (getM_Product_ID() > 0 && getM_Locator_ID() <= 0)
+
+		// check validation for non Reversed Record
+		if (getReversal_ID() <= 0)
 		{
-			log.saveError("Error", "Locator is not present in Invoice :"	+ getC_InvoiceLine().getC_Invoice().getDocumentNo()
-									+ " Invoice Line No.: " + getC_InvoiceLine().getLine());
-			return false;
+			// Set to Qty 1 if null or 0
+			if (getMovementQty() == null || getMovementQty().signum() == 0)
+				setMovementQty(Env.ONE);
+
+			// Check movment Qty is more than Zero
+			if (getMovementQty().signum() < 0)
+			{
+				log.saveError("Error", "The movement quantity must be greater than zero.");
+				return false;
+			}
+
+			// Validate InOutLine
+			if (getM_InOutLine_ID() > 0)
+			{
+				MInOutLine inOutLine = (MInOutLine) getM_InOutLine();
+
+				if (inOutLine.getM_InOut().isSOTrx()	|| !inOutLine.isProcessed()
+					|| !(MInOut.DOCSTATUS_Completed.equals(inOutLine.getM_InOut().getDocStatus())
+							|| MInOut.DOCSTATUS_Closed.equals(inOutLine.getM_InOut().getDocStatus())))
+				{
+					log.saveError("Error", "Receipt Line is not valid - " + inOutLine);
+					return false;
+				}
+
+				// Need to the same project
+				if (inOutLine.getC_Project_ID() > 0 && inOutLine.getC_Project_ID() != getC_Project_ID())
+				{
+					log.saveError("Error", "Receipt Line is not valid - " + inOutLine + ", Receipt Already present for another Project");
+					return false;
+				}
+
+				if (MProjectIssue.projectIssueHasReceipt(inOutLine.get_ID(), null))
+				{
+					log.saveError("Error", "Receipt Line is not valid - " + inOutLine);
+					return false;
+				}
+				if(inOutLine.getM_AttributeSetInstance_ID()>0) {
+					setM_AttributeSetInstance_ID(inOutLine.getM_AttributeSetInstance_ID());
+				}
+				//TODO handling multiple ASI
+			}
+			else if (getS_TimeExpenseLine_ID() > 0)
+			{  
+				// validate Time Expense Line
+				MTimeExpenseLine expenseLines = (MTimeExpenseLine) getS_TimeExpenseLine();
+				if (expenseLines.getM_Product_ID() == 0)
+				{
+					log.saveError("Error", "Time Expense Line is not valid - " + expenseLines + ", has no resouce set");
+					return false;
+				}	
+				//	Need to have Quantity
+				if (expenseLines.getQty() == null || expenseLines.getQty().signum() == 0)
+				{
+					log.saveError("Error", "Time Expense Line is not valid - " + expenseLines + ", Time Expense must have qty");
+					return false;
+				}
+				
+				// Need to the same project
+				if (expenseLines.getC_Project_ID() > 0 && expenseLines.getC_Project_ID() != getC_Project_ID())
+				{
+					log.saveError("Error", "Time Expense Line is not valid - " + expenseLines + ", Time Expense Already present for another Project");
+					return false;
+				}
+
+				// check Time Expense Line already used or not for project issue
+				if (projectIssueHasExpense(getS_TimeExpenseLine_ID(), get_TrxName()))
+				{
+					log.saveError("Error", "Expense Line is not valid - " + getS_TimeExpenseLine_ID());
+					return false;
+				}
+				
+				if(getM_Locator_ID()==0) {
+					setM_Locator_ID(getExpenseLineLocator((MTimeExpenseLine)getS_TimeExpenseLine()));
+				}
+			}
+			else if (getC_InvoiceLine_ID() > 0 && is_ValueChanged(COLUMNNAME_C_InvoiceLine_ID))
+			{ // Check Invoice Line validation
+				MInvoiceLine invLine = (MInvoiceLine) getC_InvoiceLine();
+
+				if (invLine.getC_Invoice().isSOTrx())
+				{
+					log.saveError("Error","Invoice Line is invalid - " + invLine);	
+					return false;
+				}
+
+				if (!(MInvoice.DOCSTATUS_Completed.equals(invLine.getC_Invoice().getDocStatus())
+						|| MInvoice.DOCSTATUS_Closed.equals(invLine.getC_Invoice().getDocStatus())))
+				{
+					log.saveError("Error", "Invoice Line is invalid (" + invLine + ") Invoice Line Must be Closed or Completed");
+					return false;
+				}
+
+				// Need to have Charge
+				if (invLine.getC_Charge_ID() <= 0)
+				{
+					log.saveError("Error", "Invoice line (" + invLine + ") missing charge.");
+					return false;
+				}
+
+				// Checked Using this invoice Line any issue present or not yet
+				if (projectIssueHasInvoiceLine(getC_InvoiceLine_ID(), get_TrxName()))
+				{
+					log.saveError("Error", "Project Issue is already created for this Invoice Line");
+					return false;
+				}
+
+				setAmt(getInvLineAmt(invLine));
+			}
+			//TODO handling Project line issue
+			
+			if (getM_Product_ID() > 0)
+			{ // Check if Product is present than must be Locator is available
+				if(getM_Locator_ID() <= 0)
+				{
+					log.saveError("Error","Missing Locator field");
+					return false;
+				}
+				
+				if (getMovementQty() == null || getMovementQty().signum() == 0)
+				{
+					log.saveError("Error","Qty is mandatory when issue from inventory");
+					return false;
+				}
+				return false;
+			}
 		}
+		
 		return super.beforeSave(newRecord);
-	}
+	} // beforeSave
 
 	/**
 	 * 	Get Parent
@@ -212,6 +339,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 	 */
 	private String doComplete() 
 	{
+		
 		int productID = getM_Product_ID();
 		int chargeID = getC_Charge_ID();
 		if (productID <= 0 && chargeID <= 0)
@@ -224,6 +352,17 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 
 		MTransaction mTrx = null;
 		
+		String p_msg = setProject(get_TrxName());
+		if (!Util.isEmpty(p_msg, true))
+		{
+			log.log(Level.SEVERE, p_msg);
+			return p_msg;
+		}
+		
+		/**
+		 * When a transaction is completed, update the project's balance amount, create a project
+		 * line, and set the project ID based on the creation of the project issue
+		 */
 		if (productID > 0)
 		{
 			MProduct product = MProduct.get(getCtx(), productID);
@@ -231,10 +370,12 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 			// If not a stocked Item nothing to do
 			if (!product.isStocked()) {
 				setProcessed(true);
-				updateBalanceAmt(false);
+				//TODO no error thrown if no cost found.
+				setAmt(updateBalanceAmt());
 				saveEx();
 				return null;
 			}
+			//TODO ASI mandatory check
 
 			// ** Create Material Transactions **
 			mTrx = new MTransaction(getCtx(), getAD_Org_ID(), MTransaction.MOVEMENTTYPE_WorkOrderPlus,
@@ -292,14 +433,19 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 
 			if (ok) {
 				if (mTrx != null && mTrx.save(get_TrxName())) {
-					updateBalanceAmt(false);
+					setAmt(updateBalanceAmt());
+					//TODO how to differentiate between issue project line and from inventory
+					if (getM_InOutLine_ID() != 0 || getS_TimeExpenseLine_ID() != 0) 
+					{
+						createProjetLine();
+					}
 					if (save())
 					{
 						return null;
 					}
 					else
 					{
-						log.log(Level.SEVERE, "Issue not saved");	// Update Balance
+						log.log(Level.SEVERE, "Issue not saved"); // Update Balance
 						return "Issue not saved";
 					}
 				}
@@ -317,7 +463,9 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		}
 		else if (chargeID > 0)
 		{
-			updateBalanceAmt(false);
+			setAmt(updateBalanceAmt());
+			createProjetLine();
+
 			if (save())
 				return null;
 			else
@@ -326,7 +474,46 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		//
 		log.log(Level.SEVERE, "Product Or Charge is not Present");
 		return "Product or Charge is not present";
-	}	//	process
+	}	//	doComplete
+
+	/**
+	 * Create a Project Line for Project Issue Complete Event
+	 */
+	private void createProjetLine()
+	{
+		// Check Project Issue is Reversal or not.
+		if (getReversal_ID() > 0)
+			return;
+
+		// For In Out Line 
+		if (getM_InOutLine_ID() > 0)
+		{
+			MProject proj = (MProject) getC_Project();
+			MProjectLine pl = null;
+			MProjectLine[] pls = proj.getLines();
+			for (int ii = 0; ii < pls.length; ii++)
+			{
+				// The Order we generated is the same as the Order of the receipt
+				if (pls[ii].getC_OrderPO_ID() == getM_InOutLine().getM_InOut().getC_Order_ID()
+					&& pls[ii].getM_Product_ID() == getM_InOutLine().getM_Product_ID()
+					&& pls[ii].getC_ProjectIssue_ID() == 0) // not issued
+				{
+					pl = pls[ii];
+					break;
+				}
+			}
+			if (pl == null)
+				pl = new MProjectLine(proj);
+			pl.setMProjectIssue(this); // setIssue
+			pl.saveEx();
+			return;
+		}
+		//TODO case of Project line issue not handled
+		// Create Project Line
+		MProjectLine pl = new MProjectLine((MProject) getC_Project());
+		pl.setC_ProjectIssue_ID(get_ID());
+		pl.saveEx(get_TrxName());
+	} // createProjetLine
 
 	/**
 	 * Handle reverse accrual and reverse correct document action
@@ -339,8 +526,19 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		reversal.set_TrxName(get_TrxName());
 		reversal.setM_Locator_ID(getM_Locator_ID());
 		reversal.setM_Product_ID(getM_Product_ID());
+		reversal.setC_Charge_ID(getC_Charge_ID());
+		if (getC_Charge_ID() > 0)
+			reversal.setAmt(getAmt().negate());
 		reversal.setM_AttributeSetInstance_ID(getM_AttributeSetInstance_ID());
 		reversal.setMovementQty(getMovementQty().negate());
+
+		if (getM_InOutLine_ID() > 0)
+			reversal.setM_InOutLine_ID(getM_InOutLine_ID());
+		else if (getS_TimeExpenseLine_ID() > 0)
+			reversal.setS_TimeExpenseLine_ID(getS_TimeExpenseLine_ID());
+		else if (getC_InvoiceLine_ID() > 0)
+			reversal.setC_InvoiceLine_ID(getC_InvoiceLine_ID());
+
 		if (accrual)
 			reversal.setMovementDate(new Timestamp(System.currentTimeMillis()));
 		else
@@ -373,7 +571,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		setDocAction(DOCACTION_None);
 		
 		return null;
-	}
+	} // doReverse
 	
 	/**
 	 * @return true if this is a reversal document created to reverse another document
@@ -442,7 +640,9 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 	{
 		if (!docActionDelegate.reverseCorrectIt())
 			return false;
-		updateBalanceAmt(true);
+		deleteProjectLine();
+		if (getC_InvoiceLine_ID() > 0)
+			getC_InvoiceLine().setC_Project_ID(0);
 		return true;
 	}
 
@@ -451,7 +651,9 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 	{
 		if (!docActionDelegate.reverseAccrualIt())
 			return false;
-		updateBalanceAmt(true);
+		deleteProjectLine();
+		if (getC_InvoiceLine_ID() > 0)
+			getC_InvoiceLine().setC_Project_ID(0);
 		return true;
 	}
 
@@ -577,35 +779,186 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 	 * @param isCreaditAmt true than Reduce Project Balance Amt otherwise Project Balance Amt is Add
 	 *                     cost of Project Issue
 	 */
-	private void updateBalanceAmt(boolean isCredit)
+	private BigDecimal updateBalanceAmt()
 	{
 		MProject proj = (MProject) getC_Project();
 		BigDecimal cost = Env.ZERO;
+		MAcctSchema as = MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID(), get_TrxName())[0];
 		if (getM_InOutLine_ID() > 0)
 		{
-			cost = ProjectIssueUtil.getPOCost(MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID(), get_TrxName())[0], getM_InOutLine_ID(), getMovementQty());
+			cost = ProjectIssueUtil.getPOCost(as, getM_InOutLine_ID(), getMovementQty());
 		}
 		else if (getS_TimeExpenseLine_ID() > 0)
 		{
-			cost = ProjectIssueUtil.getLaborCost(MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID(), get_TrxName())[0], getS_TimeExpenseLine_ID());
+			cost = ProjectIssueUtil.getLaborCost(as, getS_TimeExpenseLine_ID());
 		}
-		else if (getC_InvoiceLine_ID() > 0)
+		else if (getC_InvoiceLine_ID() > 0 || getC_Charge_ID() > 0)
 		{
-			cost = getAmt();
+			cost = getInvLineAmt((MInvoiceLine) getC_InvoiceLine());
 		}
 		else
 		{
-			cost = ProjectIssueUtil.getProductCosts(MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID(), get_TrxName())[0], (MProduct) getM_Product(),
-													getM_AttributeSetInstance_ID(), getAD_Org_ID(), getMovementQty(), true);
+			cost = ProjectIssueUtil.getProductCosts(as, (MProduct) getM_Product(), getM_AttributeSetInstance_ID(), getAD_Org_ID(), getMovementQty(), true);
+		}
+		if (cost == null && getM_Product_ID() > 0) // standard Product Costs
+		{
+			cost = ProjectIssueUtil.getProductStdCost(as, getAD_Org_ID(), getM_Product_ID(), getM_AttributeSetInstance_ID(), get_TrxName(), getMovementQty());
 		}
 		if (cost != null)
 		{
-			if (isCredit)
-				proj.setProjectBalanceAmt(proj.getProjectBalanceAmt().subtract(cost));
-			else
-				proj.setProjectBalanceAmt(proj.getProjectBalanceAmt().add(cost));
+			proj.setProjectBalanceAmt(proj.getProjectBalanceAmt().add(cost));
 			proj.saveEx(get_TrxName());
 		}
+		return cost;
 	} // updateBalanceAmt
+	
+	 * Line On Invoice line set Project
+	 * @param trxName
+	 */
+	private String setProject(String trxName)
+	{
+		if (getM_InOutLine_ID() > 0)
+		{
+			MInOutLine intOutLine = (MInOutLine) getM_InOutLine();
 
+			if (intOutLine.getC_Project_ID() <= 0)
+			{
+				intOutLine.setC_Project_ID(getC_Project_ID());
+				intOutLine.save(trxName);
+			}
+			else if (intOutLine.getC_Project_ID() > 0 && intOutLine.getC_Project_ID() != getC_Project_ID())
+				return "Time Expense Line(" + intOutLine.getLine() + ") is created for another Project ( Project ID: " + intOutLine.getC_Project_ID() + " )";
+		}
+		else if (getS_TimeExpenseLine_ID() <= 0)
+		{
+			MTimeExpenseLine expLine = (MTimeExpenseLine) getS_TimeExpenseLine();
+
+			if (expLine.getC_Project_ID() > 0)
+			{
+				expLine.setC_Project_ID(getC_Project_ID());
+				expLine.save(trxName);
+			}
+			else if (expLine.getC_Project_ID() > 0 && expLine.getC_Project_ID() != getC_Project_ID())
+				return "Time Expense Line(" + expLine.getLine() + ") is created for another Project ( Project ID: " + expLine.getC_Project_ID() + " )";
+		}
+		else if (getC_InvoiceLine_ID() > 0)
+		{
+			MInvoiceLine invLine = (MInvoiceLine) getC_InvoiceLine();
+			if (invLine.getC_Project_ID() <= 0)
+			{
+				invLine.setC_Project_ID(getC_Project_ID());
+				invLine.saveEx(get_TrxName());
+			}
+			else if (invLine.getC_Project_ID() > 0 && invLine.getC_Project_ID() != getC_Project_ID())
+				return "Invoice Line(" + invLine.getLine() + ") is created for another Project ( Project ID: " + invLine.getC_Project_ID() + " )";
+		}
+		return null;
+	} // setProjectOnInvLine
+	
+	/**
+	 * Delete Project Line related to Project Issue
+	 */
+	private void deleteProjectLine()
+	{
+		DB.executeUpdate("Delete From C_ProjectLine Where C_ProjectIssue_ID = ?", get_ID(), get_TrxName());
+	} // deleteProjectLine
+	
+	/**
+
+	/**
+	 * Get Project Issue Description from Invoice Line
+	 */
+	public static String getInvDescription(MInvoiceLine invLine)
+	{
+		if (!Util.isEmpty(invLine.getDescription()))
+			return invLine.getDescription();
+		else if (!Util.isEmpty(invLine.getC_Invoice().getDescription()))
+			return invLine.getC_Invoice().getDescription();
+		return null;
+	} // getInvDescription
+
+	/**
+	 * Get Project Issue Description from In Out Line
+	 */
+	public static String getInOutLineDesc(MInOutLine inOutLine)
+	{
+		if (inOutLine.getDescription() != null)
+			return inOutLine.getDescription();
+		else if (inOutLine.getM_InOut().getDescription() != null)
+			return inOutLine.getM_InOut().getDescription();
+		return null;
+	} // getInOutLineDesc
+
+	/**
+	 * Get Amt from Invoice Line 
+	 * @return	If Doc. Base Type is APCredit Memo than AMT is negate else positive
+	 */
+	public static BigDecimal getInvLineAmt(MInvoiceLine invLine)
+	{
+		if (MDocType.DOCBASETYPE_APCreditMemo.equals((invLine.getC_Invoice().getC_DocType().getDocBaseType())))
+			return invLine.getLineNetAmt().negate();
+		else
+			return invLine.getLineNetAmt();
+	} // getInvLineAmt
+	
+	/**
+	 * Get locator form Time Expense Line
+	 * @param expenseLine
+	 */
+	public static int getExpenseLineLocator(MTimeExpenseLine expenseLine)
+	{
+		int M_Locator_ID = 0;
+
+		M_Locator_ID = MStorageOnHand.getM_Locator_ID(	expenseLine.getS_TimeExpense().getM_Warehouse_ID(),
+														expenseLine.getM_Product_ID(), 0, // no ASI
+														expenseLine.getQty(), null);
+
+		if (M_Locator_ID == 0) // Service/Expense - get default (and fallback)
+			M_Locator_ID = ((MTimeExpense) expenseLine.getS_TimeExpense()).getM_Locator_ID();
+		return M_Locator_ID;
+	} // getExpenseLineLocator
+
+	/**
+	 * Check Project Issue already has Invoice Line reference present
+	 * 
+	 * @return true if exists
+	 */
+	public static boolean projectIssueHasInvoiceLine(int invoiceLineID, String trxName)
+	{
+		List<MProjectIssue> list = new Query(Env.getCtx(), MProjectIssue.Table_Name, "C_InvoiceLine_ID= ? AND DocStatus NOT IN ('VO', 'RE') ", trxName)
+									.setParameters(invoiceLineID)
+									.list();
+
+		return list.size() > 0;
+	} // projectIssueHasInvoiceLine
+
+	/**
+	 * Check if Project Issue already has Expense
+	 * 
+	 * @param  S_TimeExpenseLine_ID line
+	 * @return                      true if exists
+	 */
+	public static boolean projectIssueHasExpense(int S_TimeExpenseLine_ID, String trxName)
+	{
+		List<MProjectIssue> list = new Query(Env.getCtx(), MProjectIssue.Table_Name, "S_TimeExpenseLine_ID= ? AND DocStatus NOT IN ('VO', 'RE') ", trxName)
+									.setParameters(S_TimeExpenseLine_ID)
+									.list();
+
+		return list.size() > 0;
+	} // projectIssueHasExpense
+
+	/**
+	 * Check if Project Issue already has Receipt
+	 * 
+	 * @param  M_InOutLine_ID line
+	 * @return                true if exists
+	 */
+	public static boolean projectIssueHasReceipt(int M_InOutLine_ID, String trxName)
+	{
+		List<MProjectIssue> list = new Query(Env.getCtx(), MProjectIssue.Table_Name, "M_InOutLine_ID= ? AND DocStatus NOT IN ('VO', 'RE') ", trxName)
+									.setParameters(M_InOutLine_ID)
+									.list();
+
+		return list.size() > 0;
+	} // projectIssueHasReceipt
 }	//	MProjectIssue

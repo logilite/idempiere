@@ -34,6 +34,8 @@ import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MLookupInfo;
+import org.compiere.model.MPrintFormatAccess;
+import org.compiere.model.MRole;
 import org.compiere.model.MTable;
 import org.compiere.print.MPrintFormat;
 import org.compiere.print.MPrintFormatItem;
@@ -167,6 +169,8 @@ public class WPrintFormatEditor extends PrintFormatEditor
 	private WFieldElement wField;
 	private WPrintFormatElement wPrintFormat;
 
+	private boolean isUpdatable = true;
+
 	public WPrintFormatEditor() {
 		formEditor = new WPrintFormatEditorForm(this);
 	}
@@ -178,6 +182,8 @@ public class WPrintFormatEditor extends PrintFormatEditor
 
 	public void initForm() throws Exception {
 
+		isUpdatable = (MRole.getDefault().getWindowAccess(240)== true)//access to Print format Window
+						&& MPrintFormatAccess.isWriteAccessPrintFormat(formEditor.getProcessInfo().getRecord_ID(), null);
 		mpf = new MPrintFormat(Env.getCtx(), formEditor.getProcessInfo().getRecord_ID(), null);
 		Env.setContext(Env.getCtx(), this.getForm().getWindowNo(), "AD_Table_ID", mpf.getAD_Table_ID());
 		mpiList = loadMPrintFormatItem(formEditor.getProcessInfo().getRecord_ID());
@@ -218,6 +224,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 		for (String nameType : names) {
 			Row row = new Row();
 			Button name = new Button(nameType);
+			name.setEnabled(isUpdatable);
 			name.setWidth("115px");
 			name.addEventListener(Events.ON_CLICK, this);
 			row.appendChild(name);
@@ -263,6 +270,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 				box.setAD_Org_ID(item.getAD_Org_ID());
 				box.setFieldAlignmentType(item.getFieldAlignmentType());
 				WBoxElement wBox = box.createBoxElement();
+				wBox.setVisible(isUpdatable);
 				wBox.addEventListener(Events.ON_CLICK, this);
 				editorArea.appendChild(wBox);
 			} else if (type.equals(MPrintFormatItem.PRINTFORMATTYPE_Text)) {
@@ -280,6 +288,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 				text.setAD_Org_ID(item.getAD_Org_ID());
 				text.setFieldAlignmentType(item.getFieldAlignmentType());
 				WStringElement wString = text.createStringElement();
+				wString.setVisible(isUpdatable);
 				wString.addEventListener(Events.ON_CLICK, this);
 				editorArea.appendChild(wString);
 			} else if (type.equals(MPrintFormatItem.PRINTFORMATTYPE_Field)) {
@@ -299,6 +308,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 				field.setAD_Org_ID(item.getAD_Org_ID());
 				field.setFieldAlignmentType(item.getFieldAlignmentType());
 				WFieldElement wField = field.createFieldElement();
+				wField.setVisible(isUpdatable);
 				wField.addEventListener(Events.ON_CLICK, this);
 				editorArea.appendChild(wField);
 			} else if (type.equals(MPrintFormatItem.PRINTFORMATTYPE_Image)) {
@@ -313,6 +323,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 				image.setSeqNo(item.getSeqNo());
 				image.setImageURL(item.getImageURL());
 				WImageElement wImage = image.createImageElement();
+				wImage.setVisible(isUpdatable);
 				wImage.addEventListener(Events.ON_CLICK, this);
 				editorArea.appendChild(wImage);
 			} else if (type.equals(MPrintFormatItem.PRINTFORMATTYPE_PrintFormat)) {
@@ -329,6 +340,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 				printFormat.setAD_PrintFormat_ID(item.getAD_PrintFormat_ID());
 				printFormat.setAD_Org_ID(item.getAD_Org_ID());
 				WPrintFormatElement wPrintFormat = printFormat.createPrintFormatElement();
+				wPrintFormat.setVisible(isUpdatable);
 				wPrintFormat.addEventListener(Events.ON_CLICK, this);
 				editorArea.appendChild(wPrintFormat);
 
@@ -379,6 +391,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 				DisplayType.TableDir);
 		editorPaperSize = new WTableDirEditor(MPrintFormat.COLUMNNAME_AD_PrintPaper_ID, false, false, true,
 				lookupPaperID);
+		editorPaperSize.setReadWrite(isUpdatable);
 		ZKUpdateUtil.setHflex(((WTableDirEditor) editorPaperSize).getComponent(), "1");
 		row.appendChild(labelPaperSize.rightAlign());
 		row.appendChild(editorPaperSize.getComponent());
@@ -392,6 +405,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 				DisplayType.TableDir);
 		editorPrintColorPaper = new WTableDirEditor(MPrintFormat.COLUMNNAME_AD_PrintColor_ID, false, false, true,
 				lookupPrintColorPaper);
+		editorPrintColorPaper.setReadWrite(isUpdatable);
 		ZKUpdateUtil.setHflex(((WTableDirEditor) editorPrintColorPaper).getComponent(), "1");
 		row.appendChild(labelPrintColorPaper.rightAlign());
 		row.appendChild(editorPrintColorPaper.getComponent());
@@ -406,6 +420,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 				DisplayType.TableDir);
 		editorPrintFontPaper = new WTableDirEditor(MPrintFormatItem.COLUMNNAME_AD_PrintFont_ID, false, false, true,
 				lookupPrintFontPaper);
+		editorPrintFontPaper.setReadWrite(isUpdatable);
 		ZKUpdateUtil.setHflex(((WTableDirEditor) editorPrintFontPaper).getComponent(), "1");
 		row.appendChild(labelPrintFontPaper.rightAlign());
 		row.appendChild(editorPrintFontPaper.getComponent());
@@ -422,6 +437,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 		row = new Row();
 		Label labelName = new Label(Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_Name));
 		editorName = new WStringEditor(MPrintFormatItem.COLUMNNAME_Name, false, false, true, 1000, 1000, null, null);
+		editorName.setReadWrite(isUpdatable);
 		ZKUpdateUtil.setHflex(((WStringEditor) editorName).getComponent(), "1");
 		row.appendChild(labelName.rightAlign());
 		row.appendChild(editorName.getComponent());
@@ -433,6 +449,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 		Label labelSeq = new Label(Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_SeqNo));
 		editorSeq = new WNumberEditor(MPrintFormatItem.COLUMNNAME_SeqNo, true, false, true, DisplayType.Integer,
 				labelSeq.getValue());
+		editorSeq.setReadWrite(isUpdatable);
 		row.appendChild(labelSeq.rightAlign());
 		row.appendChild(editorSeq.getComponent());
 		row.setGroup(formatItemProps);
@@ -446,6 +463,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 		Label labelPrintText = new Label(Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_PrintName));
 		editorPrintText = new WStringEditor(MPrintFormatItem.COLUMNNAME_PrintName, false, false, true, 1000, 1000, null,
 				null);
+		editorPrintText.setReadWrite(isUpdatable);
 		ZKUpdateUtil.setHflex(((WStringEditor) editorPrintText).getComponent(), "1");
 		rowPrintText.appendChild(labelPrintText.rightAlign());
 		rowPrintText.appendChild(editorPrintText.getComponent());
@@ -460,6 +478,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 				MColumn.getColumn_ID(MPrintFormatItem.Table_Name, MPrintFormatItem.COLUMNNAME_AD_Column_ID),
 				DisplayType.TableDir);
 		editorColumn = new WTableDirEditor(MPrintFormatItem.COLUMNNAME_AD_Column_ID, false, false, true, lookupColumn);
+		editorColumn.setReadWrite(isUpdatable);
 		ZKUpdateUtil.setHflex(((WTableDirEditor) editorColumn).getComponent(), "1");
 		rowColumn.appendChild(labelColumn.rightAlign());
 		rowColumn.appendChild(editorColumn.getComponent());
@@ -474,6 +493,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 				DisplayType.TableDir);
 		editorPrintColor = new WTableDirEditor(MPrintFormatItem.COLUMNNAME_AD_PrintColor_ID, false, false, true,
 				lookupPrintColor);
+		editorPrintColor.setReadWrite(isUpdatable);
 		ZKUpdateUtil.setHflex(((WTableDirEditor) editorPrintColor).getComponent(), "1");
 		rowPrintColor.appendChild(labelPrintColor.rightAlign());
 		rowPrintColor.appendChild(editorPrintColor.getComponent());
@@ -488,6 +508,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 				DisplayType.TableDir);
 		editorPrintFont = new WTableDirEditor(MPrintFormatItem.COLUMNNAME_AD_PrintFont_ID, false, false, true,
 				lookupPrintFont);
+		editorPrintFont.setReadWrite(isUpdatable);
 		ZKUpdateUtil.setHflex(((WTableDirEditor) editorPrintFont).getComponent(), "1");
 		rowPrintFont.appendChild(labelPrintFont.rightAlign());
 		rowPrintFont.appendChild(editorPrintFont.getComponent());
@@ -498,6 +519,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 
 		Label labelIsRelative = new Label(Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_IsRelativePosition));
 		editorIsRelative = new WYesNoEditor(MPrintFormatItem.COLUMNNAME_IsRelativePosition, "", "", true, false, true);
+		editorIsRelative.setReadWrite(isUpdatable);
 		rowIsRelative.appendCellChild(labelIsRelative.rightAlign());
 		rowIsRelative.appendChild(editorIsRelative.getComponent());
 		rowIsRelative.setGroup(formatItemProps);
@@ -508,6 +530,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 		Label labelPosX = new Label(Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_XPosition));
 		editorPosX = new WNumberEditor(MPrintFormatItem.COLUMNNAME_XPosition, true, false, true, DisplayType.Integer,
 				labelPosX.getValue());
+		editorPosX.setReadWrite(isUpdatable);
 		rowPosX.appendChild(labelPosX.rightAlign());
 		rowPosX.appendChild(editorPosX.getComponent());
 		rowPosX.setGroup(formatItemProps);
@@ -518,6 +541,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 		Label labelPosY = new Label(Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_YPosition));
 		editorPosY = new WNumberEditor(MPrintFormatItem.COLUMNNAME_YPosition, true, false, true, DisplayType.Integer,
 				labelPosX.getValue());
+		editorPosY.setReadWrite(isUpdatable);
 		rowPosY.appendChild(labelPosY.rightAlign());
 		rowPosY.appendChild(editorPosY.getComponent());
 		rowPosY.setGroup(formatItemProps);
@@ -528,6 +552,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 		Label labelSpaceX = new Label(Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_XSpace));
 		editorSpaceX = new WNumberEditor(MPrintFormatItem.COLUMNNAME_XSpace, true, false, true, DisplayType.Integer,
 				labelSpaceX.getValue());
+		editorSpaceX.setReadWrite(isUpdatable);
 		rowSpaceX.appendChild(labelSpaceX.rightAlign());
 		rowSpaceX.setGroup(formatItemProps);
 		rowSpaceX.appendChild(editorSpaceX.getComponent());
@@ -538,6 +563,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 		Label labelSpaceY = new Label(Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_YSpace));
 		editorSpaceY = new WNumberEditor(MPrintFormatItem.COLUMNNAME_YSpace, true, false, true, DisplayType.Integer,
 				labelSpaceX.getValue());
+		editorSpaceY.setReadWrite(isUpdatable);
 		rowSpaceY.appendChild(labelSpaceY.rightAlign());
 		rowSpaceY.appendChild(editorSpaceY.getComponent());
 		editorSpaceY.addValueChangeListener(this);
@@ -546,6 +572,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 
 		Label labelIsNextLine = new Label(Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_IsNextLine));
 		editorIsNextLine = new WYesNoEditor(MPrintFormatItem.COLUMNNAME_IsNextLine, "", "", true, false, true);
+		editorIsNextLine.setReadWrite(isUpdatable);
 		rowIsNextLine.appendCellChild(labelIsNextLine.rightAlign());
 		rowIsNextLine.appendChild(editorIsNextLine.getComponent());
 		rowIsNextLine.setGroup(formatItemProps);
@@ -555,6 +582,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 
 		Label labelIsNextPage = new Label(Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_IsNextPage));
 		editorIsNextPage = new WYesNoEditor(MPrintFormatItem.COLUMNNAME_IsNextPage, "", "", true, false, true);
+		editorIsNextPage.setReadWrite(isUpdatable);
 		rowIsNextPage.appendCellChild(labelIsNextPage.rightAlign());
 		rowIsNextPage.appendChild(editorIsNextPage.getComponent());
 		rowIsNextPage.setGroup(formatItemProps);
@@ -566,6 +594,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 				Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_IsSetNLPosition));
 		editorIsSetNLPosition = new WYesNoEditor(MPrintFormatItem.COLUMNNAME_IsSetNLPosition, "", "", true, false,
 				true);
+		editorIsSetNLPosition.setReadWrite(isUpdatable);
 		rowIsSetNLPosition.appendCellChild(labelIsSetNLPosition.rightAlign());
 		rowIsSetNLPosition.appendChild(editorIsSetNLPosition.getComponent());
 		rowIsSetNLPosition.setGroup(formatItemProps);
@@ -580,6 +609,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 		MLookup lookupFieldAlignmentType = new MLookup(info, 0);
 		editorAlignField = new WTableDirEditor(MPrintFormatItem.COLUMNNAME_FieldAlignmentType, false, false, true,
 				lookupFieldAlignmentType);
+		editorAlignField.setReadWrite(isUpdatable);
 		ZKUpdateUtil.setHflex(((WTableDirEditor) editorAlignField).getComponent(), "1");
 		rowAligField.appendChild(labelFieldAlignmentType.rightAlign());
 		rowAligField.appendChild(editorAlignField.getComponent());
@@ -591,6 +621,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 		Label labelMaxWidth = new Label(Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_MaxWidth));
 		editorMaxWidth = new WNumberEditor(MPrintFormatItem.COLUMNNAME_MaxWidth, true, false, true, DisplayType.Integer,
 				labelMaxWidth.getValue());
+		editorMaxWidth.setReadWrite(isUpdatable);
 		rowMaxWidth.appendChild(labelMaxWidth.rightAlign());
 		rowMaxWidth.appendChild(editorMaxWidth.getComponent());
 		rowMaxWidth.setGroup(formatItemProps);
@@ -601,6 +632,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 		Label labelMaxHeight = new Label(Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_MaxHeight));
 		editorMaxHeight = new WNumberEditor(MPrintFormatItem.COLUMNNAME_MaxHeight, true, false, true,
 				DisplayType.Integer, labelMaxHeight.getValue());
+		editorMaxHeight.setReadWrite(isUpdatable);
 		rowMaxHeight.appendChild(labelMaxHeight.rightAlign());
 		rowMaxHeight.appendChild(editorMaxHeight.getComponent());
 		rowMaxHeight.setGroup(formatItemProps);
@@ -610,6 +642,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 
 		Label labelIsFixedWidth = new Label(Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_IsFixedWidth));
 		editorIsFixedWidth = new WYesNoEditor(MPrintFormatItem.COLUMNNAME_IsFixedWidth, "", "", true, false, true);
+		editorIsFixedWidth.setReadWrite(isUpdatable);
 		rowIsFixedWidth.appendCellChild(labelIsFixedWidth.rightAlign());
 		rowIsFixedWidth.appendChild(editorIsFixedWidth.getComponent());
 		rowIsFixedWidth.setGroup(formatItemProps);
@@ -621,6 +654,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 				Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_IsHeightOneLine));
 		editorIsHeightOneLine = new WYesNoEditor(MPrintFormatItem.COLUMNNAME_IsHeightOneLine, "", "", true, false,
 				true);
+		editorIsHeightOneLine.setReadWrite(isUpdatable);
 		rowIsHeightOneLine.appendCellChild(labelIsHeightOneLine.rightAlign());
 		rowIsHeightOneLine.appendChild(editorIsHeightOneLine.getComponent());
 		rowIsHeightOneLine.setGroup(formatItemProps);
@@ -636,6 +670,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 		MLookup lookupAlignLine = new MLookup(info, 0);
 		editorAlignLine = new WTableDirEditor(MPrintFormatItem.COLUMNNAME_LineAlignmentType, false, false, true,
 				lookupAlignLine);
+		editorAlignLine.setReadWrite(isUpdatable);
 		ZKUpdateUtil.setHflex(((WTableDirEditor) editorAlignLine).getComponent(), "1");
 		rowAlignLine.appendChild(labelAlignLine.rightAlign());
 		rowAlignLine.appendChild(editorAlignLine.getComponent());
@@ -650,6 +685,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 		info = MLookupFactory.getLookup_List(Env.getLanguage(Env.getCtx()), 15015);
 		MLookup lookupBarCode = new MLookup(info, 0);
 		editorBarCode = new WTableDirEditor(MPrintFormatItem.COLUMNNAME_BarcodeType, false, false, true, lookupBarCode);
+		editorBarCode.setReadWrite(isUpdatable);
 		ZKUpdateUtil.setHflex(((WTableDirEditor) editorBarCode).getComponent(), "1");
 		rowBarCode.appendChild(labelBarCode.rightAlign());
 		rowBarCode.setGroup(formatItemProps);
@@ -666,6 +702,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 				DisplayType.Table);
 		editorPrintFormat = new WTableDirEditor(MPrintFormatItem.COLUMNNAME_AD_PrintFormatChild_ID, false, false, true,
 				lookupPrintFormat);
+		editorPrintFormat.setReadWrite(isUpdatable);
 		ZKUpdateUtil.setHflex(((WTableDirEditor) editorPrintFormat).getComponent(), "1");
 		rowPrintFormat.appendChild(labelPrintFormat.rightAlign());
 		rowPrintFormat.setGroup(formatItemProps);
@@ -677,6 +714,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 		// Image Options
 		Label labelIsImageField = new Label(Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_IsImageField));
 		editorIsImageField = new WYesNoEditor(MPrintFormatItem.COLUMNNAME_IsNextLine, "", "", true, false, true);
+		editorIsImageField.setReadWrite(isUpdatable);
 		rowIsImageField.appendCellChild(labelIsImageField.rightAlign());
 		rowIsImageField.appendChild(editorIsImageField.getComponent());
 		rowIsImageField.setGroup(formatItemProps);
@@ -688,6 +726,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 				Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_ImageIsAttached));
 		editorImageIsAttached = new WYesNoEditor(MPrintFormatItem.COLUMNNAME_ImageIsAttached, "", "", true, false,
 				true);
+		editorImageIsAttached.setReadWrite(isUpdatable);
 		rowImageIsAttached.appendCellChild(labelImageIsAttached.rightAlign());
 		rowImageIsAttached.appendChild(editorImageIsAttached.getComponent());
 		rowImageIsAttached.setGroup(formatItemProps);
@@ -698,6 +737,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 		Label labelImageURL = new Label(Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_ImageURL));
 		editorImageURL = new WStringEditor(MPrintFormatItem.COLUMNNAME_ImageURL, false, false, true, 1000, 1000, null,
 				null);
+		editorImageURL.setReadWrite(isUpdatable);
 		ZKUpdateUtil.setHflex(((WStringEditor) editorImageURL).getComponent(), "1");
 		rowImageURL.appendChild(labelImageURL.rightAlign());
 		rowImageURL.appendChild(editorImageURL.getComponent());
@@ -710,6 +750,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 		Label labelLineWidth = new Label(Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_LineWidth));
 		editorLineWidth = new WNumberEditor(MPrintFormatItem.COLUMNNAME_LineWidth, true, false, true,
 				DisplayType.Integer, labelLineWidth.getValue());
+		editorLineWidth.setReadWrite(isUpdatable);
 		rowLineWidth.appendChild(labelLineWidth.rightAlign());
 		rowLineWidth.appendChild(editorLineWidth.getComponent());
 		rowLineWidth.setGroup(formatItemProps);
@@ -724,6 +765,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 		MLookup lookupTypeRectangle = new MLookup(info, 0);
 		editorTypeRectangle = new WTableDirEditor(MPrintFormatItem.COLUMNNAME_ShapeType, false, false, true,
 				lookupTypeRectangle);
+		editorTypeRectangle.setReadWrite(isUpdatable);
 		ZKUpdateUtil.setHflex(((WTableDirEditor) editorTypeRectangle).getComponent(), "1");
 		rowTypeRectangle.appendChild(labelTypeRectangle.rightAlign());
 		rowTypeRectangle.appendChild(editorTypeRectangle.getComponent());
@@ -736,6 +778,7 @@ public class WPrintFormatEditor extends PrintFormatEditor
 				Msg.getElement(Env.getCtx(), MPrintFormatItem.COLUMNNAME_IsFilledRectangle));
 		editorIsFilledRectangle = new WYesNoEditor(MPrintFormatItem.COLUMNNAME_IsFilledRectangle, "", "", true, false,
 				true);
+		editorIsFilledRectangle.setReadWrite(isUpdatable);
 		rowIsFilledRectangle.appendCellChild(labelIsFilledRectangle.rightAlign());
 		rowIsFilledRectangle.appendChild(editorIsFilledRectangle.getComponent());
 		rowIsFilledRectangle.setGroup(formatItemProps);

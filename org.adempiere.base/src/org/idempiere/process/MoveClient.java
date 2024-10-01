@@ -26,11 +26,14 @@
 
 package org.idempiere.process;
 
+import java.math.BigDecimal;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -575,12 +578,36 @@ public class MoveClient extends SvrProcess {
 				if (! "AD_Client".equalsIgnoreCase(tableName)) {
 					sqlForeignClientSB.append(" JOIN AD_Client ON (").append(tableName).append(".AD_Client_ID=AD_Client.AD_Client_ID)");
 				}
-				sqlForeignClientSB.append(" JOIN AD_Ref_List ON (").append(tableName).append(".").append(columnName).append("=AD_Ref_List.");
-				if ("AD_Ref_List_ID".equalsIgnoreCase(columnName)) {
-					sqlForeignClientSB.append("AD_Ref_List_ID");
-				} else {
-					sqlForeignClientSB.append("Value");
+
+				if (refID == DisplayType.MultiSelectList || refID == DisplayType.MultiSelectTable
+						|| refID == DisplayType.MultiSelectSearch)
+				{
+					sqlForeignClientSB.append(" JOIN AD_Ref_List ON (").append("AD_Ref_List.");
+					if ("AD_Ref_List_ID".equalsIgnoreCase(columnName))
+					{
+						sqlForeignClientSB.append("AD_Ref_List_ID");
+					}
+					else
+					{
+						sqlForeignClientSB.append("Value");
+					}
+
+					sqlForeignClientSB.append("=ANY(").append(tableName).append(".").append(columnName).append(")");
 				}
+				else
+				{
+					sqlForeignClientSB.append(" JOIN AD_Ref_List ON (").append(tableName).append(".").append(columnName)
+							.append("=AD_Ref_List.");
+					if ("AD_Ref_List_ID".equalsIgnoreCase(columnName))
+					{
+						sqlForeignClientSB.append("AD_Ref_List_ID");
+					}
+					else
+					{
+						sqlForeignClientSB.append("Value");
+					}
+				}
+
 				sqlForeignClientSB.append(" AND AD_Ref_List.AD_Reference_ID=")
 				.append(" (SELECT AD_Column.AD_Reference_Value_ID FROM AD_Column")
 				.append(" JOIN AD_Table ON (AD_Column.AD_Table_ID=AD_Table.AD_Table_ID)")
@@ -605,17 +632,30 @@ public class MoveClient extends SvrProcess {
 					sqlForeignClientSB.append(" JOIN ").append(foreignTableName)
 					.append(" c ON (").append(tableName).append(".").append(columnName).append("=c.");
 				} else {
-					sqlForeignClientSB.append(" JOIN ").append(foreignTableName)
-					.append(" ON (").append(tableName).append(".").append(columnName).append("=").append(foreignTableName).append(".");
+					sqlForeignClientSB.append(" JOIN ").append(foreignTableName);
+					sqlForeignClientSB.append(" ON (");
+					if (refID != DisplayType.MultiSelectList && refID != DisplayType.MultiSelectTable
+							&& refID != DisplayType.MultiSelectSearch)
+					{
+						sqlForeignClientSB.append(tableName).append(".").append(columnName).append("=")
+								.append(foreignTableName).append(".");
+					}
 				}
 				if ("AD_Language".equalsIgnoreCase(foreignTableName) && !columnName.equalsIgnoreCase("AD_Language_ID")) {
 					sqlForeignClientSB.append("AD_Language");
 				} else if ("AD_EntityType".equalsIgnoreCase(foreignTableName) && !columnName.equalsIgnoreCase("AD_EntityType_ID")) {
 					sqlForeignClientSB.append("EntityType");
 				} else {
-					if (foreignTable.isUUIDKeyTable()) {
+					if (refID == DisplayType.MultiSelectList || refID == DisplayType.MultiSelectTable
+							|| refID == DisplayType.MultiSelectSearch)
+					{
+						sqlForeignClientSB.append(foreignTable).append(".").append(foreignTable).append("_ID");
+						sqlForeignClientSB.append("=ANY(").append(tableName).append(".").append(columnName).append(")");
+					}
+					else if (foreignTable.isUUIDKeyTable()) {
 						sqlForeignClientSB.append(uuidCol);
-					} else {
+					} else 
+					{
 						sqlForeignClientSB.append(foreignTableName).append("_ID");
 					}
 				}
@@ -1063,6 +1103,13 @@ public class MoveClient extends SvrProcess {
 							if (rsGD.wasNull()) {
 								parameters[i] = null;
 							}
+							else if (parameters[i] != null
+									&& column.getAD_Reference_ID() == DisplayType.MultiSelectList)
+							{
+								Array arr = rsGD.getArray(i + 1);
+								parameters[i] = (String[]) arr.getArray();
+							}
+
 							if (p_IsCopyClient) {
 								String uuidCol = PO.getUUIDColumnName(tableName);
 								if (columnName.equals(uuidCol)) {
