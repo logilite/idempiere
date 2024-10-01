@@ -251,12 +251,14 @@ public class GenericZoomProvider implements IZoomProvider {
 				.append(".")
 				.append(targetColumnName)
 				.append("=");
-		if (refTable.isUUIDKeyTable()) {
-			restriction.append(DB.TO_STRING(po.get_UUID()));
-			query.setZoomValue(po.get_UUID());
-		} else {
-			restriction.append(po.get_ID());
-			query.setZoomValue(po.get_ID());
+		if (refTable != null) {
+			if (refTable.isUUIDKeyTable()) {
+				restriction.append(DB.TO_STRING(po.get_UUID()));
+				query.setZoomValue(po.get_UUID());
+			} else {
+				restriction.append(po.get_ID());
+				query.setZoomValue(po.get_ID());
+			}
 		}
 		query.addRestriction(restriction.toString());
 		query.setZoomTableName(targetTableName);

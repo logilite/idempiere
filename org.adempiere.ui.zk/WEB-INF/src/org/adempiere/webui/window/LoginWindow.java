@@ -47,7 +47,6 @@ import org.adempiere.webui.panel.RolePanel;
 import org.adempiere.webui.panel.ValidateMFAPanel;
 import org.adempiere.webui.session.SessionContextListener;
 import org.adempiere.webui.session.SessionManager;
-import org.adempiere.webui.sso.filter.SSOWebUIFilter;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.UserPreference;
 import org.adempiere.webui.util.ZkSSOUtils;
@@ -256,10 +255,21 @@ public class LoginWindow extends Window implements EventListener<Event>
         			this.appendChild(pnlValidateMFA);
         }
 	}
-    
-	protected void createRolePanel(String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isClientDefined, boolean isSSOLogin) {
+
+	/**
+	 * Create Role Panel
+	 * 
+	 * @param userName
+	 * @param show
+	 * @param clientsKNPairs
+	 * @param isClientDefined
+	 * @param isSSOLogin
+	 */
+	protected void createRolePanel(String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isClientDefined, boolean isSSOLogin)
+	{
 		pnlRole = Extensions.getRolePanel(ctx, this, userName, show, clientsKNPairs, isClientDefined, isSSOLogin);
 	}
+
 	/**
 	 * Show change password panel
 	 * @param userName

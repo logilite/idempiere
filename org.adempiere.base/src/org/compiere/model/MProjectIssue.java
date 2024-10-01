@@ -666,37 +666,6 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 	}
 
 	/**
-	 * Update Project Balance on Project issue posted
-	 */
-	private void updateBalanceAmt()
-	{
-		MProject proj = (MProject) getC_Project();
-		BigDecimal cost = Env.ZERO;
-		if (getM_InOutLine_ID() > 0)
-		{
-			cost = ProjectIssueUtil.getPOCost(MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID(), get_TrxName())[0], getM_InOutLine_ID(), getMovementQty());
-		}
-		else if (getS_TimeExpenseLine_ID() > 0)
-		{
-			cost = ProjectIssueUtil.getLaborCost(MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID(), get_TrxName())[0], getS_TimeExpenseLine_ID());
-		}
-		else if (getC_InvoiceLine_ID()>0)
-		{
-			cost = getAmt(); 
-		}
-		else
-		{
-			cost = ProjectIssueUtil.getProductCosts(MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID(), get_TrxName())[0], (MProduct) getM_Product(),
-													getM_AttributeSetInstance_ID(), getAD_Org_ID(), getMovementQty(), true);
-		}
-		if(cost!=null)
-		{
-			proj.setProjectBalanceAmt(proj.getProjectBalanceAmt().add(cost));
-			proj.saveEx(get_TrxName());
-		}
-	} // updateBalanceAmt
-
-	/**
 	 * Filter project issues by matching invoice line and project
 	 *
 	 * @param  invLineID - Invoice Line ID
@@ -710,6 +679,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		MProjectIssue issuePrj = query.setParameters(Env.getAD_Client_ID(Env.getCtx()), invLineID).first();
 		return issuePrj;
 	} // getInvLineIssue
+
 	@Override
 	public String getSummary() {
 		String summary = getDocumentInfo();
@@ -772,7 +742,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		}
 		return index;
 	}
-	
+
 	/**
 	 * Update Project Balance on Project issue posted
 	 * 
@@ -800,10 +770,12 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		{
 			cost = ProjectIssueUtil.getProductCosts(as, (MProduct) getM_Product(), getM_AttributeSetInstance_ID(), getAD_Org_ID(), getMovementQty(), true);
 		}
+
 		if (cost == null && getM_Product_ID() > 0) // standard Product Costs
 		{
 			cost = ProjectIssueUtil.getProductStdCost(as, getAD_Org_ID(), getM_Product_ID(), getM_AttributeSetInstance_ID(), get_TrxName(), getMovementQty());
 		}
+
 		if (cost != null)
 		{
 			proj.setProjectBalanceAmt(proj.getProjectBalanceAmt().add(cost));
@@ -812,7 +784,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		return cost;
 	} // updateBalanceAmt
 	
-	 * Line On Invoice line set Project
+	 /* Line On Invoice line set Project
 	 * @param trxName
 	 */
 	private String setProject(String trxName)
@@ -854,7 +826,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		}
 		return null;
 	} // setProjectOnInvLine
-	
+
 	/**
 	 * Delete Project Line related to Project Issue
 	 */
@@ -862,8 +834,6 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 	{
 		DB.executeUpdate("Delete From C_ProjectLine Where C_ProjectIssue_ID = ?", get_ID(), get_TrxName());
 	} // deleteProjectLine
-	
-	/**
 
 	/**
 	 * Get Project Issue Description from Invoice Line
@@ -900,7 +870,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		else
 			return invLine.getLineNetAmt();
 	} // getInvLineAmt
-	
+
 	/**
 	 * Get locator form Time Expense Line
 	 * @param expenseLine

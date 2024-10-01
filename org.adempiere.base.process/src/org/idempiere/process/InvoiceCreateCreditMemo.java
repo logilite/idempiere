@@ -184,10 +184,8 @@ public class InvoiceCreateCreditMemo extends SvrProcess {
 			if (p_IsCreateAllocation && DocAction.ACTION_Complete.equals(p_DocAction)) {
 				//	Create Allocation
 				StringBuilder msgall = new StringBuilder().append(Msg.translate(getCtx(), "C_Invoice_ID")).append(": ").append(invoice.getDocumentNo()).append("/").append(creditMemo.getDocumentNo());
-				MAllocationHdr alloc = new MAllocationHdr(getCtx(), false, creditDate,
-						invoice.getC_Currency_ID(),
-						msgall.toString(),
-						get_TrxName());
+				MAllocationHdr alloc = (MAllocationHdr) MTable.get(Env.getCtx(), MAllocationHdr.Table_Name).getPO(0, get_TrxName());
+				alloc.setAllocationHdrValues(false, creditDate, invoice.getC_Currency_ID(), msgall.toString());
 				alloc.setAD_Org_ID(invoice.getAD_Org_ID());
 				alloc.saveEx();
 				//	Amount

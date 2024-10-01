@@ -1277,7 +1277,8 @@ public class Login implements ILogin
 	 */
 	public KeyNamePair[] getClients(String app_user, String app_pwd, String roleTypes) {
 		return getClients(app_user, app_pwd, roleTypes, null);
-	
+	}
+
 	/**
 	 *  Validate Client Login.
 	 *  Sets Context with login info.
