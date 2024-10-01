@@ -12,7 +12,7 @@
 	<filter>
 		<display-name>iDempiere WebUI Filter</display-name>
 		<filter-name>idempiereWebuiFilter</filter-name>
-		<filter-class>org.adempiere.webui.sso.filter.SSOWebuiFilter</filter-class>
+		<filter-class>org.adempiere.webui.sso.filter.SSOWebUIFilter</filter-class>
 		<async-supported>true</async-supported>
 	</filter>
 	<filter-mapping>

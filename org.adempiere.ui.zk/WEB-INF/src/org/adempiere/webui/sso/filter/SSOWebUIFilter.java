@@ -34,7 +34,7 @@ import org.compiere.util.CLogger;
  * 
  * @author Logilite Technologies
  */
-public class SSOWebuiFilter implements Filter
+public class SSOWebUIFilter implements Filter
 {
 	/** Logger */
 	protected static CLogger		log				= CLogger.getCLogger(SSOWebuiFilter.class);
@@ -44,7 +44,7 @@ public class SSOWebuiFilter implements Filter
 	/**
 	 * AdempiereMonitorFilter
 	 */
-	public SSOWebuiFilter()
+	public SSOWebUIFilter()
 	{
 		super();
 	} // AdempiereMonitorFilter
