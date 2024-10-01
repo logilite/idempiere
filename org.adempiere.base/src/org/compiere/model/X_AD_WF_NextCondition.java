@@ -332,20 +332,6 @@ public class X_AD_WF_NextCondition extends PO implements I_AD_WF_NextCondition, 
 	}
 
 	/** Set SQL Expression/Statement.
-		@param SQLStatement SQL Expression/Statement	  */
-	public void setSQLStatement (String SQLStatement)
-	{
-		set_Value (COLUMNNAME_SQLStatement, SQLStatement);
-	}
-
-	/** Get SQL Expression/Statement.
-		@return SQL Expression/Statement	  */
-	public String getSQLStatement () 
-	{
-		return (String)get_Value(COLUMNNAME_SQLStatement);
-	}
-
-	/** Set SQL Expression/Statement.
 		@param SQLStatement SQL Expression/Statement
 	*/
 	public void setSQLStatement (String SQLStatement)

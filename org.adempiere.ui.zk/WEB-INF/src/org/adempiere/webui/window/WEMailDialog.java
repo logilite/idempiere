@@ -1049,7 +1049,6 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		}
 	}
 
-
 	public void setPO(PO m_po)
 	{
 		this.m_po = m_po;

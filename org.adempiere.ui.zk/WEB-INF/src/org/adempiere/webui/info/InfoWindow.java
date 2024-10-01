@@ -1454,12 +1454,12 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 								else
 									columnClause = columnName + " :: numeric []";
 							}
-		
+
 							if (MInfoColumn.QUERYOPERATOR_EXCLUDE.equals(queryOperator))
 							{
 								builder.append("(");
 							}
-							
+
 							builder.append(columnClause)
 								   .append(" ")
 								   .append(queryOperator);
@@ -1468,7 +1468,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 							} else {
 								builder.append(" ? ");
 							}
-		
+
 							if (MInfoColumn.QUERYOPERATOR_EXCLUDE.equals(queryOperator))
 							{
 								builder.append(")").append(MQuery.EXCLUDE_OP2);
