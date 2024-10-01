@@ -445,7 +445,7 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 				renderCalenderEvent();
 			}
 		}
-		else if (type.equals(ON_EVENT_CREATE_EVENT)) {
+		else if (type.equals(ON_EVENT_CREATE_EVENT) && !Env.isReadOnlySession()) {
 			CalendarsEvent calendarsEvent = (CalendarsEvent) e;
 			DecisionWindow decisionWin = new DecisionWindow(calendarsEvent, this);
 			SessionManager.getAppDesktop().showWindow(decisionWin);

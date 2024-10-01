@@ -2864,8 +2864,8 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 					else if (data instanceof UUIDColumn)
 					{
 						UUIDColumn id = (UUIDColumn) data;
-						parameters.add(null);
 						parameters.add(id.getRecord_UU());
+						parameters.add(null);
 						parameters.add(null);
 						parameters.add(null);
 						parameters.add(null);

@@ -100,7 +100,7 @@ public class TabCreateFields extends SvrProcess
 			+ " AND IsActive='Y' ";
 
 		if(!Util.isEmpty(p_EntityType))
-			sql += " AND c.entitytype = ?";
+			sql += " AND c.entitytype = ? ";
 		if(p_CreatedSince != null)
 			sql += " AND c.created >= ? ";
 

@@ -47,9 +47,9 @@ import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MMatchInv;
 import org.compiere.model.MOrderLandedCostAllocation;
 import org.compiere.model.MProduct;
+import org.compiere.model.MTable;
 import org.compiere.model.MTax;
 import org.compiere.model.MUOM;
-import org.compiere.model.MTable;
 import org.compiere.model.ProductCost;
 import org.compiere.model.Query;
 import org.compiere.model.X_M_Cost;
@@ -464,12 +464,14 @@ public class Doc_MatchInv extends Doc
 		String costingMethod = m_pc.getProduct().getCostingMethod(as);
 		BigDecimal amtVariance = Env.ZERO;
 		BigDecimal amtAsset = Env.ZERO;
-		BigDecimal qtyInv = m_invoiceLine.getQtyInvoiced();
+		BigDecimal qtyMatched = matchInv.getQty();
 		BigDecimal qtyCost = null;
 		Boolean isStockCoverage = false;
-		
-		if (X_M_Cost.COSTINGMETHOD_AveragePO.equals(costingMethod)  && m_invoiceLine.getM_Product_ID() > 0)
+
+		boolean isReversal = matchInv.getReversal_ID() > 0 && matchInv.getReversal_ID() < matchInv.get_ID();
+		if (X_M_Cost.COSTINGMETHOD_AveragePO.equals(costingMethod)  && m_invoiceLine.getM_Product_ID() > 0 && !isReversal)
 		{
+			isStockCoverage = true;
 
 			int AD_Org_ID = m_receiptLine.getAD_Org_ID();
 			int M_AttributeSetInstance_ID = matchInv.getM_AttributeSetInstance_ID();
@@ -493,15 +495,14 @@ public class Doc_MatchInv extends Doc
 			}else{
 				MCost c = MCost.get(getCtx(), getAD_Client_ID(), AD_Org_ID, m_invoiceLine.getM_Product_ID(),
 					as.getM_CostType_ID(), as.getC_AcctSchema_ID(), ce.getM_CostElement_ID(),
-					M_AttributeSetInstance_ID, null);
+					M_AttributeSetInstance_ID, getTrxName());
 				qtyCost = (c!=null? c.getCurrentQty():Env.ZERO);
 			}
-			
-			isStockCoverage = true;
-			if (qtyCost != null && qtyCost.compareTo(qtyInv) < 0 )
+						
+			if (qtyCost != null && qtyCost.compareTo(qtyMatched) < 0 )
 			{
 				//If current cost qty < invoice qty
-				amtAsset = qtyCost.multiply(ipv).divide(qtyInv,as.getCostingPrecision(),RoundingMode.HALF_UP);
+				amtAsset = qtyCost.multiply(ipv).divide(qtyMatched,as.getCostingPrecision(),RoundingMode.HALF_UP);
 				amtVariance = ipv.subtract(amtAsset);
 				
 			}else{
@@ -509,6 +510,15 @@ public class Doc_MatchInv extends Doc
 				amtAsset = ipv;
 			}
 			
+		}
+		else if (X_M_Cost.COSTINGMETHOD_AveragePO.equals(costingMethod)  && m_invoiceLine.getM_Product_ID() > 0 && isReversal)
+		{
+			isStockCoverage = true;
+			int M_AttributeSetInstance_ID = matchInv.getM_AttributeSetInstance_ID();
+			MCostDetail cd = MCostDetail.get (as.getCtx(), "M_MatchInv_ID=? AND Coalesce(M_CostElement_ID,0)=0", 
+					matchInv.getReversal_ID(), M_AttributeSetInstance_ID, as.getC_AcctSchema_ID(), getTrxName());
+			amtAsset = cd != null ? cd.getAmt().negate() : BigDecimal.ZERO;
+			amtVariance = ipv.subtract(amtAsset);
 		}
 		
 		Trx trx = Trx.get(getTrxName(), false);
@@ -553,7 +563,6 @@ public class Doc_MatchInv extends Doc
 						m_pc.getAccount(ProductCost.ACCTTYPE_P_AverageCostVariance, as), as.getC_Currency_ID(),
 						amtVariance);
 				updateFactLine(varianceLine);
-				varianceLine.setQty(getQty().negate());
 				
 				if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
 				{
@@ -573,7 +582,6 @@ public class Doc_MatchInv extends Doc
 		} else if (X_M_Cost.COSTINGMETHOD_AverageInvoice.equals(costingMethod) && !zeroQty) {
 			//TODO test for avg Invoice costing method as here dropped posting of posting to IPV account
 			FactLine line = fact.createLine(null, account, as.getC_Currency_ID(), ipv);
-			line.setQty(getQty().negate());
 			updateFactLine(line);
 			
 			if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
@@ -593,9 +601,8 @@ public class Doc_MatchInv extends Doc
 		}
 	}
 
-	/** 
-	 * Verify if the posting involves two or more organizations
-	 * @return true if there are more than one org involved on the posting
+	/** Verify if the posting involves two or more organizations
+	@return true if there are more than one org involved on the posting
 	 */
 	public boolean isInterOrg(MAcctSchema as) {
 		MAcctSchemaElement elementorg = as.getAcctSchemaElement(MAcctSchemaElement.ELEMENTTYPE_Organization);

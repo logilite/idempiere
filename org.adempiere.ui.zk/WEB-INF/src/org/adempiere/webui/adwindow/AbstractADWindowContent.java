@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -520,14 +521,15 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 				gridWindow.initTab(tabIndex);
 				//init parent tab by parent ids
 				StringBuilder sql = new StringBuilder("SELECT ").append(gTab.getLinkColumnName()).append(" FROM ").append(gTab.getTableName()).append(" WHERE ").append(query.getWhereClause());
-				List<Object> parentIds = DB.getSQLValueObjectsEx(null, sql.toString());
+				List<List<Object>> parentIds = DB.getSQLArrayObjectsEx(null, sql.toString());
 				if (parentIds!=null && parentIds.size() > 0)
 				{
 					GridTab parentTab = null;
 					Map<Integer, MQuery>queryMap = new TreeMap<Integer, MQuery>();
 
-					for (Object parentId : parentIds)
+					for (List<Object>parentIdList : parentIds)
 					{
+						Object parentId = parentIdList.get(0);
 						Map<Integer, Object[]>parentMap = new TreeMap<Integer, Object[]>();
 						int index = tabIndex;
 						Object oldpid = parentId;
@@ -706,6 +708,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		final GridTab gTab = gridWindow.getTab(tabIndex);
 		Env.setContext(ctx, curWindowNo, tabIndex, GridTab.CTX_TabLevel, Integer.toString(gTab.getTabLevel()));
 
+		AtomicBoolean zoomQuery = new AtomicBoolean(false);
 		// Query first tab
 		if (tabIndex == 0)
 		{
@@ -738,6 +741,8 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 
 					    initQueryOnNew(result);
 				    }
+					if (query != null && query == result)
+						zoomQuery.set(true);
 				}
 
 			});
@@ -780,6 +785,15 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 			//fallback to ADTabpanel
 			ADTabpanel fTabPanel = new ADTabpanel();
 			initTabPanel(query, tabIndex, gTab, fTabPanel);
+			// force single row mode for zoom query that return 1 record
+			if (query != null && zoomQuery.get())
+			{
+				if (gTab.getRowCount() == 1 && !gTab.isNew() && adTabbox.getSelectedTabpanel().isGridView()
+						&& adTabbox.getSelectedTabpanel().getGridTab() == gTab)
+				{
+					adTabbox.getSelectedTabpanel().switchRowPresentation();
+				}
+			}
 		}
 
 		return gTab;
@@ -1614,6 +1628,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	public void saveAndNavigate(final Callback<Boolean> callback) {
 		if (adTabbox != null)
 		{
+			boolean newrecod = adTabbox.getSelectedGridTab().isNew();
 			if (adTabbox.isSortTab())
 			{
 				onSave(false, true, callback);
@@ -1628,12 +1643,16 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 				{
 					//  new record, but nothing changed
 					adTabbox.dataIgnore();
+			        if (newrecod)
+			        	onRefresh(true, false);
 					callback.onCallback(true);
 				}
 			}   //  there is a change
 			else {
 				// just in case
 				adTabbox.dataIgnore();
+		        if (newrecod)
+		        	onRefresh(true, false);
 				callback.onCallback(true);
 			}
 		}
@@ -4351,6 +4370,12 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	 * @param pi
 	 */
 	public void onModalClose(ProcessInfo pi) {
+		if (getActiveGridTab().isQuickForm){
+			statusBarQF.setStatusLine(null);
+		}else{
+			statusBar.setStatusLine(null);
+		}
+		
 		boolean notPrint = pi != null
 		&& pi.getAD_Process_ID() != adTabbox.getSelectedGridTab().getAD_Process_ID()
 		&& pi.isReportingProcess() == false;

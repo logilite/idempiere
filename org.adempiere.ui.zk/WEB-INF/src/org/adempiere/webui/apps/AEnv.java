@@ -940,7 +940,7 @@ public final class AEnv
 	 */
 	public static String getZoomUrlTableUU(PO po)
 	{
-		return getApplicationUrl() + "?Action=Zoom&AD_Table_ID=" + po.get_Table_ID() + "&Record_UU=" + po.get_UUID();
+		return getApplicationUrl() + "?Action=Zoom&TableName=" + po.get_TableName() + "&Record_UU=" + po.get_UUID();
 	}
 
 	/**
@@ -949,7 +949,7 @@ public final class AEnv
 	 */
 	public static String getZoomUrlTableID(PO po)
 	{
-		return getApplicationUrl() + "?Action=Zoom&AD_Table_ID=" + po.get_Table_ID() + "&Record_ID=" + po.get_ID();
+		return getApplicationUrl() + "?Action=Zoom&TableName=" + po.get_TableName() + "&Record_ID=" + po.get_ID();
 	}
 
 	/**
