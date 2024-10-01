@@ -1217,7 +1217,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 					}
 
 				String queryOperator = InfoColumnVO.getQueryOperator();
-				if (mInfoColumn.isMultiSelectCriteria())
+				if (InfoColumnVO.isMultiSelectCriteria())
 				{
 					builder.append(columnClause);
 					if (MInfoColumn.QUERYOPERATOR_IN.equals(queryOperator))

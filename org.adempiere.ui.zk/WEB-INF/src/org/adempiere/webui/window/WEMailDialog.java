@@ -137,15 +137,14 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	public WEMailDialog(String title, MUser from, String to, String subject, String message, DataSource attachment,
 			int m_WindowNo, int ad_Table_ID, int record_ID, PrintInfo printInfo) {
 		super();
-		init(title, from, to, subject, message, null, m_WindowNo, ad_Table_ID, record_ID, printInfo);
+		init(title, from, to, subject, message, null, m_WindowNo, record_ID, printInfo);
 	}	//	EmailDialog
 	
 	@Override
 	public void init(String title, MUser from, String to, String subject, String message, File attachment,
-			int m_WindowNo, int ad_Table_ID, int record_ID, PrintInfo printInfo)
+			int m_WindowNo, int record_ID, PrintInfo printInfo)
 	{
 		Components.removeAllChildren(this);
-		this.m_AD_Table_ID = ad_Table_ID;
 		this.m_Record_ID = record_ID;
 		this.setTitle(title);
 		this.setSclass("popup-dialog email-dialog");
@@ -961,43 +960,6 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		}
 	}
 	
-	@Override
-	public void init(String title, MUser from, String to, String subject, String message, File attachment,
-			int m_WindowNo, int record_ID, PrintInfo printInfo)
-	{
-		Components.removeAllChildren(this);
-
-		this.m_Record_ID = record_ID;
-		this.setTitle(title);
-		this.setSclass("popup-dialog");
-		this.setClosable(true);
-		this.setBorder("normal");
-		this.setWidth("80%");
-		this.setHeight("80%");
-		this.setShadow(true);
-		this.setMaximizable(true);
-		this.setSizable(true);
-		
-		if (fCc.getValue() != null)
-			fCc.setValue(null);
-		
-		confirmPanel = new ConfirmPanel(true);
-		attachments.clear();
-
-		fMessage = new CKeditor();
-		fMessage.setCustomConfigurationsPath("/js/ckeditor/config.js");
-		fMessage.setToolbar("MyToolbar");
-		Map<String, Object> lang = new HashMap<String, Object>();
-		lang.put("language", Language.getLoginLanguage().getAD_Language());
-		fMessage.setConfig(lang);
-		
-		commonInit(from, to, subject, message, new FileDataSource(attachment));
-		
-		clearEMailContext(m_WindowNo);
-		sendEvent(m_WindowNo, m_AD_Table_ID, m_Record_ID, null, "");
-		setValuesFromContext(m_WindowNo);
-	}
-
 	public void setPO(PO m_po)
 	{
 		this.m_po = m_po;

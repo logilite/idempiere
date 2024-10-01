@@ -24,14 +24,11 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.compiere.model.PO;
-import org.compiere.util.DB;
-import org.compiere.util.Util;
-import org.idempiere.cache.ImmutablePOSupport;
 import org.compiere.model.X_AD_WF_NextCondition;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
-import org.compiere.util.Msg;
 import org.compiere.util.Util;
+import org.idempiere.cache.ImmutablePOSupport;
 
 /**
  *	Workflow Transition Condition
@@ -374,35 +371,7 @@ public class MWFNextCondition extends X_AD_WF_NextCondition implements Immutable
 		makeImmutable();
 		return this;
 	}
-	
-	/**
-	 * Get value from Column SQL (SQLStatement) instead of from AD_Column_ID
-	 * @param po
-	 * @return Value from Column SQL
-	 * @throws SQLException 
-	 */
-	private Object getColumnSQLValue(PO po) throws SQLException {
-		String columnSQL = getSQLStatement();
-		if (columnSQL.indexOf("@") >= 0) {
-			columnSQL = Env.parseVariable(columnSQL, po, po.get_TrxName(), false);
-		}
-		String tableName = po.get_TableName();
-		String pkName = po.get_KeyColumns() != null && po.get_KeyColumns().length==1 ? po.get_KeyColumns()[0] : po.getUUIDColumnName();
 
-		String resultSql = String.format("SELECT (%s) FROM %s WHERE %s = ?", columnSQL, tableName, pkName);
-
-		try (PreparedStatement pstmt = DB.prepareStatement(resultSql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, po.get_TrxName())) {
-			if (pkName.endsWith("_UU"))
-				pstmt.setString(1, po.get_ValueAsString(po.getUUIDColumnName()));				
-			else
-				pstmt.setInt(1, po.get_ID());
-			ResultSet rs = pstmt.executeQuery();
-			if (rs.next())
-				return rs.getObject(1);
-		}
-		return null;
-	}
-	
     /**
      * Get value from Column SQL (SQLStatement) instead of from AD_Column_ID
      * @param po

@@ -28,14 +28,15 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import javax.servlet.http.HttpSession;
+
 import org.adempiere.base.Core;
 import org.adempiere.base.ILogin;
-import javax.servlet.http.HttpSession;
 import org.adempiere.base.sso.ISSOPrinciple;
 import org.adempiere.base.sso.SSOUtils;
 import org.adempiere.exceptions.AdempiereException;
-import org.adempiere.webui.Extensions;
 import org.adempiere.util.Callback;
+import org.adempiere.webui.Extensions;
 import org.adempiere.webui.IWebClient;
 import org.adempiere.webui.component.FWindow;
 import org.adempiere.webui.component.Window;
@@ -46,7 +47,7 @@ import org.adempiere.webui.panel.RolePanel;
 import org.adempiere.webui.panel.ValidateMFAPanel;
 import org.adempiere.webui.session.SessionContextListener;
 import org.adempiere.webui.session.SessionManager;
-import org.adempiere.webui.sso.filter.SSOWebuiFilter;
+import org.adempiere.webui.sso.filter.SSOWebUIFilter;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.UserPreference;
 import org.adempiere.webui.util.ZkSSOUtils;
@@ -135,7 +136,7 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 		String errorMessage = null;
 		try
 		{
-			ISSOPrinciple ssoPrinciple = SSOWebuiFilter.getSSOPrinciple();
+			ISSOPrinciple ssoPrinciple = SSOWebUIFilter.getSSOPrinciple();
 			String username = ssoPrinciple.getUserName(result);
 			Language language = ssoPrinciple.getLanguage(result);
 			boolean isEmailLogin = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
@@ -240,7 +241,7 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 	}
     
 	protected void createRolePanel(String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isClientDefined, boolean isSSOLogin) {
-		pnlRole = Extensions.getRolePanel(ctx, this, userName, show, clientsKNPairs, isClientDefined,isSSOLogin);
+		pnlRole = Extensions.getRolePanel(ctx, this, userName, show, clientsKNPairs, isClientDefined, isSSOLogin);
 	}
     public void changePassword(String userName, String userPassword, boolean show, KeyNamePair[] clientsKNPairs)
     {
