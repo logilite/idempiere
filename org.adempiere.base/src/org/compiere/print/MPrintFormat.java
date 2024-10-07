@@ -71,6 +71,8 @@ public class MPrintFormat extends X_AD_PrintFormat
 														// Display restrictions - Passwords, etc.
 														+ "AND NOT EXISTS (SELECT * FROM AD_Field f WHERE pfi.AD_Column_ID=f.AD_Column_ID AND (f.IsEncrypted='Y' OR f.ObscureType IS NOT NULL))";
 
+	public static final String	PF_ACCESS_SQLWHERE	= " AND (CreatedBy = ? OR AD_PrintFormat_ID IN (SELECT DISTINCT AD_PrintFormat_ID FROM AD_PrintFormat_Access WHERE ((AD_User_ID IS NULL AND AD_Role_ID = ?) OR (AD_Role_ID IS NULL AND AD_User_ID = ?) OR (AD_Role_ID = ? AND AD_User_ID = ?)))) ";
+
 	private static final String	ORDER_BY_CLAUSE		= " ORDER BY SeqNo";
 
 	/**
@@ -1283,11 +1285,9 @@ public class MPrintFormat extends X_AD_PrintFormat
 		if (AD_Window_ID > 0)
 			sqlWhereB.append("AND (AD_Window_ID=? OR AD_Window_ID IS NULL)");
 		
-		//TODO check for if user is one who created Print format than it should be accessible.
 		MUser user = MUser.get(Env.getCtx());
 		if (!user.isSupportUser())
-			sqlWhereB.append(" AND AD_PrintFormat_ID IN (SELECT DISTINCT AD_PrintFormat_ID FROM AD_PrintFormat_Access WHERE ((AD_User_ID IS NULL AND AD_Role_ID = ?) OR (AD_Role_ID IS NULL AND AD_User_ID = ?) OR (AD_Role_ID = ? AND AD_User_ID = ?)))");
-
+			sqlWhereB.append(PF_ACCESS_SQLWHERE);
 		//
 		String sqlWhere = MRole.getDefault().addAccessSQL(sqlWhereB.toString(), "AD_PrintFormat", MRole.SQL_NOTQUALIFIED, MRole.SQL_RO);
 
@@ -1302,6 +1302,7 @@ public class MPrintFormat extends X_AD_PrintFormat
 			lsParameter.add(Integer.valueOf(AD_Window_ID));	
 		if (!user.isSupportUser())
 		{
+			lsParameter.add(Integer.valueOf(Env.getAD_User_ID(Env.getCtx())));
 			lsParameter.add(Integer.valueOf(Env.getAD_Role_ID(Env.getCtx())));
 			lsParameter.add(Integer.valueOf(Env.getAD_User_ID(Env.getCtx())));
 			lsParameter.add(Integer.valueOf(Env.getAD_Role_ID(Env.getCtx())));

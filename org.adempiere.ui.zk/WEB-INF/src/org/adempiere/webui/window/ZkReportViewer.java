@@ -81,7 +81,6 @@ import org.compiere.model.SystemIDs;
 import org.compiere.model.X_AD_ToolBarButton;
 import org.compiere.print.ArchiveEngine;
 import org.compiere.print.MPrintFormat;
-import org.compiere.print.MPrintFormatItem;
 import org.compiere.print.ReportEngine;
 import org.compiere.tools.FileUtil;
 import org.compiere.util.CLogger;
@@ -840,14 +839,14 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 			AD_Window_ID = Env.getZoomWindowID(m_reportEngine.getQuery());
 
 		int reportViewID = m_reportEngine.getPrintFormat().getAD_ReportView_ID();
-
+        MUser user = MUser.get(Env.getCtx());
 		//	fill Report Options
 		String sql = MRole.getDefault().addAccessSQL(
 			"SELECT * "
 				+ "FROM AD_PrintFormat "
 				+ "WHERE AD_Table_ID=? "
 				//Added Lines by Armen
-				+ "AND IsActive='Y' "
+				+ "AND IsActive='Y' " + (!user.isSupportUser() ? MPrintFormat.PF_ACCESS_SQLWHERE : "")
 				//End of Added Lines
 				+ (AD_Window_ID > 0 ? "AND (AD_Window_ID=? OR AD_Window_ID IS NULL) " : "")
 				+ (reportViewID > 0 ? "AND AD_ReportView_ID=? " : "")
@@ -861,6 +860,14 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 			pstmt = DB.prepareStatement(sql, null);
 			int idx = 1;
 			pstmt.setInt(idx++, AD_Table_ID);
+			if (!user.isSupportUser())
+			{
+				pstmt.setInt(idx++, Integer.valueOf(Env.getAD_User_ID(Env.getCtx())));
+				pstmt.setInt(idx++, Integer.valueOf(Env.getAD_Role_ID(Env.getCtx())));
+				pstmt.setInt(idx++, Integer.valueOf(Env.getAD_User_ID(Env.getCtx())));
+				pstmt.setInt(idx++, Integer.valueOf(Env.getAD_Role_ID(Env.getCtx())));
+				pstmt.setInt(idx++, Integer.valueOf(Env.getAD_User_ID(Env.getCtx())));
+			}
 			if (AD_Window_ID > 0)
 				pstmt.setInt(idx++, AD_Window_ID);
 			if (reportViewID > 0)
@@ -870,9 +877,6 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 			{
 				MPrintFormat printFormat = new MPrintFormat(Env.getCtx(), rs, null);
 
-				if (!MPrintFormatAccess.isReadAccessPrintFormat(printFormat.getAD_PrintFormat_ID(), null))
-					continue;
-				
 				KeyNamePair pp = new KeyNamePair(printFormat.get_ID(), printFormat.get_Translation(MPrintFormat.COLUMNNAME_Name, Env.getAD_Language(Env.getCtx()), true));
 				Listitem li = comboReport.appendItem(pp.getName(), pp.getKey());
 				if (rs.getInt(1) == AD_PrintFormat_ID)

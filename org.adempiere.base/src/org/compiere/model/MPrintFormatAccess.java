@@ -193,11 +193,11 @@ public class MPrintFormatAccess extends X_AD_PrintFormat_Access
 		return super.beforeDelete();
 	}
 
-	public static MPrintFormatAccess get(int record_ID, int ad_User_ID, int ad_Role_ID, String trxName)
+	public static MPrintFormatAccess get(int printFormat_ID, int ad_User_ID, int ad_Role_ID, String trxName)
 	{
 		List<Object> params = new ArrayList<Object>();
 		String whereClause = "AD_PrintFormat_ID = ?";
-		params.add(record_ID);
+		params.add(printFormat_ID);
 		if (ad_User_ID > 0)
 		{
 			whereClause += " AND AD_User_ID = ? ";
@@ -210,5 +210,22 @@ public class MPrintFormatAccess extends X_AD_PrintFormat_Access
 		}
 
 		return new Query(Env.getCtx(), MPrintFormatAccess.Table_Name, whereClause, trxName).setParameters(params).setOnlyActiveRecords(true).first();
+	}
+	
+	public static MPrintFormatAccess sharePrintFormatAccess(Properties ctx, int PrintFormat_ID, int user_ID, int role_ID, boolean isReadWrite, String trxName)
+	{
+		MPrintFormatAccess access = MPrintFormatAccess.get(PrintFormat_ID, user_ID, role_ID, trxName);
+		int access_ID = 0;
+		if (access != null && access.getAD_PrintFormat_Access_ID() > 0)
+			access_ID = access.getAD_PrintFormat_Access_ID();
+		access = new MPrintFormatAccess(ctx, access_ID, trxName);
+		access.setAD_PrintFormat_ID(PrintFormat_ID);
+		access.setIsReadWrite(isReadWrite);
+		if (user_ID > 0)
+			access.setAD_User_ID(user_ID);
+		if (role_ID > 0)
+			access.setAD_Role_ID(role_ID);
+		access.saveEx();
+		return access;
 	}
 }
