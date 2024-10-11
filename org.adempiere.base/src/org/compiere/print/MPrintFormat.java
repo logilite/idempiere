@@ -1388,7 +1388,6 @@ public class MPrintFormat extends X_AD_PrintFormat
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success)
 	{
-		//TODO should we keep this configurable?
 		boolean isAutoGenrateAccess = MSysConfig.getBooleanValue(MSysConfig.PRINTFORMAT_AUTOGENERATE_ACCESS, false, Env.getAD_Client_ID(getCtx()));
 		if (isAutoGenrateAccess && newRecord && success)
 		{
