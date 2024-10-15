@@ -37,7 +37,7 @@ import org.compiere.util.CLogger;
 public class SSOWebUIFilter implements Filter
 {
 	/** Logger */
-	protected static CLogger		log				= CLogger.getCLogger(SSOWebuiFilter.class);
+	protected static CLogger		log				= CLogger.getCLogger(SSOWebUIFilter.class);
 	//TODO as this is static, will not work on multi tenant environment
 	private static ISSOPrinciple	m_SSOPrinciple	= null;
 
