@@ -34,6 +34,7 @@ import org.compiere.model.MRequestAction;
 import org.compiere.model.MRequestType;
 import org.compiere.model.MRequestUpdate;
 import org.compiere.model.MSession;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.model.PO;
 import org.compiere.model.X_AD_User;
@@ -59,6 +60,14 @@ public class RequestEventHandler extends AbstractEventHandler implements Managed
 	@Override
 	protected void doHandleEvent(Event event) 
 	{
+		/*
+		 *  If disabled then prevent to execute further events
+		 */
+		if (MSysConfig.getBooleanValue(MSysConfig.DEFAULT_REQUEST_HANDLER_DISABLED, false))
+		{
+			return;
+		}
+
 		String topic = event.getTopic();
 		if (topic.equals(IEventTopics.REQUEST_SEND_EMAIL)) 
 		{
