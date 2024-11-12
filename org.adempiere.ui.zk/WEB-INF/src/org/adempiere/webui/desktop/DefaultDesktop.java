@@ -455,7 +455,11 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         contextHelp.setTooltiptext(Util.cleanAmp(Msg.getElement(Env.getCtx(), "AD_CtxHelp_ID")));
         contextHelp.setVisible(!e.isVisible());
         isQuickInfoOpen = e.isVisible();
-        
+
+		// First, customize the action in the desktop ZUL page to collapse the header based on user
+		// preferences.
+		Extensions.doZulCustomAction(page, zulPath);
+
         if (!mobile) {
 	        boolean headerCollapsed= pref.isPropertyBool(UserPreference.P_HEADER_COLLAPSED);
 	        if (headerCollapsed) {
@@ -473,8 +477,6 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	        westBtn.setSclass("window-container-toolbar-btn");
 	        westBtn.setStyle("cursor: pointer; padding: 0px; margin: 0px;");
         }
-        
-        Extensions.doZulCustomAction(page, zulPath);
         return layout;
     }
 
