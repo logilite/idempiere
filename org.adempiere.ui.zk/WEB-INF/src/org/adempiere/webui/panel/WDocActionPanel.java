@@ -59,6 +59,7 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
+import org.compiere.util.Util;
 import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFNode;
 import org.compiere.wf.MWFProcess;
@@ -543,6 +544,12 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				try
 				{
 					m_activity.setUserChoice(m_AD_User_ID, value, dt, null);
+					
+					String error = m_activity.getAD_WF_Process().getTextMsg();
+
+					if (error != null && !Util.isEmpty(error)) {
+						FDialog.error(0, error);
+					}
 				}
 				catch (Exception e)
 				{
