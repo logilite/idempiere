@@ -23,7 +23,7 @@ import java.util.logging.Level;
 
 import org.adempiere.model.GenericPO;
 import org.adempiere.webui.apps.AEnv;
-import org.adempiere.webui.apps.WProcessCtl;
+import org.adempiere.webui.apps.WSharePrintFormatForm;
 import org.adempiere.webui.component.Button;
 import org.adempiere.webui.component.ConfirmPanel;
 import org.adempiere.webui.component.Grid;
@@ -56,7 +56,6 @@ import org.compiere.model.Query;
 import org.compiere.print.MPrintFormat;
 import org.compiere.print.MPrintFormatItem;
 import org.compiere.print.ReportEngine;
-import org.compiere.process.ProcessInfo;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -78,8 +77,6 @@ import org.zkoss.zul.Vbox;
 
 @org.idempiere.ui.zk.annotation.Form
 public class WReportCustomization  implements IFormController,EventListener<Event> {
-	
-	private static final int			PROCESS_SHARE_PRINT_FORMAT	= 200163;
 	
 	protected CustomForm form = new CustomForm();	
 	
@@ -320,8 +317,7 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 		if (MPrintFormatAccess.isWriteAccessPrintFormat(m_reportEngine.getPrintFormat().getAD_PrintFormat_ID(), null))
 		{
 			btnSharePrintFormat = new Button();
-			//TODO this message must be defined in AD
-			btnSharePrintFormat.setLabel(Msg.getMsg(Env.getCtx(), "Share Print Format"));
+			btnSharePrintFormat.setLabel(Msg.getMsg(Env.getCtx(), "SharePrintFormat"));
 			btnSharePrintFormat.setName("btnSharePrintFormat");
 			confirmPanelMain.addComponentsLeft(btnSharePrintFormat);
 		}
@@ -414,9 +410,8 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 	private void cmd_sharePrintFormat()
 	{
 		int ad_PrintFormat_ID = m_reportEngine.getPrintFormat().getAD_PrintFormat_ID();
-		Env.setContext(m_ctx, m_WindowNo, "AD_PrintFormat_ID", ad_PrintFormat_ID);
-		ProcessInfo pi = new ProcessInfo("Share Print Format", PROCESS_SHARE_PRINT_FORMAT, MPrintFormat.Table_ID, ad_PrintFormat_ID);
-		WProcessCtl.process(m_WindowNo, pi, null);
+		Window window = new WSharePrintFormatForm(ad_PrintFormat_ID);
+		AEnv.showCenterScreen(window);
 	}
 
 	protected void onSave() {

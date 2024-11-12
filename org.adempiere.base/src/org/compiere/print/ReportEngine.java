@@ -2291,8 +2291,8 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				.append("WHERE d." + DOC_IDS[type] + "=?")			//	info from PrintForm
 				.append(" AND pf.AD_Org_ID IN (0,d.AD_Org_ID) ")
 				.append("ORDER BY pf.AD_Org_ID DESC");
+
 		//
-		/// TODO print format access 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
@@ -2348,6 +2348,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 					DocumentNo = rs.getString(11);
 				}
 
+				// Adding validation in query is complicated, so check for access for PF and then only set 
 				if (MPrintFormatAccess.isReadAccessPrintFormat(AD_PrintFormat_ID, trxName))
 					break;
 
