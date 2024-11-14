@@ -59,6 +59,10 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
+import org.compiere.util.Util;
+import org.compiere.util.Util;
+import org.compiere.util.Util;
+import org.compiere.util.Util;
 import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFNode;
 import org.compiere.wf.MWFProcess;
@@ -543,6 +547,12 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				try
 				{
 					m_activity.setUserChoice(m_AD_User_ID, value, dt, null);
+					
+					String error = m_activity.getAD_WF_Process().getTextMsg();
+
+					if (error != null && !Util.isEmpty(error)) {
+						FDialog.error(0, error);
+					}
 				}
 				catch (Exception e)
 				{
@@ -709,19 +719,18 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			m_activity = acts[i];
 		}
 
-		if (m_activity != null)
+		if (m_activity != null && MWFActivity.WFSTATE_Suspended.equals(m_activity.getWFState()))
 		{
 			m_WFProcess = (MWFProcess) m_activity.getAD_WF_Process();
 			
 			int AD_WF_Resp_ID = m_activity.getAD_WF_Responsible_ID();
-			final String sql = "SELECT AD_WF_Responsible_ID FROM AD_WF_Responsible WHERE AD_Client_ID=? AND Override_ID = ? AND IsActive='Y' ";
 
-			int id = DB.getSQLValue(m_activity.get_TrxName(), sql, Env.getAD_Client_ID(Env.getCtx()), AD_WF_Resp_ID);
-
-			if (id > 0)
-				AD_WF_Resp_ID = id;
-
-			resp = MWFResponsible.get(Env.getCtx(), AD_WF_Resp_ID);
+			MWFResponsible ovrResp = MWFResponsible.getClientWFResp(Env.getCtx(), AD_WF_Resp_ID);
+			
+			if (ovrResp != null)
+				resp = ovrResp;
+			else
+				resp = m_activity.getResponsible();
 		}
 	}
 

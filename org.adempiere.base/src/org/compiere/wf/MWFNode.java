@@ -723,15 +723,12 @@ public class MWFNode extends X_AD_WF_Node
 			return AD_WF_Responsible_ID;
 		}
 
+		// get Client WF Responsible from the cache
+		MWFResponsible ovrResp = MWFResponsible.getClientWFResp(p_ctx, AD_WF_Responsible_ID);
 
-		final String sql = " SELECT AD_WF_Responsible_ID FROM AD_WF_Responsible "
-				+ " WHERE AD_Client_ID=? AND Override_ID = ? AND IsActive='Y' ";
-
-		int id = DB.getSQLValue(get_TrxName(), sql, AD_Client_ID, AD_WF_Responsible_ID);
-
-		if (id > 0)
+		if (ovrResp != null)
 		{
-			AD_WF_Responsible_ID = id;
+			AD_WF_Responsible_ID = ovrResp.getAD_WF_Responsible_ID();
 		}
 
 		return AD_WF_Responsible_ID;
