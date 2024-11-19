@@ -55,3 +55,5 @@ UPDATE AD_Column SET AD_Val_Rule_ID=200204,Updated=TO_DATE('2024-10-03 14:05:32'
 INSERT INTO AD_Field (AD_Field_ID,Name,Description,Help,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLength,SeqNo,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,SeqNoGrid,XPosition,ColumnSpan) VALUES (208517,'Read Write','Field is read / write','The Read Write indicates that this field may be read and updated.',200357,216592,'Y',1,70,'N','N','N','N',0,0,'Y',TO_DATE('2024-10-04 18:12:46','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2024-10-04 18:12:46','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','ec6f3cc3-c4d7-4a87-80b9-9c365ae14b99','Y',60,2,2)
 ;
 
+SELECT register_migration_script('202410031850_IDEMPIERE-5653.sql') FROM dual
+;
