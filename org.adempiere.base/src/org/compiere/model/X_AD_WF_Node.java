@@ -33,7 +33,7 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20240221L;
+	private static final long serialVersionUID = 20241001L;
 
     /** Standard Constructor */
     public X_AD_WF_Node (Properties ctx, int AD_WF_Node_ID, String trxName)
@@ -120,6 +120,8 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	public static final String ACTION_UserWorkbench = "B";
 	/** User Info = I */
 	public static final String ACTION_UserInfo = "I";
+	/** User Task = U */
+	public static final String ACTION_UserTask = "U";
 	/** Set Action.
 		@param Action 
 		Indicates the Action to be performed

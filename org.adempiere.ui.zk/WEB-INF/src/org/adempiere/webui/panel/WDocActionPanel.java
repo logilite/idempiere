@@ -33,6 +33,7 @@ import org.adempiere.webui.component.GridFactory;
 import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.Row;
 import org.adempiere.webui.component.Rows;
+import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.event.DialogEvents;
@@ -59,9 +60,6 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
-import org.compiere.util.Util;
-import org.compiere.util.Util;
-import org.compiere.util.Util;
 import org.compiere.util.Util;
 import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFNode;
@@ -99,7 +97,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 	private Label lblAnswer;
 	private Listbox lstAnswer;
-
+	private Label lTextMsg = new Label(Msg.getMsg(Env.getCtx(), "Messages"));
+	private Textbox fTextMsg = new Textbox();
+	
 	private Listbox lstDocAction;
 	private Datebox dbDateAcct;
 	private Row rowDateAcct = new Row();
@@ -154,7 +154,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		loadActivity();
 		if (!isValidApprover()) {
 			
-			StringBuilder msg = new StringBuilder("Approval Assigned to ");
+			StringBuilder msg = new StringBuilder("Assigned to "); //TODO use Message to support translation
 
 			if (resp.isRole())
 			{
@@ -393,6 +393,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		Row rowSpacer = new Row();
 		Row rowUser = new Row();
 		Row rowAnswer = new Row();
+		Row rowTxtMsg = new Row();
 
 		Panel pnlDocAction = new Panel();
 		pnlDocAction.appendChild(lblDocAction);
@@ -410,7 +411,15 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		rowAnswer.appendCellChild(lblAnswer);
 		rowAnswer.appendCellChild(lstAnswer);
 		rowAnswer.appendCellChild(new Space());
-
+		
+		//Text Msg
+		rowTxtMsg.appendCellChild(lTextMsg);
+		rowTxtMsg.appendCellChild(fTextMsg);
+		rowTxtMsg.appendCellChild(new Space());
+		ZKUpdateUtil.setHflex(fTextMsg, "true");
+		fTextMsg.setMultiline(true);
+		ZKUpdateUtil.setWidth(fTextMsg, "100%");
+		
 		Space space = new Space();
 		space.setSpacing("30px");
 		
@@ -429,9 +438,12 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		rows.appendChild(rowLabel);
 		rows.appendChild(rowSpacer);
 
-		if (m_activity != null && m_activity.isUserApproval()) {
-			rows.appendChild(rowAnswer);
-
+		if (m_activity != null || (m_activity.isUserApproval() || m_activity.isUserTask())) {
+			if (m_activity.isUserApproval()) {
+				rows.appendChild(rowAnswer);
+			}
+			rows.appendChild(rowTxtMsg);
+			
 			// Removing Document Action if Activity found
 			rows.removeChild(rowDocAction);
 			rows.removeChild(rowDateAcct);
@@ -502,7 +514,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 	public void onOk(Event event, final Callback<Boolean> callback)
 	{
-		if (lstAnswer.getSelectedItem() != null && lstAnswer.getSelectedItem().getValue() != null)
+		if ((lstAnswer.getSelectedItem() != null && lstAnswer.getSelectedItem().getValue() != null) || (m_activity != null && m_activity.isUserTask()))
 		{
 			Trx trx = null;
 			try
@@ -512,57 +524,79 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				m_activity.set_TrxName(trx.getTrxName());
 
 				MWFNode node = m_activity.getNode();
-
-				// getting Approval column for User Choice node
-				if (m_column == null)
-					m_column = (MColumn) node.getApprovalColumn();
-
-				if (m_column == null || node.getApprovalColumn_ID() <= 0)
-					m_column = node.getColumn();
-
-				int dt = m_column.getAD_Reference_ID();
-
-				String value = null;
-
-				if (dt == DisplayType.YesNo || dt == DisplayType.List)
+				String textMsg = fTextMsg.getValue();
+				
+				if (MWFNode.ACTION_UserChoice.equals(node.getAction()))
 				{
-					Listitem li = lstAnswer.getSelectedItem();
+					// getting Approval column for User Choice node
+					if (m_column == null)
+						m_column = (MColumn) node.getApprovalColumn();
 
-					if (li != null)
-						value = li.getValue().toString();
-				}
+					if (m_column == null || node.getApprovalColumn_ID() <= 0)
+						m_column = node.getColumn();
 
-				if (value == null || value.length() == 0)
-				{
-					trx.rollback();
-					trx.close();
-					FDialog.error(m_WindowNo, this, "FillMandatory", Msg.getMsg(Env.getCtx(), "Answer"));
-					if(callback!=null)
-						callback.onCallback(false);
-					return;
-				}
-				//
-				if (logger.isLoggable(Level.CONFIG))
-					logger.config("Answer=" + value + " - " + null);
-				try
-				{
-					m_activity.setUserChoice(m_AD_User_ID, value, dt, null);
-					
-					String error = m_activity.getAD_WF_Process().getTextMsg();
+					int dt = m_column.getAD_Reference_ID();
 
-					if (error != null && !Util.isEmpty(error)) {
-						FDialog.error(0, error);
+					String value = null;
+
+					if (dt == DisplayType.YesNo || dt == DisplayType.List)
+					{
+						Listitem li = lstAnswer.getSelectedItem();
+
+						if (li != null)
+							value = li.getValue().toString();
 					}
-				}
-				catch (Exception e)
-				{
-					logger.log(Level.SEVERE, node.getName(), e);
-					FDialog.error(m_WindowNo, this, "Error", e.toString());
-					trx.rollback();
-					trx.close();
-					if(callback!=null)
-						callback.onCallback(false);
-					return;
+
+					if (value == null || value.length() == 0)
+					{
+						trx.rollback();
+						trx.close();
+						FDialog.error(m_WindowNo, this, "FillMandatory", Msg.getMsg(Env.getCtx(), "Answer"));
+						if (callback != null)
+							callback.onCallback(false);
+						return;
+					}
+					
+					//
+					if (logger.isLoggable(Level.CONFIG))
+						logger.config("Answer=" + value + " - " + textMsg);
+
+					try
+					{
+						m_activity.setUserChoice(m_AD_User_ID, value, dt, textMsg);
+
+						String error = m_activity.getAD_WF_Process().getTextMsg();
+
+						if (error != null && !Util.isEmpty(error))
+						{
+							FDialog.error(0, error);
+						}
+					}
+					catch (Exception e)
+					{
+						logger.log(Level.SEVERE, node.getName(), e);
+						FDialog.error(m_WindowNo, this, "Error", e.toString());
+						trx.rollback();
+						trx.close();
+						if (callback != null)
+							callback.onCallback(false);
+						return;
+					}
+				}else {
+					if (logger.isLoggable(Level.CONFIG)) logger.config("Action=" + node.getAction() + " - " + textMsg);
+					try
+					{
+						// ensure activity is ran within a transaction
+						m_activity.setUserConfirmation(m_AD_User_ID, textMsg);
+					}
+					catch (Exception e)
+					{
+						logger.log(Level.SEVERE, node.getName(), e);
+						FDialog.error(m_WindowNo, this, "Error", e.toString());
+						trx.rollback();
+						trx.close();
+						return;
+					}
 				}
 				trx.commit();
 				if(callback!=null)

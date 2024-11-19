@@ -567,7 +567,15 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		return getNode().isUserChoice();
 	}	//	isUserChoice
 
-
+	/**
+	 * Is this a User Task step?
+	 * @return true if User Task
+	 */
+	public boolean isUserTask()
+	{
+		return getNode().isUserTask();
+	}
+	
 	/**
 	 * 	Set Text Msg (add to existing)
 	 *	@param TextMsg
@@ -920,8 +928,9 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				setWFState(StateEngine.STATE_Terminated);
 				return;
 			}
-			//
-			setWFState(StateEngine.STATE_Running);
+			//For User Task,  Don't change to running, instead state decided at perform work
+			if(!(MWFNode.ACTION_UserTask.equals(m_node.getAction()) && StateEngine.STATE_NotStarted.equals(m_state.getState())))
+					setWFState(StateEngine.STATE_Running);
 
 			if (getNode().get_ID() == 0)
 			{
@@ -1421,6 +1430,138 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			}	//	approval
 			return false;	//	wait for user
 		}
+		/**User Task **/
+		else if (MWFNode.ACTION_UserTask.equals(action))
+		{
+			//TODO when state is Not Started, We should assign task to User by finding responsible
+			//We needs to add one more responsible type as Initiator who has started workflow.
+			//If task state is assigned and it is assigned to either user and Role, then he can progress task otherwise error should given to user but no change in workflow state.
+			//
+			if (getPO(trx) instanceof DocAction)
+			{
+				//Assign if task not started
+				if(StateEngine.STATE_NotStarted.equals(m_state.getState()))
+				{
+					DocAction doc = (DocAction) m_po;
+					// TODO like invoker, add Initiator responsible. Initiator
+					// means who initiated workflow.
+					if (isInvoker())
+					{
+						// Set Assignee
+						int startAD_User_ID = Env.getAD_User_ID(getCtx());
+						if (startAD_User_ID == 0)
+							startAD_User_ID = doc.getDoc_User_ID();
+						setAD_User_ID(startAD_User_ID);
+					}
+					else // fixed Approver
+					{
+						MWFResponsible resp = getResponsible();
+						if (resp.isHuman())
+						{
+							setAD_User_ID(resp.getAD_User_ID());
+						}
+						else if (resp.isRole())
+						{
+							;
+						}
+						else if (resp.isManual())
+						{
+							// Invoke WF Approver Factory
+							List<IWFActivityForwardFactory> factoryList = Service.locator()
+									.list(IWFActivityForwardFactory.class).getServices();
+
+							if (factoryList != null)
+							{
+								IWFActivityForwardDlg forwardDlg = null;
+								for (IWFActivityForwardFactory factory : factoryList)
+								{
+									forwardDlg = factory.getWFActivityForwardDlg();
+									if (forwardDlg != null)
+										break;
+
+								}
+								if (forwardDlg != null)
+								{
+									forwardDlg.AskApprover();
+									int userId = forwardDlg.getActivityApprover();
+									if (userId == -1)
+									{
+										throw new AdempiereException("Cancelled");
+									}
+									if (userId > 0)
+									{
+										String msg = forwardDlg.getMsg();
+										if (!forwardTo(userId, msg))
+										{
+
+											throw new AdempiereException("CannotForward");
+										}
+									}
+									else
+									{
+										throw new AdempiereException("ApproverNotSet");
+									}
+								}
+								else
+								{
+									throw new AdempiereException("CantShowApproveDialog");
+								}
+							}
+
+						}
+						else if (resp.isOrganization())
+						{
+							throw new AdempiereException("Support not implemented for " + resp);
+						}
+						else
+						{
+							throw new AdempiereException("@NotSupported@ " + resp);
+						}
+						// end MZ
+					}
+					return false; //Suspend workflow
+				}	//	Assignment
+				else {//Completion
+					int sessionAD_User_ID = Env.getAD_User_ID(getCtx());
+					if (isInvoker())
+					{
+						// Set Assignee
+						if (getAD_User_ID()>0 && sessionAD_User_ID == getAD_User_ID())
+							return true;
+					}
+					else // fixed Approver
+					{
+						MWFResponsible resp = getResponsible();
+						if (resp.isHuman() || resp.isManual())
+						{
+							if (getAD_User_ID()>0 && Env.getAD_User_ID(getCtx()) == getAD_User_ID())
+								return true;
+						}
+						else if (resp.isRole())
+						{
+							MUserRoles[] urs = MUserRoles.getOfUser(getCtx(), sessionAD_User_ID);
+							for (int i = 0; i < urs.length; i++)
+							{
+								if(urs[i].getAD_Role_ID() == resp.getAD_Role_ID() && urs[i].isActive())
+								{
+									return true;
+								}
+							}
+						}
+						else if (resp.isOrganization())
+						{
+							throw new AdempiereException("Support not implemented for " + resp);
+						}
+						else
+						{
+							throw new AdempiereException("@NotSupported@ " + resp);
+						}
+				
+				}
+			}
+			}
+			return false;	//	wait for user
+		}
 		/******	User Form					******/
 		else if (MWFNode.ACTION_UserForm.equals(action))
 		{
@@ -1439,6 +1580,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			if (log.isLoggable(Level.FINE)) log.fine("InfoWindow:AD_InfoWindow_ID=" + m_node.getAD_InfoWindow_ID());
 			return false;
 		}
+		//TODO add UserTask action here.		
 		//
 		throw new IllegalArgumentException("Invalid Action (Not Implemented) =" + action);
 	}	//	performWork
