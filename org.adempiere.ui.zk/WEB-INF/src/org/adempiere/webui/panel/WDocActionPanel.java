@@ -438,7 +438,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		rows.appendChild(rowLabel);
 		rows.appendChild(rowSpacer);
 
-		if (m_activity != null || (m_activity.isUserApproval() || m_activity.isUserTask())) {
+		if (m_activity != null && (m_activity.isUserApproval() || m_activity.isUserTask())) {
 			if (m_activity.isUserApproval()) {
 				rows.appendChild(rowAnswer);
 			}
