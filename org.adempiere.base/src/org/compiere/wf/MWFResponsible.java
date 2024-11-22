@@ -28,7 +28,7 @@ import org.compiere.util.Msg;
 
 
 /**
- *	Workflow Resoinsible
+ *	Workflow Responsible
  *	
  *  @author Jorg Janke
  *  @version $Id: MWFResponsible.java,v 1.3 2006/07/30 00:51:05 jjanke Exp $
@@ -75,18 +75,20 @@ public class MWFResponsible extends X_AD_WF_Responsible
 	 * @return
 	 */
 	public static MWFResponsible getClientWFResp(Properties ctx, int AD_WF_Responsible_ID) {
+		if(AD_WF_Responsible_ID==0)
+			return null;
+		
 		int clientID = Env.getAD_Client_ID(ctx);
 		String key = clientID + "_" + AD_WF_Responsible_ID;
 		
-		MWFResponsible resp = s_cacheCliWFResp.get(key);
-		if (resp != null)
-			return resp;
+		if (s_cacheCliWFResp.containsKey(key))
+			return s_cacheCliWFResp.get(key);
 		
-		resp = new Query(ctx, Table_Name, "AD_Client_ID=? AND Override_ID=?", null).setOnlyActiveRecords(true)
+		MWFResponsible resp = new Query(ctx, Table_Name, "AD_Client_ID=? AND Override_ID=?", null).setOnlyActiveRecords(true)
 					.setParameters(Env.getAD_Client_ID(ctx), AD_WF_Responsible_ID).first();
-		if (resp != null) {
-			s_cacheCliWFResp.put(key, resp);
-		}
+		
+		s_cacheCliWFResp.put(key, resp);
+		
 		return resp;
 	}
 
