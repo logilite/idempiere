@@ -18,6 +18,7 @@ import java.text.ParseException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.compiere.model.I_SSO_PrincipleConfig;
 import org.compiere.util.Language;
 
 /**
@@ -27,6 +28,17 @@ import org.compiere.util.Language;
 public interface ISSOPrinciple
 {
 	public static final String	SSO_PRINCIPLE_SESSION_NAME	= "sso.principle";
+
+	/**
+	 * Represents the key used to store or retrieve the selected SSO (Single Sign-On) provider
+	 * from a session.
+	 */
+	public static final String	SSO_SELECTED_PROVIDER		= "sso.selected.provider";
+
+	/**
+	 * Represents the key used to store or retrieve the request query parameter from a session.
+	 */
+	public static final String	SSO_QUERY_STRING			= "sso.query.string";
 
 	public boolean hasAuthenticationCode(HttpServletRequest request, HttpServletResponse response);
 

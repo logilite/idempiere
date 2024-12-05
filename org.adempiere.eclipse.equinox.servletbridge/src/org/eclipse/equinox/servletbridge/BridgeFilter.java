@@ -79,7 +79,10 @@ public class BridgeFilter extends BridgeServlet implements Filter {
 				if (m_SSOPrinciple != null) {
 					if (m_SSOPrinciple.hasAuthenticationCode(req, resp)) {
 						// Use authentication code to get token
+						String currentUri = req.getRequestURL().toString();
 						m_SSOPrinciple.getAuthenticationToken(req, resp, SSOUtils.SSO_MODE_OSGI);
+						if (!resp.isCommitted())
+							resp.sendRedirect(currentUri);
 					} else if (!m_SSOPrinciple.isAuthenticated(req, resp)) {
 						// Redirect to SSO sing in page for authentication
 						m_SSOPrinciple.redirectForAuthentication(req, resp, SSOUtils.SSO_MODE_OSGI);

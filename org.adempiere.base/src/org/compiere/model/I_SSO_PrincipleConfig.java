@@ -95,12 +95,12 @@ public interface I_SSO_PrincipleConfig
     public static final String COLUMNNAME_IsDefault = "IsDefault";
 
 	/** Set Default.
-	  * Default value
+	  * Indicates whether this SSO configuration is set as the default for logging in to the iDempiere Monitor and Felix Web Console.
 	  */
 	public void setIsDefault (boolean IsDefault);
 
 	/** Get Default.
-	  * Default value
+	  * Indicates whether this SSO configuration is set as the default for logging in to the iDempiere Monitor and Felix Web Console.
 	  */
 	public boolean isDefault();
 
@@ -121,12 +121,12 @@ public interface I_SSO_PrincipleConfig
     public static final String COLUMNNAME_SSO_ApplicationClientID = "SSO_ApplicationClientID";
 
 	/** Set Application Client ID.
-	  * SSO Application Client ID
+	  * SSO provider unique app client id
 	  */
 	public void setSSO_ApplicationClientID (String SSO_ApplicationClientID);
 
 	/** Get Application Client ID.
-	  * SSO Application Client ID
+	  * SSO provider unique app client id
 	  */
 	public String getSSO_ApplicationClientID();
 
@@ -134,12 +134,12 @@ public interface I_SSO_PrincipleConfig
     public static final String COLUMNNAME_SSO_ApplicationDiscoveryURI = "SSO_ApplicationDiscoveryURI";
 
 	/** Set Application Discovery URI.
-	  * SSO Application Discovery URI
+	  * A directory of the OIDC architecture of your user pool.
 	  */
 	public void setSSO_ApplicationDiscoveryURI (String SSO_ApplicationDiscoveryURI);
 
 	/** Get Application Discovery URI.
-	  * SSO Application Discovery URI
+	  * A directory of the OIDC architecture of your user pool.
 	  */
 	public String getSSO_ApplicationDiscoveryURI();
 
@@ -147,12 +147,12 @@ public interface I_SSO_PrincipleConfig
     public static final String COLUMNNAME_SSO_ApplicationDomain = "SSO_ApplicationDomain";
 
 	/** Set Application Domain.
-	  * SSO Application Domain
+	  * A domain name is a string that identifies a realm of administrative autonomy, authority or control within the Internet for your Provider.
 	  */
 	public void setSSO_ApplicationDomain (String SSO_ApplicationDomain);
 
 	/** Get Application Domain.
-	  * SSO Application Domain
+	  * A domain name is a string that identifies a realm of administrative autonomy, authority or control within the Internet for your Provider.
 	  */
 	public String getSSO_ApplicationDomain();
 
@@ -160,12 +160,12 @@ public interface I_SSO_PrincipleConfig
     public static final String COLUMNNAME_SSO_ApplicationLogoutURL = "SSO_ApplicationLogoutURL";
 
 	/** Set Application Logout URL.
-	  * SSO Application Logout URL
+	  * This is where SSO provider sends a request to have the application clear the user's session data
 	  */
 	public void setSSO_ApplicationLogoutURL (String SSO_ApplicationLogoutURL);
 
 	/** Get Application Logout URL.
-	  * SSO Application Logout URL
+	  * This is where SSO provider sends a request to have the application clear the user's session data
 	  */
 	public String getSSO_ApplicationLogoutURL();
 
@@ -173,12 +173,12 @@ public interface I_SSO_PrincipleConfig
     public static final String COLUMNNAME_SSO_ApplicationRedirectURIs = "SSO_ApplicationRedirectURIs";
 
 	/** Set Application Redirect URIs.
-	  * SSO Application Redirect URIs
+	  * The URIs SSO provider will accept as destinations when returning authentication responses (tokens) after successfully authenticating.
 	  */
 	public void setSSO_ApplicationRedirectURIs (String SSO_ApplicationRedirectURIs);
 
 	/** Get Application Redirect URIs.
-	  * SSO Application Redirect URIs
+	  * The URIs SSO provider will accept as destinations when returning authentication responses (tokens) after successfully authenticating.
 	  */
 	public String getSSO_ApplicationRedirectURIs();
 
@@ -186,12 +186,12 @@ public interface I_SSO_PrincipleConfig
     public static final String COLUMNNAME_SSO_ApplicationSecretKey = "SSO_ApplicationSecretKey";
 
 	/** Set Application Secret Key.
-	  * SSO Application Secret Key
+	  * SSO provider client secret key to access this user info
 	  */
 	public void setSSO_ApplicationSecretKey (String SSO_ApplicationSecretKey);
 
 	/** Get Application Secret Key.
-	  * SSO Application Secret Key
+	  * SSO provider client secret key to access this user info
 	  */
 	public String getSSO_ApplicationSecretKey();
 
@@ -199,12 +199,12 @@ public interface I_SSO_PrincipleConfig
     public static final String COLUMNNAME_SSO_AuthorizationTenantID = "SSO_AuthorizationTenantID";
 
 	/** Set Tenant ID.
-	  * SSO Tenant ID
+	  * SSO provider Tenant ID is a globally unique identifier (GUID)
 	  */
 	public void setSSO_AuthorizationTenantID (String SSO_AuthorizationTenantID);
 
 	/** Get Tenant ID.
-	  * SSO Tenant ID
+	  * SSO provider Tenant ID is a globally unique identifier (GUID)
 	  */
 	public String getSSO_AuthorizationTenantID();
 
@@ -220,6 +220,21 @@ public interface I_SSO_PrincipleConfig
 	  * iDempiere Monitor Redirect URIs
 	  */
 	public String getSSO_IDempMonitorRedirectURIs();
+
+    /** Column name SSO_LoginButtonImage_ID */
+    public static final String COLUMNNAME_SSO_LoginButtonImage_ID = "SSO_LoginButtonImage_ID";
+
+	/** Set Login Button Image.
+	  * Identifier for the image used as the icon for the Single Sign-On (SSO) login button. References the AD_Image table.
+	  */
+	public void setSSO_LoginButtonImage_ID (int SSO_LoginButtonImage_ID);
+
+	/** Get Login Button Image.
+	  * Identifier for the image used as the icon for the Single Sign-On (SSO) login button. References the AD_Image table.
+	  */
+	public int getSSO_LoginButtonImage_ID();
+
+	public org.compiere.model.I_AD_Image getSSO_LoginButtonImage() throws RuntimeException;
 
     /** Column name SSO_OSGIRedirectURIs */
     public static final String COLUMNNAME_SSO_OSGIRedirectURIs = "SSO_OSGIRedirectURIs";

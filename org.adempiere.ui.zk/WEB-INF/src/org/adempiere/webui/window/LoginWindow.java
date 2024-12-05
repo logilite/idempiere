@@ -40,7 +40,6 @@ import org.adempiere.webui.panel.LoginPanel;
 import org.adempiere.webui.panel.ResetPasswordPanel;
 import org.adempiere.webui.panel.RolePanel;
 import org.adempiere.webui.session.SessionContextListener;
-import org.adempiere.webui.sso.filter.SSOWebUIFilter;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.UserPreference;
 import org.adempiere.webui.util.ZkSSOUtils;
@@ -123,7 +122,8 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 		String errorMessage = null;
 		try
 		{
-			ISSOPrinciple ssoPrinciple = SSOWebUIFilter.getSSOPrinciple();
+			String provider = (String) getDesktop().getSession().getAttribute(ISSOPrinciple.SSO_SELECTED_PROVIDER);
+			ISSOPrinciple ssoPrinciple = SSOUtils.getSSOPrinciple(provider);
 			String username = ssoPrinciple.getUserName(result);
 			Language language = ssoPrinciple.getLanguage(result);
 			boolean isEmailLogin = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);

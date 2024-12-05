@@ -29,7 +29,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20230222L;
+	private static final long serialVersionUID = 20241127L;
 
     /** Standard Constructor */
     public X_SSO_PrincipleConfig (Properties ctx, int SSO_PrincipleConfig_ID, String trxName)
@@ -72,7 +72,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 
 	/** Set Default.
 		@param IsDefault 
-		Default value
+		Indicates whether this SSO configuration is set as the default for logging in to the iDempiere Monitor and Felix Web Console.
 	  */
 	public void setIsDefault (boolean IsDefault)
 	{
@@ -80,7 +80,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 	}
 
 	/** Get Default.
-		@return Default value
+		@return Indicates whether this SSO configuration is set as the default for logging in to the iDempiere Monitor and Felix Web Console.
 	  */
 	public boolean isDefault () 
 	{
@@ -113,7 +113,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 
 	/** Set Application Client ID.
 		@param SSO_ApplicationClientID 
-		SSO Application Client ID
+		SSO provider unique app client id
 	  */
 	public void setSSO_ApplicationClientID (String SSO_ApplicationClientID)
 	{
@@ -121,7 +121,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 	}
 
 	/** Get Application Client ID.
-		@return SSO Application Client ID
+		@return SSO provider unique app client id
 	  */
 	public String getSSO_ApplicationClientID () 
 	{
@@ -130,7 +130,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 
 	/** Set Application Discovery URI.
 		@param SSO_ApplicationDiscoveryURI 
-		SSO Application Discovery URI
+		A directory of the OIDC architecture of your user pool.
 	  */
 	public void setSSO_ApplicationDiscoveryURI (String SSO_ApplicationDiscoveryURI)
 	{
@@ -138,7 +138,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 	}
 
 	/** Get Application Discovery URI.
-		@return SSO Application Discovery URI
+		@return A directory of the OIDC architecture of your user pool.
 	  */
 	public String getSSO_ApplicationDiscoveryURI () 
 	{
@@ -147,7 +147,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 
 	/** Set Application Domain.
 		@param SSO_ApplicationDomain 
-		SSO Application Domain
+		A domain name is a string that identifies a realm of administrative autonomy, authority or control within the Internet for your Provider.
 	  */
 	public void setSSO_ApplicationDomain (String SSO_ApplicationDomain)
 	{
@@ -155,7 +155,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 	}
 
 	/** Get Application Domain.
-		@return SSO Application Domain
+		@return A domain name is a string that identifies a realm of administrative autonomy, authority or control within the Internet for your Provider.
 	  */
 	public String getSSO_ApplicationDomain () 
 	{
@@ -164,7 +164,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 
 	/** Set Application Logout URL.
 		@param SSO_ApplicationLogoutURL 
-		SSO Application Logout URL
+		This is where SSO provider sends a request to have the application clear the user's session data
 	  */
 	public void setSSO_ApplicationLogoutURL (String SSO_ApplicationLogoutURL)
 	{
@@ -172,7 +172,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 	}
 
 	/** Get Application Logout URL.
-		@return SSO Application Logout URL
+		@return This is where SSO provider sends a request to have the application clear the user's session data
 	  */
 	public String getSSO_ApplicationLogoutURL () 
 	{
@@ -181,7 +181,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 
 	/** Set Application Redirect URIs.
 		@param SSO_ApplicationRedirectURIs 
-		SSO Application Redirect URIs
+		The URIs SSO provider will accept as destinations when returning authentication responses (tokens) after successfully authenticating.
 	  */
 	public void setSSO_ApplicationRedirectURIs (String SSO_ApplicationRedirectURIs)
 	{
@@ -189,7 +189,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 	}
 
 	/** Get Application Redirect URIs.
-		@return SSO Application Redirect URIs
+		@return The URIs SSO provider will accept as destinations when returning authentication responses (tokens) after successfully authenticating.
 	  */
 	public String getSSO_ApplicationRedirectURIs () 
 	{
@@ -198,7 +198,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 
 	/** Set Application Secret Key.
 		@param SSO_ApplicationSecretKey 
-		SSO Application Secret Key
+		SSO provider client secret key to access this user info
 	  */
 	public void setSSO_ApplicationSecretKey (String SSO_ApplicationSecretKey)
 	{
@@ -206,7 +206,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 	}
 
 	/** Get Application Secret Key.
-		@return SSO Application Secret Key
+		@return SSO provider client secret key to access this user info
 	  */
 	public String getSSO_ApplicationSecretKey () 
 	{
@@ -215,7 +215,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 
 	/** Set Tenant ID.
 		@param SSO_AuthorizationTenantID 
-		SSO Tenant ID
+		SSO provider Tenant ID is a globally unique identifier (GUID)
 	  */
 	public void setSSO_AuthorizationTenantID (String SSO_AuthorizationTenantID)
 	{
@@ -223,7 +223,7 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 	}
 
 	/** Get Tenant ID.
-		@return SSO Tenant ID
+		@return SSO provider Tenant ID is a globally unique identifier (GUID)
 	  */
 	public String getSSO_AuthorizationTenantID () 
 	{
@@ -245,6 +245,34 @@ public class X_SSO_PrincipleConfig extends PO implements I_SSO_PrincipleConfig, 
 	public String getSSO_IDempMonitorRedirectURIs () 
 	{
 		return (String)get_Value(COLUMNNAME_SSO_IDempMonitorRedirectURIs);
+	}
+
+	public org.compiere.model.I_AD_Image getSSO_LoginButtonImage() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_Image)MTable.get(getCtx(), org.compiere.model.I_AD_Image.Table_Name)
+			.getPO(getSSO_LoginButtonImage_ID(), get_TrxName());	}
+
+	/** Set Login Button Image.
+		@param SSO_LoginButtonImage_ID 
+		Identifier for the image used as the icon for the Single Sign-On (SSO) login button. References the AD_Image table.
+	  */
+	public void setSSO_LoginButtonImage_ID (int SSO_LoginButtonImage_ID)
+	{
+		if (SSO_LoginButtonImage_ID < 1) 
+			set_Value (COLUMNNAME_SSO_LoginButtonImage_ID, null);
+		else 
+			set_Value (COLUMNNAME_SSO_LoginButtonImage_ID, Integer.valueOf(SSO_LoginButtonImage_ID));
+	}
+
+	/** Get Login Button Image.
+		@return Identifier for the image used as the icon for the Single Sign-On (SSO) login button. References the AD_Image table.
+	  */
+	public int getSSO_LoginButtonImage_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_SSO_LoginButtonImage_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Felix Web Console Redirect URIs.
