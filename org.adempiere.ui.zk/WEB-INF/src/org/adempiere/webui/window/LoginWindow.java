@@ -32,7 +32,7 @@ import javax.servlet.http.HttpSession;
 
 import org.adempiere.base.Core;
 import org.adempiere.base.ILogin;
-import org.adempiere.base.sso.ISSOPrinciple;
+import org.adempiere.base.sso.ISSOPrincipalService;
 import org.adempiere.base.sso.SSOUtils;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.Callback;
@@ -46,8 +46,6 @@ import org.adempiere.webui.panel.ResetPasswordPanel;
 import org.adempiere.webui.panel.RolePanel;
 import org.adempiere.webui.panel.ValidateMFAPanel;
 import org.adempiere.webui.session.SessionContextListener;
-import org.adempiere.webui.session.SessionManager;
-import org.adempiere.webui.sso.filter.SSOWebUIFilter;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.UserPreference;
 import org.adempiere.webui.util.ZkSSOUtils;
@@ -115,7 +113,7 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 
 	private void initComponents()
 	{
-		Object result = getDesktop().getSession().getAttribute(ISSOPrinciple.SSO_PRINCIPLE_SESSION_NAME);
+		Object result = getDesktop().getSession().getAttribute(ISSOPrincipalService.SSO_PRINCIPAL_SESSION_TOKEN);
 		if (result == null)
 		{
 			createLoginPanel();
@@ -129,16 +127,17 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 	/**
 	 * Show role panel after SSO authentication.
 	 * 
-	 * @param result session principle to get user and language.
+	 * @param token session principal to get user and language.
 	 */
-	private void ssoLogin(Object result)
+	private void ssoLogin(Object token)
 	{
 		String errorMessage = null;
 		try
 		{
-			ISSOPrinciple ssoPrinciple = SSOWebUIFilter.getSSOPrinciple();
-			String username = ssoPrinciple.getUserName(result);
-			Language language = ssoPrinciple.getLanguage(result);
+			String provider = (String) getDesktop().getSession().getAttribute(ISSOPrincipalService.SSO_SELECTED_PROVIDER);
+			ISSOPrincipalService ssoPrincipal = SSOUtils.getSSOPrincipalService(provider);
+			String username = ssoPrincipal.getUserName(token);
+			Language language = ssoPrincipal.getLanguage(token);
 			boolean isEmailLogin = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
 			if (Util.isEmpty(username))
 				throw new AdempiereException("No Apps " + (isEmailLogin ? "Email" : "User"));
@@ -178,7 +177,7 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 		if (!Util.isEmpty(errorMessage))
 		{
 			ZkSSOUtils.setErrorMessageText(errorMessage);
-			Executions.sendRedirect(SSOUtils.ERROR_VALIDATION);
+			Executions.sendRedirect(SSOUtils.ERROR_VALIDATION_URL);
 		}
 	}
 

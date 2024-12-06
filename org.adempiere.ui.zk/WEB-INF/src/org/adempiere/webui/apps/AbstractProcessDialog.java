@@ -563,6 +563,14 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 				valCode.append("AD_PrintFormat.AD_ReportView_ID=").append(pr.getAD_ReportView_ID());
 			}
 
+			if (valCode.length() > 0)
+				valCode.append(" AND ");
+			valCode.append(" (CreatedBy = @#AD_User_ID:0@ ");
+			valCode.append("	OR AD_PrintFormat_ID IN (SELECT DISTINCT AD_PrintFormat_ID FROM AD_PrintFormat_Access 	");
+			valCode.append("		WHERE ((AD_User_ID IS NULL AND AD_Role_ID = @#AD_Role_ID:0@) OR (AD_Role_ID IS NULL AND AD_User_ID = @#AD_User_ID:0@)	");
+			valCode.append("	OR (AD_Role_ID = @#AD_Role_ID:0@ AND AD_User_ID = @#AD_User_ID:0@)))	");
+			valCode.append("	OR NOT EXISTS (SELECT DISTINCT AD_PrintFormat_ID FROM AD_PrintFormat_Access WHERE AD_PrintFormat_ID= AD_PrintFormat.AD_PrintFormat_ID))	");
+
 			Lookup lookup = MLookupFactory.get (Env.getCtx(), m_WindowNo, 
 					AD_Column_ID, DisplayType.TableDir,
 					Env.getLanguage(Env.getCtx()), "AD_PrintFormat_ID", 0, false,

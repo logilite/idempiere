@@ -34,7 +34,7 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20241001L;
 
     /** Standard Constructor */
     public X_AD_WF_Node (Properties ctx, int AD_WF_Node_ID, String trxName)
@@ -150,6 +150,22 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	public static final String ACTION_UserForm = "X";
 	/** Wait (Sleep) = Z */
 	public static final String ACTION_WaitSleep = "Z";
+	/** Apps Task = T */
+	public static final String ACTION_AppsTask = "T";
+	/** Apps Report = R */
+	public static final String ACTION_AppsReport = "R";
+	/** Apps Process = P */
+	public static final String ACTION_AppsProcess = "P";
+	/** Document Action = D */
+	public static final String ACTION_DocumentAction = "D";
+	/** EMail = M */
+	public static final String ACTION_EMail = "M";
+	/** User Workbench = B */
+	public static final String ACTION_UserWorkbench = "B";
+	/** User Info = I */
+	public static final String ACTION_UserInfo = "I";
+	/** User Task = U */
+	public static final String ACTION_UserTask = "U";
 	/** Set Action.
 		@param Action Indicates the Action to be performed
 	*/

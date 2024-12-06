@@ -1075,10 +1075,22 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 			MUOMConversion conversion = conversions.get(i);
 			if (conversion.getC_UOM_ID() == C_UOM_ID)
 			{
+				// if direct conversion is available between From UOM and To UOM then return MultiplyRate
+				if(conversion.getC_UOM_To_ID() == C_UOM_To_ID)
+				{
+					return conversion.getMultiplyRate();
+				}
+
 				fromUOMRelatedUOMsWithRate.put(conversion.getC_UOM_To_ID(), conversion.getMultiplyRate());
 			}
 			else
 			{
+				// if direct conversion is available between To UOM and From UOM then return DivideRate
+				if(conversion.getC_UOM_ID() == C_UOM_To_ID)
+				{
+					return conversion.getDivideRate();
+				}
+
 				fromUOMRelatedUOMsWithRate.put(conversion.getC_UOM_ID(), conversion.getDivideRate());
 			}
 		}

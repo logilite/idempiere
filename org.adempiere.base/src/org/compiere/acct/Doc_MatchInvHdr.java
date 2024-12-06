@@ -650,6 +650,8 @@ public class Doc_MatchInvHdr extends Doc
 			{
 				FactLine factLine = fact.createLine(null, account, as.getC_Currency_ID(), amtAsset);
 				updateFactLine(factLine,m_invoiceLine);
+				// set Zero Qty for Product Asset Account to match Qty.
+				factLine.setQty(Env.ZERO);
 
 				if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
 				{
@@ -662,7 +664,7 @@ public class Doc_MatchInvHdr extends Doc
 			//TODO test for avg Invoice costing method as here dropped posting of posting to IPV account
 			FactLine factLine = fact.createLine(null, account, as.getC_Currency_ID(), ipv);
 			updateFactLine(factLine,m_invoiceLine);
-			
+			factLine.setQty(Env.ZERO);
 			if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
 			{
 				updateFactLineAmtSource(factLine, ipvSource);

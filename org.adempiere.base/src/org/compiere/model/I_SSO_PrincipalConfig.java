@@ -20,15 +20,15 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for SSO_PrincipleConfig
+/** Generated Interface for SSO_PrincipalConfig
  *  @author iDempiere (generated) 
  *  @version Release 7.1
  */
-public interface I_SSO_PrincipleConfig 
+public interface I_SSO_PrincipalConfig 
 {
 
-    /** TableName=SSO_PrincipleConfig */
-    public static final String Table_Name = "SSO_PrincipleConfig";
+    /** TableName=SSO_PrincipalConfig */
+    public static final String Table_Name = "SSO_PrincipalConfig";
 
     /** AD_Table_ID=200360 */
     public static final int Table_ID = 200360;
@@ -221,6 +221,21 @@ public interface I_SSO_PrincipleConfig
 	  */
 	public String getSSO_IDempMonitorRedirectURIs();
 
+    /** Column name SSO_LoginButtonImage_ID */
+    public static final String COLUMNNAME_SSO_LoginButtonImage_ID = "SSO_LoginButtonImage_ID";
+
+	/** Set Login Button Image.
+	  * Identifier for the image used as the icon for the Single Sign-On (SSO) login button. References the AD_Image table.
+	  */
+	public void setSSO_LoginButtonImage_ID (int SSO_LoginButtonImage_ID);
+
+	/** Get Login Button Image.
+	  * Identifier for the image used as the icon for the Single Sign-On (SSO) login button. References the AD_Image table.
+	  */
+	public int getSSO_LoginButtonImage_ID();
+
+	public org.compiere.model.I_AD_Image getSSO_LoginButtonImage() throws RuntimeException;
+
     /** Column name SSO_OSGIRedirectURIs */
     public static final String COLUMNNAME_SSO_OSGIRedirectURIs = "SSO_OSGIRedirectURIs";
 
@@ -234,23 +249,23 @@ public interface I_SSO_PrincipleConfig
 	  */
 	public String getSSO_OSGIRedirectURIs();
 
-    /** Column name SSO_PrincipleConfig_ID */
-    public static final String COLUMNNAME_SSO_PrincipleConfig_ID = "SSO_PrincipleConfig_ID";
+    /** Column name SSO_PrincipalConfig_ID */
+    public static final String COLUMNNAME_SSO_PrincipalConfig_ID = "SSO_PrincipalConfig_ID";
 
 	/** Set SSO Configuration	  */
-	public void setSSO_PrincipleConfig_ID (int SSO_PrincipleConfig_ID);
+	public void setSSO_PrincipalConfig_ID (int SSO_PrincipalConfig_ID);
 
 	/** Get SSO Configuration	  */
-	public int getSSO_PrincipleConfig_ID();
+	public int getSSO_PrincipalConfig_ID();
 
-    /** Column name SSO_PrincipleConfig_UU */
-    public static final String COLUMNNAME_SSO_PrincipleConfig_UU = "SSO_PrincipleConfig_UU";
+    /** Column name SSO_PrincipalConfig_UU */
+    public static final String COLUMNNAME_SSO_PrincipalConfig_UU = "SSO_PrincipalConfig_UU";
 
 	/** Set SSO Configuration UU	  */
-	public void setSSO_PrincipleConfig_UU (String SSO_PrincipleConfig_UU);
+	public void setSSO_PrincipalConfig_UU (String SSO_PrincipalConfig_UU);
 
 	/** Get SSO Configuration UU	  */
-	public String getSSO_PrincipleConfig_UU();
+	public String getSSO_PrincipalConfig_UU();
 
     /** Column name SSO_Provider */
     public static final String COLUMNNAME_SSO_Provider = "SSO_Provider";

@@ -72,7 +72,7 @@ public class MPrintFormat extends X_AD_PrintFormat implements ImmutablePOSupport
 														// Display restrictions - Passwords, etc.
 														+ "AND NOT EXISTS (SELECT * FROM AD_Field f WHERE pfi.AD_Column_ID=f.AD_Column_ID AND (f.IsEncrypted='Y' OR f.ObscureType IS NOT NULL))";
 
-	public static final String	PF_ACCESS_SQLWHERE	= " AND (CreatedBy = ? OR AD_PrintFormat_ID IN (SELECT DISTINCT AD_PrintFormat_ID FROM AD_PrintFormat_Access WHERE ((AD_User_ID IS NULL AND AD_Role_ID = ?) OR (AD_Role_ID IS NULL AND AD_User_ID = ?) OR (AD_Role_ID = ? AND AD_User_ID = ?)))) ";
+	public static final String	PF_ACCESS_SQLWHERE	= " AND (CreatedBy = ? OR AD_PrintFormat_ID IN (SELECT DISTINCT AD_PrintFormat_ID FROM AD_PrintFormat_Access WHERE ((AD_User_ID IS NULL AND AD_Role_ID = ?) OR (AD_Role_ID IS NULL AND AD_User_ID = ?) OR (AD_Role_ID = ? AND AD_User_ID = ?))) OR NOT EXISTS (SELECT DISTINCT AD_PrintFormat_ID FROM AD_PrintFormat_Access WHERE AD_PrintFormat_ID= AD_PrintFormat.AD_PrintFormat_ID)) ";
 
 	private static final String	ORDER_BY_CLAUSE		= " ORDER BY SeqNo";
 

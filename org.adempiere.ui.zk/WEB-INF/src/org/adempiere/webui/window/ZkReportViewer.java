@@ -1167,11 +1167,13 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 			.append(m_reportEngine.getRowCount());
 		statusBar.setStatusLine(sb.toString());
 		//
+		//Check Access for Print format window (240)
+		Boolean windowAccess = MRole.getDefault().getWindowAccess(240);
 		bWizard.setDisabled(
 				(   m_reportEngine.getPrintFormat() == null
 				 || (m_reportEngine.getPrintFormat().getAD_Client_ID() == 0 && Env.getAD_Client_ID(Env.getCtx()) != 0)
 				 || m_reportEngine.getPrintFormat().isForm()
-                 || !(MRole.getDefault().getWindowAccess(240)== true)//Print format
+                 || (windowAccess == null || !windowAccess.booleanValue())
                  || !MPrintFormatAccess.isWriteAccessPrintFormat(m_reportEngine.getPrintFormat().getAD_PrintFormat_ID(), m_reportEngine.getPrintFormat().get_TrxName())));
 		
 		this.invalidate();

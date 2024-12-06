@@ -24,10 +24,11 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.adempiere.base.sso.ISSOPrinciple;
+import org.adempiere.base.sso.ISSOPrincipalService;
 import org.adempiere.base.sso.SSOUtils;
 import org.compiere.model.MSysConfig;
 import org.compiere.util.CLogger;
+import org.compiere.util.Util;
 
 /**
  * Request filter class for the SSO authentication
@@ -38,8 +39,6 @@ public class SSOWebUIFilter implements Filter
 {
 	/** Logger */
 	protected static CLogger		log				= CLogger.getCLogger(SSOWebUIFilter.class);
-	//TODO as this is static, will not work on multi tenant environment
-	private static ISSOPrinciple	m_SSOPrinciple	= null;
 
 	/**
 	 * AdempiereMonitorFilter
@@ -66,51 +65,82 @@ public class SSOWebUIFilter implements Filter
 		{
 			HttpServletRequest httpRequest = (HttpServletRequest) request;
 			HttpServletResponse httpResponse = (HttpServletResponse) response;
-			boolean isRedirectToLoginOnError = false; 
+			
+			// Ignore the resource request	
+			if (SSOUtils.isResourceRequest(httpRequest, true))
+			{
+				chain.doFilter(request, response);
+				return;
+			}
+			
+			boolean isProviderFromSession = false;
+			String provider = httpRequest.getParameter(ISSOPrincipalService.SSO_SELECTED_PROVIDER);
+			if (Util.isEmpty(provider) && httpRequest.getSession().getAttribute(ISSOPrincipalService.SSO_SELECTED_PROVIDER) != null)
+			{
+				isProviderFromSession = true;
+				provider = (String) httpRequest.getSession().getAttribute(ISSOPrincipalService.SSO_SELECTED_PROVIDER);
+			}
+
+			ISSOPrincipalService m_SSOPrincipal = null;
 			try
 			{
-				if (m_SSOPrinciple == null)
-				{
-					m_SSOPrinciple = SSOUtils.getSSOPrinciple();
-				}
+				m_SSOPrincipal = SSOUtils.getSSOPrincipalService(provider);
 
-				if (m_SSOPrinciple != null)
+				if (m_SSOPrincipal != null)
 				{
-					if (m_SSOPrinciple.hasAuthenticationCode(httpRequest, httpResponse))
+					if (m_SSOPrincipal.hasAuthenticationCode(httpRequest, httpResponse))
 					{
 						// Use authentication code get get token
-						m_SSOPrinciple.getAuthenticationToken(httpRequest, httpResponse, SSOUtils.SSO_MODE_WEBUI);
+						m_SSOPrincipal.getAuthenticationToken(httpRequest, httpResponse, SSOUtils.SSO_MODE_WEBUI);
+						String currentUri = httpRequest.getRequestURL().toString();
+						if (!httpResponse.isCommitted())
+						{
+							// Redirect to default request URL after authentication and handle query string.
+							Object queryString = httpRequest.getSession().getAttribute(ISSOPrincipalService.SSO_QUERY_STRING);
+							if (queryString != null && queryString instanceof String && !Util.isEmpty((String) queryString))
+								currentUri += "?" + (String) queryString;
+							httpRequest.getSession().removeAttribute(ISSOPrincipalService.SSO_QUERY_STRING);
+							httpResponse.sendRedirect(currentUri);
+						}
 						return;
 					}
-					else if (!m_SSOPrinciple.isAuthenticated(httpRequest, httpResponse))
+					else if (!m_SSOPrincipal.isAuthenticated(httpRequest, httpResponse))
 					{
-						// Redirect to SSO sing in page for authentication
-						m_SSOPrinciple.redirectForAuthentication(httpRequest, httpResponse, SSOUtils.SSO_MODE_WEBUI);
-						return;
-					}
-					else if (m_SSOPrinciple.isAccessTokenExpired(httpRequest, httpResponse))
-					{
-						// Refresh token after expired
-						isRedirectToLoginOnError = true;
-						m_SSOPrinciple.refreshToken(httpRequest, httpResponse, SSOUtils.SSO_MODE_WEBUI);
+						if (isProviderFromSession)
+						{
+							// If there is an issue on the SSO provide side & if a request is not the
+							// Authentication code or refresh request then have to remove the provide from the
+							// session.
+							httpRequest.getSession().removeAttribute(ISSOPrincipalService.SSO_SELECTED_PROVIDER);
+						}
+						else
+						{
+							// Save the param that comes with orignal request so can be passed after
+							// login with SSO
+							String referrerUrl = httpRequest.getParameter(ISSOPrincipalService.SSO_QUERY_STRING);
+							if (Util.isEmpty(referrerUrl) && Util.isEmpty(provider) && !Util.isEmpty(httpRequest.getQueryString()))
+								referrerUrl = httpRequest.getQueryString();
+
+							httpRequest.getSession().setAttribute(ISSOPrincipalService.SSO_QUERY_STRING, referrerUrl);
+							httpRequest.getSession().setAttribute(ISSOPrincipalService.SSO_SELECTED_PROVIDER, provider);
+							// Redirect to SSO sing in page for authentication
+							m_SSOPrincipal.redirectForAuthentication(httpRequest, httpResponse, SSOUtils.SSO_MODE_WEBUI);
+							return;
+						}
 					}
 				}
 			}
 			catch (Throwable exc)
 			{
-				log.log(Level.SEVERE, "Exception while authenticating: ",exc);
-				if (m_SSOPrinciple != null)
-					m_SSOPrinciple.removePrincipleFromSession(httpRequest);
-				m_SSOPrinciple = null;
-				if(isRedirectToLoginOnError)
-				{
-					httpResponse.sendRedirect("webui/index.zul");
-				}
-				else
-				{
-					httpResponse.setStatus(500);
-					httpResponse.sendRedirect(SSOUtils.ERROR_API);
-				}
+				log.log(Level.SEVERE, "Exception while authenticating: ", exc);
+				if (m_SSOPrincipal != null)
+					m_SSOPrincipal.removePrincipalFromSession(httpRequest);
+				httpRequest.getSession().removeAttribute(ISSOPrincipalService.SSO_SELECTED_PROVIDER);
+				httpRequest.getSession().removeAttribute(ISSOPrincipalService.SSO_QUERY_STRING);
+				m_SSOPrincipal = null;
+				httpResponse.setStatus(500);
+				response.setContentType("text/html");
+				response.getWriter().append(SSOUtils.getCreateErrorResponce(exc.getLocalizedMessage()));
 				return;
 			}
 		}
@@ -129,8 +159,4 @@ public class SSOWebUIFilter implements Filter
 	{
 	}
 	
-	public static ISSOPrinciple getSSOPrinciple()
-	{
-		return m_SSOPrinciple;
-	}
 } // AdempiereMonitorFilter
