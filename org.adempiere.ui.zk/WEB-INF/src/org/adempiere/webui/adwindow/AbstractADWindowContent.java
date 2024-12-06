@@ -893,30 +893,31 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
             setupEmbeddedFindwindow(findWindow);
             if (findWindow.initialize())
             {
-	        	findWindow.addEventListener(DialogEvents.ON_WINDOW_CLOSE, new EventListener<Event>() {
-					@Override
-					public void onEvent(Event event) throws Exception {
-						if (!findWindow.isCancel())
-			            {
-			            	m_findCreateNew = findWindow.isCreateNew();
-			            	MQuery result = findWindow.getQuery();
-			            	callback.onCallback(result);
-			            	EventListener<? extends Event> listener = findWindow.getEventListeners(DialogEvents.ON_WINDOW_CLOSE).iterator().next();
-			            	findWindow.removeEventListener(DialogEvents.ON_WINDOW_CLOSE, listener);
-			            }
-			            else
-			            {
-			            	m_findCancelled = true;
-			            	callback.onCallback(null);
-			            }
-					}
-				});	        	
 	        	getComponent().addEventListener("onInitialQuery", new EventListener<Event>() {
 					@Override
 					public void onEvent(Event event) throws Exception {
 						if (findWindow.getParent() != getComponent().getParent())
 							getComponent().getParent().appendChild(findWindow);
-						LayoutUtils.openEmbeddedWindow(getComponent().getParent(), findWindow, "overlap");						
+						LayoutUtils.openEmbeddedWindow(getComponent().getParent(), findWindow, "overlap");		
+						//
+			        	findWindow.addEventListener(DialogEvents.ON_WINDOW_CLOSE, new EventListener<Event>() {
+							@Override
+							public void onEvent(Event event) throws Exception {
+								if (!findWindow.isCancel())
+					            {
+					            	m_findCreateNew = findWindow.isCreateNew();
+					            	MQuery result = findWindow.getQuery();
+					            	callback.onCallback(result);
+					            	EventListener<? extends Event> listener = findWindow.getEventListeners(DialogEvents.ON_WINDOW_CLOSE).iterator().next();
+					            	findWindow.removeEventListener(DialogEvents.ON_WINDOW_CLOSE, listener);
+					            }
+					            else
+					            {
+					            	m_findCancelled = true;
+					            	callback.onCallback(null);
+					            }
+							}
+						});
 					}
 				});
 	        	Events.echoEvent("onInitialQuery", getComponent(), null);
