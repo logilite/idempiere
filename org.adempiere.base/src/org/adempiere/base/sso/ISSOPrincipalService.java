@@ -27,8 +27,19 @@ import org.compiere.util.Language;
 public interface ISSOPrincipalService
 {
 	public static final String	SSO_PRINCIPAL_SESSION_TOKEN	= "sso.principal.token";
-	public static final String	SSO_QUERY_STRING			= "sso.query.string";
+
 	public static final String	SSO_ADMIN_LOGIN				= "sso.admin.login";
+
+	/**
+	 * Represents the key used to store or retrieve the selected SSO (Single Sign-On) provider
+	 * from a session. 
+	 */
+	public static final String	SSO_SELECTED_PROVIDER		= "sso.selected.provider";
+
+	/**
+	 * Represents the key used to store or retrieve the request query parameter from a session.
+	 */
+	public static final String	SSO_QUERY_STRING			= "sso.query.string";
 
 	/**
 	 * Check the request has an authentication code
@@ -95,7 +106,7 @@ public interface ISSOPrincipalService
 	 * @throws ParseException
 	 */
 	public Language getLanguage(Object token) throws ParseException;
-
+	
 	/**
 	 * Get logout url
 	 * @return logout url or null

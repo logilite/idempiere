@@ -120,7 +120,7 @@ public class AdempiereMonitorFilter implements Filter
 							return;
 						}
 						// validate the user
-						if (checkSSOAuthorization(session.getAttribute(ISSOPrincipalService.SSO_PRINCIPAL_SESSION_TOKEN)))
+						if (checkSSOAuthorization(m_SSOPrincipal, session.getAttribute(ISSOPrincipalService.SSO_PRINCIPAL_SESSION_TOKEN)))
 						{
 							chain.doFilter(request, response);
 							return;
@@ -141,7 +141,6 @@ public class AdempiereMonitorFilter implements Filter
 
 			if (m_SSOPrincipal == null || !isSSOEnable)
 			{
-				HttpSession session = req.getSession(true);
 				// Previously checked
 				Long compare = (Long) session.getAttribute(AUTHORIZATION);
 				if (compare != null && compare.compareTo(m_authorization) == 0) {
