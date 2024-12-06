@@ -20,7 +20,9 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 import org.compiere.model.MRole;
+import org.compiere.model.Query;
 import org.compiere.model.X_AD_WF_Responsible;
+import org.compiere.util.CCache;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.idempiere.cache.ImmutableIntPOCache;
@@ -87,7 +89,39 @@ public class MWFResponsible extends X_AD_WF_Responsible implements ImmutablePOSu
 	
 	/**	Cache						*/
 	private static ImmutableIntPOCache<Integer,MWFResponsible>	s_cache	= new ImmutableIntPOCache<Integer,MWFResponsible>(Table_Name, 10);
-	
+
+	/**
+	/**
+	 * Cache for Overridden Client Workflow Responsible
+	 */
+	private static CCache<String, MWFResponsible> s_cacheCliWFResp = new CCache<String, MWFResponsible>(
+			"ClientWFResponsible", 10);
+
+	/**
+	 * Get Overridden Client Workflow Responsible from the Cache
+	 * 
+	 * @param ctx
+	 * @param AD_WF_Responsible_ID - System Workflow Responsible
+	 * @return
+	 */
+	public static MWFResponsible getClientWFResp(Properties ctx, int AD_WF_Responsible_ID) {
+		if(AD_WF_Responsible_ID==0)
+			return null;
+		
+		int clientID = Env.getAD_Client_ID(ctx);
+		String key = clientID + "_" + AD_WF_Responsible_ID;
+		
+		if (s_cacheCliWFResp.containsKey(key))
+			return s_cacheCliWFResp.get(key);
+		
+		MWFResponsible resp = new Query(ctx, Table_Name, "AD_Client_ID=? AND Override_ID=?", null).setOnlyActiveRecords(true)
+					.setParameters(Env.getAD_Client_ID(ctx), AD_WF_Responsible_ID).first();
+		
+		s_cacheCliWFResp.put(key, resp);
+		
+		return resp;
+	}
+
     /**
      * UUID based Constructor
      * @param ctx  Context
@@ -98,7 +132,7 @@ public class MWFResponsible extends X_AD_WF_Responsible implements ImmutablePOSu
         super(ctx, AD_WF_Responsible_UU, trxName);
     }
 
-	/**
+	/**************************************************************************
 	 * 	Standard Constructor
 	 *	@param ctx context
 	 *	@param AD_WF_Responsible_ID id

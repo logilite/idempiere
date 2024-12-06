@@ -21,7 +21,7 @@ import org.zkoss.zk.ui.event.Events;
 
 /**
  * Error window in error.zul
- * Remove SSO Principal from session when error.
+ * Remove SSO principal from session when error.
  * 
  * @author Logilite Technologies
  */

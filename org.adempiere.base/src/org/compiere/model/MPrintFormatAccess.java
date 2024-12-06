@@ -225,10 +225,19 @@ public class MPrintFormatAccess extends X_AD_PrintFormat_Access
 			whereClause += " AND AD_User_ID = ? ";
 			params.add(ad_User_ID);
 		}
+		else
+		{
+			whereClause += " AND AD_User_ID IS NULL ";
+		}
+		
 		if (ad_Role_ID > 0)
 		{
 			whereClause += " AND AD_Role_ID = ? ";
 			params.add(ad_Role_ID);
+		}
+		else
+		{
+			whereClause += " AND AD_Role_ID IS NULL ";
 		}
 
 		return new Query(Env.getCtx(), MPrintFormatAccess.Table_Name, whereClause, trxName).setParameters(params).setOnlyActiveRecords(true).first();

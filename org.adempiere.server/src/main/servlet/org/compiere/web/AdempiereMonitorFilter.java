@@ -62,6 +62,8 @@ public class AdempiereMonitorFilter implements Filter
 	private static final String		AUTHORIZATION	= "AdempiereAuthorization";
 	/** Authorization Marker */
 	private Long					m_authorization	= null;
+	
+	private static ISSOPrincipalService	m_SSOPrincipal	= null;
 
 	/**
 	 * 	Init
@@ -94,16 +96,15 @@ public class AdempiereMonitorFilter implements Filter
 				request.getRequestDispatcher(errorPage).forward(request, response);
 				return;
 			}
-
-			boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO_IDEMPIERE_MONITOR, false);
-			HttpServletRequest req = (HttpServletRequest)request;
-			HttpServletResponse resp = (HttpServletResponse)response;
-			boolean isRedirectToLoginOnError = false;
-			ISSOPrincipalService m_SSOPrincipal = null;
+			HttpServletRequest req = (HttpServletRequest) request;
+			HttpServletResponse resp = (HttpServletResponse) response;
+			HttpSession session = req.getSession(true);
+			boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
 			if (isSSOEnable) {
 				try {
-
-					m_SSOPrincipal = SSOUtils.getSSOPrincipalService();
+					if (m_SSOPrincipal == null) {
+						m_SSOPrincipal = SSOUtils.getSSOPrincipalService();
+					}
 
 					if (m_SSOPrincipal != null) {
 						if (m_SSOPrincipal.hasAuthenticationCode(req, resp)) {
@@ -112,30 +113,28 @@ public class AdempiereMonitorFilter implements Filter
 							m_SSOPrincipal.getAuthenticationToken(req, resp, SSOUtils.SSO_MODE_MONITOR);
 							if (!resp.isCommitted())
 								resp.sendRedirect(currentUri);
+							return;
 						} else if (!m_SSOPrincipal.isAuthenticated(req, resp)) {
 							// Redirect to SSO sing in page for authentication
 							m_SSOPrincipal.redirectForAuthentication(req, resp, SSOUtils.SSO_MODE_MONITOR);
 							return;
 						}
 						// validate the user
-						if (checkSSOAuthorization(m_SSOPrincipal, req.getSession().getAttribute(ISSOPrincipalService.SSO_PRINCIPAL_SESSION_TOKEN)))
+						if (checkSSOAuthorization(session.getAttribute(ISSOPrincipalService.SSO_PRINCIPAL_SESSION_TOKEN)))
 						{
 							chain.doFilter(request, response);
 							return;
 						}
 					}
-					req.getSession().removeAttribute(ISSOPrincipalService.SSO_PRINCIPAL_SESSION_TOKEN);
+					session.removeAttribute(ISSOPrincipalService.SSO_PRINCIPAL_SESSION_TOKEN);
+					resp.sendRedirect("idempiereMonitor");
 				} catch (Throwable exc) {
 					log.log(Level.SEVERE, "Exception while authenticating: ", exc);
 					if (m_SSOPrincipal != null)
 						m_SSOPrincipal.removePrincipalFromSession(req);
-					if (isRedirectToLoginOnError) {
-						resp.sendRedirect("idempiereMonitor");
-					} else {
 						resp.setStatus(500);
 						response.setContentType("text/html");
 						response.getWriter().append(SSOUtils.getCreateErrorResponce(exc.getLocalizedMessage()));
-					}
 					return;
 				}
 			}

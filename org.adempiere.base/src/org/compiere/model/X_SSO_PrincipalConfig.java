@@ -30,7 +30,7 @@ public class X_SSO_PrincipalConfig extends PO implements I_SSO_PrincipalConfig, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20231222L;
+	private static final long serialVersionUID = 20241206L;
 
     /** Standard Constructor */
     public X_SSO_PrincipalConfig (Properties ctx, int SSO_PrincipalConfig_ID, String trxName)
@@ -83,7 +83,7 @@ public class X_SSO_PrincipalConfig extends PO implements I_SSO_PrincipalConfig, 
     }
 
     /** AccessLevel
-      * @return 4 - System
+      * @return 4 - System 
       */
     protected int get_AccessLevel()
     {
@@ -105,8 +105,9 @@ public class X_SSO_PrincipalConfig extends PO implements I_SSO_PrincipalConfig, 
     }
 
 	/** Set Default.
-		@param IsDefault Default value
-	*/
+		@param IsDefault 
+		Default value
+	  */
 	public void setIsDefault (boolean IsDefault)
 	{
 		set_Value (COLUMNNAME_IsDefault, Boolean.valueOf(IsDefault));
@@ -115,13 +116,13 @@ public class X_SSO_PrincipalConfig extends PO implements I_SSO_PrincipalConfig, 
 	/** Get Default.
 		@return Default value
 	  */
-	public boolean isDefault()
+	public boolean isDefault () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsDefault);
-		if (oo != null)
+		if (oo != null) 
 		{
-			 if (oo instanceof Boolean)
-				 return ((Boolean)oo).booleanValue();
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
 			return "Y".equals(oo);
 		}
 		return false;
@@ -201,7 +202,7 @@ public class X_SSO_PrincipalConfig extends PO implements I_SSO_PrincipalConfig, 
 
 	/** Get Application Redirect URIs.
 		@return SSO Application Redirect URIs
-	  */
+	*/
 	public String getSSO_ApplicationRedirectURIs()
 	{
 		return (String)get_Value(COLUMNNAME_SSO_ApplicationRedirectURIs);
@@ -217,7 +218,7 @@ public class X_SSO_PrincipalConfig extends PO implements I_SSO_PrincipalConfig, 
 
 	/** Get Application Secret Key.
 		@return SSO Application Secret Key
-	  */
+	*/
 	public String getSSO_ApplicationSecretKey()
 	{
 		return (String)get_Value(COLUMNNAME_SSO_ApplicationSecretKey);
@@ -249,10 +250,38 @@ public class X_SSO_PrincipalConfig extends PO implements I_SSO_PrincipalConfig, 
 
 	/** Get iDempiere Monitor Redirect URIs.
 		@return iDempiere Monitor Redirect URIs
-	  */
+	*/
 	public String getSSO_IDempMonitorRedirectURIs()
 	{
 		return (String)get_Value(COLUMNNAME_SSO_IDempMonitorRedirectURIs);
+	}
+
+	public org.compiere.model.I_AD_Image getSSO_LoginButtonImage() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_Image)MTable.get(getCtx(), org.compiere.model.I_AD_Image.Table_Name)
+			.getPO(getSSO_LoginButtonImage_ID(), get_TrxName());	}
+
+	/** Set Login Button Image.
+		@param SSO_LoginButtonImage_ID 
+		Identifier for the image used as the icon for the Single Sign-On (SSO) login button. References the AD_Image table.
+	*/
+	public void setSSO_LoginButtonImage_ID (int SSO_LoginButtonImage_ID)
+	{
+		if (SSO_LoginButtonImage_ID < 1) 
+			set_Value (COLUMNNAME_SSO_LoginButtonImage_ID, null);
+		else 
+			set_Value (COLUMNNAME_SSO_LoginButtonImage_ID, Integer.valueOf(SSO_LoginButtonImage_ID));
+	}
+
+	/** Get Login Button Image.
+		@return Identifier for the image used as the icon for the Single Sign-On (SSO) login button. References the AD_Image table.
+	*/
+	public int getSSO_LoginButtonImage_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_SSO_LoginButtonImage_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Felix Web Console Redirect URIs.
@@ -265,8 +294,8 @@ public class X_SSO_PrincipalConfig extends PO implements I_SSO_PrincipalConfig, 
 
 	/** Get Felix Web Console Redirect URIs.
 		@return Apache Felix Web Console Bundles Redirect URIs
-	  */
-	public String getSSO_OSGIRedirectURIs()
+	*/
+	public String getSSO_OSGIRedirectURIs () 
 	{
 		return (String)get_Value(COLUMNNAME_SSO_OSGIRedirectURIs);
 	}
@@ -301,7 +330,8 @@ public class X_SSO_PrincipalConfig extends PO implements I_SSO_PrincipalConfig, 
 	}
 
 	/** Get SSO Configuration UU.
-		@return SSO Configuration UU	  */
+		@return SSO Configuration UU	  
+	*/
 	public String getSSO_PrincipalConfig_UU()
 	{
 		return (String)get_Value(COLUMNNAME_SSO_PrincipalConfig_UU);
@@ -316,13 +346,12 @@ public class X_SSO_PrincipalConfig extends PO implements I_SSO_PrincipalConfig, 
 	*/
 	public void setSSO_Provider (String SSO_Provider)
 	{
-
 		set_Value (COLUMNNAME_SSO_Provider, SSO_Provider);
 	}
 
 	/** Get SSO Provider.
 		@return Single Sign-On (SSO) Providers ( Microsoft Azure , Google, Jump Cloud etc..)
-	  */
+	*/
 	public String getSSO_Provider()
 	{
 		return (String)get_Value(COLUMNNAME_SSO_Provider);

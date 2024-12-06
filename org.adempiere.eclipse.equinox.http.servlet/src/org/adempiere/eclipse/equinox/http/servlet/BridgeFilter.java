@@ -65,16 +65,8 @@ public class BridgeFilter extends BridgeServlet implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse resp = (HttpServletResponse) response;
-		
-		// Ignore the resource request	
-		if (SSOUtils.isResourceRequest(req, false))
-		{
-			super.process(req, resp, chain);
-			return;
-		}
 
-		boolean isRedirectToLoginOnError = false;
-		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO_OSGI_CONSOLE, false);
+		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
 		if (isSSOEnable) {
 			ISSOPrincipalService m_SSOPrincipal = null;
 			try
@@ -98,13 +90,11 @@ public class BridgeFilter extends BridgeServlet implements Filter {
 				log.log(Level.SEVERE, "Exception while authenticating: ", exc);
 				if (m_SSOPrincipal != null)
 					m_SSOPrincipal.removePrincipalFromSession(req);
-				if (isRedirectToLoginOnError) {
-					resp.sendRedirect("osgi/system/console/bundles");
-				} else {
-					resp.setStatus(500);
-					response.setContentType("text/html");
-					response.getWriter().append(SSOUtils.getCreateErrorResponce(exc.getLocalizedMessage()));
-				}
+
+				resp.setStatus(500);
+				response.setContentType("text/html");
+				response.getWriter().append(SSOUtils.getCreateErrorResponce(exc.getLocalizedMessage()));
+
 				return;
 			}
 		}
