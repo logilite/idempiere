@@ -1374,7 +1374,7 @@ public class DB_PostgreSQL implements AdempiereDatabase
 		if (DisplayType.isMultiSelect(column.getAD_Reference_ID()))
 		{
 			// Drop default value
-			sql.append(" ALTER TABLE").append(table.getTableName())
+			sql.append(" ALTER TABLE ").append(table.getTableName())
 				.append(" ALTER COLUMN ").append(column.getColumnName())
 				.append(" DROP DEFAULT ")
 				.append(DB.SQLSTATEMENT_SEPARATOR);
