@@ -20,15 +20,15 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for SSO_PrincipleConfig
+/** Generated Interface for SSO_PrincipalConfig
  *  @author iDempiere (generated) 
  *  @version Release 7.1
  */
-public interface I_SSO_PrincipleConfig 
+public interface I_SSO_PrincipalConfig 
 {
 
-    /** TableName=SSO_PrincipleConfig */
-    public static final String Table_Name = "SSO_PrincipleConfig";
+    /** TableName=SSO_PrincipalConfig */
+    public static final String Table_Name = "SSO_PrincipalConfig";
 
     /** AD_Table_ID=200360 */
     public static final int Table_ID = 200360;
@@ -95,12 +95,12 @@ public interface I_SSO_PrincipleConfig
     public static final String COLUMNNAME_IsDefault = "IsDefault";
 
 	/** Set Default.
-	  * Indicates whether this SSO configuration is set as the default for logging in to the iDempiere Monitor and Felix Web Console.
+	  * Default value
 	  */
 	public void setIsDefault (boolean IsDefault);
 
 	/** Get Default.
-	  * Indicates whether this SSO configuration is set as the default for logging in to the iDempiere Monitor and Felix Web Console.
+	  * Default value
 	  */
 	public boolean isDefault();
 
@@ -121,12 +121,12 @@ public interface I_SSO_PrincipleConfig
     public static final String COLUMNNAME_SSO_ApplicationClientID = "SSO_ApplicationClientID";
 
 	/** Set Application Client ID.
-	  * SSO provider unique app client id
+	  * SSO Application Client ID
 	  */
 	public void setSSO_ApplicationClientID (String SSO_ApplicationClientID);
 
 	/** Get Application Client ID.
-	  * SSO provider unique app client id
+	  * SSO Application Client ID
 	  */
 	public String getSSO_ApplicationClientID();
 
@@ -134,12 +134,12 @@ public interface I_SSO_PrincipleConfig
     public static final String COLUMNNAME_SSO_ApplicationDiscoveryURI = "SSO_ApplicationDiscoveryURI";
 
 	/** Set Application Discovery URI.
-	  * A directory of the OIDC architecture of your user pool.
+	  * SSO Application Discovery URI
 	  */
 	public void setSSO_ApplicationDiscoveryURI (String SSO_ApplicationDiscoveryURI);
 
 	/** Get Application Discovery URI.
-	  * A directory of the OIDC architecture of your user pool.
+	  * SSO Application Discovery URI
 	  */
 	public String getSSO_ApplicationDiscoveryURI();
 
@@ -147,12 +147,12 @@ public interface I_SSO_PrincipleConfig
     public static final String COLUMNNAME_SSO_ApplicationDomain = "SSO_ApplicationDomain";
 
 	/** Set Application Domain.
-	  * A domain name is a string that identifies a realm of administrative autonomy, authority or control within the Internet for your Provider.
+	  * SSO Application Domain
 	  */
 	public void setSSO_ApplicationDomain (String SSO_ApplicationDomain);
 
 	/** Get Application Domain.
-	  * A domain name is a string that identifies a realm of administrative autonomy, authority or control within the Internet for your Provider.
+	  * SSO Application Domain
 	  */
 	public String getSSO_ApplicationDomain();
 
@@ -160,12 +160,12 @@ public interface I_SSO_PrincipleConfig
     public static final String COLUMNNAME_SSO_ApplicationLogoutURL = "SSO_ApplicationLogoutURL";
 
 	/** Set Application Logout URL.
-	  * This is where SSO provider sends a request to have the application clear the user's session data
+	  * SSO Application Logout URL
 	  */
 	public void setSSO_ApplicationLogoutURL (String SSO_ApplicationLogoutURL);
 
 	/** Get Application Logout URL.
-	  * This is where SSO provider sends a request to have the application clear the user's session data
+	  * SSO Application Logout URL
 	  */
 	public String getSSO_ApplicationLogoutURL();
 
@@ -173,12 +173,12 @@ public interface I_SSO_PrincipleConfig
     public static final String COLUMNNAME_SSO_ApplicationRedirectURIs = "SSO_ApplicationRedirectURIs";
 
 	/** Set Application Redirect URIs.
-	  * The URIs SSO provider will accept as destinations when returning authentication responses (tokens) after successfully authenticating.
+	  * SSO Application Redirect URIs
 	  */
 	public void setSSO_ApplicationRedirectURIs (String SSO_ApplicationRedirectURIs);
 
 	/** Get Application Redirect URIs.
-	  * The URIs SSO provider will accept as destinations when returning authentication responses (tokens) after successfully authenticating.
+	  * SSO Application Redirect URIs
 	  */
 	public String getSSO_ApplicationRedirectURIs();
 
@@ -186,12 +186,12 @@ public interface I_SSO_PrincipleConfig
     public static final String COLUMNNAME_SSO_ApplicationSecretKey = "SSO_ApplicationSecretKey";
 
 	/** Set Application Secret Key.
-	  * SSO provider client secret key to access this user info
+	  * SSO Application Secret Key
 	  */
 	public void setSSO_ApplicationSecretKey (String SSO_ApplicationSecretKey);
 
 	/** Get Application Secret Key.
-	  * SSO provider client secret key to access this user info
+	  * SSO Application Secret Key
 	  */
 	public String getSSO_ApplicationSecretKey();
 
@@ -199,12 +199,12 @@ public interface I_SSO_PrincipleConfig
     public static final String COLUMNNAME_SSO_AuthorizationTenantID = "SSO_AuthorizationTenantID";
 
 	/** Set Tenant ID.
-	  * SSO provider Tenant ID is a globally unique identifier (GUID)
+	  * SSO Tenant ID
 	  */
 	public void setSSO_AuthorizationTenantID (String SSO_AuthorizationTenantID);
 
 	/** Get Tenant ID.
-	  * SSO provider Tenant ID is a globally unique identifier (GUID)
+	  * SSO Tenant ID
 	  */
 	public String getSSO_AuthorizationTenantID();
 
@@ -249,23 +249,23 @@ public interface I_SSO_PrincipleConfig
 	  */
 	public String getSSO_OSGIRedirectURIs();
 
-    /** Column name SSO_PrincipleConfig_ID */
-    public static final String COLUMNNAME_SSO_PrincipleConfig_ID = "SSO_PrincipleConfig_ID";
+    /** Column name SSO_PrincipalConfig_ID */
+    public static final String COLUMNNAME_SSO_PrincipalConfig_ID = "SSO_PrincipalConfig_ID";
 
 	/** Set SSO Configuration	  */
-	public void setSSO_PrincipleConfig_ID (int SSO_PrincipleConfig_ID);
+	public void setSSO_PrincipalConfig_ID (int SSO_PrincipalConfig_ID);
 
 	/** Get SSO Configuration	  */
-	public int getSSO_PrincipleConfig_ID();
+	public int getSSO_PrincipalConfig_ID();
 
-    /** Column name SSO_PrincipleConfig_UU */
-    public static final String COLUMNNAME_SSO_PrincipleConfig_UU = "SSO_PrincipleConfig_UU";
+    /** Column name SSO_PrincipalConfig_UU */
+    public static final String COLUMNNAME_SSO_PrincipalConfig_UU = "SSO_PrincipalConfig_UU";
 
 	/** Set SSO Configuration UU	  */
-	public void setSSO_PrincipleConfig_UU (String SSO_PrincipleConfig_UU);
+	public void setSSO_PrincipalConfig_UU (String SSO_PrincipalConfig_UU);
 
 	/** Get SSO Configuration UU	  */
-	public String getSSO_PrincipleConfig_UU();
+	public String getSSO_PrincipalConfig_UU();
 
     /** Column name SSO_Provider */
     public static final String COLUMNNAME_SSO_Provider = "SSO_Provider";

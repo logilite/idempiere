@@ -39,7 +39,7 @@ import org.adempiere.base.ILogin;
 import org.adempiere.base.event.EventManager;
 import org.adempiere.base.event.IEventTopics;
 import org.adempiere.base.event.LoginEventData;
-import org.adempiere.base.sso.ISSOPrinciple;
+import org.adempiere.base.sso.ISSOPrincipalService;
 import org.adempiere.util.LogAuthFailure;
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.apps.AEnv;
@@ -61,7 +61,7 @@ import org.adempiere.webui.window.FDialog;
 import org.adempiere.webui.window.LoginWindow;
 import org.compiere.Adempiere;
 import org.compiere.model.MClient;
-import org.compiere.model.MSSOPrincipleConfig;
+import org.compiere.model.MSSOPrincipalConfig;
 import org.compiere.model.MSession;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MSystem;
@@ -340,13 +340,13 @@ public class LoginPanel extends Window implements EventListener<Event>
 		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
 		if (isSSOEnable)
 		{
-			List<MSSOPrincipleConfig> configs = MSSOPrincipleConfig.getAllConfig();
+			List<MSSOPrincipalConfig> configs = MSSOPrincipalConfig.getAllSSOPrincipalConfig();
 			if (configs != null && configs.size() > 1)
 			{
 				tr = null;
 				for (int i = 0; i < configs.size(); i++)
 				{
-					MSSOPrincipleConfig config = configs.get(i);
+					MSSOPrincipalConfig config = configs.get(i);
 
 					tr = new Tr();
 					table.appendChild(tr);
@@ -771,11 +771,11 @@ public class LoginPanel extends Window implements EventListener<Event>
 	 * The button includes configuration details such as name and image, and sets up a click event
 	 * listener to handle redirection.
 	 *
-	 * @param  config the SSO principle configuration used to customize the button and generate the
+	 * @param  config the SSO principal configuration used to customize the button and generate the
 	 *                redirect URL
 	 * @return        a configured {@link Button} object for SSO login
 	 */
-	private Button createSSOLoginButton(MSSOPrincipleConfig config)
+	private Button createSSOLoginButton(MSSOPrincipalConfig config)
 	{
 		Button button = new Button(config.getName());
 		button.setTooltip(config.getName());
@@ -796,9 +796,9 @@ public class LoginPanel extends Window implements EventListener<Event>
 					referrerUrl = null;
 			}
 
-			StringBuffer ssoURL = new StringBuffer("?").append(ISSOPrinciple.SSO_SELECTED_PROVIDER).append("=").append(URLEncoder.encode(config.getSSO_PrincipleConfig_UU(), "UTF-8"));
+			StringBuffer ssoURL = new StringBuffer("?").append(ISSOPrincipalService.SSO_SELECTED_PROVIDER).append("=").append(URLEncoder.encode(config.getSSO_PrincipalConfig_UU(), "UTF-8"));
 			if (referrerUrl != null)
-				ssoURL.append("&").append(ISSOPrinciple.SSO_QUERY_STRING).append("=").append(URLEncoder.encode(referrerUrl, "UTF-8"));
+				ssoURL.append("&").append(ISSOPrincipalService.SSO_QUERY_STRING).append("=").append(URLEncoder.encode(referrerUrl, "UTF-8"));
 			Executions.sendRedirect(ssoURL.toString());
 		});
 

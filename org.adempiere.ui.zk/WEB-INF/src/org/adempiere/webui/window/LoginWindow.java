@@ -29,7 +29,7 @@ import java.util.logging.Level;
 
 import org.adempiere.base.Core;
 import org.adempiere.base.ILogin;
-import org.adempiere.base.sso.ISSOPrinciple;
+import org.adempiere.base.sso.ISSOPrincipalService;
 import org.adempiere.base.sso.SSOUtils;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.Extensions;
@@ -101,7 +101,7 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 
 	private void initComponents()
 	{
-		Object result = getDesktop().getSession().getAttribute(ISSOPrinciple.SSO_PRINCIPLE_SESSION_NAME);
+		Object result = getDesktop().getSession().getAttribute(ISSOPrincipalService.SSO_PRINCIPAL_SESSION_TOKEN);
 		if (result == null)
 		{
 			createLoginPanel();
@@ -115,17 +115,17 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 	/**
 	 * Show role panel after SSO authentication.
 	 * 
-	 * @param result session principle to get user and language.
+	 * @param token session principal to get user and language.
 	 */
-	private void ssoLogin(Object result)
+	private void ssoLogin(Object token)
 	{
 		String errorMessage = null;
 		try
 		{
-			String provider = (String) getDesktop().getSession().getAttribute(ISSOPrinciple.SSO_SELECTED_PROVIDER);
-			ISSOPrinciple ssoPrinciple = SSOUtils.getSSOPrinciple(provider);
-			String username = ssoPrinciple.getUserName(result);
-			Language language = ssoPrinciple.getLanguage(result);
+			String provider = (String) getDesktop().getSession().getAttribute(ISSOPrincipalService.SSO_SELECTED_PROVIDER);
+			ISSOPrincipalService ssoPrincipal = SSOUtils.getSSOPrincipalService(provider);
+			String username = ssoPrincipal.getUserName(token);
+			Language language = ssoPrincipal.getLanguage(token);
 			boolean isEmailLogin = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
 			if (Util.isEmpty(username))
 				throw new AdempiereException("No Apps " + (isEmailLogin ? "Email" : "User"));
@@ -165,7 +165,7 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 		if (!Util.isEmpty(errorMessage))
 		{
 			ZkSSOUtils.setErrorMessageText(errorMessage);
-			Executions.sendRedirect(SSOUtils.ERROR_VALIDATION);
+			Executions.sendRedirect(SSOUtils.ERROR_VALIDATION_URL);
 		}
 	}
 

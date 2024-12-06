@@ -10,26 +10,26 @@ import org.compiere.util.CCache;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
 
-public class MSSOPrincipleConfig extends X_SSO_PrincipleConfig
+public class MSSOPrincipalConfig extends X_SSO_PrincipalConfig
 {
 	/**
 	 * 
 	 */
 	private static final long					serialVersionUID				= -6330419996581130413L;
 
-	private static final CCache<String, Object>	s_SSOPrincipleConfigCache		= new CCache<String, Object>(MSSOPrincipleConfig.class.getSimpleName(), 10, 0);
+	private static final CCache<String, Object>	s_SSOPrincipalConfigCache		= new CCache<String, Object>(MSSOPrincipalConfig.class.getSimpleName(), 10, 0);
 
-	private static final String					DEFAULT_SSO_PRINCIPLE_CACHEKEY	= "DEFAULT_SSO_PRINCIPLE";
+	private static final String					DEFAULT_SSO_PRINCIPAL_CACHEKEY	= "DEFAULT_SSO_PRINCIPAL";
 	private static final String					ALL_SSO_CONFIG_CACHEKEY			= "ALL_SSO_CONFIG";
 
 	private String								imageBase64Src					= null;
 
-	public MSSOPrincipleConfig(Properties ctx, int MFA_SSOAuthentication_ID, String trxName)
+	public MSSOPrincipalConfig(Properties ctx, int MFA_SSOAuthentication_ID, String trxName)
 	{
 		super(ctx, MFA_SSOAuthentication_ID, trxName);
 	}
 
-	public MSSOPrincipleConfig(Properties ctx, ResultSet rs, String trxName)
+	public MSSOPrincipalConfig(Properties ctx, ResultSet rs, String trxName)
 	{
 		super(ctx, rs, trxName);
 	}
@@ -44,12 +44,12 @@ public class MSSOPrincipleConfig extends X_SSO_PrincipleConfig
 				setIsDefault(false);
 			}
 
-			if (isDefault() && getDefaultSSOPrinciple() != null)
+			if (isDefault() && getDefaultSSOPrincipalConfig() != null)
 			{
-				throw new AdempiereException("Then can be only one default SSO Authenticattion");
+				throw new AdempiereException("There can be only one default SSO Principal Configuration");
 			}
 
-			if (newRecord && getDefaultSSOPrinciple() == null)
+			if (newRecord && getDefaultSSOPrincipalConfig() == null)
 			{
 				setIsDefault(true);
 			}
@@ -58,49 +58,49 @@ public class MSSOPrincipleConfig extends X_SSO_PrincipleConfig
 		return super.beforeSave(newRecord);
 	}
 
-	public static MSSOPrincipleConfig getDefaultSSOPrinciple()
+	public static MSSOPrincipalConfig getDefaultSSOPrincipalConfig()
 	{
-		MSSOPrincipleConfig defaultConfig = (MSSOPrincipleConfig) s_SSOPrincipleConfigCache.get(DEFAULT_SSO_PRINCIPLE_CACHEKEY);
+		MSSOPrincipalConfig defaultConfig = (MSSOPrincipalConfig) s_SSOPrincipalConfigCache.get(DEFAULT_SSO_PRINCIPAL_CACHEKEY);
 		if (defaultConfig != null)
 			return defaultConfig;
 
 		defaultConfig = new Query(Env.getCtx(), Table_Name, COLUMNNAME_IsDefault + " = 'Y'", null).setOnlyActiveRecords(true).firstOnly();
 
 		if (defaultConfig != null)
-			s_SSOPrincipleConfigCache.put(DEFAULT_SSO_PRINCIPLE_CACHEKEY, defaultConfig);
+			s_SSOPrincipalConfigCache.put(DEFAULT_SSO_PRINCIPAL_CACHEKEY, defaultConfig);
 
 		return defaultConfig;
 	}
 
-	public static MSSOPrincipleConfig getSSOPrincipleConfig(String uuID)
+	public static MSSOPrincipalConfig getSSOPrincipalConfig(String uuID)
 	{
 		if (Util.isEmpty(uuID))
 			return null;
 
-		MSSOPrincipleConfig cachedConfig = (MSSOPrincipleConfig) s_SSOPrincipleConfigCache.get(uuID);
+		MSSOPrincipalConfig cachedConfig = (MSSOPrincipalConfig) s_SSOPrincipalConfigCache.get(uuID);
 		if (cachedConfig != null)
 			return cachedConfig;
 
-		cachedConfig = new Query(Env.getCtx(), Table_Name, COLUMNNAME_SSO_PrincipleConfig_UU + " = ?", null).setOnlyActiveRecords(true).setParameters(uuID)
+		cachedConfig = new Query(Env.getCtx(), Table_Name, COLUMNNAME_SSO_PrincipalConfig_UU + " = ?", null).setOnlyActiveRecords(true).setParameters(uuID)
 																											.firstOnly();
 
 		if (cachedConfig != null)
-			s_SSOPrincipleConfigCache.put(uuID, cachedConfig);
+			s_SSOPrincipalConfigCache.put(uuID, cachedConfig);
 
 		return cachedConfig;
 	}
 
-	public static List<MSSOPrincipleConfig> getAllConfig()
+	public static List<MSSOPrincipalConfig> getAllSSOPrincipalConfig()
 	{
 		@SuppressWarnings("unchecked")
-		List<MSSOPrincipleConfig> allConfigs = (List<MSSOPrincipleConfig>) s_SSOPrincipleConfigCache.get(ALL_SSO_CONFIG_CACHEKEY);
+		List<MSSOPrincipalConfig> allConfigs = (List<MSSOPrincipalConfig>) s_SSOPrincipalConfigCache.get(ALL_SSO_CONFIG_CACHEKEY);
 		if (allConfigs != null)
 			return allConfigs;
 
 		allConfigs = new Query(Env.getCtx(), Table_Name, null, null).setOnlyActiveRecords(true).list();
 
 		if (allConfigs != null && !allConfigs.isEmpty())
-			s_SSOPrincipleConfigCache.put(ALL_SSO_CONFIG_CACHEKEY, allConfigs);
+			s_SSOPrincipalConfigCache.put(ALL_SSO_CONFIG_CACHEKEY, allConfigs);
 
 		return allConfigs;
 	}

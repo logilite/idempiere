@@ -18,16 +18,15 @@ import java.text.ParseException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.compiere.model.I_SSO_PrincipleConfig;
 import org.compiere.util.Language;
 
 /**
  * @author Logilite Technologies
  *
  */
-public interface ISSOPrinciple
+public interface ISSOPrincipalService
 {
-	public static final String	SSO_PRINCIPLE_SESSION_NAME	= "sso.principle";
+	public static final String	SSO_PRINCIPAL_SESSION_TOKEN	= "sso.principal.token";
 
 	/**
 	 * Represents the key used to store or retrieve the selected SSO (Single Sign-On) provider
@@ -40,22 +39,77 @@ public interface ISSOPrinciple
 	 */
 	public static final String	SSO_QUERY_STRING			= "sso.query.string";
 
+	/**
+	 * Check the request has an authentication code
+	 * 
+	 * @param  request  HttpServletRequest
+	 * @param  response HttpServletResponse
+	 * @return
+	 */
 	public boolean hasAuthenticationCode(HttpServletRequest request, HttpServletResponse response);
 
+	/**
+	 * Get the token by authentication code and save in the session attribute
+	 * SSO_PRINCIPAL_SESSION_TOKEN
+	 * 
+	 * @param  request      HttpServletRequest
+	 * @param  response     HttpServletResponse
+	 * @param  redirectMode {@value SSOUtils#SSO_MODE_WEBUI}, {@value SSOUtils#SSO_MODE_OSGI},
+	 *                      {@value SSOUtils#SSO_MODE_MONITOR}
+	 * @throws Throwable
+	 */
 	public void getAuthenticationToken(HttpServletRequest request, HttpServletResponse response, String redirectMode) throws Throwable;
 
+	/**
+	 * Check the request session attribute SSO_PRINCIPAL_SESSION_TOKEN has token
+	 * 
+	 * @param  request  HttpServletRequest
+	 * @param  response HttpServletResponse
+	 * @return
+	 */
 	public boolean isAuthenticated(HttpServletRequest request, HttpServletResponse response);
 
+	/**
+	 * Redirect to SSO authentication/login page
+	 * 
+	 * @param  request      HttpServletRequest
+	 * @param  response     HttpServletResponse
+	 * @param  redirectMode {@value SSOUtils#SSO_MODE_WEBUI}, {@value SSOUtils#SSO_MODE_OSGI},
+	 *                      {@value SSOUtils#SSO_MODE_MONITOR}
+	 * @throws IOException
+	 */
 	public void redirectForAuthentication(HttpServletRequest request, HttpServletResponse response, String redirectMode) throws IOException;
 
-	public boolean isAccessTokenExpired(HttpServletRequest request, HttpServletResponse response);
+	/**
+	 * Remove all SSO-related attributes from the session.
+	 * 
+	 * @param request HttpServletRequest
+	 */
+	public void removePrincipalFromSession(HttpServletRequest request);
 
-	public void refreshToken(HttpServletRequest request, HttpServletResponse response, String redirectMode) throws Throwable;
+	/**
+	 * Return user name/ email from a token.
+	 * 
+	 * @param  token          authentication token
+	 * @return                User Name/email
+	 * @throws ParseException
+	 */
+	public String getUserName(Object token) throws ParseException;
 
-	public void removePrincipleFromSession(HttpServletRequest httpRequest);
-
-	public String getUserName(Object result) throws ParseException;
-
-	public Language getLanguage(Object result) throws ParseException;
-
+	/**
+	 * Return login Language from a token
+	 * 
+	 * @param  token          authentication token
+	 * @return                Login Language
+	 * @throws ParseException
+	 */
+	public Language getLanguage(Object token) throws ParseException;
+	
+	/**
+	 * Get logout url
+	 * @return logout url or null
+	 */
+	default String getLogoutURL() {
+		return null;
+	}
 }

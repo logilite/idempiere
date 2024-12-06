@@ -23,11 +23,11 @@ UPDATE AD_Column SET FKConstraintName='SSOLoginButtonImage_SSOPrincip', FKConstr
 ;
 
 -- Nov 27, 2024, 5:14:11 PM IST
-ALTER TABLE SSO_PrincipleConfig ADD SSO_LoginButtonImage_ID NUMBER(10) DEFAULT NULL 
+ALTER TABLE SSO_PrincipalConfig ADD SSO_LoginButtonImage_ID NUMBER(10) DEFAULT NULL 
 ;
 
 -- Nov 27, 2024, 5:14:11 PM IST
-ALTER TABLE SSO_PrincipleConfig ADD CONSTRAINT SSOLoginButtonImage_SSOPrincip FOREIGN KEY (SSO_LoginButtonImage_ID) REFERENCES ad_image(ad_image_id) DEFERRABLE INITIALLY DEFERRED
+ALTER TABLE SSO_PrincipalConfig ADD CONSTRAINT SSOLoginButtonImage_SSOPrincip FOREIGN KEY (SSO_LoginButtonImage_ID) REFERENCES ad_image(ad_image_id) DEFERRABLE INITIALLY DEFERRED
 ;
 
 -- Nov 27, 2024, 5:14:36 PM IST
@@ -43,7 +43,7 @@ UPDATE AD_Column SET FieldLength=25,Updated=TO_DATE('2024-12-02 18:31:36','YYYY-
 ;
 
 -- Dec 2, 2024, 6:31:38 PM IST
-ALTER TABLE SSO_PrincipleConfig MODIFY Name VARCHAR2(25 CHAR) DEFAULT NULL 
+ALTER TABLE SSO_PrincipalConfig MODIFY Name VARCHAR2(25 CHAR) DEFAULT NULL 
 ;
 
 SELECT register_migration_script('202411221055_IDEMPIERE-5653.sql') FROM dual
