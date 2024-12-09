@@ -22,7 +22,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,11 +31,11 @@ import java.util.logging.Level;
 
 import javax.swing.JOptionPane;
 
+import org.adempiere.base.Core;
+import org.adempiere.base.ILogin;
 import org.adempiere.base.sso.ISSOPrincipalService;
 import org.adempiere.base.sso.SSOUtils;
 import org.adempiere.exceptions.DBException;
-import org.adempiere.base.Core;
-import org.adempiere.base.ILogin;
 import org.compiere.Adempiere;
 import org.compiere.db.CConnection;
 import org.compiere.model.I_M_Warehouse;
@@ -1290,36 +1289,27 @@ public class Login implements ILogin
 	 */
 	public KeyNamePair[] getClients(String app_user, String app_pwd, String roleTypes, Object token) {
 		if (log.isLoggable(Level.INFO)) log.info("User=" + app_user);
-
+		loginErrMsg = null;
 		if (Util.isEmpty(app_user))
 		{
-			log.warning("No Apps User");
+			loginErrMsg = "No Apps User";
+			log.warning(loginErrMsg);
 			return null;
 		}
 
 		//	Authentication
 		boolean authenticated = false;
-		try
-		{
-			isSSOLogin = token != null && SSOUtils.getSSOPrincipalService() != null && SSOUtils.getSSOPrincipalService().getUserName(token).equalsIgnoreCase(app_user);
-		}
-		catch (ParseException e)
-		{
-			log.warning("Parsing failed: " + e.getLocalizedMessage());
-			isSSOLogin = false;
-		}
-
 		MSystem system = MSystem.get(m_ctx);
 		if (system == null)
 			throw new IllegalStateException("No System Info");
 
 		if (!isSSOLogin && (app_pwd == null || app_pwd.length() == 0))
 		{
-			log.warning("No Apps Password");
+			loginErrMsg = "No Apps Password";
+			log.warning(loginErrMsg);
 			return null;
 		}
 		
-		loginErrMsg = null;
 		isPasswordExpired = false;
 
 		if (!isSSOLogin && system.isLDAP())
@@ -1376,12 +1366,11 @@ public class Login implements ILogin
 		}
 
 		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
-		ISSOPrincipalService ssoPrincipal = SSOUtils.getSSOPrincipalService();
 		where.append("	AND EXISTS (SELECT * FROM AD_User u ")
 						.append("	INNER JOIN	AD_Client c ON (u.AD_Client_ID = c.AD_Client_ID)	")
 						.append("	WHERE (COALESCE(u.AuthenticationType, c.AuthenticationType) IN ");
 		//If Enable_SSO=N then don't allow SSO only users. 
-		where.append((isSSOEnable && ssoPrincipal != null && isSSOLogin) ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
+		where.append((isSSOEnable && isSSOLogin) ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
 		where.append("	OR COALESCE(u.AuthenticationType, c.AuthenticationType) IS NULL) AND u.AD_User_ID = AD_User.AD_User_ID) ");
 
 		String whereRoleType = MRole.getWhereRoleType(roleTypes, "r");
@@ -1489,7 +1478,7 @@ public class Login implements ILogin
 				if (! Util.isEmpty(whereRoleType)) {
 					sql.append(" AND ").append(whereRoleType);
 				}
-				sql.append(" AND  cli.AuthenticationType IN ").append((isSSOEnable && ssoPrincipal != null && isSSOLogin) ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
+				sql.append(" AND  cli.AuthenticationType IN ").append((isSSOEnable && isSSOLogin) ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
 				sql.append(" AND ur.AD_User_ID=? ORDER BY cli.Name");
 			      PreparedStatement pstmt=null;
 			      ResultSet rs=null;

@@ -68,7 +68,7 @@ public class MSSOPrincipalConfig extends X_SSO_PrincipalConfig
 				setIsDefault(false);
 			}
 
-			if (isDefault() && getDefaultSSOPrincipalConfig() != null)
+			if (isDefault() && getDefaultSSOPrincipalConfig(true) != null)
 			{
 				throw new AdempiereException("There can be only one default SSO Principal Configuration");
 			}
@@ -80,15 +80,25 @@ public class MSSOPrincipalConfig extends X_SSO_PrincipalConfig
 		}
 		return super.beforeSave(newRecord);
 	}
-
-	/**
-	 * @return Default MSSOPrincipalConfig
-	 */
+	
 	public static MSSOPrincipalConfig getDefaultSSOPrincipalConfig()
 	{
-		MSSOPrincipalConfig defaultConfig = (MSSOPrincipalConfig) s_SSOPrincipalConfigCache.get(DEFAULT_SSO_PRINCIPAL_CACHEKEY);
-		if (defaultConfig != null)
-			return defaultConfig;
+		return getDefaultSSOPrincipalConfig(false);
+	}
+
+	/**
+	 * @param isforceRequery
+	 * @return Default MSSOPrincipalConfig
+	 */
+	public static MSSOPrincipalConfig getDefaultSSOPrincipalConfig(boolean isforceRequery)
+	{
+		MSSOPrincipalConfig defaultConfig = null;
+		if (!isforceRequery)
+		{
+			defaultConfig = (MSSOPrincipalConfig) s_SSOPrincipalConfigCache.get(DEFAULT_SSO_PRINCIPAL_CACHEKEY);
+			if (defaultConfig != null)
+				return defaultConfig;
+		}
 
 		defaultConfig = new Query(Env.getCtx(), Table_Name, COLUMNNAME_IsDefault + " = 'Y'", null).setOnlyActiveRecords(true).firstOnly();
 

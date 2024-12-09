@@ -170,11 +170,13 @@ public class LoginWindow extends Window implements EventListener<Event>
 				loginOk(username, isShowRolePanel, clients, true);
 			else
 			{
-				log.log(Level.WARNING,"No Client found for user:" + username);
+				errorMessage = login.getLoginErrMsg();
+				log.log(Level.WARNING, errorMessage);
 				ValueNamePair error = CLogger.retrieveError();
 				if (error == null)
 					error = CLogger.retrieveWarning();
-				errorMessage = Msg.getMsg(language, error.getValue(), new Object[] { error.getName() });
+				if (error != null)
+					errorMessage = Msg.getMsg(language, error.getValue(), new Object[] { error.getName() });
 			}
 		}
 		catch (Exception e)

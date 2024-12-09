@@ -63,8 +63,6 @@ public class AdempiereMonitorFilter implements Filter
 	/** Authorization Marker */
 	private Long					m_authorization	= null;
 	
-	private static ISSOPrincipalService	m_SSOPrincipal	= null;
-
 	/**
 	 * 	Init
 	 *	@param config configuration
@@ -99,12 +97,11 @@ public class AdempiereMonitorFilter implements Filter
 			HttpServletRequest req = (HttpServletRequest) request;
 			HttpServletResponse resp = (HttpServletResponse) response;
 			HttpSession session = req.getSession(true);
-			boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
+			ISSOPrincipalService m_SSOPrincipal = null;
+			boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO_IDEMPIERE_MONITOR, false);
 			if (isSSOEnable) {
 				try {
-					if (m_SSOPrincipal == null) {
-						m_SSOPrincipal = SSOUtils.getSSOPrincipalService();
-					}
+					m_SSOPrincipal = SSOUtils.getSSOPrincipalService();
 
 					if (m_SSOPrincipal != null) {
 						if (m_SSOPrincipal.hasAuthenticationCode(req, resp)) {

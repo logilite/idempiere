@@ -891,10 +891,11 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
      * @param isMFAValidated
      *
      */
+    @SuppressWarnings("unused")
     public void validateRoles(boolean isMFAValidated)
     {
     	Clients.clearBusy();
-    	Comboitem lstItemRole = lstRole.getSelectedItem();
+		Comboitem lstItemRole = lstRole.getSelectedItem();
     	Comboitem lstItemClient = lstClient.getSelectedItem();
     	Comboitem lstItemOrg = lstOrganisation.getSelectedItem();
     	Comboitem lstItemWarehouse = lstWarehouse.getSelectedItem();

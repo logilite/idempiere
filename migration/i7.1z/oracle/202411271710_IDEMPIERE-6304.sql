@@ -6,16 +6,8 @@ SET DEFINE OFF
 INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,ColumnName,Name,Description,PrintName,EntityType,AD_Element_UU) VALUES (203964,0,0,'Y',TO_DATE('2024-11-27 17:10:56','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2024-11-27 17:10:56','YYYY-MM-DD HH24:MI:SS'),100,'SSO_LoginButtonImage_ID','Login Button Image','Identifier for the image used as the icon for the Single Sign-On (SSO) login button. References the AD_Image table.','Login Button Image','D','8630c585-0b23-49e6-a83b-3bad6766ed9e')
 ;
 
--- Nov 27, 2024, 5:13:20 PM IST
-INSERT INTO AD_Reference (AD_Reference_ID,Name,ValidationType,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,EntityType,IsOrderByValue,AD_Reference_UU) VALUES (200273,'AD_Image','T',0,0,'Y',TO_DATE('2024-11-27 17:13:19','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2024-11-27 17:13:19','YYYY-MM-DD HH24:MI:SS'),100,'D','N','79e5f19c-9348-4df6-ae66-82ef339f835d')
-;
-
--- Nov 27, 2024, 5:13:57 PM IST
-INSERT INTO AD_Ref_Table (AD_Reference_ID,AD_Table_ID,AD_Key,AD_Display,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsValueDisplayed,EntityType,AD_Ref_Table_UU,IsDisplayIdentifier) VALUES (200273,461,6287,6295,0,0,'Y',TO_DATE('2024-11-27 17:13:57','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2024-11-27 17:13:57','YYYY-MM-DD HH24:MI:SS'),100,'N','D','592b3679-5c97-4e04-b2eb-159f6b310e70','Y')
-;
-
 -- Nov 27, 2024, 5:14:10 PM IST
-INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,AD_Table_ID,ColumnName,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Reference_Value_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,FKConstraintType,IsHtml,IsDisableZoomAcross) VALUES (216922,0,'Login Button Image','Identifier for the image used as the icon for the Single Sign-On (SSO) login button. References the AD_Image table.',200360,'SSO_LoginButtonImage_ID',22,'N','N','N','N','N',0,'N',18,200273,0,0,'Y',TO_DATE('2024-11-27 17:14:09','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2024-11-27 17:14:09','YYYY-MM-DD HH24:MI:SS'),100,203964,'Y','N','D','N','N','N','Y','db5d3fd1-3476-4136-ae84-45a2b18fa56f','Y',0,'N','N','N','N','N')
+INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,AD_Table_ID,ColumnName,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Reference_Value_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,FKConstraintType,IsHtml,IsDisableZoomAcross) VALUES (216922,0,'Login Button Image','Identifier for the image used as the icon for the Single Sign-On (SSO) login button. References the AD_Image table.',200360,'SSO_LoginButtonImage_ID',22,'N','N','N','N','N',0,'N',18,200182,0,0,'Y',TO_DATE('2024-11-27 17:14:09','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2024-11-27 17:14:09','YYYY-MM-DD HH24:MI:SS'),100,203964,'Y','N','D','N','N','N','Y','db5d3fd1-3476-4136-ae84-45a2b18fa56f','Y',0,'N','N','N','N','N')
 ;
 
 -- Nov 27, 2024, 5:14:11 PM IST
