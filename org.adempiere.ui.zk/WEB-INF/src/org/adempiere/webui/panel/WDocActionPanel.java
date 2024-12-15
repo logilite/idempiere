@@ -806,6 +806,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	public boolean isApprover()
 	{
 		return (m_activity != null && m_AD_User_ID == m_activity.getAD_User_ID())
-				|| (resp != null && m_AD_Role_ID == resp.getAD_Role_ID());
+				|| (resp != null && m_AD_Role_ID == resp.getAD_Role_ID())
+				|| (resp != null && resp.isHuman() && resp.getAD_User_ID()==0);
 	}
 }

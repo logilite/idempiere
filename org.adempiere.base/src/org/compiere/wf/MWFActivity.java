@@ -1450,6 +1450,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				if(StateEngine.STATE_NotStarted.equals(m_state.getState()))
 				{
 					DocAction doc = (DocAction) m_po;
+					setWFState(StateEngine.STATE_Running);
 					// TODO like invoker, add Initiator responsible. Initiator
 					// means who initiated workflow.
 					if (isInvoker())
