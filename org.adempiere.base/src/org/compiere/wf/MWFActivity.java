@@ -1775,7 +1775,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			try
 			{
 				//	Not approved
-				if (!"Y".equals(value))
+				if (!"Y".equals(value) && DisplayType.YesNo == displayType)
 				{
 					newState = StateEngine.STATE_Aborted;
 					if (!(doc.processIt (DocAction.ACTION_Reject)))

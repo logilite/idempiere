@@ -50,6 +50,7 @@ import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MProduction;
+import org.compiere.model.MRefList;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
@@ -61,6 +62,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
+import org.compiere.util.ValueNamePair;
 import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFNode;
 import org.compiere.wf.MWFProcess;
@@ -362,9 +364,47 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		lstAnswer.setRows(0);
 		lstAnswer.setMold("select");
 		ZKUpdateUtil.setWidth(lstAnswer, "100%");
-		lstAnswer.appendItem("", "");
-		lstAnswer.appendItem("Yes", "Y");
-		lstAnswer.appendItem("No", "N");
+//		lstAnswer.appendItem("", "");
+//		lstAnswer.appendItem("Yes", "Y");
+//		lstAnswer.appendItem("No", "N");
+//		lstAnswer.addEventListener(Events.ON_SELECT, this);
+		
+		if (m_activity != null && m_activity.isUserApproval())
+		{
+			MWFNode node = m_activity.getNode();
+			int ApprovalColumn_ID = 0;
+
+			if (node.getAD_Column_ID() == 0)
+				ApprovalColumn_ID = node.getApprovalColumn_ID();
+			else
+				ApprovalColumn_ID = node.getAD_Column_ID();
+
+			MColumn column = MColumn.get(Env.getCtx(), ApprovalColumn_ID);
+
+			if (column != null)
+			{
+				int dt = column.getAD_Reference_ID();
+
+				if (dt == DisplayType.YesNo)
+				{
+					ValueNamePair[] values = MRefList.getList(Env.getCtx(), 319, false);
+					for (int i = 0; i < values.length; i++)
+					{
+						lstAnswer.appendItem(values[i].getName(), values[i].getValue());
+					}
+					lstAnswer.setVisible(true);
+				}
+				else if (dt == DisplayType.List)
+				{
+					ValueNamePair[] values = MRefList.getList(Env.getCtx(), column.getAD_Reference_Value_ID(), false);
+					for (int i = 0; i < values.length; i++)
+					{
+						lstAnswer.appendItem(values[i].getName(), values[i].getValue());
+					}
+					lstAnswer.setVisible(true);
+				}
+			}
+		}
 		lstAnswer.addEventListener(Events.ON_SELECT, this);
 
 		confirmPanel = new ConfirmPanel(true);
