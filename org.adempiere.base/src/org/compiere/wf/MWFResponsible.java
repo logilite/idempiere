@@ -121,7 +121,7 @@ public class MWFResponsible extends X_AD_WF_Responsible
 	 */
 	public boolean isInvoker()
 	{
-		return getAD_User_ID() == 0 && getAD_Role_ID() == 0 && !isManual();
+		return getAD_User_ID() == 0 && getAD_Role_ID() == 0 && !isManual() && !isSupervisor() && !isInitiator();
 	}	//	isInvoker
 	
 	/**
@@ -216,6 +216,26 @@ public class MWFResponsible extends X_AD_WF_Responsible
 	
 	public boolean isManual() {
 	    return RESPONSIBLETYPE_Manual.equals(getResponsibleType());
+	}
+	
+	/**
+	 * Is Initiator Responsible
+	 * 
+	 * @return true if Initiator
+	 */
+	public boolean isInitiator()
+	{
+		return RESPONSIBLETYPE_Initiator.equals(getResponsibleType());
+	}
+
+	/**
+	 * Is Supervisor Responsible
+	 * 
+	 * @return true if Supevisor
+	 */
+	public boolean isSupervisor()
+	{
+		return RESPONSIBLETYPE_Supervisor.equals(getResponsibleType());
 	}
 	
 }	//	MWFResponsible
