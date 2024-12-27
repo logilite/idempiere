@@ -518,7 +518,7 @@ public class MLookupFactory
 			if (KeyColumn.endsWith("_ID") || KeyColumn.endsWith("_UU"))
 				realSQL.append("NULL,");
 			if (!Util.isEmpty(displaySQL, true)) {
-				realSQL.append("NVL(").append(displaySQL).append(",").append(TableName).append("_Trl.").append(DisplayColumn).append(",'-1')");
+				realSQL.append("COALESCE(").append(displaySQL).append(",").append(TableName).append("_Trl.").append(DisplayColumn).append(",'-1')");
 			} else {
 				if (isValueDisplayed)
 					realSQL.append("NVL(").append(TableName).append(".Value,'-1') || '").append(separator).append("' || ");
@@ -550,7 +550,7 @@ public class MLookupFactory
 			if (KeyColumn.endsWith("_ID") || KeyColumn.endsWith("_UU"))
 				realSQL.append("NULL,");
 			if (!Util.isEmpty(displaySQL, true)) {
-				realSQL.append("NVL(").append(displaySQL).append(",").append(TableName).append(".").append(DisplayColumn).append(",'-1')");
+				realSQL.append("COALESCE(").append(displaySQL).append(",").append(TableName).append(".").append(DisplayColumn).append(",'-1')");
 			} else {
 				if (isValueDisplayed)
 					realSQL.append("NVL(").append(TableName).append(".Value,'-1') || '").append(separator).append("' || ");
