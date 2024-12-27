@@ -14,6 +14,7 @@ import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.adempiere.webui.window.FDialog;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.util.DisplayType;
@@ -149,6 +150,14 @@ public class WFApproverWindow extends Window implements EventListener<Event>,IWF
 		{
 			if (confirmPanel.getButton("Ok").equals(event.getTarget()))
 			{
+				// Check if the fApprover field is empty
+	            if (fApprover.getValue() == null)
+	            {
+	                // Show an error message and stop processing
+	                FDialog.error(0, this.getParent(), "The 'Assign To' field is mandatory. Please select an assignee.");
+	                return;
+	            }
+				
 				int userId = (int) fApprover.getValue();
 				setAD_User_ID(userId);
 				this.detach();
