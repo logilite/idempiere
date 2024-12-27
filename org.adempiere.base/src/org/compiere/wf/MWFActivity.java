@@ -1479,6 +1479,36 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 					{
 						throw new AdempiereException("Support not implemented for "+resp);
 					}
+					else if (resp.isInitiator())
+					{
+						// assign the Workflow's Initiator
+						setAD_User_ID(m_process.getAD_User_ID());
+					}
+					else if (resp.isSupervisor())
+					{
+						// assign the initiator's supervisor
+						
+						MUser initiator = MUser.get(p_ctx, m_process.getAD_User_ID());
+						int superVisorId = initiator.getSupervisor_ID();
+
+						// if Initiator didn't have Supervisor set then Assign
+						// document's Organization's Supervisor
+						if (superVisorId <= 0)
+						{
+							MOrgInfo orgInfo = MOrgInfo.get(p_ctx, m_process.getAD_Org_ID(), m_process.get_TrxName());
+							superVisorId = orgInfo.getSupervisor_ID();
+						}
+						
+						if (superVisorId > 0)
+						{
+							setAD_User_ID(superVisorId);
+						}
+						else
+						{
+							m_docStatus = DocAction.STATUS_Invalid;
+							throw new AdempiereException(Msg.getMsg(getCtx(), "NoApprover - Set Supervisor on User or Organization"));
+						}
+					}
 					else
 					{
 						throw new AdempiereException("@NotSupported@ "+resp);
@@ -1505,6 +1535,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				if(StateEngine.STATE_NotStarted.equals(m_state.getState()))
 				{
 					DocAction doc = (DocAction) m_po;
+					setWFState(StateEngine.STATE_Running);
 					// TODO like invoker, add Initiator responsible. Initiator
 					// means who initiated workflow.
 					if (isInvoker())
@@ -1792,7 +1823,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			try
 			{
 				//	Not approved
-				if (!"Y".equals(value))
+				if (!"Y".equals(value) && DisplayType.YesNo == displayType)
 				{
 					newState = StateEngine.STATE_Aborted;
 					if (!(doc.processIt (DocAction.ACTION_Reject)))
