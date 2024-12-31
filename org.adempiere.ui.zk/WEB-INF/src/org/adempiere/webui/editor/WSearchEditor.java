@@ -371,6 +371,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 		{
 			getComponent().setText("");
 		}
+		popupMenu.showDrillAssistant(value != null);
 	}
 
 	@Override

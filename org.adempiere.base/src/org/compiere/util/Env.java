@@ -117,6 +117,7 @@ public final class Env
 	public static final String HAS_ALIAS = "$HasAlias";
 	public static final String IS_CAN_APPROVE_OWN_DOC = "#IsCanApproveOwnDoc";
 	public static final String IS_CLIENT_ADMIN = "#IsClientAdmin";
+	public static final String IS_SSO_LOGIN = "#IsSSOLogin";
 	public static final String DEVELOPER_MODE = "#DeveloperMode";
 	/** Context Language identifier */
 	public static final String LANGUAGE = "#AD_Language";
@@ -1615,13 +1616,13 @@ public final class Env
 				ctxInfo = getContext(ctx, WindowNo, tabNo, token, onlyTab);	// get context
 			}
 
-			if (ctxInfo.length() == 0 && Env.isGlobalVariable(token))
+			if (Util.isEmpty(ctxInfo) && Env.isGlobalVariable(token))
 				ctxInfo = getContext(ctx, token);	// get global context
 
-			if (ctxInfo.length() == 0 && defaultV != null)
+			if (Util.isEmpty(ctxInfo) && defaultV != null)
 				ctxInfo = defaultV;
 
-			if (ctxInfo.length() == 0)
+			if (Util.isEmpty(ctxInfo))
 			{
 				if (log.isLoggable(Level.CONFIG)) log.config("No Context Win=" + WindowNo + " for: " + token);
 				if (!ignoreUnparsable)

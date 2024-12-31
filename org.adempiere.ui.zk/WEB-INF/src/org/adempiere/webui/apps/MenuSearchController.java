@@ -668,7 +668,8 @@ public class MenuSearchController implements EventListener<Event>{
 		int count = listbox.getItemCount();
 		for(int i = 0; i < count; i++) {
 			ListItem item = listbox.getItemAtIndex(i);
-			String label = item.getLabel();
+			MenuItem menuItem = item.getValue();
+			String label = menuItem.getLabel();
 			if (Util.isEmpty(label)) continue;
 			if (label.equalsIgnoreCase(text)) {
 				exact = item;
@@ -678,11 +679,13 @@ public class MenuSearchController implements EventListener<Event>{
 			}
 		}
 		if (exact != null) {
-			textbox.setText(exact.getLabel());
+			MenuItem menuItem = exact.getValue();
+			textbox.setText(menuItem.getLabel());
 			onSelect(exact, false);
 			return true;
 		} else if (firstStart != null) {
-			textbox.setText(firstStart.getLabel());
+			MenuItem menuItem = firstStart.getValue();
+			textbox.setText(menuItem.getLabel());
 			onSelect(firstStart, false);
 			return true;
 		}
@@ -755,7 +758,7 @@ public class MenuSearchController implements EventListener<Event>{
 			}
 			
 			item.appendChild(cell);
-			cell.setTooltip(data.getDescription());
+			cell.setTooltiptext(data.getDescription());
 			item.setValue(data);
 			item.addEventListener(Events.ON_CLICK, MenuSearchController.this);
 			
