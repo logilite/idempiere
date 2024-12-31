@@ -369,7 +369,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 //		lstAnswer.appendItem("No", "N");
 //		lstAnswer.addEventListener(Events.ON_SELECT, this);
 		
-		if (m_activity != null && m_activity.isUserApproval())
+		if (m_activity != null && (m_activity.isUserApproval() || m_activity.isUserTask()))
 		{
 			MWFNode node = m_activity.getNode();
 			int ApprovalColumn_ID = 0;
@@ -479,9 +479,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		rows.appendChild(rowSpacer);
 
 		if (m_activity != null && (m_activity.isUserApproval() || m_activity.isUserTask())) {
-			if (m_activity.isUserApproval()) {
-				rows.appendChild(rowAnswer);
-			}
+				
+			rows.appendChild(rowAnswer);
 			rows.appendChild(rowTxtMsg);
 			
 			// Removing Document Action if Activity found
@@ -622,12 +621,43 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 							callback.onCallback(false);
 						return;
 					}
-				}else {
-					if (logger.isLoggable(Level.CONFIG)) logger.config("Action=" + node.getAction() + " - " + textMsg);
+				}
+				else
+				{
+					if (logger.isLoggable(Level.CONFIG))
+						logger.config("Action=" + node.getAction() + " - " + textMsg);
 					try
 					{
-						// ensure activity is ran within a transaction
-						m_activity.setUserConfirmation(m_AD_User_ID, textMsg);
+						if (node.isUserTask())
+						{
+							if (node.getAD_Column_ID() > 0)
+							{
+								MColumn column = MColumn.get(Env.getCtx(), node.getAD_Column_ID());
+								String value = null;
+
+								Listitem li = lstAnswer.getSelectedItem();
+
+								if (li != null)
+									value = li.getValue().toString();
+								
+								if (value == null || value.length() == 0)
+								{
+									trx.rollback();
+									trx.close();
+									FDialog.error(m_WindowNo, this, "FillMandatory", Msg.getMsg(Env.getCtx(), "Answer"));
+									if (callback != null)
+										callback.onCallback(false);
+									return;
+								}
+
+								m_activity.setUserTask(m_AD_User_ID, value, column.getAD_Reference_ID(), textMsg);
+							}
+						}
+						else
+						{
+							// ensure activity is ran within a transaction
+							m_activity.setUserConfirmation(m_AD_User_ID, textMsg);
+						}
 					}
 					catch (Exception e)
 					{

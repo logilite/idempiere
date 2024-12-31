@@ -1890,6 +1890,26 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		setWFState (newState);
 		return ok;
 	}	//	setUserChoice
+	
+	/**
+	 * If Approval column is Configured on User Task Node then value will be set on that
+	 * column
+	 * 
+	 * @param AD_User_ID
+	 * @param value
+	 * @param displayType
+	 * @param textMsg
+	 * @return true if set
+	 * @throws Exception
+	 */
+	public void setUserTask(int AD_User_ID, String value, int displayType, String textMsg) throws Exception
+	{
+		setWFState(StateEngine.STATE_Running);
+		setAD_User_ID(AD_User_ID);
+		Trx trx = (get_TrxName() != null) ? Trx.get(get_TrxName(), false) : null;
+		setVariable(value, displayType, textMsg, trx);
+		setWFState(StateEngine.STATE_Completed);
+	}
 
 	/**
 	 * 	Forward To
