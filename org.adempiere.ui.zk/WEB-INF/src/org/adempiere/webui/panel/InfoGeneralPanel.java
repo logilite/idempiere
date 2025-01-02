@@ -398,6 +398,7 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 		String uucolName = PO.getUUIDColumnName(p_tableName);
 		boolean hasWindowAndTab = new Query(Env.getCtx(), MTab.Table_Name, " AD_Table_ID = ? ", null)
 									.setParameters(table.getAD_Table_ID())
+									.setOnlyActiveRecords(true)
 									.match();
 
 		//	Get Query Columns
@@ -516,23 +517,23 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 					+ " AND tab.Ad_Tab_ID=(SELECT MIN(mt.AD_Tab_ID) FROM AD_tab mt WHERE mt.AD_Window_ID=? AND mt.AD_Table_ID=t.AD_Table_ID AND mt.IsActive='Y')"
 					+ " AND (c.IsKey='Y' OR "
 					+ "		(f.IsEncrypted='N' AND f.ObscureType IS NULL))");
-		} else {
-			sqlc.append(" AND (c.IsKey='Y' "
+		}
+		sqlc.append(" AND (c.IsKey='Y' "
 					+ "			OR c.IsIdentifier='Y' "
 					+ "			OR c.IsParent='Y' "
 					+ "			OR c.IsSelectionColumn='Y' "
 					+ "			OR Upper(c.ColumnName) IN ('NAME','VALUE','DESCRIPTION','DOCUMENTNO') "
 					+ "			OR Upper(c.ColumnName) Like '%_NAME' "
 					+ "			OR Upper(c.ColumnName) Like '%_Value') ");
-		}
+
 		sqlc.append(" AND c.IsActive = 'Y' "
 			+ "ORDER BY ");
 		if (table.isUUIDKeyTable() || p_keyColumn.endsWith("_UU"))
 			sqlc.append("CASE WHEN c.columnname=").append(DB.TO_STRING(uucolName)).append("THEN 0 ELSE 1 END");
 		else
 			sqlc.append("c.IsKey DESC");
-		if(hasWindowAndTab)
-			sqlc.append(", f.SeqNo");
+
+		sqlc.append(", c.IsSelectionColumn DESC, c.SeqNoSelection, c.IsIdentifier DESC, c.SeqNo, c.AD_Reference_ID ");
 
 		try
 		{
