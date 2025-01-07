@@ -673,7 +673,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 								{
 									trx.rollback();
 									trx.close();
-									FDialog.error(m_WindowNo, this, "FillMandatory", Msg.getMsg(Env.getCtx(), "Answer"));
+									Dialog.error(m_WindowNo, "FillMandatory", Msg.getMsg(Env.getCtx(), "Answer"));
 									if (callback != null)
 										callback.onCallback(false);
 									return;
