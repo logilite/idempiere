@@ -2821,7 +2821,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 			insert.append("T_SELECTION_UU");
 		else
 			insert.append("T_SELECTION_ID");
-		insert.append(", COLUMNNAME, VALUE_STRING, VALUE_NUMBER, VALUE_DATE, VALUE_NUMBER_ARRAY, VALUE_STRING_ARRAY ) VALUES(?,?,?,?,?,?,?,?) ");
+		insert.append(", VIEWID, COLUMNNAME, VALUE_STRING, VALUE_NUMBER, VALUE_DATE, VALUE_NUMBER_ARRAY, VALUE_STRING_ARRAY ) VALUES(?,?,?,?,?,?,?,?,?) ");
 		for (Entry<NamePair,LinkedHashMap<String, Object>> records : m_values.entrySet()) {
 			//set Record ID
 			
@@ -2837,15 +2837,18 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 					{
 						KeyNamePair knp = (KeyNamePair)key;
 						parameters.add(knp.getKey());
+						parameters.add(knp.getName());
 					}
 					else if(key instanceof ValueNamePair)
 					{
 						ValueNamePair vnp = (ValueNamePair)key;
 						parameters.add(vnp.getValue());
+						parameters.add(vnp.getName());
 					}
 					else
 					{
 						parameters.add(key);
+						parameters.add(null);
 					}
 
 					parameters.add(field.getKey());
