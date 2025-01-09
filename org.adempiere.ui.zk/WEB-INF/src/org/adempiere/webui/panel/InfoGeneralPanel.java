@@ -654,7 +654,7 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 			else
 				embedded = MLookupFactory.getLookup_MultiSelectTableEmbed(Env.getLanguage(Env.getCtx()), columnName, p_tableName, AD_Reference_Value_ID, true);
 		} else if (AD_Reference_Value_ID > 0) {
-			embedded = MLookupFactory.getLookup_TableEmbed(Env.getLanguage(Env.getCtx()), columnName, p_tableName, AD_Reference_Value_ID);
+			embedded = MLookupFactory.getLookup_TableEmbed(Env.getLanguage(Env.getCtx()), columnName, p_tableName, AD_Reference_Value_ID, true);
 		} else {
 			if (column.isVirtualColumn())
 				embedded = MLookupFactory.getLookup_TableDirEmbed(Env.getLanguage(Env.getCtx()), columnName, p_tableName, column.getColumnSQL());
