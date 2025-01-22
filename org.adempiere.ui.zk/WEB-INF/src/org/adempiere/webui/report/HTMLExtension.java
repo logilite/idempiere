@@ -226,6 +226,16 @@ public class HTMLExtension implements IHTMLExtension {
 			theme = theme + "/";
 		String resFile = theme + "css/report.css";
 		
+		// Support to Parse Context Variable
+		if (resFile.contains("@"))
+		{
+			resFile = Env.parseContext(Env.getCtx(), 0, resFile, false);
+			if (Util.isEmpty(resFile))
+			{
+				resFile = "/css/report.css"; // default
+			}
+		}
+		
 		// translate ~./ url to classpath url
 		if (theme.startsWith(ThemeManager.ZK_URL_PREFIX_FOR_CLASSPATH_RESOURCE))
 			resFile = ThemeManager.toClassPathResourcePath(resFile);
