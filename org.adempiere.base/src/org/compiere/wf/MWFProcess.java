@@ -583,23 +583,26 @@ public class MWFProcess extends X_AD_WF_Process
 		if(Env.getAD_Client_ID(getCtx())>0) {
 			MWFNode[] nodes = getWorkflow().getNodesInOrder(Env.getAD_Client_ID(getCtx()));
 			StringBuilder sbMsg = null;
+			int ind =1;
 			for(MWFNode node:nodes) {
 				if(node.getAD_WF_Responsible_ID()>0) {
 					MWFResponsible resp = MWFResponsible.get(getCtx(), node.getAD_WF_Responsible_ID());
-					if(resp.getAD_Client_ID()==0 && (MWFResponsible.RESPONSIBLETYPE_Role.equals(resp.getResponsibleType()) || resp.isHuman()))
+					if(resp.getAD_Client_ID()==0 && (MWFResponsible.RESPONSIBLETYPE_Role.equals(resp.getResponsibleType()) || (resp.isHuman() && !resp.isInvoker())))
 					{
 						MWFResponsible cResp = MWFResponsible.getClientWFResp(getCtx(), resp.getAD_WF_Responsible_ID());
 						if(cResp==null) {
 							if(sbMsg==null) {
-								sbMsg = new StringBuilder().append(Msg.getMsg(getCtx(),"IncompeteWorkflowResponsible"));
-							}
-							sbMsg.append("\n").append(resp.getName());
+								sbMsg = new StringBuilder().append(ind++).append(". ").append(resp.getName());
+							}else
+								sbMsg.append("\n").append(ind++).append(". ").append(resp.getName());
 						}
 					}
 				}
 			}
 			if(sbMsg!=null)
-				throw new AdempiereException(sbMsg.toString());
+			{
+                throw new AdempiereException(Msg.getMsg(getCtx(), "IncompeteWorkflowResponsible", new Object[] {sbMsg.toString()}));
+			}
 		}
 		
 		if (log.isLoggable(Level.FINE)) log.fine("AD_WF_Node_ID=" + AD_WF_Node_ID);
