@@ -919,6 +919,10 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 					return false;
 				}
 			}
+			else if (MWFResponsible.RESPONSIBLETYPE_Human.equals(respType) && resp.getAD_User_ID()>0) {
+				if(resp.getAD_User_ID()!= m_AD_User_ID)
+					return false;
+			}
 			else
 			{
 				// Current User Role is not Approval Role
