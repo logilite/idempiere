@@ -34,6 +34,8 @@ import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.component.ZkCssHelper;
+import org.adempiere.webui.desktop.AbstractDesktop;
+import org.adempiere.webui.desktop.IDesktop;
 import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.session.SessionManager;
 import org.compiere.model.MDocumentStatus;
@@ -41,6 +43,7 @@ import org.compiere.model.MQuery;
 import org.compiere.print.MPrintColor;
 import org.compiere.print.MPrintFont;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -160,6 +163,16 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 		{
 			MQuery query = new MQuery(m_documentStatus.getAD_Table_ID());
 			query.addRestriction(MDocumentStatus.getWhereClause(m_documentStatus));
+
+			// Apply PredefinedContextVariables from Document Status
+			String predefinedVariables = m_documentStatus.getPredefinedContextVariables();
+			if (!Util.isEmpty(predefinedVariables, true))
+			{
+				IDesktop desktop = SessionManager.getAppDesktop();
+				if (desktop instanceof AbstractDesktop)
+					((AbstractDesktop) desktop).setPredefinedContextVariables(predefinedVariables);
+			}
+
 			AEnv.zoom(AD_Window_ID, query);
 		}
 		else if ( AD_Form_ID > 0 )
