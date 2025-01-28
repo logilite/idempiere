@@ -265,6 +265,8 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	private MWFProcess 			m_process = null;
 	/** List of email recipients	*/
 	private ArrayList<String> 	m_emails = new ArrayList<String>();
+	
+	private transient String	m_ErrorMsg	= null;
 
 	/**************************************************************************
 	 * 	Get State
@@ -353,12 +355,12 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		}
 		else
 			m_audit.setEventType(MWFEventAudit.EVENTTYPE_StateChanged);
-		boolean valid = m_audit.save();
+		boolean valid = m_audit.save(get_TrxName());
 		if (! valid) {
 			// the event audit could not be updated, probably it was deleted by the rollback to savepoint
 			// so, set the ID to zero and save it again (insert)
 			m_audit.setAD_WF_EventAudit_ID(0);
-			m_audit.saveEx();
+			m_audit.saveEx(get_TrxName());
 		}
 	}	//	updateEventAudit
 
@@ -1800,11 +1802,10 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			return false;
 
 		// Doc Validation
-		String errorMsg = ModelValidationEngine.get().fireDocValidate(this,
-				ModelValidator.TIMING_BEFORE_WF_NODE_EXECUTION);
-		if (errorMsg != null)
+		m_ErrorMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_WF_NODE_EXECUTION);
+		if (!Util.isEmpty(m_ErrorMsg, true))
 		{
-			throw new AdempiereException(errorMsg);
+			return false;
 		}
 		
 		String newState = StateEngine.STATE_Completed;
@@ -1902,19 +1903,21 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	 * @return true if set
 	 * @throws Exception
 	 */
-	public void setUserTask(int AD_User_ID, String value, int displayType, String textMsg) throws Exception
+	public boolean setUserTask(int AD_User_ID, String value, int displayType, String textMsg) throws Exception
 	{
 		setWFState(StateEngine.STATE_Running);
 		setAD_User_ID(AD_User_ID);
 		Trx trx = (get_TrxName() != null) ? Trx.get(get_TrxName(), false) : null;
 		setVariable(value, displayType, textMsg, trx);
-		String errorMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_WF_NODE_EXECUTION);
-		if (errorMsg != null)
+		m_ErrorMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_WF_NODE_EXECUTION);
+		if (m_ErrorMsg != null)
 		{
-			throw new AdempiereException(errorMsg);
+			return false;
 		}
-		else
-			setWFState(StateEngine.STATE_Completed);
+			
+		setWFState(StateEngine.STATE_Completed);
+		return true;
+			
 	}
 
 	/**
@@ -2492,5 +2495,15 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			value = val.toString();
 		return value;
 	} // parseVariables
+	
+	public String getM_ErrorMsg()
+	{
+		return m_ErrorMsg;
+	}
+
+	public void setM_ErrorMsg(String m_ErrorMsg)
+	{
+		this.m_ErrorMsg = m_ErrorMsg;
+	}
 
 }	//	MWFActivity

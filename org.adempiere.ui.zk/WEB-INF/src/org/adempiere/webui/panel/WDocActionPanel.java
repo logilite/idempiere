@@ -600,78 +600,79 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 					if (logger.isLoggable(Level.CONFIG))
 						logger.config("Answer=" + value + " - " + textMsg);
 
-					try
+					boolean ok = m_activity.setUserChoice(m_AD_User_ID, value, dt, textMsg);
+
+					if (!ok)
 					{
-						m_activity.setUserChoice(m_AD_User_ID, value, dt, textMsg);
+						String error = m_activity.getM_ErrorMsg();
 
-						String error = m_activity.getAD_WF_Process().getTextMsg();
-
-						if (error != null && !Util.isEmpty(error))
+						if (!Util.isEmpty(error, true))
 						{
 							FDialog.error(0, error);
+							trx.rollback();
+							return;
 						}
-					}
-					catch (Exception e)
-					{
-						logger.log(Level.SEVERE, node.getName(), e);
-						FDialog.error(m_WindowNo, this, "Error", e.toString());
-						trx.rollback();
-						trx.close();
-						if (callback != null)
-							callback.onCallback(false);
-						return;
 					}
 				}
 				else
 				{
 					if (logger.isLoggable(Level.CONFIG))
 						logger.config("Action=" + node.getAction() + " - " + textMsg);
-					try
+					
+					if (node.isUserTask())
 					{
-						if (node.isUserTask())
+						if (node.getAD_Column_ID() > 0)
 						{
-							if (node.getAD_Column_ID() > 0)
+							MColumn column = MColumn.get(Env.getCtx(), node.getAD_Column_ID());
+							String value = null;
+
+							Listitem li = lstAnswer.getSelectedItem();
+
+							if (li != null)
+								value = li.getValue().toString();
+
+							if (value == null || value.length() == 0)
 							{
-								MColumn column = MColumn.get(Env.getCtx(), node.getAD_Column_ID());
-								String value = null;
+								trx.rollback();
+								trx.close();
+								FDialog.error(m_WindowNo, this, "FillMandatory", Msg.getMsg(Env.getCtx(), "Answer"));
+								if (callback != null)
+									callback.onCallback(false);
+								return;
+							}
 
-								Listitem li = lstAnswer.getSelectedItem();
+							boolean ok = m_activity.setUserTask(m_AD_User_ID, value, column.getAD_Reference_ID(),
+									textMsg);
 
-								if (li != null)
-									value = li.getValue().toString();
-								
-								if (value == null || value.length() == 0)
+							if (!ok)
+							{
+								String error = m_activity.getM_ErrorMsg();
+
+								if (!Util.isEmpty(error, true))
 								{
-									trx.rollback();
-									trx.close();
-									FDialog.error(m_WindowNo, this, "FillMandatory", Msg.getMsg(Env.getCtx(), "Answer"));
-									if (callback != null)
-										callback.onCallback(false);
+									FDialog.error(0, error);
 									return;
 								}
-
-								m_activity.setUserTask(m_AD_User_ID, value, column.getAD_Reference_ID(), textMsg);
 							}
 						}
-						else
-						{
-							// ensure activity is ran within a transaction
-							m_activity.setUserConfirmation(m_AD_User_ID, textMsg);
-						}
 					}
-					catch (Exception e)
+					else
 					{
-						logger.log(Level.SEVERE, node.getName(), e);
-						FDialog.error(m_WindowNo, this, "Error", e.toString());
-						trx.rollback();
-						trx.close();
-						return;
+						// ensure activity is ran within a transaction
+						m_activity.setUserConfirmation(m_AD_User_ID, textMsg);
 					}
 				}
 				trx.commit();
-				if(callback!=null)
+				if (callback != null)
 					callback.onCallback(true);
 
+			}
+			catch (Exception e)
+			{
+				FDialog.error(m_WindowNo, this, "Error", e.toString());
+				trx.rollback();
+				trx.close();
+				return;
 			}
 			finally
 			{
