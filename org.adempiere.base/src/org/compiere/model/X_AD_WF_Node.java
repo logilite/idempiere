@@ -33,7 +33,7 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20241001L;
 
     /** Standard Constructor */
     public X_AD_WF_Node (Properties ctx, int AD_WF_Node_ID, String trxName)
@@ -120,6 +120,8 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	public static final String ACTION_UserWorkbench = "B";
 	/** User Info = I */
 	public static final String ACTION_UserInfo = "I";
+	/** User Task = U */
+	public static final String ACTION_UserTask = "U";
 	/** Set Action.
 		@param Action 
 		Indicates the Action to be performed
@@ -475,6 +477,34 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	public int getAD_Workflow_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Workflow_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_AD_Column getApprovalColumn() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_Column)MTable.get(getCtx(), org.compiere.model.I_AD_Column.Table_Name)
+			.getPO(getApprovalColumn_ID(), get_TrxName());	}
+
+	/** Set Approval Column.
+		@param ApprovalColumn_ID 
+		Specify the boolean type column which marked on approval
+	  */
+	public void setApprovalColumn_ID (int ApprovalColumn_ID)
+	{
+		if (ApprovalColumn_ID < 1) 
+			set_Value (COLUMNNAME_ApprovalColumn_ID, null);
+		else 
+			set_Value (COLUMNNAME_ApprovalColumn_ID, Integer.valueOf(ApprovalColumn_ID));
+	}
+
+	/** Get Approval Column.
+		@return Specify the boolean type column which marked on approval
+	  */
+	public int getApprovalColumn_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ApprovalColumn_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

@@ -362,6 +362,20 @@ public class MLookupFactory
 		return realSQL.toString();
 	}	//	getLookup_ListEmbed
 
+	/**
+	 * Get Lookup SQL for MultiSelectList (for use as embedded query in SELECT)
+	 * @param language
+	 * @param AD_Reference_Value_ID
+	 * @param linkColumnName
+	 * @return
+	 */
+	static public String getLookup_MultiSelectListEmbed(Language language, int AD_Reference_Value_ID, String linkColumnName)
+	{
+		String realSQL = getLookup_ListEmbed(language, AD_Reference_Value_ID, "ANY(" + linkColumnName + ")");
+		realSQL = "SELECT STRING_AGG(Name, ', ') FROM (" + realSQL + ") AS subQuery";
+		return realSQL;
+	}	//	getLookup_MultiSelectListEmbed
+
 	/***************************************************************************
 	 *	Get Lookup SQL for Table Lookup
 	 *  @param ctx context for access and dynamic access
@@ -846,7 +860,7 @@ public class MLookupFactory
 			TableNameAlias = TableName;
 		}
 
-		StringBuilder embedSQL = new StringBuilder("SELECT STRING_AGG(");
+		StringBuilder embedSQL = new StringBuilder("SELECT STRING_AGG(''||");
 
 		if (isValueDisplayed)
 			embedSQL.append(TableNameAlias).append(".Value||'-'||");
@@ -869,7 +883,7 @@ public class MLookupFactory
 			else
 				embedSQL.append(TableName).append("_Trl.").append(DisplayColumn);
 
-			embedSQL.append(DB.isPostgreSQL() ? ", ',')" : ")");
+			embedSQL.append(DB.isPostgreSQL() ? ", ', ')" : ")");
 			embedSQL.append(" FROM ").append(TableName).append(" ").append(TableNameAlias).append(" INNER JOIN ")
 					.append(TableName).append("_TRL ON (").append(TableNameAlias).append(".").append(KeyColumn)
 					.append("=").append(TableName).append("_Trl.").append(KeyColumn).append(" AND ").append(TableName)
@@ -885,7 +899,7 @@ public class MLookupFactory
 			else
 				embedSQL.append(TableNameAlias).append(".").append(DisplayColumn);
 
-			embedSQL.append(DB.isPostgreSQL() ? ", ',')" : ")");
+			embedSQL.append(DB.isPostgreSQL() ? ", ', ')" : ")");
 			embedSQL.append(" FROM ").append(TableName).append(" ").append(TableNameAlias);
 		}
 

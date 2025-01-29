@@ -151,7 +151,7 @@ public class Doc_InOut extends Doc
 					
 					if (!map.containsKey(lineMA.getM_AttributeSetInstance_ID()))
 					{
-						DocLine docLine = new DocLine(line, this);
+						DocLine docLine = new DocLine(line, this, lineMA);
 						docLine.setM_AttributeSetInstance_ID(lineMA.getM_AttributeSetInstance_ID());
 						docLine.setQty(lineMA.getMovementQty(), getDocumentType().equals(DOCTYPE_MatShipment));
 						docLine.setReversalLine_ID(line.getReversalLine_ID());
@@ -522,11 +522,19 @@ public class Doc_InOut extends Doc
 				DocLine line = p_lines[i];
 				BigDecimal costs = null;
 				MProduct product = line.getProduct();
+				//If expense type stocked product, no impact on inventory
+	            if(MProduct.PRODUCTTYPE_ExpenseType.equals(product.getProductType()) && product.isStocked()) {
+	                continue;
+	            }
+				
 				MOrderLine orderLine = null;
 				BigDecimal landedCost = BigDecimal.ZERO;
 				MInOutLine inoutLine = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(line.get_ID(),
 						getTrxName());
 				MInvoiceLine invoiceLine = MInvoiceLine.getOfInOutLine(inoutLine);
+				if(invoiceLine==null) {
+					invoiceLine=MInvoiceLine.getOfInOutLineFromMatchInv(inoutLine);
+				}
 				String costingMethod = product.getCostingMethod(as);
 				if (!isReversal(line))
 				{					
@@ -635,7 +643,7 @@ public class Doc_InOut extends Doc
 					if (costs == null || costs.signum() == 0)
 					{
 						//ok if purchase price is actually zero 
-						if (orderLine != null && orderLine.getPriceActual().signum() == 0)
+						if ((orderLine != null && orderLine.getPriceActual().signum() == 0) || (invoiceLine != null && invoiceLine.getPriceActual().signum() == 0))
                     	{
 							costs = BigDecimal.ZERO;
                     	}
@@ -767,6 +775,11 @@ public class Doc_InOut extends Doc
 				DocLine line = p_lines[i];
 				BigDecimal costs = null;
 				MProduct product = line.getProduct();
+				//If expense type stocked product, no impact on inventory
+	            if(MProduct.PRODUCTTYPE_ExpenseType.equals(product.getProductType()) && product.isStocked()) {
+	                continue;
+	            }
+				
 				MInOutLine ioLine = (MInOutLine) line.getPO();
 				
 				String costingMethod = product.getCostingMethod(as);

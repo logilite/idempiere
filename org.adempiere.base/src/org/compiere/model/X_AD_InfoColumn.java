@@ -713,6 +713,8 @@ public class X_AD_InfoColumn extends PO implements I_AD_InfoColumn, I_Persistent
 	public static final String QUERYOPERATOR_HAVE = ">>>";
 	/** IN = <<< */
 	public static final String QUERYOPERATOR_IN = "<<<";
+	/** NOT IN = !IN */
+	public static final String QUERYOPERATOR_NOT_IN = "!IN";
 	/** OVERLAP = && */
 	public static final String QUERYOPERATOR_OVERLAP = "&&";
 	/** EXCLUDE = -&& */

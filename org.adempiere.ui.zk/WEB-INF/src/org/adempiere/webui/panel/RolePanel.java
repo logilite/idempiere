@@ -136,17 +136,19 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 
 	protected static final String ON_DEFER_LOGOUT = "onDeferLogout";
 
-	public RolePanel(Properties ctx, LoginWindow loginWindow, String userName, boolean show, KeyNamePair[] clientsKNPairs) {
+	public RolePanel(Properties ctx, LoginWindow loginWindow, String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isSSOLogin) {
     	this.wndLogin = loginWindow;
     	m_ctx = ctx;
     	m_userName = userName;    	
     	login = Core.getLogin(ctx);
     	m_show = show;
         m_clientKNPairs = clientsKNPairs;
+        m_isSSOLogin = isSSOLogin;
+        login.setIsSSOLogin(m_isSSOLogin);
         
         if( m_clientKNPairs.length == 1  &&  !m_show ){
         	Env.setContext(m_ctx, "#AD_Client_ID", (String) m_clientKNPairs[0].getID());
-        	MUser user = MUser.get (m_ctx, m_userName);
+        	MUser user = MUser.get (m_ctx, m_userName, m_isSSOLogin);
         	m_userpreference=new UserPreference();
         	m_userpreference.loadPreference(user.get_ID());        	
         }
@@ -753,7 +755,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     	} else {
         	Env.setContext(m_ctx, "#AD_Client_ID", (String) null);
     	}
-    	MUser user = MUser.get (m_ctx, m_userName);
+    	MUser user = MUser.get (m_ctx, m_userName, m_isSSOLogin);
     	if (user != null) {
     		Env.setContext(m_ctx, "#AD_User_ID", user.getAD_User_ID() );
     		Env.setContext(m_ctx, "#AD_User_Name", user.getName() );
@@ -863,9 +865,10 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 				public void onEvent(Event ev) throws Exception
 				{
 					updatePerference();
+					Clients.clearBusy();
 				}
 			});
-
+			Clients.showBusy(null);
 			Events.echoEvent(SSOUtils.EVENT_ON_AFTER_SSOLOGIN, this, null);
 		}
 		else

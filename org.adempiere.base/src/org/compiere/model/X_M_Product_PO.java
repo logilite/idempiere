@@ -573,4 +573,28 @@ public class X_M_Product_PO extends PO implements I_M_Product_PO, I_Persistent
 	{
 		return (String)get_Value(COLUMNNAME_VendorProductNo);
 	}
+	
+	/**
+	 * Set Product Purchasing.
+	 * @param M_Product_PO_ID Product Purchasing
+	 */
+	public void setM_Product_PO_ID(int M_Product_PO_ID)
+	{
+		if (M_Product_PO_ID < 1)
+			set_ValueNoCheck(COLUMNNAME_M_Product_PO_ID, null);
+		else
+			set_ValueNoCheck(COLUMNNAME_M_Product_PO_ID, Integer.valueOf(M_Product_PO_ID));
+	}
+
+	/**
+	 * Get Product Purchasing.
+	 * @return Product Purchasing
+	 */
+	public int getM_Product_PO_ID()
+	{
+		Integer ii = (Integer) get_Value(COLUMNNAME_M_Product_PO_ID);
+		if (ii == null)
+			return 0;
+		return ii.intValue();
+	}
 }

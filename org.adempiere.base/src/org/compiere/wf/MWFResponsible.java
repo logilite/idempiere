@@ -20,13 +20,15 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 import org.compiere.model.MRole;
+import org.compiere.model.Query;
 import org.compiere.model.X_AD_WF_Responsible;
 import org.compiere.util.CCache;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 
 /**
- *	Workflow Resoinsible
+ *	Workflow Responsible
  *	
  *  @author Jorg Janke
  *  @version $Id: MWFResponsible.java,v 1.3 2006/07/30 00:51:05 jjanke Exp $
@@ -58,6 +60,37 @@ public class MWFResponsible extends X_AD_WF_Responsible
 
 	/**	Cache						*/
 	private static CCache<Integer,MWFResponsible>	s_cache	= new CCache<Integer,MWFResponsible>(Table_Name, 10);
+	
+	/**
+	 * Cache for Overridden Client Workflow Responsible
+	 */
+	private static CCache<String, MWFResponsible> s_cacheCliWFResp = new CCache<String, MWFResponsible>(
+			"ClientWFResponsible", 10);
+
+	/**
+	 * Get Overridden Client Workflow Responsible from the Cache
+	 * 
+	 * @param ctx
+	 * @param AD_WF_Responsible_ID - System Workflow Responsible
+	 * @return
+	 */
+	public static MWFResponsible getClientWFResp(Properties ctx, int AD_WF_Responsible_ID) {
+		if(AD_WF_Responsible_ID==0)
+			return null;
+		
+		int clientID = Env.getAD_Client_ID(ctx);
+		String key = clientID + "_" + AD_WF_Responsible_ID;
+		
+		if (s_cacheCliWFResp.containsKey(key))
+			return s_cacheCliWFResp.get(key);
+		
+		MWFResponsible resp = new Query(ctx, Table_Name, "AD_Client_ID=? AND Override_ID=?", null).setOnlyActiveRecords(true)
+					.setParameters(Env.getAD_Client_ID(ctx), AD_WF_Responsible_ID).first();
+		
+		s_cacheCliWFResp.put(key, resp);
+		
+		return resp;
+	}
 
 	
 	/**************************************************************************
@@ -88,7 +121,7 @@ public class MWFResponsible extends X_AD_WF_Responsible
 	 */
 	public boolean isInvoker()
 	{
-		return getAD_User_ID() == 0 && getAD_Role_ID() == 0 && !isManual();
+		return getAD_User_ID() == 0 && getAD_Role_ID() == 0 && !isManual() && !isSupervisor() && !isInitiator();
 	}	//	isInvoker
 	
 	/**
@@ -183,6 +216,26 @@ public class MWFResponsible extends X_AD_WF_Responsible
 	
 	public boolean isManual() {
 	    return RESPONSIBLETYPE_Manual.equals(getResponsibleType());
+	}
+	
+	/**
+	 * Is Initiator Responsible
+	 * 
+	 * @return true if Initiator
+	 */
+	public boolean isInitiator()
+	{
+		return RESPONSIBLETYPE_Initiator.equals(getResponsibleType());
+	}
+
+	/**
+	 * Is Supervisor Responsible
+	 * 
+	 * @return true if Supevisor
+	 */
+	public boolean isSupervisor()
+	{
+		return RESPONSIBLETYPE_Supervisor.equals(getResponsibleType());
 	}
 	
 }	//	MWFResponsible

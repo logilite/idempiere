@@ -296,7 +296,7 @@ public class WPaymentFormCreditCard extends PaymentFormCreditCard implements Eve
 		ValueNamePair vp = kTypeCombo.getSelectedItem().toValueNamePair();
 		String CCType = vp.getValue();
 		
-		boolean ok = processOnline(CCType, kNumberField.getText(), kApprovalField.getText(), kExpField.getText());
+		boolean ok = processOnline(CCType, kNumberField.getText(), kApprovalField.getValue(), kExpField.getText());
 		if (!ok)
 			FDialog.error(getWindowNo(), window, "PaymentNotProcessed", processMsg);
 		else 

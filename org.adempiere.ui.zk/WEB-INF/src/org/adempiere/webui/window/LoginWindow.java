@@ -29,7 +29,7 @@ import java.util.logging.Level;
 
 import org.adempiere.base.Core;
 import org.adempiere.base.ILogin;
-import org.adempiere.base.sso.ISSOPrinciple;
+import org.adempiere.base.sso.ISSOPrincipalService;
 import org.adempiere.base.sso.SSOUtils;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.Extensions;
@@ -40,7 +40,6 @@ import org.adempiere.webui.panel.LoginPanel;
 import org.adempiere.webui.panel.ResetPasswordPanel;
 import org.adempiere.webui.panel.RolePanel;
 import org.adempiere.webui.session.SessionContextListener;
-import org.adempiere.webui.sso.filter.SSOWebuiFilter;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.UserPreference;
 import org.adempiere.webui.util.ZkSSOUtils;
@@ -50,7 +49,6 @@ import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Language;
-import org.compiere.util.Login;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
@@ -103,7 +101,7 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 
 	private void initComponents()
 	{
-		Object result = getDesktop().getSession().getAttribute(ISSOPrinciple.SSO_PRINCIPLE_SESSION_NAME);
+		Object result = getDesktop().getSession().getAttribute(ISSOPrincipalService.SSO_PRINCIPAL_SESSION_TOKEN);
 		if (result == null)
 		{
 			createLoginPanel();
@@ -117,16 +115,17 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 	/**
 	 * Show role panel after SSO authentication.
 	 * 
-	 * @param result session principle to get user and language.
+	 * @param token session principal to get user and language.
 	 */
-	private void ssoLogin(Object result)
+	private void ssoLogin(Object token)
 	{
 		String errorMessage = null;
 		try
 		{
-			ISSOPrinciple ssoPrinciple = SSOWebuiFilter.getSSOPrinciple();
-			String username = ssoPrinciple.getUserName(result);
-			Language language = ssoPrinciple.getLanguage(result);
+			String provider = (String) getDesktop().getSession().getAttribute(ISSOPrincipalService.SSO_SELECTED_PROVIDER);
+			ISSOPrincipalService ssoPrincipal = SSOUtils.getSSOPrincipalService(provider);
+			String username = ssoPrincipal.getUserName(token);
+			Language language = ssoPrincipal.getLanguage(token);
 			boolean isEmailLogin = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
 			if (Util.isEmpty(username))
 				throw new AdempiereException("No Apps " + (isEmailLogin ? "Email" : "User"));
@@ -137,14 +136,15 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 			Locale locale = language.getLocale();
 			getDesktop().getSession().setAttribute(Attributes.PREFERRED_LOCALE, locale);
 
-			Login login = new Login(ctx);
+			ILogin login = Core.getLogin(ctx);
+			login.setIsSSOLogin(true);
 			boolean isShowRolePanel = MSysConfig.getBooleanValue(MSysConfig.SSO_SELECT_ROLE, true);
 			
 			// show role panel when change role
 			if (getDesktop().getSession().hasAttribute(SSOUtils.ISCHANGEROLE_REQUEST))
 				isShowRolePanel = isShowRolePanel || (boolean) getDesktop().getSession().getAttribute(SSOUtils.ISCHANGEROLE_REQUEST);
 
-			KeyNamePair[] clients = login.getClients(username, null, null, true);
+			KeyNamePair[] clients = login.getClients(username, null, null);
 			if (clients != null)
 				loginOk(username, isShowRolePanel, clients, true);
 			else
@@ -165,7 +165,7 @@ public class LoginWindow extends FWindow implements EventListener<Event>
 		if (!Util.isEmpty(errorMessage))
 		{
 			ZkSSOUtils.setErrorMessageText(errorMessage);
-			Executions.sendRedirect(SSOUtils.ERROR_VALIDATION);
+			Executions.sendRedirect(SSOUtils.ERROR_VALIDATION_URL);
 		}
 	}
 
@@ -186,8 +186,7 @@ public class LoginWindow extends FWindow implements EventListener<Event>
     }
 
 	protected void createRolePanel(String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isSSOLogin) {
-		pnlRole = Extensions.getRolePanel(ctx, this, userName, show, clientsKNPairs);
-		pnlRole.setIsSSOLogin(isSSOLogin);
+		pnlRole = Extensions.getRolePanel(ctx, this, userName, show, clientsKNPairs,isSSOLogin);
 		if (!pnlRole.isShow())
 			pnlRole.validateRoles();
 	}

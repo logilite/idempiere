@@ -23,6 +23,7 @@ import java.util.logging.Level;
 
 import org.adempiere.model.GenericPO;
 import org.adempiere.webui.apps.AEnv;
+import org.adempiere.webui.apps.WSharePrintFormatForm;
 import org.adempiere.webui.component.Button;
 import org.adempiere.webui.component.ConfirmPanel;
 import org.adempiere.webui.component.Grid;
@@ -49,6 +50,7 @@ import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.adempiere.webui.window.ZkReportViewer;
+import org.compiere.model.MPrintFormatAccess;
 import org.compiere.model.MRole;
 import org.compiere.model.Query;
 import org.compiere.print.MPrintFormat;
@@ -101,6 +103,7 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 	protected Button bExport = new Button();
 	protected Button bnext ;
 	protected Button btnSave;
+	protected Button btnSharePrintFormat;
 	protected Tabbox tabbox = new Tabbox();
 	protected Tabs tabs = new Tabs();
 	protected Tabpanels tabpanels = new Tabpanels(); 
@@ -309,6 +312,14 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 			confirmPanelMain.addComponentsLeft(bExport);
 		}
 
+		if (MPrintFormatAccess.isWriteAccessPrintFormat(m_reportEngine.getPrintFormat().getAD_PrintFormat_ID(), null))
+		{
+			btnSharePrintFormat = new Button();
+			btnSharePrintFormat.setLabel(Msg.getMsg(Env.getCtx(), "SharePrintFormat"));
+			btnSharePrintFormat.setName("btnSharePrintFormat");
+			confirmPanelMain.addComponentsLeft(btnSharePrintFormat);
+		}
+		
 		bnext=new Button();
 		bnext.setLabel(Msg.getMsg(Env.getCtx(), "NextPage"));
 		bnext.setName("Next");
@@ -354,6 +365,9 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 					((WRCTabPanel) tabbox.getSelectedTabpanel()).updatePFI();
 					cmd_export();
 				}
+				else if ("btnSharePrintFormat".equals(bt.getName())) {
+					cmd_sharePrintFormat();
+				}
 				else{
 					if("NewPrintFormat".equals(bt.getName())){
 						copyFormat();
@@ -389,6 +403,13 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 		selectAll.setVisible(oldtabidx == 0);
 		deselectAll.setVisible(oldtabidx == 0);
 		pipeSeparator.setVisible(oldtabidx == 0);
+	}
+
+	private void cmd_sharePrintFormat()
+	{
+		int ad_PrintFormat_ID = m_reportEngine.getPrintFormat().getAD_PrintFormat_ID();
+		Window window = new WSharePrintFormatForm(ad_PrintFormat_ID);
+		AEnv.showCenterScreen(window);
 	}
 
 	protected void onSave() {

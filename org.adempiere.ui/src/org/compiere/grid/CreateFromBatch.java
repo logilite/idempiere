@@ -41,19 +41,16 @@ public abstract class CreateFromBatch extends CreateFrom
 	}
 	
 	public String getSQLWhere(Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
-			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode)
+			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode, Object Currency)
 	{
-		return getSQLWhere(BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, 0);
+		return getSQLWhere(BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, Currency, 0);
 	}
 	
 	public String getSQLWhere(Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
-			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode, int AD_Org_ID)
+			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode, Object Currency, int AD_Org_ID)
 	{
 		StringBuilder sql = new StringBuilder();
-		sql.append("WHERE p.Processed='Y' AND p.IsReconciled='N'");
-		sql.append(" AND p.DocStatus IN ('CO','CL','RE','VO') AND p.PayAmt<>0"); 
-		sql.append(" AND p.C_BankAccount_ID = ?");
-	    sql.append(" AND NOT EXISTS (SELECT * FROM C_BankStatementLine l WHERE p.C_Payment_ID=l.C_Payment_ID AND l.StmtAmt <> 0)");
+		sql.append("WHERE p.Processed='Y' AND p.C_BankAccount_ID = ? ");
 	    	    
 	    if(DocType != null)
 			sql.append(" AND p.C_DocType_ID=?");
@@ -62,10 +59,13 @@ public abstract class CreateFromBatch extends CreateFrom
 		if(BPartner != null)
 			sql.append(" AND p.C_BPartner_ID=?");
 		
+		if (Currency != null && Currency.toString().length() > 0 )
+			sql.append(" AND p.C_Currency_ID=?");
+		
 		if(DocumentNo.length() > 0)
 			sql.append(" AND UPPER(p.DocumentNo) LIKE ?");
 		if(AuthCode.length() > 0)
-			sql.append(" AND p.R_AuthCode LIKE ?");
+			sql.append(" AND UPPER(p.R_AuthCode) LIKE ?");
 		
 		if(AmtFrom != null || AmtTo != null)
 		{
@@ -98,15 +98,15 @@ public abstract class CreateFromBatch extends CreateFrom
 		return sql.toString();
 	}
 	
-	protected int setParameters(PreparedStatement pstmt, Object BankAccount, Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
-			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode)
+	protected void setParameters(PreparedStatement pstmt, Object BankAccount, Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
+			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode, Object Currency)
 	throws SQLException
 	{
-		return setParameters(pstmt, BankAccount, BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, 0);
+		setParameters(pstmt, BankAccount, BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, Currency, 0);
 	}
 	
-	protected int setParameters(PreparedStatement pstmt, Object BankAccount, Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
-			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode, int AD_Org_ID)
+	protected void setParameters(PreparedStatement pstmt, Object BankAccount, Object BPartner, String DocumentNo, Object DateFrom, Object DateTo, 
+			Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode, Object Currency, int AD_Org_ID)
 	throws SQLException
 	{
 		//  Get StatementDate
@@ -127,6 +127,9 @@ public abstract class CreateFromBatch extends CreateFrom
 		
 		if(BPartner != null)
 			pstmt.setInt(index++, (Integer) BPartner);
+		
+		if(Currency != null)
+			pstmt.setInt(index++, (Integer) Currency);
 		
 		if(DocumentNo.length() > 0)
 			pstmt.setString(index++, getSQLText(DocumentNo));
@@ -169,7 +172,6 @@ public abstract class CreateFromBatch extends CreateFrom
 		if(AD_Org_ID > 0)
 			pstmt.setInt(index++, (Integer) AD_Org_ID);
 		
-		return index;
 	}
 	
 	protected String getSQLText(String text)
@@ -182,7 +184,7 @@ public abstract class CreateFromBatch extends CreateFrom
 	}
 	
 	protected abstract Vector<Vector<Object>> getBankAccountData(Object BankAccount, Object BPartner, String DocumentNo, 
-			Object DateFrom, Object DateTo, Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode);
+			Object DateFrom, Object DateTo, Object AmtFrom, Object AmtTo, Object DocType, Object TenderType, String AuthCode, Object CurrencyType);
 	
 	public void info(IMiniTable miniTable, IStatusBar statusBar)
 	{		

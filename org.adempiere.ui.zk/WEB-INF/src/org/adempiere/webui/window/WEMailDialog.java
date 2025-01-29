@@ -179,8 +179,8 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	protected String  m_cc;
 	protected String  m_subject;
 	protected String  m_message;
-	private int m_Record_ID;
-	private int m_AD_Table_ID;
+	protected int m_Record_ID;
+	protected int m_AD_Table_ID;
 	/**	File to be optionally attached	*/
 	protected DataSource	m_attachment;
 	
@@ -894,10 +894,10 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	
 	@Override
 	public void init(String title, MUser from, String to, String subject, String message, File attachment,
-			int m_WindowNo, int ad_Table_ID, int record_ID, PrintInfo printInfo)
+			int m_WindowNo, int record_ID, PrintInfo printInfo)
 	{
 		Components.removeAllChildren(this);
-		this.m_AD_Table_ID = ad_Table_ID;
+
 		this.m_Record_ID = record_ID;
 		this.setTitle(title);
 		this.setSclass("popup-dialog");
@@ -945,13 +945,15 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		AEnv.showWindow(this);
 		this.focus();
 	}
-	
+
 	@Override
-	public IEmailDialog createInstance()
+	public IEmailDialog createInstance(int ad_Table_ID)
 	{
-		return new WEMailDialog();
+		WEMailDialog mailDialog = new WEMailDialog();
+		mailDialog.m_AD_Table_ID = ad_Table_ID;
+		return mailDialog;
 	}
-	
+
 	/**
 	 * Set the user to editor and trigger the event change
 	 * @param newUserTo

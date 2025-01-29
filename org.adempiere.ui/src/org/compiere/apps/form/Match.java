@@ -14,6 +14,7 @@
 package org.compiere.apps.form;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -36,6 +37,7 @@ import org.compiere.model.MMatchInv;
 import org.compiere.model.MMatchInvHdr;
 import org.compiere.model.MMatchPO;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MProduct;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
@@ -175,14 +177,16 @@ public class Match
 	{
 		log.config("");
 		matchInvHdr = null;
-		if(!isCreateMatchInvHdr || !isMatchInvHdrEnabled)
+		KeyNamePair Product = null;
+		//|| !isMatchInvHdrEnabled
+		if(!isCreateMatchInvHdr)
 		{
 			//  Matched From
 			int matchedRow = xMatchedTable.getSelectedRow();
 			if (matchedRow < 0)
 				return;
 			KeyNamePair lineMatched = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, I_Line);
-			KeyNamePair Product = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, I_Product);
+			Product = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, I_Product);
 	
 			double totalQty = m_xMatched.doubleValue();
 	
@@ -258,6 +262,17 @@ public class Match
 			LinkedHashMap<Integer, BigDecimal> invoiceMap = new LinkedHashMap<Integer, BigDecimal>();
 			LinkedHashMap<Integer, BigDecimal> recieptMap = new LinkedHashMap<Integer, BigDecimal>();
 
+			int matchedRow = xMatchedTable.getSelectedRow();
+			if (matchedRow < 0)
+				return;
+			Product = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, I_Product);
+			int precision = 5;
+			if(Product!=null) {
+				int productID = Product.getKey();
+				MProduct p  = MProduct.get(Env.getCtx(), productID);
+				precision = p.getUOMPrecision();
+			}
+			
 			//Get Receipt line if available
 			// Create Receipt Lines Map <receiptlineID, QtyToMatch>
 			for (int row = 0; row < xMatchedToTable.getRowCount(); row++)
@@ -270,7 +285,7 @@ public class Match
 					qty -= ((Double) xMatchedToTable.getValueAt(row, I_MATCHED)).doubleValue();
 					//M_AttributeSetInstance_ID = new MInOutLine(Env.getCtx(), M_InoutLine_ID, null)
 					//		.getM_AttributeSetInstance_ID();
-					recieptMap.put(lineMatched.getKey(), BigDecimal.valueOf(qty));
+					recieptMap.put(lineMatched.getKey(), BigDecimal.valueOf(qty).setScale(precision, RoundingMode.HALF_UP));
 				}
 			}
 			
@@ -310,7 +325,7 @@ public class Match
 					KeyNamePair lineMatched = (KeyNamePair) xMatchedTable.getValueAt(row, I_Line);
 					double qty = ((Double) xMatchedTable.getValueAt(row, I_QTY)).doubleValue(); // doc
 					qty -= ((Double) xMatchedTable.getValueAt(row, I_MATCHED)).doubleValue();
-					invoiceMap.put(lineMatched.getKey(), BigDecimal.valueOf(qty));
+					invoiceMap.put(lineMatched.getKey(), BigDecimal.valueOf(qty).setScale(precision, RoundingMode.HALF_UP));
 				}
 			}
 
@@ -332,7 +347,6 @@ public class Match
 					{
 						continue;
 					}
-
 					int CreditMemo_InvLine_ID = entryCRM.getKey();
 
 					MInvoiceLine crmLine = (MInvoiceLine) MTable.get(Env.getCtx(), MInvoiceLine.Table_ID).getPO(

@@ -819,4 +819,19 @@ public final class DisplayType
 	{
 		return (MultiSelectTable == displayType || MultiSelectList == displayType || MultiSelectSearch == displayType);
 	}
+	
+	/**
+	 * Is multiple selection type (chosen, multi, single selection grid or multiple selection grid)
+	 * @param displayType
+	 * @return true if displayType is a multi ID 
+	 */
+	public static boolean isMultiID(int displayType)
+	{
+		return (displayType == ChosenMultipleSelectionSearch
+				|| displayType == ChosenMultipleSelectionTable
+				|| displayType == SingleSelectionGrid
+				|| displayType == MultipleSelectionGrid
+				|| displayType == MultiSelectTable
+				| displayType == MultiSelectSearch);
+	}
 }	//	DisplayType

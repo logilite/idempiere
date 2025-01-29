@@ -20,8 +20,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.adempiere.base.sso.ISSOPrinciple;
+import org.adempiere.base.sso.ISSOPrincipalService;
 import org.adempiere.base.sso.SSOUtils;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
@@ -69,21 +70,22 @@ public class ServletRegistration extends Registration {
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(registeredContextClassLoader);
-			if (SSOUtils.getSSOPrinciple() != null)
+			boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
+			if (SSOUtils.getSSOPrincipalService() != null && isSSOEnable)
 			{
-				Object principle = req.getSession().getAttribute(ISSOPrinciple.SSO_PRINCIPLE_SESSION_NAME);
-				if (checkSSOAuthorization(principle))
+				Object principal = req.getSession().getAttribute(ISSOPrincipalService.SSO_PRINCIPAL_SESSION_TOKEN);
+				if (checkSSOAuthorization(principal))
 				{
 					servlet.service(req, resp);
 					if (req.getPathInfo().endsWith("logout"))
 					{
-						req.getSession().removeAttribute(ISSOPrinciple.SSO_PRINCIPLE_SESSION_NAME);
+						req.getSession().removeAttribute(ISSOPrincipalService.SSO_PRINCIPAL_SESSION_TOKEN);
 						resp.sendRedirect("osgi/system/console/bundles");
 					}
 				}
 				else
 				{
-					req.getSession().removeAttribute(ISSOPrinciple.SSO_PRINCIPLE_SESSION_NAME);
+					req.getSession().removeAttribute(ISSOPrincipalService.SSO_PRINCIPAL_SESSION_TOKEN);
 				}
 			}
 			else if (httpContext.handleSecurity(req, resp))
@@ -109,7 +111,7 @@ public class ServletRegistration extends Registration {
 			return false;
 		try
 		{
-			String username = SSOUtils.getSSOPrinciple().getUserName(token);
+			String username = SSOUtils.getSSOPrincipalService().getUserName(token);
 			return validateUser(username, null, true);
 		}
 		catch (Exception e)

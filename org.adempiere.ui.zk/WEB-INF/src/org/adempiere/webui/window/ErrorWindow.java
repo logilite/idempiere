@@ -12,7 +12,7 @@
  *****************************************************************************/
 package org.adempiere.webui.window;
 
-import org.adempiere.base.sso.ISSOPrinciple;
+import org.adempiere.base.sso.ISSOPrincipalService;
 import org.adempiere.webui.component.FWindow;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
@@ -21,7 +21,7 @@ import org.zkoss.zk.ui.event.Events;
 
 /**
  * Error window in error.zul
- * Remove SSO principle from session when error.
+ * Remove SSO principal from session when error.
  * 
  * @author Logilite Technologies
  */
@@ -35,14 +35,14 @@ public class ErrorWindow extends FWindow implements EventListener<Event>
 
 	public ErrorWindow()
 	{
-		addEventListener("onRemoveSSOPrinciple", this);
-		Events.echoEvent("onRemoveSSOPrinciple", this, null);
+		addEventListener("onRemoveSSOPrincipal", this);
+		Events.echoEvent("onRemoveSSOPrincipal", this, null);
 	}
 
 	@Override
 	public void onEvent(Event event) throws Exception
 	{
-		Executions.getCurrent().getSession().removeAttribute(ISSOPrinciple.SSO_PRINCIPLE_SESSION_NAME);
+		Executions.getCurrent().getSession().removeAttribute(ISSOPrincipalService.SSO_PRINCIPAL_SESSION_TOKEN);
 	}
 
 }

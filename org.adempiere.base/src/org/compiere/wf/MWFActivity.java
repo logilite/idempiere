@@ -33,7 +33,11 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 
+import org.adempiere.base.IWFActivityForwardDlg;
+import org.adempiere.base.IWFActivityForwardFactory;
+import org.adempiere.base.Service;
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.util.BaseUtil;
 import org.compiere.model.MAttachment;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MClient;
@@ -53,6 +57,8 @@ import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.MUserRoles;
 import org.compiere.model.MWFActivityApprover;
+import org.compiere.model.ModelValidationEngine;
+import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.model.X_AD_WF_Activity;
@@ -131,6 +137,10 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < acts.length; i++)
 		{
+			//When activity is Suspended, Allow user to continue workflow on doc action
+			if( WFSTATE_Suspended.compareTo(acts[i].getWFState())==0)
+				return null;
+				
 			if (i > 0)
 				sb.append("\n");
 			MWFActivity activity = acts[i];
@@ -255,6 +265,8 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	private MWFProcess 			m_process = null;
 	/** List of email recipients	*/
 	private ArrayList<String> 	m_emails = new ArrayList<String>();
+	
+	private transient String	m_ErrorMsg	= null;
 
 	/**************************************************************************
 	 * 	Get State
@@ -343,12 +355,12 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		}
 		else
 			m_audit.setEventType(MWFEventAudit.EVENTTYPE_StateChanged);
-		boolean valid = m_audit.save();
+		boolean valid = m_audit.save(get_TrxName());
 		if (! valid) {
 			// the event audit could not be updated, probably it was deleted by the rollback to savepoint
 			// so, set the ID to zero and save it again (insert)
 			m_audit.setAD_WF_EventAudit_ID(0);
-			m_audit.saveEx();
+			m_audit.saveEx(get_TrxName());
 		}
 	}	//	updateEventAudit
 
@@ -421,7 +433,18 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		MWFNode node = getNode();
 		if (node == null)
 			return null;
-		int AD_Column_ID = node.getAD_Column_ID();
+		int AD_Column_ID = 0;
+		
+		// get Approval Column
+		if (node.getApprovalColumn_ID() > 0)
+		{
+			AD_Column_ID = node.getApprovalColumn_ID();
+		}
+		else
+		{
+			AD_Column_ID = node.getAD_Column_ID();
+		}
+		 
 		if (AD_Column_ID == 0)
 			return null;
 		PO po = getPO();
@@ -548,7 +571,15 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		return getNode().isUserChoice();
 	}	//	isUserChoice
 
-
+	/**
+	 * Is this a User Task step?
+	 * @return true if User Task
+	 */
+	public boolean isUserTask()
+	{
+		return getNode().isUserTask();
+	}
+	
 	/**
 	 * 	Set Text Msg (add to existing)
 	 *	@param TextMsg
@@ -631,6 +662,13 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	{
 		//	Responsible
 		int AD_WF_Responsible_ID = getNode().getAD_WF_Responsible_ID();
+		// get Client WF Responsible from the cache
+		MWFResponsible ovrResp = MWFResponsible.getClientWFResp(p_ctx, AD_WF_Responsible_ID);
+		if (ovrResp != null)
+		{
+			AD_WF_Responsible_ID = ovrResp.getAD_WF_Responsible_ID();
+		}
+		
 		if (AD_WF_Responsible_ID == 0)	//	not defined on Node Level
 			AD_WF_Responsible_ID = process.getAD_WF_Responsible_ID();
 		setAD_WF_Responsible_ID (AD_WF_Responsible_ID);
@@ -901,8 +939,9 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				setWFState(StateEngine.STATE_Terminated);
 				return;
 			}
-			//
-			setWFState(StateEngine.STATE_Running);
+			//For User Task,  Don't change to running, instead state decided at perform work
+			if(!(MWFNode.ACTION_UserTask.equals(m_node.getAction()) && StateEngine.STATE_NotStarted.equals(m_state.getState())))
+					setWFState(StateEngine.STATE_Running);
 
 			if (getNode().get_ID() == 0)
 			{
@@ -968,7 +1007,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				}				
 			}
 			msg.append(processMsg);
-			setTextMsg(msg.toString());
+			setTextMsg(BaseUtil.cleanMessage(msg.toString()));
 			// addTextMsg(e); // do not add the exception text
 			boolean contextLost = false;
 			if (e instanceof AdempiereException && "Context lost".equals(e.getMessage()))
@@ -1074,7 +1113,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				}
 				catch (Exception e) {
 					if (m_process != null)
-						m_process.setProcessMsg(e.getLocalizedMessage());
+						m_process.setProcessMsg(BaseUtil.cleanMessage(e.getLocalizedMessage()));
 					throw e;
 				}
 				finally
@@ -1280,6 +1319,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		else if (MWFNode.ACTION_UserChoice.equals(action))
 		{
 			if (log.isLoggable(Level.FINE)) log.fine("UserChoice:AD_Column_ID=" + m_node.getAD_Column_ID());
+			if (log.isLoggable(Level.FINE)) log.fine("UserChoice:ApprovalColumn_ID=" + m_node.getApprovalColumn_ID());
 			//	Approval
 			if (m_node.isUserApproval()
 				&& getPO(trx) instanceof DocAction)
@@ -1329,20 +1369,94 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 							}
 						}
 					}
-					else if(resp.isManual()) {
-					    MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(getCtx(), getAD_WF_Activity_ID(), get_TrxName());
-                        for (int i = 0; i < approvers.length; i++)
-                        {
-                            if(approvers[i].getAD_User_ID() == Env.getAD_User_ID(getCtx()))
-                            {
-                                autoApproval = true;
-                                break;
-                            }
-                        }
+					else if (resp.isManual())
+					{
+
+						MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(getCtx(),
+								getAD_WF_Activity_ID(), get_TrxName());
+						for (int i = 0; i < approvers.length; i++)
+						{
+							if (approvers[i].getAD_User_ID() == Env.getAD_User_ID(getCtx()))
+							{
+								autoApproval = true;
+								break;
+							}
+						}
+						if (autoApproval == false)
+						{
+							// Invoke WF Approver Factory
+							List<IWFActivityForwardFactory> factoryList = Service.locator()
+									.list(IWFActivityForwardFactory.class).getServices();
+
+							if (factoryList != null)
+							{
+								IWFActivityForwardDlg forwardDlg = null;
+								for (IWFActivityForwardFactory factory : factoryList)
+								{
+									forwardDlg = factory.getWFActivityForwardDlg();
+									if(forwardDlg!=null)
+										break;
+									
+								}
+								if (forwardDlg != null)
+								{
+									forwardDlg.AskApprover();
+									int userId = forwardDlg.getActivityApprover();
+									if(userId==-1) {
+										throw new AdempiereException("Cancelled");
+									}
+									if (userId > 0)
+									{
+										String msg = forwardDlg.getMsg();
+										if (!forwardTo(userId, msg))
+										{
+
+											throw new AdempiereException("CannotForward");
+										}
+									}
+									else
+									{
+										throw new AdempiereException("ApproverNotSet");
+									}
+								}else {
+									throw new AdempiereException("CantShowApproveDialog");
+								}
+							}
+						}
 					}
 					else if(resp.isOrganization())
 					{
 						throw new AdempiereException("Support not implemented for "+resp);
+					}
+					else if (resp.isInitiator())
+					{
+						// assign the Workflow's Initiator
+						setAD_User_ID(m_process.getAD_User_ID());
+					}
+					else if (resp.isSupervisor())
+					{
+						// assign the initiator's supervisor
+						
+						MUser initiator = MUser.get(p_ctx, m_process.getAD_User_ID());
+						int superVisorId = initiator.getSupervisor_ID();
+
+						// if Initiator didn't have Supervisor set then Assign
+						// document's Organization's Supervisor
+						if (superVisorId <= 0)
+						{
+							MOrgInfo orgInfo = MOrgInfo.get(p_ctx, m_process.getAD_Org_ID(), m_process.get_TrxName());
+							superVisorId = orgInfo.getSupervisor_ID();
+						}
+						
+						if (superVisorId > 0)
+						{
+							setAD_User_ID(superVisorId);
+						}
+						else
+						{
+							m_docStatus = DocAction.STATUS_Invalid;
+							throw new AdempiereException(Msg.getMsg(getCtx(), "NoApprover - Set Supervisor on User or Organization"));
+						}
 					}
 					else
 					{
@@ -1355,6 +1469,139 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 					&& doc.save())
 					return true;	//	done
 			}	//	approval
+			return false;	//	wait for user
+		}
+		/**User Task **/
+		else if (MWFNode.ACTION_UserTask.equals(action))
+		{
+			//TODO when state is Not Started, We should assign task to User by finding responsible
+			//We needs to add one more responsible type as Initiator who has started workflow.
+			//If task state is assigned and it is assigned to either user and Role, then he can progress task otherwise error should given to user but no change in workflow state.
+			//
+			if (getPO(trx) instanceof DocAction)
+			{
+				//Assign if task not started
+				if(StateEngine.STATE_NotStarted.equals(m_state.getState()))
+				{
+					DocAction doc = (DocAction) m_po;
+					setWFState(StateEngine.STATE_Running);
+					// TODO like invoker, add Initiator responsible. Initiator
+					// means who initiated workflow.
+					if (isInvoker())
+					{
+						// Set Assignee
+						int startAD_User_ID = Env.getAD_User_ID(getCtx());
+						if (startAD_User_ID == 0)
+							startAD_User_ID = doc.getDoc_User_ID();
+						setAD_User_ID(startAD_User_ID);
+					}
+					else // fixed Approver
+					{
+						MWFResponsible resp = getResponsible();
+						if (resp.isHuman())
+						{
+							setAD_User_ID(resp.getAD_User_ID());
+						}
+						else if (resp.isRole())
+						{
+							;
+						}
+						else if (resp.isManual())
+						{
+							// Invoke WF Approver Factory
+							List<IWFActivityForwardFactory> factoryList = Service.locator()
+									.list(IWFActivityForwardFactory.class).getServices();
+
+							if (factoryList != null)
+							{
+								IWFActivityForwardDlg forwardDlg = null;
+								for (IWFActivityForwardFactory factory : factoryList)
+								{
+									forwardDlg = factory.getWFActivityForwardDlg();
+									if (forwardDlg != null)
+										break;
+
+								}
+								if (forwardDlg != null)
+								{
+									forwardDlg.AskApprover();
+									int userId = forwardDlg.getActivityApprover();
+									if (userId == -1)
+									{
+										throw new AdempiereException("Cancelled");
+									}
+									if (userId > 0)
+									{
+										String msg = forwardDlg.getMsg();
+										if (!forwardTo(userId, msg))
+										{
+
+											throw new AdempiereException("CannotForward");
+										}
+									}
+									else
+									{
+										throw new AdempiereException("ApproverNotSet");
+									}
+								}
+								else
+								{
+									throw new AdempiereException("CantShowApproveDialog");
+								}
+							}
+
+						}
+						else if (resp.isOrganization())
+						{
+							throw new AdempiereException("Support not implemented for " + resp);
+						}
+						else
+						{
+							throw new AdempiereException("@NotSupported@ " + resp);
+						}
+						// end MZ
+					}
+					return false; //Suspend workflow
+				}	//	Assignment
+				else {//Completion
+					int sessionAD_User_ID = Env.getAD_User_ID(getCtx());
+					if (isInvoker())
+					{
+						// Set Assignee
+						if (getAD_User_ID()>0 && sessionAD_User_ID == getAD_User_ID())
+							return true;
+					}
+					else // fixed Approver
+					{
+						MWFResponsible resp = getResponsible();
+						if (resp.isHuman() || resp.isManual())
+						{
+							if (getAD_User_ID()>0 && Env.getAD_User_ID(getCtx()) == getAD_User_ID())
+								return true;
+						}
+						else if (resp.isRole())
+						{
+							MUserRoles[] urs = MUserRoles.getOfUser(getCtx(), sessionAD_User_ID);
+							for (int i = 0; i < urs.length; i++)
+							{
+								if(urs[i].getAD_Role_ID() == resp.getAD_Role_ID() && urs[i].isActive())
+								{
+									return true;
+								}
+							}
+						}
+						else if (resp.isOrganization())
+						{
+							throw new AdempiereException("Support not implemented for " + resp);
+						}
+						else
+						{
+							throw new AdempiereException("@NotSupported@ " + resp);
+						}
+				
+				}
+			}
+			}
 			return false;	//	wait for user
 		}
 		/******	User Form					******/
@@ -1375,6 +1622,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			if (log.isLoggable(Level.FINE)) log.fine("InfoWindow:AD_InfoWindow_ID=" + m_node.getAD_InfoWindow_ID());
 			return false;
 		}
+		//TODO add UserTask action here.		
 		//
 		throw new IllegalArgumentException("Invalid Action (Not Implemented) =" + action);
 	}	//	performWork
@@ -1399,6 +1647,17 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				+ getAD_Table_ID() + ", Record_ID=" + getRecord_ID());
 		//	Set Value
 		Object dbValue = null;
+		int AD_Column_ID = 0;
+		
+		if (getNode().getApprovalColumn_ID() > 0)
+		{
+			AD_Column_ID = getNode().getApprovalColumn_ID();
+		}
+		else
+		{
+			AD_Column_ID = getNode().getAD_Column_ID();
+		}
+		
 		if (value == null)
 			;
 		else if (displayType == DisplayType.YesNo)
@@ -1406,7 +1665,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		else if (DisplayType.isNumeric(displayType))
 			dbValue = new BigDecimal (value);
 		else if (DisplayType.isID(displayType)) {
-			MColumn column = MColumn.get(Env.getCtx(), getNode().getAD_Column_ID());
+			MColumn column =  MColumn.get(Env.getCtx(), AD_Column_ID);
 			String referenceTableName = column.getReferenceTableName();
 			if (referenceTableName != null) {
 				MTable refTable = MTable.get(Env.getCtx(), referenceTableName);
@@ -1467,16 +1726,16 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		}
 		else
 			dbValue = value;
-		if (!m_po.set_ValueOfColumnReturningBoolean(getNode().getAD_Column_ID(), dbValue)) {
+		if (!m_po.set_ValueOfColumnReturningBoolean(AD_Column_ID, dbValue)) {
 			throw new Exception("Persistent Object not updated - AD_Table_ID="
 					+ getAD_Table_ID() + ", Record_ID=" + getRecord_ID()
 					+ " - Value=" + value + " error : " + CLogger.retrieveErrorString("check logs"));
 		}
 		m_po.saveEx();
-		if (dbValue != null && !dbValue.equals(m_po.get_ValueOfColumn(getNode().getAD_Column_ID())))
+		if (dbValue != null && !dbValue.equals(m_po.get_ValueOfColumn(AD_Column_ID)))
 			throw new Exception("Persistent Object not updated - AD_Table_ID="
 				+ getAD_Table_ID() + ", Record_ID=" + getRecord_ID()
-				+ " - Should=" + value + ", Is=" + m_po.get_ValueOfColumn(m_node.getAD_Column_ID()));
+				+ " - Should=" + value + ", Is=" + m_po.get_ValueOfColumn(AD_Column_ID));
 		//	Info
 		String msg = getNode().getAttributeName() + "=" + value;
 		if (textMsg != null && textMsg.length() > 0)
@@ -1542,68 +1801,65 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		if (!ok)
 			return false;
 
+		// Doc Validation
+		m_ErrorMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_WF_NODE_EXECUTION);
+		if (!Util.isEmpty(m_ErrorMsg, true))
+		{
+			return false;
+		}
+		
 		String newState = StateEngine.STATE_Completed;
 		//	Approval
 		if (getNode().isUserApproval() && getPO(trx) instanceof DocAction)
 		{
 			DocAction doc = (DocAction)m_po;
-			try
+			// Not approved
+			if (!"Y".equals(value) && DisplayType.YesNo == displayType)
 			{
-				//	Not approved
-				if (!"Y".equals(value))
+				newState = StateEngine.STATE_Aborted;
+				if (!(doc.processIt(DocAction.ACTION_Reject)))
+					setTextMsg("Cannot Reject - Document Status: " + doc.getDocStatus());
+			}
+			else
+			{
+				if (isInvoker())
 				{
-					newState = StateEngine.STATE_Aborted;
-					if (!(doc.processIt (DocAction.ACTION_Reject)))
-						setTextMsg ("Cannot Reject - Document Status: " + doc.getDocStatus());
-				}
-				else
-				{
-					if (isInvoker())
-					{
-						int startAD_User_ID = Env.getAD_User_ID(getCtx());
-						if (startAD_User_ID == 0)
-							startAD_User_ID = doc.getDoc_User_ID();
-						int nextAD_User_ID = getApprovalUser(startAD_User_ID,
-							doc.getC_Currency_ID(), doc.getApprovalAmt(),
-							doc.getAD_Org_ID(),
-							startAD_User_ID == doc.getDoc_User_ID());	//	own doc
-						//	No Approver
-						if (nextAD_User_ID <= 0)
-						{
-							newState = StateEngine.STATE_Aborted;
-							setTextMsg (Msg.getMsg(getCtx(), "NoApprover"));
-							doc.processIt (DocAction.ACTION_Reject);
-						}
-						else if (startAD_User_ID != nextAD_User_ID)
-						{
-							forwardTo(nextAD_User_ID, "Next Approver");
-							newState = StateEngine.STATE_Suspended;
-						}
-						else	//	Approve
-						{
-							if (!(doc.processIt (DocAction.ACTION_Approve)))
-							{
-								newState = StateEngine.STATE_Aborted;
-								setTextMsg ("Cannot Approve - Document Status: " + doc.getDocStatus());
-							}
-						}
-					}
-					//	No Invoker - Approve
-					else if (!(doc.processIt (DocAction.ACTION_Approve)))
+					int startAD_User_ID = Env.getAD_User_ID(getCtx());
+					if (startAD_User_ID == 0)
+						startAD_User_ID = doc.getDoc_User_ID();
+					int nextAD_User_ID = getApprovalUser(startAD_User_ID, doc.getC_Currency_ID(), doc.getApprovalAmt(),
+							doc.getAD_Org_ID(), startAD_User_ID == doc.getDoc_User_ID()); // own
+																							// doc
+					// No Approver
+					if (nextAD_User_ID <= 0)
 					{
 						newState = StateEngine.STATE_Aborted;
-						setTextMsg ("Cannot Approve - Document Status: " + doc.getDocStatus());
+						setTextMsg(Msg.getMsg(getCtx(), "NoApprover"));
+						doc.processIt(DocAction.ACTION_Reject);
+					}
+					else if (startAD_User_ID != nextAD_User_ID)
+					{
+						forwardTo(nextAD_User_ID, "Next Approver");
+						newState = StateEngine.STATE_Suspended;
+					}
+					else // Approve
+					{
+						if (!(doc.processIt(DocAction.ACTION_Approve)))
+						{
+							newState = StateEngine.STATE_Aborted;
+							setTextMsg("Cannot Approve - Document Status: " + doc.getDocStatus());
+						}
 					}
 				}
-				doc.saveEx();
+				// No Invoker - Approve
+				else if (!(doc.processIt(DocAction.ACTION_Approve)))
+				{
+					newState = StateEngine.STATE_Aborted;
+					setTextMsg("Cannot Approve - Document Status: " + doc.getDocStatus());
+				}
 			}
-			catch (Exception e)
-			{
-				newState = StateEngine.STATE_Terminated;
-				setTextMsg ("User Choice: " + e.toString());
-				addTextMsg(e);
-				log.log(Level.WARNING, "", e);
-			}
+			doc.saveEx();
+
 			// Send Approval Notification
 			if (newState.equals(StateEngine.STATE_Aborted)) {
 				MUser to = new MUser(getCtx(), doc.getDoc_User_ID(), null);
@@ -1635,6 +1891,34 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		setWFState (newState);
 		return ok;
 	}	//	setUserChoice
+	
+	/**
+	 * If Approval column is Configured on User Task Node then value will be set on that
+	 * column
+	 * 
+	 * @param AD_User_ID
+	 * @param value
+	 * @param displayType
+	 * @param textMsg
+	 * @return true if set
+	 * @throws Exception
+	 */
+	public boolean setUserTask(int AD_User_ID, String value, int displayType, String textMsg) throws Exception
+	{
+		setWFState(StateEngine.STATE_Running);
+		setAD_User_ID(AD_User_ID);
+		Trx trx = (get_TrxName() != null) ? Trx.get(get_TrxName(), false) : null;
+		setVariable(value, displayType, textMsg, trx);
+		m_ErrorMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_WF_NODE_EXECUTION);
+		if (m_ErrorMsg != null)
+		{
+			return false;
+		}
+			
+		setWFState(StateEngine.STATE_Completed);
+		return true;
+			
+	}
 
 	/**
 	 * 	Forward To
@@ -1666,7 +1950,8 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		m_audit.setAD_User_ID(oldUser.getAD_User_ID());
 		m_audit.setTextMsg(getTextMsg());
 		m_audit.setAttributeName("AD_User_ID");
-		m_audit.setOldValue(oldUser.getName()+ "("+oldUser.getAD_User_ID()+")");
+		if(oldUser.getAD_User_ID()!=0)
+				m_audit.setOldValue(oldUser.getName()+ "("+oldUser.getAD_User_ID()+")");
 		m_audit.setNewValue(user.getName()+ "("+user.getAD_User_ID()+")");
 		//
 		m_audit.setWFState(getWFState());
@@ -2210,5 +2495,15 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			value = val.toString();
 		return value;
 	} // parseVariables
+	
+	public String getM_ErrorMsg()
+	{
+		return m_ErrorMsg;
+	}
+
+	public void setM_ErrorMsg(String m_ErrorMsg)
+	{
+		this.m_ErrorMsg = m_ErrorMsg;
+	}
 
 }	//	MWFActivity

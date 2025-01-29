@@ -89,6 +89,7 @@ import org.compiere.model.MMovement;
 import org.compiere.model.MOrder;
 import org.compiere.model.MPInstance;
 import org.compiere.model.MPaySelectionCheck;
+import org.compiere.model.MPrintFormatAccess;
 import org.compiere.model.MProcess;
 import org.compiere.model.MProject;
 import org.compiere.model.MQuery;
@@ -2068,6 +2069,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				.append("WHERE d." + DOC_IDS[type] + "=?")			//	info from PrintForm
 				.append(" AND pf.AD_Org_ID IN (0,d.AD_Org_ID) ")
 				.append("ORDER BY pf.AD_Org_ID DESC");
+
 		//
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -2076,7 +2078,8 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			pstmt = DB.prepareStatement(sql.toString(), trxName);
 			pstmt.setInt(1, Record_ID);
 			rs = pstmt.executeQuery();
-			if (rs.next())	//	first record only
+			
+			while (rs.next())	//	first record only
 			{
 				if (type == CHECK || type == DUNNING || type == REMITTANCE 
 					|| type == PROJECT || type == RFQ || type == MANUFACTURING_ORDER || type == DISTRIBUTION_ORDER 
@@ -2122,6 +2125,14 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 					C_BPartner_ID = rs.getInt(10);
 					DocumentNo = rs.getString(11);
 				}
+
+				// Adding validation in query is complicated, so check for access for PF and then only set 
+				if (MPrintFormatAccess.isReadAccessPrintFormat(AD_PrintFormat_ID, trxName))
+					break;
+
+				AD_PrintFormat_ID = 0;
+				C_BPartner_ID = 0;
+				DocumentNo = null;
 			}
 		}
 		catch (Exception e)

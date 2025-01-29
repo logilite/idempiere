@@ -26,11 +26,14 @@
 
 package org.idempiere.process;
 
+import java.math.BigDecimal;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -513,12 +516,36 @@ public class MoveClient extends SvrProcess {
 				if (! "AD_Client".equalsIgnoreCase(tableName)) {
 					sqlForeignClientSB.append(" JOIN AD_Client ON (").append(tableName).append(".AD_Client_ID=AD_Client.AD_Client_ID)");
 				}
-				sqlForeignClientSB.append(" JOIN AD_Ref_List ON (").append(tableName).append(".").append(columnName).append("=AD_Ref_List.");
-				if ("AD_Ref_List_ID".equalsIgnoreCase(columnName)) {
-					sqlForeignClientSB.append("AD_Ref_List_ID");
-				} else {
-					sqlForeignClientSB.append("Value");
+
+				if (refID == DisplayType.MultiSelectList || refID == DisplayType.MultiSelectTable
+						|| refID == DisplayType.MultiSelectSearch)
+				{
+					sqlForeignClientSB.append(" JOIN AD_Ref_List ON (").append("AD_Ref_List.");
+					if ("AD_Ref_List_ID".equalsIgnoreCase(columnName))
+					{
+						sqlForeignClientSB.append("AD_Ref_List_ID");
+					}
+					else
+					{
+						sqlForeignClientSB.append("Value");
+					}
+
+					sqlForeignClientSB.append("=ANY(").append(tableName).append(".").append(columnName).append(")");
 				}
+				else
+				{
+					sqlForeignClientSB.append(" JOIN AD_Ref_List ON (").append(tableName).append(".").append(columnName)
+							.append("=AD_Ref_List.");
+					if ("AD_Ref_List_ID".equalsIgnoreCase(columnName))
+					{
+						sqlForeignClientSB.append("AD_Ref_List_ID");
+					}
+					else
+					{
+						sqlForeignClientSB.append("Value");
+					}
+				}
+
 				sqlForeignClientSB.append(" AND AD_Ref_List.AD_Reference_ID=")
 				.append(" (SELECT AD_Column.AD_Reference_Value_ID FROM AD_Column")
 				.append(" JOIN AD_Table ON (AD_Column.AD_Table_ID=AD_Table.AD_Table_ID)")
@@ -540,15 +567,30 @@ public class MoveClient extends SvrProcess {
 					sqlForeignClientSB.append(" JOIN ").append(foreignTable)
 					.append(" c ON (").append(tableName).append(".").append(columnName).append("=c.");
 				} else {
-					sqlForeignClientSB.append(" JOIN ").append(foreignTable)
-					.append(" ON (").append(tableName).append(".").append(columnName).append("=").append(foreignTable).append(".");
+					sqlForeignClientSB.append(" JOIN ").append(foreignTable);
+					sqlForeignClientSB.append(" ON (");
+					if (refID != DisplayType.MultiSelectList && refID != DisplayType.MultiSelectTable
+							&& refID != DisplayType.MultiSelectSearch)
+					{
+						sqlForeignClientSB.append(tableName).append(".").append(columnName).append("=")
+								.append(foreignTable).append(".");
+					}
 				}
 				if ("AD_Language".equalsIgnoreCase(foreignTable) && !columnName.equalsIgnoreCase("AD_Language_ID")) {
 					sqlForeignClientSB.append("AD_Language");
 				} else if ("AD_EntityType".equalsIgnoreCase(foreignTable) && !columnName.equalsIgnoreCase("AD_EntityType_ID")) {
 					sqlForeignClientSB.append("EntityType");
 				} else {
-					sqlForeignClientSB.append(foreignTable).append("_ID");
+					if (refID == DisplayType.MultiSelectList || refID == DisplayType.MultiSelectTable
+							|| refID == DisplayType.MultiSelectSearch)
+					{
+						sqlForeignClientSB.append(foreignTable).append(".").append(foreignTable).append("_ID");
+						sqlForeignClientSB.append("=ANY(").append(tableName).append(".").append(columnName).append(")");
+					}
+					else
+					{
+						sqlForeignClientSB.append(foreignTable).append("_ID");
+					}
 				}
 				sqlForeignClientSB.append(")")
 				.append(" WHERE ").append(p_whereClient)
@@ -900,60 +942,96 @@ public class MoveClient extends SvrProcess {
 						}
 						if (! Util.isEmpty(convertTable)) {
 							// Foreign - potential ID conversion
-							int id = rsGD.getInt(i + 1);
+							Object objVal = rsGD.getObject(i + 1);
 							if (rsGD.wasNull()) {
 								parameters[i] = null;
 							} else {
-								if (! (id == 0 && ("Parent_ID".equalsIgnoreCase(columnName) || "Node_ID".equalsIgnoreCase(columnName)))  // Parent_ID/Node_ID=0 is valid
-										&& (id >= MTable.MAX_OFFICIAL_ID || p_IsCopyClient)) {
-									int convertedId = -1;
-									final String query = "SELECT Target_ID FROM T_MoveClient WHERE AD_PInstance_ID=? AND TableName=? AND Source_ID=?";
-									try {
-										convertedId = DB.getSQLValueEx(get_TrxName(),
-												query,
-												getAD_PInstance_ID(), convertTable.toUpperCase(), id);
-									} catch (Exception e) {
-										throw new AdempiereException("Could not execute query: " + query + "\nCause = " + e.getLocalizedMessage());
+								Integer[] idArray = null;
+								if (column.getAD_Reference_ID() == DisplayType.MultiSelectTable
+										|| column.getAD_Reference_ID() == DisplayType.MultiSelectSearch)
+								{
+									Array arr = rsGD.getArray(i + 1);
+									Object arrAsObject = arr.getArray();
+									if(arrAsObject instanceof BigDecimal[])
+									{
+										idArray = Arrays.stream((BigDecimal[]) arrAsObject).map(o -> o.intValue())
+												.toArray(Integer[]::new);
 									}
-									if (convertedId < 0) {
-										// not found in the table - try to get it again - could be missed in first pass
-										convertedId = getLocalIDFor(convertTable, id, tableName);
+									else
+									{
+										idArray = (Integer[]) arrAsObject;
+									}
+								}
+								else
+								{
+									idArray = new Integer[] { Integer.parseInt(String.valueOf(objVal)) };
+								}
+
+								Integer[] convertedIdArray = new Integer[idArray.length];
+								for(int idArrayIndex = 0; idArrayIndex < idArray.length; idArrayIndex++)
+								{
+									int convertedId = -1;
+									int id = idArray[idArrayIndex];
+									if (! (id == 0 && ("Parent_ID".equalsIgnoreCase(columnName) || "Node_ID".equalsIgnoreCase(columnName)))  // Parent_ID/Node_ID=0 is valid
+											&& (id >= MTable.MAX_OFFICIAL_ID || p_IsCopyClient)) {
+										final String query = "SELECT Target_ID FROM T_MoveClient WHERE AD_PInstance_ID=? AND TableName=? AND Source_ID=?";
+										try {
+											convertedId = DB.getSQLValueEx(get_TrxName(),
+													query,
+													getAD_PInstance_ID(), convertTable.toUpperCase(), id);
+										} catch (Exception e) {
+											throw new AdempiereException("Could not execute query: " + query + "\nCause = " + e.getLocalizedMessage());
+										}
 										if (convertedId < 0) {
-											if (("Record_ID".equalsIgnoreCase(columnName) && table.getColumnIndex("AD_Table_ID") > 0)
-													|| (("Node_ID".equalsIgnoreCase(columnName) || "Parent_ID".equalsIgnoreCase(columnName))
-															&& (       "AD_TreeNode".equalsIgnoreCase(tableName)
-																	|| "AD_TreeNodeMM".equalsIgnoreCase(tableName)
-																	|| "AD_TreeNodeBP".equalsIgnoreCase(tableName)
-																	|| "AD_TreeNodeCMC".equalsIgnoreCase(tableName)
-																	|| "AD_TreeNodeCMM".equalsIgnoreCase(tableName)
-																	|| "AD_TreeNodeCMS".equalsIgnoreCase(tableName)
-																	|| "AD_TreeNodeCMT".equalsIgnoreCase(tableName)
-																	|| "AD_TreeNodePR".equalsIgnoreCase(tableName)
-																	|| "AD_TreeNodeU1".equalsIgnoreCase(tableName)
-																	|| "AD_TreeNodeU2".equalsIgnoreCase(tableName)
-																	|| "AD_TreeNodeU3".equalsIgnoreCase(tableName)
-																	|| "AD_TreeNodeU4".equalsIgnoreCase(tableName)
-																	|| "AD_TreeBar".equalsIgnoreCase(tableName)))) {
-												if (p_tablesToExcludeList.contains(convertTable.toUpperCase())) {
-													// record is pointing to a table that is not included, ignore it
+											// not found in the table - try to get it again - could be missed in first pass
+											convertedId = getLocalIDFor(convertTable, id, tableName);
+											if (convertedId < 0) {
+												if (("Record_ID".equalsIgnoreCase(columnName) && table.getColumnIndex("AD_Table_ID") > 0)
+														|| (("Node_ID".equalsIgnoreCase(columnName) || "Parent_ID".equalsIgnoreCase(columnName))
+																&& (       "AD_TreeNode".equalsIgnoreCase(tableName)
+																		|| "AD_TreeNodeMM".equalsIgnoreCase(tableName)
+																		|| "AD_TreeNodeBP".equalsIgnoreCase(tableName)
+																		|| "AD_TreeNodeCMC".equalsIgnoreCase(tableName)
+																		|| "AD_TreeNodeCMM".equalsIgnoreCase(tableName)
+																		|| "AD_TreeNodeCMS".equalsIgnoreCase(tableName)
+																		|| "AD_TreeNodeCMT".equalsIgnoreCase(tableName)
+																		|| "AD_TreeNodePR".equalsIgnoreCase(tableName)
+																		|| "AD_TreeNodeU1".equalsIgnoreCase(tableName)
+																		|| "AD_TreeNodeU2".equalsIgnoreCase(tableName)
+																		|| "AD_TreeNodeU3".equalsIgnoreCase(tableName)
+																		|| "AD_TreeNodeU4".equalsIgnoreCase(tableName)
+																		|| "AD_TreeBar".equalsIgnoreCase(tableName)))) {
+													if (p_tablesToExcludeList.contains(convertTable.toUpperCase())) {
+														// record is pointing to a table that is not included, ignore it
+														insertRecord = false;
+														break;
+													}
+												}
+												if ("AD_ChangeLog".equalsIgnoreCase(tableName)) {
+													// skip orphan records in AD_ChangeLog, can be log of deleted records, skip
 													insertRecord = false;
 													break;
 												}
+												throw new AdempiereException("Found orphan record in " + tableName + "." + columnName + ": " + id + " related to table " + convertTable);
 											}
-											if ("AD_ChangeLog".equalsIgnoreCase(tableName)) {
-												// skip orphan records in AD_ChangeLog, can be log of deleted records, skip
-												insertRecord = false;
-												break;
-											}
-											throw new AdempiereException("Found orphan record in " + tableName + "." + columnName + ": " + id + " related to table " + convertTable);
 										}
 									}
-									id = convertedId;
+									
+									convertedIdArray[idArrayIndex] = convertedId;
 								}
+								
 								if ("AD_Preference".equalsIgnoreCase(tableName) && "Value".equalsIgnoreCase(columnName)) {
-									parameters[i] = String.valueOf(id);
+									parameters[i] = String.valueOf(objVal);
 								} else {
-									parameters[i] = id;
+									if (column.getAD_Reference_ID() == DisplayType.MultiSelectTable
+											|| column.getAD_Reference_ID() == DisplayType.MultiSelectSearch)
+									{
+										parameters[i] = convertedIdArray;
+									}
+									else
+									{
+										parameters[i] = convertedIdArray[0];
+									}
 								}
 							}
 						} else {
@@ -961,6 +1039,13 @@ public class MoveClient extends SvrProcess {
 							if (rsGD.wasNull()) {
 								parameters[i] = null;
 							}
+							else if (parameters[i] != null
+									&& column.getAD_Reference_ID() == DisplayType.MultiSelectList)
+							{
+								Array arr = rsGD.getArray(i + 1);
+								parameters[i] = (String[]) arr.getArray();
+							}
+
 							if (p_IsCopyClient) {
 								String uuidCol = MTable.getUUIDColumnName(tableName);
 								if (columnName.equals(uuidCol)) {

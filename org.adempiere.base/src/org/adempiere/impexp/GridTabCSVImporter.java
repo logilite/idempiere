@@ -730,6 +730,7 @@ public class GridTabCSVImporter implements IGridTabImporter
 								currentGridTab.dataRefresh(true); 
 						}
 					} else {
+						setError(true);
 						m_isDataError = true;
 						ValueNamePair ppE = CLogger.retrieveWarning();
 						if (ppE==null)   
@@ -997,8 +998,8 @@ public class GridTabCSVImporter implements IGridTabImporter
 				mandatoryColumns.append(" / ");
 				mandatoryColumns.append(header.get(i));
 			} 
-			
-			if (isForeing && value != null && !"(null)".equals(value)){
+
+			if (isForeing && value != null && !"(null)".equals(value) && !DisplayType.isMultiSelect(field.getDisplayType())) {
 				String foreignTable = column.getReferenceTableName();
 				String idS = null;
 				int id = -1;
@@ -1617,6 +1618,8 @@ public class GridTabCSVImporter implements IGridTabImporter
 		}
 		else
 		{
+			if (Util.isEmpty(foreignColumn, true))
+				foreignColumn = foreignTable + "_ID";
 			String dbData = value.toString().replaceAll("\"", "'").replaceAll(", ", "','");
 			String trxName = (trx != null ? trx.getTrxName() : null);
 			StringBuilder sql = new StringBuilder("SELECT ").append(foreignTable).append("_ID FROM ")

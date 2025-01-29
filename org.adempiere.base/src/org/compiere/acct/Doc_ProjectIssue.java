@@ -17,11 +17,11 @@
 package org.compiere.acct;
 
 import java.math.BigDecimal;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
+import org.adempiere.util.ProjectIssueUtil;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCostDetail;
 import org.compiere.model.MProduct;
@@ -29,7 +29,6 @@ import org.compiere.model.MProject;
 import org.compiere.model.MProjectIssue;
 import org.compiere.model.MTable;
 import org.compiere.model.ProductCost;
-import org.compiere.util.DB;
 import org.compiere.util.Env;
 
 /**
@@ -75,7 +74,7 @@ public class Doc_ProjectIssue extends Doc
 		m_line.setQty (m_issue.getMovementQty(), true);    //  sets Trx and Storage Qty
 
 		//	Pseudo Line Check
-		if (m_line.getM_Product_ID() == 0)
+		if (m_line.getM_Product_ID() == 0 && m_line.getC_Charge_ID() <= 0)
 			log.warning(m_line.toString() + " - No Product");
 		if (log.isLoggable(Level.FINE)) log.fine(m_line.toString());
 		return null;
@@ -132,19 +131,20 @@ public class Doc_ProjectIssue extends Doc
 		//  Line pointers
 		FactLine dr = null;
 		FactLine cr = null;
-
+		//TODO if cost detail exists then cost must taken from cost details only
 		//  Issue Cost
 		BigDecimal cost = null;
 		if (m_issue.getM_InOutLine_ID() != 0)
-			cost = getPOCost(as);
+			cost = ProjectIssueUtil.getPOCost(as, m_issue.getM_InOutLine_ID(), m_line.getQty());
 		else if (m_issue.getS_TimeExpenseLine_ID() != 0)
-			cost = getLaborCost(as);
+			cost = ProjectIssueUtil.getLaborCost(as, m_issue.getS_TimeExpenseLine_ID());
+		else if (m_issue.getC_InvoiceLine_ID() > 0)
+			cost = m_issue.getAmt();
 		if (cost == null)	//	standard Product Costs
 		{
 			cost = m_line.getProductCosts(as, getAD_Org_ID(), false);
 		}
-
-		
+		//TODO There is missing no cost check. 
 		
 		//  Project         DR
 		int acctType = ACCTTYPE_ProjectWIP;
@@ -155,9 +155,16 @@ public class Doc_ProjectIssue extends Doc
 		dr.setQty(m_line.getQty().negate());
 
 		//  Inventory               CR
-		acctType = ProductCost.ACCTTYPE_P_Asset;
-		if (product.isService())
-			acctType = ProductCost.ACCTTYPE_P_Expense;
+		if (m_issue.getM_Product_ID() > 0)
+		{
+			acctType = ProductCost.ACCTTYPE_P_Asset;
+			if (product.isService())
+				acctType = ProductCost.ACCTTYPE_P_Expense;
+		}
+		else if (m_issue.getC_Charge_ID() > 0)
+		{
+			acctType = Doc.ACCTTYPE_Charge;
+		}
 		cr = fact.createLine(m_line,
 			m_line.getAccount(acctType, as),
 			as.getC_Currency_ID(), null, cost);
@@ -182,94 +189,4 @@ public class Doc_ProjectIssue extends Doc
 		facts.add(fact);
 		return facts;
 	}   //  createFact
-
-	/**
-	 * 	Get PO Costs in Currency of AcctSchema
-	 *	@param as Account Schema
-	 *	@return Unit PO Cost
-	 */
-	protected BigDecimal getPOCost(MAcctSchema as)
-	{
-		BigDecimal retValue = null;
-		//	Uses PO Date
-		String sql = "SELECT currencyConvert(ol.PriceActual, o.C_Currency_ID, ?, o.DateOrdered, o.C_ConversionType_ID, ?, ?) "
-				+ "FROM C_OrderLine ol"
-				+ " INNER JOIN M_InOutLine iol ON (iol.C_OrderLine_ID=ol.C_OrderLine_ID)"
-				+ " INNER JOIN C_Order o ON (o.C_Order_ID=ol.C_Order_ID) "
-				+ "WHERE iol.M_InOutLine_ID=?";
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, getTrxName());
-			pstmt.setInt(1, as.getC_Currency_ID());
-			pstmt.setInt(2, getAD_Client_ID());
-			pstmt.setInt(3, getAD_Org_ID());
-			pstmt.setInt(4, m_issue.getM_InOutLine_ID());
-			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				retValue = rs.getBigDecimal(1);
-				if (log.isLoggable(Level.FINE)) log.fine("POCost = " + retValue);
-			}
-			else
-				log.warning("Not found for M_InOutLine_ID=" + m_issue.getM_InOutLine_ID());
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql, e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			pstmt = null; rs = null;
-		}
-		if (retValue != null)
-			retValue = retValue.multiply(m_line.getQty());
-		return retValue;
-	}	//	getPOCost();
-
-	/**
-	 * 	Get Labor Cost from Expense Report
-	 *	@param as Account Schema
-	 *	@return Unit Labor Cost
-	 */
-
-	protected BigDecimal getLaborCost(MAcctSchema as)
-	{
-		// Todor Lulov 30.01.2008
-		BigDecimal retValue = Env.ZERO;
-		BigDecimal qty = Env.ZERO;
-
-		String sql = "SELECT ConvertedAmt, Qty FROM S_TimeExpenseLine " +
-				" WHERE S_TimeExpenseLine.S_TimeExpenseLine_ID = ?";
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement (sql, getTrxName());
-			pstmt.setInt(1, m_issue.getS_TimeExpenseLine_ID());
-			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				retValue = rs.getBigDecimal(1);
-				qty = rs.getBigDecimal(2);
-				retValue = retValue.multiply(qty);
-				if (log.isLoggable(Level.FINE)) log.fine("ExpLineCost = " + retValue);
-			}
-			else
-				log.warning("Not found for S_TimeExpenseLine_ID=" + m_issue.getS_TimeExpenseLine_ID());
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql, e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			pstmt = null; rs = null;
-		}
-		return retValue;
-	}	//	getLaborCost
-
 }	//	DocProjectIssue

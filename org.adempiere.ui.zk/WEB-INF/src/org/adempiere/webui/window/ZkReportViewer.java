@@ -69,6 +69,7 @@ import org.compiere.model.GridField;
 import org.compiere.model.MArchive;
 import org.compiere.model.MClient;
 import org.compiere.model.MLanguage;
+import org.compiere.model.MPrintFormatAccess;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
@@ -838,14 +839,14 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 			AD_Window_ID = Env.getZoomWindowID(m_reportEngine.getQuery());
 
 		int reportViewID = m_reportEngine.getPrintFormat().getAD_ReportView_ID();
-
+        MUser user = MUser.get(Env.getCtx());
 		//	fill Report Options
 		String sql = MRole.getDefault().addAccessSQL(
 			"SELECT * "
 				+ "FROM AD_PrintFormat "
 				+ "WHERE AD_Table_ID=? "
 				//Added Lines by Armen
-				+ "AND IsActive='Y' "
+				+ "AND IsActive='Y' " + (!user.isSupportUser() ? MPrintFormat.PF_ACCESS_SQLWHERE : "")
 				//End of Added Lines
 				+ (AD_Window_ID > 0 ? "AND (AD_Window_ID=? OR AD_Window_ID IS NULL) " : "")
 				+ (reportViewID > 0 ? "AND AD_ReportView_ID=? " : "")
@@ -859,6 +860,14 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 			pstmt = DB.prepareStatement(sql, null);
 			int idx = 1;
 			pstmt.setInt(idx++, AD_Table_ID);
+			if (!user.isSupportUser())
+			{
+				pstmt.setInt(idx++, Integer.valueOf(Env.getAD_User_ID(Env.getCtx())));
+				pstmt.setInt(idx++, Integer.valueOf(Env.getAD_Role_ID(Env.getCtx())));
+				pstmt.setInt(idx++, Integer.valueOf(Env.getAD_User_ID(Env.getCtx())));
+				pstmt.setInt(idx++, Integer.valueOf(Env.getAD_Role_ID(Env.getCtx())));
+				pstmt.setInt(idx++, Integer.valueOf(Env.getAD_User_ID(Env.getCtx())));
+			}
 			if (AD_Window_ID > 0)
 				pstmt.setInt(idx++, AD_Window_ID);
 			if (reportViewID > 0)
@@ -866,8 +875,8 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{
-				MPrintFormat printFormat = new MPrintFormat (Env.getCtx(), rs, null);
-				
+				MPrintFormat printFormat = new MPrintFormat(Env.getCtx(), rs, null);
+
 				KeyNamePair pp = new KeyNamePair(printFormat.get_ID(), printFormat.get_Translation(MPrintFormat.COLUMNNAME_Name, Env.getAD_Language(Env.getCtx()), true));
 				Listitem li = comboReport.appendItem(pp.getName(), pp.getKey());
 				if (rs.getInt(1) == AD_PrintFormat_ID)
@@ -916,10 +925,14 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 			.append(m_reportEngine.getRowCount());
 		statusBar.setStatusLine(sb.toString());
 		//
+		//Check Access for Print format window (240)
+		Boolean windowAccess = MRole.getDefault().getWindowAccess(240);
 		bWizard.setDisabled(
 				(   m_reportEngine.getPrintFormat() == null
 				 || (m_reportEngine.getPrintFormat().getAD_Client_ID() == 0 && Env.getAD_Client_ID(Env.getCtx()) != 0)
-				 || m_reportEngine.getPrintFormat().isForm()));
+				 || m_reportEngine.getPrintFormat().isForm()
+                 || (windowAccess == null || !windowAccess.booleanValue())
+                 || !MPrintFormatAccess.isWriteAccessPrintFormat(m_reportEngine.getPrintFormat().getAD_PrintFormat_ID(), m_reportEngine.getPrintFormat().get_TrxName())));
 		
 		this.invalidate();
 	}	//	revalidate
@@ -1110,7 +1123,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 			log.log(Level.SEVERE, "", e);
 		}
 
-		IEmailDialog dialog = EMailDialogUtil.getEmailDialog(); 
+		IEmailDialog dialog = EMailDialogUtil.getEmailDialog(m_reportEngine.getPrintInfo().getAD_Table_ID()); 
 		if (dialog != null)
 		{
 			PO po = null;
@@ -1124,8 +1137,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 			if (m_reportEngine.getQuery() != null)
 				dialog.setAD_PInstance_ID(m_reportEngine.getQuery().getAD_PInstance_ID());
 			dialog.init(Msg.getMsg(Env.getCtx(), "SendMail"), from, to, subject, message, attachment, m_WindowNo,
-					m_reportEngine.getPrintInfo().getAD_Table_ID(), m_reportEngine.getPrintInfo().getRecord_ID(),
-					m_reportEngine.getPrintInfo());
+					m_reportEngine.getPrintInfo().getRecord_ID(), m_reportEngine.getPrintInfo());
 
 			dialog.show();
 		}

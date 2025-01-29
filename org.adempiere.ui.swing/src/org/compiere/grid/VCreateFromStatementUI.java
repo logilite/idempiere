@@ -301,7 +301,7 @@ public class VCreateFromStatementUI extends CreateFromStatement implements Actio
 		loadTableOIS(getBankAccountData(bankAccountField.getValue(), bPartnerLookup.getValue(), 
 				documentNoField.getText(), dateFromField.getValue(), dateToField.getValue(),
 				amtFromField.getValue(), amtToField.getValue(), 
-				documentTypeField.getValue(), tenderTypeField.getValue(), authorizationField.getText()));
+				documentTypeField.getValue(), tenderTypeField.getValue(), authorizationField.getText(), null));
 	}
 	
 	protected void loadTableOIS (Vector<? extends Vector> data)

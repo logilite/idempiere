@@ -574,7 +574,23 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 			 return Env.ZERO;
 		return bd;
 	}
+	
+	/** Set Due 91-120.
+	 * @param Due91_120 Due 91-120	 */
+	public void setDue91_120(BigDecimal Due91_120)
+	{
+		set_Value(COLUMNNAME_Due91_120, Due91_120);
+	}
 
+	/** Get Due 91_120. 
+	 * @return Due 91_120	 */
+	public BigDecimal getDue91_120()
+	{
+		BigDecimal bd = (BigDecimal) get_Value(COLUMNNAME_Due91_120);
+		if (bd == null)
+			return Env.ZERO;
+		return bd;
+	}
 	/** Set Due > 91.
 		@param Due91_Plus Due > 91	  */
 	public void setDue91_Plus (BigDecimal Due91_Plus)
@@ -589,6 +605,23 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Due91_Plus);
 		if (bd == null)
 			 return Env.ZERO;
+		return bd;
+	}
+	
+	/** Set Due > 121.
+	@param Due120_Plus Due > 121	  */
+	public void setDue121_Plus (BigDecimal Due121_Plus)
+	{
+		set_Value (COLUMNNAME_Due121_Plus, Due121_Plus);
+	}
+
+	/** Get Due > 121.
+	@return Due > 121	  */
+	public BigDecimal getDue121_Plus () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Due121_Plus);
+		if (bd == null)
+			return Env.ZERO;
 		return bd;
 	}
 
@@ -835,6 +868,24 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 			 return Env.ZERO;
 		return bd;
 	}
+	
+	/**
+	 * Set Past Due 91-120.
+	 * @param PastDue91_120 Past Due 91-120	 */
+	public void setPastDue91_120(BigDecimal PastDue91_120)
+	{
+		set_Value(COLUMNNAME_PastDue91_120, PastDue91_120);
+	}
+
+	/** Get Past Due 91-120.
+		@return Past Due 91-120	  */
+	public BigDecimal getPastDue91_120()
+	{
+		BigDecimal bd = (BigDecimal) get_Value(COLUMNNAME_PastDue91_120);
+		if (bd == null)
+			return Env.ZERO;
+		return bd;
+	}
 
 	/** Set Past Due > 91.
 		@param PastDue91_Plus Past Due > 91	  */
@@ -850,6 +901,23 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PastDue91_Plus);
 		if (bd == null)
 			 return Env.ZERO;
+		return bd;
+	}
+	
+	/** Set Past Due > 121.
+	@param PastDue121_Plus Past Due > 121	  */
+	public void setPastDue121_Plus (BigDecimal PastDue121_Plus)
+	{	
+		set_Value (COLUMNNAME_PastDue121_Plus, PastDue121_Plus);
+	}
+
+	/** Get Past Due > 121.
+	@return Past Due > 121	  */
+	public BigDecimal getPastDue121_Plus () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PastDue121_Plus);
+		if (bd == null)
+			return Env.ZERO;
 		return bd;
 	}
 

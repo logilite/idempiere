@@ -33,9 +33,8 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
-
-    /** Standard Constructor */
+    private static final long serialVersionUID = -289270779977733399L;
+	/** Standard Constructor */
     public X_C_ProjectIssue (Properties ctx, int C_ProjectIssue_ID, String trxName)
     {
       super (ctx, C_ProjectIssue_ID, trxName);
@@ -84,6 +83,82 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
       return sb.toString();
     }
 
+	/**
+	 * Set Amount.
+	 * @param Amt Amount
+	 */
+	public void setAmt (BigDecimal Amt)
+	{
+		set_Value (COLUMNNAME_Amt, Amt);
+	}
+	
+	/** Get Amount.
+		@return Amount
+	  */
+	public BigDecimal getAmt ()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Amt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+	
+	public org.compiere.model.I_C_Charge getC_Charge() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Charge)MTable.get(getCtx(), org.compiere.model.I_C_Charge.Table_Name)
+			.getPO(getC_Charge_ID(), get_TrxName());	}
+	
+	/** Set Charge.
+		@param C_Charge_ID
+		Additional document charges
+	  */
+	public void setC_Charge_ID (int C_Charge_ID)
+	{
+		if (C_Charge_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_Charge_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_Charge_ID, Integer.valueOf(C_Charge_ID));
+	}
+	
+	/** Get Charge.
+		@return Additional document charges
+	  */
+	public int getC_Charge_ID ()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Charge_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+	
+	public org.compiere.model.I_C_InvoiceLine getC_InvoiceLine() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_InvoiceLine)MTable.get(getCtx(), org.compiere.model.I_C_InvoiceLine.Table_Name)
+			.getPO(getC_InvoiceLine_ID(), get_TrxName());	}
+	
+	/** Set Invoice Line.
+		@param C_InvoiceLine_ID
+		Invoice Detail Line
+	  */
+	public void setC_InvoiceLine_ID (int C_InvoiceLine_ID)
+	{
+		if (C_InvoiceLine_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_InvoiceLine_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_InvoiceLine_ID, Integer.valueOf(C_InvoiceLine_ID));
+	}
+	
+	/** Get Invoice Line.
+		@return Invoice Detail Line
+	  */
+	public int getC_InvoiceLine_ID ()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_InvoiceLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+    
 	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
     {
 		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_Name)
@@ -172,6 +247,122 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 	public String getDescription () 
 	{
 		return (String)get_Value(COLUMNNAME_Description);
+	}
+
+	/** DocAction AD_Reference_ID=135 */
+	public static final int DOCACTION_AD_Reference_ID=135;
+	/** Complete = CO */
+	public static final String DOCACTION_Complete = "CO";
+	/** Approve = AP */
+	public static final String DOCACTION_Approve = "AP";
+	/** Reject = RJ */
+	public static final String DOCACTION_Reject = "RJ";
+	/** Post = PO */
+	public static final String DOCACTION_Post = "PO";
+	/** Void = VO */
+	public static final String DOCACTION_Void = "VO";
+	/** Close = CL */
+	public static final String DOCACTION_Close = "CL";
+	/** Reverse - Correct = RC */
+	public static final String DOCACTION_Reverse_Correct = "RC";
+	/** Reverse - Accrual = RA */
+	public static final String DOCACTION_Reverse_Accrual = "RA";
+	/** Invalidate = IN */
+	public static final String DOCACTION_Invalidate = "IN";
+	/** Re-activate = RE */
+	public static final String DOCACTION_Re_Activate = "RE";
+	/** <None> = -- */
+	public static final String DOCACTION_None = "--";
+	/** Prepare = PR */
+	public static final String DOCACTION_Prepare = "PR";
+	/** Unlock = XL */
+	public static final String DOCACTION_Unlock = "XL";
+	/** Wait Complete = WC */
+	public static final String DOCACTION_WaitComplete = "WC";
+	/** Set Document Action.
+		@param DocAction 
+		The targeted status of the document
+	  */
+	public void setDocAction (String DocAction)
+	{
+
+		set_Value (COLUMNNAME_DocAction, DocAction);
+	}
+
+	/** Get Document Action.
+		@return The targeted status of the document
+	  */
+	public String getDocAction () 
+	{
+		return (String)get_Value(COLUMNNAME_DocAction);
+	}
+
+	/** DocStatus AD_Reference_ID=131 */
+	public static final int DOCSTATUS_AD_Reference_ID=131;
+	/** Drafted = DR */
+	public static final String DOCSTATUS_Drafted = "DR";
+	/** Completed = CO */
+	public static final String DOCSTATUS_Completed = "CO";
+	/** Approved = AP */
+	public static final String DOCSTATUS_Approved = "AP";
+	/** Not Approved = NA */
+	public static final String DOCSTATUS_NotApproved = "NA";
+	/** Voided = VO */
+	public static final String DOCSTATUS_Voided = "VO";
+	/** Invalid = IN */
+	public static final String DOCSTATUS_Invalid = "IN";
+	/** Reversed = RE */
+	public static final String DOCSTATUS_Reversed = "RE";
+	/** Closed = CL */
+	public static final String DOCSTATUS_Closed = "CL";
+	/** Unknown = ?? */
+	public static final String DOCSTATUS_Unknown = "??";
+	/** In Progress = IP */
+	public static final String DOCSTATUS_InProgress = "IP";
+	/** Waiting Payment = WP */
+	public static final String DOCSTATUS_WaitingPayment = "WP";
+	/** Waiting Confirmation = WC */
+	public static final String DOCSTATUS_WaitingConfirmation = "WC";
+	/** Set Document Status.
+		@param DocStatus 
+		The current status of the document
+	  */
+	public void setDocStatus (String DocStatus)
+	{
+
+		set_Value (COLUMNNAME_DocStatus, DocStatus);
+	}
+
+	/** Get Document Status.
+		@return The current status of the document
+	  */
+	public String getDocStatus () 
+	{
+		return (String)get_Value(COLUMNNAME_DocStatus);
+	}
+
+	/** Set Approved.
+		@param IsApproved 
+		Indicates if this document requires approval
+	  */
+	public void setIsApproved (boolean IsApproved)
+	{
+		set_ValueNoCheck (COLUMNNAME_IsApproved, Boolean.valueOf(IsApproved));
+	}
+
+	/** Get Approved.
+		@return Indicates if this document requires approval
+	  */
+	public boolean isApproved () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsApproved);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set Line No.
@@ -430,6 +621,34 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	public org.compiere.model.I_C_ProjectIssue getReversal() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_ProjectIssue)MTable.get(getCtx(), org.compiere.model.I_C_ProjectIssue.Table_Name)
+			.getPO(getReversal_ID(), get_TrxName());	}
+
+	/** Set Reversal ID.
+		@param Reversal_ID 
+		ID of document reversal
+	  */
+	public void setReversal_ID (int Reversal_ID)
+	{
+		if (Reversal_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_Reversal_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_Reversal_ID, Integer.valueOf(Reversal_ID));
+	}
+
+	/** Get Reversal ID.
+		@return ID of document reversal
+	  */
+	public int getReversal_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Reversal_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_S_TimeExpenseLine getS_TimeExpenseLine() throws RuntimeException

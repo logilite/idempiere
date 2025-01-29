@@ -92,6 +92,7 @@ public class MPayment extends X_C_Payment
 	 * 
 	 */
 	private static final long serialVersionUID = 3236788845265387613L;
+	protected BigDecimal		payAllocatesAmt = Env.ZERO;
 
 	/**
 	 * 	Get Payments Of BPartner
@@ -718,7 +719,8 @@ public class MPayment extends X_C_Payment
 			             || is_ValueChanged(COLUMNNAME_DateTrx)
 			             || is_ValueChanged(COLUMNNAME_DiscountAmt)
 			             || is_ValueChanged(COLUMNNAME_PayAmt)
-			             || is_ValueChanged(COLUMNNAME_WriteOffAmt)))
+			             || is_ValueChanged(COLUMNNAME_WriteOffAmt)
+			             || is_ValueChanged(COLUMNNAME_C_Charge_ID)))
 		{ //Repost if accounting related columns changes
 			String error = DocumentEngine.postImmediate(Env.getCtx(), getAD_Client_ID(), get_Table_ID(), get_ID(),
 					true, get_TrxName());
@@ -753,7 +755,7 @@ public class MPayment extends X_C_Payment
 		}
 		//Not allow to set charge when no charge set and user setting charge
 		if (isComplete() && ! is_ValueChanged(COLUMNNAME_Processed) &&
-				is_ValueChanged(COLUMNNAME_C_Charge_ID) && get_ValueOld(COLUMNNAME_C_Charge_ID)==null) {
+				is_ValueChanged(COLUMNNAME_C_Charge_ID) && (get_ValueOld(COLUMNNAME_C_Charge_ID)==null && (getC_Invoice_ID()>0 || getC_Order_ID()>0))) {
 			log.saveError("PaymentAlreadyProcessed", Msg.translate(getCtx(), "C_Payment_ID"));
 			return false;
 		}
@@ -1780,6 +1782,7 @@ public class MPayment extends X_C_Payment
 		if (pAllocs.length > 0) {
 			for (MPaymentAllocate pAlloc : pAllocs)
 				sumPaymentAllocates = sumPaymentAllocates.add(pAlloc.getAmount());
+			setPayAllocatesAmt(sumPaymentAllocates);
 			if (getPayAmt().compareTo(sumPaymentAllocates) != 0) {
 				if (isReceipt() && getPayAmt().compareTo(sumPaymentAllocates) < 0) {
 					if (MSysConfig.getBooleanValue(MSysConfig.ALLOW_OVER_APPLIED_PAYMENT, false, Env.getAD_Client_ID(Env.getCtx()))) {
@@ -1790,6 +1793,23 @@ public class MPayment extends X_C_Payment
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * @param amt
+	 */
+	public void setPayAllocatesAmt(BigDecimal amt)
+	{
+		payAllocatesAmt = amt;
+	}
+	
+	/**
+	 * @param amt
+	 * @return
+	 */
+	public BigDecimal getPayAllocatesAmt()
+	{
+		return payAllocatesAmt;
 	}
 
 	/**
@@ -2987,6 +3007,7 @@ public class MPayment extends X_C_Payment
 		//	: Total Lines = 123.00 (#1)
 		sb.append(": ")
 			.append(Msg.translate(getCtx(),"PayAmt")).append("=").append(getPayAmt())
+			.append(",").append(Msg.translate(getCtx(), "Allocate Amount")).append("=").append(getPayAllocatesAmt())
 			.append(",").append(Msg.translate(getCtx(),"WriteOffAmt")).append("=").append(getWriteOffAmt());
 		//	 - Description
 		if (getDescription() != null && getDescription().length() > 0)

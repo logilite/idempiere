@@ -62,6 +62,49 @@ public interface I_C_ProjectIssue
 	  */
 	public int getAD_Org_ID();
 
+	/** Column name Amt */
+    public static final String COLUMNNAME_Amt = "Amt";
+
+	/** Set Amount.
+	  * Amount
+	  */
+	public void setAmt (BigDecimal Amt);
+
+	/** Get Amount.
+	  * Amount
+	  */
+	public BigDecimal getAmt();
+
+    /** Column name C_Charge_ID */
+    public static final String COLUMNNAME_C_Charge_ID = "C_Charge_ID";
+
+	/** Set Charge.
+	  * Additional document charges
+	  */
+	public void setC_Charge_ID (int C_Charge_ID);
+
+	/** Get Charge.
+	  * Additional document charges
+	  */
+	public int getC_Charge_ID();
+
+	public org.compiere.model.I_C_Charge getC_Charge() throws RuntimeException;
+
+    /** Column name C_InvoiceLine_ID */
+    public static final String COLUMNNAME_C_InvoiceLine_ID = "C_InvoiceLine_ID";
+
+	/** Set Invoice Line.
+	  * Invoice Detail Line
+	  */
+	public void setC_InvoiceLine_ID (int C_InvoiceLine_ID);
+
+	/** Get Invoice Line.
+	  * Invoice Detail Line
+	  */
+	public int getC_InvoiceLine_ID();
+
+	public org.compiere.model.I_C_InvoiceLine getC_InvoiceLine() throws RuntimeException;
+
     /** Column name C_Project_ID */
     public static final String COLUMNNAME_C_Project_ID = "C_Project_ID";
 
@@ -128,6 +171,32 @@ public interface I_C_ProjectIssue
 	  */
 	public String getDescription();
 
+    /** Column name DocAction */
+    public static final String COLUMNNAME_DocAction = "DocAction";
+
+	/** Set Document Action.
+	  * The targeted status of the document
+	  */
+	public void setDocAction (String DocAction);
+
+	/** Get Document Action.
+	  * The targeted status of the document
+	  */
+	public String getDocAction();
+
+    /** Column name DocStatus */
+    public static final String COLUMNNAME_DocStatus = "DocStatus";
+
+	/** Set Document Status.
+	  * The current status of the document
+	  */
+	public void setDocStatus (String DocStatus);
+
+	/** Get Document Status.
+	  * The current status of the document
+	  */
+	public String getDocStatus();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -140,6 +209,19 @@ public interface I_C_ProjectIssue
 	  * The record is active in the system
 	  */
 	public boolean isActive();
+
+    /** Column name IsApproved */
+    public static final String COLUMNNAME_IsApproved = "IsApproved";
+
+	/** Set Approved.
+	  * Indicates if this document requires approval
+	  */
+	public void setIsApproved (boolean IsApproved);
+
+	/** Get Approved.
+	  * Indicates if this document requires approval
+	  */
+	public boolean isApproved();
 
     /** Column name Line */
     public static final String COLUMNNAME_Line = "Line";
@@ -287,6 +369,21 @@ public interface I_C_ProjectIssue
 
 	/** Get Process Now	  */
 	public boolean isProcessing();
+
+    /** Column name Reversal_ID */
+    public static final String COLUMNNAME_Reversal_ID = "Reversal_ID";
+
+	/** Set Reversal ID.
+	  * ID of document reversal
+	  */
+	public void setReversal_ID (int Reversal_ID);
+
+	/** Get Reversal ID.
+	  * ID of document reversal
+	  */
+	public int getReversal_ID();
+
+	public org.compiere.model.I_C_ProjectIssue getReversal() throws RuntimeException;
 
     /** Column name S_TimeExpenseLine_ID */
     public static final String COLUMNNAME_S_TimeExpenseLine_ID = "S_TimeExpenseLine_ID";

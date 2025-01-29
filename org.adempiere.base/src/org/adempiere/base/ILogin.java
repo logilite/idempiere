@@ -50,4 +50,6 @@ public interface ILogin
 	KeyNamePair[] getRoles(String identity, String string);
 
 	KeyNamePair[] getClients();
+	
+	void setIsSSOLogin(boolean isSSOLogin);
 }

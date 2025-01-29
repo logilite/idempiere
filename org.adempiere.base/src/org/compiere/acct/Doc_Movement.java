@@ -112,7 +112,7 @@ public class Doc_Movement extends Doc
 					String key = lineMA.getM_AttributeSetInstance_ID() + "_" + lineMA.getM_AttributeSetInstanceTo_ID();
 					if (!map.containsKey(key))
 					{
-						DocLine docLine = new DocLine(line, this);
+						DocLine docLine = new DocLine(line, this, lineMA);
 						docLine.setM_AttributeSetInstance_ID(lineMA.getM_AttributeSetInstance_ID());
 						docLine.setM_AttributeSetInstanceTo_ID(lineMA.getM_AttributeSetInstanceTo_ID());
 						docLine.setQty(lineMA.getMovementQty(), false);

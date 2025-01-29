@@ -138,6 +138,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String PDF_FONT_DIR = "PDF_FONT_DIR";
     public static final String ProductUOMConversionRateValidate = "ProductUOMConversionRateValidate";
     public static final String ProductUOMConversionUOMValidate = "ProductUOMConversionUOMValidate";
+    public static final String PRINTFORMAT_AUTOGENERATE_ACCESS = "PRINTFORMAT_AUTOGENERATE_ACCESS";
     public static final String PROJECT_ID_COMMENTS = "PROJECT_ID_COMMENTS";
     public static final String PROJECT_ID_PASSWORD = "PROJECT_ID_PASSWORD";
     public static final String PROJECT_ID_PROJECT = "PROJECT_ID_PROJECT";
@@ -223,6 +224,9 @@ public class MSysConfig extends X_AD_SysConfig
 	public static final String ZK_DASHBOARD_SLOW_QUERY_TIME_INTERVAL = "ZK_DASHBOARD_SLOW_QUERY_TIME_INTERVAL";
 	public static final String ZK_LOGIN_LEFTPANEL_SHOWN = "ZK_LOGIN_LEFTPANEL_SHOWN";
 	public static final String ZK_SEARCH_AUTO_COMPLETE_MAX_ROWS = "ZK_SEARCH_AUTO_COMPLETE_MAX_ROWS";
+	public static final String BANKSTATEMENT_MANUAL_OPENING = "BANKSTATEMENT_MANUAL_OPENING";
+	public static final String MAIL_SEND_COMMENTS = "MAIL_SEND_COMMENTS";
+	public static final String USE_SEARCH_KEY_FOR_LOGIN = "USE_SEARCH_KEY_FOR_LOGIN";
 
 	/**
 	 * 	Standard Constructor

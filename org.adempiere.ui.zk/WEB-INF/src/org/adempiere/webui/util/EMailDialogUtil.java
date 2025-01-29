@@ -26,7 +26,7 @@ public class EMailDialogUtil
 	/**
 	 * @return Email dialog instance of highest ranked from services
 	 */
-	public static IEmailDialog getEmailDialog()
+	public static IEmailDialog getEmailDialog(int AD_Table_ID)
 	{
 		List<IEmailDialog> serviceList = Service.locator().list(IEmailDialog.class).getServices();
 		
@@ -34,7 +34,7 @@ public class EMailDialogUtil
 		{
 			for (IEmailDialog dialog : serviceList)
 			{
-				dialog = dialog.createInstance();
+				dialog = dialog.createInstance(AD_Table_ID);
 				if (dialog != null)
 					return dialog;
 			}

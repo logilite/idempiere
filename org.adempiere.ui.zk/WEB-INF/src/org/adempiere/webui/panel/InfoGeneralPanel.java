@@ -521,7 +521,8 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 					list.add(new ColumnInfo(Msg.translate(Env.getCtx(), columnName), colSql.toString(), colClass, true, columnName));
 					if (log.isLoggable(Level.FINEST)) log.finest("Added Column=" + columnName);
 				}
-				else if (isDisplayed && DisplayType.isLookup(displayType))
+				else if (isDisplayed && DisplayType.isLookup(displayType)
+						&& !(displayType == DisplayType.ChosenMultipleSelectionTable || displayType == DisplayType.ChosenMultipleSelectionSearch || displayType == DisplayType.ChosenMultipleSelectionList))
 				{
 					ColumnInfo colInfo = createLookupColumnInfo(Msg.translate(Env.getCtx(), columnName), columnName, displayType, AD_Reference_Value_ID, AD_Column_ID, colSql.toString());
 					if (colInfo != null)
@@ -647,8 +648,13 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 		MTable table = MTable.get(Env.getCtx(), p_tableName);
 		MColumn column = table.getColumn(columnName);
 		String embedded;
-		if (AD_Reference_Value_ID > 0) {
-			embedded = MLookupFactory.getLookup_TableEmbed(Env.getLanguage(Env.getCtx()), columnName, p_tableName, AD_Reference_Value_ID);
+		if (DisplayType.isMultiSelect(AD_Reference_ID)) {
+			if (DisplayType.MultiSelectList == AD_Reference_ID)
+				embedded = MLookupFactory.getLookup_MultiSelectListEmbed(Env.getLanguage(Env.getCtx()), AD_Reference_Value_ID, p_tableName + "." + columnName);
+			else
+				embedded = MLookupFactory.getLookup_MultiSelectTableEmbed(Env.getLanguage(Env.getCtx()), columnName, p_tableName, AD_Reference_Value_ID, true);
+		} else if (AD_Reference_Value_ID > 0) {
+			embedded = MLookupFactory.getLookup_TableEmbed(Env.getLanguage(Env.getCtx()), columnName, p_tableName, AD_Reference_Value_ID, true);
 		} else {
 			if (column.isVirtualColumn())
 				embedded = MLookupFactory.getLookup_TableDirEmbed(Env.getLanguage(Env.getCtx()), columnName, p_tableName, column.getColumnSQL());

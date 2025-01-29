@@ -23,7 +23,6 @@ import java.util.Set;
 
 import org.adempiere.base.IGridTabExporter;
 import org.adempiere.base.equinox.EquinoxExtensionLocator;
-import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.adwindow.AbstractADWindowContent;
@@ -336,7 +335,7 @@ public class ExportAction implements EventListener<Event>
 			media = new AMedia(exporter.getSuggestedFileName(panel.getActiveGridTab()), null, exporter.getContentType(), file, true);
 			Filedownload.save(media);
 		} catch (Exception e) {
-			throw new AdempiereException(e);
+			FDialog.error(0, e.getLocalizedMessage());
 		} finally {
 			if (winExportFile != null)
 				winExportFile.onClose();

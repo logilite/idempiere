@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
+import org.compiere.model.X_AD_PInstance_Log;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -168,7 +169,7 @@ public class ProcessInfoUtil
 		for (int i = 0; i < logs.length; i++)
 		{
 			StringBuilder sql = new StringBuilder ("INSERT INTO AD_PInstance_Log "
-				+ "(AD_PInstance_ID, Log_ID, P_Date, P_ID, P_Number, P_Msg, AD_Table_ID,Record_ID)"
+				+ "(AD_PInstance_ID, Log_ID, P_Date, P_ID, P_Number, P_Msg, AD_Table_ID,Record_ID, PInstanceLogType)"
 				+ " VALUES (");
 			sql.append(pi.getAD_PInstance_ID()).append(",")
 				.append(logs[i].getLog_ID()).append(",");
@@ -193,9 +194,13 @@ public class ProcessInfoUtil
 			else
 				sql.append(logs[i].getAD_Table_ID()).append(",");
 			if (logs[i].getRecord_ID() == 0)
-				sql.append("NULL)");
+				sql.append("NULL,");
 			else
-				sql.append(logs[i].getRecord_ID()).append(")");
+				sql.append(logs[i].getRecord_ID()).append(",");
+			if(logs[i].getPInstanceLogType() == null)
+				sql.append(DB.TO_STRING(X_AD_PInstance_Log.PINSTANCELOGTYPE_Result)).append(")");
+			else
+				sql.append(DB.TO_STRING(logs[i].getPInstanceLogType())).append(")");
 //
 			DB.executeUpdate(sql.toString(), null);
 		}
