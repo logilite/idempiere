@@ -55,6 +55,7 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
+import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
 import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFNode;
@@ -70,6 +71,7 @@ import org.zkoss.zul.South;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Html;
+import org.zkoss.zul.Listitem;
 
 /**
  * Direct port from WFActivity
@@ -531,7 +533,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 
 		//	User Actions
 		MWFNode node = m_activity.getNode();
-		if (MWFNode.ACTION_UserChoice.equals(node.getAction()))
+		if (MWFNode.ACTION_UserChoice.equals(node.getAction()) || node.isUserTask())
 		{
 			if (m_column == null)
 				m_column = (MColumn) node.getApprovalColumn();
@@ -701,40 +703,70 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 				}
 				//
 				if (log.isLoggable(Level.CONFIG)) log.config("Answer=" + value + " - " + textMsg);
-				try
+				
+				boolean ok = m_activity.setUserChoice(m_activity.getAD_User_ID(), value, dt, textMsg);
+
+				if (!ok)
 				{
-					m_activity.setUserChoice(AD_User_ID, value, dt, textMsg);
-				}
-				catch (Exception e)
-				{
-					log.log(Level.SEVERE, node.getName(), e);
-					FDialog.error(m_WindowNo, this, "Error", e.toString());
-					trx.rollback();
-					trx.close();
-					return;
+					String error = m_activity.getM_ErrorMsg();
+
+					if (!Util.isEmpty(error, true))
+					{
+						FDialog.error(0, error);
+						trx.rollback();
+						return;
+					}
 				}
 			}
 			//	User Action
 			else
 			{
-				if (log.isLoggable(Level.CONFIG)) log.config("Action=" + node.getAction() + " - " + textMsg);
-				try
+				if (logger.isLoggable(Level.CONFIG))
+					logger.config("Action=" + node.getAction() + " - " + textMsg);
+				
+				if (node.isUserTask())
+				{
+					if (node.getAD_Column_ID() > 0)
+					{
+						MColumn column = MColumn.get(Env.getCtx(), node.getAD_Column_ID());
+						String value = null;
+
+						Listitem li = fAnswerList.getSelectedItem();
+
+						if (li != null)
+							value = li.getValue().toString();
+
+						boolean ok = m_activity.setUserTask(m_activity.getAD_User_ID(), value, column.getAD_Reference_ID(), textMsg);
+
+						if (!ok)
+						{
+							String error = m_activity.getM_ErrorMsg();
+
+							if (!Util.isEmpty(error, true))
+							{
+								FDialog.error(0, error);
+								trx.rollback();
+								return;
+							}
+						}
+					}
+				}
+				else
 				{
 					// ensure activity is ran within a transaction
-					m_activity.setUserConfirmation(AD_User_ID, textMsg);
+					m_activity.setUserConfirmation(m_activity.getAD_User_ID(), textMsg);
 				}
-				catch (Exception e)
-				{
-					log.log(Level.SEVERE, node.getName(), e);
-					FDialog.error(m_WindowNo, this, "Error", e.toString());
-					trx.rollback();
-					trx.close();
-					return;
-				}
-
 			}
 
 			trx.commit();
+		}
+		catch (Exception e)
+		{
+            log.log(Level.SEVERE, node.getName(), e);
+			FDialog.error(m_WindowNo, this, "Error", e.toString());
+			trx.rollback();
+			trx.close();
+			return;
 		}
 		finally
 		{

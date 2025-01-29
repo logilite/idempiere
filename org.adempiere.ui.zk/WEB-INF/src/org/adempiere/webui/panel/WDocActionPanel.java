@@ -651,6 +651,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 								if (!Util.isEmpty(error, true))
 								{
 									FDialog.error(0, error);
+									trx.rollback();
 									return;
 								}
 							}
