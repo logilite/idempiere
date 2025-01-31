@@ -1908,7 +1908,11 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		setWFState(StateEngine.STATE_Running);
 		setAD_User_ID(AD_User_ID);
 		Trx trx = (get_TrxName() != null) ? Trx.get(get_TrxName(), false) : null;
-		setVariable(value, displayType, textMsg, trx);
+		
+		MWFNode node = getNode();
+		if(node.getAD_Column_ID()>0)
+			setVariable(value, displayType, textMsg, trx);
+		
 		m_ErrorMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_WF_NODE_EXECUTION);
 		if (m_ErrorMsg != null)
 		{
