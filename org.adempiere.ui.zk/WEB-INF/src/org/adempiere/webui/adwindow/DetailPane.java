@@ -782,6 +782,9 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
         		}
         	}        	
         }               
+
+		//Not use by ADTabpanel, for custom IADTabpanel implementation.
+		adtab.updateDetailToolbar(toolbar);
 	}
 	
 	private void updateProcessToolbar() {
