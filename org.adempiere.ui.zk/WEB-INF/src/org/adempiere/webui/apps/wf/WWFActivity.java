@@ -685,7 +685,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 
 					if (!Util.isEmpty(error, true))
 					{
-						FDialog.error(0, error);
+						Dialog.error(m_WindowNo, "Error", error);
 						trx.rollback();
 						return;
 					}
@@ -719,7 +719,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 
 							if (!Util.isEmpty(error, true))
 							{
-								FDialog.error(0, error);
+								Dialog.error(m_WindowNo, "Error", error);
 								trx.rollback();
 								return;
 							}
@@ -743,7 +743,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 		catch (Exception e)
 		{
             log.log(Level.SEVERE, node.getName(), e);
-			FDialog.error(m_WindowNo, this, "Error", e.toString());
+            Dialog.error(m_WindowNo, "Error", e.toString());
 			trx.rollback();
 			trx.close();
 			return;
