@@ -692,6 +692,8 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 							value = li.getValue().toString();
 
 						boolean ok = m_activity.setUserTask(m_activity.getAD_User_ID(), value, column.getAD_Reference_ID(), textMsg);
+						MWFProcess wfpr = new MWFProcess(m_activity.getCtx(), m_activity.getAD_WF_Process_ID(), m_activity.get_TrxName());
+						wfpr.checkCloseActivities(m_activity.get_TrxName());
 
 						if (!ok)
 						{
