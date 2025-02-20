@@ -902,10 +902,10 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
         		}else {
         			btn.setVisible(true);
         		}
-        	}
-        }
+        	}        	
+        }               
 
-		// update from customized implementation
+		//Not use by ADTabpanel, for custom IADTabpanel implementation.
 		adtab.updateDetailToolbar(toolbar);
 	}
 	

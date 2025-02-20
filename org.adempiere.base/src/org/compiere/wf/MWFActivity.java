@@ -57,6 +57,8 @@ import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.MUserRoles;
 import org.compiere.model.MWFActivityApprover;
+import org.compiere.model.ModelValidationEngine;
+import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.model.X_AD_WF_Activity;
@@ -266,6 +268,8 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	private MWFProcess 			m_process = null;
 	/** List of email recipients	*/
 	private ArrayList<String> 	m_emails = new ArrayList<String>();
+	
+	private transient String	m_ErrorMsg	= null;
 
 	/**************************************************************************
 	 * 	Get State
@@ -354,12 +358,12 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		}
 		else
 			m_audit.setEventType(MWFEventAudit.EVENTTYPE_StateChanged);
-		boolean valid = m_audit.save();
+		boolean valid = m_audit.save(get_TrxName());
 		if (! valid) {
 			// the event audit could not be updated, probably it was deleted by the rollback to savepoint
 			// so, set the ID to zero and save it again (insert)
 			m_audit.setAD_WF_EventAudit_ID(0);
-			m_audit.saveEx();
+			m_audit.saveEx(get_TrxName());
 		}
 	}	//	updateEventAudit
 
@@ -1828,68 +1832,65 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		if (!ok)
 			return false;
 
+		// Doc Validation
+		m_ErrorMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_WF_NODE_EXECUTION);
+		if (!Util.isEmpty(m_ErrorMsg, true))
+		{
+			return false;
+		}
+		
 		String newState = StateEngine.STATE_Completed;
 		//	Approval
 		if (getNode().isUserApproval() && getPO(trx) instanceof DocAction)
 		{
 			DocAction doc = (DocAction)m_po;
-			try
+			// Not approved
+			if (!"Y".equals(value) && DisplayType.YesNo == displayType)
 			{
-				//	Not approved
-				if (!"Y".equals(value) && DisplayType.YesNo == displayType)
+				newState = StateEngine.STATE_Aborted;
+				if (!(doc.processIt(DocAction.ACTION_Reject)))
+					setTextMsg("Cannot Reject - Document Status: " + doc.getDocStatus());
+			}
+			else
+			{
+				if (isInvoker())
 				{
-					newState = StateEngine.STATE_Aborted;
-					if (!(doc.processIt (DocAction.ACTION_Reject)))
-						setTextMsg ("Cannot Reject - Document Status: " + doc.getDocStatus());
-				}
-				else
-				{
-					if (isInvoker())
-					{
-						int startAD_User_ID = Env.getAD_User_ID(getCtx());
-						if (startAD_User_ID == 0)
-							startAD_User_ID = doc.getDoc_User_ID();
-						int nextAD_User_ID = getApprovalUser(startAD_User_ID,
-							doc.getC_Currency_ID(), doc.getApprovalAmt(),
-							doc.getAD_Org_ID(),
-							startAD_User_ID == doc.getDoc_User_ID());	//	own doc
-						//	No Approver
-						if (nextAD_User_ID <= 0)
-						{
-							newState = StateEngine.STATE_Aborted;
-							setTextMsg (Msg.getMsg(getCtx(), "NoApprover"));
-							doc.processIt (DocAction.ACTION_Reject);
-						}
-						else if (startAD_User_ID != nextAD_User_ID)
-						{
-							forwardTo(nextAD_User_ID, "Next Approver");
-							newState = StateEngine.STATE_Suspended;
-						}
-						else	//	Approve
-						{
-							if (!(doc.processIt (DocAction.ACTION_Approve)))
-							{
-								newState = StateEngine.STATE_Aborted;
-								setTextMsg ("Cannot Approve - Document Status: " + doc.getDocStatus());
-							}
-						}
-					}
-					//	No Invoker - Approve
-					else if (!(doc.processIt (DocAction.ACTION_Approve)))
+					int startAD_User_ID = Env.getAD_User_ID(getCtx());
+					if (startAD_User_ID == 0)
+						startAD_User_ID = doc.getDoc_User_ID();
+					int nextAD_User_ID = getApprovalUser(startAD_User_ID, doc.getC_Currency_ID(), doc.getApprovalAmt(),
+							doc.getAD_Org_ID(), startAD_User_ID == doc.getDoc_User_ID()); // own
+																							// doc
+					// No Approver
+					if (nextAD_User_ID <= 0)
 					{
 						newState = StateEngine.STATE_Aborted;
-						setTextMsg ("Cannot Approve - Document Status: " + doc.getDocStatus());
+						setTextMsg(Msg.getMsg(getCtx(), "NoApprover"));
+						doc.processIt(DocAction.ACTION_Reject);
+					}
+					else if (startAD_User_ID != nextAD_User_ID)
+					{
+						forwardTo(nextAD_User_ID, "Next Approver");
+						newState = StateEngine.STATE_Suspended;
+					}
+					else // Approve
+					{
+						if (!(doc.processIt(DocAction.ACTION_Approve)))
+						{
+							newState = StateEngine.STATE_Aborted;
+							setTextMsg("Cannot Approve - Document Status: " + doc.getDocStatus());
+						}
 					}
 				}
-				doc.saveEx();
+				// No Invoker - Approve
+				else if (!(doc.processIt(DocAction.ACTION_Approve)))
+				{
+					newState = StateEngine.STATE_Aborted;
+					setTextMsg("Cannot Approve - Document Status: " + doc.getDocStatus());
+				}
 			}
-			catch (Exception e)
-			{
-				newState = StateEngine.STATE_Terminated;
-				setTextMsg ("User Choice: " + e.toString());
-				addTextMsg(e);
-				log.log(Level.WARNING, "", e);
-			}
+			doc.saveEx();
+
 			// Send Approval Notification
 			if (newState.equals(StateEngine.STATE_Aborted)) {
 				MUser to = new MUser(getCtx(), doc.getDoc_User_ID(), null);
@@ -1933,13 +1934,25 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	 * @return true if set
 	 * @throws Exception
 	 */
-	public void setUserTask(int AD_User_ID, String value, int displayType, String textMsg) throws Exception
+	public boolean setUserTask(int AD_User_ID, String value, int displayType, String textMsg) throws Exception
 	{
 		setWFState(StateEngine.STATE_Running);
 		setAD_User_ID(AD_User_ID);
 		Trx trx = (get_TrxName() != null) ? Trx.get(get_TrxName(), false) : null;
-		setVariable(value, displayType, textMsg, trx);
+		
+		MWFNode node = getNode();
+		if(node.getAD_Column_ID()>0)
+			setVariable(value, displayType, textMsg, trx);
+		
+		m_ErrorMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_WF_NODE_EXECUTION);
+		if (m_ErrorMsg != null)
+		{
+			return false;
+		}
+			
 		setWFState(StateEngine.STATE_Completed);
+		return true;
+			
 	}
 
 	/**
@@ -2526,7 +2539,17 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			value = val.toString();
 		return value;
 	} // parseVariables
-	
+
+	public String getM_ErrorMsg()
+	{
+		return m_ErrorMsg;
+	}
+
+	public void setM_ErrorMsg(String m_ErrorMsg)
+	{
+		this.m_ErrorMsg = m_ErrorMsg;
+	}
+
 	private void prepareCommitEvent()
 	{
 		Trx trx = null;
