@@ -1510,9 +1510,9 @@ public class FinReport extends SvrProcess
 		}
 		else
 		{
-			insert.append(", Cast(NULL AS NUMBER)");
+			insert.append(", Cast(NULL AS ").append(numericType).append(")");
 			if (listSourceNoTrx)
-				unionInsert.append(", Cast(NULL AS NUMBER)");
+				unionInsert.append(", Cast(NULL AS ").append(numericType).append(")");
 		}
 
 		// for all columns create select statement
@@ -1888,7 +1888,7 @@ public class FinReport extends SvrProcess
 		}
 		else
 		{
-			insert.append(", Cast(NULL AS NUMBER)");
+			insert.append(", Cast(NULL AS ").append(numericType).append(")");
 		}
 
 		//	for all columns create select statement
