@@ -74,6 +74,7 @@ import org.adempiere.webui.component.WListbox;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.editor.WMultiSelectEditor;
+import org.adempiere.webui.editor.WMultiSelectSearchEditor;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.editor.WebEditorFactory;
@@ -2114,9 +2115,16 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	        editor.setReadWrite(true);
         }
         else 
-        {
+		{
 			if (infoColumn.isMultiSelectCriteria())
-				editor = new WMultiSelectEditor(mField);
+			{
+				if ((DisplayType.List == infoColumn.getAD_Reference_ID()
+						|| DisplayType.MultiSelectList == infoColumn.getAD_Reference_ID()
+						|| DisplayType.MultiSelectTable == infoColumn.getAD_Reference_ID()))
+					editor = new WMultiSelectEditor(mField);
+				else
+					editor = new WMultiSelectSearchEditor(mField);
+			}
 			else
 				editor = WebEditorFactory.getEditor(mField, false);
 	        editor.setReadWrite(true);

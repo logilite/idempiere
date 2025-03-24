@@ -33,6 +33,8 @@ import org.compiere.model.MSysConfig;
 import org.compiere.util.Env;
 import org.compiere.util.Language;
 import org.compiere.util.Msg;
+import org.owasp.html.AttributePolicy;
+import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 import org.zkforge.ckez.CKeditor;
@@ -70,6 +72,45 @@ public class WTextEditorDialog extends Window implements EventListener<Event>{
 	/* SysConfig USE_ESC_FOR_TAB_CLOSING */
 	private boolean isUseEscForTabClosing = MSysConfig.getBooleanValue(MSysConfig.USE_ESC_FOR_TAB_CLOSING, false, Env.getAD_Client_ID(Env.getCtx()));
 
+	private static final PolicyFactory TABLES = new HtmlPolicyBuilder()
+		    .allowStandardUrlProtocols()
+		    .allowElements(
+		                   "table", "tr", "td", "th",
+		                   "colgroup", "caption", "col",
+		                   "thead", "tbody", "tfoot")
+		    .allowAttributes("summary").onElements("table")
+		    .allowAttributes("align", "valign")
+		    .onElements("table", "tr", "td", "th",
+		                "colgroup", "col",
+		                "thead", "tbody", "tfoot")
+		    .allowAttributes("colspan","rowspan").onElements("td","th")
+		    .allowTextIn("table")  // WIDGY
+		    .toFactory();
+	private static final AttributePolicy INTEGER = new AttributePolicy() {
+	    public String apply(
+	        String elementName, String attributeName, String value) {
+	      int n = value.length();
+	      if (n == 0) { return null; }
+	      for (int i = 0; i < n; ++i) {
+	        char ch = value.charAt(i);
+	        if (ch == '.') {
+	          if (i == 0) { return null; }
+	          return value.substring(0, i);  // truncate to integer.
+	        } else if (!('0' <= ch && ch <= '9')) {
+	          return null;
+	        }
+	      }
+	      return value;
+	    }
+	  };
+	
+	  private static final PolicyFactory dataImg = new HtmlPolicyBuilder()
+      .allowUrlProtocols("http", "https","data").allowElements("img")
+      .allowAttributes("alt", "src").onElements("img")
+      .allowAttributes("border", "height", "width").matching(INTEGER)
+          .onElements("img")
+      .toFactory();
+	  
 	/**
 	 * @param title
 	 * @param text
@@ -361,13 +402,17 @@ public class WTextEditorDialog extends Window implements EventListener<Event>{
 	 * @return sanitized html content
 	 */
 	public static String sanitize(String untrustedHTML) {
+		
+		
 		final PolicyFactory policy = Sanitizers.BLOCKS
 				.and(Sanitizers.FORMATTING)
-				.and(Sanitizers.IMAGES)
+				.and(dataImg)
 				.and(Sanitizers.LINKS)
 				.and(Sanitizers.STYLES)
-				.and(Sanitizers.TABLES);
+				.and(TABLES)
+				;
 
+		
 		String ret = policy.sanitize(untrustedHTML);
 		ret = ret.replaceAll("&#35;", "#");
 		ret = ret.replaceAll("&#64;", "@");

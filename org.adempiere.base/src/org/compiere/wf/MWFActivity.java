@@ -1379,6 +1379,8 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				+ " to " +  value);
 			MColumn column = m_node.getColumn();
 			int dt = column.getAD_Reference_ID();
+			//Set additional variable
+			setVariables(trx);
 			return setVariable (value, dt, null, trx);
 		}	//	SetVariable
 
@@ -1538,6 +1540,8 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 					}
 					// end MZ
 				}
+				//Set Additional Variables
+				setVariables(trx);
 				if (autoApproval
 					&& doc.processIt(DocAction.ACTION_Approve)
 					&& doc.save())
@@ -1635,6 +1639,9 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 						}
 						// end MZ
 					}
+					//set additional variable values
+					setVariables(trx);
+					
 					return false; //Suspend workflow
 				}	//	Assignment
 				else {//Completion
@@ -1713,14 +1720,6 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	{
 		m_newValue = null;
 
-		value = parseVariables(value, false);
-
-		getPO(trx);
-		if (m_po == null)
-			throw new Exception("Persistent Object not found - AD_Table_ID="
-				+ getAD_Table_ID() + ", Record_ID=" + getRecord_ID());
-		//	Set Value
-		Object dbValue = null;
 		int AD_Column_ID = 0;
 		
 		if (getNode().getApprovalColumn_ID() > 0)
@@ -1731,6 +1730,64 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		{
 			AD_Column_ID = getNode().getAD_Column_ID();
 		}
+		
+		setVariable(AD_Column_ID, value,displayType,trx);
+		
+		//	Info
+		String msg = getNode().getAttributeName() + "=" + value;
+		if (textMsg != null && textMsg.length() > 0)
+			msg += " - " + textMsg;
+		setTextMsgBefore (msg);
+		m_newValue = value;
+		return true;
+	}	//	setVariable
+
+	/**
+	 * 
+	 * @param trx
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean setVariables(Trx trx) throws Exception
+	{
+		MWFNodeVar nodeVars[] = MWFNodeVar.getNodeVars(getCtx(), getNode().getAD_WF_Node_ID());
+		getPO(trx);
+		if (m_po == null)
+			throw new Exception(
+					"Persistent Object not found - AD_Table_ID=" + getAD_Table_ID() + ", Record_ID=" + getRecord_ID());
+
+		for (MWFNodeVar nodeVar : nodeVars)
+		{
+			if (!Util.isEmpty(nodeVar.getAttributeValue()))
+			{
+				int AD_Column_ID = nodeVar.getAD_Column_ID();
+				MColumn col = MColumn.get(getCtx(), AD_Column_ID);
+				setVariable(AD_Column_ID, nodeVar.getAttributeValue(), col.getAD_Reference_ID(), trx);
+			}
+		}
+		return true;
+	}
+	/**
+	 * 
+	 * @param AD_Column_ID
+	 * @param value
+	 * @param displayType
+	 * @param trx
+	 * @return
+	 * @throws Exception if error
+	 */
+	private boolean setVariable(int AD_Column_ID, String value, int displayType, Trx trx) throws Exception{
+		
+		
+		value = parseVariables(value, false);
+
+		getPO(trx);
+		if (m_po == null)
+			throw new Exception("Persistent Object not found - AD_Table_ID="
+				+ getAD_Table_ID() + ", Record_ID=" + getRecord_ID());
+		//	Set Value
+		Object dbValue = null;
+		
 		
 		if (value == null)
 			;
@@ -1810,15 +1867,11 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			throw new Exception("Persistent Object not updated - AD_Table_ID="
 				+ getAD_Table_ID() + ", Record_ID=" + getRecord_ID()
 				+ " - Should=" + value + ", Is=" + m_po.get_ValueOfColumn(AD_Column_ID));
-		//	Info
-		String msg = getNode().getAttributeName() + "=" + value;
-		if (textMsg != null && textMsg.length() > 0)
-			msg += " - " + textMsg;
-		setTextMsgBefore (msg);
-		m_newValue = value;
+		
 		return true;
-	}	//	setVariable
-
+	}
+	
+	
 	/**
 	 * 	Set User Choice
 	 * 	@param AD_User_ID user
