@@ -16,6 +16,7 @@ package org.adempiere.base;
 import java.sql.Timestamp;
 
 import org.compiere.db.CConnection;
+import org.compiere.model.MSSOPrincipalConfig;
 import org.compiere.util.KeyNamePair;
 
 public interface ILogin
@@ -53,5 +54,5 @@ public interface ILogin
 
 	KeyNamePair[] getClients();
 	
-	void setIsSSOLogin(boolean isSSOLogin);
+	void setSSOPrincipalConfig(MSSOPrincipalConfig principalConfig);
 }

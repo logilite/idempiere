@@ -51,6 +51,7 @@ import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.Dialog;
 import org.adempiere.webui.window.LoginWindow;
 import org.compiere.model.MRole;
+import org.compiere.model.MSSOPrincipalConfig;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.model.SystemProperties;
@@ -120,6 +121,8 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 
 	protected boolean m_isSSOLogin = false;
 	
+	protected MSSOPrincipalConfig m_ssoPrincipalConfig = null;
+	
 	protected RolePanel component;
 
 	private boolean isChangeRole = false;
@@ -147,7 +150,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 	 * @param clientsKNPairs
 	 * @param isClientDefined
 	 */
-	public RolePanel(Properties ctx, LoginWindow loginWindow, String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isClientDefined, boolean isSSOLogin) {
+	public RolePanel(Properties ctx, LoginWindow loginWindow, String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isClientDefined, MSSOPrincipalConfig principalConfig) {
     	this.wndLogin = loginWindow;
     	m_ctx = ctx;
     	m_userName = userName;    	
@@ -155,13 +158,14 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     	m_showRolePanel = show;
     	m_isClientDefined = isClientDefined;
         m_clientKNPairs = clientsKNPairs;
-        m_isSSOLogin = isSSOLogin;
-        login.setIsSSOLogin(m_isSSOLogin);
+        m_isSSOLogin = principalConfig != null;
+        m_ssoPrincipalConfig = principalConfig;
+        login.setSSOPrincipalConfig(principalConfig);
         
     	m_userpreference = SessionManager.getSessionApplication().getUserPreference();
         if( m_clientKNPairs.length == 1  &&  !m_showRolePanel ){
         	Env.setContext(m_ctx, Env.AD_CLIENT_ID, (String) m_clientKNPairs[0].getID());
-        	MUser user = MUser.get (m_ctx, Login.getAppUser(m_userName), m_isSSOLogin);
+        	MUser user = MUser.get (m_ctx, Login.getAppUser(m_userName), m_isSSOLogin, m_ssoPrincipalConfig);
         	m_userpreference.loadPreference(user.get_ID());        	
         } else {
         	m_userpreference.loadPreference(-1);
@@ -858,7 +862,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     	} else {
         	Env.setContext(m_ctx, Env.AD_CLIENT_ID, (String) null);
     	}
-    	MUser user = MUser.get (m_ctx, Login.getAppUser(m_userName), m_isSSOLogin);
+    	MUser user = MUser.get (m_ctx, Login.getAppUser(m_userName), m_isSSOLogin, m_ssoPrincipalConfig);
     	if (user != null) {
     		Env.setContext(m_ctx, Env.AD_USER_ID, user.getAD_User_ID() );
     		Env.setContext(m_ctx, Env.AD_USER_NAME, user.getName() );

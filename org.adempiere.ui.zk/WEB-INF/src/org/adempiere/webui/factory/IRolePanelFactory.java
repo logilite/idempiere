@@ -4,10 +4,11 @@ import java.util.Properties;
 
 import org.adempiere.webui.panel.RolePanel;
 import org.adempiere.webui.window.LoginWindow;
+import org.compiere.model.MSSOPrincipalConfig;
 import org.compiere.util.KeyNamePair;
 
 public interface IRolePanelFactory
 {
 	public RolePanel newInstance(Properties ctx, LoginWindow loginWindow, String userName, boolean show,
-			KeyNamePair[] clientsKNPairs, boolean isClientDefined, boolean isSSOLogin);
+			KeyNamePair[] clientsKNPairs, boolean isClientDefined, MSSOPrincipalConfig principalConfig);
 }

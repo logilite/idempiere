@@ -108,6 +108,39 @@ public class MSSOPrincipalConfig extends X_SSO_PrincipalConfig
 		return defaultConfig;
 	}
 
+	/**
+	 * Retrieves the SSOPrincipalConfig for a given UUID.
+	 * If no configuration is found and {@code isReturnFirst} is true,
+	 * returns the first available SSOPrincipalConfig from the list.
+	 *
+	 * @param uuID
+	 *            The unique identifier of the SSO principal configuration.
+	 * @param isReturnFirst
+	 *            Flag indicating whether to return the first available configuration if the
+	 *            specified one is not found.
+	 * @return The corresponding {@link MSSOPrincipalConfig} instance, or the first available
+	 *         configuration if applicable.
+	 */
+	public static MSSOPrincipalConfig getSSOPrincipalConfig(String uuID, boolean isReturnFirst)
+	{
+		MSSOPrincipalConfig config = getSSOPrincipalConfig(uuID);
+		if (config == null && isReturnFirst)
+		{
+			List <MSSOPrincipalConfig> configList = MSSOPrincipalConfig.getAllSSOPrincipalConfig();
+			if (configList != null && !configList.isEmpty())
+				return configList.get(0);
+		}
+		return config;
+	}
+
+	/**
+	 * Retrieves the SSOPrincipalConfig for a given UUID.
+	 * First checks the cache; if not found, queries the database.
+	 *
+	 * @param uuID
+	 *            The unique identifier of the SSO principal configuration.
+	 * @return The corresponding {@link MSSOPrincipalConfig} instance, or {@code null} if not found.
+	 */
 	public static MSSOPrincipalConfig getSSOPrincipalConfig(String uuID)
 	{
 		if (Util.isEmpty(uuID))
@@ -126,10 +159,16 @@ public class MSSOPrincipalConfig extends X_SSO_PrincipalConfig
 		return cachedConfig;
 	}
 
-	public static List<MSSOPrincipalConfig> getAllSSOPrincipalConfig()
+	/**
+	 * Retrieves all available SSOPrincipalConfig records.
+	 * First checks the cache; if not found, queries the database.
+	 *
+	 * @return A list of all available {@link MSSOPrincipalConfig} instances.
+	 */
+	public static List <MSSOPrincipalConfig> getAllSSOPrincipalConfig( )
 	{
 		@SuppressWarnings("unchecked")
-		List<MSSOPrincipalConfig> allConfigs = (List<MSSOPrincipalConfig>) s_SSOPrincipalConfigCache.get(ALL_SSO_CONFIG_CACHEKEY);
+		List <MSSOPrincipalConfig> allConfigs = (List <MSSOPrincipalConfig>) s_SSOPrincipalConfigCache.get(ALL_SSO_CONFIG_CACHEKEY);
 		if (allConfigs != null)
 			return allConfigs;
 

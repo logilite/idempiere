@@ -33,8 +33,6 @@ import javax.swing.JOptionPane;
 
 import org.adempiere.base.Core;
 import org.adempiere.base.ILogin;
-import org.adempiere.base.sso.ISSOPrincipalService;
-import org.adempiere.base.sso.SSOUtils;
 import org.adempiere.exceptions.DBException;
 import org.compiere.Adempiere;
 import org.compiere.db.CConnection;
@@ -46,6 +44,7 @@ import org.compiere.model.MCountry;
 import org.compiere.model.MMFARegisteredDevice;
 import org.compiere.model.MMFARegistration;
 import org.compiere.model.MRole;
+import org.compiere.model.MSSOPrincipalConfig;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MSystem;
 import org.compiere.model.MTable;
@@ -73,7 +72,7 @@ public class Login implements ILogin
 {
 	protected String loginErrMsg;
 	protected boolean isPasswordExpired;
-	protected boolean isSSOLogin = false;
+	protected MSSOPrincipalConfig m_SSOPrincipalConfig;
 
 	/**
 	 * Get login error message
@@ -1302,8 +1301,9 @@ public class Login implements ILogin
 		MSystem system = MSystem.get(m_ctx);
 		if (system == null)
 			throw new IllegalStateException("No System Info");
-
-		if (!isSSOLogin && (app_pwd == null || app_pwd.length() == 0))
+		
+		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false) && m_SSOPrincipalConfig != null;
+		if (!isSSOEnable && (app_pwd == null || app_pwd.length() == 0))
 		{
 			loginErrMsg = "No Apps Password";
 			log.warning(loginErrMsg);
@@ -1312,7 +1312,7 @@ public class Login implements ILogin
 		
 		isPasswordExpired = false;
 
-		if (!isSSOLogin && system.isLDAP())
+		if (!isSSOEnable && system.isLDAP())
 		{
 			authenticated = system.isLDAP(app_user, app_pwd);
 			if (authenticated) {
@@ -1344,33 +1344,20 @@ public class Login implements ILogin
 		}
 
 		boolean hash_password = MSysConfig.getBooleanValue(MSysConfig.USER_PASSWORD_HASH, false);
-		boolean email_login = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
-		boolean searhkey_login = MSysConfig.getBooleanValue(MSysConfig.USE_SEARCH_KEY_FOR_LOGIN, false);
+		boolean searchKey_login = MSysConfig.getBooleanValue(MSysConfig.USE_SEARCH_KEY_FOR_LOGIN, false);
 		KeyNamePair[] retValue = null;
 		ArrayList<KeyNamePair> clientList = new ArrayList<KeyNamePair>();
 		ArrayList<Integer> clientsValidated = new ArrayList<Integer>();
 
-		StringBuilder where = new StringBuilder(isSSOLogin ? "" : "Password IS NOT NULL AND ");
-		if (email_login)
-			where.append("EMail=?");
-		else
-		{
-			if (searhkey_login)
-			{
-				where.append("(COALESCE(LDAPUser,Name)=? OR Value = ?)");
-			}
-			else
-			{
-				where.append("COALESCE(LDAPUser,Name)=?");
-			}
-		}
-
-		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
+		StringBuilder where = new StringBuilder(isSSOEnable ? "" : "Password IS NOT NULL AND ");
+		
+		where.append(MUser.getUserAuthWhere(isSSOEnable, searchKey_login));
+		
 		where.append("	AND EXISTS (SELECT * FROM AD_User u ")
 						.append("	INNER JOIN	AD_Client c ON (u.AD_Client_ID = c.AD_Client_ID)	")
 						.append("	WHERE (COALESCE(u.AuthenticationType, c.AuthenticationType) IN ");
 		//If Enable_SSO=N then don't allow SSO only users. 
-		where.append((isSSOEnable && isSSOLogin) ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
+		where.append((isSSOEnable) ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
 		where.append("	OR COALESCE(u.AuthenticationType, c.AuthenticationType) IS NULL) AND u.AD_User_ID = AD_User.AD_User_ID) ");
 
 		String whereRoleType = MRole.getWhereRoleType(roleTypes, "r");
@@ -1390,11 +1377,20 @@ public class Login implements ILogin
 			where.append(" AND AD_Client_ID IN (0,").append(client.getAD_Client_ID()).append(")");
 		List<MUser> users = null;
 		List<Object> parms= new ArrayList<>();
-		if(searhkey_login)
+		if(searchKey_login)
 		{
 			parms.add(app_user);
 		}
 		parms.add(app_user);
+		if (isSSOEnable)
+		{
+			parms.add(app_user);
+			parms.add(m_SSOPrincipalConfig.getSSO_PrincipalConfig_ID());
+			
+			parms.add(app_user);
+			parms.add(m_SSOPrincipalConfig.getSSO_PrincipalConfig_ID());
+		}
+
 		try {
 			PO.setCrossTenantSafe();
 			users = new Query(m_ctx, MUser.Table_Name, where.toString(), null)
@@ -1406,7 +1402,7 @@ public class Login implements ILogin
 		}
 		
 		if (users.size() == 0) {
-			log.saveError(isSSOLogin ? "UserNotFoundError": "UserPwdError", app_user, false);
+			log.saveError(isSSOEnable ? "UserNotFoundError": "UserPwdError", app_user, false);
 			return null;
 		}
 		
@@ -1426,7 +1422,7 @@ public class Login implements ILogin
 			clientsValidated.add(user.getAD_Client_ID());
 			boolean valid = false;
 			// authenticated by ldap or sso
-			if (authenticated || isSSOLogin) {
+			if (authenticated || isSSOEnable) {
 				valid = true;
 			} else {
 				if (!system.isLDAP() || Util.isEmpty(user.getLDAPUser())) {
@@ -1478,7 +1474,7 @@ public class Login implements ILogin
 				if (! Util.isEmpty(whereRoleType)) {
 					sql.append(" AND ").append(whereRoleType);
 				}
-				sql.append(" AND  cli.AuthenticationType IN ").append((isSSOEnable && isSSOLogin) ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
+				sql.append(" AND  cli.AuthenticationType IN ").append((isSSOEnable) ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
 				sql.append(" AND ur.AD_User_ID=? ORDER BY cli.Name");
 			      PreparedStatement pstmt=null;
 			      ResultSet rs=null;
@@ -1635,7 +1631,7 @@ public class Login implements ILogin
 			}
 		}
 		
-		if (isSSOLogin)
+		if (isSSOEnable)
 			Env.setContext(Env.getCtx(), Env.IS_SSO_LOGIN, true);
 		else
 			Env.setContext(Env.getCtx(), Env.IS_SSO_LOGIN, false);
@@ -1700,28 +1696,18 @@ public class Login implements ILogin
 		String whereRoleType = MRole.getWhereRoleType(roleTypes, "r");
 		ArrayList<KeyNamePair> rolesList = new ArrayList<KeyNamePair>();
 		KeyNamePair[] retValue = null;
+		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false) && m_SSOPrincipalConfig != null;
 		StringBuilder sql = new StringBuilder("SELECT u.AD_User_ID, r.AD_Role_ID,r.Name ")
 			.append("FROM AD_User u")
 			.append(" INNER JOIN AD_User_Roles ur ON (u.AD_User_ID=ur.AD_User_ID AND ur.IsActive='Y')")
 			.append(" INNER JOIN AD_Role r ON (ur.AD_Role_ID=r.AD_Role_ID AND r.IsActive='Y') ");
 		sql.append("WHERE ur.AD_Client_ID=? AND ");
-		if(!isSSOLogin)
+		if(!isSSOEnable)
 			sql.append(" u.Password IS NOT NULL AND ");
-		boolean email_login = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
-		boolean searhkey_login = MSysConfig.getBooleanValue(MSysConfig.USE_SEARCH_KEY_FOR_LOGIN, false);
-		if (email_login)
-			sql.append("u.EMail=?");
-		else
-		{
-			if (searhkey_login)
-			{
-				sql.append("(COALESCE(u.LDAPUser,u.Name)=? OR Value =?)");
-			}
-			else
-			{
-				sql.append("COALESCE(u.LDAPUser,u.Name)=?");
-			}
-		}
+		boolean searchKey_login = MSysConfig.getBooleanValue(MSysConfig.USE_SEARCH_KEY_FOR_LOGIN, false);
+
+		sql.append(MUser.getUserAuthWhere("u.", isSSOEnable, searchKey_login));
+		
 		sql.append(" AND r.IsMasterRole='N'");
 		if (! Util.isEmpty(whereRoleType)) {
 			sql.append(" AND ").append(whereRoleType);
@@ -1742,10 +1728,21 @@ public class Login implements ILogin
 		try
 		{
 			pstmt = DB.prepareStatement(sql.toString(), null);
-			pstmt.setInt(1, client.getKey());
-			pstmt.setString(2, getAppUser(app_user));
-			if(searhkey_login)
-				pstmt.setString(3, app_user);
+			int i = 1; 
+			pstmt.setInt(i++, client.getKey());
+			pstmt.setString(i++, getAppUser(app_user));
+			if (searchKey_login)
+			{
+				pstmt.setString(i++, app_user);
+			}
+			if (isSSOEnable)
+			{
+				pstmt.setString(i++, app_user);
+				pstmt.setInt(i++, m_SSOPrincipalConfig.getSSO_PrincipalConfig_ID());
+				
+				pstmt.setString(i++, app_user);
+				pstmt.setInt(i++, m_SSOPrincipalConfig.getSSO_PrincipalConfig_ID());
+			}
 			rs = pstmt.executeQuery();
 
 			if (!rs.next())
@@ -1796,7 +1793,7 @@ public class Login implements ILogin
 		
 		loginErrMsg = null;
 		isPasswordExpired = false;
-		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
+		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false) && m_SSOPrincipalConfig != null;
 		int AD_User_ID = Env.getContextAsInt(m_ctx, Env.AD_USER_ID);
 		KeyNamePair[] retValue = null;
 		ArrayList<KeyNamePair> clientList = new ArrayList<KeyNamePair>();
@@ -1808,7 +1805,7 @@ public class Login implements ILogin
                          .append(" AND cli.IsActive='Y'")
                          .append(" AND u.IsActive='Y'")
                          .append(" AND u.AD_User_ID=? ")
-						 .append(" AND cli.AuthenticationType IN ").append((isSSOEnable && SSOUtils.getSSOPrincipalService() != null && isSSOLogin) ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ")
+						 .append(" AND cli.AuthenticationType IN ").append(isSSOEnable ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ")
 						 .append(" ORDER BY cli.Name");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -1837,9 +1834,9 @@ public class Login implements ILogin
 	}
 
 	@Override
-	public void setIsSSOLogin(boolean isSSOLogin)
+	public void setSSOPrincipalConfig(MSSOPrincipalConfig principalConfig)
 	{
-		this.isSSOLogin = isSSOLogin;
+		this.m_SSOPrincipalConfig = principalConfig;
 	}
 
 	/**

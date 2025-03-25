@@ -532,13 +532,15 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 	    if (desktop.getSession().getAttribute(ISSOPrincipalService.SSO_ADMIN_LOGIN) != null)
 	    	isAdminLogin  = (boolean)desktop.getSession().getAttribute(ISSOPrincipalService.SSO_ADMIN_LOGIN);
 	    
+	    String providerUU = (String) desktop.getSession().getAttribute(ISSOPrincipalService.SSO_SELECTED_PROVIDER);
 	    boolean isSSOLogin = "Y".equals(Env.getContext(Env.getCtx(), Env.IS_SSO_LOGIN));
 	    String ssoLogoutURL = null;
 	    if (!isAdminLogin && isSSOLogin)
-	    {
-	    	ISSOPrincipalService service = SSOUtils.getSSOPrincipalService();
-	    	ssoLogoutURL = service.getLogoutURL();
-	    }
+		{
+			ISSOPrincipalService service = SSOUtils.getSSOPrincipalService(providerUU);
+			if (service != null && Util.isEmpty(providerUU, true))
+				ssoLogoutURL = service.getLogoutURL();
+		}
 	    
 	    final Session session = logout0();
 	    

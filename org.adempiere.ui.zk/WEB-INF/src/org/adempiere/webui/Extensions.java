@@ -49,6 +49,7 @@ import org.compiere.grid.IPaymentForm;
 import org.compiere.grid.IPaymentFormFactory;
 import org.compiere.model.GridTab;
 import org.compiere.model.MDashboardContent;
+import org.compiere.model.MSSOPrincipalConfig;
 import org.compiere.util.CCache;
 import org.compiere.util.KeyNamePair;
 import org.idempiere.ui.zk.media.IMediaView;
@@ -255,14 +256,14 @@ public class Extensions {
 	 * @return
 	 */
 	public static RolePanel getRolePanel(Properties ctx, LoginWindow loginWindow, String userName, boolean show,
-			KeyNamePair[] clientsKNPairs, boolean isClientDefined, boolean isSSOLogin)
+			KeyNamePair[] clientsKNPairs, boolean isClientDefined, MSSOPrincipalConfig principalConfig)
 	{
 		List<IRolePanelFactory> factories = Service.locator().list(IRolePanelFactory.class).getServices();
 		if (factories != null && !factories.isEmpty())
 		{
 			for (IRolePanelFactory factory : factories)
 			{
-				RolePanel rolePanel = factory.newInstance(ctx, loginWindow, userName, show, clientsKNPairs, isClientDefined, isSSOLogin);
+				RolePanel rolePanel = factory.newInstance(ctx, loginWindow, userName, show, clientsKNPairs, isClientDefined, principalConfig);
 				if (rolePanel != null)
 					return rolePanel;
 			}

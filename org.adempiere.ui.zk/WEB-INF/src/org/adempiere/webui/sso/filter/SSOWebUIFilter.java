@@ -104,7 +104,7 @@ public class SSOWebUIFilter implements Filter
 			{
 				m_SSOPrincipal = SSOUtils.getSSOPrincipalService(provider);
 
-				if (m_SSOPrincipal != null && !isAdminResRequest)
+				if (m_SSOPrincipal != null && (!isAdminResRequest || !Util.isEmpty(provider)))
 				{
 					if (m_SSOPrincipal.hasAuthenticationCode(httpRequest, httpResponse))
 					{

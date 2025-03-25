@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.adempiere.base.sso.ISSOPrincipalService;
 import org.adempiere.base.sso.SSOUtils;
+import org.compiere.model.MSSOPrincipalConfig;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.util.CLogger;
@@ -118,7 +119,7 @@ public class ServletRegistration extends Registration {
 		try
 		{
 			String username = SSOUtils.getSSOPrincipalService().getUserName(token);
-			return validateUser(username, null, true);
+			return validateUser(username, null, true, MSSOPrincipalConfig.getDefaultSSOPrincipalConfig());
 		}
 		catch (Exception e)
 		{
@@ -127,9 +128,9 @@ public class ServletRegistration extends Registration {
 		return false;
 	}
 	
-	private boolean validateUser(String name, String password, boolean isSSO)
+	private boolean validateUser(String name, String password, boolean isSSOLogin, MSSOPrincipalConfig principalConfig)
 	{
-		MUser user = MUser.get(Env.getCtx(), name, password, isSSO);
+		MUser user = MUser.get(Env.getCtx(), name, password, isSSOLogin, principalConfig);
 		if (user == null)
 		{
 			log.warning ("User not found: '" + name);

@@ -50,6 +50,7 @@ import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.UserPreference;
 import org.adempiere.webui.util.ZkSSOUtils;
+import org.compiere.model.MSSOPrincipalConfig;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.util.CLogger;
@@ -158,7 +159,8 @@ public class LoginWindow extends Window implements EventListener<Event>
 			getDesktop().getSession().setAttribute(Attributes.PREFERRED_LOCALE, locale);
 
 			ILogin login = Core.getLogin(ctx);
-			login.setIsSSOLogin(true);
+			MSSOPrincipalConfig ssoPrincipalConfig = MSSOPrincipalConfig.getSSOPrincipalConfig(provider, true);
+			login.setSSOPrincipalConfig(ssoPrincipalConfig);
 			boolean isShowRolePanel = MSysConfig.getBooleanValue(MSysConfig.SSO_SELECT_ROLE, true);
 			
 			// show role panel when change role 
@@ -167,7 +169,7 @@ public class LoginWindow extends Window implements EventListener<Event>
 			
 			KeyNamePair[] clients = login.getClients(username, null, null, token);
 			if (clients != null)
-				loginOk(username, isShowRolePanel, clients, true);
+				loginOk(username, isShowRolePanel, clients, ssoPrincipalConfig);
 			else
 			{
 				errorMessage = login.getLoginErrMsg();
@@ -204,18 +206,19 @@ public class LoginWindow extends Window implements EventListener<Event>
 	 * @param userName
 	 * @param show
 	 * @param clientsKNPairs
+	 * @param m_ssoPrincipalConfig 
 	 */
 	public void loginOk(String userName, boolean show, KeyNamePair[] clientsKNPairs)
 	{
-		loginOk(userName, show, clientsKNPairs, false);
+		loginOk(userName, show, clientsKNPairs, null);
 	}
 
-    public void loginOk(String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isSSOLogin)
+    public void loginOk(String userName, boolean show, KeyNamePair[] clientsKNPairs, MSSOPrincipalConfig principalConfig)
 	{
 		boolean isClientDefined = (clientsKNPairs.length == 1 || !Util.isEmpty(Env.getContext(ctx, Env.AD_USER_ID)));
 		if (pnlRole == null)
-			pnlRole = new RolePanel(ctx, this, userName, show, clientsKNPairs, isClientDefined, isSSOLogin);
-		if (isSSOLogin)
+			pnlRole = new RolePanel(ctx, this, userName, show, clientsKNPairs, isClientDefined, principalConfig);
+		if (principalConfig != null)
 		{
 			Executions.schedule(getDesktop(), e -> validateMFPanel(userName, show, clientsKNPairs, isClientDefined), new Event(SSOUtils.EVENT_ON_AFTER_SSOLOGIN));
 		}
@@ -268,9 +271,9 @@ public class LoginWindow extends Window implements EventListener<Event>
 	 * @param isClientDefined
 	 * @param isSSOLogin
 	 */
-	protected void createRolePanel(String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isClientDefined, boolean isSSOLogin)
+	protected void createRolePanel(String userName, boolean show, KeyNamePair[] clientsKNPairs, boolean isClientDefined, MSSOPrincipalConfig principalConfig)
 	{
-		pnlRole = Extensions.getRolePanel(ctx, this, userName, show, clientsKNPairs, isClientDefined, isSSOLogin);
+		pnlRole = Extensions.getRolePanel(ctx, this, userName, show, clientsKNPairs, isClientDefined, principalConfig);
 	}
 
 	/**
