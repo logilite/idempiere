@@ -30,6 +30,7 @@ import org.compiere.model.MOrderLandedCostAllocation;
 import org.compiere.model.MProduct;
 import org.compiere.model.ProductCost;
 import org.compiere.model.X_M_Cost;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
@@ -809,4 +810,67 @@ public class Doc_MatchInvHdr extends Doc
 
 		return "";
 	}
+
+	@Override
+	public boolean isNoPostingRequired()
+	{
+		return super.isNoPostingRequired() || isReversalAlsoNotPosted();
+	}
+
+	/**
+	 * Checks if the reversal document is also not posted.
+	 * If the reverse correction posting is marked for deletion and the document
+	 * has a reversal entry, it retrieves the reversal document, checks its
+	 * posting status, and updates it to "No Posting Required" if necessary.
+	 * 
+	 * @return {@code true} if the reversal document was not posted and is now updated;
+	 *         {@code false} otherwise.
+	 */
+	public boolean isReversalAlsoNotPosted()
+	{
+		MMatchInvHdr matchInvHdr = (MMatchInvHdr) getPO();
+		if (m_as.isDeleteReverseCorrectPosting() && matchInvHdr.getReversal_ID() > 0)
+		{
+			MMatchInvHdr rev_matchInvHdr = (MMatchInvHdr) matchInvHdr.getReversal();
+			if (Util.compareDate(matchInvHdr.getDateAcct(), rev_matchInvHdr.getDateAcct()) == 0 && isNoCostDetailCreated(matchInvHdr, rev_matchInvHdr))
+			{
+				String revpostedsql = "SELECT Posted FROM M_MatchInvHdr WHERE M_MatchInvHdr_ID=?";
+				String posted = DB.getSQLValueStringEx(getTrxName(), revpostedsql, rev_matchInvHdr.get_ID());
+				if (!STATUS_Posted.equalsIgnoreCase(posted) && !STATUS_NoPostingRequired.equalsIgnoreCase(posted))
+				{
+					DocManager.save(getTrxName(), MMatchInvHdr.Table_ID, matchInvHdr.getReversal_ID(), STATUS_NoPostingRequired);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Checks if no cost detail has been created for the given MatchInvHdr records.
+	 * 
+	 * @param  matchInvHdr    The MatchInvHdr document.
+	 * @param  revMatchInvHdr The reverse MatchInvHdr document.
+	 * @return                true if no cost detail exists for any line in both documents, false
+	 *                        otherwise.
+	 */
+	public boolean isNoCostDetailCreated(MMatchInvHdr matchInvHdr, MMatchInvHdr revMatchInvHdr)
+	{
+		String sql = "SELECT COUNT(1) FROM M_CostDetail cd "
+						+ " WHERE (cd.M_MatchInv_ID IN ( "
+							+ "     SELECT mi.M_MatchInv_ID FROM M_MatchInv mi WHERE mi.M_MatchInvHdr_ID IN (?, ?) "
+							+ " ) "
+							+ " OR cd.C_InvoiceLine_ID IN ( "
+							+ "     SELECT mi.C_InvoiceLine_ID FROM M_MatchInv mi WHERE mi.M_MatchInvHdr_ID IN (?, ?) "
+							+ " ) "
+							+ " OR cd.M_InOutLine_ID IN ( "
+							+ "     SELECT mi.M_InOutLine_ID FROM M_MatchInv mi WHERE mi.M_MatchInvHdr_ID IN (?, ?) "
+							+ " ) ) AND C_AcctSchema_ID = ?  AND IsActive = 'Y' ";
+
+	       int count = DB.getSQLValue(null, sql, matchInvHdr.getM_MatchInvHdr_ID(), revMatchInvHdr.getM_MatchInvHdr_ID(),
+	                                  matchInvHdr.getM_MatchInvHdr_ID(), revMatchInvHdr.getM_MatchInvHdr_ID(),
+	                                  matchInvHdr.getM_MatchInvHdr_ID(), revMatchInvHdr.getM_MatchInvHdr_ID(), m_as.getC_AcctSchema_ID());
+
+	       return count <= 0; 
+	} // isNoCostDetailCreated
 }

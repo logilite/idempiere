@@ -211,6 +211,9 @@ public abstract class Doc
 	public static final String 	STATUS_Error            = "E";
 	/** Document Status			*/
 	public static final String	STATUS_Deferred			= "d";
+	/** Document Status */
+	public static final String	STATUS_NoPostingRequired  = "R";
+	
 
 
 	/**
@@ -593,6 +596,14 @@ public abstract class Doc
 		p_Error = loadDocumentDetails();
 		if (p_Error != null)
 			return p_Error;
+		
+		if (isNoPostingRequired())
+		{
+			unlock();
+			p_Status = STATUS_NoPostingRequired;
+			return null;
+		}
+		
 		if (isDeferPosting())
 		{
 			unlock();
@@ -2388,6 +2399,23 @@ public abstract class Doc
 	 */
 	public boolean isDeferPosting() {
 		return false;
+	}
+	
+	/**
+	 * Determines whether the document requires posting.
+	 * <p>
+	 * This method checks the "Posted" status of the document from the database
+	 * and returns {@code true} if the status matches {@code STATUS_NoPostingRequired},
+	 * otherwise it returns {@code false}.
+	 * </p>
+	 * 
+	 * @return {@code true} if no posting is required, otherwise {@code false}.
+	 */
+	public boolean isNoPostingRequired()
+	{
+		String postedSql = "SELECT Posted FROM " + get_TableName() + " WHERE " + get_TableName() + "_ID=?";
+		String posted = DB.getSQLValueStringEx(getTrxName(), postedSql, get_ID());
+		return STATUS_NoPostingRequired.equalsIgnoreCase(posted);
 	}
 
 	/**

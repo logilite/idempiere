@@ -962,4 +962,61 @@ public class Doc_InOut extends Doc
 	public boolean isDeferPosting() {
 		return m_deferPosting;
 	}
+
+	@Override
+	public boolean isNoPostingRequired()
+	{
+		return super.isNoPostingRequired() || isReversalAlsoNotPosted();
+	}
+
+	/**
+	 * Checks if the reversal document is also not posted.
+	 * If the reverse correction posting is marked for deletion and the document
+	 * has a reversal entry, it retrieves the reversal document, checks its
+	 * posting status, and updates it to "No Posting Required" if necessary.
+	 * 
+	 * @return {@code true} if the reversal document was not posted and is now updated;
+	 *         {@code false} otherwise.
+	 */
+	public boolean isReversalAlsoNotPosted()
+	{
+		if (m_as.isDeleteReverseCorrectPosting() && m_Reversal_ID > 0)
+		{
+			MInOut inOut = (MInOut) getPO();
+			MInOut rev_inOut = (MInOut) inOut.getReversal();
+			if (Util.compareDate(inOut.getDateAcct(), rev_inOut.getDateAcct()) == 0 && isNoCostDetailCreated(inOut, rev_inOut))
+			{
+				String revpostedsql = "SELECT Posted FROM M_InOut WHERE M_InOut_ID=?";
+				String posted = DB.getSQLValueStringEx(getTrxName(), revpostedsql, rev_inOut.get_ID());
+				if (!STATUS_Posted.equalsIgnoreCase(posted) && !STATUS_NoPostingRequired.equalsIgnoreCase(posted))
+				{
+					DocManager.save(getTrxName(), MInOut.Table_ID, inOut.getReversal_ID(), STATUS_NoPostingRequired);
+					return true;
+				}
+			}
+		}
+		return false;
+	}// isReversalAlsoNotPosted
+
+	/**
+	 * Checks if no cost detail has been created for the given material in-out records.
+	 * 
+	 * @param  inOut    The material in-out document.
+	 * @param  revInOut The reverse material in-out document.
+	 * @return          true if no cost detail exists for any line in both documents, false
+	 *                  otherwise.
+	 */
+	public boolean isNoCostDetailCreated(MInOut inOut, MInOut revInOut)
+	{
+		String sql = "SELECT COUNT(1) "
+						+ " FROM M_CostDetail cd "
+							+ " WHERE cd.M_InOutLine_ID IN ( "
+							+ "     SELECT iol.M_InOutLine_ID FROM M_InOutLine iol WHERE iol.M_InOut_ID IN (?, ?) "
+							+ " ) "
+							+ " AND cd.C_AcctSchema_ID = ? AND cd.IsActive = 'Y' ";
+
+		int count = DB.getSQLValue(getTrxName(), sql, inOut.getM_InOut_ID(), revInOut.getM_InOut_ID(), m_as.getC_AcctSchema_ID());
+		return count <= 0;
+	}// isNoCostDetailCreated
+
 }   //  Doc_InOut
