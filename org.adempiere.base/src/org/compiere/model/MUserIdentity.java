@@ -15,6 +15,8 @@ package org.compiere.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.compiere.util.DB;
+
 /**
  * User Identity Configuration for SSO login
  */
@@ -51,6 +53,11 @@ public class MUserIdentity extends X_AD_UserIdentity
 	public MUserIdentity(Properties ctx, String AD_UserIdentity_UU, String trxName, String[] virtualColumns)
 	{
 		super(ctx, AD_UserIdentity_UU, trxName, virtualColumns);
+	}
+
+	public static boolean isShowUserIdentity( )
+	{
+		return DB.getSQLValue(null, "SELECT COUNT(1) FROM SSO_PrincipalConfig WHERE IsActive = 'Y'") > 0;
 	}
 
 }

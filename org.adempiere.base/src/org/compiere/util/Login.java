@@ -50,6 +50,7 @@ import org.compiere.model.MSystem;
 import org.compiere.model.MTable;
 import org.compiere.model.MTree_Base;
 import org.compiere.model.MUser;
+import org.compiere.model.MUserIdentity;
 import org.compiere.model.MUserPreference;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.PO;
@@ -868,6 +869,7 @@ public class Login implements ILogin
 			Env.setContext(m_ctx, Env.SHOW_ACCOUNTING, "N");
 		Env.setContext(m_ctx, Env.SHOW_TRANSLATION, Ini.getProperty(Ini.P_SHOW_TRL));
 		Env.setContext(m_ctx, Env.SHOW_ADVANCED, MRole.getDefault().isAccessAdvanced());
+		Env.setContext(m_ctx, Env.IsShowUserIdentity, MUserIdentity.isShowUserIdentity());
 
 		String retValue = "";
 		int AD_Client_ID = Env.getContextAsInt(m_ctx, Env.AD_CLIENT_ID);
