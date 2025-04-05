@@ -200,8 +200,7 @@ public class Doc_MatchInvHdr extends Doc
 			{
 				// NotInvoicedReceipt DR
 				// From Receipt
-				BigDecimal multiplier = line.getQty()
-						.divide(m_receiptLine.getMovementQty(), 12, RoundingMode.HALF_UP).abs();
+				BigDecimal multiplier = line.getQty().divide(m_receiptLine.getMovementQty(), 12, RoundingMode.HALF_UP);
 				dr = fact.createLine(line, getAccount(Doc.ACCTTYPE_NotInvoicedReceipts, as), as.getC_Currency_ID(),
 						Env.ONE, null); // updated below
 				if (dr == null)
@@ -222,14 +221,9 @@ public class Doc_MatchInvHdr extends Doc
 					}
 				}
 				else
-				{
-					BigDecimal effMultiplier = multiplier;
-					//TODO this needs to test as it different from match invoice
-					if (getQty().signum() < 0)
-						effMultiplier = effMultiplier.negate();
-					
+				{					
 					if (!dr.updateReverseLine(MInOut.Table_ID, // Amt updated
-							m_receiptLine.getM_InOut_ID(), m_receiptLine.getM_InOutLine_ID(), effMultiplier))
+							m_receiptLine.getM_InOut_ID(), m_receiptLine.getM_InOutLine_ID(), multiplier))
 					{
 						p_Error = "Mat.Receipt not posted yet";
 						return null;
@@ -250,8 +244,7 @@ public class Doc_MatchInvHdr extends Doc
 			if (m_pc.isService())
 				expense = m_pc.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
 			BigDecimal LineNetAmt = m_invoiceLine.getLineNetAmt();
-			BigDecimal multiplier = line.getQty().divide(m_invoiceLine.getQtyInvoiced(), 12, RoundingMode.HALF_UP)
-					.abs();
+			BigDecimal multiplier = line.getQty().divide(m_invoiceLine.getQtyInvoiced(), 12, RoundingMode.HALF_UP);
 			if (multiplier.compareTo(Env.ONE) != 0)
 				LineNetAmt = LineNetAmt.multiply(multiplier);
 			if (m_pc.isService())
@@ -283,15 +276,10 @@ public class Doc_MatchInvHdr extends Doc
 				}
 				else
 				{
-					cr.setQty(getQty().negate());
-					BigDecimal effMultiplier = multiplier;
-					//TODO this needs to test as it different from match invoice
-					if (getQty().signum() < 0)
-						effMultiplier = effMultiplier.negate();
-					
+					cr.setQty(getQty().negate());					
 					// Set AmtAcctCr/Dr from Invoice (sets also Project)
 					if (!cr.updateReverseLine(MInvoice.Table_ID, // Amt updated
-							m_invoiceLine.getC_Invoice_ID(), m_invoiceLine.getC_InvoiceLine_ID(), effMultiplier))
+							m_invoiceLine.getC_Invoice_ID(), m_invoiceLine.getC_InvoiceLine_ID(), multiplier))
 					{
 						p_Error = "Invoice not posted yet";
 						return null;
