@@ -156,12 +156,13 @@ public class HelpController
         pnlToolTip.appendChild(content);
         content.appendChild(htmlToolTip = new Html());
         htmlToolTip.setWidgetOverride("defaultMessage", "'"+Msg.getMsg(Env.getCtx(), "PlaceCursorIntoField")+"'");
-        htmlToolTip.setWidgetOverride("onFieldTooltip", "function(origin,opts,header,description,help)" +
+        htmlToolTip.setWidgetOverride("onFieldTooltip", "function(origin,opts,header,description,help,entityType)" +
         		"{let s='<html><body><div class=\"help-content\">';" +
         		"if (typeof header == 'undefined') {s=s+'<i>'+this.defaultMessage+'</i>';} " +
-        		"else {s=s+'<b>'+header+'</b>';" +
-        		"if (typeof description=='string' && description.length > 0) {s=s+'<br><br><i>'+description+'</i>';}" +
-        		"if (typeof help=='string' && help.length > 0) {s=s+'<br><br>'+help;}}" +
+        		"else {s=s+'<p><strong>'+header+'</strong></p>';" +
+        		"if (typeof description=='string' && description.length > 0) {s=s+'<p><em>'+description+'</em></p>';}" +
+        		"if (typeof help=='string' && help.length > 0) {s=s+'<p>'+help+'</p>';}" +
+        		"if (typeof entityType=='string' && entityType.length > 0) {s=s+'<p class=\"help-entitytype\">[ '+entityType+' ]</p>';}}" +
         		"s=s+'</div></body></html>';this.setContent(s);}");
         setupFieldTooltip();
         

@@ -733,7 +733,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         btnSave.setId("btnSave");
         btnSave.setStyle("vertical-align: middle;");
         if (ThemeManager.isUseFontIconForImage())
-        	LayoutUtils.addSclass("large-toolbarbutton", btnSave);
+        	LayoutUtils.addSclass("medium-toolbarbutton", btnSave);
 
         btnShare = new ToolBarButton();
         btnShare.setAttribute("name","btnShareAdv");
@@ -746,7 +746,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         btnShare.setId("btnShare");
         btnShare.setStyle("vertical-align: middle;");
         if (ThemeManager.isUseFontIconForImage())
-        	LayoutUtils.addSclass("large-toolbarbutton", btnShare);
+        	LayoutUtils.addSclass("medium-toolbarbutton", btnShare);
 
         fQueryName = new Combobox();
         fQueryName.setTooltiptext(Msg.getMsg(Env.getCtx(),"QueryName"));

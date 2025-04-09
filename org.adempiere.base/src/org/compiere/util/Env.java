@@ -293,6 +293,24 @@ public final class Env
 		else
 			return ServerContextProvider.INSTANCE;
 	}
+	
+	/**
+	 * Is Show Technical Information 
+	 * @param ctx context
+	 * @return true if IsShowTechnicalInfOnHelp on User Preference
+	 */
+	public static boolean IsShowTechnicalInfOnHelp(Properties ctx)
+	{
+		if (ctx == null)
+			throw new IllegalArgumentException ("Require Context");
+		String s = getContext(Env.getCtx(), "P|IsShowTechnicalInfOnHelp");
+		if (s != null)
+		{
+			if (s.equals("Y"))
+				return true;
+		}
+		return false;
+	}	//	IsShowTechnicalInfOnHelp
 
 	/**
 	 * Replace the contents of the current session/process context.<br/>

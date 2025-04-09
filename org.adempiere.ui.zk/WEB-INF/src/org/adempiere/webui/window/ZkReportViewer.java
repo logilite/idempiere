@@ -984,7 +984,6 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 	protected void dynInit()
 	{
 		summary.addActionListener(this);
-		summary.setStyle("font-size: 14px");
 		
 		fillComboReport(m_reportEngine.getPrintFormat().get_ID());
 
