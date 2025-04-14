@@ -142,6 +142,21 @@ public interface I_C_ProjectIssue
 	/** Get C_ProjectIssue_UU	  */
 	public String getC_ProjectIssue_UU();
 
+    /** Column name C_ProjectLine_ID */
+    public static final String COLUMNNAME_C_ProjectLine_ID = "C_ProjectLine_ID";
+
+	/** Set Project Line.
+	  * Task or step in a project
+	  */
+	public void setC_ProjectLine_ID (int C_ProjectLine_ID);
+
+	/** Get Project Line.
+	  * Task or step in a project
+	  */
+	public int getC_ProjectLine_ID();
+
+	public org.compiere.model.I_C_ProjectLine getC_ProjectLine() throws RuntimeException;
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 

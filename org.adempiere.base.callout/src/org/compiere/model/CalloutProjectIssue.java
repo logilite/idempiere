@@ -8,7 +8,7 @@ import org.compiere.util.Env;
 
 /**
  * Project Issue Callout
- * Set Data from In Out Line, Expense Line and Invoice Line
+ * Set Data from In Out Line, Expense Line, Invoice Line and Project Line
  */
 public class CalloutProjectIssue extends CalloutEngine
 {
@@ -30,6 +30,7 @@ public class CalloutProjectIssue extends CalloutEngine
 				mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, 0);
 				mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, inOutLine.getMovementQty());
 				mTab.setValue(MProjectIssue.COLUMNNAME_M_Locator_ID, inOutLine.getM_Locator_ID());
+				mTab.setValue(MProjectIssue.COLUMNNAME_M_AttributeSetInstance_ID, inOutLine.getM_AttributeSetInstance_ID());
 
 				// set Description
 				mTab.setValue(MProjectIssue.COLUMNNAME_Description, MProjectIssue.getInOutLineDesc(inOutLine));
@@ -84,9 +85,24 @@ public class CalloutProjectIssue extends CalloutEngine
 				mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, invLine.getC_Charge_ID());
 				mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, invLine.getQtyInvoiced());
 				mTab.setValue(MProjectIssue.COLUMNNAME_Amt, MProjectIssue.getInvLineAmt(invLine));
+				mTab.setValue(MProjectIssue.COLUMNNAME_M_AttributeSetInstance_ID, invLine.getM_AttributeSetInstance_ID());
 
 				// Set Description
 				mTab.setValue(MProjectIssue.COLUMNNAME_Description, MProjectIssue.getInvDescription(invLine));
+			}
+		}
+		// Set data from ProjectLine
+		else if (MProjectIssue.COLUMNNAME_C_ProjectLine_ID.equals(name) && value != null && ((int) value) > 0)
+		{
+			MProjectLine projectLine = (MProjectLine) MTable.get(ctx, MProjectLine.Table_ID).getPO((int) value, null);
+
+			if (projectLine.getM_Product_ID() > 0)
+			{
+				// Set Product, Movement Qty and Amount and Remove Charge if selected
+				mTab.setValue(MProjectIssue.COLUMNNAME_M_Product_ID, projectLine.getM_Product_ID());
+				mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, 0);
+				mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, projectLine.getPlannedQty());
+				mTab.setValue(MProjectIssue.COLUMNNAME_Amt, projectLine.getPlannedPrice());
 			}
 		}
 

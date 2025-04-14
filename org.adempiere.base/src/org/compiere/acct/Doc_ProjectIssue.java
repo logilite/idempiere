@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.ProjectIssueUtil;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCostDetail;
@@ -76,6 +77,11 @@ public class Doc_ProjectIssue extends Doc
 		//	Pseudo Line Check
 		if (m_line.getM_Product_ID() == 0 && m_line.getC_Charge_ID() <= 0)
 			log.warning(m_line.toString() + " - No Product");
+		if (m_line.getM_Product_ID() > 0 && (MAcctSchema.COSTINGLEVEL_BatchLot.equals(m_line.getProduct().getCostingLevel(m_as))
+												&& m_line.getM_AttributeSetInstance_ID() <= 0))
+		{
+			log.warning(m_line.toString() + " - No ASI Present for Product (" + m_line.getM_Product_ID() + ")");
+		}
 		if (log.isLoggable(Level.FINE)) log.fine(m_line.toString());
 		return null;
 	}   //  loadDocumentDetails
@@ -131,20 +137,27 @@ public class Doc_ProjectIssue extends Doc
 		//  Line pointers
 		FactLine dr = null;
 		FactLine cr = null;
-		//TODO if cost detail exists then cost must taken from cost details only
+
 		//  Issue Cost
 		BigDecimal cost = null;
-		if (m_issue.getM_InOutLine_ID() != 0)
-			cost = ProjectIssueUtil.getPOCost(as, m_issue.getM_InOutLine_ID(), m_line.getQty());
-		else if (m_issue.getS_TimeExpenseLine_ID() != 0)
-			cost = ProjectIssueUtil.getLaborCost(as, m_issue.getS_TimeExpenseLine_ID());
-		else if (m_issue.getC_InvoiceLine_ID() > 0)
-			cost = m_issue.getAmt();
-		if (cost == null)	//	standard Product Costs
+		cost = ProjectIssueUtil.getCostDetailCost(m_issue, as).multiply(m_issue.getMovementQty());
+		if (cost == null || cost.signum() <= 0)
+		{
+			if (m_issue.getM_InOutLine_ID() != 0)
+				cost = ProjectIssueUtil.getPOCost(as, m_issue.getM_InOutLine_ID(), m_line.getQty());
+			else if (m_issue.getS_TimeExpenseLine_ID() != 0)
+				cost = ProjectIssueUtil.getLaborCost(as, m_issue.getS_TimeExpenseLine_ID());
+			else if (m_issue.getC_InvoiceLine_ID() > 0)
+				cost = m_issue.getAmt();
+		}
+		if (cost == null || cost.signum() <= 0) // standard Product Costs
 		{
 			cost = m_line.getProductCosts(as, getAD_Org_ID(), false);
 		}
-		//TODO There is missing no cost check. 
+		if (cost == null || cost.signum() <= 0)
+		{
+			throw new AdempiereException("Cost is not Present for Product (" + product.getName() + ")");
+		}
 		
 		//  Project         DR
 		int acctType = ACCTTYPE_ProjectWIP;
