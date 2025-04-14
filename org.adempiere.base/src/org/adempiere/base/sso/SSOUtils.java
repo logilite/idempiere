@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.adempiere.base.Service;
 import org.compiere.model.I_SSO_PrincipalConfig;
 import org.compiere.model.MSSOPrincipalConfig;
+import org.compiere.model.MSysConfig;
 import org.compiere.util.CCache;
 import org.compiere.util.Util;
 
@@ -67,7 +68,7 @@ public class SSOUtils
 		if (Util.isEmpty(uuID, true))
 		{
 			List<MSSOPrincipalConfig> configList = MSSOPrincipalConfig.getAllSSOPrincipalConfig();
-			if (configList == null || configList.size() > 1)
+			if (configList == null || configList.size() != 1 || MSysConfig.getBooleanValue(MSysConfig.SSO_SHOW_LOGINPAGE, false))
 				return null;
 			else
 				return getSSOPrincipalService(configList.get(0));

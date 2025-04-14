@@ -341,7 +341,7 @@ public class LoginPanel extends Window implements EventListener<Event>
 		if (isSSOEnable)
 		{
 			List<MSSOPrincipalConfig> configs = MSSOPrincipalConfig.getAllSSOPrincipalConfig();
-			if (configs != null && configs.size() > 1)
+			if (configs != null && !configs.isEmpty())
 			{
 				tr = null;
 				for (int i = 0; i < configs.size(); i++)
