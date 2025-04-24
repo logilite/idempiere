@@ -77,7 +77,7 @@ public class ServletRegistration extends Registration {
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(registeredContextClassLoader);
-			boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
+			boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO_OSGI_CONSOLE, false);
 			if (SSOUtils.getSSOPrincipalService() != null && isSSOEnable)
 			{
 				Object principal = req.getSession().getAttribute(ISSOPrincipalService.SSO_PRINCIPAL_SESSION_TOKEN);
