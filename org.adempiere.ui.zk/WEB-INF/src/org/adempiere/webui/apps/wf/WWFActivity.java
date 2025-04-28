@@ -726,6 +726,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 				
 				if (node.isUserTask())
 				{
+					boolean ok = false;
 					if (node.getAD_Column_ID() > 0)
 					{
 						MColumn column = MColumn.get(Env.getCtx(), node.getAD_Column_ID());
@@ -736,18 +737,21 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 						if (li != null)
 							value = li.getValue().toString();
 
-						boolean ok = m_activity.setUserTask(m_activity.getAD_User_ID(), value, column.getAD_Reference_ID(), textMsg);
+						ok = m_activity.setUserTask(m_activity.getAD_User_ID(), value, column.getAD_Reference_ID(), textMsg);
+						
+					}else {
+						ok = m_activity.setUserTask(m_activity.getAD_User_ID(), null, -1, textMsg);
+					}
+					
+					if (!ok)
+					{
+						String error = m_activity.getM_ErrorMsg();
 
-						if (!ok)
+						if (!Util.isEmpty(error, true))
 						{
-							String error = m_activity.getM_ErrorMsg();
-
-							if (!Util.isEmpty(error, true))
-							{
-								FDialog.error(0, error);
-								trx.rollback();
-								return;
-							}
+							FDialog.error(0, error);
+							trx.rollback();
+							return;
 						}
 					}
 				}

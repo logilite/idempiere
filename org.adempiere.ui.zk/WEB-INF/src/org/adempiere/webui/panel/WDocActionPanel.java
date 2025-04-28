@@ -363,6 +363,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		lstAnswer = new Listbox();
 		lstAnswer.setRows(0);
 		lstAnswer.setMold("select");
+		lstAnswer.setVisible(false);
+		lblAnswer.setVisible(false);
 		ZKUpdateUtil.setWidth(lstAnswer, "100%");
 //		lstAnswer.appendItem("", "");
 //		lstAnswer.appendItem("Yes", "Y");
@@ -379,10 +381,11 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			else
 				ApprovalColumn_ID = node.getAD_Column_ID();
 
-			MColumn column = MColumn.get(Env.getCtx(), ApprovalColumn_ID);
+			
 
-			if (column != null)
+			if (ApprovalColumn_ID >0)
 			{
+				MColumn column = MColumn.get(Env.getCtx(), ApprovalColumn_ID);
 				int dt = column.getAD_Reference_ID();
 
 				if (dt == DisplayType.YesNo)
@@ -393,6 +396,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 						lstAnswer.appendItem(values[i].getName(), values[i].getValue());
 					}
 					lstAnswer.setVisible(true);
+					lblAnswer.setVisible(true);
 				}
 				else if (dt == DisplayType.List)
 				{
@@ -402,6 +406,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 						lstAnswer.appendItem(values[i].getName(), values[i].getValue());
 					}
 					lstAnswer.setVisible(true);
+					lblAnswer.setVisible(true);
 				}
 			}
 		}
@@ -621,6 +626,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 					
 					if (node.isUserTask())
 					{
+						
+						boolean ok =false;
 						if (node.getAD_Column_ID() > 0)
 						{
 							MColumn column = MColumn.get(Env.getCtx(), node.getAD_Column_ID());
@@ -641,19 +648,23 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 								return;
 							}
 
-							boolean ok = m_activity.setUserTask(m_AD_User_ID, value, column.getAD_Reference_ID(),
+							ok = m_activity.setUserTask(m_AD_User_ID, value, column.getAD_Reference_ID(),
 									textMsg);
 
-							if (!ok)
-							{
-								String error = m_activity.getM_ErrorMsg();
+							
+						}else {
+							ok = m_activity.setUserTask(m_AD_User_ID, null, -1,	textMsg);
+						}
+						
+						if (!ok)
+						{
+							String error = m_activity.getM_ErrorMsg();
 
-								if (!Util.isEmpty(error, true))
-								{
-									FDialog.error(0, error);
-									trx.rollback();
-									return;
-								}
+							if (!Util.isEmpty(error, true))
+							{
+								FDialog.error(0, error);
+								trx.rollback();
+								return;
 							}
 						}
 					}
