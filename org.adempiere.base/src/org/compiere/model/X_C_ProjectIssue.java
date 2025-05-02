@@ -34,7 +34,7 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 	/**
 	 *
 	 */
-    private static final long serialVersionUID = -289270779977733399L;
+    private static final long serialVersionUID = 20240828L;
 	/** Standard Constructor */
     public X_C_ProjectIssue (Properties ctx, int C_ProjectIssue_ID, String trxName)
     {
@@ -318,6 +318,34 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 	public String getC_ProjectIssue_UU()
 	{
 		return (String)get_Value(COLUMNNAME_C_ProjectIssue_UU);
+	}
+
+	public org.compiere.model.I_C_ProjectLine getC_ProjectLine() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_ProjectLine)MTable.get(getCtx(), org.compiere.model.I_C_ProjectLine.Table_Name)
+			.getPO(getC_ProjectLine_ID(), get_TrxName());	}
+
+	/** Set Project Line.
+		@param C_ProjectLine_ID 
+		Task or step in a project
+	  */
+	public void setC_ProjectLine_ID (int C_ProjectLine_ID)
+	{
+		if (C_ProjectLine_ID < 1) 
+			set_Value (COLUMNNAME_C_ProjectLine_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_ProjectLine_ID, Integer.valueOf(C_ProjectLine_ID));
+	}
+
+	/** Get Project Line.
+		@return Task or step in a project
+	  */
+	public int getC_ProjectLine_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_ProjectLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Description.

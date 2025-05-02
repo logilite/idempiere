@@ -1,0 +1,6 @@
+SELECT register_migration_script('202503271324_IDEMPIERE-6460.sql') FROM dual;
+
+-- 27-Mar-2025, 1:24:03 PM IST
+UPDATE AD_Column SET DefaultValue='@5|AD_WF_NodeNext_ID@', IsUpdateable='N',Updated=TO_TIMESTAMP('2025-03-27 13:24:03','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID=11571
+;
+

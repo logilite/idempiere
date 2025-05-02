@@ -1578,5 +1578,60 @@ public class Doc_Invoice extends Doc
 		
 		return super.isConvertible(acctSchema);
 	}
-	
+
+	@Override
+	public boolean isNoPostingRequired()
+	{
+		return super.isNoPostingRequired() || isReversalAlsoNotPosted();
+	}
+
+	/**
+	 * Checks if the reversal document is also not posted.
+	 * If the reverse correction posting is marked for deletion and the document
+	 * has a reversal entry, it retrieves the reversal document, checks its
+	 * posting status, and updates it to "No Posting Required" if necessary.
+	 * 
+	 * @return {@code true} if the reversal document was not posted and is now updated;
+	 *         {@code false} otherwise.
+	 */
+	public boolean isReversalAlsoNotPosted()
+	{
+		MInvoice invoice = (MInvoice) getPO();
+		if (m_as.isDeleteReverseCorrectPosting() && invoice.getReversal_ID() > 0)
+		{
+			MInvoice revInvoice = (MInvoice) invoice.getReversal();
+			if (Util.compareDate(invoice.getDateAcct(), revInvoice.getDateAcct()) == 0 && isNoCostDetailCreated(invoice, revInvoice))
+			{
+				String revpostedsql = "SELECT Posted FROM M_InOut WHERE C_Invoice_ID=?";
+				String posted = DB.getSQLValueStringEx(getTrxName(), revpostedsql, revInvoice.get_ID());
+				if (!STATUS_Posted.equalsIgnoreCase(posted) && !STATUS_NoPostingRequired.equalsIgnoreCase(posted))
+				{
+					DocManager.save(getTrxName(), MInvoice.Table_ID, invoice.getReversal_ID(), STATUS_NoPostingRequired);
+					return true;
+				}
+			}
+		}
+		return false;
+	} // isReversalAlsoNotPosted
+
+	/**
+	 * Checks if no cost detail has been created for the given Invoice records.
+	 * 
+	 * @param  invoice    The Invoice document.
+	 * @param  revInvoice The reverse material Invoice document.
+	 * @return            true if no cost detail exists for any line in both documents, false
+	 *                    otherwise.
+	 */
+	public boolean isNoCostDetailCreated(MInvoice invoice, MInvoice revInvoice)
+	{
+		String sql = "SELECT COUNT(1) "
+						+ " FROM M_CostDetail cd "
+							+ " WHERE cd.C_InvoiceLine_ID IN ( "
+							+ "     SELECT il.C_InvoiceLine_ID FROM C_InvoiceLine il WHERE il.C_Invoice_ID IN (?, ?) "
+							+ " ) "
+							+ " AND cd.C_AcctSchema_ID = ? AND cd.IsActive = 'Y' ";
+		int count = DB.getSQLValue(getTrxName(), sql, invoice.getC_Invoice_ID(), revInvoice.getC_Invoice_ID(), m_as.getC_AcctSchema_ID());
+		return count <= 0;
+	} // isNoCostDetailCreated
+
 }   //  Doc_Invoice

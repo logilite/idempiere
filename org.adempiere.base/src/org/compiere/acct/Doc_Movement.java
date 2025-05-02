@@ -32,6 +32,7 @@ import org.compiere.model.ProductCost;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 /**
  *  Post {@link MMovement} Documents. DOCTYPE_MatMovement.
@@ -339,5 +340,59 @@ public class Doc_Movement extends Doc
 	protected boolean isReversal(DocLine line) {
 		return m_Reversal_ID !=0 && line.getReversalLine_ID() != 0;
 	}
+
+	@Override
+	public boolean isNoPostingRequired()
+	{
+		return super.isNoPostingRequired() || isReversalAlsoNotPosted();
+	}
+
+	/**
+	 * Checks if the reversal document is also not posted.
+	 * If the reverse correction posting is marked for deletion and the document
+	 * has a reversal entry, it retrieves the reversal document, checks its
+	 * posting status, and updates it to "No Posting Required" if necessary.
+	 * 
+	 * @return {@code true} if the reversal document was not posted and is now updated;
+	 *         {@code false} otherwise.
+	 */
+	public boolean isReversalAlsoNotPosted()
+	{
+		if (m_as.isDeleteReverseCorrectPosting() && m_Reversal_ID > 0)
+		{
+			MMovement move = (MMovement) getPO();
+			MMovement rev_move = (MMovement) move.getReversal();
+			if (Util.compareDate(move.getMovementDate(), rev_move.getMovementDate()) == 0 && isNoCostDetailCreated(move, rev_move))
+			{
+				String revpostedsql = "SELECT Posted FROM M_Movement WHERE M_Movement_ID=?";
+				String posted = DB.getSQLValueStringEx(getTrxName(), revpostedsql, rev_move.get_ID());
+				if (!STATUS_Posted.equalsIgnoreCase(posted) && !STATUS_NoPostingRequired.equalsIgnoreCase(posted))
+				{
+					DocManager.save(getTrxName(), MMovement.Table_ID, move.getReversal_ID(), STATUS_NoPostingRequired);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Checks if no cost detail has been created for the given Movement records.
+	 * 
+	 * @param  movement    The Movement document.
+	 * @param  revMovement The reverse Movement document.
+	 * @return          true if no cost detail exists for any line in both documents, false
+	 *                  otherwise.
+	 */
+	public boolean isNoCostDetailCreated(MMovement movement, MMovement revMovement)
+	{
+		String sql = "SELECT COUNT(1) FROM M_CostDetail "
+						+ " WHERE M_MovementLine_ID IN ( "
+							+ "     SELECT ml.M_MovementLine_ID FROM M_MovementLine ml WHERE ml.M_Movement_ID IN (?, ?) "
+							+ "	) "
+							+ " AND C_AcctSchema_ID = ? AND IsActive = 'Y' ";
+		int count = DB .getSQLValue(null, sql, movement.getM_Movement_ID(), revMovement.getM_Movement_ID(), m_as.getC_AcctSchema_ID());
+		return count <= 0;
+	} // isNoCostDetailCreated
 
 }   //  Doc_Movement

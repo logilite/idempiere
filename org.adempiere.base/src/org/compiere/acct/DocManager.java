@@ -462,7 +462,7 @@ public class DocManager {
 	 *  @param trxName transaction name
 	 *  @return true if saved
 	 */
-	private final static boolean save (String trxName, int AD_Table_ID, int Record_ID, String status)
+	public final static boolean save (String trxName, int AD_Table_ID, int Record_ID, String status)
 	{
 		MTable table = MTable.get(Env.getCtx(), AD_Table_ID);
 		StringBuilder sql = new StringBuilder("UPDATE ");

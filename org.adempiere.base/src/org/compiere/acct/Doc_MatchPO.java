@@ -696,4 +696,54 @@ public class Doc_MatchPO extends Doc
 		return m_deferPosting;
 	}
 	
+	@Override
+	public boolean isNoPostingRequired()
+	{
+		return super.isNoPostingRequired() || isReversalAlsoNotPosted();
+	}
+
+	/**
+	 * Checks if the reversal document is also not posted.
+	 * If the reverse correction posting is marked for deletion and the document
+	 * has a reversal entry, it retrieves the reversal document, checks its
+	 * posting status, and updates it to "No Posting Required" if necessary.
+	 * 
+	 * @return {@code true} if the reversal document was not posted and is now updated;
+	 *         {@code false} otherwise.
+	 */
+	public boolean isReversalAlsoNotPosted()
+	{
+		MMatchPO matchPO = (MMatchPO) getPO();
+		if (m_as.isDeleteReverseCorrectPosting() && matchPO.getReversal_ID() > 0)
+		{
+			MMatchPO rev_MatchPO = (MMatchPO) matchPO.getReversal();
+			if (Util.compareDate(matchPO.getDateAcct(), rev_MatchPO.getDateAcct()) == 0 && isNoCostDetailCreated(matchPO, rev_MatchPO))
+			{
+				String revpostedsql = "SELECT Posted FROM M_MatchInvHdr WHERE M_MatchInvHdr_ID=?";
+				String posted = DB.getSQLValueStringEx(getTrxName(), revpostedsql, rev_MatchPO.get_ID());
+				if (!STATUS_Posted.equalsIgnoreCase(posted) && !STATUS_NoPostingRequired.equalsIgnoreCase(posted))
+				{
+					DocManager.save(getTrxName(), MMatchPO.Table_ID, matchPO.getReversal_ID(), STATUS_NoPostingRequired);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Checks if no cost detail has been created for the given MatchPO records.
+	 * 
+	 * @param  matchPO    The MatchPO document.
+	 * @param  revMatchPO The reverse MatchPO document.
+	 * @return            true if no cost detail exists in any documents, false
+	 *                    otherwise.
+	 */
+	public boolean isNoCostDetailCreated(MMatchPO matchPO, MMatchPO revMatchPO)
+	{
+		String sql = "SELECT COUNT(1) FROM M_CostDetail WHERE C_OrderLine_ID IN (?, ?) AND C_AcctSchema_ID = ? AND IsActive = 'Y'";
+		int count = DB.getSQLValue(getTrxName(), sql, matchPO.getC_OrderLine_ID(), revMatchPO.getC_OrderLine_ID(), m_as.getC_AcctSchema_ID());
+		return count <= 0;
+	} // isNoCostDetailCreated
+
 }   //  Doc_MatchPO

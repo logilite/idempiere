@@ -176,6 +176,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 			return false;
 		}
 
+		String costingLevel = MClientInfo.get(getCtx(), getC_Project().getAD_Client_ID()).getC_AcctSchema1().getCostingLevel();
 		// check validation for non Reversed Record
 		if (getReversal_ID() <= 0)
 		{
@@ -183,7 +184,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 			if (getMovementQty() == null || getMovementQty().signum() == 0)
 				setMovementQty(Env.ONE);
 
-			// Check movment Qty is more than Zero
+			// Check movement Qty is more than Zero
 			if (getMovementQty().signum() < 0)
 			{
 				log.saveError("Error", "The movement quantity must be greater than zero.");
@@ -191,36 +192,86 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 			}
 
 			// Validate InOutLine
-			if (getM_InOutLine_ID() > 0)
+			if (getM_InOutLine_ID() > 0 && is_ValueChanged(COLUMNNAME_M_InOutLine_ID))
 			{
 				MInOutLine inOutLine = (MInOutLine) getM_InOutLine();
 
-				if (inOutLine.getM_InOut().isSOTrx()	|| !inOutLine.isProcessed()
-					|| !(MInOut.DOCSTATUS_Completed.equals(inOutLine.getM_InOut().getDocStatus())
-							|| MInOut.DOCSTATUS_Closed.equals(inOutLine.getM_InOut().getDocStatus())))
+				// Manage Multiple Attributes on Shipment Line
+				BigDecimal qty = Env.ZERO;
+				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel)	&&
+					(getM_AttributeSetInstance_ID() <= 0 && inOutLine.getM_AttributeSetInstance_ID() <= 0))
 				{
-					log.saveError("Error", "Receipt Line is not valid - " + inOutLine);
-					return false;
+					// Retrieve Multiple Attribute from In-out Line
+					MInOutLineMA[] inOutLineMAs = MInOutLineMA.get(getCtx(), inOutLine.get_ID(), get_TrxName());
+					for (MInOutLineMA inOutLineMA : inOutLineMAs)
+					{
+						if (qty.signum() > 0)
+						{
+							// Create a new Project Issue when Project Issue movement Qty is more
+							// than Zero
+							ProjectIssueUtil.createProjetIssue(	inOutLine.getM_Locator_ID(), this, inOutLineMA.getM_AttributeSetInstance_ID(),
+																inOutLineMA.getMovementQty(), get_TrxName());
+						}
+						else
+						{
+							// Set Project Issue Locator and movement Qty from First retrieval multiple Attribute
+							qty = inOutLineMA.getMovementQty();
+							setM_AttributeSetInstance_ID(inOutLineMA.getM_AttributeSetInstance_ID());
+							setMovementQty(qty);
+						}
+					}
 				}
+				/**
+				 * Executive When Costing Level
+				 * 1. Client
+				 * 2. Organization
+				 * 3. Batch / Lot and In Out Line present ASI ID (For, Single ASI ID)
+				 */
+				else
+				{
+					if (inOutLine.getM_InOut().isSOTrx()	|| !inOutLine.isProcessed()
+						|| !(MInOut.DOCSTATUS_Completed.equals(inOutLine.getM_InOut().getDocStatus())
+								|| MInOut.DOCSTATUS_Closed.equals(inOutLine.getM_InOut().getDocStatus())))
+					{
+						log.saveError("Error", "Receipt Line is not valid - " + inOutLine);
+						return false;
+					}
 
-				// Need to the same project
-				if (inOutLine.getC_Project_ID() > 0 && inOutLine.getC_Project_ID() != getC_Project_ID())
-				{
-					log.saveError("Error", "Receipt Line is not valid - " + inOutLine + ", Receipt Already present for another Project");
-					return false;
-				}
+					// Need to the same project
+					if (inOutLine.getC_Project_ID() > 0 && inOutLine.getC_Project_ID() != getC_Project_ID())
+					{
+						log.saveError("Error", "Receipt Line is not valid - " + inOutLine + ", Receipt already present for another Project");
+						return false;
+					}
 
-				if (MProjectIssue.projectIssueHasReceipt(inOutLine.get_ID(), null))
-				{
-					log.saveError("Error", "Receipt Line is not valid - " + inOutLine);
-					return false;
+					if (projectIssueHasReceipt(inOutLine.get_ID(), null))
+					{
+						log.saveError("Error", "Receipt Line is not valid - ( " + inOutLine + " ) Project Issue already created for this Recipt");
+						return false;
+					}
+
+					// Check QTY available or not for In Out Line
+					if (inOutLine.getMovementQty().compareTo(getMovementQty()) <= 0)
+					{
+						setMovementQty(ProjectIssueUtil.getInOutLineQTY(	inOutLine, inOutLine.getMovementQty(),
+																					inOutLine.getM_AttributeSetInstance_ID() == 0	? getM_AttributeSetInstance_ID()
+																																	: inOutLine.getM_AttributeSetInstance_ID()));
+
+						if (inOutLine.getMovementQty().compareTo(getMovementQty()) > 0)
+						{
+							ProjectIssueUtil.checkRemainInOutLineQty(	inOutLine, this, costingLevel, getMovementQty(),
+																				inOutLine.getM_AttributeSetInstance_ID() == 0	? getM_AttributeSetInstance_ID()
+																																: inOutLine.getM_AttributeSetInstance_ID());
+						}
+						if (getMovementQty().signum() <= 0)
+						{
+							log.saveError("Error", "Receipt Line- ( " + inOutLine + " ) is not valid, Product is not present at Locator");
+							return false;
+						}
+					}
 				}
-				if(inOutLine.getM_AttributeSetInstance_ID()>0) {
-					setM_AttributeSetInstance_ID(inOutLine.getM_AttributeSetInstance_ID());
-				}
-				//TODO handling multiple ASI
 			}
-			else if (getS_TimeExpenseLine_ID() > 0)
+			else if (getS_TimeExpenseLine_ID() > 0 && is_ValueChanged(COLUMNNAME_S_TimeExpenseLine_ID))
 			{  
 				// validate Time Expense Line
 				MTimeExpenseLine expenseLines = (MTimeExpenseLine) getS_TimeExpenseLine();
@@ -287,7 +338,27 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 
 				setAmt(getInvLineAmt(invLine));
 			}
-			//TODO handling Project line issue
+			else if (getC_ProjectLine_ID() > 0 && is_ValueChanged(COLUMNNAME_C_ProjectLine_ID))
+			{
+				MProjectLine projLine = (MProjectLine) getC_ProjectLine();
+
+				if (projLine.getM_Product_ID() == 0)
+				{
+					log.saveError("Error", "Project Line is not valid - " + projLine + ", has no resource set");
+					return false;
+				}
+				// Need to have Quantity
+				if (projLine.getPlannedQty() == null || projLine.getPlannedQty().signum() == 0)
+				{
+					log.saveError("Error", "Project Line is not valid - " + projLine + ", Project Line must have planned qty");
+					return false;
+				}
+
+				if (projLine.isProcessed())
+				{
+					log.saveError("Error", "Project Line already attached with Project Issue");
+				}
+			}
 			
 			if (getM_Product_ID() > 0)
 			{ // Check if Product is present than must be Locator is available
@@ -297,12 +368,17 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 					return false;
 				}
 				
-				if (getMovementQty() == null || getMovementQty().signum() == 0)
+				if (getMovementQty() == null || getMovementQty().signum() <= 0)
 				{
 					log.saveError("Error","Qty is mandatory when issue from inventory");
 					return false;
 				}
-				return false;
+
+				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel) && getM_AttributeSetInstance_ID() < 0)
+				{
+					log.saveError("Error", "ASI is not Present for Product");
+					return false;
+				}
 			}
 		}
 		
@@ -339,7 +415,6 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 	 */
 	private String doComplete() 
 	{
-		
 		int productID = getM_Product_ID();
 		int chargeID = getC_Charge_ID();
 		if (productID <= 0 && chargeID <= 0)
@@ -370,12 +445,17 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 			// If not a stocked Item nothing to do
 			if (!product.isStocked()) {
 				setProcessed(true);
-				//TODO no error thrown if no cost found.
 				setAmt(updateBalanceAmt());
 				saveEx();
 				return null;
 			}
-			//TODO ASI mandatory check
+
+			String costingLevel = MClientInfo.get(getCtx(), getC_Project().getAD_Client_ID()).getC_AcctSchema1().getCostingLevel();
+			if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel) && getM_AttributeSetInstance_ID() < 0)
+			{
+				log.saveError("Error", "ASI must be present for Product");
+				return "ASI must be present for Product";
+			}
 
 			// ** Create Material Transactions **
 			mTrx = new MTransaction(getCtx(), getAD_Org_ID(), MTransaction.MOVEMENTTYPE_WorkOrderPlus,
@@ -434,11 +514,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 			if (ok) {
 				if (mTrx != null && mTrx.save(get_TrxName())) {
 					setAmt(updateBalanceAmt());
-					//TODO how to differentiate between issue project line and from inventory
-					if (getM_InOutLine_ID() != 0 || getS_TimeExpenseLine_ID() != 0) 
-					{
-						createProjetLine();
-					}
+					createProjetLine();
 					if (save())
 					{
 						return null;
@@ -485,11 +561,11 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		if (getReversal_ID() > 0)
 			return;
 
-		// For In Out Line 
+		MProjectLine pl = null;
+		// For In Out Line
 		if (getM_InOutLine_ID() > 0)
 		{
 			MProject proj = (MProject) getC_Project();
-			MProjectLine pl = null;
 			MProjectLine[] pls = proj.getLines();
 			for (int ii = 0; ii < pls.length; ii++)
 			{
@@ -505,14 +581,25 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 			if (pl == null)
 				pl = new MProjectLine(proj);
 			pl.setMProjectIssue(this); // setIssue
-			pl.saveEx();
+			pl.saveEx(get_TrxName());
 			return;
 		}
-		//TODO case of Project line issue not handled
-		// Create Project Line
-		MProjectLine pl = new MProjectLine((MProject) getC_Project());
-		pl.setC_ProjectIssue_ID(get_ID());
-		pl.saveEx(get_TrxName());
+
+		// Check Issue create from Project Line or not
+		if (getC_ProjectLine_ID() > 0)
+		{
+			pl = (MProjectLine) getC_ProjectLine();
+			pl.setC_ProjectIssue_ID(getC_ProjectIssue_ID());
+			pl.saveEx(get_TrxName());
+			return;
+		}
+		else
+		{
+			// Create Project Line
+			pl = new MProjectLine((MProject) getC_Project());
+			pl.setC_ProjectIssue_ID(get_ID());
+			pl.saveEx(get_TrxName());
+		}
 	} // createProjetLine
 
 	/**
@@ -538,6 +625,8 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 			reversal.setS_TimeExpenseLine_ID(getS_TimeExpenseLine_ID());
 		else if (getC_InvoiceLine_ID() > 0)
 			reversal.setC_InvoiceLine_ID(getC_InvoiceLine_ID());
+		else if (getC_ProjectLine_ID() > 0)
+			reversal.setC_ProjectLine_ID(getC_ProjectLine_ID());
 
 		if (accrual)
 			reversal.setMovementDate(new Timestamp(System.currentTimeMillis()));
@@ -781,6 +870,12 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 			proj.setProjectBalanceAmt(proj.getProjectBalanceAmt().add(cost));
 			proj.saveEx(get_TrxName());
 		}
+		if (getReversal_ID() < 0 && (cost == null || cost.signum() <= 0))
+		{
+			throw new IllegalArgumentException(	"Product: ("	+ getM_Product().getName() + ") is not present at Locator: (" +
+												getM_Locator().getM_Warehouse().getValue() + ") for ASI: (" + getM_AttributeSetInstance().getDescription()
+												+ ")");
+		}
 		return cost;
 	} // updateBalanceAmt
 	
@@ -801,7 +896,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 			else if (intOutLine.getC_Project_ID() > 0 && intOutLine.getC_Project_ID() != getC_Project_ID())
 				return "Time Expense Line(" + intOutLine.getLine() + ") is created for another Project ( Project ID: " + intOutLine.getC_Project_ID() + " )";
 		}
-		else if (getS_TimeExpenseLine_ID() <= 0)
+		else if (getS_TimeExpenseLine_ID() > 0)
 		{
 			MTimeExpenseLine expLine = (MTimeExpenseLine) getS_TimeExpenseLine();
 

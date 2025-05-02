@@ -2839,4 +2839,60 @@ public class Doc_MatchInv extends Doc
 		
 		return isLineFullyMatched;
 	}
+
+	@Override
+	public boolean isNoPostingRequired()
+	{
+		return super.isNoPostingRequired() || isReversalAlsoNotPosted();
+	}
+
+	/**
+	 * Checks if the reversal document is also not posted.
+	 * If the reverse correction posting is marked for deletion and the document
+	 * has a reversal entry, it retrieves the reversal document, checks its
+	 * posting status, and updates it to "No Posting Required" if necessary.
+	 * 
+	 * @return {@code true} if the reversal document was not posted and is now updated;
+	 *         {@code false} otherwise.
+	 */
+	public boolean isReversalAlsoNotPosted()
+	{
+		MMatchInv matchInv = (MMatchInv) getPO();
+		if (m_as.isDeleteReverseCorrectPosting() && matchInv.getReversal_ID() > 0)
+		{
+			MMatchInv rev_matchInv = (MMatchInv) matchInv.getReversal();
+			if (Util.compareDate(matchInv.getDateAcct(), rev_matchInv.getDateAcct()) == 0 && isNoCostDetailCreated(matchInv, rev_matchInv))
+			{
+				String revpostedsql = "SELECT Posted FROM M_MatchInv WHERE M_MatchInv_ID=?";
+				String posted = DB.getSQLValueStringEx(getTrxName(), revpostedsql, rev_matchInv.get_ID());
+				if (!STATUS_Posted.equalsIgnoreCase(posted) && !STATUS_NoPostingRequired.equalsIgnoreCase(posted))
+				{
+					DocManager.save(getTrxName(), MMatchInv.Table_ID, matchInv.getReversal_ID(), STATUS_NoPostingRequired);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Checks if no cost detail has been created for the given MatchInv records.
+	 * 
+	 * @param  matchInv    The MatchInv document.
+	 * @param  revMatchInv The reverse MatchInv document.
+	 * @return             true if no cost detail exists in any documents, false
+	 *                     otherwise.
+	 */
+	public boolean isNoCostDetailCreated(MMatchInv matchInv, MMatchInv revMatchInv)
+	{
+		String sql = "SELECT COUNT(1) FROM M_CostDetail "
+						+ " WHERE M_MatchInv_ID IN (?, ?) "
+							+ "   OR C_InvoiceLine_ID IN (?, ?) "
+							+ "   OR M_InOutLine_ID IN (?, ?) AND C_AcctSchema_ID = ? AND IsActive = 'Y' ";
+		int count = DB.getSQLValue(getTrxName(), sql, matchInv.getM_MatchInv_ID(), revMatchInv.getM_MatchInv_ID(),
+										matchInv.getC_InvoiceLine_ID(), revMatchInv.getC_InvoiceLine_ID(),
+										matchInv.getM_InOutLine_ID(), revMatchInv.getM_InOutLine_ID(), m_as.getC_AcctSchema_ID());
+		return count <= 0;
+	} // isNoCostDetailCreated
+
 }   //  Doc_MatchInv

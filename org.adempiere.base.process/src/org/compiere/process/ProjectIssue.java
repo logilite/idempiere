@@ -166,9 +166,8 @@ public class ProjectIssue extends SvrProcess
 			
 			//	Create Issue
 			MProjectIssue pi = new MProjectIssue (m_project);
-			//TODO if product may moved to other locator.
-			//TODO handling ASI and multiple ASI on inout line
-			pi.setMandatory (inOutLines[i].getM_Locator_ID(), inOutLines[i].getM_Product_ID(), inOutLines[i].getMovementQty());
+
+			pi.setMandatory(inOutLines[i].getM_Locator_ID(), inOutLines[i].getM_Product_ID(), inOutLines[i].getMovementQty());
 			if (m_MovementDate != null)		//	default today
 				pi.setMovementDate(m_MovementDate);
 			
@@ -176,16 +175,17 @@ public class ProjectIssue extends SvrProcess
 				pi.setDescription(m_Description);
 			else
 				pi.setDescription(MProjectIssue.getInOutLineDesc(inOutLines[i]));
-			
+
+			pi.setM_AttributeSetInstance_ID(inOutLines[i].getM_AttributeSetInstance_ID());
 			pi.setM_InOutLine_ID(inOutLines[i].getM_InOutLine_ID());
-			pi.saveEx();
+			pi.saveEx(get_TrxName());
 			ProcessInfo processInfo = MWorkflow.runDocumentActionWorkflow(pi, DocAction.ACTION_Complete);
 			if (processInfo.isError())
 			{
 				getProcessInfo().setLogList(null);
 				throw new RuntimeException(processInfo.getSummary());
 			}
-			pi.saveEx();
+			pi.saveEx(get_TrxName());
 
 			addLog(pi.getLine(), pi.getMovementDate(), pi.getMovementQty(), null);
 			counter++;
@@ -194,7 +194,6 @@ public class ProjectIssue extends SvrProcess
 		StringBuilder msgreturn = new StringBuilder("@Created@ ").append(counter);
 		return msgreturn.toString();
 	}	//	issueReceipt
-
 
 	/**
 	 *	Issue Expense Report
@@ -212,7 +211,6 @@ public class ProjectIssue extends SvrProcess
 		int counter = 0;
 		for (int i = 0; i < expenseLines.length; i++)
 		{
-			//TODO needs to have product or Charge
 			//	Need to have a Product
 			if (expenseLines[i].getM_Product_ID() == 0)
 				continue;
@@ -251,8 +249,15 @@ public class ProjectIssue extends SvrProcess
 			counter++;
 		}	//	allExpenseLines
 
-		StringBuilder msgreturn = new StringBuilder("@Created@ ").append(counter);
-		return msgreturn.toString();
+		if (counter > 0)
+		{
+			StringBuilder msgreturn = new StringBuilder("@Created@ ").append(counter);
+			return msgreturn.toString();
+		}
+		else
+		{
+			return "@Error@ The product is missing in the Expense Line for Expense #" + m_S_TimeExpense_ID;
+		}
 	}	//	issueExpense
 
 	/**
@@ -309,6 +314,8 @@ public class ProjectIssue extends SvrProcess
 			pi.setDescription(m_Description);
 		else if (pl.getDescription() != null)
 			pi.setDescription(pl.getDescription());
+		pi.setAmt(pl.getPlannedAmt());
+		pi.setC_ProjectLine_ID(m_C_ProjectLine_ID);
 		pi.saveEx();
 		
 		ProcessInfo processInfo = MWorkflow.runDocumentActionWorkflow(pi, DocAction.ACTION_Complete);

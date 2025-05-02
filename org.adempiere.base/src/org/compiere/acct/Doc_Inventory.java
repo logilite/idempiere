@@ -469,4 +469,59 @@ public class Doc_Inventory extends Doc
 		return m_Reversal_ID !=0 && line.getReversalLine_ID() != 0;
 	}
 
+	@Override
+	public boolean isNoPostingRequired()
+	{
+		return super.isNoPostingRequired() || isReversalAlsoNotPosted();
+	}
+
+	/**
+	 * Checks if the reversal document is also not posted.
+	 * If the reverse correction posting is marked for deletion and the document
+	 * has a reversal entry, it retrieves the reversal document, checks its
+	 * posting status, and updates it to "No Posting Required" if necessary.
+	 * 
+	 * @return {@code true} if the reversal document was not posted and is now updated;
+	 *         {@code false} otherwise.
+	 */
+	public boolean isReversalAlsoNotPosted()
+	{
+		if (m_as.isDeleteReverseCorrectPosting() && m_Reversal_ID > 0)
+		{
+			MInventory inventory = (MInventory) getPO();
+			MInventory rev_inventory = (MInventory) inventory.getReversal();
+			if (Util.compareDate(inventory.getMovementDate(), rev_inventory.getMovementDate()) == 0 && isNoCostDetailCreated(inventory, rev_inventory))
+			{
+				String revpostedsql = "SELECT Posted FROM M_Inventory WHERE M_Inventory_ID=?";
+				String posted = DB.getSQLValueStringEx(getTrxName(), revpostedsql, rev_inventory.get_ID());
+				if (!STATUS_Posted.equalsIgnoreCase(posted) && !STATUS_NoPostingRequired.equalsIgnoreCase(posted))
+				{
+					DocManager.save(getTrxName(), MInventory.Table_ID, inventory.getReversal_ID(), STATUS_NoPostingRequired);
+					return true;
+				}
+			}
+		}
+		return false;
+	}// isReversalAlsoNotPosted
+
+	/**
+	 * Checks if no cost detail has been created for the given Inventory records.
+	 * 
+	 * @param  inventory    The Inventory document.
+	 * @param  revInventory The reverse Inventory document.
+	 * @return              true if no cost detail exists for any line in both documents, false
+	 *                      otherwise.
+	 */
+	public boolean isNoCostDetailCreated(MInventory inventory, MInventory revInventory)
+	{
+		String sql = "SELECT COUNT(1) "
+						+ "FROM M_CostDetail cd "
+							+ " WHERE cd.M_InventoryLine_ID IN ( "
+							+ "     SELECT il.M_InventoryLine_ID FROM M_InventoryLine il WHERE il.M_Inventory_ID IN (?, ?) "
+							+ " ) "
+							+ " AND cd.C_AcctSchema_ID = ? AND cd.IsActive = 'Y' ";
+	       int count = DB.getSQLValue(getTrxName(), sql, inventory.getM_Inventory_ID(), revInventory.getM_Inventory_ID(), m_as.getC_AcctSchema_ID());
+	       return count <= 0;
+	}// isNoCostDetailCreated
+
 }   //  Doc_Inventory
