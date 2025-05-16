@@ -108,7 +108,13 @@ public class ValuePreference extends Window implements EventListener<Event>
 		if (aValue != null)
 		{
 			Value = aValue.toString();
-			DisplayValue = (aDisplayValue == null) ? Value : aDisplayValue;
+			if (Value == "NULL")
+				Value = "";
+			if (aDisplayValue == null)
+				aDisplayValue = Value;
+			else if (Msg.getMsg(Env.getCtx(), "PleaseSelect").equals(aDisplayValue))
+				aDisplayValue = "";
+			DisplayValue = aDisplayValue;
 		}
 
 		//  Get from mField
