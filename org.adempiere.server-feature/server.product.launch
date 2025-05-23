@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.pde.ui.RuntimeWorkbench">
     <setAttribute key="additional_plugins">
-        <setEntry value="org.adempiere.eclipse.equinox.http.servlet:11.0.0.qualifier:default:true:default:true"/>
-        <setEntry value="org.adempiere.server:11.0.0.qualifier:default:true:default:true"/>
-        <setEntry value="org.adempiere.ui.zk:11.0.0.qualifier:default:true:default:true"/>
+        <setEntry value="org.adempiere.eclipse.equinox.http.servlet:12.0.0.qualifier:default:true:default:true"/>
+        <setEntry value="org.adempiere.server:12.0.0.qualifier:default:true:default:true"/>
+        <setEntry value="org.adempiere.ui.zk:12.0.0.qualifier:default:true:default:true"/>
         <setEntry value="org.apache.aries.spifly.dynamic.bundle:1.3.3:default:true:2:true"/>
         <setEntry value="org.apache.felix.scr:2.1.24.v20200924-1939:default:true:2:true"/>
         <setEntry value="org.apache.felix.webconsole:4.6.4.v202109010034:default:true:default:true"/>
@@ -23,7 +23,7 @@
         <setEntry value="org.eclipse.jetty.websocket.javax.common:10.0.9:default:true:3:true"/>
         <setEntry value="org.eclipse.jetty.websocket.javax.server:10.0.9:default:true:3:true"/>
         <setEntry value="org.eclipse.jetty.websocket.server:10.0.9:default:true:3:true"/>
-        <setEntry value="org.idempiere.felix.webconsole:11.0.0.qualifier:default:true:default:true"/>
+        <setEntry value="org.idempiere.felix.webconsole:12.0.0.qualifier:default:true:default:true"/>
         <setEntry value="org.mortbay.jasper.apache-el:9.0.52:default:true:default:true"/>
         <setEntry value="org.mortbay.jasper.apache-jsp:9.0.52:default:true:default:true"/>
     </setAttribute>
@@ -45,7 +45,6 @@
     <booleanAttribute key="org.eclipse.debug.core.ATTR_FORCE_SYSTEM_CONSOLE_ENCODING" value="false"/>
     <stringAttribute key="org.eclipse.debug.core.source_locator_id" value="org.eclipse.pde.ui.launcher.PDESourceLookupDirector"/>
     <stringAttribute key="org.eclipse.debug.core.source_locator_memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;sourceLookupDirector&gt;&#10;&lt;sourceContainers duplicates=&quot;false&quot;&gt;&#10;&lt;container memento=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;#10;&amp;lt;classpathContainer path=&amp;quot;org.eclipse.jdt.launching.JRE_CONTAINER&amp;quot;/&amp;gt;&amp;#10;&quot; typeId=&quot;org.eclipse.jdt.launching.sourceContainer.classpathContainer&quot;/&gt;&#10;&lt;container memento=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;#10;&amp;lt;default/&amp;gt;&amp;#10;&quot; typeId=&quot;org.eclipse.debug.core.containerType.default&quot;/&gt;&#10;&lt;/sourceContainers&gt;&#10;&lt;/sourceLookupDirector&gt;&#10;"/>
-    <stringAttribute key="org.eclipse.debug.ui.ATTR_CAPTURE_IN_FILE" value="C:\PHX-11-WS\PHX-11-WS.log"/>
     <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
         <listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>
     </listAttribute>
@@ -418,73 +417,6 @@
         <setEntry value="zweb@default:default"/>
     </setAttribute>
     <setAttribute key="selected_workspace_bundles">
-        <setEntry value="LiberoHR@default:true"/>
-        <setEntry value="com.cleartax.einvoice@default:true"/>
-        <setEntry value="com.logilite.FailledLoginAudit@default:true"/>
-        <setEntry value="com.logilite.aboutwindow@default:true"/>
-        <setEntry value="com.logilite.agedinventory@default:true"/>
-        <setEntry value="com.logilite.bankstatementmatcher.rules@default:true"/>
-        <setEntry value="com.logilite.barcode.scanner@default:true"/>
-        <setEntry value="com.logilite.barcodetab@default:true"/>
-        <setEntry value="com.logilite.bigdataconfig@default:true"/>
-        <setEntry value="com.logilite.centralization@default:true"/>
-        <setEntry value="com.logilite.cloud@default:true"/>
-        <setEntry value="com.logilite.costbuild@default:true"/>
-        <setEntry value="com.logilite.crm.notification@default:true"/>
-        <setEntry value="com.logilite.customerstatement@default:true"/>
-        <setEntry value="com.logilite.digitalsign@default:true"/>
-        <setEntry value="com.logilite.dms.querybuildsolr@default:true"/>
-        <setEntry value="com.logilite.dms.storageprovider@default:true"/>
-        <setEntry value="com.logilite.dms.tika@default:true"/>
-        <setEntry value="com.logilite.dms@default:true"/>
-        <setEntry value="com.logilite.dmslib@default:true"/>
-        <setEntry value="com.logilite.dmssync@default:true"/>
-        <setEntry value="com.logilite.dmstheme@default:false"/>
-        <setEntry value="com.logilite.edrs@default:true"/>
-        <setEntry value="com.logilite.einvoice@default:true"/>
-        <setEntry value="com.logilite.ewaybillmanual@default:true"/>
-        <setEntry value="com.logilite.expdateeditor@default:true"/>
-        <setEntry value="com.logilite.gst@default:true"/>
-        <setEntry value="com.logilite.hr@default:true"/>
-        <setEntry value="com.logilite.hrms@default:true"/>
-        <setEntry value="com.logilite.htmlreport.theme@default:false"/>
-        <setEntry value="com.logilite.htmlreport@default:true"/>
-        <setEntry value="com.logilite.idempiere.in-localization@default:true"/>
-        <setEntry value="com.logilite.indihr@default:true"/>
-        <setEntry value="com.logilite.interallocation@default:true"/>
-        <setEntry value="com.logilite.lims@default:true"/>
-        <setEntry value="com.logilite.linetax@default:true"/>
-        <setEntry value="com.logilite.mfg2.planning@default:true"/>
-        <setEntry value="com.logilite.numericpostfix@default:true"/>
-        <setEntry value="com.logilite.oauth@default:true"/>
-        <setEntry value="com.logilite.partyledger@default:true"/>
-        <setEntry value="com.logilite.pharma.LabelScanner@default:true"/>
-        <setEntry value="com.logilite.pharma.base@default:true"/>
-        <setEntry value="com.logilite.pharma.engineering@default:true"/>
-        <setEntry value="com.logilite.pharma.mrapp@default:true"/>
-        <setEntry value="com.logilite.pharma.notification@default:true"/>
-        <setEntry value="com.logilite.pharma.qc@default:true"/>
-        <setEntry value="com.logilite.postgres.export.copycommand@default:true"/>
-        <setEntry value="com.logilite.qms@default:true"/>
-        <setEntry value="com.logilite.qualityCheck@default:true"/>
-        <setEntry value="com.logilite.regulatory@default:true"/>
-        <setEntry value="com.logilite.search.solr@default:true"/>
-        <setEntry value="com.logilite.search.solrlib@default:true"/>
-        <setEntry value="com.logilite.search@default:true"/>
-        <setEntry value="com.logilite.signonsrv@default:true"/>
-        <setEntry value="com.logilite.syncservice@default:true"/>
-        <setEntry value="com.logilite.systemhealthchecker@default:true"/>
-        <setEntry value="com.logilite.tcstax@default:true"/>
-        <setEntry value="com.logilite.template.request@default:true"/>
-        <setEntry value="com.logilite.template.velocity@default:true"/>
-        <setEntry value="com.logilite.template@default:true"/>
-        <setEntry value="com.logilite.timewithset@default:true"/>
-        <setEntry value="com.logilite.training@default:true"/>
-        <setEntry value="com.logilite.whatsapp.notification@default:true"/>
-        <setEntry value="com.logilite.whatsapp@default:true"/>
-        <setEntry value="com.logilite.wms@default:true"/>
-        <setEntry value="com.microvista.einvoice@default:true"/>
-        <setEntry value="com.ss.kf.elapsedtimeeditor@default:true"/>
         <setEntry value="org.adempiere.base.callout@default:default"/>
         <setEntry value="org.adempiere.base.process@default:default"/>
         <setEntry value="org.adempiere.base@default:default"/>
@@ -504,26 +436,20 @@
         <setEntry value="org.apache.ecs@default:default"/>
         <setEntry value="org.compiere.db.oracle.provider@default:default"/>
         <setEntry value="org.compiere.db.postgresql.provider@default:default"/>
-        <setEntry value="org.globalqss.idempiere.LCO.withholdings@default:true"/>
-        <setEntry value="org.idempiere.eam@default:true"/>
         <setEntry value="org.idempiere.felix.webconsole@default:true"/>
         <setEntry value="org.idempiere.hazelcast.service@default:default"/>
         <setEntry value="org.idempiere.jetty.osgi.boot.fragment@default:false"/>
         <setEntry value="org.idempiere.keikai@default:false"/>
-        <setEntry value="org.idempiere.mfg2@default:true"/>
         <setEntry value="org.idempiere.printformat.editor@default:default"/>
         <setEntry value="org.idempiere.tablepartition@default:default"/>
         <setEntry value="org.idempiere.ui.sso.oidc@default:default"/>
         <setEntry value="org.idempiere.webservices.resources@default:default"/>
-        <setEntry value="org.idempiere.webservices@default:default"/>
         <setEntry value="org.idempiere.zk.billboard.chart@default:default"/>
         <setEntry value="org.idempiere.zk.billboard@default:false"/>
+        <setEntry value="org.idempiere.zk.breeze.theme@default:false"/>
         <setEntry value="org.idempiere.zk.datatable@default:false"/>
         <setEntry value="org.idempiere.zk.extra@default:default"/>
         <setEntry value="org.idempiere.zk.iceblue_c.theme@default:false"/>
-        <setEntry value="org.idempiere.zk.pivot@default:false"/>
-        <setEntry value="org.logilite.sms.base@default:true"/>
-        <setEntry value="org.logilite.syncservice@default:true"/>
     </setAttribute>
     <booleanAttribute key="show_selected_only" value="false"/>
     <booleanAttribute key="tracing" value="false"/>
