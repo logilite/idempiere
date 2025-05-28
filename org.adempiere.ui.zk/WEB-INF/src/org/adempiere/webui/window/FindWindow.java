@@ -2085,6 +2085,9 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 		historyCombo.setDisabled(false);
 		if (m_sEditors.size() > 0)
 			Clients.response(new AuFocus(m_sEditors.get(0).getComponent()));
+
+		if (m_gridTab != null && m_gridTab.getAD_Tab_ID() != m_AD_Tab_ID)
+			m_gridTab = m_windowPanel.getGridWindow().getGridTab(m_AD_Tab_ID);
 	}
 
 	/**
