@@ -32,7 +32,7 @@ public class X_M_ProductionLine extends PO implements I_M_ProductionLine, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20250603L;
 
     /** Standard Constructor */
     public X_M_ProductionLine (Properties ctx, int M_ProductionLine_ID, String trxName)
@@ -79,6 +79,56 @@ public class X_M_ProductionLine extends PO implements I_M_ProductionLine, I_Pers
         .append(get_ID()).append("]");
       return sb.toString();
     }
+
+	public org.compiere.model.I_C_CostCenter getC_CostCenter() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_CostCenter)MTable.get(getCtx(), org.compiere.model.I_C_CostCenter.Table_Name)
+			.getPO(getC_CostCenter_ID(), get_TrxName());	}
+
+	/** Set Cost Center.
+		@param C_CostCenter_ID Cost Center	  */
+	public void setC_CostCenter_ID (int C_CostCenter_ID)
+	{
+		if (C_CostCenter_ID < 1) 
+			set_Value (COLUMNNAME_C_CostCenter_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_CostCenter_ID, Integer.valueOf(C_CostCenter_ID));
+	}
+
+	/** Get Cost Center.
+		@return Cost Center	  */
+	public int getC_CostCenter_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_CostCenter_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Department getC_Department() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Department)MTable.get(getCtx(), org.compiere.model.I_C_Department.Table_Name)
+			.getPO(getC_Department_ID(), get_TrxName());	}
+
+	/** Set Department.
+		@param C_Department_ID Department	  */
+	public void setC_Department_ID (int C_Department_ID)
+	{
+		if (C_Department_ID < 1) 
+			set_Value (COLUMNNAME_C_Department_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_Department_ID, Integer.valueOf(C_Department_ID));
+	}
+
+	/** Get Department.
+		@return Department	  */
+	public int getC_Department_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Department_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
 
 	/** Set Description.
 		@param Description 

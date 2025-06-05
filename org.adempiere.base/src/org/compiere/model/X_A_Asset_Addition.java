@@ -33,7 +33,7 @@ public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20250603L;
 
     /** Standard Constructor */
     public X_A_Asset_Addition (Properties ctx, int A_Asset_Addition_ID, String trxName)
@@ -406,6 +406,31 @@ public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Pers
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_C_CostCenter getC_CostCenter() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_CostCenter)MTable.get(getCtx(), org.compiere.model.I_C_CostCenter.Table_Name)
+			.getPO(getC_CostCenter_ID(), get_TrxName());	}
+
+	/** Set Cost Center.
+		@param C_CostCenter_ID Cost Center	  */
+	public void setC_CostCenter_ID (int C_CostCenter_ID)
+	{
+		if (C_CostCenter_ID < 1) 
+			set_Value (COLUMNNAME_C_CostCenter_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_CostCenter_ID, Integer.valueOf(C_CostCenter_ID));
+	}
+
+	/** Get Cost Center.
+		@return Cost Center	  */
+	public int getC_CostCenter_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_CostCenter_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException
     {
 		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_Name)
@@ -429,6 +454,31 @@ public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Pers
 	public int getC_Currency_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Currency_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Department getC_Department() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Department)MTable.get(getCtx(), org.compiere.model.I_C_Department.Table_Name)
+			.getPO(getC_Department_ID(), get_TrxName());	}
+
+	/** Set Department.
+		@param C_Department_ID Department	  */
+	public void setC_Department_ID (int C_Department_ID)
+	{
+		if (C_Department_ID < 1) 
+			set_Value (COLUMNNAME_C_Department_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_Department_ID, Integer.valueOf(C_Department_ID));
+	}
+
+	/** Get Department.
+		@return Department	  */
+	public int getC_Department_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Department_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

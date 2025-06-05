@@ -33,7 +33,7 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20250603L;
 
     /** Standard Constructor */
     public X_M_Movement (Properties ctx, int M_Movement_ID, String trxName)
@@ -291,6 +291,56 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 	public int getC_Charge_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Charge_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_CostCenter getC_CostCenter() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_CostCenter)MTable.get(getCtx(), org.compiere.model.I_C_CostCenter.Table_Name)
+			.getPO(getC_CostCenter_ID(), get_TrxName());	}
+
+	/** Set Cost Center.
+		@param C_CostCenter_ID Cost Center	  */
+	public void setC_CostCenter_ID (int C_CostCenter_ID)
+	{
+		if (C_CostCenter_ID < 1) 
+			set_Value (COLUMNNAME_C_CostCenter_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_CostCenter_ID, Integer.valueOf(C_CostCenter_ID));
+	}
+
+	/** Get Cost Center.
+		@return Cost Center	  */
+	public int getC_CostCenter_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_CostCenter_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Department getC_Department() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Department)MTable.get(getCtx(), org.compiere.model.I_C_Department.Table_Name)
+			.getPO(getC_Department_ID(), get_TrxName());	}
+
+	/** Set Department.
+		@param C_Department_ID Department	  */
+	public void setC_Department_ID (int C_Department_ID)
+	{
+		if (C_Department_ID < 1) 
+			set_Value (COLUMNNAME_C_Department_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_Department_ID, Integer.valueOf(C_Department_ID));
+	}
+
+	/** Get Department.
+		@return Department	  */
+	public int getC_Department_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Department_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -796,6 +846,62 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 	public int getM_Shipper_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_Shipper_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_Warehouse)MTable.get(getCtx(), org.compiere.model.I_M_Warehouse.Table_Name)
+			.getPO(getM_Warehouse_ID(), get_TrxName());	}
+
+	/** Set Warehouse.
+		@param M_Warehouse_ID 
+		Storage Warehouse and Service Point
+	  */
+	public void setM_Warehouse_ID (int M_Warehouse_ID)
+	{
+		if (M_Warehouse_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_M_Warehouse_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_M_Warehouse_ID, Integer.valueOf(M_Warehouse_ID));
+	}
+
+	/** Get Warehouse.
+		@return Storage Warehouse and Service Point
+	  */
+	public int getM_Warehouse_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Warehouse_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_M_Warehouse getM_WarehouseTo() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_Warehouse)MTable.get(getCtx(), org.compiere.model.I_M_Warehouse.Table_Name)
+			.getPO(getM_WarehouseTo_ID(), get_TrxName());	}
+
+	/** Set Warehouse To.
+		@param M_WarehouseTo_ID 
+		To Storage Warehouse and Service Point
+	  */
+	public void setM_WarehouseTo_ID (int M_WarehouseTo_ID)
+	{
+		if (M_WarehouseTo_ID < 1) 
+			set_Value (COLUMNNAME_M_WarehouseTo_ID, null);
+		else 
+			set_Value (COLUMNNAME_M_WarehouseTo_ID, Integer.valueOf(M_WarehouseTo_ID));
+	}
+
+	/** Get Warehouse To.
+		@return To Storage Warehouse and Service Point
+	  */
+	public int getM_WarehouseTo_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_WarehouseTo_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

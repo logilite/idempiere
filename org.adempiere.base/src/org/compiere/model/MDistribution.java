@@ -48,6 +48,7 @@ public class MDistribution extends X_GL_Distribution
 	 *	@param PostingType only posting type
 	 *	@param C_DocType_ID only document type
 	 *	@return array of distributions
+	 *  @Deprecated
 	 */
 	public static MDistribution[] get (MAccount acct,  
 		String PostingType, int C_DocType_ID)
@@ -58,7 +59,7 @@ public class MDistribution extends X_GL_Distribution
 			acct.getM_Product_ID(), acct.getC_BPartner_ID(), acct.getC_Project_ID(),
 			acct.getC_Campaign_ID(), acct.getC_Activity_ID(), acct.getAD_OrgTrx_ID(),
 			acct.getC_SalesRegion_ID(), acct.getC_LocTo_ID(), acct.getC_LocFrom_ID(),
-			acct.getUser1_ID(), acct.getUser2_ID());
+			acct.getUser1_ID(), acct.getUser2_ID(), 0, 0, 0, 0, 0, 0, 0);
 	}	//	get
 
 	/**
@@ -80,6 +81,13 @@ public class MDistribution extends X_GL_Distribution
 	 *	@param C_LocFrom_ID location from
 	 *	@param User1_ID user 1
 	 *	@param User2_ID user 2
+	 *  @param C_CostCenter_ID 
+	 *	@param C_Department_ID 
+	 *	@param C_Employee_ID 
+	 *	@param C_Charge_ID 
+	 *	@param A_Asset_ID 
+	 *	@param M_Warehouse_ID 
+	 *	@param M_AttributeSetInstance_ID 
 	 *	@return array of distributions or null
 	 */
 	public static MDistribution[] get (Properties ctx, int C_AcctSchema_ID, 
@@ -88,7 +96,8 @@ public class MDistribution extends X_GL_Distribution
 		int M_Product_ID, int C_BPartner_ID, int C_Project_ID,
 		int C_Campaign_ID, int C_Activity_ID, int AD_OrgTrx_ID,
 		int C_SalesRegion_ID, int C_LocTo_ID, int C_LocFrom_ID,
-		int User1_ID, int User2_ID)
+		int User1_ID, int User2_ID, int C_CostCenter_ID, int C_Department_ID,
+		int C_Employee_ID, int C_Charge_ID, int A_Asset_ID, int M_Warehouse_ID, int M_AttributeSetInstance_ID)
 	{
 		MDistribution[] acctList = getAll(ctx);
 		if (acctList == null || acctList.length == 0)
@@ -135,6 +144,20 @@ public class MDistribution extends X_GL_Distribution
 			if (!distribution.isAnyUser1() && distribution.getUser1_ID() != User1_ID)
 				continue;
 			if (!distribution.isAnyUser2() && distribution.getUser2_ID() != User2_ID)
+				continue;
+			if (!distribution.isAnyCostCenter() && distribution.getC_CostCenter_ID() != C_CostCenter_ID)
+				continue;
+			if (!distribution.isAnyDepartment() && distribution.getC_Department_ID() != C_Department_ID)
+				continue;
+			if (!distribution.isAnyEmployee() && distribution.getC_Employee_ID() != C_Employee_ID)
+				continue;
+			if (!distribution.isAnyCharge() && distribution.getC_Charge_ID() != C_Charge_ID)
+				continue;
+			if (!distribution.isAnyAsset() && distribution.getA_Asset_ID() != A_Asset_ID)
+				continue;
+			if (!distribution.isAnyWarehouse() && distribution.getM_Warehouse_ID() != M_Warehouse_ID)
+				continue;
+			if (!distribution.isAnyAttributeSetInstance() && distribution.getM_AttributeSetInstance_ID() != M_AttributeSetInstance_ID)
 				continue;
 			//
 			list.add (distribution);
@@ -440,6 +463,20 @@ public class MDistribution extends X_GL_Distribution
 			setUser1_ID(0);
 		if (isAnyUser2() && getUser2_ID() != 0)
 			setUser2_ID(0);
+		if (isAnyCostCenter() && getC_CostCenter_ID() != 0)
+			setC_CostCenter_ID(0);
+		if (isAnyDepartment() && getC_Department_ID() != 0)
+			setC_Department_ID(0);
+		if (isAnyEmployee() && getC_Employee_ID() != 0)
+			setC_Employee_ID(0);
+		if (isAnyCharge() && getC_Charge_ID() != 0)
+			setC_Charge_ID(0);
+		if (isAnyAsset() && getA_Asset_ID() != 0)
+			setA_Asset_ID(0);
+		if (isAnyWarehouse() && getM_Warehouse_ID() != 0)
+			setM_Warehouse_ID(0);
+		if (isAnyAttributeSetInstance() && getM_AttributeSetInstance_ID() != 0)
+			setM_AttributeSetInstance_ID(0);
 		return true;
 	}	//	beforeSave
 	

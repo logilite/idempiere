@@ -178,6 +178,28 @@ public interface I_M_Movement
 
 	public org.compiere.model.I_C_Charge getC_Charge() throws RuntimeException;
 
+    /** Column name C_CostCenter_ID */
+    public static final String COLUMNNAME_C_CostCenter_ID = "C_CostCenter_ID";
+
+	/** Set Cost Center	  */
+	public void setC_CostCenter_ID (int C_CostCenter_ID);
+
+	/** Get Cost Center	  */
+	public int getC_CostCenter_ID();
+
+	public org.compiere.model.I_C_CostCenter getC_CostCenter() throws RuntimeException;
+
+    /** Column name C_Department_ID */
+    public static final String COLUMNNAME_C_Department_ID = "C_Department_ID";
+
+	/** Set Department	  */
+	public void setC_Department_ID (int C_Department_ID);
+
+	/** Get Department	  */
+	public int getC_Department_ID();
+
+	public org.compiere.model.I_C_Department getC_Department() throws RuntimeException;
+
     /** Column name C_DocType_ID */
     public static final String COLUMNNAME_C_DocType_ID = "C_DocType_ID";
 
@@ -466,6 +488,36 @@ public interface I_M_Movement
 	public int getM_Shipper_ID();
 
 	public org.compiere.model.I_M_Shipper getM_Shipper() throws RuntimeException;
+
+    /** Column name M_Warehouse_ID */
+    public static final String COLUMNNAME_M_Warehouse_ID = "M_Warehouse_ID";
+
+	/** Set Warehouse.
+	  * Storage Warehouse and Service Point
+	  */
+	public void setM_Warehouse_ID (int M_Warehouse_ID);
+
+	/** Get Warehouse.
+	  * Storage Warehouse and Service Point
+	  */
+	public int getM_Warehouse_ID();
+
+	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException;
+
+    /** Column name M_WarehouseTo_ID */
+    public static final String COLUMNNAME_M_WarehouseTo_ID = "M_WarehouseTo_ID";
+
+	/** Set Warehouse To.
+	  * To Storage Warehouse and Service Point
+	  */
+	public void setM_WarehouseTo_ID (int M_WarehouseTo_ID);
+
+	/** Get Warehouse To.
+	  * To Storage Warehouse and Service Point
+	  */
+	public int getM_WarehouseTo_ID();
+
+	public org.compiere.model.I_M_Warehouse getM_WarehouseTo() throws RuntimeException;
 
     /** Column name POReference */
     public static final String COLUMNNAME_POReference = "POReference";
