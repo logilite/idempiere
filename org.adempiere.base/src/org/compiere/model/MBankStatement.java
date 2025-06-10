@@ -666,7 +666,15 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 			setIsApproved(false);
 		
 		if (log.isLoggable(Level.INFO)) log.info("ReactivateIt - " + toString());
-		
+
+		// IDEMPIERE-6067 Reactivation of Invoices - uncomment in logilite-11
+//		MPeriod.testPeriodOpen(getCtx(), getDateAcct(), MDocType.DOCBASETYPE_BankStatement, getAD_Org_ID());
+//
+//		if (!DocumentEngine.canReactivateThisDocType(getC_DocType_ID())) {
+//			m_processMsg = Msg.getMsg(getCtx(), "DocTypeCannotBeReactivated", new Object[] {MDocType.get(getC_DocType_ID()).getNameTrl()});
+//			return false;
+//		}
+
 		//	Set Payment reconciled false
 		MBankStatementLine[] lines = getLines(false);
 		for (int i = 0; i < lines.length; i++)

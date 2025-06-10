@@ -333,6 +333,19 @@ public interface I_C_DocType
 	  */
 	public boolean isActive();
 
+    /** Column name IsCanBeReactivated */
+    public static final String COLUMNNAME_IsCanBeReactivated = "IsCanBeReactivated";
+
+	/** Set Can Be Reactivated.
+	  * This document can be reactivated
+	  */
+	public void setIsCanBeReactivated (boolean IsCanBeReactivated);
+
+	/** Get Can Be Reactivated.
+	  * This document can be reactivated
+	  */
+	public boolean isCanBeReactivated();
+
     /** Column name IsChargeOrProductMandatory */
     public static final String COLUMNNAME_IsChargeOrProductMandatory = "IsChargeOrProductMandatory";
 

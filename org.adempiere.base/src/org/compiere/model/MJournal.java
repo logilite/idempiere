@@ -937,6 +937,12 @@ public class MJournal extends X_GL_Journal implements DocAction
 		
 		// teo_sarca - FR [ 1776045 ] Add ReActivate action to GL Journal
 		MPeriod.testPeriodOpen(getCtx(), getDateAcct(), getC_DocType_ID(), getAD_Org_ID());
+
+		if (!DocumentEngine.canReactivateThisDocType(getC_DocType_ID())) {
+			m_processMsg = Msg.getMsg(getCtx(), "DocTypeCannotBeReactivated", new Object[] {MDocType.get(Env.getCtx(), getC_DocType_ID()).getNameTrl()});
+			return false;
+		}
+
 		MFactAcct.deleteEx(MJournal.Table_ID, get_ID(), get_TrxName());
 		setPosted(false);
 		setProcessed(false);

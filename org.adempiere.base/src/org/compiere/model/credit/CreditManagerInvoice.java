@@ -68,7 +68,7 @@ public class CreditManagerInvoice implements ICreditManager
 				}
 			}
 		}
-		else if (MInvoice.DOCACTION_Complete.equals(docAction))
+		else if (MInvoice.DOCACTION_Complete.equals(docAction) || MInvoice.DOCACTION_Re_Activate.equals(docAction))
 		{
 			// Update BP Statistics
 			Properties ctx = mInvoice.getCtx();
@@ -88,6 +88,10 @@ public class CreditManagerInvoice implements ICreditManager
 															mInvoice.getC_Currency_ID(), MClient.get(ctx).getC_Currency_ID(), mInvoice.getC_ConversionType_ID(),
 															mInvoice.getDateAcct(), trxName);
 			}
+
+			if (MInvoice.DOCACTION_Re_Activate.equals(docAction))
+				invAmt = invAmt.negate();
+
 			// Total Balance
 			BigDecimal newBalance = bp.getTotalOpenBalance();
 			if (newBalance == null)

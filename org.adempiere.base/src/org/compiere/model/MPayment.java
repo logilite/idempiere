@@ -2928,7 +2928,12 @@ public class MPayment extends X_C_Payment
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REACTIVATE);
 		if (m_processMsg != null)
 			return false;	
-		
+
+		if (!DocumentEngine.canReactivateThisDocType(getC_DocType_ID())) {
+			m_processMsg = Msg.getMsg(getCtx(), "DocTypeCannotBeReactivated", new Object[] {MDocType.get(Env.getCtx(), getC_DocType_ID()).getNameTrl()});
+			return false;
+		}
+
 		if (! reverseCorrectIt())
 			return false;
 
