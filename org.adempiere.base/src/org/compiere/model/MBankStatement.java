@@ -29,6 +29,7 @@ import org.compiere.process.DocumentEngine;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.TimeUtil;
  
 /**
 *	Bank Statement Model
@@ -52,7 +53,7 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 4286511528899179483L;
+	private static final long serialVersionUID = -2826344784570435827L;
 
 	/**
 	 * 	Standard Constructor
@@ -266,7 +267,10 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 	{
 		boolean isManualOpening = MSysConfig.getBooleanValue(MSysConfig.BANKSTATEMENT_MANUAL_OPENING, false,
 				getAD_Client_ID(), getAD_Org_ID());
-		
+
+		if (getC_DocType_ID() <= 0) {
+			setC_DocType_ID(MDocType.getDocType(MDocType.DOCBASETYPE_BankStatement));
+		}
 		if (!isProcessed() && getBeginningBalance().compareTo(Env.ZERO) == 0
 				&& (!isManualOpening || (isManualOpening && newRecord)))
 		{
@@ -343,7 +347,7 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 			return DocAction.STATUS_Invalid;
 
 		//	Std Period open?
-		MPeriod.testPeriodOpen(getCtx(), getStatementDate(), MDocType.DOCBASETYPE_BankStatement, getAD_Org_ID());
+		MPeriod.testPeriodOpen(getCtx(), getStatementDate(), getC_DocType_ID(), getAD_Org_ID());
 		MBankStatementLine[] lines = getLines(true);
 		if (lines.length == 0)
 		{
@@ -426,6 +430,9 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 				return status;
 		}
 
+		// Set the definite document number after completed (if needed)
+		setDefiniteDocumentNo();
+
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_COMPLETE);
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
@@ -487,8 +494,28 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 		setProcessed(true);
 		setDocAction(DOCACTION_Close);
 		return DocAction.STATUS_Completed;
-	}	//	completeIt
-	
+	} // completeIt
+
+	/**
+	 * 	Set the definite document number after completed
+	 */
+	protected void setDefiniteDocumentNo() {
+		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
+		if (dt.isOverwriteDateOnComplete()) {
+			if (this.getProcessedOn().signum() == 0) {
+				setStatementDate(TimeUtil.getDay(0));
+				MPeriod.testPeriodOpen(getCtx(), getStatementDate(), getC_DocType_ID(), getAD_Org_ID());
+			}
+		}
+		if (dt.isOverwriteSeqOnComplete()) {
+			if (this.getProcessedOn().signum() == 0) {
+				String value = DB.getDocumentNo(getC_DocType_ID(), get_TrxName(), true, this);
+				if (value != null)
+					setDocumentNo(value);
+			}
+		}
+	}
+
 	/**
 	 * 	Void Document.
 	 * 	@return false 
@@ -520,7 +547,7 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 		//	Std Period open?
 		else
 		{
-			MPeriod.testPeriodOpen(getCtx(), getStatementDate(), MDocType.DOCBASETYPE_BankStatement, getAD_Org_ID());
+			MPeriod.testPeriodOpen(getCtx(), getStatementDate(), getC_DocType_ID(), getAD_Org_ID());
 			MFactAcct.deleteEx(Table_ID, getC_BankStatement_ID(), get_TrxName());
 		}
 
