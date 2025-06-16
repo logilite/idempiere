@@ -32,7 +32,7 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20250616L;
 
     /** Standard Constructor */
     public X_A_Asset (Properties ctx, int A_Asset_ID, String trxName)
@@ -567,6 +567,31 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 	public int getC_BPartnerSR_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartnerSR_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Department getC_Department() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Department)MTable.get(getCtx(), org.compiere.model.I_C_Department.Table_Name)
+			.getPO(getC_Department_ID(), get_TrxName());	}
+
+	/** Set Department.
+		@param C_Department_ID Department	  */
+	public void setC_Department_ID (int C_Department_ID)
+	{
+		if (C_Department_ID < 1) 
+			set_Value (COLUMNNAME_C_Department_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_Department_ID, Integer.valueOf(C_Department_ID));
+	}
+
+	/** Get Department.
+		@return Department	  */
+	public int getC_Department_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Department_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
