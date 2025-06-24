@@ -835,9 +835,12 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		{
 			cost = ProjectIssueUtil.getLaborCost(as, getS_TimeExpenseLine_ID());
 		}
-		else if (getC_InvoiceLine_ID() > 0 || getC_Charge_ID() > 0)
+		else if (getC_InvoiceLine_ID() > 0)
 		{
 			cost = getInvLineAmt((MInvoiceLine) getC_InvoiceLine());
+		}
+		else if(getC_Charge_ID() > 0) {
+			cost = getAmt();
 		}
 		else
 		{

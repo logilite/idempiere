@@ -140,21 +140,24 @@ public class Doc_ProjectIssue extends Doc
 
 		//  Issue Cost
 		BigDecimal cost = null;
-		cost = ProjectIssueUtil.getCostDetailCost(m_issue, as).multiply(m_issue.getMovementQty());
+		if(m_issue.getM_Product_ID() > 0)
+			cost = ProjectIssueUtil.getCostDetailCost(m_issue, as).multiply(m_issue.getMovementQty());
+		
 		if (cost == null || cost.signum() <= 0)
 		{
 			if (m_issue.getM_InOutLine_ID() != 0)
 				cost = ProjectIssueUtil.getPOCost(as, m_issue.getM_InOutLine_ID(), m_line.getQty());
 			else if (m_issue.getS_TimeExpenseLine_ID() != 0)
 				cost = ProjectIssueUtil.getLaborCost(as, m_issue.getS_TimeExpenseLine_ID());
-			else if (m_issue.getC_InvoiceLine_ID() > 0)
+			else if (m_issue.getC_InvoiceLine_ID() > 0 || m_issue.getC_Charge_ID()>0)
 				cost = m_issue.getAmt();
+			else if (m_issue.getM_Product_ID()>0) // standard Product Costs
+			{
+	            cost = m_line.getProductCosts(as, getAD_Org_ID(), false);
+			}
 		}
-		if (cost == null || cost.signum() <= 0) // standard Product Costs
-		{
-			cost = m_line.getProductCosts(as, getAD_Org_ID(), false);
-		}
-		if (cost == null || cost.signum() <= 0)
+		
+		if (product!=null && (cost == null || cost.signum() <= 0))
 		{
 			throw new AdempiereException("Cost is not Present for Product (" + product.getName() + ")");
 		}
