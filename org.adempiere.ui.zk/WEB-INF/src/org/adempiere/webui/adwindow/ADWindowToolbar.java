@@ -693,6 +693,7 @@ public class ADWindowToolbar extends FToolbar implements EventListener<Event>
 	public void enableAttributeForm(boolean enabled)
 	{
 		btnAttributeForm.setDisabled(!enabled);
+		btnAttributeForm.setVisible(enabled);
 	}
 
     public void lock(boolean locked)

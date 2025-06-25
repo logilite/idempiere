@@ -35,9 +35,9 @@ public interface I_M_AttributeSet
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
 
-    /** AccessLevel = 3 - Client - Org 
+    /** AccessLevel = 7 - System - Client - Org 
      */
-    BigDecimal accessLevel = BigDecimal.valueOf(3);
+    BigDecimal accessLevel = BigDecimal.valueOf(7);
 
     /** Load Meta Data */
 
@@ -90,6 +90,21 @@ public interface I_M_AttributeSet
 	  * Optional short description of the record
 	  */
 	public String getDescription();
+
+    /** Column name EntityType */
+    public static final String COLUMNNAME_EntityType = "EntityType";
+
+	/** Set Entity Type.
+	  * Dictionary Entity Type;
+ Determines ownership and synchronization
+	  */
+	public void setEntityType (String EntityType);
+
+	/** Get Entity Type.
+	  * Dictionary Entity Type;
+ Determines ownership and synchronization
+	  */
+	public String getEntityType();
 
     /** Column name GuaranteeDays */
     public static final String COLUMNNAME_GuaranteeDays = "GuaranteeDays";
@@ -243,19 +258,6 @@ public interface I_M_AttributeSet
 	  */
 	public String getLotCharSOverwrite();
 
-    /** Column name MandatoryType */
-    public static final String COLUMNNAME_MandatoryType = "MandatoryType";
-
-	/** Set Mandatory Type.
-	  * The specification of a Product Attribute Instance is mandatory
-	  */
-	public void setMandatoryType (String MandatoryType);
-
-	/** Get Mandatory Type.
-	  * The specification of a Product Attribute Instance is mandatory
-	  */
-	public String getMandatoryType();
-
     /** Column name M_AttributeSet_ID */
     public static final String COLUMNNAME_M_AttributeSet_ID = "M_AttributeSet_ID";
 
@@ -268,6 +270,15 @@ public interface I_M_AttributeSet
 	  * Product Attribute Set
 	  */
 	public int getM_AttributeSet_ID();
+
+    /** Column name M_AttributeSet_Type */
+    public static final String COLUMNNAME_M_AttributeSet_Type = "M_AttributeSet_Type";
+
+	/** Set AttributeSet Type	  */
+	public void setM_AttributeSet_Type (String M_AttributeSet_Type);
+
+	/** Get AttributeSet Type	  */
+	public String getM_AttributeSet_Type();
 
     /** Column name M_AttributeSet_UU */
     public static final String COLUMNNAME_M_AttributeSet_UU = "M_AttributeSet_UU";
@@ -307,6 +318,19 @@ public interface I_M_AttributeSet
 	public int getM_SerNoCtl_ID();
 
 	public org.compiere.model.I_M_SerNoCtl getM_SerNoCtl() throws RuntimeException;
+
+    /** Column name MandatoryType */
+    public static final String COLUMNNAME_MandatoryType = "MandatoryType";
+
+	/** Set Mandatory Type.
+	  * The specification of a Product Attribute Instance is mandatory
+	  */
+	public void setMandatoryType (String MandatoryType);
+
+	/** Get Mandatory Type.
+	  * The specification of a Product Attribute Instance is mandatory
+	  */
+	public String getMandatoryType();
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";
@@ -371,10 +395,4 @@ public interface I_M_AttributeSet
 
 	/** Get Use Guarantee Date for Material Policy	  */
 	public boolean isUseGuaranteeDateForMPolicy();
-	/** Column name M_AttributeSet_Type */
-    public static final String COLUMNNAME_M_AttributeSet_Type = "M_AttributeSet_Type";
-	/** Set M_AttributeSet_Type	  */
-	public void setM_AttributeSet_Type (String M_AttributeSet_Type);
-	/** Get M_AttributeSet_Type	  */
-	public String getM_AttributeSet_Type();
 }

@@ -66,7 +66,6 @@ import org.adempiere.webui.exception.ApplicationException;
 import org.adempiere.webui.factory.ServiceUtil;
 import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.panel.InfoPanel;
-import org.adempiere.webui.panel.TableAttributePanel;
 import org.adempiere.webui.panel.WDocActionPanel;
 import org.adempiere.webui.panel.action.CSVImportAction;
 import org.adempiere.webui.panel.action.ExportAction;
@@ -79,6 +78,7 @@ import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.CustomizeGridViewDialog;
 import org.adempiere.webui.window.FDialog;
 import org.adempiere.webui.window.FindWindow;
+import org.adempiere.webui.window.WTableAttribute;
 import org.adempiere.webui.window.WChat;
 import org.adempiere.webui.window.WPostIt;
 import org.adempiere.webui.window.WRecordAccessDialog;
@@ -99,6 +99,7 @@ import org.compiere.model.MRecentItem;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
+import org.compiere.model.MTableAttributeSet;
 import org.compiere.model.MToolBarButtonRestrict;
 import org.compiere.model.MUserPreference;
 import org.compiere.model.MWindow;
@@ -1197,7 +1198,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 
 	public void onAttributeForm()
 	{
-		new TableAttributePanel(adTabbox.getSelectedGridTab().getAD_Table_ID(), adTabbox.getSelectedGridTab().getRecord_ID());
+		new WTableAttribute(adTabbox.getSelectedGridTab().getAD_Table_ID(), adTabbox.getSelectedGridTab().getRecord_ID());
 	}
 	
     /**
@@ -1491,7 +1492,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 
 		toolbar.enableQuickForm(adTabbox.getSelectedTabpanel().isEnableQuickFormButton() && !adTabbox.getSelectedGridTab().isReadOnly());
 		
-		toolbar.enableAttributeForm((MTable.get(Env.getCtx(), adTabbox.getSelectedGridTab().getAD_Table_ID()).getM_AttributeSet_ID() > 0));
+		toolbar.enableAttributeForm(MTableAttributeSet.hasTableAttributeSet(adTabbox.getSelectedGridTab().getAD_Table_ID()));
 
 		boolean isNewRow = adTabbox.getSelectedGridTab().getRowCount() == 0 || adTabbox.getSelectedGridTab().isNew();
         

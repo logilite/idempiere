@@ -30,7 +30,7 @@ public class X_M_Attribute extends PO implements I_M_Attribute, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20231027L;
+	private static final long serialVersionUID = 20250625L;
 
     /** Standard Constructor */
     public X_M_Attribute (Properties ctx, int M_Attribute_ID, String trxName)
@@ -54,7 +54,7 @@ public class X_M_Attribute extends PO implements I_M_Attribute, I_Persistent
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 7 - System - Client - Org 
       */
     protected int get_AccessLevel()
     {
@@ -70,8 +70,8 @@ public class X_M_Attribute extends PO implements I_M_Attribute, I_Persistent
 
     public String toString()
     {
-      StringBuilder sb = new StringBuilder ("X_M_Attribute[")
-        .append(get_ID()).append(",Name=").append(getName()).append("]");
+      StringBuffer sb = new StringBuffer ("X_M_Attribute[")
+        .append(get_ID()).append("]");
       return sb.toString();
     }
 
@@ -240,6 +240,26 @@ public class X_M_Attribute extends PO implements I_M_Attribute, I_Persistent
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
+	/** EntityType AD_Reference_ID=389 */
+	public static final int ENTITYTYPE_AD_Reference_ID=389;
+	/** Set Entity Type.
+		@param EntityType 
+		Dictionary Entity Type; Determines ownership and synchronization
+	  */
+	public void setEntityType (String EntityType)
+	{
+
+		set_Value (COLUMNNAME_EntityType, EntityType);
+	}
+
+	/** Get Entity Type.
+		@return Dictionary Entity Type; Determines ownership and synchronization
+	  */
+	public String getEntityType () 
+	{
+		return (String)get_Value(COLUMNNAME_EntityType);
+	}
+
 	/** Set Instance Attribute.
 		@param IsInstanceAttribute 
 		The product attribute is specific to the instance (like Serial No, Lot or Guarantee Date)
@@ -311,6 +331,20 @@ public class X_M_Attribute extends PO implements I_M_Attribute, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set M_Attribute_UU.
+		@param M_Attribute_UU M_Attribute_UU	  */
+	public void setM_Attribute_UU (String M_Attribute_UU)
+	{
+		set_Value (COLUMNNAME_M_Attribute_UU, M_Attribute_UU);
+	}
+
+	/** Get M_Attribute_UU.
+		@return M_Attribute_UU	  */
+	public String getM_Attribute_UU () 
+	{
+		return (String)get_Value(COLUMNNAME_M_Attribute_UU);
+	}
+
 	public org.compiere.model.I_M_AttributeSearch getM_AttributeSearch() throws RuntimeException
     {
 		return (org.compiere.model.I_M_AttributeSearch)MTable.get(getCtx(), org.compiere.model.I_M_AttributeSearch.Table_Name)
@@ -337,20 +371,6 @@ public class X_M_Attribute extends PO implements I_M_Attribute, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** Set M_Attribute_UU.
-		@param M_Attribute_UU M_Attribute_UU	  */
-	public void setM_Attribute_UU (String M_Attribute_UU)
-	{
-		set_Value (COLUMNNAME_M_Attribute_UU, M_Attribute_UU);
-	}
-
-	/** Get M_Attribute_UU.
-		@return M_Attribute_UU	  */
-	public String getM_Attribute_UU () 
-	{
-		return (String)get_Value(COLUMNNAME_M_Attribute_UU);
 	}
 
 	/** Set Name.

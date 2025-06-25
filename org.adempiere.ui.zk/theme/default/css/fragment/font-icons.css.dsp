@@ -349,4 +349,5 @@
 
 .z-icon-AttributeForm:before {
 	content: "\f29e";
+	font-weight: 900;
 }

@@ -30,7 +30,7 @@ public class X_M_AttributeValue extends PO implements I_M_AttributeValue, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20250625L;
 
     /** Standard Constructor */
     public X_M_AttributeValue (Properties ctx, int M_AttributeValue_ID, String trxName)
@@ -52,7 +52,7 @@ public class X_M_AttributeValue extends PO implements I_M_AttributeValue, I_Pers
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 7 - System - Client - Org 
       */
     protected int get_AccessLevel()
     {
@@ -88,6 +88,26 @@ public class X_M_AttributeValue extends PO implements I_M_AttributeValue, I_Pers
 	public String getDescription () 
 	{
 		return (String)get_Value(COLUMNNAME_Description);
+	}
+
+	/** EntityType AD_Reference_ID=389 */
+	public static final int ENTITYTYPE_AD_Reference_ID=389;
+	/** Set Entity Type.
+		@param EntityType 
+		Dictionary Entity Type; Determines ownership and synchronization
+	  */
+	public void setEntityType (String EntityType)
+	{
+
+		set_Value (COLUMNNAME_EntityType, EntityType);
+	}
+
+	/** Get Entity Type.
+		@return Dictionary Entity Type; Determines ownership and synchronization
+	  */
+	public String getEntityType () 
+	{
+		return (String)get_Value(COLUMNNAME_EntityType);
 	}
 
 	public org.compiere.model.I_M_Attribute getM_Attribute() throws RuntimeException
