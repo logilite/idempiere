@@ -634,7 +634,14 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		else
 			reversal.setMovementDate(getMovementDate());
 		reversal.setDescription("Reversal for Line No " + getLine() + "<"+getC_ProjectIssue_ID()+">");
-		
+
+		// Additional Dimensions
+		reversal.setA_Asset_ID(getA_Asset_ID());
+		reversal.setC_CostCenter_ID(getC_CostCenter_ID());
+		reversal.setC_Department_ID(getC_Department_ID());
+		reversal.setC_Employee_ID(getC_Employee_ID());
+		reversal.setM_Warehouse_ID(getM_Warehouse_ID());
+
 		reversal.setReversal_ID(getC_ProjectIssue_ID());
 		reversal.saveEx(get_TrxName());
 		//
