@@ -127,6 +127,7 @@ public abstract class PO
 																					+ "				INNER JOIN M_Attribute a ON (a.M_Attribute_ID = ta.M_Attribute_ID)"
 																					+ "				WHERE ta.AD_Table_ID = ? AND Record_ID = ? AND a.IsActive = 'Y' ";
 
+	/** Record Attribute and Value Map */
 	private Map<String, Object> m_tableAttributeMap = new HashMap<String, Object>();
 
 
@@ -5189,7 +5190,11 @@ public abstract class PO
 	{
 		return columnExists(columnName, false);
 	}
-	
+
+	/**
+	 * @param attributeName
+	 * @return
+	 */
 	public boolean get_TableAttributeAsBoolean(String attributeName)
 	{
 		Object value = get_TableAttribute(attributeName);
@@ -5201,7 +5206,11 @@ public abstract class PO
 		}
 		return false;
 	} // get_TableAttributeAsBoolean
-	
+
+	/**
+	 * @param attributeName
+	 * @return
+	 */
 	public int get_TableAttributeAsInt(String attributeName)
 	{
 		Object value = get_TableAttribute(attributeName);
@@ -5226,8 +5235,6 @@ public abstract class PO
 	 * TODO can write different method to get directly cast value like get_TableAttributeAsString, get_TableAttributeAsDate etc..
 	 * 
 	 * @param  attributeName
-	 * @param  table_ID
-	 * @param  record_ID
 	 * @return
 	 */
 	public Object get_TableAttribute(String attributeName)

@@ -28,19 +28,31 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.DBException;
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 public class MTableAttributeSet extends X_AD_TableAttributeSet
 {
 	/**
 	 * 
 	 */
-	private static final long									serialVersionUID			= -5802958666081579235L;
+	private static final long									serialVersionUID				= -5802958666081579235L;
 
-	private static final CCache<String, ArrayList<MAttribute>>	s_TableAttributeListCache	= new CCache<>(Table_Name, 5, 0, false, 0);
+	private static final CCache<String, ArrayList<MAttribute>>	s_TableAttributeListCache		= new CCache<>(Table_Name, 5, 0, false, 0);
+
+	private static final String									SQL_GET_DUPLICATE_ATTRIB_COUNT	= "SELECT COUNT(1) FROM M_AttributeUse au					"
+																									+ "	WHERE au.M_AttributeSet_ID = ? AND au.IsActive = 'Y'"
+																									+ "		AND au.M_Attribute_ID IN (		"
+																									+ "			SELECT au2.M_Attribute_ID	"
+																									+ "			FROM M_AttributeUse au2 	"
+																									+ "			JOIN AD_TableAttributeSet tas ON au2.M_AttributeSet_ID = tas.M_AttributeSet_ID	"
+																									+ "			WHERE au.M_Attribute_ID = au2.M_Attribute_ID AND tas.AD_Table_ID = ? 			"
+																									+ "				AND au2.IsActive = 'Y' AND tas.IsActive = 'Y'								"
+																									+ " 	) ";
 
 	public MTableAttributeSet(Properties ctx, int AD_TableAttributeSet_ID, String trxName)
 	{
@@ -64,12 +76,11 @@ public class MTableAttributeSet extends X_AD_TableAttributeSet
 		if (s_TableAttributeListCache.containsKey(String.valueOf(tableID)))
 			return s_TableAttributeListCache.get(String.valueOf(tableID));
 
-		String sql = "SELECT DISTINCT mau.M_Attribute_ID\n"
-						+ "FROM M_AttributeUse mau\n"
-							+ "INNER JOIN M_Attribute ma ON (mau.M_Attribute_ID = ma.M_Attribute_ID)\n"
-							+ "INNER JOIN AD_TableAttributeSet tas ON (mau.M_AttributeSet_ID = tas.AD_TableAttributeSet_ID)\n"
-							+ "WHERE mau.IsActive = 'Y' AND ma.IsActive = 'Y' AND tas.IsActive = 'Y'\n"
-							+ "  AND tas.AD_Table_ID = ?";
+		String sql = "SELECT DISTINCT mau.M_Attribute_ID"
+						+ " FROM M_AttributeUse mau 	"
+						+ " INNER JOIN M_Attribute ma 			ON (mau.M_Attribute_ID = ma.M_Attribute_ID) 			"
+						+ " INNER JOIN AD_TableAttributeSet tas ON (mau.M_AttributeSet_ID = tas.AD_TableAttributeSet_ID)"
+						+ " WHERE mau.IsActive = 'Y' AND ma.IsActive = 'Y' AND tas.IsActive = 'Y' AND tas.AD_Table_ID=?	";
 
 		ArrayList<MAttribute> list = new ArrayList<MAttribute>();
 		PreparedStatement pstmt = null;
@@ -112,4 +123,14 @@ public class MTableAttributeSet extends X_AD_TableAttributeSet
 	{
 		return DB.getSQLValue(null, "SELECT COUNT(1) FROM AD_TableAttributeSet WHERE AD_Table_ID = ? AND IsActive = 'Y' ", ad_Table_ID) > 0;
 	}
+
+	@Override
+	protected boolean beforeSave(boolean newRecord)
+	{
+		int count = DB.getSQLValue(get_TrxName(), SQL_GET_DUPLICATE_ATTRIB_COUNT, getM_AttributeSet_ID(), getAD_Table_ID());
+		if (count > 0)
+			throw new AdempiereException(Msg.getCleanMsg(getCtx(), "DuplicateAttribute"));
+
+		return true;
+	} // beforeSave
 }
