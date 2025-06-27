@@ -162,3 +162,6 @@ UPDATE AD_Field SET IsAlwaysUpdateable='Y',Updated=TO_TIMESTAMP('2025-06-24 11:2
 INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('E','Duplicate entries found in the Attribute Set. Each attribute must have a unique value for the associated table.',0,0,'Y',TO_TIMESTAMP('2025-06-25 18:39:59','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-06-25 18:39:59','YYYY-MM-DD HH24:MI:SS'),100,200949,'DuplicateAttribute','D','6d66970d-1da7-453b-87b4-3ad243592d37')
 ;
 
+-- Jun 27, 2025, 2:17:49 PM IST
+INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('E','Each attribute must have a unique Name.',0,0,'Y',TO_TIMESTAMP('2025-06-27 14:17:49','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-06-27 14:17:49','YYYY-MM-DD HH24:MI:SS'),100,200950,'UniqueAttribute','D','c7ba0f5a-8ca1-4d87-83e7-87f0cfae58d9')
+;
