@@ -79,7 +79,7 @@ public class MTableAttributeSet extends X_AD_TableAttributeSet
 		String sql = "SELECT DISTINCT mau.M_Attribute_ID"
 						+ " FROM M_AttributeUse mau 	"
 						+ " INNER JOIN M_Attribute ma 			ON (mau.M_Attribute_ID = ma.M_Attribute_ID) 			"
-						+ " INNER JOIN AD_TableAttributeSet tas ON (mau.M_AttributeSet_ID = tas.AD_TableAttributeSet_ID)"
+						+ " INNER JOIN AD_TableAttributeSet tas ON (mau.M_AttributeSet_ID = tas.M_AttributeSet_ID)		"
 						+ " WHERE mau.IsActive = 'Y' AND ma.IsActive = 'Y' AND tas.IsActive = 'Y' AND tas.AD_Table_ID=?	";
 
 		ArrayList<MAttribute> list = new ArrayList<MAttribute>();
