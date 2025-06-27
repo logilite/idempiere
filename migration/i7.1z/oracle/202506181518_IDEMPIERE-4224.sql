@@ -5,7 +5,7 @@ SET SQLBLANKLINES ON
 SET DEFINE OFF
 
 -- Jun 18, 2025, 3:19:57 PM IST
-INSERT INTO AD_Window (AD_Window_ID,Name,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,WindowType,Processing,EntityType,IsSOTrx,IsDefault,WinHeight,WinWidth,IsBetaFunctionality,AD_Window_UU) VALUES (200157,'Table Attributes AD',0,0,'Y',TO_TIMESTAMP('2025-06-18 15:19:56','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-06-18 15:19:56','YYYY-MM-DD HH24:MI:SS'),100,'M','N','D','Y','N',0,0,'N','6949502d-0fa4-446f-b1c6-d5810344abcf')
+INSERT INTO AD_Window (AD_Window_ID,Name,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,WindowType,Processing,EntityType,IsSOTrx,IsDefault,WinHeight,WinWidth,IsBetaFunctionality,AD_Window_UU) VALUES (200157,'Table Attribute Instance',0,0,'Y',TO_TIMESTAMP('2025-06-18 15:19:56','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-06-18 15:19:56','YYYY-MM-DD HH24:MI:SS'),100,'M','N','D','Y','N',0,0,'N','6949502d-0fa4-446f-b1c6-d5810344abcf')
 ;
 
 -- Jun 18, 2025, 3:20:39 PM IST
@@ -55,16 +55,20 @@ UPDATE AD_Field SET SeqNo=0,Updated=TO_TIMESTAMP('2025-06-18 15:21:00','YYYY-MM-
 UPDATE AD_Field SET SeqNo=0,Updated=TO_TIMESTAMP('2025-06-18 15:21:00','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=208805
 ;
 
--- Jun 18, 2025, 3:21:39 PM IST
-INSERT INTO AD_Menu (AD_Menu_ID,Name,Action,AD_Window_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsSummary,IsSOTrx,IsReadOnly,EntityType,IsCentrallyMaintained,AD_Menu_UU) VALUES (200246,'Table Attributes AD','W',200157,0,0,'Y',TO_TIMESTAMP('2025-06-18 15:36:38','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-06-18 15:36:38','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','N','D','Y','f6c635db-15ba-496a-8c92-f0616fc5a407')
+-- Jun 27, 2025, 3:42:29 PM IST
+UPDATE AD_TreeNodeMM SET Parent_ID=153, SeqNo=44,Updated=TO_TIMESTAMP('2025-06-27 15:42:29','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Tree_ID=10 AND Node_ID=50001
 ;
 
 -- Jun 18, 2025, 3:21:39 PM IST
-INSERT INTO AD_TreeNodeMM (AD_Client_ID,AD_Org_ID, IsActive,Created,CreatedBy,Updated,UpdatedBy, AD_Tree_ID, Node_ID, Parent_ID, SeqNo, AD_TreeNodeMM_UU) SELECT t.AD_Client_ID, 0, 'Y', getDate(), 100, getDate(), 100,t.AD_Tree_ID, 200246, 0, 999, Generate_UUID() FROM AD_Tree t WHERE t.AD_Client_ID=0 AND t.IsActive='Y' AND t.IsAllNodes='Y' AND t.TreeType='MM' AND NOT EXISTS (SELECT * FROM AD_TreeNodeMM e WHERE e.AD_Tree_ID=t.AD_Tree_ID AND Node_ID=200246)
+INSERT INTO AD_Menu (AD_Menu_ID,Name,Action,AD_Window_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsSummary,IsSOTrx,IsReadOnly,EntityType,IsCentrallyMaintained,AD_Menu_UU) VALUES (200246,'Table Attribute Instance','W',200157,0,0,'Y',TO_TIMESTAMP('2025-06-18 15:36:38','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-06-18 15:36:38','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','N','D','Y','f6c635db-15ba-496a-8c92-f0616fc5a407')
+;
+
+-- Jun 18, 2025, 3:21:39 PM IST
+INSERT INTO AD_TreeNodeMM (AD_Client_ID,AD_Org_ID, IsActive,Created,CreatedBy,Updated,UpdatedBy, AD_Tree_ID, Node_ID, Parent_ID, SeqNo, AD_TreeNodeMM_UU) SELECT t.AD_Client_ID, 0, 'Y', getDate(), 100, getDate(), 100,t.AD_Tree_ID, 200246, 153, 43, Generate_UUID() FROM AD_Tree t WHERE t.AD_Client_ID=0 AND t.IsActive='Y' AND t.IsAllNodes='Y' AND t.TreeType='MM' AND NOT EXISTS (SELECT * FROM AD_TreeNodeMM e WHERE e.AD_Tree_ID=t.AD_Tree_ID AND Node_ID=200246)
 ;
 
 -- Jun 24, 2025, 11:19:34 AM IST
-INSERT INTO AD_Tab (AD_Tab_ID,Name,AD_Window_ID,SeqNo,IsSingleRow,AD_Table_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,HasTree,IsInfoTab,IsTranslationTab,IsReadOnly,AD_Column_ID,WhereClause,Processing,ImportFields,TabLevel,IsSortTab,EntityType,IsInsertRecord,IsAdvancedTab,AD_Tab_UU,TreeDisplayedOn,IsLookupOnlySelection,IsAllowAdvancedLookup,MaxQueryRecords) VALUES (200397,'Table Attribute',200157,20,'Y',200390,0,0,'Y',TO_TIMESTAMP('2025-06-24 11:19:33','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-06-24 11:19:33','YYYY-MM-DD HH24:MI:SS'),100,'N','N','N','N',215944,'AD_Table_ID = @AD_Table_ID@','N','N',1,'N','D','Y','N','1b320d42-2be0-4e33-bfbd-c2b89ad41ea5','B','N','Y',1)
+INSERT INTO AD_Tab (AD_Tab_ID,Name,AD_Window_ID,SeqNo,IsSingleRow,AD_Table_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,HasTree,IsInfoTab,IsTranslationTab,IsReadOnly,AD_Column_ID,WhereClause,Processing,ImportFields,TabLevel,IsSortTab,EntityType,IsInsertRecord,IsAdvancedTab,AD_Tab_UU,TreeDisplayedOn,IsLookupOnlySelection,IsAllowAdvancedLookup,MaxQueryRecords) VALUES (200397,'Table Attribute Value',200157,20,'Y',200390,0,0,'Y',TO_TIMESTAMP('2025-06-24 11:19:33','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-06-24 11:19:33','YYYY-MM-DD HH24:MI:SS'),100,'N','N','N','N',215944,'AD_Table_ID = @AD_Table_ID@','N','N',1,'N','D','Y','N','1b320d42-2be0-4e33-bfbd-c2b89ad41ea5','B','N','Y',0)
 ;
 
 -- Jun 24, 2025, 11:19:51 AM IST
@@ -165,4 +169,34 @@ INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,
 
 -- Jun 27, 2025, 2:17:49 PM IST
 INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('E','Each attribute must have a unique Name.',0,0,'Y',TO_DATE('2025-06-27 14:17:49','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2025-06-27 14:17:49','YYYY-MM-DD HH24:MI:SS'),100,200950,'UniqueAttribute','D','c7ba0f5a-8ca1-4d87-83e7-87f0cfae58d9')
+;
+
+
+
+-- Jun 27, 2025, 4:59:27 PM IST
+UPDATE AD_Column SET IsMandatory='Y',IsUpdateable='N',Updated=TO_TIMESTAMP('2025-06-27 16:59:27','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID=215944
+;
+
+-- Jun 27, 2025, 5:08:10 PM IST
+UPDATE AD_Val_Rule SET Name='M_Attribute of M_AttributeSet ( M_AttributeUse )', Code='M_Attribute.M_Attribute_ID IN ( SELECT M_Attribute_ID FROM M_AttributeUse WHERE M_AttributeUse.M_AttributeSet_ID=@M_AttributeSet_ID@)',Updated=TO_TIMESTAMP('2025-06-27 17:08:10','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Val_Rule_ID=200099
+;
+
+-- Jun 27, 2025, 5:09:16 PM IST
+UPDATE AD_Column SET AD_Val_Rule_ID=200099, IsMandatory='Y',Updated=TO_TIMESTAMP('2025-06-27 17:09:16','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID=215940
+;
+
+-- Jun 27, 2025, 5:14:35 PM IST
+UPDATE AD_Column SET AD_Val_Rule_ID=200100, IsUpdateable='Y',Updated=TO_TIMESTAMP('2025-06-27 17:14:35','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID=215946
+;
+
+-- Jun 27, 2025, 5:14:55 PM IST
+UPDATE AD_Column SET IsMandatory='Y', IsToolbarButton='N',Updated=TO_TIMESTAMP('2025-06-27 17:14:55','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID=215945
+;
+
+-- Jun 27, 2025, 5:29:15 PM IST
+UPDATE AD_Tab SET WhereClause='AD_TableAttribute.M_Attribute_ID IN (select M_Attribute_ID from M_AttributeUse where M_AttributeUse.M_AttributeSet_ID=@M_AttributeSet_ID@)',Updated=TO_TIMESTAMP('2025-06-27 17:29:15','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Tab_ID=200397
+;
+
+
+UPDATE AD_Column SET AD_Reference_ID=28,Updated=TO_TIMESTAMP('2025-06-27 16:00:00','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID = 215945
 ;

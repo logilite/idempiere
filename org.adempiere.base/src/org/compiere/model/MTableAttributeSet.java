@@ -52,7 +52,7 @@ public class MTableAttributeSet extends X_AD_TableAttributeSet
 																									+ "			INNER JOIN	M_Attribute a2			ON a2.M_Attribute_ID = u2.M_Attribute_ID 		"
 																									+ "			INNER JOIN	AD_TableAttributeSet s	ON s.M_AttributeSet_ID = u2.M_AttributeSet_ID	"
 																									+ "			WHERE s.AD_Table_ID = ? AND u2.IsActive = 'Y' AND (a2.Name = a.Name OR u2.M_Attribute_ID = u.M_Attribute_ID) "
-																									+ "		);	";
+																									+ "		)	";
 
 	public MTableAttributeSet(Properties ctx, int AD_TableAttributeSet_ID, String trxName)
 	{

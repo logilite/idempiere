@@ -2955,7 +2955,9 @@ public abstract class PO
 			}
 		}
 		// ticket 1007459 - exclude M_AttributeInstance from filling Value column
-		if (! MAttributeInstance.Table_Name.equals(get_TableName())) {
+		// IDEMPIERE-4224 - exclude AD_TableAttribute from filling Value column
+		if (!MAttributeInstance.Table_Name.equals(get_TableName())
+			&& !MTableAttribute.Table_Name.equals(get_TableName())) {
 			//	Set empty Value
 			columnName = "Value";
 			index = p_info.getColumnIndex(columnName);
