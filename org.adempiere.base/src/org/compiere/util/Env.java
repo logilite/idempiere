@@ -98,7 +98,9 @@ public final class Env
 	public static final String M_WAREHOUSE_ID = "#M_Warehouse_ID";
 	
 	public static final String RUNNING_UNIT_TESTING_TEST_CASE = "#RUNNING_UNIT_TESTING_TEST_CASE";
-	
+
+	public static final String PREFIX_SYSCONFIG_VARIABLE = "$sysconfig.";
+
 	private final static ContextProvider clientContextProvider = new DefaultContextProvider();
 
 	private static List<IEnvEventListener> eventListeners = new ArrayList<IEnvEventListener>();
@@ -538,6 +540,9 @@ public final class Env
 	{
 		if (ctx == null || context == null)
 			throw new IllegalArgumentException ("Require Context");
+		if (isSysConfig(context)) {
+			return getSysConfigValue(context, Env.getAD_Org_ID(ctx));
+		}
 		return ctx.getProperty(context, "");
 	}	//	getContext
 
@@ -559,6 +564,11 @@ public final class Env
 		String s = ctx.getProperty(WindowNo+"|"+context);
 		if (s == null)
 		{
+			if (isSysConfig(context))
+			{
+				int AD_Org_ID = Env.getContextAsInt(ctx, WindowNo, Env.AD_ORG_ID, false);
+				return getSysConfigValue(context, AD_Org_ID);
+			}
 			//	Explicit Base Values
 			if (context.startsWith("#") || context.startsWith("$") || context.startsWith("P|"))
 				return getContext(ctx, context);
@@ -568,6 +578,13 @@ public final class Env
 		}
 		return s;
 	}	//	getContext
+
+	private static String getSysConfigValue(String context, int AD_Org_ID) {
+		String retValue = MSysConfig.getValue(context.substring(PREFIX_SYSCONFIG_VARIABLE.length()), Env.getAD_Client_ID(Env.getCtx()), AD_Org_ID);
+		if (retValue == null)
+			retValue = "";
+		return retValue;
+	}
 
 	/**
 	 *	Get Value of Context for Window.
@@ -602,7 +619,14 @@ public final class Env
 			return s != null ? s : "";
 		//
 		if (Util.isEmpty(s))
+		{
+			if (isSysConfig(context))
+			{
+				int AD_Org_ID = Env.getContextAsInt(ctx, WindowNo, TabNo, Env.AD_ORG_ID);
+				return getSysConfigValue(context, AD_Org_ID);
+			}
 			return getContext(ctx, WindowNo, context, false);
+		}
 		return s;
 	}	//	getContext
 
@@ -2182,4 +2206,13 @@ public final class Env
 		}
 	}
 
+	/**
+	 * Verifies if a context variable name is a system configuration, this is, starting with:<br/>
+	 *   $sysconfig.
+	 * @param variable
+	 * @return
+	 */
+	public static boolean isSysConfig(String variable) {
+		return variable.startsWith(PREFIX_SYSCONFIG_VARIABLE);
+	}
  }   //  Env
