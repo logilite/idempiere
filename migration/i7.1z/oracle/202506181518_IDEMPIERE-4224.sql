@@ -168,7 +168,7 @@ INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,
 ;
 
 -- Jun 27, 2025, 2:17:49 PM IST
-INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('E','Each attribute must have a unique Name.',0,0,'Y',TO_DATE('2025-06-27 14:17:49','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2025-06-27 14:17:49','YYYY-MM-DD HH24:MI:SS'),100,200950,'UniqueAttribute','D','c7ba0f5a-8ca1-4d87-83e7-87f0cfae58d9')
+INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('E','Each Table Attribute Set Type must have a unique attribute assigned. Attribute "{0}" is already used in Attribute Set "{1}".',0,0,'Y',TO_DATE('2025-06-27 14:17:49','YYYY-MM-DD HH24:MI:SS'),100,TO_DATE('2025-06-27 14:17:49','YYYY-MM-DD HH24:MI:SS'),100,200950,'UniqueAttribute','D','c7ba0f5a-8ca1-4d87-83e7-87f0cfae58d9')
 ;
 
 

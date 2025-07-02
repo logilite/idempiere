@@ -19,9 +19,9 @@ package org.compiere.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
-import org.adempiere.exceptions.AdempiereException;
 import org.compiere.util.DB;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 
 /**
@@ -37,9 +37,11 @@ public class MAttributeUse extends X_M_AttributeUse
 	 */
 	private static final long serialVersionUID = 3727204159034073907L;
 
-	private static final String	SQL_GET_DUPLICATE_ATTRIB_COUNT	= "SELECT COUNT(1) FROM M_AttributeUse u								"
-																	+ "	INNER JOIN M_Attribute a ON a.M_Attribute_ID = u.M_Attribute_ID	"
-																	+ "	WHERE u.IsActive = 'Y' AND u.M_AttributeSet_ID = ? AND (a.M_Attribute_ID = ? OR a.Name = ? )";
+	private static final String	SQL_GET_TA_DUPLICATE_ATTRIBSET	= "SELECT st.Name FROM M_AttributeSet st "
+																	+ "	INNER JOIN M_AttributeUse 	u ON (u.M_AttributeSet_ID  = st.M_AttributeSet_ID)	"
+																	+ "	INNER JOIN M_Attribute 		a ON (a.M_Attribute_ID = u.M_Attribute_ID 			"
+																	+ "									  AND a.AD_Client_ID IN (0, ?) AND UPPER(a.Name) = UPPER(?) )"
+																	+ "	WHERE st.M_AttributeSet_Type = 'TA' ";
 
 	/**
 	 * 	Persistency Constructor
@@ -85,9 +87,12 @@ public class MAttributeUse extends X_M_AttributeUse
 		if (getM_Attribute_ID() > 0 && getM_AttributeSet_ID() > 0
 			&& MAttributeSet.M_ATTRIBUTESET_TYPE_TableAttribute.equals(getM_AttributeSet().getM_AttributeSet_Type()))
 		{
-			int count = DB.getSQLValue(get_TrxName(), SQL_GET_DUPLICATE_ATTRIB_COUNT, getM_AttributeSet_ID(), getM_Attribute_ID(), getM_Attribute().getName());
-			if (count > 0)
-				throw new AdempiereException(Msg.getCleanMsg(getCtx(), "UniqueAttribute"));
+			String dupAttribSetName = DB.getSQLValueString(get_TrxName(), SQL_GET_TA_DUPLICATE_ATTRIBSET, getAD_Client_ID(), getM_Attribute().getName());
+			if (!Util.isEmpty(dupAttribSetName, true))
+			{
+				log.saveError("Error", Msg.getMsg(getCtx(), "UniqueAttribute", new Object[] { getM_Attribute().getName(), dupAttribSetName }));
+				return false;
+			}
 		}
 		return true;
 	}
