@@ -154,7 +154,7 @@ public class PO_LOB implements Serializable
 		try
 		{
 			pstmt = con.prepareStatement(sql.toString());
-			if (m_displayType == DisplayType.TextLong || m_displayType == DisplayType.JSON)
+			if (DisplayType.isText(m_displayType))
 				pstmt.setString(1, (String)m_value);
 			else
 				pstmt.setBytes(1, (byte[])m_value);

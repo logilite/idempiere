@@ -159,7 +159,8 @@ public class MPaymentAllocate extends X_C_PaymentAllocate
 			.add(getDiscountAmt())
 			.add(getWriteOffAmt())
 			.add(getOverUnderAmt());
-		if (check.compareTo(getInvoiceAmt()) != 0)
+		// If Allocate with Charge then dont required to validate 
+		if (getC_Charge_ID() == 0 && check.compareTo(getInvoiceAmt()) != 0)
 		{
 			log.saveError("Error", Msg.parseTranslation(getCtx(), 
 				"@InvoiceAmt@(" + getInvoiceAmt()

@@ -139,6 +139,18 @@ public class WAcctViewerData
 	
 	/** UserElement2 Reference	*/
 	private String m_ref2 = null;
+	/** CustomFieldText1 Reference	*/
+	private String m_cfref1 = null;
+
+	/** CustomFieldText2 Reference	*/
+	private String m_cfref2 = null;
+
+	/** CustomFieldText3 Reference	*/
+	private String m_cfref3 = null;
+
+	/** CustomFieldText4 Reference	*/
+	private String m_cfref4 = null;
+
 	
 	/**	Logger			*/
 	private static final CLogger log = CLogger.getCLogger(WAcctViewerData.class);
@@ -513,6 +525,10 @@ public class WAcctViewerData
 				rm.addColumn(new RColumn(ctx, column, DisplayType.Date));
 			else if (column != null && column.endsWith("_ID"))
 				rm.addColumn(new RColumn(ctx, column, DisplayType.TableDir));
+			else if (column!=null && column.startsWith("CustomFieldText"))
+			{
+				addCustomFieldColumn(ctx, rm, column);
+			}
 		}
 		
 		//  Main Info
@@ -547,6 +563,10 @@ public class WAcctViewerData
 				else
 					rm.addColumn(new RColumn(ctx, column, DisplayType.TableDir, null, 0, m_ref2));
 			}
+			else if (column!=null && column.startsWith("CustomFieldText"))
+			{
+				addCustomFieldColumn(ctx, rm, column);
+			}
 			else if (column != null && column.endsWith("_ID"))
 				rm.addColumn(new RColumn(ctx, column, DisplayType.TableDir));
 		}
@@ -580,7 +600,18 @@ public class WAcctViewerData
 					null));
 		return rm;
 	} // createRModel
-	
+
+	private void addCustomFieldColumn(Properties ctx, RModel rm, String column) {
+		if (column.indexOf('1') != -1)
+			rm.addColumn(new RColumn(ctx, column, DisplayType.String, null, 0, m_cfref1));
+		else if (column.indexOf('2') != -1)
+			rm.addColumn(new RColumn(ctx, column, DisplayType.String, null, 0, m_cfref2));
+		else if (column.indexOf('3') != -1)
+			rm.addColumn(new RColumn(ctx, column, DisplayType.String, null, 0, m_cfref3));
+		else if (column.indexOf('4') != -1)
+			rm.addColumn(new RColumn(ctx, column, DisplayType.String, null, 0, m_cfref4));
+	}
+
 	/**
 	 *  Create the list of key/mandatory columns to display in viewer
 	 *  @return List of Key Columns
@@ -620,6 +651,18 @@ public class WAcctViewerData
 				else
 					m_ref2 = ase.getDisplayColumnName();
 			}
+			else if (columnName.startsWith("CustomFieldText"))
+			{
+				if (columnName.indexOf('1') != -1)
+					m_cfref1 = ase.getDisplayColumnName();
+				else if (columnName.indexOf('2') != -1)
+					m_cfref2 = ase.getDisplayColumnName();
+				else if (columnName.indexOf('3') != -1)
+					m_cfref3 = ase.getDisplayColumnName();
+				else if (columnName.indexOf('4') != -1)
+					m_cfref4 = ase.getDisplayColumnName();
+			}
+
 			
 			if (!columns.contains(columnName))
 				columns.add(columnName);

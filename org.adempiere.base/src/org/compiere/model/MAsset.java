@@ -273,7 +273,9 @@ public class MAsset extends X_A_Asset {
 		
 		if (inventory.getC_Activity_ID() > 0)
 			setC_Activity_ID(inventory.getC_Activity_ID());
-		
+
+		if (inventory.getC_Department_ID() > 0)
+			setC_Department_ID(inventory.getC_Department_ID());
 		//
 		
 		if (MAssetType.isFixedAsset(this)) {

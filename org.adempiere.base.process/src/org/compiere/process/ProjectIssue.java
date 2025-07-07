@@ -178,6 +178,12 @@ public class ProjectIssue extends SvrProcess
 
 			pi.setM_AttributeSetInstance_ID(inOutLines[i].getM_AttributeSetInstance_ID());
 			pi.setM_InOutLine_ID(inOutLines[i].getM_InOutLine_ID());
+			
+			// Additional Dimensions
+			pi.setC_CostCenter_ID(inOutLines[i].getC_CostCenter_ID());
+			pi.setC_Department_ID(inOutLines[i].getC_Department_ID());
+			pi.setM_Warehouse_ID(inOutLines[i].getM_Warehouse_ID());
+
 			pi.saveEx(get_TrxName());
 			ProcessInfo processInfo = MWorkflow.runDocumentActionWorkflow(pi, DocAction.ACTION_Complete);
 			if (processInfo.isError())

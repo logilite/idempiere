@@ -484,8 +484,15 @@ public class LoginWindow extends Window implements EventListener<Event>
 			loginName = user.getEMail();
 		else
 			loginName = user.getLDAPUser() != null ? user.getLDAPUser() : user.getName();
-    	loginOk(loginName, true, login.getClients());
-    	getDesktop().getSession().setAttribute(AdempiereWebUI.CHECK_AD_USER_ID_ATTR, Env.getAD_User_ID(ctx));
+		
+		// If the current login is via SSO, the session will contain the authentication token
+		// and the selected SSO provider. Retrieve the appropriate ISSOPrincipalService based on the provider.
+		Object token = getDesktop().getSession().getAttribute(ISSOPrincipalService.SSO_PRINCIPAL_SESSION_TOKEN);
+		String provider = (String) getDesktop().getSession().getAttribute(ISSOPrincipalService.SSO_SELECTED_PROVIDER);
+		ISSOPrincipalService m_SSOPrincipal = SSOUtils.getSSOPrincipalService(provider);
+
+		loginOk(loginName, true, login.getClients(), (token != null && m_SSOPrincipal != null));
+    	getDesktop().getSession().setAttribute("Check_AD_User_ID", Env.getAD_User_ID(ctx));
     	pnlRole.setChangeRole(true);
     	pnlRole.changeRole(ctx);
     }

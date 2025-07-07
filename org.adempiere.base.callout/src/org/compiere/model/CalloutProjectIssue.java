@@ -19,39 +19,55 @@ public class CalloutProjectIssue extends CalloutEngine
 		MAcctSchema as = MAcctSchema.getClientAcctSchema(Env.getCtx(), (int) mTab.getValue(MProjectIssue.COLUMNNAME_AD_Client_ID), null)[0];
 
 		// Set Data From InOutLine
-		if (MProjectIssue.COLUMNNAME_M_InOutLine_ID.equals(name) && value != null && ((int) value) > 0)
+		if (MProjectIssue.COLUMNNAME_M_InOutLine_ID.equals(name))
 		{
-			MInOutLine inOutLine = (MInOutLine) MTable.get(ctx, MInOutLine.Table_ID).getPO((int) value, null);
-
-			if (inOutLine.getM_Product_ID() > 0)
+			if (value == null || (int) value <= 0)
 			{
-				// Set Product, Movement Qty and Locator and Remove Charge if selected
-				mTab.setValue(MProjectIssue.COLUMNNAME_M_Product_ID, inOutLine.getM_Product_ID());
-				mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, 0);
-				mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, inOutLine.getMovementQty());
-				mTab.setValue(MProjectIssue.COLUMNNAME_M_Locator_ID, inOutLine.getM_Locator_ID());
-				mTab.setValue(MProjectIssue.COLUMNNAME_M_AttributeSetInstance_ID, inOutLine.getM_AttributeSetInstance_ID());
+				resetValue(mTab);
+			}
+			else
+			{
+				MInOutLine inOutLine = (MInOutLine) MTable.get(ctx, MInOutLine.Table_ID).getPO((int) value, null);
 
-				// set Description
-				mTab.setValue(MProjectIssue.COLUMNNAME_Description, MProjectIssue.getInOutLineDesc(inOutLine));
-				BigDecimal amt = ProjectIssueUtil.getPOCost(as, inOutLine.get_ID(), inOutLine.getMovementQty());
-
-				// Get standard price of Product if product Price is null
-				if (amt == null)
+				if (inOutLine.getM_Product_ID() > 0)
 				{
-					amt = ProjectIssueUtil.getProductStdCost(	as, inOutLine.getAD_Org_ID(), inOutLine.getM_Product_ID(),
-																inOutLine.getM_AttributeSetInstance_ID(), null, inOutLine.getMovementQty());
+					// Set Product, Movement Qty and Locator and Remove Charge if selected
+					mTab.setValue(MProjectIssue.COLUMNNAME_M_Product_ID, inOutLine.getM_Product_ID());
+					mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, 0);
+					mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, inOutLine.getMovementQty());
+					mTab.setValue(MProjectIssue.COLUMNNAME_M_Locator_ID, inOutLine.getM_Locator_ID());
+					mTab.setValue(MProjectIssue.COLUMNNAME_M_AttributeSetInstance_ID, inOutLine.getM_AttributeSetInstance_ID());
+					mTab.setValue(MProjectIssue.COLUMNNAME_M_Warehouse_ID, inOutLine.getM_InOut().getM_Warehouse_ID());
+					if(inOutLine.getC_Department_ID()>0)
+						mTab.setValue(MProjectIssue.COLUMNNAME_C_Department_ID, inOutLine.getC_Department_ID());
+					else
+						mTab.setValue(MProjectIssue.COLUMNNAME_C_Department_ID, inOutLine.getM_InOut().getC_Department_ID());
+
+					// set Description
+					mTab.setValue(MProjectIssue.COLUMNNAME_Description, MProjectIssue.getInOutLineDesc(inOutLine));
+					BigDecimal amt = ProjectIssueUtil.getPOCost(as, inOutLine.get_ID(), inOutLine.getMovementQty());
+
+					// Get standard price of Product if product Price is null
+					if (amt == null)
+					{
+						amt = ProjectIssueUtil.getProductStdCost(	as, inOutLine.getAD_Org_ID(), inOutLine.getM_Product_ID(),
+																	inOutLine.getM_AttributeSetInstance_ID(), null, inOutLine.getMovementQty());
+					}
+					mTab.setValue(MProjectIssue.COLUMNNAME_Amt, amt);
 				}
-				mTab.setValue(MProjectIssue.COLUMNNAME_Amt, amt);
 			}
 		}
 		// Set Data From TimeExpenseLine
-		else if (MProjectIssue.COLUMNNAME_S_TimeExpenseLine_ID.equals(name) && value != null && ((int) value) > 0)
+		else if (MProjectIssue.COLUMNNAME_S_TimeExpenseLine_ID.equals(name))
 		{
-			MTimeExpenseLine expenseLine = (MTimeExpenseLine) MTable.get(ctx, MTimeExpenseLine.Table_ID).getPO((int) value, null);
-
-			if (expenseLine.getM_Product_ID() > 0)
+			if (value == null || (int) value <= 0)
 			{
+				resetValue(mTab);
+			}
+			else
+			{
+				MTimeExpenseLine expenseLine = (MTimeExpenseLine) MTable.get(ctx, MTimeExpenseLine.Table_ID).getPO((int) value, null);
+
 				// Set Product, Movement Qty and Locator and Remove Charge if selected
 				mTab.setValue(MProjectIssue.COLUMNNAME_M_Product_ID, expenseLine.getM_Product_ID());
 				mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, 0);
@@ -71,33 +87,48 @@ public class CalloutProjectIssue extends CalloutEngine
 			}
 		}
 		// Set Data From InvoiceLine
-		else if (MProjectIssue.COLUMNNAME_C_InvoiceLine_ID.equals(name) && value != null && ((int) value) > 0)
+		else if (MProjectIssue.COLUMNNAME_C_InvoiceLine_ID.equals(name))
 		{
-			MInvoiceLine invLine = (MInvoiceLine) MTable.get(ctx, MInvoiceLine.Table_ID).getPO((int) value, null);
-
-			if (MProjectIssue.projectIssueHasInvoiceLine(invLine.get_ID(), null))
-				throw new IllegalArgumentException("Invoice Line is not valid - " + invLine);
-
-			if (invLine.getC_Charge_ID() > 0)
+			if (value == null || (int) value <= 0)
 			{
-				// Set Charge, Qty and Amount
-				mTab.setValue(MProjectIssue.COLUMNNAME_M_Product_ID, 0);
-				mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, invLine.getC_Charge_ID());
-				mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, invLine.getQtyInvoiced());
-				mTab.setValue(MProjectIssue.COLUMNNAME_Amt, MProjectIssue.getInvLineAmt(invLine));
-				mTab.setValue(MProjectIssue.COLUMNNAME_M_AttributeSetInstance_ID, invLine.getM_AttributeSetInstance_ID());
+				resetValue(mTab);
+			}
+			else
+			{
+				MInvoiceLine invLine = (MInvoiceLine) MTable.get(ctx, MInvoiceLine.Table_ID).getPO((int) value, null);
 
-				// Set Description
-				mTab.setValue(MProjectIssue.COLUMNNAME_Description, MProjectIssue.getInvDescription(invLine));
+				if (MProjectIssue.projectIssueHasInvoiceLine(invLine.get_ID(), null))
+					throw new IllegalArgumentException("Invoice Line is not valid - " + invLine);
+
+				if (invLine.getC_Charge_ID() > 0)
+				{
+					// Set Charge, Qty and Amount
+					mTab.setValue(MProjectIssue.COLUMNNAME_M_Product_ID, 0);
+					mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, invLine.getC_Charge_ID());
+					mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, invLine.getQtyInvoiced());
+					mTab.setValue(MProjectIssue.COLUMNNAME_Amt, MProjectIssue.getInvLineAmt(invLine));
+					mTab.setValue(MProjectIssue.COLUMNNAME_M_AttributeSetInstance_ID, invLine.getM_AttributeSetInstance_ID());
+
+					if(invLine.getC_Department_ID()>0)
+						mTab.setValue(MProjectIssue.COLUMNNAME_C_Department_ID, invLine.getC_Department_ID());
+					else
+						mTab.setValue(MProjectIssue.COLUMNNAME_C_Department_ID, invLine.getC_Invoice().getC_Department_ID());
+					
+					// Set Description
+					mTab.setValue(MProjectIssue.COLUMNNAME_Description, MProjectIssue.getInvDescription(invLine));
+				}
 			}
 		}
 		// Set data from ProjectLine
-		else if (MProjectIssue.COLUMNNAME_C_ProjectLine_ID.equals(name) && value != null && ((int) value) > 0)
+		else if (MProjectIssue.COLUMNNAME_C_ProjectLine_ID.equals(name))
 		{
-			MProjectLine projectLine = (MProjectLine) MTable.get(ctx, MProjectLine.Table_ID).getPO((int) value, null);
-
-			if (projectLine.getM_Product_ID() > 0)
+			if (value == null || (int) value <= 0)
 			{
+				resetValue(mTab);
+			}
+			else
+			{
+				MProjectLine projectLine = (MProjectLine) MTable.get(ctx, MProjectLine.Table_ID).getPO((int) value, null);
 				// Set Product, Movement Qty and Amount and Remove Charge if selected
 				mTab.setValue(MProjectIssue.COLUMNNAME_M_Product_ID, projectLine.getM_Product_ID());
 				mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, 0);
@@ -108,4 +139,20 @@ public class CalloutProjectIssue extends CalloutEngine
 
 		return null;
 	} // setData
+
+	/**
+	 * Reset Tab value
+	 * 
+	 * @param mTab Project Issue Tab
+	 */
+	private void resetValue(GridTab mTab)
+	{
+		mTab.setValue(MProjectIssue.COLUMNNAME_M_Product_ID, 0);
+		mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, 0);
+		mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, Env.ZERO);
+		mTab.setValue(MProjectIssue.COLUMNNAME_M_Locator_ID, 0);
+		mTab.setValue(MProjectIssue.COLUMNNAME_M_AttributeSetInstance_ID, 0);
+		mTab.setValue(MProjectIssue.COLUMNNAME_Description, null);
+		mTab.setValue(MProjectIssue.COLUMNNAME_Amt, 0);
+	} // resetValue
 }

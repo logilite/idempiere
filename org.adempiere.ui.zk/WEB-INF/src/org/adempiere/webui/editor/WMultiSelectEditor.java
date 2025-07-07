@@ -446,8 +446,8 @@ public class WMultiSelectEditor extends WEditor implements EventListener<Event>,
 		else if (WEditorPopupMenu.PREFERENCE_EVENT.equals(evt.getContextEvent()))
 		{
 			if (isShowPreference())
-				ValuePreference.start(getComponent(), this.getGridField(), Util.convertArrayToStringForDB(getValue()),
-						null);
+				ValuePreference.start(	getComponent(), this.getGridField(), Util.convertArrayToStringForDB(getValue()),
+										getPrintableValue(getValue()));
 		}
 		else if (WEditorPopupMenu.CHANGE_LOG_EVENT.equals(evt.getContextEvent()))
 		{

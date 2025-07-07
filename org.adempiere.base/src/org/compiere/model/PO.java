@@ -127,20 +127,14 @@ public abstract class PO
 	/** default timeout, 300 seconds **/
 	private static final int QUERY_TIME_OUT = 300;
 	
-	/** Get value of the attribute for Table ID and Record ID  **/
-	private static final String	TABLE_ATTRIBUTE_VALUE_SQL = "SELECT a.Name, a.AttributeValueType, a.AD_Reference_ID, ta.Value, ta.ValueDate, ta.ValueNumber, ta.M_AttributeValue_ID "
-																		+ "	FROM AD_TableAttribute ta "
-																		+ "	INNER JOIN M_Attribute a ON (a.M_Attribute_ID = ta.M_Attribute_ID) "
-																		+ "	WHERE ta.AD_Table_ID = ? AND Record_ID = ? AND a.IsActive = 'Y' ";
-	/** Get Default value of the attribute **/
-	private static final String				TABLE_ATTRIBUTE_DEFAULTVALUE_SQL	= "SELECT a.Name, a.AttributeValueType, a.AD_Reference_ID, COALESCE(atsu.DefaultValue , a.DefaultValue)	"
-																					+ "	FROM AD_Table tb "
-																					+ "	INNER JOIN M_AttributeUse atsu ON (atsu.M_AttributeSet_ID = tb.M_AttributeSet_ID) "
-																					+ "	INNER JOIN M_Attribute a ON (a.M_Attribute_ID = atsu.M_Attribute_ID) "
-																					+ "	WHERE a.Name = ? AND a.IsActive = 'Y' AND tb.AD_Table_ID = ?	";
+	/** Get value of the attribute for Table ID and Record ID **/
+	private static final String				TABLE_ATTRIBUTE_VALUE_SQL			= "SELECT a.Name, a.AttributeValueType, a.AD_Reference_ID, ta.Value, ta.ValueDate, ta.ValueNumber, ta.M_AttributeValue_ID"
+																					+ "				FROM AD_TableAttribute ta"
+																					+ "				INNER JOIN M_Attribute a ON (a.M_Attribute_ID = ta.M_Attribute_ID)"
+																					+ "				WHERE ta.AD_Table_ID = ? AND Record_ID = ? AND a.IsActive = 'Y' ";
 
-	private static CCache<String, Object> s_tableAttributeDefault = new CCache<String, Object>("AD_TableAttribute_Default", 30);	
-
+	/** Record Attribute and Value Map */
+	private Map<String, Object> m_tableAttributeMap = new HashMap<String, Object>();
 
 
 	/**
@@ -398,8 +392,6 @@ public abstract class PO
 
 	/** Trifon - Indicates that this record is created by replication functionality.*/
 	private boolean m_isReplication = false;
-	/** Record Attribute and Value Map */
-	private Map<String, Object> attributeMap = new HashMap<String, Object>();
 	
 	/** Immutable flag **/
 	private boolean m_isImmutable = false;
@@ -3481,7 +3473,9 @@ public abstract class PO
 			}
 		}
 		// ticket 1007459 - exclude M_AttributeInstance from filling Value column
-		if (! MAttributeInstance.Table_Name.equals(get_TableName())) {
+		// IDEMPIERE-4224 - exclude AD_TableAttribute from filling Value column
+		if (!MAttributeInstance.Table_Name.equals(get_TableName())
+			&& !MTableAttribute.Table_Name.equals(get_TableName())) {
 			//	Set empty Value
 			columnName = "Value";
 			index = p_info.getColumnIndex(columnName);
@@ -6131,44 +6125,67 @@ public abstract class PO
 	public boolean columnExists(String columnName) {
 		return columnExists(columnName, false);
 	}
-	
-	public boolean getAttributeAsBoolean(String attributeName)
+
+	/**
+	 * @param attributeName
+	 * @return
+	 */
+	public boolean get_TableAttributeAsBoolean(String attributeName)
 	{
-		Object value = getAttribute(attributeName);
-		return value != null ? "Y".equals((String) value) : false;
-	} // getAttributeAsBoolean
-	
-	public int getAttributeAsInt(String attributeName)
+		Object value = get_TableAttribute(attributeName);
+		if (value != null)
+		{
+			 if (value instanceof Boolean)
+				 return ((Boolean)value).booleanValue();
+			return "Y".equals(value);
+		}
+		return false;
+	} // get_TableAttributeAsBoolean
+
+	/**
+	 * @param attributeName
+	 * @return
+	 */
+	public int get_TableAttributeAsInt(String attributeName)
 	{
-		Object value = getAttribute(attributeName);
-		return value != null ? (int) value : 0;
-	} // getAttributeAsInt
+		Object value = get_TableAttribute(attributeName);
+		if (value == null)
+			return 0;
+		if (value instanceof Integer)
+			return ((Integer)value).intValue();
+		try
+		{
+			return Integer.parseInt(value.toString());
+		}
+		catch (NumberFormatException ex)
+		{
+			log.warning("Attribute " + attributeName + " - " + ex.getMessage());
+			return 0;
+		}
+	} // get_TableAttributeAsInt
 
 	/**
 	 * Return attribute value for table and record.
 	 * Load All attribute first time, then only query attribute that are not in map.
-	 * TODO can write different method to get directly cast value like getAttributeAsString,
-	 * getAttributeAsInt, getAttributeAsDate etc..
+	 * TODO can write different method to get directly cast value like get_TableAttributeAsString, get_TableAttributeAsDate etc..
 	 * 
 	 * @param  attributeName
-	 * @param  table_ID
-	 * @param  record_ID
 	 * @return
 	 */
-	public Object getAttribute(String attributeName)
+	public Object get_TableAttribute(String attributeName)
 	{
-		if (attributeMap.isEmpty() || !attributeMap.containsKey(attributeName))
+		if (m_tableAttributeMap.isEmpty() || !m_tableAttributeMap.containsKey(attributeName))
 		{
 			PreparedStatement pstmt = null;
 			ResultSet rs = null;
 			try
 			{
-				String where = attributeMap.isEmpty() ? "" : " AND a.Name = ? ";
+				String where = m_tableAttributeMap.isEmpty() ? "" : " AND a.Name = ? ";
 				// 4 - String, 5 - data, 6 - number, 7 - attribute value
 				pstmt = DB.prepareStatement(TABLE_ATTRIBUTE_VALUE_SQL + where, null);
 				pstmt.setInt(1, get_Table_ID());
 				pstmt.setInt(2, get_ID());
-				if (!attributeMap.isEmpty())
+				if (!m_tableAttributeMap.isEmpty())
 					pstmt.setString(3, attributeName);
 
 				rs = pstmt.executeQuery();
@@ -6224,7 +6241,7 @@ public abstract class PO
 					}
 
 					if (value != null)
-						attributeMap.put(attName, value);
+						m_tableAttributeMap.put(attName, value);
 				}
 			}
 			catch (Exception e)
@@ -6240,97 +6257,21 @@ public abstract class PO
 			}
 		}
 
-		if (attributeMap.containsKey(attributeName))
-			return attributeMap.get(attributeName);
+		if (m_tableAttributeMap.containsKey(attributeName))
+			return m_tableAttributeMap.get(attributeName);
 
-		return getAttributeDefaultValue(attributeName, get_Table_ID());
-	} // getAttribute
-
+		return MTableAttribute.getAttributeDefaultValue(attributeName, get_Table_ID());
+	} // get_TableAttribute
+	
 	/**
-	 * Return attribute default value for table.
-	 *  
-	 * @param  attributeName
-	 * @param tableID 
-	 * @param  table_ID
-	 * @return
+	 * Retrieves the table attributes associated with the current record.
+	 * 
+	 * @return a list of {@link PO} objects representing table attributes
+	 *         filtered by the table ID and record ID.
 	 */
-	private static Object getAttributeDefaultValue(String attributeName, int tableID)
+	public List<PO> get_TableAttributes()
 	{
-		String key = tableID + "_" + attributeName;
-		if (!s_tableAttributeDefault.containsKey(key))
-		{
-			PreparedStatement pstmt = null;
-			ResultSet rs = null;
-			Object value = null;
-			try
-			{
-				pstmt = DB.prepareStatement(TABLE_ATTRIBUTE_DEFAULTVALUE_SQL, null);
-				pstmt.setString(1, attributeName);
-				pstmt.setInt(2, tableID);
-				rs = pstmt.executeQuery();
-				if(rs.next())
-				{
-					String attType = rs.getString(2);
-					int reference_ID = rs.getInt(3);
-					String DefaultValue = rs.getString(4);
+		return new Query(Env.getCtx(), MTableAttribute.Table_Name, "AD_Table_ID=? AND Record_ID=? ", null).setParameters(get_Table_ID(), get_ID()).list();
+	}
 
-					if (Util.isEmpty(DefaultValue))
-						return null;
-
-					if (MAttribute.ATTRIBUTEVALUETYPE_Number.equalsIgnoreCase(attType)
-						|| MAttribute.ATTRIBUTEVALUETYPE_List.equalsIgnoreCase(attType))
-					{
-						value = Integer.valueOf(DefaultValue);
-					}
-					else if (MAttribute.ATTRIBUTEVALUETYPE_Date.equalsIgnoreCase(attType))
-					{
-						value = Timestamp.valueOf(DefaultValue);
-					}
-					else if (MAttribute.ATTRIBUTEVALUETYPE_StringMax40.equalsIgnoreCase(attType))
-					{
-						value = DefaultValue;
-					}
-					else if (MAttribute.ATTRIBUTEVALUETYPE_Reference.equalsIgnoreCase(attType))
-					{
-						if (DisplayType.isText(reference_ID) || reference_ID == DisplayType.YesNo)
-						{
-							value = DefaultValue;
-						}
-						else if (DisplayType.isDate(reference_ID))
-						{
-							value = Timestamp.valueOf(DefaultValue);
-						}
-						else if (DisplayType.isNumeric(reference_ID) || DisplayType.isID(reference_ID))
-						{
-							value = Integer.valueOf(DefaultValue);
-						}
-						else
-						{
-							value = DefaultValue;
-						}
-					}
-					else
-					{
-						value = DefaultValue;
-					}
-					s_tableAttributeDefault.put(key, value);
-				}
-			}
-			catch (Exception e)
-			{
-				CLogger.get().log(Level.SEVERE, "Failed: Get Attribute = " + attributeName, e);
-				return null;
-			}
-			finally
-			{
-				DB.close(rs, pstmt);
-				rs = null;
-				pstmt = null;
-			}
-		}
-
-		if (s_tableAttributeDefault.containsKey(key))
-			return s_tableAttributeDefault.get(key);
-		return null;
-	} // getAttributeDefaultValue
 }   //  PO

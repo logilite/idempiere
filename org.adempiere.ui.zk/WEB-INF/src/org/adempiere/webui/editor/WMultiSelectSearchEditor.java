@@ -43,6 +43,7 @@ import org.compiere.model.MTable;
 import org.compiere.model.X_AD_CtxHelp;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
@@ -346,7 +347,7 @@ public class WMultiSelectSearchEditor extends WEditor implements ContextMenuList
 		if (WEditorPopupMenu.PREFERENCE_EVENT.equals(evt.getContextEvent()))
 		{
 			if (isShowPreference())
-				ValuePreference.start(getComponent(), this.getGridField(), getValue());
+				ValuePreference.start(getComponent(), this.getGridField(), Util.convertArrayToStringForDB(getValue()), getDisplay());
 			return;
 		}
 		else if (WEditorPopupMenu.CHANGE_LOG_EVENT.equals(evt.getContextEvent()))

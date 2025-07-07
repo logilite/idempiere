@@ -35,9 +35,9 @@ public interface I_M_Attribute
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
 
-    /** AccessLevel = 6 - System - Client 
+    /** AccessLevel = 7 - System - Client - Org 
      */
-    BigDecimal accessLevel = BigDecimal.valueOf(6);
+    BigDecimal accessLevel = BigDecimal.valueOf(7);
 
     /** Load Meta Data */
 
@@ -177,6 +177,21 @@ public interface I_M_Attribute
 	  */
 	public String getDescription();
 
+    /** Column name EntityType */
+    public static final String COLUMNNAME_EntityType = "EntityType";
+
+	/** Set Entity Type.
+	  * Dictionary Entity Type;
+ Determines ownership and synchronization
+	  */
+	public void setEntityType (String EntityType);
+
+	/** Get Entity Type.
+	  * Dictionary Entity Type;
+ Determines ownership and synchronization
+	  */
+	public String getEntityType();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -229,6 +244,15 @@ public interface I_M_Attribute
 	  */
 	public int getM_Attribute_ID();
 
+    /** Column name M_Attribute_UU */
+    public static final String COLUMNNAME_M_Attribute_UU = "M_Attribute_UU";
+
+	/** Set M_Attribute_UU	  */
+	public void setM_Attribute_UU (String M_Attribute_UU);
+
+	/** Get M_Attribute_UU	  */
+	public String getM_Attribute_UU();
+
     /** Column name M_AttributeSearch_ID */
     public static final String COLUMNNAME_M_AttributeSearch_ID = "M_AttributeSearch_ID";
 
@@ -243,15 +267,6 @@ public interface I_M_Attribute
 	public int getM_AttributeSearch_ID();
 
 	public org.compiere.model.I_M_AttributeSearch getM_AttributeSearch() throws RuntimeException;
-
-    /** Column name M_Attribute_UU */
-    public static final String COLUMNNAME_M_Attribute_UU = "M_Attribute_UU";
-
-	/** Set M_Attribute_UU	  */
-	public void setM_Attribute_UU (String M_Attribute_UU);
-
-	/** Get M_Attribute_UU	  */
-	public String getM_Attribute_UU();
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";

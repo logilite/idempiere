@@ -648,6 +648,8 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
 		setC_Activity_ID(line.getC_Activity_ID());
 		setUser1_ID(line.getUser1_ID());
 		setUser2_ID(line.getUser2_ID());
+		setC_CostCenter_ID(line.getC_CostCenter_ID());
+		setC_Department_ID(line.getC_Department_ID());
 		//
 		setC_DocTypeTarget_ID(line.getC_DocType_ID());
 		setDateInvoiced(line.getDateInvoiced());
@@ -805,6 +807,8 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
 		setC_Activity_ID(order.getC_Activity_ID());
 		setUser1_ID(order.getUser1_ID());
 		setUser2_ID(order.getUser2_ID());
+		setC_CostCenter_ID(order.getC_CostCenter_ID());
+		setC_Department_ID(order.getC_Department_ID());
 	}	//	setOrder
 
 	/**
@@ -835,6 +839,8 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
 		setC_Activity_ID(ship.getC_Activity_ID());
 		setUser1_ID(ship.getUser1_ID());
 		setUser2_ID(ship.getUser2_ID());
+		setC_CostCenter_ID(ship.getC_CostCenter_ID());
+		setC_Department_ID(ship.getC_Department_ID());
 		//
 		if (ship.getC_Order_ID() != 0)
 		{
@@ -2350,37 +2356,9 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
 			}
 		}	//	user
 
-		//	Update Project
-		if (isSOTrx() && getC_Project_ID() != 0)
-		{
-			MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(getC_Project_ID(), get_TrxName());
-			BigDecimal amt = getGrandTotal(true);
-			int C_CurrencyTo_ID = project.getC_Currency_ID();
-			if (C_CurrencyTo_ID != getC_Currency_ID())
-				amt = MConversionRate.convert(getCtx(), amt, getC_Currency_ID(), C_CurrencyTo_ID,
-					getDateAcct(), 0, getAD_Client_ID(), getAD_Org_ID());
-			if (amt == null)
-			{
-				m_processMsg = MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToProjectCurrency",
-						getC_Currency_ID(), C_CurrencyTo_ID, 0, getDateAcct(), get_TrxName());
-				return DocAction.STATUS_Invalid;
-			}
-			BigDecimal newAmt = project.getInvoicedAmt();
-			if (newAmt == null)
-				newAmt = amt;
-			else
-				newAmt = newAmt.add(amt);
-			if (log.isLoggable(Level.FINE)) log.fine("GrandTotal=" + getGrandTotal(true) + "(" + amt
-				+ ") Project " + project.getName()
-				+ " - Invoiced=" + project.getInvoicedAmt() + "->" + newAmt);
-			project.setInvoicedAmt(newAmt);
-			if (!project.save(get_TrxName()))
-			{
-				m_processMsg = "Could not update Project";
-				return DocAction.STATUS_Invalid;
-			}
-		}	//	project
-		
+		// Update Project
+		updateProjectInvoiceAmt(false);
+
 		// auto delay capture authorization payment
 		if (isSOTrx() && !isReversal())
 		{
@@ -2540,7 +2518,11 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
 	protected void setDefiniteDocumentNo() {
 		if (isReversal() && ! MSysConfig.getBooleanValue(MSysConfig.Invoice_ReverseUseNewNumber, true, getAD_Client_ID())) // IDEMPIERE-1771
 			return;
-		MDocType dt = MDocType.get(getC_DocType_ID());
+
+		if (getProcessedOn().signum() > 0) // IDEMPIERE-6067 - if > 0, invoice has already has been reactivated and dates/documentno should not be updated
+			return;
+
+		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
 		if (dt.isOverwriteDateOnComplete()) {
 			setDateInvoiced(TimeUtil.getDay(0));
 			if (getDateAcct().before(getDateInvoiced())) {
@@ -3085,13 +3067,55 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
 		if (m_processMsg != null)
 			return false;
 
+		MPeriod.testPeriodOpen(getCtx(), getDateAcct(), getC_DocType_ID(), getAD_Org_ID());
+
+		if (!DocumentEngine.canReactivateThisDocType(getC_DocType_ID())) {
+			m_processMsg = Msg.getMsg(getCtx(), "DocTypeCannotBeReactivated", new Object[] {MDocType.get(Env.getCtx(),getC_DocType_ID()).getNameTrl()});
+			return false;
+		}
+
+		MAllocationHdr[] allocations = MAllocationHdr.getOfInvoice(getCtx(), getC_Invoice_ID(), get_TrxName());
+		if (allocations.length > 0) {
+			setProcessMessage(Msg.parseTranslation(getCtx(), "InvoiceReactivationFailedAllocationLine"));
+			return false;
+		}
+
+		MMatchInv[] matchInvs = MMatchInv.getInvoice(getCtx(), getC_Invoice_ID(), get_TrxName());
+		if (matchInvs.length > 0) {
+			setProcessMessage(Msg.parseTranslation(getCtx(), "InvoiceReactivationFailedMatchInvoice"));
+			return false;
+		}
+
+		MMatchPO[] matchPos = MMatchPO.getInvoice(getCtx(), getC_Invoice_ID(), get_TrxName());
+		if (matchPos.length > 0) {
+			setProcessMessage(Msg.parseTranslation(getCtx(), "InvoiceReactivationFailedMatchPO"));
+			return false;
+		}
+
+		MFactAcct.deleteEx(MInvoice.Table_ID, getC_Invoice_ID(), get_TrxName());
+		setPosted(false);
+		setDocAction(DOCACTION_Complete);
+		setProcessed(false);
+
+		ICreditManager creditManager = Core.getCreditManager(this);
+		if (creditManager != null)
+		{
+			m_processMsg = creditManager.creditCheck(DOCACTION_Re_Activate);
+			if (Util.isEmpty(m_processMsg, true))
+			{
+				return false;
+			}
+		}
+
+		updateProjectInvoiceAmt(true);
+		
 		// After reActivate
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REACTIVATE);
 		if (m_processMsg != null)
 			return false;
 
 
-		return false;
+		return true;
 	}	//	reActivateIt
 
 	/**
@@ -3175,6 +3199,8 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
         setC_Campaign_ID(originalInvoice.getC_Campaign_ID());
         setUser1_ID(originalInvoice.getUser1_ID());
         setUser2_ID(originalInvoice.getUser2_ID());
+		setC_CostCenter_ID(originalInvoice.getC_CostCenter_ID());
+		setC_Department_ID(originalInvoice.getC_Department_ID());
 	}
 
 	/**
@@ -3587,5 +3613,41 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
 				saveEx();
 			}
 		}
+	}
+
+	private String updateProjectInvoiceAmt(boolean negateAmt) {
+
+		if (isSOTrx() && getC_Project_ID() != 0) {
+
+			MProject project = new MProject (getCtx(), getC_Project_ID(), get_TrxName());
+			BigDecimal amt = getGrandTotal(true);
+			int C_CurrencyTo_ID = project.getC_Currency_ID();
+			if (C_CurrencyTo_ID != getC_Currency_ID())
+				amt = MConversionRate.convert(getCtx(), amt, getC_Currency_ID(), C_CurrencyTo_ID,
+					getDateAcct(), 0, getAD_Client_ID(), getAD_Org_ID());
+			if (amt == null)
+			{
+				m_processMsg = MConversionRateUtil.getErrorMessage(getCtx(), "ErrorConvertingCurrencyToProjectCurrency",
+						getC_Currency_ID(), C_CurrencyTo_ID, 0, getDateAcct(), get_TrxName());
+				return DocAction.STATUS_Invalid;
+			}
+			BigDecimal newAmt = project.getInvoicedAmt();
+			if (newAmt == null)
+				newAmt = amt;
+			else
+				newAmt = newAmt.add(negateAmt ? amt.negate() : amt);
+			if (log.isLoggable(Level.FINE)) log.fine("GrandTotal=" + getGrandTotal(true) + "(" + amt
+				+ ") Project " + project.getName()
+				+ " - Invoiced=" + project.getInvoicedAmt() + "->" + newAmt);
+			project.setInvoicedAmt(newAmt);
+			if (!project.save(get_TrxName()))
+			{
+				m_processMsg = "Could not update Project";
+				return DocAction.STATUS_Invalid;
+			}
+
+		}
+
+		return "";
 	}
 }	//	MInvoice

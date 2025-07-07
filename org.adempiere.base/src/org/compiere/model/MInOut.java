@@ -697,6 +697,8 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		inOut.setAD_OrgTrx_ID(order.getAD_OrgTrx_ID());
 		inOut.setUser1_ID(order.getUser1_ID());
 		inOut.setUser2_ID(order.getUser2_ID());
+		inOut.setC_CostCenter_ID(order.getC_CostCenter_ID());
+		inOut.setC_Department_ID(order.getC_Department_ID());
 		inOut.setPriorityRule(order.getPriorityRule());
 		// Drop shipment
 		inOut.setIsDropShip(order.isDropShip());
@@ -756,6 +758,8 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		setAD_OrgTrx_ID(order.getAD_OrgTrx_ID());
 		setUser1_ID(order.getUser1_ID());
 		setUser2_ID(order.getUser2_ID());
+		setC_CostCenter_ID(order.getC_CostCenter_ID());
+		setC_Department_ID(order.getC_Department_ID());
 		setPriorityRule(order.getPriorityRule());
 		// Drop shipment
 		setIsDropShip(order.isDropShip());
@@ -881,6 +885,8 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());
 		setUser1_ID(invoice.getUser1_ID());
 		setUser2_ID(invoice.getUser2_ID());
+		setC_CostCenter_ID(invoice.getC_CostCenter_ID());
+		setC_Department_ID(invoice.getC_Department_ID());
 
 		if (order != null)
 		{
@@ -1002,6 +1008,8 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		setAD_OrgTrx_ID(original.getAD_OrgTrx_ID());
 		setUser1_ID(original.getUser1_ID());
 		setUser2_ID(original.getUser2_ID());
+		setC_CostCenter_ID(original.getC_CostCenter_ID());
+		setC_Department_ID(original.getC_Department_ID());
 
 		// DropShipment
 		setIsDropShip(original.isDropShip());

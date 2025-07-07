@@ -55,7 +55,7 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
     /**
 	 * generated serial id 
 	 */
-	private static final long serialVersionUID = 7420574960104461342L;
+	private static final long serialVersionUID = -2826344784570435827L;
 
 	/**
      * UUID based Constructor
@@ -289,7 +289,10 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 		}
 		boolean isManualOpening = MSysConfig.getBooleanValue(MSysConfig.BANKSTATEMENT_MANUAL_OPENING, false,
 				getAD_Client_ID(), getAD_Org_ID());
-		
+
+		if (getC_DocType_ID() <= 0) {
+			setC_DocType_ID(MDocType.getDocType(MDocType.DOCBASETYPE_BankStatement));
+		}
 		if (!isProcessed() && getBeginningBalance().compareTo(Env.ZERO) == 0
 				&& (!isManualOpening || (isManualOpening && newRecord)))
 		{
@@ -510,8 +513,8 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 		setProcessed(true);
 		setDocAction(DOCACTION_Close);
 		return DocAction.STATUS_Completed;
-	}	//	completeIt
-	
+	} // completeIt
+
 	/**
 	 * 	Set the definite document number after completed
 	 */
@@ -726,7 +729,15 @@ public class MBankStatement extends X_C_BankStatement implements DocAction
 			setIsApproved(false);
 		
 		if (log.isLoggable(Level.INFO)) log.info("ReactivateIt - " + toString());
-		
+
+		// IDEMPIERE-6067 Reactivation of Invoices - uncomment in logilite-11
+//		MPeriod.testPeriodOpen(getCtx(), getDateAcct(), MDocType.DOCBASETYPE_BankStatement, getAD_Org_ID());
+//
+//		if (!DocumentEngine.canReactivateThisDocType(getC_DocType_ID())) {
+//			m_processMsg = Msg.getMsg(getCtx(), "DocTypeCannotBeReactivated", new Object[] {MDocType.get(getC_DocType_ID()).getNameTrl()});
+//			return false;
+//		}
+
 		//	Set Payment reconciled false
 		MBankStatementLine[] lines = getLines(false);
 		for (int i = 0; i < lines.length; i++)

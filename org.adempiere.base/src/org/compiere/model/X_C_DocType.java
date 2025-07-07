@@ -31,7 +31,7 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20240924L;
+	private static final long serialVersionUID = 20250604L;
 
     /** Standard Constructor */
     public X_C_DocType (Properties ctx, int C_DocType_ID, String trxName)
@@ -46,6 +46,7 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 			setGL_Category_ID (0);
 			setHasCharges (false);
 			setIsAlwaysPosted (false);
+			setIsCanBeReactivated (false);
 // N
 			setIsCreateCounter (true);
 // Y
@@ -719,6 +720,30 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 		{
 			 if (oo instanceof Boolean)
 				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Can Be Reactivated.
+		@param IsCanBeReactivated 
+		This document can be reactivated
+	  */
+	public void setIsCanBeReactivated (boolean IsCanBeReactivated)
+	{
+		set_Value (COLUMNNAME_IsCanBeReactivated, Boolean.valueOf(IsCanBeReactivated));
+	}
+
+	/** Get Can Be Reactivated.
+		@return This document can be reactivated
+	  */
+	public boolean isCanBeReactivated () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsCanBeReactivated);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
 			return "Y".equals(oo);
 		}
 		return false;
