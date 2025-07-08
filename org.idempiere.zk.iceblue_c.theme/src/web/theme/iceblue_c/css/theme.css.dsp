@@ -129,3 +129,37 @@ table.z-vbox > tbody > tr > td > table {
 <c:if test="${u:isThemeHasCustomCSSFragment()}">
     <c:include page="fragment/custom.css.dsp" />
 </c:if>
+
+<%-- Multi Select List & Table Editor Start --%>
+
+.multi-select-box {
+}
+
+.multi-select-popup {
+  background: #f5f5f5;
+  border: solid 1px #828282;
+  border-radius: 5px;
+  max-height: 350px;
+  min-width: 250px;
+  overflow: auto;
+  height: auto !important;
+}
+
+.multi-select-vbox {
+  background: white;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.multi-select-all-btn {
+ width: 100%;
+ height: 30px;
+}
+
+.multi-select-textbox {
+  background-color: white !important;
+}
+
+.multi-select-textbox-readonly {
+  background-color: #F0F0F0 !important;
+}
