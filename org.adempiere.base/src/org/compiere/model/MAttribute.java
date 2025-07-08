@@ -52,11 +52,6 @@ public class MAttribute extends X_M_Attribute implements ImmutablePOSupport
 
 	private static CCache<Integer, MAttribute>	s_cache				= new CCache<Integer, MAttribute>(Table_Name, 30, CCache.DEFAULT_EXPIRE_MINUTE);
 
-	private static final String			SQL_GET_TA_DUPLICATE_ATTRIB	= " SELECT st.Name FROM M_Attribute a "
-																	+ " INNER JOIN M_AttributeUse u  ON (u.M_Attribute_ID = a.M_Attribute_ID) "
-																	+ " INNER JOIN M_AttributeSet st ON (st.M_AttributeSet_ID = u.M_AttributeSet_ID AND st.M_AttributeSet_Type = 'TA' ) "
-																	+ " WHERE a.AD_Client_ID IN (0, ?) AND UPPER(a.Name) = UPPER(?) AND a.M_Attribute_ID <> ? ";
-
 	/**	Values						*/
 	private MAttributeValue[]		m_values = null;
 
@@ -382,7 +377,8 @@ public class MAttribute extends X_M_Attribute implements ImmutablePOSupport
 
 		if (!newRecord && is_ValueChanged(COLUMNNAME_Name))
 		{
-			String dupAttribSetName = DB.getSQLValueString(get_TrxName(), SQL_GET_TA_DUPLICATE_ATTRIB, getAD_Client_ID(), getName(), getM_Attribute_ID());
+			String dupAttribSetName = DB.getSQLValueString(	get_TrxName(), MAttributeUse.SQL_GET_TA_DUPLICATE_ATTRIBUTE + " AND a.M_Attribute_ID <> ? ",
+															getAD_Client_ID(), getName(), getM_Attribute_ID());
 			if (!Util.isEmpty(dupAttribSetName, true))
 			{
 				log.saveError("Error", Msg.getMsg(getCtx(), "UniqueAttribute", new Object[] { getName(), dupAttribSetName }));
