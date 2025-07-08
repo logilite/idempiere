@@ -36,7 +36,6 @@ import org.adempiere.base.sso.ISSOPrincipalService;
 import org.adempiere.base.sso.SSOUtils;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.Callback;
-import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.Extensions;
 import org.adempiere.webui.IWebClient;
 import org.adempiere.webui.component.Window;
@@ -490,8 +489,10 @@ public class LoginWindow extends Window implements EventListener<Event>
 		Object token = getDesktop().getSession().getAttribute(ISSOPrincipalService.SSO_PRINCIPAL_SESSION_TOKEN);
 		String provider = (String) getDesktop().getSession().getAttribute(ISSOPrincipalService.SSO_SELECTED_PROVIDER);
 		ISSOPrincipalService m_SSOPrincipal = SSOUtils.getSSOPrincipalService(provider);
+		MSSOPrincipalConfig ssoPrincipalConfig = MSSOPrincipalConfig.getSSOPrincipalConfig(provider, true);
 
-		loginOk(loginName, true, login.getClients(), (token != null && m_SSOPrincipal != null));
+		loginOk(loginName, true, login.getClients(), ((token != null && m_SSOPrincipal != null) ? ssoPrincipalConfig : null));
+
     	getDesktop().getSession().setAttribute("Check_AD_User_ID", Env.getAD_User_ID(ctx));
     	pnlRole.setChangeRole(true);
     	pnlRole.changeRole(ctx);

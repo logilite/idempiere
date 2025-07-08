@@ -3100,9 +3100,11 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
 		ICreditManager creditManager = Core.getCreditManager(this);
 		if (creditManager != null)
 		{
-			m_processMsg = creditManager.creditCheck(DOCACTION_Re_Activate);
-			if (Util.isEmpty(m_processMsg, true))
+
+			CreditStatus status = creditManager.checkCreditStatus(DOCACTION_Re_Activate);
+			if (status.isError())
 			{
+				m_processMsg = status.getErrorMsg();
 				return false;
 			}
 		}

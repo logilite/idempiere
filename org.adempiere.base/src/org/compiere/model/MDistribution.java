@@ -96,7 +96,7 @@ public class MDistribution extends X_GL_Distribution
 		int User1_ID, int User2_ID)
 	{
 		return get(Env.getCtx(), C_AcctSchema_ID, PostingType, C_DocType_ID, dateAcct, AD_Org_ID, Account_ID, M_Product_ID, C_BPartner_ID, 
-				C_Project_ID, C_Campaign_ID, C_Activity_ID, AD_OrgTrx_ID, C_SalesRegion_ID, C_LocTo_ID, C_LocFrom_ID, User1_ID, User2_ID);
+				C_Project_ID, C_Campaign_ID, C_Activity_ID, AD_OrgTrx_ID, C_SalesRegion_ID, C_LocTo_ID, C_LocFrom_ID, User1_ID, User2_ID, 0, 0, 0, 0, 0, 0, 0);
 	}
 	
 	/**

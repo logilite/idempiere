@@ -31,7 +31,7 @@ public class X_M_AttributeSet extends PO implements I_M_AttributeSet, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20250625L;
+	private static final long serialVersionUID = 20250708L;
 
     /** Standard Constructor */
     public X_M_AttributeSet (Properties ctx, int M_AttributeSet_ID, String trxName)
@@ -67,10 +67,10 @@ public class X_M_AttributeSet extends PO implements I_M_AttributeSet, I_Persiste
 			setIsLotMandatory (false);
 			setIsSerNo (false);
 			setIsSerNoMandatory (false);
-			setMandatoryType (null);
 			setM_AttributeSet_ID (0);
 			setM_AttributeSet_Type (null);
 // MMS
+			setMandatoryType (null);
 			setName (null);
         } */
     }
@@ -88,10 +88,10 @@ public class X_M_AttributeSet extends PO implements I_M_AttributeSet, I_Persiste
 			setIsLotMandatory (false);
 			setIsSerNo (false);
 			setIsSerNoMandatory (false);
-			setMandatoryType (null);
 			setM_AttributeSet_ID (0);
 			setM_AttributeSet_Type (null);
 // MMS
+			setMandatoryType (null);
 			setName (null);
         } */
     }
@@ -109,10 +109,10 @@ public class X_M_AttributeSet extends PO implements I_M_AttributeSet, I_Persiste
 			setIsLotMandatory (false);
 			setIsSerNo (false);
 			setIsSerNoMandatory (false);
-			setMandatoryType (null);
 			setM_AttributeSet_ID (0);
 			setM_AttributeSet_Type (null);
 // MMS
+			setMandatoryType (null);
 			setName (null);
         } */
     }
@@ -124,7 +124,7 @@ public class X_M_AttributeSet extends PO implements I_M_AttributeSet, I_Persiste
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org
+      * @return 7 - System - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -164,9 +164,8 @@ public class X_M_AttributeSet extends PO implements I_M_AttributeSet, I_Persiste
 	/** EntityType AD_Reference_ID=389 */
 	public static final int ENTITYTYPE_AD_Reference_ID=389;
 	/** Set Entity Type.
-		@param EntityType 
-		Dictionary Entity Type; Determines ownership and synchronization
-	  */
+		@param EntityType Dictionary Entity Type; Determines ownership and synchronization
+	*/
 	public void setEntityType (String EntityType)
 	{
 
@@ -176,7 +175,7 @@ public class X_M_AttributeSet extends PO implements I_M_AttributeSet, I_Persiste
 	/** Get Entity Type.
 		@return Dictionary Entity Type; Determines ownership and synchronization
 	  */
-	public String getEntityType () 
+	public String getEntityType()
 	{
 		return (String)get_Value(COLUMNNAME_EntityType);
 	}
@@ -415,31 +414,6 @@ public class X_M_AttributeSet extends PO implements I_M_AttributeSet, I_Persiste
 		return (String)get_Value(COLUMNNAME_LotCharSOverwrite);
 	}
 
-	/** MandatoryType AD_Reference_ID=324 */
-	public static final int MANDATORYTYPE_AD_Reference_ID=324;
-	/** Not Mandatory = N */
-	public static final String MANDATORYTYPE_NotMandatory = "N";
-	/** When Shipping = S */
-	public static final String MANDATORYTYPE_WhenShipping = "S";
-	/** Always Mandatory = Y */
-	public static final String MANDATORYTYPE_AlwaysMandatory = "Y";
-	/** Set Mandatory Type.
-		@param MandatoryType The specification of a Product Attribute Instance is mandatory
-	*/
-	public void setMandatoryType (String MandatoryType)
-	{
-
-		set_Value (COLUMNNAME_MandatoryType, MandatoryType);
-	}
-
-	/** Get Mandatory Type.
-		@return The specification of a Product Attribute Instance is mandatory
-	  */
-	public String getMandatoryType()
-	{
-		return (String)get_Value(COLUMNNAME_MandatoryType);
-	}
-
 	/** Set Attribute Set.
 		@param M_AttributeSet_ID Product Attribute Set
 	*/
@@ -464,8 +438,12 @@ public class X_M_AttributeSet extends PO implements I_M_AttributeSet, I_Persiste
 
 	/** M_AttributeSet_Type AD_Reference_ID=200115 */
 	public static final int M_ATTRIBUTESET_TYPE_AD_Reference_ID=200115;
+	/** Document Management System = D */
+	public static final String M_ATTRIBUTESET_TYPE_DocumentManagementSystem = "D";
 	/** Material Management System = MMS */
 	public static final String M_ATTRIBUTESET_TYPE_MaterialManagementSystem = "MMS";
+	/** Table Attribute = TA */
+	public static final String M_ATTRIBUTESET_TYPE_TableAttribute = "TA";
 	/** Set Attribute Set Type.
 		@param M_AttributeSet_Type Attribute Set Type
 	*/
@@ -551,6 +529,31 @@ public class X_M_AttributeSet extends PO implements I_M_AttributeSet, I_Persiste
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** MandatoryType AD_Reference_ID=324 */
+	public static final int MANDATORYTYPE_AD_Reference_ID=324;
+	/** Not Mandatory = N */
+	public static final String MANDATORYTYPE_NotMandatory = "N";
+	/** When Shipping = S */
+	public static final String MANDATORYTYPE_WhenShipping = "S";
+	/** Always Mandatory = Y */
+	public static final String MANDATORYTYPE_AlwaysMandatory = "Y";
+	/** Set Mandatory Type.
+		@param MandatoryType The specification of a Product Attribute Instance is mandatory
+	*/
+	public void setMandatoryType (String MandatoryType)
+	{
+
+		set_Value (COLUMNNAME_MandatoryType, MandatoryType);
+	}
+
+	/** Get Mandatory Type.
+		@return The specification of a Product Attribute Instance is mandatory
+	  */
+	public String getMandatoryType()
+	{
+		return (String)get_Value(COLUMNNAME_MandatoryType);
 	}
 
 	/** Set Name.

@@ -2464,7 +2464,7 @@ public class MPayment extends X_C_Payment
 			}
 			aLine.setDocInfo(bpartnerID, 0, pa.getC_Invoice_ID());
 			if (pa.getC_Invoice_ID() > 0)
-				aLine.setPaymentInfo(getC_Payment_ID(), 0);
+				aLine.setPaymentInfo(getC_Payment_ID(), 0, getC_BankTransfer_ID());
 			if (!aLine.save(get_TrxName()))
 				log.warning("P.Allocations - line not saved");
 			else

@@ -371,20 +371,6 @@ public class X_M_Attribute extends PO implements I_M_Attribute, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set M_Attribute_UU.
-		@param M_Attribute_UU M_Attribute_UU	  */
-	public void setM_Attribute_UU (String M_Attribute_UU)
-	{
-		set_Value (COLUMNNAME_M_Attribute_UU, M_Attribute_UU);
-	}
-
-	/** Get M_Attribute_UU.
-		@return M_Attribute_UU	  */
-	public String getM_Attribute_UU () 
-	{
-		return (String)get_Value(COLUMNNAME_M_Attribute_UU);
-	}
-
 	public org.compiere.model.I_M_AttributeSearch getM_AttributeSearch() throws RuntimeException
 	{
 		return (org.compiere.model.I_M_AttributeSearch)MTable.get(getCtx(), org.compiere.model.I_M_AttributeSearch.Table_ID)
