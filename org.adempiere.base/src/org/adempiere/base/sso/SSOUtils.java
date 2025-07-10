@@ -149,7 +149,7 @@ public class SSOUtils
 		if (Util.isEmpty(uuID, true))
 		{
 			List<MSSOPrincipalConfig> configList = MSSOPrincipalConfig.getAllSSOPrincipalConfig();
-			if (configList == null || configList.size() != 1  || MSysConfig.getBooleanValue(MSysConfig.SSO_SHOW_LOGINPAGE, false))
+			if (configList == null || configList.size() != 1  || MSysConfig.getBooleanValue(MSysConfig.SSO_SHOW_LOGINPAGE, false) || MSysConfig.getBooleanValue(MSysConfig.SSO_SHOWSSO_OPTION, false))
 				return null;
 			else
 				return getSSOPrincipalService(configList.get(0));

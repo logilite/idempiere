@@ -161,6 +161,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String SYSTEM_NATIVE_SEQUENCE = "SYSTEM_NATIVE_SEQUENCE";
 	public static final String SSO_SELECT_ROLE = "SSO_SELECT_ROLE";
 	public static final String SSO_SHOW_LOGINPAGE = "SSO_SHOW_LOGINPAGE";
+    public static final String SSO_SHOWSSO_OPTION = "SSO_SHOWSSO_OPTION";
     public static final String TOP_MARGIN_PIXELS_FOR_HEADER = "TOP_MARGIN_PIXELS_FOR_HEADER";
     public static final String TRACE_ALL_TRX_CONNECTION_GET = "TRACE_ALL_TRX_CONNECTION_GET";
     public static final String TWOPACK_COMMIT_DDL = "2PACK_COMMIT_DDL";

@@ -342,7 +342,8 @@ public class LoginPanel extends Window implements EventListener<Event>
 		boolean isAdminLogin = ssoAdminLoing != null && (boolean) ssoAdminLoing;
 		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
 		boolean isShowLoginPage = MSysConfig.getBooleanValue(MSysConfig.SSO_SHOW_LOGINPAGE, false);
-		if (isSSOEnable && !isAdminLogin)
+		boolean isShowSSOOption = MSysConfig.getBooleanValue(MSysConfig.SSO_SHOWSSO_OPTION, false);
+		if (isShowSSOOption && isSSOEnable && !isAdminLogin)
 		{
 			List<MSSOPrincipalConfig> configs = MSSOPrincipalConfig.getAllSSOPrincipalConfig();
 			if (configs != null && !configs.isEmpty())
