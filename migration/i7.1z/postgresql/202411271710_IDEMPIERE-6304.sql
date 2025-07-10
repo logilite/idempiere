@@ -35,14 +35,6 @@ INSERT INTO AD_Field (AD_Field_ID,Name,Description,AD_Tab_ID,AD_Column_ID,IsDisp
 UPDATE AD_Column SET Description='Indicates whether this SSO configuration is set as the default for logging in to the iDempiere Monitor and Felix Web Console.', Help='When IsDefault is set to Y, this SSO configuration will be used for logging in to the iDempiere Monitor and Felix Web Console.',Updated=TO_TIMESTAMP('2024-11-27 17:19:51','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID=215303
 ;
 
--- Dec 2, 2024, 6:31:36 PM IST
-UPDATE AD_Column SET FieldLength=25,Updated=TO_TIMESTAMP('2024-12-02 18:31:36','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID=215296
-;
-
--- Dec 2, 2024, 6:31:38 PM IST
-INSERT INTO t_alter_column values('SSO_PrincipalConfig','Name','VARCHAR(25)',null,'NULL',null)
-;
-
 -- Jun 16, 2025, 5:47:35 PM IST
 INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('E','SSO Principal Service could not be retrieved for the specified provider. Please verify the SSO provider configuration.',0,0,'Y',TO_TIMESTAMP('2025-06-16 17:47:34','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-06-16 17:47:34','YYYY-MM-DD HH24:MI:SS'),100,200945,'SSOServiceNotFound','D','bd5f5401-a53d-40da-b785-5160d352dab1')
 ;
