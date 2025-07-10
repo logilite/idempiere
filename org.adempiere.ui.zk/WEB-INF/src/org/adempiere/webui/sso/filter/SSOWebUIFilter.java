@@ -72,7 +72,24 @@ public class SSOWebUIFilter implements Filter
 				chain.doFilter(request, response);
 				return;
 			}
-			
+
+			boolean isAdminResRequest = false;
+			if (httpRequest.getSession().getAttribute(ISSOPrincipalService.SSO_ADMIN_LOGIN) != null)
+				isAdminResRequest = (boolean) httpRequest.getSession().getAttribute(ISSOPrincipalService.SSO_ADMIN_LOGIN);
+			isAdminResRequest = isAdminResRequest || httpRequest.getServletPath().toLowerCase().startsWith("/admin");
+
+			// work as default log in
+			if (httpRequest.getServletPath().toLowerCase().startsWith("/index") || httpRequest.getServletPath().equalsIgnoreCase("/"))
+				isAdminResRequest = false;
+
+			httpRequest.getSession().setAttribute(ISSOPrincipalService.SSO_ADMIN_LOGIN, isAdminResRequest);
+			// redirect to admin zul file
+			if (isAdminResRequest && httpRequest.getServletPath().toLowerCase().endsWith("admin"))
+			{
+				httpResponse.sendRedirect("/webui/admin.zul");
+				return;
+			}
+
 			boolean isProviderFromSession = false;
 			String provider = httpRequest.getParameter(ISSOPrincipalService.SSO_SELECTED_PROVIDER);
 			if (Util.isEmpty(provider) && httpRequest.getSession().getAttribute(ISSOPrincipalService.SSO_SELECTED_PROVIDER) != null)
@@ -86,7 +103,7 @@ public class SSOWebUIFilter implements Filter
 			{
 				m_SSOPrincipal = SSOUtils.getSSOPrincipalService(provider);
 
-				if (m_SSOPrincipal != null)
+				if (m_SSOPrincipal != null && !isAdminResRequest)
 				{
 					if (m_SSOPrincipal.hasAuthenticationCode(httpRequest, httpResponse))
 					{

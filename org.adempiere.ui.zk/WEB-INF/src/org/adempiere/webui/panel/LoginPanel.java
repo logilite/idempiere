@@ -336,9 +336,11 @@ public class LoginPanel extends Window implements EventListener<Event>
         	td.appendChild(btnResetPassword);
         	btnResetPassword.addEventListener(Events.ON_CLICK, this);
     	}
-    	
+
+		Object ssoAdminLoing = Executions.getCurrent().getDesktop().getSession().getAttribute(ISSOPrincipalService.SSO_ADMIN_LOGIN);
+		boolean isAdminLogin = ssoAdminLoing != null && (boolean) ssoAdminLoing;
 		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
-		if (isSSOEnable)
+		if (isSSOEnable && !isAdminLogin)
 		{
 			List<MSSOPrincipalConfig> configs = MSSOPrincipalConfig.getAllSSOPrincipalConfig();
 			if (configs != null && !configs.isEmpty())

@@ -46,5 +46,9 @@ UPDATE AD_Column SET FieldLength=25,Updated=TO_DATE('2024-12-02 18:31:36','YYYY-
 ALTER TABLE SSO_PrincipalConfig MODIFY Name VARCHAR2(25 CHAR) DEFAULT NULL 
 ;
 
+-- Jun 16, 2025, 5:47:35 PM IST
+INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('E','SSO Principal Service could not be retrieved for the specified provider. Please verify the SSO provider configuration.',0,0,'Y',TO_TIMESTAMP('2025-06-16 17:47:34','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-06-16 17:47:34','YYYY-MM-DD HH24:MI:SS'),100,200945,'SSOServiceNotFound','D','bd5f5401-a53d-40da-b785-5160d352dab1')
+;
+
 SELECT register_migration_script('202411221055_IDEMPIERE-5653.sql') FROM dual
 ;

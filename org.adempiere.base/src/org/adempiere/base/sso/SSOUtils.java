@@ -26,6 +26,7 @@ import org.compiere.util.CCache;
 import org.compiere.util.Util;
 
 /**
+ * Utility methods for single sign on support.
  * @author Logilite Technologies
  */
 public class SSOUtils
@@ -55,61 +56,23 @@ public class SSOUtils
 	}
 
 	/**
-	 * Retrieves an ISSOPrincipalService based on the provided UUID.
-	 * If the UUID is empty or null, it attempts to retrieve the principal from a list of
-	 * configurations.
-	 * If only one configuration exists, it retrieves the principal for that configuration.
-	 *
-	 * @param  uuID the unique identifier for the SSO principal configuration
-	 * @return      an ISSOPrincipalService object if found, or null otherwise
-	 */
-	public static ISSOPrincipalService getSSOPrincipalService(String uuID)
-	{
-		if (Util.isEmpty(uuID, true))
-		{
-			List<MSSOPrincipalConfig> configList = MSSOPrincipalConfig.getAllSSOPrincipalConfig();
-			if (configList == null || configList.size() != 1 || MSysConfig.getBooleanValue(MSysConfig.SSO_SHOW_LOGINPAGE, false))
-				return null;
-			else
-				return getSSOPrincipalService(configList.get(0));
-		}
-
-		MSSOPrincipalConfig config = MSSOPrincipalConfig.getSSOPrincipalConfig(uuID);
-		if (config == null)
-			return null;
-		return getSSOPrincipalService(config);
-	}
-
-	/**
-	 * Retrieves the default ISSOPrincipalService.
-	 * The default configuration is fetched, and if it exists, its associated principal is returned.
-	 *
-	 * @return an ISSOPrincipalService object based on the default configuration, or null if none exists
+	 * Get single sign on service
+	 * @return single sign on service
 	 */
 	public static ISSOPrincipalService getSSOPrincipalService()
 	{
 		MSSOPrincipalConfig config = MSSOPrincipalConfig.getDefaultSSOPrincipalConfig();
 		if (config == null)
 			return null;
+
 		return getSSOPrincipalService(config);
 	}
 
-	/**
-	 * Retrieves or creates an ISSOPrincipalService service based on the provided configuration.
-	 * If the principal service is already cached, it is returned directly.
-	 * Otherwise, it attempts to create a new service using available ISSOPrincipalFactory
-	 * implementations
-	 * and caches the result.
-	 *
-	 * @param  config the MSSOPrincipalConfig object containing the configuration details
-	 * @return        an ISSOPrincipalService object if successfully created or found in the cache, or null
-	 *                otherwise
-	 */
 	private static ISSOPrincipalService getSSOPrincipalService(MSSOPrincipalConfig config)
 	{
-		// Check cache for existing principal service
 		if (s_SSOPrincipalServicecache.containsKey(config.getSSO_PrincipalConfig_ID()))
 			return s_SSOPrincipalServicecache.get(config.getSSO_PrincipalConfig_ID());
+
 		ISSOPrincipalService principal = null;
 		List<ISSOPrincipalFactory> factories = Service.locator().list(ISSOPrincipalFactory.class).getServices();
 		for (ISSOPrincipalFactory factory : factories)
@@ -117,30 +80,21 @@ public class SSOUtils
 			principal = factory.getSSOPrincipalService(config);
 			if (principal != null)
 			{
-				// Cache the newly created principal service
 				s_SSOPrincipalServicecache.put(config.getSSO_PrincipalConfig_ID(), principal);
 				break;
 			}
 		}
 		return principal;
 	}
-	
+
 	/**
-	 * Retrieves the appropriate redirected URL based on the specified redirect mode and SSO
-	 * configuration.
-	 * The method checks the redirect mode and returns the corresponding URL from the configuration.
-	 *
-	 * @param  redirectMode the mode of redirection, such as SSO_MODE_OSGI, SSO_MODE_MONITOR, or
-	 *                      others
-	 * @param  config       the SSO principal configuration object containing the redirect URIs
-	 * @return              the redirected URL as a string, or an empty string if the configuration
-	 *                      is null
+	 * The target redirect URL for identity provider after authentication 
+	 * @param redirectMode
+	 * @param config
+	 * @return
 	 */
 	public static String getRedirectedURL(String redirectMode, I_SSO_PrincipalConfig config)
 	{
-		if (config == null)
-			return "";
-
 		if (SSO_MODE_OSGI.equalsIgnoreCase(redirectMode))
 			return config.getSSO_OSGIRedirectURIs();
 		else if (SSO_MODE_MONITOR.equalsIgnoreCase(redirectMode))
@@ -188,5 +142,23 @@ public class SSOUtils
 			return urlpath != null && urlpath.length > 1 && ignoreResourceURL.contains(urlpath[1]);
 		else
 			return urlpath != null && urlpath.length > 3 && ignoreResourceURL.contains(urlpath[3]);
+	}
+
+	public static ISSOPrincipalService getSSOPrincipalService(String uuID)
+	{
+		if (Util.isEmpty(uuID, true))
+		{
+			List<MSSOPrincipalConfig> configList = MSSOPrincipalConfig.getAllSSOPrincipalConfig();
+			if (configList == null || configList.size() != 1  || MSysConfig.getBooleanValue(MSysConfig.SSO_SHOW_LOGINPAGE, false))
+				return null;
+			else
+				return getSSOPrincipalService(configList.get(0));
+		}
+
+		MSSOPrincipalConfig config = MSSOPrincipalConfig.getSSOPrincipalConfig(uuID);
+		if (config == null)
+			return null;
+		return getSSOPrincipalService(config);
+	
 	}
 }

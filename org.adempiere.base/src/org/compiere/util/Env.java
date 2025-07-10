@@ -97,6 +97,8 @@ public final class Env
 	
 	public static final String M_WAREHOUSE_ID = "#M_Warehouse_ID";
 	
+	public static final String IS_SSO_LOGIN = "#IsSSOLogin";
+	
 	public static final String RUNNING_UNIT_TESTING_TEST_CASE = "#RUNNING_UNIT_TESTING_TEST_CASE";
 
 	public static final String PREFIX_SYSCONFIG_VARIABLE = "$sysconfig.";

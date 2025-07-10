@@ -28,7 +28,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.adempiere.base.sso.ISSOPrincipalService;
 import org.adempiere.base.sso.SSOUtils;
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.ServerContext;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.DrillCommand;
@@ -403,16 +405,46 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 	    Desktop desktop = Executions.getCurrent().getDesktop();
 	    if (desktop.isServerPushEnabled())
 			desktop.enableServerPush(false);
-    	
+
+	    boolean isAdminLogin = false;
+	    if (desktop.getSession().getAttribute(ISSOPrincipalService.SSO_ADMIN_LOGIN) != null)
+	    	isAdminLogin  = (boolean)desktop.getSession().getAttribute(ISSOPrincipalService.SSO_ADMIN_LOGIN);
+
+	    boolean isSSOLogin = "Y".equals(Env.getContext(Env.getCtx(), Env.IS_SSO_LOGIN));
+		String provider = (String) desktop.getSession().getAttribute(ISSOPrincipalService.SSO_SELECTED_PROVIDER);
+	    String ssoLogoutURL = null;
+	    if (!isAdminLogin && (isSSOLogin && Util.isEmpty(provider)))
+		{
+			ISSOPrincipalService service = SSOUtils.getSSOPrincipalService(provider);
+			if (service != null)
+				ssoLogoutURL = service.getLogoutURL();
+			else
+				throw new AdempiereException(Msg.getMsg(Env.getCtx(), "SSOServiceNotFound"));
+		}
+
     	Session session = logout0();
     	
     	//clear context, invalidate session
     	Env.getCtx().clear();
     	session.invalidate();
     	desktop.setAttribute(DESKTOP_SESSION_INVALIDATED_ATTR, Boolean.TRUE);
-            	
-        //redirect to login page
-        Executions.sendRedirect("index.zul");        
+
+    	//redirect to login page
+    	if (isAdminLogin)
+    	{
+    		Executions.sendRedirect("admin.zul");
+    	}
+    	else
+    	{
+    		if (isSSOLogin && !Util.isEmpty(ssoLogoutURL, true))
+    		{
+    			Executions.sendRedirect(ssoLogoutURL);
+    		}
+    		else
+    		{
+    			Executions.sendRedirect("index.zul");
+    		}
+    	}     
     }
     
     public void logoutAfterTabDestroyed(){

@@ -29,7 +29,7 @@ public class X_SSO_PrincipalConfig extends PO implements I_SSO_PrincipalConfig, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20241206L;
+	private static final long serialVersionUID = 20250704L;
 
     /** Standard Constructor */
     public X_SSO_PrincipalConfig (Properties ctx, int SSO_PrincipalConfig_ID, String trxName)
@@ -143,23 +143,6 @@ public class X_SSO_PrincipalConfig extends PO implements I_SSO_PrincipalConfig, 
 	public String getSSO_ApplicationDiscoveryURI () 
 	{
 		return (String)get_Value(COLUMNNAME_SSO_ApplicationDiscoveryURI);
-	}
-
-	/** Set Application Domain.
-		@param SSO_ApplicationDomain 
-		SSO Application Domain
-	  */
-	public void setSSO_ApplicationDomain (String SSO_ApplicationDomain)
-	{
-		set_Value (COLUMNNAME_SSO_ApplicationDomain, SSO_ApplicationDomain);
-	}
-
-	/** Get Application Domain.
-		@return SSO Application Domain
-	  */
-	public String getSSO_ApplicationDomain () 
-	{
-		return (String)get_Value(COLUMNNAME_SSO_ApplicationDomain);
 	}
 
 	/** Set Application Logout URL.
@@ -328,7 +311,6 @@ public class X_SSO_PrincipalConfig extends PO implements I_SSO_PrincipalConfig, 
 
 	/** SSO_Provider AD_Reference_ID=200213 */
 	public static final int SSO_PROVIDER_AD_Reference_ID=200213;
-
 	/** Set SSO Provider.
 		@param SSO_Provider 
 		Single Sign-On (SSO) Providers ( Microsoft Azure , Google, Jump Cloud etc..)

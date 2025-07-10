@@ -21,8 +21,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.compiere.util.Language;
 
 /**
+ * Single sign on service interface
  * @author Logilite Technologies
- *
  */
 public interface ISSOPrincipalService
 {
@@ -37,7 +37,8 @@ public interface ISSOPrincipalService
 	/**
 	 * Represents the key used to store or retrieve the request query parameter from a session.
 	 */
-	public static final String	SSO_QUERY_STRING			= "sso.query.string";
+	public static final String	SSO_QUERY_STRING				= "sso.query.string";
+	public static final String	SSO_ADMIN_LOGIN				= "sso.admin.login";
 
 	/**
 	 * Check the request has an authentication code

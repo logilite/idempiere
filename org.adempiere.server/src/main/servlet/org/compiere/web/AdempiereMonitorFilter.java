@@ -100,7 +100,7 @@ public class AdempiereMonitorFilter implements Filter
 			HttpServletRequest req = (HttpServletRequest) request;
 			HttpServletResponse resp = (HttpServletResponse) response;
 			HttpSession session = req.getSession(true);
-			boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
+			boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO_IDEMPIERE_MONITOR, false);
 			if (isSSOEnable) {
 				try {
 					if (m_SSOPrincipal == null) {
