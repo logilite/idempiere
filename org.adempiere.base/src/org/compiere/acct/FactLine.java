@@ -142,6 +142,7 @@ public final class FactLine extends X_Fact_Acct
 		reversal.setCustomFieldText3(getCustomFieldText3());
 		reversal.setCustomFieldText4(getCustomFieldText4());
 		reversal.setC_Tax_ID(getC_Tax_ID());
+		reversal.setC_BankAccount_ID(getC_BankAccount_ID());
 		
 		return reversal;
 	}	//	reverse
@@ -414,6 +415,13 @@ public final class FactLine extends X_Fact_Acct
 			setC_Period_ID (m_doc.getC_Period_ID());
 		if (m_docLine != null)
 			setC_Tax_ID (m_docLine.getC_Tax_ID());
+		
+		
+		if (m_docLine != null &&  m_docLine.getC_BankAccount_ID() != 0)
+			setC_BankAccount_ID(m_docLine.getC_BankAccount_ID());
+		else if (m_doc != null && m_doc.getC_BankAccount_ID() != 0)
+			setC_BankAccount_ID(m_doc.getC_BankAccount_ID());
+		
 		//	Description
 		StringBuilder description = new StringBuilder().append(m_doc.getDocumentNo());
 		if (m_docLine != null)
@@ -1378,7 +1386,7 @@ public final class FactLine extends X_Fact_Acct
 				setUser1_ID(fact.getUser1_ID());
 				setUser2_ID(fact.getUser2_ID());
 				setC_UOM_ID(fact.getC_UOM_ID());
-				setC_Tax_ID(fact.getC_Tax_ID());
+				setC_BankAccount_ID(getC_BankAccount_ID());
 				setM_AttributeSetInstance_ID(fact.getM_AttributeSetInstance_ID());	
 				setCustomFieldText1(fact.getCustomFieldText1());
 				setCustomFieldText2(fact.getCustomFieldText2());

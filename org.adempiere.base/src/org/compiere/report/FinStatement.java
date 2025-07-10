@@ -105,7 +105,8 @@ public class FinStatement extends SvrProcess
 	private int				p_M_AttributeSetInstance_ID	= 0;
 	/** Tax Parameter */
 	private int				p_C_Tax_ID					= 0;
-
+	/** Bank Account Parameter */
+	private int					p_C_BankAccount_ID			= 0;
 	/**	Parameter Where Clause			*/
 	private StringBuffer		m_parameterWhere = new StringBuffer();
 	/**	Account							*/ 
@@ -181,6 +182,8 @@ public class FinStatement extends SvrProcess
 				p_M_AttributeSetInstance_ID = para[i].getParameterAsInt();
 			else if (name.equals("C_Tax_ID"))
 				p_C_Tax_ID = para[i].getParameterAsInt();
+			else if (name.equals("C_BankAccount_ID"))
+				p_C_BankAccount_ID = para[i].getParameterAsInt();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -258,6 +261,9 @@ public class FinStatement extends SvrProcess
 		// Optional ASI
 		if (p_C_Tax_ID != 0)
 			m_parameterWhere.append(" AND C_Tax_ID = ").append(p_C_Tax_ID);
+		// Optional Bank Account
+		if (p_C_BankAccount_ID != 0)
+			m_parameterWhere.append(" AND C_BankAccount_ID = ").append(p_C_BankAccount_ID);
 		//
 		setDateAcct();
 		sb.append(" - DateAcct ").append(p_DateAcct_From).append("-").append(p_DateAcct_To);
