@@ -604,8 +604,19 @@ public class MTree extends MTree_Base
 						}
 					}
 					else if (X_AD_Menu.ACTION_Process.equals(actionColor) 
-						|| X_AD_Menu.ACTION_Report.equals(actionColor))
+						|| X_AD_Menu.ACTION_Report.equals(actionColor)) {
 						access = role.getProcessAccess(AD_Process_ID);
+						// Get ProcessCustomization
+						MUserDefProc userDef = null; 
+						userDef = MUserDefProc.getBestMatch(getCtx(), AD_Process_ID);
+						if (userDef != null)
+						{
+							if (userDef.getName() != null)
+								name = userDef.getName();
+							if (userDef.getDescription() != null)
+								description = userDef.getDescription();
+						}
+					}
 					else if (X_AD_Menu.ACTION_Form.equals(actionColor))
 						access = role.getFormAccess(AD_Form_ID);
 					else if (X_AD_Menu.ACTION_WorkFlow.equals(actionColor))
