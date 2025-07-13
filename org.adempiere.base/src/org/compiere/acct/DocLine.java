@@ -965,6 +965,15 @@ public class DocLine
 	}	//	getC_Tax_ID
 
 	/**
+	 *  Line Bank Account
+	 *  @return C_BankAccount_ID
+	 */
+	public int getC_BankAccount_ID()
+	{
+		return getValue("C_BankAccount_ID");
+	}	//	getC_BankAccount_ID
+	
+	/**
 	 *  Get Line Number
 	 *  @return line no
 	 */

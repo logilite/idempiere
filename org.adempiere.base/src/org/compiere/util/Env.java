@@ -128,6 +128,8 @@ public final class Env
 	public static final String M_PRODUCT_CATEGORY_ID = "#M_Product_Category_ID";
 	public static final String M_WAREHOUSE_ID = "#M_Warehouse_ID";	
 	/** Context for multi factor authentication */
+	public static final String IS_SSO_LOGIN = "#IsSSOLogin";
+	
 	public static final String MFA_Registration_ID = "#MFA_Registration_ID";
 	/** Context for SSO multi User Identity */
 	public static final String IsShowUserIdentity = "#IsShowUserIdentity";

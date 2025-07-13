@@ -34,7 +34,7 @@ public class X_GL_JournalLine extends PO implements I_GL_JournalLine, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20250603L;
+	private static final long serialVersionUID = 20250708L;
 
     /** Standard Constructor */
     public X_GL_JournalLine (Properties ctx, int GL_JournalLine_ID, String trxName)
@@ -445,6 +445,34 @@ public class X_GL_JournalLine extends PO implements I_GL_JournalLine, I_Persiste
 	public int getC_Activity_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Activity_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_BankAccount getC_BankAccount() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_BankAccount)MTable.get(getCtx(), org.compiere.model.I_C_BankAccount.Table_Name)
+			.getPO(getC_BankAccount_ID(), get_TrxName());	}
+
+	/** Set Bank Account.
+		@param C_BankAccount_ID 
+		Account at the Bank
+	  */
+	public void setC_BankAccount_ID (int C_BankAccount_ID)
+	{
+		if (C_BankAccount_ID < 1) 
+			set_Value (COLUMNNAME_C_BankAccount_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_BankAccount_ID, Integer.valueOf(C_BankAccount_ID));
+	}
+
+	/** Get Bank Account.
+		@return Account at the Bank
+	  */
+	public int getC_BankAccount_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_BankAccount_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

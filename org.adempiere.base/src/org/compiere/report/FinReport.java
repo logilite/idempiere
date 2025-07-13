@@ -102,6 +102,8 @@ public class FinReport extends SvrProcess
 	private int					p_A_Asset_ID				= 0;
 	/** Attribute Set Instance Parameter */
 	private int					p_M_AttributeSetInstance_ID	= 0;
+	/** Bank Account Parameter */
+	private int					p_C_BankAccount_ID			= 0;
 	/** Exclude Adjustment Period		*/
 	protected String				p_AdjPeriodToExclude = "";
 
@@ -180,6 +182,8 @@ public class FinReport extends SvrProcess
 				p_A_Asset_ID = para[i].getParameterAsInt();
 			else if (name.equals("M_AttributeSetInstance_ID"))
 				p_M_AttributeSetInstance_ID = para[i].getParameterAsInt();
+			else if (name.equals("C_BankAccount_ID"))
+				p_C_BankAccount_ID = para[i].getParameterAsInt();
 			else
 				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
@@ -212,6 +216,9 @@ public class FinReport extends SvrProcess
 		// Optional ASI
 		if (p_M_AttributeSetInstance_ID != 0)
 			m_parameterWhere.append(" AND M_AttributeSetInstance_ID = ").append(p_M_AttributeSetInstance_ID);
+		
+		if (p_C_BankAccount_ID != 0)
+			m_parameterWhere.append(" AND C_BankAccount_ID = ").append(p_C_BankAccount_ID);
 		//	Optional Product
 		if (p_M_Product_ID != 0)
 			m_parameterWhere.append(" AND ").append(MReportTree.getWhereClause(getCtx(), 

@@ -1362,6 +1362,14 @@ public class Login implements ILogin
 		where.append((isSSOEnable) ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
 		where.append("	OR COALESCE(u.AuthenticationType, c.AuthenticationType) IS NULL) AND u.AD_User_ID = AD_User.AD_User_ID) ");
 
+
+		where.append("	AND EXISTS (SELECT * FROM AD_User u ")
+			.append("	INNER JOIN	AD_Client c ON (u.AD_Client_ID = c.AD_Client_ID)	")
+			.append("	WHERE (COALESCE(u.AuthenticationType, c.AuthenticationType) IN ");
+		// If Enable_SSO=N then don't allow SSO only users.
+		where.append(isSSOLogin ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
+		where.append("	OR COALESCE(u.AuthenticationType, c.AuthenticationType) IS NULL) AND u.AD_User_ID = AD_User.AD_User_ID) ");
+
 		String whereRoleType = MRole.getWhereRoleType(roleTypes, "r");
 		where.append(" AND")
 				.append(" EXISTS (SELECT * FROM AD_User_Roles ur")
@@ -1471,13 +1479,8 @@ public class Login implements ILogin
                    .append(" WHERE ur.IsActive='Y'")
                    .append(" AND u.IsActive='Y'")
                    .append(" AND cli.IsActive='Y'");
-				if (client != null)
-					sql.append(" AND r.AD_Client_ID=").append(client.getAD_Client_ID());
-				if (! Util.isEmpty(whereRoleType)) {
-					sql.append(" AND ").append(whereRoleType);
-				}
-				sql.append(" AND  cli.AuthenticationType IN ").append((isSSOEnable) ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
-				sql.append(" AND ur.AD_User_ID=? ORDER BY cli.Name");
+                   .append(" AND cli.AuthenticationType IN ").append(isSSOLogin ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ")
+                   .append(" AND ur.AD_User_ID=? ORDER BY cli.Name");
 			      PreparedStatement pstmt=null;
 			      ResultSet rs=null;
 			      try{
@@ -1633,11 +1636,8 @@ public class Login implements ILogin
 			}
 		}
 		
-		if (isSSOEnable)
-			Env.setContext(Env.getCtx(), Env.IS_SSO_LOGIN, true);
-		else
-			Env.setContext(Env.getCtx(), Env.IS_SSO_LOGIN, false);
-		
+		Env.setContext(Env.getCtx(), Env.IS_SSO_LOGIN, isSSOLogin);
+
 		return retValue;
 	}
 

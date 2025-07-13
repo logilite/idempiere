@@ -32,6 +32,7 @@ import javax.servlet.http.HttpSession;
 
 import org.adempiere.base.sso.ISSOPrincipalService;
 import org.adempiere.base.sso.SSOUtils;
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.ServerContext;
 import org.adempiere.util.ServerContextURLHandler;
 import org.adempiere.webui.apps.AEnv;
@@ -531,19 +532,20 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 	    final DesktopCache desktopCache = ((WebAppCtrl) wapp).getDesktopCache(desktop.getSession());	    	    
 	    boolean isAdminLogin = false;
 	    if (desktop.getSession().getAttribute(ISSOPrincipalService.SSO_ADMIN_LOGIN) != null)
-	    	isAdminLogin  = (boolean)desktop.getSession().getAttribute(ISSOPrincipalService.SSO_ADMIN_LOGIN);
-	    
-	    String providerUU = (String) desktop.getSession().getAttribute(ISSOPrincipalService.SSO_SELECTED_PROVIDER);
+	    	isAdminLogin  = (boolean)desktop.getSession().getAttribute(ISSOPrincipalService.SSO_ADMIN_LOGIN);	    
+
 	    boolean isSSOLogin = "Y".equals(Env.getContext(Env.getCtx(), Env.IS_SSO_LOGIN));
+		String provider = (String) desktop.getSession().getAttribute(ISSOPrincipalService.SSO_SELECTED_PROVIDER);
 	    String ssoLogoutURL = null;
-	    if (!isAdminLogin && isSSOLogin)
+	    if (!isAdminLogin && (isSSOLogin && Util.isEmpty(provider)))
 		{
-			ISSOPrincipalService service = SSOUtils.getSSOPrincipalService(providerUU);
-			if (service != null && Util.isEmpty(providerUU, true))
+			ISSOPrincipalService service = SSOUtils.getSSOPrincipalService(provider);
+			if (service != null)
 				ssoLogoutURL = service.getLogoutURL();
+			else
+				throw new AdempiereException(Msg.getMsg(Env.getCtx(), "SSOServiceNotFound"));
 		}
-	    
-	    final Session session = logout0();
+
 	    
     	//clear context, invalidate session
     	Env.getCtx().clear();

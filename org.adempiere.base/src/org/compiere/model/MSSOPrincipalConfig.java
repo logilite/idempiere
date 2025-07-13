@@ -24,18 +24,19 @@ import org.compiere.util.Util;
 /**
  * SSO Principal Service Configuration
  */
+ */
 public class MSSOPrincipalConfig extends X_SSO_PrincipalConfig
 {
 	/**
 	 * generated serial id
 	 */
-	private static final long serialVersionUID = -6330419996581130413L;
-
+	private static final long serialVersionUID =  -5318719820186470903L;
+	
 	private static final CCache<String, Object>	s_SSOPrincipalConfigCache		= new CCache<String, Object>(MSSOPrincipalConfig.class.getSimpleName(), 10, 0);
 
 	private static final String					DEFAULT_SSO_PRINCIPAL_CACHEKEY	= "DEFAULT_SSO_PRINCIPAL";
 	private static final String					ALL_SSO_CONFIG_CACHEKEY			= "ALL_SSO_CONFIG";
-
+	
 	private String								imageBase64Src					= null;
 
 	/**
@@ -58,29 +59,6 @@ public class MSSOPrincipalConfig extends X_SSO_PrincipalConfig
 		super(ctx, rs, trxName);
 	}
 
-	@Override
-	protected boolean beforeSave(boolean newRecord)
-	{
-		if (newRecord || is_ValueChanged(COLUMNNAME_IsDefault)|| is_ValueChanged(COLUMNNAME_IsActive))
-		{
-			if(!isActive())
-			{
-				setIsDefault(false);
-			}
-
-			if (isDefault() && getDefaultSSOPrincipalConfig(true) != null)
-			{
-				throw new AdempiereException("There can be only one default SSO Principal Configuration");
-			}
-
-			if (newRecord && getDefaultSSOPrincipalConfig() == null)
-			{
-				setIsDefault(true);
-			}
-		}
-		return super.beforeSave(newRecord);
-	}
-	
 	public static MSSOPrincipalConfig getDefaultSSOPrincipalConfig()
 	{
 		return getDefaultSSOPrincipalConfig(false);
@@ -179,7 +157,7 @@ public class MSSOPrincipalConfig extends X_SSO_PrincipalConfig
 
 		return allConfigs;
 	}
-
+	
 	/**
 	 * Generates a Base64-encoded image source string or retrieves the image URL.
 	 * If binary data is available, it is encoded in Base64 and prefixed for direct use in HTML
@@ -204,5 +182,30 @@ public class MSSOPrincipalConfig extends X_SSO_PrincipalConfig
 		}
 
 		return imageBase64Src;
+	}
+
+	@Override
+	protected boolean beforeSave(boolean newRecord)
+	{
+		// Validate only one default SSO Principal Configuration
+		if (newRecord || is_ValueChanged(COLUMNNAME_IsDefault)|| is_ValueChanged(COLUMNNAME_IsActive))
+		{
+			if(!isActive())
+			{
+				setIsDefault(false);
+			}
+
+			if (isDefault() && getDefaultSSOPrincipalConfig() != null)
+			{
+				throw new AdempiereException("There can be only one default SSO Principal Configuration");
+			}
+
+			if (newRecord && getDefaultSSOPrincipalConfig() == null)
+			{
+				setIsDefault(true);
+			}
+			
+		}
+		return super.beforeSave(newRecord);
 	}
 }
