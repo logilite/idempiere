@@ -24,7 +24,6 @@ import org.compiere.util.Util;
 /**
  * SSO Principal Service Configuration
  */
- */
 public class MSSOPrincipalConfig extends X_SSO_PrincipalConfig
 {
 	/**

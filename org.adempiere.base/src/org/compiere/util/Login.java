@@ -1356,18 +1356,10 @@ public class Login implements ILogin
 		where.append(MUser.getUserAuthWhere(isSSOEnable, searchKey_login));
 		
 		where.append("	AND EXISTS (SELECT * FROM AD_User u ")
-						.append("	INNER JOIN	AD_Client c ON (u.AD_Client_ID = c.AD_Client_ID)	")
-						.append("	WHERE (COALESCE(u.AuthenticationType, c.AuthenticationType) IN ");
-		//If Enable_SSO=N then don't allow SSO only users. 
-		where.append((isSSOEnable) ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
-		where.append("	OR COALESCE(u.AuthenticationType, c.AuthenticationType) IS NULL) AND u.AD_User_ID = AD_User.AD_User_ID) ");
-
-
-		where.append("	AND EXISTS (SELECT * FROM AD_User u ")
 			.append("	INNER JOIN	AD_Client c ON (u.AD_Client_ID = c.AD_Client_ID)	")
 			.append("	WHERE (COALESCE(u.AuthenticationType, c.AuthenticationType) IN ");
 		// If Enable_SSO=N then don't allow SSO only users.
-		where.append(isSSOLogin ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
+		where.append(isSSOEnable ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
 		where.append("	OR COALESCE(u.AuthenticationType, c.AuthenticationType) IS NULL) AND u.AD_User_ID = AD_User.AD_User_ID) ");
 
 		String whereRoleType = MRole.getWhereRoleType(roleTypes, "r");
@@ -1478,8 +1470,8 @@ public class Login implements ILogin
                    .append(" INNER JOIN AD_Client cli on (ur.AD_Client_ID=cli.AD_Client_ID)")
                    .append(" WHERE ur.IsActive='Y'")
                    .append(" AND u.IsActive='Y'")
-                   .append(" AND cli.IsActive='Y'");
-                   .append(" AND cli.AuthenticationType IN ").append(isSSOLogin ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ")
+                   .append(" AND cli.IsActive='Y'")
+                   .append(" AND cli.AuthenticationType IN ").append(isSSOEnable ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ")
                    .append(" AND ur.AD_User_ID=? ORDER BY cli.Name");
 			      PreparedStatement pstmt=null;
 			      ResultSet rs=null;
@@ -1636,7 +1628,7 @@ public class Login implements ILogin
 			}
 		}
 		
-		Env.setContext(Env.getCtx(), Env.IS_SSO_LOGIN, isSSOLogin);
+		Env.setContext(Env.getCtx(), Env.IS_SSO_LOGIN, isSSOEnable);
 
 		return retValue;
 	}

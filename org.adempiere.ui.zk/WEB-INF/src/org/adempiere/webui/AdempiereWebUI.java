@@ -546,7 +546,8 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 				throw new AdempiereException(Msg.getMsg(Env.getCtx(), "SSOServiceNotFound"));
 		}
 
-	    
+		final Session session = logout0();
+
     	//clear context, invalidate session
     	Env.getCtx().clear();
     	afterLogout(session);

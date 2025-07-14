@@ -19,6 +19,7 @@ package org.compiere.model;
 
 import java.sql.ResultSet;
 import java.util.Properties;
+
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_Client
@@ -260,29 +261,6 @@ public class X_AD_Client extends PO implements I_AD_Client, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** AuthenticationType AD_Reference_ID=200239 */
-	public static final int AUTHENTICATIONTYPE_AD_Reference_ID=200239;
-	/** SSO Only = SSO */
-	public static final String AUTHENTICATIONTYPE_SSOOnly = "SSO";
-	/** Application Only = APO */
-	public static final String AUTHENTICATIONTYPE_ApplicationOnly = "APO";
-	/** Application and SSO = AAS */
-	public static final String AUTHENTICATIONTYPE_ApplicationAndSSO = "AAS";
-	/** Set Authentication Type.
-		@param AuthenticationType Authentication Type	  */
-	public void setAuthenticationType (String AuthenticationType)
-	{
-
-		set_Value (COLUMNNAME_AuthenticationType, AuthenticationType);
-	}
-
-	/** Get Authentication Type.
-		@return Authentication Type	  */
-	public String getAuthenticationType () 
-	{
-		return (String)get_Value(COLUMNNAME_AuthenticationType);
 	}
 
 	/** AuthenticationType AD_Reference_ID=200239 */
