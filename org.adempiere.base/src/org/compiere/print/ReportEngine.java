@@ -414,7 +414,7 @@ public class ReportEngine implements PrintServiceAttributeListener
 	 */
 	public String getName()
 	{
-		return m_printFormat.get_Translation("Name");
+		return getTranPrintFormat() != null ? getTranPrintFormat().getName() : m_printFormat.get_Translation("Name");
 	}	//	getName
 
 	/**
