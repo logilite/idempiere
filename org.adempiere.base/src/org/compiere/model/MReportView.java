@@ -62,4 +62,12 @@ public class MReportView extends X_AD_ReportView {
 		}
 		return retValue;
 	}	//	get
+
+	public X_AD_ReportView_Col getADReportViewCol(int ad_Column_ID)
+	{
+		return new Query(getCtx(), X_AD_ReportView_Col.Table_Name, "AD_ReportView_ID=? AND AD_Column_ID=?", get_TrxName())
+						.setParameters(getAD_ReportView_ID(), ad_Column_ID)
+						.setOnlyActiveRecords(true)
+						.first();
+	}
 }

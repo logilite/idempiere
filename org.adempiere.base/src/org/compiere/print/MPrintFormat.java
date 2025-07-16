@@ -213,6 +213,16 @@ public class MPrintFormat extends X_AD_PrintFormat
 		if (items != null)
 			m_items = items;
 	}	//	setItems
+	
+	public MPrintFormatItem[] getSortedPFItems()
+	{
+	    if (m_items == null)
+	        return m_items;
+
+	    // Sort by SeqNo using Comparator
+	    Arrays.sort(m_items, Comparator.comparingInt(MPrintFormatItem::getSeqNo));
+		return m_items;
+	} // setItems
 
 	/**
 	 * 	Get active Items
