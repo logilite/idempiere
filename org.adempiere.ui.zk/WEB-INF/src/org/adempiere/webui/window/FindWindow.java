@@ -501,8 +501,6 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         	btnNew.setImage(ThemeManager.getThemeResource("images/New24.png"));
         btnNew.setAttribute("name", "btnNewAdv");
         btnNew.addEventListener(Events.ON_CLICK, this);
-		if (m_gridTab != null && m_gridTab.getAD_Window_ID() > 0)
-			btnNew.setDisabled(MToolBarButtonRestrict.isNewButtonRestricted(m_gridTab.getAD_Window_ID(), m_AD_Tab_ID));
 
         ToolBarButton btnDelete = new ToolBarButton();
         btnDelete.setAttribute("name","btnDeleteAdv");
