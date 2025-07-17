@@ -1888,4 +1888,8 @@ public class ZkReportViewer extends Window implements EventListener<Event>, ITab
 		}
 	} // printPreviewPDF
 
+	public ToolBarButton getbWizard()
+	{
+		return bWizard;
+	}
 }
