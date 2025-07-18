@@ -605,7 +605,7 @@ public class MReportLine extends X_PA_ReportLine
 	} // getPatternDashed
 
 	/**
-	 * Get Value Query for Segment Type
+	 * Get Name ( Value )  Query for Segment Type
 	 * 
 	 * @return Query for first source element or null
 	 */
@@ -630,47 +630,51 @@ public class MReportLine extends X_PA_ReportLine
 		boolean translated = Env.isMultiLingualDocument(Env.getCtx()) && !language.equalsIgnoreCase(baseLanguage);
 		if (dimensionGroup.equals(DIMENSIONGROUP_Organization))
 		{
-			return "SELECT Name FROM AD_Org WHERE AD_Org_ID=";
+			return "SELECT CASE WHEN Value IS NOT NULL THEN Name || ' ( ' || Value || ' )' ELSE Name END AS DisplayName FROM AD_Org WHERE AD_Org_ID=";
 		}
 		else if (dimensionGroup.equals(DIMENSIONGROUP_BusinessPartner))
 		{
-			return "SELECT Name FROM C_BPartner WHERE C_BPartner_ID=";
+			return "SELECT CASE WHEN Value IS NOT NULL THEN Name || ' ( ' || Value || ' )' ELSE Name END AS DisplayName FROM C_BPartner WHERE C_BPartner_ID=";
 		}
 		else if (dimensionGroup.equals(DIMENSIONGROUP_Product))
 		{
 			if (translated)
-				return "SELECT t.Name FROM M_Product o JOIN M_Product_Trl t ON (o.M_Product_ID=t.M_Product_ID AND t.AD_Language="	+ DB.TO_STRING(language)
-						+ ") WHERE o.M_Product_ID=";
+				return "SELECT CASE WHEN o.Value IS NOT NULL THEN t.Name || ' ( ' || o.Value || ' )' ELSE t.Name END AS DisplayName FROM M_Product o JOIN M_Product_Trl t ON (o.M_Product_ID=t.M_Product_ID AND t.AD_Language="
+						+ DB.TO_STRING(language)
+							+ ") WHERE o.M_Product_ID=";
 			else
-				return "SELECT Name FROM M_Product WHERE M_Product_ID=";
+				return "SELECT CASE WHEN Value IS NOT NULL THEN Name || ' ( ' || Value || ' )' ELSE Name END AS DisplayName FROM M_Product WHERE M_Product_ID=";
 		}
 		else if (dimensionGroup.equals(DIMENSIONGROUP_Activity))
 		{
 			if (translated)
-				return "SELECT Name FROM C_Activity o JOIN C_Activity_Trl t ON (o.C_Activity_ID=t.C_Activity_ID AND t.AD_Language=" + DB.TO_STRING(language)
-						+ ") WHERE o.C_Activity_ID=";
+				return "SELECT CASE WHEN o.Value IS NOT NULL THEN t.Name || ' ( ' || o.Value || ' )' ELSE t.Name END AS DisplayName FROM C_Activity o JOIN C_Activity_Trl t ON (o.C_Activity_ID=t.C_Activity_ID AND t.AD_Language="
+						+ DB.TO_STRING(language)
+							+ ") WHERE o.C_Activity_ID=";
 			else
-				return "SELECT Name FROM C_Activity WHERE C_Activity_ID=";
+				return "SELECT CASE WHEN Value IS NOT NULL THEN Name || ' ( ' || Value || ' )' ELSE Name END AS DisplayName FROM C_Activity WHERE C_Activity_ID=";
 		}
 		else if (dimensionGroup.equals(DIMENSIONGROUP_Campaign))
 		{
 			if (translated)
-				return "SELECT Name FROM C_Campaign o JOIN C_Campaign_Trl t ON (o.C_Campaign_ID=t.C_Campaign_ID AND t.AD_Language=" + DB.TO_STRING(language)
-						+ ") WHERE o.C_Campaign_ID=";
+				return "SELECT CASE WHEN o.Value IS NOT NULL THEN t.Name || ' ( ' || o.Value || ' )' ELSE t.Name END AS DisplayName FROM C_Campaign o JOIN C_Campaign_Trl t ON (o.C_Campaign_ID=t.C_Campaign_ID AND t.AD_Language="
+						+ DB.TO_STRING(language)
+							+ ") WHERE o.C_Campaign_ID=";
 			else
-				return "SELECT Name FROM C_Campaign WHERE C_Campaign_ID=";
+				return "SELECT CASE WHEN Value IS NOT NULL THEN Name || ' ( ' || Value || ' )' ELSE Name END AS DisplayName FROM C_Campaign WHERE C_Campaign_ID=";
 		}
 		else if (dimensionGroup.equals(DIMENSIONGROUP_Project))
 		{
-			return "SELECT Name FROM C_Project WHERE C_Project_ID=";
+			return "SELECT CASE WHEN Value IS NOT NULL THEN Name || ' ( ' || Value || ' )' ELSE Name END AS DisplayName FROM C_Project WHERE C_Project_ID=";
 		}
 		else if (dimensionGroup.equals(DIMENSIONGROUP_SalesRegion))
 		{
 			if (translated)
-				return "SELECT Name FROM C_SalesRegion o JOIN C_SalesRegion_Trl t ON (o.C_SalesRegion_ID=t.C_SalesRegion_ID AND t.AD_Language="
-						+ DB.TO_STRING(language) + ") WHERE o.C_SalesRegion_ID=";
+				return "SELECT CASE WHEN o.Value IS NOT NULL THEN t.Name || ' ( ' || o.Value || ' )' ELSE t.Name END AS DisplayName FROM C_SalesRegion o JOIN C_SalesRegion_Trl t ON (o.C_SalesRegion_ID=t.C_SalesRegion_ID AND t.AD_Language="
+						+ DB.TO_STRING(language)
+							+ ") WHERE o.C_SalesRegion_ID=";
 			else
-				return "SELECT Name FROM C_SalesRegion WHERE C_SalesRegion_ID=";
+				return "SELECT CASE WHEN Value IS NOT NULL THEN Name || ' ( ' || Value || ' )' ELSE Name END AS DisplayName FROM C_SalesRegion WHERE C_SalesRegion_ID=";
 		}
 		//
 		return "";

@@ -282,8 +282,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 		}
 		m_isCanExport = MRole.getDefault().isCanExport(m_AD_Table_ID);
 		
-		setTitle(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Report") + ": " +
-				m_reportEngine.getPrintFormat().get_Translation(MPrintFormat.COLUMNNAME_Name)));
+		setTitle(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Report") + ": " + m_reportEngine.getName()));
 		
 		addEventListener(ON_RENDER_REPORT_EVENT, this);
 		addEventListener("onPostInit", e -> {
@@ -2122,4 +2121,9 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 
 		}
 	} // printPreviewPDF
+
+	public ToolBarButton getbWizard()
+	{
+		return bWizard;
+	}
 }

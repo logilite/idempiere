@@ -122,7 +122,8 @@ public class FinReport extends SvrProcess
 	protected MReportColumn[] 	m_columns;
 	/** The Report Lines				*/
 	protected MReportLine[] 		m_lines;
-
+	
+	protected boolean			hasDimensionCol				= false;
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -283,6 +284,12 @@ public class FinReport extends SvrProcess
 		if ( p_PA_ReportCube_ID > 0)
 			m_parameterWhere.append(" AND PA_ReportCube_ID=").append(p_PA_ReportCube_ID);
 		
+		
+		int dimensionColCount = DB.getSQLValue(get_TrxName(), "SELECT COUNT(1) FROM PA_ReportLine l INNER JOIN PA_ReportSource s ON s.PA_ReportLine_ID = l.PA_ReportLine_ID "
+													+ "	WHERE (l.DimensionGroup IS NOT NULL OR s.DimensionGroup IS NOT NULL) AND l.IsActive = 'Y' AND s.IsActive = 'Y' ");
+		
+		hasDimensionCol = dimensionColCount > 0;
+		
 		if (log.isLoggable(Level.INFO)) log.info(sb.toString());
 	//	m_report.list();
 	}	//	prepare
@@ -374,10 +381,10 @@ public class FinReport extends SvrProcess
 		//	** Create Temporary and empty Report Lines from PA_ReportLine
 		//	- AD_PInstance_ID, PA_ReportLine_ID, 0, 0
 		int PA_ReportLineSet_ID = m_report.getLineSet().getPA_ReportLineSet_ID();
-		StringBuilder sql = new StringBuilder ("INSERT INTO T_Report "
-			+ "(AD_PInstance_ID, PA_ReportLine_ID, Record_ID,Fact_Acct_ID, SeqNo,LevelNo, Name,Description, DimensionGroupRecord_ID, DimensionGroupName) "
+		StringBuffer sql = new StringBuffer ("INSERT INTO T_Report "
+			+ "(AD_PInstance_ID, PA_ReportLine_ID, Record_ID,Fact_Acct_ID, SeqNo,LevelNo, Name,Description, DimensionGroupRecord_ID, DimensionGroupName, DimensionName) "
 			+ "SELECT ").append(getAD_PInstance_ID()).append(", rl.PA_ReportLine_ID, 0,0, rl.SeqNo,0, CASE WHEN LineType='B' THEN '' ELSE NVL(trl.Name, rl.Name) END as Name, NVL(trl.Description,rl.Description) as Description"
-			+ " , NULL, CASE WHEN LineType='B' THEN '' ELSE NVL(trl.Name, rl.Name) END as Name "
+			+ " , NULL, CASE WHEN LineType='B' THEN '' ELSE NVL(trl.Name, rl.Name) END as Name, NULL "
 			+ "FROM PA_ReportLine rl "
 			+ "LEFT JOIN PA_ReportLine_Trl trl ON trl.PA_ReportLine_ID = rl.PA_ReportLine_ID AND trl.AD_Language = '" + Env.getAD_Language(Env.getCtx()) + "' "
 			+ "WHERE rl.IsActive='Y' AND rl.PA_ReportLineSet_ID=").append(PA_ReportLineSet_ID);
@@ -1845,8 +1852,9 @@ public class FinReport extends SvrProcess
 		//
 		sql.append(") WHERE Record_ID <> 0 AND AD_PInstance_ID=").append(getAD_PInstance_ID())
 				.append(" AND PA_ReportLine_ID=").append(m_lines[line].getPA_ReportLine_ID())
-				.append(" AND Fact_Acct_ID=0 AND Name IS NULL");
-
+				.append(" AND Fact_Acct_ID=0 AND Name IS NULL")
+				.append(" AND LevelNo <> ")
+				.append(p_DetailsSourceFirst ? "-2" : "2");
 		if (isCombination)
 			sql.append(" AND C_ValidCombination_ID=" + combinationID);
 
@@ -1855,10 +1863,10 @@ public class FinReport extends SvrProcess
 
 		if (!Util.isEmpty(dimGroupVariable) && isDimensionLine)
 		{
-			// Set Dimension Group Value in Description
-			sql = new StringBuilder("UPDATE T_Report SET Description = (");
+			// Set Dimension Group Name & Value in DimensionName column
+			sql = new StringBuffer("UPDATE T_Report SET DimensionName = (");
 			sql	.append(m_lines[line].getDimensionGroupQuery(srcLine))
-				.append("T_Report.DimensionGroupRecord_ID) || ' ( ' || Description || ' ) ' ")
+				.append("T_Report.DimensionGroupRecord_ID) ")
 				.append("WHERE AD_PInstance_ID=")
 				.append(getAD_PInstance_ID())
 				.append(" AND PA_ReportLine_ID=")
@@ -2322,6 +2330,17 @@ public class FinReport extends SvrProcess
 					pfi.setSeqNo(20);
 				if (!pfi.isPrinted())
 					pfi.setIsPrinted(true);
+				if (pfi.isOrderBy())
+					pfi.setIsOrderBy(false);
+				if (pfi.getSortNo() != 0)
+					pfi.setSortNo(0);
+			}
+			else if (ColumnName.equals("DimensionName"))
+			{
+				if (pfi.getSeqNo() != 21)
+					pfi.setSeqNo(21);
+				if (pfi.isPrinted() != hasDimensionCol)
+					pfi.setIsPrinted(hasDimensionCol);
 				if (pfi.isOrderBy())
 					pfi.setIsOrderBy(false);
 				if (pfi.getSortNo() != 0)
