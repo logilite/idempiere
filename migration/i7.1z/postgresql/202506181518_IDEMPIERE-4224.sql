@@ -171,15 +171,6 @@ INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,
 ;
 
 
--- Aug 3, 2017 10:42:42 PM GMT+08:00
--- IDEMPIERE-4899 Report: print product instance attribute name and value as column
-INSERT INTO AD_Val_Rule (Code,AD_Val_Rule_ID,Name,Updated,Type,AD_Val_Rule_UU,CreatedBy,UpdatedBy,AD_Org_ID,IsActive,AD_Client_ID,Created,EntityType) VALUES ('M_Attribute.M_Attribute_ID IN ( SELECT M_Attribute_ID FROM M_AttributeUse WHERE IsActive=''Y'' AND M_AttributeSet_ID=@M_Product_M_AttributeSet_ID@ )',200099,'M_Attribute of M_Product_M_AttributeSet',TO_TIMESTAMP('2021-08-04 22:42:40','YYYY-MM-DD HH24:MI:SS'),'S','16287e64-946d-4256-abfe-6dcc694eebb7',100,100,0,'Y',0,TO_TIMESTAMP('2021-08-04 22:42:40','YYYY-MM-DD HH24:MI:SS'),'D')
-;
-
-INSERT INTO AD_Val_Rule (Code,AD_Val_Rule_ID,Name,Updated,Type,AD_Val_Rule_UU,CreatedBy,UpdatedBy,AD_Org_ID,IsActive,AD_Client_ID,Created,EntityType) VALUES ('M_AttributeValue.M_Attribute_ID=@M_Attribute_ID@',200100,'M_AttributeValue of M_Attribute (Dictionary)',TO_TIMESTAMP('2021-08-04 15:51:27','YYYY-MM-DD HH24:MI:SS'),'S','3f465604-2f70-4bf8-a874-87ad6d4cd7e5',100,100,0,'Y',0,TO_TIMESTAMP('2021-08-04 15:51:27','YYYY-MM-DD HH24:MI:SS'),'D')
-;
-
-
 -- Jun 27, 2025, 4:59:27 PM IST
 UPDATE AD_Column SET IsMandatory='Y',IsUpdateable='N',Updated=TO_TIMESTAMP('2025-06-27 16:59:27','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID=215944
 ;
