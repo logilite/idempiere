@@ -1864,7 +1864,7 @@ public class FinReport extends SvrProcess
 		if (!Util.isEmpty(dimGroupVariable) && isDimensionLine)
 		{
 			// Set Dimension Group Name & Value in DimensionName column
-			sql = new StringBuffer("UPDATE T_Report SET DimensionName = (");
+			sql = new StringBuilder("UPDATE T_Report SET DimensionName = (");
 			sql	.append(m_lines[line].getDimensionGroupQuery(srcLine))
 				.append("T_Report.DimensionGroupRecord_ID) ")
 				.append("WHERE AD_PInstance_ID=")

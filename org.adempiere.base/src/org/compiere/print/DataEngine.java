@@ -38,7 +38,6 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import org.adempiere.exceptions.AdempiereException;
-import org.apache.commons.collections4.map.HashedMap;
 import org.compiere.model.MColumn;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MQuery;
@@ -382,7 +381,10 @@ public class DataEngine
 				else
 					info.setFormatPattern(column.getFormatPattern());
 				info.setDesc(pfi.isDesc());
+				info.setScript(pfi.getScript());
+				info.setPfiName(pfi.getName());	
 				info.setPrintFormatItemId(pfi.getAD_PrintFormatItem_ID());
+				info.setPrintFormatType(pfi.getPrintFormatType());
 
 				processPFColumnInfo(info, tableName, regTranslateTable, IsGroupedBy, sqlSELECT, sqlFROM, groupByColumns, columns, orderAD_Column_IDs, orderColumns);
 			}
@@ -399,9 +401,10 @@ public class DataEngine
 							.append("pfi.IsMinCalc,pfi.IsMaxCalc, ") // 18..19
 							.append("pfi.isRunningTotal,pfi.RunningTotalLines, ") // 20..21
 							.append("pfi.IsVarianceCalc, pfi.IsDeviationCalc, ") // 22..23
-							.append("c.ColumnSQL, COALESCE(pfi.FormatPattern, c.FormatPattern) ") // 24, 25
+							.append("c.ColumnSQL, COALESCE(pfi.FormatPattern, c.FormatPattern), ") // 24, 25
 							// BEGIN http://jira.idempiere.com/browse/IDEMPIERE-153
-							.append(" , pfi.Script, pfi.Name, pfi.AD_PrintFormatItem_ID, pfi.PrintFormatType ") // 26..30
+							/** START DEVCOFFEE: script column **/
+							.append(" pfi.isDesc, pfi.Script, pfi.Name, pfi.AD_PrintFormatItem_ID, pfi.PrintFormatType ") // 26..30
 							// END
 							.append("FROM AD_PrintFormat pf")
 							.append(" INNER JOIN AD_PrintFormatItem pfi ON (pf.AD_PrintFormat_ID=pfi.AD_PrintFormat_ID)")
@@ -414,7 +417,7 @@ public class DataEngine
 			}
 			else
 			{
-				sql.append(" AND pfi.IsActive='Y' AND (pfi.IsPrinted='Y' OR c.IsKey='Y' OR pfi.SortNo > 0) ")
+				sql.append(" AND pfi.IsActive='Y' AND (pfi.IsPrinted='Y' OR c.IsKey='Y' OR pfi.SortNo > 0 ")
 				.append(" OR EXISTS(select 1 from AD_PrintFormatItem x where x.AD_PrintFormat_ID=pf.AD_PrintFormat_ID and x.DisplayLogic is not null and ")
 				.append("(x.DisplayLogic Like '%@'||c.ColumnName||'@%' OR x.DisplayLogic Like '%@'||c.ColumnName||':%@%' OR x.DisplayLogic Like '%@'||c.ColumnName||'.%@%'))) ");
 			}
@@ -465,7 +468,10 @@ public class DataEngine
 					info.setColumnSQL(rs.getString(24));
 					info.setFormatPattern(rs.getString(25));
 					info.setDesc("Y".equals(rs.getString(26)));
-					info.setPrintFormatItemId(rs.getInt(27));
+					info.setScript(rs.getString(27));
+					info.setPfiName(rs.getString(28));	
+					info.setPrintFormatItemId(rs.getInt(29));
+					info.setPrintFormatType(rs.getString(30));
 
 					processPFColumnInfo(info, tableName, regTranslateTable, IsGroupedBy, sqlSELECT, sqlFROM, groupByColumns, columns, orderAD_Column_IDs, orderColumns);
 
@@ -707,8 +713,8 @@ public class DataEngine
 		boolean isDesc = info.isDesc();
 		// END
 		/** START DEVCOFFEE: script column  **/
-		String script = rs.getString(27);
-		String pfiName = rs.getString(28);
+		String script = info.getScript();
+		String pfiName = info.getPfiName();
 
 		// Fully qualified Table.Column for ordering
 		String orderName = tableName + "." + ColumnName;
@@ -741,7 +747,7 @@ public class DataEngine
 				script = "";
 
 			if (ColumnName == null && script.isEmpty())
-				continue;
+				return;
 
 			sqlSELECT.append(script).append(" AS \"").append(m_synonym).append(pfiName).append("\",")
 			// Warning here: Oracle treats empty strings '' as NULL and the code below checks for wasNull on this column
@@ -848,7 +854,7 @@ public class DataEngine
 		}
 
 		// -- List or Button with ReferenceValue --
-		else if (AD_Reference_ID == DisplayType.List
+		else if (DisplayType.isList(AD_Reference_ID)
 					|| (AD_Reference_ID == DisplayType.Button && AD_Reference_Value_ID != 0))
 		{
 			if (ColumnSQL.length() > 0)
@@ -918,6 +924,7 @@ public class DataEngine
 			}
 			// TableName.ColumnName,
 			sqlSELECT.append(lookupSQL).append(" AS ").append(ColumnName).append(",");
+			groupByColumns.add(lookupSQL); 
 			pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak, SortNo);
 			synonymNext();
 		}
@@ -1149,7 +1156,7 @@ public class DataEngine
 			return;
 
 		pdc.setFormatPattern(formatPattern);
-		pdc.setPrintFormatType(printFormatType);
+		pdc.setPrintFormatType(info.getPrintFormatType());
 		columns.add(pdc);
 	} // processPFColumnInfo
 
@@ -1958,6 +1965,9 @@ class PrintFormatColumnInfo {
     private String columnSQL;
     private String formatPattern;
     private boolean isDesc;
+    private String script;
+    private String pfiName;
+    private String printFormatType;
     private int printFormatItemId;
 
     // Getters and Setters
@@ -2168,4 +2178,28 @@ class PrintFormatColumnInfo {
     public void setPrintFormatItemId(int printFormatItemId) {
         this.printFormatItemId = printFormatItemId;
     }
+
+	public String getScript() {
+		return script;
+	}
+
+	public void setScript(String script) {
+		this.script = script;
+	}
+
+	public String getPfiName() {
+		return pfiName;
+	}
+
+	public void setPfiName(String pfiName) {
+		this.pfiName = pfiName;
+	}
+
+	public String getPrintFormatType() {
+		return printFormatType;
+	}
+
+	public void setPrintFormatType(String printFormatType) {
+		this.printFormatType = printFormatType;
+	}
 }

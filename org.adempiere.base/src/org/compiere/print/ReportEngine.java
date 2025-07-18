@@ -413,8 +413,7 @@ public class ReportEngine implements PrintServiceAttributeListener
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 			String dt = sdf.format(cal.getTime());
 
-			m_name = m_printFormat.get_Translation("Name") + "_" + dt;
- 
+			m_name = (getTranPrintFormat() != null ? getTranPrintFormat().getName() : m_printFormat.get_Translation("Name")) + "_" + dt;
 
 		} else {
 			m_name = FileUtil.parseTitle(m_ctx, processFileNamePattern, m_info.getAD_Table_ID(), m_info.getRecord_ID(), m_windowNo, m_trxName);
