@@ -178,7 +178,10 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 						if (!Util.isEmpty(autoCompleteSearchColumn))
 						{
 							if (!autoCompleteSearchColumn.equals(m_queryColumns.get(i)))
+							{
+								i++;
 								continue;
+							}
 						}
 					}
 					t.setValue(queryValue);
