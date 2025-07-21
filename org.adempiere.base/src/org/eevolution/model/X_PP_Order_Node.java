@@ -21,7 +21,11 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Properties;
-import org.compiere.model.*;
+
+import org.compiere.model.I_Persistent;
+import org.compiere.model.MTable;
+import org.compiere.model.PO;
+import org.compiere.model.POInfo;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
@@ -1199,18 +1203,18 @@ public class X_PP_Order_Node extends PO implements I_PP_Order_Node, I_Persistent
 	}
 
 	/** Set Qty Required.
-		@param QtyRequiered Qty Required
+		@param QtyRequired Qty Required
 	*/
-	public void setQtyRequiered (BigDecimal QtyRequiered)
+	public void setQtyRequired (BigDecimal QtyRequired)
 	{
-		set_Value (COLUMNNAME_QtyRequiered, QtyRequiered);
+		set_Value (COLUMNNAME_QtyRequired, QtyRequired);
 	}
 
 	/** Get Qty Required.
 		@return Qty Required	  */
-	public BigDecimal getQtyRequiered()
+	public BigDecimal getQtyRequired()
 	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyRequiered);
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyRequired);
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
