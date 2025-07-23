@@ -73,12 +73,12 @@ public class ReportAction implements EventListener<Event>
 {
 	private static final CLogger log = CLogger.getCLogger(ReportAction.class);
 	
-	private AbstractADWindowContent panel;
+	protected AbstractADWindowContent panel;
 	
 	private Window winReport = null;
 	private ConfirmPanel confirmPanel = new ConfirmPanel(true);
 	private Listbox cboPrintFormat = new Listbox();
-	private Listbox cboExportType = new Listbox();
+	protected Listbox cboExportType = new Listbox();
 	private Checkbox chkCurrentRowOnly = new Checkbox();
 	private Checkbox chkExport = new Checkbox();
 	private Checkbox chkAllColumns = new Checkbox();
@@ -387,7 +387,7 @@ public class ReportAction implements EventListener<Event>
 		tabPanel.getLinkedTab().setSelected(true);
 	}
 	
-	private void export(ReportEngine re) 
+	protected void export(ReportEngine re) 
 	{
 		try
 		{
