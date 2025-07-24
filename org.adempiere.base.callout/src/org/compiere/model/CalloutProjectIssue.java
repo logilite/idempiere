@@ -33,12 +33,12 @@ public class CalloutProjectIssue extends CalloutEngine
 				{
 					// Set Product, Movement Qty and Locator and Remove Charge if selected
 					mTab.setValue(MProjectIssue.COLUMNNAME_M_Product_ID, inOutLine.getM_Product_ID());
-					mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, 0);
+					mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, null);
 					mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, inOutLine.getMovementQty());
 					mTab.setValue(MProjectIssue.COLUMNNAME_M_Locator_ID, inOutLine.getM_Locator_ID());
 					mTab.setValue(MProjectIssue.COLUMNNAME_M_AttributeSetInstance_ID, inOutLine.getM_AttributeSetInstance_ID());
 					mTab.setValue(MProjectIssue.COLUMNNAME_M_Warehouse_ID, inOutLine.getM_InOut().getM_Warehouse_ID());
-					if(inOutLine.getC_Department_ID()>0)
+					if (inOutLine.getC_Department_ID() > 0)
 						mTab.setValue(MProjectIssue.COLUMNNAME_C_Department_ID, inOutLine.getC_Department_ID());
 					else
 						mTab.setValue(MProjectIssue.COLUMNNAME_C_Department_ID, inOutLine.getM_InOut().getC_Department_ID());
@@ -70,7 +70,7 @@ public class CalloutProjectIssue extends CalloutEngine
 
 				// Set Product, Movement Qty and Locator and Remove Charge if selected
 				mTab.setValue(MProjectIssue.COLUMNNAME_M_Product_ID, expenseLine.getM_Product_ID());
-				mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, 0);
+				mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, null);
 				mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, expenseLine.getQty());
 				mTab.setValue(MProjectIssue.COLUMNNAME_M_Locator_ID, MProjectIssue.getExpenseLineLocator(expenseLine));
 
@@ -103,17 +103,17 @@ public class CalloutProjectIssue extends CalloutEngine
 				if (invLine.getC_Charge_ID() > 0)
 				{
 					// Set Charge, Qty and Amount
-					mTab.setValue(MProjectIssue.COLUMNNAME_M_Product_ID, 0);
+					mTab.setValue(MProjectIssue.COLUMNNAME_M_Product_ID, null);
 					mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, invLine.getC_Charge_ID());
 					mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, invLine.getQtyInvoiced());
 					mTab.setValue(MProjectIssue.COLUMNNAME_Amt, MProjectIssue.getInvLineAmt(invLine));
 					mTab.setValue(MProjectIssue.COLUMNNAME_M_AttributeSetInstance_ID, invLine.getM_AttributeSetInstance_ID());
 
-					if(invLine.getC_Department_ID()>0)
+					if (invLine.getC_Department_ID() > 0)
 						mTab.setValue(MProjectIssue.COLUMNNAME_C_Department_ID, invLine.getC_Department_ID());
 					else
 						mTab.setValue(MProjectIssue.COLUMNNAME_C_Department_ID, invLine.getC_Invoice().getC_Department_ID());
-					
+
 					// Set Description
 					mTab.setValue(MProjectIssue.COLUMNNAME_Description, MProjectIssue.getInvDescription(invLine));
 				}
@@ -131,7 +131,7 @@ public class CalloutProjectIssue extends CalloutEngine
 				MProjectLine projectLine = (MProjectLine) MTable.get(ctx, MProjectLine.Table_ID).getPO((int) value, null);
 				// Set Product, Movement Qty and Amount and Remove Charge if selected
 				mTab.setValue(MProjectIssue.COLUMNNAME_M_Product_ID, projectLine.getM_Product_ID());
-				mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, 0);
+				mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, null);
 				mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, projectLine.getPlannedQty());
 				mTab.setValue(MProjectIssue.COLUMNNAME_Amt, projectLine.getPlannedPrice());
 			}
@@ -147,12 +147,13 @@ public class CalloutProjectIssue extends CalloutEngine
 	 */
 	private void resetValue(GridTab mTab)
 	{
-		mTab.setValue(MProjectIssue.COLUMNNAME_M_Product_ID, 0);
-		mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, 0);
+		mTab.setValue(MProjectIssue.COLUMNNAME_M_Product_ID, null);
+		mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, null);
 		mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, Env.ZERO);
-		mTab.setValue(MProjectIssue.COLUMNNAME_M_Locator_ID, 0);
-		mTab.setValue(MProjectIssue.COLUMNNAME_M_AttributeSetInstance_ID, 0);
+		mTab.setValue(MProjectIssue.COLUMNNAME_M_Locator_ID, null);
+		mTab.setValue(MProjectIssue.COLUMNNAME_M_AttributeSetInstance_ID, null);
 		mTab.setValue(MProjectIssue.COLUMNNAME_Description, null);
-		mTab.setValue(MProjectIssue.COLUMNNAME_Amt, 0);
+		mTab.setValue(MProjectIssue.COLUMNNAME_Amt, null);
+		mTab.setValue(MProjectIssue.COLUMNNAME_C_Department_ID, null);
 	} // resetValue
 }
