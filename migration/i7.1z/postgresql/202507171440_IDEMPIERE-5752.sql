@@ -27,3 +27,6 @@ INSERT INTO AD_Ref_List (AD_Ref_List_ID,Name,AD_Reference_ID,Value,AD_Client_ID,
 INSERT INTO AD_Ref_List (AD_Ref_List_ID,Name,AD_Reference_ID,Value,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,EntityType,AD_Ref_List_UU) VALUES (200731,'Bank Account',200249,'BA',0,0,'Y',TO_TIMESTAMP('2025-07-17 13:35:59','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-07-17 13:35:59','YYYY-MM-DD HH24:MI:SS'),100,'D','914045b2-7581-4fb1-b750-21662b6dca7f')
 ;
 
+
+SELECT register_migration_script('202507171440_IDEMPIERE-5752.sql') FROM dual;
+;
