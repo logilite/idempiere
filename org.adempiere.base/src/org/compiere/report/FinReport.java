@@ -1376,9 +1376,17 @@ public class FinReport extends SvrProcess
 				.append(" AND Col_10 IS NULL AND Col_11 IS NULL AND Col_12 IS NULL AND Col_13 IS NULL AND Col_14 IS NULL AND Col_15 IS NULL AND Col_16 IS NULL AND Col_17 IS NULL AND Col_18 IS NULL AND Col_19 IS NULL AND Col_20 IS NULL"); 
 			int no = DB.executeUpdate(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine("Deleted empty #=" + no);
+
+			// Clean up Dimension Line if empty or 0
+			sql = new StringBuilder("DELETE FROM T_Report WHERE ABS(LevelNo) = 2 ")
+				.append(" AND NVL(Col_0, 0)=0 AND NVL(Col_1, 0)=0 AND NVL(Col_2, 0)=0 AND NVL(Col_3, 0)=0 AND NVL(Col_4, 0)=0 AND NVL(Col_5, 0)=0 AND NVL(Col_6, 0)=0 AND NVL(Col_7, 0)=0 AND NVL(Col_8, 0)=0 AND NVL(Col_9, 0)=0 ")
+				.append(" AND NVL(Col_10,0)=0 AND NVL(Col_11,0)=0 AND NVL(Col_12,0)=0 AND NVL(Col_13,0)=0 AND NVL(Col_14,0)=0 AND NVL(Col_15,0)=0 AND NVL(Col_16,0)=0 AND NVL(Col_17,0)=0 AND NVL(Col_18,0)=0 AND NVL(Col_19,0)=0 AND NVL(Col_20,0)=0 ");
+			no = DB.executeUpdate(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE))
+				log.fine("Deleted Dimension Line empty/0 #=" + no);
 		}
 		//
-		
+
 		//	Set SeqNo
 		StringBuilder sql = new StringBuilder ("UPDATE T_Report r1 "
 			+ "SET SeqNo = (SELECT SeqNo "
