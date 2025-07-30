@@ -606,4 +606,12 @@ public interface I_C_DocType
 	  */
 	public boolean isOverrideDocControl();
 
+   /** Column name isZeroQtyIgnored */
+   public static final String COLUMNNAME_isZeroQtyIgnored = "isZeroQtyIgnored";
+
+	/** Set Zero Qty Ignored	  */
+	public void setisZeroQtyIgnored (boolean isZeroQtyIgnored);
+
+	/** Get Zero Qty Ignored	  */
+	public boolean isZeroQtyIgnored();
 }

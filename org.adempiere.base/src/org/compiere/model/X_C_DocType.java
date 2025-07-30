@@ -1182,4 +1182,25 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 		return false;
 	}
 
+	/** Set Zero Qty Ignored.
+		@param isZeroQtyIgnored Zero Qty Ignored
+	 */
+	public void setisZeroQtyIgnored (boolean isZeroQtyIgnored)
+	{
+		set_Value (COLUMNNAME_isZeroQtyIgnored, Boolean.valueOf(isZeroQtyIgnored));
+	}
+
+	/** Get Zero Qty Ignored.
+		@return Zero Qty Ignored	  */
+	public boolean isZeroQtyIgnored()
+	{
+		Object oo = get_Value(COLUMNNAME_isZeroQtyIgnored);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
 }
