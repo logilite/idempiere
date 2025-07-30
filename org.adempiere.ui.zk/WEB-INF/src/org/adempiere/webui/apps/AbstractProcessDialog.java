@@ -661,8 +661,8 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 
 			if (valCode.length() > 0)
 				valCode.append(" AND ");
-			valCode.append(" (CreatedBy = @#AD_User_ID:0@ ");
-			valCode.append("	OR AD_PrintFormat_ID IN (SELECT DISTINCT AD_PrintFormat_ID FROM AD_PrintFormat_Access 	");
+			valCode.append(" (AD_PrintFormat.CreatedBy = @#AD_User_ID:0@ ");
+			valCode.append("	OR AD_PrintFormat.AD_PrintFormat_ID IN (SELECT DISTINCT AD_PrintFormat_ID FROM AD_PrintFormat_Access 	");
 			valCode.append("		WHERE ((AD_User_ID IS NULL AND AD_Role_ID = @#AD_Role_ID:0@) OR (AD_Role_ID IS NULL AND AD_User_ID = @#AD_User_ID:0@)	");
 			valCode.append("	OR (AD_Role_ID = @#AD_Role_ID:0@ AND AD_User_ID = @#AD_User_ID:0@)))	");
 			valCode.append("	OR NOT EXISTS (SELECT DISTINCT AD_PrintFormat_ID FROM AD_PrintFormat_Access WHERE AD_PrintFormat_ID= AD_PrintFormat.AD_PrintFormat_ID))	");
