@@ -22,7 +22,9 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -107,6 +109,26 @@ public class MReportLine extends X_PA_ReportLine
 	private MReportSource[]		m_sources = null;
 	/** Cache result					*/
 	private String				m_whereClause = null;
+
+	// Preload all dimension metadata
+	private static final Map<String, DimensionMeta>	dimensionMap	= new HashMap<>();
+	static {
+		dimensionMap.put(DIMENSIONGROUP_Organization, new DimensionMeta("AD_Org", null, false, "Name", "Value"));
+		dimensionMap.put(DIMENSIONGROUP_BusinessPartner, new DimensionMeta("C_BPartner", null, false, "Name", "Value"));
+		dimensionMap.put(DIMENSIONGROUP_Employee, new DimensionMeta("C_BPartner", null, false, "Name", "Value"));
+		dimensionMap.put(DIMENSIONGROUP_Product, new DimensionMeta("M_Product", "M_Product_Trl", true, "Name", "Value"));
+		dimensionMap.put(DIMENSIONGROUP_Activity, new DimensionMeta("C_Activity", "C_Activity_Trl", true, "Name", "Value"));
+		dimensionMap.put(DIMENSIONGROUP_Campaign, new DimensionMeta("C_Campaign", "C_Campaign_Trl", true, "Name", "Value"));
+		dimensionMap.put(DIMENSIONGROUP_Project, new DimensionMeta("C_Project", null, false, "Name", "Value"));
+		dimensionMap.put(DIMENSIONGROUP_SalesRegion, new DimensionMeta("C_SalesRegion", "C_SalesRegion_Trl", true, "Name", "Value"));
+		dimensionMap.put(DIMENSIONGROUP_Charge, new DimensionMeta("C_Charge", null, false, "Name", null));
+		dimensionMap.put(DIMENSIONGROUP_Warehouse, new DimensionMeta("M_Warehouse", null, false, "Name", "Value"));
+		dimensionMap.put(DIMENSIONGROUP_Department, new DimensionMeta("C_Department", null, false, "Name", "Value"));
+		dimensionMap.put(DIMENSIONGROUP_CostCenter, new DimensionMeta("C_CostCenter", null, false, "Name", "Value"));
+		dimensionMap.put(DIMENSIONGROUP_Tax, new DimensionMeta("C_Tax", null, false, "Name", null));
+		dimensionMap.put(DIMENSIONGROUP_BankAccount, new DimensionMeta("C_BankAccount", null, false, "Name", "Value"));
+	}
+
 
 	/**
 	 * 	Load contained Sources
@@ -618,67 +640,76 @@ public class MReportLine extends X_PA_ReportLine
 	} //
 
 	/**
-	 * Get Value Query for Dimension Group
-	 * 
-	 * @param  dimensionGroup Dimension Group
-	 * @return                query "SELECT Name FROM Table WHERE ID=" or "" if not found
+	 * Builds an SQL query to fetch the display name for a given dimension group.
+	 * Handles translations and value formatting based on metadata configuration.
+	 *
+	 * @param  dimensionGroup the identifier for the dimension group
+	 * @return                the SQL query string or an empty string if invalid
 	 */
 	public static String getDimensionGroupQuery(String dimensionGroup)
 	{
 		String baseLanguage = Language.getBaseAD_Language();
 		String language = Language.getLoginLanguage().getAD_Language();
 		boolean translated = Env.isMultiLingualDocument(Env.getCtx()) && !language.equalsIgnoreCase(baseLanguage);
-		if (dimensionGroup.equals(DIMENSIONGROUP_Organization))
+	
+		DimensionMeta meta = dimensionMap.get(dimensionGroup);
+		if (meta == null || Util.isEmpty(meta.table) || Util.isEmpty(meta.nameColumn))
 		{
-			return "SELECT CASE WHEN Value IS NOT NULL THEN Name || ' ( ' || Value || ' )' ELSE Name END AS DisplayName FROM AD_Org WHERE AD_Org_ID=";
+			return "";
 		}
-		else if (dimensionGroup.equals(DIMENSIONGROUP_BusinessPartner))
+	
+		String idColumn = getDimensionColumnName(dimensionGroup);
+		if (idColumn == null || idColumn.isEmpty())
 		{
-			return "SELECT CASE WHEN Value IS NOT NULL THEN Name || ' ( ' || Value || ' )' ELSE Name END AS DisplayName FROM C_BPartner WHERE C_BPartner_ID=";
+			return "";
 		}
-		else if (dimensionGroup.equals(DIMENSIONGROUP_Product))
+	
+		StringBuilder sql = new StringBuilder();
+	
+		if (Util.isEmpty(meta.valueColumn))
 		{
-			if (translated)
-				return "SELECT CASE WHEN o.Value IS NOT NULL THEN t.Name || ' ( ' || o.Value || ' )' ELSE t.Name END AS DisplayName FROM M_Product o JOIN M_Product_Trl t ON (o.M_Product_ID=t.M_Product_ID AND t.AD_Language="
-						+ DB.TO_STRING(language)
-							+ ") WHERE o.M_Product_ID=";
+			if (meta.translatable && translated && !Util.isEmpty(meta.trlTable))
+			{
+				sql.append("SELECT t.").append(meta.nameColumn).append(" ")
+				   .append("FROM ").append(meta.table).append(" o ")
+				   .append("JOIN ").append(meta.trlTable).append(" t ON (o.")
+				   .append(idColumn).append(" = t.").append(idColumn).append(" ")
+				   .append("AND t.AD_Language = ").append(DB.TO_STRING(language)).append(") ")
+				   .append("WHERE o.").append(idColumn).append(" = ");
+			}
 			else
-				return "SELECT CASE WHEN Value IS NOT NULL THEN Name || ' ( ' || Value || ' )' ELSE Name END AS DisplayName FROM M_Product WHERE M_Product_ID=";
+			{
+				sql.append("SELECT ")
+				   .append(meta.nameColumn).append(" ")
+				   .append("FROM ").append(meta.table).append(" ")
+				   .append("WHERE ").append(idColumn).append(" = ");
+			}
 		}
-		else if (dimensionGroup.equals(DIMENSIONGROUP_Activity))
+		else if (meta.translatable && translated && !Util.isEmpty(meta.trlTable))
 		{
-			if (translated)
-				return "SELECT CASE WHEN o.Value IS NOT NULL THEN t.Name || ' ( ' || o.Value || ' )' ELSE t.Name END AS DisplayName FROM C_Activity o JOIN C_Activity_Trl t ON (o.C_Activity_ID=t.C_Activity_ID AND t.AD_Language="
-						+ DB.TO_STRING(language)
-							+ ") WHERE o.C_Activity_ID=";
-			else
-				return "SELECT CASE WHEN Value IS NOT NULL THEN Name || ' ( ' || Value || ' )' ELSE Name END AS DisplayName FROM C_Activity WHERE C_Activity_ID=";
+			sql.append("SELECT CASE WHEN o.").append(meta.valueColumn).append(" IS NOT NULL THEN ")
+			   .append("t.").append(meta.nameColumn).append(" || ' ( ' || o.")
+			   .append(meta.valueColumn).append(" || ' )' ELSE t.")
+			   .append(meta.nameColumn).append(" END AS DisplayName ")
+			   .append("FROM ").append(meta.table).append(" o ")
+			   .append("JOIN ").append(meta.trlTable).append(" t ON (o.")
+			   .append(idColumn).append(" = t.").append(idColumn)
+			   .append(" AND t.AD_Language = ").append(DB.TO_STRING(language)).append(") ")
+			   .append("WHERE o.").append(idColumn).append(" = ");
 		}
-		else if (dimensionGroup.equals(DIMENSIONGROUP_Campaign))
+		else
 		{
-			if (translated)
-				return "SELECT CASE WHEN o.Value IS NOT NULL THEN t.Name || ' ( ' || o.Value || ' )' ELSE t.Name END AS DisplayName FROM C_Campaign o JOIN C_Campaign_Trl t ON (o.C_Campaign_ID=t.C_Campaign_ID AND t.AD_Language="
-						+ DB.TO_STRING(language)
-							+ ") WHERE o.C_Campaign_ID=";
-			else
-				return "SELECT CASE WHEN Value IS NOT NULL THEN Name || ' ( ' || Value || ' )' ELSE Name END AS DisplayName FROM C_Campaign WHERE C_Campaign_ID=";
+			sql.append("SELECT CASE WHEN ")
+			   .append(meta.valueColumn).append(" IS NOT NULL THEN ")
+			   .append(meta.nameColumn).append(" || ' ( ' || ")
+			   .append(meta.valueColumn).append(" || ' )' ELSE ")
+			   .append(meta.nameColumn).append(" END AS DisplayName ")
+			   .append("FROM ").append(meta.table).append(" ")
+			   .append("WHERE ").append(idColumn).append(" = ");
 		}
-		else if (dimensionGroup.equals(DIMENSIONGROUP_Project))
-		{
-			return "SELECT CASE WHEN Value IS NOT NULL THEN Name || ' ( ' || Value || ' )' ELSE Name END AS DisplayName FROM C_Project WHERE C_Project_ID=";
-		}
-		else if (dimensionGroup.equals(DIMENSIONGROUP_SalesRegion))
-		{
-			if (translated)
-				return "SELECT CASE WHEN o.Value IS NOT NULL THEN t.Name || ' ( ' || o.Value || ' )' ELSE t.Name END AS DisplayName FROM C_SalesRegion o JOIN C_SalesRegion_Trl t ON (o.C_SalesRegion_ID=t.C_SalesRegion_ID AND t.AD_Language="
-						+ DB.TO_STRING(language)
-							+ ") WHERE o.C_SalesRegion_ID=";
-			else
-				return "SELECT CASE WHEN Value IS NOT NULL THEN Name || ' ( ' || Value || ' )' ELSE Name END AS DisplayName FROM C_SalesRegion WHERE C_SalesRegion_ID=";
-		}
-		//
-		return "";
-	} // getValueQuery
+	
+		return sql.toString();
+	}
 
 	/**
 	 * @param  srcLine
@@ -751,6 +782,22 @@ public class MReportLine extends X_PA_ReportLine
 			return I_C_AcctSchema_Element.COLUMNNAME_C_Project_ID;
 		else if (elementType.equals(DIMENSIONGROUP_SalesRegion))
 			return I_C_AcctSchema_Element.COLUMNNAME_C_SalesRegion_ID;
+		else if (elementType.equals(DIMENSIONGROUP_Charge))
+			return I_C_AcctSchema_Element.COLUMNNAME_C_Charge_ID;
+		else if (elementType.equals(DIMENSIONGROUP_Warehouse))
+			return I_C_AcctSchema_Element.COLUMNNAME_M_Warehouse_ID;
+		else if (elementType.equals(DIMENSIONGROUP_Employee))
+			return I_C_AcctSchema_Element.COLUMNNAME_C_Employee_ID;
+		else if (elementType.equals(DIMENSIONGROUP_Department))
+			return I_C_AcctSchema_Element.COLUMNNAME_C_Department_ID;
+		else if (elementType.equals(DIMENSIONGROUP_CostCenter))
+			return I_C_AcctSchema_Element.COLUMNNAME_C_CostCenter_ID;
+		else if (elementType.equals(DIMENSIONGROUP_Tax))
+			return "C_Tax_ID";
+		else if (elementType.equals(DIMENSIONGROUP_BankAccount))
+			return "C_BankAccount_ID";
+		
+		
 		return "";
 	} // getDimensionColumnName
 	
@@ -853,5 +900,23 @@ public class MReportLine extends X_PA_ReportLine
 	{
 		return combinationGroupBy;
 	} // getCombinationGroupByColumns
+	
+	private static class DimensionMeta
+	{
+		String	table;
+		String	trlTable;		// can be null
+		boolean	translatable;
+		String	nameColumn;
+		String	valueColumn;
+
+		public DimensionMeta(String table, String trlTable, boolean translatable, String nameColumn, String valueColumn)
+		{
+			this.table = table;
+			this.trlTable = trlTable;
+			this.translatable = translatable;
+			this.nameColumn = nameColumn;
+			this.valueColumn = valueColumn;
+		}
+	}
 
 }	//	MReportLine

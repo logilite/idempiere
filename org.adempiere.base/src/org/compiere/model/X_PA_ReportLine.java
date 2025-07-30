@@ -33,7 +33,7 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20231222L;
+	private static final long serialVersionUID = 20250717L;
 
     /** Standard Constructor */
     public X_PA_ReportLine (Properties ctx, int PA_ReportLine_ID, String trxName)
@@ -197,6 +197,20 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 	public static final String DIMENSIONGROUP_Activity = "AY";
 	/** Business Partner = BP */
 	public static final String DIMENSIONGROUP_BusinessPartner = "BP";
+	/** Charge = CH */
+	public static final String DIMENSIONGROUP_Charge = "CH";
+	/** Warehouse = WH */
+	public static final String DIMENSIONGROUP_Warehouse = "WH";
+	/** Employee = EP */
+	public static final String DIMENSIONGROUP_Employee = "EP";
+	/** Department = DP */
+	public static final String DIMENSIONGROUP_Department = "DP";
+	/** Cost Center = CC */
+	public static final String DIMENSIONGROUP_CostCenter = "CC";
+	/** Tax = TX */
+	public static final String DIMENSIONGROUP_Tax = "TX";
+	/** Bank Account = BA */
+	public static final String DIMENSIONGROUP_BankAccount = "BA";
 	/** Set Dimension Group.
 		@param DimensionGroup 
 		Dimension Group for report line and source.
