@@ -854,8 +854,9 @@ public class DataEngine
 		}
 
 		// -- List or Button with ReferenceValue --
-		else if (DisplayType.isList(AD_Reference_ID)
-					|| (AD_Reference_ID == DisplayType.Button && AD_Reference_Value_ID != 0))
+		// -- Multi-Select reference handled separately --
+		else if ((DisplayType.isList(AD_Reference_ID) && !DisplayType.isMultiSelect(AD_Reference_ID))
+				|| (AD_Reference_ID == DisplayType.Button && AD_Reference_Value_ID != 0))
 		{
 			if (ColumnSQL.length() > 0)
 			{
