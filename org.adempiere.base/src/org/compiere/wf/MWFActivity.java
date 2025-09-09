@@ -710,6 +710,103 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		//
 		setAD_User_ID(AD_User_ID);
 	}	//	setResponsible
+	
+	@Override
+	protected boolean afterSave(boolean newRecord, boolean success)
+	{
+		boolean save = super.afterSave(newRecord, success);
+		if (save && newRecord)
+		{
+			// Responsible ID for the client is already set.
+			MWFResponsible resp = getResponsible();
+			
+			if (getAD_User_ID() == 0
+				&& resp != null
+					&& resp.isManual()
+					&& MWFActivityApprover.getOfActivity(p_ctx, getAD_WF_Activity_ID(), get_TrxName()).length == 0
+					&& !Util.isEmpty(resp.getSelectClause(), true))
+			{
+				List <Integer> userIDs;
+				userIDs = getApproverUserIDs(getPO(), resp.getSelectClause(), resp.getFromClause());
+
+				for (Integer userId : userIDs)
+				{
+					if (userId == null || userId == 0)
+						continue; // skip invalid users
+
+					MWFActivityApprover approver = new MWFActivityApprover(p_ctx, 0, get_TrxName());
+					approver.setAD_WF_Activity_ID(getAD_WF_Activity_ID());
+					approver.setAD_User_ID(userId);
+					approver.saveEx();
+				}
+			}
+		}
+		return save;
+	}
+	
+	public List <Integer> getApproverUserIDs(PO po, String selectClause, String fromClause)
+	{
+		List <Integer> results = new ArrayList <>();
+		String tableName = po.get_TableName();
+		String keyColumn = po.get_KeyColumns()[0]; // usually <TableName>_ID
+		int recordId = po.get_ID();
+
+		StringBuilder sql = new StringBuilder("SELECT ").append(selectClause).append(" FROM ");
+
+		if (fromClause == null || fromClause.isBlank())
+		{
+			// No fromClause → just use table name
+			sql.append(tableName);
+		}
+		else
+		{
+			if (fromClause.toLowerCase().startsWith("from "))
+				fromClause = fromClause.substring(4).trim(); // remove "FROM"
+			// Normalize spacing/case for matching
+			String normalized = fromClause.replaceAll("\\s+", " ").toLowerCase();
+			String tableLower = tableName.toLowerCase();
+
+			// Case 1: fromClause already starts with table/alias
+			if (normalized.startsWith(tableLower) || normalized.startsWith(tableLower + " "))
+				sql.append(fromClause);
+			else
+				sql.append(tableName).append(" ").append(fromClause);
+		}
+
+		// Decide whether to prepend WHERE or AND
+		String lowerFrom = (fromClause == null) ? "" : fromClause.toLowerCase();
+		if (lowerFrom.contains("where"))
+			sql.append(" AND ");
+		else
+			sql.append(" WHERE ");
+
+		// This stays outside
+		sql.append(keyColumn).append("=?");
+
+		try (PreparedStatement pstmt = DB.prepareStatement(sql.toString(), null))
+		{
+			pstmt.setInt(1, recordId);
+
+			try (ResultSet rs = pstmt.executeQuery())
+			{
+				while (rs.next())
+				{
+					results.add(rs.getInt(1));
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			String errorMsg = Msg.getMsg(Env.getAD_Language(getCtx()), "Invalid") + e.getLocalizedMessage();
+			if (m_process != null)
+				m_process.setProcessMsg(BaseUtil.cleanMessage(errorMsg));
+			log.log(Level.SEVERE, "Invalid Query STATEMENT = " + sql.toString(), e);
+			log.log(Level.SEVERE, "Invalid Query ERROR = " + e.getMessage(), e);
+			throw new AdempiereException(errorMsg, e);
+		}
+
+		return results;
+	}
 
 	/**
 	 * 	Get workflow Responsible
@@ -717,8 +814,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	 */
 	public MWFResponsible getResponsible()
 	{
-		MWFResponsible resp = MWFResponsible.getCopy(getCtx(), getAD_WF_Responsible_ID(), get_TrxName());
-		return resp;
+		return  MWFResponsible.getCopy(getCtx(), getAD_WF_Responsible_ID(), get_TrxName());
 	}	//	isInvoker
 
 	/**
@@ -1447,7 +1543,6 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 					}
 					else if (resp.isManual())
 					{
-
 						MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(getCtx(),
 								getAD_WF_Activity_ID(), get_TrxName());
 						for (int i = 0; i < approvers.length; i++)
@@ -1586,45 +1681,49 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 						}
 						else if (resp.isManual())
 						{
-							// Invoke WF Approver Factory
-							List<IWFActivityForwardFactory> factoryList = Service.locator()
-									.list(IWFActivityForwardFactory.class).getServices();
-
-							if (factoryList != null)
+							MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(getCtx(), getAD_WF_Activity_ID(), get_TrxName());
+							boolean isApproverSet = approvers.length > 0;
+							if(!isApproverSet)
 							{
-								IWFActivityForwardDlg forwardDlg = null;
-								for (IWFActivityForwardFactory factory : factoryList)
-								{
-									forwardDlg = factory.getWFActivityForwardDlg();
-									if (forwardDlg != null)
-										break;
+								// Invoke WF Approver Factory
+								List <IWFActivityForwardFactory> factoryList = Service.locator().list(IWFActivityForwardFactory.class).getServices();
 
-								}
-								if (forwardDlg != null)
+								if (factoryList != null)
 								{
-									forwardDlg.AskApprover();
-									int userId = forwardDlg.getActivityApprover();
-									if (userId == -1)
+									IWFActivityForwardDlg forwardDlg = null;
+									for (IWFActivityForwardFactory factory : factoryList)
 									{
-										throw new AdempiereException("Cancelled");
+										forwardDlg = factory.getWFActivityForwardDlg();
+										if (forwardDlg != null)
+											break;
+
 									}
-									if (userId > 0)
+									if (forwardDlg != null)
 									{
-										String msg = forwardDlg.getMsg();
-										if (!forwardTo(userId, msg))
+										forwardDlg.AskApprover();
+										int userId = forwardDlg.getActivityApprover();
+										if (userId == -1)
 										{
+											throw new AdempiereException("Cancelled");
+										}
+										if (userId > 0)
+										{
+											String msg = forwardDlg.getMsg();
+											if (!forwardTo(userId, msg))
+											{
 
-											throw new AdempiereException("CannotForward");
+												throw new AdempiereException("CannotForward");
+											}
+										}
+										else
+										{
+											throw new AdempiereException("ApproverNotSet");
 										}
 									}
 									else
 									{
-										throw new AdempiereException("ApproverNotSet");
+										throw new AdempiereException("CantShowApproveDialog");
 									}
-								}
-								else
-								{
-									throw new AdempiereException("CantShowApproveDialog");
 								}
 							}
 

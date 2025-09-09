@@ -31,7 +31,7 @@ public class X_AD_WF_Responsible extends PO implements I_AD_WF_Responsible, I_Pe
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20231222L;
+	private static final long serialVersionUID = 20250903L;
 
     /** Standard Constructor */
     public X_AD_WF_Responsible (Properties ctx, int AD_WF_Responsible_ID, String trxName)
@@ -249,6 +249,22 @@ public class X_AD_WF_Responsible extends PO implements I_AD_WF_Responsible, I_Pe
 		return (String)get_Value(COLUMNNAME_EntityType);
 	}
 
+	/** Set Sql FROM.
+		@param FromClause SQL FROM clause
+	*/
+	public void setFromClause (String FromClause)
+	{
+		set_Value (COLUMNNAME_FromClause, FromClause);
+	}
+
+	/** Get Sql FROM.
+		@return SQL FROM clause
+	  */
+	public String getFromClause()
+	{
+		return (String)get_Value(COLUMNNAME_FromClause);
+	}
+
 	/** Set Name.
 		@param Name Alphanumeric identifier of the entity
 	*/
@@ -330,4 +346,21 @@ public class X_AD_WF_Responsible extends PO implements I_AD_WF_Responsible, I_Pe
 	{
 		return (String)get_Value(COLUMNNAME_ResponsibleType);
 	}
+
+	/** Set Sql SELECT.
+		@param SelectClause SQL SELECT clause
+	*/
+	public void setSelectClause (String SelectClause)
+	{
+		set_Value (COLUMNNAME_SelectClause, SelectClause);
+	}
+
+	/** Get Sql SELECT.
+		@return SQL SELECT clause
+	  */
+	public String getSelectClause()
+	{
+		return (String)get_Value(COLUMNNAME_SelectClause);
+	}
+
 }

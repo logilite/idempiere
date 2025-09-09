@@ -158,6 +158,19 @@ public interface I_AD_WF_Responsible
 	  */
 	public String getEntityType();
 
+    /** Column name FromClause */
+    public static final String COLUMNNAME_FromClause = "FromClause";
+
+	/** Set Sql FROM.
+	  * SQL FROM clause
+	  */
+	public void setFromClause (String FromClause);
+
+	/** Get Sql FROM.
+	  * SQL FROM clause
+	  */
+	public String getFromClause();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -207,6 +220,19 @@ public interface I_AD_WF_Responsible
 	  * Type of the Responsibility for a workflow
 	  */
 	public String getResponsibleType();
+
+    /** Column name SelectClause */
+    public static final String COLUMNNAME_SelectClause = "SelectClause";
+
+	/** Set Sql SELECT.
+	  * SQL SELECT clause
+	  */
+	public void setSelectClause (String SelectClause);
+
+	/** Get Sql SELECT.
+	  * SQL SELECT clause
+	  */
+	public String getSelectClause();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

@@ -19,9 +19,11 @@ package org.adempiere.webui.panel;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.Callback;
@@ -54,6 +56,7 @@ import org.compiere.model.MLookupFactory;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MRefList;
 import org.compiere.model.MTable;
+import org.compiere.model.MWFActivityApprover;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
@@ -186,6 +189,12 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			else if (resp.isHuman())
 			{
 				msg.append(resp.getAD_User().getName());
+			}
+			else if (resp.isManual())
+			{
+				MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(m_activity.getCtx(), m_activity.getAD_WF_Activity_ID(), m_activity.get_TrxName());
+				String approverNames = Arrays.stream(approvers).map(a -> a.getAD_User().getName()).collect(Collectors.joining(", "));
+				msg.append(approverNames);
 			}
 			else
 			{
@@ -911,7 +920,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			if (MWFResponsible.RESPONSIBLETYPE_Manual.equals(respType))
 			{
 				// If Approver is not assign then check current user is invoker
-				if (m_activity.getAD_User_ID() <= 0 && m_WFProcess.getAD_User_ID() != m_AD_User_ID)
+				MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(m_activity.getCtx(), m_activity.getAD_WF_Activity_ID(), m_activity.get_TrxName());
+				if ((approvers == null || approvers.length == 0) && m_activity.getAD_User_ID() <= 0 && m_WFProcess.getAD_User_ID() != m_AD_User_ID)
 				{
 					return false;
 				}
@@ -920,6 +930,20 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				if (m_activity.getAD_User_ID() > 0 && m_AD_User_ID != m_activity.getAD_User_ID())
 				{
 					return false;
+				}
+				
+				if (approvers != null && approvers.length > 0)
+				{
+					boolean isApprover = false;
+					for (int i = 0; i < approvers.length; i++)
+					{
+						if (approvers[i].getAD_User_ID() == Env.getAD_User_ID(m_activity.getCtx()))
+						{
+							isApprover = true;
+							break;
+						}
+					}
+					return isApprover;
 				}
 
 				return true;

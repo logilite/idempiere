@@ -14,7 +14,7 @@ import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.util.DisplayType;
@@ -38,8 +38,9 @@ public class WFApproverWindow extends Window implements EventListener<Event>,IWF
 	/** Window No */
 	private int					m_WindowNo			= 0;
 
-	private static final String MESSAGE_PANEL_STYLE = "text-align:left; word-break: break-all; overflow: auto; min-width: 230pt; max-width: 450pt;";	
-	private static final String SMALLER_MESSAGE_PANEL_STYLE = "text-align:left; word-break: break-all; max-height: 350pt; min-width: 180pt; ";
+	private static final String	MESSAGE_PANEL_STYLE			= "text-align:left; word-break: break-all; overflow: auto; min-width: 230pt; max-width: 450pt;";
+	private static final String	SMALLER_MESSAGE_PANEL_STYLE	= "text-align:left; word-break: break-all; max-height: 350pt; min-width: 180pt; ";
+	private static final String	EVENT_onTimeOut				= "onTimeOut";
 	
 	private WSearchEditor		fApprover			= null;
 	private Label				lblAssignTo;
@@ -68,6 +69,7 @@ public class WFApproverWindow extends Window implements EventListener<Event>,IWF
 		this.setStyle("position: absolute;");
 		this.setSclass("popup-dialog");
 		this.setClosable(false);
+		addEventListener(EVENT_onTimeOut, this);
 
 		// Set widget attribute
 		setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "Approver Dialog");
@@ -154,7 +156,7 @@ public class WFApproverWindow extends Window implements EventListener<Event>,IWF
 	            if (fApprover.getValue() == null)
 	            {
 	                // Show an error message and stop processing
-	                FDialog.error(0, this.getParent(), "The 'Assign To' field is mandatory. Please select an assignee.");
+	                Dialog.error(0, "The 'Assign To' field is mandatory. Please select an assignee.");
 	                return;
 	            }
 				
@@ -167,6 +169,10 @@ public class WFApproverWindow extends Window implements EventListener<Event>,IWF
 				isCancelled = true;
 				this.detach();
 			}
+		}
+		else if (EVENT_onTimeOut.equals(event.getName()))
+		{
+			this.detach();
 		}
 	}
 
@@ -209,8 +215,9 @@ public class WFApproverWindow extends Window implements EventListener<Event>,IWF
 			while (m_AD_User_ID <= 0 && !isCancelled)
 			{
 				Thread.sleep(500);
-				if((new Date().getTime()-time)>300000) {
-					this.detach();
+				if ((new Date().getTime() - time) > 30000)
+				{
+					AEnv.executeAsyncDesktopTask(( ) -> Events.sendEvent(EVENT_onTimeOut, this, null));
 					break;
 				}
 			}
