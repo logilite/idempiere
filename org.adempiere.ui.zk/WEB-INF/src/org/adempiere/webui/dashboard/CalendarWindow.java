@@ -96,8 +96,11 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 	 * generated serial id
 	 */
 	private static final long serialVersionUID = 1576992746053720647L;
-	private static final String ON_MOBILE_SET_SELECTED_TAB_ECHO = "onMobileSetSelectedTabEcho";
+
 	private static CLogger log = CLogger.getCLogger(CalendarWindow.class);
+
+	private static final String ON_MOBILE_SET_SELECTED_TAB_ECHO = "onMobileSetSelectedTabEcho";
+	private static final String ON_DAY_CLICK_EVENT = "onDayClick";
 	private static final String ON_MOVE_DATE_EVENT = "onMoveDate";
 	private static final String ON_UPDATE_VIEW_EVENT = "onUpdateView";
 	private static final String ON_MOUSE_OVER_EVENT = "onMouseOver";
@@ -320,6 +323,7 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 		calendars.addEventListener(ON_EVENT_EDIT_EVENT, this);
 		calendars.addEventListener(ON_EVENT_UPDATE_EVENT, this);
 		calendars.addEventListener(ON_MOUSE_OVER_EVENT, this);
+		calendars.addEventListener(ON_DAY_CLICK_EVENT, this);
 
 		if (ClientInfo.isMobile()) {
 			addCallback(AFTER_PAGE_ATTACHED, t -> afterPageAttached());
@@ -440,16 +444,25 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 			{
 				renderCalenderEvent();
 			}
+		}
+		else if (type.equals(ON_EVENT_CREATE_EVENT) && !Env.isReadOnlySession()) {
+			if (e instanceof CalendarsEvent) {
+				CalendarsEvent calendarsEvent = (CalendarsEvent) e;
+				RequestWindow requestWin = new RequestWindow(calendarsEvent, this);
+				SessionManager.getAppDesktop().showWindow(requestWin);
+			}
 			else if (e.getTarget() == lbxResources)
 			{
 				renderCalenderEvent();
 			}
 		}
-		else if (type.equals(ON_EVENT_CREATE_EVENT) && !Env.isReadOnlySession()) {
-			CalendarsEvent calendarsEvent = (CalendarsEvent) e;
-			DecisionWindow decisionWin = new DecisionWindow(calendarsEvent, this);
-			SessionManager.getAppDesktop().showWindow(decisionWin);
-		}	
+		else if (type.equals(ON_DAY_CLICK_EVENT) && ! Env.isReadOnlySession()) {
+			if (e.getData() instanceof Date date) {
+				CalendarsEvent calendarsEvent = new CalendarsEvent(ON_EVENT_CREATE_EVENT, e.getTarget(), null, date, date, 0, 0, 0, 0);
+				RequestWindow requestWin = new RequestWindow(calendarsEvent, this);
+				SessionManager.getAppDesktop().showWindow(requestWin);
+			}
+		}
 		else if (type.equals(ON_EVENT_EDIT_EVENT)) {
 			if (e instanceof CalendarsEvent) {
 				CalendarsEvent calendarsEvent = (CalendarsEvent) e;

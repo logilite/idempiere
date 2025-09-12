@@ -124,7 +124,7 @@ public class TableAttributeElementHandler extends GenericPOElementHandler
 			m_tableName = Env.getContext(packout.getCtx().ctx, "Table_Name");
 		int tableId = MTable.get(packout.getCtx().ctx, m_tableName).getAD_Table_ID();
 		StringBuilder sql = new StringBuilder("SELECT * FROM AD_TableAttribute WHERE AD_Table_ID = ").append(tableId)
-					.append(" AND Record_ID = ").append(recordId);
+				.append(" AND Record_ID = ").append(recordId);
 		packout.getCtx().ctx.put(DataElementParameters.SQL_STATEMENT, sql.toString());
 		this.create(packout.getCtx(), packoutHandler);
 		packout.getCtx().ctx.remove(DataElementParameters.SQL_STATEMENT);

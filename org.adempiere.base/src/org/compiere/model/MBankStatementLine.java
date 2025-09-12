@@ -176,11 +176,6 @@ import org.compiere.util.Util;
 		}
 	}	//	addDescription
 	
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
 	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
@@ -196,9 +191,9 @@ import org.compiere.util.Util;
 				return false;				
 			}
 		}
-
+		
 		if (getC_Payment_ID() != 0 && getC_DepositBatch_ID() != 0) {
-			log.saveError("SaveError", Msg.translate(getCtx(), "NotSetBothValue_Payment_And_DepositBatch"));
+			log.saveError("SaveError", Msg.translate(getCtx(), "EitherPaymentOrDepositBatch"));
 			return false;
 		}
 		
@@ -207,19 +202,19 @@ import org.compiere.util.Util;
 			return false;
 		}
 
-		//	Calculate Charge = Statement - trx - Interest  
+		//	Calculate Charge = Statement - Trx - Interest  
 		BigDecimal amt = getStmtAmt();
 		amt = amt.subtract(getTrxAmt());
 		amt = amt.subtract(getInterestAmt());
 		if (amt.compareTo(getChargeAmt()) != 0)
 			setChargeAmt (amt);
-		//
+		// Charge is mandatory if charge amount is not zero
 		if (getChargeAmt().signum() != 0 && getC_Charge_ID() == 0)
 		{
 			log.saveError("FillMandatory", Msg.getElement(getCtx(), "C_Charge_ID"));
 			return false;
 		}
-		// Un-link Payment if TrxAmt is zero - teo_sarca BF [ 1896880 ] 
+		// Reset Payment and Invoice field to 0 if TrxAmt is zero 
 		if (getTrxAmt().signum() == 0 && getC_Payment_ID() > 0)
 		{
 			setC_Payment_ID(I_ZERO);
@@ -233,7 +228,7 @@ import org.compiere.util.Util;
 			setLine (ii);
 		}
 		
-		//	Set References
+		//	Set business partner and invoice from payment
 		if (getC_Payment_ID() != 0 && getC_BPartner_ID() == 0)
 		{
 			MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(getC_Payment_ID(),get_TrxName());
@@ -241,6 +236,7 @@ import org.compiere.util.Util;
 			if (payment.getC_Invoice_ID() != 0)
 				setC_Invoice_ID(payment.getC_Invoice_ID());
 		}
+		// Set business partner from invoice
 		if (getC_Invoice_ID() != 0 && getC_BPartner_ID() == 0)
 		{
 			MInvoice invoice = (MInvoice) MTable.get(getCtx(), MInvoice.Table_ID).getPO(getC_Invoice_ID(),
@@ -266,12 +262,6 @@ import org.compiere.util.Util;
 		return m_parent;
 	}	//	getParent
 	
-	/**
-	 * 	After Save
-	 *	@param newRecord new
-	 *	@param success success
-	 *	@return success
-	 */
 	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
@@ -280,11 +270,6 @@ import org.compiere.util.Util;
 		return updateHeader();
 	}	//	afterSave
 	
-	/**
-	 * 	After Delete
-	 *	@param success success
-	 *	@return success
-	 */
 	@Override
 	protected boolean afterDelete (boolean success)
 	{
@@ -345,6 +330,11 @@ import org.compiere.util.Util;
 			return headerPeriod != null && linePeriod != null && headerPeriod.getC_Period_ID() == linePeriod.getC_Period_ID();	
 		}
 		return true;
+	}
+	
+	@Override
+	public MDepositBatch getC_DepositBatch() throws RuntimeException {
+		return getC_DepositBatch_ID() > 0 ? new MDepositBatch(getCtx(), getC_DepositBatch_ID(), get_TrxName()) : null;
 	}
 	
  }	//	MBankStatementLine

@@ -31,6 +31,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.HexFormat;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -801,6 +802,7 @@ public class DB_Oracle implements AdempiereDatabase
      *  @return data type
      *  @deprecated
      */
+    @Deprecated
     public String getDataType (String columnName, int displayType, int precision,
         boolean defaultValue)
     {
@@ -1162,7 +1164,16 @@ public class DB_Oracle implements AdempiereDatabase
 				.append(dt);
 		}
 		else
-			sqlDefault.append(column.getSQLDataType());
+		{
+			if (! column.isMandatory())
+				sqlDefault.append(" DEFAULT NULL ");
+			defaultValue = null;
+		}
+		sql.append(sqlDefault);
+		
+		//	Constraint
+		if (column.getAD_Reference_ID() == DisplayType.JSON)
+			sql.append(" CONSTRAINT ").append(column.getAD_Table().getTableName()).append("_").append(column.getColumnName()).append("_isjson CHECK (").append(column.getColumnName()).append(" IS JSON)");
 
 		if (!isMultiSelect)
 		{
@@ -1246,5 +1257,10 @@ public class DB_Oracle implements AdempiereDatabase
 	@Override
 	public ITablePartitionService getTablePartitionService() {
 		return new TablePartitionService();
+	}
+
+	@Override
+	public String TO_Blob(byte[] blob) {
+		return "HEXTORAW('"+HexFormat.of().formatHex(blob)+"')";
 	}
 }   //  DB_Oracle

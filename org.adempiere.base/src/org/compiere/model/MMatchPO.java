@@ -1039,7 +1039,7 @@ public class MMatchPO extends X_M_MatchPO
 	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
-		//	Set Trx Date
+		//	Set DateTrx to today date
 		if (getDateTrx() == null)
 			setDateTrx (new Timestamp(System.currentTimeMillis()));
 		//	Set Acct Date
@@ -1058,8 +1058,7 @@ public class MMatchPO extends X_M_MatchPO
 			setM_AttributeSetInstance_ID(iol.getM_AttributeSetInstance_ID());
 		}
 		
-		// BF [ 2240484 ] Re MatchingPO, MMatchPO doesn't contains Invoice info
-		// If newRecord, set c_invoiceline_id while null
+		// Set C_InvoiceLine_ID from MatchInv records
 		if (newRecord && getC_InvoiceLine_ID() == 0 && getReversal_ID()==0) 
 		{
 			MMatchInv[] mpi = MMatchInv.getInOutLine(getCtx(), getM_InOutLine_ID(), get_TrxName());
@@ -1068,7 +1067,7 @@ public class MMatchPO extends X_M_MatchPO
 				if (mpi[i].getC_InvoiceLine_ID() != 0 && 
 						mpi[i].getM_AttributeSetInstance_ID() == getM_AttributeSetInstance_ID()) 
 				{
-					//verify m_matchpo not created yet
+					// skip if m_matchpo have been created
 					int cnt = DB.getSQLValue(get_TrxName(), "SELECT Count(*) FROM M_MatchPO WHERE M_InOutLine_ID="+getM_InOutLine_ID()
 							+" AND C_InvoiceLine_ID="+mpi[i].getC_InvoiceLine_ID());
 					if (cnt > 0)
@@ -1090,10 +1089,9 @@ public class MMatchPO extends X_M_MatchPO
 						setC_InvoiceLine_ID(mpi[i].getC_InvoiceLine_ID());
 						break;
 					}
-					else // create MatchPO record for PO-Invoice if different quantity
+					else 
 					{
-						MInvoiceLine il = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(
-								mpi[i].getC_InvoiceLine_ID(), get_TrxName());
+						MInvoiceLine il = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(mpi[i].getC_InvoiceLine_ID(), get_TrxName());
 						MMatchPO match = MMatchPO.createFrom(il, getDateTrx(), availableQty);
 						match.setC_OrderLine_ID(getC_OrderLine_ID());
 						if (!match.save())
@@ -1109,16 +1107,17 @@ public class MMatchPO extends X_M_MatchPO
 			}
 		}
 		
-		//	Find OrderLine
+		//	Find OrderLine or invoice line or material receipt line
 		if (getC_OrderLine_ID() == 0)
 		{
 			MInvoiceLine il = null;
 			if (getC_InvoiceLine_ID() != 0)
 			{
+				// get from invoice
 				il = getInvoiceLine();
 				if (il.getC_OrderLine_ID() != 0)
 					setC_OrderLine_ID(il.getC_OrderLine_ID());
-			}	//	get from invoice
+			}	
 			if (getC_OrderLine_ID() == 0 && getM_InOutLine_ID() != 0)
 			{
 				MInOutLine iol = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(getM_InOutLine_ID(),
@@ -1135,7 +1134,7 @@ public class MMatchPO extends X_M_MatchPO
 			}	//	get from shipment
 		}	//	find order line
 		
-		//	Price Match Approval
+		//	Set PriceMatchDifference to difference between PO price and Invoice price
 		if (getC_OrderLine_ID() != 0 
 			&& getC_InvoiceLine_ID() != 0
 			&& (newRecord || 
@@ -1148,7 +1147,7 @@ public class MMatchPO extends X_M_MatchPO
 			{
 				difference = difference.multiply(getQty());
 				setPriceMatchDifference(difference);
-				//	Approval
+				//	Validate against PriceMatchTolerance of business partner group and update IsApproved
 				MBPGroup group = MBPGroup.getOfBPartner(getCtx(), getOrderLine().getC_BPartner_ID());
 				BigDecimal mt = group.getPriceMatchTolerance();
 				if (mt != null && mt.signum() != 0)
@@ -1170,7 +1169,7 @@ public class MMatchPO extends X_M_MatchPO
 				setIsApproved(true);
 			}
 			
-			//validate against M_MatchInv
+			// Validate existence of corresponding invoice matching record.
 			if (getM_InOutLine_ID() > 0 && getC_InvoiceLine_ID() > 0)
 			{
 				int cnt = DB.getSQLValue(get_TrxName(), "SELECT Count(*) FROM M_MatchInv WHERE M_InOutLine_ID="+getM_InOutLine_ID()
@@ -1190,19 +1189,13 @@ public class MMatchPO extends X_M_MatchPO
 		return true;
 	}	//	beforeSave	
 	
-	/**
-	 * 	After Save.
-	 * 	Set Order Qty Delivered/Invoiced 
-	 *	@param newRecord new
-	 *	@param success success
-	 *	@return success
-	 */
 	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
-		//perform matched qty validation
+		// Perform matched qty validation
 		if (success)
 		{
+			// Validate total M_MatchPO.Qty for M_InOutLine_ID against M_InOutLine.MovementQty
 			if (getM_InOutLine_ID() > 0)
 			{
 				MInOutLine line = (MInOutLine) MTable.get(getCtx(), MInOutLine.Table_ID).getPO(getM_InOutLine_ID(),
@@ -1214,6 +1207,7 @@ public class MMatchPO extends X_M_MatchPO
 				}
 			}
 			
+			// Validate total M_MatchPO.Qty for C_InvoiceLine_ID against C_InvoiceLine.QtyInvoiced
 			if (getC_InvoiceLine_ID() > 0)
 			{
 				MInvoiceLine line = (MInvoiceLine) MTable.get(getCtx(), MInvoiceLine.Table_ID).getPO(
@@ -1225,13 +1219,14 @@ public class MMatchPO extends X_M_MatchPO
 				}
 			}
 			
+			// Validate matching for QtyOrdered
 			if (getC_OrderLine_ID() > 0)
 			{
 				boolean validateOrderedQty = MSysConfig.getBooleanValue(MSysConfig.VALIDATE_MATCHING_TO_ORDERED_QTY, true, Env.getAD_Client_ID(Env.getCtx()));
 				if (validateOrderedQty)
 				{
-					MOrderLine line = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(getC_OrderLine_ID(),
-							get_TrxName());
+					// Validate total M_MatchPO.Qty (with C_InvoiceLine) for C_OrderLine_ID against C_OrderLine.QtyOrdered
+					MOrderLine line = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(getC_OrderLine_ID(), get_TrxName());
 					BigDecimal qtyOrdered = line.getQtyOrdered();
 					BigDecimal invoicedQty = DB.getSQLValueBD(get_TrxName(), "SELECT Coalesce(SUM(Qty),0) FROM M_MatchPO WHERE C_InvoiceLine_ID > 0 and C_OrderLine_ID=? AND Reversal_ID IS NULL" , getC_OrderLine_ID());
 					if (    invoicedQty != null
@@ -1242,6 +1237,7 @@ public class MMatchPO extends X_M_MatchPO
 					{
 						throw new IllegalStateException("Total matched invoiced qty > ordered qty. MatchedInvoicedQty="+invoicedQty+", OrderedQty="+qtyOrdered+", Line="+line);
 					}
+					// Validate total M_MatchPO.Qty (with M_InOutLine) for C_OrderLine_ID against C_OrderLine.QtyOrdered
 					BigDecimal deliveredQty = DB.getSQLValueBD(get_TrxName(), "SELECT Coalesce(SUM(Qty),0) FROM M_MatchPO WHERE M_InOutLine_ID > 0 and C_OrderLine_ID=? AND Reversal_ID IS NULL" , getC_OrderLine_ID());
 					if (   deliveredQty != null
 						&& (   (qtyOrdered.signum() > 0 && deliveredQty.compareTo(qtyOrdered) > 0)
@@ -1255,11 +1251,12 @@ public class MMatchPO extends X_M_MatchPO
 			}
 		}
 				
-		//	Purchase Order Delivered/Invoiced/Reserved
+		//	Purchase Order Delivered/Invoiced
+		//	(Reserved in WMatch and MInOut.completeIt)
 		if (success && getC_OrderLine_ID() != 0)
 		{
 			MOrderLine orderLine = getOrderLine();
-			//
+			// Update C_OrderLine.QtyDelivered and C_OrderLine.DateDelivered
 			if (m_isInOutLineChange && (newRecord || getM_InOutLine_ID() != get_ValueOldAsInt("M_InOutLine_ID")))
 			{
 				if (getM_InOutLine_ID() != 0)							//	new delivery
@@ -1283,7 +1280,7 @@ public class MMatchPO extends X_M_MatchPO
 				BigDecimal oldQty = (BigDecimal)(get_ValueOld(COLUMNNAME_Qty));
 				orderLine.setQtyDelivered(orderLine.getQtyDelivered().subtract(oldQty.subtract(getQty())));
 			}
-			
+			// Update C_OrderLine.QtyInvoiced and C_OrderLine.DateInvoiced
 			if (m_isInvoiceLineChange && (newRecord || getC_InvoiceLine_ID() != get_ValueOldAsInt("C_InvoiceLine_ID")))
 			{
 				if (getC_InvoiceLine_ID() != 0)						//	first time
@@ -1356,13 +1353,10 @@ public class MMatchPO extends X_M_MatchPO
 		return shipDate;
 	}	//	getNewerDateAcct
 	
-	/**
-	 * 	Before Delete
-	 *	@return true if acct was deleted
-	 */
 	@Override
 	protected boolean beforeDelete ()
 	{
+		// Check is period open and delete postings (Fact_Acct)
 		if (isPosted())
 		{
 			MPeriod.testPeriodOpen(getCtx(), getDateTrx(), MDocType.DOCBASETYPE_MatchPO, getAD_Org_ID());
@@ -1372,17 +1366,10 @@ public class MMatchPO extends X_M_MatchPO
 		return true;
 	}	//	beforeDelete
 	
-	/**
-	 * 	After Delete.
-	 * 	Update Order Line Qty Delivered/Invoiced .
-	 *	@param success success
-	 *	@return success
-	 */
 	@Override
 	protected boolean afterDelete (boolean success)
 	{
-		//	Order Delivered/Invoiced
-		//	(Reserved in VMatch and MInOut.completeIt)
+		// Update QtyDelivered and QtyInvoiced of order line
 		if (success && getC_OrderLine_ID() != 0)
 		{
 			MOrderLine orderLine = (MOrderLine) MTable.get(getCtx(), MOrderLine.Table_ID).getPO(getC_OrderLine_ID(),

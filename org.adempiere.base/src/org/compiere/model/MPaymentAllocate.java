@@ -137,15 +137,10 @@ public class MPaymentAllocate extends X_C_PaymentAllocate
 		return m_invoice.getC_BPartner_ID();
 	}	//	getC_BPartner_ID
 		
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
 	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
-		MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(getC_Payment_ID(),get_TrxName());
+		MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(getC_Payment_ID(), get_TrxName());
 		if ((newRecord || is_ValueChanged("C_Invoice_ID"))
 			&& (payment.getC_Charge_ID() != 0 
 				|| payment.getC_Invoice_ID() != 0 
@@ -155,6 +150,7 @@ public class MPaymentAllocate extends X_C_PaymentAllocate
 			return false;
 		}
 		
+		// Validate allocation amount = invoice amount
 		BigDecimal check = getAmount()
 			.add(getDiscountAmt())
 			.add(getWriteOffAmt())
@@ -168,7 +164,7 @@ public class MPaymentAllocate extends X_C_PaymentAllocate
 			return false;
 		}
 		
-		//	Org
+		//	Set organization from invoice
 		if (newRecord || is_ValueChanged("C_Invoice_ID"))
 		{
 			getInvoice();

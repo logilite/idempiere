@@ -13,13 +13,16 @@ public class DocLine_DepositBatch extends DocLine {
 
 	public DocLine_DepositBatch(MPayment line, Doc_BankStatement doc, Boolean isReversal) {
 		super(line, doc);
+		
+		MPayment payment = new MPayment(line.getCtx(), line.getC_Payment_ID(), line.get_TrxName());
+		
 		m_C_Payment_ID = line.getC_Payment_ID();
 		m_IsReversal = isReversal;
 
 		//
-		setDateDoc(line.getDateTrx());
+		setDateDoc(payment.getDateTrx());
 		setDateAcct(MBankStatement.isPostWithDateFromLine(doc.getAD_Client_ID()) ? line.getDateAcct() : doc.getDateAcct());
-		setC_BPartner_ID(line.getC_BPartner_ID());
+		setC_BPartner_ID(payment.getC_BPartner_ID());
 	}
 
 	/** Reversal Flag */

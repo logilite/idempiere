@@ -92,7 +92,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1348522540831550683L;
+	private static final long serialVersionUID = 7274149891086011624L;
 
 	private static final String CURRENT_WORKFLOW_PROCESS_INFO_ATTR = "Workflow.ProcessInfo";
 	
@@ -330,7 +330,15 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			if (m_process == null)
 				m_process = new MWFProcess (getCtx(), getAD_WF_Process_ID(),
 					this.get_TrxName());
-			m_process.checkActivities(this.get_TrxName(), m_po);
+			try{
+				m_process.checkActivities(this.get_TrxName(), m_po);
+			}catch (Exception e) {
+				setWFState(WFSTATE_Terminated); 
+				m_process.setWFState(MWFProcess.WFSTATE_Terminated);
+				 m_docStatus = DocAction.STATUS_Invalid;
+				 m_process.setProcessMsg(e.getLocalizedMessage());
+				 log.log(Level.SEVERE, e.getLocalizedMessage());
+			}
 		}
 		else
 		{
@@ -470,7 +478,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 
 	/**
 	 * 	Is SO Trx
-	 *	@return SO Trx or of not found true
+	 *	@return SO Trx or if not found true
 	 */
 	public boolean isSOTrx()
 	{
@@ -592,21 +600,6 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	{
 		return getNode().isUserTask();
 	}
-
-	/**
-	 * 	Set Text Msg (add after existing)
-	 *	@param TextMsg
-	 */
-	public void setTextMsg (String TextMsg)
-	{
-		if (TextMsg == null || TextMsg.length() == 0)
-			return;
-		String oldText = getTextMsg();
-		if (oldText == null || oldText.length() == 0)
-			super.setTextMsg (Util.trimSize(TextMsg,1000));
-		else if (TextMsg != null && TextMsg.length() > 0)
-			super.setTextMsg (Util.trimSize(oldText + "\n - " + TextMsg,1000));
-	}	//	setTextMsg
 
 	/**
 	 * 	Set Text Msg (add before existing)
@@ -1029,13 +1022,13 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			{
 				StateEngine state = m_process.getState();
 				if (!Util.isEmpty(m_process.getProcessMsg()) && (state.isTerminated() || state.isAborted()))
-				{
+				{W
 					msg.append(m_process.getProcessMsg());
 					msg.append("\n");
-				}				
+				}
 			}
 			msg.append(processMsg);
-			setTextMsg(BaseUtil.cleanMessage(msg.toString()));
+			setTextMsgBefore(BaseUtil.cleanMessage(msg.toString()));
 			// addTextMsg(e); // do not add the exception text
 			boolean contextLost = false;
 			if (e instanceof AdempiereException && "Context lost".equals(e.getMessage()))
@@ -1147,7 +1140,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				//
 				try {
 					success = doc.processIt (m_node.getDocAction());	//	** Do the work
-					setTextMsg(doc.getSummary());
+					setTextMsgBefore(doc.getSummary());
 					processMsg = doc.getProcessMsg();
 					// Bug 1904717 - Invoice reversing has incorrect doc status
 					// Just prepare and complete return a doc status to take into account
@@ -1238,6 +1231,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			attachment.addEntry(report);
 			attachment.setTextMsg(m_node.getName(true));
 			attachment.saveEx();
+			attachment.close();
 			return true;
 		}
 
@@ -1366,7 +1360,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 					m_emails.add(to);
 				}
 
-				setTextMsg(m_emails.toString());
+				setTextMsgBefore(m_emails.toString());
 			}
 			return true;	//	done
 		}	//	EMail
@@ -1808,7 +1802,6 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	 */
 	private boolean setVariable(int AD_Column_ID, String value, int displayType, Trx trx) throws Exception{
 		
-		
 		value = parseVariables(value, false);
 
 		getPO(trx);
@@ -1817,8 +1810,6 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				+ getAD_Table_ID() + ", Record_ID=" + getRecord_ID());
 		//	Set Value
 		Object dbValue = null;
-		
-		
 		if (value == null)
 			;
 		else if (displayType == DisplayType.YesNo)
@@ -1897,10 +1888,14 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			throw new Exception("Persistent Object not updated - AD_Table_ID="
 				+ getAD_Table_ID() + ", Record_ID=" + getRecord_ID()
 				+ " - Should=" + value + ", Is=" + m_po.get_ValueOfColumn(AD_Column_ID));
-		
+		//	Info
+		String msg = getNode().getAttributeName() + "=" + value;
+		if (textMsg != null && textMsg.length() > 0)
+			msg += " - " + textMsg;
+		setTextMsgBefore (msg);
+		m_newValue = value;
 		return true;
-	}
-	
+	}	//	setVariable
 	
 	/**
 	 * 	Set User Choice
@@ -1938,19 +1933,14 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			{
 				newState = StateEngine.STATE_Aborted;
 				if (!(doc.processIt(DocAction.ACTION_Reject)))
-					setTextMsg("Cannot Reject - Document Status: " + doc.getDocStatus());
-			}
-			else
-			{
-				if (isInvoker())
-				{
+					setTextMsgBefore("Cannot Reject - Document Status: " + doc.getDocStatus());
+			} else {
+				if (isInvoker()) {
 					int startAD_User_ID = Env.getAD_User_ID(getCtx());
 					if (startAD_User_ID == 0)
 						startAD_User_ID = doc.getDoc_User_ID();
-					int nextAD_User_ID = getApprovalUser(startAD_User_ID,
-						doc.getC_Currency_ID(), doc.getApprovalAmt(),
-						doc.getAD_Org_ID(),
-						startAD_User_ID == doc.getDoc_User_ID());	//	own doc
+					int nextAD_User_ID = getApprovalUser(startAD_User_ID, doc.getC_Currency_ID(), doc.getApprovalAmt(),
+						doc.getAD_Org_ID(), startAD_User_ID == doc.getDoc_User_ID()); // own doc
 
 					//	No Approver
 					if (nextAD_User_ID <= 0)
@@ -2069,7 +2059,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		}
 		//	Update
 		setAD_User_ID (user.getAD_User_ID());
-		setTextMsg(textMsg);
+		setTextMsgBefore(textMsg);
 		saveEx();
 		//	Close up Old Event
 		getEventAudit();
@@ -2266,14 +2256,14 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		String subject = null;
 		String raw = text.getMailHeader(false);
 		if (raw != null && raw.contains("@_noDocInfo_@"))
-			subject = text.getMailHeader().replaceAll("@_noDocInfo_@", "");
+			subject = text.getMailHeader().replace("@_noDocInfo_@", "");
 		else
 			subject = doc.getDocumentInfo() + ": " + text.getMailHeader();
 		String message = null;
 		raw = text.getMailText(true, false);
 		if (raw != null && (raw.contains("@=DocumentInfo") || raw.contains("@=documentInfo")
 				|| raw.contains("@=Summary") || raw.contains("@=summary") || raw.contains("@_noDocInfo_@")))
-			message = text.getMailText(true).replaceAll("@_noDocInfo_@", "");
+			message = text.getMailText(true).replace("@_noDocInfo_@", "");
 		else
 			message = text.getMailText(true)
 				+ "\n-----\n" + doc.getDocumentInfo()
@@ -2547,7 +2537,6 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		}
 		return sb.toString();
 	}	//	getSummary
-	
 
 	/**
 	 * Parse Values replaces global or Window context @tag@ with actual value.
@@ -2563,6 +2552,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 
 		// from GridField.defaultFromSQLExpression()
 		String defStr = null;
+		// TODO Use Final String
 		if (value != null && value.startsWith("@SQL="))
 		{
 			// w/o tag
@@ -2619,6 +2609,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 
 		if (value == null || (value != null && value.length() == 0))
 			val = null;
+		// TODO Use Final String
 		else if (!value.startsWith("@SQL=") && m_po != null && (value.indexOf('@') != -1 && !isEmailAction) || (isEmailAction && value.startsWith("@"))) // we have a variable
 		{
 			// Strip

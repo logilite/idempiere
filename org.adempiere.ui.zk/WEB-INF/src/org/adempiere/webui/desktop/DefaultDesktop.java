@@ -40,6 +40,8 @@ import org.adempiere.webui.adwindow.IADTabpanel;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.apps.BusyDialog;
 import org.adempiere.webui.apps.ProcessDialog;
+import org.adempiere.webui.component.Anchorchildren;
+import org.adempiere.webui.component.Anchorlayout;
 import org.adempiere.webui.component.Tab;
 import org.adempiere.webui.component.Tabpanel;
 import org.adempiere.webui.component.ToolBar;
@@ -57,6 +59,7 @@ import org.adempiere.webui.panel.TimeoutPanel;
 import org.adempiere.webui.part.ITabOnSelectHandler;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.UserPreference;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.GridField;
@@ -96,8 +99,6 @@ import org.zkoss.zk.ui.event.SwipeEvent;
 import org.zkoss.zk.ui.metainfo.PageDefinition;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zk.ui.util.DesktopCleanup;
-import org.zkoss.zul.Anchorchildren;
-import org.zkoss.zul.Anchorlayout;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
 import org.zkoss.zul.East;
@@ -106,20 +107,18 @@ import org.zkoss.zul.Popup;
 import org.zkoss.zul.West;
 
 /**
- *
  * Default {@link IDesktop} implementation.
  * @author <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @author <a href="mailto:hengsin@gmail.com">Low Heng Sin</a>
  * @date Mar 2, 2007
- * @version $Revision: 0.10 $
  * @author Deepak Pansheriya/Vivek - Adding support for message broadcasting
  */
 public class DefaultDesktop extends TabbedDesktop implements MenuListener, Serializable, EventListener<Event>, EventHandler, DesktopCleanup
 {		
-	/**
-	 * generated serial id 
+    /**
+	 * generated serial id
 	 */
-	private static final long serialVersionUID = 7189914859100400758L;
+	private static final long serialVersionUID = 1019213060161640026L;
 
 	private static final String IMAGES_UPARROW_PNG = "images/collapse-header.png";
 
@@ -354,7 +353,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         	Component content = e.getFirstChild();
         	eastPopup = new Popup();
         	ToolBarButton btn = new ToolBarButton();
-        	btn.setIconSclass("z-icon-remove");
+        	btn.setIconSclass(Icon.getIconSclass(Icon.REMOVE));
         	btn.addEventListener(Events.ON_CLICK, evt -> {
 				eastPopup.close();
 				isQuickInfoOpen = false;
@@ -427,7 +426,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	        };
 	        toolbar.appendChild(showHeader);
 	        if (ThemeManager.isUseFontIconForImage())
-	        	showHeader.setIconSclass("z-icon-ThreeLineMenu");
+	        	showHeader.setIconSclass(Icon.getIconSclass(Icon.THREE_LINE_MENU));
 			else
 				showHeader.setImage(ThemeManager.getThemeResource(IMAGES_THREELINE_MENU_PNG));
 	        showHeader.addEventListener(Events.ON_CLICK, this);
@@ -437,7 +436,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	        max = new ToolBarButton();
 	        toolbar.appendChild(max);
 	        if (ThemeManager.isUseFontIconForImage())
-	        	max.setIconSclass("z-icon-Collapsing");
+	        	max.setIconSclass(Icon.getIconSclass(Icon.COLLAPSING));
 			else
 				max.setImage(ThemeManager.getThemeResource(IMAGES_UPARROW_PNG));
 	        max.addEventListener(Events.ON_CLICK, this);
@@ -447,7 +446,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         contextHelp = new ToolBarButton();
         toolbar.appendChild(contextHelp);
         if (ThemeManager.isUseFontIconForImage())
-        	contextHelp.setIconSclass("z-icon-Help");
+        	contextHelp.setIconSclass(Icon.getIconSclass(Icon.HELP));
         else
         	contextHelp.setImage(ThemeManager.getThemeResource(IMAGES_CONTEXT_HELP_PNG));
         contextHelp.addEventListener(Events.ON_CLICK, this);
@@ -470,7 +469,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         if (mobile) {
 	        westBtn = new ToolBarButton();
 	        if (ThemeManager.isUseFontIconForImage())
-	        	westBtn.setIconSclass("z-icon-ThreeLineMenu");
+	        	westBtn.setIconSclass(Icon.getIconSclass(Icon.THREE_LINE_MENU));
 			else
 				westBtn.setImage(ThemeManager.getThemeResource(IMAGES_THREELINE_MENU_PNG));
 	        westBtn.addEventListener(Events.ON_CLICK, this);
@@ -648,7 +647,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 		if (mobile)
 		{
 			ToolBarButton btn = new ToolBarButton();
-        	btn.setIconSclass("z-icon-remove");
+        	btn.setIconSclass(Icon.getIconSclass(Icon.REMOVE));
         	btn.addEventListener(Events.ON_CLICK, evt -> {
         		westPopup.close();
         		westPopup.removeAttribute(POPUP_OPEN_ATTR);
@@ -789,7 +788,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	protected void restoreHeader() {
 		layout.getNorth().setVisible(true);
 		if (ThemeManager.isUseFontIconForImage())
-        	max.setIconSclass("z-icon-Collapsing");
+        	max.setIconSclass(Icon.getIconSclass(Icon.COLLAPSING));
 		else
 			max.setImage(ThemeManager.getThemeResource(IMAGES_UPARROW_PNG));
 		showHeader.setVisible(false);
@@ -805,7 +804,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	protected void collapseHeader() {
 		layout.getNorth().setVisible(false);
 		if (ThemeManager.isUseFontIconForImage())
-        	max.setIconSclass("z-icon-Expanding");
+        	max.setIconSclass(Icon.getIconSclass(Icon.EXPANDING));
 		else
 			max.setImage(ThemeManager.getThemeResource(IMAGES_DOWNARROW_PNG));
 		showHeader.setVisible(true);
@@ -833,6 +832,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	/**
 	 * @param page
 	 */
+	@Override
 	public void setPage(Page page) {
 		if (this.page != page) {
 			layout.setPage(page);
@@ -852,6 +852,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	 * Get the root component
 	 * @return Component
 	 */
+	@Override
 	public Component getComponent() {
 		return layout;
 	}
@@ -1076,8 +1077,8 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	}
 
 	@Override
-	public void updateHelpTooltip(String hdr, String  desc, String help, String otherContent) {		
-		helpController.renderToolTip(hdr, desc, help, otherContent);
+	public void updateHelpTooltip(String hdr, String  desc, String help, String otherContent,String entityType) {		
+		helpController.renderToolTip(hdr, desc, help, otherContent, entityType);
 	}
 
 	@Override
@@ -1112,13 +1113,6 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 		ADForm form = super.openForm(formId);
 		updateHelpContext(X_AD_CtxHelp.CTXTYPE_Form, formId);
 		return form;
-	}
-
-	@Override
-	public void openInfo(int infoId) {
-		super.openInfo(infoId);
-		// updateHelpContext is already called in InfoPanel onPageAttached method - IDEMPIERE-5772
-//		updateHelpContext(X_AD_CtxHelp.CTXTYPE_Info, infoId);
 	}
 
 	@Override

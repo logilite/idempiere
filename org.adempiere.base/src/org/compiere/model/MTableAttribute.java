@@ -15,7 +15,6 @@ package org.compiere.model;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -26,22 +25,28 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
 
+/**
+ * Table Attribute Model
+ * @author DPansheriya
+ *
+ */
 public class MTableAttribute extends X_AD_TableAttribute
 {
 	/**
 	 * 
 	 */
-	private static final long				serialVersionUID					= -2624557341374329315L;
+	private static final long serialVersionUID = -2624557341374329315L;
 
 	/** Get Default value of the attribute **/
-	private static final String				TABLE_ATTRIBUTE_DEFAULTVALUE_SQL	= " SELECT a.Name, a.AttributeValueType, a.AD_Reference_ID, COALESCE(atsu.DefaultValue , a.DefaultValue)"
-																					+ " FROM AD_TableAttributeSet tas"
-																					+ "	INNER JOIN M_AttributeUse atsu ON (atsu.M_AttributeSet_ID = tas.M_AttributeSet_ID)"
-																					+ "	INNER JOIN M_Attribute a ON (a.M_Attribute_ID = atsu.M_Attribute_ID)"
-																					+ "	WHERE a.Name = ? AND a.IsActive = 'Y' AND tas.AD_Table_ID = ?	";
+	private static final String TABLE_ATTRIBUTE_DEFAULTVALUE_SQL = """
+														SELECT a.Name, a.AttributeValueType, a.AD_Reference_ID, COALESCE(atsu.DefaultValue , a.DefaultValue)
+																FROM AD_TableAttributeSet tas
+																INNER JOIN M_AttributeUse atsu ON (atsu.M_AttributeSet_ID = tas.M_AttributeSet_ID)
+																INNER JOIN M_Attribute a ON (a.M_Attribute_ID = atsu.M_Attribute_ID)
+																WHERE a.Name = ? AND a.IsActive = 'Y' AND tas.AD_Table_ID = ?	""";
 
-	private static CCache<String, Object>	s_tableAttributeDefault				= new CCache<String, Object>("AD_TableAttribute_Default", 30);
-
+	private static CCache<String, Object> s_tableAttributeDefault = new CCache<String, Object>("AD_TableAttribute_Default", 30);	
+	
 	public MTableAttribute(Properties ctx, int AD_TableAttribute_ID, String trxName)
 	{
 		super(ctx, AD_TableAttribute_ID, trxName);
@@ -51,7 +56,7 @@ public class MTableAttribute extends X_AD_TableAttribute
 	{
 		super(ctx, rs, trxName);
 	}
-
+	
 	public static List<MTableAttribute> get(int tableID, int recordID)
 	{
 		final String whereClause = "AD_Table_ID=? AND Record_ID=? ";
@@ -60,34 +65,15 @@ public class MTableAttribute extends X_AD_TableAttribute
 
 	public static MTableAttribute get(int tableID, int recordID, int attrID)
 	{
-		return get(tableID, recordID, attrID, 0);
+		final String whereClause = "AD_Table_ID=? AND Record_ID=? AND M_Attribute_ID=? ";
+		return new Query(Env.getCtx(), MTableAttribute.Table_Name, whereClause, null).setParameters(tableID, recordID, attrID).firstOnly();
 	}
-	
-	public static MTableAttribute get(int tableID, int recordID, int attrID, int attrSetID)
-	{
-		StringBuilder whereClause = new StringBuilder("AD_Table_ID=? AND Record_ID=? AND M_attribute_ID = ? ");
-		List<Object> params = new ArrayList<>();
-		params.add(tableID);
-		params.add(recordID);
-		params.add(attrID);
-		
-		if (attrSetID > 0)
-		{
-			whereClause.append(" AND M_AttributeSet_ID=?");
-			params.add(attrSetID);
-		}
-
-		return new Query(Env.getCtx(), MTableAttribute.Table_Name, whereClause.toString(), null)
-																							.setParameters(params.toArray())
-																							.first();
-	}
-
 
 	/**
 	 * Return attribute default value for table.
-	 * 
+	 *  
 	 * @param  attributeName
-	 * @param  tableID
+	 * @param tableID 
 	 * @param  table_ID
 	 * @return
 	 */
@@ -105,7 +91,7 @@ public class MTableAttribute extends X_AD_TableAttribute
 				pstmt.setString(1, attributeName);
 				pstmt.setInt(2, tableID);
 				rs = pstmt.executeQuery();
-				if (rs.next())
+				if(rs.next())
 				{
 					String attType = rs.getString(2);
 					int reference_ID = rs.getInt(3);
@@ -131,7 +117,7 @@ public class MTableAttribute extends X_AD_TableAttribute
 					{
 						if (reference_ID == DisplayType.YesNo)
 						{
-							value = Util.isEmpty(DefaultValue) ? null : DefaultValue.equalsIgnoreCase("Y");
+							value = Util.isEmpty(DefaultValue) ? null: DefaultValue.equalsIgnoreCase("Y");
 						}
 						else if (DisplayType.isText(reference_ID))
 						{
@@ -173,5 +159,5 @@ public class MTableAttribute extends X_AD_TableAttribute
 			return s_tableAttributeDefault.get(key);
 		return null;
 	} // getAttributeDefaultValue
-
+	
 }

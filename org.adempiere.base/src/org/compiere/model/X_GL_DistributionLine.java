@@ -25,7 +25,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for GL_DistributionLine
  *  @author iDempiere (generated)
- *  @version Release 11 - $Id$ */
+ *  @version Release 13 - $Id$ */
 @org.adempiere.base.Model(table="GL_DistributionLine")
 public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, I_Persistent
 {
@@ -33,7 +33,7 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20250603L;
+	private static final long serialVersionUID = 20250805L;
 
     /** Standard Constructor */
     public X_GL_DistributionLine (Properties ctx, int GL_DistributionLine_ID, String trxName)
@@ -41,8 +41,8 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
       super (ctx, GL_DistributionLine_ID, trxName);
       /** if (GL_DistributionLine_ID == 0)
         {
-			setGL_Distribution_ID (0);
 			setGL_DistributionLine_ID (0);
+			setGL_Distribution_ID (0);
 			setLine (0);
 // @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM GL_DistributionLine WHERE GL_Distribution_ID=@GL_Distribution_ID@
 			setOverwriteAcct (false);
@@ -82,14 +82,26 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
       super (ctx, GL_DistributionLine_ID, trxName, virtualColumns);
       /** if (GL_DistributionLine_ID == 0)
         {
-			setGL_Distribution_ID (0);
 			setGL_DistributionLine_ID (0);
+			setGL_Distribution_ID (0);
 			setLine (0);
 // @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM GL_DistributionLine WHERE GL_Distribution_ID=@GL_Distribution_ID@
 			setOverwriteAcct (false);
 			setOverwriteActivity (false);
+			setOverwriteAsset (false);
+// N
+			setOverwriteAttributeSetInstance (false);
+// N
 			setOverwriteBPartner (false);
 			setOverwriteCampaign (false);
+			setOverwriteCharge (false);
+// N
+			setOverwriteCostCenter (false);
+// N
+			setOverwriteDepartment (false);
+// N
+			setOverwriteEmployee (false);
+// N
 			setOverwriteLocFrom (false);
 			setOverwriteLocTo (false);
 			setOverwriteOrg (false);
@@ -99,6 +111,8 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 			setOverwriteSalesRegion (false);
 			setOverwriteUser1 (false);
 			setOverwriteUser2 (false);
+			setOverwriteWarehouse (false);
+// N
 			setPercent (Env.ZERO);
         } */
     }
@@ -109,14 +123,26 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
       super (ctx, GL_DistributionLine_UU, trxName);
       /** if (GL_DistributionLine_UU == null)
         {
-			setGL_Distribution_ID (0);
 			setGL_DistributionLine_ID (0);
+			setGL_Distribution_ID (0);
 			setLine (0);
 // @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM GL_DistributionLine WHERE GL_Distribution_ID=@GL_Distribution_ID@
 			setOverwriteAcct (false);
 			setOverwriteActivity (false);
+			setOverwriteAsset (false);
+// N
+			setOverwriteAttributeSetInstance (false);
+// N
 			setOverwriteBPartner (false);
 			setOverwriteCampaign (false);
+			setOverwriteCharge (false);
+// N
+			setOverwriteCostCenter (false);
+// N
+			setOverwriteDepartment (false);
+// N
+			setOverwriteEmployee (false);
+// N
 			setOverwriteLocFrom (false);
 			setOverwriteLocTo (false);
 			setOverwriteOrg (false);
@@ -126,6 +152,8 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 			setOverwriteSalesRegion (false);
 			setOverwriteUser1 (false);
 			setOverwriteUser2 (false);
+			setOverwriteWarehouse (false);
+// N
 			setPercent (Env.ZERO);
         } */
     }
@@ -136,14 +164,26 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
       super (ctx, GL_DistributionLine_UU, trxName, virtualColumns);
       /** if (GL_DistributionLine_UU == null)
         {
-			setGL_Distribution_ID (0);
 			setGL_DistributionLine_ID (0);
+			setGL_Distribution_ID (0);
 			setLine (0);
 // @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM GL_DistributionLine WHERE GL_Distribution_ID=@GL_Distribution_ID@
 			setOverwriteAcct (false);
 			setOverwriteActivity (false);
+			setOverwriteAsset (false);
+// N
+			setOverwriteAttributeSetInstance (false);
+// N
 			setOverwriteBPartner (false);
 			setOverwriteCampaign (false);
+			setOverwriteCharge (false);
+// N
+			setOverwriteCostCenter (false);
+// N
+			setOverwriteDepartment (false);
+// N
+			setOverwriteEmployee (false);
+// N
 			setOverwriteLocFrom (false);
 			setOverwriteLocTo (false);
 			setOverwriteOrg (false);
@@ -153,6 +193,8 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 			setOverwriteSalesRegion (false);
 			setOverwriteUser1 (false);
 			setOverwriteUser2 (false);
+			setOverwriteWarehouse (false);
+// N
 			setPercent (Env.ZERO);
         } */
     }
@@ -185,27 +227,50 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
       return sb.toString();
     }
 
+	/** Set Trx Organization.
+		@param AD_OrgTrx_ID Performing or initiating organization
+	*/
+	public void setAD_OrgTrx_ID (int AD_OrgTrx_ID)
+	{
+		if (AD_OrgTrx_ID < 1)
+			set_Value (COLUMNNAME_AD_OrgTrx_ID, null);
+		else
+			set_Value (COLUMNNAME_AD_OrgTrx_ID, Integer.valueOf(AD_OrgTrx_ID));
+	}
+
+	/** Get Trx Organization.
+		@return Performing or initiating organization
+	  */
+	public int getAD_OrgTrx_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_OrgTrx_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_A_Asset getA_Asset() throws RuntimeException
-    {
-		return (org.compiere.model.I_A_Asset)MTable.get(getCtx(), org.compiere.model.I_A_Asset.Table_Name)
-			.getPO(getA_Asset_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_A_Asset)MTable.get(getCtx(), org.compiere.model.I_A_Asset.Table_ID)
+			.getPO(getA_Asset_ID(), get_TrxName());
+	}
 
 	/** Set Asset.
-		@param A_Asset_ID 
-		Asset used internally or by customers
-	  */
+		@param A_Asset_ID Asset used internally or by customers
+	*/
 	public void setA_Asset_ID (int A_Asset_ID)
 	{
-		if (A_Asset_ID < 1) 
+		if (A_Asset_ID < 1)
 			set_Value (COLUMNNAME_A_Asset_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_A_Asset_ID, Integer.valueOf(A_Asset_ID));
 	}
 
 	/** Get Asset.
 		@return Asset used internally or by customers
 	  */
-	public int getA_Asset_ID () 
+	public int getA_Asset_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_A_Asset_ID);
 		if (ii == null)
@@ -235,28 +300,7 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 		return ii.intValue();
 	}
 
-	/** Set Trx Organization.
-		@param AD_OrgTrx_ID Performing or initiating organization
-	*/
-	public void setAD_OrgTrx_ID (int AD_OrgTrx_ID)
-	{
-		if (AD_OrgTrx_ID < 1)
-			set_Value (COLUMNNAME_AD_OrgTrx_ID, null);
-		else
-			set_Value (COLUMNNAME_AD_OrgTrx_ID, Integer.valueOf(AD_OrgTrx_ID));
-	}
-
-	/** Get Trx Organization.
-		@return Performing or initiating organization
-	  */
-	public int getAD_OrgTrx_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_AD_OrgTrx_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Activity getC_Activity() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Activity)MTable.get(getCtx(), org.compiere.model.I_C_Activity.Table_ID)
@@ -285,6 +329,7 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
@@ -313,6 +358,7 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Campaign getC_Campaign() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Campaign)MTable.get(getCtx(), org.compiere.model.I_C_Campaign.Table_ID)
@@ -341,27 +387,28 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Charge getC_Charge() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Charge)MTable.get(getCtx(), org.compiere.model.I_C_Charge.Table_Name)
-			.getPO(getC_Charge_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Charge)MTable.get(getCtx(), org.compiere.model.I_C_Charge.Table_ID)
+			.getPO(getC_Charge_ID(), get_TrxName());
+	}
 
 	/** Set Charge.
-		@param C_Charge_ID 
-		Additional document charges
-	  */
+		@param C_Charge_ID Additional document charges
+	*/
 	public void setC_Charge_ID (int C_Charge_ID)
 	{
-		if (C_Charge_ID < 1) 
+		if (C_Charge_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_C_Charge_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_C_Charge_ID, Integer.valueOf(C_Charge_ID));
 	}
 
 	/** Get Charge.
 		@return Additional document charges
 	  */
-	public int getC_Charge_ID () 
+	public int getC_Charge_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Charge_ID);
 		if (ii == null)
@@ -369,24 +416,27 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_CostCenter getC_CostCenter() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_CostCenter)MTable.get(getCtx(), org.compiere.model.I_C_CostCenter.Table_Name)
-			.getPO(getC_CostCenter_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_CostCenter)MTable.get(getCtx(), org.compiere.model.I_C_CostCenter.Table_ID)
+			.getPO(getC_CostCenter_ID(), get_TrxName());
+	}
 
 	/** Set Cost Center.
-		@param C_CostCenter_ID Cost Center	  */
+		@param C_CostCenter_ID Cost Center
+	*/
 	public void setC_CostCenter_ID (int C_CostCenter_ID)
 	{
-		if (C_CostCenter_ID < 1) 
+		if (C_CostCenter_ID < 1)
 			set_Value (COLUMNNAME_C_CostCenter_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_CostCenter_ID, Integer.valueOf(C_CostCenter_ID));
 	}
 
 	/** Get Cost Center.
 		@return Cost Center	  */
-	public int getC_CostCenter_ID () 
+	public int getC_CostCenter_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_CostCenter_ID);
 		if (ii == null)
@@ -394,24 +444,27 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Department getC_Department() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Department)MTable.get(getCtx(), org.compiere.model.I_C_Department.Table_Name)
-			.getPO(getC_Department_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Department)MTable.get(getCtx(), org.compiere.model.I_C_Department.Table_ID)
+			.getPO(getC_Department_ID(), get_TrxName());
+	}
 
 	/** Set Department.
-		@param C_Department_ID Department	  */
+		@param C_Department_ID Department
+	*/
 	public void setC_Department_ID (int C_Department_ID)
 	{
-		if (C_Department_ID < 1) 
+		if (C_Department_ID < 1)
 			set_Value (COLUMNNAME_C_Department_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Department_ID, Integer.valueOf(C_Department_ID));
 	}
 
 	/** Get Department.
 		@return Department	  */
-	public int getC_Department_ID () 
+	public int getC_Department_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Department_ID);
 		if (ii == null)
@@ -419,27 +472,28 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_BPartner getC_Employee() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
-			.getPO(getC_Employee_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
+			.getPO(getC_Employee_ID(), get_TrxName());
+	}
 
 	/** Set Employee.
-		@param C_Employee_ID 
-		Identifies a Business Partner
-	  */
+		@param C_Employee_ID Identifies a Business Partner
+	*/
 	public void setC_Employee_ID (int C_Employee_ID)
 	{
-		if (C_Employee_ID < 1) 
+		if (C_Employee_ID < 1)
 			set_Value (COLUMNNAME_C_Employee_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Employee_ID, Integer.valueOf(C_Employee_ID));
 	}
 
 	/** Get Employee.
 		@return Identifies a Business Partner
 	  */
-	public int getC_Employee_ID () 
+	public int getC_Employee_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Employee_ID);
 		if (ii == null)
@@ -447,6 +501,7 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Location getC_LocFrom() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Location)MTable.get(getCtx(), org.compiere.model.I_C_Location.Table_ID)
@@ -475,6 +530,7 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Location getC_LocTo() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Location)MTable.get(getCtx(), org.compiere.model.I_C_Location.Table_ID)
@@ -503,6 +559,7 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
@@ -531,6 +588,7 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_SalesRegion getC_SalesRegion() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_SalesRegion)MTable.get(getCtx(), org.compiere.model.I_C_SalesRegion.Table_ID)
@@ -575,34 +633,6 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
-	public org.compiere.model.I_GL_Distribution getGL_Distribution() throws RuntimeException
-	{
-		return (org.compiere.model.I_GL_Distribution)MTable.get(getCtx(), org.compiere.model.I_GL_Distribution.Table_ID)
-			.getPO(getGL_Distribution_ID(), get_TrxName());
-	}
-
-	/** Set GL Distribution.
-		@param GL_Distribution_ID General Ledger Distribution
-	*/
-	public void setGL_Distribution_ID (int GL_Distribution_ID)
-	{
-		if (GL_Distribution_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_GL_Distribution_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_GL_Distribution_ID, Integer.valueOf(GL_Distribution_ID));
-	}
-
-	/** Get GL Distribution.
-		@return General Ledger Distribution
-	  */
-	public int getGL_Distribution_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_GL_Distribution_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	/** Set GL Distribution Line.
 		@param GL_DistributionLine_ID General Ledger Distribution Line
 	*/
@@ -640,6 +670,35 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 		return (String)get_Value(COLUMNNAME_GL_DistributionLine_UU);
 	}
 
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_GL_Distribution getGL_Distribution() throws RuntimeException
+	{
+		return (org.compiere.model.I_GL_Distribution)MTable.get(getCtx(), org.compiere.model.I_GL_Distribution.Table_ID)
+			.getPO(getGL_Distribution_ID(), get_TrxName());
+	}
+
+	/** Set GL Distribution.
+		@param GL_Distribution_ID General Ledger Distribution
+	*/
+	public void setGL_Distribution_ID (int GL_Distribution_ID)
+	{
+		if (GL_Distribution_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_GL_Distribution_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_GL_Distribution_ID, Integer.valueOf(GL_Distribution_ID));
+	}
+
+	/** Get GL Distribution.
+		@return General Ledger Distribution
+	  */
+	public int getGL_Distribution_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_GL_Distribution_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Line No.
 		@param Line Unique line for this document
 	*/
@@ -667,27 +726,28 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
         return new KeyNamePair(get_ID(), String.valueOf(getLine()));
     }
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_M_AttributeSetInstance getM_AttributeSetInstance() throws RuntimeException
-    {
-		return (org.compiere.model.I_M_AttributeSetInstance)MTable.get(getCtx(), org.compiere.model.I_M_AttributeSetInstance.Table_Name)
-			.getPO(getM_AttributeSetInstance_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_M_AttributeSetInstance)MTable.get(getCtx(), org.compiere.model.I_M_AttributeSetInstance.Table_ID)
+			.getPO(getM_AttributeSetInstance_ID(), get_TrxName());
+	}
 
 	/** Set Attribute Set Instance.
-		@param M_AttributeSetInstance_ID 
-		Product Attribute Set Instance
-	  */
+		@param M_AttributeSetInstance_ID Product Attribute Set Instance
+	*/
 	public void setM_AttributeSetInstance_ID (int M_AttributeSetInstance_ID)
 	{
-		if (M_AttributeSetInstance_ID < 0) 
+		if (M_AttributeSetInstance_ID < 0)
 			set_Value (COLUMNNAME_M_AttributeSetInstance_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_M_AttributeSetInstance_ID, Integer.valueOf(M_AttributeSetInstance_ID));
 	}
 
 	/** Get Attribute Set Instance.
 		@return Product Attribute Set Instance
 	  */
-	public int getM_AttributeSetInstance_ID () 
+	public int getM_AttributeSetInstance_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_AttributeSetInstance_ID);
 		if (ii == null)
@@ -695,6 +755,7 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException
 	{
 		return (org.compiere.model.I_M_Product)MTable.get(getCtx(), org.compiere.model.I_M_Product.Table_ID)
@@ -723,27 +784,28 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException
-    {
-		return (org.compiere.model.I_M_Warehouse)MTable.get(getCtx(), org.compiere.model.I_M_Warehouse.Table_Name)
-			.getPO(getM_Warehouse_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_M_Warehouse)MTable.get(getCtx(), org.compiere.model.I_M_Warehouse.Table_ID)
+			.getPO(getM_Warehouse_ID(), get_TrxName());
+	}
 
 	/** Set Warehouse.
-		@param M_Warehouse_ID 
-		Storage Warehouse and Service Point
-	  */
+		@param M_Warehouse_ID Storage Warehouse and Service Point
+	*/
 	public void setM_Warehouse_ID (int M_Warehouse_ID)
 	{
-		if (M_Warehouse_ID < 1) 
+		if (M_Warehouse_ID < 1)
 			set_Value (COLUMNNAME_M_Warehouse_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_M_Warehouse_ID, Integer.valueOf(M_Warehouse_ID));
 	}
 
 	/** Get Warehouse.
 		@return Storage Warehouse and Service Point
 	  */
-	public int getM_Warehouse_ID () 
+	public int getM_Warehouse_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_Warehouse_ID);
 		if (ii == null)
@@ -820,9 +882,8 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 	}
 
 	/** Set Overwrite Asset.
-		@param OverwriteAsset 
-		Overwrite the account segment Asset with the value specified
-	  */
+		@param OverwriteAsset Overwrite the account segment Asset with the value specified
+	*/
 	public void setOverwriteAsset (boolean OverwriteAsset)
 	{
 		set_Value (COLUMNNAME_OverwriteAsset, Boolean.valueOf(OverwriteAsset));
@@ -831,22 +892,21 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 	/** Get Overwrite Asset.
 		@return Overwrite the account segment Asset with the value specified
 	  */
-	public boolean isOverwriteAsset () 
+	public boolean isOverwriteAsset()
 	{
 		Object oo = get_Value(COLUMNNAME_OverwriteAsset);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
 	}
 
 	/** Set Overwrite Attribute Set Instance.
-		@param OverwriteAttributeSetInstance 
-		Overwrite the account segment Attribute Set Instance with the value specified
-	  */
+		@param OverwriteAttributeSetInstance Overwrite the account segment Attribute Set Instance with the value specified
+	*/
 	public void setOverwriteAttributeSetInstance (boolean OverwriteAttributeSetInstance)
 	{
 		set_Value (COLUMNNAME_OverwriteAttributeSetInstance, Boolean.valueOf(OverwriteAttributeSetInstance));
@@ -855,13 +915,13 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 	/** Get Overwrite Attribute Set Instance.
 		@return Overwrite the account segment Attribute Set Instance with the value specified
 	  */
-	public boolean isOverwriteAttributeSetInstance () 
+	public boolean isOverwriteAttributeSetInstance()
 	{
 		Object oo = get_Value(COLUMNNAME_OverwriteAttributeSetInstance);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -914,9 +974,8 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 	}
 
 	/** Set Overwrite Charge.
-		@param OverwriteCharge 
-		Overwrite the account segment Charge with the value specified
-	  */
+		@param OverwriteCharge Overwrite the account segment Charge with the value specified
+	*/
 	public void setOverwriteCharge (boolean OverwriteCharge)
 	{
 		set_Value (COLUMNNAME_OverwriteCharge, Boolean.valueOf(OverwriteCharge));
@@ -925,22 +984,21 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 	/** Get Overwrite Charge.
 		@return Overwrite the account segment Charge with the value specified
 	  */
-	public boolean isOverwriteCharge () 
+	public boolean isOverwriteCharge()
 	{
 		Object oo = get_Value(COLUMNNAME_OverwriteCharge);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
 	}
 
 	/** Set Overwrite Cost Center.
-		@param OverwriteCostCenter 
-		Overwrite the account segment Cost Center with the value specified
-	  */
+		@param OverwriteCostCenter Overwrite the account segment Cost Center with the value specified
+	*/
 	public void setOverwriteCostCenter (boolean OverwriteCostCenter)
 	{
 		set_Value (COLUMNNAME_OverwriteCostCenter, Boolean.valueOf(OverwriteCostCenter));
@@ -949,22 +1007,21 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 	/** Get Overwrite Cost Center.
 		@return Overwrite the account segment Cost Center with the value specified
 	  */
-	public boolean isOverwriteCostCenter () 
+	public boolean isOverwriteCostCenter()
 	{
 		Object oo = get_Value(COLUMNNAME_OverwriteCostCenter);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
 	}
 
 	/** Set Overwrite Department.
-		@param OverwriteDepartment 
-		Overwrite the account segment Department with the value specified
-	  */
+		@param OverwriteDepartment Overwrite the account segment Department with the value specified
+	*/
 	public void setOverwriteDepartment (boolean OverwriteDepartment)
 	{
 		set_Value (COLUMNNAME_OverwriteDepartment, Boolean.valueOf(OverwriteDepartment));
@@ -973,22 +1030,21 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 	/** Get Overwrite Department.
 		@return Overwrite the account segment Department with the value specified
 	  */
-	public boolean isOverwriteDepartment () 
+	public boolean isOverwriteDepartment()
 	{
 		Object oo = get_Value(COLUMNNAME_OverwriteDepartment);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
 	}
 
 	/** Set Overwrite Employee.
-		@param OverwriteEmployee 
-		Overwrite the account segment Employee with the value specified
-	  */
+		@param OverwriteEmployee Overwrite the account segment Employee with the value specified
+	*/
 	public void setOverwriteEmployee (boolean OverwriteEmployee)
 	{
 		set_Value (COLUMNNAME_OverwriteEmployee, Boolean.valueOf(OverwriteEmployee));
@@ -997,13 +1053,13 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 	/** Get Overwrite Employee.
 		@return Overwrite the account segment Employee with the value specified
 	  */
-	public boolean isOverwriteEmployee () 
+	public boolean isOverwriteEmployee()
 	{
 		Object oo = get_Value(COLUMNNAME_OverwriteEmployee);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1217,9 +1273,8 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 	}
 
 	/** Set Overwrite Warehouse.
-		@param OverwriteWarehouse 
-		Overwrite the account segment Warehouse with the value specified
-	  */
+		@param OverwriteWarehouse Overwrite the account segment Warehouse with the value specified
+	*/
 	public void setOverwriteWarehouse (boolean OverwriteWarehouse)
 	{
 		set_Value (COLUMNNAME_OverwriteWarehouse, Boolean.valueOf(OverwriteWarehouse));
@@ -1228,13 +1283,13 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 	/** Get Overwrite Warehouse.
 		@return Overwrite the account segment Warehouse with the value specified
 	  */
-	public boolean isOverwriteWarehouse () 
+	public boolean isOverwriteWarehouse()
 	{
 		Object oo = get_Value(COLUMNNAME_OverwriteWarehouse);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1259,6 +1314,7 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 		return bd;
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_ID)
@@ -1287,6 +1343,7 @@ public class X_GL_DistributionLine extends PO implements I_GL_DistributionLine, 
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_ID)

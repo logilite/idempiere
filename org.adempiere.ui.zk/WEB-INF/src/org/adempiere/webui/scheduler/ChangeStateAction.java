@@ -34,6 +34,7 @@ import org.adempiere.webui.adwindow.ADWindowContent;
 import org.adempiere.webui.adwindow.IADTabpanel;
 import org.adempiere.webui.component.Button;
 import org.adempiere.webui.factory.ButtonFactory;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.window.Dialog;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
@@ -169,7 +170,7 @@ public class ChangeStateAction implements IAction, EventListener<Event> {
 	public void decorate(Toolbarbutton toolbarButton) {
 		if (Util.isEmpty(toolbarButton.getTooltiptext()))
 			toolbarButton.setTooltiptext(toolbarButton.getLabel());		
-		toolbarButton.setIconSclass("z-icon-spinner");
+		toolbarButton.setIconSclass(Icon.getIconSclass(Icon.SPINNER));
 		toolbarButton.setLabel(null);
 		toolbarButton.setImageContent((Image)null);
 		LayoutUtils.addSclass("font-icon-toolbar-button", toolbarButton);

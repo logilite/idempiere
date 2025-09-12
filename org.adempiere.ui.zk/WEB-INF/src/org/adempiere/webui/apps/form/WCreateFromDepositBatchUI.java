@@ -50,7 +50,6 @@ import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MPayment;
 import org.compiere.model.SystemIDs;
-import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -96,9 +95,6 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 		}
 		AEnv.showWindow(window);
 	}
-
-	/**	Logger */
-	private static final CLogger log = CLogger.getCLogger(WCreateFromDepositBatchUI.class);
 	
 	/** form parameters for loading of payment transactions ({@link #loadBankAccount}) */
 	
@@ -205,7 +201,7 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 	 */
 	protected void zkInit() throws Exception
 	{
-		window.setWidth("1200px");
+    	ZKUpdateUtil.setWindowWidthX(window, 1200);
 		bankAccountLabel.setText(Msg.translate(Env.getCtx(), "C_BankAccount_ID"));
     	authorizationLabel.setText(Msg.translate(Env.getCtx(), "R_AuthCode"));
     	

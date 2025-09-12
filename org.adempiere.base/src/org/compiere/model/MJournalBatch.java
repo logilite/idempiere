@@ -951,14 +951,10 @@ public class MJournalBatch extends X_GL_JournalBatch implements DocAction
 		}
 	}
 	
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
 	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
+		// Set DateDoc and DateAcct to today date if still null
 		if (getDateDoc() == null)
 		{
 			if (getDateAcct() == null)
@@ -974,7 +970,7 @@ public class MJournalBatch extends X_GL_JournalBatch implements DocAction
 		}
 		else if (!isProcessed())
 		{
-			//validate period
+			// Validate period for DateAcct
 			int C_Period_ID = MPeriod.getC_Period_ID(getCtx(), getDateAcct(), getAD_Org_ID());
 			if (C_Period_ID == 0)
 			{

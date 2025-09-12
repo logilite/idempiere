@@ -22,11 +22,11 @@
  * Contributors:                                                       *
  * - Carlos Ruiz - globalqss - bxservice                               *
  **********************************************************************/
-
 package org.compiere.model;
 
 import org.compiere.util.Ini;
 import org.compiere.util.SecureInterface;
+import org.compiere.util.Util;
 
 /**
  * Collection of System properties used in iDempiere
@@ -35,7 +35,7 @@ import org.compiere.util.SecureInterface;
  */
 public class SystemProperties {
 
-	private static final String ADEMPIERE_DB_SYSTEM_USER = "ADEMPIERE_DB_SYSTEM_USER";
+	public static final String ADEMPIERE_DB_SYSTEM_USER = "ADEMPIERE_DB_SYSTEM_USER";
 	private static final String ADEMPIERE_SECURE = SecureInterface.ADEMPIERE_SECURE;
 	private static final String Cache_ExpireMinute = "Cache.ExpireMinute";
 	private static final String Cache_MaxSize = "Cache.MaxSize";
@@ -49,6 +49,7 @@ public class SystemProperties {
 	private static final String org_idempiere_db_debug = "org.idempiere.db.debug";
 	private static final String org_idempiere_db_debug_convert = "org.idempiere.db.debug.convert";
 	private static final String org_idempiere_db_debug_filter = "org.idempiere.db.debug.filter";
+	private static final String org_idempiere_developermode = "org.idempiere.developermode";
 	private static final String org_idempiere_FileLogPrefix = "org.idempiere.FileLogPrefix";
 	private static final String org_idempiere_FullExceptionTraceInLog = "org.idempiere.FullExceptionTraceInLog";
 	private static final String org_idempiere_postgresql_URLParameters = "org.idempiere.postgresql.URLParameters";
@@ -63,10 +64,14 @@ public class SystemProperties {
 
 	/**
 	 * ADEMPIERE_DB_SYSTEM_USER allows to override the default name of the system user for the database
+	 * try first with a JVM variable, if not defined then try environment variable
 	 * @return
 	 */
 	public static String getAdempiereDBSystemUser() {
-		return System.getProperty(ADEMPIERE_DB_SYSTEM_USER);
+		String systemUser = System.getProperty(ADEMPIERE_DB_SYSTEM_USER);
+		if (Util.isEmpty(systemUser, true))
+			systemUser = System.getenv(ADEMPIERE_DB_SYSTEM_USER);
+		return systemUser;
 	}
 
 	/**
@@ -74,7 +79,10 @@ public class SystemProperties {
 	 * @return
 	 */
 	public static String getAdempiereSecure() {
-		return System.getProperty(ADEMPIERE_SECURE);
+		String secureClass = System.getProperty(ADEMPIERE_SECURE);
+		if (Util.isEmpty(secureClass, true))
+			secureClass = System.getenv(ADEMPIERE_SECURE);
+		return secureClass;
 	}
 
 	/**
@@ -94,8 +102,8 @@ public class SystemProperties {
 	}
 
 	/**
-	 * Cache.MaxSize.[Table] allows to define a max size for cache specific for one table
-	 * for example -DCache.MaxSize.AD_Column=15000 will set the max size for AD_Column
+	 * Cache.MaxSize.[Table] allows to define a max size for cache specific for one table.<br/>
+	 * For example -DCache.MaxSize.AD_Column=15000 will set the max size for AD_Column
 	 * @return
 	 */
 	public static String getCacheMaxSizeTable(String tableName) {
@@ -103,7 +111,7 @@ public class SystemProperties {
 	}
 
 	/**
-	 * env.IDEMPIERE_HOME to define the home of iDempiere
+	 * env.IDEMPIERE_HOME to define the home of iDempiere server instance
 	 * @return
 	 */
 	public static String getEnvIdempiereHome() {
@@ -111,7 +119,7 @@ public class SystemProperties {
 	}
 
 	/**
-	 * IDEMPIERE_HOME to define the home of iDempiere
+	 * IDEMPIERE_HOME to define the home of iDempiere server instance
 	 * @return
 	 */
 	public static String getIdempiereHome() {
@@ -119,7 +127,7 @@ public class SystemProperties {
 	}
 
 	/**
-	 * IDEMPIERE_HOME to define the home of iDempiere
+	 * IDEMPIERE_HOME to define the home of iDempiere server instance
 	 * @return
 	 */
 	public static String setIdempiereHome(String idempiereHome) {
@@ -127,10 +135,10 @@ public class SystemProperties {
 	}
 
 	/**
-	 * Verify if the system manages properties in a more secure way
-	 * for Windows and swing client the properties are managed as always
-	 * for other systems (like Linux) the default is to manage it with more security
-	 * this can be overridden passing the parameter -DIDEMPIERE_SECURE_PROPERTIES=false to the JVM
+	 * Verify if the system manages properties in a more secure way.<br/>
+	 * For Windows and swing client the properties are managed as always.<br/>
+	 * For other systems (like Linux) the default is to manage it with more security.<br/>
+	 * This can be overridden passing the parameter -DIDEMPIERE_SECURE_PROPERTIES=false to the JVM.
 	 * @return
 	 */
 	public static boolean isSecureProperties() {
@@ -139,7 +147,7 @@ public class SystemProperties {
 	}
 
 	/**
-	 * LogLevel=SEVERE|WARNING|INFO|CONFIG|FINE|FINER|FINEST  Set the log level for the Pack In Folder application
+	 * LogLevel=SEVERE|WARNING|INFO|CONFIG|FINE|FINER|FINEST  Set the log level for the Pack In Folder application.
 	 * for example: LogLevel=INFO
 	 * @return
 	 */
@@ -172,7 +180,7 @@ public class SystemProperties {
 	}
 
 	/**
-	 * org.idempiere.db.debug.filter as a regular expression to filter the statements written in log
+	 * org.idempiere.db.debug.filter as a regular expression to filter the statements written in log.<br/>
 	 * for example: org.idempiere.db.debug.filter='(?i)(?s:.)*\bc_order\b(?s:.)*' will show all SQL related to c_order table
 	 * @return
 	 */
@@ -186,6 +194,14 @@ public class SystemProperties {
 	 */
 	public static boolean isDBDebugConvert() {
 		return "true".equals(System.getProperty(org_idempiere_db_debug_convert));
+	}
+
+	/**
+	 * org_idempiere_developermode=Y to define that iDempiere is running in developer mode (usually in eclipse IDE) Y/N
+	 * @return
+	 */
+	public static boolean isDeveloperMode() {
+		return System.getProperty(org_idempiere_developermode, "N").equals("Y");
 	}
 
 	/**

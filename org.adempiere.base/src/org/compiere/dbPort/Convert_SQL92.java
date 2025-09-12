@@ -24,7 +24,6 @@ import org.compiere.util.Util;
 /***
  * Convert from oracle syntax to sql 92 standard
  * @author Low Heng Sin
- *
  */
 public abstract class Convert_SQL92 extends Convert {
 	
@@ -38,9 +37,9 @@ public abstract class Convert_SQL92 extends Convert {
 	public static final String	PG_ARRAY_OVERLAP_EXP	= "&&";
 	public static final String	PG_ARRAY_EXCLUDE_ALIAS_EXP	= "-&&";
 	
-	/**************************************************************************
+	/**
 	 *  Convert Outer Join.<br/>
-	 *  Converting joins can be very complex when multiple tables/keys are involved.
+	 *  Converting joins can be very complex when multiple tables/keys are involved.<br/>
 	 *  The main scenarios supported are two tables with multiple key columns
 	 *  and multiple tables with single key columns.
 	 *  <pre>{@code

@@ -50,7 +50,6 @@ import org.compiere.util.Util;
  *	Print Invoices on Paper or send PDFs
  *
  * 	@author 	Jorg Janke
- * 	@version 	$Id: InvoicePrint.java,v 1.2 2006/07/30 00:51:02 jjanke Exp $
  */
 @org.adempiere.base.annotation.Process
 public class InvoicePrint extends SvrProcess
@@ -79,6 +78,7 @@ public class InvoicePrint extends SvrProcess
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
+	@Override
 	protected void prepare()
 	{
 		ProcessInfoParameter[] para = getParameter();
@@ -131,6 +131,7 @@ public class InvoicePrint extends SvrProcess
 	 *  @return Message
 	 *  @throws Exception
 	 */
+	@Override
 	protected String doIt() throws java.lang.Exception
 	{
 		//	Need to have Template
@@ -431,7 +432,7 @@ public class InvoicePrint extends SvrProcess
 		}
 		String orgWhere = MRole.getDefault(getCtx(), false).getOrgWhere(MRole.SQL_RO);
 		if (!Util.isEmpty(orgWhere, true)) {
-			orgWhere = orgWhere.replaceAll("AD_Org_ID", "i.AD_Org_ID");
+			orgWhere = orgWhere.replace("AD_Org_ID", "i.AD_Org_ID");
 			sql.append(" AND ");
 			sql.append(orgWhere);
 		}

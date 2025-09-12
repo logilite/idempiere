@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_Department
  *  @author iDempiere (generated) 
- *  @version Release 7.1
+ *  @version Release 13
  */
 public interface I_C_Department 
 {
@@ -70,6 +70,15 @@ public interface I_C_Department
 
 	/** Get Department	  */
 	public int getC_Department_ID();
+
+    /** Column name C_Department_UU */
+    public static final String COLUMNNAME_C_Department_UU = "C_Department_UU";
+
+	/** Set Department UU	  */
+	public void setC_Department_UU (String C_Department_UU);
+
+	/** Get Department UU	  */
+	public String getC_Department_UU();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";

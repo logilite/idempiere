@@ -49,6 +49,9 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Column;
 import org.zkoss.zul.Columns;
 
+/**
+ * Dialog to customize grid view layout
+ */
 public class CustomizeGridViewDialog extends Window {
 
 	/**

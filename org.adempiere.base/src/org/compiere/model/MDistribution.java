@@ -54,6 +54,7 @@ public class MDistribution extends X_GL_Distribution
 	 *	@return array of distributions
 	 *  @Deprecated
 	 */
+	@Deprecated
 	public static MDistribution[] get (MAccount acct,  
 		String PostingType, int C_DocType_ID, Timestamp dateAcct)
 	{
@@ -85,23 +86,32 @@ public class MDistribution extends X_GL_Distribution
 	 *	@param C_LocFrom_ID location from
 	 *	@param User1_ID user 1
 	 *	@param User2_ID user 2
+	 *	@param C_CostCenter_ID 
+	 *	@param C_Department_ID 
+	 *	@param C_Employee_ID 
+	 *	@param C_Charge_ID 
+	 *	@param A_Asset_ID 
+	 *	@param M_Warehouse_ID 
+	 *	@param M_AttributeSetInstance_ID 
 	 *	@return array of distributions or null
 	 */
-	public static MDistribution[] get (int C_AcctSchema_ID, 
+	public static MDistribution[] get(int C_AcctSchema_ID,
 		String PostingType, int C_DocType_ID, Timestamp dateAcct,
 		int AD_Org_ID, int Account_ID,
 		int M_Product_ID, int C_BPartner_ID, int C_Project_ID,
 		int C_Campaign_ID, int C_Activity_ID, int AD_OrgTrx_ID,
 		int C_SalesRegion_ID, int C_LocTo_ID, int C_LocFrom_ID,
-		int User1_ID, int User2_ID)
+		int User1_ID, int User2_ID, int C_CostCenter_ID, int C_Department_ID,
+		int C_Employee_ID, int C_Charge_ID, int A_Asset_ID, int M_Warehouse_ID, int M_AttributeSetInstance_ID)
 	{
-		return get(Env.getCtx(), C_AcctSchema_ID, PostingType, C_DocType_ID, dateAcct, AD_Org_ID, Account_ID, M_Product_ID, C_BPartner_ID, 
-				C_Project_ID, C_Campaign_ID, C_Activity_ID, AD_OrgTrx_ID, C_SalesRegion_ID, C_LocTo_ID, C_LocFrom_ID, User1_ID, User2_ID, 0, 0, 0, 0, 0, 0, 0);
+		return get(Env.getCtx(), C_AcctSchema_ID, PostingType, C_DocType_ID, dateAcct, AD_Org_ID, Account_ID, M_Product_ID, C_BPartner_ID,
+						C_Project_ID, C_Campaign_ID, C_Activity_ID, AD_OrgTrx_ID, C_SalesRegion_ID, C_LocTo_ID, C_LocFrom_ID, User1_ID, User2_ID, C_CostCenter_ID, C_Department_ID, C_Employee_ID,
+						C_Charge_ID, A_Asset_ID, M_Warehouse_ID, M_AttributeSetInstance_ID);
 	}
 	
 	/**
 	 * 	Get Distributions for combination
-	 *  @param ctx context
+	 *	@param ctx context
 	 *	@param C_AcctSchema_ID schema
 	 *	@param PostingType posting type
 	 *	@param C_DocType_ID document type
@@ -118,13 +128,13 @@ public class MDistribution extends X_GL_Distribution
 	 *	@param C_LocFrom_ID location from
 	 *	@param User1_ID user 1
 	 *	@param User2_ID user 2
-	 *  @param C_CostCenter_ID 
-	 *	@param C_Department_ID 
-	 *	@param C_Employee_ID 
-	 *	@param C_Charge_ID 
-	 *	@param A_Asset_ID 
-	 *	@param M_Warehouse_ID 
-	 *	@param M_AttributeSetInstance_ID 
+	 *	@param C_CostCenter_ID
+	 *	@param C_Department_ID
+	 *	@param C_Employee_ID
+	 *	@param C_Charge_ID
+	 *	@param A_Asset_ID
+	 *	@param M_Warehouse_ID
+	 *	@param M_AttributeSetInstance_ID
 	 *	@return array of distributions or null
 	 */
 	public static MDistribution[] get (Properties ctx, int C_AcctSchema_ID, 
@@ -534,15 +544,10 @@ public class MDistribution extends X_GL_Distribution
 		}
 	}	//	distribute
 		
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
 	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
-		//	Reset not selected Any
+		//	Reset corresponding field to 0 if IsAny* is true
 		if (isAnyAcct() && getAccount_ID() != 0)
 			setAccount_ID(0);
 		if (isAnyActivity() && getC_Activity_ID() != 0)

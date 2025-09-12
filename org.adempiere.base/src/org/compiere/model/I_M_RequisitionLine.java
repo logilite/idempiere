@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for M_RequisitionLine
  *  @author iDempiere (generated) 
- *  @version Release 11
+ *  @version Release 13
  */
 public interface I_M_RequisitionLine 
 {
@@ -75,6 +75,7 @@ public interface I_M_RequisitionLine
 	  */
 	public int getC_BPartner_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException;
 
     /** Column name C_Campaign_ID */
@@ -105,6 +106,7 @@ public interface I_M_RequisitionLine
 	  */
 	public int getC_Charge_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Charge getC_Charge() throws RuntimeException;
 
     /** Column name C_OrderLine_ID */
@@ -120,22 +122,24 @@ public interface I_M_RequisitionLine
 	  */
 	public int getC_OrderLine_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_OrderLine getC_OrderLine() throws RuntimeException;
 
-    /** Column name C_Project_ID */
-    public static final String COLUMNNAME_C_Project_ID = "C_Project_ID";
+    /** Column name C_UOM_ID */
+    public static final String COLUMNNAME_C_UOM_ID = "C_UOM_ID";
 
-	/** Set Project.
-	  * Financial Project
+	/** Set UOM.
+	  * Unit of Measure
 	  */
-	public void setC_Project_ID (int C_Project_ID);
+	public void setC_UOM_ID (int C_UOM_ID);
 
-	/** Get Project.
-	  * Financial Project
+	/** Get UOM.
+	  * Unit of Measure
 	  */
-	public int getC_Project_ID();
+	public int getC_UOM_ID();
 
-	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException;
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException;
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
@@ -152,21 +156,6 @@ public interface I_M_RequisitionLine
 	  * User who created this records
 	  */
 	public int getCreatedBy();
-
-    /** Column name C_UOM_ID */
-    public static final String COLUMNNAME_C_UOM_ID = "C_UOM_ID";
-
-	/** Set UOM.
-	  * Unit of Measure
-	  */
-	public void setC_UOM_ID (int C_UOM_ID);
-
-	/** Get UOM.
-	  * Unit of Measure
-	  */
-	public int getC_UOM_ID();
-
-	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException;
 
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";
@@ -233,6 +222,7 @@ public interface I_M_RequisitionLine
 	  */
 	public int getM_AttributeSetInstance_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public I_M_AttributeSetInstance getM_AttributeSetInstance() throws RuntimeException;
 
     /** Column name M_Product_ID */
@@ -248,22 +238,8 @@ public interface I_M_RequisitionLine
 	  */
 	public int getM_Product_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException;
-
-    /** Column name M_Requisition_ID */
-    public static final String COLUMNNAME_M_Requisition_ID = "M_Requisition_ID";
-
-	/** Set Requisition.
-	  * Material Requisition
-	  */
-	public void setM_Requisition_ID (int M_Requisition_ID);
-
-	/** Get Requisition.
-	  * Material Requisition
-	  */
-	public int getM_Requisition_ID();
-
-	public org.compiere.model.I_M_Requisition getM_Requisition() throws RuntimeException;
 
     /** Column name M_RequisitionLine_ID */
     public static final String COLUMNNAME_M_RequisitionLine_ID = "M_RequisitionLine_ID";
@@ -286,6 +262,22 @@ public interface I_M_RequisitionLine
 
 	/** Get M_RequisitionLine_UU	  */
 	public String getM_RequisitionLine_UU();
+
+    /** Column name M_Requisition_ID */
+    public static final String COLUMNNAME_M_Requisition_ID = "M_Requisition_ID";
+
+	/** Set Requisition.
+	  * Material Requisition
+	  */
+	public void setM_Requisition_ID (int M_Requisition_ID);
+
+	/** Get Requisition.
+	  * Material Requisition
+	  */
+	public int getM_Requisition_ID();
+
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_M_Requisition getM_Requisition() throws RuntimeException;
 
     /** Column name PriceActual */
     public static final String COLUMNNAME_PriceActual = "PriceActual";

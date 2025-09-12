@@ -47,6 +47,9 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
+import org.compiere.process.DocAction;
+import org.compiere.process.DocumentEngine;
+import org.compiere.util.Msg;
 
 /**
  *  Deposit Batch Model
@@ -91,9 +94,8 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 	 */
 	private void setInitialDefaults() {
 		setDocStatus (DOCSTATUS_Drafted);
-			setDocAction (DOCACTION_Complete);
+		setDocAction (DOCACTION_Complete);
 		setProcessed (false);
-		setProcessing (false);
 		setDepositAmt(Env.ZERO);
 	}
 
@@ -127,15 +129,13 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 		setDepositAmt(original.getDepositAmt());
 	}	//	MDepositBatch
 	
-	
-	
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
 		if (!newRecord && is_ValueChanged(COLUMNNAME_C_Currency_ID))
 		{
 			String sql = "SELECT COUNT(1) FROM C_DepositBatchLine WHERE C_DepositBatch_ID=?";
-			int ii = DB.getSQLValue (get_TrxName(), sql, getC_DepositBatch_ID());
+			int ii = DB.getSQLValueEx(get_TrxName(), sql, getC_DepositBatch_ID());
 			
 			if (ii > 0)
 			{
@@ -143,7 +143,6 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 				return false;
 			}
 		}
-
 		return true;
 	}
 
@@ -181,7 +180,6 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 	public boolean unlockIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("unlockIt - " + toString());
-		setProcessing(false);
 		return true;
 	}	//	unlockIt
 	
@@ -190,6 +188,7 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 	 * 	@return true if success 
 	 *  @deprecated incomplete/abandon implementation of DocAction interface
 	 */
+	@Override
 	@Deprecated
 	public boolean invalidateIt()
 	{
@@ -203,9 +202,9 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 	 * 	@return false
 	 *  @deprecated incomplete/abandon implementation of DocAction interface 
 	 */
+	@Override
 	@Deprecated
-	public boolean voidIt()
-	{
+	public boolean voidIt() {
 		if (log.isLoggable(Level.INFO)) log.info("voidIt - " + toString());
 		// Before Void
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_VOID);
@@ -221,17 +220,27 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 				return false;
 			}
 		
+		if (DB.getSQLValueEx(get_TrxName(), "SELECT 1 FROM C_BankStatementLine WHERE C_DepositBatch_ID = ?", getC_DepositBatch_ID()) == 1) {
+			m_processMsg = Msg.getMsg(getCtx(), "DepositBatchVoidFailedBankStatementLine");
+			return false;
+		}
+		
 		MDepositBatchLine[] lines = getLines();			
 		for (int i = 0; i < lines.length; i++)
 		{
 			MDepositBatchLine line = lines[i];
 			if (line.getPayAmt().compareTo(Env.ZERO) != 0)
 			{
-
 				if (line.getC_Payment_ID() != 0) 
 				{
-					String sql = "UPDATE C_Payment p SET C_DepositBatch_ID= null WHERE p.C_Payment_ID=?";
-					DB.executeUpdateEx(sql, new Object[] {line.getC_Payment_ID()}, get_TrxName());
+					MPayment payment= new MPayment(getCtx(),line.getC_Payment_ID(),get_TrxName());
+					if (payment.isReconciled()) {
+						m_processMsg = Msg.getMsg(getCtx(), "PaymentIsAlreadyReconciled") + payment;
+						return false;
+					}
+					
+					payment.setC_DepositBatch_ID(0);
+					payment.saveEx(get_TrxName());
 				}
 				line.setPayAmt(Env.ZERO);
 				line.setProcessed(true);
@@ -249,7 +258,7 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 		setProcessed(true);
 		setDocAction(DOCACTION_None);
 		return true;
-	}	//	voidIt
+	}
 
 	/**
 	 * 	String Representation
@@ -343,14 +352,10 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 		return getDepositAmt();
 	}	//	getApprovalAmt
 			
-	/**
-	 * 	After Delete
-	 *	@param success success
-	 *	@return success
-	 */
 	@Override
 	protected boolean afterDelete (boolean success)
 	{
+		// Remove reference from C_Payment
 		if (getC_DepositBatch_ID() != 0 )
 		{
 			String sql = "UPDATE C_Payment p SET C_DepositBatch_ID= 0  WHERE p.C_DepositBatch_ID=?";			
@@ -463,14 +468,12 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 
 	@Override
 	public boolean approveIt() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 
 	@Override
 	public boolean rejectIt() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -494,7 +497,7 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 				+ "INNER JOIN C_DepositBatchLine dbl ON dbl.C_Payment_ID = p.C_Payment_ID "
 				+ "WHERE dbl.C_DepositBatch_ID = ? ";
 		
-		int currencyCount = DB.getSQLValue (get_TrxName(), sql, getC_DepositBatch_ID());
+		int currencyCount = DB.getSQLValueEx(get_TrxName(), sql, getC_DepositBatch_ID());
 		if (currencyCount > 1)
 		{
 			m_processMsg = Msg.getMsg(getCtx(), "ErrorMultipleCurrencyPaymentsRestricted", new Object[] { getC_Currency().getISO_Code()} ); 
@@ -510,6 +513,9 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 			depositbatchLines[line].setProcessed(true);
 			depositbatchLines[line].saveEx();
 		}
+		
+		//Re-calculate lines total amount and Update Header Deposit Amount
+		updateHeaderAmt();
 		
 		//	User Validation
 		String valid = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_COMPLETE);
@@ -543,7 +549,6 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 		return true;
 	}
 
-
 	@Override
 	public boolean reverseCorrectIt() {
 		if (log.isLoggable(Level.INFO)) log.info("reverseCorrectIt - " + toString());
@@ -558,7 +563,6 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 			return false;
 		return false;
 	}
-
 
 	@Override
 	public boolean reverseAccrualIt() {
@@ -575,7 +579,6 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 		return false;
 	}
 
-
 	@Override
 	public boolean reActivateIt() {
 		if (log.isLoggable(Level.INFO)) log.info("reActivateIt - " + toString());
@@ -585,15 +588,20 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 			return false;		
 		
 		if (log.isLoggable(Level.INFO)) log.info("ReactivateIt - " + toString());
-		// Set Payment reconciled false
+
+		if (DB.getSQLValueEx(get_TrxName(), "SELECT 1 FROM C_BankStatementLine WHERE C_DepositBatch_ID = ?", getC_DepositBatch_ID()) == 1) {
+			m_processMsg = Msg.getMsg(getCtx(), "DepositBatchReactivationFailedBankStatementLine");
+			return false;
+		}
+		
 		MDepositBatchLine[] depositbatchLines = getLines();
 
-		// Close lines
+		// Reactivate lines
 		for (int line = 0; line < depositbatchLines.length; line++) {
 			
-			// Throw idempiere exception for payment already reconciled
 			if(depositbatchLines[line].getC_Payment().isReconciled()) {
-				throw new AdempiereException(Msg.getMsg(getCtx(), "NotAllowReActivationOfReconciledPaymentsIntoBatch"));
+				m_processMsg = Msg.getMsg(getCtx(), "NotAllowReActivationOfReconciledPaymentsIntoBatch") + depositbatchLines[line].getC_Payment();
+				return false;
 			}
 			
 			depositbatchLines[line].setProcessed(false);
@@ -634,5 +642,17 @@ public class MDepositBatch extends X_C_DepositBatch implements DocAction
 			sb.append(" - ").append(getDescription());
 		return sb.toString();
 	}
+	
+	private void updateHeaderAmt()
+	{
+		BigDecimal depositAmt = DB.getSQLValueBDEx(get_TrxName(),
+				"SELECT COALESCE(SUM(PayAmt),0) FROM C_DepositBatchLine WHERE C_DepositBatch_ID=? AND IsActive='Y'",
+				getC_DepositBatch_ID());
+		
+		MDepositBatch batch = new MDepositBatch(getCtx(), getC_DepositBatch_ID(),get_TrxName());
+		batch.setDepositAmt(depositAmt);
+		batch.saveEx(get_TrxName());
+		
+	}	//	updateHeader
 
 }	//	MDepositBatch

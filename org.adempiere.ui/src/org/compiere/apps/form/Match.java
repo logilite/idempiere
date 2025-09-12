@@ -60,6 +60,9 @@ import org.compiere.util.TimeUtil;
 import org.compiere.util.Trx;
 import org.compiere.util.ValueNamePair;
 
+/**
+ * Form to perform Matching between Purchase Order, Vendor Invoice and Material Receipt.
+ */
 public class Match
 {
 
@@ -108,8 +111,9 @@ public class Match
 	}
 	
 	/**
-	 * Match From Changed - Fill Match To
+	 * Get applicable match to options for match from
 	 * @param selection match from
+	 * @return list of applicable match to options
 	 */
 	protected Vector<String> cmd_matchFrom(String selection)
 	{
@@ -125,11 +129,10 @@ public class Match
 		}
 		return vector;
 	}   //  cmd_matchFrom
-
 	
 	/**
-	 *  Search Button Pressed - Fill match from.
-	 *  @param xMatchedTable
+	 *  Retrieve available match from records
+	 *  @param xMatchedTable table to fill with retrieved records
 	 *  @param display match from (MATCH_* constant), to popular xMatchedTable.
 	 *  @param matchToString match to (invoice, material receipt or purchase order)
 	 *  @param Product optional M_Product_ID
@@ -178,7 +181,7 @@ public class Match
 	}   //  cmd_search
 
 	/**
-	 * Process Button Pressed - Process Matching
+	 * Process Matching
 	 * @param xMatchedTable Match from table
 	 * @param xMatchedToTable Match to table
 	 * @param matchMode {@link #MODE_NOTMATCHED} or {@link #MODE_MATCHED}
@@ -520,9 +523,9 @@ public class Match
 	
 
 	/**
-	 * Fill match to
+	 * Retrieve available match to records
 	 * @param xMatchedTable Match from table, to get line id from selected row
-	 * @param xMatchedToTable
+	 * @param xMatchedToTable Match to table, to fill with retrieved records
 	 * @param displayString Match from, to populate xMatchedToTable
 	 * @param matchToType Document to match with displayString (MATCH_* constant)
 	 * @param sameBPartner
@@ -565,8 +568,8 @@ public class Match
 		return xMatchedToTable;
 	}   //  cmd_seachTo
 	
-	/**************************************************************************
-	 *  Initialize Table access - create SQL, dateColumn.
+	/**
+	 *  Initialize Table - build SQL, set dateColumn and qtyColumn.
 	 *  <br>
 	 *  The driving table is "hdr", e.g. for hdr.C_BPartner_ID=..<br/>
 	 *  The line table is "lin", e.g. for lin.M_Product_ID=..<br/>
@@ -582,7 +585,6 @@ public class Match
 	 */
 	protected void tableInit (int display, int matchToType, boolean matched, KeyNamePair lineMatched, int C_InvoiceLine_ID)
 	{
-		//boolean matched = matchMode.getSelectedIndex() == MODE_MATCHED;
 		if (log.isLoggable(Level.CONFIG)) log.config("Display=" + m_matchOptions[display]
 			+ ", MatchTo=" + m_matchOptions[matchToType]
 			+ ", Matched=" + matched);
@@ -657,9 +659,8 @@ public class Match
 		}
 	}   //  tableInit
 
-
 	/**
-	 *  Fill the table using m_sql
+	 *  Fill table with records retrieve using m_sql
 	 *  @param table table
 	 */
 	protected void tableLoad (IMiniTable table)
@@ -667,7 +668,7 @@ public class Match
 		String sql = MRole.getDefault().addAccessSQL(
 			m_sql.toString(), "hdr", MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO)
 			+ m_groupBy;
-		log.finest(sql);
+		if (log.isLoggable(Level.FINEST)) log.finest(sql);
 		Statement stmt = null;
 		ResultSet rs = null;
 		try
@@ -846,7 +847,6 @@ public class Match
 	}   //  createMatchRecord
 
 	/**
-	 * 
 	 * @param trxName
 	 */
 	public void setTrxName(String trxName) {
@@ -854,7 +854,6 @@ public class Match
 	}
 
 	/**
-	 * 
 	 * @return trxName
 	 */
 	public String getTrxName() {
@@ -862,7 +861,7 @@ public class Match
 	}
 	
 	/**
-	 * 
+	 * Get display text for matching type
 	 * @param matchType MATCH_INVOICE, MATCH_SHIPMENT or MATCH_ORDER
 	 * @return display text for match type
 	 */
@@ -873,7 +872,7 @@ public class Match
 	}
 	
 	/**
-	 * 
+	 * Get column names for table
 	 * @return {@link ColumnInfo} array
 	 */
 	public ColumnInfo[] getColumnLayout() {

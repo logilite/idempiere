@@ -166,43 +166,24 @@ public class CalloutBankStatement extends CalloutEngine
 	*/
 	public String paymentIntoBatch (Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value)
 	{
-		Integer C_DepositBatch_ID = (Integer)value;
+		Integer C_DepositBatch_ID = (Integer) value;
 		if (C_DepositBatch_ID == null || C_DepositBatch_ID.intValue() == 0)
 			return "";
 		//
-		BigDecimal stmt = (BigDecimal)mTab.getValue("StmtAmt");
+		BigDecimal stmt = (BigDecimal) mTab.getValue("StmtAmt");
 		if (stmt == null)
 			stmt = Env.ZERO;
 
-		String sql = "SELECT DepositAmt FROM C_DepositBatch WHERE C_DepositBatch_ID=?";		//	1
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, C_DepositBatch_ID.intValue());
-			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				BigDecimal bd = rs.getBigDecimal(1);
-				mTab.setValue("TrxAmt", bd);
-				if (stmt.compareTo(Env.ZERO) == 0)
-					mTab.setValue("StmtAmt", bd);
-			}
-		}
-		catch (SQLException e)
-		{
-			log.log(Level.SEVERE, "BankStmt_PaymentIntoBatch", e);
-			return e.getLocalizedMessage();
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-		//  Recalculate Amounts
-		amount (ctx, WindowNo, mTab, mField, value);
+		BigDecimal depositAmt = DB.getSQLValueBDEx(null, "SELECT DepositAmt FROM C_DepositBatch WHERE C_DepositBatch_ID=?",
+				C_DepositBatch_ID.intValue());
+		mTab.setValue("TrxAmt", depositAmt);
+		if (stmt.compareTo(Env.ZERO) == 0)
+			mTab.setValue("StmtAmt", depositAmt);
+
+		// Recalculate Amounts
+		amount(ctx, WindowNo, mTab, mField, value);
 		return "";
 	}	//	payment into batch
+
 
 }	//	CalloutBankStatement

@@ -14,6 +14,7 @@ import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.dashboard.DPFavourites;
 import org.adempiere.webui.desktop.FavouriteController;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.TreeUtils;
 import org.adempiere.webui.window.Dialog;
 import org.compiere.model.MTable;
@@ -220,7 +221,7 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 		menuItem.setValue(MENU_ITEM_DELETE);
 		menuItem.addEventListener(Events.ON_CLICK, new DeleteListener(toNode));
 		if (ThemeManager.isUseFontIconForImage())
-			menuItem.setIconSclass("z-icon-Delete");
+			menuItem.setIconSclass(Icon.getIconSclass(Icon.DELETE));
 		else
 			menuItem.setImage(ThemeManager.getThemeResource("images/Delete24.png"));
 
@@ -239,7 +240,7 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 				menuItem = new Menuitem(Msg.getMsg(Env.getCtx(), MENU_ITEM_DEFAULT_EXPANDED));
 				menuItem.setValue(MENU_ITEM_DEFAULT_EXPANDED);
 				if (ThemeManager.isUseFontIconForImage())
-					menuItem.setIconSclass("z-icon-Expand");
+					menuItem.setIconSclass(Icon.getIconSclass(Icon.EXPAND));
 				else
 					menuItem.setImage(ThemeManager.getThemeResource("images/expand-header.png"));
 			}
@@ -248,7 +249,7 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 				menuItem = new Menuitem(Msg.getMsg(Env.getCtx(), MENU_ITEM_DEFAULT_COLLAPSED));
 				menuItem.setValue(MENU_ITEM_DEFAULT_COLLAPSED);
 				if (ThemeManager.isUseFontIconForImage())
-					menuItem.setIconSclass("z-icon-Parent");
+					menuItem.setIconSclass(Icon.getIconSclass(Icon.PARENT));
 				else
 					menuItem.setImage(ThemeManager.getThemeResource("images/collapse-header.png"));
 			}
@@ -462,8 +463,7 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 						throw new AdempiereException(Msg.getMsg(favNode.getCtx(), CLogger.retrieveError().getValue()));
 					}
 				} else {
-					boolean isNodeDeleted = favNode.delete(true);
-					if (isNodeDeleted)
+					if (favNode.delete(true))
 						treeModel.removeNode(toNode);
 					else
 						throw new AdempiereException(Msg.getMsg(favNode.getCtx(), CLogger.retrieveError().getValue()));

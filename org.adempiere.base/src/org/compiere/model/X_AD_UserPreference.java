@@ -22,7 +22,7 @@ import java.util.Properties;
 
 /** Generated Model for AD_UserPreference
  *  @author iDempiere (generated)
- *  @version Release 11 - $Id$ */
+ *  @version Release 13 - $Id$ */
 @org.adempiere.base.Model(table="AD_UserPreference")
 public class X_AD_UserPreference extends PO implements I_AD_UserPreference, I_Persistent
 {
@@ -30,7 +30,7 @@ public class X_AD_UserPreference extends PO implements I_AD_UserPreference, I_Pe
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20240719L;
+	private static final long serialVersionUID = 20250805L;
 
     /** Standard Constructor */
     public X_AD_UserPreference (Properties ctx, int AD_UserPreference_ID, String trxName)
@@ -41,6 +41,8 @@ public class X_AD_UserPreference extends PO implements I_AD_UserPreference, I_Pe
 			setAD_UserPreference_ID (0);
 			setAD_User_ID (0);
 			setIsReadOnlySession (false);
+// N
+			setIsShowTechnicalInfOnHelp (false);
 // N
 			setViewFindResult (null);
 // 0
@@ -57,6 +59,8 @@ public class X_AD_UserPreference extends PO implements I_AD_UserPreference, I_Pe
 			setAD_User_ID (0);
 			setIsReadOnlySession (false);
 // N
+			setIsShowTechnicalInfOnHelp (false);
+// N
 			setViewFindResult (null);
 // 0
         } */
@@ -72,6 +76,8 @@ public class X_AD_UserPreference extends PO implements I_AD_UserPreference, I_Pe
 			setAD_User_ID (0);
 			setIsReadOnlySession (false);
 // N
+			setIsShowTechnicalInfOnHelp (false);
+// N
 			setViewFindResult (null);
 // 0
         } */
@@ -86,6 +92,8 @@ public class X_AD_UserPreference extends PO implements I_AD_UserPreference, I_Pe
 			setAD_UserPreference_ID (0);
 			setAD_User_ID (0);
 			setIsReadOnlySession (false);
+// N
+			setIsShowTechnicalInfOnHelp (false);
 // N
 			setViewFindResult (null);
 // 0
@@ -156,6 +164,7 @@ public class X_AD_UserPreference extends PO implements I_AD_UserPreference, I_Pe
 		return (String)get_Value(COLUMNNAME_AD_UserPreference_UU);
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)
@@ -184,16 +193,17 @@ public class X_AD_UserPreference extends PO implements I_AD_UserPreference, I_Pe
 		return ii.intValue();
 	}
 
-	/** Set Automatic Commit.
-		@param AutoCommit Automatic Commit
+	/** Set Save on Navigate.
+		@param AutoCommit Automatically save changes to the current record upon user navigation.
 	*/
 	public void setAutoCommit (boolean AutoCommit)
 	{
 		set_Value (COLUMNNAME_AutoCommit, Boolean.valueOf(AutoCommit));
 	}
 
-	/** Get Automatic Commit.
-		@return Automatic Commit	  */
+	/** Get Save on Navigate.
+		@return Automatically save changes to the current record upon user navigation.
+	  */
 	public boolean isAutoCommit()
 	{
 		Object oo = get_Value(COLUMNNAME_AutoCommit);
@@ -301,6 +311,28 @@ public class X_AD_UserPreference extends PO implements I_AD_UserPreference, I_Pe
 	public boolean isReadOnlySession()
 	{
 		Object oo = get_Value(COLUMNNAME_IsReadOnlySession);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Show Technical Information on Help.
+		@param IsShowTechnicalInfOnHelp Show Technical Information on Help
+	*/
+	public void setIsShowTechnicalInfOnHelp (boolean IsShowTechnicalInfOnHelp)
+	{
+		set_Value (COLUMNNAME_IsShowTechnicalInfOnHelp, Boolean.valueOf(IsShowTechnicalInfOnHelp));
+	}
+
+	/** Get Show Technical Information on Help.
+		@return Show Technical Information on Help	  */
+	public boolean isShowTechnicalInfOnHelp()
+	{
+		Object oo = get_Value(COLUMNNAME_IsShowTechnicalInfOnHelp);
 		if (oo != null)
 		{
 			 if (oo instanceof Boolean)

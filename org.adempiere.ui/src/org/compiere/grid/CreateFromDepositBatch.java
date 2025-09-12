@@ -40,11 +40,16 @@ import org.compiere.util.Msg;
  */
 public abstract class CreateFromDepositBatch extends CreateFromBatch 
 {
-	//AD_Org_ID
+	
+	// AD_Org_ID
 	protected int AD_Org_ID = 0;
-	/** Window No               */
+	/** Window No */
 	protected int p_WindowNo;
-		
+	
+	/**
+	 * 
+	 * @param mTab
+	 */
 	public CreateFromDepositBatch(GridTab mTab) 
 	{
 		super(mTab);
@@ -59,7 +64,7 @@ public abstract class CreateFromDepositBatch extends CreateFromBatch
 
 		//  Set AD_Org_ID
 		AD_Org_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, MOrg.COLUMNNAME_AD_Org_ID);
-		
+			
 		return true;
 	}
 	
@@ -81,12 +86,13 @@ public abstract class CreateFromDepositBatch extends CreateFromBatch
 		sql.append(" INNER JOIN C_Payment py ON (py.C_Payment_ID=p.C_Payment_ID)");
 		sql.append(" LEFT OUTER JOIN C_BPartner bp ON (p.C_BPartner_ID=bp.C_BPartner_ID) ");
 		sql.append(getSQLWhere(BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, Currency, AD_Org_ID));
+		
 		sql.append(" AND py.IsReconciled = 'N'");
 		sql.append(" AND p.DocStatus IN ('CO','CL') AND p.PayAmt<>0");
 		sql.append(" AND py.TrxType <> 'X'");
 		sql.append(" AND (py.C_DepositBatch_ID = 0 OR py.C_DepositBatch_ID IS NULL)");
-	    sql.append(" AND NOT EXISTS (SELECT 1 FROM C_BankStatementLine l WHERE p.C_Payment_ID=l.C_Payment_ID AND l.StmtAmt <> 0)");
-
+		sql.append(" AND NOT EXISTS (SELECT 1 FROM C_BankStatementLine l WHERE p.C_Payment_ID=l.C_Payment_ID AND l.StmtAmt <> 0)");
+		
 		sql.append(" ORDER BY p.DateTrx");
 		
 		PreparedStatement pstmt = null;
@@ -167,7 +173,7 @@ public abstract class CreateFromDepositBatch extends CreateFromBatch
 				if (log.isLoggable(Level.FINE)) log.fine("Line Date=" + trxDate + ", Payment=" + C_Payment_ID + ", Currency=" + C_Currency_ID + ", Amt=" + TrxAmt);
 				//	
 				MDepositBatchLine dbl = new MDepositBatchLine(db);
-				dbl.setPayment((MPayment) MTable.get(Env.getCtx(), MPayment.Table_ID).getPO(C_Payment_ID,trxName));
+				dbl.setPayment(new MPayment(Env.getCtx(), C_Payment_ID, trxName));
 				dbl.saveEx();
 			}   //   if selected
 		}   //  for all rows

@@ -32,7 +32,7 @@ import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 /**
- * 	Process Info with Utilities
+ * 	Process Info related Utilities methods
  *
  *  @author Jorg Janke
  *  @version $Id: ProcessInfoUtil.java,v 1.2 2006/07/30 00:54:44 jjanke Exp $
@@ -42,15 +42,13 @@ public class ProcessInfoUtil
 	/**	Logger							*/
 	private static CLogger		s_log = CLogger.getCLogger (ProcessInfoUtil.class);
 
-	
-	/**************************************************************************
-	 *	Query PInstance for result.
-	 *  Fill Summary and success in ProcessInfo
+	/**
+	 *	Query AD_PInstance for result.<br/>
+	 *  Fill Summary and success field in ProcessInfo.
 	 * 	@param pi process info
 	 */
 	public static void setSummaryFromDB (ProcessInfo pi)
 	{
-	//	s_log.fine("setSummaryFromDB - AD_PInstance_ID=" + pi.getAD_PInstance_ID());
 		//
 		int sleepTime = 2000;	//	2 secomds
 		int noRetry = 5;        //  10 seconds total
@@ -84,7 +82,6 @@ public class ProcessInfoUtil
 					//
 					if (Message != null)
 						pi.addSummary ("  (" +  Msg.parseTranslation(Env.getCtx(), Message)  + ")");
-				//	s_log.fine("setSummaryFromDB - " + Message);
 					return;
 				}
 				DB.close(rs);
@@ -92,7 +89,7 @@ public class ProcessInfoUtil
 				//	sleep
 				try
 				{
-					s_log.fine("sleeping");
+					if (s_log.isLoggable(Level.FINE)) s_log.fine("sleeping");
 					Thread.sleep(sleepTime);
 				}
 				catch (InterruptedException ie)
@@ -116,7 +113,7 @@ public class ProcessInfoUtil
 	}	//	setSummaryFromDB
 
 	/**
-	 *	Set Log of Process from Database JUST when they are not already in memory
+	 *	Set Log of Process from Database (if pi.getLogs is empty)
 	 * 	@param pi process info
 	 */
 	public static void setLogFromDB (ProcessInfo pi)
@@ -125,7 +122,6 @@ public class ProcessInfoUtil
         if (m_logs != null && m_logs.length > 0)
         	return;
 
-	//	s_log.fine("setLogFromDB - AD_PInstance_ID=" + pi.getAD_PInstance_ID());
 		String sql = "SELECT Log_ID, P_ID, P_Date, P_Number, P_Msg, AD_Table_ID,Record_ID "				             
 			+ "FROM AD_PInstance_Log "
 			+ "WHERE AD_PInstance_ID=? "
@@ -155,7 +151,7 @@ public class ProcessInfoUtil
 	}	//	getLogFromDB
 
 	/**
-	 *  Create Process Log
+	 *  Save process info logs to DB (AD_PInstance_Log)
 	 * 	@param pi process info
 	 */
 	public static void saveLogToDB (ProcessInfo pi)
@@ -163,12 +159,10 @@ public class ProcessInfoUtil
 		ProcessInfoLog[] logs = pi.getLogs();
 		if (logs == null || logs.length == 0)
 		{
-	//		s_log.fine("saveLogToDB - No Log");
 			return;
 		}
 		if (pi.getAD_PInstance_ID() == 0)
 		{
-	//		s_log.log(Level.WARNING,"saveLogToDB - not saved - AD_PInstance_ID==0");
 			return;
 		}
 		for (int i = 0; i < logs.length; i++)
@@ -182,7 +176,7 @@ public class ProcessInfoUtil
 	}   //  saveLogToDB
 
 	/**
-	 *  Set Parameter of Process (and Client/User)
+	 *  Read process parameters from DB (AD_PInstance_Para)
 	 * 	@param pi Process Info
 	 */
 	public static void setParameterFromDB (ProcessInfo pi)
@@ -190,15 +184,15 @@ public class ProcessInfoUtil
 		ArrayList<ProcessInfoParameter> list = new ArrayList<ProcessInfoParameter>();
 		final String sql = "SELECT p.ParameterName,"					//  1
 			+ " p.P_String,p.P_String_To, p.P_Number,p.P_Number_To,"    //  2/3 4/5
-			+ " p.P_Date,p.P_Date_To, p.P_Number_Array,p.P_String_Array,"//  6/7 8/9
-			+ " p.Info,p.Info_To,	"	           						//  10/11
-			+ " i.AD_Client_ID, i.AD_Org_ID, i.AD_User_ID, "				//	12..14
-			+ " p.IsNotClause, p.SeqNo "											//  15
+			+ " p.P_Date,p.P_Date_To, p.Info,p.Info_To, "               //  6/7 8/9
+			+ " i.AD_Client_ID, i.AD_Org_ID, i.AD_User_ID, "			//	10..12
+			+ " p.IsNotClause, p.SeqNo, "								//  13..14
+			+ " p.P_Number_Array, p.P_String_Array "					//  15..16
 			+ "FROM AD_PInstance_Para p"
 			+ " INNER JOIN AD_PInstance i ON (p.AD_PInstance_ID=i.AD_PInstance_ID) "
 			+ "WHERE p.AD_PInstance_ID=? "
 			+ " UNION " /* Add as null the parameters that were not passed */
-			+ " SELECT pp.ColumnName, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, i.AD_Client_ID, i.AD_Org_ID, i.AD_User_ID, 'N', pp.SeqNo "
+			+ " SELECT pp.ColumnName, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, i.AD_Client_ID, i.AD_Org_ID, i.AD_User_ID, 'N', pp.SeqNo, NULL, NULL "
 			+ " FROM AD_PInstance i "
 			+ "  JOIN AD_Process_Para pp ON (pp.AD_Process_ID=i.AD_Process_ID AND pp.IsActive='Y') "
 			+ " WHERE i.AD_PInstance_ID=? "
@@ -232,27 +226,27 @@ public class ProcessInfoUtil
 					Parameter_To = rs.getTimestamp(7);
 				}
 				// Multi-select table
-				if (Parameter == null && rs.getArray(8) != null) 
+				if (Parameter == null && rs.getArray(15) != null) 
 				{
-					Parameter = Util.convertBigDecimalToInteger((BigDecimal[]) rs.getArray(8).getArray());
+					Parameter = Util.convertBigDecimalToInteger((BigDecimal[]) rs.getArray(15).getArray());
 				}
 				// Multi-select List
-				if (Parameter == null && rs.getArray(9) != null) 
+				if (Parameter == null && rs.getArray(16) != null) 
 				{
-					Parameter = rs.getArray(9).getArray();
+					Parameter = rs.getArray(16).getArray();
 				}
 
 				//	Info
-				String Info = rs.getString(10);
-				String Info_To = rs.getString(11);
+				String Info = rs.getString(8);
+				String Info_To = rs.getString(9);
 				//
-				boolean isNotClause = "Y".equals(rs.getString(15));
+				boolean isNotClause = "Y".equals(rs.getString(13));
 				list.add (new ProcessInfoParameter(ParameterName, Parameter, Parameter_To, Info, Info_To, isNotClause));
 				//
 				if (pi.getAD_Client_ID() == null)
-					pi.setAD_Client_ID (rs.getInt(12));
+					pi.setAD_Client_ID (rs.getInt(10));
 				if (pi.getAD_User_ID() == null)
-					pi.setAD_User_ID(rs.getInt(14));
+					pi.setAD_User_ID(rs.getInt(12));
 			}
 		}
 		catch (SQLException e)
@@ -270,6 +264,5 @@ public class ProcessInfoUtil
 		list.toArray(pars);
 		pi.setParameter(pars);
 	}   //  setParameterFromDB
-
 
 }	//	ProcessInfoUtil

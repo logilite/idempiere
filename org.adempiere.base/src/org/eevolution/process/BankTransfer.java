@@ -16,7 +16,6 @@
  *****************************************************************************/
 package org.eevolution.process;
 
-
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.logging.Level;
@@ -50,12 +49,12 @@ public class BankTransfer extends SvrProcess
 	protected int 		p_C_ConversionType_ID = 0;		// Payment Conversion Type
 	protected int			p_C_Charge_ID = 0;				// Charge to be used as bridge
 
-	protected BigDecimal 	p_Amount = Env.ZERO;  			// Amount to be transfered between the accounts
-	protected int 		p_From_C_BankAccount_ID = 0;	// Bank Account From
-	protected int 		p_To_C_BankAccount_ID= 0;		// Bank Account To
-	protected Timestamp	p_StatementDate = null;  		// Date Statement
-	protected Timestamp	p_DateAcct = null;  			// Date Account
-	protected int         p_AD_Org_ID = 0;
+	private BigDecimal 	p_Amount = Env.ZERO;  			// Amount to be transferred between the accounts
+	private int 		p_From_C_BankAccount_ID = 0;	// Bank Account From
+	private int 		p_To_C_BankAccount_ID= 0;		// Bank Account To
+	private Timestamp	p_StatementDate = null;  		// Date Statement
+	private Timestamp	p_DateAcct = null;  			// Date Account
+	private int         p_AD_Org_ID = 0;
 	private boolean		p_IsCreateBankTransferDoc = false;		// Create bank transfer document?
 	private int         m_created = 0;
 
@@ -101,7 +100,7 @@ public class BankTransfer extends SvrProcess
 	}	//	prepare
 
 	/**
-	 *  Perform process.
+	 *  Create bank transfer document (optional, if IsCreateBankTransferDoc=Y) and 2 payment document (from and to).
 	 *  @return Message (translated text)
 	 *  @throws Exception if not successful
 	 */

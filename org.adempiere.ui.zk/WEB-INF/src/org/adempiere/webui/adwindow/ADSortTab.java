@@ -48,6 +48,7 @@ import org.compiere.model.PO;
 import org.compiere.model.SystemProperties;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
+import org.compiere.util.DefaultEvaluatee;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
@@ -68,17 +69,16 @@ import org.zkoss.zul.event.ListDataEvent;
  *	Tab to maintain Order/Sequence
  *
  * 	@author 	Jorg Janke
- * 	@version 	$Id: VSortTab.java,v 1.2 2006/07/30 00:51:28 jjanke Exp $
  *
- * @author Teo Sarca, SC ARHIPAC SERVICE SRL
+ *  @author Teo Sarca, SC ARHIPAC SERVICE SRL
  * 				FR [ 1779410 ] VSortTab: display ID for not visible columns
  *
- * @author victor.perez@e-evolution.com, e-Evolution
+ *  @author victor.perez@e-evolution.com, e-Evolution
  * 				FR [ 2826406 ] The Tab Sort without parent column
  *				<li> https://sourceforge.net/p/adempiere/feature-requests/776/
- * Zk Port
- * @author Low Heng Sin
- * @author Juan David Arboleda : Refactoring Yes and No List to work with multiple choice.
+ *  Zk Port
+ *  @author Low Heng Sin
+ *  @author Juan David Arboleda : Refactoring Yes and No List to work with multiple choice.
  */
 public class ADSortTab extends Panel implements IADTabpanel
 {
@@ -143,7 +143,7 @@ public class ADSortTab extends Panel implements IADTabpanel
 	//
 	protected SimpleListModel noModel = new SimpleListModel() {
 		/**
-		 * 
+		 * generated serial id
 		 */
 		private static final long serialVersionUID = 3488081120336708285L;
 
@@ -291,7 +291,7 @@ public class ADSortTab extends Panel implements IADTabpanel
 	}	//	dynInit
 
 	/**
-	 * 	Static Layout
+	 * 	Layout panel
 	 * 	@throws Exception
 	 */
 	private void init() throws Exception
@@ -394,8 +394,8 @@ public class ADSortTab extends Panel implements IADTabpanel
 		hlayout.appendChild(yesList);
 	}	//	Init
 
-	/* (non-Javadoc)
-	 * @see org.compiere.grid.APanelTab#loadData()
+	/**
+	 * Load data
 	 */
 	public void loadData()
 	{
@@ -521,7 +521,7 @@ public class ADSortTab extends Panel implements IADTabpanel
 
 	/**
 	 * Set tab change status.
-	 * @param value
+	 * @param value true for dirty/changed state, false otherwise
 	 */
 	public void setIsChanged(boolean value) {
 		isChanged = value;
@@ -532,6 +532,7 @@ public class ADSortTab extends Panel implements IADTabpanel
 	}
 
 	/**
+	 * Is tab has changes
 	 * @return true if tab has changes
 	 */
 	public boolean isChanged() {
@@ -539,7 +540,7 @@ public class ADSortTab extends Panel implements IADTabpanel
 	}
 	
 	/**
-	 * Move an item between yes and no list.
+	 * Move an item between yes and no list.<br/>
 	 * Delegate to {@link #migrateLists(Listbox, Listbox, int)}
 	 * @param event
 	 */
@@ -666,8 +667,8 @@ public class ADSortTab extends Panel implements IADTabpanel
 
 	/**
 	 * 	Move items within Yes List with Drag Event and Multiple Choice
-	 *  @param endIndex
-	 *  @param selObjects
+	 *  @param endIndex move items after endIndex
+	 *  @param selObjects selected items to move
 	 */
 	protected void migrateValueWithinYesList (int endIndex, List<ListElement> selObjects)
 	{
@@ -698,7 +699,6 @@ public class ADSortTab extends Panel implements IADTabpanel
 	{
 		adWindowPanel = panel;
 	}	//	registerAPanel
-
 
 	/**
 	 * Save changes to db.
@@ -820,7 +820,7 @@ public class ADSortTab extends Panel implements IADTabpanel
 	 */
 	private class ListElement extends NamePair {
 		/**
-		 * 
+		 * generated serial id
 		 */
 		private static final long serialVersionUID = -6319536467438753815L;
 		private int		m_key;
@@ -899,8 +899,8 @@ public class ADSortTab extends Panel implements IADTabpanel
 	}
 
 	/**
+	 * Listener for drop event
 	 * @author eslatis
-	 *
 	 */
 	private class DragListener implements EventListener<Event>
 	{
@@ -1040,10 +1040,14 @@ public class ADSortTab extends Panel implements IADTabpanel
 	@Override
 	public void switchRowPresentation() {
 	}
+	
+	@Override
+	public void onAfterFind() {
+	}
 
 	@Override
 	public String get_ValueAsString(String variableName) {
-		return Env.getContext(Env.getCtx(), m_WindowNo, variableName);
+		return new DefaultEvaluatee(getGridTab(), m_WindowNo, tabNo).get_ValueAsString(Env.getCtx(), variableName);
 	}
 
 	@Override

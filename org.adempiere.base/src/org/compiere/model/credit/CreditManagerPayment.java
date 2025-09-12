@@ -28,7 +28,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Util;
 
 /**
- * Credit Manager for Payment
+ * Credit Status Management for Payment
  * 
  * @author Logilite Technologies
  * @since  June 25, 2023
@@ -108,6 +108,7 @@ public class CreditManagerPayment implements ICreditManager
 																MClient.get(ctx).getC_Currency_ID(),
 																payment.getC_ConversionType_ID(),
 																payment.getDateAcct(), payment.get_TrxName());
+					return new CreditStatus(errorMsg, true);
 				}
 				else
 				{

@@ -25,7 +25,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_Role
  *  @author iDempiere (generated)
- *  @version Release 11 - $Id$ */
+ *  @version Release 13 - $Id$ */
 @org.adempiere.base.Model(table="AD_Role")
 public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 {
@@ -33,7 +33,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20231222L;
+	private static final long serialVersionUID = 20250805L;
 
     /** Standard Constructor */
     public X_AD_Role (Properties ctx, int AD_Role_ID, String trxName)
@@ -370,6 +370,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 		return (String)get_Value(COLUMNNAME_AD_Role_UU);
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Tree getAD_Tree_Menu() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_Tree)MTable.get(getCtx(), org.compiere.model.I_AD_Tree.Table_ID)
@@ -398,6 +399,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Tree getAD_Tree_Org() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_Tree)MTable.get(getCtx(), org.compiere.model.I_AD_Tree.Table_ID)
@@ -492,16 +494,16 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 		return false;
 	}
 
-	/** Set Allow Info InOut.
-		@param Allow_Info_InOut Allow Info InOut
+	/** Set Allow Shipment Info.
+		@param Allow_Info_InOut Allow Shipment Info
 	*/
 	public void setAllow_Info_InOut (boolean Allow_Info_InOut)
 	{
 		set_Value (COLUMNNAME_Allow_Info_InOut, Boolean.valueOf(Allow_Info_InOut));
 	}
 
-	/** Get Allow Info InOut.
-		@return Allow Info InOut	  */
+	/** Get Allow Shipment Info.
+		@return Allow Shipment Info	  */
 	public boolean isAllow_Info_InOut()
 	{
 		Object oo = get_Value(COLUMNNAME_Allow_Info_InOut);
@@ -684,6 +686,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 		return bd;
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_ID)
@@ -1326,6 +1329,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 		return (String)get_Value(COLUMNNAME_RoleType);
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_User getSupervisor() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)

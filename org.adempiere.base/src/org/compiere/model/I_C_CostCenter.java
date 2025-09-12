@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_CostCenter
  *  @author iDempiere (generated) 
- *  @version Release 7.1
+ *  @version Release 13
  */
 public interface I_C_CostCenter 
 {
@@ -70,6 +70,15 @@ public interface I_C_CostCenter
 
 	/** Get Cost Center	  */
 	public int getC_CostCenter_ID();
+
+    /** Column name C_CostCenter_UU */
+    public static final String COLUMNNAME_C_CostCenter_UU = "C_CostCenter_UU";
+
+	/** Set Cost Center UU	  */
+	public void setC_CostCenter_UU (String C_CostCenter_UU);
+
+	/** Get Cost Center UU	  */
+	public String getC_CostCenter_UU();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";

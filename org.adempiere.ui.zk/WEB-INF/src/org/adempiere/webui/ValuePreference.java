@@ -66,7 +66,6 @@ import org.zkoss.zul.Vlayout;
  *  To delete a preference, select a null value and save.
  *
  *  @author Jorg Janke
- *  @version  $Id: ValuePreference.java,v 1.2 2006/07/30 00:51:28 jjanke Exp $
  */
 public class ValuePreference extends Window implements EventListener<Event>
 {
@@ -273,7 +272,7 @@ public class ValuePreference extends Window implements EventListener<Event>
 	private boolean isProcessInIW = false;
 
 	/**
-	 *  Static Layout
+	 *  Layout dialog
 	 *  @throws Exception
 	 */
 	private void init() throws Exception
@@ -452,6 +451,7 @@ public class ValuePreference extends Window implements EventListener<Event>
 	 *  Event Listener
 	 *  @param e event
 	 */
+	@Override
 	public void onEvent(Event e) throws Exception
 	{
 		if (e.getTarget().getId().equals("Cancel"))
@@ -476,6 +476,9 @@ public class ValuePreference extends Window implements EventListener<Event>
 			setExplanation();
 	}
 
+	/**
+	 * Handle esc key event
+	 */
 	private void onCancel() {
 		// do not allow to close tab for Events.ON_CTRL_KEY event
 		if(isUseEscForTabClosing)
@@ -588,9 +591,9 @@ public class ValuePreference extends Window implements EventListener<Event>
 	}   //  delete
 
 	/**
-	 *  Get Context Key.
-	 *  Preferences in context update follow key.
-	 *  They load when login, and update when change.
+	 *  Get Context Key.<br/>
+	 *  Preferences in context update follow key.<br/>
+	 *  Preferences are loaded after login, and update when change.
 	 *  @see Login#loadPreferences(org.compiere.util.KeyNamePair, org.compiere.util.KeyNamePair, java.sql.Timestamp, String)
 	 *  and set to field when display field, {@link GridField#getDefault()}
 	 *  @return Context Key

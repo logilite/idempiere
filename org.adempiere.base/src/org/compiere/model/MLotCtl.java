@@ -39,7 +39,7 @@ public class MLotCtl extends X_M_LotCtl
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 915382326315907170L;
+	private static final long serialVersionUID = -5538987472159034317L;
 
 	public static CCache<Integer, MLotCtl>s_cache	= new CCache<Integer, MLotCtl>(Table_Name, 5,30);
     /**

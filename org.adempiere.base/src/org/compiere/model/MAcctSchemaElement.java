@@ -209,12 +209,12 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 			else
 				return "SELECT Value,Name FROM C_SalesRegion WHERE C_SalesRegion_ID="; // ADEMPIERE-119 / Freepath
 		//
-		} else if (elementType.equals(ELEMENTTYPE_UserColumn1)
-					|| elementType.equals(ELEMENTTYPE_UserColumn2)
-				    || elementType.equals(ELEMENTTYPE_CustomField1)
-				    || elementType.equals(ELEMENTTYPE_CustomField2)
-				    || elementType.equals(ELEMENTTYPE_CustomField3)
-				    || elementType.equals(ELEMENTTYPE_CustomField4)) {
+		} else if (   elementType.equals(ELEMENTTYPE_UserColumn1)
+				   || elementType.equals(ELEMENTTYPE_UserColumn2)
+				   || elementType.equals(ELEMENTTYPE_CustomField1)
+				   || elementType.equals(ELEMENTTYPE_CustomField2)
+				   || elementType.equals(ELEMENTTYPE_CustomField3)
+				   || elementType.equals(ELEMENTTYPE_CustomField4)) {
 			return null;
 		}
 		else if (elementType.equals("CO"))
@@ -377,7 +377,7 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 		setName (Name);
 		setC_Employee_ID(C_Employee_ID);
 	}	//	setTypeEmployee
-
+	
 	/**
 	 * Set value for Department element type
 	 * @param SeqNo sequence
@@ -391,7 +391,7 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 		setName (Name);
 		setC_Department_ID(C_Department_ID);
 	}	//	setTypeDepartment
-
+	
 	/**
 	 * Set value for CostCenter element type
 	 * @param SeqNo sequence
@@ -405,7 +405,7 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 		setName (Name);
 		setC_CostCenter_ID(C_CostCenter_ID);
 	}	//	setTypeCostCenter
-
+	
 	/**
 	 * Set value for Employee element type
 	 * @param SeqNo sequence
@@ -419,7 +419,7 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 		setName (Name);
 		setC_Charge_ID(C_Charge_ID);
 	}	//	setTypeCharge
-
+	
 	/**
 	 * Set value for Employee element type
 	 * @param SeqNo sequence
@@ -433,7 +433,7 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 		setName (Name);
 		setM_Warehouse_ID(M_Warehouse_ID);
 	}	//	setTypeWarehouse
-
+	
 	/**
 	 * Set value for Employee element type
 	 * @param SeqNo sequence
@@ -447,7 +447,7 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 		setName (Name);
 		setA_Asset_ID(A_Asset_ID);
 	}	//	setTypeAsset
-	
+
 	/**
 	 * Set value for Product element type
 	 * @param SeqNo sequence
@@ -593,18 +593,19 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 		return msgreturn.toString();
 	}   //  toString
 	
-	/**
-	 * Before Save
-	 * @param newRecord new
-	 * @return true if it can be saved
-	 */
 	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		if (getAD_Org_ID() != 0)
 			setAD_Org_ID(0);
+		
+		// Validate IsMandatory configuration
 		String et = getElementType();
-		if (isMandatory() && (ELEMENTTYPE_UserColumn1.equals(et) || ELEMENTTYPE_UserColumn2.equals(et)))
+		if (isMandatory() &&
+			(ELEMENTTYPE_UserElementList1.equals(et) || ELEMENTTYPE_UserElementList2.equals(et)
+			|| ELEMENTTYPE_UserColumn1.equals(et) || ELEMENTTYPE_UserColumn2.equals(et) 
+			|| ELEMENTTYPE_CustomField1.equals(et) || ELEMENTTYPE_CustomField2.equals(et)
+			|| ELEMENTTYPE_CustomField3.equals(et) || ELEMENTTYPE_CustomField4.equals(et)))
 			setIsMandatory(false);
 		else if (isMandatory())
 		{
@@ -651,7 +652,8 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 				return false;
 			}
 		}
-		//
+		
+		// AD_Column_ID is mandatory for UserColumn1 and UserColumn2
 		if (getAD_Column_ID() == 0
 			&& (ELEMENTTYPE_UserColumn1.equals(et) || ELEMENTTYPE_UserColumn2.equals(et)))
 		{
@@ -670,18 +672,12 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 		return true;
 	}	//	beforeSave
 	
-	/**
-	 * After Save
-	 * @param newRecord new
-	 * @param success success
-	 * @return success
-	 */
 	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (!success)
 			return success;
-		//	Default Value
+		//	Update existing valid combination records with mandatory element value (i.e replace null)
 		if (isMandatory() && is_ValueChanged(COLUMNNAME_IsMandatory))
 		{
 			if (ELEMENTTYPE_Activity.equals(getElementType()))
@@ -713,7 +709,7 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 		//	Clear Cache
 		s_cache.clear();
 		
-		//	Resequence
+		//	Update Combination and Description of Account (C_ValidCombination)
 		if (newRecord || is_ValueChanged(COLUMNNAME_SeqNo)){
 			StringBuilder msguvd = new StringBuilder("AD_Client_ID=").append(getAD_Client_ID());
 			MAccount.updateValueDescription(getCtx(), msguvd.toString(), get_TrxName());
@@ -742,17 +738,12 @@ public class MAcctSchemaElement extends X_C_AcctSchema_Element implements Immuta
 		MAccount.updateValueDescription(getCtx(),msguvd.toString(), get_TrxName());
 	}	//	updateData
 
-	/**
-	 * After Delete
-	 * @param success success
-	 * @return success
-	 */
 	@Override
 	protected boolean afterDelete (boolean success)
 	{
 		if (!success)
 			return success;
-		//	Update Account Info
+		//	Update Combination and Description of C_ValidCombination
 		StringBuilder msguvd = new StringBuilder("AD_Client_ID=").append(getAD_Client_ID());
 		MAccount.updateValueDescription(getCtx(),msguvd.toString(), get_TrxName());
 		//

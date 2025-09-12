@@ -29,6 +29,7 @@ import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.ToolBarButton;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.DocumentSearch;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.TreeItemAction;
 import org.adempiere.webui.util.TreeNodeAction;
 import org.adempiere.webui.util.TreeUtils;
@@ -65,7 +66,6 @@ import org.zkoss.zul.impl.LabelImageElement;
  * Use by {@link ADTreePanel}.
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date    Mar 3, 2007
- * @version $Revision: 0.10 $
  */
 public class TreeSearchPanel extends Panel implements EventListener<Event>, TreeDataListener, IdSpace
 {
@@ -156,7 +156,7 @@ public class TreeSearchPanel extends Panel implements EventListener<Event>, Tree
     	layout.setHflex("1");
     	layout.setValign("middle");
         lblSearch = new Label();
-        lblSearch.setValue(Msg.getMsg(Env.getCtx(),"TreeSearch").replaceAll("&", "") + ":");
+        lblSearch.setValue(Msg.getMsg(Env.getCtx(),"TreeSearch").replace("&", "") + ":");
         lblSearch.setTooltiptext(Msg.getMsg(Env.getCtx(),"TreeSearchText"));
 
         cmbSearch = new AutoComplete();
@@ -272,7 +272,7 @@ public class TreeSearchPanel extends Panel implements EventListener<Event>, Tree
 		moveItemBox.appendChild(l);
 		moveItemBox.setValign("middle");
 		ToolBarButton btn = new ToolBarButton();
-		btn.setIconSclass("z-icon-remove");
+		btn.setIconSclass(Icon.getIconSclass(Icon.REMOVE));
 		moveItemBox.appendChild(btn);
 		moveItemBox.setAttribute("draggedComponent", tr);
 		btn.addEventListener(Events.ON_CLICK, e -> {

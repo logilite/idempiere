@@ -26,7 +26,7 @@ import org.compiere.util.Language;
 import org.compiere.util.Util;
 
 /**
- *
+ * Controller for user preference (AD_Preference)
  * @author hengsin
  * @author Teo Sarca, www.arhipac.ro
  *			<li>FR [ 2694043 ] Query. first/firstOnly usage best practice
@@ -70,10 +70,14 @@ public final class UserPreference implements Serializable {
 	/** Header Collapsed **/
 	public static final String P_HEADER_COLLAPSED = "HeaderCollapsed";
 	public static final String DEFAULT_HEADER_COLLAPSED = "N";
-	
+
 	/** Show Resources**/
 	public static final String P_SHOWRESOURCES = "HeaderCollapsed";
 	public static final String  DEFAULT_SHOWRESOURCES= "N";
+
+	/** Header Collapsed **/
+	public static final String P_RECORD_INFO_DEFAULT_TAB = "RecordInfoDefaultTab";
+	public static final String DEFAULT_RECORD_INFO_DEFAULT_TAB = "C";
 
 	/** Ini Properties */
 	private static final String[] PROPERTIES = new String[] {
@@ -85,6 +89,7 @@ public final class UserPreference implements Serializable {
 		P_MENU_COLLAPSED,
 		P_HELP_COLLAPSED,
 		P_HEADER_COLLAPSED,
+		P_RECORD_INFO_DEFAULT_TAB,
 		P_SHOWRESOURCES};
 	/** Ini Property Values */
 	private static final String[] VALUES = new String[] {
@@ -96,6 +101,7 @@ public final class UserPreference implements Serializable {
 		DEFAULT_MENU_COLLAPSED,
 		DEFAULT_HELP_COLLAPSED,
 		DEFAULT_HEADER_COLLAPSED,
+		DEFAULT_RECORD_INFO_DEFAULT_TAB,
 		DEFAULT_SHOWRESOURCES};
 
 	/** Container for Properties */

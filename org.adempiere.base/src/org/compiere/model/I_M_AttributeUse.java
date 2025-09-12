@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for M_AttributeUse
  *  @author iDempiere (generated) 
- *  @version Release 11
+ *  @version Release 13
  */
 public interface I_M_AttributeUse 
 {
@@ -121,21 +121,6 @@ public interface I_M_AttributeUse
 	  */
 	public boolean isActive();
 
-    /** Column name M_Attribute_ID */
-    public static final String COLUMNNAME_M_Attribute_ID = "M_Attribute_ID";
-
-	/** Set Attribute.
-	  * Product Attribute
-	  */
-	public void setM_Attribute_ID (int M_Attribute_ID);
-
-	/** Get Attribute.
-	  * Product Attribute
-	  */
-	public int getM_Attribute_ID();
-
-	public org.compiere.model.I_M_Attribute getM_Attribute() throws RuntimeException;
-
     /** Column name M_AttributeSet_ID */
     public static final String COLUMNNAME_M_AttributeSet_ID = "M_AttributeSet_ID";
 
@@ -149,6 +134,7 @@ public interface I_M_AttributeUse
 	  */
 	public int getM_AttributeSet_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_M_AttributeSet getM_AttributeSet() throws RuntimeException;
 
     /** Column name M_AttributeUse_UU */
@@ -159,6 +145,22 @@ public interface I_M_AttributeUse
 
 	/** Get M_AttributeUse_UU	  */
 	public String getM_AttributeUse_UU();
+
+    /** Column name M_Attribute_ID */
+    public static final String COLUMNNAME_M_Attribute_ID = "M_Attribute_ID";
+
+	/** Set Attribute.
+	  * Product Attribute
+	  */
+	public void setM_Attribute_ID (int M_Attribute_ID);
+
+	/** Get Attribute.
+	  * Product Attribute
+	  */
+	public int getM_Attribute_ID();
+
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_M_Attribute getM_Attribute() throws RuntimeException;
 
     /** Column name SeqNo */
     public static final String COLUMNNAME_SeqNo = "SeqNo";

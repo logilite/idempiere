@@ -80,10 +80,10 @@ public class GridField
 	implements Serializable, Evaluatee, Cloneable
 {
 	/**
-	 * generated serial id
+	 * 
 	 */
-	private static final long serialVersionUID = -4496344553246662012L;
-	
+	private static final long serialVersionUID = -1301956809914059765L;
+
 	private static final Character SPECIAL_CASE_DEFAULT = '1';
 	private static final Character SQL_DEFAULT = '2';
 	private static final Character DEFAULT_LOGIC = '3';
@@ -468,11 +468,7 @@ public class GridField
 				isAlwaysUpdatable = Evaluator.parseSQLLogic(m_vo.AlwaysUpdatableLogic, ctx, m_vo.WindowNo,
 						m_vo.TabNo, m_vo.ColumnName);
 			} else {
-				Evaluatee evaluatee = new Evaluatee() {
-					public String get_ValueAsString(String variableName) {
-						return GridField.this.get_ValueAsString(ctx, variableName);
-					}
-				};
+				Evaluatee evaluatee = (variableName) -> {return get_ValueAsString(ctx, variableName);};
 				isAlwaysUpdatable = Evaluator.evaluateLogic(evaluatee, m_vo.AlwaysUpdatableLogic);
 				if (log.isLoggable(Level.FINEST))
 					log.finest(m_vo.ColumnName + " R/O(" + m_vo.AlwaysUpdatableLogic + ") => R/W-" + isAlwaysUpdatable);
@@ -553,11 +549,7 @@ public class GridField
 			}
 			else
 			{
-				Evaluatee evaluatee = new Evaluatee() {
-					public String get_ValueAsString(String variableName) {
-						return GridField.this.get_ValueAsString(ctx, variableName);
-					}
-				};
+				Evaluatee evaluatee = variableName -> {return get_ValueAsString(ctx, variableName);};
 				boolean retValue = !Evaluator.evaluateLogic(evaluatee, m_vo.ReadOnlyLogic);
 				if (log.isLoggable(Level.FINEST)) log.finest(m_vo.ColumnName + " R/O(" + m_vo.ReadOnlyLogic + ") => R/W-" + retValue);
 				if (!retValue)
@@ -1241,6 +1233,7 @@ public class GridField
 	 *  @return true if valid
 	 *  @deprecated use validateValueNoDirect instead
 	 */
+	@Deprecated
 	public boolean validateValue()
 	{
 		//  null
@@ -1316,11 +1309,7 @@ public class GridField
 			if (m_vo.DisplayLogic.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX)) {
 				return Evaluator.parseSQLLogic(m_vo.DisplayLogic, m_vo.ctx, m_vo.WindowNo, m_vo.TabNo, m_vo.ColumnName);
 			}
-			Evaluatee evaluatee = new Evaluatee() {
-				public String get_ValueAsString(String variableName) {
-					return GridField.this.get_ValueAsString(ctx, variableName);
-				}
-			};
+			Evaluatee evaluatee = (variableName) -> {return get_ValueAsString(ctx, variableName);};
 			boolean retValue = Evaluator.evaluateLogic(evaluatee, m_vo.DisplayLogic);
 			if (log.isLoggable(Level.FINEST)) log.finest(m_vo.ColumnName 
 				+ " (" + m_vo.DisplayLogic + ") => " + retValue);
@@ -1361,11 +1350,7 @@ public class GridField
 			if (m_vo.DisplayLogic.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX)) {
 				return Evaluator.parseSQLLogic(m_vo.DisplayLogic, ctx, m_vo.WindowNo, m_vo.TabNo, m_vo.ColumnName);
 			}
-			Evaluatee evaluatee = new Evaluatee() {
-				public String get_ValueAsString(String variableName) {
-					return GridField.this.get_ValueAsString(ctx, variableName);
-				}
-			};
+			Evaluatee evaluatee = (variableName) -> {return get_ValueAsString(ctx, variableName);};
 			boolean retValue = Evaluator.evaluateLogic(evaluatee, m_vo.DisplayLogic);
 			if (log.isLoggable(Level.FINEST)) log.finest(m_vo.ColumnName 
 				+ " (" + m_vo.DisplayLogic + ") => " + retValue);
@@ -1379,6 +1364,7 @@ public class GridField
 	 *	@param variableName name
 	 *	@return value
 	 */
+	@Override
 	public String get_ValueAsString (String variableName)
 	{
 		return get_ValueAsString(m_vo.ctx, variableName);
@@ -1526,6 +1512,16 @@ public class GridField
 	{
 		return m_vo.Header;
 	}
+
+	/**
+	 * Get EntityType
+	 * @return Window Entity Type
+	 */
+	public String getEntityType()
+	{
+		return m_vo.EntityType;
+	}
+
 	/**
 	 * 	Get Display Type
 	 *	@return display type
@@ -2858,5 +2854,43 @@ public class GridField
 	 */
 	public void setParentEvaluatee(Evaluatee evaluatee) {
 		m_parentEvaluatee  = evaluatee;
+	}
+	
+	/**
+	 * Update dependent field after changes to a column
+	 * @param dependentField field with logic depending on column that changed
+	 * @param columnName name of column that changed
+	 * @param tabNo optional tab number
+	 * @param resetFieldAction optional action to reset dependent field value
+	 */
+	public static void updateDependentField(GridField dependentField, String columnName, int tabNo, Runnable resetFieldAction) {
+		//  if the field has a lookup
+		if (dependentField.getLookup() instanceof MLookup mLookup)
+		{
+			//  if the lookup is dynamic (i.e. contains this columnName as variable)
+			if (mLookup.getValidation().indexOf("@"+columnName+"@") != -1
+					|| (tabNo >= 0 && mLookup.getValidation().matches(".*[@]"+tabNo+"[|]"+columnName+"([:].+)?[@].*"))
+					|| mLookup.getValidation().matches(".*[@][~]?"+columnName+"([:].+)?[@].*"))
+			{
+				if (log.isLoggable(Level.FINE)) log.fine(columnName + " changed - "
+					+ dependentField.getColumnName() + " set to null");
+				mLookup.refresh();
+				if (resetFieldAction != null) {
+					resetFieldAction.run();
+				} else {
+					Object currentValue = dependentField.getValue();
+					
+					//  invalidate current selection
+					dependentField.setValue(null, false);
+					
+					if (currentValue != null && mLookup.containsKeyNoDirect(currentValue))
+						dependentField.setValue(currentValue, false);
+				}
+			}
+		}
+		//  if the field is a Virtual UI Column
+		if (dependentField.isVirtualUIColumn()) {
+			dependentField.processUIVirtualColumn();
+		}
 	}
 }   //  GridField

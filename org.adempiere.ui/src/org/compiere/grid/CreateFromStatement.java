@@ -73,7 +73,7 @@ public abstract class CreateFromStatement extends CreateFromBatch
 		StringBuilder sql = new StringBuilder();
 		sql.append("WITH Payments AS ( ");
 		sql.append("SELECT p.DateTrx as DateTrx, p.C_Payment_ID, NULL AS C_DepositBatch_ID, p.DocumentNo, p.C_Currency_ID, c.ISO_Code, p.PayAmt,");
-		sql.append(" currencyConvertPayment(p.C_Payment_ID,ba.C_Currency_ID) AS ConvAmount, bp.Name,");
+		sql.append(" currencyConvert(p.PayAmt,p.C_Currency_ID,ba.C_Currency_ID,p.DateAcct,p.C_ConversionType_ID,p.AD_Client_ID,p.AD_Org_ID) AS ConvAmount, bp.Name,");
 		sql.append(" p.Processed, p.C_BankAccount_ID, p.C_DocType_ID, p.TenderType, p.R_AuthCode, p.C_BPartner_ID ");
 		sql.append("FROM C_BankAccount ba");
 		sql.append(" INNER JOIN C_Payment_v p ON (p.C_BankAccount_ID=ba.C_BankAccount_ID)");
@@ -95,11 +95,13 @@ public abstract class CreateFromStatement extends CreateFromBatch
 		sql.append(" INNER JOIN C_Payment_v p ON (p.C_Payment_ID=dbl.C_Payment_ID)");
 		sql.append(" INNER JOIN C_Currency c ON (p.C_Currency_ID=c.C_Currency_ID)");
 		sql.append(" WHERE db.DocStatus IN ('CO','CL') AND db.DepositAmt<>0");
+	    sql.append(" AND NOT EXISTS (SELECT 1 FROM C_BankStatementLine l WHERE p.C_Payment_ID=l.C_Payment_ID AND l.StmtAmt <> 0)");
 		sql.append(" AND NOT EXISTS (SELECT 1 FROM C_BankStatementLine l WHERE db.C_DepositBatch_ID=l.C_DepositBatch_ID AND l.StmtAmt <> 0)");
 		sql.append(" GROUP BY db.C_DepositBatch_ID,db.DocumentNo,p.C_Currency_ID, c.ISO_Code, db.DateDeposit, p.Processed, p.C_BankAccount_ID, p.C_DocType_ID ");
 		
 		sql.append(") SELECT DateTrx, C_Payment_ID, C_DepositBatch_ID, DocumentNo, C_Currency_ID, ISO_Code, PayAmt, ConvAmount, Name FROM Payments p ");
 		sql.append(getSQLWhere(BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, Currency, 0));
+		sql.append(" ORDER BY DateTrx");
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -107,12 +109,11 @@ public abstract class CreateFromStatement extends CreateFromBatch
 		{
 			pstmt = DB.prepareStatement(sql.toString(), getTrxName());
 			setParameters(pstmt, BankAccount, BPartner, DocumentNo, DateFrom, DateTo, AmtFrom, AmtTo, DocType, TenderType, AuthCode, Currency, 0);
-			
 			rs = pstmt.executeQuery();
 			while(rs.next())
 			{
 				Vector<Object> line = new Vector<Object>(7);
-				line.add(Boolean.FALSE);      		//  0-Selection
+				line.add(Boolean.FALSE);       //  0-Selection
 				line.add(rs.getTimestamp(1));       //  1-DateTrx
 				if (rs.getInt(2) > 0)
 					line.add(new KeyNamePair(rs.getInt(2), rs.getString(4)));
@@ -123,7 +124,6 @@ public abstract class CreateFromStatement extends CreateFromBatch
 					line.add(new KeyNamePair(rs.getInt(3), rs.getString(4)));					
 				else 
 					line.add(null);					// 3-DepositBatch
-				
 				line.add(new KeyNamePair(rs.getInt(5), rs.getString(6))); //  4-Currency
 				line.add(rs.getBigDecimal(7));      //  5-PayAmt
 				line.add(rs.getBigDecimal(8));      //  6-Conv Amt

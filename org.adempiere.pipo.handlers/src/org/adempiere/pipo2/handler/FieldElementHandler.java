@@ -134,6 +134,7 @@ public class FieldElementHandler extends AbstractElementHandler {
 			throw new SAXException(e);
 		}
 
+
 		boolean createElement = isPackOutElement(ctx, m_Field);
 		if (createElement)
 		{
@@ -168,7 +169,7 @@ public class FieldElementHandler extends AbstractElementHandler {
 		}
 
 		if (createElement)
-			document.endElement("", "", X_AD_Field.Table_Name);
+			document.endElement("", "", X_AD_Field.Table_Name);	
 	}
 
 	private void createFieldBinding(PIPOContext ctx, TransformerHandler document,

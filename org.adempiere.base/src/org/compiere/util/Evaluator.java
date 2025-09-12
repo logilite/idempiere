@@ -46,6 +46,17 @@ public class Evaluator
 	
 	private static final Map<String, SQLLogicResult> sqlLogicCache = new ConcurrentHashMap<>();
 
+	public static final String VARIABLE_PO_PROPERTY_OPERATOR = "=";
+	public static final String VARIABLE_FORMATTING_OPERATOR_START = "<";
+	public static final String VARIABLE_FORMATTING_OPERATOR_END = ">";	
+	public static final String VARIABLE_DEFAULT_VALUE_OPERATOR = ":";
+	public static final String VARIABLE_START_END_MARKER = "@";
+	public static final String VARIABLE_SELF_TAB_OPERATOR = "~";
+	public static final String VARIABLE_REFERENCE_OPERATOR = ".";
+	public static final String VARIABLE_TAB_NO_SEPARATOR = "|";
+	
+	public static final String ID_COLUMN_SUFFIX = "_ID";
+	
 	/** Value object for SQL logic result */
 	public static class SQLLogicResult {
 		long timestamp;
@@ -99,212 +110,9 @@ public class Evaluator
 	}   //  evaluateLogic
 
 	/**
-	 *	Evaluate	@context@=value or @context@!value or @context@^value.
-	 *  <pre>
-	 *	value: strips ' and " always (no escape or mid stream)
-	 *  value: can also be a context variable
-	 *  </pre>
-	 *  @param source class implementing get_ValueAsString(variable)
-	 *  @param logic logic tuple
-	 *	@return	true or false
-	 */
-	private static boolean evaluateLogicTuple (Evaluatee source, String logic)
-	{
-		Pattern pattern = Pattern.compile("(={1,2}|!|>|<|\\^[=]?)");
-		Matcher matcher = pattern.matcher(logic.trim());
-		if (!matcher.find())
-		{
-			s_log.log(Level.SEVERE, "Logic tuple does not comply with format "
-					+ "'@context@=value' where operand could be one of '=, !, ^, >, <, ==, ^=' --> " + logic);
-			return false;
-		}
-
-		// Comparator
-		String operand = matcher.group(1);
-		if (operand.isEmpty())
-		{
-			s_log.log(Level.SEVERE, "Operand not found from --> " + logic);
-			return false;
-		}
-
-		String[] myStrings = matcher.replaceAll("\n").split("\n");
-		if (myStrings.length != 2)
-		{
-			s_log.log(Level.SEVERE, "Logic tuple does not comply with format '@context@=value' --> " + logic);
-			return false;
-		}
-
-		String first = myStrings[0];
-		String rightToken = myStrings[1];
-		boolean isArrayItems = false;
-		
-		// First Part
-		String firstEval = first.trim();
-		if (firstEval != null && firstEval.startsWith("{") && firstEval.endsWith("}"))
-		{
-			isArrayItems = true;
-		}
-		if (first.indexOf('@') != -1)		//	variable
-		{			
-			first = first.replace ('@', ' ').trim (); 			//	strip 'tag'
-			// IDEMPIERE-194 Handling null context variable
-			String defaultValue = "";
-			int idx = first.indexOf(":");	//	or clause
-			if (idx  >=  0) 
-			{
-				defaultValue = first.substring(idx+1, first.length());
-				first = first.substring(0, idx);
-			}
-			firstEval = source.get_ValueAsString (first);		//	replace with it's value
-			if (Util.isEmpty(firstEval) && !Util.isEmpty(defaultValue)) {
-				firstEval = defaultValue;
-			}
-		}
-		//NPE sanity check
-		if (firstEval == null)
-			firstEval = "";
-		
-		firstEval = firstEval.replace('\'', ' ').replace('"', ' ').trim();	//	strip ' and "
-
-		// Second Part
-		String[] list = null;
-		if (rightToken != null && rightToken.trim().startsWith("{") && rightToken.trim().endsWith("}"))
-		{
-			list = new String[1];
-			list[0] = rightToken;
-			isArrayItems = true;
-		}
-		else
-		{
-			list = rightToken.split("[,]");
-		}
-		for(String second : list)
-		{
-			String secondEval = second.trim();
-			if (second.indexOf('@') != -1)		//	variable
-			{
-				second = second.replace('@', ' ').trim();			// strip tag
-				secondEval = source.get_ValueAsString (second);		//	replace with it's value
-			}
-			secondEval = secondEval.replace('\'', ' ').replace('"', ' ').trim();	//	strip ' and "
-	
-			//	Handling of ID compare (null => 0)
-			if (first.trim().endsWith("_ID") && firstEval.length() == 0)
-				firstEval = "0";
-			if (second.trim().endsWith("_ID") && secondEval.length() == 0)
-				secondEval = "0";
-	
-			//	Logical Comparison
-			boolean result = evaluateLogicTuple(firstEval, operand, secondEval, isArrayItems);
-			//
-			if (s_log.isLoggable(Level.FINEST)) s_log.finest(logic 
-				+ " => \"" + firstEval + "\" " + operand + " \"" + secondEval + "\" => " + result);
-			if (result)
-				return true;
-		}
-		//
-		return false;
-	}	//	evaluateLogicTuple
-	
-	/**
-	 * 	Evaluate Logic Tuple
-	 *	@param value1 value
-	 *	@param operand operand = ~ ^ ! > < == ^=
-	 *	@param value2
-	 *  @param isArrayItems 
-	 *	@return evaluation
-	 */
-	private static boolean evaluateLogicTuple (String value1, String operand, String value2, boolean isArrayItems)
-	{
-		if (value1 == null || operand == null || value2 == null)
-			return false;
-		
-		// IDEMPIERE-3413
-		if (isArrayItems)
-		{
-			Set<String> setValue1 = new TreeSet<String>();
-			Set<String> setValue2 = new TreeSet<String>();
-
-			value1 = value1.replaceAll("[{}]", "");
-			value2 = value2.replaceAll("[{}]", "");
-
-			for (String val : Arrays.asList(value1.split(",")))
-			{
-				if (!Util.isEmpty(val, true))
-					setValue1.add(val.trim());
-			}
-			for (String val : Arrays.asList(value2.split(",")))
-			{
-				if (!Util.isEmpty(val, true))
-					setValue2.add(val.trim());
-			}
-
-			// Equals or Not Equals
-			if (operand.equals("=") || operand.equals("^="))
-			{
-				boolean isSame = false;
-				if (setValue1.size() == setValue2.size())
-					isSame = setValue1.equals(setValue2);
-
-				if (operand.equals("^="))
-					return !isSame;
-
-				return isSame;
-			}
-			else if (operand.equals("==")) // Contains
-			{
-				return setValue1.containsAll(setValue2);
-			}
-			
-			return false;
-		}
-		
-		BigDecimal value1bd = null;
-		BigDecimal value2bd = null;
-		try
-		{
-			if (!value1.startsWith("'"))
-				value1bd = new BigDecimal (value1);
-			if (!value2.startsWith("'"))
-				value2bd = new BigDecimal (value2);
-		}
-		catch (Exception e)
-		{
-			value1bd = null;
-			value2bd = null;
-		}
-		//
-		if (operand.equals("="))
-		{
-			if (value1bd != null && value2bd != null)
-				return value1bd.compareTo(value2bd) == 0;
-			return value1.compareTo(value2) == 0;
-		}
-		else if (operand.equals("<"))
-		{
-			if (value1bd != null && value2bd != null)
-				return value1bd.compareTo(value2bd) < 0;
-			return value1.compareTo(value2) < 0;
-		}
-		else if (operand.equals(">"))
-		{
-			if (value1bd != null && value2bd != null)
-				return value1bd.compareTo(value2bd) > 0;
-			return value1.compareTo(value2) > 0;
-		}
-		else //	interpreted as not
-		{
-			if (value1bd != null && value2bd != null)
-				return value1bd.compareTo(value2bd) != 0;
-			return value1.compareTo(value2) != 0;
-		}
-	}	//	evaluateLogicTuple
-
-	
-	/**
-	 *  Parse String and add variables with @ to the list.
+	 *  Parse expression and add variables with @ to the list.
 	 *  @param list list to be added to
-	 *  @param parseString string to parse for variables
+	 *  @param parseString expression to parse for variables
 	 */
 	public static void parseDepends (ArrayList<String> list, String parseString)
 	{
@@ -339,12 +147,12 @@ public class Evaluator
 	}   //  parseDepends
 
 	/**
-	 * Evaluate a logic expression base on SQL
+	 * Evaluate a SQL logic expression (with @SQL= prefix)
 	 * @param sqlLogic
 	 * @param ctx
 	 * @param windowNo
 	 * @param tabNo
-	 * @param targetObjectName expression logic is evaluated for, that target object (purpose for logging) can be field name, toolbar button name,..
+	 * @param targetObjectName expression logic is evaluated for, that target object (for logging purpose) can be field name, toolbar button name,..
 	 * @return result of logic expression
 	 */
 	public static boolean parseSQLLogic(String sqlLogic, Properties ctx, int windowNo, int tabNo, String targetObjectName) {

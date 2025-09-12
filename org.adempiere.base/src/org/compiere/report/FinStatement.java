@@ -121,6 +121,7 @@ public class FinStatement extends SvrProcess
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
+	@Override
 	protected void prepare()
 	{
 		StringBuilder sb = new StringBuilder ("Record_ID=")
@@ -240,7 +241,7 @@ public class FinStatement extends SvrProcess
 		//  Optional UserElement2_ID
 		if (p_UserElement2_ID != 0)
 			m_parameterWhere.append(" AND UserElement2_ID=").append(p_UserElement2_ID);	
-		// Optional Employee
+		//	Optional Employee
 		if (p_C_Employee_ID != 0)
 			m_parameterWhere.append(" AND C_Employee_ID = ").append(p_C_Employee_ID);
 		//	Optional Charge
@@ -328,12 +329,11 @@ public class FinStatement extends SvrProcess
 		}
 	}	//	setDateAcct
 
-	
-	
-	/**************************************************************************
-	 *  Perform process.
+	/**
+	 *  Insert reporting data to T_ReportStatement
 	 *  @return Message to be translated
 	 */
+	@Override
 	protected String doIt()
 	{
 		createBalanceLine();
@@ -386,7 +386,7 @@ public class FinStatement extends SvrProcess
 	}	//	createBalanceLine
 
 	/**
-	 * 	Create Beginning Balance Line
+	 * 	Create Detail Lines
 	 */
 	private void createDetailLines()
 	{

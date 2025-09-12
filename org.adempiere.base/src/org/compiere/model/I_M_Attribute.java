@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for M_Attribute
  *  @author iDempiere (generated) 
- *  @version Release 11
+ *  @version Release 13
  */
 public interface I_M_Attribute 
 {
@@ -75,6 +75,7 @@ public interface I_M_Attribute
 	  */
 	public int getAD_Reference_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Reference getAD_Reference() throws RuntimeException;
 
     /** Column name AD_Reference_Value_ID */
@@ -90,6 +91,7 @@ public interface I_M_Attribute
 	  */
 	public int getAD_Reference_Value_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Reference getAD_Reference_Value() throws RuntimeException;
 
     /** Column name AD_Val_Rule_ID */
@@ -105,6 +107,7 @@ public interface I_M_Attribute
 	  */
 	public int getAD_Val_Rule_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Val_Rule getAD_Val_Rule() throws RuntimeException;
 
     /** Column name AttributeValueType */
@@ -231,6 +234,22 @@ public interface I_M_Attribute
 	  */
 	public boolean isMandatory();
 
+    /** Column name M_AttributeSearch_ID */
+    public static final String COLUMNNAME_M_AttributeSearch_ID = "M_AttributeSearch_ID";
+
+	/** Set Attribute Search.
+	  * Common Search Attribute 
+	  */
+	public void setM_AttributeSearch_ID (int M_AttributeSearch_ID);
+
+	/** Get Attribute Search.
+	  * Common Search Attribute 
+	  */
+	public int getM_AttributeSearch_ID();
+
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_M_AttributeSearch getM_AttributeSearch() throws RuntimeException;
+
     /** Column name M_Attribute_ID */
     public static final String COLUMNNAME_M_Attribute_ID = "M_Attribute_ID";
 
@@ -252,21 +271,6 @@ public interface I_M_Attribute
 
 	/** Get M_Attribute_UU	  */
 	public String getM_Attribute_UU();
-
-    /** Column name M_AttributeSearch_ID */
-    public static final String COLUMNNAME_M_AttributeSearch_ID = "M_AttributeSearch_ID";
-
-	/** Set Attribute Search.
-	  * Common Search Attribute 
-	  */
-	public void setM_AttributeSearch_ID (int M_AttributeSearch_ID);
-
-	/** Get Attribute Search.
-	  * Common Search Attribute 
-	  */
-	public int getM_AttributeSearch_ID();
-
-	public org.compiere.model.I_M_AttributeSearch getM_AttributeSearch() throws RuntimeException;
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";

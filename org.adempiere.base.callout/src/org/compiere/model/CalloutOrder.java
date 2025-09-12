@@ -821,7 +821,9 @@ public class CalloutOrder extends CalloutEngine
 		Env.setContext(ctx, WindowNo, "EnforcePriceLimit", pp.isEnforcePriceLimit() ? "Y" : "N");
 		Env.setContext(ctx, WindowNo, "DiscountSchema", pp.isDiscountSchema() ? "Y" : "N");
 
-		if (Env.isSOTrx(ctx, WindowNo))
+		int M_Warehouse_ID = Env.getContextAsInt(ctx, WindowNo, "M_Warehouse_ID");
+		MWarehouse warehouse = MWarehouse.get(ctx, M_Warehouse_ID);
+		if (Env.isSOTrx(ctx, WindowNo) && !warehouse.isDisableInventoryPopup())
 		{
 			MProduct product = MProduct.get (ctx, M_Product_ID.intValue());
 			if (product.isStocked() && Env.getContext(ctx, WindowNo, "IsDropShip").equals("N")
@@ -835,7 +837,7 @@ public class CalloutOrder extends CalloutEngine
 				BigDecimal QtyOrdered = (BigDecimal)mTab.getValue("QtyOrdered");
 				if (QtyOrdered == null)
 					QtyOrdered = Env.ZERO;
-				int M_Warehouse_ID = Env.getContextAsInt(ctx, WindowNo, "M_Warehouse_ID");
+
 				int M_AttributeSetInstance_ID = Env.getContextAsInt(ctx, WindowNo, mTab.getTabNo(), "M_AttributeSetInstance_ID");
 				BigDecimal available = MStorageReservation.getQtyAvailable
 					(M_Warehouse_ID, M_Product_ID.intValue(), M_AttributeSetInstance_ID, null);
@@ -1322,10 +1324,13 @@ public class CalloutOrder extends CalloutEngine
 			QtyOrdered = (BigDecimal)mTab.getValue("QtyOrdered");
 		}
 
+		int M_Warehouse_ID = Env.getContextAsInt(ctx, WindowNo, "M_Warehouse_ID");
+		MWarehouse warehouse = MWarehouse.get(ctx, M_Warehouse_ID);
 		//	Storage
 		if (M_Product_ID != 0
 			&& Env.isSOTrx(ctx, WindowNo)
-			&& QtyOrdered.signum() > 0)		//	no negative (returns)
+			&& QtyOrdered.signum() > 0		//	no negative (returns)
+			&& !warehouse.isDisableInventoryPopup())
 		{
 			MProduct product = MProduct.get (ctx, M_Product_ID);
 			if (product.isStocked() && Env.getContext(ctx, WindowNo, "IsDropShip").equals("N")
@@ -1336,37 +1341,36 @@ public class CalloutOrder extends CalloutEngine
 				Boolean isStockAvailabilityCheck = docType.get_ValueAsBoolean("isStockAvailabilityCheck");
 				if (isStockAvailabilityCheck)
 				{
-				int M_Warehouse_ID = Env.getContextAsInt(ctx, WindowNo, "M_Warehouse_ID");
-				int M_AttributeSetInstance_ID = Env.getContextAsInt(ctx, WindowNo, mTab.getTabNo(), "M_AttributeSetInstance_ID");
-				BigDecimal available = MStorageReservation.getQtyAvailable
-					(M_Warehouse_ID, M_Product_ID, M_AttributeSetInstance_ID, null);
-				if (available == null)
-					available = Env.ZERO;
-				if (available.signum() == 0)
-					mTab.fireDataStatusEEvent ("NoQtyAvailable", product.getName()+"["+product.getValue()+"] " + "0", false);
-				else if (available.compareTo(QtyOrdered) < 0)
-					mTab.fireDataStatusEEvent ("InsufficientQtyAvailable", product.getName()+"["+product.getValue()+"] " + available.toString(), false);
-				else
-				{
-					Integer C_OrderLine_ID = (Integer)mTab.getValue("C_OrderLine_ID");
-					if (C_OrderLine_ID == null)
-						C_OrderLine_ID = Integer.valueOf(0);
-					BigDecimal notReserved = MOrderLine.getNotReserved(ctx,
-						M_Warehouse_ID, M_Product_ID, M_AttributeSetInstance_ID,
-						C_OrderLine_ID.intValue());
-					if (notReserved == null)
-						notReserved = Env.ZERO;
-					BigDecimal total = available.subtract(notReserved);
-					if (total.compareTo(QtyOrdered) < 0)
+					int M_Warehouse_ID = Env.getContextAsInt(ctx, WindowNo, "M_Warehouse_ID");
+					int M_AttributeSetInstance_ID = Env.getContextAsInt(ctx, WindowNo, mTab.getTabNo(), "M_AttributeSetInstance_ID");
+					BigDecimal available = MStorageReservation.getQtyAvailable
+						(M_Warehouse_ID, M_Product_ID, M_AttributeSetInstance_ID, null);
+					if (available == null)
+						available = Env.ZERO;
+					if (available.signum() == 0)
+						mTab.fireDataStatusEEvent ("NoQtyAvailable", product.getName()+"["+product.getValue()+"] " + "0", false);
+					else if (available.compareTo(QtyOrdered) < 0)
+						mTab.fireDataStatusEEvent ("InsufficientQtyAvailable", product.getName()+"["+product.getValue()+"] " + available.toString(), false);
+					else
 					{
-						StringBuilder msgpts = new StringBuilder(product.getName()).append("[").append(product.getValue()).append("] ").append("@QtyAvailable@=").append(available)
-								.append("  -  @QtyNotReserved@=").append(notReserved).append("  =  ").append(total);
-						String info = Msg.parseTranslation(ctx, msgpts.toString());
-						mTab.fireDataStatusEEvent ("InsufficientQtyAvailable",
-							info, false);
+						Integer C_OrderLine_ID = (Integer)mTab.getValue("C_OrderLine_ID");
+						if (C_OrderLine_ID == null)
+							C_OrderLine_ID = Integer.valueOf(0);
+						BigDecimal notReserved = MOrderLine.getNotReserved(ctx,
+							M_Warehouse_ID, M_Product_ID, M_AttributeSetInstance_ID,
+							C_OrderLine_ID.intValue());
+						if (notReserved == null)
+							notReserved = Env.ZERO;
+						BigDecimal total = available.subtract(notReserved);
+						if (total.compareTo(QtyOrdered) < 0)
+						{
+							StringBuilder msgpts = new StringBuilder(product.getName()).append("[").append(product.getValue()).append("] ").append("@QtyAvailable@=").append(available)
+									.append("  -  @QtyNotReserved@=").append(notReserved).append("  =  ").append(total);
+							String info = Msg.parseTranslation(ctx, msgpts.toString());
+							mTab.fireDataStatusEEvent ("InsufficientQtyAvailable", info, false);
+						}
 					}
 				}
-			}
 			}
 		}
 		//

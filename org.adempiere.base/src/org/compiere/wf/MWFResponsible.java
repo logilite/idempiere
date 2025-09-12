@@ -26,6 +26,7 @@ import org.compiere.util.CCache;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.idempiere.cache.ImmutableIntPOCache;
+import org.idempiere.cache.ImmutablePOCache;
 import org.idempiere.cache.ImmutablePOSupport;
 
 /**
@@ -71,6 +72,41 @@ public class MWFResponsible extends X_AD_WF_Responsible implements ImmutablePOSu
 		}
 		return null;
 	} //	get
+	
+	/**
+	 * Cache for Overridden Client Workflow Responsible
+	 */
+	private static ImmutablePOCache<String, MWFResponsible> s_cacheCliWFResp = new ImmutablePOCache<String, MWFResponsible>(
+			"ClientWFResponsible", 10);
+
+	/**
+	 * Get Overridden Client Workflow Responsible from the Cache
+	 * 
+	 * @param ctx
+	 * @param AD_WF_Responsible_ID - System Workflow Responsible
+	 * @return
+	 */
+	public static MWFResponsible getClientWFResp(Properties ctx, int AD_WF_Responsible_ID) {
+		if(AD_WF_Responsible_ID==0)
+			return null;
+		
+		int clientID = Env.getAD_Client_ID(ctx);
+		String key = clientID + "_" + AD_WF_Responsible_ID;
+		 
+		MWFResponsible resp = null;
+		if(s_cacheCliWFResp.containsKey(key))
+		{
+			resp = s_cacheCliWFResp.get(ctx, key, e->new MWFResponsible(ctx, e));
+			return resp;
+		}
+		
+		resp = new Query(ctx, Table_Name, "AD_Client_ID=? AND Override_ID=?", null).setOnlyActiveRecords(true)
+					.setParameters(Env.getAD_Client_ID(ctx), AD_WF_Responsible_ID).first();
+		
+		//if no override then put null value so it reduce query to check is over ride
+		s_cacheCliWFResp.put(key, resp);
+		return resp;
+	}
 
 	/**
 	 * Get updateable copy of MWFResponsible from cache
@@ -89,39 +125,7 @@ public class MWFResponsible extends X_AD_WF_Responsible implements ImmutablePOSu
 	
 	/**	Cache						*/
 	private static ImmutableIntPOCache<Integer,MWFResponsible>	s_cache	= new ImmutableIntPOCache<Integer,MWFResponsible>(Table_Name, 10);
-
-	/**
-	/**
-	 * Cache for Overridden Client Workflow Responsible
-	 */
-	private static CCache<String, MWFResponsible> s_cacheCliWFResp = new CCache<String, MWFResponsible>(
-			"ClientWFResponsible", 10);
-
-	/**
-	 * Get Overridden Client Workflow Responsible from the Cache
-	 * 
-	 * @param ctx
-	 * @param AD_WF_Responsible_ID - System Workflow Responsible
-	 * @return
-	 */
-	public static MWFResponsible getClientWFResp(Properties ctx, int AD_WF_Responsible_ID) {
-		if(AD_WF_Responsible_ID==0)
-			return null;
-		
-		int clientID = Env.getAD_Client_ID(ctx);
-		String key = clientID + "_" + AD_WF_Responsible_ID;
-		
-		if (s_cacheCliWFResp.containsKey(key))
-			return s_cacheCliWFResp.get(key);
-		
-		MWFResponsible resp = new Query(ctx, Table_Name, "AD_Client_ID=? AND Override_ID=?", null).setOnlyActiveRecords(true)
-					.setParameters(Env.getAD_Client_ID(ctx), AD_WF_Responsible_ID).first();
-		
-		s_cacheCliWFResp.put(key, resp);
-		
-		return resp;
-	}
-
+	
     /**
      * UUID based Constructor
      * @param ctx  Context
@@ -132,7 +136,7 @@ public class MWFResponsible extends X_AD_WF_Responsible implements ImmutablePOSu
         super(ctx, AD_WF_Responsible_UU, trxName);
     }
 
-	/**************************************************************************
+	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
 	 *	@param AD_WF_Responsible_ID id
@@ -235,14 +239,10 @@ public class MWFResponsible extends X_AD_WF_Responsible implements ImmutablePOSu
 			&& getAD_Org_ID() != 0;
 	}	//	isOrg
 	
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true if can be saved
-	 */
 	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
+		// AD_Role_ID mandatory for role responsible type
 		if (RESPONSIBLETYPE_Role.equals(getResponsibleType()) 
 			&& getAD_Role_ID() == 0
 			&& getAD_Client_ID() > 0)
@@ -257,7 +257,7 @@ public class MWFResponsible extends X_AD_WF_Responsible implements ImmutablePOSu
 		//	Role not used
 		if (!RESPONSIBLETYPE_Role.equals(getResponsibleType()) && getAD_Role_ID() > 0)
 			setAD_Role_ID(0);
-		
+		//  User and role not used for manual responsible type
 		if (RESPONSIBLETYPE_Manual.equals(getResponsibleType())) {
 		    setAD_User_ID(0);
 		    setAD_Role_ID(0);

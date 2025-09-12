@@ -40,6 +40,7 @@ import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.factory.ButtonFactory;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.WFieldRecordInfo;
 import org.compiere.model.GridField;
@@ -248,7 +249,7 @@ public class WChosenboxListEditor extends WEditor implements ContextMenuListener
         getComponent().getChosenbox().setModel(model);
         String imageUrl;
 		if (ThemeManager.isUseFontIconForImage())
-			imageUrl = "z-icon-More";
+			imageUrl = Icon.getIconSclass(Icon.MORE);
 		else
 			imageUrl = ThemeManager.getThemeResource("images/ShowMore16.png");
 		if (ThemeManager.isUseFontIconForImage())
@@ -285,17 +286,17 @@ public class WChosenboxListEditor extends WEditor implements ContextMenuListener
         {
             popupMenu = new WEditorPopupMenu(false, true, isShowPreference(), false, false, false, lookup);
     		addChangeLogMenu(popupMenu);
-    		
+
     		if (gridField.getDisplayType() == DisplayType.ChosenMultipleSelectionList) { // The Assistant must be shown for MultipleSelectionList only (not for MultipleSelectionTable editors)
-        		Menuitem editor = new Menuitem();
-	        		editor.setAttribute("EVENT", WEditorPopupMenu.ASSISTANT_EVENT);
-        		editor.setLabel(Msg.getMsg(Env.getCtx(), "Assistant"));
-        		if (ThemeManager.isUseFontIconForImage())
-        			editor.setIconSclass("z-icon-Wizard");
-        		else
-        			editor.setImage(ThemeManager.getThemeResource("images/Wizard16.png"));
-        		editor.addEventListener(Events.ON_CLICK, popupMenu);
-        		popupMenu.appendChild(editor);    			
+				Menuitem editor = new Menuitem();
+				editor.setAttribute("EVENT", WEditorPopupMenu.ASSISTANT_EVENT);
+				editor.setLabel(Msg.getMsg(Env.getCtx(), "Assistant"));
+				if (ThemeManager.isUseFontIconForImage())
+					editor.setIconSclass(Icon.getIconSclass(Icon.WIZARD));
+				else
+					editor.setImage(ThemeManager.getThemeResource("images/Wizard16.png"));
+				editor.addEventListener(Events.ON_CLICK, popupMenu);
+				popupMenu.appendChild(editor);   			
     		}
         }        
     }

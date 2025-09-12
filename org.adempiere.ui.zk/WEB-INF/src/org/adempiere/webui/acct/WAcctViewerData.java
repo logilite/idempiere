@@ -59,7 +59,6 @@ import org.compiere.util.ValueNamePair;
  *  @author Niraj Sohun
  *  		July 27, 2007
  */
-
 public class WAcctViewerData
 {
 	/** Window              */
@@ -139,18 +138,18 @@ public class WAcctViewerData
 	
 	/** UserElement2 Reference	*/
 	private String m_ref2 = null;
+
 	/** CustomFieldText1 Reference	*/
 	private String m_cfref1 = null;
-
+	
 	/** CustomFieldText2 Reference	*/
 	private String m_cfref2 = null;
-
+	
 	/** CustomFieldText3 Reference	*/
 	private String m_cfref3 = null;
-
+	
 	/** CustomFieldText4 Reference	*/
 	private String m_cfref4 = null;
-
 	
 	/**	Logger			*/
 	private static final CLogger log = CLogger.getCLogger(WAcctViewerData.class);
@@ -326,8 +325,7 @@ public class WAcctViewerData
 	 *  @param columnName column
 	 *  @param selectSQL sql
 	 *  @return Text on button
-	 */
-	
+	 */	
 	protected String getButtonText (String tableName, String columnName, String selectSQL)
 	{
 		//  SELECT (<embedded>) FROM tableName avd WHERE avd.<selectSQL>
@@ -365,8 +363,7 @@ public class WAcctViewerData
 	/**
 	 *  Create query and execute
 	 *  @return {@link RModel} query result
-	 */
-	
+	 */	
 	protected RModel query()
 	{
 		//  Set Where Clause
@@ -662,7 +659,6 @@ public class WAcctViewerData
 				else if (columnName.indexOf('4') != -1)
 					m_cfref4 = ase.getDisplayColumnName();
 			}
-
 			
 			if (!columns.contains(columnName))
 				columns.add(columnName);

@@ -140,7 +140,7 @@ public class DocLine
 	private int					m_C_Employee_ID			= -1;
 	/** Asset */
 	private int					m_A_Asset_ID			= -1;
-	/** Period						*/
+    /** Period                        */
 	private int					m_C_Period_ID = -1;
 	private BigDecimal 			m_currencyRate = null;
 	/**ASI To 					*/
@@ -673,19 +673,21 @@ public class DocLine
 		this.m_AttributeSetInstance_ID = m_AttributeSetInstance_ID;
 	}
 
-
-	
 	/**
-	 * @return ASI To
+	 *  ASI
+	 *  @return getM_AttributeSetInstanceTo_ID
 	 */
-	public int getM_AttributeSetInstanceTo_ID() {
-		if (m_AttributeSetInstanceTo_ID != 0)
+	public int getM_AttributeSetInstanceTo_ID()
+	{
+		int index = p_po.get_ColumnIndex("M_AttributeSetInstanceTo_ID");
+		if (index != -1)
 		{
-			return m_AttributeSetInstanceTo_ID;
+			Integer ii = (Integer)p_po.get_Value(index);
+			if (ii != null)
+				return ii.intValue();
 		}
-
-		return getValue("M_AttributeSetInstanceTo_ID");
-	}
+		return 0;
+	}   //  getM_AttributeSetInstanceTo_ID
 
 	/**
 	 * @param m_AttributeSetInstanceTo_ID
@@ -693,6 +695,7 @@ public class DocLine
 	public void setM_AttributeSetInstanceTo_ID(int m_AttributeSetInstanceTo_ID) {
 		this.m_AttributeSetInstanceTo_ID = m_AttributeSetInstanceTo_ID;
 	}
+
 	/**
 	 *  Get Warehouse Locator (from)
 	 *  @return M_Locator_ID
@@ -831,11 +834,11 @@ public class DocLine
 			if (cd != null)
 			{
 				BigDecimal amt = cd.getAmt();
-				BigDecimal pcost = getProductCosts(as, AD_Org_ID, zeroCostsOK);
+				BigDecimal pcost = getProductCosts(as, AD_Org_ID, zeroCostsOK, cd);
 				if (amt.signum() != 0 && pcost.signum() != 0 && amt.signum() != pcost.signum())
-					return amt.negate();
+					return amt.signum() > 0 ? pcost.negate() : pcost;
 				else
-					return amt;
+					return pcost;
 			}
 		}
 		return getProductCosts(as, AD_Org_ID, zeroCostsOK);
@@ -851,11 +854,25 @@ public class DocLine
 	 */
 	public BigDecimal getProductCosts (MAcctSchema as, int AD_Org_ID, boolean zeroCostsOK)
 	{
+		return getProductCosts(as, AD_Org_ID, zeroCostsOK, (MCostDetail) null);
+	}
+	
+	/**
+	 * Get Total Product Costs
+	 * @param as accounting schema
+	 * @param AD_Org_ID trx org
+	 * @param zeroCostsOK zero/no costs are OK
+	 * @param costDetail optional cost detail - use to retrieve the cost history
+	 * @return costs
+	 */
+	public BigDecimal getProductCosts (MAcctSchema as, int AD_Org_ID, boolean zeroCostsOK, MCostDetail costDetail)
+	{
 		ProductCost pc = getProductCost();
 		int C_OrderLine_ID = getC_OrderLine_ID();
 		String costingMethod = null;
 		BigDecimal costs = pc.getProductCosts(as, AD_Org_ID, costingMethod, 
-			C_OrderLine_ID, zeroCostsOK);
+			C_OrderLine_ID, zeroCostsOK, 
+			getDateAcct(), costDetail, m_doc.isInBackDatePostingProcess());
 		if (costs != null)
 			return costs;
 		return Env.ZERO;
@@ -1018,7 +1035,7 @@ public class DocLine
 		}
 		return m_C_Employee_ID;
 	}// getC_Employee_ID
-
+	
 	/**
 	 * 	Set C_Employee_ID
 	 *	@param C_Employee_ID id
@@ -1157,7 +1174,7 @@ public class DocLine
 	{
 		this.m_A_Asset_ID = m_A_Asset_ID;
 	}// setA_Asset_ID
-
+	
 	/**
 	 * 	Get M_Warehouse_ID
 	 *	@return M_Warehouse_ID or 0
@@ -1173,7 +1190,7 @@ public class DocLine
 		}
 		return 0;
 	}	//	getM_Warehouse_ID
-
+	
 	/**
 	 * Get C_CostCenter_ID
 	 * 
@@ -1195,7 +1212,7 @@ public class DocLine
 		}
 		return m_C_CostCenter_ID;
 	}// getC_CostCenter_ID
-
+	
 	/**
 	 * Set C_CostCenter_ID
 	 * 
@@ -1227,7 +1244,7 @@ public class DocLine
 		}
 		return m_C_Department_ID;
 	}// getC_Department_ID
-
+	
 	/**
 	 * Set C_Department_ID
 	 * 
@@ -1237,7 +1254,7 @@ public class DocLine
 	{
 		this.m_C_Department_ID = m_C_Department_ID;
 	} // setC_Department_ID
-
+	
 	/**
 	 *  Get user defined id 1
 	 *  @return User1_ID
@@ -1285,8 +1302,8 @@ public class DocLine
 				return ii.intValue();
 		}
 		return 0;
-	} // getValue
-
+	}   //  getValue
+	
     /**
 	 * Get value by column name
 	 * @param ColumnName
@@ -1294,8 +1311,13 @@ public class DocLine
 	 */
 	public String get_ValueAsString (String ColumnName)
 	{
-		return p_po.get_ValueAsString(ColumnName);
-	} // get_ValueAsString
+		int index = p_po.get_ColumnIndex(ColumnName);
+		if (index != -1)
+		{
+			return p_po.get_ValueAsString(index);
+		}
+		return null;
+	}	//	get_ValueAsString
 
 	//AZ Goodwill
 	private int         		m_ReversalLine_ID = 0;

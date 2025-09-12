@@ -26,7 +26,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for A_Depreciation_Entry
  *  @author iDempiere (generated)
- *  @version Release 11 - $Id$ */
+ *  @version Release 13 - $Id$ */
 @org.adempiere.base.Model(table="A_Depreciation_Entry")
 public class X_A_Depreciation_Entry extends PO implements I_A_Depreciation_Entry, I_Persistent
 {
@@ -34,7 +34,7 @@ public class X_A_Depreciation_Entry extends PO implements I_A_Depreciation_Entry
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20250603L;
+	private static final long serialVersionUID = 20250805L;
 
     /** Standard Constructor */
     public X_A_Depreciation_Entry (Properties ctx, int A_Depreciation_Entry_ID, String trxName)
@@ -266,6 +266,7 @@ public class X_A_Depreciation_Entry extends PO implements I_A_Depreciation_Entry
 		return (String)get_Value(COLUMNNAME_A_Entry_Type);
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_AcctSchema getC_AcctSchema() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_AcctSchema)MTable.get(getCtx(), org.compiere.model.I_C_AcctSchema.Table_ID)
@@ -294,24 +295,27 @@ public class X_A_Depreciation_Entry extends PO implements I_A_Depreciation_Entry
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_CostCenter getC_CostCenter() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_CostCenter)MTable.get(getCtx(), org.compiere.model.I_C_CostCenter.Table_Name)
-			.getPO(getC_CostCenter_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_CostCenter)MTable.get(getCtx(), org.compiere.model.I_C_CostCenter.Table_ID)
+			.getPO(getC_CostCenter_ID(), get_TrxName());
+	}
 
 	/** Set Cost Center.
-		@param C_CostCenter_ID Cost Center	  */
+		@param C_CostCenter_ID Cost Center
+	*/
 	public void setC_CostCenter_ID (int C_CostCenter_ID)
 	{
-		if (C_CostCenter_ID < 1) 
+		if (C_CostCenter_ID < 1)
 			set_Value (COLUMNNAME_C_CostCenter_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_CostCenter_ID, Integer.valueOf(C_CostCenter_ID));
 	}
 
 	/** Get Cost Center.
 		@return Cost Center	  */
-	public int getC_CostCenter_ID () 
+	public int getC_CostCenter_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_CostCenter_ID);
 		if (ii == null)
@@ -319,6 +323,7 @@ public class X_A_Depreciation_Entry extends PO implements I_A_Depreciation_Entry
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_ID)
@@ -347,24 +352,27 @@ public class X_A_Depreciation_Entry extends PO implements I_A_Depreciation_Entry
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Department getC_Department() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Department)MTable.get(getCtx(), org.compiere.model.I_C_Department.Table_Name)
-			.getPO(getC_Department_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Department)MTable.get(getCtx(), org.compiere.model.I_C_Department.Table_ID)
+			.getPO(getC_Department_ID(), get_TrxName());
+	}
 
 	/** Set Department.
-		@param C_Department_ID Department	  */
+		@param C_Department_ID Department
+	*/
 	public void setC_Department_ID (int C_Department_ID)
 	{
-		if (C_Department_ID < 1) 
+		if (C_Department_ID < 1)
 			set_Value (COLUMNNAME_C_Department_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Department_ID, Integer.valueOf(C_Department_ID));
 	}
 
 	/** Get Department.
 		@return Department	  */
-	public int getC_Department_ID () 
+	public int getC_Department_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Department_ID);
 		if (ii == null)
@@ -372,6 +380,7 @@ public class X_A_Depreciation_Entry extends PO implements I_A_Depreciation_Entry
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_ID)
@@ -400,6 +409,7 @@ public class X_A_Depreciation_Entry extends PO implements I_A_Depreciation_Entry
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Period getC_Period() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Period)MTable.get(getCtx(), org.compiere.model.I_C_Period.Table_ID)

@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_TableAttributeSet
  *  @author iDempiere (generated) 
- *  @version Release 7.1
+ *  @version Release 13
  */
 public interface I_AD_TableAttributeSet 
 {
@@ -62,21 +62,6 @@ public interface I_AD_TableAttributeSet
 	  */
 	public int getAD_Org_ID();
 
-    /** Column name AD_Table_ID */
-    public static final String COLUMNNAME_AD_Table_ID = "AD_Table_ID";
-
-	/** Set Table.
-	  * Database Table information
-	  */
-	public void setAD_Table_ID (int AD_Table_ID);
-
-	/** Get Table.
-	  * Database Table information
-	  */
-	public int getAD_Table_ID();
-
-	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException;
-
     /** Column name AD_TableAttributeSet_ID */
     public static final String COLUMNNAME_AD_TableAttributeSet_ID = "AD_TableAttributeSet_ID";
 
@@ -94,6 +79,22 @@ public interface I_AD_TableAttributeSet
 
 	/** Get AD_TableAttributeSet_UU	  */
 	public String getAD_TableAttributeSet_UU();
+
+    /** Column name AD_Table_ID */
+    public static final String COLUMNNAME_AD_Table_ID = "AD_Table_ID";
+
+	/** Set Table.
+	  * Database Table information
+	  */
+	public void setAD_Table_ID (int AD_Table_ID);
+
+	/** Get Table.
+	  * Database Table information
+	  */
+	public int getAD_Table_ID();
+
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException;
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
@@ -137,6 +138,7 @@ public interface I_AD_TableAttributeSet
 	  */
 	public int getM_AttributeSet_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_M_AttributeSet getM_AttributeSet() throws RuntimeException;
 
     /** Column name Updated */

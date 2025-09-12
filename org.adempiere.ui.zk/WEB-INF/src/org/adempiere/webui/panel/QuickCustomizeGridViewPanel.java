@@ -78,7 +78,7 @@ public class QuickCustomizeGridViewPanel extends Panel {
 	private Map <Integer, String>	m_columnsWidth;
 	protected ArrayList <Integer>	tableSeqs;
 	protected QuickGridView			gridview			= null;
-	MTabCustomization m_tabcust;
+	protected MTabCustomization 	m_tabcust;
 
 	private int						m_WindowNo;
 	private int						m_AD_Tab_ID;

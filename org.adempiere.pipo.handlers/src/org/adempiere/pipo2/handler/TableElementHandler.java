@@ -270,7 +270,7 @@ public class TableElementHandler extends AbstractElementHandler {
 		} catch (Exception e)	{
 			throw new AdempiereException(e);
 		}
-
+		
 		List<MTableAttributeSet> mTableAttributeSets = new Query(ctx.ctx, MTableAttributeSet.Table_Name, "AD_Table_ID=?", getTrxName(ctx))
 						.setParameters(AD_Table_ID)
 						.list();
@@ -287,7 +287,7 @@ public class TableElementHandler extends AbstractElementHandler {
 		{
 			throw new AdempiereException(e);
 		}
-
+		
 		if (createElement) {
 			document.endElement("","",X_AD_Table.Table_Name);
 		}

@@ -47,6 +47,8 @@ public class PackageExpDetail implements IColumnCallout {
 			if (sql.startsWith("SELECT ") && sql.contains(" FROM ")) {
 				int start = sql.indexOf(" FROM ") + 6;
 				int end = sql.indexOf(" ", start + 1);
+				if (end == -1)
+					end = sql.length();
 
 				String tablename = sql.substring(start, end);
 

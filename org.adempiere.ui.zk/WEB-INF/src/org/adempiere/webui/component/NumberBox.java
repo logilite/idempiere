@@ -26,6 +26,7 @@ import java.text.ParseException;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.MSysConfig;
 import org.compiere.util.DisplayType;
@@ -45,7 +46,6 @@ import org.zkoss.zul.Vbox;
  * Composite component of {@link Decimalbox} and {@link Button}
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date    Mar 11, 2007
- * @version $Revision: 0.10 $
  * 
  * @author Low Heng Sin
  */
@@ -142,7 +142,7 @@ public class NumberBox extends Div
 		
 		btn = new Button();
 		if (ThemeManager.isUseFontIconForImage())
-			btn.setIconSclass("z-icon-Calculator");
+			btn.setIconSclass(Icon.getIconSclass(Icon.CALCULATOR));
 		else
 			btn.setImage(ThemeManager.getThemeResource("images/Calculator16.png"));
 		btn.setTabindex(-1);
@@ -169,7 +169,7 @@ public class NumberBox extends Div
 						}
 					}
 					String txtCalcId = txtCalc.getId();
-					Clients.evalJavaScript("calc.append('" + txtCalcId + "', '" + curValue + "')");					
+					Clients.evalJavaScript("calc.clearAll('" + txtCalcId + "'); calc.append('" + txtCalcId + "', '" + curValue + "')");	
 				}				
 			}
 		});
@@ -473,7 +473,7 @@ public class NumberBox extends Div
 	}
 	
 	/**
-	 * Set enable/disable.
+	 * Set enable/disable.<br/>
 	 * Hide calculator button if set to disable.
 	 * @param enabled
 	 */
@@ -508,7 +508,7 @@ public class NumberBox extends Div
 	}
 	
 	/**
-	 * If evtnm is ON_CLICK, add listener to {@link #btn}.
+	 * If evtnm is ON_CLICK, add listener to {@link #btn}.<br/>
 	 * Otherwise, add listener to {@link #decimalBox}.
 	 * @param evtnm
 	 * @param listener

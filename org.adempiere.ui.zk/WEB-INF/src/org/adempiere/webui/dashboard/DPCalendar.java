@@ -88,6 +88,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 	 */
 	private static final long serialVersionUID = -224914882522997787L;
 	private static final String ON_MOBILE_SET_SELECTED_TAB_ECHO = "onMobileSetSelectedTabEcho";
+	private static final String ON_DAY_CLICK_EVENT = "onDayClick";
 	private static final String ON_EVENT_EDIT_EVENT = "onEventEdit";
 	private static final String ON_EVENT_CREATE_EVENT = "onEventCreate";
 	private static final String ON_MOVE_DATE_EVENT = "onMoveDate";
@@ -159,6 +160,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 
 		calendars.addEventListener(ON_EVENT_CREATE_EVENT, this);
 		calendars.addEventListener(ON_EVENT_EDIT_EVENT, this);	
+		calendars.addEventListener(ON_DAY_CLICK_EVENT, this);
 				
 		createStaticListeners();
 		
@@ -243,10 +245,18 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 				divArrowClicked(true);
 		}
 		else if (type.equals(ON_EVENT_CREATE_EVENT) && ! Env.isReadOnlySession()) {
+			if (e instanceof CalendarsEvent) {
 				CalendarsEvent calendarsEvent = (CalendarsEvent) e;
 				DecisionWindow decisionWin = new DecisionWindow(calendarsEvent, this);
 				SessionManager.getAppDesktop().showWindow(decisionWin);
 		}	
+		else if (type.equals(ON_DAY_CLICK_EVENT) && ! Env.isReadOnlySession()) {
+			if (e.getData() instanceof Date date) {
+				CalendarsEvent calendarsEvent = new CalendarsEvent(ON_EVENT_CREATE_EVENT, e.getTarget(), null, date, date, 0, 0, 0, 0);
+				RequestWindow requestWin = new RequestWindow(calendarsEvent, this);
+				SessionManager.getAppDesktop().showWindow(requestWin);
+			}
+		}
 		else if (type.equals(ON_EVENT_EDIT_EVENT)) {
 			if (e instanceof CalendarsEvent) {
 				CalendarsEvent calendarsEvent = (CalendarsEvent) e;
@@ -283,7 +293,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 	}
 	
 	/**
-	 * TODO move this and ADCalendarEvent to org.adempiere.ui and create unit test for it
+	 * TODO move this and ADCalendarEvent to org.adempiere.ui and create unit test for it.<br/>
 	 * Retrieve events (request) from DB
 	 * @param RequestTypeID
 	 * @param ctx
@@ -453,7 +463,6 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		return types;
 	}
 
-	
 	public static ArrayList<ADCalendarContactActivity> getContactActivities(String ContactActivityType, Properties ctx,ArrayList<ValueNamePair> users)
 	{
 		String userIDs = "";
@@ -690,9 +699,14 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 			return events;
 		}
 		return null;
-}
+	}
 
-	
+	/**
+	 * TODO move to MRequestType.<br/>
+	 * Get request types from DB
+	 * @param ctx
+	 * @return X_R_RequestType list
+	 */
 	public static ArrayList<X_R_RequestType> getRequestTypes(Properties ctx) {
 		ArrayList<X_R_RequestType> types = new ArrayList<X_R_RequestType>();
 		String sql = "SELECT * "
@@ -720,7 +734,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		
 		return types;
 	}
-	
+
 	public static ArrayList<X_S_Resource> getResources(Properties ctx)
 	{
 		ArrayList<X_S_Resource> resources = new ArrayList<X_S_Resource>();
@@ -752,7 +766,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 
 		return resources;
 	}
-	
+
 	public static ArrayList<MRefList> getContactActivityTypes(Properties ctx)
 	{
 
@@ -781,7 +795,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 		}
 		return types;
 	}
-	
+
 	/**
 	 * Refresh model and UI
 	 */
@@ -804,7 +818,6 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 			if (desktop.get() != null)
 				desktop.get().addListener(listener);
 		}
-		
 	}
 
 	@Override

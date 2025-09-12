@@ -106,9 +106,8 @@ import org.idempiere.print.renderer.XMLReportRenderer;
 import org.idempiere.print.renderer.XMLReportRendererConfiguration;
 
 /**
- *	Report Engine.
- *  For a given PrintFormat,
- *  create a Report
+ *	Report Engine.<br/>
+ *  For a given PrintFormat, create a Report.
  *  <p>
  *  Change log:
  *  <ul>
@@ -120,7 +119,7 @@ import org.idempiere.print.renderer.XMLReportRendererConfiguration;
  * 	@author 	Jorg Janke
  * 	@version 	$Id: ReportEngine.java,v 1.4 2006/10/08 06:52:51 comdivision Exp $
  * 
- * @author Teo Sarca, www.arhipac.ro
+ *  @author Teo Sarca, www.arhipac.ro
  * 			<li>BF [ 2828300 ] Error when printformat table differs from DOC_TABLES
  * 				https://sourceforge.net/p/adempiere/bugs/1995/
  * 			<li>BF [ 2828886 ] Problem with reports from temporary tables
@@ -144,7 +143,7 @@ public class ReportEngine implements PrintServiceAttributeListener
 	}	//	ReportEngine
 	
 	/**
-	 * Set report engine with summary and null transaction
+	 * Create report engine with summary and null transaction
 	 * @param ctx
 	 * @param pf
 	 * @param query
@@ -157,7 +156,7 @@ public class ReportEngine implements PrintServiceAttributeListener
 	}	//	ReportEngine
 	
 	/**
-	 * Set report engine with summary = false
+	 * Create report engine with summary = false
 	 * @param ctx
 	 * @param pf
 	 * @param query
@@ -261,11 +260,20 @@ public class ReportEngine implements PrintServiceAttributeListener
 	
 	private List<IReportEngineEventListener> eventListeners = new ArrayList<IReportEngineEventListener>();
 
+	/**
+	 * Add report engine event listener
+	 * @param listener
+	 */
 	public void addEventListener(IReportEngineEventListener listener)
 	{
 		eventListeners.add(listener);
 	}
 	
+	/**
+	 * Remove report engine event listener
+	 * @param listener
+	 * @return true if found and remove
+	 */
 	public boolean removeEventListener(IReportEngineEventListener listener)
 	{
 		return eventListeners.remove(listener);
@@ -301,8 +309,9 @@ public class ReportEngine implements PrintServiceAttributeListener
 	}	//	setPrintFormat
 	
 	/**
-	 * 	Set Query and generate PrintData.
-	 *  If Layout was created, re-create layout
+	 * 	Set Query and load PrintData.<br/>
+	 *  If Layout was created, re-create layout.<br/>
+	 *  Fire onQueryChanged event.
 	 * 	@param query query
 	 */
 	public void setQuery (MQuery query)
@@ -332,9 +341,8 @@ public class ReportEngine implements PrintServiceAttributeListener
 	}	//	getQuery
 
 	/**
-	 * 	Set PrintData for Format restricted by Query.
-	 * 	Nothing set if there is no query
-	 *  Sets m_printData
+	 * 	Load PrintData (m_printData) for Format restricted by Query.<br/>
+	 * 	Nothing loaded if there is no query.
 	 */
 	private void setPrintData()
 	{
@@ -343,9 +351,7 @@ public class ReportEngine implements PrintServiceAttributeListener
 		
 		DataEngine de = new DataEngine(m_printFormat.getLanguage(),m_trxName, m_windowNo);
 		setPrintData(de.getPrintData (m_ctx, m_printFormat, m_query, m_summary, m_info.isTransientObject()));
-	//	m_printData.dump();
 	}	//	setPrintData
-
 
 	/**
 	 * 	Get PrintData
@@ -366,10 +372,10 @@ public class ReportEngine implements PrintServiceAttributeListener
 			return;
 		m_printData = printData;
 	}	//	setPrintData
-
 	
-	/**************************************************************************
+	/**
 	 * 	Layout
+	 *  @see LayoutEngine
 	 */
 	private void layout()
 	{
@@ -383,8 +389,8 @@ public class ReportEngine implements PrintServiceAttributeListener
 	}	//	layout
 
 	/**
-	 * 	Get Layout
-	 *  @return Layout
+	 * 	Get Layout Engine
+	 *  @return Layout engine
 	 */
 	public LayoutEngine getLayout()
 	{
@@ -477,10 +483,9 @@ public class ReportEngine implements PrintServiceAttributeListener
 			return m_layout.getColumnCount();
 		return 0;
 	}	//	getColumnCount
-
 	
-	/**************************************************************************
-	 * 	Print Report
+	/**
+	 * 	Print Report. Issue print job to printer.
 	 */
 	public void print ()
 	{
@@ -503,7 +508,6 @@ public class ReportEngine implements PrintServiceAttributeListener
 		{
 			//	PrinterJob
 			PrinterJob job = getPrinterJob(m_info.getPrinterName());
-		//	job.getPrintService().addPrintServiceAttributeListener(this);
 			job.setPageable(m_layout.getPageable(false));	//	no copy
 		//	Dialog
 			try
@@ -573,8 +577,8 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	}	//	getPrinterJob
 
 	/**
-	 * 	Show Dialog and Set Paper
-	 *  Optionally re-calculate layout
+	 * 	Show Print Dialog and Set Paper.<br/>
+	 *  Optionally re-calculate layout.
 	 */
 	public void pageSetupDialog ()
 	{
@@ -686,9 +690,12 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	 * 	@return true if success
 	 */
 	public boolean createHTML (Writer writer, boolean onlyTable, Language language, IHTMLExtension extension, boolean isExport)
-	{		
+	{
 		HTMLReportRendererConfiguration config = new HTMLReportRendererConfiguration()
-				.setOutputWriter(writer).setOnlyTable(onlyTable).setExport(isExport).setExtension(extension)
+				.setOutputWriter(writer)
+				.setOnlyTable(onlyTable)
+				.setExport(isExport)
+				.setExtension(extension)
 				.setLanguage(language);
 		new HTMLReportRenderer().renderReport(this, config);
 		return true;
@@ -769,7 +776,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	 * @param column
 	 * @param tableName
 	 * @param isTrl - is translated
-	 * @return String tableName
+	 * @return tableName
 	 */
 	private String addTrlSuffix(MColumn column, String tableName, boolean isTrl) {
 		if(column.isTranslated() && isTrl)
@@ -856,8 +863,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	}	//	createXML
 	
 	/**
-	 * 	Create PDF file.
-	 * 	(created in temporary storage)
+	 * 	Create PDF file (created as temporary file).
 	 *	@return PDF file
 	 */
 	public File getPDF()
@@ -867,7 +873,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 
 	/**
 	 * 	Create PDF file.
-	 * 	@param file file
+	 * 	@param file optional, null to use system generated temporary file
 	 *	@return PDF file
 	 */
 	public File getPDF (File file)
@@ -888,8 +894,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	}	//	getPDF
 
 	/**
-	 * 	Create HTML file.
-	 * 	(created in temporary storage)
+	 * 	Create HTML file (created as temporary file).
 	 *	@return HTML file
 	 */
 	public File getHTML()
@@ -899,7 +904,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 
 	/**
 	 * 	Create HTML file.
-	 * 	@param file file
+	 * 	@param file optional, null to use system generated temporary file
 	 *	@return HTML file
 	 */
 	public File getHTML(File file)
@@ -919,8 +924,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	}	//	getHTML
 	
 	/**
-	 * 	Create CSV file.
-	 * 	(created in temporary storage)
+	 * 	Create CSV file (created as temporary file).
 	 *	@return CSV file
 	 */
 	public File getCSV()
@@ -930,7 +934,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 
 	/**
 	 * 	Create CSV file.
-	 * 	@param file file
+	 * 	@param file optional, null to use system generated temporary file
 	 *	@return CSV file
 	 */
 	public File getCSV(File file)
@@ -950,8 +954,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	}	//	getCSV
 	
 	/**
-	 * 	Create XLS file.
-	 * 	(created in temporary storage)
+	 * 	Create XLS file (created as temporary file).
 	 *	@return XLS file
 	 */
 	public File getXLS()
@@ -961,7 +964,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 
 	/**
 	 * 	Create XLS file.
-	 * 	@param file file
+	 * 	@param file optional, null to use system generated temporary file
 	 *	@return XLS file
 	 */
 	public File getXLS(File file)
@@ -988,8 +991,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	}	//	getXLS
 	
 	/**
-	 * 	Create XLSX file.
-	 * 	(created in temporary storage)
+	 * 	Create XLSX file (created as temporary file).
 	 *	@return XLSX file
 	 */
 	public File getXLSX()
@@ -999,7 +1001,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 
 	/**
 	 * 	Create XLSX file.
-	 * 	@param file file
+	 * 	@param file optional, null to use system generated temporary file
 	 *	@return XLSX file
 	 */
 	public File getXLSX(File file)
@@ -1027,7 +1029,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	
 	/**
 	 * 	Create PDF File
-	 * 	@param file file
+	 * 	@param file optional, null to use system generated temporary file
 	 * 	@return true if success
 	 */
 	public boolean createPDF (File file)
@@ -1066,6 +1068,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				}
 				pi.setIsBatch(true);
 				pi.setPDFFileName(fileName);
+				pi.setTransientObject(m_printFormat);
 				ServerProcessCtl.process(pi, (m_trxName == null ? null : Trx.get(m_trxName, false)), false);
 			} else {
 				PDFReportRendererConfiguration config = new PDFReportRendererConfiguration().setOutputFile(file);
@@ -1095,9 +1098,9 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return os.toByteArray();
 	}	//	createPDFData
 	
-	/**************************************************************************
+	/**
 	 * 	Create PostScript File
-	 * 	@param file file
+	 * 	@param file output file
 	 * 	@return true if success
 	 */
 	public boolean createPS (File file)
@@ -1145,7 +1148,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		new XLSXReportRenderer().renderReport(this, config);
 	}
 	
-	/**************************************************************************
+	/**
 	 * 	Get Report Engine for process info 
 	 *	@param ctx context
 	 *	@param pi process info with AD_PInstance_ID
@@ -1156,7 +1159,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return get(ctx, pi, 0);
 	}
 
-	/**************************************************************************
+	/**
 	 * 	Get Report Engine for process info 
 	 *	@param ctx context
 	 *	@param pi process info with AD_PInstance_ID
@@ -1316,8 +1319,6 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return new ReportEngine(ctx, format, query, info, pi.isSummary(), pi.getTransactionName(), windowNo);
 	}	//	get
 	
-	/*************************************************************************/
-
 	/** Order = 0				*/
 	public static final int		ORDER = 0;
 	/** Shipment = 1				*/
@@ -1362,7 +1363,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		MDunningRunEntry.Table_ID, X_PP_Order.Table_ID, MDDOrder.Table_ID, MInventory.Table_ID, MMovement.Table_ID,
 		MRMA.Table_ID};
 
-	/**************************************************************************
+	/**
 	 * 	Get Document Print Engine for Document Type.
 	 * 	@param ctx context
 	 * 	@param type document type
@@ -1374,7 +1375,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return get(ctx, type, Record_ID, null, 0);
 	}
 	
-	/**************************************************************************
+	/**
 	 * 	Get Document Print Engine for Document Type.
 	 * 	@param ctx context
 	 * 	@param type document type
@@ -1386,7 +1387,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return get(ctx, type, Record_ID, null, windowNo);
 	}
 	
-	/**************************************************************************
+	/**
 	 * 	Get Document Print Engine for Document Type.
 	 * 	@param ctx context
 	 * 	@param type document type
@@ -1399,7 +1400,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return get(ctx, type, Record_ID, trxName, 0);
 	}
 
-	/**************************************************************************
+	/**
 	 * 	Get Document Print Engine for Document Type.
 	 * 	@param ctx context
 	 * 	@param type document type
@@ -1653,7 +1654,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	/**
 	 *	Determine what Order document to print.
 	 *  @param C_Order_ID id
-	 *	@return int Array with [printWhat, ID]
+	 *	@return int Array with [ReportEngine constant for type of print(INVOICE, ORDER, etc), record id]
 	 */
 	private static int[] getDocumentWhat (int C_Order_ID)
 	{
@@ -1747,9 +1748,9 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	}	//	getDocumentWhat
 
 	/**
-	 * 	Print Confirm.
-	 *  Update Date Printed
-	 * 	@param type document type
+	 * 	Print Confirm.<br/>
+	 *  Update Date Printed.
+	 * 	@param type report engine document type ({@link #ORDER}, {@link #SHIPMENT}, etc)
 	 * 	@param Record_ID record id
 	 */
 	public static void printConfirm (int type, int Record_ID)
@@ -1768,38 +1769,68 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		}
 	}	//	printConfirm
 
+	/**
+	 * Set extended where clause
+	 * @param whereExtended
+	 */
 	public void setWhereExtended(String whereExtended) {
 		m_whereExtended = whereExtended;
 	}
 
+	/**
+	 * Get extended where clause
+	 * @return extended where clause
+	 */
 	public String getWhereExtended() {
 		return m_whereExtended;
 	}
 
-	/* Save windowNo of the report to parse the context */
+	/**
+	 * Set windowNo of the report to parse the context 
+	 */
 	public void setWindowNo(int windowNo) {
 		m_windowNo = windowNo;
 	}
 	
+	/**
+	 * Get window no
+	 * @return window no
+	 */
 	public int getWindowNo() {
 		return m_windowNo;
 	}
 
+	/**
+	 * Set summary report
+	 * @param summary
+	 */
 	public void setSummary(boolean summary)
 	{
 		m_summary = summary;
 	}
 
+	/**
+	 * Is summary report
+	 * @return true if it is a summary report
+	 */
 	public boolean isSummary()
 	{
 		return m_summary;
 	}
 	
+	/**
+	 * Set language id
+	 * @param languageID
+	 */
 	public void setLanguageID(int languageID)
 	{
 		m_language_id = languageID;
 	}
 
+	/**
+	 * Get language id
+	 * @return language id
+	 */
 	public int getLanguageID()
 	{
 		return m_language_id;
@@ -1807,11 +1838,19 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	
 	private String reportType;
 	
+	/**
+	 * Set report output type 
+	 * @param type output type (pdf, html, etc)
+	 */
 	public void setReportType(String type)
 	{
 		reportType = type;
 	}
 	
+	/**
+	 * Get report output type
+	 * @return report output type (pdf, html, etc)
+	 */
 	public String getReportType()
 	{
 		return reportType;
@@ -1819,7 +1858,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	
 	/**
 	 * Determines, if current tab content should be replaced, or a new tab should be opened
-	 * @return
+	 * @return true if it is to replace content of current active tab
 	 */
 	public boolean isReplaceTabContent() {
 		return m_isReplaceTabContent;
@@ -1857,6 +1896,12 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		this.m_tranPrintFormat = m_tranPrintFormat;
 	}
 	
+	/**
+	 * Update AD_PInstance with default report output type (if it is not set)
+	 * @param ctx
+	 * @param instance
+	 * @param printFormatID
+	 */
 	public static void setDefaultReportTypeToPInstance(Properties ctx, MPInstance instance, int printFormatID) {
 		if(Util.isEmpty(instance.getReportType())) {
 			MPrintFormat pf = new MPrintFormat(ctx, printFormatID, null);
@@ -1867,7 +1912,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			instance.setReportType(type);
 		}
 	}
-		
+	
 	private ProcessInfo m_pi = null;
 	
 	/**

@@ -414,8 +414,8 @@ public class WTextEditorDialog extends Window implements EventListener<Event>{
 
 		
 		String ret = policy.sanitize(untrustedHTML);
-		ret = ret.replaceAll("&#35;", "#");
-		ret = ret.replaceAll("&#64;", "@");
+		ret = ret.replace("&#35;", "#");
+		ret = ret.replace("&#64;", "@");
 
 		return ret;
 	}

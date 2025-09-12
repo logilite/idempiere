@@ -52,9 +52,8 @@ public class FinReportPeriod
 	private Timestamp 	m_EndDate;
 	private Timestamp 	m_YearStartDate;
 
-
 	/**
-	 * 	Get Period Info
+	 * 	Get Period BETWEEN Clause
 	 * 	@return BETWEEN start AND end
 	 */
 	public String getPeriodWhere ()
@@ -67,7 +66,7 @@ public class FinReportPeriod
 	}	//	getPeriodWhere
 
 	/**
-	 * 	Get Year Info
+	 * 	Get Year BETWEEN clause
 	 * 	@return BETWEEN start AND end
 	 */
 	public String getYearWhere ()
@@ -80,7 +79,7 @@ public class FinReportPeriod
 	}	//	getPeriodWhere
 
 	/**
-	 * 	Get Total Info
+	 * 	Get Total filter clause
 	 * 	@return &lt;= end
 	 */
 	public String getTotalWhere ()
@@ -127,6 +126,7 @@ public class FinReportPeriod
 	{
 		return m_Name;
 	}
+	
 	/**
 	 * 	Get C_Period_ID
 	 *	@return period
@@ -135,6 +135,7 @@ public class FinReportPeriod
 	{
 		return m_C_Period_ID;
 	}
+	
 	/**
 	 * 	Get End Date
 	 *	@return end date
@@ -143,6 +144,7 @@ public class FinReportPeriod
 	{
 		return m_EndDate;
 	}
+	
 	/**
 	 * 	Get Start Date
 	 *	@return start date
@@ -151,6 +153,7 @@ public class FinReportPeriod
 	{
 		return m_StartDate;
 	}
+	
 	/**
 	 * 	Get Year Start Date
 	 *	@return year start date
@@ -161,7 +164,7 @@ public class FinReportPeriod
 	}
 
 	/**
-	 * Get natural balance dateacct filter
+	 * Get natural balance DateAcct filter
 	 * @param alias table name or alias name
 	 * @return is balance sheet a/c and &lt;= end or BETWEEN start AND end 
 	 */

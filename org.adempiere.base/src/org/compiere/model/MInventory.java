@@ -27,6 +27,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.exceptions.BackDateTrxNotAllowedException;
 import org.adempiere.exceptions.NegativeInventoryDisallowedException;
 import org.adempiere.exceptions.PeriodClosedException;
 import org.compiere.process.DocAction;
@@ -56,7 +57,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 	/**
 	 * generated serial id 
 	 */
-	private static final long serialVersionUID = 3877357565525655884L;
+	private static final long serialVersionUID = -1031896407532927376L;
 	
 	/** Reversal Indicator			*/
 	public static String	REVERSE_INDICATOR = "^";
@@ -296,12 +297,6 @@ public class MInventory extends X_M_Inventory implements DocAction
 		return null;
 	}	//	createPDF
 
-	
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
 	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
@@ -310,7 +305,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 			log.saveError("FillMandatory", Msg.getElement(getCtx(), COLUMNNAME_C_DocType_ID));
 			return false;
 		}
-		// IDEMPIERE-1887 can make inconsistent data from physical inventory window
+		// Disallow change of warehouse if there are inventory lines
 		if (!newRecord && is_ValueChanged(COLUMNNAME_M_Warehouse_ID)) {
 			int cnt = DB.getSQLValueEx(get_TrxName(), "SELECT COUNT(*) FROM M_InventoryLine WHERE M_Inventory_ID=?", getM_Inventory_ID());
 			if (cnt > 0) {
@@ -318,7 +313,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 				return false;
 			}
 		}
-		
+		// Set document currency to primary accounting schema currency for cost adjustment document.
 		String docSubTypeInv = MDocType.get(getC_DocType_ID()).getDocSubTypeInv();
 		if (MDocType.DOCSUBTYPEINV_CostAdjustment.equals(docSubTypeInv))
 		{
@@ -403,6 +398,8 @@ public class MInventory extends X_M_Inventory implements DocAction
 
 		//	Std Period open?
 		MPeriod.testPeriodOpen(getCtx(), getMovementDate(), MDocType.DOCBASETYPE_MaterialPhysicalInventory, getAD_Org_ID());
+		MAcctSchema.testBackDateTrxAllowed(getCtx(), getMovementDate(), get_TrxName());
+		
 		MInventoryLine[] lines = getLines(false);
 		if (lines.length == 0)
 		{
@@ -626,6 +623,16 @@ public class MInventory extends X_M_Inventory implements DocAction
 		if (!isApproved())
 			approveIt();
 		if (log.isLoggable(Level.INFO)) log.info(toString());
+		
+		if (!isReversal())
+		{
+			try {
+				periodClosedCheckForBackDateTrx(null);
+			} catch (PeriodClosedException e) {
+				m_processMsg = e.getLocalizedMessage();
+				return DocAction.STATUS_Invalid;
+			}
+		}
 
 		StringBuilder errors = new StringBuilder();
 		MInventoryLine[] lines = getLines(false);
@@ -692,7 +699,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 							}
 						}
 	
-						MCost cost = product.getCostingRecord(as, getAD_Org_ID(), line.getM_AttributeSetInstance_ID(), getCostingMethod());
+						ICostInfo cost = product.getCostInfo(as, getAD_Org_ID(), line.getM_AttributeSetInstance_ID(), getCostingMethod(), getMovementDate());
 						if (cost != null && cost.getCurrentCostPrice().compareTo(currentCost) != 0) 
 						{
 							m_processMsg = "Current Cost for Line " + line.getLine() + " have changed.";
@@ -878,6 +885,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 		if (dt.isOverwriteDateOnComplete()) {
 			setMovementDate(TimeUtil.getDay(0));
 			MPeriod.testPeriodOpen(getCtx(), getMovementDate(), MDocType.DOCBASETYPE_MaterialPhysicalInventory, getAD_Org_ID());
+			MAcctSchema.testBackDateTrxAllowed(getCtx(), getMovementDate(), get_TrxName());
 		}
 		if (dt.isOverwriteSeqOnComplete()) {
 			String value = DB.getDocumentNo(getC_DocType_ID(), get_TrxName(), true, this);
@@ -1126,6 +1134,15 @@ public class MInventory extends X_M_Inventory implements DocAction
 				accrual = true;
 			}
 			
+			try
+			{
+				MAcctSchema.testBackDateTrxAllowed(getCtx(), getMovementDate(), get_TrxName());
+			}
+			catch (BackDateTrxNotAllowedException e)
+			{
+				accrual = true;
+			}
+			
 			if (accrual)
 				return reverseAccrualIt();
 			else
@@ -1202,6 +1219,14 @@ public class MInventory extends X_M_Inventory implements DocAction
 		
 		MDocType dt = MDocType.get(getC_DocType_ID());
 		MPeriod.testPeriodOpen(getCtx(), reversalDate, dt.getDocBaseType(), getAD_Org_ID());
+		MAcctSchema.testBackDateTrxAllowed(getCtx(), reversalDate, get_TrxName());
+		
+		try {
+			periodClosedCheckForBackDateTrx(reversalDate);
+		} catch (PeriodClosedException e) {
+			m_processMsg = e.getLocalizedMessage();
+			return null;
+		}
 
 		//	Deep Copy
 		MInventory reversal = new MInventory(getCtx(), 0, get_TrxName());
@@ -1397,4 +1422,71 @@ public class MInventory extends X_M_Inventory implements DocAction
 			|| DOCSTATUS_Reversed.equals(ds);
 	}	//	isComplete
 
+	/**
+	 * Period Closed Check for Back-Date Transaction
+	 * @param reversalDate reversal date - null when it is not a reversal
+	 * @return false when failed the period closed check
+	 */
+	private boolean periodClosedCheckForBackDateTrx(Timestamp reversalDate)
+	{
+		MClientInfo info = MClientInfo.get(getCtx(), getAD_Client_ID(), get_TrxName()); 
+		MAcctSchema as = info.getMAcctSchema1();
+		if (!MAcctSchema.COSTINGMETHOD_AveragePO.equals(as.getCostingMethod()) 
+				&& !MAcctSchema.COSTINGMETHOD_AverageInvoice.equals(as.getCostingMethod()))
+			return true;
+		
+		if (as.getBackDateDay() == 0)
+			return true;
+		
+		Timestamp dateAcct = reversalDate != null ? reversalDate : getMovementDate();
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT COUNT(*) FROM M_CostDetail ");
+		sql.append("WHERE M_Product_ID IN (SELECT M_Product_ID FROM M_InventoryLine WHERE M_Inventory_ID=?) ");
+		sql.append("AND Processed='Y' ");
+		sql.append(reversalDate != null ? "AND DateAcct>=? " : "AND DateAcct>? ");
+		int no = DB.getSQLValueEx(get_TrxName(), sql.toString(), get_ID(), dateAcct);
+		if (no <= 0)
+			return true;
+		
+		MInventoryLine[] iLines = getLines(false);
+		for (MInventoryLine iLine : iLines) {
+			int AD_Org_ID = iLine.getAD_Org_ID();
+			int M_AttributeSetInstance_ID = iLine.getM_AttributeSetInstance_ID();
+
+			if (MAcctSchema.COSTINGLEVEL_Client.equals(as.getCostingLevel()))
+			{
+				AD_Org_ID = 0;
+				M_AttributeSetInstance_ID = 0;
+			}
+			else if (MAcctSchema.COSTINGLEVEL_Organization.equals(as.getCostingLevel()))
+				M_AttributeSetInstance_ID = 0;
+			else if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(as.getCostingLevel()))
+				AD_Org_ID = 0;
+			
+			MCostElement ce = MCostElement.getMaterialCostElement(getCtx(), as.getCostingMethod(), AD_Org_ID);
+			
+			int M_CostDetail_ID = 0;
+			int M_InventoryLine_ID = iLine.getM_InventoryLine_ID();
+			if (iLine.getReversalLine_ID() > 0 && iLine.get_ID() > iLine.getReversalLine_ID())
+				M_InventoryLine_ID = iLine.getReversalLine_ID();
+			MCostDetail cd = MCostDetail.getInventory(as, iLine.getM_Product_ID(), M_AttributeSetInstance_ID, 
+					M_InventoryLine_ID, 0, get_TrxName());
+			if (cd != null)
+				M_CostDetail_ID = cd.getM_CostDetail_ID();
+			else {
+				MCostHistory history = MCostHistory.get(getCtx(), getAD_Client_ID(), AD_Org_ID, iLine.getM_Product_ID(), 
+						as.getM_CostType_ID(), as.getC_AcctSchema_ID(), ce.getCostingMethod(), ce.getM_CostElement_ID(),
+						M_AttributeSetInstance_ID, dateAcct, get_TrxName());
+				if (history != null)
+					M_CostDetail_ID = history.getM_CostDetail_ID();
+			}
+			
+			if (M_CostDetail_ID > 0) {
+				MCostDetail.periodClosedCheckForDocsAfterBackDateTrx(getAD_Client_ID(), as.getC_AcctSchema_ID(), 
+						iLine.getM_Product_ID(), M_CostDetail_ID, dateAcct, get_TrxName());
+			}
+		}
+		return true;
+	}
 }	//	MInventory

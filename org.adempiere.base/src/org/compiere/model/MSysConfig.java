@@ -47,7 +47,7 @@ public class MSysConfig extends X_AD_SysConfig
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 8636352432923806208L;
+	private static final long serialVersionUID = 4467301251742419106L;
 
 	/** Constant for Predefine System Configuration Names (in alphabetical order) */
 	
@@ -67,12 +67,14 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String APPLICATION_IMPLEMENTATION_VENDOR = "APPLICATION_IMPLEMENTATION_VENDOR";
     public static final String APPLICATION_IMPLEMENTATION_VENDOR_SHOWN = "APPLICATION_IMPLEMENTATION_VENDOR_SHOWN";
     public static final String APPLICATION_JVM_VERSION_SHOWN = "APPLICATION_JVM_VERSION_SHOWN";
+    public static final String APPLICATION_LOGIN_INFO_SHOWN = "APPLICATION_LOGIN_INFO_SHOWN";
     public static final String APPLICATION_LOGIN_LEFT_PANEL_SHOWN = "APPLICATION_LOGIN_LEFT_PANEL_SHOWN";
     public static final String APPLICATION_MAIN_VERSION = "APPLICATION_MAIN_VERSION";
     public static final String APPLICATION_MAIN_VERSION_SHOWN = "APPLICATION_MAIN_VERSION_SHOWN";
     public static final String APPLICATION_OS_INFO_SHOWN = "APPLICATION_OS_INFO_SHOWN";
     public static final String APPLICATION_URL = "APPLICATION_URL";
     public static final String ATTACH_EMBEDDED_2PACK = "ATTACH_EMBEDDED_2PACK";
+    public static final String ATTACH_NOTIFY_2PACK = "ATTACH_NOTIFY_2PACK";
     public static final String AUTO_ASSIGN_ROLE_TO_CREATOR_USER = "AUTO_ASSIGN_ROLE_TO_CREATOR_USER";
     public static final String AUTOMATIC_PACKIN_FOLDERS = "AUTOMATIC_PACKIN_FOLDERS";
     public static final String AUTOMATIC_PACKIN_INITIAL_DELAY = "AUTOMATIC_PACKIN_INITIAL_DELAY";
@@ -109,11 +111,14 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String DPViews_ShowInfoAccount = "DPViews_ShowInfoAccount";
     public static final String DPViews_ShowInfoSchedule = "DPViews_ShowInfoSchedule";
     public static final String EMAIL_NOTIFY_2PACK = "EMAIL_NOTIFY_2PACK";
+    public static final String EMAIL_SERVER_START_ENABLED = "EMAIL_SERVER_START_ENABLED";
     public static final String EMAIL_TEST_MAILTEXT_ID = "EMAIL_TEST_MAILTEXT_ID";
     public static final String ENABLE_PAYMENTBOX_BUTTON = "ENABLE_PAYMENTBOX_BUTTON";
     public static final String ENABLE_SSO = "ENABLE_SSO";
     public static final String ENABLE_SSO_OSGI_CONSOLE = "ENABLE_SSO_OSGI_CONSOLE";
     public static final String ENABLE_SSO_IDEMPIERE_MONITOR = "ENABLE_SSO_IDEMPIERE_MONITOR";
+	public static final String SSO_SHOW_LOGINPAGE = "SSO_SHOW_LOGINPAGE";
+    public static final String EXPORT_BLOB_COLUMN_FOR_INSERT = "EXPORT_BLOB_COLUMN_FOR_INSERT";
     public static final String FEEDBACK_EMAIL_CC = "FEEDBACK_EMAIL_CC";
     public static final String FEEDBACK_EMAIL_TO = "FEEDBACK_EMAIL_TO";
     public static final String FORCE_POSTING_PRIOR_TO_PERIOD_CLOSE = "FORCE_POSTING_PRIOR_TO_PERIOD_CLOSE";
@@ -206,7 +211,6 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String SYSTEM_INSERT_CHANGELOG = "SYSTEM_INSERT_CHANGELOG";
     public static final String SYSTEM_NATIVE_SEQUENCE = "SYSTEM_NATIVE_SEQUENCE";
 	public static final String SSO_SELECT_ROLE = "SSO_SELECT_ROLE";
-	public static final String SSO_SHOW_LOGINPAGE = "SSO_SHOW_LOGINPAGE";
     public static final String SSO_SHOWSSO_OPTION = "SSO_SHOWSSO_OPTION";
     public static final String TAX_LOOKUP_SERVICE = "TAX_LOOKUP_SERVICE";
     public static final String TOP_MARGIN_PIXELS_FOR_HEADER = "TOP_MARGIN_PIXELS_FOR_HEADER";
@@ -226,6 +230,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String VALIDATE_MATCHING_PRODUCT_ON_SHIPMENT = "VALIDATE_MATCHING_PRODUCT_ON_SHIPMENT";
     public static final String VALIDATE_MATCHING_TO_ORDERED_QTY = "VALIDATE_MATCHING_TO_ORDERED_QTY";
     public static final String WEBUI_LOGOURL = "WEBUI_LOGOURL";
+    public static final String XLSX_EXPORT_USE_FAST_METHOD = "XLSX_EXPORT_USE_FAST_METHOD";
     public static final String ZK_ADVANCE_FIND_FILTER_COLUMN_LIST = "ZK_ADVANCE_FIND_FILTER_COLUMN_LIST";
     public static final String ZK_AUTO_SAVE_CHANGES = "ZK_AUTO_SAVE_CHANGES";
     public static final String ZK_AUTO_SAVE_TABS_EXCLUDED = "ZK_AUTO_SAVE_TABS_EXCLUDED";
@@ -239,18 +244,24 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String ZK_DASHBOARD_PERFORMANCE_TIMEOUT = "ZK_DASHBOARD_PERFORMANCE_TIMEOUT";
     public static final String ZK_DASHBOARD_REFRESH_INTERVAL = "ZK_DASHBOARD_REFRESH_INTERVAL";
     public static final String ZK_DECIMALBOX_PROCESS_DOTKEYPAD = "ZK_DECIMALBOX_PROCESS_DOTKEYPAD";
+	public static final String ZK_DESKTOP_HEADER_BACKGROUND_COLOR = "ZK_DESKTOP_HEADER_BACKGROUND_COLOR"; // used in desktop.css.dsp
+	public static final String ZK_DESKTOP_HEADER_MESSAGE_VALUE = "ZK_DESKTOP_HEADER_MESSAGE_VALUE";
     public static final String ZK_DESKTOP_CLASS = "ZK_DESKTOP_CLASS";
     public static final String ZK_DESKTOP_SHOW_HOME_BUTTON = "ZK_DESKTOP_SHOW_HOME_BUTTON";
     public static final String ZK_DESKTOP_SHOW_TAB_LIST_BUTTON = "ZK_DESKTOP_SHOW_TAB_LIST_BUTTON";
     public static final String ZK_DESKTOP_TAB_AUTO_SHRINK_TO_FIT = "ZK_DESKTOP_TAB_AUTO_SHRINK_TO_FIT";
     public static final String ZK_DESKTOP_TAB_MAX_TITLE_LENGTH = "ZK_DESKTOP_TAB_MAX_TITLE_LENGTH";
     public static final String ZK_ERROR_MSG_LIFETIME_MILLISECONDS = "ZK_ERROR_MSG_LIFETIME_MILLISECONDS";
+    public static final String ZK_FIELD_LABEL_ABOVE_INPUT = "ZK_FIELD_LABEL_ABOVE_INPUT";
+    public static final String ZK_FIELD_MOBILE_LABEL_ABOVE_INPUT = "ZK_FIELD_MOBILE_LABEL_ABOVE_INPUT";
+    public static final String ZK_FIELD_MOBILE_SMALL_WIDTH_LABEL_ABOVE_INPUT = "ZK_FIELD_MOBILE_SMALL_WIDTH_LABEL_ABOVE_INPUT";
     public static final String ZK_FLAT_VIEW_MENU_TREE = "ZK_FLAT_VIEW_MENU_TREE";
     public static final String ZK_FOOTER_SERVER_DATETIME_FORMAT = "ZK_FOOTER_SERVER_DATETIME_FORMAT";
     public static final String ZK_FOOTER_SERVER_MSG = "ZK_FOOTER_SERVER_MSG";
     public static final String ZK_GRID_AFTER_FIND = "ZK_GRID_AFTER_FIND";
     public static final String ZK_GRID_AUTO_HIDE_EMPTY_COLUMNS = "ZK_GRID_AUTO_HIDE_EMPTY_COLUMNS";
     public static final String ZK_GRID_EDIT_MODELESS = "ZK_GRID_EDIT_MODELESS";
+    public static final String ZK_GRID_MOBILE_AUTO_HIDE_EMPTY_COLUMNS = "ZK_GRID_MOBILE_AUTO_HIDE_EMPTY_COLUMNS";
     public static final String ZK_GRID_MOBILE_EDITABLE = "ZK_GRID_MOBILE_EDITABLE";
     public static final String ZK_GRID_MOBILE_EDIT_MODELESS = "ZK_GRID_MOBILE_EDIT_MODELESS";
     public static final String ZK_GRID_MOBILE_LINE_BREAK_AS_IDENTIFIER_SEPARATOR = "ZK_GRID_MOBILE_LINE_BREAK_AS_IDENTIFIER_SEPARATOR";
@@ -259,6 +270,8 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String ZK_GRID_VIEW_USE_DEFER_RENDERING = "ZK_GRID_VIEW_USE_DEFER_RENDERING";
     public static final String ZK_INFO_AUTO_COLLAPSED_PARAMETER_PANEL = "ZK_INFO_AUTO_COLLAPSED_PARAMETER_PANEL";
     public static final String ZK_INFO_AUTO_HIDE_EMPTY_COLUMNS = "ZK_INFO_AUTO_HIDE_EMPTY_COLUMNS";
+    public static final String ZK_INFO_MOBILE_AUTO_COLLAPSED_PARAMETER_PANEL = "ZK_INFO_MOBILE_AUTO_COLLAPSED_PARAMETER_PANEL";
+    public static final String ZK_INFO_MOBILE_AUTO_HIDE_EMPTY_COLUMNS = "ZK_INFO_MOBILE_AUTO_HIDE_EMPTY_COLUMNS";
     public static final String ZK_INFO_NUM_PAGE_PRELOAD = "ZK_INFO_NUM_PAGE_PRELOAD";
     public static final String ZK_INFO_QUERY_TIME_OUT =  "ZK_INFO_QUERY_TIME_OUT";
     public static final String ZK_LOGIN_ALLOW_CHROME_SAVE_PASSWORD = "ZK_LOGIN_ALLOW_CHROME_SAVE_PASSWORD";
@@ -281,6 +294,8 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String ZK_SESSION_TIMEOUT_IN_SECONDS = "ZK_SESSION_TIMEOUT_IN_SECONDS";
     public static final String ZK_THEME = "ZK_THEME";
     public static final String ZK_THEME_USE_FONT_ICON_FOR_IMAGE = "ZK_THEME_USE_FONT_ICON_FOR_IMAGE";
+    public static final String ZK_THUMBNAIL_IMAGE_HEIGHT = "ZK_THUMBNAIL_IMAGE_HEIGHT";
+    public static final String ZK_THUMBNAIL_IMAGE_WIDTH = "ZK_THUMBNAIL_IMAGE_WIDTH";
     public static final String ZK_TOOLBAR_SHOW_MORE_VERTICAL = "ZK_TOOLBAR_SHOW_MORE_VERTICAL";
     public static final String ZK_USE_PDF_JS_VIEWER = "ZK_USE_PDF_JS_VIEWER";
     public static final String ZOOM_ACROSS_QUERY_TIMEOUT = "ZOOM_ACROSS_QUERY_TIMEOUT";
@@ -333,7 +348,7 @@ public class MSysConfig extends X_AD_SysConfig
 	/**	Static Logger	*/
 	private static CLogger	s_log	= CLogger.getCLogger (MSysConfig.class);
 	/** Cache			*/
-	private static CCache<String, String> s_cache = new CCache<String, String>(Table_Name, 40, 0);
+	private static CCache<String, String> s_cache = new CCache<String, String>(Table_Name, 40, 0, false, 0);
 	
 	/**
 	 * Get system configuration property of type string
@@ -830,19 +845,15 @@ public class MSysConfig extends X_AD_SysConfig
 		return dt;
 	}	
 	
-	/**
-	 * 	Before Save
-	 *	@param newRecord
-	 *	@return true if save
-	 */
 	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		if (log.isLoggable(Level.FINE)) log.fine("New=" + newRecord);
 		
+		// Validate configuration level
 		if (getAD_Client_ID() != 0 || getAD_Org_ID() != 0) {
 			
-			// Get the configuration level from the System Record
+			// Get the configuration level from System client Record
 			String configLevel = null;
 			String sql = "SELECT ConfigurationLevel FROM AD_SysConfig WHERE Name=? AND AD_Client_ID = 0 AND AD_Org_ID = 0";
 			PreparedStatement pstmt = null;
@@ -866,10 +877,10 @@ public class MSysConfig extends X_AD_SysConfig
 			}
 			
 			if (configLevel == null) {
-				// not found for system
-				// if saving an org parameter - look config in client
+				// No System client record
+				// If saving with org parameter, find configuration level from client
 				if (getAD_Org_ID() != 0) {
-					// Get the configuration level from the System Record
+					// Get the configuration level from client record
 					sql = "SELECT ConfigurationLevel FROM AD_SysConfig WHERE Name=? AND AD_Client_ID = ? AND AD_Org_ID = 0";
 					try
 					{

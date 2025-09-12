@@ -210,7 +210,7 @@ public class InOutGenerateRMA extends SvrProcess
                     shipLine.setM_AttributeSetInstance_ID(rmaLine.getM_AttributeSetInstance_ID());
                     shipLine.setM_Locator_ID(rmaLine.getM_Locator_ID());
                 }
-                
+
                 shipLine.setC_UOM_ID(rmaLine.getC_UOM_ID());
                 shipLine.setQty(rmaLine.getQty());
                 shipLine.setC_Project_ID(rmaLine.getC_Project_ID());
@@ -220,7 +220,7 @@ public class InOutGenerateRMA extends SvrProcess
                 shipLine.setC_ProjectTask_ID(rmaLine.getC_ProjectTask_ID());
                 shipLine.setUser1_ID(rmaLine.getUser1_ID());
                 shipLine.setUser2_ID(rmaLine.getUser2_ID());
-                shipLine.setC_CostCenter_ID(rmaLine.getC_CostCenter_ID());
+				shipLine.setC_CostCenter_ID(rmaLine.getC_CostCenter_ID());
 				shipLine.setC_Department_ID(rmaLine.getC_Department_ID());
                 shipLine.saveEx();
                 shipLineList.add(shipLine);

@@ -11,8 +11,6 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,    *
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.                     *
  *****************************************************************************/
-
-
 package org.adempiere.webui.panel;
 
 import java.util.ArrayList;
@@ -373,7 +371,7 @@ public class ChangePasswordPanel extends Window implements EventListener<Event>
 				user.set_ValueOfColumn("Password", newPassword); // will be hashed and validate on saveEx
 	    		user.setIsExpired(false);
 	    		user.setSecurityQuestion(securityQuestion);
-	    		user.setAnswer(answer);  
+	    		user.setAnswer(answer);    		
     			user.saveCrossTenantSafeEx(trx.getTrxName());
     			if (tenantsChanged.length() > 0)
     				tenantsChanged.append(", ");

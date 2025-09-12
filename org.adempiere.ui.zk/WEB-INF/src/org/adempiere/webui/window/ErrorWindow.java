@@ -20,15 +20,15 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 
 /**
- * Error window in error.zul
- * Remove SSO principal from session when error.
+ * Error window in error.zul<br/>
+ * Remove SSO Principal from session when error.
  * 
  * @author Logilite Technologies
  */
 public class ErrorWindow extends Window implements EventListener<Event>
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -1089842665320591389L;
 

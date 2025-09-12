@@ -32,6 +32,7 @@ package org.adempiere.webui.apps.graph;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.Panel;
+import org.adempiere.webui.component.Tab.DecorateInfo;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.component.ZkCssHelper;
 import org.adempiere.webui.desktop.AbstractDesktop;
@@ -39,6 +40,7 @@ import org.adempiere.webui.desktop.IDesktop;
 import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.session.SessionManager;
 import org.compiere.model.MDocumentStatus;
+import org.compiere.model.MForm;
 import org.compiere.model.MQuery;
 import org.compiere.print.MPrintColor;
 import org.compiere.print.MPrintFont;
@@ -98,7 +100,7 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 		return m_documentStatus;
 	}	//	getGoal
 
-     /**
+    /**
 	 * 	Init Document Status Display
 	 */
 	private void init()
@@ -180,6 +182,7 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 			ADForm form = ADForm.openForm(AD_Form_ID);
 
 			form.setAttribute(Window.MODE_KEY, Window.MODE_EMBEDDED);
+			form.setAttribute(Window.DECORATE_INFO, DecorateInfo.get(MForm.get(AD_Form_ID)));
 			SessionManager.getAppDesktop().showWindow(form);
 		}
 		

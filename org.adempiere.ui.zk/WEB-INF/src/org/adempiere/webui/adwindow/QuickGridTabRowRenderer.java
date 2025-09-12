@@ -132,7 +132,6 @@ public class QuickGridTabRowRenderer
 	private String						sortOrder;
 
 	/**
-	 *
 	 * @param gridTab
 	 * @param windowNo
 	 */
@@ -187,6 +186,7 @@ public class QuickGridTabRowRenderer
 	}
 
 	/**
+	 * Get column index
 	 * @param field
 	 * @return column index for field, -1 if not found
 	 */
@@ -200,6 +200,7 @@ public class QuickGridTabRowRenderer
 	}
 
 	/**
+	 * Set paging component
 	 * @param paging
 	 */
 	public void setPaging(Paging paging) {
@@ -347,10 +348,12 @@ public class QuickGridTabRowRenderer
 					component.setVisible(false);
 				}
 
-				if (DisplayType.YesNo == gridPanelFields[i].getDisplayType() || DisplayType.Image == gridPanelFields[i].getDisplayType()) {
+				if (DisplayType.YesNo == gridPanelFields[i].getDisplayType() || DisplayType.Image == gridPanelFields[i].getDisplayType())
+				{
 					divStyle = CELL_DIV_STYLE_ALIGN_CENTER;
 				}
-				else if (DisplayType.isNumeric(gridPanelFields[i].getDisplayType())) {
+				else if (DisplayType.isNumeric(gridPanelFields[i].getDisplayType()))
+				{
 					divStyle = CELL_DIV_STYLE_ALIGN_RIGHT;
 				}
 				if (isDisableReadonlyComponent(component, true))
@@ -437,15 +440,15 @@ public class QuickGridTabRowRenderer
 		// repaint the grid when rendering the last row
 		if (gridTab.isNew() && rowIndex == grid.getRows().getChildren().size() - 1)
 		{
-			grid.invalidate();
+			Clients.resize(grid);
 		}
 	}
 
 	/**
-	 * Disable Read-only components for while pressing tab button focus goes to
-	 * read-only component.
-	 * Enable Read-only component before display Logic update.
-	 * Add/Remove CSS Class from read-only component
+	 * Disable Read-only components while pressing tab button and focus can goes to
+	 * read-only component.<br/>
+	 * Set component to Read-only before display Logic update.<br/>
+	 * Add/Remove CSS Class from read-only component.
 	 * 
 	 * @param component
 	 * @param isDisable
@@ -611,7 +614,7 @@ public class QuickGridTabRowRenderer
 		else
 		{
 			if (zclass.contains(CSS_READ_ONLY_COMPONENT))
-				zclass.replaceAll(CSS_READ_ONLY_COMPONENT, "");
+				zclass.replace(CSS_READ_ONLY_COMPONENT, "");
 		}
 		return zclass;
 	}
@@ -693,18 +696,18 @@ public class QuickGridTabRowRenderer
 		}
 
 		int pgIndex = row >= 0 ? row % paging.getPageSize() : 0;
-		if (row != currentRowIndex || pgIndex != currentRowIndex) {
-			if (currentRow != null)
-				currentRow.setStyle(null);
-			if (grid.getRows().getChildren().size() <= 0) {
-				currentCell = null;
-				return;
-			}
-			gridTab.setCurrentRow(pgIndex + paging.getActivePage() * paging.getPageSize());
-			currentRow = ((Row) grid.getRows().getChildren().get(pgIndex));
-			currentRowIndex = gridTab.getCurrentRow();
-			currentRow.setStyle(CURRENT_ROW_STYLE);
+//		if (row != currentRowIndex || pgIndex != currentRowIndex) {
+		if (currentRow != null)
+			LayoutUtils.removeSclass("current-row", currentRow);
+		if (grid.getRows().getChildren().size() <= 0) {
+			currentCell = null;
+			return;
 		}
+		gridTab.setCurrentRow(pgIndex + paging.getActivePage() * paging.getPageSize());
+		currentRow = ((Row) grid.getRows().getChildren().get(pgIndex));
+		currentRowIndex = gridTab.getCurrentRow();
+		LayoutUtils.addSclass("current-row", currentRow);
+//		}
 		
 		setCurrentRow(currentRow);
 		
@@ -796,7 +799,7 @@ public class QuickGridTabRowRenderer
 	{
 		int pgIndex = row >= 0 ? row % paging.getPageSize() : 0;
 		currentRow = ((Row) grid.getRows().getChildren().get(pgIndex));
-		currentRow.setStyle(QuickGridTabRowRenderer.CURRENT_ROW_STYLE);
+		LayoutUtils.addSclass("current-row", currentRow);
 		setCurrentRow(currentRow);
 	}
 
@@ -823,56 +826,39 @@ public class QuickGridTabRowRenderer
 			return false;
 		// get component of cell
 		Component component = cell.getChildren().get(0);
-		if (component instanceof NumberBox && (!((NumberBox) component).getDecimalbox().isDisabled()
-				&& !((NumberBox) component).getDecimalbox().isReadonly()
-				&& ((NumberBox) component).getDecimalbox().isVisible()))
+		if (component instanceof NumberBox && (!((NumberBox) component).getDecimalbox().isDisabled() && !((NumberBox) component).getDecimalbox().isReadonly() && ((NumberBox) component).getDecimalbox().isVisible()))
 			return true;
-		else if (component instanceof Checkbox
-				&& (((Checkbox) component).isEnabled() && ((Checkbox) component).isVisible()))
+		else if (component instanceof Checkbox && (((Checkbox) component).isEnabled() && ((Checkbox) component).isVisible()))
 			return true;
-		else if (component instanceof Combobox && (!((Combobox) component).isReadonly()
-				&& ((Combobox) component).isEnabled() && ((Combobox) component).isVisible()))
+		else if (component instanceof Combobox && (!((Combobox) component).isReadonly() && ((Combobox) component).isEnabled() && ((Combobox) component).isVisible()))
 			return true;
-		else if (component instanceof Textbox && (!((Textbox) component).isDisabled()
-				&& !((Textbox) component).isReadonly() && ((Textbox) component).isVisible()))
+		else if (component instanceof Textbox && (!((Textbox) component).isDisabled() && !((Textbox) component).isReadonly() && ((Textbox) component).isVisible()))
 			return true;
-		else if (component instanceof Datebox && (!((Datebox) component).isReadonly()
-				&& ((Datebox) component).isEnabled() && ((Datebox) component).isVisible()))
+		else if (component instanceof Datebox && (!((Datebox) component).isReadonly() && ((Datebox) component).isEnabled() && ((Datebox) component).isVisible()))
 			return true;
-		else if (component instanceof DatetimeBox
-				&& (((DatetimeBox) component).isEnabled() && ((DatetimeBox) component).isVisible()))
+		else if (component instanceof DatetimeBox && (((DatetimeBox) component).isEnabled() && ((DatetimeBox) component).isVisible()))
 			return true;
-		else if (component instanceof Locationbox
-				&& (((Locationbox) component).isEnabled() && ((Locationbox) component).isVisible()))
+		else if (component instanceof Locationbox && (((Locationbox) component).isEnabled() && ((Locationbox) component).isVisible()))
 			return true;
-		else if (component instanceof Searchbox && (!((Searchbox) component).getTextbox().isDisabled()
-				&& !((Searchbox) component).getTextbox().isReadonly()
-				&& ((Searchbox) component).getTextbox().isVisible()))
+		else if (component instanceof Searchbox && (!((Searchbox) component).getTextbox().isDisabled() && !((Searchbox) component).getTextbox().isReadonly() && ((Searchbox) component).getTextbox().isVisible()))
 			return true;
 		else if (component instanceof Button && (((Button) component).isEnabled() && ((Button) component).isVisible()))
 			return true;
-		else if (component instanceof Combinationbox && (!((Combinationbox) component).getTextbox().isReadonly()
-				&& ((Combinationbox) component).isEnabled() && ((Combinationbox) component).isVisible()))
+		else if (component instanceof Combinationbox && (!((Combinationbox) component).getTextbox().isReadonly() && ((Combinationbox) component).isEnabled() && ((Combinationbox) component).isVisible()))
 			return true;
-		else if (component instanceof EditorBox && (!((EditorBox) component).getTextbox().isReadonly()
-				&& ((EditorBox) component).isEnabled() && ((EditorBox) component).isVisible()))
+		else if (component instanceof EditorBox && (!((EditorBox) component).getTextbox().isReadonly() && ((EditorBox) component).isEnabled() && ((EditorBox) component).isVisible()))
 			return true;
 		else if (component instanceof Urlbox && (((Urlbox) component).isEnabled() && ((Urlbox) component).isVisible()))
 			return true;
-		else if (component instanceof FilenameBox && (!((FilenameBox) component).getTextbox().isReadonly()
-				&& ((FilenameBox) component).isEnabled() && ((FilenameBox) component).isVisible()))
+		else if (component instanceof FilenameBox && (!((FilenameBox) component).getTextbox().isReadonly() && ((FilenameBox) component).isEnabled() && ((FilenameBox) component).isVisible()))
 			return true;
-		else if (component instanceof Timebox && !((Timebox) component).isReadonly()
-				&& ((Timebox) component).isVisible())
+		else if (component instanceof Timebox && !((Timebox) component).isReadonly() && ((Timebox) component).isVisible())
 			return true;
-		else if (component instanceof Paymentbox
-				&& (((Paymentbox) component).isEnabled() && ((Paymentbox) component).isVisible()))
+		else if (component instanceof Paymentbox && (((Paymentbox) component).isEnabled() && ((Paymentbox) component).isVisible()))
 			return true;
-		else if (component instanceof PAttributebox && !((PAttributebox) component).getTextbox().isReadonly()
-				&& (((PAttributebox) component).isEnabled() && ((PAttributebox) component).isVisible()))
+		else if (component instanceof PAttributebox && !((PAttributebox) component).getTextbox().isReadonly() && (((PAttributebox) component).isEnabled() && ((PAttributebox) component).isVisible()))
 			return true;
-		else if (component instanceof MultiSelectBox && !((MultiSelectBox) component).getTextbox().isReadonly()
-				&& (((MultiSelectBox) component).isEnabled() && ((MultiSelectBox) component).isVisible()))
+		else if (component instanceof MultiSelectBox && !((MultiSelectBox) component).getTextbox().isReadonly() && (((MultiSelectBox) component).isEnabled() && ((MultiSelectBox) component).isVisible()))
 			return true;
 		else if (component instanceof ComboEditorBox && !((ComboEditorBox) component).getCombobox().isReadonly() && (((ComboEditorBox) component).isEnabled() && ((ComboEditorBox) component).isVisible()))
 			return true;

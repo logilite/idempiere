@@ -17,6 +17,8 @@
 package org.adempiere.webui.window;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -42,7 +44,6 @@ import org.adempiere.base.Core;
 import org.adempiere.base.upload.IUploadService;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.DBException;
-import org.adempiere.pdf.Document;
 import org.adempiere.util.Callback;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.Extensions;
@@ -76,6 +77,7 @@ import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.EMailDialogUtil;
 import org.adempiere.webui.util.IServerPushCallback;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ServerPushTemplate;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.util.ZkContextRunnable;
@@ -159,7 +161,6 @@ import net.sf.jasperreports.engine.JasperPrint;
  *	Report Viewer.
  *
  * 	@author 	Jorg Janke
- * 	@version 	$Id: Viewer.java,v 1.2 2006/07/30 00:51:28 jjanke Exp $
  * globalqss: integrate phib contribution from 
  *   https://sourceforge.net/p/adempiere/patches/4/
  * globalqss: integrate Teo Sarca bug fixing
@@ -247,7 +248,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 	private ToolBarButton bCloudUpload = new ToolBarButton();
 	protected Map<MAuthorizationAccount, IUploadService> uploadServicesMap = new HashMap<>();
 	/** Row count label */
-	private Label rowCount;
+	private Label rowCount; 
 	
 	private final Map<ExportFormat, String> exportMap = new LinkedHashMap<>();
 	private final Map<String, IReportViewerRenderer> rendererMap = new TreeMap<>();
@@ -275,15 +276,15 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 		Env.setContext(re.getCtx(), m_WindowNo, "_WinInfo_IsReportViewer", "Y");
 		m_reportEngine = re;
 		m_AD_Table_ID = re.getPrintFormat().getAD_Table_ID();
+		setTitle(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Report") + ": " +
+				m_reportEngine.getPrintFormat().get_Translation(MPrintFormat.COLUMNNAME_Name)));
 		if (!MRole.getDefault().isCanReport(m_AD_Table_ID))
 		{
 			Dialog.error(m_WindowNo, "AccessCannotReport", m_reportEngine.getName());
 			this.onClose();
+			return;
 		}
 		m_isCanExport = MRole.getDefault().isCanExport(m_AD_Table_ID);
-		
-		setTitle(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Report") + ": " + m_reportEngine.getName()));
-		
 		addEventListener(ON_RENDER_REPORT_EVENT, this);
 		addEventListener("onPostInit", e -> {
 			postRenderReportEvent();
@@ -328,7 +329,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 	@Override
 	public void onPageAttached(Page newpage, Page oldpage) {
 		super.onPageAttached(newpage, oldpage);
-		if (newpage != null && !init) {
+		if (newpage != null && !init && m_reportEngine != null) {
 			try
 			{
 				m_ctx = m_reportEngine.getCtx();
@@ -477,7 +478,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 		
 		bCustomize.setName("Customize");
 		if (ThemeManager.isUseFontIconForImage())
-			bCustomize.setIconSclass("z-icon-Preference");
+			bCustomize.setIconSclass(Icon.getIconSclass(Icon.PREFERENCE));
 		else
 			bCustomize.setImage(ThemeManager.getThemeResource("images/Preference24.png"));
 		bCustomize.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "PrintCustomize")));
@@ -494,7 +495,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 		
 		bFind.setName("Find");
 		if (ThemeManager.isUseFontIconForImage())
-			bFind.setIconSclass("z-icon-Find");
+			bFind.setIconSclass(Icon.getIconSclass(Icon.FIND));
 		else
 			bFind.setImage(ThemeManager.getThemeResource("images/Find24.png"));
 		bFind.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Find")));		
@@ -518,7 +519,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 		
 		bSendMail.setName("SendMail");
 		if (ThemeManager.isUseFontIconForImage())
-			bSendMail.setIconSclass("z-icon-SendMail");
+			bSendMail.setIconSclass(Icon.getIconSclass(Icon.SEND_MAIL));
 		else
 			bSendMail.setImage(ThemeManager.getThemeResource("images/SendMail24.png"));
 		bSendMail.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "SendMail")));
@@ -535,7 +536,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 		
 		bArchive.setName("Archive");
 		if (ThemeManager.isUseFontIconForImage())
-			bArchive.setIconSclass("z-icon-Archive");
+			bArchive.setIconSclass(Icon.getIconSclass(Icon.ARCHIVE));
 		else
 			bArchive.setImage(ThemeManager.getThemeResource("images/Archive24.png"));
 		bArchive.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Archive")));
@@ -555,7 +556,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 		if (tableId > 0 && recordId > 0) {
 			bAttachment.setName("Attachment");
 			if (ThemeManager.isUseFontIconForImage())
-				bAttachment.setIconSclass("z-icon-Attachment");
+				bAttachment.setIconSclass(Icon.getIconSclass(Icon.ATTACHMENT));
 			else
 				bAttachment.setImage(ThemeManager.getThemeResource("images/Attachment24.png"));
 			bAttachment.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Attachment")));
@@ -575,7 +576,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 		{
 			bExport.setName("Export");
 			if (ThemeManager.isUseFontIconForImage())
-				bExport.setIconSclass("z-icon-Export");
+				bExport.setIconSclass(Icon.getIconSclass(Icon.EXPORT));
 			else
 				bExport.setImage(ThemeManager.getThemeResource("images/Export24.png"));
 			bExport.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Export")));
@@ -596,7 +597,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 		
 		bRefresh.setName("Refresh");
 		if (ThemeManager.isUseFontIconForImage())
-			bRefresh.setIconSclass("z-icon-Refresh");
+			bRefresh.setIconSclass(Icon.getIconSclass(Icon.REFRESH));
 		else
 			bRefresh.setImage(ThemeManager.getThemeResource("images/Refresh24.png"));
 		bRefresh.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Refresh")));
@@ -612,30 +613,28 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 			LayoutUtils.addSclass("medium-toolbarbutton", bRefresh);
 		
 		MPrintFormat pf = m_reportEngine.getPrintFormat();
-		if (pf != null) {
-			if((!pf.isForm()) && (pf.getAD_ReportView_ID() > 0)) {
-				bReRun.setName("ReRun");
-				if (ThemeManager.isUseFontIconForImage())
-					bReRun.setIconSclass("z-icon-ReRun");
-				else
-					bReRun.setImage(ThemeManager.getThemeResource("images/ReRun24.png"));
-				bReRun.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "ReRun")));
-				if (toolbarPopup != null)
-				{
-					toolbarPopupLayout.appendChild(bReRun);
-					bReRun.setLabel(bReRun.getTooltiptext());
-				}
-				else
-					toolBar.appendChild(bReRun);
-				bReRun.addEventListener(Events.ON_CLICK, this);
-				if (ThemeManager.isUseFontIconForImage())
-					LayoutUtils.addSclass("medium-toolbarbutton", bReRun);
-			}
+		if (   pf != null
+			&& !pf.isForm()
+			&& pf.getAD_ReportView_ID() > 0
+			&& m_reportEngine.isReplaceTabContent()) {
+			bReRun.setName("ReRun");
+			if (ThemeManager.isUseFontIconForImage())
+				bReRun.setIconSclass(Icon.getIconSclass(Icon.RE_RUN));
+			else
+				bReRun.setImage(ThemeManager.getThemeResource("images/ReRun24.png"));
+			bReRun.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "ReRun")));
+			if (toolbarPopup != null) {
+				toolbarPopupLayout.appendChild(bReRun);
+				bReRun.setLabel(bReRun.getTooltiptext());
+			} else
+				toolBar.appendChild(bReRun);
+			bReRun.addEventListener(Events.ON_CLICK, this);
+			if (ThemeManager.isUseFontIconForImage())
+				LayoutUtils.addSclass("medium-toolbarbutton", bReRun);
 		}
-					
 		bWizard.setName("Wizard");
 		if (ThemeManager.isUseFontIconForImage())
-			bWizard.setIconSclass("z-icon-Wizard");
+			bWizard.setIconSclass(Icon.getIconSclass(Icon.WIZARD));
 		else
 			bWizard.setImage(ThemeManager.getThemeResource("images/Wizard24.png"));
 		bWizard.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "PrintWizard")));
@@ -654,7 +653,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 		{
 			ToolBarButton more = new ToolBarButton();
 			if (ThemeManager.isUseFontIconForImage())
-				more.setIconSclass("z-icon-Expand");
+				more.setIconSclass(Icon.getIconSclass(Icon.EXPAND));
 			else
 				more.setImage(ThemeManager.getThemeResource("images/expand-header.png"));
 
@@ -671,7 +670,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 			if (uploadServicesMap.size() > 0) {
 				bCloudUpload.setName("CloudUpload");
 				if (ThemeManager.isUseFontIconForImage())
-					bCloudUpload.setIconSclass("z-icon-FileImport");
+					bCloudUpload.setIconSclass(Icon.getIconSclass(Icon.FILE_IMPORT));
 				else
 					bCloudUpload.setImage(ThemeManager.getThemeResource("images/FileImport24.png"));
 				bCloudUpload.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "CloudUpload")));
@@ -813,6 +812,36 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 		}		
 	}
 
+	private void setupPreviewType() {
+		String selectedValue = null;
+		if (previewType.getItemCount() > 0) {
+			if (previewType.getSelectedIndex() >= 0) {
+				selectedValue = previewType.getSelectedItem().getValue();
+			}
+			previewType.getChildren().clear();
+		}
+		if (m_reportEngine.getPrintFormat().getJasperProcess_ID() > 0) {
+			for (ValueNamePair vnp : JasperPrintRenderer.getPreviewType(m_isCanExport)) {
+				ListItem li = previewType.appendItem(vnp.getName(), vnp.getValue());
+				if (selectedValue != null && selectedValue.equals(li.getValue()))
+					previewType.setSelectedItem(li);
+			}
+			if (summary != null)
+				summary.setVisible(false);
+		} else {
+			for(String id : rendererMap.keySet()) {
+				IReportViewerRenderer renderer = rendererMap.get(id);
+				if (!renderer.isPreview(m_isCanExport))
+					continue;
+				ListItem li = previewType.appendItem(renderer.getPreviewLabel(), renderer.getId());
+				if (selectedValue != null && selectedValue.equals(li.getValue()))
+					previewType.setSelectedItem(li);
+			}
+			if (summary != null)
+				summary.setVisible(true);
+		}		
+	}
+
 	/**
 	 * Set dummy onCloseHandler for parent tab
 	 */
@@ -857,7 +886,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 	/**
 	 * Call from renderer runnable to show report output
 	 */
-	protected void onPreviewReport() {		
+	private void onPreviewReport() {		
 		try {
 			if(media == null) {
 				iframe.setSrc(null);
@@ -1126,6 +1155,8 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 		
 		updateRowCount();
 		
+		updateRowCount();
+		
 		this.invalidate();
 	}	//	revalidate
 
@@ -1353,13 +1384,17 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 	 */
 	protected void cmd_archive ()
 	{
-		boolean success = false;
-		byte[] data = Document.getPDFAsArray(m_reportEngine.getLayout().getPageable(false));	//	No Copy
-		if (data != null)
+		boolean success = false;		
+		AMedia archiveMedia = getMedia(PDF_OUTPUT_TYPE);
+		if (archiveMedia != null)
 		{
 			MArchive archive = new MArchive (Env.getCtx(), m_reportEngine.getPrintInfo(), null);
-			archive.setBinaryData(data);
-			success = archive.save();
+			try (InputStream is = archiveMedia.getStreamData()) {
+				archive.setInputStream(is);
+				success = archive.save();
+			} catch (IOException e) {
+				log.log(Level.SEVERE, "Error reading archive media stream", e);
+			}			
 		}
 		if (success)
 			Dialog.info(m_WindowNo, "Archived");
@@ -1589,7 +1624,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 	 */
 	private void cmd_refresh() {
 		int AD_Process_ID = m_reportEngine.getPrintInfo() != null ? m_reportEngine.getPrintInfo().getAD_Process_ID() : 0;
-		if(AD_Process_ID <= 0 || m_reportEngine.getPrintInfo().getRecord_ID() > 0)
+		if(AD_Process_ID <= 0 || m_reportEngine.getPrintInfo().getRecord_ID() > 0 || !m_reportEngine.isReplaceTabContent())
 			this.cmd_report();
 		else
 			this.cmd_reRun(MProcess.SHOWHELP_RunSilently_TakeDefaults);
@@ -1769,8 +1804,10 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 		{
 			if (find == null) 
 			{
-				find = new FindWindow(m_WindowNo, 0, title, AD_Table_ID, tableName,m_reportEngine.getWhereExtended(), findFields, 1, AD_Tab_ID);
-	            if (!find.initialize()) 
+
+				find = Extensions.getFindWindow(m_WindowNo, 0, title, AD_Table_ID, tableName,m_reportEngine.getWhereExtended(), findFields, 1, AD_Tab_ID, null);
+	            
+				if (!find.initialize()) 
 	            {
 	            	find = null;
 	            	return;
@@ -2101,6 +2138,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 			}
 		}
 	}
+
 	/**
 	 * PDF Printer Print Preview page load directly
 	 * 

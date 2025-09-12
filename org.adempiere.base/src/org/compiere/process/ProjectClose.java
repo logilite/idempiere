@@ -16,7 +16,6 @@
  *****************************************************************************/
 package org.compiere.process;
 
-
 import java.util.logging.Level;
 
 import org.compiere.model.MProcessPara;
@@ -25,12 +24,12 @@ import org.compiere.model.MProjectLine;
 import org.compiere.model.MTable;
  
 /**
- *  Close Project.
+ *  Process to Close a Project.
  *
  *	@author Jorg Janke
  *	@version $Id: ProjectClose.java,v 1.2 2006/07/30 00:51:01 jjanke Exp $
  *
- * @author Teo Sarca, wwww.arhipac.ro
+ *  @author Teo Sarca, wwww.arhipac.ro
  * 			<li>FR [ 2791635 ] Use saveEx whenever is possible
  * 				https://sourceforge.net/p/adempiere/feature-requests/722/
  */
@@ -43,6 +42,7 @@ public class ProjectClose extends SvrProcess
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
+	@Override
 	protected void prepare()
 	{
 		ProcessInfoParameter[] para = getParameter();
@@ -57,10 +57,11 @@ public class ProjectClose extends SvrProcess
 	}	//	prepare
 
 	/**
-	 *  Perform process.
-	 *  @return Message (translated text)
+	 *  Close a project by setting processed to true.
+	 *  @return empty string
 	 *  @throws Exception if not successful
 	 */
+	@Override
 	protected String doIt() throws Exception
 	{
 		MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(m_C_Project_ID, get_TrxName());

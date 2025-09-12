@@ -60,22 +60,9 @@ public class MSSOPrincipalConfig extends X_SSO_PrincipalConfig
 
 	public static MSSOPrincipalConfig getDefaultSSOPrincipalConfig()
 	{
-		return getDefaultSSOPrincipalConfig(false);
-	}
-
-	/**
-	 * @param isforceRequery
-	 * @return Default MSSOPrincipalConfig
-	 */
-	public static MSSOPrincipalConfig getDefaultSSOPrincipalConfig(boolean isforceRequery)
-	{
-		MSSOPrincipalConfig defaultConfig = null;
-		if (!isforceRequery)
-		{
-			defaultConfig = (MSSOPrincipalConfig) s_SSOPrincipalConfigCache.get(DEFAULT_SSO_PRINCIPAL_CACHEKEY);
-			if (defaultConfig != null)
-				return defaultConfig;
-		}
+		MSSOPrincipalConfig defaultConfig = (MSSOPrincipalConfig) s_SSOPrincipalConfigCache.get(DEFAULT_SSO_PRINCIPAL_CACHEKEY);
+		if (defaultConfig != null)
+			return defaultConfig;
 
 		defaultConfig = new Query(Env.getCtx(), Table_Name, COLUMNNAME_IsDefault + " = 'Y'", null).setOnlyActiveRecords(true).firstOnly();
 
@@ -127,25 +114,19 @@ public class MSSOPrincipalConfig extends X_SSO_PrincipalConfig
 		if (cachedConfig != null)
 			return cachedConfig;
 
-		cachedConfig = new Query(Env.getCtx(), Table_Name, COLUMNNAME_SSO_PrincipalConfig_UU + " = ?", null).setOnlyActiveRecords(true)
-																											.setParameters(uuID)
+		cachedConfig = new Query(Env.getCtx(), Table_Name, COLUMNNAME_SSO_PrincipalConfig_UU + " = ?", null).setOnlyActiveRecords(true).setParameters(uuID)
 																											.firstOnly();
+
 		if (cachedConfig != null)
 			s_SSOPrincipalConfigCache.put(uuID, cachedConfig);
 
 		return cachedConfig;
 	}
 
-	/**
-	 * Retrieves all available SSOPrincipalConfig records.
-	 * First checks the cache; if not found, queries the database.
-	 *
-	 * @return A list of all available {@link MSSOPrincipalConfig} instances.
-	 */
-	public static List <MSSOPrincipalConfig> getAllSSOPrincipalConfig( )
+	public static List<MSSOPrincipalConfig> getAllSSOPrincipalConfig()
 	{
 		@SuppressWarnings("unchecked")
-		List <MSSOPrincipalConfig> allConfigs = (List <MSSOPrincipalConfig>) s_SSOPrincipalConfigCache.get(ALL_SSO_CONFIG_CACHEKEY);
+		List<MSSOPrincipalConfig> allConfigs = (List<MSSOPrincipalConfig>) s_SSOPrincipalConfigCache.get(ALL_SSO_CONFIG_CACHEKEY);
 		if (allConfigs != null)
 			return allConfigs;
 

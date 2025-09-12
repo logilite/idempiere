@@ -33,6 +33,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.exceptions.BackDateTrxNotAllowedException;
 import org.adempiere.exceptions.PeriodClosedException;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
@@ -278,6 +279,7 @@ public class MProduction extends X_M_Production implements DocAction {
 			if (this.getProcessedOn().signum() == 0) {
 				setMovementDate(TimeUtil.getDay(0));
 				MPeriod.testPeriodOpen(getCtx(), getMovementDate(), getC_DocType_ID(), getAD_Org_ID());
+				MAcctSchema.testBackDateTrxAllowed(getCtx(), getMovementDate(), get_TrxName());
 			}
 		}
 		if (dt.isOverwriteSeqOnComplete()) {
@@ -631,6 +633,7 @@ public class MProduction extends X_M_Production implements DocAction {
 
 		//	Std Period open?
 		MPeriod.testPeriodOpen(getCtx(), getMovementDate(), getC_DocType_ID(), getAD_Org_ID());
+		MAcctSchema.testBackDateTrxAllowed(getCtx(), getMovementDate(), get_TrxName());
 
 		if ( getIsCreated().equals("N") )
 		{
@@ -818,6 +821,15 @@ public class MProduction extends X_M_Production implements DocAction {
 			{
 				accrual = true;
 			}
+			
+			try
+			{
+				MAcctSchema.testBackDateTrxAllowed(getCtx(), getMovementDate(), get_TrxName());
+			}
+			catch (BackDateTrxNotAllowedException e)
+			{
+				accrual = true;
+			}
 
 			if (accrual)
 				return reverseAccrualIt();
@@ -894,6 +906,7 @@ public class MProduction extends X_M_Production implements DocAction {
 			setC_OrderLine_ID(0);
 
 		MPeriod.testPeriodOpen(getCtx(), reversalDate, getC_DocType_ID(), getAD_Org_ID());
+		MAcctSchema.testBackDateTrxAllowed(getCtx(), reversalDate, get_TrxName());
 		MProduction reversal = null;
 		reversal = copyFrom (reversalDate);
 
@@ -1096,6 +1109,7 @@ public class MProduction extends X_M_Production implements DocAction {
 		if (getC_DocType_ID() <= 0) {
 			setC_DocType_ID(MDocType.getDocType(MDocType.DOCBASETYPE_MaterialProduction));
 		}
+		// Set IsUseProductionPlan flag
 		if (getM_Product_ID() > 0) {
 			if (isUseProductionPlan()) {
 				setIsUseProductionPlan(false);

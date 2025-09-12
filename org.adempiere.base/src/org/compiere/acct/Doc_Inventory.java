@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.logging.Level;
 
+import org.compiere.model.ICostInfo;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MClient;
@@ -37,7 +38,6 @@ import org.compiere.model.MInventoryLine;
 import org.compiere.model.MInventoryLineMA;
 import org.compiere.model.MProduct;
 import org.compiere.model.ProductCost;
-import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
 
@@ -289,28 +289,14 @@ public class Doc_Inventory extends Doc
 					asiId = 0;
 				else if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))
 					orgId = 0;
-
-				MCostDetail cd = MCostDetail.get(Env.getCtx(), "M_InventoryLine_ID=?", line.get_ID(), asiId,
-						as.getC_AcctSchema_ID(), line.getPO().get_TrxName());
-				if (cd != null)
-				{
-					costs = cd.getAmt(); 
-					BigDecimal currentQty = cd.getCurrentQty();
-					adjustmentDiff = costs;
-					costs = costs.multiply(currentQty);
-				}
-				else
-				{
-					MCostElement ce = MCostElement.getMaterialCostElement(getCtx(), docCostingMethod, orgId);
-					MCost cost = MCost.get(product, asiId, as, 
-							orgId, ce.getM_CostElement_ID(), getTrxName());					
-					DB.getDatabase().forUpdate(cost, 120);
-
-					costs = line.getAmtSource();
-					BigDecimal currentQty = cost.getCurrentQty();
-					adjustmentDiff = costs;
-					costs = costs.multiply(currentQty);
-				}
+				MCostElement ce = MCostElement.getMaterialCostElement(getCtx(), docCostingMethod, orgId);
+				MCostDetail cd = MCostDetail.getInventory(as, product.getM_Product_ID(), asiId, get_ID(), ce.getM_CostElement_ID(), getTrxName());
+				ICostInfo cost = MCost.getCostInfo(product, asiId, as, 
+						orgId, ce.getM_CostElement_ID(), 
+						getDateAcct(), cd, getTrxName());
+				BigDecimal currentQty = cost.getCurrentQty();
+				adjustmentDiff = costs;
+				costs = costs.multiply(currentQty);
 			}
 			else 
 			{
@@ -442,16 +428,87 @@ public class Doc_Inventory extends Doc
 							costDetailAmt, getC_Currency_ID(), as.getC_Currency_ID(),
 							getDateAcct(), 0, getAD_Client_ID(), getAD_Org_ID(), true);
 				}
-				//	Cost Detail
-					BigDecimal amt = costDetailAmt;
-				if (!MCostDetail.createInventory(as, line.getAD_Org_ID(),
-					line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
-					line.get_ID(), 0,
-						amt, line.getQty(),
-					line.getDescription(), getTrxName()))
+				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
 				{
-					p_Error = "Failed to create cost detail record";
-					return null;
+					if (line.getM_AttributeSetInstance_ID() == 0 ) 
+					{
+						MInventoryLine invLine = (MInventoryLine) line.getPO();
+						MInventoryLineMA mas[] = MInventoryLineMA.get(getCtx(), invLine.get_ID(), getTrxName());
+						if (mas != null && mas.length > 0 )
+						{
+							costs  = BigDecimal.ZERO;
+							for (int j = 0; j < mas.length; j++)
+							{
+								MInventoryLineMA ma = mas[j];				
+								BigDecimal maCost = costMap.get(line.get_ID()+ "_"+ ma.getM_AttributeSetInstance_ID());		
+								BigDecimal qty = ma.getMovementQty();
+								if (qty.signum() != line.getQty().signum())
+									qty = qty.negate();
+								if (maCost.signum() != costDetailAmt.signum())
+									maCost = maCost.negate();
+								int Ref_CostDetail_ID = 0;
+								if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+								{
+									MCostDetail cd = MCostDetail.getInventory(as, line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
+											line.getReversalLine_ID(), 0, getTrxName());
+									if (cd != null)
+										Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+								}
+								if (!MCostDetail.createInventory(as, line.getAD_Org_ID(),
+										line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
+										line.get_ID(), 0,
+										maCost, qty,
+										line.getDescription(), line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
+								{
+									p_Error = "Failed to create cost detail record";
+									return null;
+								}
+							}						
+						}
+					} 
+					else
+					{
+						BigDecimal amt = costDetailAmt;
+						int Ref_CostDetail_ID = 0;
+						if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+						{
+							MCostDetail cd = MCostDetail.getInventory(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+									line.getReversalLine_ID(), 0, getTrxName());
+							if (cd != null)
+								Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+						}
+						if (!MCostDetail.createInventory(as, line.getAD_Org_ID(),
+								line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+								line.get_ID(), 0,
+								amt, line.getQty(),
+								line.getDescription(), line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
+						{
+							p_Error = "Failed to create cost detail record";
+							return null;
+						}
+					}
+				} 
+				else
+				{
+					//	Cost Detail
+					BigDecimal amt = costDetailAmt;
+					int Ref_CostDetail_ID = 0;
+					if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+					{
+						MCostDetail cd = MCostDetail.getInventory(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+								line.getReversalLine_ID(), 0, getTrxName());
+						if (cd != null)
+							Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+					}
+					if (!MCostDetail.createInventory(as, line.getAD_Org_ID(),
+						line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+						line.get_ID(), 0,
+						amt, line.getQty(),
+						line.getDescription(), line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
+					{
+						p_Error = "Failed to create cost detail record";
+						return null;
+					}
 				}
 			}
 		}

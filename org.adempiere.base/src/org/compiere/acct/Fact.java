@@ -240,9 +240,8 @@ public final class Fact
 	{
 		return m_acctSchema;
 	}	//	getAcctSchema
-
 	
-	/**************************************************************************
+	/**
 	 *	Are the lines Source Balanced
 	 *  @return true if source lines balanced
 	 */
@@ -276,7 +275,7 @@ public final class Fact
 	}	//	isSourceBalanced
 
 	/**
-	 *	Return Source Balance
+	 *	Get Source Balance Amount
 	 *  @return source balance
 	 */
 	public BigDecimal getSourceBalance()
@@ -296,7 +295,7 @@ public final class Fact
 	 *  Only if Suspense Balancing is enabled and not a multi-currency document
 	 *  (double check as, otherwise the rule should not have fired). <br/>
 	 *  If not balanced, create balancing entry in currency of the document.
-	 *  @return FactLine
+	 *  @return Balancing FactLine or null
 	 */
 	public FactLine balanceSource()
 	{
@@ -700,25 +699,21 @@ public final class Fact
 		for (int i = 0; i < m_lines.size(); i++)
 		{
 			FactLine dLine = (FactLine)m_lines.get(i);
-			MDistribution[] distributions = MDistribution.get (dLine.getAccount(), 
-							m_postingType, m_doc.getC_DocType_ID(), dLine.getDateAcct());
-            if (distributions == null || distributions.length == 0)
-            {
-				 distributions = MDistribution.get (dLine.getCtx(), dLine.getC_AcctSchema_ID(),
-						m_postingType, m_doc.getC_DocType_ID(), dLine.getDateAcct(),
-						dLine.getAD_Org_ID(), dLine.getAccount_ID(),
-						dLine.getM_Product_ID(), dLine.getC_BPartner_ID(), dLine.getC_Project_ID(),
-						dLine.getC_Campaign_ID(), dLine.getC_Activity_ID(), dLine.getAD_OrgTrx_ID(),
-						dLine.getC_SalesRegion_ID(), dLine.getC_LocTo_ID(), dLine.getC_LocFrom_ID(),
-						dLine.getUser1_ID(), dLine.getUser2_ID(), dLine.getC_CostCenter_ID(),
-						dLine.getC_Department_ID(), dLine.getC_Employee_ID(), dLine.getC_Charge_ID(),
-						dLine.getA_Asset_ID(), dLine.getM_Warehouse_ID(), dLine.getM_AttributeSetInstance_ID());
-            }
+			MDistribution[] distributions = MDistribution.get (dLine.getCtx(), dLine.getC_AcctSchema_ID(),
+					m_postingType, m_doc.getC_DocType_ID(), dLine.getDateAcct(),
+					dLine.getAD_Org_ID(), dLine.getAccount_ID(),
+					dLine.getM_Product_ID(), dLine.getC_BPartner_ID(), dLine.getC_Project_ID(),
+					dLine.getC_Campaign_ID(), dLine.getC_Activity_ID(), dLine.getAD_OrgTrx_ID(),
+					dLine.getC_SalesRegion_ID(), dLine.getC_LocTo_ID(), dLine.getC_LocFrom_ID(),
+					dLine.getUser1_ID(), dLine.getUser2_ID(), dLine.getC_CostCenter_ID(),
+					dLine.getC_Department_ID(), dLine.getC_Employee_ID(), dLine.getC_Charge_ID(),
+					dLine.getA_Asset_ID(), dLine.getM_Warehouse_ID(), dLine.getM_AttributeSetInstance_ID());
+			
 			if (distributions == null || distributions.length == 0)
 			{
 				continue;
 			}
-
+			
 			//	Just the first
 			if (distributions.length > 1)
 				log.warning("More than one Distribution for " + dLine.getAccount());
@@ -805,6 +800,36 @@ public final class Fact
 					factLine.setUser2_ID(dl.getUser2_ID());	
 				else
 					factLine.setUser2_ID(dLine.getUser2_ID());
+				
+				if (dl.isOverwriteAsset())
+					factLine.setA_Asset_ID(dl.getA_Asset_ID());
+				else
+					factLine.setA_Asset_ID(dLine.getA_Asset_ID());
+				
+				if (dl.isOverwriteCharge())
+					factLine.setC_Charge_ID(dl.getC_Charge_ID());
+				else
+					factLine.setC_Charge_ID(dLine.getC_Charge_ID());
+				
+				if (dl.isOverwriteCostCenter())
+					factLine.setC_CostCenter_ID(dl.getC_CostCenter_ID());
+				else
+					factLine.setC_CostCenter_ID(dLine.getC_CostCenter_ID());
+				
+				if (dl.isOverwriteDepartment())
+					factLine.setC_Department_ID(dl.getC_Department_ID());
+				else
+					factLine.setC_Department_ID(dLine.getC_Department_ID());
+
+				if (dl.isOverwriteEmployee())
+					factLine.setC_Employee_ID(dl.getC_Employee_ID());
+				else
+					factLine.setC_Employee_ID(dLine.getC_Employee_ID());
+				
+				if (dl.isOverwriteWarehouse())
+					factLine.setM_Warehouse_ID(dl.getM_Warehouse_ID());
+				else
+					factLine.setM_Warehouse_ID(dLine.getM_Warehouse_ID());
 				factLine.setUserElement1_ID(dLine.getUserElement1_ID());
 				factLine.setUserElement2_ID(dLine.getUserElement2_ID());
 

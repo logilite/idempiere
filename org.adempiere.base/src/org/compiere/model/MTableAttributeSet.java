@@ -44,15 +44,16 @@ public class MTableAttributeSet extends X_AD_TableAttributeSet
 
 	private static final CCache<String, ArrayList<MAttribute>>	s_TableAttributeListCache		= new CCache<>(Table_Name, 5, 0, false, 0);
 
-	private static final String									SQL_GET_DUPLICATE_ATTRIB_COUNT	= "		SELECT COUNT(1) FROM M_AttributeUse u 										"
-																									+ "	INNER JOIN M_Attribute a 	ON a.M_Attribute_ID = u.M_Attribute_ID 			"
-																									+ "	WHERE u.M_AttributeSet_ID = ?  AND u.IsActive = 'Y'  AND a.IsActive = 'Y' 	"
-																									+ "		AND EXISTS ( 															"
-																									+ "			SELECT 1	FROM M_AttributeUse u2 									"
-																									+ "			INNER JOIN	M_Attribute a2			ON a2.M_Attribute_ID = u2.M_Attribute_ID 		"
-																									+ "			INNER JOIN	AD_TableAttributeSet s	ON s.M_AttributeSet_ID = u2.M_AttributeSet_ID	"
-																									+ "			WHERE s.AD_Table_ID = ? AND u2.IsActive = 'Y' AND (a2.Name = a.Name OR u2.M_Attribute_ID = u.M_Attribute_ID) "
-																									+ "		)	";
+	private static final String									SQL_GET_DUPLICATE_ATTRIB_COUNT	= """
+					SELECT COUNT(1) FROM M_AttributeUse u
+					INNER JOIN M_Attribute a 	ON a.M_Attribute_ID = u.M_Attribute_ID
+					WHERE u.M_AttributeSet_ID = ?  AND u.IsActive = 'Y'  AND a.IsActive = 'Y'
+						AND EXISTS (
+							SELECT 1	FROM M_AttributeUse u2
+							INNER JOIN	M_Attribute a2			ON a2.M_Attribute_ID = u2.M_Attribute_ID
+							INNER JOIN	AD_TableAttributeSet s	ON s.M_AttributeSet_ID = u2.M_AttributeSet_ID
+							WHERE s.AD_Table_ID = ? AND u2.IsActive = 'Y' AND (a2.Name = a.Name OR u2.M_Attribute_ID = u.M_Attribute_ID)
+						) """;
 
 	public MTableAttributeSet(Properties ctx, int AD_TableAttributeSet_ID, String trxName)
 	{
@@ -76,11 +77,13 @@ public class MTableAttributeSet extends X_AD_TableAttributeSet
 		if (s_TableAttributeListCache.containsKey(String.valueOf(tableID)))
 			return s_TableAttributeListCache.get(String.valueOf(tableID));
 
-		String sql = "SELECT DISTINCT mau.M_Attribute_ID"
-						+ " FROM M_AttributeUse mau 	"
-						+ " INNER JOIN M_Attribute ma 			ON (mau.M_Attribute_ID = ma.M_Attribute_ID) 			"
-						+ " INNER JOIN AD_TableAttributeSet tas ON (mau.M_AttributeSet_ID = tas.M_AttributeSet_ID)		"
-						+ " WHERE mau.IsActive = 'Y' AND ma.IsActive = 'Y' AND tas.IsActive = 'Y' AND tas.AD_Table_ID=?	";
+		String sql = """
+						SELECT DISTINCT mau.M_Attribute_ID
+						FROM M_AttributeUse mau
+						INNER JOIN M_Attribute ma 			ON (mau.M_Attribute_ID = ma.M_Attribute_ID)
+						INNER JOIN AD_TableAttributeSet tas ON (mau.M_AttributeSet_ID = tas.M_AttributeSet_ID)
+						WHERE mau.IsActive = 'Y' AND ma.IsActive = 'Y' AND tas.IsActive = 'Y' AND tas.AD_Table_ID = ?
+						""";
 
 		ArrayList<MAttribute> list = new ArrayList<MAttribute>();
 		PreparedStatement pstmt = null;

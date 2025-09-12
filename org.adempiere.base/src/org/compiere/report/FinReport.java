@@ -47,7 +47,7 @@ import org.compiere.util.TimeUtil;
 import org.compiere.util.Util;
 
 /**
- *  Financial Report Engine
+ *  Financial Report
  *
  *  @author Jorg Janke
  *	@author Armen Rizal, Goodwill Consulting
@@ -87,7 +87,7 @@ public class FinReport extends SvrProcess
 	/** Hierarchy						*/
 	protected int					p_PA_Hierarchy_ID = 0;
 	/** Optional report cube			*/
-	protected int 				p_PA_ReportCube_ID = 0;
+	private int 				p_PA_ReportCube_ID = 0;
 	/** BPartner Employee Parameter */
 	private int					p_C_Employee_ID				= 0;
 	/** Charge Parameter */
@@ -122,13 +122,14 @@ public class FinReport extends SvrProcess
 	protected MReportColumn[] 	m_columns;
 	/** The Report Lines				*/
 	protected MReportLine[] 		m_lines;
-	
+
 	protected boolean			hasDimensionCol				= false;
 
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
-	public void prepare()
+	@Override
+	protected void prepare()
 	{
 		StringBuilder sb = new StringBuilder ("Record_ID=")
 			.append(getRecord_ID());
@@ -295,7 +296,7 @@ public class FinReport extends SvrProcess
 	}	//	prepare
 
 	/**
-	 * 	Set Periods
+	 * 	Set Reporting Periods
 	 */
 	public void setPeriods()
 	{
@@ -362,10 +363,9 @@ public class FinReport extends SvrProcess
 		}
 	}	//	setPeriods
 
-	
-	/**************************************************************************
-	 *  Perform process.
-	 *  @return Message to be translated
+	/**
+	 *  Insert reporting data to T_Report
+	 *  @return empty string
 	 *  @throws Exception
 	 */
 	public String doIt() throws Exception
@@ -424,8 +424,8 @@ public class FinReport extends SvrProcess
 		return "";
 	}	//	doIt
 
-	/**************************************************************************
-	 * 	For all columns (in a line) with relative period access
+	/**
+	 * 	Update value for all columns (in a line) with relative period access
 	 * 	@param line line
 	 */
 	public void insertLine (int line)
@@ -570,29 +570,29 @@ public class FinReport extends SvrProcess
 				}
 			}
 
-		//	Line Where
-		String s = m_lines[line].getWhereClause(p_PA_Hierarchy_ID);	//	(sources, posting type)
-		if (s != null && s.length() > 0)
-			select.append(" AND ").append(s);
-
-		//	Report Where
-		s = m_report.getWhereClause();
-		if (s != null && s.length() > 0)
-			select.append(" AND ").append(s);
-
-		//	PostingType
-		if (!m_lines[line].isPostingType())		//	only if not defined on line
-		{
-			String PostingType = m_columns[col].getPostingType();
-			if (PostingType != null && PostingType.length() > 0)
-				select.append(" AND PostingType='").append(PostingType).append("'");
-			// globalqss - CarlosRuiz
-			if (MReportColumn.POSTINGTYPE_Budget.equals(PostingType)) {
-				if (m_columns[col].getGL_Budget_ID() > 0)
-					select.append(" AND GL_Budget_ID=" + m_columns[col].getGL_Budget_ID());
+			//	Line Where
+			String s = m_lines[line].getWhereClause(p_PA_Hierarchy_ID);	//	(sources, posting type)
+			if (s != null && s.length() > 0)
+				select.append(" AND ").append(s);
+	
+			//	Report Where
+			s = m_report.getWhereClause();
+			if (s != null && s.length() > 0)
+				select.append(" AND ").append(s);
+	
+			//	PostingType
+			if (!m_lines[line].isPostingType())		//	only if not defined on line
+			{
+				String PostingType = m_columns[col].getPostingType();
+				if (PostingType != null && PostingType.length() > 0)
+					select.append(" AND PostingType='").append(PostingType).append("'");
+				// globalqss - CarlosRuiz
+				if (MReportColumn.POSTINGTYPE_Budget.equals(PostingType)) {
+					if (m_columns[col].getGL_Budget_ID() > 0)
+						select.append(" AND GL_Budget_ID=" + m_columns[col].getGL_Budget_ID());
+				}
+				// end globalqss
 			}
-			// end globalqss
-		}
 
 			if (m_columns[col].isColumnTypeSegmentValue() || m_columns[col].isWithSources())
 				select.append(m_columns[col].getWhereClause(p_PA_Hierarchy_ID));
@@ -623,8 +623,7 @@ public class FinReport extends SvrProcess
 		}
 	}	//	insertLine
 
-
-	/**************************************************************************
+	/**
 	 *	Line + Column calculation
 	 */
 	public void doCalculations()
@@ -920,7 +919,6 @@ public class FinReport extends SvrProcess
 				}
 			}
 		}	//	for all lines
-
 
 		//	for all columns		***********************************************
 		for (int col = 0; col < m_columns.length; col++)
@@ -1223,14 +1221,13 @@ public class FinReport extends SvrProcess
 			}
 
 		}
-
 	}
 
 	/**
 	 * 	Get List of PA_ReportLine_ID from .. to
 	 * 	@param fromID from ID
 	 * 	@param toID to ID
-	 * 	@return comma separated list
+	 * 	@return comma separated list of PA_ReportLine_ID
 	 */
 	public String getLineIDs (int fromID, int toID)
 	{
@@ -1292,8 +1289,7 @@ public class FinReport extends SvrProcess
 		return -1;
 	}	//	getColumnIndex
 
-	
-	/**************************************************************************
+	/**
 	 * 	Get Financial Reporting Period based on reporting Period and offset.
 	 * 	@param relativeOffset offset
 	 * 	@return reporting period
@@ -1346,15 +1342,14 @@ public class FinReport extends SvrProcess
 		return m_periods[index];
 	}	//	getPeriod
 
-	
-	/**************************************************************************
-	 *	Insert Detail Lines if enabled
+	/**
+	 *	Insert Detail Lines if enabled (isListSources=Y)
 	 */
 	public void insertLineDetail()
 	{
 		if (!m_report.isListSources())
 			return;
-		log.info("");
+		if(log.isLoggable(Level.INFO)) log.info("");
 
 		//	for all source lines
 		for (int line = 0; line < m_lines.length; line++)
@@ -1447,9 +1442,9 @@ public class FinReport extends SvrProcess
 	}	//	insertLineDetail
 
 	/**
-	 * 	Insert Detail Line per Source.
-	 * 	For all columns (in a line) with relative period access
-	 * 	- AD_PInstance_ID, PA_ReportLine_ID, variable, 0 - Level 1, dimension - Level 2
+	 * 	Insert Detail Line per Source (call from {@link #insertLineDetail()}).<br/>
+	 * 	For all columns (in a line) with relative period access<br/>
+	 * 	- AD_PInstance_ID, PA_ReportLine_ID, variable, 0 - Level 1
 	 * 	@param line line
 	 * 	@param isDimensionLine is Dimension Group
 	 */
@@ -1912,8 +1907,8 @@ public class FinReport extends SvrProcess
 	}
 
 	/**
-	 * 	Create Trx Line per Source Detail.
-	 * 	- AD_PInstance_ID, PA_ReportLine_ID, variable, Fact_Acct_ID - Level 3
+	 * 	Create Trx Line per Source Detail (isListTrx=Y).<br/>
+	 * 	- AD_PInstance_ID, PA_ReportLine_ID, variable, Fact_Acct_ID - Level 2
 	 * 	@param line line
 	 * 	@param srcLine 
 	 * 	@param variable variable, e.g. Account_ID
@@ -2101,9 +2096,8 @@ public class FinReport extends SvrProcess
 		int no = DB.executeUpdateEx(insert.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINEST)) log.finest("Trx #=" + no + " - " + insert);
 	}	//	insertLineTrx
-
 	
-	/**************************************************************************
+	/**
 	 *	Delete Unprinted Lines
 	 */
 	public void deleteUnprintedLines()
@@ -2122,8 +2116,10 @@ public class FinReport extends SvrProcess
 		}	//	for all lines
 	}	//	deleteUnprintedLines
 
-
-	public void scaleResults() {
+	/**
+	 * Update result with multiplier and rounding factor
+	 */
+	private void scaleResults() {
 
 		for (int column = 0; column < m_columns.length; column++) {
 			BigDecimal multiplier = (BigDecimal) m_columns[column].get_Value(MReportColumn.COLUMNNAME_Multiplier);
@@ -2173,7 +2169,7 @@ public class FinReport extends SvrProcess
 		
 	}
 	
-	/**************************************************************************
+	/**
 	 *	Get/Create PrintFormat
 	 * 	@return print format
 	 */
@@ -2482,7 +2478,7 @@ public class FinReport extends SvrProcess
 			pfi.setSortNo(0);
 	} // setPFItemOptions
 
-	/****************************************************************************
+	/**
 	 * Get Financial Reporting Period To based on reporting Period and offset to.
 	 * 
 	 * @param relativeOffsetTo - offset TO

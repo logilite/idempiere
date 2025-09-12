@@ -267,16 +267,57 @@ public class Doc_Production extends Doc
 			String CostingLevel = product.getCostingLevel(as);
 			String costingMethod = product.getCostingMethod(as);
 
-			BigDecimal costs = null;
-			
-			// MZ Goodwill
-			// if Production CostDetail exist then get Cost from Cost Detail
-			MCostDetail cd = MCostDetail.get (as.getCtx(), "M_ProductionLine_ID=?",
-					line.get_ID(), line.getM_AttributeSetInstance_ID(), as.getC_AcctSchema_ID(), getTrxName());
-			if (cd != null) {
-				costs = cd.getAmt();
-			} else {
-				costs = line.getProductCosts(as, line.getAD_Org_ID(), false);
+			if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(CostingLevel) ) 
+			{
+				if (line.getM_AttributeSetInstance_ID() == 0 && (mas!=null && mas.length> 0 )) 
+				{
+					for (int j = 0; j < mas.length; j++)
+					{
+						MProductionLineMA ma = mas[j];													
+						MCostDetail cd = MCostDetail.getProduction(as, line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
+								line.get_ID(), getTrxName());	
+						if (cd != null)
+							costs = costs.add(cd.getAmt());	
+						else 
+						{
+							ProductCost pc = line.getProductCost();
+							pc.setQty(ma.getMovementQty());
+							pc.setM_M_AttributeSetInstance_ID(ma.getM_AttributeSetInstance_ID());
+							costs = costs.add(line.getProductCosts(as, line.getAD_Org_ID(), false));
+						}
+						costMap.put(line.get_ID()+ "_"+ ma.getM_AttributeSetInstance_ID(), costs);
+					}
+				} 
+				else
+				{
+					MCostDetail cd = MCostDetail.getProduction(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+							line.get_ID(), getTrxName());
+					if (cd != null) 
+					{
+						costs = cd.getAmt();
+					} 
+					else 
+					{
+						costs = line.getProductCosts(as, line.getAD_Org_ID(), false);
+					}
+					costMap.put(line.get_ID()+ "_"+ line.getM_AttributeSetInstance_ID(), costs);
+				}
+			} 
+			else 
+			{
+				// MZ Goodwill
+				// if Production CostDetail exist then get Cost from Cost Detail
+				MCostDetail cd = MCostDetail.getProduction(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+						line.get_ID(), getTrxName());
+				if (cd != null) 
+				{
+					costs = cd.getAmt();
+				} 
+				else 
+				{
+					costs = line.getProductCosts(as, line.getAD_Org_ID(), false);
+				}
+				costMap.put(line.get_ID()+ "_"+ line.getM_AttributeSetInstance_ID(), costs);
 			}
 			
 			int stdPrecision = as.getStdPrecision();
@@ -298,14 +339,75 @@ public class Doc_Production extends Doc
 					if (parentBomPro != parentEndPro)
 						continue;
 					if (!line0.isProductionBOM()) {
+						MProduct product0 = (MProduct) bomProLine.getM_Product();
+						String CostingLevel0 = product0.getCostingLevel(as);
+						if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(CostingLevel0) )
+						{
+							if (bomProLine.getM_AttributeSetInstance_ID() == 0 ) 
+							{
+								MProductionLineMA bomLineMA[] = MProductionLineMA.get(getCtx(), line0.get_ID(), getTrxName());
+								if (bomLineMA!=null && bomLineMA.length> 0 )
+								{
+								 // get cost of children for batch costing level (auto generate)									
+									BigDecimal costs0 = BigDecimal.ZERO ;
+									for (int j = 0; j < bomLineMA.length; j++)
+									{
+										BigDecimal maCost = BigDecimal.ZERO ;
+										MProductionLineMA ma = bomLineMA[j];								
+										// get cost of children
+										MCostDetail cd0 = MCostDetail.getProduction(as, line0.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
+												line0.get_ID(), getTrxName());
+										if (cd0 != null) 
+											maCost = cd0.getAmt();
+										else 
+										{
+											ProductCost pc = line0.getProductCost();
+											pc.setQty(ma.getMovementQty());
+											pc.setM_M_AttributeSetInstance_ID(ma.getM_AttributeSetInstance_ID());
+											maCost = line0.getProductCosts(as, line0.getAD_Org_ID(), false);
+										}
+										costMap.put(line0.get_ID()+ "_"+ ma.getM_AttributeSetInstance_ID(),maCost);
+										costs0 = costs0.add(maCost);
+									}						
+									bomCost = bomCost.add(costs0);
+								} 
+								else
+									p_Error = "Failed to post - No Attribute Set for line";
+							}
+							else
+							{
+								// get cost of children  for batch costing level 
+								MCostDetail cd0 = MCostDetail.getProduction(as, line0.getM_Product_ID(), line0.getM_AttributeSetInstance_ID(),
+										line0.get_ID(), getTrxName());
+								BigDecimal costs0;
+								if (cd0 != null) 
+								{
+									costs0 = cd0.getAmt();
+								} 
+								else 
+								{
+									costs0 = line0.getProductCosts(as, line0.getAD_Org_ID(), false);
+								}
+								costMap.put(line0.get_ID()+ "_"+ line0.getM_AttributeSetInstance_ID(),costs0);
+								bomCost = bomCost.add(costs0);
+							}
+						}
+						else
+						{
 						// get cost of children
-						MCostDetail cd0 = MCostDetail.get (as.getCtx(), "M_ProductionLine_ID=?",
-								line0.get_ID(), line0.getM_AttributeSetInstance_ID(), as.getC_AcctSchema_ID(), getTrxName());
-						BigDecimal costs0;
-						if (cd0 != null) {
-							costs0 = cd0.getAmt();
-						} else {
-							costs0 = line0.getProductCosts(as, line0.getAD_Org_ID(), false);
+							MCostDetail cd0 = MCostDetail.getProduction(as, line0.getM_Product_ID(), line0.getM_AttributeSetInstance_ID(),
+									line0.get_ID(), getTrxName());
+							BigDecimal costs0;
+							if (cd0 != null) 
+							{
+								costs0 = cd0.getAmt();
+							} 
+							else 
+							{
+								costs0 = line0.getProductCosts(as, line0.getAD_Org_ID(), false);
+							}
+							costMap.put(line0.get_ID()+ "_"+ line0.getM_AttributeSetInstance_ID(),costs0);
+							bomCost = bomCost.add(costs0);
 						}
 							bomCost = bomCost.add(costs0);
 					}
@@ -334,7 +436,7 @@ public class Doc_Production extends Doc
 					fl.setQty(qtyProduced);
 				} 
 				else if (MAcctSchema.COSTINGMETHOD_StandardCosting.equals(costingMethod))
-				{					
+				{
 					BigDecimal variance = costs.subtract(bomCost.negate()).setScale(stdPrecision, RoundingMode.HALF_UP);
 					// only post variance if it's not zero 
 					if (variance.signum() != 0) 
@@ -385,25 +487,89 @@ public class Doc_Production extends Doc
 				description += "(*)";
 			if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(CostingLevel) && line.isProductionBOM()) 
 			{
-				if (!MCostDetail.createProduction(as, line.getAD_Org_ID(),
-						line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
-						line.get_ID(), 0,
-						bomCost.negate(), qtyProduced,
-						description, getTrxName()))
-				 {
-					 p_Error = "Failed to create cost detail record";
-					 return null;
+				if (line.isProductionBOM())
+				{
+					int Ref_CostDetail_ID = 0;
+					if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+					{
+						MCostDetail cd = MCostDetail.getProduction(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+								line.getReversalLine_ID(), 0, getTrxName());
+						if (cd != null)
+							Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+					}
+					if (!MCostDetail.createProduction(as, line.getAD_Org_ID(),
+							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+							line.get_ID(), 0,
+							bomCost.negate(), qtyProduced,
+							description, line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
+					 {
+						 p_Error = "Failed to create cost detail record";
+						 return null;
+					 }
+				}
+				else if (line.getM_AttributeSetInstance_ID() == 0 && (mas!=null && mas.length> 0 ))
+				{
+					 for (int j = 0; j < mas.length; j++)
+					 {
+						MProductionLineMA ma = mas[j];
+						BigDecimal maCost = costMap.get(line.get_ID()+ "_"+ ma.getM_AttributeSetInstance_ID());		
+						int Ref_CostDetail_ID = 0;
+						if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+						{
+							MCostDetail cd = MCostDetail.getProduction(as, line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
+									line.getReversalLine_ID(), 0, getTrxName());
+							if (cd != null)
+								Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+						}
+						if (!MCostDetail.createProduction(as, line.getAD_Org_ID(),
+								line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
+								line.get_ID(), 0,
+								maCost, ma.getMovementQty(),
+								description, line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
+						{
+							p_Error = "Failed to create cost detail record";
+							return null;
+						}
+					 }
 				 }
-			} 
+				 else
+				 {
+					 int Ref_CostDetail_ID = 0;
+					 if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+					 {
+						 MCostDetail cd = MCostDetail.getProduction(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+								 line.getReversalLine_ID(), 0, getTrxName());
+						 if (cd != null)
+							 Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+					 }
+					 if (!MCostDetail.createProduction(as, line.getAD_Org_ID(),
+							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+							line.get_ID(), 0,
+							costs, line.getQty(),
+							description, line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
+					 {
+						 p_Error = "Failed to create cost detail record";
+						 return null;
+					 }
+				 }
+			}
 			else
-			{		
+			{
 				if (line.isProductionBOM() && !(MAcctSchema.COSTINGMETHOD_StandardCosting.equals(costingMethod)))
 				{
+					int Ref_CostDetail_ID = 0;
+					if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+					{
+						MCostDetail cd = MCostDetail.getProduction(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+								line.getReversalLine_ID(), 0, getTrxName());
+						if (cd != null)
+							Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+					}
 					if (!MCostDetail.createProduction(as, line.getAD_Org_ID(),
 							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
 							line.get_ID(), 0,
 							bomCost.negate(), line.getQty(),
-							description, getTrxName()))
+							description, line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
 					{
 						p_Error = "Failed to create cost detail record";
 						return null;
@@ -411,11 +577,19 @@ public class Doc_Production extends Doc
 				}
 				else
 				{
+					int Ref_CostDetail_ID = 0;
+					if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+					{
+						MCostDetail cd = MCostDetail.getProduction(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+								line.getReversalLine_ID(), 0, getTrxName());
+						if (cd != null)
+							Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+					}
 					if (!MCostDetail.createProduction(as, line.getAD_Org_ID(),
 						line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
 						line.get_ID(), 0,
 						costs, line.getQty(),
-						description, getTrxName()))
+						description, line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
 					{
 						p_Error = "Failed to create cost detail record";
 						return null;

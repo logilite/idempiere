@@ -84,17 +84,16 @@ import org.zkoss.zul.Div;
 import org.zkoss.zul.Image;
 
 /**
- * Select role panel
+ * Select role panel of {@link LoginWindow}
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date    Feb 25, 2007
- * @version $Revision: 0.10 $
  * @author <a href="mailto:sendy.yagambrum@posterita.org">Sendy Yagambrum</a>
  * @date    July 18, 2007
  */
 public class RolePanel extends Window implements EventListener<Event>, Deferrable
 {
     /**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -8077156023041816851L;
 
@@ -175,6 +174,8 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
         init();
         this.setId("rolePanel");
         this.setSclass("login-box");
+		if (isLabelAboveInput())
+			LayoutUtils.addSclass("form-label-above-input", this);
 
         if (! m_showRolePanel) {
         	// check if all mandatory fields are ok to not show
@@ -206,10 +207,15 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     	createUI();
     }
 
+	private boolean isLabelAboveInput() {
+		return LayoutUtils.isLabelAboveInputForSmallWidth();
+	}
+
     /**
      * Layout panel
      */
 	protected void createUI() {
+
 		Div div = new Div();
     	div.setSclass(ITheme.LOGIN_BOX_HEADER_CLASS);
     	Label label = new Label(Msg.getMsg(Env.getCtx(), "SelectRole"));
@@ -241,11 +247,18 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     	td = new Td();
     	tr.appendChild(td);
     	td.setSclass(ITheme.LOGIN_LABEL_CLASS);
-    	td.appendChild(lblClient.rightAlign());
+    	td.appendChild(isLabelAboveInput() ? lblClient : lblClient.rightAlign());
+		if (isLabelAboveInput()) {
+			tr = new Tr();
+			table.appendChild(tr);
+			td.setSclass(td.getSclass() + " form-label-above-input");
+		}
     	td = new Td();
     	td.setSclass(ITheme.LOGIN_FIELD_CLASS);
     	tr.appendChild(td);
     	td.appendChild(lstClient);
+		if (isLabelAboveInput())
+			lstClient.setWidth("100%");
 
         tr = new Tr();
         tr.setId("rowRole");
@@ -253,11 +266,18 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     	td = new Td();
     	tr.appendChild(td);
     	td.setSclass(ITheme.LOGIN_LABEL_CLASS);
-    	td.appendChild(lblRole.rightAlign());
+    	td.appendChild(isLabelAboveInput() ? lblRole : lblRole.rightAlign());
+		if (isLabelAboveInput()) {
+			tr = new Tr();
+			table.appendChild(tr);
+			td.setSclass(td.getSclass() + " form-label-above-input");
+		}
     	td = new Td();
     	td.setSclass(ITheme.LOGIN_FIELD_CLASS);
     	tr.appendChild(td);
     	td.appendChild(lstRole);
+		if (isLabelAboveInput())
+			lstRole.setWidth("100%");
 
     	tr = new Tr();
         tr.setId("rowLabelDefault");
@@ -268,7 +288,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     	tr.appendChild(td);
     	td.setSclass(ITheme.LOGIN_LABEL_CLASS);
 		div = new Div();
-		div.setStyle("text-align: right; text-decoration: underline");
+		div.setStyle("text-align: " + (isLabelAboveInput() ? "left;" : "right;") + " text-decoration: underline");
 		div.appendChild(lblDef);
     	td.appendChild(div);
 
@@ -278,11 +298,18 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     	td = new Td();
     	tr.appendChild(td);
     	td.setSclass(ITheme.LOGIN_LABEL_CLASS);
-    	td.appendChild(lblOrganisation.rightAlign());
+    	td.appendChild(isLabelAboveInput() ? lblOrganisation : lblOrganisation.rightAlign());
+		if (isLabelAboveInput()) {
+			tr = new Tr();
+			table.appendChild(tr);
+			td.setSclass(td.getSclass() + " form-label-above-input");
+		}
     	td = new Td();
     	td.setSclass(ITheme.LOGIN_FIELD_CLASS);
     	tr.appendChild(td);
     	td.appendChild(lstOrganisation);
+		if (isLabelAboveInput())
+			lstOrganisation.setWidth("100%");
 
     	tr = new Tr();
         tr.setId("rowWarehouse");
@@ -290,11 +317,18 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     	td = new Td();
     	tr.appendChild(td);
     	td.setSclass(ITheme.LOGIN_LABEL_CLASS);
-    	td.appendChild(lblWarehouse.rightAlign());
+    	td.appendChild(isLabelAboveInput() ? lblWarehouse : lblWarehouse.rightAlign());
+		if (isLabelAboveInput()) {
+			tr = new Tr();
+			table.appendChild(tr);
+			td.setSclass(td.getSclass() + " form-label-above-input");
+		}
     	td = new Td();
     	td.setSclass(ITheme.LOGIN_FIELD_CLASS);
     	tr.appendChild(td);
     	td.appendChild(lstWarehouse);
+		if (isLabelAboveInput())
+			lstWarehouse.setWidth("100%");
     	
     	tr = new Tr();
     	tr.setId("rowLanguage");
@@ -302,11 +336,18 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     	td = new Td();
     	tr.appendChild(td);
     	td.setSclass(ITheme.LOGIN_LABEL_CLASS);
-    	td.appendChild(lblLanguage.rightAlign());
+    	td.appendChild(isLabelAboveInput() ? lblLanguage : lblLanguage.rightAlign());
+		if (isLabelAboveInput()) {
+			tr = new Tr();
+			table.appendChild(tr);
+			td.setSclass(td.getSclass() + " form-label-above-input");
+		}
     	td = new Td();
     	td.setSclass(ITheme.LOGIN_FIELD_CLASS);
     	tr.appendChild(td);
     	td.appendChild(lstLanguage);
+		if (isLabelAboveInput())
+			lstLanguage.setWidth("100%");
 
     	tr = new Tr();
         tr.setId("rowDate");
@@ -314,7 +355,12 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     	td = new Td();
     	tr.appendChild(td);
     	td.setSclass(ITheme.LOGIN_LABEL_CLASS);
-    	td.appendChild(lblDate.rightAlign());
+    	td.appendChild(isLabelAboveInput() ? lblDate : lblDate.rightAlign());
+		if (isLabelAboveInput()) {
+			tr = new Tr();
+			table.appendChild(tr);
+			td.setSclass(td.getSclass() + " form-label-above-input");
+		}
     	td = new Td();
     	td.setSclass(ITheme.LOGIN_FIELD_CLASS);
     	tr.appendChild(td);
@@ -331,13 +377,13 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
 
         Button helpButton = pnlButtons.createButton(ConfirmPanel.A_HELP);
 		helpButton.addEventListener(Events.ON_CLICK, this);
-		helpButton.setSclass(ITheme.LOGIN_BUTTON_CLASS);
+		helpButton.addSclass(ITheme.LOGIN_BUTTON_CLASS);
 		pnlButtons.addComponentsRight(helpButton);
 
         LayoutUtils.addSclass(ITheme.LOGIN_BOX_FOOTER_PANEL_CLASS, pnlButtons);
         ZKUpdateUtil.setWidth(pnlButtons, null);
-        pnlButtons.getButton(ConfirmPanel.A_OK).setSclass(ITheme.LOGIN_BUTTON_CLASS);
-        pnlButtons.getButton(ConfirmPanel.A_CANCEL).setSclass(ITheme.LOGIN_BUTTON_CLASS);
+        pnlButtons.getButton(ConfirmPanel.A_OK).addSclass(ITheme.LOGIN_BUTTON_CLASS);
+        pnlButtons.getButton(ConfirmPanel.A_CANCEL).addSclass(ITheme.LOGIN_BUTTON_CLASS);
         div.appendChild(pnlButtons);
         this.appendChild(div);
         
@@ -386,7 +432,6 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
         lstRole.setId("lstRole");
 
         lstRole.addEventListener(Events.ON_SELECT, this);
-        ZKUpdateUtil.setWidth(lstRole, "220px");
 
         lstClient = new Combobox();
         lstClient.setAutocomplete(true);
@@ -394,7 +439,6 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
         lstClient.setId("lstClient");
 
         lstClient.addEventListener(Events.ON_SELECT, this);
-        ZKUpdateUtil.setWidth(lstClient, "220px");
 
         lstOrganisation = new Combobox();
         lstOrganisation.setAutocomplete(true);
@@ -402,7 +446,6 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
         lstOrganisation.setId("lstOrganisation");
 
         lstOrganisation.addEventListener(Events.ON_SELECT, this);
-        ZKUpdateUtil.setWidth(lstOrganisation, "220px");
 
         lstWarehouse = new Combobox();
         lstWarehouse.setAutocomplete(true);
@@ -410,7 +453,6 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
         lstWarehouse.setId("lstWarehouse");
 
         lstWarehouse.addEventListener(Events.ON_SELECT, this);
-        ZKUpdateUtil.setWidth(lstWarehouse, "220px");
 
         lstDate = new WDateEditor();
         lstDate.setValue(new Timestamp(System.currentTimeMillis()));
@@ -462,7 +504,6 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
         lstLanguage.setAutocomplete(true);
         lstLanguage.setAutodrop(true);
         lstLanguage.setId("lstLanguage");
-        ZKUpdateUtil.setWidth(lstLanguage, "220px");
 
         // Update Language List
         lstLanguage.getItems().clear();
@@ -871,7 +912,7 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     }
     
     /**
-     * show UI for change role
+     * Show UI for change role
      * @param ctx env context
      */
     public void changeRole(Properties ctx) {
@@ -893,7 +934,6 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
     /**
      * Validate fields
      * @param isMFAValidated
-     *
      */
     @SuppressWarnings("unused")
     public void validateRoles(boolean isMFAValidated)
@@ -1001,12 +1041,25 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
         }
 	}
 
+    /**
+     * Check if the field is filled, throws WrongValueException if not
+     * @param lst
+     * @param lbl
+     */
+    private void checkMandatoryField(Combobox lst, Label lbl) {
+    	Comboitem item = lst.getSelectedItem();
+        if (item == null || item.getValue() == null) {
+        	throw new WrongValueException(lst, Msg.getMsg(m_ctx, "FillMandatory") + lbl.getValue());
+        }
+	}
+
 	@Override
 	public boolean isDeferrable() {
 		return false;
 	}
 
     /**
+     * Is show role selection panel to user
      * @return true if role selection panel will be shown to user
      */
 	public boolean show() {

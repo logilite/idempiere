@@ -45,6 +45,9 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Util;
 import org.compiere.wf.MWFActivity;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.launch.Framework;
 import org.osgi.service.event.Event;
 
 /**
@@ -82,7 +85,7 @@ public class ModelValidationEngine
 	/** Engine Singleton				*/
 	private static ModelValidationEngine s_engine = null;
 	/** flag to indicate a missing model validation class */
-	private static String missingModelValidationMessage = "";
+	private String missingModelValidationMessage = "";
 
 	/**
 	 * 	Private Constructor.
@@ -121,6 +124,22 @@ public class ModelValidationEngine
 				continue;
 			loadValidatorClasses(clients[i], classNames);
 		}
+		if (    MSystem.get(Env.getCtx()).isFailOnMissingModelValidator()
+			&& !Util.isEmpty(missingModelValidationMessage)) {
+			// do not use severe, logging to db will try to init ModelValidationEngine again!
+			System.out.println(missingModelValidationMessage);
+			System.out.println("Terminating");
+	        try {
+	            BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+	            context.getBundle(0).stop();
+				if (context.getBundle(0) instanceof Framework framework)
+					framework.waitForStop(60000);
+			} catch (Exception e) {
+			} finally {
+				System.exit(1);
+			}
+		}
+
 	}	//	ModelValidatorEngine
 
 	/**
@@ -289,14 +308,10 @@ public class ModelValidationEngine
 			return eventErrors.toString();
 		}
 
-		if ((AD_User_ID == SystemIDs.USER_SYSTEM || AD_User_ID == SystemIDs.USER_SUPERUSER) && AD_Role_ID == SystemIDs.ROLE_SYSTEM)
-			; // don't validate for user system on role system
-		else
-			if (! Util.isEmpty(missingModelValidationMessage)) {
-				MSystem system = MSystem.get(Env.getCtx());
-				if (system.isFailOnMissingModelValidator())
-					return missingModelValidationMessage;
-			}
+		if (   !Util.isEmpty(missingModelValidationMessage)
+			&& ! (   AD_Role_ID == SystemIDs.ROLE_SYSTEM
+				  && (AD_User_ID == SystemIDs.USER_SYSTEM || AD_User_ID == SystemIDs.USER_SUPERUSER)))
+			return missingModelValidationMessage;
 		return null;
 	}	//	loginComplete
 

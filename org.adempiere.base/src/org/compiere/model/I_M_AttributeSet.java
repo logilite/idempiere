@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for M_AttributeSet
  *  @author iDempiere (generated) 
- *  @version Release 11
+ *  @version Release 13
  */
 public interface I_M_AttributeSet 
 {
@@ -302,6 +302,7 @@ public interface I_M_AttributeSet
 	  */
 	public int getM_LotCtl_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_M_LotCtl getM_LotCtl() throws RuntimeException;
 
     /** Column name M_SerNoCtl_ID */
@@ -317,6 +318,7 @@ public interface I_M_AttributeSet
 	  */
 	public int getM_SerNoCtl_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_M_SerNoCtl getM_SerNoCtl() throws RuntimeException;
 
     /** Column name MandatoryType */

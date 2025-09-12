@@ -37,6 +37,7 @@ import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.FeedbackManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.Dialog;
 import org.apache.commons.io.IOUtils;
@@ -68,7 +69,6 @@ import org.zkoss.zul.South;
 /**
  * Window to capture feedback request from user.
  * @author hengsin
- *
  */
 public class FeedbackRequestWindow extends Window implements EventListener<Event> {
 	
@@ -231,7 +231,7 @@ public class FeedbackRequestWindow extends Window implements EventListener<Event
 
 		//devCoffee #6142
 		if (ThemeManager.isUseFontIconForImage())
-			btn.setIconSclass("z-icon-Attachment");
+			btn.setIconSclass(Icon.getIconSclass(Icon.ATTACHMENT));
 		else
 			btn.setImage(ThemeManager.getThemeResource("images/Attachment24.png"));
 		btn.setUpload(AdempiereWebUI.getUploadSetting());

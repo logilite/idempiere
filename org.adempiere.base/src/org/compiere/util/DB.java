@@ -181,7 +181,7 @@ public final class DB
 	}	//	afterMigration
 
 	/**
-	 * 	Update Mail Settings for System Client and System User
+	 * 	Update Mail Settings for System Client and System User (idempiereEnv.properties)
 	 */
 	public static void updateMail()
 	{
@@ -309,6 +309,7 @@ public final class DB
 	}
 
 	/**
+	 * Is connected to DB.
 	 * @return true, if connected to database
 	 */
 	public static boolean isConnected()
@@ -360,7 +361,7 @@ public final class DB
 	
 	/**
 	 * Get auto or not auto commit connection from connection pool.<br/>
-	 * Usually you should use @{@link #getConnection()} instead to get auto commit connection 
+	 * Usually, developer should use @{@link #getConnection()} instead to get auto commit connection 
 	 * and use {@link Trx} to works with not autoCommit connection.
 	 * @param autoCommit
 	 * @return {@link Connection}
@@ -439,7 +440,8 @@ public final class DB
 
 	/**
 	 *	Create new Connection.<br/>
-	 *  The connection must be closed explicitly by the application.
+	 *  The connection must be closed explicitly by the caller.<br/>
+	 *  Usually, developer should not call this directly.
 	 *
 	 *  @param autoCommit auto commit
 	 *  @param trxLevel - Connection.TRANSACTION_READ_UNCOMMITTED, Connection.TRANSACTION_READ_COMMITTED, Connection.TRANSACTION_REPEATABLE_READ, or Connection.TRANSACTION_READ_COMMITTED.
@@ -509,7 +511,7 @@ public final class DB
 	}   //  getDatabase
 
 	/**
-	 * 	Do we have an Oracle DB ?
+	 * 	Is connected to Oracle DB  ?
 	 *	@return true if connected to Oracle
 	 */
 	public static boolean isOracle()
@@ -521,7 +523,7 @@ public final class DB
 	}	//	isOracle
 
 	/**
-	 * 	Do we have a PostgreSQL DB ?
+	 * 	Is connected to PostgreSQL DB ?
 	 *	@return true if connected to PostgreSQL
 	 */
 	public static boolean isPostgreSQL()
@@ -693,6 +695,7 @@ public final class DB
 	 *  @return Prepared Statement
 	 *  @deprecated
 	 */
+	@Deprecated
 	public static CPreparedStatement prepareStatement (String sql)
 	{
 		return prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, null);
@@ -728,6 +731,7 @@ public final class DB
 	 *  @return Prepared Statement
 	 *  @deprecated
 	 */
+	@Deprecated
 	public static CPreparedStatement prepareStatement (String sql,
 		int resultSetType, int resultSetConcurrency)
 	{
@@ -826,7 +830,7 @@ public final class DB
 	}
 
 	/**
-	 * Set PreparedStatement's parameter.
+	 * Set PreparedStatement's parameter.<br/>
 	 * Similar with calling <code>pstmt.setObject(index, param)</code>
 	 * @param pstmt
 	 * @param index
@@ -869,13 +873,14 @@ public final class DB
 	 *  @return number of rows updated or -1 if error
 	 *  @deprecated
 	 */
+	@Deprecated
 	public static int executeUpdate (String sql)
 	{
 		return executeUpdate(sql, null, false, null);
 	}	//	executeUpdate
 
 	/**
-	 *	Execute Update.
+	 *	Execute Update.<br/>
 	 *  Saves "DBExecuteError" in Log.<br/>
 	 *  Developer is recommended to call {@link #executeUpdateEx(String, String)} instead.
 	 *  @param sql
@@ -888,7 +893,7 @@ public final class DB
 	}	//	executeUpdate
 
 	/**
-	 *	Execute Update.
+	 *	Execute Update.<br/>
 	 *  Saves "DBExecuteError" in Log.<br/>
 	 *  Developer is recommended to call {@link #executeUpdateEx(String, String, int)} instead.
 	 *  @param sql
@@ -909,13 +914,14 @@ public final class DB
 	 *  @return number of rows updated or -1 if error
 	 *  @deprecated
 	 */
+	@Deprecated
 	public static int executeUpdate (String sql, boolean ignoreError)
 	{
 		return executeUpdate (sql, null, ignoreError, null);
 	}	//	executeUpdate
 
 	/**
-	 *	Execute Update.
+	 *	Execute Update.<br/>
 	 *  Saves "DBExecuteError" in Log.<br/>
 	 *  Developer is recommended to call {@link #executeUpdateEx(String, String)} instead.
 	 *  @param sql
@@ -929,7 +935,7 @@ public final class DB
 	}	//	executeUpdate
 
 	/**
-	 *	Execute Update.
+	 *	Execute Update.<br/>
 	 *  Saves "DBExecuteError" in Log.<br/>
 	 *  Developer is recommended to call {@link #executeUpdateEx(String, String, int)} instead.
 	 *  @param sql
@@ -944,7 +950,7 @@ public final class DB
 	}
 
 	/**
-	 *	Execute Update.
+	 *	Execute Update.<br/>
 	 *  Saves "DBExecuteError" in Log.<br/>
 	 *  Developer is recommended to call {@link #executeUpdateEx(String, Object[], String)} instead.
 	 *  @param sql
@@ -958,7 +964,7 @@ public final class DB
 	}	//	executeUpdate
 
 	/**
-	 *	Execute Update.
+	 *	Execute Update.<br/>
 	 *  Saves "DBExecuteError" in Log.<br/>
 	 *  Developer is recommended to call {@link #executeUpdateEx(String, Object[], String, int)} instead.
 	 *  @param sql
@@ -973,7 +979,7 @@ public final class DB
 	}	//	executeUpdate
 
 	/**
-	 *	Execute Update.
+	 *	Execute Update.<br/>
 	 *  Saves "DBExecuteError" in Log.<br/>
 	 *  Developer is recommended to call {@link #executeUpdateEx(String, Object[], String)} instead.
 	 *  @param sql
@@ -988,7 +994,7 @@ public final class DB
 	}	//	executeUpdate
 
 	/**
-	 *	Execute Update.
+	 *	Execute Update.<br/>
 	 *  Saves "DBExecuteError" in Log.
 	 *  Developer is recommended to call {@link #executeUpdateEx(String, Object[], String, int)} instead.
 	 *  @param sql
@@ -1004,7 +1010,7 @@ public final class DB
 	}	//	executeUpdate
 
 	/**
-	 *	Execute Update.
+	 *	Execute Update.<br/>
 	 *  Saves "DBExecuteError" in Log.<br/>
 	 *  Developer is recommended to call {@link #executeUpdateEx(String, Object[], String)} instead.
 	 *  @param sql
@@ -1019,7 +1025,7 @@ public final class DB
 	}
 
 	/**
-	 *	Execute Update.
+	 *	Execute Update.<br/>
 	 *  Saves "DBExecuteError" in Log.<br/>
 	 *  Developer is recommended to call {@link #executeUpdateEx(String, Object[], String, int)} instead.
 	 *  @param sql
@@ -1126,7 +1132,7 @@ public final class DB
 	}
 
 	/**
-	 *	Execute multiple Update statements.
+	 *	Execute multiple Update statements.<br/>
 	 *  Saves (last) "DBExecuteError" in Log.
 	 *  @param sql multiple sql statements separated by "; " SQLSTATEMENT_SEPARATOR
 	 * 	@param ignoreError if true, no execution error is reported
@@ -1254,7 +1260,7 @@ public final class DB
 	}	//	commit
 
 	/**
-	 * 	Get Row Set.
+	 * 	Get Row Set.<br/>
 	 * 	When a Rowset is closed, it also closes the underlying connection.
 	 *	@param sql
 	 *	@return row set or null
@@ -1738,6 +1744,18 @@ public final class DB
 	 * Get Array of Key Name Pairs
 	 * @param sql select with id / name as first / second column
 	 * @param optional if true (-1,"") is added
+	 * @return array of {@link KeyNamePair}
+	 * @see #getKeyNamePairs(String, boolean, Object...)
+	 */
+	public static KeyNamePair[] getKeyNamePairsEx(String sql, boolean optional)
+	{
+		return getKeyNamePairsEx(sql, optional, (Object[])null);
+	}
+	
+	/**
+	 * Get Array of Key Name Pairs
+	 * @param sql select with id / name as first / second column
+	 * @param optional if true (-1,"") is added
 	 * @param params query parameters
 	 */
 	public static KeyNamePair[] getKeyNamePairs(String sql, boolean optional, Object ... params)
@@ -1745,6 +1763,18 @@ public final class DB
 		return getKeyNamePairs(null, sql, optional, params);
 	}
 
+	/**
+	 * Get Array of Key Name Pairs
+	 * @param sql select with id / name as first / second column
+	 * @param optional if true (-1,"") is added
+	 * @param params query parameters
+	 * @return Array of Key Name Pairs
+	 */
+	public static KeyNamePair[] getKeyNamePairsEx(String sql, boolean optional, Object ... params)
+	{
+		return getKeyNamePairsEx(null, sql, optional, params);
+	}
+	
 	/**
 	 * Get Array of Key Name Pairs
 	 * @param trxName
@@ -1755,8 +1785,32 @@ public final class DB
 	 */
 	public static KeyNamePair[] getKeyNamePairs(String trxName, String sql, boolean optional, Object ... params)
 	{
+		try 
+		{
+			return getKeyNamePairsEx(trxName, sql, optional, params);		
+		} 
+		catch (Exception e)
+        {
+            log.log(Level.SEVERE, sql, getSQLException(e));
+        }
+		return new KeyNamePair[0];
+	}
+	
+	/**
+	 * Get Array of Key Name Pairs
+	 * @param trxName
+	 * @param sql select with id / name as first / second column
+	 * @param optional if true (-1,"") is added
+	 * @param params query parameters
+	 * @return Array of Key Name Pairs
+	 */
+	public static KeyNamePair[] getKeyNamePairsEx(String trxName, String sql, boolean optional, Object ... params)
+	{
         PreparedStatement pstmt = null;
         ResultSet rs = null;
+        Connection conn = null; 
+    	if (trxName == null)
+    		conn = DB.createConnection(true, Connection.TRANSACTION_READ_COMMITTED);
         ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
         if (optional)
         {
@@ -1764,7 +1818,15 @@ public final class DB
         }
         try
         {
-            pstmt = DB.prepareStatement(sql, trxName);
+        	if (conn != null)
+    		{
+    			conn.setAutoCommit(false);
+    			conn.setReadOnly(true);
+    		}
+        	if (conn != null)
+        		pstmt = prepareStatement(conn, sql);
+        	else
+        		pstmt = DB.prepareStatement(sql, trxName);
             setParameters(pstmt, params);
             rs = pstmt.executeQuery();
             while (rs.next())
@@ -1772,15 +1834,27 @@ public final class DB
                 list.add(new KeyNamePair(rs.getInt(1), rs.getString(2)));
             }
         }
-        catch (Exception e)
+        catch (SQLException e)
         {
-            log.log(Level.SEVERE, sql, getSQLException(e));
+        	if (conn != null)
+    		{
+    			try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+    		}
+            throw new DBException(e.getMessage(), e);
         }
         finally
         {
             close(rs, pstmt);
             rs= null;
             pstmt = null;
+            if (conn != null)
+    		{
+    			closeAndResetReadonlyConnection(conn);
+    		}
         }
         KeyNamePair[] retValue = new KeyNamePair[list.size()];
         list.toArray(retValue);
@@ -1829,7 +1903,7 @@ public final class DB
 	}	//	getIDsEx
 	
 	/**
-	 * 	Is Sales Order Trx.
+	 * 	Is Sales Order Trx.<br/>
 	 * 	Assumes Sales Order. Query IsSOTrx value of table with where clause
 	 *	@param TableName table
 	 *	@param whereClause where clause
@@ -1966,6 +2040,7 @@ public final class DB
 	 *	@return document no or null
 	 *  @deprecated
 	 */
+	@Deprecated
 	public static String getDocumentNo(int C_DocType_ID, String trxName)
 	{
 		return MSequence.getDocumentNo (C_DocType_ID, trxName, false);
@@ -2181,8 +2256,8 @@ public final class DB
 	/**
 	 *	Package Strings for SQL command in quotes.
 	 *  <pre>
-	 *		-	include in ' (single quotes)
-	 *		-	replace ' with ''
+	 *	    -	include in ' (single quotes)
+	 *	    -	replace ' with ''
 	 *  </pre>
 	 *  @param txt  String with text
 	 *  @param maxLength    Maximum Length of content or 0 to ignore
@@ -2533,6 +2608,7 @@ public final class DB
 	private static boolean m_isUUIDSupported = false;
 	
 	/**
+	 * Is DB support generate_uuid function
 	 * @return true if current db have working generate_uuid function. generate_uuid doesn't work on 64 bit postgresql
 	 * on windows yet.
 	 */
@@ -2563,6 +2639,7 @@ public final class DB
 	}
 
 	/**
+	 * Is table or view exists
 	 * @param tableName
 	 * @return true if table or view with name=tableName exists in db
 	 */
@@ -2876,7 +2953,7 @@ public final class DB
 	} // buildDBArray
 	
 	/**
-	 * Create IN clause for cs
+	 * Create IN clause for csv value
 	 * @param columnName
 	 * @param csv comma separated value
 	 * @return IN clause

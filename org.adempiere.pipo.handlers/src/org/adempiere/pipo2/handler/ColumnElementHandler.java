@@ -96,6 +96,7 @@ public class ColumnElementHandler extends AbstractElementHandler {
 					deferFK(element, mColumn);
 					syncColumn(ctx, mColumn, "Sync", false);
 				}
+				element.recordId = mColumn.getAD_Column_ID();
 				return;
 			}
 			
@@ -347,17 +348,17 @@ public class ColumnElementHandler extends AbstractElementHandler {
 		AttributesImpl atts = new AttributesImpl();
 		X_AD_Column m_Column = new X_AD_Column(ctx.ctx, AD_Column_ID,
 				getTrxName(ctx));
+
 		boolean createElement = isPackOutElement(ctx, m_Column);
 		PackOut packOut = ctx.packOut;
 		if (createElement)
-		{//TODO what if column not changed but related table attribute changed? I suggest in that case only Column's min field exported while changes table attribute exported
+		{
 			verifyPackOutRequirement(m_Column);
 
 			addTypeName(atts, "table");
 			document.startElement("", "", I_AD_Column.Table_Name, atts);
 			createColumnBinding(ctx, document, m_Column);
 		}
-
 		packOut.getCtx().ctx.put("Table_Name", I_AD_Column.Table_Name);
 		try
 		{

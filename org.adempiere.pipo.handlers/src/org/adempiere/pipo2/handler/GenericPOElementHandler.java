@@ -296,14 +296,15 @@ public class GenericPOElementHandler extends AbstractElementHandler {
 					}
 					
 					ctx.packOut.getCtx().ctx.put("Table_Name", mainTable);
-					if (po.get_ID() > 0) {
-						try {
-							handler = ctx.packOut.getHandler(I_AD_TableAttribute.Table_Name);
-							handler.packOut(ctx.packOut, document, null, po.get_ID());
-						} catch (Exception e) {
-							if (log.isLoggable(Level.INFO))
-								log.info(e.toString());
-						}
+					try
+					{
+						ElementHandler handlerTabAttr = ctx.packOut.getHandler(I_AD_TableAttribute.Table_Name);
+						handlerTabAttr.packOut(ctx.packOut, document, null, po.get_ID());
+					}
+					catch (Exception e)
+					{
+						if (log.isLoggable(Level.INFO))
+							log.info(e.toString());
 					}
 				}
 				for (int i=1; i<tables.length; i++) {

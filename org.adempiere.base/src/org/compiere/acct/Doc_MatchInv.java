@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AverageCostingZeroQtyException;
+import org.compiere.model.ICostInfo;
 import org.compiere.model.I_C_Order;
 import org.compiere.model.I_C_OrderLine;
 import org.compiere.model.MAccount;
@@ -384,8 +385,8 @@ public class Doc_MatchInv extends Doc
 		cr.setC_ProjectPhase_ID(m_invoiceLine.getC_ProjectPhase_ID());
 		cr.setC_ProjectTask_ID(m_invoiceLine.getC_ProjectTask_ID());
 		cr.setC_UOM_ID(m_invoiceLine.getC_UOM_ID());
-			cr.setC_Charge_ID(m_invoiceLine.getC_Charge_ID());
-			cr.setA_Asset_ID(m_invoiceLine.getA_Asset_ID());
+		cr.setC_Charge_ID(m_invoiceLine.getC_Charge_ID());
+		cr.setA_Asset_ID(m_invoiceLine.getA_Asset_ID());
 		cr.setUser1_ID(m_invoiceLine.getUser1_ID());
 		cr.setUser2_ID(m_invoiceLine.getUser2_ID());
 		cr.setC_CostCenter_ID(m_invoiceLine.getC_CostCenter_ID());
@@ -480,7 +481,6 @@ public class Doc_MatchInv extends Doc
 
 			int AD_Org_ID = m_receiptLine.getAD_Org_ID();
 			int M_AttributeSetInstance_ID = matchInv.getM_AttributeSetInstance_ID();
-
 			if (MAcctSchema.COSTINGLEVEL_Client.equals(as.getCostingLevel()))
 			{
 				AD_Org_ID = 0;
@@ -490,40 +490,73 @@ public class Doc_MatchInv extends Doc
 				M_AttributeSetInstance_ID = 0;
 			else if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(as.getCostingLevel()))
 				AD_Org_ID = 0;
-
 			MCostElement ce = MCostElement.getMaterialCostElement(getCtx(), costingMethod, AD_Org_ID);
-			
-			MCostDetail cd = MCostDetail.get (as.getCtx(), "M_MatchInv_ID=? AND Coalesce(M_CostElement_ID,0)=0", 
-					matchInv.getM_MatchInv_ID(), M_AttributeSetInstance_ID, as.getC_AcctSchema_ID(), getTrxName());
-			if(cd!=null){
+			MCostDetail cd = MCostDetail.getMatchInvoice(as, matchInv.getM_Product_ID(), M_AttributeSetInstance_ID,
+					matchInv.getM_MatchInv_ID(), 0, getTrxName());
+			if (cd != null) {
 				qtyCost = cd.getCurrentQty();
-			}else{
-				MCost c = MCost.get(getCtx(), getAD_Client_ID(), AD_Org_ID, m_invoiceLine.getM_Product_ID(),
+			} else {
+				ICostInfo c = MCost.getCostInfo(getCtx(), getAD_Client_ID(), AD_Org_ID, m_invoiceLine.getM_Product_ID(),
 					as.getM_CostType_ID(), as.getC_AcctSchema_ID(), ce.getM_CostElement_ID(),
-					M_AttributeSetInstance_ID, getTrxName());
-				qtyCost = (c!=null? c.getCurrentQty():Env.ZERO);
+					M_AttributeSetInstance_ID, 
+					getDateAcct(), null, getTrxName());
+				qtyCost = (c != null ? c.getCurrentQty() : Env.ZERO);
 			}
-						
 			if (qtyCost != null && qtyCost.compareTo(qtyMatched) < 0 )
 			{
-				//If current cost qty < invoice qty
+				// If current cost qty < invoice qty
 				amtAsset = qtyCost.multiply(ipv).divide(qtyMatched,as.getCostingPrecision(),RoundingMode.HALF_UP);
 				amtVariance = ipv.subtract(amtAsset);
 				
-			}else{
-				//If current qty >= invoice qty
+			} else {
+				// If current qty >= invoice qty
 				amtAsset = ipv;
 			}
-			
 		}
 		else if (X_M_Cost.COSTINGMETHOD_AveragePO.equals(costingMethod)  && m_invoiceLine.getM_Product_ID() > 0 && isReversal)
 		{
 			isStockCoverage = true;
-			int M_AttributeSetInstance_ID = matchInv.getM_AttributeSetInstance_ID();
-			MCostDetail cd = MCostDetail.get (as.getCtx(), "M_MatchInv_ID=? AND Coalesce(M_CostElement_ID,0)=0", 
-					matchInv.getReversal_ID(), M_AttributeSetInstance_ID, as.getC_AcctSchema_ID(), getTrxName());
-			amtAsset = cd != null ? cd.getAmt().negate() : BigDecimal.ZERO;
-			amtVariance = ipv.subtract(amtAsset);
+			if (matchInv.getReversal().getDateAcct().compareTo(getDateAcct()) != 0) { // reverse-accrual
+				// If it is a reverse-accrual, perform a stock coverage check using the current stock quantity to prevent any leftover amount in the inventory GL
+				int AD_Org_ID = m_receiptLine.getAD_Org_ID();
+				int M_AttributeSetInstance_ID = matchInv.getM_AttributeSetInstance_ID();
+				if (MAcctSchema.COSTINGLEVEL_Client.equals(as.getCostingLevel()))
+				{
+					AD_Org_ID = 0;
+					M_AttributeSetInstance_ID = 0;
+				}
+				else if (MAcctSchema.COSTINGLEVEL_Organization.equals(as.getCostingLevel()))
+					M_AttributeSetInstance_ID = 0;
+				else if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(as.getCostingLevel()))
+					AD_Org_ID = 0;
+				MCostElement ce = MCostElement.getMaterialCostElement(getCtx(), costingMethod, AD_Org_ID); 
+				MCostDetail cd = MCostDetail.getMatchInvoice(as, matchInv.getM_Product_ID(), M_AttributeSetInstance_ID,
+						matchInv.getM_MatchInv_ID(), 0, getTrxName());
+				if (cd != null) {
+					qtyCost = cd.getCurrentQty();
+				} else {
+					ICostInfo c = MCost.getCostInfo(getCtx(), getAD_Client_ID(), AD_Org_ID, m_invoiceLine.getM_Product_ID(),
+						as.getM_CostType_ID(), as.getC_AcctSchema_ID(), ce.getM_CostElement_ID(),
+						M_AttributeSetInstance_ID, 
+						getDateAcct(), null, getTrxName());
+					qtyCost = (c != null ? c.getCurrentQty() : Env.ZERO);
+				}	
+				if (qtyCost != null && qtyCost.compareTo(qtyMatched.negate()) < 0 )
+				{
+					// If current cost qty < invoice qty
+					amtAsset = qtyCost.multiply(ipv).divide(qtyMatched.negate(),as.getCostingPrecision(),RoundingMode.HALF_UP);
+					amtVariance = ipv.subtract(amtAsset); 
+				} else {
+					// If current qty >= invoice qty
+					amtAsset = ipv;
+				} 
+			} else { // reverse-correct
+				int M_AttributeSetInstance_ID = matchInv.getM_AttributeSetInstance_ID();
+				MCostDetail cd = MCostDetail.getMatchInvoice(as, matchInv.getM_Product_ID(), M_AttributeSetInstance_ID,
+						matchInv.getReversal_ID(), 0, getTrxName());
+				amtAsset = cd != null ? cd.getAmt().negate() : BigDecimal.ZERO;
+				amtVariance = ipv.subtract(amtAsset);
+			}
 		}
 		
 		Trx trx = Trx.get(getTrxName(), false);
@@ -531,11 +564,18 @@ public class Doc_MatchInv extends Doc
 		boolean zeroQty = false;
 		try {
 			savepoint = trx.setSavepoint(null);
-			
+			int Ref_CostDetail_ID = 0;
+			if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
+			{
+				MCostDetail cd = MCostDetail.getMatchInvoice(as, m_invoiceLine.getM_Product_ID(), m_invoiceLine.getM_AttributeSetInstance_ID(),
+						matchInv.getReversal_ID(), 0, getTrxName());
+				if (cd != null)
+					Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+			}
 			if (!MCostDetail.createMatchInvoice(as, m_invoiceLine.getAD_Org_ID(),
 					m_invoiceLine.getM_Product_ID(), m_invoiceLine.getM_AttributeSetInstance_ID(),
 					matchInv.getM_MatchInv_ID(), 0,
-					isStockCoverage ? amtAsset: ipv, BigDecimal.ZERO, "Invoice Price Variance", getTrxName())) {
+					isStockCoverage ? amtAsset: ipv, BigDecimal.ZERO, "Invoice Price Variance", getDateAcct(), Ref_CostDetail_ID, getTrxName())) {
 				throw new RuntimeException("Failed to create cost detail record.");
 			}				
 		} catch (SQLException e) {
@@ -556,7 +596,6 @@ public class Doc_MatchInv extends Doc
 			}
 		}
 		
-		//TODO Test for Expense type product?
 		MAccount account = m_pc.getAccount(ProductCost.ACCTTYPE_P_Asset, as);
 		if (m_pc.isService())
 			account = m_pc.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
@@ -571,26 +610,23 @@ public class Doc_MatchInv extends Doc
 				
 				if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
 				{
-					updateFactLineAmtSource(varianceLine, ipvSource.multiply(amtVariance).divide(ipv));
+					updateFactLineAmtSource(varianceLine, ipvSource.multiply(amtVariance).divide(ipv, 12, RoundingMode.HALF_UP));
 				}
 			}
 			if (amtAsset.compareTo(Env.ZERO) != 0)
 			{
 				FactLine line = fact.createLine(null, account, as.getC_Currency_ID(), amtAsset);
 				updateFactLine(line);
-				// set Zero Qty for Product Asset Account to match Qty.
-				line.setQty(Env.ZERO);
 
 				if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
 				{
-					updateFactLineAmtSource(line, ipvSource.multiply(amtAsset).divide(ipv));
+					updateFactLineAmtSource(line, ipvSource.multiply(amtAsset).divide(ipv, 12, RoundingMode.HALF_UP));
 				}
 			}
 		} else if (X_M_Cost.COSTINGMETHOD_AverageInvoice.equals(costingMethod) && !zeroQty) {
 			//TODO test for avg Invoice costing method as here dropped posting of posting to IPV account
 			FactLine line = fact.createLine(null, account, as.getC_Currency_ID(), ipv);
 			updateFactLine(line);
-			line.setQty(Env.ZERO);
 			
 			if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
 			{
@@ -662,7 +698,9 @@ public class Doc_MatchInv extends Doc
 			BigDecimal tAmt = Env.ZERO;
 			for (int i = 0 ; i < mInv.length ; i++)
 			{
-				if (mInv[i].isPosted() && mInv[i].getM_MatchInv_ID() != get_ID() && mInv[i].getM_AttributeSetInstance_ID() == matchInv.getM_AttributeSetInstance_ID())
+				if (mInv[i].isPosted() && mInv[i].getM_MatchInv_ID() != get_ID() 
+						&& mInv[i].getM_AttributeSetInstance_ID() == matchInv.getM_AttributeSetInstance_ID()
+						&& mInv[i].getDateAcct().compareTo(matchInv.getDateAcct()) == 0)
 				{
 					tQty = tQty.add(mInv[i].getQty());
 					multiplier = mInv[i].getQty()
@@ -742,8 +780,19 @@ public class Doc_MatchInv extends Doc
 				tQty = tQty.add(getQty().negate()); //	Qty is set to negative value
 			else
 				tQty = tQty.add(getQty());
-			//If original match invoice has no cost detail created, then no needs to create it for reversal
-			if(!isCheckCost || (((MMatchInv) matchInv.getReversal()).getInvoiceCostDetail(as, 0) != null))
+			int Ref_CostDetail_ID = 0;
+			if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
+			{
+				MCostDetail cd = MCostDetail.getInvoice(as, getM_Product_ID(), matchInv.getM_AttributeSetInstance_ID(),
+						matchInv.getReversal().getC_InvoiceLine_ID(), 0, matchInv.getReversal().getDateAcct(), getTrxName());
+				if (cd != null)
+					Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+			}		
+			// Set Total Amount and Total Quantity from Matched Invoice
+			if (!MCostDetail.createInvoice(as, getAD_Org_ID(), 
+					getM_Product_ID(), matchInv.getM_AttributeSetInstance_ID(),
+					m_invoiceLine.getC_InvoiceLine_ID(), 0,		//	No cost element
+					tAmt, tQty,	getDescription(), getDateAcct(), Ref_CostDetail_ID, getTrxName()))
 			{
 				// Set Total Amount and Total Quantity from Matched Invoice 
 				if (!MCostDetail.createInvoice(as, getAD_Org_ID(), 
@@ -798,7 +847,19 @@ public class Doc_MatchInv extends Doc
 			
 			for(Integer elementId : landedCostMap.keySet())
 			{
-				if(!isCheckCost || (((MMatchInv) matchInv.getReversal()).getInOutLineCostDetail(as, elementId) != null))
+				BigDecimal amt = landedCostMap.get(elementId);
+				Ref_CostDetail_ID = 0;
+				if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
+				{
+					MCostDetail cd = MCostDetail.getShipment(as, getM_Product_ID(), matchInv.getM_AttributeSetInstance_ID(),
+							matchInv.getReversal().getM_InOutLine_ID(), 0, getTrxName());
+					if (cd != null)
+						Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+				}
+				if (!MCostDetail.createShipment(as, getAD_Org_ID(), 
+					getM_Product_ID(), matchInv.getM_AttributeSetInstance_ID(),
+					m_receiptLine.getM_InOutLine_ID(), elementId,
+					amt, tQty,	getDescription(), false, getDateAcct(), Ref_CostDetail_ID, getTrxName()))
 				{
 					BigDecimal amt = landedCostMap.get(elementId);
 					if (!MCostDetail.createShipment(as, getAD_Org_ID(), 

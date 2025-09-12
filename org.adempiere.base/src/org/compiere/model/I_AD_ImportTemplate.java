@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_ImportTemplate
  *  @author iDempiere (generated) 
- *  @version Release 12
+ *  @version Release 13
  */
 public interface I_AD_ImportTemplate 
 {
@@ -93,6 +93,7 @@ public interface I_AD_ImportTemplate
 	  */
 	public int getAD_Tab_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Tab getAD_Tab() throws RuntimeException;
 
     /** Column name AD_Window_ID */
@@ -108,7 +109,26 @@ public interface I_AD_ImportTemplate
 	  */
 	public int getAD_Window_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Window getAD_Window() throws RuntimeException;
+
+    /** Column name CSVAliasHeader */
+    public static final String COLUMNNAME_CSVAliasHeader = "CSVAliasHeader";
+
+	/** Set CSV Alias Header	  */
+	public void setCSVAliasHeader (String CSVAliasHeader);
+
+	/** Get CSV Alias Header	  */
+	public String getCSVAliasHeader();
+
+    /** Column name CSVHeader */
+    public static final String COLUMNNAME_CSVHeader = "CSVHeader";
+
+	/** Set CSV Header	  */
+	public void setCSVHeader (String CSVHeader);
+
+	/** Get CSV Header	  */
+	public String getCSVHeader();
 
     /** Column name CharacterSet */
     public static final String COLUMNNAME_CharacterSet = "CharacterSet";
@@ -134,24 +154,6 @@ public interface I_AD_ImportTemplate
 	  * User who created this records
 	  */
 	public int getCreatedBy();
-
-    /** Column name CSVAliasHeader */
-    public static final String COLUMNNAME_CSVAliasHeader = "CSVAliasHeader";
-
-	/** Set CSV Alias Header	  */
-	public void setCSVAliasHeader (String CSVAliasHeader);
-
-	/** Get CSV Alias Header	  */
-	public String getCSVAliasHeader();
-
-    /** Column name CSVHeader */
-    public static final String COLUMNNAME_CSVHeader = "CSVHeader";
-
-	/** Set CSV Header	  */
-	public void setCSVHeader (String CSVHeader);
-
-	/** Get CSV Header	  */
-	public String getCSVHeader();
 
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";

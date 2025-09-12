@@ -21,21 +21,52 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 /** Generated Model for C_CostCenter
- *  @author iDempiere (generated) 
- *  @version Release 7.1 - $Id$ */
-public class X_C_CostCenter extends PO implements I_C_CostCenter, I_Persistent 
+ *  @author iDempiere (generated)
+ *  @version Release 13 - $Id$ */
+@org.adempiere.base.Model(table="C_CostCenter")
+public class X_C_CostCenter extends PO implements I_C_CostCenter, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20250603L;
+	private static final long serialVersionUID = 20250805L;
 
     /** Standard Constructor */
     public X_C_CostCenter (Properties ctx, int C_CostCenter_ID, String trxName)
     {
       super (ctx, C_CostCenter_ID, trxName);
       /** if (C_CostCenter_ID == 0)
+        {
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_CostCenter (Properties ctx, int C_CostCenter_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_CostCenter_ID, trxName, virtualColumns);
+      /** if (C_CostCenter_ID == 0)
+        {
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_CostCenter (Properties ctx, String C_CostCenter_UU, String trxName)
+    {
+      super (ctx, C_CostCenter_UU, trxName);
+      /** if (C_CostCenter_UU == null)
+        {
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_CostCenter (Properties ctx, String C_CostCenter_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_CostCenter_UU, trxName, virtualColumns);
+      /** if (C_CostCenter_UU == null)
         {
 			setValue (null);
         } */
@@ -48,7 +79,7 @@ public class X_C_CostCenter extends PO implements I_C_CostCenter, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -64,24 +95,25 @@ public class X_C_CostCenter extends PO implements I_C_CostCenter, I_Persistent
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_C_CostCenter[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_C_CostCenter[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
 	/** Set Cost Center.
-		@param C_CostCenter_ID Cost Center	  */
+		@param C_CostCenter_ID Cost Center
+	*/
 	public void setC_CostCenter_ID (int C_CostCenter_ID)
 	{
-		if (C_CostCenter_ID < 1) 
+		if (C_CostCenter_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_C_CostCenter_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_C_CostCenter_ID, Integer.valueOf(C_CostCenter_ID));
 	}
 
 	/** Get Cost Center.
 		@return Cost Center	  */
-	public int getC_CostCenter_ID () 
+	public int getC_CostCenter_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_CostCenter_ID);
 		if (ii == null)
@@ -89,10 +121,24 @@ public class X_C_CostCenter extends PO implements I_C_CostCenter, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Cost Center UU.
+		@param C_CostCenter_UU Cost Center UU
+	*/
+	public void setC_CostCenter_UU (String C_CostCenter_UU)
+	{
+		set_ValueNoCheck (COLUMNNAME_C_CostCenter_UU, C_CostCenter_UU);
+	}
+
+	/** Get Cost Center UU.
+		@return Cost Center UU	  */
+	public String getC_CostCenter_UU()
+	{
+		return (String)get_Value(COLUMNNAME_C_CostCenter_UU);
+	}
+
 	/** Set Name.
-		@param Name 
-		Alphanumeric identifier of the entity
-	  */
+		@param Name Alphanumeric identifier of the entity
+	*/
 	public void setName (String Name)
 	{
 		set_Value (COLUMNNAME_Name, Name);
@@ -101,15 +147,14 @@ public class X_C_CostCenter extends PO implements I_C_CostCenter, I_Persistent
 	/** Get Name.
 		@return Alphanumeric identifier of the entity
 	  */
-	public String getName () 
+	public String getName()
 	{
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
 	/** Set Search Key.
-		@param Value 
-		Search key for the record in the format required - must be unique
-	  */
+		@param Value Search key for the record in the format required - must be unique
+	*/
 	public void setValue (String Value)
 	{
 		set_Value (COLUMNNAME_Value, Value);
@@ -118,7 +163,7 @@ public class X_C_CostCenter extends PO implements I_C_CostCenter, I_Persistent
 	/** Get Search Key.
 		@return Search key for the record in the format required - must be unique
 	  */
-	public String getValue () 
+	public String getValue()
 	{
 		return (String)get_Value(COLUMNNAME_Value);
 	}

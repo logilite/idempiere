@@ -15,9 +15,13 @@
 package org.adempiere.webui.panel;
 
 import org.adempiere.webui.apps.AEnv;
+import org.adempiere.webui.component.Anchorchildren;
+import org.adempiere.webui.component.Anchorlayout;
 import org.adempiere.webui.component.Menupopup;
 import org.adempiere.webui.desktop.IDesktop;
 import org.adempiere.webui.event.ZoomEvent;
+import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.WCtxHelpSuggestion;
 import org.compiere.model.GridField;
@@ -50,8 +54,6 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.Clients;
-import org.zkoss.zul.Anchorchildren;
-import org.zkoss.zul.Anchorlayout;
 import org.zkoss.zul.Html;
 import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.Panel;
@@ -61,9 +63,8 @@ import org.zkoss.zul.Style;
 import org.zkoss.zul.Vlayout;
 
 /**
- * 
+ * Controller for context help, context tool tip and context quick info gadget.
  * @author Elaine
- *
  */
 public class HelpController
 {	
@@ -203,6 +204,7 @@ public class HelpController
     	String desc = null;
     	String help = null;
     	String otherContent = null;
+    	String entityType = null;
     	
     	if (field != null)
     	{
@@ -214,6 +216,10 @@ public class HelpController
 				
 				if (field.getHelp().length() != 0)
 					help = field.getHelp();
+				
+				if (Env.IsShowTechnicalInfOnHelp(Env.getCtx())
+						&& field.getEntityType().length() != 0)
+					entityType = field.getEntityType();
 			}
     	}
     	else
@@ -221,7 +227,7 @@ public class HelpController
     		otherContent = Msg.getMsg(Env.getCtx(), "PlaceCursorIntoField");
     	}
     	
-    	renderToolTip(hdr, desc, help, otherContent);
+    	renderToolTip(hdr, desc, help, otherContent, entityType);
     }
     
     /**
@@ -231,7 +237,7 @@ public class HelpController
      * @param help
      * @param otherContent
      */
-    public void renderToolTip(String hdr, String  desc, String help, String otherContent)
+    public void renderToolTip(String hdr, String  desc, String help, String otherContent,String entityType)
     {
     	if (Util.isEmpty(hdr) && Util.isEmpty(otherContent))
     		pnlToolTip.setVisible(false);
@@ -246,23 +252,33 @@ public class HelpController
     			otherContent = Msg.getMsg(Env.getCtx(), "PlaceCursorIntoField");
     		}
     		
-			sb.append("<i>(");
+			sb.append("<p><em>(");
 			sb.append (otherContent);
-			sb.append (")</i>");
+			sb.append (")</em></p>");
     	}else{
-    		sb.append("<b>");
+    		sb.append("<p><strong>");
     		sb.append(hdr);
-    		sb.append("</b>");
+    		sb.append("</strong></p>");
     		
     		if (desc != null && desc.trim().length() > 0){
-    			sb.append("<br><br>\n<i>");
+    			sb.append("<p><i>");
     			sb.append(desc);
-    			sb.append("</i>");
+    			sb.append("</i></p>");
     		}
     		
     		if (help != null && help.trim().length() > 0){
-    			sb.append("<br><br>\n");
+    			sb.append("<p>");
     			sb.append(help);
+    			sb.append("</p>");   		}
+    		
+    		if (Env.IsShowTechnicalInfOnHelp(Env.getCtx()))
+    		{
+	    		if (entityType != null && entityType.trim().length() > 0){
+	    			sb.append("<p class=\"help-entitytype\">[ ");
+	    			sb.append(entityType);
+	    			sb.append(" ]</p>");
+
+	    		}
     		}
     		
     	}    	
@@ -336,8 +352,7 @@ public class HelpController
 					
 					if (translatedContent.length() > 0)
 					{
-						translatedContent.insert(0, "<p>\n");
-						translatedContent.append("</p>");
+						appendEntityType(translatedContent, tab.getEntityType());
 					}
 
 				}
@@ -356,8 +371,7 @@ public class HelpController
 				
 				if (baseContent.length() > 0)
 				{
-					baseContent.insert(0, "<p>\n");
-					baseContent.append("</p>");
+					appendEntityType(baseContent, tab.getEntityType());
 				}
 				
         		sb.append(Util.isEmpty(translatedContent.toString()) ? baseContent.toString() : translatedContent.toString());
@@ -384,8 +398,7 @@ public class HelpController
 					
 					if (translatedContent.length() > 0)
 					{
-						translatedContent.insert(0, "<p>\n");
-						translatedContent.append("</p>");
+						appendEntityType(translatedContent, process.getEntityType());
 					}
 
 				} 
@@ -404,8 +417,7 @@ public class HelpController
 				
 				if (baseContent.length() > 0)
 				{
-					baseContent.insert(0, "<p>\n");
-					baseContent.append("</p>");
+					appendEntityType(baseContent, process.getEntityType());
 				}
 				
         		sb.append(Util.isEmpty(translatedContent.toString()) ? baseContent.toString() : translatedContent.toString());
@@ -432,8 +444,7 @@ public class HelpController
 
 					if (translatedContent.length() > 0)
 					{
-						translatedContent.insert(0, "<p>\n");
-						translatedContent.append("</p>");
+						appendEntityType(translatedContent, form.getEntityType());
 					}
 				} 
 
@@ -451,8 +462,7 @@ public class HelpController
 				
 				if (baseContent.length() > 0)
 				{
-					baseContent.insert(0, "<p>\n");
-					baseContent.append("</p>");
+					appendEntityType(baseContent, form.getEntityType());
 				}
 				
         		sb.append(Util.isEmpty(translatedContent.toString()) ? baseContent.toString() : translatedContent.toString());
@@ -490,8 +500,7 @@ public class HelpController
 					
 					if (translatedContent.length() > 0)
 					{
-						translatedContent.insert(0, "<p>\n");
-						translatedContent.append("</p>");
+						appendEntityType(translatedContent, info.getEntityType());
 					}
 				}
         		
@@ -521,8 +530,7 @@ public class HelpController
 				
 				if (baseContent.length() > 0)
 				{
-					baseContent.insert(0, "<p>\n");
-					baseContent.append("</p>");
+					appendEntityType(baseContent, info.getEntityType());
 				}
 				
 				sb.append(Util.isEmpty(translatedContent.toString()) ? baseContent.toString() : translatedContent.toString());
@@ -548,8 +556,7 @@ public class HelpController
 					
 					if (translatedContent.length() > 0)
 					{
-						translatedContent.insert(0, "<p>\n");
-						translatedContent.append("</p>");
+						appendEntityType(translatedContent, workflow.getEntityType());
 					}
 				}
         		
@@ -567,8 +574,7 @@ public class HelpController
 				
 				if (baseContent.length() > 0)
 				{
-					baseContent.insert(0, "<p>\n");
-					baseContent.append("</p>");
+					appendEntityType(baseContent, workflow.getEntityType());
 				}
 				
 				sb.append(Util.isEmpty(translatedContent.toString()) ? baseContent.toString() : translatedContent.toString());
@@ -596,8 +602,7 @@ public class HelpController
 					
 					if (translatedContent.length() > 0)
 					{
-						translatedContent.insert(0, "<p>\n");
-						translatedContent.append("</p>");
+						appendEntityType(translatedContent, task.getEntityType());
 					}					
 				} 
 	
@@ -615,8 +620,7 @@ public class HelpController
 				
 				if (baseContent.length() > 0)
 				{
-					baseContent.insert(0, "<p>\n");
-					baseContent.append("</p>");
+					appendEntityType(baseContent, task.getEntityType());
 				}
 				
 				sb.append(Util.isEmpty(translatedContent.toString()) ? baseContent.toString() : translatedContent.toString());
@@ -643,8 +647,7 @@ public class HelpController
 					
 					if (translatedContent.length() > 0)
 					{
-						translatedContent.insert(0, "<p>\n");
-						translatedContent.append("</p>");
+						appendEntityType(translatedContent, node.getEntityType());
 					}
 				}
 	    		
@@ -662,8 +665,7 @@ public class HelpController
 				
 				if (baseContent.length() > 0)
 				{
-					baseContent.insert(0, "<p>\n");
-					baseContent.append("</p>");
+					appendEntityType(baseContent, node.getEntityType());
 				}
 				
 				sb.append(Util.isEmpty(translatedContent.toString()) ? baseContent.toString() : translatedContent.toString());
@@ -699,6 +701,23 @@ public class HelpController
     		popup.setPage(pnlContextHelp.getPage());
     	}
     }
+    
+    /**
+	 * Append Entity Type information on a given string
+	 *
+	 * @param string
+	 * @param entityType
+	 */
+	private void appendEntityType(StringBuilder string, String entityType) {
+
+		if (!Env.IsShowTechnicalInfOnHelp(Env.getCtx()))
+				return;
+
+		if (string == null)
+			string = new StringBuilder();
+
+		string.append("<p class=\"help-entitytype\">[ ").append(entityType).append(" ]</p>");
+	}
 
     /**
      * Render quick info (AD_StatusLine)
@@ -725,9 +744,9 @@ public class HelpController
     		} else {
             	pnlQuickInfo.setVisible(true);
             	StringBuilder sb = new StringBuilder();
-            	sb.append("<html>\n<body>\n<div class=\"help-content\">\n");
+            	sb.append("<div class=\"help-content\">\n");
        			sb.append(widget);
-            	sb.append("</div>\n</body>\n</html>");
+            	sb.append("</div>\n");
             	htmlQuickInfo.setContent(sb.toString());
     		}
     	}
@@ -822,7 +841,7 @@ public class HelpController
 	
 	private class ContextHelpMenupopup extends Menupopup implements EventListener<Event> {
 		/**
-		 * 
+		 * generated serial id
 		 */
 		private static final long serialVersionUID = 5430991475805225567L;
 
@@ -850,6 +869,10 @@ public class HelpController
 			} else {
 				item.setLabel(Msg.getElement(Env.getCtx(), "AD_CtxHelpSuggestion_ID"));
 			}
+			if (ThemeManager.isUseFontIconForImage())
+				item.setIconSclass(Icon.getIconSclass(Icon.FIELD_SUGGESTION));
+			else
+				item.setImage(ThemeManager.getThemeResource("images/FieldSuggestion16.png"));
 			appendChild(item);
 			item.addEventListener(Events.ON_CLICK, this);
 		}

@@ -16,11 +16,9 @@
  *****************************************************************************/
 package org.compiere.print;
 
-//import java.util.logging.*;
-
 /**
  *	Print Data Column.
- * 	Optional Meta Data of Columns
+ * 	Optional Meta Data of Columns.
  *
  * 	@author 	Jorg Janke
  * 	@version 	$Id: PrintDataColumn.java,v 1.2 2006/07/30 00:53:02 jjanke Exp $
@@ -56,6 +54,16 @@ public class PrintDataColumn
 		m_SortNo = SortNo;
 	}
 
+	/**
+	 * @param AD_PrintFormatItem_ID
+	 * @param AD_Column_ID
+	 * @param columnName
+	 * @param displayType
+	 * @param columnSize
+	 * @param alias
+	 * @param isPageBreak
+	 * @param SortNo
+	 */
 	public PrintDataColumn (int AD_PrintFormatItem_ID, int AD_Column_ID, String columnName,int displayType, int columnSize,String alias, boolean isPageBreak, int SortNo)
 	{
 		this(AD_PrintFormatItem_ID, AD_Column_ID, columnName, displayType, columnSize, alias, isPageBreak, null, SortNo);
@@ -71,12 +79,10 @@ public class PrintDataColumn
 	private boolean		m_pageBreak;
 	private String      m_FormatPattern;
 	private String		m_PrintFormatType;
-	private int		m_SortNo;
-
-	/*************************************************************************/
+	private int			m_SortNo;
 
 	/**
-	 * 
+	 * Get AD_PrintFormatItem_ID
 	 * @return AD_PrintFormatItem_ID
 	 */
 	public int getAD_PrintFormatItem_ID() 
@@ -155,6 +161,7 @@ public class PrintDataColumn
 	 *	String Representation
 	 * 	@return info
 	 */
+	@Override
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder("PrintDataColumn[");
@@ -169,18 +176,34 @@ public class PrintDataColumn
 		return sb.toString();
 	}	//	toString
 
+	/**
+	 * Set format pattern
+	 * @param formatPattern
+	 */
 	public void setFormatPattern(String formatPattern) {
 		m_FormatPattern = formatPattern;
 	}
 	
+	/**
+	 * Get format pattern
+	 * @return format pattern
+	 */
 	public String getFormatPattern() {
 		return m_FormatPattern;
 	}
-	
+
+	/**
+	 * Get print format type
+	 * @return print format type
+	 */
 	public String getPrintFormatType() {
 		return m_PrintFormatType;
 	}
 
+	/**
+	 * Set print format type
+	 * @param m_PrintFormatType
+	 */
 	public void setPrintFormatType(String m_PrintFormatType) {
 		this.m_PrintFormatType = m_PrintFormatType;
 	}

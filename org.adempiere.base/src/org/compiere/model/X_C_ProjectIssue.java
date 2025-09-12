@@ -26,7 +26,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_ProjectIssue
  *  @author iDempiere (generated)
- *  @version Release 11 - $Id$ */
+ *  @version Release 13 - $Id$ */
 @org.adempiere.base.Model(table="C_ProjectIssue")
 public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persistent
 {
@@ -34,7 +34,7 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20250626L;
+	private static final long serialVersionUID = 20250805L;
 
     /** Standard Constructor */
     public X_C_ProjectIssue (Properties ctx, int C_ProjectIssue_ID, String trxName)
@@ -42,8 +42,8 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
       super (ctx, C_ProjectIssue_ID, trxName);
       /** if (C_ProjectIssue_ID == 0)
         {
-			setC_Project_ID (0);
 			setC_ProjectIssue_ID (0);
+			setC_Project_ID (0);
 			setDocAction (null);
 // CO
 			setDocStatus (null);
@@ -54,9 +54,9 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 // @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM C_ProjectIssue WHERE C_Project_ID=@C_Project_ID@
 			setM_AttributeSetInstance_ID (0);
 			setM_Locator_ID (0);
+			setM_Product_ID (0);
 			setMovementDate (new Timestamp( System.currentTimeMillis() ));
 			setMovementQty (Env.ZERO);
-			setM_Product_ID (0);
 			setPosted (false);
 // N
 			setProcessed (false);
@@ -69,8 +69,8 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
       super (ctx, C_ProjectIssue_ID, trxName, virtualColumns);
       /** if (C_ProjectIssue_ID == 0)
         {
-			setC_Project_ID (0);
 			setC_ProjectIssue_ID (0);
+			setC_Project_ID (0);
 			setDocAction (null);
 // CO
 			setDocStatus (null);
@@ -81,9 +81,9 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 // @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM C_ProjectIssue WHERE C_Project_ID=@C_Project_ID@
 			setM_AttributeSetInstance_ID (0);
 			setM_Locator_ID (0);
+			setM_Product_ID (0);
 			setMovementDate (new Timestamp( System.currentTimeMillis() ));
 			setMovementQty (Env.ZERO);
-			setM_Product_ID (0);
 			setPosted (false);
 // N
 			setProcessed (false);
@@ -96,8 +96,8 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
       super (ctx, C_ProjectIssue_UU, trxName);
       /** if (C_ProjectIssue_UU == null)
         {
-			setC_Project_ID (0);
 			setC_ProjectIssue_ID (0);
+			setC_Project_ID (0);
 			setDocAction (null);
 // CO
 			setDocStatus (null);
@@ -108,9 +108,9 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 // @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM C_ProjectIssue WHERE C_Project_ID=@C_Project_ID@
 			setM_AttributeSetInstance_ID (0);
 			setM_Locator_ID (0);
+			setM_Product_ID (0);
 			setMovementDate (new Timestamp( System.currentTimeMillis() ));
 			setMovementQty (Env.ZERO);
-			setM_Product_ID (0);
 			setPosted (false);
 // N
 			setProcessed (false);
@@ -123,8 +123,8 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
       super (ctx, C_ProjectIssue_UU, trxName, virtualColumns);
       /** if (C_ProjectIssue_UU == null)
         {
-			setC_Project_ID (0);
 			setC_ProjectIssue_ID (0);
+			setC_Project_ID (0);
 			setDocAction (null);
 // CO
 			setDocStatus (null);
@@ -133,6 +133,9 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 // N
 			setLine (0);
 // @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM C_ProjectIssue WHERE C_Project_ID=@C_Project_ID@
+			setM_AttributeSetInstance_ID (0);
+			setM_Locator_ID (0);
+			setM_Product_ID (0);
 			setMovementDate (new Timestamp( System.currentTimeMillis() ));
 			setMovementQty (Env.ZERO);
 			setPosted (false);
@@ -167,224 +170,6 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
       StringBuilder sb = new StringBuilder ("X_C_ProjectIssue[")
         .append(get_ID()).append("]");
       return sb.toString();
-    }
-
-	public org.compiere.model.I_A_Asset getA_Asset() throws RuntimeException
-    {
-		return (org.compiere.model.I_A_Asset)MTable.get(getCtx(), org.compiere.model.I_A_Asset.Table_Name)
-			.getPO(getA_Asset_ID(), get_TrxName());	}
-
-	/** Set Asset.
-		@param A_Asset_ID 
-		Asset used internally or by customers
-	  */
-	public void setA_Asset_ID (int A_Asset_ID)
-	{
-		if (A_Asset_ID < 1) 
-			set_Value (COLUMNNAME_A_Asset_ID, null);
-		else 
-			set_Value (COLUMNNAME_A_Asset_ID, Integer.valueOf(A_Asset_ID));
-	}
-
-	/** Get Asset.
-		@return Asset used internally or by customers
-	  */
-	public int getA_Asset_ID () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_A_Asset_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	/** Set Amount.
-		@param Amt 
-		Amount
-	  */
-	public void setAmt (BigDecimal Amt)
-	{
-		set_Value (COLUMNNAME_Amt, Amt);
-	}
-
-	/** Get Amount.
-		@return Amount
-	  */
-	public BigDecimal getAmt () 
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Amt);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
-	}
-
-	public org.compiere.model.I_C_Charge getC_Charge() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Charge)MTable.get(getCtx(), org.compiere.model.I_C_Charge.Table_Name)
-			.getPO(getC_Charge_ID(), get_TrxName());	}
-
-	/** Set Charge.
-		@param C_Charge_ID 
-		Additional document charges
-	  */
-	public void setC_Charge_ID (int C_Charge_ID)
-	{
-		if (C_Charge_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_Charge_ID, null);
-		else 
-			set_ValueNoCheck (COLUMNNAME_C_Charge_ID, Integer.valueOf(C_Charge_ID));
-	}
-
-	/** Get Charge.
-		@return Additional document charges
-	  */
-	public int getC_Charge_ID () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Charge_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_C_CostCenter getC_CostCenter() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_CostCenter)MTable.get(getCtx(), org.compiere.model.I_C_CostCenter.Table_Name)
-			.getPO(getC_CostCenter_ID(), get_TrxName());	}
-
-	/** Set Cost Center.
-		@param C_CostCenter_ID Cost Center	  */
-	public void setC_CostCenter_ID (int C_CostCenter_ID)
-	{
-		if (C_CostCenter_ID < 1) 
-			set_Value (COLUMNNAME_C_CostCenter_ID, null);
-		else 
-			set_Value (COLUMNNAME_C_CostCenter_ID, Integer.valueOf(C_CostCenter_ID));
-	}
-
-	/** Get Cost Center.
-		@return Cost Center	  */
-	public int getC_CostCenter_ID () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_CostCenter_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_C_Department getC_Department() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Department)MTable.get(getCtx(), org.compiere.model.I_C_Department.Table_Name)
-			.getPO(getC_Department_ID(), get_TrxName());	}
-
-	/** Set Department.
-		@param C_Department_ID Department	  */
-	public void setC_Department_ID (int C_Department_ID)
-	{
-		if (C_Department_ID < 1) 
-			set_Value (COLUMNNAME_C_Department_ID, null);
-		else 
-			set_Value (COLUMNNAME_C_Department_ID, Integer.valueOf(C_Department_ID));
-	}
-
-	/** Get Department.
-		@return Department	  */
-	public int getC_Department_ID () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Department_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_C_BPartner getC_Employee() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
-			.getPO(getC_Employee_ID(), get_TrxName());	}
-
-	/** Set Employee.
-		@param C_Employee_ID 
-		Identifies a Business Partner
-	  */
-	public void setC_Employee_ID (int C_Employee_ID)
-	{
-		if (C_Employee_ID < 1) 
-			set_Value (COLUMNNAME_C_Employee_ID, null);
-		else 
-			set_Value (COLUMNNAME_C_Employee_ID, Integer.valueOf(C_Employee_ID));
-	}
-
-	/** Get Employee.
-		@return Identifies a Business Partner
-	  */
-	public int getC_Employee_ID () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Employee_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_C_InvoiceLine getC_InvoiceLine() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_InvoiceLine)MTable.get(getCtx(), org.compiere.model.I_C_InvoiceLine.Table_Name)
-			.getPO(getC_InvoiceLine_ID(), get_TrxName());	}
-
-	/** Set Invoice Line.
-		@param C_InvoiceLine_ID 
-		Invoice Detail Line
-	  */
-	public void setC_InvoiceLine_ID (int C_InvoiceLine_ID)
-	{
-		if (C_InvoiceLine_ID < 1) 
-			set_Value (COLUMNNAME_C_InvoiceLine_ID, null);
-		else 
-			set_Value (COLUMNNAME_C_InvoiceLine_ID, Integer.valueOf(C_InvoiceLine_ID));
-	}
-
-	/** Get Invoice Line.
-		@return Invoice Detail Line
-	  */
-	public int getC_InvoiceLine_ID () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_InvoiceLine_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
-			.getPO(getC_Project_ID(), get_TrxName());
-	}
-
-	/** Set Project.
-		@param C_Project_ID Financial Project
-	*/
-	public void setC_Project_ID (int C_Project_ID)
-	{
-		if (C_Project_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_C_Project_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
-	}
-
-	/** Get Project.
-		@return Financial Project
-	  */
-	public int getC_Project_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Project_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-    /** Get Record ID/ColumnName
-        @return ID/ColumnName pair
-      */
-    public KeyNamePair getKeyNamePair()
-    {
-        return new KeyNamePair(get_ID(), String.valueOf(getC_Project_ID()));
     }
 
 	/** Set Project Issue.
@@ -424,33 +209,42 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 		return (String)get_Value(COLUMNNAME_C_ProjectIssue_UU);
 	}
 
-	public org.compiere.model.I_C_ProjectLine getC_ProjectLine() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_ProjectLine)MTable.get(getCtx(), org.compiere.model.I_C_ProjectLine.Table_Name)
-			.getPO(getC_ProjectLine_ID(), get_TrxName());	}
-
-	/** Set Project Line.
-		@param C_ProjectLine_ID 
-		Task or step in a project
-	  */
-	public void setC_ProjectLine_ID (int C_ProjectLine_ID)
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
 	{
-		if (C_ProjectLine_ID < 1) 
-			set_Value (COLUMNNAME_C_ProjectLine_ID, null);
-		else 
-			set_Value (COLUMNNAME_C_ProjectLine_ID, Integer.valueOf(C_ProjectLine_ID));
+		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
+			.getPO(getC_Project_ID(), get_TrxName());
 	}
 
-	/** Get Project Line.
-		@return Task or step in a project
-	  */
-	public int getC_ProjectLine_ID () 
+	/** Set Project.
+		@param C_Project_ID Financial Project
+	*/
+	public void setC_Project_ID (int C_Project_ID)
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_ProjectLine_ID);
+		if (C_Project_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_Project_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
+	}
+
+	/** Get Project.
+		@return Financial Project
+	  */
+	public int getC_Project_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Project_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
 	}
+
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair()
+    {
+        return new KeyNamePair(get_ID(), String.valueOf(getC_Project_ID()));
+    }
 
 	/** Set Description.
 		@param Description Optional short description of the record
@@ -600,6 +394,7 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public I_M_AttributeSetInstance getM_AttributeSetInstance() throws RuntimeException
 	{
 		return (I_M_AttributeSetInstance)MTable.get(getCtx(), I_M_AttributeSetInstance.Table_ID)
@@ -628,6 +423,7 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_M_InOutLine getM_InOutLine() throws RuntimeException
 	{
 		return (org.compiere.model.I_M_InOutLine)MTable.get(getCtx(), org.compiere.model.I_M_InOutLine.Table_ID)
@@ -656,6 +452,7 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public I_M_Locator getM_Locator() throws RuntimeException
 	{
 		return (I_M_Locator)MTable.get(getCtx(), I_M_Locator.Table_ID)
@@ -684,29 +481,30 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException
-    {
-		return (org.compiere.model.I_M_Warehouse)MTable.get(getCtx(), org.compiere.model.I_M_Warehouse.Table_Name)
-			.getPO(getM_Warehouse_ID(), get_TrxName());	}
-
-	/** Set Warehouse.
-		@param M_Warehouse_ID 
-		Storage Warehouse and Service Point
-	  */
-	public void setM_Warehouse_ID (int M_Warehouse_ID)
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException
 	{
-		if (M_Warehouse_ID < 1) 
-			set_Value (COLUMNNAME_M_Warehouse_ID, null);
-		else 
-			set_Value (COLUMNNAME_M_Warehouse_ID, Integer.valueOf(M_Warehouse_ID));
+		return (org.compiere.model.I_M_Product)MTable.get(getCtx(), org.compiere.model.I_M_Product.Table_ID)
+			.getPO(getM_Product_ID(), get_TrxName());
 	}
 
-	/** Get Warehouse.
-		@return Storage Warehouse and Service Point
-	  */
-	public int getM_Warehouse_ID () 
+	/** Set Product.
+		@param M_Product_ID Product, Service, Item
+	*/
+	public void setM_Product_ID (int M_Product_ID)
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_Warehouse_ID);
+		if (M_Product_ID < 1)
+			set_Value (COLUMNNAME_M_Product_ID, null);
+		else
+			set_Value (COLUMNNAME_M_Product_ID, Integer.valueOf(M_Product_ID));
+	}
+
+	/** Get Product.
+		@return Product, Service, Item
+	  */
+	public int getM_Product_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Product_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -745,34 +543,6 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
-	}
-
-	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException
-	{
-		return (org.compiere.model.I_M_Product)MTable.get(getCtx(), org.compiere.model.I_M_Product.Table_ID)
-			.getPO(getM_Product_ID(), get_TrxName());
-	}
-
-	/** Set Product.
-		@param M_Product_ID Product, Service, Item
-	*/
-	public void setM_Product_ID (int M_Product_ID)
-	{
-		if (M_Product_ID < 1)
-			set_Value (COLUMNNAME_M_Product_ID, null);
-		else
-			set_Value (COLUMNNAME_M_Product_ID, Integer.valueOf(M_Product_ID));
-	}
-
-	/** Get Product.
-		@return Product, Service, Item
-	  */
-	public int getM_Product_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_Product_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
 	}
 
 	/** Set Posted.
@@ -862,6 +632,7 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 		return false;
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_ProjectIssue getReversal() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_ProjectIssue)MTable.get(getCtx(), org.compiere.model.I_C_ProjectIssue.Table_ID)
@@ -890,6 +661,7 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_S_TimeExpenseLine getS_TimeExpenseLine() throws RuntimeException
 	{
 		return (org.compiere.model.I_S_TimeExpenseLine)MTable.get(getCtx(), org.compiere.model.I_S_TimeExpenseLine.Table_ID)

@@ -26,11 +26,11 @@ import java.util.logging.Level;
 import javax.xml.transform.sax.TransformerHandler;
 
 import org.adempiere.pipo2.AbstractElementHandler;
+import org.adempiere.pipo2.Element;
 import org.adempiere.pipo2.ElementHandler;
 import org.adempiere.pipo2.PIPOContext;
-import org.adempiere.pipo2.PoExporter;
-import org.adempiere.pipo2.Element;
 import org.adempiere.pipo2.PackOut;
+import org.adempiere.pipo2.PoExporter;
 import org.adempiere.pipo2.PoFiller;
 import org.adempiere.pipo2.exception.DatabaseAccessException;
 import org.adempiere.pipo2.exception.POSaveFailedException;
@@ -171,6 +171,7 @@ public class WindowElementHandler extends AbstractElementHandler {
 			if (log.isLoggable(Level.INFO))
 				log.info(e.toString());
 		}
+		
 		// Tab Tag
 		String sql = "SELECT AD_Tab_ID, AD_Table_ID FROM AD_TAB WHERE AD_WINDOW_ID = "
 				+ AD_Window_ID;

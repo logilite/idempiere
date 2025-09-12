@@ -633,6 +633,7 @@ public class GridTabCSVExporter implements IGridTabExporter
 						if (   gridField.isEncrypted()
 							|| gridField.isEncryptedColumn()
 							|| !(gridField.isDisplayed() || gridField.isDisplayedGrid())
+							|| gridField.isReadOnly()
 							|| DisplayType.Button == gridField.getDisplayType()
 							|| DisplayType.Binary == gridField.getDisplayType()
 						   )

@@ -464,7 +464,7 @@ public class Login implements ILogin
 	}	//	getRoles
 	
 	/**
-	 *  Get Clients.
+	 *  Get Clients (AD_Client).
 	 *  <p>
 	 *  Sets Role info in context and loads its clients
 	 *  @param  role    role information
@@ -539,7 +539,7 @@ public class Login implements ILogin
 	}   //  getClients
 
 	/**
-	 *  Get Organizations.
+	 *  Get Organizations (AD_Org).
 	 *  <p>
 	 *  Sets Client info in context and loads organizations that the role has access to
 	 *  @param  rol role
@@ -1036,7 +1036,7 @@ public class Login implements ILogin
 	}// loadUserPreferences
 
 	/**
-	 *	Load Default Value for Table into Context.
+	 *	Load Default Value for Table into Context (IsDefault=Y, #ColumnName=Value).
 	 *  @param TableName table name
 	 *  @param ColumnName column name
 	 */
@@ -1077,6 +1077,7 @@ public class Login implements ILogin
 	
 	/**
 	 * 	Batch Login using Ini values
+	 * <pre>
 	 * 	<code>
 		Adempiere.startup(true);
 		Ini.setProperty(Ini.P_UID,"SuperUser");
@@ -1090,6 +1091,7 @@ public class Login implements ILogin
 		Login login = new Login(Env.getCtx());
 		login.batchLogin();
 	 * 	</code>
+	 *  </pre>
 	 * 	@param loginDate optional login date
 	 * 	@return true if logged in using Ini values
 	 */
@@ -1257,7 +1259,7 @@ public class Login implements ILogin
 	}	//	getPrincipal
 
 	/**
-	 * Get clients
+	 * Get clients (AD_Client)
 	 * @param app_user login id
 	 * @param app_pwd login password
 	 * @return list of accessible client
@@ -1280,12 +1282,12 @@ public class Login implements ILogin
 	}
 
 	/**
-	 *  Validate Client Login.
+	 *  Validate Client Login.<br/>
 	 *  Sets Context with login info.
 	 *  @param app_user user id
-	 *  @param app_pwd password
+	 *  @param app_pwd password, ignore for SSO login
 	 *  @param roleTypes comma separated list of the role types allowed to login (NULL can be added)
-	 *  @param token validate the user with a token for SSO login.
+	 *  @param token token to validate SSO login user (app_user).
 	 *  @return client array or null if in error.
 	 */
 	public KeyNamePair[] getClients(String app_user, String app_pwd, String roleTypes, Object token) {
@@ -1300,6 +1302,9 @@ public class Login implements ILogin
 
 		//	Authentication
 		boolean authenticated = false;
+		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
+		isSSOLogin = isSSOEnable && token != null;
+
 		MSystem system = MSystem.get(m_ctx);
 		if (system == null)
 			throw new IllegalStateException("No System Info");
@@ -1351,15 +1356,17 @@ public class Login implements ILogin
 		ArrayList<KeyNamePair> clientList = new ArrayList<KeyNamePair>();
 		ArrayList<Integer> clientsValidated = new ArrayList<Integer>();
 
-		StringBuilder where = new StringBuilder(isSSOEnable ? "" : "Password IS NOT NULL AND ");
-		
-		where.append(MUser.getUserAuthWhere(isSSOEnable, searchKey_login));
-		
+		StringBuilder where = new StringBuilder("Password IS NOT NULL AND ");
+		if (email_login)
+			where.append("EMail=?");
+		else
+			where.append("COALESCE(LDAPUser,Name)=?");
+
 		where.append("	AND EXISTS (SELECT * FROM AD_User u ")
-			.append("	INNER JOIN	AD_Client c ON (u.AD_Client_ID = c.AD_Client_ID)	")
-			.append("	WHERE (COALESCE(u.AuthenticationType, c.AuthenticationType) IN ");
-		// If Enable_SSO=N then don't allow SSO only users.
-		where.append(isSSOEnable ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
+						.append("	INNER JOIN	AD_Client c ON (u.AD_Client_ID = c.AD_Client_ID)	")
+						.append("	WHERE (COALESCE(u.AuthenticationType, c.AuthenticationType) IN ");
+		//If Enable_SSO=N then don't allow SSO only users. 
+		where.append(isSSOLogin ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
 		where.append("	OR COALESCE(u.AuthenticationType, c.AuthenticationType) IS NULL) AND u.AD_User_ID = AD_User.AD_User_ID) ");
 
 		String whereRoleType = MRole.getWhereRoleType(roleTypes, "r");
@@ -1424,7 +1431,7 @@ public class Login implements ILogin
 			clientsValidated.add(user.getAD_Client_ID());
 			boolean valid = false;
 			// authenticated by ldap or sso
-			if (authenticated || isSSOEnable) {
+			if (authenticated || isSSOLogin) {
 				valid = true;
 			} else {
 				if (!system.isLDAP() || Util.isEmpty(user.getLDAPUser())) {
@@ -1470,9 +1477,14 @@ public class Login implements ILogin
                    .append(" INNER JOIN AD_Client cli on (ur.AD_Client_ID=cli.AD_Client_ID)")
                    .append(" WHERE ur.IsActive='Y'")
                    .append(" AND u.IsActive='Y'")
-                   .append(" AND cli.IsActive='Y'")
-                   .append(" AND cli.AuthenticationType IN ").append(isSSOEnable ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ")
-                   .append(" AND ur.AD_User_ID=? ORDER BY cli.Name");
+                   .append(" AND cli.IsActive='Y'");
+				if (client != null)
+					sql.append(" AND r.AD_Client_ID=").append(client.getAD_Client_ID());
+				if (! Util.isEmpty(whereRoleType)) {
+					sql.append(" AND ").append(whereRoleType);
+				}
+				sql.append(" AND  cli.AuthenticationType IN ").append(isSSOLogin ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ");
+				sql.append(" AND ur.AD_User_ID=? ORDER BY cli.Name");
 			      PreparedStatement pstmt=null;
 			      ResultSet rs=null;
 			      try{
@@ -1579,7 +1591,7 @@ public class Login implements ILogin
 		else 
 		{
 			boolean foundLockedAccount = false;
-			for (MUser user : usersAuthenticated)
+			for (MUser user : users)
 			{
 				if (user.isLocked())
 				{
@@ -1628,13 +1640,16 @@ public class Login implements ILogin
 			}
 		}
 		
-		Env.setContext(Env.getCtx(), Env.IS_SSO_LOGIN, isSSOEnable);
-
+		if (isSSOLogin)
+			Env.setContext(Env.getCtx(), Env.IS_SSO_LOGIN, true);
+		else
+			Env.setContext(Env.getCtx(), Env.IS_SSO_LOGIN, false);
+		
 		return retValue;
 	}
 
 	/**
-	 * Get the tenant from the login text when using login prefix
+	 * Get the tenant from the login text when using login prefix (tenant/user)
 	 * @param app_user
 	 * @return tenant from app_user or null
 	 */
@@ -1777,7 +1792,7 @@ public class Login implements ILogin
 	}   //  getRoles
 	
 	/**
-	 * Get clients
+	 * Get clients (AD_Client)
 	 * @return clients
 	 */
     public KeyNamePair[] getClients() {		
@@ -1787,7 +1802,6 @@ public class Login implements ILogin
 		
 		loginErrMsg = null;
 		isPasswordExpired = false;
-		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false) && m_SSOPrincipalConfig != null;
 		int AD_User_ID = Env.getContextAsInt(m_ctx, Env.AD_USER_ID);
 		KeyNamePair[] retValue = null;
 		ArrayList<KeyNamePair> clientList = new ArrayList<KeyNamePair>();
@@ -1799,7 +1813,7 @@ public class Login implements ILogin
                          .append(" AND cli.IsActive='Y'")
                          .append(" AND u.IsActive='Y'")
                          .append(" AND u.AD_User_ID=? ")
-						 .append(" AND cli.AuthenticationType IN ").append(isSSOEnable ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ")
+						 .append(" AND cli.AuthenticationType IN ").append(isSSOLogin ? " ('SSO', 'AAS') " : " ('APO', 'AAS') ")
 						 .append(" ORDER BY cli.Name");
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;

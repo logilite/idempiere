@@ -22,7 +22,7 @@ import java.util.Properties;
 
 /** Generated Model for AD_TableValRule
  *  @author iDempiere (generated)
- *  @version Release 12 - $Id$ */
+ *  @version Release 13 - $Id$ */
 @org.adempiere.base.Model(table="AD_TableValRule")
 public class X_AD_TableValRule extends PO implements I_AD_TableValRule, I_Persistent
 {
@@ -30,7 +30,7 @@ public class X_AD_TableValRule extends PO implements I_AD_TableValRule, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20240125L;
+	private static final long serialVersionUID = 20250805L;
 
     /** Standard Constructor */
     public X_AD_TableValRule (Properties ctx, String AD_TableValRule_UU, String trxName)
@@ -82,6 +82,7 @@ public class X_AD_TableValRule extends PO implements I_AD_TableValRule, I_Persis
       return sb.toString();
     }
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Role getAD_Role() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_Role)MTable.get(getCtx(), org.compiere.model.I_AD_Role.Table_ID)
@@ -110,6 +111,22 @@ public class X_AD_TableValRule extends PO implements I_AD_TableValRule, I_Persis
 		return ii.intValue();
 	}
 
+	/** Set AD_TableValRule_UU.
+		@param AD_TableValRule_UU AD_TableValRule_UU
+	*/
+	public void setAD_TableValRule_UU (String AD_TableValRule_UU)
+	{
+		set_Value (COLUMNNAME_AD_TableValRule_UU, AD_TableValRule_UU);
+	}
+
+	/** Get AD_TableValRule_UU.
+		@return AD_TableValRule_UU	  */
+	public String getAD_TableValRule_UU()
+	{
+		return (String)get_Value(COLUMNNAME_AD_TableValRule_UU);
+	}
+
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_Table)MTable.get(getCtx(), org.compiere.model.I_AD_Table.Table_ID)
@@ -138,21 +155,7 @@ public class X_AD_TableValRule extends PO implements I_AD_TableValRule, I_Persis
 		return ii.intValue();
 	}
 
-	/** Set AD_TableValRule_UU.
-		@param AD_TableValRule_UU AD_TableValRule_UU
-	*/
-	public void setAD_TableValRule_UU (String AD_TableValRule_UU)
-	{
-		set_Value (COLUMNNAME_AD_TableValRule_UU, AD_TableValRule_UU);
-	}
-
-	/** Get AD_TableValRule_UU.
-		@return AD_TableValRule_UU	  */
-	public String getAD_TableValRule_UU()
-	{
-		return (String)get_Value(COLUMNNAME_AD_TableValRule_UU);
-	}
-
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)

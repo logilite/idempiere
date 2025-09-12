@@ -42,9 +42,8 @@ import org.zkoss.zk.ui.sys.WebAppCtrl;
 import fi.jawsy.jawwa.zk.atmosphere.AtmosphereServerPush;
 
 /**
- * watch for disconnected desktop and destroy it
+ * Watch for disconnected desktop and destroy it
  * @author hengsin
- *
  */
 public class DesktopWatchDog {
 
@@ -60,7 +59,7 @@ public class DesktopWatchDog {
 	 * default constructor
 	 */
 	private DesktopWatchDog() {
-		printLog("Constructor called, Instance Creation:", "");
+		//Check disconnected desktop every 40 seconds
 		Adempiere.getThreadPoolExecutor().scheduleWithFixedDelay(() -> {
 			doMonitoring();
 		}, 60, 40, TimeUnit.SECONDS);
@@ -120,7 +119,7 @@ public class DesktopWatchDog {
 	}
 	
 	/**
-	 * add desktop to watch list
+	 * Add desktop to watch list
 	 * @param desktop
 	 */
 	public static void addDesktop(Desktop desktop) {
@@ -129,7 +128,7 @@ public class DesktopWatchDog {
 	}
 	
 	/**
-	 * remove desktop from watch list
+	 * Remove desktop from watch list
 	 * @param desktop
 	 */
 	public static void removeDesktop(Desktop desktop) {

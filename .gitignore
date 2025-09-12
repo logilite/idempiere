@@ -2,6 +2,9 @@
 **/bin/
 **/lib/*.jar
 **/seed/*.jar
+org.adempiere.server-feature/data/seed/Adempiere.dmp
+org.adempiere.server-feature/data/seed/Adempiere_pg.dmp
+org.adempiere.server-feature/data/seed/Adempiere.log
 /org.adempiere.ui.zk/labelapplet.jar
 /org.adempiere.extend/test.properties
 
@@ -89,7 +92,6 @@ org.adempiere.webstore.servlet/bin/
 org.adempiere.webstore/bin/
 org.compiere.db.postgresql.provider/bin/
 org.idempiere.felix.webconsole/bin/
-org.idempiere.fitnesse.fixture/bin/org/idempiere/fitnesse/fixture/Activator.class
 org.idempiere.fitnesse.fixture/bin/
 org.idempiere.fitnesse.server/bin/
 org.idempiere.fitrecorder/bin/
@@ -98,3 +100,9 @@ org.idempiere.hazelcast.service/bin/
 org.idempiere.ui.zk.selenium/bin/
 org.idempiere.webservices/bin/
 org.idempiere.zk.extra/bin/
+.idea/**/Partial_*.xml
+out/
+.idea/*
+*/.maven.run/**
+**/.idea/*
+partial-runtime/

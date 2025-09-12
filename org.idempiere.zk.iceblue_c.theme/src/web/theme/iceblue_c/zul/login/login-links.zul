@@ -4,6 +4,10 @@ Copyright (C) 2009 Low Heng Sin
 Copyright (C) 2009 Idalica Corporation
 -->
 <zk>
+<zscript>
+    import org.compiere.Adempiere;
+	var isLoginInfoShown = Adempiere.isLoginInfoShown();
+</zscript>
 <style>
 	.loginLinksBox {
 		padding: 0;

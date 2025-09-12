@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.adempiere.util.Callback;
+import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.adwindow.AbstractADWindowContent;
 import org.adempiere.webui.adwindow.QuickGridView;
 import org.adempiere.webui.component.Borderlayout;
@@ -106,6 +107,7 @@ public class WQuickForm extends Window implements IQuickForm
 		super();
 
 		this.setMode(Mode.POPUP);
+		LayoutUtils.addSclass("quick-form", this);
 		windowNo = SessionManager.getAppDesktop().registerWindow(this);
 		adWinContent = winContent;
 		onlyCurrentRows = m_onlyCurrentRows;
@@ -245,6 +247,7 @@ public class WQuickForm extends Window implements IQuickForm
 	/**
 	 * Cancel/Close form.
 	 */
+	@Override
 	public void onCancel( )
 	{
 		if (gridTab.getTableModel().getRowChanged() > -1)
@@ -269,6 +272,7 @@ public class WQuickForm extends Window implements IQuickForm
 	/**
 	 * Reset sort state
 	 */
+	@Override
 	public void onUnSort( )
 	{
 		adWinContent.getActiveGridTab().getTableModel().resetCacheSortState();
@@ -285,6 +289,7 @@ public class WQuickForm extends Window implements IQuickForm
 	/**
 	 * Open {@link CustomizeGridViewDialog} for {@link #quickGridView}.
 	 */
+	@Override
 	public void onCustomize( )
 	{
 		onSave();
@@ -312,6 +317,7 @@ public class WQuickForm extends Window implements IQuickForm
 	/**
 	 * Ignore/Undo changes
 	 */
+	@Override
 	public void onIgnore( )
 	{
 		gridTab.dataIgnore();
@@ -328,6 +334,7 @@ public class WQuickForm extends Window implements IQuickForm
 	/**
 	 * Delete selected rows.
 	 */
+	@Override
 	public void onDelete( )
 	{
 		if (gridTab == null || !quickGridView.isNewLineSaved)
@@ -393,6 +400,7 @@ public class WQuickForm extends Window implements IQuickForm
 	/**
 	 * Save {@link #quickGridView} changes.
 	 */
+	@Override
 	public void onSave( )
 	{
 		if (gridTab.getTableModel().getRowChanged() == gridTab.getCurrentRow())
@@ -413,6 +421,7 @@ public class WQuickForm extends Window implements IQuickForm
 	/**
 	 * Refresh {@link #gridTab} and {@link #quickGridView}.
 	 */
+	@Override
 	public void onRefresh( )
 	{
 		gridTab.dataRefreshAll();
@@ -471,7 +480,7 @@ public class WQuickForm extends Window implements IQuickForm
 		{
 			adWinContent.setCurrQGV(null);
 		}
-		adWinContent.getADTab().getSelectedTabpanel().query(onlyCurrentRows, onlyCurrentDays, MRole.getDefault().getMaxQueryRecords()); // autoSize
+		adWinContent.getADTab().getSelectedTabpanel().query(onlyCurrentRows, onlyCurrentDays, adWinContent.getADTab().getSelectedTabpanel().getGridTab().getMaxQueryRecords()); // autoSize
 
 		if (stayInParent) {
 			adWinContent.onParentRecord();

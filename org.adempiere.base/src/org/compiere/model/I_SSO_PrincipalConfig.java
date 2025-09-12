@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for SSO_PrincipalConfig
  *  @author iDempiere (generated) 
- *  @version Release 11
+ *  @version Release 13
  */
 public interface I_SSO_PrincipalConfig 
 {
@@ -221,6 +221,7 @@ public interface I_SSO_PrincipalConfig
 	  */
 	public int getSSO_LoginButtonImage_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Image getSSO_LoginButtonImage() throws RuntimeException;
 
     /** Column name SSO_OSGIRedirectURIs */

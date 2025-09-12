@@ -45,8 +45,10 @@ import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 
+import org.adempiere.base.Generated;
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.Adempiere;
+import org.compiere.model.SystemProperties;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -127,7 +129,7 @@ public class Util
 
 	/**
 	 * Clean - Remove all white spaces
-	 * @param in in
+	 * @param in
 	 * @return cleaned string
 	 */
 	public static String cleanWhitespace (String in)
@@ -154,9 +156,9 @@ public class Util
 	}	//	cleanWhitespace
 
 	/**
-	 * Mask HTML content.
-	 * i.e. replace characters with &values;
-	 * CR is not masked
+	 * Mask HTML content.<br/>
+	 * i.e. replace characters with &values;<br/>
+	 * CR is not masked.
 	 * @param content content
 	 * @return masked content
 	 * @see #maskHTML(String, boolean)
@@ -167,7 +169,7 @@ public class Util
 	}	//	maskHTML
 	
 	/**
-	 * Mask HTML content.
+	 * Mask HTML content.<br/>
 	 * i.e. replace characters with &values;
 	 * @param content content
 	 * @param maskCR convert CR into <br>
@@ -204,6 +206,7 @@ public class Util
 				case '\n':
 					if (maskCR)
 						out.append ("<br>");
+					break;
 				//
 				default:
 					int ii =  (int)c;
@@ -240,7 +243,7 @@ public class Util
 	/**
 	 * Is String Empty or null
 	 * @param str string
-	 * @return true if &gt;= 1 char
+	 * @return true if str is empty or null
 	 */
 	public static boolean isEmpty (String str)
 	{
@@ -251,7 +254,7 @@ public class Util
 	 * Is String Empty or null
 	 * @param str string
 	 * @param trimWhitespaces trim whitespaces
-	 * @return true if &gt;= 1 char
+	 * @return true if str is empty or null
 	 */
 	public static boolean isEmpty (String str, boolean trimWhitespaces)
 	{
@@ -276,7 +279,7 @@ public class Util
 	}
 
 	/**
-	 * Find index of search character in str.
+	 * Find index of search character in str.<br/>
 	 * This ignores content in () and quoted text ('texts').
 	 * @param str string
 	 * @param search search character
@@ -288,7 +291,7 @@ public class Util
 	}   //  findIndexOf
 
 	/**
-	 *  Find index of search characters in str.
+	 *  Find index of search characters in str.<br/>
 	 *  This ignores content in () and quoted text ('texts').
 	 *  @param str string
 	 *  @param search1 first search character
@@ -323,10 +326,10 @@ public class Util
 	}   //  findIndexOf
 
 	/**
-	 *  Find index of search character in str.
+	 *  Find index of search string in str.<br/>
 	 *  This ignores content in () and quoted text ('texts')
 	 *  @param str string
-	 *  @param search search character
+	 *  @param search search string
 	 *  @return index or -1 if not found
 	 */
 	public static int findIndexOf (String str, String search)
@@ -420,6 +423,7 @@ public class Util
 	 * @param relevantAttributes relevant attributes
 	 * @return iterator
 	 */
+	@Generated
 	static public AttributedCharacterIterator getIterator (AttributedString aString, 
 		AttributedCharacterIterator.Attribute[] relevantAttributes)
 	{
@@ -468,6 +472,7 @@ public class Util
 	 * Dump a Map (key=value) to standard out
 	 * @param map Map
 	 */
+	@Generated
 	static public void dump (Map<Object,Object> map)
 	{
 		System.out.println("Dump Map - size=" + map.size());
@@ -483,7 +488,10 @@ public class Util
 	/**
 	 * Print Action and Input Map for component
 	 * @param comp  Component with ActionMap
+	 * @deprecated Swing client have been deprecated
 	 */
+	@Deprecated
+	@Generated
 	public static void printActionInputMap (JComponent comp)
 	{
 		//	Action Map
@@ -560,9 +568,9 @@ public class Util
 	}   //  printActionInputMap
 
 	/**
-	 * Is 8 Bit
+	 * Is str a 8 Bit string
 	 * @param str string
-	 * @return true if string doesn't contains chars &gt; 255
+	 * @return true if str doesn't contains chars &gt; 255
 	 */
 	public static boolean is8Bit (String str)
 	{
@@ -580,7 +588,7 @@ public class Util
 	}	//	is8Bit
 	
 	/**
-	 * Clean Ampersand (used to indicate shortcut) 
+	 * Remove all Ampersand character (used to indicate shortcut in Swing client) 
 	 * @param in input
 	 * @return cleaned string
 	 */
@@ -631,6 +639,7 @@ public class Util
 		}
 		catch (UnsupportedEncodingException e)
 		{
+			//should never happen
 			log.log(Level.SEVERE, str, e);
 		}
 		return size;
@@ -664,6 +673,7 @@ public class Util
 		}
 		catch (UnsupportedEncodingException e)
 		{
+			//should never happen
 			log.log(Level.SEVERE, str, e);
 		}
 		return str;
@@ -673,24 +683,12 @@ public class Util
 	 * Strip diacritics from given string
 	 * @param s	original string
 	 * @return string without diacritics
+	 * @deprecated dummy method, not doing anything
 	 */
+	@Deprecated(forRemoval = true, since = "12")
+	@Generated
 	public static String stripDiacritics(String s) {
-		/* JAVA5 behaviour */
 		return s;
-		/* JAVA6 behaviour *
-		if (s == null) {
-			return s;
-		}
-		String normStr = java.text.Normalizer.normalize(s, java.text.Normalizer.Form.NFD);
-		
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < normStr.length(); i++) {
-			char ch = normStr.charAt(i);
-			if (ch < 255)
-				sb.append(ch);
-		}
-		return sb.toString();
-		/* */
 	}
 
 	/**
@@ -746,11 +744,14 @@ public class Util
 					cb.addTemplate(page, 0, 0);
 					copy.releaseTemplate(page);
 				}
-			}
-			document.close();
+			}			
 		}
 		finally
 		{
+			if(document != null)
+			{
+				document.close();
+			}
 			for(PdfReader reader:pdfReaders)
 			{
 				reader.close();
@@ -764,18 +765,18 @@ public class Util
 	}
 	
 	/**
-	 * Make filename safe (updating all unauthorized characters to safe ones)
+	 * Make filename safe (replace all unauthorized characters with safe ones)
 	 * @param input the filename to check
-	 * @returns the correct filename
+	 * @returns the corrected filename
 	 */
 	public static String setFilenameCorrect(String input) {
 		String output = Normalizer.normalize(input, Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
-		output = output.replaceAll("/" , "-");
-		output = output.replaceAll(":" , "-");
-		output = output.replaceAll("\\*" , "-");
-		output = output.replaceAll("<" , "-");
-		output = output.replaceAll(">" , "-");
-		output = output.replaceAll("%" , "-");
+		output = output.replace("/" , "-");
+		output = output.replace(":" , "-");
+		output = output.replace("*" , "-");
+		output = output.replace("<" , "-");
+		output = output.replace(">" , "-");
+		output = output.replace("%" , "-");
 		return output.trim();
 	}
 
@@ -784,7 +785,7 @@ public class Util
 	/**
 	 * Is value a valid UUID string
 	 * @param value
-	 * @return true if value is a uuid identifier
+	 * @return true if value is a UUID identifier
 	 */
 	public static boolean isUUID(String value)
 	{
@@ -795,8 +796,9 @@ public class Util
 	 * Is running from Eclipse
 	 * @return true if there is a directory org.adempiere.base within AdempiereHome or if there is a System property org.idempiere.developermode set to Y 
 	 */
+	@Generated
 	public static boolean isDeveloperMode() {
-		return Files.isDirectory(Paths.get(Adempiere.getAdempiereHome() + File.separator + "org.adempiere.base")) || "Y".equals(System.getProperty("org.idempiere.developermode"));
+		return Files.isDirectory(Paths.get(Adempiere.getAdempiereHome() + File.separator + "org.adempiere.base")) || SystemProperties.isDeveloperMode();
 	}
 	
 	/**
@@ -813,10 +815,8 @@ public class Util
 	    }
 	}
 
-
-	
-	 /**
-	  *  Convert BigDecimal array to Integer array ( IDEMPIERE-3413 )
+	/**
+	 *  Convert BigDecimal array to Integer array ( IDEMPIERE-3413 )
 	 * 
 	 * @param arrayBD - BigDecimal Array
 	 * @return Convert to integer array

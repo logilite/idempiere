@@ -98,6 +98,7 @@ public class MWFProcess extends X_AD_WF_Process
 	 *  @deprecated
 	 *	@throws Exception
 	 */
+	@Deprecated
 	public MWFProcess (MWorkflow wf, ProcessInfo pi) throws Exception
 	{
 		this(wf, pi, wf.get_TrxName());
@@ -612,11 +613,9 @@ public class MWFProcess extends X_AD_WF_Process
 				}
 			}
 			if(sbMsg!=null)
-			{
-                throw new AdempiereException(Msg.getMsg(getCtx(), "IncompeteWorkflowResponsible", new Object[] {sbMsg.toString()}));
-			}
+				throw new AdempiereException(Msg.getMsg(getCtx(), "IncompeteWorkflowResponsible", new Object[] {sbMsg.toString()}));
 		}
-		
+
 		if (log.isLoggable(Level.FINE)) log.fine("AD_WF_Node_ID=" + AD_WF_Node_ID);
 		setWFState(WFSTATE_Running);
 		try

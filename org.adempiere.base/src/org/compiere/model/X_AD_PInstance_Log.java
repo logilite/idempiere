@@ -25,7 +25,7 @@ import org.compiere.util.Env;
 
 /** Generated Model for AD_PInstance_Log
  *  @author iDempiere (generated)
- *  @version Release 11 - $Id$ */
+ *  @version Release 13 - $Id$ */
 @org.adempiere.base.Model(table="AD_PInstance_Log")
 public class X_AD_PInstance_Log extends PO implements I_AD_PInstance_Log, I_Persistent
 {
@@ -33,7 +33,7 @@ public class X_AD_PInstance_Log extends PO implements I_AD_PInstance_Log, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20231222L;
+	private static final long serialVersionUID = 20250805L;
 
     /** Standard Constructor */
     public X_AD_PInstance_Log (Properties ctx, int AD_PInstance_Log_ID, String trxName)
@@ -107,6 +107,7 @@ public class X_AD_PInstance_Log extends PO implements I_AD_PInstance_Log, I_Pers
       return sb.toString();
     }
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_PInstance getAD_PInstance() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_PInstance)MTable.get(getCtx(), org.compiere.model.I_AD_PInstance.Table_ID)
@@ -150,6 +151,7 @@ public class X_AD_PInstance_Log extends PO implements I_AD_PInstance_Log, I_Pers
 		return (String)get_Value(COLUMNNAME_AD_PInstance_Log_UU);
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_Table)MTable.get(getCtx(), org.compiere.model.I_AD_Table.Table_ID)
@@ -215,6 +217,31 @@ public class X_AD_PInstance_Log extends PO implements I_AD_PInstance_Log, I_Pers
 		return ii.intValue();
 	}
 
+	/** PInstanceLogType AD_Reference_ID=200242 */
+	public static final int PINSTANCELOGTYPE_AD_Reference_ID=200242;
+	/** Progress = P */
+	public static final String PINSTANCELOGTYPE_Progress = "P";
+	/** Result = R */
+	public static final String PINSTANCELOGTYPE_Result = "R";
+	/** Status = S */
+	public static final String PINSTANCELOGTYPE_Status = "S";
+	/** Set Log Type.
+		@param PInstanceLogType Process Audit Log Type
+	*/
+	public void setPInstanceLogType (String PInstanceLogType)
+	{
+
+		set_Value (COLUMNNAME_PInstanceLogType, PInstanceLogType);
+	}
+
+	/** Get Log Type.
+		@return Process Audit Log Type
+	  */
+	public String getPInstanceLogType()
+	{
+		return (String)get_Value(COLUMNNAME_PInstanceLogType);
+	}
+
 	/** Set Process Date.
 		@param P_Date Process Parameter
 	*/
@@ -250,31 +277,6 @@ public class X_AD_PInstance_Log extends PO implements I_AD_PInstance_Log, I_Pers
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** PInstanceLogType AD_Reference_ID=200242 */
-	public static final int PINSTANCELOGTYPE_AD_Reference_ID=200242;
-	/** Progress = P */
-	public static final String PINSTANCELOGTYPE_Progress = "P";
-	/** Result = R */
-	public static final String PINSTANCELOGTYPE_Result = "R";
-	/** Status = S */
-	public static final String PINSTANCELOGTYPE_Status = "S";
-	/** Set Log Type.
-		@param PInstanceLogType Process Audit Log Type
-	*/
-	public void setPInstanceLogType (String PInstanceLogType)
-	{
-
-		set_Value (COLUMNNAME_PInstanceLogType, PInstanceLogType);
-	}
-
-	/** Get Log Type.
-		@return Process Audit Log Type
-	  */
-	public String getPInstanceLogType()
-	{
-		return (String)get_Value(COLUMNNAME_PInstanceLogType);
 	}
 
 	/** Set Process Message.

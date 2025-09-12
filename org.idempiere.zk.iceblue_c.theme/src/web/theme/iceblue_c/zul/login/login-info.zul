@@ -5,10 +5,12 @@ Copyright (C) 2009 Idalica Corporation
 -->
 <zk>
 <zscript>
+    import org.compiere.Adempiere;
 	import org.compiere.model.MSysConfig;
+	var isLoginInfoShown = Adempiere.isLoginInfoShown();
 	var isEmailLogin = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
 </zscript>
-<html>
+<html if="${isLoginInfoShown == true}">
 <![CDATA[
 <style>
 	.section-head {

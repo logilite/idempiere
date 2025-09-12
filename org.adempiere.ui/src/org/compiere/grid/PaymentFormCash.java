@@ -39,9 +39,8 @@ import org.compiere.util.Msg;
 import org.compiere.util.TimeUtil;
 
 /**
- * 
+ * Payment form for cash tender type
  * @author Elaine
- *
  */
 public abstract class PaymentFormCash extends PaymentForm {
 	private static final String PAYMENTRULE = MInvoice.PAYMENTRULE_Cash;
@@ -109,8 +108,8 @@ public abstract class PaymentFormCash extends PaymentForm {
 	protected KeyNamePair selectedBankAccount;
 	
 	/**
-	 * 
-	 * @return list of active bank account
+	 * Get bank accounts
+	 * @return list of active bank account (C_BankAccount_ID, Name+AccountNo)
 	 */
 	public ArrayList<KeyNamePair> getBankAccountList() {
 		selectedBankAccount = null;
@@ -160,8 +159,8 @@ public abstract class PaymentFormCash extends PaymentForm {
 	protected KeyNamePair selectedCashBook;
 	
 	/**
-	 * 
-	 * @return list of active cash book
+	 * Get cash books
+	 * @return list of active cash book (C_CashBook_ID, Name)
 	 */
 	public ArrayList<KeyNamePair> getCashBookList() {
 		selectedCashBook = null;
@@ -228,7 +227,7 @@ public abstract class PaymentFormCash extends PaymentForm {
 	private int newC_CashLine_ID;
 	
 	/**
-	 * 
+	 * Save changes
 	 * @param C_BankAccount_ID
 	 * @param C_CashBook_ID
 	 * @param dateAcct

@@ -31,7 +31,6 @@ import org.compiere.util.Trx;
 /**
  * Transfer data from editor to GridTab
  * @author hengsin
- *
  */
 public class GridTabDataBinder implements ValueChangeListener {
 
@@ -40,7 +39,6 @@ public class GridTabDataBinder implements ValueChangeListener {
 	private GridTab gridTab;
 
 	/**
-	 * 
 	 * @param gridTab
 	 */
 	public GridTabDataBinder(GridTab gridTab) {
@@ -50,6 +48,7 @@ public class GridTabDataBinder implements ValueChangeListener {
 	/**
 	 * @param e
 	 */
+	@Override
 	public void valueChange(ValueChangeEvent e)
     {
         if (gridTab.isProcessed())       //  only editable records
@@ -203,7 +202,7 @@ public class GridTabDataBinder implements ValueChangeListener {
 
     } // ValueChange
 	
-	/**************************************************************************
+	/**
 	 * Save Multiple records - Clone a record and assign new values to each 
 	 * clone for a specific column.
 	 * @param ctx context

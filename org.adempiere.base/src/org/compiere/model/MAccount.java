@@ -274,7 +274,7 @@ public class MAccount extends X_C_ValidCombination implements ImmutablePOSupport
 			fa.getM_Product_ID(), fa.getC_BPartner_ID(), fa.getAD_OrgTrx_ID(), 
 			fa.getC_LocFrom_ID(), fa.getC_LocTo_ID(), fa.getC_SalesRegion_ID(), 
 			fa.getC_Project_ID(), fa.getC_Campaign_ID(), fa.getC_Activity_ID(),
-			fa.getUser1_ID(), fa.getUser2_ID(), fa.getUserElement1_ID(), fa.getUserElement2_ID(), fa.get_TrxName());
+			fa.getUser1_ID(), fa.getUser2_ID(), fa.getUserElement1_ID(), fa.getUserElement2_ID(), trxName);
 		return acct;
 	}	//	get
 	
@@ -618,7 +618,7 @@ public class MAccount extends X_C_ValidCombination implements ImmutablePOSupport
 	}	//	isPassiva
 
 	/**
-	 * 	Set Value and Description and Fully Qualified Flag for Combination
+	 * 	Set Value(Combination) and Description and Fully Qualified Flag for Combination
 	 */
 	public void setValueDescription()
 	{
@@ -867,11 +867,7 @@ public class MAccount extends X_C_ValidCombination implements ImmutablePOSupport
 		return ok;
 	}	//	validate
 	
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		setValueDescription();

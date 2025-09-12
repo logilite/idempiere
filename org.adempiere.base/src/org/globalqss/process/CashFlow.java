@@ -79,7 +79,7 @@ public class CashFlow  extends SvrProcess {
 	}	//	prepare
 
 	/**
-	 * 	Process
+	 * 	Insert reporting data to T_CashFlow
 	 *	@return message
 	 *	@throws Exception
 	 */

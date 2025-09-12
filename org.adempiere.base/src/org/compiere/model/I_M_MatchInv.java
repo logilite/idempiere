@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for M_MatchInv
  *  @author iDempiere (generated) 
- *  @version Release 11
+ *  @version Release 13
  */
 public interface I_M_MatchInv 
 {
@@ -75,6 +75,7 @@ public interface I_M_MatchInv
 	  */
 	public int getC_InvoiceLine_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_InvoiceLine getC_InvoiceLine() throws RuntimeException;
 
     /** Column name Created */
@@ -184,6 +185,7 @@ public interface I_M_MatchInv
 	  */
 	public int getM_AttributeSetInstance_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public I_M_AttributeSetInstance getM_AttributeSetInstance() throws RuntimeException;
 
     /** Column name M_InOutLine_ID */
@@ -199,6 +201,7 @@ public interface I_M_MatchInv
 	  */
 	public int getM_InOutLine_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_M_InOutLine getM_InOutLine() throws RuntimeException;
 
     /** Column name M_MatchInv_ID */
@@ -247,6 +250,7 @@ public interface I_M_MatchInv
 	  */
 	public int getM_Product_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException;
 
     /** Column name Posted */
@@ -319,6 +323,7 @@ public interface I_M_MatchInv
 	/** Get Referenced Match Invoice	  */
 	public int getRef_MatchInv_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_M_MatchInv getRef_MatchInv() throws RuntimeException;
 
     /** Column name Reversal_ID */
@@ -334,6 +339,7 @@ public interface I_M_MatchInv
 	  */
 	public int getReversal_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_M_MatchInv getReversal() throws RuntimeException;
 
     /** Column name Updated */
