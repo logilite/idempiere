@@ -156,7 +156,7 @@ public class WFApproverWindow extends Window implements EventListener<Event>,IWF
 	            if (fApprover.getValue() == null)
 	            {
 	                // Show an error message and stop processing
-	                Dialog.error(0, "The 'Assign To' field is mandatory. Please select an assignee.");
+	                Dialog.error(0, "WFApprover_AssignTo_Mandatory");
 	                return;
 	            }
 				

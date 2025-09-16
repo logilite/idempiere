@@ -85,3 +85,6 @@ UPDATE AD_Field SET DisplayLogic='@ResponsibleType@=M', SeqNo=110,Updated=TO_TIM
 UPDATE AD_Field SET DisplayLogic='@ResponsibleType@=M', SeqNo=120,Updated=TO_TIMESTAMP('2025-09-03 16:22:31','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=208846
 ;
 
+-- 10-Sep-2025, 11:37:12 am IST
+INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('E','The ''Assign To'' field is mandatory. Please select an assignee.',0,0,'Y',TO_TIMESTAMP('2025-09-10 11:37:11','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-09-10 11:37:11','YYYY-MM-DD HH24:MI:SS'),100,200969,'WFApprover_AssignTo_Mandatory','D','ede72295-5b6b-44c2-8074-1417ba796cb8')
+;
