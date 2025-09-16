@@ -1272,6 +1272,13 @@ public class MCostDetail extends X_M_CostDetail
 					addition = false;
 				}
 			}
+			//If not import and it is due to inventory then don't mark as addition
+			if(addition && getM_InventoryLine_ID() != 0) {
+				int I_Inventory_ID = MInventoryLine.getImportLine_ID(getM_InventoryLine_ID(),get_TrxName());
+				if(I_Inventory_ID<=0)
+					addition = false;
+			}
+					
 			if (ce.isAverageInvoice())
 			{
 				if (!isVendorRMA)
