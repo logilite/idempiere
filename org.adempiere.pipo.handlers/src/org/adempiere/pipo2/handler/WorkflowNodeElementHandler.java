@@ -124,6 +124,8 @@ public class WorkflowNodeElementHandler extends AbstractElementHandler {
 			if (log.isLoggable(Level.INFO)) log.info(e.toString());
 		}
 
+		packoutTableAttibute(document, m_WF_Node, packOut);
+
 		document.endElement("", "", I_AD_WF_Node.Table_Name);
 	}
 

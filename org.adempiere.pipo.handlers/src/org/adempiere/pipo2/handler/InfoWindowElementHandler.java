@@ -139,6 +139,8 @@ public class InfoWindowElementHandler extends AbstractElementHandler {
 
 			}
 
+			packoutTableAttibute(document, m_InfoWindow, packOut);
+
 			Query queryCols = new Query(ctx.ctx, "AD_InfoColumn", "AD_InfoWindow_ID = ?", getTrxName(ctx));
 			List<X_AD_InfoColumn> infoColumnlist = queryCols.setParameters(AD_InfoWindow_ID).list();
 			for (X_AD_InfoColumn infoColumn : infoColumnlist) {

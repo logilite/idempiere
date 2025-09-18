@@ -133,6 +133,9 @@ public class FieldGroupElementHandler extends AbstractElementHandler {
 		} catch(Exception e) {
 			if (log.isLoggable(Level.INFO)) log.info(e.toString());
 		}
+
+		packoutTableAttibute(document, fieldGroup, packOut);
+
 		document.endElement("", "", I_AD_FieldGroup.Table_Name);
 	}
 

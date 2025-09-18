@@ -133,6 +133,8 @@ public class InfoColumnElementHandler extends AbstractElementHandler {
 			if (log.isLoggable(Level.INFO)) log.info(e.toString());
 		}
 
+		packoutTableAttibute(document, m_InfoColumn, packOut);
+
 		document.endElement("", "", I_AD_InfoColumn.Table_Name);
 	}
 

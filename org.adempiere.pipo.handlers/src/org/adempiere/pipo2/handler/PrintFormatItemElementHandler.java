@@ -114,6 +114,8 @@ public class PrintFormatItemElementHandler extends AbstractElementHandler {
 			if (log.isLoggable(Level.INFO)) log.info(e.toString());
 		}
 
+		packoutTableAttibute(document, m_PrintFormatItem, packOut);
+
 		document.endElement("", "", I_AD_PrintFormatItem.Table_Name);
 	}
 

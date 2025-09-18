@@ -126,6 +126,8 @@ public class ReferenceElementHandler extends AbstractElementHandler {
 			}
 		}
 
+		packoutTableAttibute(document, m_Reference, packOut);
+
 		if (MReference.VALIDATIONTYPE_ListValidation.equals(m_Reference.getValidationType())) {
 			int[] rls = DB.getIDsEx(getTrxName(ctx), "SELECT AD_Ref_List_ID FROM AD_Ref_List WHERE AD_Reference_ID=?", Reference_id);
 			for (int rl : rls) {

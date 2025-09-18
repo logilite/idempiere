@@ -32,6 +32,7 @@ import java.util.logging.Level;
 import javax.xml.transform.sax.TransformerHandler;
 
 import org.adempiere.pipo2.exception.DatabaseAccessException;
+import org.compiere.model.I_AD_TableAttribute;
 import org.compiere.model.MColumn;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
@@ -606,4 +607,19 @@ public abstract class AbstractElementHandler implements ElementHandler {
 		}
 		return true;
 	}        
+
+	public void packoutTableAttibute(TransformerHandler document, PO po, PackOut packOut)
+	{
+		packOut.getCtx().ctx.put("Table_Name",po.get_TableName());
+		try
+		{
+			ElementHandler handler = packOut.getHandler(I_AD_TableAttribute.Table_Name);
+			handler.packOut(packOut, document, null, po.get_ID());
+		}
+		catch (Exception e)
+		{
+			if (log.isLoggable(Level.INFO))
+				log.info(e.toString());
+		}
+	}
 }
