@@ -121,6 +121,8 @@ public class InfoRelatedElementHandler extends AbstractElementHandler {
 			if (log.isLoggable(Level.INFO)) log.info(e.toString());
 		}
 
+		packoutTableAttibute(document, m_InfoRelated, packOut);
+
 		document.endElement("", "", I_AD_InfoRelated.Table_Name);
 	}
 

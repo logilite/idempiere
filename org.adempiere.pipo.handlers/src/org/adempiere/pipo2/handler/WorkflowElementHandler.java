@@ -172,6 +172,8 @@ public class WorkflowElementHandler extends AbstractElementHandler {
 			}
 		}
 
+		packoutTableAttibute(document, m_Workflow, packOut);
+
 		try {
 			List<MWFNode> wns = new Query(ctx.ctx, MWFNode.Table_Name, "AD_Workflow_ID=? AND AD_Client_ID=?", getTrxName(ctx))
 					.setParameters(AD_Workflow_ID, Env.getAD_Client_ID(ctx.ctx))

@@ -129,6 +129,8 @@ public class AdElementHandler extends AbstractElementHandler {
 			if (log.isLoggable(Level.INFO)) log.info(e.toString());
 		}
 
+		packoutTableAttibute(document, mAdElement, packOut);
+
 		document.endElement("", "", "AD_Element");
 	}
 

@@ -113,6 +113,8 @@ public class FormElementHandler extends AbstractElementHandler {
 			if (log.isLoggable(Level.INFO)) log.info(e.toString());
 		}
 
+		packoutTableAttibute(document, m_Form, packOut);
+
 		document.endElement("","",I_AD_Form.Table_Name);
 	}
 

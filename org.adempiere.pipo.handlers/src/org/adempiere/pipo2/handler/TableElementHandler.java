@@ -34,7 +34,6 @@ import org.adempiere.pipo2.PoFiller;
 import org.adempiere.pipo2.exception.DatabaseAccessException;
 import org.adempiere.pipo2.exception.POSaveFailedException;
 import org.compiere.model.I_AD_Table;
-import org.compiere.model.I_AD_TableAttribute;
 import org.compiere.model.MColumn;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
@@ -167,17 +166,7 @@ public class TableElementHandler extends AbstractElementHandler {
 			createTableBinding(ctx,document,m_Table);
 		}
 		
-		packOut.getCtx().ctx.put("Table_Name", I_AD_Table.Table_Name);
-		try
-		{
-			ElementHandler handler = packOut.getHandler(I_AD_TableAttribute.Table_Name);
-			handler.packOut(packOut, document, null, m_Table.get_ID());
-		}
-		catch (Exception e)
-		{
-			if (log.isLoggable(Level.INFO))
-				log.info(e.toString());
-		}
+		packoutTableAttibute(document, m_Table, packOut);
 
 		try {
 			List<MColumn> cols = new Query(ctx.ctx, MColumn.Table_Name, "AD_Table_ID=?", getTrxName(ctx))

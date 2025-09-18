@@ -115,6 +115,8 @@ public class ReferenceListElementHandler extends AbstractElementHandler {
 			if (log.isLoggable(Level.INFO)) log.info(e.toString());
 		}
 
+		packoutTableAttibute(document, m_Ref_List, packOut);
+
 		document.endElement("", "", I_AD_Ref_List.Table_Name);
 	}
 

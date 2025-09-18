@@ -131,12 +131,12 @@ public class PrintFormatElementHandler extends AbstractElementHandler {
 			}
 		}
 		
+		PackOut packOut = ctx.packOut;
 		if (createElement) {
 			verifyPackOutRequirement(m_Printformat);
 			addTypeName(atts, "table");
 			document.startElement("", "", I_AD_PrintFormat.Table_Name, atts);
 			createPrintFormatBinding(ctx, document, m_Printformat);
-			PackOut packOut = ctx.packOut;
 			packOut.getCtx().ctx.put("Table_Name",I_AD_PrintFormat.Table_Name);
 			try {
 				new CommonTranslationHandler().packOut(packOut,document,null,m_Printformat.get_ID());
@@ -144,6 +144,7 @@ public class PrintFormatElementHandler extends AbstractElementHandler {
 				if (log.isLoggable(Level.INFO)) log.info(e.toString());
 			}
 		}
+		packoutTableAttibute(document, m_Printformat, packOut);
 
 		String sql = "SELECT AD_PrintFormatItem_ID FROM AD_PrintFormatItem WHERE AD_PrintFormat_ID= "
 				+ m_Printformat.getAD_PrintFormat_ID()
