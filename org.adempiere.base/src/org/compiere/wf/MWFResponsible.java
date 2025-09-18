@@ -191,7 +191,7 @@ public class MWFResponsible extends X_AD_WF_Responsible implements ImmutablePOSu
 	 */
 	public boolean isInvoker()
 	{
-		return getAD_User_ID() == 0 && getAD_Role_ID() == 0 && !isManual() && !isSupervisor() && !isInitiator();
+		return getAD_User_ID() == 0 && getAD_Role_ID() == 0 && !isManual() && !isInitiatorSupervisor() && !isInitiator() && !isCurrentUserSupervisor();
 	}	//	isInvoker
 	
 	/**
@@ -316,9 +316,19 @@ public class MWFResponsible extends X_AD_WF_Responsible implements ImmutablePOSu
 	 * 
 	 * @return true if Supevisor
 	 */
-	public boolean isSupervisor()
+	public boolean isInitiatorSupervisor()
 	{
-		return RESPONSIBLETYPE_Supervisor.equals(getResponsibleType());
+		return RESPONSIBLETYPE_SupervisorOfInitiator.equals(getResponsibleType());
+	}
+	
+	/**
+	 * Is Current User Supervisor Responsible
+	 * 
+	 * @return true if Supevisor
+	 */
+	public boolean isCurrentUserSupervisor()
+	{
+		return RESPONSIBLETYPE_SupervisorOfCurrentUser.equals(getResponsibleType());
 	}
 	
 }	//	MWFResponsible

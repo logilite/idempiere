@@ -31,7 +31,7 @@ public class X_AD_WF_Responsible extends PO implements I_AD_WF_Responsible, I_Pe
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20250903L;
+	private static final long serialVersionUID = 20250915L;
 
     /** Standard Constructor */
     public X_AD_WF_Responsible (Properties ctx, int AD_WF_Responsible_ID, String trxName)
@@ -328,9 +328,10 @@ public class X_AD_WF_Responsible extends PO implements I_AD_WF_Responsible, I_Pe
 	public static final String RESPONSIBLETYPE_SystemResource = "S";
 	/** Initiator = I */
 	public static final String RESPONSIBLETYPE_Initiator = "I";
-	/** Supervisor = SV */
-	public static final String RESPONSIBLETYPE_Supervisor = "SV";
-
+	/** Supervisor of Current User = SC */
+	public static final String RESPONSIBLETYPE_SupervisorOfCurrentUser = "SC";
+	/** Supervisor of Initiator = SV */
+	public static final String RESPONSIBLETYPE_SupervisorOfInitiator = "SV";
 	/** Set Responsible Type.
 	*	@param ResponsibleType Type of the Responsibility for a workflow
 	*/

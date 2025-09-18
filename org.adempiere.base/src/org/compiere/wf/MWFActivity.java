@@ -1604,10 +1604,33 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 						// assign the Workflow's Initiator
 						setAD_User_ID(m_process.getAD_User_ID());
 					}
-					else if (resp.isSupervisor())
+					else if (resp.isCurrentUserSupervisor())
 					{
 						// assign the initiator's supervisor
-						
+						MUser initiator = MUser.get(p_ctx, Env.getAD_User_ID(getCtx()));
+						int superVisorId = initiator.getSupervisor_ID();
+
+						// if Initiator didn't have Supervisor set then Assign
+						// document's Organization's Supervisor
+						if (superVisorId <= 0)
+						{
+							MOrgInfo orgInfo = MOrgInfo.get(p_ctx, Env.getAD_Org_ID(getCtx()), m_process.get_TrxName());
+							superVisorId = orgInfo.getSupervisor_ID();
+						}
+
+						if (superVisorId > 0)
+						{
+							setAD_User_ID(superVisorId);
+						}
+						else
+						{
+							m_docStatus = DocAction.STATUS_Invalid;
+							throw new AdempiereException(Msg.getMsg(getCtx(), "NoApprover - Set Supervisor on User or Organization"));
+						}
+					}
+					else if (resp.isInitiatorSupervisor())
+					{
+						// assign the initiator's supervisor
 						MUser initiator = MUser.get(p_ctx, m_process.getAD_User_ID());
 						int superVisorId = initiator.getSupervisor_ID();
 
@@ -1737,7 +1760,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 							// assign the Workflow's Initiator
 							setAD_User_ID(m_process.getAD_User_ID());
 						}
-						else if (resp.isSupervisor())
+						else if (resp.isInitiatorSupervisor())
 						{
 							// assign the initiator's supervisor
 							
@@ -1752,6 +1775,30 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 								superVisorId = orgInfo.getSupervisor_ID();
 							}
 							
+							if (superVisorId > 0)
+							{
+								setAD_User_ID(superVisorId);
+							}
+							else
+							{
+								m_docStatus = DocAction.STATUS_Invalid;
+								throw new AdempiereException(Msg.getMsg(getCtx(), "NoApprover - Set Supervisor on User or Organization"));
+							}
+						}
+						else if (resp.isCurrentUserSupervisor())
+						{
+							// assign the initiator's supervisor
+							MUser initiator = MUser.get(p_ctx, Env.getAD_User_ID(getCtx()));
+							int superVisorId = initiator.getSupervisor_ID();
+
+							// if Initiator didn't have Supervisor set then Assign
+							// document's Organization's Supervisor
+							if (superVisorId <= 0)
+							{
+								MOrgInfo orgInfo = MOrgInfo.get(p_ctx, Env.getAD_Org_ID(getCtx()), m_process.get_TrxName());
+								superVisorId = orgInfo.getSupervisor_ID();
+							}
+
 							if (superVisorId > 0)
 							{
 								setAD_User_ID(superVisorId);

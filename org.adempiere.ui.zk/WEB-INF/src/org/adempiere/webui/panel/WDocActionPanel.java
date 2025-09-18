@@ -346,7 +346,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	 * @return available document action items
 	 */
 	public List<Listitem> getDocActionItems() {
-		return (List<Listitem>)lstDocAction.getItems();
+		return lstDocAction == null ? new ArrayList <Listitem>()  : (List<Listitem>)lstDocAction.getItems();
 	}
 	
 	/**
@@ -955,7 +955,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 					return false;
 				}
 			}
-			else if (MWFResponsible.RESPONSIBLETYPE_Supervisor.equals(respType))
+			else if (MWFResponsible.RESPONSIBLETYPE_SupervisorOfInitiator.equals(respType) || MWFResponsible.RESPONSIBLETYPE_SupervisorOfCurrentUser.equals(respType))
 			{
 				if (m_activity.getAD_User_ID() != m_AD_User_ID)
 				{
