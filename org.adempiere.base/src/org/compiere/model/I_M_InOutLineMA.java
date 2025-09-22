@@ -129,6 +129,19 @@ public interface I_M_InOutLineMA
 	@Deprecated(since="13") // use better methods with cache
 	public I_M_AttributeSetInstance getM_AttributeSetInstance() throws RuntimeException;
 
+    /** Column name M_InOutLineMA_ID */
+    public static final String COLUMNNAME_M_InOutLineMA_ID = "M_InOutLineMA_ID";
+
+	/** Set M_InOutLineMA_ID.
+	  * Attributes
+	  */
+	public void setM_InOutLineMA_ID (int M_InOutLineMA_ID);
+
+	/** Get M_InOutLineMA_ID.
+	  * Attributes
+	  */
+	public int getM_InOutLineMA_ID();
+
     /** Column name M_InOutLineMA_UU */
     public static final String COLUMNNAME_M_InOutLineMA_UU = "M_InOutLineMA_UU";
 

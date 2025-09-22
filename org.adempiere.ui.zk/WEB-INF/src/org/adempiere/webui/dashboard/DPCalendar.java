@@ -249,6 +249,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 				CalendarsEvent calendarsEvent = (CalendarsEvent) e;
 				DecisionWindow decisionWin = new DecisionWindow(calendarsEvent, this);
 				SessionManager.getAppDesktop().showWindow(decisionWin);
+			}
 		}	
 		else if (type.equals(ON_DAY_CLICK_EVENT) && ! Env.isReadOnlySession()) {
 			if (e.getData() instanceof Date date) {
@@ -289,7 +290,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 					SessionManager.getAppDesktop().showWindow(assignmentWin);
 				}
 			}
-		}		
+		}
 	}
 	
 	/**

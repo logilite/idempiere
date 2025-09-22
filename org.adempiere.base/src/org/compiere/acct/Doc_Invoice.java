@@ -628,13 +628,19 @@ public class Doc_Invoice extends Doc
 			//  Charge          DR
 			if(isCreatePost)
 			{
-				FactLine tl = fact.createLine(null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as),
-					getC_Currency_ID(), m_taxes[i].getAmount(), null);
-				if (tl != null)
-					tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
-				if (tl != null && invoice.getReversal_ID() > 0 && invoice.getReversal_ID() < invoice.getC_Invoice_ID())
+				fact.createLine(null, getAccount(Doc.ACCTTYPE_Charge, as),
+								getC_Currency_ID(), getAmount(Doc.AMTTYPE_Charge), null);
+				//  TaxCredit       DR
+				for (int i = 0; i < m_taxes.length; i++)
 				{
-					tl.updateReverseLine(MInvoice.Table_ID, invoice.getReversal_ID(), 0, BigDecimal.ONE);
+					FactLine tl = fact.createLine(null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as),
+						getC_Currency_ID(), m_taxes[i].getAmount(), null);
+					if (tl != null)
+						tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+					if (tl != null && invoice.getReversal_ID() > 0 && invoice.getReversal_ID() < invoice.getC_Invoice_ID())
+					{
+						tl.updateReverseLine(MInvoice.Table_ID, invoice.getReversal_ID(), 0, BigDecimal.ONE);
+					}
 				}
 			}
 			//  Expense         DR

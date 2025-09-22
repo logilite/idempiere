@@ -327,6 +327,18 @@ public interface I_A_Asset
 	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_BPartner_Location getC_BPartner_Location() throws RuntimeException;
 
+    /** Column name C_Department_ID */
+    public static final String COLUMNNAME_C_Department_ID = "C_Department_ID";
+
+	/** Set Department	  */
+	public void setC_Department_ID (int C_Department_ID);
+
+	/** Get Department	  */
+	public int getC_Department_ID();
+
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_C_Department getC_Department() throws RuntimeException;
+
     /** Column name C_Location_ID */
     public static final String COLUMNNAME_C_Location_ID = "C_Location_ID";
 
@@ -724,12 +736,12 @@ public interface I_A_Asset
     public static final String COLUMNNAME_NextMaintenenceUnit = "NextMaintenenceUnit";
 
 	/** Set Next Unit.
-	  * Next Maintenance Unit
+	  * Next Maintenence Unit
 	  */
 	public void setNextMaintenenceUnit (int NextMaintenenceUnit);
 
 	/** Get Next Unit.
-	  * Next Maintenance Unit
+	  * Next Maintenence Unit
 	  */
 	public int getNextMaintenenceUnit();
 

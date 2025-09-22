@@ -73,6 +73,7 @@ public class Login implements ILogin
 {
 	protected String loginErrMsg;
 	protected boolean isPasswordExpired;
+	protected boolean isSSOLogin = false;
 	protected MSSOPrincipalConfig m_SSOPrincipalConfig;
 
 	/**
@@ -812,7 +813,7 @@ public class Login implements ILogin
 	 *  @param  warehouse   optional warehouse information
 	 *  @param  timestamp   optional date
 	 *  @param  printerName optional printer info
-	 *  @return AD_Message of error (NoValidAcctInfo) or "" or error from model validator
+	 *  @return AD_Message of error (NoValidAcctInfo) or ""
 	 */
 	public String loadPreferences (KeyNamePair org, 
 		KeyNamePair warehouse, java.sql.Timestamp timestamp, String printerName)
@@ -1022,8 +1023,7 @@ public class Login implements ILogin
 		//	Country
 		Env.setContext(m_ctx, Env.C_COUNTRY_ID, MCountry.getDefault().getC_Country_ID());
 		// Call ModelValidators afterLoadPreferences - teo_sarca FR [ 1670025 ]
-		if (Util.isEmpty(retValue, true))
-			return ModelValidationEngine.get().afterLoadPreferences(m_ctx);
+		ModelValidationEngine.get().afterLoadPreferences(m_ctx);
 		return retValue;
 	}	//	loadPreferences
 	
@@ -1302,14 +1302,13 @@ public class Login implements ILogin
 
 		//	Authentication
 		boolean authenticated = false;
-		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
+		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false) && m_SSOPrincipalConfig != null;
 		isSSOLogin = isSSOEnable && token != null;
 
 		MSystem system = MSystem.get(m_ctx);
 		if (system == null)
 			throw new IllegalStateException("No System Info");
 		
-		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false) && m_SSOPrincipalConfig != null;
 		if (!isSSOEnable && (app_pwd == null || app_pwd.length() == 0))
 		{
 			loginErrMsg = "No Apps Password";
@@ -1356,11 +1355,9 @@ public class Login implements ILogin
 		ArrayList<KeyNamePair> clientList = new ArrayList<KeyNamePair>();
 		ArrayList<Integer> clientsValidated = new ArrayList<Integer>();
 
-		StringBuilder where = new StringBuilder("Password IS NOT NULL AND ");
-		if (email_login)
-			where.append("EMail=?");
-		else
-			where.append("COALESCE(LDAPUser,Name)=?");
+		StringBuilder where = new StringBuilder(isSSOEnable ? "" : "Password IS NOT NULL AND ");
+
+		where.append(MUser.getUserAuthWhere(isSSOEnable, searchKey_login));
 
 		where.append("	AND EXISTS (SELECT * FROM AD_User u ")
 						.append("	INNER JOIN	AD_Client c ON (u.AD_Client_ID = c.AD_Client_ID)	")
@@ -1639,12 +1636,9 @@ public class Login implements ILogin
 				loginErrMsg = Msg.getMsg(m_ctx, "UserAccountLocked", new Object[] {app_user});				
 			}
 		}
-		
-		if (isSSOLogin)
-			Env.setContext(Env.getCtx(), Env.IS_SSO_LOGIN, true);
-		else
-			Env.setContext(Env.getCtx(), Env.IS_SSO_LOGIN, false);
-		
+
+		Env.setContext(Env.getCtx(), Env.IS_SSO_LOGIN, isSSOEnable);
+
 		return retValue;
 	}
 

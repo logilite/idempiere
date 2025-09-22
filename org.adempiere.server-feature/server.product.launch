@@ -130,7 +130,7 @@
         <setEntry value="groovy-sql@default:false"/>
         <setEntry value="groovy-xml@default:false"/>
         <setEntry value="groovy@default:default"/>
-        <setEntry value="io.github.classgraph.classgraph*4.8.147@default:default"/>
+        <setEntry value="io.github.classgraph.classgraph@default:default"/>
         <setEntry value="jakarta.annotation-api@default:default"/>
         <setEntry value="jakarta.jws-api@default:default"/>
         <setEntry value="jakarta.persistence-api@default:default"/>
@@ -179,9 +179,11 @@
         <setEntry value="org.apache.cxf.cxf-rt-bindings-soap@default:default"/>
         <setEntry value="org.apache.cxf.cxf-rt-bindings-xml@default:default"/>
         <setEntry value="org.apache.cxf.cxf-rt-databinding-jaxb@default:default"/>
+        <setEntry value="org.apache.cxf.cxf-rt-databinding-xmlbeans@default:default"/>
         <setEntry value="org.apache.cxf.cxf-rt-frontend-jaxrs@default:default"/>
         <setEntry value="org.apache.cxf.cxf-rt-frontend-jaxws@default:default"/>
         <setEntry value="org.apache.cxf.cxf-rt-frontend-simple@default:default"/>
+        <setEntry value="org.apache.cxf.cxf-rt-rs-extension-providers@default:default"/>
         <setEntry value="org.apache.cxf.cxf-rt-rs-service-description@default:default"/>
         <setEntry value="org.apache.cxf.cxf-rt-security@default:default"/>
         <setEntry value="org.apache.cxf.cxf-rt-transports-http@default:default"/>
@@ -476,6 +478,7 @@
         <setEntry value="org.idempiere.tablepartition@default:default"/>
         <setEntry value="org.idempiere.ui.sso.oidc@default:default"/>
         <setEntry value="org.idempiere.webservices.resources@default:default"/>
+        <setEntry value="org.idempiere.webservices@default:default"/>
         <setEntry value="org.idempiere.zk.billboard.chart@default:default"/>
         <setEntry value="org.idempiere.zk.billboard@default:default"/>
         <setEntry value="org.idempiere.zk.breeze.theme@default:false"/>

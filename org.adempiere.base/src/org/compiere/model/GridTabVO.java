@@ -90,7 +90,7 @@ public class GridTabVO implements Evaluatee, Serializable
 	/**
 	 * 	Load Tab Details from rs into vo
 	 * 	@param vo Tab value object
-	 *	@param rs ResultSet from AD_Tab_v/t
+	 *	@param rs ResultSet from AD_Tab_v/t 
 	 * 	@return true if read ok
 	 */
 	private static boolean loadTabDetails (GridTabVO vo, ResultSet rs)
@@ -121,9 +121,7 @@ public class GridTabVO implements Evaluatee, Serializable
 			vo.AD_Table_UU = rs.getString("AD_Table_UU");			
 			
 			if (rs.getString("IsReadOnly").equals("Y"))
-				vo.IsReadOnly = true;
-			if (userDef != null)
-				vo.IsReadOnly = MUserDefTab.ISREADONLY_Yes.equals(userDef.getIsReadOnly());
+				vo.IsReadOnly = true;			
 			vo.ReadOnlyLogic = rs.getString("ReadOnlyLogic");
 						
 			if (rs.getString("IsInsertRecord").equals("N"))

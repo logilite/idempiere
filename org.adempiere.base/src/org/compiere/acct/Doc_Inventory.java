@@ -38,6 +38,7 @@ import org.compiere.model.MInventoryLine;
 import org.compiere.model.MInventoryLineMA;
 import org.compiere.model.MProduct;
 import org.compiere.model.ProductCost;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
 
@@ -119,8 +120,7 @@ public class Doc_Inventory extends Doc
 
 			String docSubTypeInv;
 			if (Util.isEmpty(parentDocSubTypeInv)) {
-				// IDEMPIERE-675: for backward compatibility - to post old
-				// documents that could have subtypeinv empty
+				// IDEMPIERE-675: for backward compatibility - to post old documents that could have subtypeinv empty
 				if (line.getQtyInternalUse().signum() != 0) {
 					docSubTypeInv = MDocType.DOCSUBTYPEINV_InternalUseInventory;
 				} else {
@@ -249,7 +249,7 @@ public class Doc_Inventory extends Doc
 		MInventory inventory = (MInventory) getPO();
 		boolean costAdjustment = MDocType.DOCSUBTYPEINV_CostAdjustment.equals(parentDocSubTypeInv);
 		String docCostingMethod = inventory.getCostingMethod();
-		
+		HashMap<String, BigDecimal> costMap =  new HashMap<String, BigDecimal>();
 		for (int i = 0; i < p_lines.length; i++)
 		{
 			DocLine line = p_lines[i];
@@ -278,6 +278,7 @@ public class Doc_Inventory extends Doc
 			BigDecimal adjustmentDiff = null;
 			if (costAdjustment)
 			{
+				costs = line.getAmtSource();
 				int orgId = line.getAD_Org_ID();
 				int asiId = line.getM_AttributeSetInstance_ID();
 				if (MAcctSchema.COSTINGLEVEL_Client.equals(costingLevel))
@@ -307,43 +308,51 @@ public class Doc_Inventory extends Doc
                 
 				if (!isReversal(line))
 				{
-					// MZ Goodwill
-					// if Physical Inventory CostDetail is exist then get Cost from Cost Detail
-					costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InventoryLine_ID=?");
-					// end MZ	
-					if (costs == null || costs.signum() == 0)
+					if (product.isStocked())
 					{
-						if (product.isStocked())
+						if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(product.getCostingLevel(as)) ) 
 						{
-							//ok if we have purchased zero cost item from vendor before
-							String sql="SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND ((Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)) OR M_InventoryLine_ID > 0)"
-									+ " AND AD_Client_ID = ? ";
-							ArrayList<Integer> list = new ArrayList<Integer>();
-							list.add(product.getM_Product_ID());
-							list.add(getAD_Client_ID());
-							
-							if(MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))
+							if (line.getM_AttributeSetInstance_ID() == 0 ) 
 							{
-								sql = "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND ((Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)) OR M_InventoryLine_ID > 0)"
-									+ " AND AD_Client_ID = ? AND M_AttributeSetInstance_ID=?";
-								list.add(line.getM_AttributeSetInstance_ID());
-							}
-							
-							int count = DB.getSQLValue(null,sql,list.toArray());
-							if (count > 0)
-							{
-								costs = BigDecimal.ZERO;
-							}
+								MInventoryLine invLine = (MInventoryLine) line.getPO();
+								MInventoryLineMA mas[] = MInventoryLineMA.get(getCtx(), invLine.get_ID(), getTrxName());
+								if (mas != null && mas.length > 0 )
+								{
+									costs  = BigDecimal.ZERO;
+									for (int j = 0; j < mas.length; j++)
+									{
+										MInventoryLineMA ma = mas[j];
+										BigDecimal QtyMA = ma.getMovementQty();
+										ProductCost pc = line.getProductCost();
+										pc.setQty(QtyMA.negate());
+										pc.setM_M_AttributeSetInstance_ID(ma.getM_AttributeSetInstance_ID());
+										BigDecimal maCosts = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InventoryLine_ID=?");
+										costMap.put(line.get_ID()+ "_"+ ma.getM_AttributeSetInstance_ID(), maCosts);
+	
+										costs = costs.add(maCosts);
+									}						
+								}
+							} 
 							else
 							{
-								p_Error = "No Costs for line " + line.getLine() +"-"+ line.getProduct().getName() ;
-								log.log(Level.WARNING, p_Error);
-								return null;
+								costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InventoryLine_ID=?");
 							}
+						} 
+						else
+						{
+							// MZ Goodwill
+							// if Physical Inventory CostDetail is exist then get Cost from Cost Detail
+							costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InventoryLine_ID=?");
+							// end MZ	
+						}					
+						if (costs == null || costs.signum() == 0)
+						{
+							p_Error = "No Costs for " + line.getProduct().getName();
+							return null;
 						}
-						else	//	ignore service
-							doPosting = false;
 					}
+					else	//	ignore service
+						doPosting = false;
 				}
 				else
 				{

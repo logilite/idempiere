@@ -14,7 +14,7 @@ import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.util.DisplayType;
@@ -70,7 +70,7 @@ public class WFApproverWindow extends Window implements EventListener<Event>,IWF
 		this.setClosable(false);
 
 		// Set widget attribute
-		setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "Approver Dialog");
+		setWidgetOverride(AdempiereWebUI.WIDGET_INSTANCE_NAME, "Approver Dialog");
 
 				
 		Panel pnlApprover = new Panel();
@@ -154,7 +154,7 @@ public class WFApproverWindow extends Window implements EventListener<Event>,IWF
 	            if (fApprover.getValue() == null)
 	            {
 	                // Show an error message and stop processing
-	                FDialog.error(0, this.getParent(), "The 'Assign To' field is mandatory. Please select an assignee.");
+	                Dialog.error(0, "The 'Assign To' field is mandatory. Please select an assignee.");
 	                return;
 	            }
 				

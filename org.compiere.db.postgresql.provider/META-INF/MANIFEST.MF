@@ -18,7 +18,4 @@ Service-Component: OSGI-INF/*.xml
 Automatic-Module-Name: org.compiere.db.postgresql.provider
 Bundle-Vendor: iDempiere Community
 Export-Package: org.adempiere.db.postgresql.config,
- org.compiere.dbPort,
- com.mchange.v2.c3p0,
- org.postgresql,
- org.postgresql.copy
+ org.compiere.dbPort

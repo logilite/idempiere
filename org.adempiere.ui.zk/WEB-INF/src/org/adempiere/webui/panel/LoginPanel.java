@@ -445,11 +445,8 @@ public class LoginPanel extends Window implements EventListener<Event>
 			}
 		}
 
-    	boolean isShowOKButton = true;
-		Object ssoAdminLoing = Executions.getCurrent().getDesktop().getSession().getAttribute(ISSOPrincipalService.SSO_ADMIN_LOGIN);
-		boolean isAdminLogin = ssoAdminLoing != null && (boolean) ssoAdminLoing;
-		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
-		boolean isShowLoginPage = MSysConfig.getBooleanValue(MSysConfig.SSO_SHOW_LOGINPAGE, false);
+		Object ssoAdminLogin = Executions.getCurrent().getDesktop().getSession().getAttribute(ISSOPrincipalService.SSO_ADMIN_LOGIN);
+		boolean isAdminLogin = ssoAdminLogin != null && (boolean) ssoAdminLogin;
 		boolean isShowSSOOption = MSysConfig.getBooleanValue(MSysConfig.SSO_SHOWSSO_OPTION, false);
 		if (isShowSSOOption && isSSOEnable && !isAdminLogin)
 		{

@@ -133,8 +133,6 @@ public class MCostDetail extends X_M_CostDetail
 				M_CostElement_ID, 
 				Amt, Qty, Description, DateAcct, Ref_CostDetail_ID, trxName);
 			cd.setC_OrderLine_ID (C_OrderLine_ID);
-			if(M_InOutLine_ID>0)
-				cd.setM_InOutLine_ID(M_InOutLine_ID);
 		}
 		else
 		{
@@ -187,9 +185,9 @@ public class MCostDetail extends X_M_CostDetail
 	 */
 	@Deprecated
 	public static boolean createInvoice (MAcctSchema as, int AD_Org_ID, 
-			int M_Product_ID, int M_AttributeSetInstance_ID,
-			int C_InvoiceLine_ID, int M_CostElement_ID,
-			BigDecimal Amt, BigDecimal Qty,
+		int M_Product_ID, int M_AttributeSetInstance_ID,
+		int C_InvoiceLine_ID, int M_CostElement_ID, 
+		BigDecimal Amt, BigDecimal Qty,
 		String Description, String trxName)
 	{
 		return createInvoice (as, AD_Org_ID, M_Product_ID, M_AttributeSetInstance_ID, C_InvoiceLine_ID, M_CostElement_ID, 

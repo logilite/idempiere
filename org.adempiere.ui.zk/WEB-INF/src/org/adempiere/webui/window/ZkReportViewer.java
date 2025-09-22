@@ -812,36 +812,6 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 		}		
 	}
 
-	private void setupPreviewType() {
-		String selectedValue = null;
-		if (previewType.getItemCount() > 0) {
-			if (previewType.getSelectedIndex() >= 0) {
-				selectedValue = previewType.getSelectedItem().getValue();
-			}
-			previewType.getChildren().clear();
-		}
-		if (m_reportEngine.getPrintFormat().getJasperProcess_ID() > 0) {
-			for (ValueNamePair vnp : JasperPrintRenderer.getPreviewType(m_isCanExport)) {
-				ListItem li = previewType.appendItem(vnp.getName(), vnp.getValue());
-				if (selectedValue != null && selectedValue.equals(li.getValue()))
-					previewType.setSelectedItem(li);
-			}
-			if (summary != null)
-				summary.setVisible(false);
-		} else {
-			for(String id : rendererMap.keySet()) {
-				IReportViewerRenderer renderer = rendererMap.get(id);
-				if (!renderer.isPreview(m_isCanExport))
-					continue;
-				ListItem li = previewType.appendItem(renderer.getPreviewLabel(), renderer.getId());
-				if (selectedValue != null && selectedValue.equals(li.getValue()))
-					previewType.setSelectedItem(li);
-			}
-			if (summary != null)
-				summary.setVisible(true);
-		}		
-	}
-
 	/**
 	 * Set dummy onCloseHandler for parent tab
 	 */

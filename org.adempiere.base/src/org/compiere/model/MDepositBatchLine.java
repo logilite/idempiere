@@ -155,6 +155,7 @@ import org.compiere.util.Util;
 		}
 		
 		//	Set DepositBatch_ID into C_Payment table
+		MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(getC_Payment_ID(),get_TrxName());
 		if (getC_Payment_ID() != 0 && (getC_DepositBatch().getDocStatus().equals(MDepositBatch.STATUS_Drafted))
 				|| getC_DepositBatch().getDocStatus().equals(MDepositBatch.STATUS_InProgress)
 				|| getC_DepositBatch().getDocStatus().equals(MDepositBatch.STATUS_Invalid)
@@ -164,19 +165,18 @@ import org.compiere.util.Util;
 			//if payment is changed then clear reference of deposit batch from old payment and mark reconciled flag as N
 			if (!newRecord && is_ValueChanged(COLUMNNAME_C_Payment_ID))
 			{
-				MPayment payment = new Query(getCtx(),
+				MPayment payment1 = new Query(getCtx(),
 						MPayment.Table_Name, "C_Payment_ID = ? AND C_DepositBatch_ID = ?", get_TrxName())
 								.setParameters(get_ValueOldAsInt(COLUMNNAME_C_Payment_ID), getC_DepositBatch_ID()).first();
 				
-				if (payment != null) {
-					payment.setC_DepositBatch_ID(0);
-					payment.setIsReconciled(false);
-					payment.saveEx(get_TrxName());
+				if (payment1 != null) {
+					payment1.setC_DepositBatch_ID(0);
+					payment1.setIsReconciled(false);
+					payment1.saveEx(get_TrxName());
 				}
 				
 			}
 			
-            MPayment payment = (MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(getC_Payment_ID(), get_TrxName());
 			payment.setC_DepositBatch_ID(getC_DepositBatch_ID());
 			payment.saveEx(get_TrxName());
 

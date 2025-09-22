@@ -1022,7 +1022,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			{
 				StateEngine state = m_process.getState();
 				if (!Util.isEmpty(m_process.getProcessMsg()) && (state.isTerminated() || state.isAborted()))
-				{W
+				{
 					msg.append(m_process.getProcessMsg());
 					msg.append("\n");
 				}
@@ -1890,8 +1890,6 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				+ " - Should=" + value + ", Is=" + m_po.get_ValueOfColumn(AD_Column_ID));
 		//	Info
 		String msg = getNode().getAttributeName() + "=" + value;
-		if (textMsg != null && textMsg.length() > 0)
-			msg += " - " + textMsg;
 		setTextMsgBefore (msg);
 		m_newValue = value;
 		return true;

@@ -36,6 +36,7 @@ import org.idempiere.adInterface.x10.ModelSetDocActionRequestDocument;
 import org.idempiere.adInterface.x10.Operation;
 import org.idempiere.adInterface.x10.Operation.TargetPort;
 import org.idempiere.adInterface.x10.Operations;
+import org.idempiere.adInterface.x10.RunProcessResponseDocument;
 import org.idempiere.adInterface.x10.StandardResponse;
 import org.idempiere.adInterface.x10.StandardResponseDocument;
 import org.idempiere.adInterface.x10.WindowTabDataDocument;
@@ -208,8 +209,13 @@ public class CompositeServiceImpl extends AbstractService implements CompositeSe
 				runProcessReq.setADLoginRequest(reqlogin);
 				runProcessReq.setModelRunProcess(operation.getModelRunProcess());
 
-				respDoc = modelADService.runProcessTrx(wrapperDoc);
-				
+				RunProcessResponseDocument runResponse = modelADService.runProcess(wrapperDoc);
+				if (runResponse != null) {
+					respDoc = StandardResponseDocument.Factory.newInstance();
+					StandardResponse resp = respDoc.addNewStandardResponse();
+					resp.setIsError(runResponse.getRunProcessResponse().getIsError());
+					resp.setRunProcessResponse(runResponse.getRunProcessResponse());
+				}
 			} else if (portEnum == TargetPort.SET_DOC_ACTION) {
 				if (operation.getModelSetDocAction() == null) {
 					rollbackAndSetError(trx, compResp, respAggregator, "Operation updateData must required ModelSetDocAction");

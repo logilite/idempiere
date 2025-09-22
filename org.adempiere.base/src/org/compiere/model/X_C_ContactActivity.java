@@ -32,7 +32,7 @@ public class X_C_ContactActivity extends PO implements I_C_ContactActivity, I_Pe
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20250805L;
+	private static final long serialVersionUID = 20250922L;
 
     /** Standard Constructor */
     public X_C_ContactActivity (Properties ctx, int C_ContactActivity_ID, String trxName)
@@ -146,17 +146,49 @@ public class X_C_ContactActivity extends PO implements I_C_ContactActivity, I_Pe
 			 return 0;
 		return ii.intValue();
 	}
-	
+
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
+			.getPO(getC_BPartner_ID(), get_TrxName());
+	}
+
+	/** Set Business Partner.
+		@param C_BPartner_ID Identifies a Business Partner
+	*/
+	public void setC_BPartner_ID (int C_BPartner_ID)
+	{
+		if (C_BPartner_ID < 1)
+			set_Value (COLUMNNAME_C_BPartner_ID, null);
+		else
+			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
+	}
+
+	/** Get Business Partner.
+		@return Identifies a Business Partner
+	  */
+	public int getC_BPartner_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** C_ContactActivityRelatedTo AD_Reference_ID=200107 */
+	public static final int C_CONTACTACTIVITYRELATEDTO_AD_Reference_ID=200107;
+	/** Business Partner = BP */
+	public static final String C_CONTACTACTIVITYRELATEDTO_BusinessPartner = "BP";
+	/** Contact = CO */
+	public static final String C_CONTACTACTIVITYRELATEDTO_Contact = "CO";
 	/** Lead = LE */
 	public static final String C_CONTACTACTIVITYRELATEDTO_Lead = "LE";
 	/** Sales Opportunity = SO */
 	public static final String C_CONTACTACTIVITYRELATEDTO_SalesOpportunity = "SO";
-	/** Contact = CO */
-	public static final String C_CONTACTACTIVITYRELATEDTO_Contact = "CO";
-	/** Business Partner = BP */
-	public static final String C_CONTACTACTIVITYRELATEDTO_BusinessPartner = "BP";
 	/** Set Related To.
-		@param C_ContactActivityRelatedTo Related To	  */
+		@param C_ContactActivityRelatedTo Related To
+	*/
 	public void setC_ContactActivityRelatedTo (String C_ContactActivityRelatedTo)
 	{
 
@@ -165,7 +197,7 @@ public class X_C_ContactActivity extends PO implements I_C_ContactActivity, I_Pe
 
 	/** Get Related To.
 		@return Related To	  */
-	public String getC_ContactActivityRelatedTo () 
+	public String getC_ContactActivityRelatedTo()
 	{
 		return (String)get_Value(COLUMNNAME_C_ContactActivityRelatedTo);
 	}
@@ -206,12 +238,6 @@ public class X_C_ContactActivity extends PO implements I_C_ContactActivity, I_Pe
 	{
 		return (String)get_Value(COLUMNNAME_C_ContactActivity_UU);
 	}
-	
-	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_Name)
-			.getPO(getC_Project_ID(), get_TrxName());	
-	}
 
 	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Opportunity getC_Opportunity() throws RuntimeException
@@ -240,6 +266,36 @@ public class X_C_ContactActivity extends PO implements I_C_ContactActivity, I_Pe
 			 return 0;
 		return ii.intValue();
 	}
+
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
+			.getPO(getC_Project_ID(), get_TrxName());
+	}
+
+	/** Set Project.
+		@param C_Project_ID Financial Project
+	*/
+	public void setC_Project_ID (int C_Project_ID)
+	{
+		if (C_Project_ID < 1)
+			set_Value (COLUMNNAME_C_Project_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
+	}
+
+	/** Get Project.
+		@return Financial Project
+	  */
+	public int getC_Project_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Project_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Comments.
 		@param Comments Comments or additional information
 	*/
@@ -389,40 +445,5 @@ public class X_C_ContactActivity extends PO implements I_C_ContactActivity, I_Pe
 	public Timestamp getStartDate()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_StartDate);
-	}
-
-	/**
-	 * Set Business Partner .
-	 * 
-	 * @param C_BPartner_ID Identifies a Business Partner
-	 */
-	@Override
-	public void setC_BPartner_ID(int C_BPartner_ID)
-	{
-		if (C_BPartner_ID < 1)
-			set_Value(COLUMNNAME_C_BPartner_ID, null);
-		else
-			set_Value(COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
-	}
-
-	/**
-	 * Get Business Partner .
-	 * 
-	 * @return Identifies a Business Partner
-	 */
-	@Override
-	public int getC_BPartner_ID()
-	{
-		Integer ii = (Integer) get_Value(COLUMNNAME_C_BPartner_ID);
-		if (ii == null)
-			return 0;
-		return ii.intValue();
-	}
-
-	@Override
-	public I_C_BPartner getC_BPartner() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_BPartner) MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
-				.getPO(getC_BPartner_ID(), get_TrxName());
 	}
 }

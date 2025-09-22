@@ -221,7 +221,7 @@ public class LoginWindow extends Window implements EventListener<Event>
 	 * @param clientsKNPairs
 	 * @param principalConfig
 	 */
-    public void loginOk(String userName, boolean show, KeyNamePair[] clientsKNPairs, SSOPrincipalConfig principalConfig)
+    public void loginOk(String userName, boolean show, KeyNamePair[] clientsKNPairs, MSSOPrincipalConfig principalConfig)
 	{
 		boolean isClientDefined = (clientsKNPairs.length == 1 || !Util.isEmpty(Env.getContext(ctx, Env.AD_USER_ID)));
 		if (pnlRole == null)

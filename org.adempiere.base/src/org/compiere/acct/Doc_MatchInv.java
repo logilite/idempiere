@@ -861,7 +861,7 @@ public class Doc_MatchInv extends Doc
 					m_receiptLine.getM_InOutLine_ID(), elementId,
 					amt, tQty,	getDescription(), false, getDateAcct(), Ref_CostDetail_ID, getTrxName()))
 				{
-					BigDecimal amt = landedCostMap.get(elementId);
+					amt = landedCostMap.get(elementId);
 					if (!MCostDetail.createShipment(as, getAD_Org_ID(), 
 						getM_Product_ID(), matchInv.getM_AttributeSetInstance_ID(),
 						m_receiptLine.getM_InOutLine_ID(), elementId,

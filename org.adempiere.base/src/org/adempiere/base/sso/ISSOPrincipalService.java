@@ -33,19 +33,11 @@ public interface ISSOPrincipalService
 	 * from a session.
 	 */
 	public static final String	SSO_SELECTED_PROVIDER		= "sso.selected.provider";
-
-	public static final String	SSO_ADMIN_LOGIN				= "sso.admin.login";
-
-	/**
-	 * Represents the key used to store or retrieve the selected SSO (Single Sign-On) provider
-	 * from a session. 
-	 */
-	public static final String	SSO_SELECTED_PROVIDER		= "sso.selected.provider";
-
 	/**
 	 * Represents the key used to store or retrieve the request query parameter from a session.
 	 */
 	public static final String	SSO_QUERY_STRING				= "sso.query.string";
+	public static final String	SSO_ADMIN_LOGIN				= "sso.admin.login";
 
 	/**
 	 * Check the request has an authentication code

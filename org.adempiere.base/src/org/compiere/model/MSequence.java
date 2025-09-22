@@ -358,6 +358,8 @@ public class MSequence extends X_AD_Sequence
 		String orgColumn = seq.getOrgColumn();
 		int startNo = seq.getStartNo();
 		int incrementNo = seq.getIncrementNo();
+//		String prefix = seq.getPrefix();
+//		String suffix = seq.getSuffix();
 		String decimalPattern = seq.getDecimalPattern();
 		SequenceNoKeyParts keyParts = new SequenceNoKeyParts(seq, po, trxName);
 		
@@ -383,6 +385,8 @@ public class MSequence extends X_AD_Sequence
 				selectSQL.append("AND y.AD_Org_ID = ? ");
 			if (seq.isStartNewYear() || seq.isUsePrefixAsKey() || seq.isUseSuffixAsKey())
 				selectSQL.append("AND y.SequenceKey = ? ");
+//			if (seq.isStartNewYear() || seq.isOrgLevelSequence())
+//				selectSQL.append("AND y.CalendarYearMonth = ? ");
 			selectSQL.append("AND s.IsActive='Y' AND s.IsTableID='N' AND s.IsAutoSequence='Y' ")
 					.append("ORDER BY s.AD_Client_ID DESC");
 		} else {
@@ -444,22 +448,21 @@ public class MSequence extends X_AD_Sequence
 				else
 					sdf = new SimpleDateFormat("yyyy");
 				
-				
 				if (po != null && dateColumn != null && dateColumn.length() > 0)
 				{
-					Object docDate = po.get_Value(dateColumn);
-					if (docDate != null && docDate instanceof Date)
+					Object dDate = po.get_Value(dateColumn);
+					if (dDate != null && dDate instanceof Date)
 					{
+						Date docDate = (Date)dDate;
 						Timestamp timestamp = new Timestamp(((Date)docDate).getTime());
 						period = MPeriod.get(Env.getCtx(), timestamp, Env.getAD_Org_ID(Env.getCtx()), null);
-					
-						if(IsUseFiscalYear && !isStartNewMonth) {
+
+						if(IsUseFiscalYear && !isStartNewMonth)
 							calendarYearMonth = period.getC_Year().getFiscalYear();
-						}
 						else
-							calendarYearMonth = sdf.format((Date) docDate);
+							calendarYearMonth = sdf.format(docDate);
 					}
-					else if (docDate != null)
+					else if (dDate != null)
 					{
 						errorMsg = "DateColumnInvalid";
 					}
@@ -468,11 +471,10 @@ public class MSequence extends X_AD_Sequence
 				{
 					calendarYearMonth = sdf.format(new Date());
 				}
+				keyParts.setCalendarYearMonth(calendarYearMonth);
 
 				if (!Util.isEmpty(errorMsg, true))
 					throw new AdempiereException(errorMsg);
-
-				keyParts.setCalendarYearMonth(calendarYearMonth);
 			}
 			
 			if (isUseOrgLevel)
@@ -524,7 +526,7 @@ public class MSequence extends X_AD_Sequence
 							sql.append(" AND AD_Org_ID=?");
 						if (seq.isStartNewYear() || seq.isUsePrefixAsKey() || seq.isUseSuffixAsKey())
 							sql.append(" AND SequenceKey=?");
-						
+
 						if (!DB.isOracle() && !DB.isPostgreSQL())
 							sql = new StringBuilder(DB.getDatabase().convertStatement(sql.toString()));
 						updateSQL = conn.prepareStatement(sql.toString());
@@ -573,9 +575,7 @@ public class MSequence extends X_AD_Sequence
 		catch (Exception e)
 		{
 			s_log.log(Level.SEVERE, "(DocType) [" + trxName + "]", e);
-			if (!Util.isEmpty(errorMsg, true))
-				throw new AdempiereException(errorMsg, e);
-			else if (DBException.isTimeout(e))
+			if (DBException.isTimeout(e))
 				throw new AdempiereException("GenerateDocumentNoTimeOut", e);
 			else
 				throw new AdempiereException("GenerateDocumentNoError", e);
@@ -623,20 +623,20 @@ public class MSequence extends X_AD_Sequence
 		
 		//	create DocumentNo
 		StringBuilder doc = new StringBuilder();
-		if (prefix != null && prefix.length() > 0) {
+		if (prefixValue != null && prefixValue.length() > 0) {
 			if(isStartNewYear && IsUseFiscalYear && !isStartNewMonth)
-				prefix = prefix.replace(FISCAL_YEAR, calendarYearMonth);
+				prefixValue = prefixValue.replace(FISCAL_YEAR, calendarYearMonth);
 
 			if(docDate!=null)
-				prefix = replaceDateItem(prefix, docDate);
-			
+				prefixValue = replaceDateItem(prefixValue, docDate);
+
 			//Supporting to support Period and year related columns in prefix
 			if(period!=null)
-				prefix = Env.parseVariable(prefix, period, trxName, true);
-			
-			String prefixValue = Env.parseVariable(prefix, po, trxName, false);
-			if (!Util.isEmpty(prefixValue, true))
-				doc.append(prefixValue);
+				prefixValue = Env.parseVariable(prefixValue, period, trxName, true);
+
+			String prefix = Env.parseVariable(prefixValue, po, trxName, false);
+			if (!Util.isEmpty(prefix, true))
+				doc.append(prefix);
 		}
 
 		if (decimalPattern != null && decimalPattern.length() > 0)
@@ -644,19 +644,19 @@ public class MSequence extends X_AD_Sequence
 		else
 			doc.append(next);
 
-		if (suffix != null && suffix.length() > 0) {
+		if (suffixValue != null && suffixValue.length() > 0) {
 			if(isStartNewYear && IsUseFiscalYear && !isStartNewMonth)
-				suffix = suffix.replace(FISCAL_YEAR, calendarYearMonth);
-			
+				suffixValue = suffixValue.replace(FISCAL_YEAR, calendarYearMonth);
+
 			if(docDate!=null)
-				suffix = replaceDateItem(suffix, docDate);
+				suffixValue = replaceDateItem(suffixValue, docDate);
 			//Supporting to support Period and year related columns in suffix
 			if(period!=null)
-				suffix = Env.parseVariable(suffix, period, trxName, true);
-			
-			String suffixValue = Env.parseVariable(suffix, po, trxName, false);
-			if (!Util.isEmpty(suffixValue, true))
-				doc.append(suffixValue);
+				suffixValue = Env.parseVariable(suffixValue, period, trxName, true);
+
+			String suffix = Env.parseVariable(suffixValue, po, trxName, false);
+			if (!Util.isEmpty(suffix, true))
+				doc.append(suffix);
 		}
 
 		String documentNo = doc.toString();
@@ -1404,6 +1404,7 @@ public class MSequence extends X_AD_Sequence
 						docOrg_ID = (Integer)orgObj;
 					keyParts.setAD_Org_ID(docOrg_ID);
 				}
+				// TODO Cross check functionality
 				String sql = "SELECT CurrentNext FROM AD_Sequence_No WHERE AD_Sequence_ID=? AND SequenceKey=?";
 				if (seq.isOrgLevelSequence())
 					sql += " AND AD_Org_ID=?";

@@ -312,8 +312,6 @@ public class MPrintFormat extends X_AD_PrintFormat implements ImmutablePOSupport
 	 */
 	private ArrayList<MPrintFormatItem> getItemsList(String sql)
 	{
-		if (m_items != null)
-			return m_items;
 		ArrayList<MPrintFormatItem> list = new ArrayList<MPrintFormatItem>();
 
 		MRole role = MRole.getDefault(getCtx(), false);

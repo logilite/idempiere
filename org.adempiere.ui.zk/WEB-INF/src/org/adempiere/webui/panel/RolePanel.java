@@ -1041,18 +1041,6 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
         }
 	}
 
-    /**
-     * Check if the field is filled, throws WrongValueException if not
-     * @param lst
-     * @param lbl
-     */
-    private void checkMandatoryField(Combobox lst, Label lbl) {
-    	Comboitem item = lst.getSelectedItem();
-        if (item == null || item.getValue() == null) {
-        	throw new WrongValueException(lst, Msg.getMsg(m_ctx, "FillMandatory") + lbl.getValue());
-        }
-	}
-
 	@Override
 	public boolean isDeferrable() {
 		return false;

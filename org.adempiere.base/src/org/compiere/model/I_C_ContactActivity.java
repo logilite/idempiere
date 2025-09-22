@@ -77,24 +77,24 @@ public interface I_C_ContactActivity
 
 	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException;
-	
-	/** Column name C_BPartner_ID */
+
+    /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
 
-	/** Set Business Partner .
+	/** Set Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public void setC_BPartner_ID (int C_BPartner_ID);
 
-	/** Get Business Partner .
+	/** Get Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public int getC_BPartner_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException;
 
-	
-	/** Column name C_ContactActivityRelatedTo */
+    /** Column name C_ContactActivityRelatedTo */
     public static final String COLUMNNAME_C_ContactActivityRelatedTo = "C_ContactActivityRelatedTo";
 
 	/** Set Related To	  */
@@ -124,21 +124,6 @@ public interface I_C_ContactActivity
 
 	/** Get C_ContactActivity_UU	  */
 	public String getC_ContactActivity_UU();
-	
-	/** Column name C_Project_ID */
-    public static final String COLUMNNAME_C_Project_ID = "C_Project_ID";
-
-	/** Set Project.
-	  * Financial Project
-	  */
-	public void setC_Project_ID (int C_Project_ID);
-
-	/** Get Project.
-	  * Financial Project
-	  */
-	public int getC_Project_ID();
-
-	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException;
 
     /** Column name C_Opportunity_ID */
     public static final String COLUMNNAME_C_Opportunity_ID = "C_Opportunity_ID";
@@ -151,6 +136,22 @@ public interface I_C_ContactActivity
 
 	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Opportunity getC_Opportunity() throws RuntimeException;
+
+    /** Column name C_Project_ID */
+    public static final String COLUMNNAME_C_Project_ID = "C_Project_ID";
+
+	/** Set Project.
+	  * Financial Project
+	  */
+	public void setC_Project_ID (int C_Project_ID);
+
+	/** Get Project.
+	  * Financial Project
+	  */
+	public int getC_Project_ID();
+
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException;
 
     /** Column name Comments */
     public static final String COLUMNNAME_Comments = "Comments";

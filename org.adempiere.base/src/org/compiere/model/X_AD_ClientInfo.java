@@ -31,7 +31,7 @@ public class X_AD_ClientInfo extends PO implements I_AD_ClientInfo, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20250805L;
+	private static final long serialVersionUID = 20250922L;
 
     /** Standard Constructor */
     public X_AD_ClientInfo (Properties ctx, int AD_ClientInfo_ID, String trxName)
@@ -745,6 +745,27 @@ public class X_AD_ClientInfo extends PO implements I_AD_ClientInfo, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Logo Web Header.
+		@param LogoWebHeader_ID Logo Web Header
+	*/
+	public void setLogoWebHeader_ID (int LogoWebHeader_ID)
+	{
+		if (LogoWebHeader_ID < 1)
+			set_Value (COLUMNNAME_LogoWebHeader_ID, null);
+		else
+			set_Value (COLUMNNAME_LogoWebHeader_ID, Integer.valueOf(LogoWebHeader_ID));
+	}
+
+	/** Get Logo Web Header.
+		@return Logo Web Header	  */
+	public int getLogoWebHeader_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_LogoWebHeader_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Logo Web.
 		@param LogoWeb_ID Logo Web
 	*/
@@ -889,9 +910,8 @@ public class X_AD_ClientInfo extends PO implements I_AD_ClientInfo, I_Persistent
 	}
 
 	/** Set ZK Hostname.
-		@param ZKHostname 
-		Hostname of the ZK webui server
-	  */
+		@param ZKHostname Hostname of the ZK webui server
+	*/
 	public void setZKHostname (String ZKHostname)
 	{
 		set_Value (COLUMNNAME_ZKHostname, ZKHostname);
@@ -900,7 +920,7 @@ public class X_AD_ClientInfo extends PO implements I_AD_ClientInfo, I_Persistent
 	/** Get ZK Hostname.
 		@return Hostname of the ZK webui server
 	  */
-	public String getZKHostname () 
+	public String getZKHostname()
 	{
 		return (String)get_Value(COLUMNNAME_ZKHostname);
 	}

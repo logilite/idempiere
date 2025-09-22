@@ -258,12 +258,17 @@ public class Doc_Production extends Doc
 		//  Line pointer
 		FactLine fl = null;
 		X_M_Production prod = (X_M_Production)getPO();
+		HashMap<String, BigDecimal> costMap =  new HashMap<String, BigDecimal>();
+
 		for (int i = 0; i < p_lines.length; i++)
 		{
 			DocLine line = p_lines[i];
+			//	Calculate Costs
+			BigDecimal costs = BigDecimal.ZERO;
 			
-			MProductionLine productionLine = (MProductionLine)line.getPO();
-			MProduct product = (MProduct) productionLine.getM_Product();
+			X_M_ProductionLine prodline = (X_M_ProductionLine)line.getPO();
+			MProductionLineMA mas[] = MProductionLineMA.get(getCtx(), prodline.get_ID(), getTrxName());
+			MProduct product = (MProduct) prodline.getM_Product();
 			String CostingLevel = product.getCostingLevel(as);
 			String costingMethod = product.getCostingMethod(as);
 
@@ -318,12 +323,12 @@ public class Doc_Production extends Doc
 					costs = line.getProductCosts(as, line.getAD_Org_ID(), false);
 				}
 				costMap.put(line.get_ID()+ "_"+ line.getM_AttributeSetInstance_ID(), costs);
+
 			}
 			
 			int stdPrecision = as.getStdPrecision();
-			BigDecimal bomCost = Env.ZERO;
-			BigDecimal qtyProduced = Env.ZERO;	
-			
+			BigDecimal bomCost = Env.ZERO;	
+			BigDecimal qtyProduced = null;
 			if (line.isProductionBOM())
 			{
 				X_M_ProductionLine endProLine = (X_M_ProductionLine)line.getPO();
@@ -373,7 +378,8 @@ public class Doc_Production extends Doc
 								} 
 								else
 									p_Error = "Failed to post - No Attribute Set for line";
-							}
+
+							} 
 							else
 							{
 								// get cost of children  for batch costing level 
@@ -409,7 +415,6 @@ public class Doc_Production extends Doc
 							costMap.put(line0.get_ID()+ "_"+ line0.getM_AttributeSetInstance_ID(),costs0);
 							bomCost = bomCost.add(costs0);
 						}
-							bomCost = bomCost.add(costs0);
 					}
 				}
 				

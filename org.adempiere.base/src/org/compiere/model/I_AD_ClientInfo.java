@@ -426,15 +426,6 @@ public interface I_AD_ClientInfo
 	/** Get Logo Report	  */
 	public int getLogoReport_ID();
 
-    /** Column name LogoWeb_ID */
-    public static final String COLUMNNAME_LogoWeb_ID = "LogoWeb_ID";
-
-	/** Set Logo Web	  */
-	public void setLogoWeb_ID (int LogoWeb_ID);
-
-	/** Get Logo Web	  */
-	public int getLogoWeb_ID();
-
     /** Column name LogoWebHeader_ID */
     public static final String COLUMNNAME_LogoWebHeader_ID = "LogoWebHeader_ID";
 
@@ -443,6 +434,15 @@ public interface I_AD_ClientInfo
 
 	/** Get Logo Web Header	  */
 	public int getLogoWebHeader_ID();
+
+    /** Column name LogoWeb_ID */
+    public static final String COLUMNNAME_LogoWeb_ID = "LogoWeb_ID";
+
+	/** Set Logo Web	  */
+	public void setLogoWeb_ID (int LogoWeb_ID);
+
+	/** Get Logo Web	  */
+	public int getLogoWeb_ID();
 
     /** Column name Logo_ID */
     public static final String COLUMNNAME_Logo_ID = "Logo_ID";

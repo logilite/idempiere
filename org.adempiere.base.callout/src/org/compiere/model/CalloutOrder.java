@@ -1341,7 +1341,6 @@ public class CalloutOrder extends CalloutEngine
 				Boolean isStockAvailabilityCheck = docType.get_ValueAsBoolean("isStockAvailabilityCheck");
 				if (isStockAvailabilityCheck)
 				{
-					int M_Warehouse_ID = Env.getContextAsInt(ctx, WindowNo, "M_Warehouse_ID");
 					int M_AttributeSetInstance_ID = Env.getContextAsInt(ctx, WindowNo, mTab.getTabNo(), "M_AttributeSetInstance_ID");
 					BigDecimal available = MStorageReservation.getQtyAvailable
 						(M_Warehouse_ID, M_Product_ID, M_AttributeSetInstance_ID, null);

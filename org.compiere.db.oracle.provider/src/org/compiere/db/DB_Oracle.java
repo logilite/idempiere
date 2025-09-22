@@ -1167,7 +1167,6 @@ public class DB_Oracle implements AdempiereDatabase
 		{
 			if (! column.isMandatory())
 				sqlDefault.append(" DEFAULT NULL ");
-			defaultValue = null;
 		}
 		sql.append(sqlDefault);
 		

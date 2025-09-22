@@ -569,6 +569,10 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	public static final String ACTION_UserForm = "X";
 	/** Wait (Sleep) = Z */
 	public static final String ACTION_WaitSleep = "Z";
+	/** User Task = U */
+	public static final String ACTION_UserTask = "U";
+
+	
 	/** Set Action.
 		@param Action Indicates the Action to be performed
 	*/
@@ -1476,5 +1480,28 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	@Override
+	public void setApprovalColumn_ID(int ApprovalColumn_ID)
+	{
+		set_Value (COLUMNNAME_ApprovalColumn_ID, Integer.valueOf(ApprovalColumn_ID));
+	}
+
+	@Override
+	public int getApprovalColumn_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ApprovalColumn_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	@Override
+	@Deprecated(since="13") // use better methods with cache
+	public I_AD_Column getApprovalColumn() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_Column)MTable.get(getCtx(), org.compiere.model.I_AD_Column.Table_ID)
+			.getPO(getApprovalColumn_ID(), get_TrxName());
 	}
 }

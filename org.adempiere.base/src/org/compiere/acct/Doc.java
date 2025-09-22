@@ -188,7 +188,7 @@ public abstract class Doc
 	/** Purchase Requisition    */
 	public static final String	DOCTYPE_PurchaseRequisition	= "POR";
 	/** Match invoice header */
-	public static final String	DOCTYPE_MatchInvHdr	= "MWB";
+	public static final String	DOCTYPE_MatchInvHdr		= "MWB";
 	
 
 
@@ -212,9 +212,7 @@ public abstract class Doc
 	/** Document Status			*/
 	public static final String	STATUS_Deferred			= "d";
 	/** Document Status */
-	public static final String	STATUS_NoPostingRequired  = "R";
-	
-
+	public static final String	STATUS_NoPostingRequired= "R";
 
 	/**
 	 *  Create Posting document
@@ -427,7 +425,7 @@ public abstract class Doc
 	}   //  Doc
 
 	/** Accounting Schema */
-	protected MAcctSchema    		m_as = null;
+	protected MAcctSchema    	m_as = null;
 	/** Properties					*/
 	private Properties			m_ctx = null;
 	/** Transaction Name			*/
@@ -714,7 +712,8 @@ public abstract class Doc
 
 			if (!skip)
 			{
-				p_Status = postLogic();
+				//	post
+				p_Status = postLogic ();
 			}
 			else
 			{
@@ -897,7 +896,7 @@ public abstract class Doc
 			return STATUS_Error;
 
 		// call modelValidator
-		String validatorMsg = ModelValidationEngine.get().fireFactsValidate(m_as, facts, getPO(),FactsValidator.TIME_AFTER_FACTCREATE);
+		String validatorMsg = ModelValidationEngine.get().fireFactsValidate(m_as, facts, getPO(), FactsValidator.TIME_AFTER_FACTCREATE);
 		if (validatorMsg != null) {
 			p_Error = validatorMsg;
 			return STATUS_Error;
@@ -2090,36 +2089,6 @@ public abstract class Doc
 	}// setA_Asset_ID
 
 	/**
-	 * 	Get header level A_Asset_ID
-	 *	@return A_Asset_ID or 0
-	 */
-	public int getA_Asset_ID()
-	{
-		if(m_A_Asset_ID == -1)
-		{
-			int index = p_po.get_ColumnIndex("A_Asset_ID");
-			if (index != -1)
-			{
-				Integer ii = (Integer) p_po.get_Value(index);
-				if (ii != null)
-					m_A_Asset_ID = ii.intValue();
-			}
-			if (m_A_Asset_ID == -1)
-				m_A_Asset_ID = 0;
-		}
-		return m_A_Asset_ID;
-	}	//	getA_Asset_ID
-
-	/**
-	 * Set A_Asset_ID
-	 * @param m_A_Asset_ID Asset
-	 */
-	public void setA_Asset_ID(int m_A_Asset_ID)
-	{
-		this.m_A_Asset_ID = m_A_Asset_ID;
-	}// setA_Asset_ID
-
-	/**
 	 * 	Get SalesRep_ID
 	 *	@return SalesRep_ID or 0
 	 */
@@ -2337,36 +2306,6 @@ public abstract class Doc
 		m_C_BPartner_ID = C_BPartner_ID;
 	}	//	setC_BPartner_ID
 	
-	/**
-	 *  Get BPartner Employee
-	 *  @return C_Employee_ID
-	 */
-	public int getC_Employee_ID()
-	{
-		if (m_C_Employee_ID == -1)
-		{
-			int index = p_po.get_ColumnIndex("C_Employee_ID");
-			if (index != -1)
-			{
-				Integer ii = (Integer) p_po.get_Value(index);
-				if (ii != null)
-					m_C_Employee_ID = ii.intValue();
-			}
-			if (m_C_Employee_ID == -1)
-				m_C_Employee_ID = 0;
-		}
-		return m_C_Employee_ID;
-	}// getC_Employee_ID
-
-	/**
-	 * Set C_Employee_ID
-	 * 
-	 * @param C_Employee_ID bp
-	 */
-	public void setC_Employee_ID(int C_Employee_ID) {
-		m_C_Employee_ID = C_Employee_ID;
-	} // setC_Employee_ID
-
 	/**
 	 *  Get BPartner Employee
 	 *  @return C_Employee_ID

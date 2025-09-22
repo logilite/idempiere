@@ -22,7 +22,7 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.util.Env;
-import org.compiere.util.ValueNamePair;
+import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_InOutLineMA
  *  @author iDempiere (generated)
@@ -34,7 +34,7 @@ public class X_M_InOutLineMA extends PO implements I_M_InOutLineMA, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20250805L;
+	private static final long serialVersionUID = 20250922L;
 
     /** Standard Constructor */
     public X_M_InOutLineMA (Properties ctx, int M_InOutLineMA_ID, String trxName)
@@ -112,7 +112,7 @@ public class X_M_InOutLineMA extends PO implements I_M_InOutLineMA, I_Persistent
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_M_InOutLineMA[")
-        .append(get_UUID()).append("]");
+        .append(get_ID()).append("]");
       return sb.toString();
     }
 
@@ -121,7 +121,7 @@ public class X_M_InOutLineMA extends PO implements I_M_InOutLineMA, I_Persistent
 	*/
 	public void setDateMaterialPolicy (Timestamp DateMaterialPolicy)
 	{
-		set_Value (COLUMNNAME_DateMaterialPolicy, DateMaterialPolicy);
+		set_ValueNoCheck (COLUMNNAME_DateMaterialPolicy, DateMaterialPolicy);
 	}
 
 	/** Get Date  Material Policy.
@@ -183,6 +183,28 @@ public class X_M_InOutLineMA extends PO implements I_M_InOutLineMA, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set M_InOutLineMA_ID.
+		@param M_InOutLineMA_ID Attributes
+	*/
+	public void setM_InOutLineMA_ID (int M_InOutLineMA_ID)
+	{
+		if (M_InOutLineMA_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_M_InOutLineMA_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_M_InOutLineMA_ID, Integer.valueOf(M_InOutLineMA_ID));
+	}
+
+	/** Get M_InOutLineMA_ID.
+		@return Attributes
+	  */
+	public int getM_InOutLineMA_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_InOutLineMA_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set M_InOutLineMA_UU.
 		@param M_InOutLineMA_UU M_InOutLineMA_UU
 	*/
@@ -227,36 +249,13 @@ public class X_M_InOutLineMA extends PO implements I_M_InOutLineMA, I_Persistent
 		return ii.intValue();
 	}
 
-    /** Get Record UU/ColumnName
-        @return UU/ColumnName pair
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
       */
-    public ValueNamePair getValueNamePair()
+    public KeyNamePair getKeyNamePair()
     {
-        return new ValueNamePair(get_UUID(), String.valueOf(getM_InOutLine_ID()));
+        return new KeyNamePair(get_ID(), String.valueOf(getM_InOutLine_ID()));
     }
-
-	/** Set M_InOutLineMA_ID.
-		@param M_InOutLineMA_ID 
-		Attributes
-	  */
-	public void setM_InOutLineMA_ID (int M_InOutLineMA_ID)
-	{
-		if (M_InOutLineMA_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_M_InOutLineMA_ID, null);
-		else 
-			set_ValueNoCheck (COLUMNNAME_M_InOutLineMA_ID, Integer.valueOf(M_InOutLineMA_ID));
-	}
-
-	/** Get M_InOutLineMA_ID.
-		@return Attributes
-	  */
-	public int getM_InOutLineMA_ID () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_InOutLineMA_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
 
 	/** Set Movement Quantity.
 		@param MovementQty Quantity of a product moved.

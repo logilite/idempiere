@@ -205,7 +205,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     /** Search fields of calling tab ({@link #m_AD_Tab_ID}) */
     protected GridField[]     m_findFields;
     /** Grid tab for current row of {@link #advancedPanel} */
-    protected GridTab m_gridTab = null;
+	protected GridTab m_gridTab = null;
     /** Resulting query             */
     protected MQuery          m_query = null;
     /** Is cancel ?                 */
@@ -344,7 +344,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	}
 
     /**
-     * FindPanel Constructor
+     * FindWindow Constructor
      * @param targetWindowNo targetWindowNo
      * @param targetTabNo
      * @param title title
@@ -443,6 +443,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         
         return true;
     }
+    
     /**
      * @param targetWindowNo
      * @param title
@@ -482,7 +483,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 		// no query in case of high volume & window type maintain
 		boolean noQuery = (m_gridTab != null) ? m_gridTab.isHighVolume() : false;
 		m_total = noQuery ? m_minRecords : getNoOfRecords(null, false);
-		
+
     	if (m_total != COUNTING_RECORDS_TIMED_OUT && m_total < m_minRecords)	
         {
             return false;
@@ -1169,8 +1170,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
      	boolean noQuery = (m_gridTab != null) ? m_gridTab.isHighVolume() : false;
 		m_total = noQuery ? m_minRecords : getNoOfRecords(null, false);
 
-		/** START DEVCOFFEE **/
-		// Get Total
+		//	Show Total
 		if (!noQuery)
 			setStatusDB(m_total);
 		statusBar.setStatusLine("");
@@ -2071,13 +2071,17 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
                     focusToLastAdvanceRow();
                 }
 
-                else if ("btnSaveAdv".equals(button.getAttribute("name").toString()))
+                else if ("btnSaveAdv".equals(button.getAttribute("name").toString())
+                		|| "btnShareAdv".equals(button.getAttribute("name").toString()))
                 {
+                	boolean shareAllUsers = "btnShareAdv".equals(button.getAttribute("name").toString());
                 	if (winMain.getComponent().getSelectedIndex() == 1) {
-                    	cmd_saveAdvanced(true);
+                    	cmd_saveAdvanced(true, shareAllUsers);
                 	} else {
-                    	cmd_saveSimple(true);
+                    	cmd_saveSimple(true, shareAllUsers);
                 	}
+                	if (shareAllUsers)
+                		btnSave.setDisabled(true);
                 }
             }
             //  Confirm panel actions
@@ -2720,7 +2724,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            		appendCode(code, ColumnName, Operator, "", "", andOr, lBrackets, rBrackets, tableUID);
 	            	}
 	            	continue;
-	            }else {
+	            } else {
 	            	if(MQuery.ILIKE.equals(Operator)) {
 	            		ColumnSQL = "UPPER("+ColumnSQL+")";
 	            	}
@@ -2883,7 +2887,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            appendCode(code, ColumnName, Operator, value.toString(), value2 != null ? value2.toString() : "", andOr, lBrackets, rBrackets, tableUID);
 	        }
 	        
-	        saveQuery(saveQuery, code);			
+	        saveQuery(saveQuery, code, shareAllUsers);			
 		} else {
 			m_query.addRestriction(Env.parseContext(Env.getCtx(), m_targetWindowNo, m_whereUserQuery, false));
 		}
@@ -2978,6 +2982,8 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 						uq.setAD_Tab_ID(m_AD_Tab_ID); //red1 UserQuery [ 1798539 ] taking in new field from Compiere
 						uq.setAD_User_ID(Env.getAD_User_ID(Env.getCtx()));
 					}
+					if (shareAllUsers)
+						uq.setAD_User_ID(-1); // set to null
 
 				} else	if (code.length() <= 0){ // Delete the query
 					if (uq == null) 
@@ -3134,8 +3140,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 							m_query.addRestriction(ColumnSQL.toString(), oper, sValue, ColumnName, wed.getDisplay());
 							appendCode(code, ColumnName, oper, sValue, "", "AND", "", "", m_AD_Tab_UU);
 						}
-					}
-                    else {
+					} else {
                     	String oper = MQuery.EQUAL;
                     	if (wedTo != null) {
                             ToolBarButton wedFlag = m_sEditorsFlag.get(i);
@@ -3166,7 +3171,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         	addHistoryRestriction(historyCombo.getSelectedItem());
         }
 
-        saveQuery(saveQuery, code);
+        saveQuery(saveQuery, code, shareAllUsers);
 
 	}	//	cmd_saveSimple
 
@@ -3510,7 +3515,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     {
         m_isCancel = false; // teo_sarca [ 1708717 ]
         //  save pending
-        cmd_saveSimple(false);
+        cmd_saveSimple(false, false);
         
         //  Test for no records
         if (getNoOfRecords(m_query, true) != 0) {
@@ -3580,7 +3585,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     {
         m_isCancel = false; // teo_sarca [ 1708717 ]
         //  save pending
-        cmd_saveAdvanced(false);
+        cmd_saveAdvanced(false, false);
         
         if(historyCombo.getSelectedItem()!=null)
         {
@@ -3768,9 +3773,9 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
      */
     public static class SimpleTreeNode {
 
-        protected int nodeId;
+    	protected int nodeId;
 
-        protected int parentId;
+    	protected int parentId;
 
         public SimpleTreeNode(int nodeId, int parentId) {
             this.nodeId = nodeId;
@@ -4083,7 +4088,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 		advancedPanel.setVisible(true);
 		winAdvanced.invalidate();
 	}
-	
+
 	/**
 	 * Retrieves the currently active user query based on the selected item in the `fQueryName` combobox.
 	 *

@@ -50,5 +50,6 @@ public interface IAction {
 	 * @param changed
 	 * @param readOnly
 	 */
-	public void updateToolbarCustomBtn(Toolbarbutton toolbarButton, IADTabpanel tabPanel, boolean changed, boolean readOnly);
+	public default void updateToolbarCustomBtn(Toolbarbutton toolbarButton, IADTabpanel tabPanel, boolean changed, boolean readOnly) {
+	};
 }

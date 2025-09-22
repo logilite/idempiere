@@ -138,26 +138,24 @@
 <xsd:complexType name="ADLoginRequest">
 <xsd:sequence>
   <xsd:element name="user" type="xsd:string"/>
-  <xsd:element name="Token" type="xsd:string" minOccurs="0" maxOccurs="1"/>
-  <xsd:element name="pass" type="xsd:string" minOccurs="0" maxOccurs="1"/>
-  <xsd:element name="lang" type="xsd:string" minOccurs="0" maxOccurs="1"/>
-  <xsd:element name="ClientID" type="xsd:int" minOccurs="0" maxOccurs="1"/>
-  <xsd:element name="RoleID" type="xsd:int" minOccurs="0" maxOccurs="1"/>
-  <xsd:element name="OrgID" type="xsd:int" minOccurs="0" maxOccurs="1"/>
-  <xsd:element name="WarehouseID" type="xsd:int" minOccurs="0" maxOccurs="1"/>
-  <xsd:element name="stage" type="xsd:int" minOccurs="0" maxOccurs="1"/>
+  <xsd:element name="pass" type="xsd:string"/>
+  <xsd:element name="lang" type="xsd:string"/>
+  <xsd:element name="ClientID" type="xsd:int"/>
+  <xsd:element name="RoleID" type="xsd:int"/>
+  <xsd:element name="OrgID" type="xsd:int"/>
+  <xsd:element name="WarehouseID" type="xsd:int"/>
+  <xsd:element name="stage" type="xsd:int" />
 </xsd:sequence>
 </xsd:complexType>
 
 <xsd:complexType name="ADLoginResponse">
 <xsd:sequence>
-  <xsd:element name="Token" type="xsd:string" minOccurs="0"/>
-  <xsd:element name="status" type="xsd:int" minOccurs="0"/>
-  <xsd:element name="roles" type="xsd:int" minOccurs="0"/>
-  <xsd:element name="langs" type="xsd:string" minOccurs="0"/>
-  <xsd:element name="orgs" type="xsd:int" minOccurs="0"/>
-  <xsd:element name="clients" type="xsd:int" minOccurs="0"/>
-  <xsd:element name="warehouses" type="xsd:int" minOccurs="0"/>
+  <xsd:element name="status" type="xsd:int"/>
+  <xsd:element name="roles" type="tns:LookupValues"/>
+  <xsd:element name="langs" type="tns:LookupValues"/>
+  <xsd:element name="orgs" type="tns:LookupValues"/>
+  <xsd:element name="clients" type="tns:LookupValues"/>
+  <xsd:element name="warehouses" type="tns:LookupValues"/>
 </xsd:sequence>
 </xsd:complexType>
 
