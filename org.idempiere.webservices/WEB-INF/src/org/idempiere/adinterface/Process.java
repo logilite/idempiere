@@ -65,6 +65,7 @@ import org.idempiere.adInterface.x10.ProcessParamList;
 import org.idempiere.adInterface.x10.ProcessParams;
 import org.idempiere.adInterface.x10.ProcessParamsDocument;
 import org.idempiere.adInterface.x10.RunProcessResponse;
+import org.idempiere.adInterface.x10.RunProcessResponseDocument;
 import org.idempiere.adInterface.x10.StandardResponse;
 import org.idempiere.adInterface.x10.StandardResponseDocument;
 import org.idempiere.webservices.fault.IdempiereServiceFault;
@@ -90,7 +91,7 @@ public class Process {
 	@Deprecated
 	public static ProcessParamsDocument getProcessParams( CompiereService cs, GetProcessParamsDocument req ) 
 	{
-		ProcessParamsDocument res = ProcessParamsDocument.Factory.newInstance();
+		ProcessParamsDocument res = (ProcessParamsDocument) ProcessParamsDocument.Factory.newInstance();
 		ProcessParams params = res.addNewProcessParams();
 		ProcessParamList PL = params.addNewParams();
 		
@@ -203,7 +204,7 @@ public class Process {
 	 */
 	public static StandardResponseDocument runProcess (CompiereService m_cs,MWebServiceType m_webservicetype, ModelRunProcess rp, Map<String, Object> requestCtx, String trxName )
 	{
-		StandardResponseDocument resDoc = StandardResponseDocument.Factory.newInstance();
+		StandardResponseDocument resDoc = (StandardResponseDocument) StandardResponseDocument.Factory.newInstance();
 		StandardResponse standardRes= resDoc.addNewStandardResponse();
 		RunProcessResponse rpResp = standardRes.addNewRunProcessResponse();
 		int AD_Menu_ID = rp.getADMenuID();

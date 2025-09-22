@@ -121,7 +121,7 @@ public class QueryDataLookup extends Lookup {
 			SOAPEnvelope env = part.getEnvelope();
 			SOAPBody body = env.getBody();
 			
-			ModelCRUDRequestDocument crudDocument = ModelCRUDRequestDocument.Factory.newInstance();
+			ModelCRUDRequestDocument crudDocument = (ModelCRUDRequestDocument) ModelCRUDRequestDocument.Factory.newInstance();
 			ModelCRUDRequest crudRequest = crudDocument.addNewModelCRUDRequest();
 			crudRequest.setADLoginRequest(login);
 			
@@ -158,7 +158,7 @@ public class QueryDataLookup extends Lookup {
 				{
 					throw new RuntimeException(responseMsg.getSOAPBody().getFault().getFaultString());
 				}
-				WindowTabDataDocument responseDoc = WindowTabDataDocument.Factory.parse(responseMsg.getSOAPBody().getFirstChild().getFirstChild());
+				WindowTabDataDocument responseDoc = (WindowTabDataDocument) WindowTabDataDocument.Factory.parse(responseMsg.getSOAPBody().getFirstChild().getFirstChild());
 				WindowTabData windowTabData = responseDoc.getWindowTabData();
 				if (windowTabData.isSetError()) 
 				{
