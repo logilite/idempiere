@@ -4,6 +4,27 @@ SELECT register_migration_script('202501091801_IDEMPIERE-4925.sql') FROM dual;
 SET SQLBLANKLINES ON
 SET DEFINE OFF
 
+-- START Merge correction on based on migration\i7.1z\postgresql\202108231900_IDEMPIERE-4925.sql
+DELETE FROM AD_Field_Trl
+WHERE AD_Field_ID IN (
+	SELECT AD_Field_ID FROM AD_Field WHERE AD_Column_ID IN (214579, 214580)
+);
+
+DELETE FROM AD_Field
+WHERE  AD_Column_ID IN (214579, 214580)
+;
+
+DELETE FROM AD_Column_Trl
+WHERE  AD_Column_ID IN (214579, 214580)
+;
+
+
+DELETE FROM AD_Column
+WHERE  AD_Column_ID IN (214579, 214580)
+;
+
+-- END Merge correction
+
 -- Jan 9, 2025, 6:01:19 PM CET
 INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,Help,AD_Table_ID,ColumnName,DefaultValue,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,IsHtml,IsPartitionKey) VALUES (217029,0,'Quantity','The Quantity Entered is based on the selected UoM','The Quantity Entered is converted to base product UoM quantity',324,'QtyEntered','1',22,'N','N','Y','N','N',0,'N',29,0,0,'Y',TO_TIMESTAMP('2025-01-09 18:01:18','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-01-09 18:01:18','YYYY-MM-DD HH24:MI:SS'),100,2589,'Y','N','D','N','N','N','Y','093ccbe2-a73e-4ac8-aa75-47e4a6f35d38','Y',0,'N','N','N','N')
 ;
@@ -12,16 +33,13 @@ INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,Help,AD_Table_ID,Co
 INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,Help,AD_Table_ID,AD_Val_Rule_ID,ColumnName,DefaultValue,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,FKConstraintType,IsHtml,IsPartitionKey) VALUES (217031,0,'UOM','Unit of Measure','The UOM defines a unique non monetary Unit of Measure',324,210,'C_UOM_ID','@#C_UOM_ID@',22,'N','N','N','N','N',0,'N',19,0,0,'Y',TO_TIMESTAMP('2025-01-09 18:04:23','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-01-09 18:04:23','YYYY-MM-DD HH24:MI:SS'),100,215,'Y','N','D','N','N','N','Y','0d7ae178-c716-4750-b758-c21299c3c941','Y',0,'N','N','N','N','N')
 ;
 
--- Jan 9, 2025, 6:06:48 PM CET
-ALTER TABLE M_MovementLine ADD QtyEntered NUMBER DEFAULT 1 NOT NULL
-;
 
 -- Jan 9, 2025, 6:06:48 PM CET
 UPDATE AD_Column SET FKConstraintName='CUOM_MMovementLine', FKConstraintType='N',Updated=TO_TIMESTAMP('2025-01-09 18:06:48','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID=217031
 ;
 
 -- Jan 9, 2025, 6:06:48 PM CET
-ALTER TABLE M_MovementLine ADD C_UOM_ID NUMBER(10) DEFAULT NULL 
+ALTER TABLE M_MovementLine MODIFY COLUMN C_UOM_ID SET DEFAULT NULL 
 ;
 
 UPDATE M_MovementLine SET C_UOM_ID = (select c_uom_id from m_product where m_product_id=m_movementline.m_product_id)
@@ -29,21 +47,22 @@ UPDATE M_MovementLine SET C_UOM_ID = (select c_uom_id from m_product where m_pro
 
 UPDATE M_MovementLine SET QtyEntered = MovementQty
 ;
+-- Jan 9, 2025, 6:06:48 PM CET
+ALTER TABLE M_MovementLine ALTER COLUMN QtyEntered SET DEFAULT '1' 
+;
+ALTER TABLE M_MovementLine ALTER COLUMN QtyEntered SET NOT NULL
+;
 
--- Jan 10, 2025, 12:25:43 PM CET
+-- Jan 9, 2025, 6:15:48 PM CET
 UPDATE AD_Column SET IsMandatory='Y',Updated=TO_TIMESTAMP('2025-01-10 12:25:43','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID=217031
 ;
 
--- Jan 10, 2025, 12:25:48 PM CET
+-- Jan 9, 2025, 6:15:48 PM CET
 ALTER TABLE M_MovementLine MODIFY C_UOM_ID NUMBER(10)
 ;
 
--- Jan 10, 2025, 12:25:48 PM CET
+-- Jan 9, 2025, 6:15:48 PM CET
 ALTER TABLE M_MovementLine MODIFY C_UOM_ID NOT NULL
-;
-
--- Jan 9, 2025, 6:15:20 PM CET
-ALTER TABLE M_MovementLine ADD CONSTRAINT CUOM_MMovementLine FOREIGN KEY (C_UOM_ID) REFERENCES c_uom(c_uom_id) DEFERRABLE INITIALLY DEFERRED
 ;
 
 -- Jan 10, 2025, 12:33:54 PM CET
