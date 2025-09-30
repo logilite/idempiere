@@ -116,6 +116,7 @@ public class MReportLine extends X_PA_ReportLine
 		dimensionMap.put(DIMENSIONGROUP_Organization, new DimensionMeta("AD_Org", null, false, "Name", "Value"));
 		dimensionMap.put(DIMENSIONGROUP_BusinessPartner, new DimensionMeta("C_BPartner", null, false, "Name", "Value"));
 		dimensionMap.put(DIMENSIONGROUP_Employee, new DimensionMeta("C_BPartner", null, false, "Name", "Value"));
+		dimensionMap.put(DIMENSIONGROUP_Asset, new DimensionMeta("A_Asset", null, false, "Name", "Value"));
 		dimensionMap.put(DIMENSIONGROUP_Product, new DimensionMeta("M_Product", "M_Product_Trl", true, "Name", "Value"));
 		dimensionMap.put(DIMENSIONGROUP_Activity, new DimensionMeta("C_Activity", "C_Activity_Trl", true, "Name", "Value"));
 		dimensionMap.put(DIMENSIONGROUP_Campaign, new DimensionMeta("C_Campaign", "C_Campaign_Trl", true, "Name", "Value"));
@@ -796,7 +797,8 @@ public class MReportLine extends X_PA_ReportLine
 			return "C_Tax_ID";
 		else if (elementType.equals(DIMENSIONGROUP_BankAccount))
 			return "C_BankAccount_ID";
-		
+		else if (elementType.equals(DIMENSIONGROUP_Asset))
+			return I_C_AcctSchema_Element.COLUMNNAME_A_Asset_ID;
 		
 		return "";
 	} // getDimensionColumnName
