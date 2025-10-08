@@ -180,15 +180,10 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		loadActivity();
 		if (!isValidApprover()) {
 			
-			StringBuilder msg = new StringBuilder("Assigned to "); //TODO use Message to support translation
-
+			StringBuilder msg = new StringBuilder(Msg.getMsg(Env.getCtx(), "AssignedToState", new Object[] { m_activity.getWFStateText(), m_activity.getNode().getName() }));
 			if (resp.isRole())
 			{
 				msg.append(resp.getRole().getName());
-			}
-			else if (resp.isHuman())
-			{
-				msg.append(resp.getAD_User().getName());
 			}
 			else if (resp.isManual())
 			{
@@ -196,11 +191,15 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				String approverNames = Arrays.stream(approvers).map(a -> a.getAD_User().getName()).collect(Collectors.joining(", "));
 				msg.append(approverNames);
 			}
-			else
+			// if activity has use then he as priority then responsible user
+			else if(m_activity.getAD_User_ID() > 0 )
 			{
 				msg.append(m_activity.getAD_User().getName());
 			}
-			
+			else if (resp.isHuman())
+			{
+				msg.append(resp.getAD_User().getName());
+			}
 			// If Activity already suspended then show error
 			Dialog.error(gridTab.getWindowNo(), msg.toString(), m_activity.toStringX());
 			return;
@@ -901,12 +900,14 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			
 			int AD_WF_Resp_ID = m_activity.getAD_WF_Responsible_ID();
 
-			MWFResponsible ovrResp = MWFResponsible.getClientWFResp(Env.getCtx(), AD_WF_Resp_ID);
-			
-			if (ovrResp != null)
-				resp = ovrResp;
-			else
-				resp = m_activity.getResponsible();
+			resp = m_activity.getResponsible();
+			// first priority to suspended activity responsible
+			if (resp == null)
+			{
+				MWFResponsible ovrResp = MWFResponsible.getClientWFResp(Env.getCtx(), AD_WF_Resp_ID);
+				if (ovrResp != null)
+					resp = ovrResp;
+			}
 		}
 	}
 
@@ -962,9 +963,16 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 					return false;
 				}
 			}
-			else if (MWFResponsible.RESPONSIBLETYPE_Human.equals(respType) && resp.getAD_User_ID()>0) {
-				if(resp.getAD_User_ID()!= m_AD_User_ID)
+			else if (MWFResponsible.RESPONSIBLETYPE_Human.equals(respType) && resp.getAD_User_ID() > 0)
+			{
+				if (m_activity.getAD_User_ID() != 0 && m_activity.getAD_User_ID() == m_AD_User_ID)
+				{
+					return true;
+				}
+				else if (resp.getAD_User_ID() != m_AD_User_ID)
+				{
 					return false;
+				}
 			}
 			else
 			{
