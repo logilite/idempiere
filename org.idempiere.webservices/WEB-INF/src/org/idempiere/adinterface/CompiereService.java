@@ -40,7 +40,6 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Language;
 import org.compiere.util.Util;
-import org.compiere.util.Util;
 import org.idempiere.adInterface.x10.ADLoginRequest;
 import org.idempiere.webservices.AbstractService;
 
@@ -423,10 +422,12 @@ public class CompiereService {
 		
 		// Create session
 		if(Util.isEmpty(sessionId, true)) {
-			MSession session = MSession.get (getCtx(), false);
+			MSession session = MSession.get (getCtx());
 			if (session == null){
 				log.fine("No Session found");
-				session = MSession.get (getCtx(), true);    	
+				session = MSession.create (getCtx());
+			} else {
+				session = new MSession(getCtx(), session.getAD_Session_ID(), null);
 			}
 			
 			session.setWebSession("WebService");
