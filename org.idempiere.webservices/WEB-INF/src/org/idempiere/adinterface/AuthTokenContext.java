@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.util.Properties;
 
 import org.compiere.model.MAuthorizationToken;
-import org.compiere.util.Env;
 
 public class AuthTokenContext
 {

@@ -226,7 +226,7 @@ public class AbstractService {
 			boolean validForSameClient = isValidForSameClient(webService, method, serviceType, m_cs,
 					loginRequest.getClientID(), loginRequest.getRoleID());
 			
-			if (!m_cs.login(AD_User_ID, loginRequest.getRoleID(), loginRequest.getClientID(), loginRequest.getOrgID(), loginRequest.getWarehouseID(), loginRequest.getLang(),remoteIP,validForSameClient,  MSession.AD_SESSIONTYPE_WebService))
+			if (!m_cs.login(AD_User_ID, loginRequest.getRoleID(), loginRequest.getClientID(), loginRequest.getOrgID(), loginRequest.getWarehouseID(), loginRequest.getLang(), remoteIP, validForSameClient,  MSession.AD_SESSIONTYPE_WebService))
 				return "Error logging in";
 			
 		} else {
@@ -361,7 +361,6 @@ public class AbstractService {
 
 	private static ImmutablePOCache<String,MWebServiceType> s_WebServiceTypeCache	= new ImmutablePOCache<String,MWebServiceType>(MWebServiceType.Table_Name, 10, 60);	//60 minutes
 	private static CCache<String,Boolean> s_RoleAccessCache = new CCache<>(X_WS_WebServiceTypeAccess.Table_Name, 60, CCache.DEFAULT_EXPIRE_MINUTE);
-
 
 	/**
 	 * Authenticate user for requested service type

@@ -51,7 +51,7 @@ import org.idempiere.webservices.AbstractService;
 public class CompiereService {
 
 	private static final CLogger	log = CLogger.getCLogger(CompiereService.class);
-	
+
 	public static CCache<String, AuthTokenContext> authContexts = new CCache<String, AuthTokenContext>("AuthToken", 10, 30);
 	private int m_AD_Client_ID;
 	private int m_AD_Org_ID;
@@ -162,7 +162,6 @@ public class CompiereService {
 		expungeIfExpire();		
 	}
 
-
 	/**
 	 * @return Language of current request
 	 */
@@ -255,9 +254,11 @@ public class CompiereService {
 	 * @param M_Warehouse_ID
 	 * @param Lang
 	 * @param remoteIP 
+	 * @param isValidForSameClient 
+	 * @param sessionType 
 	 * @return true if login is successful
 	 */
-	public synchronized boolean login( int AD_User_ID, int AD_Role_ID, int AD_Client_ID, int AD_Org_ID, int M_Warehouse_ID, String Lang,String remoteIP,boolean isValidForSameClient, String sessionType ) {
+	public synchronized boolean login( int AD_User_ID, int AD_Role_ID, int AD_Client_ID, int AD_Org_ID, int M_Warehouse_ID, String Lang, String remoteIP, boolean isValidForSameClient, String sessionType ) {
 		m_loggedin = false;
 		String loginInfo = checkLogin (getCtx(), AD_User_ID, AD_Role_ID, AD_Client_ID, AD_Org_ID, M_Warehouse_ID );				
 		if (loginInfo == null)
@@ -301,8 +302,7 @@ public class CompiereService {
 		
 		if (remoteIP != null) {
 			// Create Token
-			MAuthorizationToken token = new MAuthorizationToken(getCtx(), 0,
-					null);
+			MAuthorizationToken token = new MAuthorizationToken(getCtx(), 0, null);
 			token.setAD_Language(Lang);
 			token.setAD_Org_ID(AD_Org_ID);
 			token.setAD_Role_ID(AD_Role_ID);
@@ -372,6 +372,7 @@ public class CompiereService {
 	/**
 	 * 
 	 * @param token
+	 * @param sessionType
 	 * @return true if login is successful
 	 */
 	public boolean login(MAuthorizationToken token, String sessionType) {

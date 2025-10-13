@@ -56,18 +56,14 @@ import org.idempiere.adInterface.x10.DataField;
 import org.idempiere.adInterface.x10.DataRow;
 import org.idempiere.adInterface.x10.GetProcessParamsDocument;
 import org.idempiere.adInterface.x10.LookupValues;
-import org.idempiere.adInterface.x10.ModelRunProcess;
-import org.idempiere.adInterface.x10.ModelRunProcessDocument;
-import org.idempiere.adInterface.x10.OutputField;
-import org.idempiere.adInterface.x10.OutputFields;
 import org.idempiere.adInterface.x10.ProcessParam;
 import org.idempiere.adInterface.x10.ProcessParamList;
 import org.idempiere.adInterface.x10.ProcessParams;
 import org.idempiere.adInterface.x10.ProcessParamsDocument;
+import org.idempiere.adInterface.x10.RunProcess;
+import org.idempiere.adInterface.x10.RunProcessDocument;
 import org.idempiere.adInterface.x10.RunProcessResponse;
 import org.idempiere.adInterface.x10.RunProcessResponseDocument;
-import org.idempiere.adInterface.x10.StandardResponse;
-import org.idempiere.adInterface.x10.StandardResponseDocument;
 import org.idempiere.webservices.fault.IdempiereServiceFault;
 import org.idempiere.webservices.model.MWebServiceType;
 
@@ -91,7 +87,7 @@ public class Process {
 	@Deprecated
 	public static ProcessParamsDocument getProcessParams( CompiereService cs, GetProcessParamsDocument req ) 
 	{
-		ProcessParamsDocument res = (ProcessParamsDocument) ProcessParamsDocument.Factory.newInstance();
+		ProcessParamsDocument res = ProcessParamsDocument.Factory.newInstance();
 		ProcessParams params = res.addNewProcessParams();
 		ProcessParamList PL = params.addNewParams();
 		
@@ -187,26 +183,33 @@ public class Process {
 	 * 	Run process
 	 *	@param m_cs
 	 *  @param req
+	 *  @param m_webservicetype
 	 *	@return {@link RunProcessResponseDocument}
 	 */
-	public static StandardResponseDocument runProcess (CompiereService m_cs,MWebServiceType m_webservicetype, ModelRunProcessDocument req )
+	public static RunProcessResponseDocument runProcess (CompiereService m_cs, RunProcessDocument req, MWebServiceType m_webservicetype)
 	{
-		return runProcess(m_cs,m_webservicetype,req.getModelRunProcess(), null, null);
+		return runProcess(m_cs, req, null, null, m_webservicetype);
 	}
 	
 	/**************************************************************************
 	 * 	Run process
 	 *	@param m_cs
-	 *  @param req
+	 *  @param docprocess
 	 *  @param requestCtx
 	 *  @param trxName
+	 *  @param m_webservicetype
 	 *	@return {@link RunProcessResponseDocument}
 	 */
-	public static StandardResponseDocument runProcess (CompiereService m_cs,MWebServiceType m_webservicetype, ModelRunProcess rp, Map<String, Object> requestCtx, String trxName )
+	public static RunProcessResponseDocument runProcess (CompiereService m_cs, RunProcessDocument docprocess, Map<String, Object> requestCtx, String trxName, MWebServiceType m_webservicetype )
 	{
-		StandardResponseDocument resDoc = (StandardResponseDocument) StandardResponseDocument.Factory.newInstance();
-		StandardResponse standardRes= resDoc.addNewStandardResponse();
-		RunProcessResponse rpResp = standardRes.addNewRunProcessResponse();
+//		StandardResponseDocument resDoc = (StandardResponseDocument) StandardResponseDocument.Factory.newInstance();
+//		StandardResponse standardRes= resDoc.addNewStandardResponse();
+//		RunProcessResponse rpResp = standardRes.addNewRunProcessResponse();
+		
+		RunProcessResponseDocument res = RunProcessResponseDocument.Factory.newInstance();
+		RunProcessResponse r= res.addNewRunProcessResponse();
+
+		RunProcess rp = docprocess.getRunProcess();
 		int AD_Menu_ID = rp.getADMenuID();
 		int AD_Process_ID = rp.getADProcessID();
 		int m_record_id = rp.getADRecordID();
@@ -218,9 +221,9 @@ public class Process {
 			process = MProcess.getFromMenu(m_cs.getCtx(), AD_Menu_ID);
 		if (process == null)
 		{
-			standardRes.setError("Process not found");
-			standardRes.setIsError( true );
-			return resDoc;
+			r.setError("Process not found");
+			r.setIsError( true );
+			return res;
 		}
 		
 		// Evaluate DocAction, if call have DocAction parameter, then try to set DocAction before calling workflow process
@@ -256,9 +259,9 @@ public class Process {
 		}
 		catch (Exception ex)
 		{
-			standardRes.setError(ex.getMessage());
-			standardRes.setIsError( true );
-			return resDoc;
+			r.setError(ex.getMessage());
+			r.setIsError( true );
+			return res;
 		}
 		
 		DataField[] fields = rp.getParamValues().getFieldArray();
@@ -343,19 +346,19 @@ public class Process {
 				if(wfProcess != null)
 				{
 					//wynik
-					rpResp.setSummary(pi.getSummary());
+					r.setSummary(pi.getSummary());
 					requestCtx.put(m_webservicetype.getValue() + "_Summary", pi.getSummary());
-					rpResp.setLogInfo(pi.getLogInfo(true));
-					standardRes.setIsError( false );
-					return resDoc;					
+					r.setLogInfo(pi.getLogInfo(true));
+					r.setIsError( false );
+					return res;					
 				}
 			}
 			catch(Exception ex)
 			{
-				standardRes.setError(ex.getMessage());
-				rpResp.setLogInfo(pi.getLogInfo(true) );
-				standardRes.setIsError( true );
-				return resDoc;
+				r.setError(ex.getMessage());
+				r.setLogInfo(pi.getLogInfo(true) );
+				r.setIsError( true );
+				return res;
 			}
 			finally {
 				pInstance.setIsProcessing(false);
@@ -387,33 +390,47 @@ public class Process {
 			}
 			if (!processOK || pi.isError())
 			{
-				rpResp.setSummary(pi.getSummary());
+				r.setSummary(pi.getSummary());
 				requestCtx.put(m_webservicetype.getValue() + "_Summary", pi.getSummary());
-				standardRes.setError(pi.getSummary());
-				rpResp.setLogInfo(pi.getLogInfo(true));
-				standardRes.setIsError( true );				
+				r.setError(pi.getSummary());
+				r.setLogInfo(pi.getLogInfo(true));
+				r.setIsError( true );				
 				processOK = false;
 			} 
 			else
 			{
-				Serializable serializable = pi.getSerializableObject();
-				if (serializable != null && serializable instanceof List)
-		        {
-		            List<?> outputValues = (List<?>)pi.getSerializableObject();
-		            setOuputFields(standardRes, outputValues);
-		            for (Object obj : outputValues) {
-						if (obj instanceof ValueNamePair) {
-							ValueNamePair pair = (ValueNamePair) obj;
-							requestCtx.put(m_webservicetype.getValue() +"-"+pair.getName(),pair.getValue());
+				try{
+					if( pi.getExportFile() != null ){
+						r.setData(java.nio.file.Files.readAllBytes(pi.getExportFile().toPath()));
+						r.setReportFormat(pi.getExportFileExtension());
+					}
+
+					Serializable serializable = pi.getSerializableObject();
+					if (serializable != null && serializable instanceof List)
+			        {
+			            List<?> outputValues = (List<?>)pi.getSerializableObject();
+//			            setOuputFields(r, outputValues);
+			            for (Object obj : outputValues) {
+							if (obj instanceof ValueNamePair) {
+								ValueNamePair pair = (ValueNamePair) obj;
+								requestCtx.put(m_webservicetype.getValue() +"-"+pair.getName(),pair.getValue());
+							}
 						}
 					}
-		        }
-				
-				rpResp.setSummary(pi.getSummary());
-				requestCtx.put(m_webservicetype.getValue() + "_Summary", pi.getSummary());
-				standardRes.setError(pi.getSummary());
-				rpResp.setLogInfo(pi.getLogInfo(true));
-				standardRes.setIsError( false );
+
+					r.setSummary(pi.getSummary());
+					requestCtx.put(m_webservicetype.getValue() + "_Summary", pi.getSummary());
+					r.setError(pi.getSummary());
+					r.setLogInfo(pi.getLogInfo(true));
+					r.setIsError( false );
+				}
+				catch (Exception e)
+				{
+					r.setError("Cannot get the export file:" + e.getMessage());
+					r.setLogInfo(pi.getLogInfo(true) );
+					r.setIsError( true );
+					return res;
+				}
 			}
 		}
 		
@@ -421,7 +438,7 @@ public class Process {
 		if ((process.isReport() || jasperreport))
 		{
 			pi.setReportingProcess(true);
-			rpResp.setIsReport(true);
+			r.setIsReport(true);
 			ReportEngine re=null;
 			if (!jasperreport) 
 				re = start(pi);
@@ -446,14 +463,14 @@ public class Process {
 							file_type ="html";
 							String data = wr.toString();
 							if (data!=null)
-								rpResp.setData(data.getBytes());
-							rpResp.setReportFormat(file_type);
+								r.setData(data.getBytes());
+							r.setReportFormat(file_type);
 						} else
 						{
 							byte dat[] = re.createPDFData();
 							file_type ="pdf";
-							rpResp.setData(dat);		
-							rpResp.setReportFormat(file_type);
+							r.setData(dat);		
+							r.setReportFormat(file_type);
 						}
 						
 						ok = true;
@@ -465,8 +482,8 @@ public class Process {
 						pi.setIsBatch(true);
 						ProcessUtil.startJavaProcess(Env.getCtx(), pi, trx, true, null);
 						file_type ="pdf";				
-						rpResp.setData(java.nio.file.Files.readAllBytes(pi.getPDFReport().toPath()));
-						rpResp.setReportFormat(file_type);
+						r.setData(java.nio.file.Files.readAllBytes(pi.getPDFReport().toPath()));
+						r.setReportFormat(file_type);
 						ok = true;
 					}
 											
@@ -477,39 +494,39 @@ public class Process {
 					}
 					else
 					{
-						standardRes.setError("Cannot create report");
-						rpResp.setLogInfo(pi.getLogInfo(true) );
-						standardRes.setIsError( true );
-						return resDoc;								
+						r.setError("Cannot create report");
+						r.setLogInfo(pi.getLogInfo(true) );
+						r.setIsError( true );
+						return res;								
 					}
 				}
 				catch (Exception e)
 				{
-					standardRes.setError("Cannot create report:" + e.getMessage());
-					rpResp.setLogInfo(pi.getLogInfo(true) );
-					standardRes.setIsError( true );
-					return resDoc;								
+					r.setError("Cannot create report:" + e.getMessage());
+					r.setLogInfo(pi.getLogInfo(true) );
+					r.setIsError( true );
+					return res;								
 					// , 
 				}  
 			}
 		}
-		return resDoc;
+		return res;
 	}	//	createProcessPage
 
-	public static void setOuputFields(StandardResponse resp, List<?> outPara) {
-		if (outPara.size() > 0) {
-			OutputFields outputFields = resp.addNewOutputFields();
-
-			for (Object obj : outPara) {
-				if (obj instanceof ValueNamePair) {
-					ValueNamePair pair = (ValueNamePair) obj;
-					OutputField outField = outputFields.addNewOutputField();
-					outField.setColumn(pair.getName());
-					outField.setValue(pair.getValue());
-				}
-			}
-		}
-	}
+//	public static void setOuputFields(RunProcessResponse r, List<?> outPara) {
+//		if (outPara.size() > 0) {
+//			OutputFields outputFields = r.get addNewOutputFields();
+//
+//			for (Object obj : outPara) {
+//				if (obj instanceof ValueNamePair) {
+//					ValueNamePair pair = (ValueNamePair) obj;
+//					OutputField outField = outputFields.addNewOutputField();
+//					outField.setColumn(pair.getName());
+//					outField.setValue(pair.getValue());
+//				}
+//			}
+//		}
+//	}
 	
 	
 	private static MPInstance fillParameter(CompiereService m_cs, DataRow dr, MProcess process, Map<String, Object> requestCtx) throws Exception

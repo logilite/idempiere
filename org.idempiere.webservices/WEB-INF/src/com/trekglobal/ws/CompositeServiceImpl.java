@@ -69,7 +69,7 @@ public class CompositeServiceImpl extends AbstractService implements CompositeSe
 		try {
 			getCompiereService().connect();
 			
-			CompositeResponsesDocument ret = (CompositeResponsesDocument) CompositeResponsesDocument.Factory.newInstance();
+			CompositeResponsesDocument ret = CompositeResponsesDocument.Factory.newInstance();
 			CompositeResponses resps = ret.addNewCompositeResponses();
 	
 			CompositeRequest req = reqs.getCompositeRequest();
@@ -184,14 +184,14 @@ public class CompositeServiceImpl extends AbstractService implements CompositeSe
 				ModelCRUDRequestDocument wrapperDoc = getWrappedCRUD(operation, reqlogin);
 				if (wrapperDoc == null) {
 					// Do not rollback, Continue with consecutive operations
-					respDoc = (StandardResponseDocument) StandardResponseDocument.Factory.newInstance();
+					respDoc = StandardResponseDocument.Factory.newInstance();
 					StandardResponse resp = respDoc.addNewStandardResponse();
 					resp.setIsError(false);
 					resp.setError("Operation readData must required ModelCRUD");
 				} else {
 					WindowTabDataDocument dataResponse = modelADService.readData(wrapperDoc);
 					if (dataResponse != null) {
-						respDoc = (StandardResponseDocument) StandardResponseDocument.Factory.newInstance();
+						respDoc = StandardResponseDocument.Factory.newInstance();
 						StandardResponse resp = respDoc.addNewStandardResponse();
 						// Do not fail though read is failed
 						resp.setIsError(false);
@@ -204,14 +204,14 @@ public class CompositeServiceImpl extends AbstractService implements CompositeSe
 					return false;
 				}
 
-				ModelRunProcessRequestDocument wrapperDoc = (ModelRunProcessRequestDocument) ModelRunProcessRequestDocument.Factory.newInstance();
+				ModelRunProcessRequestDocument wrapperDoc = ModelRunProcessRequestDocument.Factory.newInstance();
 				ModelRunProcessRequest runProcessReq = wrapperDoc.addNewModelRunProcessRequest();
 				runProcessReq.setADLoginRequest(reqlogin);
 				runProcessReq.setModelRunProcess(operation.getModelRunProcess());
 
 				RunProcessResponseDocument runResponse = modelADService.runProcess(wrapperDoc);
 				if (runResponse != null) {
-					respDoc = (StandardResponseDocument) StandardResponseDocument.Factory.newInstance();
+					respDoc = StandardResponseDocument.Factory.newInstance();
 					StandardResponse resp = respDoc.addNewStandardResponse();
 					resp.setIsError(runResponse.getRunProcessResponse().getIsError());
 					resp.setRunProcessResponse(runResponse.getRunProcessResponse());
@@ -222,7 +222,7 @@ public class CompositeServiceImpl extends AbstractService implements CompositeSe
 					return false;
 				}
 
-				ModelSetDocActionRequestDocument wrapperDoc = (ModelSetDocActionRequestDocument) ModelSetDocActionRequestDocument.Factory.newInstance();
+				ModelSetDocActionRequestDocument wrapperDoc = ModelSetDocActionRequestDocument.Factory.newInstance();
 				ModelSetDocActionRequest actionReq = wrapperDoc.addNewModelSetDocActionRequest();
 				actionReq.setADLoginRequest(reqlogin);
 				actionReq.setModelSetDocAction(operation.getModelSetDocAction());
@@ -268,7 +268,7 @@ public class CompositeServiceImpl extends AbstractService implements CompositeSe
 		if (operation.getModelCRUD() == null)
 			return null;
 
-		ModelCRUDRequestDocument wrapperDoc = (ModelCRUDRequestDocument) ModelCRUDRequestDocument.Factory.newInstance();
+		ModelCRUDRequestDocument wrapperDoc = ModelCRUDRequestDocument.Factory.newInstance();
 		ModelCRUDRequest wrapperCRUD = wrapperDoc.addNewModelCRUDRequest();
 		wrapperCRUD.setModelCRUD(operation.getModelCRUD());
 		wrapperCRUD.setADLoginRequest(reqlogin);
@@ -346,7 +346,7 @@ public class CompositeServiceImpl extends AbstractService implements CompositeSe
 
 		if (trx.isActive() && !trx.commit()) {
 			if (addNewResp)
-				respAggregator.add((StandardResponse) StandardResponse.Factory.newInstance());
+				respAggregator.add(StandardResponse.Factory.newInstance());
 
 			rollbackAndSetError(trx, compResp, respAggregator, string);
 			return false;

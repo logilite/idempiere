@@ -80,6 +80,8 @@ import org.idempiere.adInterface.x10.ModelRunProcess;
 import org.idempiere.adInterface.x10.ModelRunProcessRequestDocument;
 import org.idempiere.adInterface.x10.ModelSetDocAction;
 import org.idempiere.adInterface.x10.ModelSetDocActionRequestDocument;
+import org.idempiere.adInterface.x10.RunProcess;
+import org.idempiere.adInterface.x10.RunProcessDocument;
 import org.idempiere.adInterface.x10.RunProcessResponse;
 import org.idempiere.adInterface.x10.RunProcessResponseDocument;
 import org.idempiere.adInterface.x10.StandardResponse;
@@ -114,8 +116,10 @@ import org.idempiere.webservices.model.X_WS_WebService_Para;
 
 
 /**
+ *
  * @author kolec
  * @author Deepak Pansheriya
+ *
  */
 @WebService(endpointInterface="org.idempiere.adinterface.ModelADService", serviceName="ModelADService",targetNamespace="http://idempiere.org/ADInterface/1_0")
 public class ModelADServiceImpl extends AbstractService implements ModelADService {
@@ -172,7 +176,7 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 		try {
 			getCompiereService().connect();
 			
-			StandardResponseDocument ret = (StandardResponseDocument) StandardResponseDocument.Factory.newInstance();
+			StandardResponseDocument ret = StandardResponseDocument.Factory.newInstance();
 			StandardResponse resp = ret.addNewStandardResponse();
 			ModelSetDocAction modelSetDocAction = req.getModelSetDocActionRequest().getModelSetDocAction();
 			String serviceType = modelSetDocAction.getServiceType();
@@ -319,7 +323,7 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 
 		if (X_WS_WebService_Para.PARAMETERTYPE_Constant.equals(para.getParameterType())) {
 			if (string == null || string.length() == 0) {
-				if (log.isLoggable(Level.FINE))log.log(Level.FINE, "Web service type "
+				if (log.isLoggable(Level.INFO))log.log(Level.INFO, "Web service type "
 						+ m_webservicetype.getValue() + ": constant parameter "
 						+ parameterName + " set to "
 						+ para.getConstantValue());
@@ -387,11 +391,12 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 		return (Enum) table.forString(string);
 	}
 
-	
-
-	public StandardResponseDocument runProcessTrx(ModelRunProcessRequestDocument req) {
+	public RunProcessResponseDocument runProcessTrx(ModelRunProcessRequestDocument req) {
 		try {
 			getCompiereService().connect();
+			
+			RunProcessResponseDocument resbadlogin = RunProcessResponseDocument.Factory.newInstance();
+			RunProcessResponse rbadlogin = resbadlogin.addNewRunProcessResponse();
 			ModelRunProcess modelRunProcess = req.getModelRunProcessRequest().getModelRunProcess();
 			String serviceType = modelRunProcess.getServiceType();
 	
@@ -399,14 +404,11 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 	
 			String err = login(reqlogin, webServiceName, "runProcess", serviceType);
 			if (err != null && err.length() > 0) {
-				StandardResponseDocument respDoc = (StandardResponseDocument) StandardResponseDocument.Factory.newInstance();
-				StandardResponse resp = respDoc.addNewStandardResponse();
-				
-				resp.setError(err);
-				resp.setIsError(true);
-				return respDoc;
+				rbadlogin.setError(err);
+				rbadlogin.setIsError(true);
+				return resbadlogin;
 			}
-			
+	
 			MWebServiceType m_webservicetype = getWebServiceType();
 			// Validate parameters
 			try {
@@ -430,15 +432,23 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 			modelRunProcess.setADRecordID(validateParameter("AD_Record_ID", modelRunProcess.getADRecordID()));
 			modelRunProcess.setDocAction(validateParameter("DocAction", modelRunProcess.getDocAction()));
 	
-			
-			StandardResponseDocument response = Process.runProcess(getCompiereService(),m_webservicetype, modelRunProcess, getRequestCtx(), localTrxName);
-			StandardResponse stndResp =response.getStandardResponse();
-			RunProcessResponse rResp = stndResp.getRunProcessResponse();
-			CompiereService m_cs = getCompiereService();
-			addLoginResponse(m_cs,rResp);
+			RunProcessDocument docprocess = RunProcessDocument.Factory.newInstance();
+			RunProcess reqprocess = docprocess.addNewRunProcess();
+			reqprocess.setParamValues(modelRunProcess.getParamValues());
+			reqprocess.setADProcessID(modelRunProcess.getADProcessID());
+			reqprocess.setADMenuID(modelRunProcess.getADMenuID());
+			reqprocess.setADRecordID(modelRunProcess.getADRecordID());
+			reqprocess.setDocAction(modelRunProcess.getDocAction());
 
-			if (response != null && response.getStandardResponse() != null && response.getStandardResponse().getIsError())
-				log.warning("Error running webservice " + serviceType + " -> " + response.getStandardResponse().getError());
+			RunProcessResponseDocument response = Process.runProcess(getCompiereService(), docprocess, getRequestCtx(), localTrxName, m_webservicetype);
+			RunProcessResponse stndResp =response.getRunProcessResponse();
+			CompiereService m_cs = getCompiereService();
+			addLoginResponse(m_cs,stndResp);
+
+			if (response != null && response.getRunProcessResponse() != null && response.getRunProcessResponse().getIsError())
+				log.warning("Error running webservice " + serviceType + " -> " + response.getRunProcessResponse().getError());
+			Map<String, Object> requestCtx = getRequestCtx();
+			requestCtx.put(serviceType+"_Summary", response.getRunProcessResponse().getSummary());
 			return response;
 		} finally {
 			getCompiereService().disconnect();
@@ -459,11 +469,11 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 
 	public RunProcessResponseDocument runProcess(ModelRunProcessRequestDocument req) {
 		
-		StandardResponseDocument stndRespDoc = runProcessTrx(req);
-		StandardResponse stndResp =stndRespDoc.getStandardResponse();
+		RunProcessResponseDocument stndRespDoc = runProcessTrx(req);
+		RunProcessResponse stndResp =stndRespDoc.getRunProcessResponse();
 		
 		RunProcessResponseDocument retDocument = (RunProcessResponseDocument) RunProcessResponseDocument.Factory.newInstance();
-		RunProcessResponse rResp = stndResp.getRunProcessResponse();
+		RunProcessResponse rResp = retDocument.getRunProcessResponse();
 		
 		if(rResp==null){
 			rResp=retDocument.addNewRunProcessResponse();
@@ -474,10 +484,17 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 			CompiereService m_cs = getCompiereService();
 			addLoginResponse(m_cs,rResp);
 		}
-
 		if(stndResp.getIsError()){
 			rResp.setIsError(stndResp.getIsError());
 			rResp.setError(stndResp.getError());
+		}
+		//
+		rResp.setSummary(stndResp.getSummary());
+		//
+		if (stndResp.getData() != null)
+		{
+			rResp.setData(stndResp.getData());
+			rResp.setReportFormat(stndResp.getReportFormat());
 		}
 
 		retDocument.setRunProcessResponse(rResp);
@@ -489,7 +506,7 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 		try {
 			getCompiereService().connect();
 			
-			WindowTabDataDocument resdoc = (WindowTabDataDocument) WindowTabDataDocument.Factory.newInstance();
+			WindowTabDataDocument resdoc = WindowTabDataDocument.Factory.newInstance();
 			WindowTabData res = resdoc.addNewWindowTabData();
 	    	DataSet ds = res.addNewDataSet();
 	    	ModelGetList modelGetList = req.getModelGetListRequest().getModelGetList();
@@ -696,7 +713,7 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 		try {
 			getCompiereService().connect();
 			
-			StandardResponseDocument ret = (StandardResponseDocument) StandardResponseDocument.Factory.newInstance();
+			StandardResponseDocument ret = StandardResponseDocument.Factory.newInstance();
 			StandardResponse resp = ret.addNewStandardResponse();
 			ModelCRUD modelCRUD = req.getModelCRUDRequest().getModelCRUD();
 			String serviceType = modelCRUD.getServiceType();
@@ -777,7 +794,7 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 		try {
 			getCompiereService().connect();
 			
-	    	StandardResponseDocument ret = (StandardResponseDocument) StandardResponseDocument.Factory.newInstance();
+	    	StandardResponseDocument ret = StandardResponseDocument.Factory.newInstance();
 	    	StandardResponse resp = ret.addNewStandardResponse();
 	    	ModelCRUD modelCRUD = req.getModelCRUDRequest().getModelCRUD();
 			String serviceType = modelCRUD.getServiceType();
@@ -1264,7 +1281,7 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 		try {
 			getCompiereService().connect();
 			
-	    	StandardResponseDocument ret = (StandardResponseDocument) StandardResponseDocument.Factory.newInstance();
+	    	StandardResponseDocument ret = StandardResponseDocument.Factory.newInstance();
 	    	StandardResponse resp = ret.addNewStandardResponse();
 	    	ModelCRUD modelCRUD = req.getModelCRUDRequest().getModelCRUD();
 			String serviceType = modelCRUD.getServiceType();
@@ -1350,7 +1367,7 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 		try {
 			getCompiereService().connect();
 			
-			WindowTabDataDocument ret = (WindowTabDataDocument) WindowTabDataDocument.Factory.newInstance();
+			WindowTabDataDocument ret = WindowTabDataDocument.Factory.newInstance();
 			WindowTabData resp = ret.addNewWindowTabData();
 	    	ModelCRUD modelCRUD = req.getModelCRUDRequest().getModelCRUD();
 			String serviceType = modelCRUD.getServiceType();
@@ -1531,7 +1548,7 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 			{
 				DataRow dr = modelCRUD.getDataRow();
 				DataField fields[] = dr.getFieldArray();
-				StandardResponseDocument stdRet = (StandardResponseDocument) StandardResponseDocument.Factory.newInstance();
+				StandardResponseDocument stdRet = StandardResponseDocument.Factory.newInstance();
 				StandardResponse stdResp = stdRet.addNewStandardResponse();
 		
 				StandardResponseDocument retResp = invokeWSValidator(m_webservicetype, IWSValidator.TIMING_BEFORE_PARSE, holderPo, fields, trx,
