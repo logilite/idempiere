@@ -254,7 +254,7 @@ public class QuickFormPasteData extends Window implements EventListener<Event>
 				if(failCnt>0) {
 					textbox.setValue(result);
 					textbox.setEnabled(false);
-					FDialog.warn(windowNo, "line " + failCnt + " out of " + lineCnt + " has failed. Please review same in paste area!!!");
+					Dialog.warn(windowNo, "line " + failCnt + " out of " + lineCnt + " has failed. Please review same in paste area!!!");
 				}else {
 					dispose();
 				}

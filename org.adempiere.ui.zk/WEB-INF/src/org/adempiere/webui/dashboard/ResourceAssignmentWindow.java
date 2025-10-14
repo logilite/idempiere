@@ -33,7 +33,7 @@ import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
@@ -203,7 +203,7 @@ public class ResourceAssignmentWindow extends Window implements EventListener<Ev
 			// Check Mandatory fields
 			int AD_Org_ID = Env.getAD_Org_ID(Env.getCtx());
 			if (AD_Org_ID == 0){ 
-				FDialog.error(0, this, Msg.parseTranslation(Env.getCtx(), "@Org0NotAllowed@"));
+				Dialog.error(0, Msg.parseTranslation(Env.getCtx(), "@Org0NotAllowed@"));
 				return;
 			}
 
@@ -241,7 +241,7 @@ public class ResourceAssignmentWindow extends Window implements EventListener<Ev
 			}
 			else
 			{
-				FDialog.error(0, this, "RequestRecordNotSaved");
+				Dialog.error(0, "RequestRecordNotSaved");
 				return;
 			}
 

@@ -90,7 +90,6 @@ import org.adempiere.webui.window.CustomizeGridViewDialog;
 import org.adempiere.webui.window.Dialog;
 import org.adempiere.webui.window.FindWindow;
 import org.adempiere.webui.window.LabelAction;
-import org.adempiere.webui.window.WTableAttribute;
 import org.adempiere.webui.window.WChat;
 import org.adempiere.webui.window.WPostIt;
 import org.adempiere.webui.window.WRecordAccessDialog;

@@ -40,7 +40,6 @@ import org.adempiere.webui.panel.CustomizeGridViewPanel;
 import org.adempiere.webui.panel.QuickCustomizeGridViewPanel;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.panel.QuickCustomizeGridViewPanel;
 import org.compiere.model.GridField;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;

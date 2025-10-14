@@ -56,7 +56,7 @@ import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.ReaderInputStream;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.GridTab;
 import org.compiere.model.MImportTemplate;
 import org.compiere.model.MQuery;
@@ -362,7 +362,7 @@ public class CSVImportAction implements EventListener<Event>
 			Filedownload.save(media);
 
 			if (media.getName().startsWith("Error"))
-				FDialog.error(panel.getActiveGridTab().getWindowNo(), theCSVImporter.getErrorMessage());
+				Dialog.error(panel.getActiveGridTab().getWindowNo(), theCSVImporter.getErrorMessage());
 			
 			if (query != null) {
 	        	query.addRestriction("1=1");

@@ -132,7 +132,7 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 	private static final String TOGGLE_IMAGE = "images/Multi16.png";
 
 	/** tabbox for AD_Tabs **/
-	private ToolBarButton btnNew, btnSave;
+	private ToolBarButton btnSave;
 	private Tabbox tabbox;
 
 	/** Registered event listener for DetailPane events **/

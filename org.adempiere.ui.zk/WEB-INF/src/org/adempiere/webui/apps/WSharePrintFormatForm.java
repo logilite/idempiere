@@ -27,7 +27,7 @@ import org.adempiere.webui.editor.WYesNoEditor;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.session.SessionManager;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
@@ -125,7 +125,7 @@ public class WSharePrintFormatForm extends Window implements EventListener<Event
 			Object[] infoPara = new Object[2];
 			infoPara[0] = access.getAD_User_ID() > 0 ? access.getAD_User().getName() : "N/A";
 			infoPara[1] = access.getAD_Role_ID() > 0 ? access.getAD_Role().getName() : "N/A";
-			FDialog.info(0, this, Msg.getMsg(Env.getCtx(), MPrintFormatAccess.Mag_PF_Access_Share_Successfully, infoPara));
+			Dialog.info(0, Msg.getMsg(Env.getCtx(), MPrintFormatAccess.Mag_PF_Access_Share_Successfully, infoPara));
 			dispose();
 		}
 		else if (event.getTarget().equals(confirmPanel.getButton(ConfirmPanel.A_CANCEL)))

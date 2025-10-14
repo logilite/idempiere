@@ -25,7 +25,6 @@ import org.compiere.model.MPayment;
 import org.compiere.model.MProcessPara;
 import org.compiere.model.MTable;
 import org.compiere.util.DB;
-import org.compiere.util.Env;
 
 /**
  *  Copy BankStatement Lines :

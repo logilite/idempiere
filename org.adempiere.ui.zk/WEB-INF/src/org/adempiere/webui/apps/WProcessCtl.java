@@ -24,8 +24,6 @@ import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.IProcessUI;
 import org.adempiere.webui.ISupportMask;
 import org.adempiere.webui.LayoutUtils;
-import org.adempiere.webui.apps.wf.WFActivityApprover;
-import org.adempiere.webui.apps.wf.WFApproverWindow;
 import org.adempiere.webui.component.Mask;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.event.DialogEvents;

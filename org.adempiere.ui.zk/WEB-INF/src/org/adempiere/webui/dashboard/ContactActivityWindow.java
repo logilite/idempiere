@@ -45,7 +45,7 @@ import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.MClientInfo;
 import org.compiere.model.MColumn;
 import org.compiere.model.MContactActivity_Attendees;
@@ -643,7 +643,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 				}
 				else
 				{
-					FDialog.error(0, this, "Request Lead not saved");
+					Dialog.error(0, "Request Lead not saved");
 					return;
 				}
 			}
@@ -693,7 +693,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 			}
 			else
 			{
-				FDialog.error(0, this, "Request Activity not saved");
+				Dialog.error(0, "Request Activity not saved");
 				return;
 			}
 		
@@ -739,7 +739,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 				}
 				else
 				{
-					FDialog.error(0, this, "Request Follow Activity not saved");
+					Dialog.error(0, "Request Follow Activity not saved");
 					return;
 				}
 				

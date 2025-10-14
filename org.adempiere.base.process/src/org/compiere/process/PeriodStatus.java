@@ -24,7 +24,6 @@ import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MPeriodControl;
 import org.compiere.model.MProcessPara;
-import org.compiere.model.MTable;
 import org.compiere.model.MSysConfig;
 import org.compiere.util.AdempiereUserError;
 import org.compiere.util.CacheMgt;

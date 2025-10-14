@@ -21,7 +21,7 @@ import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.TreeUtils;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.MMenu;
 import org.compiere.model.MTable;
 import org.compiere.model.MTreeFavorite;
@@ -381,7 +381,7 @@ public class DPFavourites extends DashboardPanel implements EventListener<Event>
 		{
 			if (getCurrentSelectedNodeID(tree) <= 0)
 			{
-				FDialog.error(0, "PleaseSelect");
+				Dialog.error(0, "PleaseSelect");
 				return;
 			}
 		}

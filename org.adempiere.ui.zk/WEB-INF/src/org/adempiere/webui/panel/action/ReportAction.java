@@ -64,7 +64,6 @@ import org.zkoss.zul.Popup;
 import org.zkoss.zul.Space;
 import org.zkoss.zul.Tabpanel;
 import org.zkoss.zul.impl.LabelImageElement;
-import org.zkoss.zul.impl.LabelImageElement;
 
 /**
  * Action for Report toolbar button

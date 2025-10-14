@@ -53,7 +53,6 @@ import org.zkoss.zul.ListModel;
 import org.zkoss.zul.Listhead;
 import org.zkoss.zul.Listheader;
 import org.zkoss.zul.event.ZulEvents;
-import org.zkoss.zul.Listheader;
 
 /**
  * {@link IMiniTable} implementation for Zk.
