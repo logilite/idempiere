@@ -87,7 +87,7 @@ public class Process {
 	@Deprecated
 	public static ProcessParamsDocument getProcessParams( CompiereService cs, GetProcessParamsDocument req ) 
 	{
-		ProcessParamsDocument res = ProcessParamsDocument.Factory.newInstance();
+		ProcessParamsDocument res = (ProcessParamsDocument) ProcessParamsDocument.Factory.newInstance();
 		ProcessParams params = res.addNewProcessParams();
 		ProcessParamList PL = params.addNewParams();
 		
@@ -206,7 +206,7 @@ public class Process {
 //		StandardResponse standardRes= resDoc.addNewStandardResponse();
 //		RunProcessResponse rpResp = standardRes.addNewRunProcessResponse();
 		
-		RunProcessResponseDocument res = RunProcessResponseDocument.Factory.newInstance();
+		RunProcessResponseDocument res = (RunProcessResponseDocument) RunProcessResponseDocument.Factory.newInstance();
 		RunProcessResponse r= res.addNewRunProcessResponse();
 
 		RunProcess rp = docprocess.getRunProcess();
