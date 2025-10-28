@@ -18,9 +18,13 @@
 	height: 46px;
 	padding-left: 4px;
 }
+
 .desktop-header.mobile {
 	height: 36px;
 	padding: 4px 4px;
+}
+.desktop-header.mobile .systemStatus {
+	display:none;
 }
 
 <%-- user name and links --%>

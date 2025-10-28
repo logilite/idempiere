@@ -281,7 +281,7 @@
 .z-icon-Previous:before {
 	content: "\f0d9";
 }
-.z-icon-PreviousRecord:before, z-icon-angle-left:before {
+.z-icon-PreviousRecord:before, .z-icon-angle-left:before {
 	content: "\f060";
 }
 .z-icon-Print:before {
@@ -415,5 +415,40 @@
 }
 .z-icon-ZoomAcross:before {	
 	content: "\f00e";
+	font-weight: 900;
+}
+.z-icon-AttributeForm:before {
+	content: "\f29e";
+	font-weight: 900;
+}
+
+.z-icon-Abort:before {
+	content: "\f05e";
+}
+.z-icon-Retry:before {
+	content: "\f021";
+}
+
+.z-icon-DoubleArrowUp:before {
+	content: "\f102";
+}
+.z-icon-DoubleArrowDown:before {
+	content: "\f103";
+}
+.z-icon-Bars:before {
+	content: "\f0c9";
+}
+.z-icon-CopyTree:before {
+	content: "\f0c5";
+}
+.z-icon-ChangeTree:before {
+	content: "\f079";
+}
+.z-icon-Paste:before {
+	content: "\f0ea";
+}
+
+.z-icon-AttributeForm:before {
+	content: "\f29e";
 	font-weight: 900;
 }

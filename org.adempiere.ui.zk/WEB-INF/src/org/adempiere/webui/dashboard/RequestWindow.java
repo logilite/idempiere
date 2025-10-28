@@ -31,7 +31,6 @@ import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.Row;
 import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.component.Textbox;
-import org.adempiere.webui.component.Timebox;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WTableDirEditor;
@@ -78,7 +77,7 @@ public class RequestWindow extends Window implements EventListener<Event> {
 	private DatetimeBox dbxStartPlan, dbxCompletePlan;
 	private ConfirmPanel confirmPanel;
 	
-	private Window parent;
+//	private Window parent;
 	private Calendar calBegin,calEnd;
 	
 	/**
@@ -89,7 +88,7 @@ public class RequestWindow extends Window implements EventListener<Event> {
 		
 		super();
 		
-		this.parent = parent;
+//		this.parent = parent;
 
 		Properties ctx = Env.getCtx();
 		setTitle(Msg.getMsg(Env.getCtx(),"NewRequest"));

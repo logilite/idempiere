@@ -38,7 +38,7 @@ import org.adempiere.webui.component.Window;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.MColumn;
 import org.compiere.model.MContactActivity_Attendees;
 import org.compiere.model.MLookup;
@@ -406,7 +406,7 @@ public class ActivityWindow extends Window implements EventListener<Event> {
 				}
 				else
 				{
-					FDialog.error(0, this, "Request Activity not saved");
+					Dialog.error(0, "Request Activity not saved");
 					return;
 				}
 			markSalesRep(salesrepField.getValues(), activity.getC_ContactActivity_ID());
