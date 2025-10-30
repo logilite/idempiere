@@ -43,17 +43,6 @@ Copyright (C) 2007 Ashley G Ramdass (ADempiere WebUI).
 		</mold>
 	</component>
 
-	<component>
-		<component-name>chosenbox</component-name>
-		<component-class>org.zkoss.addon.chosenbox.Chosenbox</component-class>
-		<widget-class>chosenbox.Chosenbox</widget-class>
-		<mold>
-			<mold-name>default</mold-name>
-			<mold-uri>mold/chosenbox.js</mold-uri>
-			<css-uri>css/chosenbox.css.dsp</css-uri>
-		</mold>
-	</component>
-
 	<javascript-module name="org.idempiere.websocket" version="202507310500"/>	
 	<javascript-module name="jawwa.atmosphere" version="202205100600"/>
 	<javascript-module name="adempiere.local.storage" version="202205100600"/>

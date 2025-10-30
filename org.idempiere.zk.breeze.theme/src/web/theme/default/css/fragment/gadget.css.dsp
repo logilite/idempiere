@@ -268,9 +268,6 @@
 
 .statusline-gadget {
 	padding: 0px 10px 10px;
-}
-
-.statusline-gadget {
 	display: flex;
 	flex-direction: column;
  	justify-content: center;
