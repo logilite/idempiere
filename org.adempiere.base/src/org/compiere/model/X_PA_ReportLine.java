@@ -33,7 +33,7 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20250805L;
+	private static final long serialVersionUID = 20250929L;
 
     /** Standard Constructor */
     public X_PA_ReportLine (Properties ctx, int PA_ReportLine_ID, String trxName)
@@ -183,6 +183,8 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 
 	/** DimensionGroup AD_Reference_ID=200249 */
 	public static final int DIMENSIONGROUP_AD_Reference_ID=200249;
+	/** Asset = AS */
+	public static final String DIMENSIONGROUP_Asset = "AS";
 	/** Organization = OO */
 	public static final String DIMENSIONGROUP_Organization = "OO";
 	/** Product = PR */

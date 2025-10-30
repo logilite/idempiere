@@ -79,6 +79,20 @@
 	padding-bottom: 0px;
 	padding-top: 8px;
 }
+
+<%-- panel for menu tree --%>
+.menu-panel .z-toolbar-panel {
+	padding-right: 0;
+}
+.menu-panel {
+	width: 100% !important;
+	height: 100% !important;
+	position: relative !important;
+}
+.menu-panel .z-tree {
+	border: none !important;
+	width: 100%;
+}
 .menu-search-toggle-box {
 	display: inline-block;
 	border: 1px solid #ababab;			
@@ -101,19 +115,6 @@
 	width: 16px;
 }
 
-<%-- panel for menu tree --%>
-.menu-panel .z-toolbar-panel {
-	padding-right: 0;
-}
-.menu-panel {
-	width: 100% !important;
-	height: 100% !important;
-	position: relative !important;
-}
-.menu-panel .z-tree {
-	border: none !important;
-	width: 100%;
-}
 
 <%-- global search (document and application menu) --%>
 <%-- current selected document link --%>

@@ -119,6 +119,8 @@ public class MessageElementHandler extends AbstractElementHandler {
 			if (log.isLoggable(Level.INFO)) log.info(e.toString());
 		}
 
+		packoutTableAttibute(document, m_Message, packOut);
+
 		document.endElement("","",I_AD_Message.Table_Name);
 	}
 

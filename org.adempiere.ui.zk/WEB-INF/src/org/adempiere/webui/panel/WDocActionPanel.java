@@ -14,18 +14,22 @@
  * Posterita Ltd., 3, Draper Avenue, Quatre Bornes, Mauritius                 *
  * or via info@posterita.org or http://www.posterita.org/                     *
  *****************************************************************************/
-
 package org.adempiere.webui.panel;
 
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.Callback;
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.LayoutUtils;
+import org.adempiere.webui.apps.DesktopRunnable;
 import org.adempiere.webui.component.ConfirmPanel;
 import org.adempiere.webui.component.Datebox;
 import org.adempiere.webui.component.Grid;
@@ -39,7 +43,9 @@ import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.adempiere.webui.util.ZkContextRunnable;
 import org.adempiere.webui.window.Dialog;
+import org.compiere.Adempiere;
 import org.compiere.model.GridTab;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MAllocationHdr;
@@ -51,6 +57,7 @@ import org.compiere.model.MLookupFactory;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MRefList;
 import org.compiere.model.MTable;
+import org.compiere.model.MWFActivityApprover;
 import org.compiere.model.PO;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
@@ -66,10 +73,10 @@ import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFNode;
 import org.compiere.wf.MWFProcess;
 import org.compiere.wf.MWFResponsible;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Listbox;
@@ -86,6 +93,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	 * generated serial id
 	 */
 	private static final long serialVersionUID = -3218367479851088526L;
+
+	/** Event to fire on complete of execution of doc action **/
+	private static final String		ON_COMPLETE_EVENT	= "onComplete";
 
 	private Label lblDocAction;
 	private Label label;
@@ -135,6 +145,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	/** Current Role */
 	private int m_AD_Role_ID = 0;
 
+	/** Reference to docAction thread/task **/
+	private Future <?>				future;
+
 	private static final CLogger logger;
 
     static
@@ -168,21 +181,26 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		loadActivity();
 		if (!isValidApprover()) {
 			
-			StringBuilder msg = new StringBuilder("Assigned to "); //TODO use Message to support translation
-
+			StringBuilder msg = new StringBuilder(Msg.getMsg(Env.getCtx(), "AssignedToState", new Object[] { m_activity.getWFStateText(), m_activity.getNode().getName() }));
 			if (resp.isRole())
 			{
 				msg.append(resp.getRole().getName());
+			}
+			else if (resp.isManual())
+			{
+				MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(m_activity.getCtx(), m_activity.getAD_WF_Activity_ID(), m_activity.get_TrxName());
+				String approverNames = Arrays.stream(approvers).map(a -> a.getAD_User().getName()).collect(Collectors.joining(", "));
+				msg.append(approverNames);
+			}
+			// if activity has use then he as priority then responsible user
+			else if(m_activity.getAD_User_ID() > 0 )
+			{
+				msg.append(m_activity.getAD_User().getName());
 			}
 			else if (resp.isHuman())
 			{
 				msg.append(resp.getAD_User().getName());
 			}
-			else
-			{
-				msg.append(m_activity.getAD_User().getName());
-			}
-			
 			// If Activity already suspended then show error
 			Dialog.error(gridTab.getWindowNo(), msg.toString(), m_activity.toStringX());
 			return;
@@ -331,7 +349,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	 * @return available document action items
 	 */
 	public List<Listitem> getDocActionItems() {
-		return (List<Listitem>)lstDocAction.getItems();
+		return lstDocAction == null ? new ArrayList <Listitem>()  : (List<Listitem>)lstDocAction.getItems();
 	}
 	
 	/**
@@ -542,7 +560,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	}	//	isStartProcess
 
 	@Override
-	public void onEvent(Event event)
+	public void onEvent(Event event) throws Exception
 	{
 
 		String eventName = event.getName();
@@ -551,13 +569,35 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		{
 			if (confirmPanel.getButton("Ok").equals(event.getTarget()))
 			{
-				onOk(event, null);
+				if (isWFActivity())
+					future = Adempiere.getThreadPoolExecutor().submit(new DesktopRunnable(new DocActionDialogRunnable(), getDesktop()));
+				else
+					onOk(null);
 			}
 			else if (confirmPanel.getButton("Cancel").equals(event.getTarget()))
 			{
 				m_OKpressed = false;
 				this.detach();
 			}
+		}
+		else if (ON_COMPLETE_EVENT.equals(eventName))
+		{
+			if (future != null)
+			{
+				try
+				{
+					future.get();
+				}
+				catch (Exception e)
+				{
+					Throwable error = e.getCause();
+					Dialog.error(m_WindowNo, "Error", error != null ? error.getLocalizedMessage() : e.getLocalizedMessage());
+					logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
+				}
+			}
+			future = null;
+			this.detach();
+			gridTab.dataRefresh();
 		}
 		else if (Events.ON_SELECT.equals(eventName))
 		{
@@ -586,154 +626,128 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	}
 
 	/**
-	 * Handle onOk event
-	 * @param callback
+	 * Runs the workflow activity in a background transaction.  
+	 * Handles different node actions (User Choice, User Task)  
+	 * by capturing user input, validating it, and updating the activity state.  
+	 * Commits on success, or rolls back and throws an exception on failure.  
 	 */
-	public void onOk(Event event, final Callback<Boolean> callback)
+	public void runBackgroundJob( )
 	{
-		if ((lstAnswer.getSelectedItem() != null && lstAnswer.getSelectedItem().getValue() != null) || (m_activity != null && m_activity.isUserTask()))
+		Trx trx = null;
+		try
 		{
-			Trx trx = null;
-			try
+			trx = Trx.get(Trx.createTrxName("FWFA"), true);
+			trx.setDisplayName(getClass().getName() + "_onOK");
+			m_activity.set_TrxName(trx.getTrxName());
+
+			MWFNode node = m_activity.getNode();
+			String textMsg = fTextMsg.getValue();
+
+			if (MWFNode.ACTION_UserChoice.equals(node.getAction()))
 			{
-				trx = Trx.get(Trx.createTrxName("FWFA"), true);
-				trx.setDisplayName(getClass().getName() + "_onOK");
-				m_activity.set_TrxName(trx.getTrxName());
+				// getting Approval column for User Choice node
+				if (m_column == null)
+					m_column = (MColumn) node.getApprovalColumn();
 
-				MWFNode node = m_activity.getNode();
-				String textMsg = fTextMsg.getValue();
-				
-				if (MWFNode.ACTION_UserChoice.equals(node.getAction()))
+				if (m_column == null || node.getApprovalColumn_ID() <= 0)
+					m_column = node.getColumn();
+
+				int dt = m_column.getAD_Reference_ID();
+
+				String value = null;
+
+				if (dt == DisplayType.YesNo || dt == DisplayType.List)
 				{
-					// getting Approval column for User Choice node
-					if (m_column == null)
-						m_column = (MColumn) node.getApprovalColumn();
+					Listitem li = lstAnswer.getSelectedItem();
 
-					if (m_column == null || node.getApprovalColumn_ID() <= 0)
-						m_column = node.getColumn();
+					if (li != null)
+						value = li.getValue().toString();
+				}
 
-					int dt = m_column.getAD_Reference_ID();
+				if (value == null || value.length() == 0)
+					throw new AdempiereException("FillMandatory" + Msg.getMsg(Env.getCtx(), "Answer"));
 
-					String value = null;
+				//
+				if (logger.isLoggable(Level.CONFIG))
+					logger.config("Answer=" + value + " - " + textMsg);
 
-					if (dt == DisplayType.YesNo || dt == DisplayType.List)
+				boolean ok = m_activity.setUserChoice(m_AD_User_ID, value, dt, textMsg);
+
+				if (!ok || !Util.isEmpty(m_activity.getProcessMsg()))
+				{
+					String error = Util.isEmpty(m_activity.getM_ErrorMsg()) ? m_activity.getProcessMsg() : m_activity.getM_ErrorMsg();
+
+					if (!Util.isEmpty(error, true))
+						throw new AdempiereException(error);
+				}
+			}
+			else
+			{
+				if (logger.isLoggable(Level.CONFIG))
+					logger.config("Action=" + node.getAction() + " - " + textMsg);
+
+				if (node.isUserTask())
+				{
+
+					boolean ok = false;
+					if (node.getAD_Column_ID() > 0)
 					{
+						MColumn column = MColumn.get(Env.getCtx(), node.getAD_Column_ID());
+						String value = null;
+
 						Listitem li = lstAnswer.getSelectedItem();
 
 						if (li != null)
 							value = li.getValue().toString();
+
+						if (value == null || value.length() == 0)
+							throw new AdempiereException("FillMandatory" + Msg.getMsg(Env.getCtx(), "Answer"));
+
+						ok = m_activity.setUserTask(m_AD_User_ID, value, column.getAD_Reference_ID(), textMsg);
+
+					}
+					else
+					{
+						ok = m_activity.setUserTask(m_AD_User_ID, null, -1, textMsg);
 					}
 
-					if (value == null || value.length() == 0)
+					if (!ok || !Util.isEmpty(m_activity.getProcessMsg()))
 					{
-						trx.rollback();
-						trx.close();
-						Dialog.error(m_WindowNo, "FillMandatory", Msg.getMsg(Env.getCtx(), "Answer"));
-						if (callback != null)
-							callback.onCallback(false);
-						return;
-					}
-					
-					//
-					if (logger.isLoggable(Level.CONFIG))
-						logger.config("Answer=" + value + " - " + textMsg);
-
-					boolean ok = m_activity.setUserChoice(m_AD_User_ID, value, dt, textMsg);
-
-					if (!ok)
-					{
-						String error = m_activity.getM_ErrorMsg();
+						String error = Util.isEmpty(m_activity.getM_ErrorMsg()) ? m_activity.getProcessMsg() : m_activity.getM_ErrorMsg();
 
 						if (!Util.isEmpty(error, true))
-						{
-							Dialog.error(m_WindowNo, "Error", error);
-							trx.rollback();
-							return;
-						}
+							throw new AdempiereException(error);
 					}
 				}
 				else
 				{
-					if (logger.isLoggable(Level.CONFIG))
-						logger.config("Action=" + node.getAction() + " - " + textMsg);
-					
-					if (node.isUserTask())
-					{
-						
-						boolean ok =false;
-						if (node.getAD_Column_ID() > 0)
-						{
-							MColumn column = MColumn.get(Env.getCtx(), node.getAD_Column_ID());
-							String value = null;
-
-							Listitem li = lstAnswer.getSelectedItem();
-
-							if (li != null)
-								value = li.getValue().toString();
-
-							if (value == null || value.length() == 0)
-							{
-								trx.rollback();
-								trx.close();
-								Dialog.error(m_WindowNo, "FillMandatory", Msg.getMsg(Env.getCtx(), "Answer"));
-								if (callback != null)
-									callback.onCallback(false);
-								return;
-							}
-
-							ok = m_activity.setUserTask(m_AD_User_ID, value, column.getAD_Reference_ID(),
-									textMsg);
-
-							
-						}else {
-							ok = m_activity.setUserTask(m_AD_User_ID, null, -1,	textMsg);
-						}
-						
-						if (!ok)
-						{
-							String error = m_activity.getM_ErrorMsg();
-
-							if (!Util.isEmpty(error, true))
-							{
-									Dialog.error(m_WindowNo, "Error", error);
-								trx.rollback();
-								return;
-							}
-						}
-					}
-					else
-					{
-						// ensure activity is ran within a transaction
-						m_activity.setUserConfirmation(m_AD_User_ID, textMsg);
-					}
+					// ensure activity is ran within a transaction
+					m_activity.setUserConfirmation(m_AD_User_ID, textMsg);
 				}
-				trx.commit();
-				if (callback != null)
-					callback.onCallback(true);
-
 			}
-			catch (Exception e)
-			{
-				Dialog.error(m_WindowNo, "Error", e.toString());
-				trx.rollback();
-				trx.close();
-				return;
-			}
-			finally
-			{
-				Clients.clearBusy();
-				if (trx != null)
-					trx.close();
-			}
-
-			detach();
-			gridTab.dataRefresh();
+			trx.commit();
 		}
-		else
+		catch (Exception e)
 		{
-			onOk(null);
+			trx.rollback();
+			trx.close();
+			throw new AdempiereException(e.getLocalizedMessage(), e);
 		}
+		finally
+		{
+			if (trx != null)
+				trx.close();
+		}
+	}
 
+	/**
+	 * Checks if the workflow activity is valid for processing.  
+	 * Returns true if a user answer is selected with a value,  
+	 * or if the current activity exists and is a user task.  
+	 */
+	private boolean isWFActivity( )
+	{
+		return (lstAnswer.getSelectedItem() != null && lstAnswer.getSelectedItem().getValue() != null) || (m_activity != null && m_activity.isUserTask());
 	}
 
 	public void onOk(final Callback<Boolean> callback)
@@ -890,12 +904,14 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			
 			int AD_WF_Resp_ID = m_activity.getAD_WF_Responsible_ID();
 
-			MWFResponsible ovrResp = MWFResponsible.getClientWFResp(Env.getCtx(), AD_WF_Resp_ID);
-			
-			if (ovrResp != null)
-				resp = ovrResp;
-			else
-				resp = m_activity.getResponsible();
+			resp = m_activity.getResponsible();
+			// first priority to suspended activity responsible
+			if (resp == null)
+			{
+				MWFResponsible ovrResp = MWFResponsible.getClientWFResp(Env.getCtx(), AD_WF_Resp_ID);
+				if (ovrResp != null)
+					resp = ovrResp;
+			}
 		}
 	}
 
@@ -909,7 +925,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			if (MWFResponsible.RESPONSIBLETYPE_Manual.equals(respType))
 			{
 				// If Approver is not assign then check current user is invoker
-				if (m_activity.getAD_User_ID() <= 0 && m_WFProcess.getAD_User_ID() != m_AD_User_ID)
+				MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(m_activity.getCtx(), m_activity.getAD_WF_Activity_ID(), m_activity.get_TrxName());
+				if ((approvers == null || approvers.length == 0) && m_activity.getAD_User_ID() <= 0 && m_WFProcess.getAD_User_ID() != m_AD_User_ID)
 				{
 					return false;
 				}
@@ -918,6 +935,20 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				if (m_activity.getAD_User_ID() > 0 && m_AD_User_ID != m_activity.getAD_User_ID())
 				{
 					return false;
+				}
+				
+				if (approvers != null && approvers.length > 0)
+				{
+					boolean isApprover = false;
+					for (int i = 0; i < approvers.length; i++)
+					{
+						if (approvers[i].getAD_User_ID() == Env.getAD_User_ID(m_activity.getCtx()))
+						{
+							isApprover = true;
+							break;
+						}
+					}
+					return isApprover;
 				}
 
 				return true;
@@ -929,16 +960,23 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 					return false;
 				}
 			}
-			else if (MWFResponsible.RESPONSIBLETYPE_Supervisor.equals(respType))
+			else if (MWFResponsible.RESPONSIBLETYPE_SupervisorOfInitiator.equals(respType) || MWFResponsible.RESPONSIBLETYPE_SupervisorOfCurrentUser.equals(respType))
 			{
 				if (m_activity.getAD_User_ID() != m_AD_User_ID)
 				{
 					return false;
 				}
 			}
-			else if (MWFResponsible.RESPONSIBLETYPE_Human.equals(respType) && resp.getAD_User_ID()>0) {
-				if(resp.getAD_User_ID()!= m_AD_User_ID)
+			else if (MWFResponsible.RESPONSIBLETYPE_Human.equals(respType) && resp.getAD_User_ID() > 0)
+			{
+				if (m_activity.getAD_User_ID() != 0 && m_activity.getAD_User_ID() == m_AD_User_ID)
+				{
+					return true;
+				}
+				else if (resp.getAD_User_ID() != m_AD_User_ID)
+				{
 					return false;
+				}
 			}
 			else
 			{
@@ -958,4 +996,28 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				|| (resp != null && m_AD_Role_ID == resp.getAD_Role_ID())
 				|| (resp != null && resp.isHuman() && resp.getAD_User_ID()==0);
 	}
+	
+	/**
+	 * Runnable to run process in background thread.
+	 * Notify process dialog with {@link WDocActionPanel#ON_COMPLETE_EVENT} event.
+	 */
+	private class DocActionDialogRunnable extends ZkContextRunnable
+	{
+		private DocActionDialogRunnable() 
+		{
+			super();			
+		}
+		
+		protected void doRun() 
+		{
+			try {
+				runBackgroundJob();
+			} catch (Exception ex) {
+				logger.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
+				throw new AdempiereException(ex.getLocalizedMessage(), ex);
+			} finally {
+				Executions.schedule(getDesktop(), WDocActionPanel.this, new Event(ON_COMPLETE_EVENT, WDocActionPanel.this, null));
+			}		
+		}
+	}// DocActionDialogRunnable
 }

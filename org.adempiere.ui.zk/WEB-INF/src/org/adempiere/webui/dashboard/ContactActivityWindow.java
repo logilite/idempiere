@@ -739,7 +739,7 @@ public class ContactActivityWindow extends Window implements EventListener<Event
 				}
 				else
 				{
-					Dialog.error(0, "Request Follow Activity not saved");
+					Dialog.error(0,  "Request Follow Activity not saved");
 					return;
 				}
 				

@@ -113,6 +113,8 @@ public class ModelValidatorElementHandler extends AbstractElementHandler{
 			if (log.isLoggable(Level.INFO)) log.info(e.toString());
 		}
 
+		packoutTableAttibute(document, validator, packOut);
+
 		document.endElement("", "", "AD_ModelValidator");
 	}
 

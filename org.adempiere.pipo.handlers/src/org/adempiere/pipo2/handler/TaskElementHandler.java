@@ -111,6 +111,8 @@ public class TaskElementHandler extends AbstractElementHandler {
 			if (log.isLoggable(Level.INFO)) log.info(e.toString());
 		}
 
+		packoutTableAttibute(document, m_Task, packOut);
+
 		document.endElement("", "", I_AD_Task.Table_Name);
 
 	}

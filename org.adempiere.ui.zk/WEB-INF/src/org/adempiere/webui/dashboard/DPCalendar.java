@@ -486,7 +486,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 			userIDs = userIDs.substring(0, userIDs.length() - 1);
 		}
 		
-		if (users != null && !users.contains(SALES_REPRESENTATIVE_ALL))
+		if (users != null && users.size() > 0 && !users.contains(SALES_REPRESENTATIVE_ALL))
 			where.append(" AND au.AD_USER_ID IN (").append(userIDs).append(") ");
 
 		if (ContactActivityType.length() > 0)
@@ -1049,6 +1049,7 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 	public boolean isLazy() {
 		return true;
 	}
+
 	public static String getTimeFormat()
 	{
 		return MSysConfig.getValue("CALENDAR_TIME_FORMAT", "HH:mm", Env.getAD_Client_ID(Env.getCtx()));
@@ -1056,11 +1057,11 @@ public class DPCalendar extends DashboardPanel implements EventListener<Event>, 
 
 	public static int getStartTimeHour()
 	{
-		return (int) (MSysConfig.getDoubleValue("CALENDAR_START_TIME_HOUR", 0, Env.getAD_Client_ID(Env.getCtx())) * 60 * 60 * 1000);
+		return MSysConfig.getIntValue("CALENDAR_START_TIME_HOUR", 0, Env.getAD_Client_ID(Env.getCtx())) * 60 * 60 * 1000;
 	}
 
 	public static int getEndTimeHour()
 	{
-		return (int) (MSysConfig.getDoubleValue("CALENDAR_END_TIME_HOUR", 24, Env.getAD_Client_ID(Env.getCtx())) * 60 * 60 * 1000);
+		return MSysConfig.getIntValue("CALENDAR_END_TIME_HOUR", 24, Env.getAD_Client_ID(Env.getCtx())) * 60 * 60 * 1000;
 	}
 }

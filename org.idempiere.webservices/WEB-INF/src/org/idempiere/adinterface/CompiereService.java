@@ -420,10 +420,12 @@ public class CompiereService {
 		
 		// Create session
 		if(Util.isEmpty(sessionId, true)) {
-			MSession session = MSession.get (getCtx(), false);
+			MSession session = MSession.get (getCtx());
 			if (session == null){
 				log.fine("No Session found");
-				session = MSession.get (getCtx(), true);    	
+				session = MSession.create (getCtx());
+			} else {
+				session = new MSession(getCtx(), session.getAD_Session_ID(), null);
 			}
 			
 			session.setWebSession("WebService");
