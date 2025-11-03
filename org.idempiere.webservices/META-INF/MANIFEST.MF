@@ -112,7 +112,7 @@ Require-Bundle: org.adempiere.base;bundle-version="13.0.0",
  org.apache.cxf.cxf-rt-databinding-xmlbeans;bundle-version="3.6.3",
  org.apache.cxf.cxf-rt-rs-extension-providers;bundle-version="3.6.3"
 Bundle-ClassPath: .,
- lib/idempiere-xmlbeans.jar
+ lib/idempiere-xmlbeans-2.0.jar
 Export-Package: org.idempiere.webservices.model,
  org.idempiere.adInterface.x10,
  org.idempiere.adInterface.x10.impl,
