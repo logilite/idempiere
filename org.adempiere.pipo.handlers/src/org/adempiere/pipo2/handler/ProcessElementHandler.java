@@ -34,6 +34,7 @@ import org.compiere.model.I_AD_PrintFormat;
 import org.compiere.model.I_AD_Process;
 import org.compiere.model.I_AD_Reference;
 import org.compiere.model.I_AD_ReportView;
+import org.compiere.model.I_AD_TableAttribute;
 import org.compiere.model.I_AD_Val_Rule;
 import org.compiere.model.I_AD_Workflow;
 import org.compiere.model.MAttachment;

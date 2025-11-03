@@ -12,7 +12,7 @@ ALTER TABLE AD_PrintFormat ADD COLUMN IsShowSummaryMultipleRowOnly CHAR(1) DEFAU
 ;
 
 -- Jan 5, 2022, 12:51:25 PM IST
-INSERT INTO AD_Field (AD_Field_ID,Name,Description,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLogic,DisplayLength,SeqNo,SortNo,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,SeqNoGrid,XPosition,ColumnSpan,NumLines,IsQuickEntry,IsDefaultFocus,IsAdvancedField,IsQuickForm) VALUES (206832,'Show Summary Multiple Row Only','Show Summary Line For Multiple Row Only',425,214660,'Y','@IsForm @ = N',0,260,0,'N','N','N','N',0,0,'Y',TO_TIMESTAMP('2022-01-05 12:51:24','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2022-01-05 12:51:24','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','fee58018-d4fd-43c5-bc7c-71f00b12de83','Y',260,2,2,1,'N','N','N','N')
+INSERT INTO AD_Field (AD_Field_ID,Name,Description,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLogic,DisplayLength,SeqNo,SortNo,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,SeqNoGrid,XPosition,ColumnSpan,NumLines,IsQuickEntry,IsDefaultFocus,IsAdvancedField,IsQuickForm) VALUES (206832,'Show Summary Multiple Row Only','Show Summary Line For Multiple Row Only',425,214660,'Y','@IsForm@=N',0,260,0,'N','N','N','N',0,0,'Y',TO_TIMESTAMP('2022-01-05 12:51:24','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2022-01-05 12:51:24','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','fee58018-d4fd-43c5-bc7c-71f00b12de83','Y',260,2,2,1,'N','N','N','N')
 ;
 
 SELECT register_migration_script('202201051630_IDEMPIERE-5143.sql') FROM dual

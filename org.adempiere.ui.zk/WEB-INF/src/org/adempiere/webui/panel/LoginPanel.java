@@ -401,53 +401,13 @@ public class LoginPanel extends Window implements EventListener<Event>
         	td.appendChild(btnResetPassword);
         	btnResetPassword.addEventListener(Events.ON_CLICK, this);
     	}
-    	
-		boolean isShowOKButton = true;
-		boolean isShowLoginPage = MSysConfig.getBooleanValue(MSysConfig.SSO_SHOW_LOGINPAGE, true);
+
+    	boolean isShowOKButton = true;
+    	Object ssoAdminLogin = Executions.getCurrent().getDesktop().getSession().getAttribute(ISSOPrincipalService.SSO_ADMIN_LOGIN);
 		boolean isSSOEnable = MSysConfig.getBooleanValue(MSysConfig.ENABLE_SSO, false);
-		if (isSSOEnable)
-		{
-			List<MSSOPrincipalConfig> configs = MSSOPrincipalConfig.getAllSSOPrincipalConfig();
-			if (configs != null && !configs.isEmpty())
-			{
-				tr = null;
-				for (int i = 0; i < configs.size(); i++)
-				{
-					MSSOPrincipalConfig config = configs.get(i);
-
-					tr = new Tr();
-					table.appendChild(tr);
-					td = new Td();
-					tr.appendChild(td);
-					td = new Td();
-					tr.appendChild(td);
-					// Apply styles and add button
-					td.setStyle("display: flex; align-items: center;");
-					Button loginButton = createSSOLoginButton(config);
-					td.appendChild(loginButton);
-
-					td = new Td();
-					tr.appendChild(td);
-				}
-				
-				// Toggle visibility of user credentials and language selection fields based on configuration
-				lblUserId.setVisible(isShowLoginPage);
-				lblPassword.setVisible(isShowLoginPage);
-				lblLanguage.setVisible(isShowLoginPage);
-				lblLogin.setVisible(isShowLoginPage);
-				txtUserId.setVisible(isShowLoginPage);
-				txtPassword.setVisible(isShowLoginPage);
-				lstLanguage.setVisible(isShowLoginPage);
-				chkRememberMe.setVisible(isShowLoginPage);
-				chkSelectRole.setVisible(isShowLoginPage);
-				// Display the OK button only when the traditional login form is visible
-				isShowOKButton = isShowLoginPage;
-			}
-		}
-
-		Object ssoAdminLogin = Executions.getCurrent().getDesktop().getSession().getAttribute(ISSOPrincipalService.SSO_ADMIN_LOGIN);
 		boolean isAdminLogin = ssoAdminLogin != null && (boolean) ssoAdminLogin;
 		boolean isShowSSOOption = MSysConfig.getBooleanValue(MSysConfig.SSO_SHOWSSO_OPTION, false);
+		boolean isShowLoginPage = MSysConfig.getBooleanValue(MSysConfig.SSO_SHOW_LOGINPAGE, false);
 		if (isShowSSOOption && isSSOEnable && !isAdminLogin)
 		{
 			List<MSSOPrincipalConfig> configs = MSSOPrincipalConfig.getAllSSOPrincipalConfig();
