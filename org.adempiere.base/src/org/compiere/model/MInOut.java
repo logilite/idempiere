@@ -39,6 +39,7 @@ import org.adempiere.exceptions.PeriodClosedException;
 import org.adempiere.util.IReservationTracer;
 import org.adempiere.util.IReservationTracerFactory;
 import org.adempiere.util.ShippingUtil;
+import org.compiere.acct.Doc;
 import org.compiere.print.MPrintFormat;
 import org.compiere.print.ReportEngine;
 import org.compiere.process.DocAction;
@@ -2987,6 +2988,9 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		MInOut reversal = reverse(false);
 		if (reversal == null)
 			return false;
+
+		// delete the fact line of the  after reverse Correct
+		Doc.deleteReverseCorrectPosting(getCtx(),getAD_Client_ID(), MInOut.Table_ID , getM_InOut_ID() ,get_TrxName());
 
 		// After reverseCorrect
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSECORRECT);
