@@ -28,6 +28,7 @@ import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.NegativeInventoryDisallowedException;
 import org.adempiere.model.DocActionDelegate;
 import org.adempiere.util.ProjectIssueUtil;
+import org.compiere.acct.Doc;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
@@ -736,6 +737,10 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 	{
 		if (!docActionDelegate.reverseCorrectIt())
 			return false;
+		
+		// delete the fact line of the Project Issue after reverse Correct
+		Doc.deleteReverseCorrectPosting(getCtx(), getAD_Client_ID(), MProjectIssue.Table_ID, getC_ProjectIssue_ID(), get_TrxName());
+
 		deleteProjectLine();
 		if (getC_InvoiceLine_ID() > 0)
 			getC_InvoiceLine().setC_Project_ID(0);
