@@ -43,7 +43,7 @@ public interface IAction {
 	}
 
 	/**
-	 * you can customize toolbar button enable/disable based on current panel toolbar update.
+	 * Customize detail toolbar button enable/disable based on current tab data status update
 	 * 
 	 * @param toolbarButton
 	 * @param tabPanel
@@ -51,5 +51,6 @@ public interface IAction {
 	 * @param readOnly
 	 */
 	public default void updateToolbarCustomBtn(Toolbarbutton toolbarButton, IADTabpanel tabPanel, boolean changed, boolean readOnly) {
-	};
+	}
+
 }

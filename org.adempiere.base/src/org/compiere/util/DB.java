@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import javax.sql.RowSet;
@@ -856,7 +857,8 @@ public final class DB
 			pstmt.setBytes(index, (byte[]) param);
 		else if (param instanceof Clob)
 			pstmt.setClob(index, (Clob) param);
-		else if (param.getClass().getName().equals("oracle.sql.BLOB"))
+		else if (param instanceof UUID
+				 || param.getClass().getName().equals("oracle.sql.BLOB"))
 			pstmt.setObject(index, param);
 		else if (param instanceof Integer[])
 			pstmt.setArray(index, buildDBArray(param));

@@ -211,7 +211,7 @@ public class DB_PostgreSQL implements AdempiereDatabase
 			.append(connection.getDbHost())
 			.append(":").append(connection.getDbPort())
 			.append("/").append(connection.getDbName())
-			.append("?encoding=UNICODE&ApplicationName=iDempiere");
+			.append("?encoding=UNICODE&ApplicationName=iDempiere&stringtype=unspecified");
 
 		String urlParameters = SystemProperties.getPostgresqlURLParameters();
 	    if (!Util.isEmpty(urlParameters)) {
@@ -1250,7 +1250,12 @@ public class DB_PostgreSQL implements AdempiereDatabase
 	public String getTimestampWithTimezoneDataType() {
 		return "TIMESTAMP WITH TIME ZONE";
 	}
-	
+
+	@Override
+	public String getUUIDDataType() {
+		return "UUID";
+	}
+
 	@Override
 	public String getSQLDDL(MColumn column) {				
 		StringBuilder sql = new StringBuilder ().append(column.getColumnName())
@@ -1308,7 +1313,7 @@ public class DB_PostgreSQL implements AdempiereDatabase
 		StringBuilder sql = new StringBuilder ("ALTER TABLE ")
 			.append(table.getTableName())
 			.append(" ADD COLUMN ").append(column.getSQLDDL());
-		String constraint = column.getConstraint(table.getTableName());
+		String constraint = column.getConstraint(table);
 		if (constraint != null && constraint.length() > 0) {
 			sql.append(DB.SQLSTATEMENT_SEPARATOR).append("ALTER TABLE ")
 			.append(table.getTableName())

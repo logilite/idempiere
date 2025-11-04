@@ -25,10 +25,11 @@ import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.ProjectIssueUtil;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCostDetail;
+import org.compiere.model.MInOutLine;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProject;
 import org.compiere.model.MProjectIssue;
-import org.compiere.model.MTable;
+import org.compiere.model.MTimeExpenseLine;
 import org.compiere.model.ProductCost;
 import org.compiere.util.Env;
 
@@ -145,28 +146,19 @@ public class Doc_ProjectIssue extends Doc
 
 		//  Issue Cost
 		BigDecimal cost = null;
-		if(m_issue.getM_Product_ID() > 0)
-			cost = ProjectIssueUtil.getCostDetailCost(m_issue, as).multiply(m_issue.getMovementQty());
-		
-		if (cost == null || cost.signum() <= 0)
+		if (m_issue.getM_InOutLine_ID() != 0)
 		{
-			if (m_issue.getM_InOutLine_ID() != 0)
-				cost = ProjectIssueUtil.getPOCost(as, m_issue.getM_InOutLine_ID(), m_line.getQty());
-			else if (m_issue.getS_TimeExpenseLine_ID() != 0)
-				cost = ProjectIssueUtil.getLaborCost(as, m_issue.getS_TimeExpenseLine_ID());
-			else if (m_issue.getC_InvoiceLine_ID() > 0 || m_issue.getC_Charge_ID()>0)
-				cost = m_issue.getAmt();
-			else if (m_issue.getM_Product_ID()>0) // standard Product Costs
-			{
-	            cost = m_line.getProductCosts(as, getAD_Org_ID(), false);
-			}
+			MInOutLine inOutLine = new MInOutLine(getCtx(), m_issue.getM_InOutLine_ID(), getTrxName());
+			cost = inOutLine.getPOCost(as, m_line.getQty());
 		}
-		
-		if (product!=null && (cost == null || cost.signum() <= 0))
+		else if (m_issue.getS_TimeExpenseLine_ID() != 0)
 		{
-			throw new AdempiereException("Cost is not Present for Product (" + product.getName() + ")");
+			MTimeExpenseLine timeExpenseLine = new MTimeExpenseLine(getCtx(), m_issue.getS_TimeExpenseLine_ID(), getTrxName());
+			cost = timeExpenseLine.getLaborCost(as);
 		}
-		
+		if (cost == null)	//	standard Product Costs
+			cost = m_line.getProductCosts(as, getAD_Org_ID(), false);
+
 		//  Project         DR
 		int acctType = ACCTTYPE_ProjectWIP;
 		if (MProject.PROJECTCATEGORY_AssetProject.equals(ProjectCategory))

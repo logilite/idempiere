@@ -919,7 +919,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		}
 		return true;
 	}
-
+	
 	/**
 	 * Update Project Balance on Project issue posted
 	 * 
@@ -928,44 +928,45 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 	 */
 	private BigDecimal updateBalanceAmt()
 	{
-		MProject proj = (MProject) getC_Project();
-		BigDecimal cost = Env.ZERO;
+		BigDecimal cost = null;
 		MAcctSchema as = MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID(), get_TrxName())[0];
+		MProduct product = new MProduct(getCtx(), getM_Product_ID(), get_TrxName());
 		if (getM_InOutLine_ID() > 0)
 		{
-			cost = ProjectIssueUtil.getPOCost(as, getM_InOutLine_ID(), getMovementQty());
+			MInOutLine inOutLine = new MInOutLine(getCtx(), getM_InOutLine_ID(), get_TrxName());
+			cost = inOutLine.getPOCost(as, getMovementQty());
 		}
 		else if (getS_TimeExpenseLine_ID() > 0)
 		{
-			cost = ProjectIssueUtil.getLaborCost(as, getS_TimeExpenseLine_ID());
+			MTimeExpenseLine expenseLine = new MTimeExpenseLine(getCtx(), getS_TimeExpenseLine_ID(), get_TrxName());
+			cost = expenseLine.getLaborCost(as);
 		}
 		else if (getC_InvoiceLine_ID() > 0)
 		{
 			cost = getInvLineAmt((MInvoiceLine) getC_InvoiceLine());
 		}
-		else if(getC_Charge_ID() > 0) {
+		else if(getC_Charge_ID() > 0)
+		{
 			cost = getAmt();
 		}
 		else
 		{
-			cost = ProjectIssueUtil.getProductCosts(as, (MProduct) getM_Product(), getM_AttributeSetInstance_ID(), getAD_Org_ID(), getMovementQty(), true);
+ 			cost = MCost.getCost(	product, getM_AttributeSetInstance_ID(), as, getAD_Org_ID(), as.getCostingMethod(), getMovementQty(), 0, true, getMovementDate(), null,
+									false, get_TrxName());
 		}
-
-		if (cost == null && getM_Product_ID() > 0) // standard Product Costs
-		{
-			cost = ProjectIssueUtil.getProductStdCost(as, getAD_Org_ID(), getM_Product_ID(), getM_AttributeSetInstance_ID(), get_TrxName(), getMovementQty());
-		}
-
 		if (cost != null)
 		{
+			MProject proj = new MProject(getCtx(), getC_Project_ID(), get_TrxName());
 			proj.setProjectBalanceAmt(proj.getProjectBalanceAmt().add(cost));
 			proj.saveEx(get_TrxName());
 		}
 		if (getReversal_ID() < 0 && (cost == null || cost.signum() <= 0))
 		{
-			throw new IllegalArgumentException(	"Product: ("	+ getM_Product().getName() + ") is not present at Locator: (" +
-												getM_Locator().getM_Warehouse().getValue() + ") for ASI: (" + getM_AttributeSetInstance().getDescription()
-												+ ")");
+			MLocator locator = new MLocator(getCtx(), getM_Locator_ID(), get_TrxName());
+			MWarehouse warehouse = new MWarehouse(getCtx(), locator.getM_Warehouse_ID(), get_TrxName());
+			MAttributeSetInstance asi = new MAttributeSetInstance(getCtx(), getM_AttributeSetInstance_ID(), get_TrxName());
+			throw new IllegalArgumentException(	"Product: ("	+ product.getName() + ") is not present at Locator: (" + warehouse.getValue() + ") for ASI: ("
+												+ asi.getDescription() + ")");
 		}
 		return cost;
 	} // updateBalanceAmt

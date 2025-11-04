@@ -129,7 +129,7 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 	public static MColumn get (Properties ctx, String tableName, String columnName)
 	{
 		MTable table = MTable.get(ctx, tableName);
-		return  table.getColumn(columnName);
+		return  table != null ? table.getColumn(columnName) : null;
 	}	//	get
 
 	/**
@@ -143,7 +143,7 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 	public static MColumn get (Properties ctx, String tableName, String columnName, String trxName)
 	{
 		MTable table = MTable.get(ctx, tableName, trxName);
-		return table.getColumn(columnName);
+		return table != null ? table.getColumn(columnName) : null;
 	}	//	get
 
 	/**
@@ -618,6 +618,10 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 		if (getAD_Reference_ID() == DisplayType.Payment)
 			setAD_Reference_Value_ID(SystemIDs.REFERENCE_PAYMENTRULE);
 
+		// Fix references for old tables created for example with 2Packs defining the reference as String
+		if (getColumnName().equals(PO.getUUIDColumnName(tableName)) && getAD_Reference_ID() != DisplayType.UUID)
+			setAD_Reference_ID(DisplayType.UUID);
+
 		return true;
 	}	//	beforeSave
 	
@@ -718,6 +722,18 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 	 */
 	public String getConstraint(String tableName)
 	{
+		MTable table = MTable.get(getCtx(), tableName);
+		return getConstraint(table);
+	}
+	
+	/**
+	 * 	Get Table Constraint
+	 *	@param table table
+	 *	@return table constraint clause
+	 */
+	public String getConstraint(MTable table)
+	{
+		String tableName = table.getTableName();
 		if (isKey()) {
 			StringBuilder constraintName;
 			if (tableName.length() > AdempiereDatabase.MAX_OBJECT_NAME_LENGTH - 4)
@@ -733,8 +749,7 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 			return "CONSTRAINT " ADTable_ADTableTrl
 				+ " FOREIGN KEY (" + getColumnName() + ") REFERENCES "
 				+ AD_Table(AD_Table_ID) ON DELETE CASCADE
-		**/
-		MTable table = MTable.get(getAD_Table_ID());
+		**/		
 		// IDEMPIERE-965
 		if (getColumnName().equals(PO.getUUIDColumnName(tableName))) {
 			String indexName = MTable.getUUIDIndexName(tableName);
@@ -878,6 +893,8 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 						foreignTable = rt.getAD_Table().getTableName();
 				}
 			}
+		} else if (DisplayType.isMultiID(refid)) {
+			foreignTable = getMultiReferenceTableName();
 		} else if (DisplayType.Button == refid) {
 			// C_BPartner.AD_OrgBP_ID and C_Project.C_ProjectType_ID are defined as buttons
 			if ("AD_OrgBP_ID".equalsIgnoreCase(getColumnName()))
@@ -1039,7 +1056,7 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 		if (!column.isKey() && !column.getColumnName().equals(PO.getUUIDColumnName(table.getTableName())) && !column.isVirtualColumn())
 		{
 			int refid = column.getAD_Reference_ID();
-			if (refid != DisplayType.List && refid != DisplayType.Payment && !DisplayType.isMultiSelect(refid))
+			if (!DisplayType.isList(refid) && !DisplayType.isMultiID(refid) && refid != DisplayType.Payment)
 			{
 				String referenceTableName = column.getReferenceTableName();
 				if (referenceTableName != null)
@@ -1279,7 +1296,7 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 				return "";
 
 			int refid = column.getAD_Reference_ID();
-			if (!DisplayType.isList(refid))
+			if (!DisplayType.isList(refid) && !DisplayType.isMultiID(refid))
 			{
 				String referenceTableName = column.getReferenceTableName();
 				if (referenceTableName != null)

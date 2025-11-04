@@ -226,6 +226,11 @@ public class ToolbarCustomButton implements EventListener<Event>, Evaluatee {
 		return toolbarButton;
 	}
 
+	/**
+	 * @param tabPanel
+	 * @param changed
+	 * @param readOnly
+	 */
 	public void updateToolbarCustomBtn(IADTabpanel tabPanel, boolean changed, boolean readOnly)
 	{
 		IServiceHolder<IAction> serviceHolder = Actions.getAction(actionId);

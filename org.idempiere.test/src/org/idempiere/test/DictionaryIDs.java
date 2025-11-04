@@ -141,6 +141,17 @@ public final class DictionaryIDs {
 		}
 	}
 	
+	public enum C_BankAccount_Processor {
+		MONEYBANK_1234("f4a64026-bf68-4c8c-b238-8cdf006aae04"),
+		MONEYBANK_5678("f8f892f0-36ab-4b4d-9dd3-c3bbe12cf455");
+
+		public final String uuid;
+
+		private C_BankAccount_Processor(String uuid) {
+			this.uuid = uuid;
+		}
+	}
+
 	public enum C_BPartner {
 		STANDARD(112,"dc4962ad-066f-4ebf-88ac-545d12c9f1f0"),
 		TREE_FARM(114,"5c557ed6-c443-4b99-ae77-546ccd46bc1f"),
@@ -762,6 +773,31 @@ public final class DictionaryIDs {
 		public final int id;
 
 		private GL_Category(int id) {
+			this.id = id;
+		}
+	}
+  
+  public enum AD_Field {
+		BPartner_PaymentRule(9624),
+		BPartner_Description(2133),
+		PackageInstallation_PackageVersion(203844);
+		
+		public final int id;
+
+		private AD_Field(int id) {
+			this.id = id;
+		}
+	}
+	
+	public enum AD_Column {
+		VIRTUALCOLUMN_UPCEAN(14102),
+		REPORT_VIEW_ORDERBYCLAUSE(4396),
+		MULTISELECTCOLUMN_SCOPELIST(214414);
+		
+		
+		public final int id;
+
+		private AD_Column(int id) {
 			this.id = id;
 		}
 	}

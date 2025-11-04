@@ -220,7 +220,6 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
     /**
      * Create desktop layout from "zul/desktop/desktop.zul".
      */
-    @SuppressWarnings("serial")
 	protected Component doCreatePart(Component parent)
     {
     	String zulPath = "zul/desktop/desktop.zul";

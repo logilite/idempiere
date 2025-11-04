@@ -36,6 +36,7 @@ import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_ID;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_IMAGE;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_IMAGE_URL;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_INTEGER;
+import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_JSON;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_LIST;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_LOCATION;
 import static org.compiere.model.SystemIDs.REFERENCE_DATATYPE_LOCATOR;
@@ -1094,6 +1095,9 @@ public final class DisplayType
 				return getDatabase().getVarcharDataType()+"(" + fieldLength + getDatabase().getVarcharLengthSuffix() + ")[]";
 		}
 		
+		if (DisplayType.isUUID(displayType))
+			return getDatabase().getUUIDDataType();
+
 		IServiceReferenceHolder<IDisplayTypeFactory> cache = s_displayTypeFactoryCache.get(displayType);
 		if (cache != null) {
 			IDisplayTypeFactory service = cache.getService();

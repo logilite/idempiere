@@ -1022,7 +1022,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 
 		if (mt == null)
 		{
-			mt = (MMailText) MUser.get(Env.getCtx()).getR_DefaultMailText();
+			mt = new MMailText(Env.getCtx(), MUser.get(Env.getCtx()).getR_DefaultMailText_ID(), null);
 		}
 
 		if (mt != null && mt.get_ID() > 0) 
