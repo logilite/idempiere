@@ -49,6 +49,8 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLandedCost;
 import org.compiere.model.MOrderLandedCostAllocation;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MProduct;
+import org.compiere.model.MTable;
 import org.compiere.model.MTax;
 import org.compiere.model.MUOM;
 import org.compiere.model.ProductCost;
@@ -822,7 +824,6 @@ public class Doc_MatchInv extends Doc
 				if (orderLine.getC_Currency_ID() != as.getC_Currency_ID())
 				{
 					MOrder order = orderLine.getParent();
-					Timestamp dateAcct = order.getDateAcct();
 					BigDecimal rate = MConversionRate.getRate(
 						order.getC_Currency_ID(), as.getC_Currency_ID(),
 						getDateAcct(), order.getC_ConversionType_ID(),

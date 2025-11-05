@@ -234,7 +234,9 @@ UNION
    FROM m_requisition
   WHERE (m_requisition.docstatus <> ALL (ARRAY['CO'::bpchar, 'CL'::bpchar, 'VO'::bpchar, 'RE'::bpchar]));
 
-CREATE VIEW rv_unposted AS
+
+CREATE OR REPLACE VIEW rv_unposted
+ AS
  SELECT gl_journal.ad_client_id,
     gl_journal.ad_org_id,
     gl_journal.created,
@@ -255,9 +257,9 @@ CREATE VIEW rv_unposted AS
     gl_journal.processedon,
     dt.docbasetype,
     gl_journal.gl_journal_uu AS rv_unposted_uu
-   FROM (gl_journal
-     JOIN c_doctype dt ON ((dt.c_doctype_id = gl_journal.c_doctype_id)))
-  WHERE ((gl_journal.posted <> 'Y'::bpchar) AND (gl_journal.docstatus <> 'VO'::bpchar))
+   FROM gl_journal
+     JOIN c_doctype dt ON dt.c_doctype_id = gl_journal.c_doctype_id
+  WHERE (gl_journal.posted <> ALL (ARRAY['Y'::bpchar, 'R'::bpchar])) AND gl_journal.docstatus <> 'VO'::bpchar
 UNION
  SELECT pi.ad_client_id,
     pi.ad_org_id,
@@ -266,7 +268,7 @@ UNION
     pi.updated,
     pi.updatedby,
     pi.isactive,
-    (((p.name)::text || '_'::text) || pi.line) AS documentno,
+    (p.name::text || '_'::text) || pi.line AS documentno,
     pi.movementdate AS datedoc,
     pi.movementdate AS dateacct,
     623 AS ad_table_id,
@@ -279,9 +281,9 @@ UNION
     pi.processedon,
     'PJI'::bpchar AS docbasetype,
     pi.c_projectissue_uu AS rv_unposted_uu
-   FROM (c_projectissue pi
-     JOIN c_project p ON ((pi.c_project_id = p.c_project_id)))
-  WHERE (pi.posted <> 'Y'::bpchar)
+   FROM c_projectissue pi
+     JOIN c_project p ON pi.c_project_id = p.c_project_id
+  WHERE pi.posted <> ALL (ARRAY['Y'::bpchar, 'R'::bpchar])
 UNION
  SELECT c_invoice.ad_client_id,
     c_invoice.ad_org_id,
@@ -303,9 +305,9 @@ UNION
     c_invoice.processedon,
     dt.docbasetype,
     c_invoice.c_invoice_uu AS rv_unposted_uu
-   FROM (c_invoice
-     JOIN c_doctype dt ON ((dt.c_doctype_id = c_invoice.c_doctype_id)))
-  WHERE ((c_invoice.posted <> 'Y'::bpchar) AND (c_invoice.docstatus <> 'VO'::bpchar))
+   FROM c_invoice
+     JOIN c_doctype dt ON dt.c_doctype_id = c_invoice.c_doctype_id
+  WHERE (c_invoice.posted <> ALL (ARRAY['Y'::bpchar, 'R'::bpchar])) AND c_invoice.docstatus <> 'VO'::bpchar
 UNION
  SELECT m_inout.ad_client_id,
     m_inout.ad_org_id,
@@ -327,9 +329,9 @@ UNION
     m_inout.processedon,
     dt.docbasetype,
     m_inout.m_inout_uu AS rv_unposted_uu
-   FROM (m_inout
-     JOIN c_doctype dt ON ((dt.c_doctype_id = m_inout.c_doctype_id)))
-  WHERE ((m_inout.posted <> 'Y'::bpchar) AND (m_inout.docstatus <> 'VO'::bpchar))
+   FROM m_inout
+     JOIN c_doctype dt ON dt.c_doctype_id = m_inout.c_doctype_id
+  WHERE (m_inout.posted <> ALL (ARRAY['Y'::bpchar, 'R'::bpchar])) AND m_inout.docstatus <> 'VO'::bpchar
 UNION
  SELECT m_inventory.ad_client_id,
     m_inventory.ad_org_id,
@@ -351,9 +353,9 @@ UNION
     m_inventory.processedon,
     dt.docbasetype,
     m_inventory.m_inventory_uu AS rv_unposted_uu
-   FROM (m_inventory
-     JOIN c_doctype dt ON ((dt.c_doctype_id = m_inventory.c_doctype_id)))
-  WHERE ((m_inventory.posted <> 'Y'::bpchar) AND (m_inventory.docstatus <> 'VO'::bpchar))
+   FROM m_inventory
+     JOIN c_doctype dt ON dt.c_doctype_id = m_inventory.c_doctype_id
+  WHERE (m_inventory.posted <> ALL (ARRAY['Y'::bpchar, 'R'::bpchar])) AND m_inventory.docstatus <> 'VO'::bpchar
 UNION
  SELECT m_movement.ad_client_id,
     m_movement.ad_org_id,
@@ -375,9 +377,9 @@ UNION
     m_movement.processedon,
     dt.docbasetype,
     m_movement.m_movement_uu AS rv_unposted_uu
-   FROM (m_movement
-     JOIN c_doctype dt ON ((dt.c_doctype_id = m_movement.c_doctype_id)))
-  WHERE ((m_movement.posted <> 'Y'::bpchar) AND (m_movement.docstatus <> 'VO'::bpchar))
+   FROM m_movement
+     JOIN c_doctype dt ON dt.c_doctype_id = m_movement.c_doctype_id
+  WHERE (m_movement.posted <> ALL (ARRAY['Y'::bpchar, 'R'::bpchar])) AND m_movement.docstatus <> 'VO'::bpchar
 UNION
  SELECT m_production.ad_client_id,
     m_production.ad_org_id,
@@ -400,7 +402,7 @@ UNION
     'MMP'::bpchar AS docbasetype,
     m_production.m_production_uu AS rv_unposted_uu
    FROM m_production
-  WHERE ((m_production.posted <> 'Y'::bpchar) AND ((m_production.docstatus)::text <> 'VO'::text))
+  WHERE (m_production.posted <> ALL (ARRAY['Y'::bpchar, 'R'::bpchar])) AND m_production.docstatus::text <> 'VO'::text
 UNION
  SELECT c_cash.ad_client_id,
     c_cash.ad_org_id,
@@ -423,7 +425,7 @@ UNION
     'CMC'::bpchar AS docbasetype,
     c_cash.c_cash_uu AS rv_unposted_uu
    FROM c_cash
-  WHERE ((c_cash.posted <> 'Y'::bpchar) AND (c_cash.docstatus <> 'VO'::bpchar))
+  WHERE (c_cash.posted <> ALL (ARRAY['Y'::bpchar, 'R'::bpchar])) AND c_cash.docstatus <> 'VO'::bpchar
 UNION
  SELECT c_payment.ad_client_id,
     c_payment.ad_org_id,
@@ -445,9 +447,9 @@ UNION
     c_payment.processedon,
     dt.docbasetype,
     c_payment.c_payment_uu AS rv_unposted_uu
-   FROM (c_payment
-     JOIN c_doctype dt ON ((dt.c_doctype_id = c_payment.c_doctype_id)))
-  WHERE ((c_payment.posted <> 'Y'::bpchar) AND (c_payment.docstatus <> 'VO'::bpchar))
+   FROM c_payment
+     JOIN c_doctype dt ON dt.c_doctype_id = c_payment.c_doctype_id
+  WHERE (c_payment.posted <> ALL (ARRAY['Y'::bpchar, 'R'::bpchar])) AND c_payment.docstatus <> 'VO'::bpchar
 UNION
  SELECT c_allocationhdr.ad_client_id,
     c_allocationhdr.ad_org_id,
@@ -469,9 +471,9 @@ UNION
     c_allocationhdr.processedon,
     dt.docbasetype,
     c_allocationhdr.c_allocationhdr_uu AS rv_unposted_uu
-   FROM (c_allocationhdr
-     JOIN c_doctype dt ON ((dt.c_doctype_id = c_allocationhdr.c_doctype_id)))
-  WHERE ((c_allocationhdr.posted <> 'Y'::bpchar) AND (c_allocationhdr.docstatus <> 'VO'::bpchar))
+   FROM c_allocationhdr
+     JOIN c_doctype dt ON dt.c_doctype_id = c_allocationhdr.c_doctype_id
+  WHERE (c_allocationhdr.posted <> ALL (ARRAY['Y'::bpchar, 'R'::bpchar])) AND c_allocationhdr.docstatus <> 'VO'::bpchar
 UNION
  SELECT c_bankstatement.ad_client_id,
     c_bankstatement.ad_org_id,
@@ -494,7 +496,7 @@ UNION
     'CMB'::bpchar AS docbasetype,
     c_bankstatement.c_bankstatement_uu AS rv_unposted_uu
    FROM c_bankstatement
-  WHERE ((c_bankstatement.posted <> 'Y'::bpchar) AND (c_bankstatement.docstatus <> 'VO'::bpchar))
+  WHERE (c_bankstatement.posted <> ALL (ARRAY['Y'::bpchar, 'R'::bpchar])) AND c_bankstatement.docstatus <> 'VO'::bpchar
 UNION
  SELECT m_matchinv.ad_client_id,
     m_matchinv.ad_org_id,
@@ -517,7 +519,7 @@ UNION
     'MXI'::bpchar AS docbasetype,
     m_matchinv.m_matchinv_uu AS rv_unposted_uu
    FROM m_matchinv
-  WHERE (m_matchinv.posted <> 'Y'::bpchar)
+  WHERE m_matchinv.posted <> ALL (ARRAY['Y'::bpchar, 'R'::bpchar])
 UNION
  SELECT m_matchpo.ad_client_id,
     m_matchpo.ad_org_id,
@@ -540,7 +542,7 @@ UNION
     'MXP'::bpchar AS docbasetype,
     m_matchpo.m_matchpo_uu AS rv_unposted_uu
    FROM m_matchpo
-  WHERE (m_matchpo.posted <> 'Y'::bpchar)
+  WHERE m_matchpo.posted <> ALL (ARRAY['Y'::bpchar, 'R'::bpchar])
 UNION
  SELECT c_order.ad_client_id,
     c_order.ad_org_id,
@@ -562,9 +564,9 @@ UNION
     c_order.processedon,
     dt.docbasetype,
     c_order.c_order_uu AS rv_unposted_uu
-   FROM (c_order
-     JOIN c_doctype dt ON ((dt.c_doctype_id = c_order.c_doctype_id)))
-  WHERE ((c_order.posted <> 'Y'::bpchar) AND (c_order.docstatus <> 'VO'::bpchar))
+   FROM c_order
+     JOIN c_doctype dt ON dt.c_doctype_id = c_order.c_doctype_id
+  WHERE (c_order.posted <> ALL (ARRAY['Y'::bpchar, 'R'::bpchar])) AND c_order.docstatus <> 'VO'::bpchar
 UNION
  SELECT m_requisition.ad_client_id,
     m_requisition.ad_org_id,
@@ -586,9 +588,33 @@ UNION
     m_requisition.processedon,
     dt.docbasetype,
     m_requisition.m_requisition_uu AS rv_unposted_uu
-   FROM (m_requisition
-     JOIN c_doctype dt ON ((dt.c_doctype_id = m_requisition.c_doctype_id)))
-  WHERE ((m_requisition.posted <> 'Y'::bpchar) AND (m_requisition.docstatus <> 'VO'::bpchar));
+   FROM m_requisition
+     JOIN c_doctype dt ON dt.c_doctype_id = m_requisition.c_doctype_id
+  WHERE (m_requisition.posted <> ALL (ARRAY['Y'::bpchar, 'R'::bpchar])) AND m_requisition.docstatus <> 'VO'::bpchar
+UNION
+ SELECT m_matchinvhdr.ad_client_id,
+    m_matchinvhdr.ad_org_id,
+    m_matchinvhdr.created,
+    m_matchinvhdr.createdby,
+    m_matchinvhdr.updated,
+    m_matchinvhdr.updatedby,
+    m_matchinvhdr.isactive,
+    m_matchinvhdr.documentno,
+    m_matchinvhdr.datetrx AS datedoc,
+    m_matchinvhdr.dateacct,
+    200196 AS ad_table_id,
+    m_matchinvhdr.m_matchinvhdr_id AS record_id,
+    'N'::text AS issotrx,
+    m_matchinvhdr.posted,
+    m_matchinvhdr.processing,
+    m_matchinvhdr.processed,
+    m_matchinvhdr.docstatus,
+    m_matchinvhdr.processedon,
+    dt.docbasetype,
+    m_matchinvhdr.m_matchinvhdr_uu AS rv_unposted_uu
+   FROM m_matchinvhdr
+     JOIN c_doctype dt ON dt.c_doctype_id = m_matchinvhdr.c_doctype_id
+  WHERE m_matchinvhdr.posted <> ALL (ARRAY['Y'::bpchar, 'R'::bpchar]);
 
 CREATE VIEW m_storage AS
  SELECT s.m_product_id,
@@ -667,10 +693,10 @@ CREATE VIEW rv_pp_order_storage AS
           WHERE (p.m_product_id = o.m_product_id)) AS name,
     obl.c_uom_id,
     s.qtyonhand,
-    round(obl.qtyrequiered, 4) AS qtyrequiered,
+    round(obl.qtyrequired, 4) AS qtyrequired,
         CASE
             WHEN (o.qtybatchs = (0)::numeric) THEN (1)::numeric
-            ELSE round((obl.qtyrequiered / o.qtybatchs), 4)
+            ELSE round((obl.qtyrequired / o.qtybatchs), 4)
         END AS qtybatchsize,
     round(bomqtyreserved(obl.m_product_id, obl.m_warehouse_id, (0)::numeric), 4) AS qtyreserved,
     round(bomqtyavailable(obl.m_product_id, obl.m_warehouse_id, (0)::numeric), 4) AS qtyavailable,
@@ -799,7 +825,7 @@ CREATE VIEW rv_pp_order_receipt_issue AS
     asi.description AS instancename,
     mos.c_uom_id,
     u.name AS uomname,
-    obl.qtyrequiered,
+    obl.qtyrequired,
     obl.qtyreserved AS qtyreserved_order,
     mos.qtyonhand,
     mos.qtyreserved AS qtyreserved_storage,
@@ -811,7 +837,7 @@ CREATE VIEW rv_pp_order_receipt_issue AS
     mos.isqtypercentage,
     mos.qtybatch,
     obl.componenttype,
-    (mos.qtyrequiered - obl.qtydelivered) AS qtyopen,
+    (mos.qtyrequired - obl.qtydelivered) AS qtyopen,
     obl.pp_order_id
    FROM (((((rv_pp_order_storage mos
      JOIN pp_order_bomline obl ON ((mos.pp_order_bomline_id = obl.pp_order_bomline_id)))

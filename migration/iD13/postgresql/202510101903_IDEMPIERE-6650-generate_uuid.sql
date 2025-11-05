@@ -4,6 +4,8 @@
 
 DROP FUNCTION IF EXISTS Generate_UUID();
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- v7
 CREATE OR REPLACE FUNCTION Generate_UUID(ts timestamp with time zone DEFAULT clock_timestamp())
 RETURNS uuid AS $$

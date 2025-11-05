@@ -1526,7 +1526,7 @@ public class MCostDetail extends X_M_CostDetail
 			boolean isReturnTrx = qty.signum() < 0;
 			boolean isPOFirst = true;
 			if(getM_InOutLine_ID()!=0) {
-				MCostDetail cd=MCostDetail.get(getCtx(), "M_InOutLine_ID = ?",getM_InOutLine_ID() ,getM_AttributeSetInstance_ID(),as.getC_AcctSchema_ID() ,get_TrxName());
+				cd=MCostDetail.get(getCtx(), "M_InOutLine_ID = ?",getM_InOutLine_ID() ,getM_AttributeSetInstance_ID(),as.getC_AcctSchema_ID() ,get_TrxName());
 				if(cd!=null && cd.getCreated().before(this.getCreated())) {
 					isPOFirst = false;
 				}
@@ -1659,7 +1659,7 @@ public class MCostDetail extends X_M_CostDetail
 		else if (getM_InOutLine_ID() != 0 && !isSOTrx())
 		{
 			//NO PO Posted
-			MCostDetail cd=MCostDetail.get(getCtx(), "M_InOutLine_ID = ? AND C_OrderLine_ID > 0",getM_InOutLine_ID() ,getM_AttributeSetInstance_ID(),as.getC_AcctSchema_ID() ,get_TrxName());
+			cd=MCostDetail.get(getCtx(), "M_InOutLine_ID = ? AND C_OrderLine_ID > 0",getM_InOutLine_ID() ,getM_AttributeSetInstance_ID(),as.getC_AcctSchema_ID() ,get_TrxName());
 			boolean isPOFirst = false;
 			if(cd!=null && cd.getCreated().before(this.getCreated())) {
 				isPOFirst = true;

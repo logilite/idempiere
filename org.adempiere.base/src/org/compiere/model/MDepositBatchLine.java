@@ -156,11 +156,11 @@ import org.compiere.util.Util;
 		}
 		
 		//	Set DepositBatch_ID into C_Payment table
-		if (getC_Payment_ID() != 0 && (parent.getDocStatus().equals(MDepositBatch.STATUS_Drafted)
+		if (getC_Payment_ID() != 0 && (parent.getDocStatus().equals(MDepositBatch.STATUS_Drafted))
 				|| parent.getDocStatus().equals(MDepositBatch.STATUS_InProgress)
 				|| parent.getDocStatus().equals(MDepositBatch.STATUS_Invalid)
 				|| parent.getDocStatus().equals(MDepositBatch.STATUS_Approved)
-				|| parent.getDocStatus().equals(MDepositBatch.STATUS_NotApproved)))
+				|| parent.getDocStatus().equals(MDepositBatch.STATUS_NotApproved))
 		{
 			//if payment is changed then clear reference of deposit batch from old payment and mark reconciled flag as N
 			if (!newRecord && is_ValueChanged(COLUMNNAME_C_Payment_ID))
@@ -177,18 +177,13 @@ import org.compiere.util.Util;
 				
 			}
 			
+            MPayment payment = new MPayment(getCtx(), getC_Payment_ID(), get_TrxName());
 			payment.setC_DepositBatch_ID(getC_DepositBatch_ID());
 			payment.saveEx(get_TrxName());
 
 			setPayment(payment); // set payment amount
 		}
 		
-		if (getC_DepositBatch().getC_Currency_ID() != payment.getC_Currency_ID())
-		{
-			log.saveError("SaveError", Msg.getMsg(getCtx(), "ErrorMultipleCurrencyPaymentsRestricted", new Object[] { getC_DepositBatch().getC_Currency().getISO_Code()} )); 
-			return false;
-		}
-			
 		return true;
 	}	//	beforeSave
 		

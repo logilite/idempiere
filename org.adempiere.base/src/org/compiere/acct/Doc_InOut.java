@@ -34,12 +34,14 @@ import org.compiere.model.MCurrency;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInOutLineMA;
+import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLandedCostAllocation;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
+import org.compiere.model.MTable;
 import org.compiere.model.MTax;
 import org.compiere.model.ProductCost;
 import org.compiere.util.DB;
@@ -1097,7 +1099,7 @@ public class Doc_InOut extends Doc
 					{
 						MRMALine rmaLine = new MRMALine(getCtx(), ioLine.getM_RMALine_ID(), getTrxName());
 						costs = rmaLine != null ? rmaLine.getAmt() : BigDecimal.ZERO;
-						I_M_InOutLine originalInOutLine = rmaLine != null ? new MInOutLine(getCtx(), rmaLine.getM_InOutLine_ID(), getTrxName()) : null;
+						MInOutLine originalInOutLine = rmaLine != null ? new MInOutLine(getCtx(), rmaLine.getM_InOutLine_ID(), getTrxName()) : null;
 						if (originalInOutLine != null && originalInOutLine.getC_OrderLine_ID() > 0)
 						{
 							MOrderLine originalOrderLine = (MOrderLine) originalInOutLine.getC_OrderLine();
