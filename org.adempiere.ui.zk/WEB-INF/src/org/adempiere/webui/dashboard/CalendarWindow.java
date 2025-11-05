@@ -445,18 +445,16 @@ public class CalendarWindow extends Window implements EventListener<Event>, ITab
 			{
 				btnRefreshClicked();
 			}
-		}
-		else if (type.equals(ON_EVENT_CREATE_EVENT) && !Env.isReadOnlySession()) {
-			if (e instanceof CalendarsEvent) {
-				CalendarsEvent calendarsEvent = (CalendarsEvent) e;
-				RequestWindow requestWin = new RequestWindow(calendarsEvent, this);
-				SessionManager.getAppDesktop().showWindow(requestWin);
-			}
 			else if (e.getTarget() == lbxResources)
 			{
 				btnRefreshClicked();
 			}
 		}
+		else if (type.equals(ON_EVENT_CREATE_EVENT) && !Env.isReadOnlySession()) {
+			CalendarsEvent calendarsEvent = (CalendarsEvent) e;
+			DecisionWindow decisionWin = new DecisionWindow(calendarsEvent, this);
+			SessionManager.getAppDesktop().showWindow(decisionWin);
+		}	
 		else if (type.equals(ON_DAY_CLICK_EVENT) && ! Env.isReadOnlySession()) {
 			if (e.getData() instanceof Date date) {
 				CalendarsEvent calendarsEvent = new CalendarsEvent(ON_EVENT_CREATE_EVENT, e.getTarget(), null, date, date, 0, 0, 0, 0);
