@@ -1077,12 +1077,12 @@ public class MoveClient extends SvrProcess {
 													throw new AdempiereException("Found orphan record in " + tableName + "." + columnName + ": " + multiKey + " related to table " + convertTable);
 												}
 											}
-											if (convertedId == null) {
+											if (convertedIdArr == null) {
 												convertedIdArr = new Integer[multiKeys.length];
 											}
 
 											if(multiConvertedId instanceof Number)
-												convertedIdArr[index]=((Number)convertedId).intValue();
+												convertedIdArr[index]=((Number)multiConvertedId).intValue();
 											else
 												convertedIdArr[index]=Integer.parseInt((String)multiConvertedId);
 											index++;
