@@ -1049,7 +1049,6 @@ public class MoveClient extends SvrProcess {
 								if (   ! (key instanceof Number && ((Number)key).intValue() == 0 && ("Parent_ID".equalsIgnoreCase(columnName) || "Node_ID".equalsIgnoreCase(columnName)))  // Parent_ID/Node_ID=0 is valid
 									&& (key instanceof String || (key instanceof Number && ((Number)key).intValue() >= MTable.MAX_OFFICIAL_ID) || p_IsCopyClient)) {
 									Object convertedId = null;
-									Integer[] convertedIdArr = null;
 									if (DisplayType.isMultiID(column.getAD_Reference_ID())) {
 										// multiple IDs or UUIDs separated by commas
 										Array arr = rsGD.getArray(i + 1);
@@ -1062,6 +1061,7 @@ public class MoveClient extends SvrProcess {
 
 										int index = 0;
 										String[] multiKeys = ((String[])arrAsObject);
+										Integer[] convertedIdArr = new Integer[multiKeys.length];
 										for (String multiKey : multiKeys) {
 											Object keyToConvert;
 											if (Util.isUUID(multiKey))
@@ -1077,14 +1077,20 @@ public class MoveClient extends SvrProcess {
 													throw new AdempiereException("Found orphan record in " + tableName + "." + columnName + ": " + multiKey + " related to table " + convertTable);
 												}
 											}
-											if (convertedId == null) {
-												convertedIdArr = new Integer[multiKeys.length];
-											}
 
 											if(multiConvertedId instanceof Number)
-												convertedIdArr[index]=((Number)convertedId).intValue();
-											else
-												convertedIdArr[index]=Integer.parseInt((String)multiConvertedId);
+												convertedIdArr[index]=((Number)multiConvertedId).intValue();
+											else if (multiConvertedId instanceof String) {
+												try {
+													convertedIdArr[index] = Integer.parseInt((String) multiConvertedId);
+												}
+												catch (NumberFormatException e) {
+													throw new AdempiereException("Invalid numeric value in " + tableName + "." + columnName + ": " + multiConvertedId);
+												}
+											}
+											else {
+												throw new AdempiereException("Unexpected type for converted ID in " + tableName + "." + columnName + ": " + (multiConvertedId != null ? multiConvertedId.getClass().getName(): "null"));
+											}
 											index++;
 										}
 										convertedId = convertedIdArr;
