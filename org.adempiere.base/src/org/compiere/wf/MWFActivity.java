@@ -711,7 +711,18 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			AD_User_ID = process.getAD_User_ID();
 		//
 		setAD_User_ID(AD_User_ID);
-	}	//	setResponsible
+	}	/**
+	 * Post-save hook that ensures manual approvers are created for a newly inserted activity when a manual
+	 * responsible configuration specifies a select clause.
+	 *
+	 * <p>If the record was newly created and saved, and the activity has a manual responsible with a
+	 * non-empty select clause and no existing approvers, this method will create MWFActivityApprover
+	 * entries for the user IDs resolved from that select clause.</p>
+	 *
+	 * @param newRecord true if the saved row is new
+	 * @param success   true if the underlying save succeeded
+	 * @return          `true` if the save (and any post-save processing) completed successfully, `false` otherwise
+	 */
 	
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success)
@@ -745,6 +756,20 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		return save;
 	}
 	
+	/**
+	 * Collects approver user IDs by executing the provided SELECT expression against the given PO's table
+	 * and filtering for the PO's current record.
+	 *
+	 * The method builds a query from the supplied selectClause and optional fromClause, ensures the PO's
+	 * key column is restricted to the PO's ID, executes the query and returns the distinct integers
+	 * found in the first column of the result rows.
+	 *
+	 * @param po           the persistent object whose table and record ID will be used for the query
+	 * @param selectClause the SELECT clause specifying the column(s) to retrieve (e.g. "AD_User_ID")
+	 * @param fromClause   optional FROM/joins/WHERE fragment; may start with or without the keyword "FROM"
+	 * @return a Set of distinct integers from the first result column (typically user IDs); empty if no rows
+	 * @throws AdempiereException if the constructed query fails to execute (a process message is set when available)
+	 */
 	public Set <Integer> getApproverUserIDs(PO po, String selectClause, String fromClause)
 	{
 		Set <Integer> results = new HashSet <Integer>();
