@@ -745,60 +745,63 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		return save;
 	}
 	
-	public Set <Integer> getApproverUserIDs(PO po, String selectClause, String fromClause)
+	/**
+	 * Returns distinct approver user IDs for the given record.
+	 * The query is built dynamically using {@code selectClause} and {@code fromClause}.
+	 * DISTINCT is added if missing. If {@code fromClause} is empty, only the table name is used.
+	 *
+	 * @param po record reference (table + ID)
+	 * @param selectClause fields to select (no SELECT keyword)
+	 * @param fromClause optional FROM part (no FROM keyword), may include joins/alias
+	 * @return set of approver user IDs (may be empty)
+	 * @throws AdempiereException on SQL error
+	 */
+	public Set<Integer> getApproverUserIDs(PO po, String selectClause, String fromClause)
 	{
 		Set <Integer> results = new HashSet <Integer>();
+
+		if (Util.isEmpty(selectClause, true))
+			return results;
+
 		String tableName = po.get_TableName();
-		String keyColumn = po.get_KeyColumns()[0]; // usually <TableName>_ID
+		String keyColumn = po.get_KeyColumns()[0];
 		int recordId = po.get_ID();
-		
-		String normalizedSelect = selectClause.trim().toUpperCase();
-		String sqlSelect = "SELECT ";
-		if (!normalizedSelect.startsWith("DISTINCT"))
-			sqlSelect = "SELECT DISTINCT ";
+
+		// Ensure DISTINCT
+		String sqlSelect = selectClause.trim().toUpperCase().startsWith("DISTINCT") ? "SELECT " : "SELECT DISTINCT ";
 
 		StringBuilder sql = new StringBuilder(sqlSelect).append(selectClause).append(" FROM ");
 
-		if (fromClause == null || fromClause.isBlank())
+		if (Util.isEmpty(fromClause))
 		{
-			// No fromClause → just use table name
-			sql.append(tableName);
+			sql.append(tableName).append(" WHERE ");
 		}
 		else
 		{
-			if (fromClause.toLowerCase().startsWith("from "))
-				fromClause = fromClause.substring(4).trim(); // remove "FROM"
-			// Normalize spacing/case for matching
-			String normalizedFrom = fromClause.replaceAll("\\s+", " ").toLowerCase();
+			String normalizedFrom = fromClause.trim().toLowerCase();
 			String tableLower = tableName.toLowerCase();
 
-			// Case 1: fromClause already starts with table/alias
+			if (normalizedFrom.startsWith("from "))
+				normalizedFrom = normalizedFrom.substring(4).trim();
+
+			// Prepend table name if missing
 			if (normalizedFrom.startsWith(tableLower) || normalizedFrom.startsWith(tableLower + " "))
-				sql.append(fromClause);
+				sql.append(normalizedFrom);
 			else
-				sql.append(tableName).append(" ").append(fromClause);
+				sql.append(tableName).append(" ").append(normalizedFrom);
+
+			sql.append(normalizedFrom.contains("where") ? " AND " : " WHERE ");
 		}
 
-		// Decide whether to prepend WHERE or AND
-		String lowerFrom = (fromClause == null) ? "" : fromClause.toLowerCase();
-		if (lowerFrom.contains("where"))
-			sql.append(" AND ");
-		else
-			sql.append(" WHERE ");
-
-		// This stays outside
 		sql.append(keyColumn).append("=?");
 
 		try (PreparedStatement pstmt = DB.prepareStatement(sql.toString(), null))
 		{
 			pstmt.setInt(1, recordId);
-
 			try (ResultSet rs = pstmt.executeQuery())
 			{
 				while (rs.next())
-				{
 					results.add(rs.getInt(1));
-				}
 			}
 		}
 		catch (Exception e)
