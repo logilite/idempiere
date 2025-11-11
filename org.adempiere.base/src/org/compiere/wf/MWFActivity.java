@@ -751,8 +751,13 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		String tableName = po.get_TableName();
 		String keyColumn = po.get_KeyColumns()[0]; // usually <TableName>_ID
 		int recordId = po.get_ID();
+		
+		String normalizedSelect = selectClause.trim().toUpperCase();
+		String sqlSelect = "SELECT ";
+		if (!normalizedSelect.startsWith("DISTINCT"))
+			sqlSelect = "SELECT DISTINCT ";
 
-		StringBuilder sql = new StringBuilder("SELECT ").append(selectClause).append(" FROM ");
+		StringBuilder sql = new StringBuilder(sqlSelect).append(selectClause).append(" FROM ");
 
 		if (fromClause == null || fromClause.isBlank())
 		{
@@ -764,11 +769,11 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			if (fromClause.toLowerCase().startsWith("from "))
 				fromClause = fromClause.substring(4).trim(); // remove "FROM"
 			// Normalize spacing/case for matching
-			String normalized = fromClause.replaceAll("\\s+", " ").toLowerCase();
+			String normalizedFrom = fromClause.replaceAll("\\s+", " ").toLowerCase();
 			String tableLower = tableName.toLowerCase();
 
 			// Case 1: fromClause already starts with table/alias
-			if (normalized.startsWith(tableLower) || normalized.startsWith(tableLower + " "))
+			if (normalizedFrom.startsWith(tableLower) || normalizedFrom.startsWith(tableLower + " "))
 				sql.append(fromClause);
 			else
 				sql.append(tableName).append(" ").append(fromClause);
