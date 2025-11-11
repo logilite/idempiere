@@ -28,8 +28,10 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 
@@ -726,8 +728,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 					&& MWFActivityApprover.getOfActivity(p_ctx, getAD_WF_Activity_ID(), get_TrxName()).length == 0
 					&& !Util.isEmpty(resp.getSelectClause(), true))
 			{
-				List <Integer> userIDs;
-				userIDs = getApproverUserIDs(getPO(), resp.getSelectClause(), resp.getFromClause());
+				Set <Integer> userIDs = getApproverUserIDs(getPO(), resp.getSelectClause(), resp.getFromClause());
 
 				for (Integer userId : userIDs)
 				{
@@ -744,9 +745,9 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		return save;
 	}
 	
-	public List <Integer> getApproverUserIDs(PO po, String selectClause, String fromClause)
+	public Set <Integer> getApproverUserIDs(PO po, String selectClause, String fromClause)
 	{
-		List <Integer> results = new ArrayList <>();
+		Set <Integer> results = new HashSet <Integer>();
 		String tableName = po.get_TableName();
 		String keyColumn = po.get_KeyColumns()[0]; // usually <TableName>_ID
 		int recordId = po.get_ID();
