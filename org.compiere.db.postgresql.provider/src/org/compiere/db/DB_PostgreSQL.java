@@ -1317,10 +1317,18 @@ public class DB_PostgreSQL implements AdempiereDatabase
 	}	//	getSQLAdd
 	
 	/**
-	 * 	Get SQL Modify command
-	 *	@param table table
-	 *	@param setNullOption generate null / not null statement
-	 *	@return sql separated by ;
+	 * Builds SQL statements to modify a table column definition and perform any required migration steps.
+	 *
+	 * The generated SQL may include dropping defaults and constraints for multi-select columns, inserting
+	 * a record into t_alter_column with the new column metadata (including optional NULL/NOT NULL and
+	 * DEFAULT clauses), an optional USING clause to convert multi-select values, and an UPDATE to
+	 * initialize existing NULL (and for multi-select also empty-array) values when a non-null default
+	 * is provided for a mandatory column.
+	 *
+	 * @param table the table containing the column to modify
+	 * @param column the column metadata describing the desired new definition
+	 * @param setNullOption if true, include a NULL/NOT NULL clause for the column in the generated metadata
+	 * @return the SQL statements to apply the modification, separated by DB.SQLSTATEMENT_SEPARATOR
 	 */
 	public String getSQLModify (MTable table, MColumn column, boolean setNullOption)
 	{
