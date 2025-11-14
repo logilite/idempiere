@@ -1613,12 +1613,15 @@ public class DataEngine
 					if(e == null)	// primarily on grouping rows, if no functions are assigned to the script column
 						continue;
 					Object value = parseVariable(e.getValueAsString().replace("@SCRIPT", ""), c, pd);
-					Interpreter bsh = new Interpreter();
-					try {
-						value = bsh.eval(value.toString());
-					}
-					catch (EvalError err) {
-						log.severe(err.getMessage());
+					if (e.getValueAsString().equals("@SCRIPT@LINE@")) {
+						value = Double.valueOf(String.valueOf(value));
+					} else {
+						Interpreter bsh = new Interpreter();
+						try {
+							value = bsh.eval(value.toString());
+						} catch (EvalError err) {
+							log.severe(err.getMessage());
+						}
 					}
 					e.setDisplayType(getDisplayType(value));
 					if(value instanceof Serializable)
