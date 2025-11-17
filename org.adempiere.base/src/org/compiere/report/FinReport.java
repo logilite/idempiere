@@ -125,6 +125,8 @@ public class FinReport extends SvrProcess
 	
 	protected boolean			hasDimensionCol				= false;
 
+	protected boolean			p_IsHideDimensionSummaryLine	= false;
+
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
@@ -185,6 +187,8 @@ public class FinReport extends SvrProcess
 				p_M_AttributeSetInstance_ID = para[i].getParameterAsInt();
 			else if (name.equals("C_BankAccount_ID"))
 				p_C_BankAccount_ID = para[i].getParameterAsInt();
+			else if (name.equals("IsHideDimensionSummaryLine"))
+				p_IsHideDimensionSummaryLine = para[i].getParameterAsBoolean();
 			else
 				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
@@ -409,11 +413,15 @@ public class FinReport extends SvrProcess
 		}	//	for all lines
 
 		insertLineDetail();
-		doCalculations();
+		if (!p_IsHideDimensionSummaryLine)
+			doCalculations();
 		doColumnPercentageOfLineForMultiRange();
 
 		deleteUnprintedLines();
 		
+		if (p_IsHideDimensionSummaryLine)
+			clearParentTotalsForDimensionLines();
+
 		scaleResults();
 
 		//	Create Report
@@ -423,6 +431,151 @@ public class FinReport extends SvrProcess
 		if (log.isLoggable(Level.FINE)) log.fine((System.currentTimeMillis() - m_start) + " ms");
 		return "";
 	}	//	doIt
+	
+	/**
+	 * Level Definitions:
+	 *
+	 *   Level 0  [Report Line (summary line)]
+	 *   Level 1  [List Sources]
+	 *   Level 2  [Dimension Line]
+	 *   Level 3  [List Transactions]
+	 *
+	 * Processing Overview:
+	 *
+	 *   1. Clear all dynamic column values for Level-2 rows that are tied to Level-3 transaction details.
+	 *   2. Delete Level-1 rows that have matching Level-2 or Level-3 detail.
+	 *   3. Delete Level-0 summary rows when the underlying Level-1 / Level-2 detail exists.
+	 *   4. Clear all dynamic column values for Level-0 rows when Level-3 data exists.
+	 */
+	private void clearParentTotalsForDimensionLines( )
+	{
+		// Build dynamic column list (Col_0 … Col_n) for UPDATE statements
+		StringBuilder setClause = new StringBuilder();
+		for (int column = 0; column < m_columns.length; column++)
+		{
+			if (setClause.length() > 0)
+				setClause.append(", ");
+			setClause.append("Col_").append(column).append(" = NULL");
+		}
+
+		// Clear values for Level 2 [Dimension Line]
+		// when Level 3 [List Transactions] exist
+		StringBuilder sql = new StringBuilder("UPDATE T_Report t ");
+		sql.append("SET ").append(setClause.toString())
+						.append(" WHERE t.AD_PInstance_ID = ").append(getAD_PInstance_ID())
+						.append("  AND t.levelno = ").append(getLevel2No()) // Level-2
+						.append("  AND (t.PA_ReportLine_ID, t.Record_ID, t.AD_PInstance_ID) IN (")
+						.append("    SELECT PA_ReportLine_ID, Record_ID, AD_PInstance_ID ")
+						.append("    FROM T_Report ")
+						.append("    WHERE levelno = ").append(getLevel3No())
+						.append("      AND AD_PInstance_ID = ").append(getAD_PInstance_ID())
+						.append("    GROUP BY PA_ReportLine_ID, Record_ID, AD_PInstance_ID ")
+						.append("  )");
+
+		// Execute update once for all columns
+		int no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+		// Log updated count
+		if (log.isLoggable(Level.FINE))
+			log.fine("Cleared dynamic column values for Level 2 [Dimension Line] rows tied to Level 3 [List Transactions] - updated #" + no);
+
+		// Delete Level 1 [List Sources]
+		// when Level 2 [Dimension Line] or Level 3 exists
+		sql = new StringBuilder("DELETE FROM T_Report t ");
+		sql.append(" WHERE t.AD_PInstance_ID = ").append(getAD_PInstance_ID())
+						.append("  AND t.levelno = ").append(getLevel1No()) // dynamic Level-1
+						.append("  AND t.dimensiongrouprecord_ID IS NULL ")
+						.append("  AND (t.PA_ReportLine_ID, t.Record_ID, t.AD_PInstance_ID) IN (")
+						.append("    SELECT PA_ReportLine_ID, Record_ID, AD_PInstance_ID ")
+						.append("    FROM T_Report ")
+						.append("    WHERE ((levelno = ").append(getLevel2No()) // dynamic Level-2
+						.append("      AND dimensiongrouprecord_ID IS NOT NULL) OR levelno = ").append(getLevel3No()).append(") ")
+						.append("      AND AD_PInstance_ID = ").append(getAD_PInstance_ID())
+						.append("    GROUP BY PA_ReportLine_ID, Record_ID, AD_PInstance_ID")
+						.append("  )");
+
+		// Execute Delete
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+		// Log Delete count
+		if (log.isLoggable(Level.FINE))
+			log.fine("Deleted Level 1 [List Sources] rows with Level 2 [Dimension Line] or Level 3 [List Transactions] data - deleted #" + no);
+
+		// Delete Level 0 [Report Line]
+		// when Level 1 [List Sources] or Level 2 [Dimension Line] detail exists
+		sql = new StringBuilder("DELETE FROM T_Report t ");
+		sql.append(" WHERE t.AD_PInstance_ID = ").append(getAD_PInstance_ID())
+						.append("  AND t.levelno = 0 ") // Level-0
+						.append("  AND t.dimensiongrouprecord_ID IS NULL ")
+						.append("  AND (t.PA_ReportLine_ID, t.AD_PInstance_ID) IN (")
+						.append("    SELECT PA_ReportLine_ID, AD_PInstance_ID ")
+						.append("    FROM T_Report ")
+						.append("    WHERE ((levelno = ").append(getLevel2No()).append(" AND dimensiongrouprecord_ID IS NOT NULL) ")
+						.append("           OR levelno = ").append(getLevel1No()).append(") ")
+						.append("      AND AD_PInstance_ID = ").append(getAD_PInstance_ID())
+						.append("    GROUP BY PA_ReportLine_ID, AD_PInstance_ID ")
+						.append("  )");
+
+		// Execute Delete
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+		// Log Delete count
+		if (log.isLoggable(Level.FINE))
+			log.fine("Deleted Level 0 [Report Line] rows with Level 1 [List Sources] or Level 2 [Dimension Line] detail - deleted #" + no);
+
+		// Clear values for Level 0 [Report Line]
+		// when Level 3 [List Transactions] exist
+		sql = new StringBuilder("UPDATE T_Report t ");
+		sql.append("SET ").append(setClause.toString())
+						.append(" WHERE t.AD_PInstance_ID = ")
+						.append(getAD_PInstance_ID())
+						.append("  AND t.levelno = 0 ") // Level-0
+						.append("  AND t.dimensiongrouprecord_ID IS NULL ")
+						.append("  AND (t.PA_ReportLine_ID, t.AD_PInstance_ID) IN (")
+						.append("    SELECT PA_ReportLine_ID, AD_PInstance_ID ")
+						.append("    FROM T_Report ")
+						.append("    WHERE levelno = ").append(getLevel3No())
+						.append("      AND AD_PInstance_ID = ").append(getAD_PInstance_ID())
+						.append("    GROUP BY PA_ReportLine_ID, AD_PInstance_ID ")
+						.append("  )");
+
+		// Execute update once for all columns
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+
+		// Log updated count
+		if (log.isLoggable(Level.FINE))
+			log.fine("Cleared all dynamic column values for Level 0 [Report Line] rows which has Level 3 [List Transactions] detail - updated #" + no);
+	}
+
+	/**
+	 * Determine level number for Level-3 rows (List Transactions) based on p_DetailsSourceFirst
+	 * 
+	 * @return int level number for Level-3
+	 */
+	private String getLevel3No( )
+	{
+		return p_DetailsSourceFirst ? "-3 " : "3 ";
+	}
+
+	/**
+	 * Determine level number for Level-2 rows (List Sources Dimension) based on p_DetailsSourceFirst
+	 * 
+	 * @return int level number for Level-2
+	 */
+	private String getLevel2No( )
+	{
+		return p_DetailsSourceFirst ? "-2 " : "2 ";
+	}
+
+	/**
+	 * Determine level number for Level-1 rows (List Sources) based on p_DetailsSourceFirst
+	 * 
+	 * @return int level number for Level-1
+	 */
+	private String getLevel1No( )
+	{
+		return p_DetailsSourceFirst ? "-1 " : "1 ";
+	}
 
 	/**************************************************************************
 	 * 	For all columns (in a line) with relative period access
@@ -1531,33 +1684,15 @@ public class FinReport extends SvrProcess
 		//
 		if (isDimensionLine)
 		{
-			if (p_DetailsSourceFirst)
-			{
-				insert.append("-2 ");
-				if (listSourceNoTrx)
-					unionInsert.append("-2 ");
-			}
-			else
-			{
-				insert.append("2 ");
-				if (listSourceNoTrx)
-					unionInsert.append("2 ");
-			}
+			insert.append(getLevel2No());
+			if (listSourceNoTrx)
+				unionInsert.append(getLevel2No());
 		}
 		else
 		{
-			if (p_DetailsSourceFirst)
-			{
-				insert.append("-1 ");
-				if (listSourceNoTrx)
-					unionInsert.append("-1 ");
-			}
-			else
-			{
-				insert.append("1 ");
-				if (listSourceNoTrx)
-					unionInsert.append("1 ");
-			}
+			insert.append(getLevel1No());
+			if (listSourceNoTrx)
+				unionInsert.append(getLevel1No());
 		}
 
 		String numericType = DB.getDatabase().getNumericDataType();
@@ -1575,9 +1710,9 @@ public class FinReport extends SvrProcess
 
 		if (!Util.isEmpty(dimGroupVariable) && isDimensionLine)
 		{
-			insert.append(",").append(dimGroupVariable);
+			insert.append(",COALESCE(").append(dimGroupVariable).append(", 0)");
 			if (listSourceNoTrx)
-				unionInsert.append(",").append(dimGroupVariable);
+				unionInsert.append(",COALESCE(").append(dimGroupVariable).append(", 0)");
 		}
 		else
 		{
@@ -1699,8 +1834,9 @@ public class FinReport extends SvrProcess
 			if (m_columns[col].isColumnTypeSegmentValue() || m_columns[col].isWithSources())
 				select.append(m_columns[col].getWhereClause(p_PA_Hierarchy_ID));
 
+			// Add validation to handle cases where the dimension group value is null
 			if (!Util.isEmpty(dimGroupVariable) && isDimensionLine)
-				select.append(" AND fb.").append(dimGroupVariable).append(" = x.").append(dimGroupVariable);
+				select.append(" AND COALESCE(fb.").append(dimGroupVariable).append(",0) = COALESCE(x.").append(dimGroupVariable).append(",0)");
 
 			// Parameter Where
 			select.append(m_parameterWhere);
@@ -1785,13 +1921,7 @@ public class FinReport extends SvrProcess
 			where.append(" AND ");
 		if (!isCombination)
 			where.append(variable).append(" IS NOT NULL");
-		if (!Util.isEmpty(dimGroupVariable) && isDimensionLine)
-		{
-			if (where.length() > 0)
-				where.append(" AND ");
-			where.append(dimGroupVariable).append(" IS NOT NULL ");
-		}
-
+		
 		if (p_PA_ReportCube_ID > 0)
 			insert.append(" FROM Fact_Acct_Summary x WHERE ").append(p_AdjPeriodToExclude).append(where);
 		else
@@ -1819,12 +1949,7 @@ public class FinReport extends SvrProcess
 			if (unionWhere.length() > 0)
 				unionWhere.append(" AND ");
 			unionWhere.append(variable).append(" IS NOT NULL ");
-			if (!Util.isEmpty(dimGroupVariable) && isDimensionLine)
-			{
-				if (unionWhere.length() > 0)
-					unionWhere.append(" AND ");
-				unionWhere.append(dimGroupVariable).append(" IS NOT NULL ");
-			}
+			
 			unionWhere.append(" AND Account_ID not in (select Account_ID ");
 			if (p_PA_ReportCube_ID > 0)
 				unionWhere.append(" from Fact_Acct_Summary x WHERE ").append(p_AdjPeriodToExclude).append(where);
@@ -1860,9 +1985,10 @@ public class FinReport extends SvrProcess
 		//
 		sql.append(") WHERE Record_ID <> 0 AND AD_PInstance_ID=").append(getAD_PInstance_ID())
 				.append(" AND PA_ReportLine_ID=").append(m_lines[line].getPA_ReportLine_ID())
-				.append(" AND Fact_Acct_ID=0 AND Name IS NULL")
-				.append(" AND LevelNo <> ")
-				.append(p_DetailsSourceFirst ? "-2" : "2");
+				.append(" AND Fact_Acct_ID=0 AND Name IS NULL");
+		// When summary lines are not visible, exclude the level check so that all detail lines receive a name and description
+		if (!p_IsHideDimensionSummaryLine)
+			sql.append(" AND LevelNo <> ").append(getLevel2No());
 		if (isCombination)
 			sql.append(" AND C_ValidCombination_ID=" + combinationID);
 
@@ -1880,7 +2006,7 @@ public class FinReport extends SvrProcess
 				.append(" AND PA_ReportLine_ID=")
 				.append(m_lines[line].getPA_ReportLine_ID())
 				.append(" AND Fact_Acct_ID=0 AND DimensionGroupRecord_ID <> 0 AND DimensionGroupName IS NULL AND LevelNo = ")
-				.append(p_DetailsSourceFirst ? "-2" : "2");
+				.append(getLevel2No());
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE))
 				log.fine("Name #=" + no + " - " + sql.toString());
@@ -1944,10 +2070,7 @@ public class FinReport extends SvrProcess
 			insert.append(variable);
 		insert.append(",Fact_Acct_ID, ");
 
-		if (p_DetailsSourceFirst)
-			insert.append("-3 ");
-		else
-			insert.append("3 ");
+		insert.append(getLevel3No());
 
 		String numericType = DB.getDatabase().getNumericDataType();
 		
