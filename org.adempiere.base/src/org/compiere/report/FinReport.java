@@ -433,14 +433,23 @@ public class FinReport extends SvrProcess
 	}	//	doIt
 	
 	/**
-	 * Clears and removes parent totals for dimension line hierarchies in T_Report.
-	 * Nulls column values for Level-2 rows and deletes corresponding Level-1 and
-	 * Level-0 parent rows where child Level-2/Level-3 detail rows exist. Ensures
-	 * accurate regeneration of report totals for dimension-based structures.
+	 * Level Definitions:
+	 *
+	 *   Level 0  [Report Line (summary line)]
+	 *   Level 1  [List Sources]
+	 *   Level 2  [Dimension Line]
+	 *   Level 3  [List Transactions]
+	 *
+	 * Processing Overview:
+	 *
+	 *   1. Clear all dynamic column values for Level-2 rows that are tied to Level-3 transaction details.
+	 *   2. Delete Level-1 rows that have matching Level-2 or Level-3 detail.
+	 *   3. Delete Level-0 summary rows when the underlying Level-1 / Level-2 detail exists.
+	 *   4. Clear all dynamic column values for Level-0 rows when Level-3 data exists.
 	 */
 	private void clearParentTotalsForDimensionLines( )
 	{
-		// Build the list of columns to update: Col_0, Col_1, ..., Col_n
+		// Build dynamic column list (Col_0 … Col_n) for UPDATE statements
 		StringBuilder setClause = new StringBuilder();
 		for (int column = 0; column < m_columns.length; column++)
 		{
@@ -449,7 +458,8 @@ public class FinReport extends SvrProcess
 			setClause.append("Col_").append(column).append(" = NULL");
 		}
 
-		// Build the UPDATE query for Level-2 rows
+		// Clear values for Level 2 [Dimension Line]
+		// when Level 3 [List Transactions] exist
 		StringBuilder sql = new StringBuilder("UPDATE T_Report t ");
 		sql.append("SET ").append(setClause.toString())
 						.append(" WHERE t.AD_PInstance_ID = ").append(getAD_PInstance_ID())
@@ -467,9 +477,10 @@ public class FinReport extends SvrProcess
 
 		// Log updated count
 		if (log.isLoggable(Level.FINE))
-			log.fine("Cleared values for Level-2 columns - #" + no);
+			log.fine("Cleared dynamic column values for Level 2 [Dimension Line] rows tied to Level 3 [List Transactions] - updated #" + no);
 
-		// Build the DELETE query level-1
+		// Delete Level 1 [List Sources]
+		// when Level 2 [Dimension Line] or Level 3 exists
 		sql = new StringBuilder("DELETE FROM T_Report t ");
 		sql.append(" WHERE t.AD_PInstance_ID = ").append(getAD_PInstance_ID())
 						.append("  AND t.levelno = ").append(getLevel1No()) // dynamic Level-1
@@ -488,9 +499,10 @@ public class FinReport extends SvrProcess
 
 		// Log Delete count
 		if (log.isLoggable(Level.FINE))
-			log.fine("Delete values for Level-1 columns - #" + no);
+			log.fine("Deleted Level 1 [List Sources] rows with Level 2 [Dimension Line] or Level 3 [List Transactions] data - deleted #" + no);
 
-		// Build the DELETE query for Level-0 rows
+		// Delete Level 0 [Report Line]
+		// when Level 1 [List Sources] or Level 2 [Dimension Line] detail exists
 		sql = new StringBuilder("DELETE FROM T_Report t ");
 		sql.append(" WHERE t.AD_PInstance_ID = ").append(getAD_PInstance_ID())
 						.append("  AND t.levelno = 0 ") // Level-0
@@ -509,9 +521,10 @@ public class FinReport extends SvrProcess
 
 		// Log Delete count
 		if (log.isLoggable(Level.FINE))
-			log.fine("Delete values for Level-0 columns - #" + no);
+			log.fine("Deleted Level 0 [Report Line] rows with Level 1 [List Sources] or Level 2 [Dimension Line] detail - deleted #" + no);
 
-		// Build the UPDATE query for Level-0 rows
+		// Clear values for Level 0 [Report Line]
+		// when Level 3 [List Transactions] exist
 		sql = new StringBuilder("UPDATE T_Report t ");
 		sql.append("SET ").append(setClause.toString())
 						.append(" WHERE t.AD_PInstance_ID = ")
@@ -531,7 +544,7 @@ public class FinReport extends SvrProcess
 
 		// Log updated count
 		if (log.isLoggable(Level.FINE))
-			log.fine("Cleared values for Level-0 columns - #" + no);
+			log.fine("Cleared all dynamic column values for Level 0 [Report Line] rows which has Level 3 [List Transactions] detail - updated #" + no);
 	}
 
 	/**
@@ -545,7 +558,7 @@ public class FinReport extends SvrProcess
 	}
 
 	/**
-	 * Determine level number for Level-2 rows (List Sources) based on p_DetailsSourceFirst
+	 * Determine level number for Level-2 rows (List Sources Dimension) based on p_DetailsSourceFirst
 	 * 
 	 * @return int level number for Level-2
 	 */
@@ -555,7 +568,7 @@ public class FinReport extends SvrProcess
 	}
 
 	/**
-	 * Determine level number for Level-1 rows (Report Line) based on p_DetailsSourceFirst
+	 * Determine level number for Level-1 rows (List Sources) based on p_DetailsSourceFirst
 	 * 
 	 * @return int level number for Level-1
 	 */
