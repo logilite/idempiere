@@ -440,15 +440,6 @@ public class FinReport extends SvrProcess
 	 */
 	private void clearParentTotalsForDimensionLines( )
 	{
-		// Determine level number for Level-1 rows based on p_DetailsSourceFirst
-		int level1No = p_DetailsSourceFirst ? -1 : 1;
-
-		// Determine level number for Level-2 child rows
-		int level2No = p_DetailsSourceFirst ? -2 : 2;
-		
-		// Determine level number for Level-3 child rows
-		int level3No = p_DetailsSourceFirst ? -3 : 3;
-
 		// Build the list of columns to update: Col_0, Col_1, ..., Col_n
 		StringBuilder setClause = new StringBuilder();
 		for (int column = 0; column < m_columns.length; column++)
@@ -459,16 +450,15 @@ public class FinReport extends SvrProcess
 		}
 
 		// Build the UPDATE query for Level-2 rows
-		StringBuilder sql = new StringBuilder();
-		sql.append("UPDATE T_Report t ")
-						.append("SET ").append(setClause.toString()).append(" ")
-						.append("WHERE t.AD_PInstance_ID = ").append(getAD_PInstance_ID()).append(" ")
-						.append("  AND t.levelno = ").append(level2No).append(" ")  // Level-2
+		StringBuilder sql = new StringBuilder("UPDATE T_Report t ");
+		sql.append("SET ").append(setClause.toString())
+						.append(" WHERE t.AD_PInstance_ID = ").append(getAD_PInstance_ID())
+						.append("  AND t.levelno = ").append(getLevel2No()) // Level-2
 						.append("  AND (t.PA_ReportLine_ID, t.Record_ID, t.AD_PInstance_ID) IN (")
 						.append("    SELECT PA_ReportLine_ID, Record_ID, AD_PInstance_ID ")
 						.append("    FROM T_Report ")
-						.append("    WHERE levelno = ").append(level3No)
-						.append("      AND AD_PInstance_ID = ").append(getAD_PInstance_ID()).append(" ")
+						.append("    WHERE levelno = ").append(getLevel3No())
+						.append("      AND AD_PInstance_ID = ").append(getAD_PInstance_ID())
 						.append("    GROUP BY PA_ReportLine_ID, Record_ID, AD_PInstance_ID ")
 						.append("  )");
 
@@ -481,19 +471,19 @@ public class FinReport extends SvrProcess
 
 		// Build the DELETE query level-1
 		sql = new StringBuilder("DELETE FROM T_Report t ");
-		sql.append("WHERE t.AD_PInstance_ID = ").append(getAD_PInstance_ID()).append(" ")
-						.append("  AND t.levelno = ").append(level1No).append(" ") // dynamic Level-1
+		sql.append(" WHERE t.AD_PInstance_ID = ").append(getAD_PInstance_ID())
+						.append("  AND t.levelno = ").append(getLevel1No()) // dynamic Level-1
 						.append("  AND t.dimensiongrouprecord_ID IS NULL ")
 						.append("  AND (t.PA_ReportLine_ID, t.Record_ID, t.AD_PInstance_ID) IN (")
 						.append("    SELECT PA_ReportLine_ID, Record_ID, AD_PInstance_ID ")
 						.append("    FROM T_Report ")
-						.append("    WHERE ((levelno = ").append(level2No) // dynamic Level-2
-						.append("      AND dimensiongrouprecord_ID IS NOT NULL) OR levelno = ").append(level3No).append(") ")
-						.append("      AND AD_PInstance_ID = ").append(getAD_PInstance_ID()).append(" ")
+						.append("    WHERE ((levelno = ").append(getLevel2No()) // dynamic Level-2
+						.append("      AND dimensiongrouprecord_ID IS NOT NULL) OR levelno = ").append(getLevel3No()).append(") ")
+						.append("      AND AD_PInstance_ID = ").append(getAD_PInstance_ID())
 						.append("    GROUP BY PA_ReportLine_ID, Record_ID, AD_PInstance_ID")
 						.append("  )");
 
-		// Execute Delete 
+		// Execute Delete
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 
 		// Log Delete count
@@ -502,19 +492,19 @@ public class FinReport extends SvrProcess
 
 		// Build the DELETE query for Level-0 rows
 		sql = new StringBuilder("DELETE FROM T_Report t ");
-		sql.append("WHERE t.AD_PInstance_ID = ").append(getAD_PInstance_ID()).append(" ")
+		sql.append(" WHERE t.AD_PInstance_ID = ").append(getAD_PInstance_ID())
 						.append("  AND t.levelno = 0 ") // Level-0
 						.append("  AND t.dimensiongrouprecord_ID IS NULL ")
 						.append("  AND (t.PA_ReportLine_ID, t.AD_PInstance_ID) IN (")
 						.append("    SELECT PA_ReportLine_ID, AD_PInstance_ID ")
 						.append("    FROM T_Report ")
-						.append("    WHERE ((levelno = ").append(level2No).append(" AND dimensiongrouprecord_ID IS NOT NULL) ")
-						.append("           OR levelno = ").append(level1No).append(") ")
-						.append("      AND AD_PInstance_ID = ").append(getAD_PInstance_ID()).append(" ")
+						.append("    WHERE ((levelno = ").append(getLevel2No()).append(" AND dimensiongrouprecord_ID IS NOT NULL) ")
+						.append("           OR levelno = ").append(getLevel1No()).append(") ")
+						.append("      AND AD_PInstance_ID = ").append(getAD_PInstance_ID())
 						.append("    GROUP BY PA_ReportLine_ID, AD_PInstance_ID ")
 						.append("  )");
 
-		// Execute Delete 
+		// Execute Delete
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 
 		// Log Delete count
@@ -523,16 +513,16 @@ public class FinReport extends SvrProcess
 
 		// Build the UPDATE query for Level-0 rows
 		sql = new StringBuilder("UPDATE T_Report t ");
-		sql.append("SET ").append(setClause.toString()).append(" ")
-						.append("WHERE t.AD_PInstance_ID = ")
-						.append(getAD_PInstance_ID()).append(" ")
+		sql.append("SET ").append(setClause.toString())
+						.append(" WHERE t.AD_PInstance_ID = ")
+						.append(getAD_PInstance_ID())
 						.append("  AND t.levelno = 0 ") // Level-0
 						.append("  AND t.dimensiongrouprecord_ID IS NULL ")
 						.append("  AND (t.PA_ReportLine_ID, t.AD_PInstance_ID) IN (")
 						.append("    SELECT PA_ReportLine_ID, AD_PInstance_ID ")
 						.append("    FROM T_Report ")
-						.append("    WHERE levelno = ").append(level3No)
-						.append("      AND AD_PInstance_ID = ").append(getAD_PInstance_ID()).append(" ")
+						.append("    WHERE levelno = ").append(getLevel3No())
+						.append("      AND AD_PInstance_ID = ").append(getAD_PInstance_ID())
 						.append("    GROUP BY PA_ReportLine_ID, AD_PInstance_ID ")
 						.append("  )");
 
@@ -543,7 +533,37 @@ public class FinReport extends SvrProcess
 		if (log.isLoggable(Level.FINE))
 			log.fine("Cleared values for Level-0 columns - #" + no);
 	}
-	
+
+	/**
+	 * Determine level number for Level-3 rows (List Transactions) based on p_DetailsSourceFirst
+	 * 
+	 * @return int level number for Level-3
+	 */
+	private String getLevel3No( )
+	{
+		return p_DetailsSourceFirst ? "-3 " : "3 ";
+	}
+
+	/**
+	 * Determine level number for Level-2 rows (List Sources) based on p_DetailsSourceFirst
+	 * 
+	 * @return int level number for Level-2
+	 */
+	private String getLevel2No( )
+	{
+		return p_DetailsSourceFirst ? "-2 " : "2 ";
+	}
+
+	/**
+	 * Determine level number for Level-1 rows (Report Line) based on p_DetailsSourceFirst
+	 * 
+	 * @return int level number for Level-1
+	 */
+	private String getLevel1No( )
+	{
+		return p_DetailsSourceFirst ? "-1 " : "1 ";
+	}
+
 	/**************************************************************************
 	 * 	For all columns (in a line) with relative period access
 	 * 	@param line line
@@ -1651,33 +1671,15 @@ public class FinReport extends SvrProcess
 		//
 		if (isDimensionLine)
 		{
-			if (p_DetailsSourceFirst)
-			{
-				insert.append("-2 ");
-				if (listSourceNoTrx)
-					unionInsert.append("-2 ");
-			}
-			else
-			{
-				insert.append("2 ");
-				if (listSourceNoTrx)
-					unionInsert.append("2 ");
-			}
+			insert.append(getLevel2No());
+			if (listSourceNoTrx)
+				unionInsert.append(getLevel2No());
 		}
 		else
 		{
-			if (p_DetailsSourceFirst)
-			{
-				insert.append("-1 ");
-				if (listSourceNoTrx)
-					unionInsert.append("-1 ");
-			}
-			else
-			{
-				insert.append("1 ");
-				if (listSourceNoTrx)
-					unionInsert.append("1 ");
-			}
+			insert.append(getLevel1No());
+			if (listSourceNoTrx)
+				unionInsert.append(getLevel1No());
 		}
 
 		String numericType = DB.getDatabase().getNumericDataType();
@@ -1973,7 +1975,7 @@ public class FinReport extends SvrProcess
 				.append(" AND Fact_Acct_ID=0 AND Name IS NULL");
 		// When summary lines are not visible, exclude the level check so that all detail lines receive a name and description
 		if (!p_IsHideDimensionSummaryLine)
-			sql.append(" AND LevelNo <> ").append(p_DetailsSourceFirst ? "-2" : "2");
+			sql.append(" AND LevelNo <> ").append(getLevel2No());
 		if (isCombination)
 			sql.append(" AND C_ValidCombination_ID=" + combinationID);
 
@@ -1991,7 +1993,7 @@ public class FinReport extends SvrProcess
 				.append(" AND PA_ReportLine_ID=")
 				.append(m_lines[line].getPA_ReportLine_ID())
 				.append(" AND Fact_Acct_ID=0 AND DimensionGroupRecord_ID <> 0 AND DimensionGroupName IS NULL AND LevelNo = ")
-				.append(p_DetailsSourceFirst ? "-2" : "2");
+				.append(getLevel2No());
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE))
 				log.fine("Name #=" + no + " - " + sql.toString());
@@ -2055,10 +2057,7 @@ public class FinReport extends SvrProcess
 			insert.append(variable);
 		insert.append(",Fact_Acct_ID, ");
 
-		if (p_DetailsSourceFirst)
-			insert.append("-3 ");
-		else
-			insert.append("3 ");
+		insert.append(getLevel3No());
 
 		String numericType = DB.getDatabase().getNumericDataType();
 		
