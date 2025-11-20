@@ -188,6 +188,7 @@ public class LoginWindow extends Window implements EventListener<Event>
 
 		if (!Util.isEmpty(errorMessage))
 		{
+			getDesktop().enableServerPush(false);
 			ZkSSOUtils.setErrorMessageText(errorMessage);
 			Executions.sendRedirect(SSOUtils.ERROR_VALIDATION_URL);
 		}
