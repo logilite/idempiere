@@ -778,17 +778,21 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		}
 		else
 		{
-			String normalizedFrom = fromClause.trim().toLowerCase();
+			String trimmedFrom = fromClause.trim();
+			String normalizedFrom = trimmedFrom.toLowerCase();
 			String tableLower = tableName.toLowerCase();
 
 			if (normalizedFrom.startsWith("from "))
-				normalizedFrom = normalizedFrom.substring(4).trim();
+			{
+				normalizedFrom = normalizedFrom.substring(5);
+				trimmedFrom = trimmedFrom.substring(5);
+			}
 
 			// Prepend table name if missing
 			if (normalizedFrom.startsWith(tableLower) || normalizedFrom.startsWith(tableLower + " "))
-				sql.append(normalizedFrom);
+				sql.append(trimmedFrom);
 			else
-				sql.append(tableName).append(" ").append(normalizedFrom);
+				sql.append(tableName).append(" ").append(trimmedFrom);
 
 			sql.append(normalizedFrom.contains("where") ? " AND " : " WHERE ");
 		}
