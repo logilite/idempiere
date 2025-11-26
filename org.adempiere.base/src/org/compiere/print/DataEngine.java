@@ -63,8 +63,8 @@ import bsh.EvalError;
 import bsh.Interpreter;
 
 /**
- * Data Engine.
- * Creates SQL and loads data into PrintData (including totals/etc.)
+ * Data Engine.<br/>
+ * Creates SQL and loads data into PrintData (including totals/etc).
  *
  * @author 	Jorg Janke
  * @version 	$Id: DataEngine.java,v 1.3 2006/07/30 00:53:02 jjanke Exp $
@@ -83,7 +83,7 @@ import bsh.Interpreter;
  * @author Paul Bowden (phib)
  * 				<li> BF 2908435 Virtual columns with lookup reference types can't be printed
  *                   https://sourceforge.net/p/adempiere/bugs/2246/
- *  @contributor  Fernandinho (FAIRE)
+ * @contributor  Fernandinho (FAIRE)
  *  				- http://jira.idempiere.com/browse/IDEMPIERE-153
  */
 public class DataEngine
@@ -103,9 +103,8 @@ public class DataEngine
 	 * @param trxName
 	 */
 	public DataEngine (Language language, String trxName){
-		this(language, trxName, 0);
+		this(language,trxName,0);
 	}
-
 	/**
 	 *	Constructor
 	 *	@param language Language of the data (for translation)
@@ -146,13 +145,14 @@ public class DataEngine
 	public static final String KEY = "*";
 	/** Window No 						*/
 	private int				m_windowNo = 0;
+
 	private Map<Object, Object> m_summarized = new HashMap<Object, Object>();
 
 	public static final int DEFAULT_REPORT_LOAD_TIMEOUT_IN_SECONDS = 120;
 
 	public static final int DEFAULT_GLOBAL_MAX_REPORT_RECORDS = 100000;
 
-	/**************************************************************************
+	/**
 	 * 	Load Data
 	 *
 	 * 	@param format print format
@@ -164,8 +164,8 @@ public class DataEngine
 	{
 		return getPrintData(ctx, format, query, false);
 	}
-	
-	/**************************************************************************
+
+	/**
 	 * 	Load Data
 	 *
 	 * @param ctx
@@ -179,7 +179,7 @@ public class DataEngine
 		return getPrintData(ctx, format, query, summary, false);
 	}
 	
-	/**************************************************************************
+	/**
 	 * 	Load Data
 	 *
 	 * 	@param format print format
@@ -270,10 +270,9 @@ public class DataEngine
 		loadPrintData(pd, format);
 		return pd;
 	}	//	getPrintData
-
 	
-	/**************************************************************************
-	 * 	Create Load SQL and update PrintData Info
+	/**
+	 * 	Construct Load Data SQL and create new PrintData instance
 	 *
 	 * 	@param ctx context
 	 * 	@param format print format
@@ -393,24 +392,24 @@ public class DataEngine
 		{
 			//
 			StringBuilder sql = new StringBuilder("SELECT c.AD_Column_ID,c.ColumnName,") // 1..2
-							.append("c.AD_Reference_ID,c.AD_Reference_Value_ID,") // 3..4
-							.append("c.FieldLength,c.IsMandatory,c.IsKey,c.IsParent,") // 5..8
-							.append("COALESCE(rvc.IsGroupFunction,'N'),rvc.FunctionColumn,") // 9..10
-							.append("pfi.IsGroupBy,pfi.IsSummarized,pfi.IsAveraged,pfi.IsCounted, ") // 11..14
-							.append("pfi.IsPrinted,pfi.SortNo,pfi.IsPageBreak, ") // 15..17
-							.append("pfi.IsMinCalc,pfi.IsMaxCalc, ") // 18..19
-							.append("pfi.isRunningTotal,pfi.RunningTotalLines, ") // 20..21
-							.append("pfi.IsVarianceCalc, pfi.IsDeviationCalc, ") // 22..23
-							.append("c.ColumnSQL, COALESCE(pfi.FormatPattern, c.FormatPattern), ") // 24, 25
-							// BEGIN http://jira.idempiere.com/browse/IDEMPIERE-153
-							/** START DEVCOFFEE: script column **/
-							.append(" pfi.isDesc, pfi.Script, pfi.Name, pfi.AD_PrintFormatItem_ID, pfi.PrintFormatType ") // 26..30
-							// END
-							.append("FROM AD_PrintFormat pf")
-							.append(" INNER JOIN AD_PrintFormatItem pfi ON (pf.AD_PrintFormat_ID=pfi.AD_PrintFormat_ID)")
-							.append(" LEFT JOIN AD_Column c ON (pfi.AD_Column_ID=c.AD_Column_ID)")
-							.append(" LEFT OUTER JOIN AD_ReportView_Col rvc ON (pf.AD_ReportView_ID=rvc.AD_ReportView_ID AND c.AD_Column_ID=rvc.AD_Column_ID) ")
-							.append("WHERE pf.AD_PrintFormat_ID=?"); // #1
+				.append("c.AD_Reference_ID,c.AD_Reference_Value_ID,") // 3..4
+				.append("c.FieldLength,c.IsMandatory,c.IsKey,c.IsParent,") // 5..8
+				.append("COALESCE(rvc.IsGroupFunction,'N'),rvc.FunctionColumn,") // 9..10
+				.append("pfi.IsGroupBy,pfi.IsSummarized,pfi.IsAveraged,pfi.IsCounted, ") // 11..14
+				.append("pfi.IsPrinted,pfi.SortNo,pfi.IsPageBreak, ") // 15..17
+				.append("pfi.IsMinCalc,pfi.IsMaxCalc, ") // 18..19
+				.append("pfi.isRunningTotal,pfi.RunningTotalLines, ") // 20..21
+				.append("pfi.IsVarianceCalc, pfi.IsDeviationCalc, ") // 22..23
+				.append("c.ColumnSQL, COALESCE(pfi.FormatPattern, c.FormatPattern) ") // 24, 25
+				// BEGIN http://jira.idempiere.com/browse/IDEMPIERE-153
+				/** START DEVCOFFEE: script column **/
+				.append(" , pfi.isDesc, pfi.Script, pfi.Name, pfi.AD_PrintFormatItem_ID, pfi.PrintFormatType ") // 26..30
+				// END
+				.append("FROM AD_PrintFormat pf")
+				.append(" INNER JOIN AD_PrintFormatItem pfi ON (pf.AD_PrintFormat_ID=pfi.AD_PrintFormat_ID)")
+				.append(" LEFT JOIN AD_Column c ON (pfi.AD_Column_ID=c.AD_Column_ID)")
+				.append(" LEFT OUTER JOIN AD_ReportView_Col rvc ON (pf.AD_ReportView_ID=rvc.AD_ReportView_ID AND c.AD_Column_ID=rvc.AD_Column_ID) ")
+				.append("WHERE pf.AD_PrintFormat_ID=?"); // #1
 			if (isTranPrintFormat)
 			{
 				sql.append(" AND pfi.AD_PrintFormatItem_ID IN ( " + getTranPrintFormatItemIDs(format) + ")");
@@ -446,32 +445,50 @@ public class DataEngine
 					info.setColumnName(rs.getString(2));
 					info.setAdReferenceId(rs.getInt(3));
 					info.setAdReferenceValueId(rs.getInt(4));
+					//  ColumnInfo
 					info.setFieldLength(rs.getInt(5));
 					info.setMandatory("Y".equals(rs.getString(6)));
 					info.setKey("Y".equals(rs.getString(7)));
+					//  SQL GroupBy
 					info.setGroupFunction("Y".equals(rs.getString(9)));
 					info.setFunctionColumn(Optional.ofNullable(rs.getString(10)).orElse(""));
+					//	Breaks/Column Functions
 					info.setGroupBy("Y".equals(rs.getString(11)));
 					info.setSum("Y".equals(rs.getString(12)));
 					info.setMean("Y".equals(rs.getString(13)));
 					info.setCount("Y".equals(rs.getString(14)));
-					info.setPrinted("Y".equals(rs.getString(15)));
-					info.setSortNo(rs.getInt(16));
-					info.setPageBreak("Y".equals(rs.getString(17)));
 					info.setMinCalc("Y".equals(rs.getString(18)));
 					info.setMaxCalc("Y".equals(rs.getString(19)));
-					info.setRunningTotal("Y".equals(rs.getString(20)));
-					info.setRunningTotalLines(Math.max(m_runningTotalLines, rs.getInt(21)));
 					info.setVarianceCalc("Y".equals(rs.getString(22)));
 					info.setDeviationCalc("Y".equals(rs.getString(23)));
+					info.setRunningTotal("Y".equals(rs.getString(20)));
+					//	RunningTotalLines only once - use max
+					info.setRunningTotalLines(Math.max(m_runningTotalLines, rs.getInt(21)));
+
+					//	General Info
+					info.setPrinted("Y".equals(rs.getString(15)));
+
+					info.setPageBreak("Y".equals(rs.getString(17)));
+
+					info.setFormatPattern(rs.getString(25));
+					
+					info.setPrintFormatType(rs.getString(30));
+
+					//BEGIN http://jira.idempiere.com/browse/IDEMPIERE-153
+					info.setDesc("Y".equals(rs.getString(26)));
+					//END
+					/** START DEVCOFFEE: script column  **/
+					info.setScript(rs.getString(27));
+					info.setPfiName(rs.getString(28));
+
+					info.setSortNo(rs.getInt(16));
+
 					// ColumnSQL handling
 					info.setColumnSQL(rs.getString(24));
-					info.setFormatPattern(rs.getString(25));
-					info.setDesc("Y".equals(rs.getString(26)));
-					info.setScript(rs.getString(27));
-					info.setPfiName(rs.getString(28));	
+
+
+
 					info.setPrintFormatItemId(rs.getInt(29));
-					info.setPrintFormatType(rs.getString(30));
 
 					processPFColumnInfo(info, tableName, regTranslateTable, IsGroupedBy, sqlSELECT, sqlFROM, groupByColumns, columns, orderAD_Column_IDs, orderColumns);
 
@@ -490,7 +507,7 @@ public class DataEngine
 			if (columns.size() == 0)
 				if (log.isLoggable(Level.FINEST)) log.finest("No Colums - SQL=" + sql + " - ID=" + format.get_ID());
 		}
-		
+
 		if (columns.size() == 0)
 		{
 			log.log(Level.SEVERE, "No Columns - Delete Report Format " + reportName + " and start again");
@@ -716,17 +733,17 @@ public class DataEngine
 		String script = info.getScript();
 		String pfiName = info.getPfiName();
 
-		// Fully qualified Table.Column for ordering
+		//	Fully qualified Table.Column for ordering
 		String orderName = tableName + "." + ColumnName;
 		String lookupSQL = orderName;
 		PrintDataColumn pdc = null;
 
-		// -- Key --
+		//  -- Key --
 		if (IsKey)
 		{
-			// => Table.Column,
+			//	=>	Table.Column,
 			sqlSELECT.append(tableName).append(".").append(ColumnName).append(",");
-			groupByColumns.add(tableName + "." + ColumnName);
+			groupByColumns.add(tableName+"."+ColumnName);
 			pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, KEY, isPageBreak, SortNo); // KeyColumn
 		}
 		/** START DEVCOFFEE: script column  **/
@@ -754,7 +771,7 @@ public class DataEngine
 			.append("' '").append(" AS \"").append(pfiName).append("\",");
 			//
 			int scriptDisplayType = getDisplayTypeFromPattern(formatPattern);
-			pdc = new PrintDataColumn(AD_PrintFormatItem_ID, -1, pfiName, scriptDisplayType, FieldLength, orderName, isPageBreak,SortNo);
+			pdc = new PrintDataColumn(AD_PrintFormatItem_ID, -1, pfiName, scriptDisplayType, FieldLength, orderName, isPageBreak, SortNo);
 			synonymNext();
 		}
 		// not printed Sort Columns
@@ -762,18 +779,14 @@ public class DataEngine
 		{
 			;
 		}
-		// -- Parent, TableDir (and unqualified Search) --
-		else if ( /*
-					 * (IsParent && DisplayType.isLookup(AD_Reference_ID)) || <-- IDEMPIERE-71
-					 * Carlos Ruiz - globalqss
-					 */
-		AD_Reference_ID == DisplayType.TableDir
-					|| (AD_Reference_ID == DisplayType.Search && AD_Reference_Value_ID == 0))
+		//	-- Parent, TableDir (and unqualified Search) --
+		else if ( AD_Reference_ID == DisplayType.TableDir
+				|| (AD_Reference_ID == DisplayType.Search && AD_Reference_Value_ID == 0)
+			)
 		{
 
-			// Creates Embedded SQL in the form
-			// SELECT ColumnTable.Name FROM ColumnTable WHERE
-			// TableName.ColumnName=ColumnTable.ColumnName
+			//  Creates Embedded SQL in the form
+			//  SELECT ColumnTable.Name FROM ColumnTable WHERE TableName.ColumnName=ColumnTable.ColumnName
 			String eSql;
 
 			if (ColumnSQL.length() > 0)
@@ -786,24 +799,14 @@ public class DataEngine
 				eSql = MLookupFactory.getLookup_TableDirEmbed(m_language, ColumnName, tableName, true);
 			}
 
-			if (Util.isEmpty(eSql))
-			{ // No Identifier records found
+			if (Util.isEmpty(eSql)) { // No Identifier records found
 				eSql = lookupSQL;
 			}
-			// DisplayColumn
+			//  DisplayColumn
 			String display = ColumnName;
-			// => (..) AS AName, Table.ID,
-			sqlSELECT
-							.append("(")
-							.append(eSql)
-							.append(") AS ")
-							.append(m_synonym)
-							.append(display)
-							.append(",")
-							.append(lookupSQL)
-							.append(" AS ")
-							.append(ColumnName)
-							.append(",");
+			//	=> (..) AS AName, Table.ID,
+			sqlSELECT.append("(").append(eSql).append(") AS ").append(m_synonym).append(display).append(",")
+					.append(lookupSQL).append(" AS ").append(ColumnName).append(",");
 			groupByColumns.add(lookupSQL);
 			orderName = m_synonym + display;
 			//
@@ -811,11 +814,12 @@ public class DataEngine
 			synonymNext();
 		}
 
-		// -- Table --
+		//	-- Table --
 		else if (AD_Reference_ID == DisplayType.Table
-					|| AD_Reference_ID == DisplayType.MultiSelectTable
-						|| AD_Reference_ID == DisplayType.MultiSelectSearch
-						|| (AD_Reference_ID == DisplayType.Search && AD_Reference_Value_ID != 0))
+				|| AD_Reference_ID == DisplayType.MultiSelectTable
+				|| AD_Reference_ID == DisplayType.MultiSelectSearch
+				|| (AD_Reference_ID == DisplayType.Search && AD_Reference_Value_ID != 0)
+			)
 		{
 			if (ColumnSQL.length() > 0)
 			{
@@ -829,21 +833,12 @@ public class DataEngine
 			else
 				eSql = MLookupFactory.getLookup_TableEmbed(m_language, ColumnName, tableName, AD_Reference_Value_ID, true);
 
-			// DisplayColumn
+			//  DisplayColumn
 			String display = ColumnName;
-			// => (..) AS AName, Table.ID,
-			sqlSELECT
-							.append("(")
-							.append(eSql)
-							.append(") AS ")
-							.append(m_synonym)
-							.append(display)
-							.append(",")
-							.append(lookupSQL)
-							.append(" AS ")
-							.append(ColumnName)
-							.append(",");
-			groupByColumns.add(m_synonym + display);
+			//	=> (..) AS AName, Table.ID,
+			sqlSELECT.append("(").append(eSql).append(") AS ").append(m_synonym).append(display).append(",")
+				.append(lookupSQL).append(" AS ").append(ColumnName).append(",");
+			groupByColumns.add(m_synonym+display);
 			groupByColumns.add(lookupSQL);
 			orderName = m_synonym + display;
 			//
@@ -853,10 +848,10 @@ public class DataEngine
 			synonymNext();
 		}
 
-		// -- List or Button with ReferenceValue --
+		//	-- List or Button with ReferenceValue --
 		// -- Multi-Select reference handled separately --
 		else if ((DisplayType.isList(AD_Reference_ID) && !DisplayType.isMultiSelect(AD_Reference_ID))
-				|| (AD_Reference_ID == DisplayType.Button && AD_Reference_Value_ID != 0))
+			|| (AD_Reference_ID == DisplayType.Button && AD_Reference_Value_ID != 0))
 		{
 			if (ColumnSQL.length() > 0)
 			{
@@ -864,66 +859,36 @@ public class DataEngine
 			}
 			if (Env.isBaseLanguage(m_language, "AD_Ref_List"))
 			{
-				// => A.Name AS AName,
+				//	=> A.Name AS AName,
 				sqlSELECT.append(m_synonym).append(".Name AS ").append(m_synonym).append("Name,");
-				groupByColumns.add(m_synonym + ".Name");
+				groupByColumns.add(m_synonym+".Name");
 				orderName = m_synonym + "Name";
-				// => x JOIN AD_Ref_List A ON (x.KeyColumn=A.Value AND A.AD_Reference_ID=123)
+				//	=> x JOIN AD_Ref_List A ON (x.KeyColumn=A.Value AND A.AD_Reference_ID=123)
 				sqlFROM.append(" LEFT OUTER JOIN ");
-				sqlFROM
-								.append("AD_Ref_List ")
-								.append(m_synonym)
-								.append(" ON (")
-								.append(lookupSQL)
-								.append("=")
-								.append(m_synonym)
-								.append(".Value")
-								.append(" AND ")
-								.append(m_synonym)
-								.append(".AD_Reference_ID=")
-								.append(AD_Reference_Value_ID)
-								.append(")");
+				sqlFROM.append("AD_Ref_List ").append(m_synonym).append(" ON (")
+					.append(lookupSQL).append("=").append(m_synonym).append(".Value")
+					.append(" AND ").append(m_synonym).append(".AD_Reference_ID=").append(AD_Reference_Value_ID).append(")");
 			}
 			else
 			{
-				// => A.Name AS AName,
+				//	=> A.Name AS AName,
 				sqlSELECT.append(m_synonym).append(".Name AS ").append(m_synonym).append("Name,");
-				groupByColumns.add(m_synonym + ".Name");
+				groupByColumns.add(m_synonym+".Name");
 				orderName = m_synonym + "Name";
 
-				// LEFT OUTER JOIN AD_Ref_List XA ON (AD_Table.EntityType=XA.Value AND
-				// XA.AD_Reference_ID=245)
-				// LEFT OUTER JOIN AD_Ref_List_Trl A ON (XA.AD_Ref_List_ID=A.AD_Ref_List_ID AND
-				// A.AD_Language='de_DE')
+				//	LEFT OUTER JOIN AD_Ref_List XA ON (AD_Table.EntityType=XA.Value AND XA.AD_Reference_ID=245)
+				//	LEFT OUTER JOIN AD_Ref_List_Trl A ON (XA.AD_Ref_List_ID=A.AD_Ref_List_ID AND A.AD_Language='de_DE')
 				sqlFROM.append(" LEFT OUTER JOIN ");
-				sqlFROM
-								.append(" AD_Ref_List X")
-								.append(m_synonym)
-								.append(" ON (")
-								.append(lookupSQL)
-								.append("=X")
-								.append(m_synonym)
-								.append(".Value AND X")
-								.append(m_synonym)
-								.append(".AD_Reference_ID=")
-								.append(AD_Reference_Value_ID)
-								.append(")");
+				sqlFROM.append(" AD_Ref_List X").append(m_synonym).append(" ON (")
+					.append(lookupSQL).append("=X")
+					.append(m_synonym).append(".Value AND X").append(m_synonym).append(".AD_Reference_ID=").append(AD_Reference_Value_ID)
+					.append(")");
 				sqlFROM.append(" LEFT OUTER JOIN ");
-				sqlFROM
-								.append(" AD_Ref_List_Trl ")
-								.append(m_synonym)
-								.append(" ON (X")
-								.append(m_synonym)
-								.append(".AD_Ref_List_ID=")
-								.append(m_synonym)
-								.append(".AD_Ref_List_ID")
-								.append(" AND ")
-								.append(m_synonym)
-								.append(".AD_Language='")
-								.append(m_language.getAD_Language())
-								.append("')");
+				sqlFROM.append(" AD_Ref_List_Trl ").append(m_synonym).append(" ON (X")
+					.append(m_synonym).append(".AD_Ref_List_ID=").append(m_synonym).append(".AD_Ref_List_ID")
+					.append(" AND ").append(m_synonym).append(".AD_Language='").append(m_language.getAD_Language()).append("')");
 			}
-			// TableName.ColumnName,
+			// 	TableName.ColumnName,
 			sqlSELECT.append(lookupSQL).append(" AS ").append(ColumnName).append(",");
 			groupByColumns.add(lookupSQL); 
 			pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak, SortNo);
@@ -943,11 +908,7 @@ public class DataEngine
 				// WHERE O.Value=ANY(C_Order.Multi_DocBaseType) AND O.AD_Reference_ID=183) AS
 				// O.Multi_DocBaseType
 
-				sqlSELECT
-								.append("(SELECT STRING_AGG(")
-								.append(m_synonym)
-								.append(".Name")
-								.append(DB.isPostgreSQL() ? ",',')" : ")");
+				sqlSELECT.append("(SELECT STRING_AGG(").append(m_synonym).append(".Name").append(DB.isPostgreSQL() ? ",',')" : ")");
 				sqlSELECT.append(" FROM AD_Ref_List ").append(m_synonym);
 
 				groupByColumns.add(lookupSQL);
@@ -956,81 +917,49 @@ public class DataEngine
 			else
 			{
 				// (SELECT STRING_AGG(NVL(O.Name,XO.Name),',') FROM AD_Ref_List XO
-				// LEFT OUTER JOIN AD_Ref_List_Trl O ON (O.AD_Ref_List_ID=XO.AD_Ref_List_ID AND
-				// O.AD_Language='es_CO')
-				// WHERE (XO.Value=ANY(C_Order.Multi_DocBaseType) AND XO.AD_Reference_ID=183)) AS
-				// OMulti_DocBaseType
+				// LEFT OUTER JOIN AD_Ref_List_Trl O ON (O.AD_Ref_List_ID=XO.AD_Ref_List_ID AND O.AD_Language='es_CO')
+				// WHERE (XO.Value=ANY(C_Order.Multi_DocBaseType) AND XO.AD_Reference_ID=183)) AS OMulti_DocBaseType
 				alias = "X";
-				sqlSELECT
-								.append("(SELECT STRING_AGG(NVL(")
-								.append(m_synonym)
-								.append(".Name, ")
-								.append(alias)
-								.append(m_synonym)
-								.append(".Name)")
-								.append(DB.isPostgreSQL() ? ",',')" : ")");
-				sqlSELECT
-								.append(" FROM AD_Ref_List ")
-								.append(alias)
-								.append(m_synonym)
-								.append(" LEFT OUTER JOIN AD_Ref_List_Trl ")
-								.append(m_synonym)
-								.append(" ON (")
-								.append(m_synonym)
-								.append(".AD_Ref_List_ID=")
-								.append(alias)
-								.append(m_synonym)
-								.append(".AD_Ref_List_ID AND ")
-								.append(m_synonym)
-								.append(".AD_Language='")
-								.append(m_language.getAD_Language())
-								.append("')");
+				sqlSELECT.append("(SELECT STRING_AGG(NVL(").append(m_synonym).append(".Name, ").append(alias)
+								.append(m_synonym).append(".Name)").append(DB.isPostgreSQL() ? ",',')" : ")");
+				sqlSELECT.append(" FROM AD_Ref_List ").append(alias).append(m_synonym)
+					.append(" LEFT OUTER JOIN AD_Ref_List_Trl ").append(m_synonym)
+					.append(" ON (").append(m_synonym).append(".AD_Ref_List_ID=").append(alias).append(m_synonym).append(".AD_Ref_List_ID AND ")
+					.append(m_synonym).append(".AD_Language='").append(m_language.getAD_Language()).append("')");
 
 				groupByColumns.add(lookupSQL);
 				orderName = m_synonym + ColumnName;
 			}
 
-			sqlSELECT
-							.append(" WHERE ")
-							.append(alias)
-							.append(m_synonym)
-							.append(".Value=ANY(")
-							.append(lookupSQL)
-							.append(") AND ")
-							.append(alias)
-							.append(m_synonym)
-							.append(".AD_Reference_ID=")
-							.append(AD_Reference_Value_ID)
-							.append(")")
-							.append(" AS ")
-							.append(m_synonym)
-							.append(ColumnName)
-							.append(",");
+			sqlSELECT.append(" WHERE ").append(alias).append(m_synonym).append(".Value=ANY(").append(lookupSQL).append(") AND ")
+							.append(alias).append(m_synonym).append(".AD_Reference_ID=").append(AD_Reference_Value_ID).append(")")
+				.append(" AS ").append(m_synonym).append(ColumnName).append(",");
 			pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak, SortNo);
 			synonymNext();
 		}
 
-		// -- Special Lookups --
+		//  -- Special Lookups --
 		else if (AD_Reference_ID == DisplayType.Location
-					|| AD_Reference_ID == DisplayType.Account
-						|| AD_Reference_ID == DisplayType.Locator
-						|| AD_Reference_ID == DisplayType.PAttribute)
+			|| AD_Reference_ID == DisplayType.Account
+			|| AD_Reference_ID == DisplayType.Locator
+			|| AD_Reference_ID == DisplayType.PAttribute
+		)
 		{
 			if (ColumnSQL.length() > 0)
 			{
 				lookupSQL = ColumnSQL;
 			}
-			// TableName, DisplayColumn
-			String table = "";
-			String key = "";
-			String display = "";
+			//	TableName, DisplayColumn
+			String table = ""; 
+			String key = ""; 
+			String display = ""; 
 			String synonym = null;
 			//
 			if (AD_Reference_ID == DisplayType.Location)
 			{
 				table = "C_Location";
 				key = "C_Location_ID";
-				display = "City||'.'"; // in case City is empty
+				display = "City";
 				synonym = "Address";
 			}
 			else if (AD_Reference_ID == DisplayType.Account)
@@ -1057,58 +986,47 @@ public class DataEngine
 			if (synonym == null)
 				synonym = display;
 
-			// => A.Name AS AName, table.ID,
-			sqlSELECT
-							.append(m_synonym)
-							.append(".")
-							.append(display)
-							.append(" AS ")
-							.append(m_synonym)
-							.append(synonym)
-							.append(",")
-							.append(lookupSQL)
-							.append(" AS ")
-							.append(ColumnName)
-							.append(",");
-			groupByColumns.add(m_synonym + "." + synonym);
+			// IDEMPIERE-6443
+			if ("City".equals(display)) {
+				sqlSELECT.append("COALESCE(").append(m_synonym).append(".").append(display).append(", '.')");
+			}else {
+				sqlSELECT.append(m_synonym).append(".").append(display);
+			}
+//				=> A.Name AS AName, table.ID,
+			sqlSELECT.append(" AS ")
+				.append(m_synonym).append(synonym).append(",")
+				.append(lookupSQL).append(" AS ").append(ColumnName).append(",");
+			groupByColumns.add(m_synonym+"."+synonym);
 			groupByColumns.add(lookupSQL);
 			orderName = m_synonym + synonym;
-			// => x JOIN table A ON (table.ID=A.Key)
+			//	=> x JOIN table A ON (table.ID=A.Key)
 			if (IsMandatory)
 				sqlFROM.append(" INNER JOIN ");
 			else
 				sqlFROM.append(" LEFT OUTER JOIN ");
-			sqlFROM
-							.append(table)
-							.append(" ")
-							.append(m_synonym)
-							.append(" ON (")
-							.append(lookupSQL)
-							.append("=")
-							.append(m_synonym)
-							.append(".")
-							.append(key)
-							.append(")");
+			sqlFROM.append(table).append(" ").append(m_synonym).append(" ON (")
+				.append(lookupSQL).append("=")
+				.append(m_synonym).append(".").append(key).append(")");
 			//
 			pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak, SortNo);
 			synonymNext();
 		}
 
-		// -- Standard Column --
+		//	-- Standard Column --
 		else
 		{
 			int index = FunctionColumn.indexOf('@');
 			if (ColumnSQL != null && ColumnSQL.length() > 0)
 			{
-				// => ColumnSQL AS ColumnName
+			//	=> ColumnSQL AS ColumnName
 				sqlSELECT.append(ColumnSQL).append(" AS ").append(ColumnName).append(",");
 				if (!IsGroupFunction)
 					groupByColumns.add(ColumnSQL);
-				orderName = ColumnName; // no prefix for synonym
+				orderName = ColumnName;		//	no prefix for synonym
 			}
 			else if (index == -1)
 			{
-				// => Table.Column,
+			//	=> Table.Column,
 				StringBuilder sb = new StringBuilder();
 				sb.append(tableName).append(".").append(ColumnName);
 				sqlSELECT.append(sb).append(",");
@@ -1117,36 +1035,36 @@ public class DataEngine
 			}
 			else
 			{
-				// => Function(Table.Column) AS Column -- function has @ where column name goes
+			//  => Function(Table.Column) AS Column   -- function has @ where column name goes
 				StringBuilder sb = new StringBuilder();
 				sb.append(FunctionColumn.substring(0, index))
 					.append(tableName).append(".").append(ColumnName)
-					.append(FunctionColumn.substring(index + 1));
+					.append(FunctionColumn.substring(index+1));
 				sqlSELECT.append(sb).append(" AS ").append(ColumnName).append(",");
 				if (!IsGroupFunction)
 					groupByColumns.add(sb.toString());
-				orderName = ColumnName; // no prefix for synonym
+				orderName = ColumnName;		//	no prefix for synonym
 			}
 			pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName,
-					AD_Reference_ID, FieldLength, ColumnName, isPageBreak, SortNo);
+				AD_Reference_ID, FieldLength, ColumnName, isPageBreak, SortNo);
 		}
 
-		// Order Sequence - Overwrite order column name
+		//	Order Sequence - Overwrite order column name
 		for (int i = 0; i < orderAD_Column_IDs.length; i++)
 		{
 			if (AD_Column_ID == orderAD_Column_IDs[i])
 			{
-
-				// BEGIN fernandinho - http://jira.idempiere.com/browse/IDEMPIERE-153
+				
+				//BEGIN fernandinho - http://jira.idempiere.com/browse/IDEMPIERE-153
 				if (isDesc)
 					orderName += " DESC";
-				// END
+				//END
 
 				orderColumns.set(i, orderName);
 				// We need to GROUP BY even is not printed, because is used in ORDER clause
 				if (!IsPrinted && !IsGroupFunction)
 				{
-					groupByColumns.add(tableName + "." + ColumnName);
+					groupByColumns.add(tableName+"."+ColumnName);
 				}
 				break;
 			}
@@ -1178,7 +1096,7 @@ public class DataEngine
 	}// getTranPrintFormatItemIDs
 
 	/**
-	 *	Next Synonym.
+	 *	Next Synonym.<br/>
 	 * 	Creates next synonym A..Z AA..ZZ AAA..ZZZ
 	 */
 	private void synonymNext()
@@ -1252,9 +1170,8 @@ public class DataEngine
 		}
 		return tr;
 	}	//  getTableReference
-
 	
-	/**************************************************************************
+	/**
 	 * 	Load Data into PrintData
 	 * 	@param pd print data with SQL and ColumnInfo set
 	 *  @param format print format
@@ -1535,7 +1452,7 @@ public class DataEngine
 							}
                             // fix bug [ 1755592 ] Printing time in format
                             else if (pdc.getDisplayType() == DisplayType.DateTime)
-{
+                            {
                                 Timestamp datetime = rs.getTimestamp(counter++);
                                 pde = new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), datetime, pdc.getDisplayType(), pdc.getFormatPattern());
                             }
@@ -1632,7 +1549,6 @@ public class DataEngine
 		//	Check last Group Change
 		if (m_group.getGroupColumnCount() > 1)	//	one is TOTAL
 		{
-			
 			ArrayList<PrintDataColumn> changedGroups = new ArrayList<PrintDataColumn>();
 			Map<PrintDataColumn, Object> changedValues = new HashMap<PrintDataColumn, Object>();
 			//	Check Columns for Function Columns
@@ -1817,7 +1733,7 @@ public class DataEngine
 	}
 	
 	/**
-	 * Parse expression, replaces @tag@ with pdc values and/or execute functions
+	 * Parse expression, replaces @tag@ with column value (COL/) or pdc value (ACCUMULATE/ or LINE)
 	 * @param expression
 	 * @param pdc
 	 * @param pd
@@ -1895,7 +1811,7 @@ public class DataEngine
 
 		return outStr.toString();
 	}
-	
+
 	/*************************************************************************
 	 * 	Test
 	 * 	@param args args
@@ -1910,11 +1826,19 @@ public class DataEngine
 		query.addRestriction("AD_Table_ID", MQuery.LESS, 105);
 	}
 
+	/**
+	 * Get window no
+	 * @return window no
+	 */
 	public int getWindowNo()
 	{
 		return m_windowNo;
 	}
 
+	/**
+	 * Set window no
+	 * @param windowNo
+	 */
 	public void setWindowNo(int windowNo)
 	{
 		this.m_windowNo = windowNo;
