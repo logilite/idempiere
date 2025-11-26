@@ -185,6 +185,18 @@ public final class DictionaryIDs {
 		}
 	}
 
+	public enum C_BP_Group {
+		STANDARD_CUSTOMERS(103),
+		VENDORS(104),
+		STAFF(105);
+
+		public final int id;
+
+		private C_BP_Group(int id) {
+			this.id = id;
+		}
+	}
+	
 	public enum C_Calendar {
 		GARDENWORLD_CALENDAR(102);
 		
@@ -777,7 +789,8 @@ public final class DictionaryIDs {
 		}
 	}
   
-  public enum AD_Field {
+	public enum AD_Field {
+	  	USER_CONTACT_NAME(300),
 		BPartner_PaymentRule(9624),
 		BPartner_Description(2133),
 		PackageInstallation_PackageVersion(203844);
@@ -790,10 +803,10 @@ public final class DictionaryIDs {
 	}
 	
 	public enum AD_Column {
+		COLUMN_NAME(213),
 		VIRTUALCOLUMN_UPCEAN(14102),
 		REPORT_VIEW_ORDERBYCLAUSE(4396),
 		MULTISELECTCOLUMN_SCOPELIST(214414);
-		
 		
 		public final int id;
 
@@ -801,5 +814,47 @@ public final class DictionaryIDs {
 			this.id = id;
 		}
 	}
+	
+	public enum AD_Window {
+		USER(108);
+		
+		public final int id;
 
+		private AD_Window(int id) {
+			this.id = id;
+		}
+	}
+	
+	public enum AD_Tab {
+		USER_CONTACT(118);
+		
+		public final int id;
+
+		private AD_Tab(int id) {
+			this.id = id;
+		}
+	}
+	
+	public enum AD_Element {
+		NAME(469);
+		
+		public final int id;
+
+		private AD_Element(int id) {
+			this.id = id;
+		}
+	}
+	
+	public enum AD_Process {
+		CACHE_RESET(205),
+		C_ORDER_PROCESS(104),
+		DBA_RECOMPILE(185);
+		
+		public final int id;
+
+		private AD_Process(int id) {
+			this.id = id;
+		}
+	}
+	
 }

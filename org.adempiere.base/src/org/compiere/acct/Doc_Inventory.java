@@ -110,6 +110,33 @@ public class Doc_Inventory extends Doc
 	 */
 	protected DocLine[] loadLines(MInventory inventory)
 	{		
+		MDocType dt = MDocType.get(inventory.getCtx(), inventory.getC_DocType_ID());
+		if (MDocType.DOCSUBTYPEINV_CostAdjustment.equals(dt.getDocSubTypeInv())) {
+			MClient client = MClient.get(inventory.getCtx(), inventory.getAD_Client_ID());
+			MAcctSchema as = client.getAcctSchema();
+			MAcctSchema[] ass = MAcctSchema.getClientAcctSchema(inventory.getCtx(), client.get_ID());
+			if (as.getC_Currency_ID() != inventory.getC_Currency_ID()) {
+				for (MAcctSchema a : ass) {
+					if (a.getC_Currency_ID() == inventory.getC_Currency_ID()) 
+						as = a ; 
+				}
+			}
+			if (getAcctSchema().get_ID() == as.get_ID()) {
+				MInventoryLine[] lines = inventory.getLines(false);
+				for (MInventoryLine line : lines) {
+					BigDecimal currentCostPrice = line.getCurrentCostPriceForCostAdjustment();
+					if (currentCostPrice != null) {
+						if (currentCostPrice.compareTo(line.getCurrentCostPrice()) != 0) {
+							line.setCurrentCostPrice(currentCostPrice);
+							line.saveEx(inventory.get_TrxName());
+							if (s_log.isLoggable(Level.INFO))
+								s_log.info("CurrentCostPrice updated to " + line.getCurrentCostPrice());
+						}
+					}
+				}
+			}
+		}
+		
 		ArrayList<DocLine> list = new ArrayList<DocLine>();
 		MInventoryLine[] lines = inventory.getLines(false);
 		for (int i = 0; i < lines.length; i++)
@@ -291,7 +318,7 @@ public class Doc_Inventory extends Doc
 				else if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))
 					orgId = 0;
 				MCostElement ce = MCostElement.getMaterialCostElement(getCtx(), docCostingMethod, orgId);
-				MCostDetail cd = MCostDetail.getInventory(as, product.getM_Product_ID(), asiId, get_ID(), ce.getM_CostElement_ID(), getTrxName());
+				MCostDetail cd = MCostDetail.getInventory(as, product.getM_Product_ID(), asiId, line.get_ID(), ce.getM_CostElement_ID(), getTrxName());
 				ICostInfo cost = MCost.getCostInfo(product, asiId, as, 
 						orgId, ce.getM_CostElement_ID(), 
 						getDateAcct(), cd, getTrxName());

@@ -490,13 +490,17 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 
 			// IDEMPIERE-1850 - validate date against related docs
 			if (line.getC_Invoice_ID() > 0) {
-				if (line.getC_Invoice().getDateAcct().after(getDateAcct())) {
-					setDateAcct(line.getC_Invoice().getDateAcct());
+				MInvoice invoice = line.getInvoice();
+				if (invoice != null && invoice.getDateAcct().after(getDateAcct())) {
+					m_processMsg = "Wrong allocation date";
+					return DocAction.STATUS_Invalid;
 				}
 			}
 			if (line.getC_Payment_ID() > 0) {
-				if (line.getC_Payment().getDateAcct().after(getDateAcct())) {
-					setDateAcct(line.getC_Payment().getDateAcct());
+				MPayment payment = new MPayment(getCtx(), line.getC_Payment_ID(), get_TrxName());
+				if (payment.getDateAcct().after(getDateAcct())) {
+					m_processMsg = "Wrong allocation date";
+					return DocAction.STATUS_Invalid;
 				}
 			}
 		}
@@ -1071,8 +1075,8 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 				MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(line.getC_Payment_ID(),get_TrxName());
 				if (DOCSTATUS_Reversed.equals(payment.getDocStatus()))
 				{
-					MPayment reversal = (MPayment) payment.getReversal();
-					if (reversal != null)
+					MPayment reversal = new MPayment(payment.getCtx(), payment.getReversal_ID(), payment.get_TrxName());
+					if (reversal.getC_Payment_ID() == payment.getReversal_ID())
 					{
 						line.setPaymentInfo(reversal.getC_Payment_ID(), 0);
 					}

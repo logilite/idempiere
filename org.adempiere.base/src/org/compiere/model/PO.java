@@ -139,6 +139,30 @@ public abstract class PO
 	/** Record Attribute and Value Map */
 	private Map<String, Object> m_tableAttributeMap = new HashMap<String, Object>();
 
+	/** Query Timeout in seconds, override {@link #QUERY_TIME_OUT} **/
+	private Integer m_queryTimeout = null;
+	
+	/**
+	 * Set Query Timeout in seconds, override the default {@link #QUERY_TIME_OUT} value.<br/>
+	 * This has no effect if {@link #isUseTimeoutForUpdate()} returns false.
+	 * @param seconds
+	 */
+	public void set_QueryTimeout(int seconds)
+	{		
+		m_queryTimeout = seconds > 0 ? Integer.valueOf(seconds) : null;
+	}
+	
+	/**
+	 * Get Query Timeout in seconds.
+	 * @return query timeout in seconds
+	 */
+	public int get_QueryTimeout()
+	{
+		if (m_queryTimeout != null)
+			return m_queryTimeout.intValue();
+		return QUERY_TIME_OUT;
+	}
+	
 	/**
 	 * 	Set Document Value Workflow Manager
 	 *	@param docWFMgr mgr
@@ -793,7 +817,7 @@ public abstract class PO
 	}   //  is_ValueChanged
 
 	/**
-	 *  Get new - old.<br/>
+	 *  Get new - old (implemented for numeric and timestamp type).<br/>
 	 * 	- New Value if Old Value is null<br/>
 	 * 	- New Value - Old Value if Number<br/>
 	 * 	- otherwise null
@@ -826,6 +850,12 @@ public abstract class PO
 			result -= ((Integer)oValue).intValue();
 			return Integer.valueOf(result);
 		}
+		else if (nValue instanceof Timestamp)
+		{
+			long result = ((Timestamp)nValue).getTime();
+			result -= ((Timestamp)oValue).getTime();
+			return Long.valueOf(result);
+		}
 		//
 		log.warning("Invalid type - New=" + nValue);
 		return null;
@@ -856,7 +886,7 @@ public abstract class PO
 	 *  @param value value to set
 	 *  @return true if value set
 	 */
-	protected final boolean set_Value (String ColumnName, Object value)
+	public final boolean set_Value (String ColumnName, Object value)
 	{
 		return set_Value(ColumnName, value, true);
 	}
@@ -879,9 +909,7 @@ public abstract class PO
 		int index = get_ColumnIndex(ColumnName);
 		if (index < 0)
 		{
-			log.log(Level.SEVERE, "Column not found - " + get_TableName() + "." + ColumnName);
-			log.saveError("ColumnNotFound", get_TableName() + "." + ColumnName);
-			return false;
+			throw new AdempiereUserError("ColumnNotFound", get_TableName() + "." + ColumnName);
 		}
 		if (ColumnName.endsWith("_ID") && value instanceof String )
 		{
@@ -915,7 +943,7 @@ public abstract class PO
 	 *  @param value value to set
 	 *  @return true if value set
 	 */
-	protected final boolean set_Value (int index, Object value)
+	public final boolean set_Value (int index, Object value)
 	{
 		return set_Value(index, value, true);
 	}
@@ -934,8 +962,7 @@ public abstract class PO
 		
 		if (index < 0 || index >= get_ColumnCount())
 		{
-			log.log(Level.WARNING, "Index invalid - " + index);
-			return false;
+			throw new AdempiereException("Index invalid - " + index);
 		}
 		String ColumnName = p_info.getColumnName(index);
 		String colInfo = " - " + ColumnName;
@@ -2096,6 +2123,7 @@ public abstract class PO
 	 *  Stops at first null mandatory field.
 	 *  @return true if all mandatory fields are ok
 	 */
+	@Deprecated
 	protected boolean isMandatoryOK()
 	{
 		int size = get_ColumnCount();
@@ -3400,8 +3428,8 @@ public abstract class PO
 			
 			int no = 0;
 			if (isUseTimeoutForUpdate())
-				no = withValues ? DB.executeUpdateEx(sql.toString(), m_trxName, QUERY_TIME_OUT)
-								: DB.executeUpdateEx(sql.toString(), params.toArray(), m_trxName, QUERY_TIME_OUT);
+				no = withValues ? DB.executeUpdateEx(sql.toString(), m_trxName, get_QueryTimeout())
+								: DB.executeUpdateEx(sql.toString(), params.toArray(), m_trxName, get_QueryTimeout());
 			else
 				no = withValues ? DB.executeUpdate(sql.toString(), m_trxName)
 						 		: DB.executeUpdate(sql.toString(), params.toArray(), false, m_trxName);
@@ -3754,7 +3782,7 @@ public abstract class PO
 		StringBuilder sqlValues = new StringBuilder(") VALUES (");
 		int size = get_ColumnCount();
 		boolean doComma = false;
-		Map<String, String> oracleBlobSQL = new HashMap<String, String>();
+		OracleBlobSQL oracleBlobSQL = new OracleBlobSQL(this);
 		for (int i = 0; i < size; i++)
 		{
 			String columnName = p_info.getColumnName(i);
@@ -3850,34 +3878,7 @@ public abstract class PO
 						}
 						else
 						{
-							String refTableName = null;
-							if ("AD_Tree_Favorite_Node".equalsIgnoreCase(tableName))
-								refTableName = "AD_Tree_Favorite_Node";
-							else if ("AD_TreeBar".equalsIgnoreCase(tableName)
-									|| "AD_TreeNodeMM".equalsIgnoreCase(tableName))
-								refTableName = "AD_Menu";
-							else if ("AD_TreeNodeBP".equalsIgnoreCase(tableName))
-								refTableName = "C_BPartner";
-							else if ("AD_TreeNodeCMC".equalsIgnoreCase(tableName))
-								refTableName = "CM_Container";
-							else if ("AD_TreeNodeCMM".equalsIgnoreCase(tableName))
-								refTableName = "CM_Media";
-							else if ("AD_TreeNodeCMS".equalsIgnoreCase(tableName))
-								refTableName = "CM_CStage";
-							else if ("AD_TreeNodeCMT".equalsIgnoreCase(tableName))
-								refTableName = "CM_Template";
-							else if ("AD_TreeNodePR".equalsIgnoreCase(tableName))
-								refTableName = "M_Product";
-							else if ("AD_TreeNodeU1".equalsIgnoreCase(tableName)
-									|| "AD_TreeNodeU2".equalsIgnoreCase(tableName) 
-									|| "AD_TreeNodeU3".equalsIgnoreCase(tableName)
-									|| "AD_TreeNodeU4".equalsIgnoreCase(tableName))
-								refTableName = "C_ElementValue";
-							else if ("AD_TreeNode".equalsIgnoreCase(tableName))
-							{
-								int treeId = get_ValueAsInt("AD_Tree_ID");
-								refTableName = MTree.getRefTableFromTree(treeId);
-							}
+							String refTableName = MTree.getRefTableNameFromTableName(tableName, get_ValueAsInt("AD_Tree_ID"));
 							if (refTableName != null)
 							{
 								MTable refTable = MTable.get(Env.getCtx(), refTableName);
@@ -4052,9 +4053,8 @@ public abstract class PO
 			while (it.hasNext())
 			{
 				String column = (String)it.next();
-				int index = p_info.getColumnIndex(column);
 				String value = (String)m_custom.get(column);
-				if (value == null)
+				if (value == null || value.length() == 0)
 					continue;
 				if (doComma)
 				{
@@ -4064,67 +4064,17 @@ public abstract class PO
 				else
 					doComma = true;
 				sqlInsert.append(column);
-				if (withValues)
-				{
-					sqlValues.append(encrypt(index, value));
-				}
-				else
-				{
-					sqlValues.append("?");
-					if (value == null || value.toString().length() == 0)
-					{
-						params.add(null);
-					}
-					else
-					{
-						params.add(encrypt(index, value));
-					}
-				}
+				// custom column value is always in sql string format (for e.g 'CustomVlue'), see set_CustomColumn
+				sqlValues.append(value);
 			}
 			m_custom = null;
 		}
 		sqlInsert.append(sqlValues)
 			.append(")");
-		
-		// Use pl/sql block for Oracle blob insert that's > 2048 bytes
+				
 		if (!oracleBlobSQL.isEmpty()) 
 		{
-			sqlInsert.append("\n;");
-			for(String column : oracleBlobSQL.keySet())
-			{
-				sqlInsert.append("\n\n");				
-				String blobSQL = oracleBlobSQL.get(column);
-				int hexDataStart = blobSQL.indexOf("'");
-				int hexDataEnd = blobSQL.indexOf("'", hexDataStart+1);
-				String functionStart = blobSQL.substring(0, hexDataStart);
-				String hexData = blobSQL.substring(hexDataStart+1, hexDataEnd);
-				String functionEnd = blobSQL.substring(hexDataEnd+1);
-				int remaining = hexData.length();
-				int lineSize = 2048;
-				sqlInsert.append("DECLARE\n")
-					.append("   lob_out blob;\n")
-					.append("BEGIN\n")
-					.append("   UPDATE ").append(tableName)
-					.append(" SET ").append(column).append("=EMPTY_BLOB()\n")
-					.append("   WHERE ").append(getUUIDColumnName()).append("=")
-					.append("'").append(get_UUID()).append("';\n")
-					.append("   SELECT ").append(column).append(" INTO lob_out\n")
-					.append("   FROM ").append(tableName).append("\n")
-					.append("   WHERE ").append(getUUIDColumnName()).append("=")
-					.append("'").append(get_UUID()).append("'\n")
-					.append("   FOR UPDATE;\n");
-				// Split hex encoded text into 2048 bytes block
-				int index = 0;				
-				while (remaining > 0) 
-				{
-					sqlInsert.append("   dbms_lob.append(lob_out, ").append(functionStart).append("'");
-					String data = remaining > lineSize ? hexData.substring(index, index+lineSize) : hexData.substring(index);
-					sqlInsert.append(data).append("'").append(functionEnd).append(");\n");
-					remaining = remaining > lineSize ? remaining - lineSize : 0;
-					index = index + lineSize;
-				}
-				sqlInsert.append("END;\n/");
-			}
+			oracleBlobSQL.appendPLSQLBlock(sqlInsert);
 		}
 		return AD_ChangeLog_ID;
 	}
@@ -4459,8 +4409,8 @@ public abstract class PO
 				int no = 0;
 				if (isUseTimeoutForUpdate())
 					no = optimisticLockingParams.isEmpty() 
-						 ? DB.executeUpdateEx(sql.toString(), localTrxName, QUERY_TIME_OUT)
-						 : DB.executeUpdateEx(sql.toString(), optimisticLockingParams.toArray(), localTrxName, QUERY_TIME_OUT);
+						 ? DB.executeUpdateEx(sql.toString(), localTrxName, get_QueryTimeout())
+						 : DB.executeUpdateEx(sql.toString(), optimisticLockingParams.toArray(), localTrxName, get_QueryTimeout());
 				else
 					no = optimisticLockingParams.isEmpty() 
 						 ? DB.executeUpdate(sql.toString(), localTrxName)
@@ -5240,8 +5190,8 @@ public abstract class PO
 		}
 		String updateSeqNo = "UPDATE " + tableName + " SET SeqNo=SeqNo+1 WHERE Parent_ID=? AND SeqNo>=? AND AD_Tree_ID=?";
 		String update = "UPDATE " + tableName + " SET SeqNo=?, Parent_ID=? WHERE Node_ID=? AND AD_Tree_ID=?";
-		String selMinSeqNo = "SELECT COALESCE(MIN(tn.SeqNo),-1) FROM AD_TreeNode tn JOIN " + sourceTableName + " n ON (tn.Node_ID=n." + sourceTableName + "_ID) WHERE tn.Parent_ID=? AND tn.AD_Tree_ID=? AND n.Value>?";
-		String selMaxSeqNo = "SELECT COALESCE(MAX(tn.SeqNo)+1,999) FROM AD_TreeNode tn JOIN " + sourceTableName + " n ON (tn.Node_ID=n." + sourceTableName + "_ID) WHERE tn.Parent_ID=? AND tn.AD_Tree_ID=? AND n.Value<?";
+		String selMinSeqNo = "SELECT COALESCE(MIN(tn.SeqNo),-1) FROM " + tableName +" tn JOIN " + sourceTableName + " n ON (tn.Node_ID=n." + sourceTableName + "_ID) WHERE tn.Parent_ID=? AND tn.AD_Tree_ID=? AND n.Value>?";
+		String selMaxSeqNo = "SELECT COALESCE(MAX(tn.SeqNo)+1,999) FROM " + tableName +" tn JOIN " + sourceTableName + " n ON (tn.Node_ID=n." + sourceTableName + "_ID) WHERE tn.Parent_ID=? AND tn.AD_Tree_ID=? AND n.Value<?";
 
 		List<MTree_Base> trees = new Query(getCtx(), MTree_Base.Table_Name, whereTree, get_TrxName())
 			.setClient_ID()
@@ -5393,7 +5343,7 @@ public abstract class PO
 				+ get_WhereClause(true);
 			boolean success = false;
 			if (isUseTimeoutForUpdate())
-				success = DB.executeUpdateEx(sql, null, QUERY_TIME_OUT) == 1;	//	outside trx
+				success = DB.executeUpdateEx(sql, null, get_QueryTimeout()) == 1;	//	outside trx
 			else
 				success = DB.executeUpdate(sql, null) == 1;	//	outside trx
 			if (success)
@@ -5430,7 +5380,7 @@ public abstract class PO
 				+ " SET Processing='N' WHERE " + get_WhereClause(true);
 			boolean success = false;
 			if (isUseTimeoutForUpdate())
-				success = DB.executeUpdateEx(sql, trxName, QUERY_TIME_OUT) == 1;
+				success = DB.executeUpdateEx(sql, trxName, get_QueryTimeout()) == 1;
 			else
 				success = DB.executeUpdate(sql, trxName) == 1;
 			if (success) {
@@ -5486,7 +5436,7 @@ public abstract class PO
 	public MAttachment getAttachment (boolean requery)
 	{
 		if (m_attachment == null || requery)
-			m_attachment = MAttachment.get (getCtx(), p_info.getAD_Table_ID(), get_ID(), get_UUID(), null);
+			m_attachment = MAttachment.get (getCtx(), p_info.getAD_Table_ID(), get_ID(), get_UUID(), get_TrxName());
 		return m_attachment;
 	}	//	getAttachment
 
@@ -6528,7 +6478,7 @@ public abstract class PO
 			{
 				String where = m_tableAttributeMap.isEmpty() ? "" : " AND a.Name = ? ";
 				// 4 - String, 5 - data, 6 - number, 7 - attribute value
-				pstmt = DB.prepareStatement(TABLE_ATTRIBUTE_VALUE_SQL + where, null);
+				pstmt = DB.prepareStatement(TABLE_ATTRIBUTE_VALUE_SQL + where, get_TrxName());
 				pstmt.setInt(1, get_Table_ID());
 				pstmt.setInt(2, get_ID());
 				if (!m_tableAttributeMap.isEmpty())
@@ -6616,7 +6566,7 @@ public abstract class PO
 	 */
 	public List<PO> get_TableAttributes()
 	{
-		return new Query(Env.getCtx(), MTableAttribute.Table_Name, "AD_Table_ID=? AND Record_ID=? ", null).setParameters(get_Table_ID(), get_ID()).list();
+		return new Query(Env.getCtx(), MTableAttribute.Table_Name, "AD_Table_ID=? AND Record_ID=? ", get_TrxName()).setParameters(get_Table_ID(), get_ID()).list();
 	}
 
 }   //  PO

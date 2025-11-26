@@ -268,7 +268,7 @@ public class Doc_Production extends Doc
 			
 			X_M_ProductionLine prodline = (X_M_ProductionLine)line.getPO();
 			MProductionLineMA mas[] = MProductionLineMA.get(getCtx(), prodline.get_ID(), getTrxName());
-			MProduct product = (MProduct) prodline.getM_Product();
+			MProduct product = new MProduct(getCtx(), prodline.getM_Product_ID(), getTrxName());
 			String CostingLevel = product.getCostingLevel(as);
 			String costingMethod = product.getCostingMethod(as);
 
@@ -344,7 +344,7 @@ public class Doc_Production extends Doc
 					if (parentBomPro != parentEndPro)
 						continue;
 					if (!line0.isProductionBOM()) {
-						MProduct product0 = (MProduct) bomProLine.getM_Product();
+						MProduct product0 = new MProduct(getCtx(), bomProLine.getM_Product_ID(), getTrxName());
 						String CostingLevel0 = product0.getCostingLevel(as);
 						if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(CostingLevel0) )
 						{

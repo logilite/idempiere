@@ -1269,7 +1269,20 @@ public final class DB
 	 */
 	public static RowSet getRowSet (String sql)
 	{
+		return getRowSet(sql, null);
+	}
+	
+	/**
+	 * 	Get Row Set.<br/>
+	 * 	When a Rowset is closed, it also closes the underlying connection.
+	 *	@param sql
+	 *  @param trxName optional transaction name
+	 *	@return row set or null
+	 */
+	public static RowSet getRowSet (String sql, String trxName)
+	{
 		CStatementVO info = new CStatementVO (RowSet.TYPE_SCROLL_INSENSITIVE, RowSet.CONCUR_READ_ONLY, DB.getDatabase().convertStatement(sql));
+		info.setTrxName(trxName);
 		CPreparedStatement stmt = null;
 		RowSet retValue = null;
 		try {
@@ -1344,7 +1357,7 @@ public final class DB
      * Reset connection's auto commit to true and read only to false before closing it.
      * @param conn
      */
-	private static void closeAndResetReadonlyConnection(Connection conn) {
+	public static void closeAndResetReadonlyConnection(Connection conn) {
 		try {
 			conn.setAutoCommit(true);
 		} catch (SQLException e) {
