@@ -21,8 +21,6 @@ import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.util.Properties;
 
-import javax.management.Query;
-
 import org.compiere.process.DocAction;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
