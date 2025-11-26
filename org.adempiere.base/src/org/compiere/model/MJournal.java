@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.acct.Doc;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
 import org.compiere.util.CLogger;
@@ -791,6 +792,9 @@ public class MJournal extends X_GL_Journal implements DocAction
 		
 		if (! ok_correct)
 			return false;
+		
+		// delete the fact line of the Journal after reverse Correct
+		Doc.deleteReverseCorrectPosting(getCtx(), getAD_Client_ID(), MJournal.Table_ID, getGL_Journal_ID(), get_TrxName());
 
 		// After reverseCorrect
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSECORRECT);

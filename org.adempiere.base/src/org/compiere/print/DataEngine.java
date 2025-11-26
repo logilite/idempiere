@@ -1604,6 +1604,7 @@ public class DataEngine
 
 		// Parse Script column values
 		if(scriptColumns.size() > 0) {
+			Interpreter bsh = new Interpreter();
 			for(int i = 0; i < pd.getRowCount(); i++) {
 				for(PrintDataColumn c : scriptColumns) {
 					pd.setRowIndex(i);
@@ -1611,11 +1612,10 @@ public class DataEngine
 					if(e == null)	// primarily on grouping rows, if no functions are assigned to the script column
 						continue;
 					Object value = parseVariable(e.getValueAsString().replace("@SCRIPT", ""), c, pd);
-					Interpreter bsh = new Interpreter();
+
 					try {
 						value = bsh.eval(value.toString());
-					}
-					catch (EvalError err) {
+					} catch (EvalError err) {
 						log.severe(err.getMessage());
 					}
 					e.setDisplayType(getDisplayType(value));

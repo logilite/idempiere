@@ -1296,6 +1296,14 @@ public class Doc_InOut extends Doc
 		}
 		//
 		facts.add(fact);
+		// check is date of both InOut same
+		// When reversing a document, the fact lines are created temporarily to generate the necessary Cost Detail records, but these temporary fact
+		// lines are not saved to the database.
+		MInOut inout = (MInOut) getPO();
+		if (as.isDeleteReverseCorrectPosting()
+			&& inout.getReversal_ID() > 0
+				&& Util.compareDate(inout.getDateAcct(), inout.getReversal().getDateAcct()) == 0)
+			return new ArrayList <Fact>();
 		return facts;
 	}   //  createFact
 

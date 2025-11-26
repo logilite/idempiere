@@ -20,9 +20,11 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 import org.compiere.model.MAcctSchemaElement;
 import org.compiere.model.MElementValue;
@@ -118,6 +120,9 @@ public class FinStatement extends SvrProcess
 	/**	Start Time						*/
 	private long 				m_start = System.currentTimeMillis();
 
+	private final static String	SQL_INSERT					= "INSERT INTO T_ReportStatement (AD_PInstance_ID, Fact_Acct_ID, LevelNo, DateAcct, Name,"
+																+ " Description, AmtAcctDr, AmtAcctCr, Balance, Qty, Account_ID, C_BPartner_ID, C_DocType_ID) ";
+
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
@@ -192,88 +197,92 @@ public class FinStatement extends SvrProcess
 				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 		//	Mandatory C_AcctSchema_ID, PostingType
-		m_parameterWhere.append("C_AcctSchema_ID=").append(p_C_AcctSchema_ID)
-			.append(" AND PostingType='").append(p_PostingType).append("'");
+		m_parameterWhere.append("fa.C_AcctSchema_ID=").append(p_C_AcctSchema_ID)
+			.append(" AND fa.PostingType='").append(p_PostingType).append("'");
 		//	Optional Account_ID
 		if (p_Account_ID != 0)
-			m_parameterWhere.append(" AND ").append(MReportTree.getWhereClause(getCtx(), 
-				p_PA_Hierarchy_ID, MAcctSchemaElement.ELEMENTTYPE_Account, p_Account_ID));
-		//	Optional Org
+			m_parameterWhere.append(getIDs(MAcctSchemaElement.ELEMENTTYPE_Account, p_Account_ID));
+		// Optional Org
 		if (p_AD_Org_ID != 0)
-			m_parameterWhere.append(" AND ").append(MReportTree.getWhereClause(getCtx(), 
-				p_PA_Hierarchy_ID, MAcctSchemaElement.ELEMENTTYPE_Organization, p_AD_Org_ID));
-		//	Optional BPartner
+			m_parameterWhere.append(getIDs(MAcctSchemaElement.ELEMENTTYPE_Organization, p_AD_Org_ID));
+		// Optional BPartner
 		if (p_C_BPartner_ID != 0)
-			m_parameterWhere.append(" AND ").append(MReportTree.getWhereClause(getCtx(), 
-				p_PA_Hierarchy_ID, MAcctSchemaElement.ELEMENTTYPE_BPartner, p_C_BPartner_ID));
-		//	Optional Product
+			m_parameterWhere.append(getIDs(MAcctSchemaElement.ELEMENTTYPE_BPartner, p_C_BPartner_ID));
+		// Optional Product
 		if (p_M_Product_ID != 0)
-			m_parameterWhere.append(" AND ").append(MReportTree.getWhereClause(getCtx(), 
-				p_PA_Hierarchy_ID, MAcctSchemaElement.ELEMENTTYPE_Product, p_M_Product_ID));
-		//	Optional Project
+			m_parameterWhere.append(getIDs(MAcctSchemaElement.ELEMENTTYPE_Product, p_M_Product_ID));
+		// Optional Project
 		if (p_C_Project_ID != 0)
-			m_parameterWhere.append(" AND ").append(MReportTree.getWhereClause(getCtx(), 
-				p_PA_Hierarchy_ID, MAcctSchemaElement.ELEMENTTYPE_Project, p_C_Project_ID));
-		//	Optional Activity
+			m_parameterWhere.append(getIDs(MAcctSchemaElement.ELEMENTTYPE_Project, p_C_Project_ID));
+		// Optional Activity
 		if (p_C_Activity_ID != 0)
-			m_parameterWhere.append(" AND ").append(MReportTree.getWhereClause(getCtx(), 
-				p_PA_Hierarchy_ID, MAcctSchemaElement.ELEMENTTYPE_Activity, p_C_Activity_ID));
-		//	Optional Campaign
+			m_parameterWhere.append(getIDs(MAcctSchemaElement.ELEMENTTYPE_Activity, p_C_Activity_ID));
+		// Optional Campaign
 		if (p_C_Campaign_ID != 0)
-			m_parameterWhere.append(" AND C_Campaign_ID=").append(p_C_Campaign_ID);
-		//	m_parameterWhere.append(" AND ").append(MReportTree.getWhereClause(getCtx(), 
-		//		MAcctSchemaElement.ELEMENTTYPE_Campaign, p_C_Campaign_ID));
-		//	Optional Sales Region
+			m_parameterWhere.append(" AND fa.C_Campaign_ID=").append(p_C_Campaign_ID);
+		// Optional Sales Region
 		if (p_C_SalesRegion_ID != 0)
-			m_parameterWhere.append(" AND ").append(MReportTree.getWhereClause(getCtx(), 
-				p_PA_Hierarchy_ID, MAcctSchemaElement.ELEMENTTYPE_SalesRegion, p_C_SalesRegion_ID));
-		//	Optional User1_ID
+			m_parameterWhere.append(getIDs(MAcctSchemaElement.ELEMENTTYPE_SalesRegion, p_C_SalesRegion_ID));
+		// Optional User1_ID
 		if (p_User1_ID != 0)
-			m_parameterWhere.append(" AND ").append(MReportTree.getWhereClause(getCtx(), 
-				p_PA_Hierarchy_ID, MAcctSchemaElement.ELEMENTTYPE_UserElementList1, p_User1_ID));
-		//  Optional User2_ID
+			m_parameterWhere.append(getIDs(MAcctSchemaElement.ELEMENTTYPE_UserElementList1, p_User1_ID));
+		// Optional User2_ID
 		if (p_User2_ID != 0)
-			m_parameterWhere.append(" AND ").append(MReportTree.getWhereClause(getCtx(), 
-				p_PA_Hierarchy_ID, MAcctSchemaElement.ELEMENTTYPE_UserElementList2, p_User2_ID));
-		//	Optional UserElement1_ID
+			m_parameterWhere.append(getIDs(MAcctSchemaElement.ELEMENTTYPE_UserElementList2, p_User2_ID));
+		// Optional UserElement1_ID
 		if (p_UserElement1_ID != 0)
-			m_parameterWhere.append(" AND UserElement1_ID=").append(p_UserElement1_ID);
+			m_parameterWhere.append(" AND fa.UserElement1_ID=").append(p_UserElement1_ID);
 		//  Optional UserElement2_ID
 		if (p_UserElement2_ID != 0)
-			m_parameterWhere.append(" AND UserElement2_ID=").append(p_UserElement2_ID);	
+			m_parameterWhere.append(" AND fa.UserElement2_ID=").append(p_UserElement2_ID);	
 		//	Optional Employee
 		if (p_C_Employee_ID != 0)
-			m_parameterWhere.append(" AND C_Employee_ID = ").append(p_C_Employee_ID);
+			m_parameterWhere.append(" AND fa.C_Employee_ID = ").append(p_C_Employee_ID);
 		//	Optional Charge
 		if (p_C_Charge_ID != 0)
-			m_parameterWhere.append(" AND C_Charge_ID = ").append(p_C_Charge_ID);
+			m_parameterWhere.append(" AND fa.C_Charge_ID = ").append(p_C_Charge_ID);
 		//	Optional Cost Center
 		if (p_C_CostCenter_ID != 0)
-			m_parameterWhere.append(" AND C_CostCenter_ID = ").append(p_C_CostCenter_ID);
+			m_parameterWhere.append(" AND fa.C_CostCenter_ID = ").append(p_C_CostCenter_ID);
 		//	Optional Department
 		if (p_C_Department_ID != 0)
-			m_parameterWhere.append(" AND C_Department_ID = ").append(p_C_Department_ID);
+			m_parameterWhere.append(" AND fa.C_Department_ID = ").append(p_C_Department_ID);
 		//	Optional Warehouse
 		if (p_M_Warehouse_ID != 0)
-			m_parameterWhere.append(" AND M_Warehouse_ID = ").append(p_M_Warehouse_ID);
+			m_parameterWhere.append(" AND fa.M_Warehouse_ID = ").append(p_M_Warehouse_ID);
 		// Optional Asset
 		if (p_A_Asset_ID != 0)
-			m_parameterWhere.append(" AND A_Asset_ID = ").append(p_A_Asset_ID);
+			m_parameterWhere.append(" AND fa.A_Asset_ID = ").append(p_A_Asset_ID);
 		// Optional ASI
 		if (p_M_AttributeSetInstance_ID != 0)
-			m_parameterWhere.append(" AND M_AttributeSetInstance_ID = ").append(p_M_AttributeSetInstance_ID);
+			m_parameterWhere.append(" AND fa.M_AttributeSetInstance_ID = ").append(p_M_AttributeSetInstance_ID);
 		// Optional ASI
 		if (p_C_Tax_ID != 0)
-			m_parameterWhere.append(" AND C_Tax_ID = ").append(p_C_Tax_ID);
+			m_parameterWhere.append(" AND fa.C_Tax_ID = ").append(p_C_Tax_ID);
 		// Optional Bank Account
 		if (p_C_BankAccount_ID != 0)
-			m_parameterWhere.append(" AND C_BankAccount_ID = ").append(p_C_BankAccount_ID);
+			m_parameterWhere.append(" AND fa.C_BankAccount_ID = ").append(p_C_BankAccount_ID);
 		//
 		setDateAcct();
 		sb.append(" - DateAcct ").append(p_DateAcct_From).append("-").append(p_DateAcct_To);
 		sb.append(" - Where=").append(m_parameterWhere);
 		if (log.isLoggable(Level.FINE)) log.fine(sb.toString());
 	}	//	prepare
+
+	/**
+	 * Returns an SQL IN-clause for all child IDs of the given element type.
+	 *
+	 * @param  elementType the schema element type
+	 * @param  ID          the parent ID
+	 * @return             SQL like: " AND fa.<column> IN (id1,id2,...)"
+	 */
+	private String getIDs(String elementType, int ID)
+	{
+		String ids = Arrays	.stream(MReportTree.getChildIDs(getCtx(), p_PA_Hierarchy_ID, elementType, ID))
+							.map(String::valueOf)
+							.collect(Collectors.joining(","));
+		return " AND fa." + MAcctSchemaElement.getColumnName(elementType) + " IN ( " + ids + " )";
+	} // getIDs
 
 	/**
 	 * 	Set Start/End Date of Report - if not defined current Month
@@ -354,17 +363,14 @@ public class FinStatement extends SvrProcess
 	 */
 	private void createBalanceLine()
 	{
-		StringBuilder sb = new StringBuilder ("INSERT INTO T_ReportStatement "
-			+ "(AD_PInstance_ID, Fact_Acct_ID, LevelNo,"
-			+ "DateAcct, Name, Description,"
-			+ "AmtAcctDr, AmtAcctCr, Balance, Qty) ");
+		StringBuilder sb = new StringBuilder (SQL_INSERT);
 		sb.append("SELECT ").append(getAD_PInstance_ID()).append(",0,0,")
 			.append(DB.TO_DATE(p_DateAcct_From, true)).append(",")
 			.append(DB.TO_STRING(Msg.getMsg(Env.getCtx(), "BeginningBalance"))).append(",NULL,"
-			+ "COALESCE(SUM(AmtAcctDr),0), COALESCE(SUM(AmtAcctCr),0), COALESCE(SUM(AmtAcctDr-AmtAcctCr),0), COALESCE(SUM(Qty),0) "
-			+ "FROM Fact_Acct "
+			+ "COALESCE(SUM(AmtAcctDr),0), COALESCE(SUM(AmtAcctCr),0), COALESCE(SUM(AmtAcctDr-AmtAcctCr),0), COALESCE(SUM(Qty),0), Account_ID, NULL, NULL "				
+			+ "FROM Fact_Acct fa "
 			+ "WHERE ").append(m_parameterWhere)
-			.append(" AND TRUNC(DateAcct) < ").append(DB.TO_DATE(p_DateAcct_From));
+			.append(" AND TRUNC(fa.DateAcct) < ").append(DB.TO_DATE(p_DateAcct_From));
 			
 		//	Start Beginning of Year
 		if (p_Account_ID > 0)
@@ -374,11 +380,12 @@ public class FinStatement extends SvrProcess
 			{
 				MPeriod first = MPeriod.getFirstInYear (getCtx(), p_DateAcct_From, p_AD_Org_ID);
 				if (first != null)
-					sb.append(" AND TRUNC(DateAcct) >= ").append(DB.TO_DATE(first.getStartDate()));
+					sb.append(" AND TRUNC(fa.DateAcct) >= ").append(DB.TO_DATE(first.getStartDate()));
 				else
 					log.log(Level.SEVERE, "First period not found");
 			}
 		}
+		sb.append(" GROUP BY fa.Account_ID ");
 		//
 		int no = DB.executeUpdate(sb.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("#" + no + " (Account_ID=" + p_Account_ID + ")");
@@ -390,17 +397,26 @@ public class FinStatement extends SvrProcess
 	 */
 	private void createDetailLines()
 	{
-		StringBuilder sb = new StringBuilder ("INSERT INTO T_ReportStatement "
-			+ "(AD_PInstance_ID, Fact_Acct_ID, LevelNo,"
-			+ "DateAcct, Name, Description,"
-			+ "AmtAcctDr, AmtAcctCr, Balance, Qty) ");
-		sb.append("SELECT ").append(getAD_PInstance_ID()).append(",Fact_Acct_ID,1,")
-			.append("TRUNC(DateAcct),NULL,NULL,"
-			+ "AmtAcctDr, AmtAcctCr, AmtAcctDr-AmtAcctCr, Qty "
-			+ "FROM Fact_Acct "
-			+ "WHERE ").append(m_parameterWhere)
-			.append(" AND TRUNC(DateAcct) BETWEEN ").append(DB.TO_DATE(p_DateAcct_From))
+		StringBuilder sb = new StringBuilder (SQL_INSERT);
+		sb.append("SELECT ").append(getAD_PInstance_ID()).append(", fa.Fact_Acct_ID, 1, "
+			+ "		TRUNC(fa.DateAcct), NULL, NULL, fa.AmtAcctDr, fa.AmtAcctCr, fa.AmtAcctDr-fa.AmtAcctCr, fa.Qty, fa.Account_ID, fa.C_BPartner_ID, "
+			+ "		COALESCE(ah.C_DocType_ID, pd.C_DocType_ID, mi.C_DocType_ID, gj.C_DocType_ID, m.C_DocType_ID, i.C_DocType_ID, p.C_DocType_ID, io.C_DocType_ID, cc.C_DocType_ID) "
+			+ "FROM Fact_Acct fa "
+			+ "INNER JOIN AD_Table t			ON (t.AD_Table_ID = fa.AD_Table_ID) 										 "
+			+ " LEFT JOIN PP_Cost_Collector cc	ON (t.TableName='PP_Cost_Collector' AND fa.Record_ID=cc.PP_Cost_Collector_ID)"
+			+ " LEFT JOIN C_AllocationHdr ah	ON (t.TableName = 'C_AllocationHdr' AND fa.Record_ID = ah.C_AllocationHdr_ID)"
+			+ " LEFT JOIN M_Production pd		ON (t.TableName = 'M_Production' 	AND fa.Record_ID = pd.M_Production_ID 	)"
+			+ " LEFT JOIN M_Inventory mi		ON (t.TableName = 'M_Inventory' 	AND fa.Record_ID = mi.M_Inventory_ID  	)"
+			+ " LEFT JOIN GL_Journal gj			ON (t.TableName = 'GL_Journal' 		AND fa.Record_ID = gj.GL_Journal_ID 	)"
+			+ " LEFT JOIN M_Movement m			ON (t.TableName = 'M_Movement' 		AND fa.Record_ID = m.M_Movement_ID 		)"
+			+ " LEFT JOIN C_Invoice i			ON (t.TableName = 'C_Invoice' 		AND fa.Record_ID = i.C_Invoice_ID 		)"
+			+ " LEFT JOIN C_Payment p			ON (t.TableName = 'C_Payment' 		AND fa.Record_ID = p.C_Payment_ID 		)"
+			+ " LEFT JOIN M_InOut io			ON (t.TableName = 'M_InOut' 		AND fa.Record_ID = io.M_InOut_ID 		)"
+			+ " WHERE (fa.AmtAcctDr-fa.AmtAcctCr) <> 0 AND ")
+			.append(m_parameterWhere)
+			.append(" AND TRUNC(fa.DateAcct) BETWEEN ").append(DB.TO_DATE(p_DateAcct_From))
 			.append(" AND ").append(DB.TO_DATE(p_DateAcct_To));
+
 		//
 		int no = DB.executeUpdate(sb.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("#" + no);

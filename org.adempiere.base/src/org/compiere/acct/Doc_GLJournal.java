@@ -25,7 +25,9 @@ import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MJournal;
 import org.compiere.model.MJournalLine;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  *  Post GL Journal Documents.
@@ -145,6 +147,13 @@ public class Doc_GLJournal extends Doc
 		if (as.getC_AcctSchema_ID() != m_C_AcctSchema_ID)
 			return facts;
 
+		MJournal journal = (MJournal) getPO();
+		// check is date of both Journal same
+		boolean isCreatePost = !(as.isDeleteReverseCorrectPosting()
+									&& journal.getReversal_ID() > 0
+										&& Util.compareDate(journal.getDateAcct(), journal.getReversal().getDateAcct()) == 0);
+		if (!isCreatePost)
+			return facts;
 		//  create Fact Header
 		Fact fact = new Fact (this, as, m_PostingType);
 
@@ -175,5 +184,41 @@ public class Doc_GLJournal extends Doc
 		facts.add(fact);
 		return facts;
 	}   //  createFact
+	
+	@Override
+	public boolean isNoPostingRequired( )
+	{
+		return super.isNoPostingRequired() || isReversalAlsoNotPosted();
+	}
+
+	/**
+	 * Checks if the reversal document is also not posted.
+	 * If the reverse correction posting is marked for deletion and the document
+	 * has a reversal entry, it retrieves the reversal document, checks its
+	 * posting status, and updates it to "No Posting Required" if necessary.
+	 * 
+	 * @return {@code true} if the reversal document was not posted and is now updated;
+	 *         {@code false} otherwise.
+	 */
+	public boolean isReversalAlsoNotPosted( )
+	{
+		MJournal journal = (MJournal) getPO();
+		int reversal_ID = journal.getReversal_ID();
+		if (m_as.isDeleteReverseCorrectPosting() && reversal_ID > 0)
+		{
+			MJournal rev_Journal = (MJournal) journal.getReversal();
+			if (Util.compareDate(journal.getDateAcct(), rev_Journal.getDateAcct()) == 0)
+			{
+				String revpostedsql = "SELECT Posted FROM GL_Journal WHERE GL_Journal_ID=?";
+				String posted = DB.getSQLValueStringEx(getTrxName(), revpostedsql, rev_Journal.get_ID());
+				if (!STATUS_Posted.equalsIgnoreCase(posted) && !STATUS_NoPostingRequired.equalsIgnoreCase(posted))
+				{
+					DocManager.save(getTrxName(), MJournal.Table_ID, journal.getReversal_ID(), STATUS_NoPostingRequired);
+					return true;
+				}
+			}
+		}
+		return false;
+	}// isReversalAlsoNotPosted
 
 }   //  Doc_GLJournal

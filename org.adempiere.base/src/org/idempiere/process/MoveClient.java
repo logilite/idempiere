@@ -667,7 +667,7 @@ public class MoveClient extends SvrProcess {
 					if (refID == DisplayType.MultiSelectList || refID == DisplayType.MultiSelectTable
 							|| refID == DisplayType.MultiSelectSearch)
 					{
-						sqlForeignClientSB.append(foreignTable).append(".").append(foreignTable).append("_ID");
+						sqlForeignClientSB.append(foreignTableName).append(".").append(foreignTableName).append("_ID");
 						sqlForeignClientSB.append("=ANY(").append(tableName).append(".").append(columnName).append(")");
 					}
 					else if (foreignTable.isUUIDKeyTable()) {
@@ -974,7 +974,7 @@ public class MoveClient extends SvrProcess {
 						String convertTable = column.getReferenceTableName();
 						if ((tableName + "_ID").equalsIgnoreCase(columnName)) {
 							convertTable = tableName;
-						} else if (DisplayType.isMultiID(column.getAD_Reference_ID())) {
+						} else if (Util.isEmpty(convertTable, true) && DisplayType.isMultiID(column.getAD_Reference_ID())) {
 							convertTable = column.getMultiReferenceTableName();
 						} else if (convertTable != null
 								&& ("AD_Ref_List".equalsIgnoreCase(convertTable)
@@ -1071,10 +1071,19 @@ public class MoveClient extends SvrProcess {
 								if (   ! (key instanceof Number && ((Number)key).intValue() == 0 && ("Parent_ID".equalsIgnoreCase(columnName) || "Node_ID".equalsIgnoreCase(columnName)))  // Parent_ID/Node_ID=0 is valid
 									&& (key instanceof String || (key instanceof Number && ((Number)key).intValue() >= MTable.MAX_OFFICIAL_ID) || p_IsCopyClient)) {
 									Object convertedId = null;
-
 									if (DisplayType.isMultiID(column.getAD_Reference_ID())) {
 										// multiple IDs or UUIDs separated by commas
-										String[] multiKeys = ((String)key).split(",");
+										Array arr = rsGD.getArray(i + 1);
+										Object arrAsObject = arr.getArray();
+										if(arrAsObject instanceof BigDecimal[])
+										{
+											arrAsObject = Arrays.stream((BigDecimal[]) arrAsObject).map(BigDecimal::toPlainString)
+													.toArray(String[]::new);
+										}
+
+										int index = 0;
+										String[] multiKeys = ((String[])arrAsObject);
+										Integer[] convertedIdArr = new Integer[multiKeys.length];
 										for (String multiKey : multiKeys) {
 											Object keyToConvert;
 											if (Util.isUUID(multiKey))
@@ -1090,13 +1099,23 @@ public class MoveClient extends SvrProcess {
 													throw new AdempiereException("Found orphan record in " + tableName + "." + columnName + ": " + multiKey + " related to table " + convertTable);
 												}
 											}
-											if (convertedId == null) {
-												convertedId = "";
-											} else {
-												convertedId += ",";
+
+											if(multiConvertedId instanceof Number)
+												convertedIdArr[index]=((Number)multiConvertedId).intValue();
+											else if (multiConvertedId instanceof String) {
+												try {
+													convertedIdArr[index] = Integer.parseInt((String) multiConvertedId);
+												}
+												catch (NumberFormatException e) {
+													throw new AdempiereException("Invalid numeric value in " + tableName + "." + columnName + ": " + multiConvertedId);
+												}
 											}
-											convertedId += String.valueOf(multiConvertedId);
+											else {
+												throw new AdempiereException("Unexpected type for converted ID in " + tableName + "." + columnName + ": " + (multiConvertedId != null ? multiConvertedId.getClass().getName(): "null"));
+											}
+											index++;
 										}
+										convertedId = convertedIdArr;
 									} else {
 										// single ID or UUID to convert
 										convertedId = getConvertedId(convertTable, key, tableName, columnName);
@@ -1109,12 +1128,22 @@ public class MoveClient extends SvrProcess {
 											}
 										}
 									}
-									key = convertedId instanceof Number ? ((Number)convertedId).intValue() : convertedId.toString();
+									if(convertedId instanceof Integer[])
+										key=convertedId;
+									else if(convertedId != null)
+										key =  convertedId instanceof Number ? ((Number)convertedId).intValue() : convertedId.toString();
 								}
 								if ("AD_Preference".equalsIgnoreCase(tableName) && "Value".equalsIgnoreCase(columnName)) {
 									parameters[i] = String.valueOf(key);
 								} else {
-									if (DisplayType.isText(column.getAD_Reference_ID()))
+									if(DisplayType.isMultiID(column.getAD_Reference_ID())) {
+										if(key instanceof Integer[])
+											parameters[i] = key;
+										else
+											// handle empty array value
+											parameters[i] = new Integer[] {};
+									}
+									else if (DisplayType.isText(column.getAD_Reference_ID()))
 										parameters[i] = key.toString();
 									else
 										parameters[i] = Integer.valueOf(key.toString());

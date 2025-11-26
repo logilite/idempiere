@@ -923,6 +923,8 @@ public class LoginPanel extends Window implements EventListener<Event>
 					referrerUrl = null;
 			}
 
+			if (getDesktop() != null)
+				getDesktop().enableServerPush(false);
 			StringBuffer ssoURL = new StringBuffer("?").append(ISSOPrincipalService.SSO_SELECTED_PROVIDER).append("=").append(URLEncoder.encode(config.getSSO_PrincipalConfig_UU(), "UTF-8"));
 			if (referrerUrl != null)
 				ssoURL.append("&").append(ISSOPrincipalService.SSO_QUERY_STRING).append("=").append(URLEncoder.encode(referrerUrl, "UTF-8"));

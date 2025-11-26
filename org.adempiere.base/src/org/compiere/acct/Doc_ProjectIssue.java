@@ -30,7 +30,9 @@ import org.compiere.model.MProjectIssue;
 import org.compiere.model.MTable;
 import org.compiere.model.MTimeExpenseLine;
 import org.compiere.model.ProductCost;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  *	Posting for {@link MProjectIssue} document. DOCTYPE_ProjectIssue.<br/>
@@ -132,7 +134,12 @@ public class Doc_ProjectIssue extends Doc
 	{
 		//  create Fact Header
 		Fact fact = new Fact(this, as, Fact.POST_Actual);
-		setC_Currency_ID (as.getC_Currency_ID());
+		
+		// check is date of both issue same
+		boolean isCreatePost = !(as.isDeleteReverseCorrectPosting()
+									&& m_issue.getReversal_ID() > 0
+										&& Util.compareDate(m_issue.getMovementDate(), m_issue.getReversal().getMovementDate()) == 0);
+		setC_Currency_ID(as.getC_Currency_ID());
 
 		MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(m_issue.getC_Project_ID(),
 				getTrxName());
@@ -162,10 +169,12 @@ public class Doc_ProjectIssue extends Doc
 		int acctType = ACCTTYPE_ProjectWIP;
 		if (MProject.PROJECTCATEGORY_AssetProject.equals(ProjectCategory))
 			acctType = ACCTTYPE_ProjectAsset;
-		dr = fact.createLine(m_line,
-			getAccount(acctType, as), as.getC_Currency_ID(), cost, null);
-		dr.setQty(m_line.getQty().negate());
-
+		if(isCreatePost)
+		{
+			dr = fact.createLine(m_line,
+				getAccount(acctType, as), as.getC_Currency_ID(), cost, null);
+			dr.setQty(m_line.getQty().negate());
+		}
 		//  Inventory               CR
 		if (m_issue.getM_Product_ID() > 0)
 		{
@@ -177,11 +186,14 @@ public class Doc_ProjectIssue extends Doc
 		{
 			acctType = Doc.ACCTTYPE_Charge;
 		}
-		cr = fact.createLine(m_line,
-			m_line.getAccount(acctType, as),
-			as.getC_Currency_ID(), null, cost);
-		cr.setM_Locator_ID(m_line.getM_Locator_ID());
-		cr.setLocationFromLocator(m_line.getM_Locator_ID(), true);	// from Loc
+		if(isCreatePost)
+		{
+			cr = fact.createLine(m_line,
+				m_line.getAccount(acctType, as),
+				as.getC_Currency_ID(), null, cost);
+			cr.setM_Locator_ID(m_line.getM_Locator_ID());
+			cr.setLocationFromLocator(m_line.getM_Locator_ID(), true);	// from Loc
+		}
 		//
 		if (product != null && product.get_ID() > 0 && !product.isService() && product.isStocked()) {
 			BigDecimal costDetailQty = m_line.getQty();
@@ -211,4 +223,60 @@ public class Doc_ProjectIssue extends Doc
 		facts.add(fact);
 		return facts;
 	}   //  createFact
+	
+	@Override
+	public boolean isNoPostingRequired( )
+	{
+		return super.isNoPostingRequired() || isReversalAlsoNotPosted();
+	}
+
+	/**
+	 * Checks if the reversal document is also not posted.
+	 * If the reverse correction posting is marked for deletion and the document
+	 * has a reversal entry, it retrieves the reversal document, checks its
+	 * posting status, and updates it to "No Posting Required" if necessary.
+	 * 
+	 * @return {@code true} if the reversal document was not posted and is now updated;
+	 *         {@code false} otherwise.
+	 */
+	public boolean isReversalAlsoNotPosted( )
+	{
+		int reversal_ID = m_issue.getReversal_ID();
+		if (m_as.isDeleteReverseCorrectPosting() && reversal_ID > 0)
+		{
+			MProjectIssue rev_Issue = (MProjectIssue) m_issue.getReversal();
+			if (Util.compareDate(m_issue.getMovementDate(), rev_Issue.getMovementDate()) == 0 && isNoCostDetailCreated(m_issue, rev_Issue))
+			{
+				String revpostedsql = "SELECT Posted FROM C_ProjectIssue WHERE C_ProjectIssue_ID=?";
+				String posted = DB.getSQLValueStringEx(getTrxName(), revpostedsql, rev_Issue.get_ID());
+				if (!STATUS_Posted.equalsIgnoreCase(posted) && !STATUS_NoPostingRequired.equalsIgnoreCase(posted))
+				{
+					DocManager.save(getTrxName(), MProjectIssue.Table_ID, m_issue.getReversal_ID(), STATUS_NoPostingRequired);
+					return true;
+				}
+			}
+		}
+		return false;
+	}// isReversalAlsoNotPosted
+	
+	/**
+	 * Checks if no cost detail has been created for the given Project Issue records.
+	 * 
+	 * @param issue The Project Issue document.
+	 * @param revIssue The reverse Project Issue document.
+	 * @return true if no cost detail exists for any line in both documents, false otherwise.
+	 */
+	public boolean isNoCostDetailCreated(MProjectIssue issue, MProjectIssue revIssue)
+	{
+		String sql = "SELECT COUNT(1) "
+						+ " FROM M_CostDetail cd "
+							+ " WHERE cd.C_ProjectIssue_ID IN ( "
+							+ "     SELECT pji.C_ProjectIssue_ID FROM C_ProjectIssue pji WHERE pji.C_ProjectIssue_ID IN (?, ?) "
+							+ " ) "
+							+ " AND cd.C_AcctSchema_ID = ? AND cd.IsActive = 'Y' ";
+
+		int count = DB.getSQLValue(getTrxName(), sql, issue.getC_ProjectIssue_ID(), revIssue.getC_ProjectIssue_ID(), m_as.getC_AcctSchema_ID());
+		return count <= 0;
+	}// isNoCostDetailCreated
+
 }	//	DocProjectIssue

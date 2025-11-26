@@ -1404,6 +1404,7 @@ public class DB_PostgreSQL implements AdempiereDatabase
 		{
 			if (!(DisplayType.isText(column.getAD_Reference_ID()) 
 					|| DisplayType.isList(column.getAD_Reference_ID())
+					|| DisplayType.isMultiSelect(column.getAD_Reference_ID())
 					|| column.getAD_Reference_ID() == DisplayType.YesNo
 					|| column.getAD_Reference_ID() == DisplayType.Payment
 					// Two special columns: Defined as Table but DB Type is String 
@@ -1420,6 +1421,8 @@ public class DB_PostgreSQL implements AdempiereDatabase
 				.append(" SET ").append(quoteColumnName(column.getColumnName()))
 				.append("=").append(defaultValue)
 				.append(" WHERE ").append(quoteColumnName(column.getColumnName())).append(" IS NULL");
+			if (DisplayType.isMultiSelect(column.getAD_Reference_ID()))
+				sqlSet.append(" OR ").append(quoteColumnName(column.getColumnName())).append(" = '{}' ");
 			sql.append(DB.SQLSTATEMENT_SEPARATOR).append(sqlSet);
 		}
 		
