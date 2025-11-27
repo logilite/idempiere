@@ -68,7 +68,6 @@ public class MultiSelectBox extends Div
 
 		popup = new Popup();
 		LayoutUtils.addSclass("multi-select-popup", popup);
-		ZKUpdateUtil.setVflex(popup, "1");
 		appendChild(popup);
 
 		vbox = new Vbox();
