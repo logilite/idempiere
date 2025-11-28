@@ -31,9 +31,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 import org.adempiere.base.LookupFactoryHelper;
@@ -1131,12 +1131,13 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		List<InfoColumnVO> gridDisplayedIC = new ArrayList<>();				
 		gridDisplayedIC.add(null); // First column does not have any matching info column		
 		
-		boolean haveNotProcess = !haveProcess; // A field is editabile only if is not readonly and theres a process
-				
-		int i = 0;
+		boolean haveNotProcess = !haveProcess; // A field is editable only if is not read-only and there is a process
+
+		int i = -1;
 		for(InfoColumnVO infoColumn : infoColumns) 
-		{						
-			if (infoColumn.isDisplayed(infoContext, p_WindowNo) || infoColumn.isHideInfoColumn())
+		{
+			i++;
+			if (infoColumn.isDisplayed(infoContext, p_WindowNo) || infoColumn.isHideInfoColumn()) 
 			{
 				ColumnInfo columnInfo = null;
 				String colSQL = infoColumn.getSelectClause();
@@ -2382,7 +2383,9 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
         // for SELECT DISTINCT, ORDER BY expressions must appear in select list - applies for lookup columns and multiselection columns
         if(dataSql.startsWith("SELECT DISTINCT") && indexOrderColumn > 0) {
         	ColumnInfo orderColumnInfo = p_layout[indexOrderColumn];
-        	if (DisplayType.isLookup(orderColumnInfo.getAD_Reference_ID()) || DisplayType.isChosenMultipleSelection(orderColumnInfo.getAD_Reference_ID())) {
+        	if (   !Util.isEmpty(orderColumnInfo.getDisplayColumn())
+        		&& (   (DisplayType.isID(orderColumnInfo.getAD_Reference_ID()) && orderColumnInfo.getAD_Reference_ID() != DisplayType.ID)
+        			|| DisplayType.isLookup(orderColumnInfo.getAD_Reference_ID()))) {
         		dataSql = appendOrderByToSelectList(dataSql, orderClause);
         	}
         }
@@ -3438,7 +3441,8 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	    exportButton.setEnabled(false);       
 	    exportButton.addEventListener(Events.ON_CLICK, new XlsxExportAction());
 	
-	    confirmPanel.addComponentsLeft(exportButton);
+	    if (MRole.getDefault().isCanExport())
+	    	confirmPanel.addComponentsLeft(exportButton);
 	}
 
 	/**
@@ -3448,8 +3452,8 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	{
 		if(exportButton == null)
 			return;
-		
-		exportButton.setEnabled(contentPanel.getRowCount() > 0);		
+
+		exportButton.setEnabled(contentPanel.getRowCount() > 0 && MRole.getDefault().isCanExport());
 	}
 
 	/**

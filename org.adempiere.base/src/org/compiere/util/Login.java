@@ -1579,7 +1579,7 @@ public class Login implements ILogin
 		else 
 		{
 			boolean foundLockedAccount = false;
-			for (MUser user : usersAuthenticated)
+			for (MUser user : users)
 			{
 				if (user.isLocked())
 				{
