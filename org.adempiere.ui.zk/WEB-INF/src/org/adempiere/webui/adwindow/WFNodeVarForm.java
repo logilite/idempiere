@@ -13,9 +13,12 @@
 package org.adempiere.webui.adwindow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Borderlayout;
@@ -55,6 +58,8 @@ import org.zkoss.zul.Div;
 public class WFNodeVarForm extends Window implements ValueChangeListener
 {
 	private static final long				serialVersionUID	= 3400124922854405892L;
+	
+	private static final Set <String>		SKIP_COLUMNS		= new HashSet <>(Arrays.asList("CREATED", "CREATEDBY", "UPDATED", "UPDATEDBY"));
 
 	/** Dependency map: fieldName → dependent GridFields */
 	private MultiMap <String, GridField>	m_depOnField		= new MultiMap <>();
@@ -93,7 +98,7 @@ public class WFNodeVarForm extends Window implements ValueChangeListener
 	{
 		// TODO future: To add support for the window record value parsing for mandatory and displaylogic
 		m_WindowNo = SessionManager.getAppDesktop().registerWindow(this);
-		setTitle("Workflow Node Variable");
+		setTitle(Msg.getMsg(Env.getCtx(), "WFNodeVariable"));
 		setWidth("100%");
 		setClosable(false);
 		setStyle("position: absolute;");
@@ -168,10 +173,7 @@ public class WFNodeVarForm extends Window implements ValueChangeListener
 		String colName = column.getColumnName();
 		if (column.isKey() || column.isVirtualColumn() || column.isEncrypted())
 			return true;
-		return "Created".equalsIgnoreCase(colName)
-				|| "CreatedBy".equalsIgnoreCase(colName)
-					|| "Updated".equalsIgnoreCase(colName)
-					|| "UpdatedBy".equalsIgnoreCase(colName);
+		return SKIP_COLUMNS.contains(colName.toUpperCase());
 	}
 
 	/**
@@ -377,6 +379,8 @@ public class WFNodeVarForm extends Window implements ValueChangeListener
 			if (dep.getLookup() instanceof MLookup)
 			{
 				MLookup m = (MLookup) dep.getLookup();
+				// Refresh lookup if validation references this field
+				// Matches patterns like: @FieldName@, @~FieldName@, @FieldName:modifier@
 				if (m.getValidation().contains("@" + name + "@")
 					|| m.getValidation().matches(".*[@][~]?" + name + "([:].+)?[@].*"))
 					m.refresh();

@@ -707,6 +707,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 						log.log(Level.SEVERE, "Forward User=" + fw);
 						trx.rollback();
 						trx.close();
+						Dialog.error(m_WindowNo, "FillMandatory", Msg.getMsg(Env.getCtx(), "Forward"));
 						return;
 					}
 					po.set_Attribute(MWFActivity.WF_Activity_Manual_AD_User_ID, fw);
@@ -828,10 +829,11 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 				if (valMap != null)
 				{
 					// Assign variable values
+					final PO activityPO = m_activity.getPO(trx);
 					for (Entry <Integer, String> colValue : valMap.entrySet())
 					{
 						MColumn col = MColumn.get(m_activity.getCtx(), colValue.getKey());
-						MWFActivity.setVariable(colValue.getKey(), colValue.getValue(), col.getAD_Reference_ID(), m_activity.getPO(trx), m_activity.getNode(), (trx != null ? trx.getTrxName() : null));
+						MWFActivity.setVariable(colValue.getKey(), colValue.getValue(), col.getAD_Reference_ID(), activityPO, m_activity.getNode(), (trx != null ? trx.getTrxName() : null));
 					}
 				}
 			}

@@ -914,13 +914,19 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 
 	private String getRefTable( )
 	{
-		MReference ref = MReference.get(getCtx(), getAD_Reference_Value_ID(), get_TrxName());
+		int refValueId = getAD_Reference_Value_ID();
+
+		// Early exit for invalid / unset reference values
+		if (refValueId <= 0)
+			return null;
+
+		MReference ref = MReference.get(getCtx(), refValueId, get_TrxName());
 		if (MReference.VALIDATIONTYPE_TableValidation.equals(ref.getValidationType()))
 		{
-			int cnt = DB.getSQLValueEx(get_TrxName(), "SELECT COUNT(1) FROM AD_Ref_Table WHERE AD_Reference_ID=?", getAD_Reference_Value_ID());
+			int cnt = DB.getSQLValueEx(get_TrxName(), "SELECT COUNT(1) FROM AD_Ref_Table WHERE AD_Reference_ID=?", refValueId);
 			if (cnt == 1)
 			{
-				MRefTable rt = MRefTable.get(getCtx(), getAD_Reference_Value_ID(), get_TrxName());
+				MRefTable rt = MRefTable.get(getCtx(), refValueId, get_TrxName());
 				if (rt != null)
 					return rt.getAD_Table().getTableName();
 			}

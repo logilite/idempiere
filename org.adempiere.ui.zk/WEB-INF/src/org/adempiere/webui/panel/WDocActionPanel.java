@@ -521,7 +521,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		{
 			node = m_activity.getNode();
 		}
-		else if(org.compiere.process.DocAction.STATUS_Drafted.equals(DocAction))
+		else if(org.compiere.process.DocAction.STATUS_Drafted.equals(DocAction) && m_Process_ID > 0)
 		{
 			// Currently it only works for the DR state, because when the activity isn’t created yet, we don’t know which node will run.
 			MProcess pr = new MProcess(Env.getCtx(), m_Process_ID, null);
@@ -646,9 +646,24 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				if (isWFActivity())
 				{
 					Trx trx = Trx.get(Trx.createTrxName("FWFA"), true);
-					m_activity.set_TrxName(trx.getTrxName());
-					setNodeVarValue();
-					future = Adempiere.getThreadPoolExecutor().submit(new DesktopRunnable(new DocActionDialogRunnable(), getDesktop()));
+					try
+					{
+						m_activity.set_TrxName(trx.getTrxName());
+						setNodeVarValue();
+						future = Adempiere.getThreadPoolExecutor().submit(new DesktopRunnable(new DocActionDialogRunnable(), getDesktop()));
+					}
+					catch (Exception e)
+					{
+						// Ensure leaked transaction is cleaned up
+						if (trx != null)
+						{
+							trx.rollback();
+							trx.close();
+						}
+						Throwable error = e.getCause();
+						Dialog.error(m_WindowNo, "Error", error != null ? error.getLocalizedMessage() : e.getLocalizedMessage());
+						logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
+					}
 				}
 				else
 					onOk(null);
@@ -938,29 +953,32 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				// workflow node: from activity or process workflow
 				if (m_activity != null)
 					node = m_activity.getNode();
-				else
+				else if (m_Process_ID > 0)
 				{
 					MProcess pr = new MProcess(Env.getCtx(), m_Process_ID, trxName);
 					node = (MWFNode) pr.getAD_Workflow().getAD_WF_Node();
 				}
 
-				try
+				if(node == null)
 				{
-					// Get column based on ID
-					MColumn col = MColumn.get(ctx, colValue.getKey());
-					// Assign workflow variable using column ID, value, reference type, PO, and node
-					MWFActivity.setVariable(
-									colValue.getKey(), // Column ID
-									colValue.getValue(), // Value to set
-									col.getAD_Reference_ID(), // Column reference type
-									po, // Target PO
-									node, // Workflow node
-									trxName // Transaction
-					);
-				}
-				catch (Exception e)
-				{
-					throw new AdempiereException(e.getMessage(), e);
+					try
+					{
+						// Get column based on ID
+						MColumn col = MColumn.get(ctx, colValue.getKey());
+						// Assign workflow variable using column ID, value, reference type, PO, and node
+						MWFActivity.setVariable(
+										colValue.getKey(), // Column ID
+										colValue.getValue(), // Value to set
+										col.getAD_Reference_ID(), // Column reference type
+										po, // Target PO
+										node, // Workflow node
+										trxName // Transaction
+						);
+					}
+					catch (Exception e)
+					{
+						throw new AdempiereException(e.getMessage(), e);
+					}
 				}
 			}
 		}

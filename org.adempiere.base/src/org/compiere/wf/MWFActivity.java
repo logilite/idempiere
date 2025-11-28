@@ -98,6 +98,9 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 
 	private static final String CURRENT_WORKFLOW_PROCESS_INFO_ATTR = "Workflow.ProcessInfo";
 	
+	/** Attribute name for pre-assigned workflow approver */
+	public static final String	WF_Activity_Manual_AD_User_ID		= "FWFA_AD_User_ID";
+	
 	/**
 	 * 	Get Activities for table/record
 	 *	@param ctx context
@@ -1499,8 +1502,6 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			log.warning ("Workflow:AD_Workflow_ID=" + m_node.getAD_Workflow_ID());
 			log.warning("Start WF Instance is not implemented yet");
 		}
-
-		/******	User Choice					******/
 		else if (MWFNode.ACTION_UserChoice.equals(action))
 		{
 			if (log.isLoggable(Level.FINE)) log.fine("UserChoice:AD_Column_ID=" + m_node.getAD_Column_ID());
@@ -1522,10 +1523,10 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 						doc.getC_Currency_ID(), doc.getApprovalAmt(),
 						doc.getAD_Org_ID(),
 						startAD_User_ID == doc.getDoc_User_ID());	//	own doc
-                   if (nextAD_User_ID<=0) {
-                	   m_docStatus = DocAction.STATUS_Invalid;
-                	   throw new AdempiereException(Msg.getMsg(getCtx(), "NoApprover"));
-                   }
+		           if (nextAD_User_ID<=0) {
+		        	   m_docStatus = DocAction.STATUS_Invalid;
+		        	   throw new AdempiereException(Msg.getMsg(getCtx(), "NoApprover"));
+		           }
 					//	same user = approved
 					autoApproval = startAD_User_ID == nextAD_User_ID;
 					if (!autoApproval)
@@ -1556,7 +1557,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 					}
 					else if (resp.isManual())
 					{
-						Integer userId = (Integer) getPO().get_Attribute("FWFA_AD_User_ID");
+						Integer userId = (Integer) getPO().get_Attribute(WF_Activity_Manual_AD_User_ID);
 						if (userId != null && userId.intValue() > 0)
 						{
 							autoApproval = true;
@@ -1728,7 +1729,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 							
 							if (!isApproverSet)
 							{
-								Integer userId = (Integer) getPO().get_Attribute("FWFA_AD_User_ID");
+								Integer userId = (Integer) getPO().get_Attribute(WF_Activity_Manual_AD_User_ID);
 								if (userId != null && userId.intValue() > 0)
 								{
 									isApproverSet = true;
@@ -2087,12 +2088,46 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		po.save(); // persist change
 
 		// Verify the saved value matches what was written
-		if (dbValue != null && !dbValue.equals(po.get_ValueOfColumn(AD_Column_ID)))
+		Object savedValue = po.get_ValueOfColumn(AD_Column_ID);
+		if (dbValue != null && savedValue != null && !valuesMatch(dbValue, savedValue))
 			throw new Exception("Persistent Object not updated - AD_Table_ID="
 								+ po.get_Table_ID() + ", Record_ID=" + po.get_ID()
 								+ " - Should=" + value + ", Is=" + po.get_ValueOfColumn(AD_Column_ID));
 
 		return true;
+	}
+	
+	private static boolean valuesMatch(Object dbValue, Object savedValue)
+	{
+		// Handle BigDecimal with compareTo()
+		if (dbValue instanceof BigDecimal && savedValue instanceof BigDecimal)
+		{
+			return ((BigDecimal) dbValue).compareTo((BigDecimal) savedValue) == 0;
+		}
+
+		// Handle Timestamp comparisons
+		if (dbValue instanceof Timestamp && savedValue instanceof Timestamp)
+		{
+			Timestamp t1 = (Timestamp) dbValue;
+			Timestamp t2 = (Timestamp) savedValue;
+
+			// Normalize to milliseconds (since DB may store different precision)
+			long time1 = t1.getTime();
+			long time2 = t2.getTime();
+
+			return time1 == time2;
+		}
+
+		// Handle numeric comparisons using compareTo()
+		if (dbValue instanceof Number && savedValue instanceof Number)
+		{
+			BigDecimal n1 = new BigDecimal(dbValue.toString());
+			BigDecimal n2 = new BigDecimal(savedValue.toString());
+			return n1.compareTo(n2) == 0;
+		}
+
+		// Fallback: use equals()
+		return dbValue.equals(savedValue);
 	}
 	
 	
@@ -2814,8 +2849,13 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		String val = value;
 
 		if (value == null || (value != null && value.length() == 0))
-			val = null;
-		else if (!value.startsWith("@SQL=") && po != null && (value.indexOf('@') != -1 && !isEmailAction) || (isEmailAction && value.startsWith("@"))) // we have a variable
+			return null;
+
+		boolean hasAt = value.contains("@");
+		boolean isSql = value.startsWith("@SQL=");
+		boolean startsWithAt = value.startsWith("@");
+		boolean needsProcessing = !isSql && po != null && ((!isEmailAction && hasAt) || (isEmailAction && startsWithAt));
+		if (needsProcessing) // we have a variable
 		{
 			// Strip
 			int index = value.indexOf('@');
