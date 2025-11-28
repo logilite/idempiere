@@ -650,7 +650,6 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 					{
 						m_activity.set_TrxName(trx.getTrxName());
 						setNodeVarValue();
-						future = Adempiere.getThreadPoolExecutor().submit(new DesktopRunnable(new DocActionDialogRunnable(), getDesktop()));
 					}
 					catch (Exception e)
 					{
@@ -661,9 +660,12 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 							trx.close();
 						}
 						Throwable error = e.getCause();
-						Dialog.error(m_WindowNo, "Error", error != null ? error.getLocalizedMessage() : e.getLocalizedMessage());
 						logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
+						Dialog.error(m_WindowNo, "Error", error != null ? error.getLocalizedMessage() : e.getLocalizedMessage());
+						return;
 					}
+
+					future = Adempiere.getThreadPoolExecutor().submit(new DesktopRunnable(new DocActionDialogRunnable(), getDesktop()));
 				}
 				else
 					onOk(null);

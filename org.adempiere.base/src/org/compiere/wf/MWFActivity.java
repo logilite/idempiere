@@ -1492,7 +1492,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			MColumn column = m_node.getColumn();
 			int dt = column.getAD_Reference_ID();
 			//Set additional variable
-			setVariables(trx);
+			setNodeVariables(trx);
 			return setVariable (value, dt, null, trx);
 		}	//	SetVariable
 
@@ -1679,7 +1679,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 					// end MZ
 				}
 				//Set Additional Variables
-				setVariables(trx);
+				setNodeVariables(trx);
 				if (autoApproval
 					&& doc.processIt(DocAction.ACTION_Approve)
 					&& doc.save())
@@ -1847,7 +1847,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 						// end MZ
 					}
 					//set additional variable values
-					setVariables(trx);
+					setNodeVariables(trx);
 					
 					return false; //Suspend workflow
 				}	//	Assignment
@@ -1950,17 +1950,9 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	}	//	setVariable
 
 	/**
-	 * 
 	 * @param trx
-	 * @return
 	 * @throws Exception
 	 */
-	private boolean setVariables(Trx trx) throws Exception
-	{
-		setNodeVariables(trx);
-		return true;
-	}
-
 	public void setNodeVariables(Trx trx) throws Exception
 	{
 		MWFNodeVar nodeVars[] = MWFNodeVar.getNodeVars(getCtx(), getNode().getAD_WF_Node_ID());

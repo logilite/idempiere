@@ -44,6 +44,7 @@ import org.compiere.model.MultiMap;
 import org.compiere.model.PO;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 import org.compiere.wf.MWFNode;
 import org.compiere.wf.MWFNodeVar;
 import org.zkoss.zul.Div;
@@ -82,6 +83,9 @@ public class WFNodeVarForm extends Window implements ValueChangeListener
 	 */
 	public WFNodeVarForm(MWFNode node, List <MColumn> columns, PO po, GridTab gridTab)
 	{
+		if (node == null || columns == null || po == null)
+			throw new IllegalArgumentException("node, columns, and po must not be null");
+
 		init(node, columns, po, gridTab);
 		setHeight((columns.size() * 35 + 50) + "px");
 	}
@@ -379,11 +383,15 @@ public class WFNodeVarForm extends Window implements ValueChangeListener
 			if (dep.getLookup() instanceof MLookup)
 			{
 				MLookup m = (MLookup) dep.getLookup();
-				// Refresh lookup if validation references this field
-				// Matches patterns like: @FieldName@, @~FieldName@, @FieldName:modifier@
-				if (m.getValidation().contains("@" + name + "@")
-					|| m.getValidation().matches(".*[@][~]?" + name + "([:].+)?[@].*"))
-					m.refresh();
+				String validation = m.getValidation();
+				if (!Util.isEmpty(validation))
+				{
+					// Refresh lookup if validation references this field
+					// Matches patterns like: @FieldName@, @~FieldName@, @FieldName:modifier@
+					if (validation.contains("@" + name + "@")
+						|| validation.matches(".*[@][~]?" + name + "([:].+)?[@].*"))
+						m.refresh();
+				}
 			}
 
 			if (dep.isVirtualUIColumn())
