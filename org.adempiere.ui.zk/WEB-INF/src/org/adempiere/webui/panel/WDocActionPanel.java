@@ -521,7 +521,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		{
 			node = m_activity.getNode();
 		}
-		else if(org.compiere.process.DocAction.STATUS_Drafted.equals(DocAction) && m_Process_ID > 0)
+		else if(org.compiere.process.DocAction.STATUS_Drafted.equals(DocStatus) && m_Process_ID > 0)
 		{
 			// Currently it only works for the DR state, because when the activity isn’t created yet, we don’t know which node will run.
 			MProcess pr = new MProcess(Env.getCtx(), m_Process_ID, null);
