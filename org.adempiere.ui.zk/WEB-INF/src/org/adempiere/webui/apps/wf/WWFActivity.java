@@ -588,8 +588,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 			nodeVarDiv.appendChild(nodeVarForm);
 			nodeVarRow.setVisible(true);
 			fAnswerList.addEventListener(Events.ON_SELECT, this);
-			if (fAnswerList != null)
-				dynamicDisplaNVForm();
+			dynamicDisplaNVForm();
 		}
 		else
 		{

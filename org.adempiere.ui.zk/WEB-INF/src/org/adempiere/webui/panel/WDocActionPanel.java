@@ -949,7 +949,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				Properties ctx = m_activity != null ? m_activity.getCtx() : Env.getCtx();
 
 				// PO object: from activity or table record
-				PO po = m_activity != null ? m_activity.getPO(Trx.get(trxName, true)) : MTable.get(m_AD_Table_ID).getPO(gridTab.getRecord_ID(), trxName);
+				PO po = m_activity != null ? m_activity.getPO(Trx.get(trxName, true)) : MTable.get(Env.getCtx(), m_AD_Table_ID).getPO(gridTab.getRecord_ID(), trxName);
 
 				MWFNode node = null;
 				// workflow node: from activity or process workflow
