@@ -355,7 +355,7 @@ public abstract class PO
 	/**	Logger							*/
 	protected transient CLogger	log = CLogger.getCLogger (getClass());
 	/** Static Logger					*/
-	private static CLogger		s_log = CLogger.getCLogger (PO.class);
+	protected static CLogger			s_log						= CLogger.getCLogger(PO.class);
 
 	/** Context                 */
 	protected transient Properties		p_ctx;
