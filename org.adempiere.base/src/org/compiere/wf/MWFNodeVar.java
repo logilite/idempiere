@@ -75,10 +75,17 @@ public class MWFNodeVar extends X_AD_WF_Node_Var
 		return colList;
 	}
 	
-	public static MWFNodeVar getNodeVarsForColumns(Properties ctx, int WF_Node_ID, int AD_Column_ID)
+	/**
+	 * Retrieves a workflow node variable record for the given node and column.
+	 * Looks up the active MWFNodeVar entry matching both WF_Node_ID and AD_Column_ID.
+	 *
+	 * @param ctx application context
+	 * @param WF_Node_ID workflow node
+	 * @param AD_Column_ID column linked to the node variable
+	 * @return the matching MWFNodeVar record, or null if none exists
+	 */
+	public static MWFNodeVar getNodeVarsField(Properties ctx, int WF_Node_ID, int AD_Column_ID)
 	{
 		return new Query(ctx, Table_Name, "AD_WF_Node_ID = ? AND AD_Column_ID = ? ", null).setOnlyActiveRecords(true).setParameters(WF_Node_ID, AD_Column_ID).first();
 	}
-
-
 }

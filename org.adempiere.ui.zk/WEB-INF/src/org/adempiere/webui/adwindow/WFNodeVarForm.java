@@ -204,7 +204,7 @@ public class WFNodeVarForm extends Window implements ValueChangeListener
 				field.getVO().Header = windowField.getHeader();
 		}
 
-		MWFNodeVar nodeVar = MWFNodeVar.getNodeVarsForColumns(node.getCtx(), node.getAD_WF_Node_ID(), column.getAD_Column_ID());
+		MWFNodeVar nodeVar = MWFNodeVar.getNodeVarsField(node.getCtx(), node.getAD_WF_Node_ID(), column.getAD_Column_ID());
 		field.getVO().DisplayLogic = nodeVar.getDisplayLogic() != null ? nodeVar.getDisplayLogic() : "";
 		field.getVO().MandatoryLogic = nodeVar.getMandatoryLogic() != null ? nodeVar.getMandatoryLogic() : "";
 		field.getVO().AD_Table_ID = po.get_Table_ID();
