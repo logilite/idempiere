@@ -21,21 +21,61 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 /** Generated Model for AD_WF_Node_Var
- *  @author iDempiere (generated) 
- *  @version Release 7.1 - $Id$ */
-public class X_AD_WF_Node_Var extends PO implements I_AD_WF_Node_Var, I_Persistent 
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
+@org.adempiere.base.Model(table="AD_WF_Node_Var")
+public class X_AD_WF_Node_Var extends PO implements I_AD_WF_Node_Var, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20250317L;
+	private static final long serialVersionUID = 20251124L;
 
     /** Standard Constructor */
     public X_AD_WF_Node_Var (Properties ctx, int AD_WF_Node_Var_ID, String trxName)
     {
       super (ctx, AD_WF_Node_Var_ID, trxName);
       /** if (AD_WF_Node_Var_ID == 0)
+        {
+			setAD_Column_ID (0);
+			setAD_WF_Node_ID (0);
+// @1|AD_WF_Node_ID@
+			setAD_WF_Node_Var_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_WF_Node_Var (Properties ctx, int AD_WF_Node_Var_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_WF_Node_Var_ID, trxName, virtualColumns);
+      /** if (AD_WF_Node_Var_ID == 0)
+        {
+			setAD_Column_ID (0);
+			setAD_WF_Node_ID (0);
+// @1|AD_WF_Node_ID@
+			setAD_WF_Node_Var_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_WF_Node_Var (Properties ctx, String AD_WF_Node_Var_UU, String trxName)
+    {
+      super (ctx, AD_WF_Node_Var_UU, trxName);
+      /** if (AD_WF_Node_Var_UU == null)
+        {
+			setAD_Column_ID (0);
+			setAD_WF_Node_ID (0);
+// @1|AD_WF_Node_ID@
+			setAD_WF_Node_Var_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_WF_Node_Var (Properties ctx, String AD_WF_Node_Var_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_WF_Node_Var_UU, trxName, virtualColumns);
+      /** if (AD_WF_Node_Var_UU == null)
         {
 			setAD_Column_ID (0);
 			setAD_WF_Node_ID (0);
@@ -196,6 +236,22 @@ public class X_AD_WF_Node_Var extends PO implements I_AD_WF_Node_Var, I_Persiste
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
+	/** Set Display Logic.
+		@param DisplayLogic If the Field is displayed, the result determines if the field is actually displayed
+	*/
+	public void setDisplayLogic (String DisplayLogic)
+	{
+		set_Value (COLUMNNAME_DisplayLogic, DisplayLogic);
+	}
+
+	/** Get Display Logic.
+		@return If the Field is displayed, the result determines if the field is actually displayed
+	  */
+	public String getDisplayLogic()
+	{
+		return (String)get_Value(COLUMNNAME_DisplayLogic);
+	}
+
 	/** EntityType AD_Reference_ID=389 */
 	public static final int ENTITYTYPE_AD_Reference_ID=389;
 	/** Set Entity Type.
@@ -214,5 +270,20 @@ public class X_AD_WF_Node_Var extends PO implements I_AD_WF_Node_Var, I_Persiste
 	public String getEntityType () 
 	{
 		return (String)get_Value(COLUMNNAME_EntityType);
+	}
+
+	/** Set Mandatory Logic.
+		@param MandatoryLogic Mandatory Logic
+	*/
+	public void setMandatoryLogic (String MandatoryLogic)
+	{
+		set_Value (COLUMNNAME_MandatoryLogic, MandatoryLogic);
+	}
+
+	/** Get Mandatory Logic.
+		@return Mandatory Logic	  */
+	public String getMandatoryLogic()
+	{
+		return (String)get_Value(COLUMNNAME_MandatoryLogic);
 	}
 }

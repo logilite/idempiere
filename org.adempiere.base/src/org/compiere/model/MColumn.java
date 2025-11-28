@@ -870,15 +870,7 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 		} else if (DisplayType.Table == refid || DisplayType.TableUU == refid 
 				|| DisplayType.Search == refid || DisplayType.SearchUU == refid 
 				|| DisplayType.MultiSelectTable == refid || DisplayType.MultiSelectSearch == refid) {
-			MReference ref = MReference.get(getCtx(), getAD_Reference_Value_ID(), get_TrxName());
-			if (MReference.VALIDATIONTYPE_TableValidation.equals(ref.getValidationType())) {
-				int cnt = DB.getSQLValueEx(get_TrxName(), "SELECT COUNT(1) FROM AD_Ref_Table WHERE AD_Reference_ID=?", getAD_Reference_Value_ID());
-				if (cnt == 1) {
-					MRefTable rt = MRefTable.get(getCtx(), getAD_Reference_Value_ID(), get_TrxName());
-					if (rt != null)
-						foreignTable = rt.getAD_Table().getTableName();
-				}
-			}
+			foreignTable = getRefTable();
 		} else if (DisplayType.Button == refid) {
 			// C_BPartner.AD_OrgBP_ID and C_Project.C_ProjectType_ID are defined as buttons
 			if ("AD_OrgBP_ID".equalsIgnoreCase(getColumnName()))
@@ -912,8 +904,34 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 				foreignTable = "AD_Role";
 			}
 		}
+		else
+		{
+			foreignTable = getRefTable();
+		}
 
 		return foreignTable;
+	}
+
+	private String getRefTable( )
+	{
+		int refValueId = getAD_Reference_Value_ID();
+
+		// Early exit for invalid / unset reference values
+		if (refValueId <= 0)
+			return null;
+
+		MReference ref = MReference.get(getCtx(), refValueId, get_TrxName());
+		if (MReference.VALIDATIONTYPE_TableValidation.equals(ref.getValidationType()))
+		{
+			int cnt = DB.getSQLValueEx(get_TrxName(), "SELECT COUNT(1) FROM AD_Ref_Table WHERE AD_Reference_ID=?", refValueId);
+			if (cnt == 1)
+			{
+				MRefTable rt = MRefTable.get(getCtx(), refValueId, get_TrxName());
+				if (rt != null)
+					return rt.getAD_Table().getTableName();
+			}
+		}
+		return null;
 	}
 
 	/**

@@ -98,6 +98,9 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 
 	private static final String CURRENT_WORKFLOW_PROCESS_INFO_ATTR = "Workflow.ProcessInfo";
 	
+	/** Attribute name for pre-assigned workflow approver */
+	public static final String	WF_Activity_Manual_AD_User_ID		= "FWFA_AD_User_ID";
+	
 	/**
 	 * 	Get Activities for table/record
 	 *	@param ctx context
@@ -1471,7 +1474,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				}
 				else
 				{
-					client.sendEMail(parseVariables(to, true), subject, message, null);
+					client.sendEMail(parseVariables(to, m_node, m_po, true), subject, message, null);
 					m_emails.add(to);
 				}
 
@@ -1489,7 +1492,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			MColumn column = m_node.getColumn();
 			int dt = column.getAD_Reference_ID();
 			//Set additional variable
-			setVariables(trx);
+			setNodeVariables(trx);
 			return setVariable (value, dt, null, trx);
 		}	//	SetVariable
 
@@ -1499,8 +1502,6 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			log.warning ("Workflow:AD_Workflow_ID=" + m_node.getAD_Workflow_ID());
 			log.warning("Start WF Instance is not implemented yet");
 		}
-
-		/******	User Choice					******/
 		else if (MWFNode.ACTION_UserChoice.equals(action))
 		{
 			if (log.isLoggable(Level.FINE)) log.fine("UserChoice:AD_Column_ID=" + m_node.getAD_Column_ID());
@@ -1522,10 +1523,10 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 						doc.getC_Currency_ID(), doc.getApprovalAmt(),
 						doc.getAD_Org_ID(),
 						startAD_User_ID == doc.getDoc_User_ID());	//	own doc
-                   if (nextAD_User_ID<=0) {
-                	   m_docStatus = DocAction.STATUS_Invalid;
-                	   throw new AdempiereException(Msg.getMsg(getCtx(), "NoApprover"));
-                   }
+		           if (nextAD_User_ID<=0) {
+		        	   m_docStatus = DocAction.STATUS_Invalid;
+		        	   throw new AdempiereException(Msg.getMsg(getCtx(), "NoApprover"));
+		           }
 					//	same user = approved
 					autoApproval = startAD_User_ID == nextAD_User_ID;
 					if (!autoApproval)
@@ -1556,8 +1557,17 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 					}
 					else if (resp.isManual())
 					{
-						MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(getCtx(),
-								getAD_WF_Activity_ID(), get_TrxName());
+						// The Activity Forward dialog doesn’t open when performing the Document Action in Workflow Activities.
+						// So, to forward the activity, use the value from Workflow Activities > Forward (Optional). It’s set as a PO attribute and
+						// used as the forward user.
+						Integer userId = (Integer) getPO().get_Attribute(WF_Activity_Manual_AD_User_ID);
+						if (userId != null && userId.intValue() > 0)
+						{
+							autoApproval = true;
+							setAD_User_ID(userId);
+						}
+
+						MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(getCtx(), getAD_WF_Activity_ID(), get_TrxName());
 						for (int i = 0; i < approvers.length; i++)
 						{
 							if (approvers[i].getAD_User_ID() == Env.getAD_User_ID(getCtx()))
@@ -1585,7 +1595,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 								if (forwardDlg != null)
 								{
 									forwardDlg.AskApprover();
-									int userId = forwardDlg.getActivityApprover();
+									userId = forwardDlg.getActivityApprover();
 									if(userId==-1) {
 										throw new AdempiereException("Cancelled");
 									}
@@ -1672,7 +1682,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 					// end MZ
 				}
 				//Set Additional Variables
-				setVariables(trx);
+				setNodeVariables(trx);
 				if (autoApproval
 					&& doc.processIt(DocAction.ACTION_Approve)
 					&& doc.save())
@@ -1719,6 +1729,20 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 						{
 							MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(getCtx(), getAD_WF_Activity_ID(), get_TrxName());
 							boolean isApproverSet = approvers.length > 0;
+							
+							if (!isApproverSet)
+							{
+								// The Activity Forward dialog doesn’t open when performing the Document Action in Workflow Activities.
+								// So, to forward the activity, use the value from Workflow Activities > Forward (Optional). It’s set as a PO attribute and
+								// used as the forward user.
+								Integer userId = (Integer) getPO().get_Attribute(WF_Activity_Manual_AD_User_ID);
+								if (userId != null && userId.intValue() > 0)
+								{
+									isApproverSet = true;
+									setAD_User_ID(userId);
+								}
+							}
+							
 							if(!isApproverSet)
 							{
 								// Invoke WF Approver Factory
@@ -1829,7 +1853,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 						// end MZ
 					}
 					//set additional variable values
-					setVariables(trx);
+					setNodeVariables(trx);
 					
 					return false; //Suspend workflow
 				}	//	Assignment
@@ -1920,7 +1944,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			AD_Column_ID = getNode().getAD_Column_ID();
 		}
 		
-		setVariable(AD_Column_ID, value,displayType,trx);
+		setVariable(AD_Column_ID, value, displayType, getPO(trx), m_node, (trx != null ? trx.getTrxName() : null));
 		
 		//	Info
 		String msg = getNode().getAttributeName() + "=" + value;
@@ -1932,12 +1956,10 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	}	//	setVariable
 
 	/**
-	 * 
 	 * @param trx
-	 * @return
 	 * @throws Exception
 	 */
-	private boolean setVariables(Trx trx) throws Exception
+	public void setNodeVariables(Trx trx) throws Exception
 	{
 		MWFNodeVar nodeVars[] = MWFNodeVar.getNodeVars(getCtx(), getNode().getAD_WF_Node_ID());
 		getPO(trx);
@@ -1951,113 +1973,159 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			{
 				int AD_Column_ID = nodeVar.getAD_Column_ID();
 				MColumn col = MColumn.get(getCtx(), AD_Column_ID);
-				setVariable(AD_Column_ID, nodeVar.getAttributeValue(), col.getAD_Reference_ID(), trx);
+				setVariable(AD_Column_ID, nodeVar.getAttributeValue(), col.getAD_Reference_ID(), m_po, m_node, (trx != null ? trx.getTrxName() : null));
 			}
 		}
-		return true;
 	}
-	/**
-	 * 
-	 * @param AD_Column_ID
-	 * @param value
-	 * @param displayType
-	 * @param trx
-	 * @return
-	 * @throws Exception if error
-	 */
-	private boolean setVariable(int AD_Column_ID, String value, int displayType, Trx trx) throws Exception{
-		
-		
-		value = parseVariables(value, false);
 
-		getPO(trx);
-		if (m_po == null)
-			throw new Exception("Persistent Object not found - AD_Table_ID="
-				+ getAD_Table_ID() + ", Record_ID=" + getRecord_ID());
-		//	Set Value
-		Object dbValue = null;
-		
-		
+	/**
+	 * Sets a column value on a persistent object after converting the input based
+	 * on its display type. Validates foreign keys and ensures the value is saved
+	 * correctly.
+	 *
+	 * @param AD_Column_ID the ID of the column to update
+	 * @param value the raw input value to assign
+	 * @param displayType the display type used to interpret the value
+	 * @param po the PO to update
+	 * @param node workflow node
+	 * @param trxName the transaction
+	 * @return true if the value was successfully set and verified
+	 * @throws Exception if the object is invalid, the value is invalid, or the update fails
+	 */
+	public static boolean setVariable(int AD_Column_ID, String value, int displayType, PO po, MWFNode node, String trxName) throws Exception
+	{
+		if (po == null)
+			throw new Exception("Persistent Object not found ");
+
+		// Resolve variables inside 'value' using PO context
+		value = parseVariables(value, node, po, false);
+
+		Object dbValue = null; // final value to write to the column
+
 		if (value == null)
 			;
 		else if (displayType == DisplayType.YesNo)
-			dbValue = Boolean.valueOf("Y".equals(value));
+			dbValue = Boolean.valueOf("Y".equals(value)); // convert Yes/No to boolean
 		else if (DisplayType.isNumeric(displayType))
-			dbValue = new BigDecimal (value);
-		else if (DisplayType.isID(displayType)) {
-			MColumn column =  MColumn.get(Env.getCtx(), AD_Column_ID);
+			dbValue = new BigDecimal(value); // convert numeric strings to BigDecimal
+		else if (DisplayType.isID(displayType))
+		{
+			// Handle foreign key (ID) references
+			MColumn column = MColumn.get(Env.getCtx(), AD_Column_ID);
 			String referenceTableName = column.getReferenceTableName();
-			if (referenceTableName != null) {
+
+			if (referenceTableName != null)
+			{
 				MTable refTable = MTable.get(Env.getCtx(), referenceTableName);
-				dbValue = Integer.valueOf(value);
+				dbValue = Integer.valueOf(value); // FK integer value
+
 				boolean validValue = true;
-				PO po = refTable.getPO((Integer)dbValue, trx.getTrxName());
-				if (po == null || po.get_ID() == 0) {
-					// foreign key does not exist
+				PO rPO = refTable.getPO((Integer) dbValue, trxName); // load referenced record
+
+				if (rPO == null || rPO.get_ID() == 0)
+					validValue = false; // referenced record doesn’t exist
+
+				// Validate client ownership rules
+				if (validValue && rPO.getAD_Client_ID() != Env.getAD_Client_ID(Env.getCtx()))
+				{
 					validValue = false;
-				}
-				if (validValue && po.getAD_Client_ID() != Env.getAD_Client_ID(Env.getCtx())) {
-					validValue = false;
-					if (po.getAD_Client_ID() == 0) {
+					if (rPO.getAD_Client_ID() == 0)
+					{
 						String accessLevel = refTable.getAccessLevel();
-						if (   MTable.ACCESSLEVEL_All.equals(accessLevel)
-							|| MTable.ACCESSLEVEL_SystemPlusClient.equals(accessLevel)) {
-							// client foreign keys are OK if the table has reference All or System+Client
-							validValue = true;
+						if (MTable.ACCESSLEVEL_All.equals(accessLevel)
+							|| MTable.ACCESSLEVEL_SystemPlusClient.equals(accessLevel))
+						{
+							validValue = true; // system-level FK allowed
 						}
 					}
 				}
-				if (! validValue) {
+
+				if (!validValue)
 					throw new Exception("Persistent Object not updated - AD_Table_ID="
-							+ getAD_Table_ID() + ", Record_ID=" + getRecord_ID()
-							+ " - Value=" + value + " is not valid for a foreign key");
-				}
+										+ po.get_Table_ID() + ", Record_ID=" + po.get_ID()
+										+ " - Value=" + value + " is not valid for a foreign key");
 			}
 		}
 		else if (DisplayType.isDate(displayType))
 		{
-			// parse Date copied from GridField
-			// try timestamp format - then date format -- [ 1950305 ]
+			// Parse date/time values using appropriate formatters
 			java.util.Date date = null;
 			SimpleDateFormat dateTimeFormat = DisplayType.getTimestampFormat_Default();
 			SimpleDateFormat dateFormat = DisplayType.getDateFormat_JDBC();
 			SimpleDateFormat timeFormat = DisplayType.getTimeFormat_Default();
+
 			try
 			{
 				if (displayType == DisplayType.Date)
-				{
 					date = dateFormat.parse(value);
-				}
 				else if (displayType == DisplayType.Time)
-				{
 					date = timeFormat.parse(value);
-				}
 				else
-				{
-					date = dateTimeFormat.parse(value);
-				}
+					date = dateTimeFormat.parse(value); // timestamp
 			}
 			catch (java.text.ParseException e)
 			{
+				// fallback date parsing
 				date = DisplayType.getDateFormat_JDBC().parse(value);
 			}
+
 			if (date != null)
-				dbValue = new Timestamp(date.getTime());
+				dbValue = new Timestamp(date.getTime()); // convert to SQL timestamp
 		}
 		else
-			dbValue = value;
-		if (!m_po.set_ValueOfColumnReturningBoolean(AD_Column_ID, dbValue)) {
+			dbValue = value; // fallback for String-like types
+
+		// Attempt to set column value; failure returns false
+		if (!po.set_ValueOfColumnReturningBoolean(AD_Column_ID, dbValue))
+		{
 			throw new Exception("Persistent Object not updated - AD_Table_ID="
-					+ getAD_Table_ID() + ", Record_ID=" + getRecord_ID()
-					+ " - Value=" + value + " error : " + CLogger.retrieveErrorString("check logs"));
+								+ po.get_Table_ID() + ", Record_ID=" + po.get_ID()
+								+ " - Value=" + value + " error : " + CLogger.retrieveErrorString("check logs"));
 		}
-		m_po.saveEx();
-		if (dbValue != null && !dbValue.equals(m_po.get_ValueOfColumn(AD_Column_ID)))
+
+		po.save(); // persist change
+
+		// Verify the saved value matches what was written
+		Object savedValue = po.get_ValueOfColumn(AD_Column_ID);
+		if (dbValue != null && savedValue != null && !valuesMatch(dbValue, savedValue))
 			throw new Exception("Persistent Object not updated - AD_Table_ID="
-				+ getAD_Table_ID() + ", Record_ID=" + getRecord_ID()
-				+ " - Should=" + value + ", Is=" + m_po.get_ValueOfColumn(AD_Column_ID));
-		
+								+ po.get_Table_ID() + ", Record_ID=" + po.get_ID()
+								+ " - Should=" + value + ", Is=" + po.get_ValueOfColumn(AD_Column_ID));
+
 		return true;
+	}
+	
+	private static boolean valuesMatch(Object dbValue, Object savedValue)
+	{
+		// Handle BigDecimal with compareTo()
+		if (dbValue instanceof BigDecimal && savedValue instanceof BigDecimal)
+		{
+			return ((BigDecimal) dbValue).compareTo((BigDecimal) savedValue) == 0;
+		}
+
+		// Handle Timestamp comparisons
+		if (dbValue instanceof Timestamp && savedValue instanceof Timestamp)
+		{
+			Timestamp t1 = (Timestamp) dbValue;
+			Timestamp t2 = (Timestamp) savedValue;
+
+			// Normalize to milliseconds (since DB may store different precision)
+			long time1 = t1.getTime();
+			long time2 = t2.getTime();
+
+			return time1 == time2;
+		}
+
+		// Handle numeric comparisons using compareTo()
+		if (dbValue instanceof Number && savedValue instanceof Number)
+		{
+			BigDecimal n1 = new BigDecimal(dbValue.toString());
+			BigDecimal n2 = new BigDecimal(savedValue.toString());
+			return n1.compareTo(n2) == 0;
+		}
+
+		// Fallback: use equals()
+		return dbValue.equals(savedValue);
 	}
 	
 	
@@ -2712,13 +2780,17 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	 * Parse Values replaces global or Window context @tag@ with actual value.
 	 * 
 	 * @param value - String that has to be parse
+	 * @param node 
+	 * @param po 
 	 * @param isEmailAction - Is Email action
 	 * @return
 	 */
-	private String parseVariables(String value, boolean isEmailAction)
+	public static String parseVariables(String value, MWFNode node, PO po, boolean isEmailAction)
 	{
-		if (log.isLoggable(Level.FINE))
-			log.fine(m_node.getAttributeName() + " = " + value);
+		final String attrName = node != null ? node.getAttributeName() : "";
+
+		if (s_log.isLoggable(Level.FINE))
+			s_log.fine(attrName + " = " + value);
 
 		// from GridField.defaultFromSQLExpression()
 		String defStr = null;
@@ -2731,10 +2803,10 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			// hengsin, capture unparseable error to avoid subsequent sql exception
 
 			// replace variables
-			sql = Env.parseContext(m_po.getCtx(), 0, sql, false, false);
+			sql = Env.parseContext(po != null ? po.getCtx() : Env.getCtx(), 0, sql, false, false);
 			if (sql.equals(""))
 			{
-				log.log(Level.WARNING, "(" + m_node.getAttributeName() + ") - SQL variable parse failed: " + value);
+				s_log.log(Level.WARNING, "(" + attrName + ") - SQL variable parse failed: " + value);
 			}
 			else
 			{
@@ -2748,13 +2820,13 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 						defStr = rs.getString(1);
 					else
 					{
-						if (log.isLoggable(Level.INFO))
-							log.log(Level.INFO, "(" + m_node.getAttributeName() + ") - no Result: " + sql);
+						if (s_log.isLoggable(Level.INFO))
+							s_log.log(Level.INFO, "(" + attrName + ") - no Result: " + sql);
 					}
 				}
 				catch (SQLException e)
 				{
-					log.log(Level.WARNING, "(" + m_node.getAttributeName() + ") " + sql, e);
+					s_log.log(Level.WARNING, "(" + attrName + ") " + sql, e);
 				}
 				finally
 				{
@@ -2765,8 +2837,8 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			}
 			if (defStr != null && defStr.length() > 0)
 			{
-				if (log.isLoggable(Level.FINE))
-					log.fine("[SQL] " + m_node.getAttributeName() + "=" + defStr);
+				if (s_log.isLoggable(Level.FINE))
+					s_log.fine("[SQL] " + attrName + "=" + defStr);
 				value = defStr;
 			}
 		}
@@ -2777,8 +2849,13 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		String val = value;
 
 		if (value == null || (value != null && value.length() == 0))
-			val = null;
-		else if (!value.startsWith("@SQL=") && m_po != null && (value.indexOf('@') != -1 && !isEmailAction) || (isEmailAction && value.startsWith("@"))) // we have a variable
+			return null;
+
+		boolean hasAt = value.contains("@");
+		boolean isSql = value.startsWith("@SQL=");
+		boolean startsWithAt = value.startsWith("@");
+		boolean needsProcessing = !isSql && po != null && ((!isEmailAction && hasAt) || (isEmailAction && startsWithAt));
+		if (needsProcessing) // we have a variable
 		{
 			// Strip
 			int index = value.indexOf('@');
@@ -2786,13 +2863,13 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			index = columnName.indexOf('@');
 			if (index == -1)
 			{
-				log.warning(m_node.getAttributeName() + " - cannot evaluate=" + value);
+				s_log.warning(attrName + " - cannot evaluate=" + value);
 			}
 			columnName = columnName.substring(0, index);
-			index = m_po.get_ColumnIndex(columnName);
+			index = po.get_ColumnIndex(columnName);
 			if (index != -1)
 			{
-				val = m_po.get_ValueAsString(columnName);
+				val = po.get_ValueAsString(columnName);
 			}
 			else // not a column
 			{
@@ -2800,7 +2877,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				String env = Env.getContext(Env.getCtx(), columnName);
 				if (env.length() == 0)
 				{
-					log.warning(m_node.getAttributeName() + " - not column nor environment =" + columnName + "(" + value + ")");
+					s_log.warning(attrName + " - not column nor environment =" + columnName + "(" + value + ")");
 				}
 				else
 					val = env;

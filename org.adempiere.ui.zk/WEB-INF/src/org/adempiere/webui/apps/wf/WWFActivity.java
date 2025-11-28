@@ -17,9 +17,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import org.adempiere.webui.LayoutUtils;
+import org.adempiere.webui.adwindow.WFNodeVarForm;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Button;
 import org.adempiere.webui.component.Column;
@@ -49,6 +52,7 @@ import org.compiere.model.MLookupFactory;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRefList;
 import org.compiere.model.MSysConfig;
+import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.model.SystemIDs;
 import org.compiere.util.CLogger;
@@ -60,8 +64,11 @@ import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
 import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFNode;
+import org.compiere.wf.MWFNodeVar;
 import org.compiere.wf.MWFProcess;
+import org.compiere.wf.MWFResponsible;
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Components;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -72,10 +79,10 @@ import org.zkoss.zul.Center;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Html;
+import org.zkoss.zul.Listitem;
 import org.zkoss.zul.North;
 import org.zkoss.zul.South;
 import org.zkoss.zul.Vlayout;
-import org.zkoss.zul.Listitem;
 
 /**
  * Workflow activity form
@@ -99,6 +106,8 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 	private int	 				m_index = 0;
 	/**	Set Column					*/
 	private	MColumn 			m_column = null;
+
+	private WFNodeVarForm			nodeVarForm				= null;
 	/**	Logger			*/
 	private static final CLogger log = CLogger.getCLogger(WWFActivity.class);
 
@@ -123,7 +132,8 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 	private Label lForward = new Label(Msg.getMsg(Env.getCtx(), "Forward") + " (" + Msg.translate(Env.getCtx(), "Optional") + ")");
 	private StatusBarPanel statusBar = new StatusBarPanel();
 	private Button bRefresh = new Button();
-
+	private Row nodeVarRow = new Row();
+	private Div nodeVarDiv = new Div();
 	private ListModelTable model = null;
 	private WListbox listbox = new WListbox();
 
@@ -269,6 +279,12 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 		row.appendChild(fTextMsg);
 		fTextMsg.setMultiline(true);
 		ZKUpdateUtil.setWidth(fTextMsg, "100%");
+		
+		nodeVarRow = new Row();
+		nodeVarRow.setVisible(false);
+		rows.appendChild(nodeVarRow);
+		nodeVarDiv = new Div();
+		nodeVarRow.appendCellChild(nodeVarDiv, 2);
 
 		row = new Row();
 		rows.appendChild(row);
@@ -351,6 +367,13 @@ public class WWFActivity extends ADForm implements EventListener<Event>
         	if (m_index >= 0)
     			display(m_index);
         }
+        else if (Events.ON_SELECT.equals(eventName) && comp == fAnswerList)
+		{
+			if (nodeVarForm != null)
+			{
+				dynamicDisplaNVForm();
+			}
+		}
         else
         {
     		super.onEvent(event);
@@ -476,6 +499,8 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 			fHistory.setContent(HISTORY_DIV_START_TAG + "&nbsp;</div>");
 			statusBar.setStatusDB("0/" + m_activities.length);
 			statusBar.setStatusLine(Msg.getMsg(Env.getCtx(), "WFNoActivities"));
+			Components.removeAllChildren(nodeVarDiv);
+			nodeVarRow.setVisible(false);
 		}
 		return m_activity;
 	}	//	resetDisplay
@@ -552,8 +577,32 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 
 		statusBar.setStatusDB((m_index+1) + "/" + m_activities.length);
 		statusBar.setStatusLine(Msg.getMsg(Env.getCtx(), "WFActivities"));
+		
+		List <MColumn> colms = MWFNodeVar.getNodeVarsColumns(node.getCtx(), node.getAD_WF_Node_ID());
+		if (colms != null && !colms.isEmpty())
+		{
+			Components.removeAllChildren(nodeVarDiv);
+			nodeVarForm = new WFNodeVarForm(node, colms, m_activity.getPO(), null);
+			nodeVarForm.setHeight(nodeVarForm.getHeight());
+			nodeVarDiv.setHeight(nodeVarForm.getHeight());
+			nodeVarDiv.appendChild(nodeVarForm);
+			nodeVarRow.setVisible(true);
+			fAnswerList.addEventListener(Events.ON_SELECT, this);
+			dynamicDisplaNVForm();
+		}
+		else
+		{
+			fAnswerList.removeEventListener(Events.ON_SELECT, this);
+			nodeVarForm = null;
+			nodeVarRow.setVisible(false);
+		}
 	}	//	display
 
+	private void dynamicDisplaNVForm( )
+	{
+		Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), m_column.getColumnName(), String.valueOf(fAnswerList.getValue()));
+		nodeVarForm.dynamicDisplay();
+	}
 
 	/**
 	 * Zoom to workflow activity window
@@ -622,6 +671,17 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 		MWFNode node = m_activity.getNode();
 
 		Object forward = fForward.getValue();
+		
+		if (nodeVarForm != null)
+		{
+			String errorMsg = nodeVarForm.validateMandatory();
+			if (!Util.isEmpty(errorMsg, true))
+			{
+				Dialog.error(m_WindowNo, "Error", errorMsg);
+				Clients.clearBusy();
+				return;
+			}
+		}
 
 		// ensure activity is ran within a transaction - [ 1953628 ]
 		Trx trx = null;
@@ -629,28 +689,52 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 			trx = Trx.get(Trx.createTrxName("FWFA"), true);
 			trx.setDisplayName(getClass().getName()+"_onOK");
 			m_activity.set_TrxName(trx.getTrxName());
-
+			PO po = m_activity.getPO(trx);
 			if (forward != null)
 			{
 				if (log.isLoggable(Level.CONFIG)) log.config("Forward to " + forward);
 				int fw = ((Integer)forward).intValue();
-				if (fw == AD_User_ID || fw == 0)
+				
+				boolean isForwordMandatory = isForwardToMandatory(node);
+				if (isForwordMandatory && fw == 0)
 				{
 					log.log(Level.SEVERE, "Forward User=" + fw);
 					trx.rollback();
 					trx.close();
+					Dialog.error(m_WindowNo, "FillMandatory", Msg.getMsg(Env.getCtx(), "Forward"));
 					return;
+
 				}
-				if (!m_activity.forwardTo(fw, textMsg))
+				else if (isForwordMandatory)
 				{
-					Dialog.error(m_WindowNo, "CannotForward");
-					trx.rollback();
-					trx.close();
-					return;
+					// The Activity Forward dialog doesn’t open when performing the Document Action in Workflow Activities.
+					// So, to forward the activity, use the value from Workflow Activities > Forward (Optional). It’s set as a PO attribute and
+					// used as the forward user. TODO, find a way to open the dialog
+					po.set_Attribute(MWFActivity.WF_Activity_Manual_AD_User_ID, fw);
 				}
+				else
+				{
+					if (fw == AD_User_ID || fw == 0)
+					{
+						log.log(Level.SEVERE, "Forward User=" + fw);
+						trx.rollback();
+						trx.close();
+						return;
+					}
+
+					if (!m_activity.forwardTo(fw, textMsg))
+					{
+						Dialog.error(m_WindowNo, "CannotForward");
+						trx.rollback();
+						trx.close();
+						return;
+					}
+				}
+				
+				
 			}
 			//	User Choice - Answer
-			else if (MWFNode.ACTION_UserChoice.equals(node.getAction()))
+			if (node.isUserChoice())
 			{
 				// getting Approval column for User Choice node
 				if (m_column == null)
@@ -692,56 +776,68 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 				}
 			}
 			//	User Action
+			else if (node.isUserTask())
+			{
+				boolean ok = false;
+				if (node.getAD_Column_ID() > 0)
+				{
+					MColumn column = MColumn.get(Env.getCtx(), node.getAD_Column_ID());
+					String value = null;
+
+					Listitem li = fAnswerList.getSelectedItem();
+
+					if (li != null)
+						value = li.getValue().toString();
+					ok = m_activity.setUserTask(m_activity.getAD_User_ID(), value, column.getAD_Reference_ID(), textMsg);
+
+				}
+				else
+				{
+					ok = m_activity.setUserTask(m_activity.getAD_User_ID(), null, -1, textMsg);
+				}
+				MWFProcess wfpr = new MWFProcess(m_activity.getCtx(), m_activity.getAD_WF_Process_ID(), m_activity.get_TrxName());
+				wfpr.checkCloseActivities(m_activity.get_TrxName());
+
+				if (!ok)
+				{
+					String error = m_activity.getM_ErrorMsg();
+
+					if (!Util.isEmpty(error, true))
+					{
+						Dialog.error(m_WindowNo, "Error", error);
+						trx.rollback();
+						return;
+					}
+				}
+			}
 			else
 			{
 				if (logger.isLoggable(Level.CONFIG))
 					logger.config("Action=" + node.getAction() + " - " + textMsg);
-				
-				if (node.isUserTask())
-				{
-					boolean ok = false;
-					if (node.getAD_Column_ID() > 0)
-					{
-						MColumn column = MColumn.get(Env.getCtx(), node.getAD_Column_ID());
-						String value = null;
+				// ensure activity is ran within a transaction
+				m_activity.setUserConfirmation(m_activity.getAD_User_ID(), textMsg);
+				MWFProcess wfpr = new MWFProcess(m_activity.getCtx(), m_activity.getAD_WF_Process_ID(), m_activity.get_TrxName());
+				wfpr.checkCloseActivities(m_activity.get_TrxName());
 
-						Listitem li = fAnswerList.getSelectedItem();
-
-						if (li != null)
-							value = li.getValue().toString();
-
-						ok = m_activity.setUserTask(m_activity.getAD_User_ID(), value, column.getAD_Reference_ID(), textMsg);
-						
-					}else {
-						ok = m_activity.setUserTask(m_activity.getAD_User_ID(), null, -1, textMsg);
-					}
-					MWFProcess wfpr = new MWFProcess(m_activity.getCtx(), m_activity.getAD_WF_Process_ID(), m_activity.get_TrxName());
-					wfpr.checkCloseActivities(m_activity.get_TrxName());
-
-					if (!ok)
-					{
-						String error = m_activity.getM_ErrorMsg();
-
-						if (!Util.isEmpty(error, true))
-						{
-							Dialog.error(m_WindowNo, "Error", error);
-							trx.rollback();
-							return;
-						}
-					}
-				}
-				else
-				{
-					// ensure activity is ran within a transaction
-					m_activity.setUserConfirmation(m_activity.getAD_User_ID(), textMsg);
-					MWFProcess wfpr = new MWFProcess(m_activity.getCtx(), m_activity.getAD_WF_Process_ID(), m_activity.get_TrxName());
-					wfpr.checkCloseActivities(m_activity.get_TrxName());
-
-					if (!Util.isEmpty(m_activity.getProcessMsg(), true))
-						Dialog.error(m_WindowNo, m_activity.getProcessMsg());
-				}
+				if (!Util.isEmpty(m_activity.getProcessMsg(), true))
+					Dialog.error(m_WindowNo, m_activity.getProcessMsg());
 			}
 
+			if (nodeVarForm != null)
+			{
+				Map <Integer, String> valMap = nodeVarForm.getValuesMap();
+				if (valMap != null && !valMap.isEmpty())
+				{
+					// Assign variable values
+					final PO activityPO = m_activity.getPO(trx);
+					for (Entry <Integer, String> colValue : valMap.entrySet())
+					{
+						MColumn col = MColumn.get(m_activity.getCtx(), colValue.getKey());
+						MWFActivity.setVariable(colValue.getKey(), colValue.getValue(), col.getAD_Reference_ID(), activityPO, m_activity.getNode(), (trx != null ? trx.getTrxName() : null));
+					}
+				}
+			}
+			
 			trx.commit();
 		}
 		catch (Exception e)
@@ -763,4 +859,31 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 		loadActivities();
 		display(-1);
 	}	//	onOK
+
+	/**
+	 * Determines whether forwarding is mandatory for the specified workflow node.
+	 * Forwarding is required when the node represents a user-driven step and the responsible
+	 * party is manually assigned.
+	 *
+	 * @param node the workflow node being evaluated
+	 * @return true if manual forwarding is required; false otherwise
+	 */
+	private boolean isForwardToMandatory(MWFNode node)
+	{
+		// If the node is a User Task or User Choice and the responsible is Manual,
+		// then we have to assign the user manually because the user
+		// assignment dialog isn’t opening. TODO: fix this in the future.
+
+	    // Retrieve the responsible party for the current workflow activity
+	    MWFResponsible resp = m_activity.getResponsible();
+
+	    // Forwarding is mandatory when the node is User Task or User Choice
+	    // AND the responsible type is Manual (because auto-assignment cannot occur)
+	    boolean isForwardToMandatory = 
+	            (node.isUserChoice() || node.isUserTask()) 
+	            && (resp != null && resp.isManual());
+
+	    // Return whether the forwar
+	    return isForwardToMandatory;
+	}
 }
