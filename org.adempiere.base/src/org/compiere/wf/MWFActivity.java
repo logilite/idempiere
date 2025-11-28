@@ -2787,8 +2787,10 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	 */
 	public static String parseVariables(String value, MWFNode node, PO po, boolean isEmailAction)
 	{
+		final String attrName = node != null ? node.getAttributeName() : "";
+
 		if (s_log.isLoggable(Level.FINE))
-			s_log.fine(node.getAttributeName() + " = " + value);
+			s_log.fine(attrName + " = " + value);
 
 		// from GridField.defaultFromSQLExpression()
 		String defStr = null;
@@ -2804,7 +2806,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			sql = Env.parseContext(po != null ? po.getCtx() : Env.getCtx(), 0, sql, false, false);
 			if (sql.equals(""))
 			{
-				s_log.log(Level.WARNING, "(" + node.getAttributeName() + ") - SQL variable parse failed: " + value);
+				s_log.log(Level.WARNING, "(" + attrName + ") - SQL variable parse failed: " + value);
 			}
 			else
 			{
@@ -2819,12 +2821,12 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 					else
 					{
 						if (s_log.isLoggable(Level.INFO))
-							s_log.log(Level.INFO, "(" + node.getAttributeName() + ") - no Result: " + sql);
+							s_log.log(Level.INFO, "(" + attrName + ") - no Result: " + sql);
 					}
 				}
 				catch (SQLException e)
 				{
-					s_log.log(Level.WARNING, "(" + node.getAttributeName() + ") " + sql, e);
+					s_log.log(Level.WARNING, "(" + attrName + ") " + sql, e);
 				}
 				finally
 				{
@@ -2836,7 +2838,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			if (defStr != null && defStr.length() > 0)
 			{
 				if (s_log.isLoggable(Level.FINE))
-					s_log.fine("[SQL] " + node.getAttributeName() + "=" + defStr);
+					s_log.fine("[SQL] " + attrName + "=" + defStr);
 				value = defStr;
 			}
 		}
@@ -2861,7 +2863,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			index = columnName.indexOf('@');
 			if (index == -1)
 			{
-				s_log.warning(node.getAttributeName() + " - cannot evaluate=" + value);
+				s_log.warning(attrName + " - cannot evaluate=" + value);
 			}
 			columnName = columnName.substring(0, index);
 			index = po.get_ColumnIndex(columnName);
@@ -2875,7 +2877,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				String env = Env.getContext(Env.getCtx(), columnName);
 				if (env.length() == 0)
 				{
-					s_log.warning(node.getAttributeName() + " - not column nor environment =" + columnName + "(" + value + ")");
+					s_log.warning(attrName + " - not column nor environment =" + columnName + "(" + value + ")");
 				}
 				else
 					val = env;
