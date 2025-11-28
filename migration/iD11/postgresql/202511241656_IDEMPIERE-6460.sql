@@ -59,3 +59,10 @@ UPDATE AD_Field SET DisplayLogic='@AttributeValue@=''''',Updated=TO_TIMESTAMP('2
 UPDATE AD_Field SET DisplayLogic='@AttributeValue@=''''',Updated=TO_TIMESTAMP('2025-11-24 17:03:30','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=208978
 ;
 
+-- 27-Nov-2025, 7:18:21 pm IST
+UPDATE AD_Tab SET DisplayLogic='@Action@=C|@Action@=V|@Action@=U|@Action@=Z',Updated=TO_TIMESTAMP('2025-11-27 19:18:21','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Tab_ID=200393
+;
+
+-- 28-Nov-2025, 12:34:48 pm IST
+INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('I','Workflow Node Variable',0,0,'Y',TO_TIMESTAMP('2025-11-28 12:34:47','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-11-28 12:34:47','YYYY-MM-DD HH24:MI:SS'),100,200986,'WFNodeVariable','D','e632e285-26c5-4c3b-9c2d-73fd9bb3169e')
+;
