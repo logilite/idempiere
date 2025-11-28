@@ -1557,6 +1557,9 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 					}
 					else if (resp.isManual())
 					{
+						// The Activity Forward dialog doesn’t open when performing the Document Action in Workflow Activities.
+						// So, to forward the activity, use the value from Workflow Activities > Forward (Optional). It’s set as a PO attribute and
+						// used as the forward user.
 						Integer userId = (Integer) getPO().get_Attribute(WF_Activity_Manual_AD_User_ID);
 						if (userId != null && userId.intValue() > 0)
 						{
@@ -1729,6 +1732,9 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 							
 							if (!isApproverSet)
 							{
+								// The Activity Forward dialog doesn’t open when performing the Document Action in Workflow Activities.
+								// So, to forward the activity, use the value from Workflow Activities > Forward (Optional). It’s set as a PO attribute and
+								// used as the forward user.
 								Integer userId = (Integer) getPO().get_Attribute(WF_Activity_Manual_AD_User_ID);
 								if (userId != null && userId.intValue() > 0)
 								{

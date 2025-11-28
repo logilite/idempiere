@@ -707,6 +707,9 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 				}
 				else if (isForwordMandatory)
 				{
+					// The Activity Forward dialog doesn’t open when performing the Document Action in Workflow Activities.
+					// So, to forward the activity, use the value from Workflow Activities > Forward (Optional). It’s set as a PO attribute and
+					// used as the forward user. TODO, find a way to open the dialog
 					po.set_Attribute(MWFActivity.WF_Activity_Manual_AD_User_ID, fw);
 				}
 				else
@@ -823,7 +826,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 			if (nodeVarForm != null)
 			{
 				Map <Integer, String> valMap = nodeVarForm.getValuesMap();
-				if (valMap != null)
+				if (valMap != null && !valMap.isEmpty())
 				{
 					// Assign variable values
 					final PO activityPO = m_activity.getPO(trx);
