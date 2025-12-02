@@ -1647,7 +1647,6 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 						}
 						else
 						{
-							m_docStatus = DocAction.STATUS_Invalid;
 							throw new AdempiereException(Msg.getMsg(getCtx(), "NoApprover - Set Supervisor on User or Organization"));
 						}
 					}
@@ -1671,7 +1670,6 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 						}
 						else
 						{
-							m_docStatus = DocAction.STATUS_Invalid;
 							throw new AdempiereException(Msg.getMsg(getCtx(), "NoApprover - Set Supervisor on User or Organization"));
 						}
 					}
@@ -1818,7 +1816,6 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 							}
 							else
 							{
-								m_docStatus = DocAction.STATUS_Invalid;
 								throw new AdempiereException(Msg.getMsg(getCtx(), "NoApprover - Set Supervisor on User or Organization"));
 							}
 						}
