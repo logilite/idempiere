@@ -72,9 +72,9 @@ public class MPayment extends X_C_Payment
 	implements DocAction, ProcessCall, PaymentInterface, IDocsPostProcess
 {
 	/**
-	 * generated serial id
+	 * 
 	 */
-	private static final long serialVersionUID = -1581098289090430363L;
+	private static final long serialVersionUID = -1157628050370126666L;
 	protected BigDecimal		payAllocatesAmt = Env.ZERO;
 
 	/**
@@ -984,6 +984,13 @@ public class MPayment extends X_C_Payment
 		
 		return true;
 	}	//	beforeSave
+
+	@Override
+	protected boolean beforeDelete() {
+		@SuppressWarnings("unused")
+		boolean ok = MPaySelectionCheck.deleteGeneratedDraft(getCtx(), getC_Payment_ID(), get_TrxName());
+		return true;
+	}
 
 	/**
 	 * 	Document Status is Complete or Closed

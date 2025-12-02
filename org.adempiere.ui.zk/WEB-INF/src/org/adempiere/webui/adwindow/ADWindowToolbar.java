@@ -271,10 +271,10 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
         if (MRole.getDefault().isCanReport()) {
             btnReport = createButton("Report", "Report", "Report");
             btnReport.setTooltiptext(btnReport.getTooltiptext()+ "    Alt+R");
+            btnArchive = createButton("Archive", "Archive", "Archive");
+            btnPrint = createButton("Print", "Print", "Print");
+            btnPrint.setTooltiptext(btnPrint.getTooltiptext()+ "    Alt+P");
         }
-        btnArchive = createButton("Archive", "Archive", "Archive");
-        btnPrint = createButton("Print", "Print", "Print");
-        btnPrint.setTooltiptext(btnPrint.getTooltiptext()+ "    Alt+P");
         if (isPersonalLock) {
             btnLock = createButton("Lock", "Lock", "Lock"); // Elaine 2008/12/04
             btnLock.setDisabled(!isPersonalLock); // Elaine 2008/12/04
@@ -309,7 +309,8 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 
         btnActiveWorkflows.setDisabled(false); // Elaine 2008/07/17
         btnRequests.setDisabled(false); // Elaine 2008/07/22
-        btnArchive.setDisabled(false); // Elaine 2008/07/28
+		if (btnArchive != null)
+			btnArchive.setDisabled(false); // Elaine 2008/07/28
 
         if (MRole.getDefault().isCanExport())
         {
@@ -522,7 +523,8 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 		altKeyMap.put(VK_Z, btnIgnore);
 		if (btnReport != null)
 			altKeyMap.put(VK_R, btnReport);		
-		altKeyMap.put(VK_P, btnPrint);
+		if (btnPrint != null)
+			altKeyMap.put(VK_P, btnPrint);
 		altKeyMap.put(VK_O, btnProcess);
 		altKeyMap.put(VK_L, btnCustomize);
 	}
@@ -776,7 +778,8 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
      */
     public void enablePrint(boolean enabled)
     {
-    	this.btnPrint.setDisabled(!enabled);
+		if (btnPrint != null)
+			this.btnPrint.setDisabled(!enabled);
     }
 
     /**
@@ -822,7 +825,8 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
      */
     public void enableArchive(boolean enabled)
     {
-    	btnArchive.setDisabled(!enabled);
+		if (btnArchive != null)
+			btnArchive.setDisabled(!enabled);
     }
     
     /**
