@@ -443,6 +443,7 @@
 }
 .z-icon-ChangeTree:before {
 	content: "\f079";
+	font-weight: 900;
 }
 .z-icon-Paste:before {
 	content: "\f0ea";

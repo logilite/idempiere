@@ -395,7 +395,7 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 
 		btnSave = new ToolBarButton();
 		if (ThemeManager.isUseFontIconForImage())
-			button.setIconSclass(Icon.getIconSclass(Icon.SAVE));
+			btnSave.setIconSclass(Icon.getIconSclass(Icon.SAVE));
 		else
 			btnSave.setImage(ThemeManager.getThemeResource(SAVE_IMAGE));
 		btnSave.setId(BTN_SAVE_ID);

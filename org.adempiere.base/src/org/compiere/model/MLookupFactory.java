@@ -529,7 +529,7 @@ public class MLookupFactory
 			if (KeyColumn.endsWith("_ID") || KeyColumn.endsWith("_UU"))
 				realSQL.append("NULL,");
 			if (!Util.isEmpty(displaySQL, true)) {
-				realSQL.append("COALESCE(").append(displaySQL).append(",").append(TableName).append("_Trl.").append(DisplayColumn).append(",'-1')");
+				realSQL.append("NVL(").append(displaySQL).append(",").append(DisplayColumn).append(")");
 			} else {
 				if (isValueDisplayed)
 					realSQL.append("NVL(").append(TableName).append(".Value,'-1') || '").append(separator).append("' || ");
@@ -542,7 +542,7 @@ public class MLookupFactory
 						realSQL.append(displayColumn);
 					} else {
 						lookupDisplayColumn = DisplayColumn;
-						realSQL.append("NVL(").append(TableName).append("_Trl.").append(DisplayColumn).append(",'-1')");
+						realSQL.append(DisplayColumn);
 					}
 				}
 			}
@@ -564,7 +564,7 @@ public class MLookupFactory
 			if (KeyColumn.endsWith("_ID") || KeyColumn.endsWith("_UU"))
 				realSQL.append("NULL,");
 			if (!Util.isEmpty(displaySQL, true)) {
-				realSQL.append("COALESCE(").append(displaySQL).append(",").append(TableName).append(".").append(DisplayColumn).append(",'-1')");
+				realSQL.append("NVL(").append(displaySQL).append(",").append(DisplayColumn).append(")");
 			} else {
 				if (isValueDisplayed)
 					realSQL.append("NVL(").append(TableName).append(".Value,'-1') || '").append(separator).append("' || ");
@@ -577,7 +577,7 @@ public class MLookupFactory
 						realSQL.append(displayColumn);
 					} else {
 						lookupDisplayColumn = DisplayColumn;
-						realSQL.append("NVL(").append(TableName).append(".").append(DisplayColumn).append(",'-1')");
+						realSQL.append(DisplayColumn);
 					}
 				}
 			}
