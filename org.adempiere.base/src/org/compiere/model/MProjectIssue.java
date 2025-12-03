@@ -113,13 +113,6 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		setC_Project_ID (project.getC_Project_ID());	//	Parent
 		setLine (getNextLine());
 		m_parent = project;
-		//
-		setMovementDate (new Timestamp(System.currentTimeMillis()));
-		setDateAcct(new Timestamp(System.currentTimeMillis()));
-		setMovementQty (Env.ZERO);
-		setPosted (false);
-		setProcessed (false);
-		init();
 	}	//	MProjectIssue
 
 	/**

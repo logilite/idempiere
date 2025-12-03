@@ -168,11 +168,9 @@ public class ProjectIssue extends SvrProcess
 			MProjectIssue pi = new MProjectIssue (m_project);
 
 			pi.setMandatory(inOutLines[i].getM_Locator_ID(), inOutLines[i].getM_Product_ID(), inOutLines[i].getMovementQty());
-			if (m_MovementDate != null)		//	default today
-			{
+			if (m_MovementDate != null) // default today
 				pi.setMovementDate(m_MovementDate);
-				pi.setDateAcct(m_MovementDate != null ? m_MovementDate : inOut.getDateAcct());
-			}
+			pi.setDateAcct(pi.getMovementDate());
 			
 			if (!Util.isEmpty(m_Description, true))
 				pi.setDescription(m_Description);
@@ -238,11 +236,9 @@ public class ProjectIssue extends SvrProcess
 			
 			pi.setMandatory (MProjectIssue.getExpenseLineLocator(expenseLines[i]), expenseLines[i].getM_Product_ID(), expenseLines[i].getQty());
 			
-			if (m_MovementDate != null)		//	default today
-			{
+			if (m_MovementDate != null) // default today
 				pi.setMovementDate(m_MovementDate);
-				pi.setDateAcct(m_MovementDate != null ? m_MovementDate : expenseLines[i].getDateExpense());
-			}
+			pi.setDateAcct(pi.getMovementDate());
 			
 			if (m_Description != null && m_Description.length() > 0)
 				pi.setDescription(m_Description);
@@ -285,10 +281,8 @@ public class ProjectIssue extends SvrProcess
 		pi.setMandatory(invLine.getC_Charge_ID(), invLine.getQtyInvoiced());
 
 		if (m_MovementDate != null) // default today
-		{
 			pi.setMovementDate(m_MovementDate);
-			pi.setDateAcct(m_MovementDate != null ? m_MovementDate : invLine.getC_Invoice().getDateAcct());
-		}
+		pi.setDateAcct(pi.getMovementDate());
 		if (!Util.isEmpty(m_Description))
 			pi.setDescription(m_Description);
 		else
@@ -324,10 +318,8 @@ public class ProjectIssue extends SvrProcess
 		MProjectIssue pi = new MProjectIssue (m_project);
 		pi.setMandatory (m_M_Locator_ID, pl.getM_Product_ID(), pl.getPlannedQty());
 		if (m_MovementDate != null)		//	default today
-		{
 			pi.setMovementDate(m_MovementDate);
-			pi.setDateAcct(m_MovementDate);
-		}
+		pi.setDateAcct(pi.getMovementDate());
 		if (m_Description != null && m_Description.length() > 0)
 			pi.setDescription(m_Description);
 		else if (pl.getDescription() != null)

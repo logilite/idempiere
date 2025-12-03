@@ -36,7 +36,7 @@ public class CalloutProjectIssue extends CalloutEngine
 					mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, null);
 					mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, inOutLine.getMovementQty());
 					mTab.setValue(MProjectIssue.COLUMNNAME_MovementDate, inOutLine.getM_InOut().getMovementDate());
-					mTab.setValue(MProjectIssue.COLUMNNAME_MovementDate, inOutLine.getM_InOut().getDateAcct());
+					mTab.setValue(MProjectIssue.COLUMNNAME_DateAcct, inOutLine.getM_InOut().getDateAcct());
 					mTab.setValue(MProjectIssue.COLUMNNAME_M_Locator_ID, inOutLine.getM_Locator_ID());
 					mTab.setValue(MProjectIssue.COLUMNNAME_M_AttributeSetInstance_ID, inOutLine.getM_AttributeSetInstance_ID());
 					mTab.setValue(MProjectIssue.COLUMNNAME_M_Warehouse_ID, inOutLine.getM_InOut().getM_Warehouse_ID());
@@ -76,7 +76,7 @@ public class CalloutProjectIssue extends CalloutEngine
 				mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, expenseLine.getQty());
 				mTab.setValue(MProjectIssue.COLUMNNAME_M_Locator_ID, MProjectIssue.getExpenseLineLocator(expenseLine));
 				mTab.setValue(MProjectIssue.COLUMNNAME_MovementDate, expenseLine.getDateExpense());
-				mTab.setValue(MProjectIssue.COLUMNNAME_MovementDate, expenseLine.getDateExpense());
+				mTab.setValue(MProjectIssue.COLUMNNAME_DateAcct, expenseLine.getDateExpense());
 
 				// Set amt
 				BigDecimal amt = ProjectIssueUtil.getLaborCost(as, expenseLine.get_ID());
