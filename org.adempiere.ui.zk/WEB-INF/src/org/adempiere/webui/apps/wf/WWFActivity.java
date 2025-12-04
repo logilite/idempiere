@@ -371,7 +371,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 		{
 			if (nodeVarForm != null)
 			{
-				dynamicDisplaNVForm();
+				updateNodeVarFormDisplay();
 			}
 		}
         else
@@ -588,7 +588,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 			nodeVarDiv.appendChild(nodeVarForm);
 			nodeVarRow.setVisible(true);
 			fAnswerList.addEventListener(Events.ON_SELECT, this);
-			dynamicDisplaNVForm();
+			updateNodeVarFormDisplay();
 		}
 		else
 		{
@@ -598,7 +598,12 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 		}
 	}	//	display
 
-	private void dynamicDisplaNVForm( )
+	/**
+	 * Updates the context with the selected value for the current column and
+	 * triggers a dynamic display refresh for the node variable form.
+	 * Ensures the UI reacts to the latest user input.
+	 */
+	private void updateNodeVarFormDisplay( )
 	{
 		Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), m_column.getColumnName(), String.valueOf(fAnswerList.getValue()));
 		nodeVarForm.dynamicDisplay();

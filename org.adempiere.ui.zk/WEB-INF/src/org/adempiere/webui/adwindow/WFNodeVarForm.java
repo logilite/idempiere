@@ -146,13 +146,14 @@ public class WFNodeVarForm extends Window implements ValueChangeListener
 			if (editor != null)
 			{
 				row.appendChild(editor.getLabel());
+				editors.add(editor);
 				editor.setReadWrite(true);
 				Object value = po.get_Value(column.getColumnName());
 				if (value != null)
 					Env.setContext(Env.getCtx(), m_WindowNo, editor.getGridField().getColumnName(), value.toString());
 				editor.setValue(value);
 				row.appendChild(editor.getComponent());
-				editors.add(editor);
+				applyDynamicLogic(editor);
 			}
 			else
 			{
@@ -291,34 +292,49 @@ public class WFNodeVarForm extends Window implements ValueChangeListener
 		return null;
 	}
 
+	/**
+	 * Applies dynamic UI display rules to all editors.
+	 * Evaluates visibility, editability, and mandatory status based on context.
+	 */
 	public void dynamicDisplay( )
 	{
 		for (WEditor comp : editors)
 		{
-			GridField mField = comp.getGridField();
-			if (mField != null)
-			{
-				if (mField.isDisplayed(true)) // check context
-				{
-					if (!comp.isVisible())
-					{
-						comp.setVisible(true); // visibility
-					}
-
-					boolean rw = mField.isEditable(true); // r/w - check Context
-					if (rw && !comp.isReadWrite()) // IDEMPIERE-3421 - if it was read-only the list can contain direct values
-						mField.refreshLookup();
-					comp.setReadWrite(rw);
-					comp.setMandatory(mField.isMandatory(true)); // check context
-					comp.dynamicDisplay();
-				}
-				else if (comp.isVisible())
-				{
-					comp.setVisible(false);
-				}
-			}
-			comp.updateStyle();
+			applyDynamicLogic(comp);
 		} // all components
+	}
+
+	/**
+	 * Updates the display state of a single editor based on its GridField configuration.
+	 * Handles visibility, read/write mode, mandatory flag, and triggers editor-specific dynamic behavior.
+	 *
+	 * @param comp the editor whose dynamic UI rules should be evaluated
+	 */
+	private void applyDynamicLogic(WEditor comp)
+	{
+		GridField mField = comp.getGridField();
+		if (mField != null)
+		{
+			if (mField.isDisplayed(true)) // check context
+			{
+				if (!comp.isVisible())
+				{
+					comp.setVisible(true); // visibility
+				}
+
+				boolean rw = mField.isEditable(true); // r/w - check Context
+				if (rw && !comp.isReadWrite()) // IDEMPIERE-3421 - if it was read-only the list can contain direct values
+					mField.refreshLookup();
+				comp.setReadWrite(rw);
+				comp.setMandatory(mField.isMandatory(true)); // check context
+				comp.dynamicDisplay();
+			}
+			else if (comp.isVisible())
+			{
+				comp.setVisible(false);
+			}
+		}
+		comp.updateStyle();
 	}
 
 	/**
