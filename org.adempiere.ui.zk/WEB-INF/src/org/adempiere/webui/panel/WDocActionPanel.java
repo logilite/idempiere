@@ -513,11 +513,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		Div nodeVarDiv = new Div();
 		MWFNode node = null;
 		nodeVarForm = null;
-		if (m_activity != null && (m_activity.isUserApproval() || m_activity.isUserTask()))
-		{
-			node = m_activity.getNode();
-		}
-		else if (m_activity != null)
+		if (m_activity != null)
 		{
 			node = m_activity.getNode();
 		}
@@ -961,7 +957,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 					node = (MWFNode) pr.getAD_Workflow().getAD_WF_Node();
 				}
 
-				if(node == null)
+				if(node != null)
 				{
 					try
 					{
