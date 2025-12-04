@@ -70,8 +70,8 @@ public class Doc_ProjectIssue extends Doc
 	{
 		setC_Currency_ID(NO_CURRENCY);
 		m_issue = (MProjectIssue)getPO();
-		setDateDoc (m_issue.getMovementDate());
-		setDateAcct(m_issue.getMovementDate());
+		setDateDoc (m_issue.getDateAcct());
+		setDateAcct(m_issue.getDateAcct());
 
 		//	Pseudo Line
 		m_line = new DocLine (m_issue, this);
@@ -137,7 +137,7 @@ public class Doc_ProjectIssue extends Doc
 		// check is date of both issue same
 		boolean isCreatePost = !(as.isDeleteReverseCorrectPosting()
 									&& m_issue.getReversal_ID() > 0
-										&& Util.compareDate(m_issue.getMovementDate(), m_issue.getReversal().getMovementDate()) == 0);
+										&& Util.compareDate(m_issue.getDateAcct(), m_issue.getReversal().getDateAcct()) == 0);
 		setC_Currency_ID(as.getC_Currency_ID());
 
 		MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(m_issue.getC_Project_ID(),
@@ -245,7 +245,7 @@ public class Doc_ProjectIssue extends Doc
 		if (m_as.isDeleteReverseCorrectPosting() && reversal_ID > 0)
 		{
 			MProjectIssue rev_Issue = (MProjectIssue) m_issue.getReversal();
-			if (Util.compareDate(m_issue.getMovementDate(), rev_Issue.getMovementDate()) == 0 && isNoCostDetailCreated(m_issue, rev_Issue))
+			if (Util.compareDate(m_issue.getDateAcct(), rev_Issue.getDateAcct()) == 0 && isNoCostDetailCreated(m_issue, rev_Issue))
 			{
 				String revpostedsql = "SELECT Posted FROM C_ProjectIssue WHERE C_ProjectIssue_ID=?";
 				String posted = DB.getSQLValueStringEx(getTrxName(), revpostedsql, rev_Issue.get_ID());
