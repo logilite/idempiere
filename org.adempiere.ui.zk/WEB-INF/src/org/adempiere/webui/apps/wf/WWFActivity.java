@@ -605,7 +605,11 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 	 */
 	private void updateNodeVarFormDisplay( )
 	{
-		Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), m_column.getColumnName(), String.valueOf(fAnswerList.getValue()));
+		if (nodeVarForm == null)
+			return;
+
+		if (m_column != null)
+			Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), m_column.getColumnName(), String.valueOf(fAnswerList.getValue()));
 		nodeVarForm.dynamicDisplay();
 	}
 
