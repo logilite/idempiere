@@ -66,7 +66,6 @@ import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFNode;
 import org.compiere.wf.MWFNodeVar;
 import org.compiere.wf.MWFProcess;
-import org.compiere.wf.MWFResponsible;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Components;
 import org.zkoss.zk.ui.Executions;

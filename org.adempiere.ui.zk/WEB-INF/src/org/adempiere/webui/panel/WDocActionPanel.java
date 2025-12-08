@@ -979,6 +979,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 					}
 				}
 			}
+
+			if (gridTab != null)
+				gridTab.dataRefresh();
 		}
 	}
 
