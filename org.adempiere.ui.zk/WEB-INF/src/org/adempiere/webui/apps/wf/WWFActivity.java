@@ -681,66 +681,45 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 
 		Object forward = fForward.getValue();
 		
-		if (nodeVarForm != null)
-		{
-			String errorMsg = nodeVarForm.validateMandatory();
-			if (!Util.isEmpty(errorMsg, true))
-			{
-				Dialog.error(m_WindowNo, "Error", errorMsg);
-				Clients.clearBusy();
-				return;
-			}
-		}
-
 		// ensure activity is ran within a transaction - [ 1953628 ]
 		Trx trx = null;
 		try {
 			trx = Trx.get(Trx.createTrxName("FWFA"), true);
 			trx.setDisplayName(getClass().getName()+"_onOK");
 			m_activity.set_TrxName(trx.getTrxName());
-			PO po = m_activity.getPO(trx);
 			if (forward != null)
 			{
-				if (log.isLoggable(Level.CONFIG)) log.config("Forward to " + forward);
-				int fw = ((Integer)forward).intValue();
-				
-				boolean isForwordMandatory = isForwardToMandatory(node);
-				if (isForwordMandatory && fw == 0)
+				if (log.isLoggable(Level.CONFIG))
+					log.config("Forward to " + forward);
+				int fw = ((Integer) forward).intValue();
+				if (fw == AD_User_ID || fw == 0)
 				{
 					log.log(Level.SEVERE, "Forward User=" + fw);
 					trx.rollback();
 					trx.close();
-					Dialog.error(m_WindowNo, "FillMandatory", Msg.getMsg(Env.getCtx(), "Forward"));
 					return;
+				}
 
-				}
-				else if (isForwordMandatory)
+				if (!m_activity.forwardTo(fw, textMsg))
 				{
-					// The Activity Forward dialog doesn’t open when performing the Document Action in Workflow Activities.
-					// So, to forward the activity, use the value from Workflow Activities > Forward (Optional). It’s set as a PO attribute and
-					// used as the forward user. TODO, find a way to open the dialog
-					po.set_Attribute(MWFActivity.WF_Activity_Manual_AD_User_ID, fw);
+					Dialog.error(m_WindowNo, "CannotForward");
+					trx.rollback();
+					trx.close();
+					return;
 				}
-				else
+				// Assign the current node to the fw user and do not process further.
+				return;
+			}
+			
+			if (nodeVarForm != null)
+			{
+				String errorMsg = nodeVarForm.validateMandatory();
+				if (!Util.isEmpty(errorMsg, true))
 				{
-					if (fw == AD_User_ID || fw == 0)
-					{
-						log.log(Level.SEVERE, "Forward User=" + fw);
-						trx.rollback();
-						trx.close();
-						return;
-					}
-
-					if (!m_activity.forwardTo(fw, textMsg))
-					{
-						Dialog.error(m_WindowNo, "CannotForward");
-						trx.rollback();
-						trx.close();
-						return;
-					}
+					Dialog.error(m_WindowNo, "Error", errorMsg);
+					Clients.clearBusy();
+					return;
 				}
-				
-				
 			}
 			//	User Choice - Answer
 			if (node.isUserChoice())
@@ -869,30 +848,4 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 		display(-1);
 	}	//	onOK
 
-	/**
-	 * Determines whether forwarding is mandatory for the specified workflow node.
-	 * Forwarding is required when the node represents a user-driven step and the responsible
-	 * party is manually assigned.
-	 *
-	 * @param node the workflow node being evaluated
-	 * @return true if manual forwarding is required; false otherwise
-	 */
-	private boolean isForwardToMandatory(MWFNode node)
-	{
-		// If the node is a User Task or User Choice and the responsible is Manual,
-		// then we have to assign the user manually because the user
-		// assignment dialog isn’t opening. TODO: fix this in the future.
-
-	    // Retrieve the responsible party for the current workflow activity
-	    MWFResponsible resp = m_activity.getResponsible();
-
-	    // Forwarding is mandatory when the node is User Task or User Choice
-	    // AND the responsible type is Manual (because auto-assignment cannot occur)
-	    boolean isForwardToMandatory = 
-	            (node.isUserChoice() || node.isUserTask()) 
-	            && (resp != null && resp.isManual());
-
-	    // Return whether the forwar
-	    return isForwardToMandatory;
-	}
 }
