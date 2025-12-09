@@ -30,7 +30,7 @@ public class X_AD_Sequence_No extends PO implements I_AD_Sequence_No, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20231222L;
+	private static final long serialVersionUID = 20250805L;
 
     /** Standard Constructor */
     public X_AD_Sequence_No (Properties ctx, int AD_Sequence_No_ID, String trxName)
@@ -39,8 +39,8 @@ public class X_AD_Sequence_No extends PO implements I_AD_Sequence_No, I_Persiste
       /** if (AD_Sequence_No_ID == 0)
         {
 			setAD_Sequence_ID (0);
-			setCalendarYearMonth (null);
 			setCurrentNext (0);
+			setSequenceKey (null);
         } */
     }
 
@@ -51,8 +51,8 @@ public class X_AD_Sequence_No extends PO implements I_AD_Sequence_No, I_Persiste
       /** if (AD_Sequence_No_ID == 0)
         {
 			setAD_Sequence_ID (0);
-			setCalendarYearMonth (null);
 			setCurrentNext (0);
+			setSequenceKey (null);
         } */
     }
 
@@ -63,8 +63,8 @@ public class X_AD_Sequence_No extends PO implements I_AD_Sequence_No, I_Persiste
       /** if (AD_Sequence_No_UU == null)
         {
 			setAD_Sequence_ID (0);
-			setCalendarYearMonth (null);
 			setCurrentNext (0);
+			setSequenceKey (null);
         } */
     }
 
@@ -75,8 +75,8 @@ public class X_AD_Sequence_No extends PO implements I_AD_Sequence_No, I_Persiste
       /** if (AD_Sequence_No_UU == null)
         {
 			setAD_Sequence_ID (0);
-			setCalendarYearMonth (null);
 			setCurrentNext (0);
+			setSequenceKey (null);
         } */
     }
 
@@ -151,22 +151,6 @@ public class X_AD_Sequence_No extends PO implements I_AD_Sequence_No, I_Persiste
 		return (String)get_Value(COLUMNNAME_AD_Sequence_No_UU);
 	}
 
-	/** Set Year Month.
-		@param CalendarYearMonth YYYYMM
-	*/
-	public void setCalendarYearMonth (String CalendarYearMonth)
-	{
-		set_ValueNoCheck (COLUMNNAME_CalendarYearMonth, CalendarYearMonth);
-	}
-
-	/** Get Year Month.
-		@return YYYYMM
-	  */
-	public String getCalendarYearMonth()
-	{
-		return (String)get_Value(COLUMNNAME_CalendarYearMonth);
-	}
-
 	/** Set Current Next.
 		@param CurrentNext The next number to be used
 	*/
@@ -184,5 +168,21 @@ public class X_AD_Sequence_No extends PO implements I_AD_Sequence_No, I_Persiste
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Sequence Key.
+		@param SequenceKey Stores a unique key that determines the sequence numbering scope.
+	*/
+	public void setSequenceKey (String SequenceKey)
+	{
+		set_ValueNoCheck (COLUMNNAME_SequenceKey, SequenceKey);
+	}
+
+	/** Get Sequence Key.
+		@return Stores a unique key that determines the sequence numbering scope.
+	  */
+	public String getSequenceKey()
+	{
+		return (String)get_Value(COLUMNNAME_SequenceKey);
 	}
 }
