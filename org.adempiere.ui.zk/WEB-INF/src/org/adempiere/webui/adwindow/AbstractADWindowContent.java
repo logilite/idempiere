@@ -360,6 +360,8 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     public void focusToActivePanel() {
     	IADTabpanel adTabPanel = adTabbox.getSelectedTabpanel();
 		focusToTabpanel(adTabPanel);
+		WindowValidatorEvent event = new WindowValidatorEvent(adwindow, WindowValidatorEventType.AFTER_DATA_LOAD.getName());
+    	WindowValidatorManager.getInstance().fireWindowValidatorEvent(event, null);
 	}
 
     /**
@@ -2263,7 +2265,6 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         IADTabpanel adtab = adTabbox.getSelectedTabpanel();
         toolbar.enableProcessButton(!isNewRow && adtab != null && adtab.isEnableProcessButton());
         toolbar.enableCustomize(adtab.isEnableCustomizeButton());
-
     }
 
 	/**

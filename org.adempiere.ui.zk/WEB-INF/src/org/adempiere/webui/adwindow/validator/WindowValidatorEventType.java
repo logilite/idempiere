@@ -45,7 +45,8 @@ public enum WindowValidatorEventType {
 	BEFORE_DOC_ACTION("beforeDocAction"),
 	AFTER_DOC_ACTION("afterDocAction"),
 	BEFORE_PROCESS("beforeProcess"),
-	AFTER_PROCESS("afterProcess");
+	AFTER_PROCESS("afterProcess"),
+	AFTER_DATA_LOAD("afterDataLoad");
 	
 	/** Event name **/
 	private String name;
