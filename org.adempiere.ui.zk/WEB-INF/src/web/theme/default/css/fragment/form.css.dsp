@@ -27,6 +27,7 @@
 }
 .confirm-panel-right {
 	float: right;
+	padding: 1px;
 }
 .confirm-panel-left {
 	float: left;
@@ -64,7 +65,7 @@
 	height: 29px;
 }
 .status-db {
-    white-space: nowrap;
+	white-space: nowrap;
 	padding-top: 0;
 	padding-bottom: 0;
 	padding-left: 5px;
@@ -74,6 +75,7 @@
 	height: 100%;
 	margin: 0;
 	border-left: solid 1px #9CBDFF;
+	display: inline-block;
 }
 .status-info {
 	padding-right: 10px;
@@ -93,4 +95,15 @@
 <%-- report wizard --%>
 .report-wizard-footer {
 	width: 100%;
+}
+
+<%-- workflow activity --%>
+.workflow-activity-form {
+}
+.workflow-panel-table {
+	border: 0px;
+}
+
+<%-- payment form --%>
+.payment-form-content {
 }

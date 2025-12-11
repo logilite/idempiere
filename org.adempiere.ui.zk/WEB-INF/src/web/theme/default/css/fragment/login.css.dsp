@@ -75,10 +75,40 @@
 }
 
 .login-east-panel, .login-west-panel {
-	width: 350px;
-	background-color: #E0EAF7;
+	width: 380px;
+	background-color: #E5E5E5;
 	position: relative;
+	border-right: 2px solid #3c3c3c !important;
 }
+
+/* SSO buttons */
+.sso-login-btn {
+    width: 65% !important;
+    max-width: 300px;
+    border-radius: 20px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 8px 15px !important;
+}
+
+.sso-login-btn img {
+    margin-right: 10px;
+    height: 24px;
+}
+
+.sso-login-btn.icon-only img {
+    margin: 0 !important;
+    height: 24px;
+}
+
+@media (max-width: 600px) {
+    .sso-login-btn {
+        width: 95% !important;
+        overflow: hidden;
+    	text-overflow: ellipsis;
+    }
+}
+
 @media screen and (max-width: 659px) {
 	.login-box-body, .login-box-header, .login-box-footer {
 		background-image: none;
@@ -110,32 +140,3 @@
 		padding: 0px
 	}
 }
-
-/* SSO buttons */
-.sso-login-btn {
-    width: 65% !important;
-    max-width: 300px;
-    border-radius: 20px !important;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding: 8px 15px !important;
-}
-
-.sso-login-btn img {
-    margin-right: 10px;
-    height: 24px;
-}
-
-.sso-login-btn.icon-only img {
-    margin: 0 !important;
-    height: 24px;
-}
-
-@media (max-width: 600px) {
-    .sso-login-btn {
-        width: 95% !important;
-        overflow: hidden;
-    	text-overflow: ellipsis;
-    }
-}
-

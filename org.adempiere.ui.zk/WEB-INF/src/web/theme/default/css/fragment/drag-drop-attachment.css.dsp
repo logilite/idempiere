@@ -1,7 +1,7 @@
 <%-- CSS for Drag & Drop on Attachment --%>
 
 .attachment-drag-entered {
-    border: 5px dashed #3fb900;
+    border: 5px dashed #0093F9;
 }
 
 .drop-progress-meter

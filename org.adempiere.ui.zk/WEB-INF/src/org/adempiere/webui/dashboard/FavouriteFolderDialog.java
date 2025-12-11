@@ -113,7 +113,7 @@ public class FavouriteFolderDialog extends Window implements EventListener<Event
 		this.setMode(Window.MODE_HIGHLIGHTED);
 		this.setSclass("popup-dialog fav-add-edit-dialog");
 		ZKUpdateUtil.setWindowWidthX(this, 325);
-		ZKUpdateUtil.setWindowHeightX(this, 225);
+		ZKUpdateUtil.setWindowHeightX(this, 250);
 
 		mainLayout.setParent(this);
 

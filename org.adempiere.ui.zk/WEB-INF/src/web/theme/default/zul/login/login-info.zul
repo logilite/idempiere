@@ -12,7 +12,7 @@ Copyright (C) 2009 Idalica Corporation
 	}
 
 	.loginInfoBox {
-		background-color: #9CBDFF;
+		background-color: #B0B0B0;
 		margin: 5px;
 		padding: 3px;
 		margin-top: 20px;

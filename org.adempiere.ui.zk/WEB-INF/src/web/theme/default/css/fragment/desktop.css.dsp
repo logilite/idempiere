@@ -22,6 +22,7 @@
 	border-bottom: 1px solid #C5C5C5 !important;
 	padding-left: 4px;
 }
+
 .desktop-header.mobile {
 	height: 36px;
 	padding: 4px 4px;
@@ -74,10 +75,6 @@
 .desktop-tabbox {
 	padding-top: 0px; 
 	background-color: #E4E4E4;
-}
-
-.desktop-tabbox .z-tabs-content {
-    width: 5555px !important;
 }
 
 .desktop-tabbox .z-tab {
@@ -268,6 +265,10 @@
 .user-panel-popup .z-popup-content > .z-vlayout {
 	overflow-x: auto;
 	padding: 8px;
+}
+
+.help-entitytype {
+	padding-top: 5px;
 }
 
 .dashboard-content-help .z-popup-content {

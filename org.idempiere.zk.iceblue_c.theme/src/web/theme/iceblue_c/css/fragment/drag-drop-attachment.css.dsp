@@ -1,7 +1,7 @@
 <%-- CSS for Drag & Drop on Attachment --%>
 
 .attachment-drag-entered {
-    border: 5px dashed #3fb900;
+    border: 5px dashed #0093F9;
 }
 
 .drop-progress-meter
@@ -10,7 +10,7 @@
 }
 
 .z-progressmeter-image {
-	background: linear-gradient(to bottom, #1eff00 0%, #1a6b18 100%);
+	background: linear-gradient(to bottom, #0093F9 0%, #54eeff 15%, #0093F9 100%);
 }
 
 .popup-content-background 

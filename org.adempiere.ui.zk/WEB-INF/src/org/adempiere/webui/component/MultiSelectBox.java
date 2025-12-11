@@ -144,12 +144,14 @@ public class MultiSelectBox extends Div
 		{
 			if (!isEnabled())
 			{
+				LayoutUtils.removeSclass("multi-select-textbox", textbox);
 				LayoutUtils.addSclass("multi-select-textbox-readonly", textbox);
 				textbox.setPopup((Popup) null);
 			}
 			else
 			{
 				LayoutUtils.addSclass("multi-select-textbox", textbox);
+				LayoutUtils.removeSclass("multi-select-textbox-readonly", textbox);
 				textbox.setPopup("uuid(" + popup.getUuid() + "), after_start");
 			}
 		}

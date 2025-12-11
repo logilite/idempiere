@@ -59,17 +59,6 @@ table.z-vbox > tbody > tr > td > table {
 	width: 100%;	
 }
 
-<%-- workflow activity --%>
-.workflow-activity-form {
-}
-.workflow-panel-table {
-	border: 0px;
-}
-
-<%-- payment form --%>
-.payment-form-content {
-}
-
 <c:include page="fragment/login.css.dsp" />
 
 <c:include page="fragment/desktop.css.dsp" />
@@ -136,7 +125,6 @@ table.z-vbox > tbody > tr > td > table {
     <c:include page="fragment/custom.css.dsp" />
 </c:if>
 
-
 <%-- Multi Select List & Table Editor Start --%>
 
 .multi-select-box {
@@ -149,6 +137,7 @@ table.z-vbox > tbody > tr > td > table {
   max-height: 350px;
   min-width: 250px;
   overflow: auto;
+  height: auto !important;
 }
 
 .multi-select-vbox {
@@ -171,49 +160,3 @@ table.z-vbox > tbody > tr > td > table {
 }
 
 <%-- Multi Select List & Table Editor End --%>
-
-
-<%-- Attachment by Drag & Drop Start --%>
-
-.drop-btn-holder {
-	background: #eee;
-    border: 5px dashed #ccc;
-    width: 99%;
-    min-height: 100px;
-    margin: 1px 1px !important;
-}
-
-.drop-btn-holder:hover {
-    border: 5px dashed #2184ba;
-}
-
-.attachment-drag-entered {
-    border: 5px dashed #3fb900;
-}
-
-.drop-progress-meter
-{
-	width:100% !important;
-}
-
-.z-progressmeter-image {
-	background: linear-gradient(to bottom, #1eff00 0%, #1a6b18 100%);
-}
-
-<%-- Attachment by Drag & Drop End --%>
-
-input[type="checkbox"]:focus
-{
- 	 outline: #0000ff auto 1px;
-	-moz-outline-radius: 3px;
-}
-
-<%-- Quick Form Read-only Component --%>
-.quickform-readonly .z-textbox-readonly, .quickform-readonly .z-intbox-readonly, .quickform-readonly .z-longbox-readonly, .quickform-readonly .z-doublebox-readonly,
-.quickform-readonly .z-decimalbox-readonly, .quickform-readonly .z-datebox-readonly, .quickform-readonly .z-timebox-readonly, .quickform-readonly .editor-input-disd,
-.quickform-readonly .z-textbox[readonly], .quickform-readonly .z-intbox[readonly], .quickform-readonly .z-longbox[readonly], .quickform-readonly .z-doublebox[readonly],
-.quickform-readonly .z-decimalbox[readonly], .quickform-readonly .z-datebox[readonly], .quickform-readonly .z-timebox[readonly]
-{
-    color: #252525 !important;
-    opacity: .8;
-}
