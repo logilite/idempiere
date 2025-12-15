@@ -63,8 +63,8 @@ public class WMultiSelectSearchEditor extends WEditor implements ContextMenuList
 {
 	private static final String[]	LISTENER_EVENTS	= { Events.ON_CLICK, Events.ON_SELECT };
 	private Lookup					lookup;
-	private String					m_tableName		= null;
-	private String					m_keyColumnName	= null;
+	protected String				m_tableName		= null;
+	protected String				m_keyColumnName	= null;
 	private String					columnName;
 	private Object					value;
 	private InfoPanel				infoPanel		= null;
@@ -356,7 +356,7 @@ public class WMultiSelectSearchEditor extends WEditor implements ContextMenuList
 		}
 	}
 
-	private void processSelectedKeys(Object value)
+	protected void processSelectedKeys(Object value)
 	{
 		if (log.isLoggable(Level.FINE))
 			log.fine("Value=" + value);
@@ -549,7 +549,7 @@ public class WMultiSelectSearchEditor extends WEditor implements ContextMenuList
 		}
 	}
 
-	private String getWhereClause()
+	protected String getWhereClause()
 	{
 		String whereClause = "";
 

@@ -870,7 +870,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 	 * Parse where clause from lookup validation code.
 	 * @return where clause
 	 */
-	private String getWhereClause()
+	protected String getWhereClause()
 	{
 		String whereClause = "";
 
