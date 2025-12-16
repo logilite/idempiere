@@ -222,6 +222,7 @@ public class ProjectIssueUtil
 		pi.setMandatory(locatorID, projectIssue.getM_Product_ID(), qty);
 		pi.setM_InOutLine_ID(projectIssue.getM_InOutLine_ID());
 		pi.setMovementDate(projectIssue.getMovementDate());
+		pi.setDateAcct(projectIssue.getDateAcct());
 		pi.setM_AttributeSetInstance_ID(asiID);
 		pi.setDescription(desc);
 		pi.saveEx(trxName);

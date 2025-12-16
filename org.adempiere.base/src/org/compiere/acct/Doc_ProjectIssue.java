@@ -71,7 +71,7 @@ public class Doc_ProjectIssue extends Doc
 		setC_Currency_ID(NO_CURRENCY);
 		m_issue = (MProjectIssue)getPO();
 		setDateDoc (m_issue.getMovementDate());
-		setDateAcct(m_issue.getMovementDate());
+		setDateAcct(m_issue.getDateAcct());
 
 		//	Pseudo Line
 		m_line = new DocLine (m_issue, this);
@@ -137,7 +137,7 @@ public class Doc_ProjectIssue extends Doc
 		// check is date of both issue same
 		boolean isCreatePost = !(as.isDeleteReverseCorrectPosting()
 									&& m_issue.getReversal_ID() > 0
-										&& Util.compareDate(m_issue.getMovementDate(), m_issue.getReversal().getMovementDate()) == 0);
+										&& Util.compareDate(m_issue.getDateAcct(), m_issue.getReversal().getDateAcct()) == 0);
 		setC_Currency_ID(as.getC_Currency_ID());
 
 		MProject project = (MProject) MTable.get(getCtx(), MProject.Table_ID).getPO(m_issue.getC_Project_ID(),
@@ -245,7 +245,7 @@ public class Doc_ProjectIssue extends Doc
 		if (m_as.isDeleteReverseCorrectPosting() && reversal_ID > 0)
 		{
 			MProjectIssue rev_Issue = (MProjectIssue) m_issue.getReversal();
-			if (Util.compareDate(m_issue.getMovementDate(), rev_Issue.getMovementDate()) == 0 && isNoCostDetailCreated(m_issue, rev_Issue))
+			if (Util.compareDate(m_issue.getDateAcct(), rev_Issue.getDateAcct()) == 0 && isNoCostDetailCreated(m_issue, rev_Issue))
 			{
 				String revpostedsql = "SELECT Posted FROM C_ProjectIssue WHERE C_ProjectIssue_ID=?";
 				String posted = DB.getSQLValueStringEx(getTrxName(), revpostedsql, rev_Issue.get_ID());
@@ -268,12 +268,8 @@ public class Doc_ProjectIssue extends Doc
 	 */
 	public boolean isNoCostDetailCreated(MProjectIssue issue, MProjectIssue revIssue)
 	{
-		String sql = "SELECT COUNT(1) "
-						+ " FROM M_CostDetail cd "
-							+ " WHERE cd.C_ProjectIssue_ID IN ( "
-							+ "     SELECT pji.C_ProjectIssue_ID FROM C_ProjectIssue pji WHERE pji.C_ProjectIssue_ID IN (?, ?) "
-							+ " ) "
-							+ " AND cd.C_AcctSchema_ID = ? AND cd.IsActive = 'Y' ";
+		String sql = "SELECT COUNT(1) FROM M_CostDetail cd "
+						+ " WHERE cd.C_ProjectIssue_ID IN (?, ?) AND cd.C_AcctSchema_ID = ? AND cd.IsActive = 'Y' ";
 
 		int count = DB.getSQLValue(getTrxName(), sql, issue.getC_ProjectIssue_ID(), revIssue.getC_ProjectIssue_ID(), m_as.getC_AcctSchema_ID());
 		return count <= 0;
