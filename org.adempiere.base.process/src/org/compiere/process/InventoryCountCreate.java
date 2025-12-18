@@ -21,14 +21,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.Iterator;
 import java.util.Vector;
 import java.util.logging.Level;
 
 import org.compiere.model.MInventory;
 import org.compiere.model.MInventoryLine;
-import org.compiere.model.MTable;
+import org.compiere.model.MInventoryLineMA;
 import org.compiere.model.MProcessPara;
+import org.compiere.model.MSysConfig;
+import org.compiere.model.MTable;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -65,6 +68,7 @@ public class InventoryCountCreate extends SvrProcess
 	
 	/** Inventory Line				*/
 	private MInventoryLine	m_line = null; 
+	private Timestamp		oldDateMPolicy			= null;
 	
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -105,6 +109,9 @@ public class InventoryCountCreate extends SvrProcess
 	 */
 	protected String doIt () throws Exception
 	{
+		boolean isInvCreateLineMA = MSysConfig.getBooleanValue(MSysConfig.INVENTORYCOUNT_CREATE_LINEMA, false,
+				getAD_Client_ID());
+		
 		if (log.isLoggable(Level.INFO)) log.info("M_Inventory_ID=" + p_M_Inventory_ID
 			+ ", M_Locator_ID=" + p_M_Locator_ID + ", LocatorValue=" + p_LocatorValue
 			+ ", ProductValue=" + p_ProductValue 
@@ -159,13 +166,22 @@ public class InventoryCountCreate extends SvrProcess
 			if (log.isLoggable(Level.FINE)) log.fine("'0' Inserted #" + no);
 		}
 		
-		StringBuilder sql = new StringBuilder("SELECT p.M_Product_ID, l.M_Locator_ID, ");
-							   sql.append(" Sum(s.QtyOnHand) QtyOnHand, l.Value, p.Value ");
-							   sql.append(" FROM M_Product p");
-							   sql.append(" INNER JOIN M_StorageOnHand s ON (s.M_Product_ID=p.M_Product_ID)");
-							   sql.append(" INNER JOIN M_Locator l ON (s.M_Locator_ID=l.M_Locator_ID) ");
-							   sql.append("WHERE l.M_Warehouse_ID=?");
-							   sql.append(" AND p.IsActive='Y' AND p.IsStocked='Y' and p.ProductType='I'");
+		StringBuilder sql;
+		if (isInvCreateLineMA)
+		{
+			sql = new StringBuilder("SELECT s.M_Product_ID, s.M_Locator_ID, s.M_AttributeSetInstance_ID,");
+			sql.append(" s.QtyOnHand, p.M_AttributeSet_ID ,s.DateMaterialPolicy");
+		}
+		else
+		{
+			sql = new StringBuilder("SELECT p.M_Product_ID, l.M_Locator_ID, ");
+			sql.append(" Sum(s.QtyOnHand) QtyOnHand, l.Value, p.Value ");
+		}
+		sql.append(" FROM M_Product p");
+		sql.append(" INNER JOIN M_StorageOnHand s ON (s.M_Product_ID=p.M_Product_ID)");
+		sql.append(" INNER JOIN M_Locator l ON (s.M_Locator_ID=l.M_Locator_ID) ");
+		sql.append("WHERE l.M_Warehouse_ID=?");
+		sql.append(" AND p.IsActive='Y' AND p.IsStocked='Y' and p.ProductType='I'");
 		//
 		if (p_M_Locator_ID != 0)
 			sql.append(" AND s.M_Locator_ID=?");
@@ -195,8 +211,12 @@ public class InventoryCountCreate extends SvrProcess
 			   .append(" AND il.M_Locator_ID=s.M_Locator_ID")
 			   .append(" AND COALESCE(il.M_AttributeSetInstance_ID,0)=COALESCE(s.M_AttributeSetInstance_ID,0))");
 		//
-		sql.append(" Group By  p.M_Product_ID, l.M_Locator_ID, l.Value, p.Value"
-				+ " ORDER BY l.Value, p.Value");	//	Locator/Product
+		if (isInvCreateLineMA)
+			sql.append(
+					" ORDER BY l.Value, p.Value, s.M_AttributeSetInstance_ID, s.DateMaterialPolicy, s.QtyOnHand DESC"); // Locator/Product
+		else
+			sql.append(" Group By  p.M_Product_ID, l.M_Locator_ID, l.Value, p.Value" 
+							+ " ORDER BY l.Value, p.Value"); // Locator/Product
 		//
 		int count = 0;
 		PreparedStatement pstmt = null;
@@ -219,7 +239,22 @@ public class InventoryCountCreate extends SvrProcess
 			{
 				int M_Product_ID = rs.getInt(1);
 				int M_Locator_ID = rs.getInt(2);
-				BigDecimal QtyOnHand = rs.getBigDecimal(3);
+				
+				int M_AttributeSetInstance_ID = 0;
+				BigDecimal QtyOnHand;
+				int M_AttributeSet_ID = 0;
+				Timestamp dateMpolicy = null;
+				if (isInvCreateLineMA)
+				{
+					M_AttributeSetInstance_ID = rs.getInt(3);
+					QtyOnHand = rs.getBigDecimal(4);
+					M_AttributeSet_ID = rs.getInt(5);
+					dateMpolicy = rs.getTimestamp(6);
+				}
+				else
+				{
+					QtyOnHand = rs.getBigDecimal(3);
+				}
 				if (QtyOnHand == null)
 					QtyOnHand = Env.ZERO;
 				//
@@ -230,11 +265,19 @@ public class InventoryCountCreate extends SvrProcess
 		            || (p_QtyRange.equals("=") && compare == 0)
 		            || (p_QtyRange.equals("N") && compare != 0))
 		        {
-		        	m_line = new MInventoryLine (m_inventory, M_Locator_ID, 
-		        			M_Product_ID, 0,
-		        			QtyOnHand, QtyOnHand);		//	book/count
-	        		if (m_line.save())
-	        			count++;
+		        	if(isInvCreateLineMA)
+		        	{
+		        		count += createInventoryLine (M_Locator_ID, M_Product_ID, 
+								M_AttributeSetInstance_ID, QtyOnHand, M_AttributeSet_ID,dateMpolicy);
+		        	}
+		        	else
+		        	{
+		        		m_line = new MInventoryLine (m_inventory, M_Locator_ID, 
+			        			M_Product_ID, 0,
+			        			QtyOnHand, QtyOnHand);		//	book/count
+		        		if (m_line.save())
+		        			count++;
+		        	}
 		        }
 			}
 		}
@@ -263,6 +306,67 @@ public class InventoryCountCreate extends SvrProcess
 		StringBuilder msgreturn = new StringBuilder("@M_InventoryLine_ID@ - #").append(count);
 		return msgreturn.toString();
 	}	//	doIt
+	
+	/**
+	 * 	Create/Add to Inventory Line
+	 *	@param M_Product_ID product
+	 *	@param M_Locator_ID locator
+	 *	@param M_AttributeSetInstance_ID asi
+	 *	@param QtyOnHand qty
+	 *	@param M_AttributeSet_ID as
+	 *	@return lines added
+	 */
+	private int createInventoryLine (int M_Locator_ID, int M_Product_ID, 
+		int M_AttributeSetInstance_ID, BigDecimal QtyOnHand, int M_AttributeSet_ID,Timestamp dateMPolicy)
+	{
+		if (QtyOnHand.signum() == 0)
+			M_AttributeSetInstance_ID = 0;
+
+		// TODO???? This is not working --- must create one line and multiple MA
+		if (m_line != null 
+			&& m_line.getM_Locator_ID() == M_Locator_ID
+			&& m_line.getM_Product_ID() == M_Product_ID)
+		{
+			if (QtyOnHand.signum() == 0)
+				return 0;
+			//	Same ASI and Date
+			if (m_line.getM_AttributeSetInstance_ID() == M_AttributeSetInstance_ID && ((dateMPolicy==null && oldDateMPolicy==null) || (dateMPolicy!=null && dateMPolicy.equals(oldDateMPolicy)) || (oldDateMPolicy!=null && oldDateMPolicy.equals(dateMPolicy))))
+			{
+				m_line.setQtyBook(m_line.getQtyBook().add(QtyOnHand));
+				m_line.setQtyCount(m_line.getQtyCount().add(QtyOnHand));
+				m_line.saveEx();
+				return 0;
+			}
+			//	Save Old Line info
+			else if (m_line.getM_AttributeSetInstance_ID() != 0 )
+			{
+				MInventoryLineMA ma = new MInventoryLineMA (m_line, 
+					m_line.getM_AttributeSetInstance_ID(), m_line.getQtyBook(),oldDateMPolicy,true);
+				if (!ma.save())
+					log.warning("Could not save " + ma);
+			}
+			m_line.setM_AttributeSetInstance_ID(0);
+			m_line.setQtyBook(m_line.getQtyBook().add(QtyOnHand));
+			m_line.setQtyCount(m_line.getQtyCount().add(QtyOnHand));
+			m_line.saveEx();
+			
+			//
+			MInventoryLineMA ma = new MInventoryLineMA (m_line, 
+				M_AttributeSetInstance_ID, QtyOnHand,dateMPolicy,true);
+			if (!ma.save())
+				log.warning("Could not save " + ma);
+			return 0;
+		}
+		//	new line
+		m_line = new MInventoryLine (m_inventory, M_Locator_ID, 
+			M_Product_ID, M_AttributeSetInstance_ID,
+			QtyOnHand, QtyOnHand);		//	book/count
+		
+		oldDateMPolicy = dateMPolicy;
+		if (m_line.save())
+			return 1;
+		return 0;
+	}	//	createInventoryLine
 	
 	/**
 	 * Returns a sql where string with the given category id and all of its subcategory ids.
