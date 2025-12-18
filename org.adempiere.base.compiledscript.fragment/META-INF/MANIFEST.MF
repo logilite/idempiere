@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: iDempiere CompiledScript Cache Fragment
+Bundle-SymbolicName: org.adempiere.base.compiledscript.fragment
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: JSMGroup
+Fragment-Host: org.adempiere.base;bundle-version="11.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version>=17))"
