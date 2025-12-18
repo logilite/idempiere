@@ -136,6 +136,7 @@ public class MSysConfig extends X_AD_SysConfig
     @Deprecated(forRemoval = true, since = "11")
     public static final String INFO_DOUBLECLICKTOGGLESSELECTION = "INFO_DOUBLECLICKTOGGLESSELECTION";
     public static final String INFO_PRODUCT_SHOW_PRODUCTS_WITHOUT_PRICE = "INFO_PRODUCT_SHOW_PRODUCTS_WITHOUT_PRICE";
+    public static final String INVENTORYCOUNT_CREATE_LINEMA = "INVENTORYCOUNT_CREATE_LINEMA";
     public static final String Invoice_ReverseUseNewNumber = "Invoice_ReverseUseNewNumber";
     public static final String JASPER_SWAP_MAX_PAGES = "JASPER_SWAP_MAX_PAGES";
     public static final String LABEL_AUTOMATIC_COLOR = "LABEL_AUTOMATIC_COLOR";
