@@ -40,3 +40,4 @@ out/
 */.maven.run/**
 **/.idea/*
 partial-runtime/
+**/.DS_Store
