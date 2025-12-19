@@ -1099,6 +1099,7 @@ public class DocumentEngine implements DocAction
 			{
 				if (periodOpen) {
 					options[index++] = DocumentEngine.ACTION_Reverse_Correct;
+					options[index++] = DocumentEngine.ACTION_ReActivate;
 				}
 				options[index++] = DocumentEngine.ACTION_Reverse_Accrual;
 			}
