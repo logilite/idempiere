@@ -351,4 +351,11 @@ public class MRule extends X_AD_Rule implements ImmutablePOSupport
 		return this;
 	}
 
+	@Override
+	protected boolean afterSave(boolean newRecord, boolean success)
+	{
+		Core.invalidateCompiledScript(getAD_Rule_ID());
+		return super.afterSave(newRecord, success);
+	}
+
 }	//	MRule
