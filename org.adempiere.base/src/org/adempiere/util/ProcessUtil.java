@@ -286,7 +286,8 @@ public final class ProcessUtil {
 					}
 				}
 				bindings.put(MRule.ARGUMENTS_PREFIX + "ProcessInfo", pi);
-				msg = compiled.eval(bindings).toString();
+				Object result = compiled.eval(bindings);
+				msg = (result == null ? "" : result.toString());
 			} else {
 				// Fallback to non-compiled execution
 				ScriptEngine engine = rule.getScriptEngine();
@@ -332,7 +333,8 @@ public final class ProcessUtil {
 					}
 				}
 				engine.put(MRule.ARGUMENTS_PREFIX + "ProcessInfo", pi);
-				msg = engine.eval(rule.getScript()).toString();
+				Object result = engine.eval(rule.getScript());
+				msg = (result == null ? "" : result.toString());
 			}
 			//transaction should rollback if there are error in process
 			if (msg != null && msg.startsWith("@Error@"))

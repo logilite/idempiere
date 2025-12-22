@@ -1190,7 +1190,11 @@ public class Core {
 
 		// Cache only supported for Groovy script engine
 		if (!"groovy".equalsIgnoreCase(rule.getEngineName()))
+		{
+			if (s_log.isLoggable(Level.FINE))
+				s_log.fine("Script compilation caching is only supported for Groovy engine, skipping: " + rule.getEngineName());
 			return null;
+		}
 
 		Integer key = Integer.valueOf(rule.getAD_Rule_ID());
 

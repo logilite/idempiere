@@ -3010,8 +3010,9 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
                         bindings.put(MRule.ARGUMENTS_PREFIX + "OldValue", oldValue);
                         bindings.put(MRule.ARGUMENTS_PREFIX + "Ctx", m_vo.ctx);
                         try {
-                            this.activeCallouts.add(cmd);
-                            retValue = compiled.eval(bindings).toString();
+							this.activeCallouts.add(cmd);
+							Object result = compiled.eval(bindings);
+							retValue = result != null ? result.toString() : "";
                         }
                         catch (Exception e) {
                             this.log.log(Level.SEVERE, "", e);
@@ -3045,7 +3046,8 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 						try
 						{
 							activeCallouts.add(cmd);
-							retValue = engine.eval(rule.getScript()).toString();
+							Object result = engine.eval(rule.getScript());
+							retValue = result != null ? result.toString() : "";
 						}
 						catch (Exception e)
 						{
