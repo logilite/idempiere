@@ -2883,6 +2883,23 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 						parameters.add(null);
 						parameters.add(null);
 					}
+					else if (data instanceof MultiSelectColumn)
+					{
+						parameters.add(null);
+						parameters.add(null);
+						parameters.add(null);
+						Object multiValue = ((MultiSelectColumn) data).getValue();
+						if (multiValue instanceof Integer[])
+						{
+							parameters.add(multiValue);
+							parameters.add(null);
+						}
+						else
+						{
+							parameters.add(null);
+							parameters.add(multiValue);
+						}
+					}
 					else if (data instanceof Integer[] || data instanceof String[] )
 					{
 						parameters.add(null);
