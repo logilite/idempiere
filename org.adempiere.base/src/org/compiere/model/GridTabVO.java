@@ -629,7 +629,7 @@ public class GridTabVO implements Evaluatee, Serializable
 		GridTabVO clone = new GridTabVO(Ctx, windowNo);
 		clone.AD_Window_ID = AD_Window_ID;
 		clone.TabNo = TabNo;
-		Env.setContext(Ctx, windowNo, clone.TabNo, GridTab.CTX_AD_Tab_ID, String.valueOf(clone.AD_Tab_ID));
+		Env.setContext(Ctx, windowNo, clone.TabNo, GridTab.CTX_AD_Tab_ID, String.valueOf(AD_Tab_ID));
 		//
 		clone.AD_Tab_ID = AD_Tab_ID;
 		clone.AD_Tab_UU = AD_Tab_UU;
