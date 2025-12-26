@@ -175,12 +175,15 @@ public class InventoryCountCreate extends SvrProcess
 		}
 		else
 		{
-			sql = new StringBuilder("SELECT p.M_Product_ID, l.M_Locator_ID, ");
-			sql.append(" Sum(s.QtyOnHand) QtyOnHand, l.Value, p.Value ");
+			sql = new StringBuilder("SELECT p.M_Product_ID, l.M_Locator_ID, SUM(s.QtyOnHand) AS QtyOnHand,");
+			sql.append(
+					" CASE WHEN asi.IsInstanceAttribute='Y' THEN s.M_AttributeSetInstance_ID ELSE 0 END M_AttributeSetInstance_ID, l.Value, p.Value ");
+
 		}
 		sql.append(" FROM M_Product p");
 		sql.append(" INNER JOIN M_StorageOnHand s ON (s.M_Product_ID=p.M_Product_ID)");
 		sql.append(" INNER JOIN M_Locator l ON (s.M_Locator_ID=l.M_Locator_ID) ");
+		sql.append(" LEFT JOIN M_AttributeSet asi ON (p.M_AttributeSet_ID=asi.M_AttributeSet_ID) ");
 		sql.append("WHERE l.M_Warehouse_ID=?");
 		sql.append(" AND p.IsActive='Y' AND p.IsStocked='Y' and p.ProductType='I'");
 		//
@@ -216,8 +219,12 @@ public class InventoryCountCreate extends SvrProcess
 			sql.append(
 					" ORDER BY l.Value, p.Value, s.M_AttributeSetInstance_ID, s.DateMaterialPolicy, s.QtyOnHand DESC"); // Locator/Product
 		else
-			sql.append(" Group By  p.M_Product_ID, l.M_Locator_ID, l.Value, p.Value" 
-							+ " ORDER BY l.Value, p.Value"); // Locator/Product
+		{
+			sql.append(" GROUP BY p.M_Product_ID, l.M_Locator_ID, asi.IsInstanceAttribute, "
+					+ "CASE WHEN asi.IsInstanceAttribute='Y' THEN s.M_AttributeSetInstance_ID ELSE 0 END");
+			sql.append(" ORDER BY l.Value, p.Value"); // Locator/Product
+		}
+
 		//
 		int count = 0;
 		PreparedStatement pstmt = null;
@@ -241,13 +248,12 @@ public class InventoryCountCreate extends SvrProcess
 				int M_Product_ID = rs.getInt(1);
 				int M_Locator_ID = rs.getInt(2);
 				BigDecimal QtyOnHand = rs.getBigDecimal(3);
+				int M_AttributeSetInstance_ID = rs.getInt(4);
 
-				int M_AttributeSetInstance_ID = 0;
 				int M_AttributeSet_ID = 0;
 				Timestamp dateMpolicy = null;
 				if (isInvCreateLineMA)
 				{
-					M_AttributeSetInstance_ID = rs.getInt(4);
 					M_AttributeSet_ID = rs.getInt(5);
 					dateMpolicy = rs.getTimestamp(6);
 				}
@@ -269,7 +275,7 @@ public class InventoryCountCreate extends SvrProcess
 		        	else
 		        	{
 		        		m_line = new MInventoryLine (m_inventory, M_Locator_ID, 
-			        			M_Product_ID, 0,
+			        			M_Product_ID, M_AttributeSetInstance_ID,
 			        			QtyOnHand, QtyOnHand);		//	book/count
 		        		if (m_line.save())
 		        			count++;
