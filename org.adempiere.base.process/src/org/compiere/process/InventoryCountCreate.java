@@ -176,15 +176,11 @@ public class InventoryCountCreate extends SvrProcess
 		else
 		{
 			sql = new StringBuilder("SELECT p.M_Product_ID, l.M_Locator_ID, SUM(s.QtyOnHand) AS QtyOnHand,");
-			sql.append(
-					" CASE WHEN asi.IsInstanceAttribute='Y' THEN s.M_AttributeSetInstance_ID ELSE 0 END M_AttributeSetInstance_ID, l.Value, p.Value ");
-
+			sql.append(" s.M_AttributeSetInstance_ID, l.Value, p.Value ");
 		}
 		sql.append(" FROM M_Product p");
 		sql.append(" INNER JOIN M_StorageOnHand s ON (s.M_Product_ID=p.M_Product_ID)");
 		sql.append(" INNER JOIN M_Locator l ON (s.M_Locator_ID=l.M_Locator_ID) ");
-		if (!isInvCreateLineMA)
-			sql.append(" LEFT JOIN M_AttributeSet asi ON (p.M_AttributeSet_ID=asi.M_AttributeSet_ID) ");
 		sql.append("WHERE l.M_Warehouse_ID=?");
 		sql.append(" AND p.IsActive='Y' AND p.IsStocked='Y' and p.ProductType='I'");
 		//
@@ -221,9 +217,8 @@ public class InventoryCountCreate extends SvrProcess
 					" ORDER BY l.Value, p.Value, s.M_AttributeSetInstance_ID, s.DateMaterialPolicy, s.QtyOnHand DESC"); // Locator/Product
 		else
 		{
-			sql.append(" GROUP BY p.M_Product_ID, l.M_Locator_ID, "
-					+ "CASE WHEN asi.IsInstanceAttribute='Y' THEN s.M_AttributeSetInstance_ID ELSE 0 END");
-			sql.append(" ORDER BY l.Value, p.Value"); // Locator/Product
+			sql.append(" GROUP BY p.M_Product_ID, l.M_Locator_ID, s.M_AttributeSetInstance_ID");
+			sql.append(" ORDER BY l.Value, p.Value, s.M_AttributeSetInstance_ID"); // Locator/Product
 		}
 
 		//
