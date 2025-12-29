@@ -2080,7 +2080,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 								+ " - Value=" + value + " error : " + CLogger.retrieveErrorString("check logs"));
 		}
 
-		po.save(); // persist change
+		po.saveEx(); // persist change
 
 		// Verify the saved value matches what was written
 		Object savedValue = po.get_ValueOfColumn(AD_Column_ID);
