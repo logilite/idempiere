@@ -532,7 +532,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 			//	Product requires ASI
 			if (line.getM_AttributeSetInstance_ID() == 0)
 			{
-				MProduct product = MProduct.get(getCtx(), line.getM_Product_ID(), get_TrxName());
+				MProduct product = line.getProduct();
 				if (product != null && product.isASIMandatoryFor(null, line.isSOTrx()))
 				{
 					if (product.getAttributeSet() != null && !product.getAttributeSet().excludeTableEntry(MInventoryLine.Table_ID, line.isSOTrx())) {
@@ -548,7 +548,7 @@ public class MInventory extends X_M_Inventory implements DocAction
 								qtyma = qtyma.add(ma.getMovementQty());
 							}
 						}
-						if (qtyma.subtract(qtyDiff).signum() != 0) {
+						if (qtyma.compareTo(qtyDiff) != 0) {
 							m_processMsg = "@Line@ " + line.getLine() + ": @FillMandatory@ @M_AttributeSetInstance_ID@";
 							return DocAction.STATUS_Invalid;
 						}
