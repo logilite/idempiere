@@ -13,11 +13,11 @@ INSERT INTO AD_IndexColumn (AD_Client_ID,AD_Org_ID,AD_IndexColumn_ID,AD_IndexCol
 ;
 
 -- 31-Dec-2025, 6:37:33 pm IST
-INSERT INTO AD_IndexColumn (AD_Client_ID,AD_Org_ID,AD_IndexColumn_ID,AD_IndexColumn_UU,Created,CreatedBy,EntityType,IsActive,Updated,UpdatedBy,AD_Column_ID,AD_TableIndex_ID,SeqNo) VALUES (0,0,201770,'249a5206-3a8d-4ffd-a4ed-3eaa68f15055',TO_TIMESTAMP('2025-12-31 18:37:32','YYYY-MM-DD HH24:MI:SS'),100,'D','Y',TO_TIMESTAMP('2025-12-31 18:37:32','YYYY-MM-DD HH24:MI:SS'),100,200327,201292,10)
+INSERT INTO AD_IndexColumn (AD_Client_ID,AD_Org_ID,AD_IndexColumn_ID,AD_IndexColumn_UU,Created,CreatedBy,EntityType,IsActive,Updated,UpdatedBy,AD_Column_ID,AD_TableIndex_ID,SeqNo) VALUES (0,0,201770,'249a5206-3a8d-4ffd-a4ed-3eaa68f15055',TO_TIMESTAMP('2025-12-31 18:37:32','YYYY-MM-DD HH24:MI:SS'),100,'D','Y',TO_TIMESTAMP('2025-12-31 18:37:32','YYYY-MM-DD HH24:MI:SS'),100,200327,201292,20)
 ;
 
 -- 31-Dec-2025, 6:37:42 pm IST
-INSERT INTO AD_IndexColumn (AD_Client_ID,AD_Org_ID,AD_IndexColumn_ID,AD_IndexColumn_UU,Created,CreatedBy,EntityType,IsActive,Updated,UpdatedBy,AD_Column_ID,AD_TableIndex_ID,SeqNo) VALUES (0,0,201771,'24aca515-d12d-4322-9bed-65c50460e1f8',TO_TIMESTAMP('2025-12-31 18:37:41','YYYY-MM-DD HH24:MI:SS'),100,'D','Y',TO_TIMESTAMP('2025-12-31 18:37:41','YYYY-MM-DD HH24:MI:SS'),100,200350,201292,10)
+INSERT INTO AD_IndexColumn (AD_Client_ID,AD_Org_ID,AD_IndexColumn_ID,AD_IndexColumn_UU,Created,CreatedBy,EntityType,IsActive,Updated,UpdatedBy,AD_Column_ID,AD_TableIndex_ID,SeqNo) VALUES (0,0,201771,'24aca515-d12d-4322-9bed-65c50460e1f8',TO_TIMESTAMP('2025-12-31 18:37:41','YYYY-MM-DD HH24:MI:SS'),100,'D','Y',TO_TIMESTAMP('2025-12-31 18:37:41','YYYY-MM-DD HH24:MI:SS'),100,200350,201292,30)
 ;
 
 -- 31-Dec-2025, 6:37:45 pm IST
