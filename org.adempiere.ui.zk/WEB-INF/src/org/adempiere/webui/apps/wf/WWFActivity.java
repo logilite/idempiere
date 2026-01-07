@@ -389,7 +389,19 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 		int AD_Client_ID = Env.getAD_Client_ID(Env.getCtx());
 		int count = new Query(Env.getCtx(), MWFActivity.Table_Name, MWFActivity.getWhereUserPendingActivities(), null)
 				.setApplyAccessFilter(true, false)
-				.setParameters(AD_User_ID, AD_User_ID, AD_User_ID, AD_User_ID, AD_User_ID, AD_Client_ID)
+						.setParameters(
+										AD_User_ID, // #1 Owner
+										AD_User_ID, // #2 Owner substitute
+										AD_User_ID, // #3 Invoker
+										AD_User_ID, // #4 Invoker substitute
+										AD_User_ID, // #5 Responsible User
+										AD_User_ID, // #6 Responsible User substitute
+										AD_User_ID, // #7 Responsible Role
+										AD_User_ID, // #8 Responsible Role substitute
+										AD_User_ID, // #9 Manual Responsible
+										AD_User_ID, // #10 Manual Responsible substitute
+										AD_Client_ID // #11 Client
+						)
 				.count();
 		return count;
 	}
@@ -410,7 +422,19 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 		int AD_Client_ID = Env.getAD_Client_ID(Env.getCtx());
 		Iterator<MWFActivity> it = new Query(Env.getCtx(), MWFActivity.Table_Name, MWFActivity.getWhereUserPendingActivities(), null)
 				.setApplyAccessFilter(true, false)
-				.setParameters(AD_User_ID, AD_User_ID, AD_User_ID, AD_User_ID, AD_User_ID, AD_Client_ID)
+				.setParameters(
+							    AD_User_ID, // #1 Owner
+							    AD_User_ID, // #2 Owner substitute
+							    AD_User_ID, // #3 Invoker
+							    AD_User_ID, // #4 Invoker substitute
+							    AD_User_ID, // #5 Responsible User
+							    AD_User_ID, // #6 Responsible User substitute
+							    AD_User_ID, // #7 Responsible Role
+							    AD_User_ID, // #8 Responsible Role substitute
+							    AD_User_ID, // #9 Manual Responsible
+							    AD_User_ID, // #10 Manual Responsible substitute
+							    AD_Client_ID // #11 Client
+							)
 				.setOrderBy("AD_WF_Activity.Priority DESC, AD_WF_Activity.Created")
 				.iterate();
 
@@ -715,7 +739,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 				String errorMsg = nodeVarForm.validateMandatory();
 				if (!Util.isEmpty(errorMsg, true))
 				{
-					Dialog.error(m_WindowNo, "Error", errorMsg);
+					Dialog.error(m_WindowNo, "Error", Msg.parseTranslation(Env.getCtx(), errorMsg));
 					Clients.clearBusy();
 					return;
 				}
@@ -738,7 +762,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 				}
 				if (value == null || value.length() == 0)
 				{
-					Dialog.error(m_WindowNo, "FillMandatory", Msg.getMsg(Env.getCtx(), "Answer"));
+					Dialog.error(m_WindowNo, "FillMandatory", Msg.parseTranslation(Env.getCtx(), "Answer"));
 					trx.rollback();
 					trx.close();
 					return;
@@ -756,7 +780,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 
 					if (!Util.isEmpty(error, true))
 					{
-						Dialog.error(m_WindowNo, "Error", error);
+						Dialog.error(m_WindowNo, "Error", Msg.parseTranslation(Env.getCtx(), error));
 						trx.rollback();
 						return;
 					}
@@ -791,7 +815,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 
 					if (!Util.isEmpty(error, true))
 					{
-						Dialog.error(m_WindowNo, "Error", error);
+						Dialog.error(m_WindowNo, "Error", Msg.parseTranslation(Env.getCtx(), error));
 						trx.rollback();
 						return;
 					}
@@ -830,7 +854,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 		catch (Exception e)
 		{
             log.log(Level.SEVERE, node.getName(), e);
-            Dialog.error(m_WindowNo, "Error", e.toString());
+            Dialog.error(m_WindowNo, "Error", e.getLocalizedMessage());
 			trx.rollback();
 			trx.close();
 			return;
