@@ -1184,7 +1184,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			}
 			else if (MWFResponsible.RESPONSIBLETYPE_Human.equals(respType) && resp.getAD_User_ID() > 0)
 			{
-				if (m_activity.getAD_User_ID() != 0 && !substituteUserID.contains(m_activity.getAD_User_ID()))
+				if (m_activity.getAD_User_ID() != 0 && substituteUserID.contains(m_activity.getAD_User_ID()))
 				{
 					return true;
 				}
