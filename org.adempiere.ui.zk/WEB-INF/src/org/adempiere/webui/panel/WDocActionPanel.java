@@ -20,6 +20,7 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -162,9 +163,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	private Map <Integer, String>	valMap;
 	
 	/** Active substitute users (including the current user). */
-	private Set <Integer>			substituteUserID;
+	private Set <Integer>			substituteUserID = new HashSet<>();
 	/** Active roles assigned to substitute users. */
-	private Set <Integer>			substituteRoleID;
+	private Set <Integer>			substituteRoleID = new HashSet<>();
 
 	private static final CLogger logger;
 
@@ -261,10 +262,12 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	 */
 	private void loadSubstituteDetails( )
 	{
+		substituteUserID.clear();
+		substituteRoleID.clear();
+
 		if (m_activity != null)
 		{
-			final String subUserSQL
-									= "SELECT AD_User_ID FROM AD_User WHERE AD_User_ID IN (SELECT AD_User_ID FROM AD_User_Substitute  WHERE Substitute_ID = ? "
+			final String subUserSQL = "SELECT AD_User_ID FROM AD_User WHERE AD_User_ID IN (SELECT AD_User_ID FROM AD_User_Substitute  WHERE Substitute_ID = ? "
 										+ "AND (ValidFrom IS NULL OR ValidFrom <= CURRENT_DATE)  AND (ValidTo IS NULL OR ValidTo >= CURRENT_DATE) AND IsActive = 'Y') OR AD_User_ID = ? ";
 			int[] userIDs = DB.getIDsEx(m_activity.get_TrxName(), subUserSQL, m_AD_User_ID, m_AD_User_ID);
 			substituteUserID = Arrays.stream(userIDs).boxed().collect(Collectors.toSet());
@@ -273,6 +276,11 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			final String subUserRoleSQL = "SELECT AD_Role_ID FROM AD_User_Roles WHERE AD_User_ID IN ( " + userIDsStr + " ) AND IsActive = 'Y' ";
 			int[] userRoleIDs = DB.getIDsEx(m_activity.get_TrxName(), subUserRoleSQL);
 			substituteRoleID = Arrays.stream(userRoleIDs).boxed().collect(Collectors.toSet());
+		}
+		else
+		{
+			substituteUserID.add(m_AD_User_ID);
+			substituteRoleID.add(m_AD_Role_ID);
 		}
 	}
 
