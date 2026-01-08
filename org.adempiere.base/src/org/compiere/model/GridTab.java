@@ -1792,34 +1792,28 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 			String columnToken = parts[0];
 			String direction = (parts.length > 1) ? parts[1] : "";
 
-			String columnName = resolveColumnName(columnToken, tableName);
-			if (columnName == null)
+			if ("{_ID}".equalsIgnoreCase(columnToken) || columnToken.endsWith("_ID"))
+				columnToken = tableName + "_ID";
+
+			if ("{_UU}".equalsIgnoreCase(columnToken) || columnToken.endsWith("_UU"))
+				columnToken = tableName + "_UU";
+
+			if (Util.isEmpty(columnToken, true))
 				continue;
 
-			int columnID = MColumn.getColumn_ID(tableName, columnName);
+			int columnID = MColumn.getColumn_ID(tableName, columnToken);
 			if (columnID <= 0)
 				continue;
 
 			if (m_vo.OrderByClause.length() > 0)
 				m_vo.OrderByClause += ", ";
 
-			m_vo.OrderByClause += columnName;
+			m_vo.OrderByClause += columnToken;
 
 			if ("ASC".equalsIgnoreCase(direction) || "DESC".equalsIgnoreCase(direction))
 				m_vo.OrderByClause += " " + direction;
 		}
 	} // applyDefaultOrderBy
-
-	private String resolveColumnName(String token, String tableName)
-	{
-		if ("{_ID}".equalsIgnoreCase(token) || token.endsWith("_ID"))
-			return tableName + "_ID";
-
-		if ("{_UU}".equalsIgnoreCase(token) || token.endsWith("_UU"))
-			return tableName + "_UU";
-
-		return token; // normal column name
-	} // resolveColumnName
 
 	/**
 	 *	Transaction support.
