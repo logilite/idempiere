@@ -1762,18 +1762,33 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		}
 		if (m_vo.OrderByClause.length() > 0)
 			return m_vo.OrderByClause;
+		
+		// Third Prio: System Config
 		if (!isDetail()) {
 			applyDefaultOrderBy();
-			if(!Util.isEmpty(m_vo.OrderByClause, true))
+
+			if (!Util.isEmpty(m_vo.OrderByClause, true))
 				return m_vo.OrderByClause;
 		}
-		//	Third Prio: onlyCurrentRows
+
+		// Fourth Prio: onlyCurrentRows 
 		m_vo.OrderByClause = "Created";
 		if (onlyCurrentRows && !isDetail())	//	first tab only
 			m_vo.OrderByClause += " DESC";
 		return m_vo.OrderByClause;
 	}	//	getOrderByClause
 
+	/**
+	 * Apply default ORDER BY clause from system configuration.
+	 * <p>
+	 * Configuration format: "Column1 ASC, Column2 DESC, {_ID}"
+	 * <p>
+	 * Special tokens:
+	 * <ul>
+	 * <li>{_ID} - Resolves to TableName_ID</li>
+	 * <li>{_UU} - Resolves to TableName_UU</li>
+	 * </ul>
+	 */
 	private void applyDefaultOrderBy()
 	{
 		String orderByClause = MSysConfig.getValue(MSysConfig.ZK_DEFAULT_ORDERBY, "", Env.getAD_Client_ID(m_vo.ctx));
@@ -1784,22 +1799,18 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		String tableName = getTableName();
 		for (String token : orderByClause.split(","))
 		{
-			token = token.trim();
 			if (Util.isEmpty(token, true))
 				continue;
 
+			token = token.trim();
 			String[] parts = token.split("\\s+");
 			String columnToken = parts[0];
-			String direction = (parts.length > 1) ? parts[1] : "";
+			String sortBy = (parts.length > 1) ? parts[1] : "";
 
-			if ("{_ID}".equalsIgnoreCase(columnToken) || columnToken.endsWith("_ID"))
+			if ("{_ID}".equalsIgnoreCase(columnToken))
 				columnToken = tableName + "_ID";
-
-			if ("{_UU}".equalsIgnoreCase(columnToken) || columnToken.endsWith("_UU"))
+			else if ("{_UU}".equalsIgnoreCase(columnToken))
 				columnToken = tableName + "_UU";
-
-			if (Util.isEmpty(columnToken, true))
-				continue;
 
 			int columnID = MColumn.getColumn_ID(tableName, columnToken);
 			if (columnID <= 0)
@@ -1810,8 +1821,8 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 
 			m_vo.OrderByClause += columnToken;
 
-			if ("ASC".equalsIgnoreCase(direction) || "DESC".equalsIgnoreCase(direction))
-				m_vo.OrderByClause += " " + direction;
+			if ("ASC".equalsIgnoreCase(sortBy) || "DESC".equalsIgnoreCase(sortBy))
+				m_vo.OrderByClause += " " + sortBy;
 		}
 	} // applyDefaultOrderBy
 
