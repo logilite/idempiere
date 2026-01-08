@@ -1762,13 +1762,64 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		}
 		if (m_vo.OrderByClause.length() > 0)
 			return m_vo.OrderByClause;
-
+		if (!isDetail()) {
+			applyDefaultOrderBy();
+			if(!Util.isEmpty(m_vo.OrderByClause, true))
+				return m_vo.OrderByClause;
+		}
 		//	Third Prio: onlyCurrentRows
 		m_vo.OrderByClause = "Created";
 		if (onlyCurrentRows && !isDetail())	//	first tab only
 			m_vo.OrderByClause += " DESC";
 		return m_vo.OrderByClause;
 	}	//	getOrderByClause
+
+	private void applyDefaultOrderBy()
+	{
+		String orderByClause = MSysConfig.getValue(MSysConfig.ZK_DEFAULT_ORDERBY, "", Env.getAD_Client_ID(m_vo.ctx));
+
+		if (Util.isEmpty(orderByClause, true))
+			return;
+
+		String tableName = getTableName();
+		for (String token : orderByClause.split(","))
+		{
+			token = token.trim();
+			if (Util.isEmpty(token, true))
+				continue;
+
+			String[] parts = token.split("\\s+");
+			String columnToken = parts[0];
+			String direction = (parts.length > 1) ? parts[1] : "";
+
+			String columnName = resolveColumnName(columnToken, tableName);
+			if (columnName == null)
+				continue;
+
+			int columnID = MColumn.getColumn_ID(tableName, columnName);
+			if (columnID <= 0)
+				continue;
+
+			if (m_vo.OrderByClause.length() > 0)
+				m_vo.OrderByClause += ", ";
+
+			m_vo.OrderByClause += columnName;
+
+			if ("ASC".equalsIgnoreCase(direction) || "DESC".equalsIgnoreCase(direction))
+				m_vo.OrderByClause += " " + direction;
+		}
+	} // applyDefaultOrderBy
+
+	private String resolveColumnName(String token, String tableName)
+	{
+		if ("{_ID}".equalsIgnoreCase(token) || token.endsWith("_ID"))
+			return tableName + "_ID";
+
+		if ("{_UU}".equalsIgnoreCase(token) || token.endsWith("_UU"))
+			return tableName + "_UU";
+
+		return token; // normal column name
+	} // resolveColumnName
 
 	/**
 	 *	Transaction support.
