@@ -1161,7 +1161,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			{
 				// If Approver is not assign then check current user is invoker
 				MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(m_activity.getCtx(), m_activity.getAD_WF_Activity_ID(), m_activity.get_TrxName());
-				if ((approvers == null || approvers.length == 0) && m_activity.getAD_User_ID() <= 0 && !substituteUserID.contains(m_WFProcess.getAD_User_ID()))
+				if ((approvers == null || approvers.length == 0) && m_activity.getAD_User_ID() <= 0 && m_WFProcess != null && !substituteUserID.contains(m_WFProcess.getAD_User_ID()))
 				{
 					return false;
 				}
