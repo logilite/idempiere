@@ -103,6 +103,22 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 	/** Event to fire on complete of execution of doc action **/
 	private static final String		ON_COMPLETE_EVENT	= "onComplete";
+	
+	private static final String		SQL_GET_SUBSTITUTE_USERS
+																	= "SELECT AD_User_ID  FROM AD_User_Substitute "
+																			+ "WHERE Substitute_ID = ? "
+																			+ "AND (ValidFrom IS NULL OR ValidFrom <= CURRENT_DATE) "
+																			+ "AND (ValidTo IS NULL OR ValidTo >= CURRENT_DATE) "
+																			+ "AND IsActive = 'Y'";
+
+	private static final String		SQL_GET_SUBSTITUTE_USER_ROLES
+																	= "SELECT DISTINCT ur.AD_Role_ID  FROM AD_User_Roles ur "
+																			+ "JOIN AD_User_Substitute us ON (us.AD_User_ID = ur.AD_User_ID) "
+																			+ "WHERE us.Substitute_ID = ? "
+																			+ "AND (us.ValidFrom IS NULL OR us.ValidFrom <= CURRENT_DATE) "
+																			+ "AND (us.ValidTo IS NULL OR us.ValidTo >= CURRENT_DATE) "
+																			+ "AND us.IsActive = 'Y' "
+																			+ "AND ur.IsActive = 'Y'";
 
 	private Label lblDocAction;
 	private Label label;
@@ -163,9 +179,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	private Map <Integer, String>	valMap;
 	
 	/** Active substitute users (including the current user). */
-	private Set <Integer>			substituteUserID = new HashSet<>();
+	private final Set <Integer>		substituteUserID	= new HashSet <>();
 	/** Active roles assigned to substitute users. */
-	private Set <Integer>			substituteRoleID = new HashSet<>();
+	private final Set <Integer>		substituteRoleID	= new HashSet <>();
 
 	private static final CLogger logger;
 
@@ -253,12 +269,14 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	}
 
 	/**
-	 * Loads active substitute users for the current user and
-	 * retrieves all active roles assigned to those users.
+	 * Loads substitute-related user and role information for the current user.
 	 * <p>
-	 * Includes the current user and validates substitutes
-	 * based on date range and active status.
-	 * Does nothing if {@code m_activity} is {@code null}.
+	 * Always includes the current user and their role. If an activity is present,
+	 * also loads all active substitute users (valid by date range) and all active
+	 * roles assigned to those substitute users.
+	 * <p>
+	 * When {@code m_activity} is {@code null}, only the current user and role
+	 * are retained.
 	 */
 	private void loadSubstituteDetails( )
 	{
@@ -269,18 +287,12 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		substituteRoleID.add(m_AD_Role_ID);
 		if (m_activity != null)
 		{
-			final String subUserSQL = "SELECT AD_User_ID FROM AD_User_Substitute WHERE Substitute_ID = ? AND (ValidFrom IS NULL OR ValidFrom <= CURRENT_DATE) AND (ValidTo IS NULL OR ValidTo >= CURRENT_DATE) AND IsActive = 'Y'";
-			int[] userIDs = DB.getIDsEx(m_activity.get_TrxName(), subUserSQL, m_AD_User_ID);
+			int[] userIDs = DB.getIDsEx(m_activity.get_TrxName(), SQL_GET_SUBSTITUTE_USERS, m_AD_User_ID);
 			for (int id : userIDs)
 				substituteUserID.add(id);
-			if (userIDs.length > 0)
-			{
-				String userIDsStr = substituteUserID.stream().map(String::valueOf).collect(Collectors.joining(","));
-				final String subUserRoleSQL = "SELECT AD_Role_ID FROM AD_User_Roles WHERE AD_User_ID IN ( " + userIDsStr + " ) AND IsActive = 'Y' ";
-				int[] userRoleIDs = DB.getIDsEx(m_activity.get_TrxName(), subUserRoleSQL);
-				for (int id : userRoleIDs)
-					substituteRoleID.add(id);
-			}
+			int[] userRoleIDs = DB.getIDsEx(m_activity.get_TrxName(), SQL_GET_SUBSTITUTE_USER_ROLES, m_AD_User_ID);
+			for (int id : userRoleIDs)
+				substituteRoleID.add(id);
 		}
 	}
 
@@ -1185,7 +1197,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			else if (MWFResponsible.RESPONSIBLETYPE_Human.equals(respType) && resp.getAD_User_ID() > 0)
 			{
 				int userId = m_activity.getAD_User_ID() != 0 ? m_activity.getAD_User_ID() : resp.getAD_User_ID();
-				return substituteUserID.contains(userId);
+				return userId > 0 && substituteUserID.contains(userId);
 			}
 			else
 			{
@@ -1201,9 +1213,16 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 	public boolean isApprover()
 	{
-		return (m_activity != null && substituteUserID.contains(m_activity.getAD_User_ID()))
-				|| (resp != null && substituteRoleID.contains(resp.getAD_Role_ID()))
-				|| (resp != null && resp.isHuman() && resp.getAD_User_ID()==0);
+		if (m_activity != null && substituteUserID.contains(m_activity.getAD_User_ID()))
+			return true;
+		else if (resp != null && substituteRoleID.contains(resp.getAD_Role_ID()))
+			return true;
+		else if (resp != null && MWFResponsible.RESPONSIBLETYPE_Human.equals(resp.getResponsibleType()))
+		{
+			final int userId = (m_activity != null && m_activity.getAD_User_ID() != 0) ? m_activity.getAD_User_ID() : resp.getAD_User_ID();
+			return userId > 0 && substituteUserID.contains(userId);
+		}
+		return false;
 	}
 	
 	/**
