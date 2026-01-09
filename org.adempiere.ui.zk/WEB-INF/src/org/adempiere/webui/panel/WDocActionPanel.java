@@ -31,6 +31,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.exceptions.DBException;
 import org.adempiere.util.Callback;
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.LayoutUtils;
@@ -277,8 +278,10 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	 * <p>
 	 * When {@code m_activity} is {@code null}, only the current user and role
 	 * are retained.
+	 * 
+	 * @throws DBException if there is any SQLException
 	 */
-	private void loadSubstituteDetails( )
+	private void loadSubstituteDetails( ) throws DBException
 	{
 		substituteUserID.clear();
 		substituteRoleID.clear();
@@ -1204,8 +1207,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			}
 			else if (MWFResponsible.RESPONSIBLETYPE_Human.equals(respType) && resp.getAD_User_ID() > 0)
 			{
-				int userId = m_activity.getAD_User_ID() != 0 ? m_activity.getAD_User_ID() : resp.getAD_User_ID();
-				return userId > 0 && substituteUserID.contains(userId);
+				return isValidHumanResponsible();
 			}
 			else
 			{
@@ -1226,11 +1228,20 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		else if (resp != null && substituteRoleID.contains(resp.getAD_Role_ID()))
 			return true;
 		else if (resp != null && MWFResponsible.RESPONSIBLETYPE_Human.equals(resp.getResponsibleType()))
-		{
-			final int userId = (m_activity != null && m_activity.getAD_User_ID() != 0) ? m_activity.getAD_User_ID() : resp.getAD_User_ID();
-			return userId > 0 && substituteUserID.contains(userId);
-		}
+			return isValidHumanResponsible();
 		return false;
+	}
+
+	/**
+	 * Checks whether the human responsible user is valid
+	 * for the current activity or responsibility, including substitutes.
+	 *
+	 * @return {@code true} if the user is active and allowed, otherwise {@code false}
+	 */
+	private boolean isValidHumanResponsible( )
+	{
+		final int userId = (m_activity != null && m_activity.getAD_User_ID() != 0) ? m_activity.getAD_User_ID() : resp.getAD_User_ID();
+		return userId > 0 && substituteUserID.contains(userId);
 	}
 	
 	/**
