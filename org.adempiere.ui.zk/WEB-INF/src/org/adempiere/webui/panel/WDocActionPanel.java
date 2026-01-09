@@ -1225,7 +1225,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	{
 		if (m_activity != null && substituteUserID.contains(m_activity.getAD_User_ID()))
 			return true;
-		else if (resp != null && substituteRoleID.contains(resp.getAD_Role_ID()))
+		else if (resp != null && resp.isRole() && substituteRoleID.contains(resp.getAD_Role_ID()))
 			return true;
 		else if (resp != null && MWFResponsible.RESPONSIBLETYPE_Human.equals(resp.getResponsibleType()))
 			return isValidHumanResponsible();
