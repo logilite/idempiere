@@ -101,6 +101,8 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	/** Attribute name for pre-assigned workflow approver */
 	public static final String	WF_Activity_Manual_AD_User_ID		= "FWFA_AD_User_ID";
 	
+	public static final String	SUBSTITUTE_SUBQUERY 				= "COLUMN IN (SELECT AD_User_ID FROM AD_User_Substitute  WHERE Substitute_ID = ?  AND (ValidFrom IS NULL OR ValidFrom <= CURRENT_DATE)  AND (ValidTo IS NULL OR ValidTo >= CURRENT_DATE) AND IsActive = 'Y')";
+	
 	/**
 	 * 	Get Activities for table/record
 	 *	@param ctx context
@@ -2940,28 +2942,62 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	}
 
 	/**
-	 * Get where clause to get the pending activities related to a User (unprocessed and suspended).<br/>
-	 * The where clause return requires the AD_User_ID parameter 5 times, and then AD_Client_ID.
-	 * @return Where Clause
+	 * Builds the SQL WHERE clause for pending workflow activities
+	 * accessible to a user or their substitutes.
+	 *
+	 * <p>Filters: unprocessed activities, open workflow state, ownership/responsibility
+	 * (owner, invoker, user/role, manual approver), and client scope.
+	 *
+	 * @return SQL WHERE clause for pending activities
+	 *
+	 * <p>Parameter order: 1–10 = AD_User_ID, 11 = AD_Client_ID
 	 */
-	public static String getWhereUserPendingActivities() {
-		final String where =
-			"AD_WF_Activity.Processed='N' AND AD_WF_Activity.WFState='OS' AND ("
-			//	Owner of Activity
-			+ " AD_WF_Activity.AD_User_ID=?"	//	#1
-			//	Invoker (if no invoker = all)
-			+ " OR EXISTS (SELECT * FROM AD_WF_Responsible r WHERE AD_WF_Activity.AD_WF_Responsible_ID=r.AD_WF_Responsible_ID"
-			+ " AND r.ResponsibleType='H' AND COALESCE(r.AD_User_ID,0)=0 AND COALESCE(r.AD_Role_ID,0)=0 AND (AD_WF_Activity.AD_User_ID=? OR AD_WF_Activity.AD_User_ID IS NULL))"	//	#2
-			//  Responsible User
-			+ " OR EXISTS (SELECT * FROM AD_WF_Responsible r WHERE AD_WF_Activity.AD_WF_Responsible_ID=r.AD_WF_Responsible_ID"
-			+ " AND r.ResponsibleType='H' AND r.AD_User_ID=?)"		//	#3
-			//	Responsible Role
-			+ " OR EXISTS (SELECT * FROM AD_WF_Responsible r INNER JOIN AD_User_Roles ur ON (r.AD_Role_ID=ur.AD_Role_ID)"
-			+ " WHERE AD_WF_Activity.AD_WF_Responsible_ID=r.AD_WF_Responsible_ID AND r.ResponsibleType='R' AND ur.AD_User_ID=? AND ur.isActive = 'Y')"	//	#4
-			///* Manual Responsible */ 
-			+ " OR EXISTS (SELECT * FROM AD_WF_ActivityApprover r "
-			+ " WHERE AD_WF_Activity.AD_WF_Activity_ID=r.AD_WF_Activity_ID AND r.AD_User_ID=? AND r.isActive = 'Y')" // #5
-			+ ") AND AD_WF_Activity.AD_Client_ID=?";	//	#6
+	public static String getWhereUserPendingActivities( )
+	{
+		final String where
+							= "AD_WF_Activity.Processed='N' AND AD_WF_Activity.WFState='OS' AND ("
+								// Owner or Substitute
+								+ " (AD_WF_Activity.AD_User_ID = ? " // #1 Owner
+									+ " OR "
+									+ SUBSTITUTE_SUBQUERY.replace("COLUMN", "AD_WF_Activity.AD_User_ID")
+									+ ") " // #2 Owner substitute
+									// Invoker or Substitute
+									+ " OR EXISTS (SELECT 1 FROM AD_WF_Responsible r "
+									+ "            WHERE AD_WF_Activity.AD_WF_Responsible_ID = r.AD_WF_Responsible_ID "
+									+ "              AND r.ResponsibleType='H' "
+									+ "              AND COALESCE(r.AD_User_ID,0)=0 AND COALESCE(r.AD_Role_ID,0)=0 "
+									+ "              AND (AD_WF_Activity.AD_User_ID IS NULL "
+									+ "                   OR AD_WF_Activity.AD_User_ID = ? " // #3 Invoker
+									+ "                   OR "
+									+ SUBSTITUTE_SUBQUERY.replace("COLUMN", "AD_WF_Activity.AD_User_ID")
+									+ ")) " // #4 Invoker substitute
+									// Responsible User or Substitute
+									+ " OR EXISTS (SELECT 1 FROM AD_WF_Responsible r "
+									+ "            WHERE AD_WF_Activity.AD_WF_Responsible_ID = r.AD_WF_Responsible_ID "
+									+ "              AND r.ResponsibleType='H' "
+									+ "              AND (r.AD_User_ID = ? " // #5 Responsible User
+									+ "                   OR "
+									+ SUBSTITUTE_SUBQUERY.replace("COLUMN", "r.AD_User_ID")
+									+ ")) " // #6 Responsible User substitute
+									// Responsible Role or Substitute
+									+ " OR EXISTS (SELECT 1 FROM AD_WF_Responsible r "
+									+ "            INNER JOIN AD_User_Roles ur ON r.AD_Role_ID = ur.AD_Role_ID "
+									+ "            WHERE AD_WF_Activity.AD_WF_Responsible_ID = r.AD_WF_Responsible_ID "
+									+ "              AND r.ResponsibleType='R' "
+									+ "              AND (ur.AD_User_ID = ? " // #7 Responsible Role
+									+ "                   OR "
+									+ SUBSTITUTE_SUBQUERY.replace("COLUMN", "ur.AD_User_ID")
+									+ ") " // #8 Responsible Role substitute
+									+ "              AND ur.isActive='Y') "
+									// Manual Responsible or Substitute
+									+ " OR EXISTS (SELECT 1 FROM AD_WF_ActivityApprover r "
+									+ "            WHERE AD_WF_Activity.AD_WF_Activity_ID = r.AD_WF_Activity_ID "
+									+ "              AND (r.AD_User_ID = ? " // #9 Manual Responsible
+									+ "                   OR "
+									+ SUBSTITUTE_SUBQUERY.replace("COLUMN", "r.AD_User_ID")
+									+ ") " // #10 Manual Responsible substitute
+									+ "              AND r.isActive='Y') "
+									+ ") AND AD_WF_Activity.AD_Client_ID = ?"; // #11 Client
 		return where;
 	}
 
