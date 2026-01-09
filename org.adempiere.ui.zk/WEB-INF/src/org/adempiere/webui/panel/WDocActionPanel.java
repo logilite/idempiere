@@ -265,22 +265,22 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		substituteUserID.clear();
 		substituteRoleID.clear();
 
+		substituteUserID.add(m_AD_User_ID);
+		substituteRoleID.add(m_AD_Role_ID);
 		if (m_activity != null)
 		{
-			final String subUserSQL = "SELECT AD_User_ID FROM AD_User WHERE AD_User_ID IN (SELECT AD_User_ID FROM AD_User_Substitute  WHERE Substitute_ID = ? "
-										+ "AND (ValidFrom IS NULL OR ValidFrom <= CURRENT_DATE)  AND (ValidTo IS NULL OR ValidTo >= CURRENT_DATE) AND IsActive = 'Y') OR AD_User_ID = ? ";
-			int[] userIDs = DB.getIDsEx(m_activity.get_TrxName(), subUserSQL, m_AD_User_ID, m_AD_User_ID);
-			substituteUserID = Arrays.stream(userIDs).boxed().collect(Collectors.toSet());
-
-			String userIDsStr = substituteUserID.stream().map(String::valueOf).collect(Collectors.joining(","));
-			final String subUserRoleSQL = "SELECT AD_Role_ID FROM AD_User_Roles WHERE AD_User_ID IN ( " + userIDsStr + " ) AND IsActive = 'Y' ";
-			int[] userRoleIDs = DB.getIDsEx(m_activity.get_TrxName(), subUserRoleSQL);
-			substituteRoleID = Arrays.stream(userRoleIDs).boxed().collect(Collectors.toSet());
-		}
-		else
-		{
-			substituteUserID.add(m_AD_User_ID);
-			substituteRoleID.add(m_AD_Role_ID);
+			final String subUserSQL = "SELECT AD_User_ID FROM AD_User_Substitute WHERE Substitute_ID = ? AND (ValidFrom IS NULL OR ValidFrom <= CURRENT_DATE) AND (ValidTo IS NULL OR ValidTo >= CURRENT_DATE) AND IsActive = 'Y'";
+			int[] userIDs = DB.getIDsEx(m_activity.get_TrxName(), subUserSQL, m_AD_User_ID);
+			for (int id : userIDs)
+				substituteUserID.add(id);
+			if (userIDs.length > 0)
+			{
+				String userIDsStr = substituteUserID.stream().map(String::valueOf).collect(Collectors.joining(","));
+				final String subUserRoleSQL = "SELECT AD_Role_ID FROM AD_User_Roles WHERE AD_User_ID IN ( " + userIDsStr + " ) AND IsActive = 'Y' ";
+				int[] userRoleIDs = DB.getIDsEx(m_activity.get_TrxName(), subUserRoleSQL);
+				for (int id : userRoleIDs)
+					substituteRoleID.add(id);
+			}
 		}
 	}
 
@@ -1184,14 +1184,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			}
 			else if (MWFResponsible.RESPONSIBLETYPE_Human.equals(respType) && resp.getAD_User_ID() > 0)
 			{
-				if (m_activity.getAD_User_ID() != 0 && substituteUserID.contains(m_activity.getAD_User_ID()))
-				{
-					return true;
-				}
-				else if (!substituteUserID.contains(resp.getAD_User_ID()))
-				{
-					return false;
-				}
+				int userId = m_activity.getAD_User_ID() != 0 ? m_activity.getAD_User_ID() : resp.getAD_User_ID();
+				return substituteUserID.contains(userId);
 			}
 			else
 			{
