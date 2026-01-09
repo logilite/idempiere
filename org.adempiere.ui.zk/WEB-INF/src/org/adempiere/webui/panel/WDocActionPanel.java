@@ -285,6 +285,10 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 		substituteUserID.add(m_AD_User_ID);
 		substituteRoleID.add(m_AD_Role_ID);
+		
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("Loaded current user: " + m_AD_User_ID + ", role: " + m_AD_Role_ID);
+
 		if (m_activity != null)
 		{
 			int[] userIDs = DB.getIDsEx(m_activity.get_TrxName(), SQL_GET_SUBSTITUTE_USERS, m_AD_User_ID);
@@ -293,6 +297,10 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			int[] userRoleIDs = DB.getIDsEx(m_activity.get_TrxName(), SQL_GET_SUBSTITUTE_USER_ROLES, m_AD_User_ID);
 			for (int id : userRoleIDs)
 				substituteRoleID.add(id);
+			
+			if (logger.isLoggable(Level.FINE))
+				logger.fine("Loaded " + userIDs.length + " substitute users and " + userRoleIDs.length + " substitute roles");
+		 
 		}
 	}
 
