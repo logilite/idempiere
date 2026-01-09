@@ -1762,13 +1762,82 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		}
 		if (m_vo.OrderByClause.length() > 0)
 			return m_vo.OrderByClause;
+		
+		// Third Prio: System Config
+		if (!isDetail()) {
+			applyDefaultOrderBy();
 
-		//	Third Prio: onlyCurrentRows
+			if (!Util.isEmpty(m_vo.OrderByClause, true))
+				return m_vo.OrderByClause;
+		}
+
+		// Fourth Prio: onlyCurrentRows 
 		m_vo.OrderByClause = "Created";
 		if (onlyCurrentRows && !isDetail())	//	first tab only
 			m_vo.OrderByClause += " DESC";
 		return m_vo.OrderByClause;
 	}	//	getOrderByClause
+
+	/**
+	 * Apply default ORDER BY clause from system configuration.
+	 * <p>
+	 * Configuration format: "Column1 ASC, Column2 DESC, {_ID}"
+	 * <p>
+	 * Special tokens:
+	 * <ul>
+	 * <li>{_ID} - Resolves to TableName_ID</li>
+	 * <li>{_UU} - Resolves to TableName_UU</li>
+	 * </ul>
+	 */
+	private void applyDefaultOrderBy()
+	{
+		try {
+			String orderByClause = MSysConfig.getValue(MSysConfig.ZK_DEFAULT_ORDERBY, "", Env.getAD_Client_ID(m_vo.ctx));
+
+			if (Util.isEmpty(orderByClause, true))
+				return;
+
+			if (log.isLoggable(Level.FINE))
+				log.fine("Applying default ORDER BY config: " + orderByClause);
+
+			String tableName = getTableName();
+			for (String token : orderByClause.split(",")) {
+				if (Util.isEmpty(token, true))
+					continue;
+
+				token = token.trim();
+				String[] parts = token.split("\\s+");
+				String columnToken = parts[0];
+				String sortBy = (parts.length > 1) ? parts[1].toUpperCase().trim() : "";
+
+				if ("{_ID}".equalsIgnoreCase(columnToken))
+					columnToken = tableName + "_ID";
+				else if ("{_UU}".equalsIgnoreCase(columnToken))
+					columnToken = tableName + "_UU";
+
+				int columnID = MColumn.getColumn_ID(tableName, columnToken);
+				if (columnID <= 0) {
+					if (log.isLoggable(Level.WARNING))
+						log.warning("Column '" + columnToken + "' not found in table '" + tableName + "' - skipping from default ORDER BY");
+					continue;
+				}
+
+				if (m_vo.OrderByClause.length() > 0)
+					m_vo.OrderByClause += ", ";
+
+				m_vo.OrderByClause += columnToken;
+
+				if ("ASC".equalsIgnoreCase(sortBy) || "DESC".equalsIgnoreCase(sortBy))
+					m_vo.OrderByClause += " " + sortBy;
+			}
+
+			if (!Util.isEmpty(m_vo.OrderByClause, true) && log.isLoggable(Level.INFO))
+				log.info("Applied default ORDER BY for table '" + tableName + "': " + m_vo.OrderByClause);
+		}
+		catch (Exception e) {
+			log.log(Level.SEVERE, "Failed to apply default ORDER BY configuration: " + e.getMessage(), e.getLocalizedMessage());
+		}
+	} // applyDefaultOrderBy
 
 	/**
 	 *	Transaction support.
