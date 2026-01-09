@@ -1791,38 +1791,51 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	 */
 	private void applyDefaultOrderBy()
 	{
-		String orderByClause = MSysConfig.getValue(MSysConfig.ZK_DEFAULT_ORDERBY, "", Env.getAD_Client_ID(m_vo.ctx));
+		try {
+			String orderByClause = MSysConfig.getValue(MSysConfig.ZK_DEFAULT_ORDERBY, "", Env.getAD_Client_ID(m_vo.ctx));
 
-		if (Util.isEmpty(orderByClause, true))
-			return;
+			if (Util.isEmpty(orderByClause, true))
+				return;
 
-		String tableName = getTableName();
-		for (String token : orderByClause.split(","))
-		{
-			if (Util.isEmpty(token, true))
-				continue;
+			if (log.isLoggable(Level.FINE))
+				log.fine("Applying default ORDER BY config: " + orderByClause);
 
-			token = token.trim();
-			String[] parts = token.split("\\s+");
-			String columnToken = parts[0];
-			String sortBy = (parts.length > 1) ? parts[1].toUpperCase().trim() : "";
+			String tableName = getTableName();
+			for (String token : orderByClause.split(",")) {
+				if (Util.isEmpty(token, true))
+					continue;
 
-			if ("{_ID}".equalsIgnoreCase(columnToken))
-				columnToken = tableName + "_ID";
-			else if ("{_UU}".equalsIgnoreCase(columnToken))
-				columnToken = tableName + "_UU";
+				token = token.trim();
+				String[] parts = token.split("\\s+");
+				String columnToken = parts[0];
+				String sortBy = (parts.length > 1) ? parts[1].toUpperCase().trim() : "";
 
-			int columnID = MColumn.getColumn_ID(tableName, columnToken);
-			if (columnID <= 0)
-				continue;
+				if ("{_ID}".equalsIgnoreCase(columnToken))
+					columnToken = tableName + "_ID";
+				else if ("{_UU}".equalsIgnoreCase(columnToken))
+					columnToken = tableName + "_UU";
 
-			if (m_vo.OrderByClause.length() > 0)
-				m_vo.OrderByClause += ", ";
+				int columnID = MColumn.getColumn_ID(tableName, columnToken);
+				if (columnID <= 0) {
+					if (log.isLoggable(Level.WARNING))
+						log.warning("Column '" + columnToken + "' not found in table '" + tableName + "' - skipping from default ORDER BY");
+					continue;
+				}
 
-			m_vo.OrderByClause += columnToken;
+				if (m_vo.OrderByClause.length() > 0)
+					m_vo.OrderByClause += ", ";
 
-			if ("ASC".equalsIgnoreCase(sortBy) || "DESC".equalsIgnoreCase(sortBy))
-				m_vo.OrderByClause += " " + sortBy;
+				m_vo.OrderByClause += columnToken;
+
+				if ("ASC".equalsIgnoreCase(sortBy) || "DESC".equalsIgnoreCase(sortBy))
+					m_vo.OrderByClause += " " + sortBy;
+			}
+
+			if (!Util.isEmpty(m_vo.OrderByClause, true) && log.isLoggable(Level.INFO))
+				log.info("Applied default ORDER BY for table '" + tableName + "': " + m_vo.OrderByClause);
+		}
+		catch (Exception e) {
+			log.log(Level.SEVERE, "Failed to apply default ORDER BY configuration: " + e.getMessage(), e.getLocalizedMessage());
 		}
 	} // applyDefaultOrderBy
 
