@@ -105,15 +105,15 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	private static final String		ON_COMPLETE_EVENT	= "onComplete";
 	
 	private static final String		SQL_GET_SUBSTITUTE_USERS
-																	= "SELECT AD_User_ID  FROM AD_User_Substitute "
-																			+ "WHERE Substitute_ID = ? "
+																	= "SELECT AD_User_ID FROM AD_User_Substitute "
+																		+ "WHERE Substitute_ID = ? "
 																			+ "AND (ValidFrom IS NULL OR ValidFrom <= CURRENT_DATE) "
 																			+ "AND (ValidTo IS NULL OR ValidTo >= CURRENT_DATE) "
 																			+ "AND IsActive = 'Y'";
 
 	private static final String		SQL_GET_SUBSTITUTE_USER_ROLES
-																	= "SELECT DISTINCT ur.AD_Role_ID  FROM AD_User_Roles ur "
-																			+ "JOIN AD_User_Substitute us ON (us.AD_User_ID = ur.AD_User_ID) "
+																	= "SELECT DISTINCT ur.AD_Role_ID FROM AD_User_Roles ur "
+																		+ "JOIN AD_User_Substitute us ON (us.AD_User_ID = ur.AD_User_ID) "
 																			+ "WHERE us.Substitute_ID = ? "
 																			+ "AND (us.ValidFrom IS NULL OR us.ValidFrom <= CURRENT_DATE) "
 																			+ "AND (us.ValidTo IS NULL OR us.ValidTo >= CURRENT_DATE) "
@@ -1169,7 +1169,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 					boolean isApprover = false;
 					for (int i = 0; i < approvers.length; i++)
 					{
-						if (approvers[i].getAD_User_ID() == Env.getAD_User_ID(m_activity.getCtx()) || substituteUserID.contains(approvers[i].getAD_User_ID()))
+						if (substituteUserID.contains(approvers[i].getAD_User_ID()))
 						{
 							isApprover = true;
 							break;
