@@ -1805,7 +1805,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 			token = token.trim();
 			String[] parts = token.split("\\s+");
 			String columnToken = parts[0];
-			String sortBy = (parts.length > 1) ? parts[1] : "";
+			String sortBy = (parts.length > 1) ? parts[1].toUpperCase().trim() : "";
 
 			if ("{_ID}".equalsIgnoreCase(columnToken))
 				columnToken = tableName + "_ID";
