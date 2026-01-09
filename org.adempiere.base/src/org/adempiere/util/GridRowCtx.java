@@ -78,8 +78,10 @@ implements Evaluatee
 		}
 		String columnName = keyStr.substring(windowStr.length()).trim();
 		//strip tab no too
-		if (columnName.indexOf("|") > 0) {
-			columnName = columnName.substring(columnName.indexOf("|")+1);
+		String tabPrefix = gridTab.getTabNo() + "|";
+		if (columnName.startsWith(tabPrefix))
+		{
+			columnName = columnName.substring(tabPrefix.length());
 		}
 		return columnName;
 	}
