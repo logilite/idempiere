@@ -180,9 +180,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	private Map <Integer, String>	valMap;
 	
 	/** Active substitute users (including the current user). */
-	private final Set <Integer>		substituteUserID	= new HashSet <>();
+	private final Set <Integer>		substituteUserIDs	= new HashSet <>();
 	/** Active roles assigned to substitute users. */
-	private final Set <Integer>		substituteRoleID	= new HashSet <>();
+	private final Set <Integer>		substituteRoleIDs	= new HashSet <>();
 
 	private static final CLogger logger;
 
@@ -283,11 +283,11 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	 */
 	private void loadSubstituteDetails( ) throws DBException
 	{
-		substituteUserID.clear();
-		substituteRoleID.clear();
+		substituteUserIDs.clear();
+		substituteRoleIDs.clear();
 
-		substituteUserID.add(m_AD_User_ID);
-		substituteRoleID.add(m_AD_Role_ID);
+		substituteUserIDs.add(m_AD_User_ID);
+		substituteRoleIDs.add(m_AD_Role_ID);
 		
 		if (logger.isLoggable(Level.FINE))
 			logger.fine("Loaded current user: " + m_AD_User_ID + ", role: " + m_AD_Role_ID);
@@ -296,10 +296,10 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		{
 			int[] userIDs = DB.getIDsEx(m_activity.get_TrxName(), SQL_GET_SUBSTITUTE_USERS, m_AD_User_ID);
 			for (int id : userIDs)
-				substituteUserID.add(id);
+				substituteUserIDs.add(id);
 			int[] userRoleIDs = DB.getIDsEx(m_activity.get_TrxName(), SQL_GET_SUBSTITUTE_USER_ROLES, m_AD_User_ID);
 			for (int id : userRoleIDs)
-				substituteRoleID.add(id);
+				substituteRoleIDs.add(id);
 			
 			if (logger.isLoggable(Level.FINE))
 				logger.fine("Loaded " + userIDs.length + " substitute users and " + userRoleIDs.length + " substitute roles");
@@ -1164,13 +1164,13 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			{
 				// If Approver is not assign then check current user is invoker
 				MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(m_activity.getCtx(), m_activity.getAD_WF_Activity_ID(), m_activity.get_TrxName());
-				if ((approvers == null || approvers.length == 0) && m_activity.getAD_User_ID() <= 0 && m_WFProcess != null && !substituteUserID.contains(m_WFProcess.getAD_User_ID()))
+				if ((approvers == null || approvers.length == 0) && m_activity.getAD_User_ID() <= 0 && m_WFProcess != null && !substituteUserIDs.contains(m_WFProcess.getAD_User_ID()))
 				{
 					return false;
 				}
 
 				// If Approver is assign then check current user is not Approver
-				if (m_activity.getAD_User_ID() > 0 && !substituteUserID.contains(m_activity.getAD_User_ID()))
+				if (m_activity.getAD_User_ID() > 0 && !substituteUserIDs.contains(m_activity.getAD_User_ID()))
 				{
 					return false;
 				}
@@ -1180,7 +1180,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 					boolean isApprover = false;
 					for (int i = 0; i < approvers.length; i++)
 					{
-						if (substituteUserID.contains(approvers[i].getAD_User_ID()))
+						if (substituteUserIDs.contains(approvers[i].getAD_User_ID()))
 						{
 							isApprover = true;
 							break;
@@ -1193,14 +1193,14 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			}
 			else if (MWFResponsible.RESPONSIBLETYPE_Initiator.equals(respType))
 			{
-				if (!substituteUserID.contains(m_activity.getAD_User_ID()))
+				if (!substituteUserIDs.contains(m_activity.getAD_User_ID()))
 				{
 					return false;
 				}
 			}
 			else if (MWFResponsible.RESPONSIBLETYPE_SupervisorOfInitiator.equals(respType) || MWFResponsible.RESPONSIBLETYPE_SupervisorOfCurrentUser.equals(respType))
 			{
-				if (!substituteUserID.contains(m_activity.getAD_User_ID()))
+				if (!substituteUserIDs.contains(m_activity.getAD_User_ID()))
 				{
 					return false;
 				}
@@ -1212,7 +1212,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			else
 			{
 				// Current User Role is not Approval Role
-				if (MWFResponsible.RESPONSIBLETYPE_Role.equals(respType) && !substituteRoleID.contains(resp.getAD_Role_ID()))
+				if (MWFResponsible.RESPONSIBLETYPE_Role.equals(respType) && !substituteRoleIDs.contains(resp.getAD_Role_ID()))
 				{
 					return false;
 				}
@@ -1223,9 +1223,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 	public boolean isApprover()
 	{
-		if (m_activity != null && substituteUserID.contains(m_activity.getAD_User_ID()))
+		if (m_activity != null && substituteUserIDs.contains(m_activity.getAD_User_ID()))
 			return true;
-		else if (resp != null && resp.isRole() && substituteRoleID.contains(resp.getAD_Role_ID()))
+		else if (resp != null && resp.isRole() && substituteRoleIDs.contains(resp.getAD_Role_ID()))
 			return true;
 		else if (resp != null && MWFResponsible.RESPONSIBLETYPE_Human.equals(resp.getResponsibleType()))
 			return isValidHumanResponsible();
@@ -1241,7 +1241,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	private boolean isValidHumanResponsible( )
 	{
 		final int userId = (m_activity != null && m_activity.getAD_User_ID() != 0) ? m_activity.getAD_User_ID() : resp.getAD_User_ID();
-		return userId > 0 && substituteUserID.contains(userId);
+		return userId > 0 && substituteUserIDs.contains(userId);
 	}
 	
 	/**
