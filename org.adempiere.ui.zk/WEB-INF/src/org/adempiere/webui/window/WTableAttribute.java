@@ -215,7 +215,7 @@ public class WTableAttribute extends Window implements EventListener<Event>
 	{
 		GridFieldVO vo = GridFieldVO.createParameter(Env.getCtx(), m_WindowNo, m_TabNo, AEnv.getADWindowID(m_WindowNo), 0, 0, attribute.getName(),
 										Msg.translate(Env.getCtx(), attribute.get_Translation("Name")), attribute.getAD_Reference_ID(),
-										attribute.getAD_Reference_Value_ID(), false, false, null);
+										attribute.getAD_Reference_Value_ID(), false, false, null, null);
 
 		if (attribute.isAttributeValueTypeReference() && DisplayType.isLookup(attribute.getAD_Reference_ID()) && attribute.getAD_Val_Rule_ID() > 0)
 		{
@@ -234,28 +234,28 @@ public class WTableAttribute extends Window implements EventListener<Event>
 	public GridField getStringGridField(MAttribute attribute)
 	{
 		GridFieldVO vo = GridFieldVO.createParameter(Env.getCtx(), m_WindowNo, m_TabNo, AEnv.getADWindowID(m_WindowNo), 0, 0, attribute.getName(),
-										Msg.translate(Env.getCtx(), attribute.get_Translation("Name")), DisplayType.String, 0, false, false, null);
+										Msg.translate(Env.getCtx(), attribute.get_Translation("Name")), DisplayType.String, 0, false, false, null, null);
 		return createGridField(attribute, vo);
 	} // getStringGridField
 
 	public GridField getNumberGridField(MAttribute attribute)
 	{
 		GridFieldVO vo = GridFieldVO.createParameter(Env.getCtx(), m_WindowNo, m_TabNo, AEnv.getADWindowID(m_WindowNo), 0, 0, attribute.getName(),
-										Msg.translate(Env.getCtx(), attribute.get_Translation("Name")), DisplayType.Number, 0, false, false, null);
+										Msg.translate(Env.getCtx(), attribute.get_Translation("Name")), DisplayType.Number, 0, false, false, null, null);
 		return createGridField(attribute, vo);
 	} // getNumberGridField
 
 	public GridField getDateGridField(MAttribute attribute)
 	{
 		GridFieldVO vo = GridFieldVO.createParameter(Env.getCtx(), m_WindowNo, m_TabNo, AEnv.getADWindowID(m_WindowNo), 0, 0, attribute.getName(),
-										Msg.translate(Env.getCtx(), attribute.get_Translation("Name")), DisplayType.Date, 0, false, false, null);
+										Msg.translate(Env.getCtx(), attribute.get_Translation("Name")), DisplayType.Date, 0, false, false, null, null);
 		return createGridField(attribute, vo);
 	} // getDateGridField
 
 	public GridField getListTypeGridField(MAttribute attribute)
 	{
 		GridFieldVO vo = GridFieldVO.createParameter(Env.getCtx(), m_WindowNo, m_TabNo, AEnv.getADWindowID(m_WindowNo), 0, 0,
-										"M_AttributeValue_ID", attribute.getName(), DisplayType.TableDir, 0, false, false, null);
+										"M_AttributeValue_ID", attribute.getName(), DisplayType.TableDir, 0, false, false, null, null);
 		// Validation for List - Attribute Values
 		vo.ValidationCode = "M_AttributeValue.M_Attribute_ID=" + attribute.get_ID();
 		vo.lookupInfo.ValidationCode = vo.ValidationCode;

@@ -26,6 +26,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 
+import javax.management.Query;
 import javax.script.Bindings;
 import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
@@ -609,57 +610,54 @@ public class ModelValidationEngine
 				return error;
 		}
 
-		// now process the script model validator for this event
-		if(docTiming != ModelValidator.TIMING_BEFORE_WF_NODE_EXECUTION)
-		{
-			List<MTableScriptValidator> scriptValidators =
-			MTableScriptValidator.getModelValidatorRules(po.getCtx(),
-				po.get_Table_ID(), ModelValidator.documentEventValidators[docTiming]);
-			if (scriptValidators != null) {
-				for (MTableScriptValidator scriptValidator : scriptValidators) {
-					MRule rule = MRule.get(po.getCtx(), scriptValidator.getAD_Rule_ID());
-					// currently just JSR 223 supported
-					if (   rule != null
-						&& rule.isActive()
-						&& rule.getRuleType().equals(MRule.RULETYPE_JSR223ScriptingAPIs)
-						&& rule.getEventType().equals(MRule.EVENTTYPE_ModelValidatorDocumentEvent)) {
-						String error;
-						try {
-							// Try to use cached compiled script for better performance
-							CompiledScript compiled = Core.getCompiledScript(rule);
-							Object retval;
-							if (compiled != null) {
-								// Use compiled script with bindings
-								Bindings bindings = compiled.getEngine().createBindings();
-								MRule.setContext(bindings, po.getCtx(), 0);  // no window
-								bindings.put(MRule.ARGUMENTS_PREFIX + "Ctx", po.getCtx());
-								bindings.put(MRule.ARGUMENTS_PREFIX + "PO", po);
-								bindings.put(MRule.ARGUMENTS_PREFIX + "Type", docTiming);
-								bindings.put(MRule.ARGUMENTS_PREFIX + "Event", ModelValidator.documentEventValidators[docTiming]);
-								retval = compiled.eval(bindings);
-							} else {
-								// Fallback to non-compiled execution
-								ScriptEngine engine = rule.getScriptEngine();
-								if (engine == null) {
-									throw new AdempiereException("Engine not found: " + rule.getEngineName());
-								}
-								MRule.setContext(engine, po.getCtx(), 0);  // no window
-								engine.put(MRule.ARGUMENTS_PREFIX + "Ctx", po.getCtx());
-								engine.put(MRule.ARGUMENTS_PREFIX + "PO", po);
-								engine.put(MRule.ARGUMENTS_PREFIX + "Type", docTiming);
-								engine.put(MRule.ARGUMENTS_PREFIX + "Event", ModelValidator.documentEventValidators[docTiming]);
-								retval = engine.eval(rule.getScript());
+		// 	if(docTiming != ModelValidator.TIMING_BEFORE_WF_NODE_EXECUTION)
+		List<MTableScriptValidator> scriptValidators =
+		MTableScriptValidator.getModelValidatorRules(po.getCtx(),
+			po.get_Table_ID(), ModelValidator.documentEventValidators[docTiming]);
+		if (scriptValidators != null) {
+			for (MTableScriptValidator scriptValidator : scriptValidators) {
+				MRule rule = MRule.get(po.getCtx(), scriptValidator.getAD_Rule_ID());
+				// currently just JSR 223 supported
+				if (   rule != null
+					&& rule.isActive()
+					&& rule.getRuleType().equals(MRule.RULETYPE_JSR223ScriptingAPIs)
+					&& rule.getEventType().equals(MRule.EVENTTYPE_ModelValidatorDocumentEvent)) {
+					String error;
+					try {
+						// Try to use cached compiled script for better performance
+						CompiledScript compiled = Core.getCompiledScript(rule);
+						Object retval;
+						if (compiled != null) {
+							// Use compiled script with bindings
+							Bindings bindings = compiled.getEngine().createBindings();
+							MRule.setContext(bindings, po.getCtx(), 0);  // no window
+							bindings.put(MRule.ARGUMENTS_PREFIX + "Ctx", po.getCtx());
+							bindings.put(MRule.ARGUMENTS_PREFIX + "PO", po);
+							bindings.put(MRule.ARGUMENTS_PREFIX + "Type", docTiming);
+							bindings.put(MRule.ARGUMENTS_PREFIX + "Event", ModelValidator.documentEventValidators[docTiming]);
+							retval = compiled.eval(bindings);
+						} else {
+							// Fallback to non-compiled execution
+							ScriptEngine engine = rule.getScriptEngine();
+							if (engine == null) {
+								throw new AdempiereException("Engine not found: " + rule.getEngineName());
 							}
-							error = (retval == null ? "" : retval.toString());
+							MRule.setContext(engine, po.getCtx(), 0);  // no window
+							engine.put(MRule.ARGUMENTS_PREFIX + "Ctx", po.getCtx());
+							engine.put(MRule.ARGUMENTS_PREFIX + "PO", po);
+							engine.put(MRule.ARGUMENTS_PREFIX + "Type", docTiming);
+							engine.put(MRule.ARGUMENTS_PREFIX + "Event", ModelValidator.documentEventValidators[docTiming]);
+							retval = engine.eval(rule.getScript());
 						}
-						catch (Exception e)
-						{
-							e.printStackTrace();
-							error = e.toString();
-						}
-						if (error != null && error.length() > 0)
-							return error;
+						error = (retval == null ? "" : retval.toString());
 					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+						error = e.toString();
+					}
+					if (error != null && error.length() > 0)
+						return error;
 				}
 			}
 		}
@@ -1031,7 +1029,7 @@ public class ModelValidationEngine
 	 * Before Save Properties for selected client.
 	 * @deprecated for deprecated swing client only
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public void beforeSaveProperties ()
 	{
 		int AD_Client_ID = Env.getAD_Client_ID(Env.getCtx());

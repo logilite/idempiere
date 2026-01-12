@@ -69,6 +69,7 @@ public class SystemIDs
 	public final static int FORM_SQL_QUERY = 200018;
 
 	public final static int MENU_NOTICE = 233;
+	public final static int MENU_TEST = 113;
 	
 	public final static int MESSAGE_REQUESTUPDATE = 834;
 	public final static int MESSAGE_WORKFLOWRESULT = 753;
@@ -236,6 +237,7 @@ public class SystemIDs
 	public final static int WINDOW_SHIPMENT_CUSTOMER = 169;
 	public final static int WINDOW_TABLE_AND_COLUMN = 100;
 	public final static int WINDOW_TEST = 127;
+	public final static int WINDOW_TEST_UU = 200138;
 	public final static int WINDOW_USER_PREFERENCE = 200073;
 	public final static int WINDOW_VENDOR_RMA = 53099;
 	public final static int WINDOW_WAREHOUSE_LOCATOR = 139;

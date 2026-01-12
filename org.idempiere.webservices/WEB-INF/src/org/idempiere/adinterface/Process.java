@@ -84,7 +84,7 @@ public class Process {
 	 * @return
 	 * @deprecated - method not used - will be deleted in future versions
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public static ProcessParamsDocument getProcessParams( CompiereService cs, GetProcessParamsDocument req ) 
 	{
 		ProcessParamsDocument res = (ProcessParamsDocument) ProcessParamsDocument.Factory.newInstance();

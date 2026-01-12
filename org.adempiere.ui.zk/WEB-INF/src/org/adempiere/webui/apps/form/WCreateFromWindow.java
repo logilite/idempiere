@@ -284,14 +284,7 @@ public class WCreateFromWindow extends Window implements EventListener<Event>, W
 		//
 		confirmPanel.getOKButton().setEnabled(selectedRowCount > 0);
 	}
-	
-	/**
-	 * @return {@link StatusBarPanel}
-	 */
-	/**
-	 * @param statusBar
-	 */
-	@Deprecated(forRemoval = true, since = "11")
+
 	/**
 	 * @return {@link WListbox}
 	 */

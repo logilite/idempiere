@@ -17,7 +17,6 @@
 package org.compiere.util;
 
 import java.security.Principal;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -34,8 +33,6 @@ import javax.swing.JOptionPane;
 import org.adempiere.base.Core;
 import org.adempiere.base.ILogin;
 import org.adempiere.exceptions.DBException;
-import org.compiere.Adempiere;
-import org.compiere.db.CConnection;
 import org.compiere.model.I_M_Warehouse;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MClient;
@@ -47,7 +44,6 @@ import org.compiere.model.MRole;
 import org.compiere.model.MSSOPrincipalConfig;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MSystem;
-import org.compiere.model.MTable;
 import org.compiere.model.MTree_Base;
 import org.compiere.model.MUser;
 import org.compiere.model.MUserIdentity;
@@ -55,7 +51,6 @@ import org.compiere.model.MUserPreference;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
-import org.compiere.model.SystemIDs;
 
 /**
  *	Login Manager
@@ -1252,7 +1247,7 @@ public class Login implements ILogin
 	 * 	Get SSO Principal
 	 *	@return principal
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public Principal getPrincipal()
 	{
 		return null;

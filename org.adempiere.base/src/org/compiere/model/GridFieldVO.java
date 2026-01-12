@@ -554,37 +554,39 @@ public class GridFieldVO implements Serializable, Cloneable
 	 * @param IsMandatory  IsMandatory
 	 * @param IsEncrypted IsEncrypted
 	 * @param Placeholder Placeholder
-	 * @return GridFieldV0
+	 * @param EntityType EntityType
+	 * @return GridFieldVO
 	 */
 	public static GridFieldVO createParameter (Properties ctx, int WindowNo, int WindowIDOfPanel, int infoWindowID,
 			int AD_Column_ID, String ColumnName, String Name, int AD_Reference_ID, int AD_Reference_Value_ID, 
-			boolean IsMandatory, boolean IsEncrypted, String Placeholder,String EntityType)
+			boolean IsMandatory, boolean IsEncrypted, String Placeholder, String EntityType)
 	{
 		return GridFieldVO.createParameter(	ctx, WindowNo, 0, WindowIDOfPanel, infoWindowID, AD_Column_ID, ColumnName, Name,
-											AD_Reference_ID, AD_Reference_Value_ID, IsMandatory, IsEncrypted, Placeholder);
+											AD_Reference_ID, AD_Reference_Value_ID, IsMandatory, IsEncrypted, Placeholder, EntityType);
 	}
 
 	/**
 	 * Create parameter for infoWindow
 	 * 
-	 * @param  ctx
-	 * @param  WindowNo
-	 * @param  TabNo
-	 * @param  WindowIDOfPanel
-	 * @param  infoWindowID
-	 * @param  AD_Column_ID
-	 * @param  ColumnName
-	 * @param  Name
-	 * @param  AD_Reference_ID
-	 * @param  AD_Reference_Value_ID
-	 * @param  IsMandatory
-	 * @param  IsEncrypted
-	 * @param  Placeholder
-	 * @return
+	 * @param ctx ctx
+	 * @param WindowNo WindowNo
+	 * @param TabNo TabNo
+	 * @param WindowIDOfPanel
+	 * @param infoWindowID
+	 * @param AD_Column_ID AD_Column_ID
+	 * @param ColumnName ColumnName
+	 * @param Name  Name
+	 * @param AD_Reference_ID AD_Reference_ID
+	 * @param AD_Reference_Value_ID AD_Reference_Value_ID
+	 * @param IsMandatory  IsMandatory
+	 * @param IsEncrypted IsEncrypted
+	 * @param Placeholder Placeholder
+	 * @param EntityType EntityType
+	 * @return GridFieldVO
 	 */
 	public static GridFieldVO createParameter (Properties ctx, int WindowNo, int TabNo, int WindowIDOfPanel, int infoWindowID,
    			int AD_Column_ID, String ColumnName, String Name, int AD_Reference_ID, int AD_Reference_Value_ID, 
-   			boolean IsMandatory, boolean IsEncrypted, String Placeholder)
+   			boolean IsMandatory, boolean IsEncrypted, String Placeholder, String EntityType)
 	{
 		GridFieldVO vo = new GridFieldVO(ctx, WindowNo, TabNo, 0, 0, false);
 		vo.isProcess = true;

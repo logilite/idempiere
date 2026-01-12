@@ -32,6 +32,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.base.GeneratedCodeCoverageExclusion;
 import org.adempiere.model.MTabCustomization;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
@@ -1478,7 +1479,9 @@ public class MPrintFormat extends X_AD_PrintFormat implements ImmutablePOSupport
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
+	@SuppressWarnings("removal")
+	@GeneratedCodeCoverageExclusion
 	public MPrintFormat clone() throws CloneNotSupportedException {
 		MPrintFormat clone = (MPrintFormat) super.clone();
 		clone.m_items = getItems() == null ? null : new MPrintFormatItem[getItems().length];

@@ -25,6 +25,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.base.GeneratedCodeCoverageExclusion;
 import org.adempiere.base.IServiceHolder;
 import org.adempiere.base.Service;
 import org.adempiere.base.ServiceQuery;
@@ -138,7 +139,9 @@ public class SecureEngine
 	 *  @param value message
 	 *  @return HexString of digested message (length = 32 characters)
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
+	@SuppressWarnings("removal")
+	@GeneratedCodeCoverageExclusion
 	public static String getDigest (String value)
 	{
 		if (s_engine == null)
@@ -297,7 +300,7 @@ public class SecureEngine
 	 * @param planText
 	 * @return true if valid
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public static boolean isMatchHash (String hashedText, String hexSalt, String planText) {
 		return isMatchHash(Secure.LEGACY_PASSWORD_HASH_ALGORITHM, hashedText, hexSalt, planText);
 	}

@@ -1325,11 +1325,9 @@ public class LayoutEngine implements Pageable, Printable, Doc
 					}
 				}
 
-				if (item.isFixedWidth() && item.getMaxWidth() > 0)
-				{
+				if (item.isFixedWidth() && item.getMaxWidth() > 0) {
 					maxWidth = item.getMaxWidth();
 				}
-
 				//	Type
 				PrintElement element = null;
 				if ( !PrintDataEvaluatee.hasPageLogic(item.getDisplayLogic()) && !isDisplayed(m_data, item) )
@@ -1456,18 +1454,20 @@ public class LayoutEngine implements Pageable, Printable, Doc
 				}
 				//	We know Position and Size
 				if (element != null)
-					element.setLocation(m_position[m_area]);
-				//	Add to Area
-				if (m_area == AREA_CONTENT)
-					m_currPage.addElement (element);
-				else
-					m_headerFooter.addElement (element);
-				
-				if (PrintDataEvaluatee.hasPageLogic(item.getDisplayLogic()))
 				{
-					element.setPrintData(m_data);
-					element.setRowIndex(row);
-					element.setPageLogic(item.getDisplayLogic());
+					element.setLocation(m_position[m_area]);
+					//	Add to Area
+					if (m_area == AREA_CONTENT)
+						m_currPage.addElement (element);
+					else
+						m_headerFooter.addElement (element);
+					
+					if (PrintDataEvaluatee.hasPageLogic(item.getDisplayLogic()))
+					{
+						element.setPrintData(m_data);
+						element.setRowIndex(row);
+						element.setPageLogic(item.getDisplayLogic());
+					}
 				}
 
 		return element;

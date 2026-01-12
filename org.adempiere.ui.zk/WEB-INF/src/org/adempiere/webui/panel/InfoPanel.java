@@ -1785,7 +1785,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	 *  @deprecated use getSaveKeys
 	 *  @return selected keys (Integers)
 	 */
-    @Deprecated
+    @Deprecated (since="13", forRemoval=true)
 	public Collection<Object> getSelectedKeysCollection()
 	{
 		m_ok = true;

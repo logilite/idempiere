@@ -493,7 +493,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	 * @deprecated only orgs are now fetched automatically
 	 * @throws IllegalStateException every time when you call it 
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public void setOnlyOrgs (Integer[] orgs)
 	{
 		throw new IllegalStateException("The OnlyOrgs are now fetched automatically");
@@ -731,6 +731,12 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 				log.saveError("Error", Msg.getMsg(getCtx(), "ChangeCostingLevelError") + ". Products: " + products);
 				return false; 
 			}
+		}
+		// Validate that StartDate is not after EndDate
+		if (getStartDate() != null && getEndDate() != null && getStartDate().after(getEndDate()))
+		{
+			log.saveError("Error", Msg.getMsg(getCtx(), "EndDateAfterStartDate"));
+			return false;
 		}
 		return true;
 	}	//	beforeSave

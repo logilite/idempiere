@@ -296,7 +296,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		if (log.isLoggable(Level.FINE)) log.fine("#" + m_vo.TabNo + " - Async=" + async + " - Where=" + m_vo.WhereClause);
 		if (isLoadComplete()) return true;
 
-		if (m_loaderFuture != null && m_loaderFuture.isDone())
+		if (m_loaderFuture != null && !m_loaderFuture.isDone())
 		{
 			waitLoadComplete();
 			if (isLoadComplete())
@@ -527,7 +527,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	 *  Get Tab Icon
 	 *  @return Icon
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	@GeneratedCodeCoverageExclusion
 	public javax.swing.Icon getIcon()
 	{
@@ -688,9 +688,11 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 			else
 			{
 				String value = null;
+				String effectiveLinkColumnName = lc;
 				if ( m_parentColumnName.length() > 0 )
 				{
 					// explicit parent link defined
+					effectiveLinkColumnName = m_parentColumnName;
 					value = Env.getContext(m_vo.ctx, m_vo.WindowNo, getParentTabNo(), m_parentColumnName, true);
 					if (value == null || value.length() == 0)
 						value = Env.getContext(m_vo.ctx, m_vo.WindowNo, m_parentColumnName, true); // back compatibility
@@ -705,7 +707,8 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 					setQuery(null);
 				m_linkValue = value;
 				//	Check validity
-				if (value.length() == 0)
+				if (value.length() == 0 || (effectiveLinkColumnName.endsWith("_ID") && "0".equals(value)
+					&& getParentTab() != null && getParentTab().isNew()))
 				{
 					//parent is new, can't retrieve detail
 					m_parentNeedSave = true;
@@ -843,7 +846,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 			colName = refColName;
 		}
 
-		//	Column NOT in Tab - create IN subquery for detail/child tab
+		//	Column NOT exists in this Tab - assume it is in detail tab and try to create IN sub-query for detail tab
 		String tabKeyColumn = getKeyColumnName();
 		final String sql2 = "SELECT t.TableName "
 			+ "FROM AD_Column c"
@@ -852,14 +855,6 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 			+ " AND EXISTS (SELECT * FROM AD_Column cc"
 			+ " WHERE cc.AD_Table_ID=t.AD_Table_ID AND cc.ColumnName=?)";	//	#2 Tab Key Column
 		String tableName = DB.getSQLValueStringEx(null, sql2, colName, tabKeyColumn);
-		//	Special Reference Handling
-		if (tabKeyColumn.equals("AD_Reference_ID"))
-		{
-			//	Column=AccessLevel, Key=AD_Reference_ID, Query=AccessLevel='6'
-			final String sql3 = "SELECT AD_Reference_ID FROM AD_Column WHERE ColumnName=?";
-			int AD_Reference_ID = DB.getSQLValueEx(null, sql3, colName);
-			return "AD_Reference_ID=" + AD_Reference_ID;
-		}
 
 		//	Causes could be functions in query
 		//	e.g. Column=UPPER(Name), Key=AD_Element_ID, Query=UPPER(AD_Element.Name) LIKE '%CUSTOMER%'
@@ -1099,24 +1094,28 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	}
 	
 	/**
-	 *  Do we need to Save?
-	 *  @param rowChange row change
-	 *  @param  onlyRealChange if true the value of a field was actually changed
-	 *  (e.g. for new records, which have not been changed) - default false
-	 *	@return true it needs to be saved
+	 *  Return true for one of the following conditions:
+	 *  <li>rowChange is true and current row has changes</li>
+	 *  <li>rowChange is false and onlyRealChange is false and current row is new and has no changes and setChanged(true) was called</li>
+	 *  <br/>
+	 *  Return false for one of the following conditions:
+	 *  <li>current row has no changes and setChanged(true) was not called</li>
+	 *  <li>rowChange is false and onlyRealChange is true and current row is new and has no changes and setChanged(true) was called</li>
+	 *  <li>rowChange is false and onlyRealChange is false and current row has changes</li>
+	 *  <li>rowChange is true and current row has no changes</li>
+	 *  @param rowChange if true, return true if current row has changes
+	 *  @param  onlyRealChange if rowChange is false and onlyRealChange is false, return true if setChanged(true) was called and no real changes were made
+	 *	@return true if conditions met the parameters passed
 	 */
 	public boolean needSave (boolean rowChange, boolean onlyRealChange)
 	{
 		if (rowChange)
 		{
-			return m_mTable.needSave(-2, onlyRealChange);
+			return m_mTable.needSave(-2, true);
 		}
 		else
 		{
-			if (onlyRealChange)
-				return m_mTable.needSave();
-			else
-				return m_mTable.needSave(onlyRealChange);
+			return m_mTable.needSave(m_mTable.getRowChanged()==-1 ? -2 : m_mTable.getRowChanged(), onlyRealChange);
 		}
 	}   //  isDataChanged
 
@@ -1381,7 +1380,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	 *  @return true if included
 	 *  @deprecated
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	@GeneratedCodeCoverageExclusion
 	public boolean isIncluded()
 	{
@@ -1405,7 +1404,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	 *  @param isIncluded true if included
 	 *  @deprecated The method getIncluded now validate against the structure, this method is called nowhere
 	*/
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public void setIncluded(boolean isIncluded)
 	{
 		m_included = isIncluded;
@@ -1679,7 +1678,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	 *  @return Included_Tab_ID
 	 *  @deprecated the functionality related to AD_Tab.Included_Tab_ID is deprecated
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public int getIncluded_Tab_ID()
 	{
 		return m_vo.Included_Tab_ID;
@@ -1870,7 +1869,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	 *  @return info
 	 *  @deprecated use getStatusLine and configure Status Line instead
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	@GeneratedCodeCoverageExclusion
 	public String getTrxInfo()
 	{
@@ -3021,7 +3020,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 					if (currentValue != null && mLookup.containsKeyNoDirect(currentValue))
 						setValue(dependentField, currentValue);
 				}
-			});			
+			});
 		}   //  for all dependent fields
 	}   //  processDependencies
 
@@ -3265,12 +3264,12 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	 * The following variables are exposed to the callout script using the
 	 * {@link MRule#ARGUMENTS_PREFIX}:
 	 * <ul>
-	 *   <li>{@code WindowNo} – current window number</li>
-	 *   <li>{@code Tab} – current {@link GridTab}</li>
-	 *   <li>{@code Field} – field that triggered the callout</li>
-	 *   <li>{@code Value} – new field value</li>
-	 *   <li>{@code OldValue} – previous field value</li>
-	 *   <li>{@code Ctx} – application context</li>
+	 *   <li>{@code WindowNo} � current window number</li>
+	 *   <li>{@code Tab} � current {@link GridTab}</li>
+	 *   <li>{@code Field} � field that triggered the callout</li>
+	 *   <li>{@code Value} � new field value</li>
+	 *   <li>{@code OldValue} � previous field value</li>
+	 *   <li>{@code Ctx} � application context</li>
 	 * </ul>
 	 *
 	 * @param putter
@@ -3297,7 +3296,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		putter.accept(MRule.ARGUMENTS_PREFIX + "OldValue", oldValue);
 		putter.accept(MRule.ARGUMENTS_PREFIX + "Ctx", m_vo.ctx);
 	} // setCalloutScriptContext
-	
+
 	/**
 	 *  Get Value of Field with columnName
 	 *  @param columnName column name
@@ -3471,16 +3470,11 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 			return;
 		}
 		//get the line/seq numbers
-		Integer lineNoCurrentRow = null;
-		Integer lineNoNextRow = null;
-		if (m_mTable.getValueAt(from, lineCol) instanceof Integer) {
-			lineNoCurrentRow = (Integer) m_mTable.getValueAt(from, lineCol);
-			lineNoNextRow = (Integer) m_mTable.getValueAt(to, lineCol);
-		} else if (m_mTable.getValueAt(from, lineCol) instanceof BigDecimal) {
-			lineNoCurrentRow = Integer.valueOf(((BigDecimal) m_mTable.getValueAt(from, lineCol))
-					.intValue());
-			lineNoNextRow = Integer.valueOf(((BigDecimal) m_mTable.getValueAt(to, lineCol))
-					.intValue());
+		int lineNoCurrentRow = -1;
+		int lineNoNextRow = -1;
+		if (m_mTable.getValueAt(from, lineCol) instanceof Number) {
+			lineNoCurrentRow = ((Number) m_mTable.getValueAt(from, lineCol)).intValue();
+			lineNoNextRow = ((Number) m_mTable.getValueAt(to, lineCol)).intValue();
 		} else {
 			log.fine("unknown value format - return");
 			return;

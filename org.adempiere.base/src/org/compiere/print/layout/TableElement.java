@@ -54,6 +54,7 @@ import org.compiere.util.KeyNamePair;
 import org.compiere.util.NamePair;
 import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
+import org.w3c.dom.html.HTMLElement;
 
 /**
  *	Table Print Element.<br/>
@@ -267,7 +268,7 @@ public class TableElement extends PrintElement
     /**	Key: Integer (original Column) - Value: Integer (below column)	*/
     private HashMap<Integer,Integer>	m_additionalLines;
 
-    /** Key: Integer (below column) - Value: Integer (original Column) */
+	/** Key: Integer (below column) - Value: Integer (original Column) */
 	private MultiMap<Integer, Integer> belowColumnMultiMap	= null;
 
     /** List of Fin Report Summary Rows */
@@ -381,6 +382,11 @@ public class TableElement extends PrintElement
                         }
                         else
                         {
+                        	// set null data for below columns
+    						if (col != dataCol)
+    						{
+    							addPrintLines(row, col, dataItem);
+    						}
                             dimensions.set(dataCol, new Dimension2DImpl());
                         }
                         continue;
@@ -1311,6 +1317,11 @@ public class TableElement extends PrintElement
 	 */
 	private ArrayList<Integer> getBelowColumns(Integer col)
 	{
+        // Defensive: if col is null or there are no additional lines, return null
+		if (col == null || m_additionalLines == null || m_additionalLines.isEmpty())
+		{
+			return null;
+		}
 		if (belowColumnMultiMap == null)
 		{
 			belowColumnMultiMap = new MultiMap<Integer, Integer>();
@@ -1341,6 +1352,7 @@ public class TableElement extends PrintElement
      * 	@param firstRow first row index
      * 	@param nextPageRow row index of next page
      *  @param isView true if online view (IDs are links)
+     *  @param belowCols 
      */
     private void printColumn (Graphics2D g2D, int col,
         final int origX, final int origY, boolean leftVline,
@@ -1612,7 +1624,7 @@ public class TableElement extends PrintElement
                             String[] lines = Pattern.compile("\n", Pattern.MULTILINE).split(str);
                             for (int lineNo = 0; lineNo < lines.length; lineNo++)
                             {
-                                int fcColumn = col;
+                            	int fcColumn = col;
 								if (belowCols != null)
 								{
 									fcColumn = belowCols.get(index);
@@ -1634,7 +1646,9 @@ public class TableElement extends PrintElement
                                 iter = aString.getIterator();
                                 boolean fastDraw = LayoutEngine.s_FASTDRAW;
                                 if (fastDraw && !isView && !Util.is8Bit(thisLine))
+                                {
                                     fastDraw = false;
+                                }
                                 measurer = new LineBreakMeasurer(iter, g2D.getFontRenderContext());
                                 while (measurer.getPosition() < iter.getEndIndex())		//	print element
                                 {
@@ -1657,26 +1671,26 @@ public class TableElement extends PrintElement
                                             penX += (netWidth-layout.getAdvance())/2;
                                         else if ((alignment.equals(MPrintFormatItem.FIELDALIGNMENTTYPE_TrailingRight) && layout.isLeftToRight())
                                                 || (alignment.equals(MPrintFormatItem.FIELDALIGNMENTTYPE_LeadingLeft) && !layout.isLeftToRight()))
-                                         {
+										{
                                             penX += netWidth-layout.getAdvance();
-                                            // In last line one char x-space is left more
+											// In last line one char x-space is left more
 											if (alignment.equals(MPrintFormatItem.FIELDALIGNMENTTYPE_TrailingRight)
-												&& measurer.getPosition() >= iter.getEndIndex())
-											{
-												penX -= Math.ceil((layout.getAdvance() / layout.getCharacterCount()) / 2);
+													&& measurer.getPosition() >= iter.getEndIndex()) {
+												penX -= Math
+														.ceil((layout.getAdvance() / layout.getCharacterCount()) / 2);
 											}
-                                         }
+										}
                                         //
                                         if (fastDraw)
                                         {	//	Bug - set Font/Color explicitly
-                                            g2D.setFont(getFont(row, fcColumn));
+                                        	g2D.setFont(getFont(row, fcColumn));
                                             if (isView && printItems[index] instanceof NamePair)	//	ID
                                             {
                                                 g2D.setColor(LINK_COLOR);
                                                 //	TextAttribute.UNDERLINE
                                             }
                                             else
-                                                g2D.setColor(getColor(row, fcColumn));
+                                            	g2D.setColor(getColor(row, fcColumn));
                                             g2D.drawString(iter, penX, penY);
                                         }
                                         else
@@ -1758,7 +1772,7 @@ public class TableElement extends PrintElement
             }
             else
             {
-                //  next line is a function column -> underline this
+            //  next line is a function column -> underline this
                 boolean nextIsFunction = m_functionRows.contains(Integer.valueOf(row+1));
                 if (nextIsFunction && m_functionRows.contains(Integer.valueOf(row)))
                     nextIsFunction = false;     //  this is a function line too
