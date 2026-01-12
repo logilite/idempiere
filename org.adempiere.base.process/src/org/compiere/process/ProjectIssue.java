@@ -168,8 +168,9 @@ public class ProjectIssue extends SvrProcess
 			MProjectIssue pi = new MProjectIssue (m_project);
 
 			pi.setMandatory(inOutLines[i].getM_Locator_ID(), inOutLines[i].getM_Product_ID(), inOutLines[i].getMovementQty());
-			if (m_MovementDate != null)		//	default today
+			if (m_MovementDate != null) // default today
 				pi.setMovementDate(m_MovementDate);
+			pi.setDateAcct(pi.getMovementDate());
 			
 			if (!Util.isEmpty(m_Description, true))
 				pi.setDescription(m_Description);
@@ -235,8 +236,9 @@ public class ProjectIssue extends SvrProcess
 			
 			pi.setMandatory (MProjectIssue.getExpenseLineLocator(expenseLines[i]), expenseLines[i].getM_Product_ID(), expenseLines[i].getQty());
 			
-			if (m_MovementDate != null)		//	default today
+			if (m_MovementDate != null) // default today
 				pi.setMovementDate(m_MovementDate);
+			pi.setDateAcct(pi.getMovementDate());
 			
 			if (m_Description != null && m_Description.length() > 0)
 				pi.setDescription(m_Description);
@@ -280,6 +282,7 @@ public class ProjectIssue extends SvrProcess
 
 		if (m_MovementDate != null) // default today
 			pi.setMovementDate(m_MovementDate);
+		pi.setDateAcct(pi.getMovementDate());
 		if (!Util.isEmpty(m_Description))
 			pi.setDescription(m_Description);
 		else
@@ -316,6 +319,7 @@ public class ProjectIssue extends SvrProcess
 		pi.setMandatory (m_M_Locator_ID, pl.getM_Product_ID(), pl.getPlannedQty());
 		if (m_MovementDate != null)		//	default today
 			pi.setMovementDate(m_MovementDate);
+		pi.setDateAcct(pi.getMovementDate());
 		if (m_Description != null && m_Description.length() > 0)
 			pi.setDescription(m_Description);
 		else if (pl.getDescription() != null)
@@ -332,7 +336,7 @@ public class ProjectIssue extends SvrProcess
 		//	Update Line
 		pl.setMProjectIssue(pi);
 		pl.saveEx();
-		addLog(pi.getLine(), pi.getMovementDate(), pi.getMovementQty(), null);
+		addLog(pi.getLine(), pi.getDateAcct(), pi.getMovementQty(), null);
 		return "@Created@ 1";
 	}	//	issueProjectLine
 
@@ -355,7 +359,10 @@ public class ProjectIssue extends SvrProcess
 		MProjectIssue pi = new MProjectIssue (m_project);
 		pi.setMandatory (m_M_Locator_ID, m_M_Product_ID, m_MovementQty);
 		if (m_MovementDate != null)		//	default today
+		{
 			pi.setMovementDate(m_MovementDate);
+			pi.setDateAcct(m_MovementDate);
+		}
 		if (m_Description != null && m_Description.length() > 0)
 			pi.setDescription(m_Description);
 		pi.saveEx();
@@ -365,7 +372,7 @@ public class ProjectIssue extends SvrProcess
 			throw new RuntimeException(processInfo.getSummary());
 		pi.saveEx();
 
-		addLog(pi.getLine(), pi.getMovementDate(), pi.getMovementQty(), null);
+		addLog(pi.getLine(), pi.getDateAcct(), pi.getMovementQty(), null);
 		return "@Created@ 1";
 	}	//	issueInventory
 }	//	ProjectIssue

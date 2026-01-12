@@ -35,6 +35,7 @@ public class CalloutProjectIssue extends CalloutEngine
 					mTab.setValue(MProjectIssue.COLUMNNAME_M_Product_ID, inOutLine.getM_Product_ID());
 					mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, null);
 					mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, inOutLine.getMovementQty());
+					mTab.setValue(MProjectIssue.COLUMNNAME_MovementDate, inOutLine.getM_InOut().getMovementDate());
 					mTab.setValue(MProjectIssue.COLUMNNAME_M_Locator_ID, inOutLine.getM_Locator_ID());
 					mTab.setValue(MProjectIssue.COLUMNNAME_M_AttributeSetInstance_ID, inOutLine.getM_AttributeSetInstance_ID());
 					mTab.setValue(MProjectIssue.COLUMNNAME_M_Warehouse_ID, inOutLine.getM_InOut().getM_Warehouse_ID());
@@ -73,6 +74,7 @@ public class CalloutProjectIssue extends CalloutEngine
 				mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, null);
 				mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, expenseLine.getQty());
 				mTab.setValue(MProjectIssue.COLUMNNAME_M_Locator_ID, MProjectIssue.getExpenseLineLocator(expenseLine));
+				mTab.setValue(MProjectIssue.COLUMNNAME_MovementDate, expenseLine.getDateExpense());
 
 				// Set amt
 				BigDecimal amt = ProjectIssueUtil.getLaborCost(as, expenseLine.get_ID());
@@ -108,6 +110,7 @@ public class CalloutProjectIssue extends CalloutEngine
 					mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, invLine.getQtyInvoiced());
 					mTab.setValue(MProjectIssue.COLUMNNAME_Amt, MProjectIssue.getInvLineAmt(invLine));
 					mTab.setValue(MProjectIssue.COLUMNNAME_M_AttributeSetInstance_ID, invLine.getM_AttributeSetInstance_ID());
+					mTab.setValue(MProjectIssue.COLUMNNAME_MovementDate, invLine.getC_Invoice().getDateInvoiced());
 
 					if (invLine.getC_Department_ID() > 0)
 						mTab.setValue(MProjectIssue.COLUMNNAME_C_Department_ID, invLine.getC_Department_ID());
@@ -150,6 +153,7 @@ public class CalloutProjectIssue extends CalloutEngine
 		mTab.setValue(MProjectIssue.COLUMNNAME_M_Product_ID, null);
 		mTab.setValue(MProjectIssue.COLUMNNAME_C_Charge_ID, null);
 		mTab.setValue(MProjectIssue.COLUMNNAME_MovementQty, Env.ZERO);
+		mTab.setValue(MProjectIssue.COLUMNNAME_MovementDate, null);
 		mTab.setValue(MProjectIssue.COLUMNNAME_M_Locator_ID, null);
 		mTab.setValue(MProjectIssue.COLUMNNAME_M_AttributeSetInstance_ID, null);
 		mTab.setValue(MProjectIssue.COLUMNNAME_Description, null);

@@ -84,6 +84,8 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 	 * Set the initial defaults for a new record
 	 */
 	private void setInitialDefaults() {
+		setMovementDate (new Timestamp(System.currentTimeMillis()));
+		setDateAcct(new Timestamp(System.currentTimeMillis()));
 		setMovementQty (Env.ZERO);
 		setPosted (false);
 		setProcessed (false);
@@ -112,12 +114,6 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		setC_Project_ID (project.getC_Project_ID());	//	Parent
 		setLine (getNextLine());
 		m_parent = project;
-		//
-		setMovementDate (new Timestamp(System.currentTimeMillis()));
-		setMovementQty (Env.ZERO);
-		setPosted (false);
-		setProcessed (false);
-		init();
 	}	//	MProjectIssue
 
 	/**
@@ -474,7 +470,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 					getMovementDate(), get_TrxName());
 			mTrx.setC_ProjectIssue_ID(getC_ProjectIssue_ID());
 
-			Timestamp dateMPolicy = getMovementDate();
+			Timestamp dateMPolicy = getDateAcct();
 
 			if (getM_AttributeSetInstance_ID() > 0) {
 				Timestamp t = MStorageOnHand.getDateMaterialPolicy(productID, getM_AttributeSetInstance_ID(),
@@ -632,6 +628,7 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		reversal.setM_Locator_ID(getM_Locator_ID());
 		reversal.setM_Product_ID(getM_Product_ID());
 		reversal.setC_Charge_ID(getC_Charge_ID());
+		reversal.setMovementDate(getMovementDate());
 		if (getC_Charge_ID() > 0)
 			reversal.setAmt(getAmt().negate());
 		reversal.setM_AttributeSetInstance_ID(getM_AttributeSetInstance_ID());
@@ -646,7 +643,10 @@ public class MProjectIssue extends X_C_ProjectIssue implements DocAction, DocOpt
 		else if (getC_ProjectLine_ID() > 0)
 			reversal.setC_ProjectLine_ID(getC_ProjectLine_ID());
 
-		reversal.setMovementDate(reversalDate);
+		if (accrual)
+			reversal.setDateAcct(new Timestamp(System.currentTimeMillis()));
+		else
+			reversal.setDateAcct(getDateAcct());
 		reversal.setDescription("Reversal for Line No " + getLine() + "<"+getC_ProjectIssue_ID()+">");
 
 		// Additional Dimensions

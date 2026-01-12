@@ -20,15 +20,22 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.exceptions.DBException;
 import org.adempiere.util.Callback;
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.LayoutUtils;
+import org.adempiere.webui.adwindow.WFNodeVarForm;
 import org.adempiere.webui.apps.DesktopRunnable;
 import org.adempiere.webui.component.ConfirmPanel;
 import org.adempiere.webui.component.Datebox;
@@ -55,6 +62,7 @@ import org.compiere.model.MDocType;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MPeriod;
+import org.compiere.model.MProcess;
 import org.compiere.model.MRefList;
 import org.compiere.model.MTable;
 import org.compiere.model.MWFActivityApprover;
@@ -71,6 +79,7 @@ import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
 import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFNode;
+import org.compiere.wf.MWFNodeVar;
 import org.compiere.wf.MWFProcess;
 import org.compiere.wf.MWFResponsible;
 import org.zkoss.zk.ui.Executions;
@@ -96,6 +105,22 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 	/** Event to fire on complete of execution of doc action **/
 	private static final String		ON_COMPLETE_EVENT	= "onComplete";
+	
+	private static final String		SQL_GET_SUBSTITUTE_USERS
+																	= "SELECT AD_User_ID FROM AD_User_Substitute "
+																		+ "WHERE Substitute_ID = ? "
+																			+ "AND (ValidFrom IS NULL OR ValidFrom <= CURRENT_DATE) "
+																			+ "AND (ValidTo IS NULL OR ValidTo >= CURRENT_DATE) "
+																			+ "AND IsActive = 'Y'";
+
+	private static final String		SQL_GET_SUBSTITUTE_USER_ROLES
+																	= "SELECT DISTINCT ur.AD_Role_ID FROM AD_User_Roles ur "
+																		+ "JOIN AD_User_Substitute us ON (us.AD_User_ID = ur.AD_User_ID) "
+																			+ "WHERE us.Substitute_ID = ? "
+																			+ "AND (us.ValidFrom IS NULL OR us.ValidFrom <= CURRENT_DATE) "
+																			+ "AND (us.ValidTo IS NULL OR us.ValidTo >= CURRENT_DATE) "
+																			+ "AND us.IsActive = 'Y' "
+																			+ "AND ur.IsActive = 'Y'";
 
 	private Label lblDocAction;
 	private Label label;
@@ -135,6 +160,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 	/** Current User */
 	private int m_AD_User_ID = 0;
+	
+	/** Current process */
+	private int						m_Process_ID		= 0;
 
 	/** Current Workflow Responsible */
 	private MWFResponsible resp = null;
@@ -147,6 +175,15 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 	/** Reference to docAction thread/task **/
 	private Future <?>				future;
+	
+	private WFNodeVarForm			nodeVarForm;
+	
+	private Map <Integer, String>	valMap;
+	
+	/** Active substitute users (including the current user). */
+	private final Set <Integer>		substituteUserIDs	= new HashSet <>();
+	/** Active roles assigned to substitute users. */
+	private final Set <Integer>		substituteRoleIDs	= new HashSet <>();
 
 	private static final CLogger logger;
 
@@ -160,7 +197,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
      */
 	public WDocActionPanel(GridTab mgridTab)
 	{
-		this(mgridTab, false);
+		this(mgridTab, false, 0);
 	}
 
 	/**
@@ -169,16 +206,37 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	 */
 	public WDocActionPanel(GridTab mgridTab, boolean fromMenu)
 	{
+		this(mgridTab, fromMenu, 0);
+	}
+
+    /**
+     * @param mgridTab
+     * @param process_ID 
+     */
+	public WDocActionPanel(GridTab mgridTab, int process_ID)
+	{
+		this(mgridTab, false, process_ID);
+	}
+
+	/**
+	 * @param mgridTab
+	 * @param fromMenu
+	 */
+	public WDocActionPanel(GridTab mgridTab, boolean fromMenu, int process_ID)
+	{
 		gridTab = mgridTab;
 		DocStatus = (String)gridTab.getValue("DocStatus");
 		DocAction = (String)gridTab.getValue("DocAction");
-
+		m_Process_ID = process_ID;
 		m_AD_Table_ID = mgridTab.getAD_Table_ID();
 
 		m_AD_User_ID = Env.getAD_User_ID(Env.getCtx());
 		m_AD_Role_ID = Env.getAD_Role_ID(Env.getCtx());
 
 		loadActivity();
+		
+		loadSubstituteDetails();
+
 		if (!isValidApprover()) {
 			
 			StringBuilder msg = new StringBuilder(Msg.getMsg(Env.getCtx(), "AssignedToState", new Object[] { m_activity.getWFStateText(), m_activity.getNode().getName() }));
@@ -210,6 +268,44 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		dynInit(fromMenu);
 
 		init();
+	}
+
+	/**
+	 * Loads substitute-related user and role information for the current user.
+	 * <p>
+	 * Always includes the current user and their role. If an activity is present,
+	 * also loads all active substitute users (valid by date range) and all active
+	 * roles assigned to those substitute users.
+	 * <p>
+	 * When {@code m_activity} is {@code null}, only the current user and role
+	 * are retained.
+	 * 
+	 * @throws DBException if there is any SQLException
+	 */
+	private void loadSubstituteDetails( ) throws DBException
+	{
+		substituteUserIDs.clear();
+		substituteRoleIDs.clear();
+
+		substituteUserIDs.add(m_AD_User_ID);
+		substituteRoleIDs.add(m_AD_Role_ID);
+		
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("Loaded current user: " + m_AD_User_ID + ", role: " + m_AD_Role_ID);
+
+		if (m_activity != null)
+		{
+			int[] userIDs = DB.getIDsEx(m_activity.get_TrxName(), SQL_GET_SUBSTITUTE_USERS, m_AD_User_ID);
+			for (int id : userIDs)
+				substituteUserIDs.add(id);
+			int[] userRoleIDs = DB.getIDsEx(m_activity.get_TrxName(), SQL_GET_SUBSTITUTE_USER_ROLES, m_AD_User_ID);
+			for (int id : userRoleIDs)
+				substituteRoleIDs.add(id);
+			
+			if (logger.isLoggable(Level.FINE))
+				logger.fine("Loaded " + userIDs.length + " substitute users and " + userRoleIDs.length + " substitute roles");
+		 
+		}
 	}
 
 	/**
@@ -481,13 +577,45 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		Row rowUser = new Row();
 		Row rowAnswer = new Row();
 		Row rowTxtMsg = new Row();
+		
+		Row nodeVarRow = new Row();
+		Div nodeVarDiv = new Div();
+		MWFNode node = null;
+		nodeVarForm = null;
+		if (m_activity != null)
+		{
+			node = m_activity.getNode();
+		}
+		else if(org.compiere.process.DocAction.STATUS_Drafted.equals(DocStatus) && m_Process_ID > 0)
+		{
+			// Currently it only works for the DR state, because when the activity isn’t created yet, we don’t know which node will run.
+			MProcess pr = new MProcess(Env.getCtx(), m_Process_ID, null);
+			node = (MWFNode) pr.getAD_Workflow().getAD_WF_Node();
+		}
+		
+		int colSpan = 1;
+		if (node != null)
+		{
+			List <MColumn> colms = MWFNodeVar.getNodeVarsColumns(node.getCtx(), node.getAD_WF_Node_ID());
+			if (colms != null && !colms.isEmpty())
+			{
+				PO po = m_activity == null ? MTable.get(gridTab.getAD_Table_ID()).getPO(gridTab.getRecord_ID(), null) : m_activity.getPO();
+				nodeVarForm = new WFNodeVarForm(node, colms, po, gridTab);
+				nodeVarForm.setHeight(nodeVarForm.getHeight());
+				nodeVarDiv.setHeight(nodeVarForm.getHeight());
+				nodeVarDiv.appendChild(nodeVarForm);
+				ZKUpdateUtil.setWidth(nodeVarDiv, "100%");
+				colSpan = 3;
+			}
+		}
+		nodeVarRow.appendCellChild(nodeVarDiv, colSpan);
 
 		Panel pnlDocAction = new Panel();
 		pnlDocAction.appendChild(lblDocAction);
 		pnlDocAction.appendChild(new Space());
 		pnlDocAction.appendChild(lstDocAction);
 
-		rowDocAction.appendChild(pnlDocAction);
+		rowDocAction.appendCellChild(pnlDocAction, colSpan);
 		
 		// Approver User
 		rowUser.appendCellChild(lblUser, 1);
@@ -515,26 +643,27 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		pnlDateAcct.appendChild(space);
 		pnlDateAcct.appendChild(dbDateAcct);
 
-		rowDateAcct.appendChild(pnlDateAcct);
+		rowDateAcct.appendCellChild(pnlDateAcct);
 
-		rowLabel.appendChild(label);
-		rowSpacer.appendChild(new Space());
+		rowLabel.appendCellChild(label, colSpan);
+		rowSpacer.appendCellChild(new Space(), colSpan);
 
-		rows.appendChild(rowDocAction);
-		rows.appendChild(rowDateAcct);
-		rows.appendChild(rowLabel);
-		rows.appendChild(rowSpacer);
-
-		if (m_activity != null && (m_activity.isUserApproval() || m_activity.isUserTask())) {
-				
+		if (m_activity != null && (m_activity.isUserApproval() || m_activity.isUserTask()))
+		{
 			rows.appendChild(rowAnswer);
 			rows.appendChild(rowTxtMsg);
-			
-			// Removing Document Action if Activity found
-			rows.removeChild(rowDocAction);
-			rows.removeChild(rowDateAcct);
-			rows.removeChild(rowLabel);
-			rows.removeChild(rowSpacer);
+		}
+		else
+		{
+			rows.appendChild(rowDocAction);
+			rows.appendChild(rowDateAcct);
+			rows.appendChild(rowLabel);
+			rows.appendChild(rowSpacer);
+		}
+
+		if (nodeVarForm != null)
+		{
+			rows.appendChild(nodeVarRow);
 		}
 
 		Div footer = new Div();
@@ -562,15 +691,47 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	@Override
 	public void onEvent(Event event) throws Exception
 	{
-
 		String eventName = event.getName();
-
 		if (Events.ON_CLICK.equals(eventName))
 		{
 			if (confirmPanel.getButton("Ok").equals(event.getTarget()))
 			{
+				valMap = null;
+				if (nodeVarForm != null)
+				{
+					String errorMsg = nodeVarForm.validateMandatory();
+					if (!Util.isEmpty(errorMsg, true))
+					{
+						Dialog.error(m_WindowNo, "Error", errorMsg);
+						return;
+					}
+					valMap = nodeVarForm.getValuesMap();
+				}
+	
 				if (isWFActivity())
+				{
+					Trx trx = Trx.get(Trx.createTrxName("FWFA"), true);
+					try
+					{
+						m_activity.set_TrxName(trx.getTrxName());
+						setNodeVarValue();
+					}
+					catch (Exception e)
+					{
+						// Ensure leaked transaction is cleaned up
+						if (trx != null)
+						{
+							trx.rollback();
+							trx.close();
+						}
+						Throwable error = e.getCause();
+						logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
+						Dialog.error(m_WindowNo, "Error", error != null ? error.getLocalizedMessage() : e.getLocalizedMessage());
+						return;
+					}
+
 					future = Adempiere.getThreadPoolExecutor().submit(new DesktopRunnable(new DocActionDialogRunnable(), getDesktop()));
+				}
 				else
 					onOk(null);
 			}
@@ -607,6 +768,27 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				label.setValue(s_description[getSelectedIndex()]);
 				setDateAcctVisible(s_value[getSelectedIndex()].equals(DocumentEngine.ACTION_Reverse_Accrual) && isAllowSetDateAcct);
 			}
+			else if (lstAnswer.equals(event.getTarget()))
+			{
+				if (nodeVarForm != null && m_activity != null)
+				{
+					MWFNode node = m_activity.getNode();
+					int ApprovalColumn_ID = 0;
+
+					if (node.getAD_Column_ID() == 0)
+						ApprovalColumn_ID = node.getApprovalColumn_ID();
+					else
+						ApprovalColumn_ID = node.getAD_Column_ID();
+
+					if (ApprovalColumn_ID > 0)
+					{
+						MColumn column = MColumn.get(Env.getCtx(), ApprovalColumn_ID);
+						String value = lstAnswer.getSelectedItem().getValue();
+						Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), column.getColumnName(), value);
+					}
+					nodeVarForm.dynamicDisplay();
+				}
+			}
 		}
 	}
 
@@ -636,7 +818,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		Trx trx = null;
 		try
 		{
-			trx = Trx.get(Trx.createTrxName("FWFA"), true);
+			trx = Trx.get((m_activity.get_TrxName() == null ? Trx.createTrxName("FWFA") : m_activity.get_TrxName()), true);
 			trx.setDisplayName(getClass().getName() + "_onOK");
 			m_activity.set_TrxName(trx.getTrxName());
 
@@ -808,8 +990,68 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			throw new IllegalStateException(Msg.getMsg(Env.getCtx(), "DocStatusChanged"));
 		}
 		m_OKpressed = true;
+		setNodeVarValue();
 		setValue();
 		detach();
+	}
+
+	/**
+	 * Sets workflow node variables based on the values provided in valMap.
+	 * Resolves context, transaction, PO, and workflow node, then assigns variables using MWFActivity.
+	 * Throws AdempiereException if any variable assignment fails.
+	 */
+	private void setNodeVarValue( )
+	{
+		if (valMap != null)
+		{
+			// Iterate through each column-value pair to be set
+			for (Entry <Integer, String> colValue : valMap.entrySet())
+			{
+				// transaction: use activity's trx or create a new one
+				String trxName = m_activity != null ? m_activity.get_TrxName() : null;// Trx.get(Trx.createTrxName("FWFA"), true);
+
+				// context: activity context or default context
+				Properties ctx = m_activity != null ? m_activity.getCtx() : Env.getCtx();
+
+				// PO object: from activity or table record
+				PO po = m_activity != null ? m_activity.getPO(Trx.get(trxName, true)) : MTable.get(Env.getCtx(), m_AD_Table_ID).getPO(gridTab.getRecord_ID(), trxName);
+
+				MWFNode node = null;
+				// workflow node: from activity or process workflow
+				if (m_activity != null)
+					node = m_activity.getNode();
+				else if (m_Process_ID > 0)
+				{
+					MProcess pr = new MProcess(Env.getCtx(), m_Process_ID, trxName);
+					node = (MWFNode) pr.getAD_Workflow().getAD_WF_Node();
+				}
+
+				if(node != null)
+				{
+					try
+					{
+						// Get column based on ID
+						MColumn col = MColumn.get(ctx, colValue.getKey());
+						// Assign workflow variable using column ID, value, reference type, PO, and node
+						MWFActivity.setVariable(
+										colValue.getKey(), // Column ID
+										colValue.getValue(), // Value to set
+										col.getAD_Reference_ID(), // Column reference type
+										po, // Target PO
+										node, // Workflow node
+										trxName // Transaction
+						);
+					}
+					catch (Exception e)
+					{
+						throw new AdempiereException(e.getMessage(), e);
+					}
+				}
+			}
+
+			if (gridTab != null)
+				gridTab.dataRefresh();
+		}
 	}
 
 	/**
@@ -926,13 +1168,13 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			{
 				// If Approver is not assign then check current user is invoker
 				MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(m_activity.getCtx(), m_activity.getAD_WF_Activity_ID(), m_activity.get_TrxName());
-				if ((approvers == null || approvers.length == 0) && m_activity.getAD_User_ID() <= 0 && m_WFProcess.getAD_User_ID() != m_AD_User_ID)
+				if ((approvers == null || approvers.length == 0) && m_activity.getAD_User_ID() <= 0 && m_WFProcess != null && !substituteUserIDs.contains(m_WFProcess.getAD_User_ID()))
 				{
 					return false;
 				}
 
 				// If Approver is assign then check current user is not Approver
-				if (m_activity.getAD_User_ID() > 0 && m_AD_User_ID != m_activity.getAD_User_ID())
+				if (m_activity.getAD_User_ID() > 0 && !substituteUserIDs.contains(m_activity.getAD_User_ID()))
 				{
 					return false;
 				}
@@ -942,7 +1184,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 					boolean isApprover = false;
 					for (int i = 0; i < approvers.length; i++)
 					{
-						if (approvers[i].getAD_User_ID() == Env.getAD_User_ID(m_activity.getCtx()))
+						if (substituteUserIDs.contains(approvers[i].getAD_User_ID()))
 						{
 							isApprover = true;
 							break;
@@ -955,33 +1197,26 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			}
 			else if (MWFResponsible.RESPONSIBLETYPE_Initiator.equals(respType))
 			{
-				if (m_activity.getAD_User_ID() != m_AD_User_ID)
+				if (!substituteUserIDs.contains(m_activity.getAD_User_ID()))
 				{
 					return false;
 				}
 			}
 			else if (MWFResponsible.RESPONSIBLETYPE_SupervisorOfInitiator.equals(respType) || MWFResponsible.RESPONSIBLETYPE_SupervisorOfCurrentUser.equals(respType))
 			{
-				if (m_activity.getAD_User_ID() != m_AD_User_ID)
+				if (!substituteUserIDs.contains(m_activity.getAD_User_ID()))
 				{
 					return false;
 				}
 			}
 			else if (MWFResponsible.RESPONSIBLETYPE_Human.equals(respType) && resp.getAD_User_ID() > 0)
 			{
-				if (m_activity.getAD_User_ID() != 0 && m_activity.getAD_User_ID() == m_AD_User_ID)
-				{
-					return true;
-				}
-				else if (resp.getAD_User_ID() != m_AD_User_ID)
-				{
-					return false;
-				}
+				return isValidHumanResponsible();
 			}
 			else
 			{
 				// Current User Role is not Approval Role
-				if (MWFResponsible.RESPONSIBLETYPE_Role.equals(respType) && m_AD_Role_ID != resp.getAD_Role_ID())
+				if (MWFResponsible.RESPONSIBLETYPE_Role.equals(respType) && !substituteRoleIDs.contains(resp.getAD_Role_ID()))
 				{
 					return false;
 				}
@@ -992,9 +1227,25 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 	public boolean isApprover()
 	{
-		return (m_activity != null && m_AD_User_ID == m_activity.getAD_User_ID())
-				|| (resp != null && m_AD_Role_ID == resp.getAD_Role_ID())
-				|| (resp != null && resp.isHuman() && resp.getAD_User_ID()==0);
+		if (m_activity != null && substituteUserIDs.contains(m_activity.getAD_User_ID()))
+			return true;
+		else if (resp != null && resp.isRole() && substituteRoleIDs.contains(resp.getAD_Role_ID()))
+			return true;
+		else if (resp != null && MWFResponsible.RESPONSIBLETYPE_Human.equals(resp.getResponsibleType()))
+			return isValidHumanResponsible();
+		return false;
+	}
+
+	/**
+	 * Checks whether the human responsible user is valid
+	 * for the current activity or responsibility, including substitutes.
+	 *
+	 * @return {@code true} if the user is active and allowed, otherwise {@code false}
+	 */
+	private boolean isValidHumanResponsible( )
+	{
+		final int userId = (m_activity != null && m_activity.getAD_User_ID() != 0) ? m_activity.getAD_User_ID() : resp.getAD_User_ID();
+		return userId > 0 && substituteUserIDs.contains(userId);
 	}
 	
 	/**

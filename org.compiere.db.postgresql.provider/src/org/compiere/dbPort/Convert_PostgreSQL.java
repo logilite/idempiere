@@ -140,6 +140,12 @@ public class Convert_PostgreSQL extends Convert_SQL92 {
 				statement = convertComplexStatement(convertAlias(statement));
 			}
 		}
+
+		// Replace HAVE/IN expression for array data types
+		statement = statement.replaceAll(PG_ARRAY_HAVE_ALIAS_EXP, PG_ARRAY_HAVE_EXP);
+		statement = statement.replaceAll(PG_ARRAY_IN_ALIAS_EXP, PG_ARRAY_IN_EXP);
+		statement = statement.replaceAll(PG_ARRAY_EXCLUDE_ALIAS_EXP, PG_ARRAY_OVERLAP_EXP);
+
 		if (retVars.size() > 0)
 			statement = recoverQuotedStrings(statement, retVars, nonce);
 		result.add(statement);
@@ -272,11 +278,6 @@ public class Convert_PostgreSQL extends Convert_SQL92 {
 
 		// Convert datatypes from CAST(.. as datatypes):
 		retValue = convertCast(retValue);
-		
-		// Replace HAVE/IN expression for array data types
-		retValue = retValue.replaceAll(PG_ARRAY_HAVE_ALIAS_EXP, PG_ARRAY_HAVE_EXP);
-		retValue = retValue.replaceAll(PG_ARRAY_IN_ALIAS_EXP, PG_ARRAY_IN_EXP);
-		retValue = retValue.replaceAll(PG_ARRAY_EXCLUDE_ALIAS_EXP, PG_ARRAY_OVERLAP_EXP);
 
 		return retValue;
 	} // convertComplexStatement

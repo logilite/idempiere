@@ -359,6 +359,8 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     public void focusToActivePanel() {
     	IADTabpanel adTabPanel = adTabbox.getSelectedTabpanel();
 		focusToTabpanel(adTabPanel);
+		WindowValidatorEvent event = new WindowValidatorEvent(adwindow, WindowValidatorEventType.AFTER_DATA_LOAD.getName());
+    	WindowValidatorManager.getInstance().fireWindowValidatorEvent(event, null);
 	}
 
     /**
@@ -1521,10 +1523,9 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	 */
 	public void onAttributeForm()
 	{
-		new WTableAttribute(adTabbox.getSelectedGridTab().getAD_Table_ID(), adTabbox.getSelectedGridTab().getRecord_ID());
-		
+		new WTableAttribute(adTabbox.getSelectedGridTab());
 	}
-	
+
     /**
      * @param event
      * @see EventListener#onEvent(Event)
@@ -2303,7 +2304,6 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         IADTabpanel adtab = adTabbox.getSelectedTabpanel();
         toolbar.enableProcessButton(!isNewRow && adtab != null && adtab.isEnableProcessButton());
         toolbar.enableCustomize(adtab.isEnableCustomizeButton());
-
     }
 
 	/**
@@ -3780,7 +3780,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		//	Show Document Action (Workflow) dialog
 		if (col.equals("DocAction"))
 		{
-			final WDocActionPanel win = new WDocActionPanel(adtabPanel.getGridTab());
+			final WDocActionPanel win = new WDocActionPanel(adtabPanel.getGridTab(), wButton.getProcess_ID());
 			if (win.getNumberOfOptions() == 0 && !win.isApprover())
 			{
 				logger.info("DocAction - No Options");

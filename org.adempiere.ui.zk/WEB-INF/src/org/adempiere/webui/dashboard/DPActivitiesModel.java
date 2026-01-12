@@ -77,7 +77,19 @@ public class DPActivitiesModel {
 		int AD_Client_ID = Env.getAD_Client_ID(Env.getCtx());
 		int count = new Query(Env.getCtx(), MWFActivity.Table_Name, MWFActivity.getWhereUserPendingActivities(), null)
 				.setApplyAccessFilter(true, false)
-				.setParameters(AD_User_ID, AD_User_ID, AD_User_ID, AD_User_ID, AD_User_ID, AD_Client_ID)
+						.setParameters(
+										AD_User_ID, // #1 Owner
+										AD_User_ID, // #2 Owner substitute
+										AD_User_ID, // #3 Invoker
+										AD_User_ID, // #4 Invoker substitute
+										AD_User_ID, // #5 Responsible User
+										AD_User_ID, // #6 Responsible User substitute
+										AD_User_ID, // #7 Responsible Role
+										AD_User_ID, // #8 Responsible Role substitute
+										AD_User_ID, // #9 Manual Responsible
+										AD_User_ID, // #10 Manual Responsible substitute
+										AD_Client_ID // #11 Client
+						)
 				.count();
 		return count;
 	}

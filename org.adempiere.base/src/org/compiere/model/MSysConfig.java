@@ -141,6 +141,7 @@ public class MSysConfig extends X_AD_SysConfig
     @Deprecated(forRemoval = true, since = "11")
     public static final String INFO_DOUBLECLICKTOGGLESSELECTION = "INFO_DOUBLECLICKTOGGLESSELECTION";
     public static final String INFO_PRODUCT_SHOW_PRODUCTS_WITHOUT_PRICE = "INFO_PRODUCT_SHOW_PRODUCTS_WITHOUT_PRICE";
+    public static final String INVENTORYCOUNT_CREATE_LINEMA = "INVENTORYCOUNT_CREATE_LINEMA";
     public static final String Invoice_ReverseUseNewNumber = "Invoice_ReverseUseNewNumber";
     public static final String JASPER_SWAP_MAX_PAGES = "JASPER_SWAP_MAX_PAGES";
     public static final String LABEL_AUTOMATIC_COLOR = "LABEL_AUTOMATIC_COLOR";
@@ -238,6 +239,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String ZK_BROWSER_ICON = "ZK_BROWSER_ICON";
     public static final String ZK_BROWSER_TITLE = "ZK_BROWSER_TITLE";
     public static final String ZK_BUTTON_STYLE = "ZK_BUTTON_STYLE";
+    public static final String ZK_DEFAULT_ORDERBY = "ZK_DEFAULT_ORDERBY";
     public static final String ZK_DASHBOARD_CALENDAR_REQUEST_DISPLAY_MODE = "ZK_DASHBOARD_CALENDAR_REQUEST_DISPLAY_MODE";
     public static final String ZK_DASHBOARD_PERFORMANCE_REFRESH_INTERVAL = "ZK_DASHBOARD_PERFORMANCE_REFRESH_INTERVAL";
     /** @deprecated not use for the new billboard implementation */

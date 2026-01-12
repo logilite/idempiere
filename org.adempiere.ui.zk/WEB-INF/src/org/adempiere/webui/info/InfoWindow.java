@@ -1190,9 +1190,9 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 
 		int i = -1;
 		for(InfoColumnVO infoColumn : infoColumns) 
-		{						
+		{
 			i++;
-			if (infoColumn.isDisplayed(infoContext, p_WindowNo) || infoColumn.isHideInfoColumn())
+			if (infoColumn.isDisplayed(infoContext, p_WindowNo) || infoColumn.isHideInfoColumn()) 
 			{
 				ColumnInfo columnInfo = null;
 				String colSQL = infoColumn.getSelectClause();

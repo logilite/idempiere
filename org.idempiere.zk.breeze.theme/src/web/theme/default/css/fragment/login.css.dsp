@@ -79,9 +79,10 @@
 }
 
 .login-east-panel, .login-west-panel {
-	width: 350px;
-	background-color: #E0EAF7;
+	width: 380px;
+	background-color: #E5E5E5;
 	position: relative;
+	border-right: 2px solid #3c3c3c !important;
 }
 
 /* SSO buttons */

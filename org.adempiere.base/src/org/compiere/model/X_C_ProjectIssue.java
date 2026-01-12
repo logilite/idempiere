@@ -34,7 +34,7 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20250922L;
+	private static final long serialVersionUID = 20251202L;
 
     /** Standard Constructor */
     public X_C_ProjectIssue (Properties ctx, int C_ProjectIssue_ID, String trxName)
@@ -453,6 +453,22 @@ public class X_C_ProjectIssue extends PO implements I_C_ProjectIssue, I_Persiste
     {
         return new KeyNamePair(get_ID(), String.valueOf(getC_Project_ID()));
     }
+
+	/** Set Account Date.
+		@param DateAcct Accounting Date
+	*/
+	public void setDateAcct (Timestamp DateAcct)
+	{
+		set_ValueNoCheck (COLUMNNAME_DateAcct, DateAcct);
+	}
+
+	/** Get Account Date.
+		@return Accounting Date
+	  */
+	public Timestamp getDateAcct()
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DateAcct);
+	}
 
 	/** Set Description.
 		@param Description Optional short description of the record

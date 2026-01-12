@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_WF_Node_Var
  *  @author iDempiere (generated) 
- *  @version Release 7.1
+ *  @version Release 11
  */
 public interface I_AD_WF_Node_Var 
 {
@@ -152,6 +152,19 @@ public interface I_AD_WF_Node_Var
 	  */
 	public String getDescription();
 
+    /** Column name DisplayLogic */
+    public static final String COLUMNNAME_DisplayLogic = "DisplayLogic";
+
+	/** Set Display Logic.
+	  * If the Field is displayed, the result determines if the field is actually displayed
+	  */
+	public void setDisplayLogic (String DisplayLogic);
+
+	/** Get Display Logic.
+	  * If the Field is displayed, the result determines if the field is actually displayed
+	  */
+	public String getDisplayLogic();
+
     /** Column name EntityType */
     public static final String COLUMNNAME_EntityType = "EntityType";
 
@@ -179,6 +192,15 @@ public interface I_AD_WF_Node_Var
 	  * The record is active in the system
 	  */
 	public boolean isActive();
+
+    /** Column name MandatoryLogic */
+    public static final String COLUMNNAME_MandatoryLogic = "MandatoryLogic";
+
+	/** Set Mandatory Logic	  */
+	public void setMandatoryLogic (String MandatoryLogic);
+
+	/** Get Mandatory Logic	  */
+	public String getMandatoryLogic();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";
