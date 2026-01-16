@@ -597,9 +597,12 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			{
 				PO po = m_activity == null ? MTable.get(gridTab.getAD_Table_ID()).getPO(gridTab.getRecord_ID(), null) : m_activity.getPO();
 				nodeVarForm = new WFNodeVarForm(node, colms, po, gridTab);
+				if (lstDocAction != null && lstDocAction.getSelectedItem() != null)
+					Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), "DocAction", s_value[getSelectedIndex()]);
 				nodeVarForm.setHeight(nodeVarForm.getHeight());
 				nodeVarDiv.setHeight(nodeVarForm.getHeight());
 				nodeVarDiv.appendChild(nodeVarForm);
+				nodeVarForm.dynamicDisplay();
 				ZKUpdateUtil.setWidth(nodeVarDiv, "100%");
 				colSpan = 3;
 			}
@@ -763,6 +766,11 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			{
 				label.setValue(s_description[getSelectedIndex()]);
 				setDateAcctVisible(s_value[getSelectedIndex()].equals(DocumentEngine.ACTION_Reverse_Accrual) && isAllowSetDateAcct);
+				if (nodeVarForm != null && lstDocAction.getSelectedItem() != null)
+				{
+					Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), "DocAction", s_value[getSelectedIndex()]);
+					nodeVarForm.dynamicDisplay();
+				}
 			}
 			else if (lstAnswer.equals(event.getTarget()))
 			{
