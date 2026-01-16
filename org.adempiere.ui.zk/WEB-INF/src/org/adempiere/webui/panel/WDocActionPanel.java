@@ -531,7 +531,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				}
 				else if (dt == DisplayType.List)
 				{
-					ValueNamePair[] values = MRefList.getList(Env.getCtx(), column.getAD_Reference_Value_ID(), false);
+					ValueNamePair[] values = MRefList.getList(Env.getCtx(), column.getAD_Reference_Value_ID(), false, "Value");
 					for (int i = 0; i < values.length; i++)
 					{
 						lstAnswer.appendItem(values[i].getName(), values[i].getValue());
