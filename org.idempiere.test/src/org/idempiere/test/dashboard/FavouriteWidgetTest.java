@@ -24,7 +24,7 @@ public class FavouriteWidgetTest extends AbstractTestCase{
     	assertTrue(menu.isActive());
     	
     	// add Test to favorite
-    	int AD_Favorite_Tree_ID = MTreeFavorite.getFavoriteTreeID(getAD_User_ID());
+    	int AD_Favorite_Tree_ID = MTreeFavorite.getFavoriteTreeID(getAD_User_ID(), GARDEN_WORLD_ADMIN_ROLE);
     	MTreeFavoriteNode favoriteNode = new MTreeFavoriteNode(Env.getCtx(), 0, getTrxName());
     	favoriteNode.setAD_Org_ID(GARDEN_WORLD_HQ_ORG);
     	favoriteNode.setAD_Menu_ID(menu.getAD_Menu_ID());

@@ -54,7 +54,6 @@ import org.compiere.util.KeyNamePair;
 import org.compiere.util.NamePair;
 import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
-import org.w3c.dom.html.HTMLElement;
 
 /**
  *	Table Print Element.<br/>
