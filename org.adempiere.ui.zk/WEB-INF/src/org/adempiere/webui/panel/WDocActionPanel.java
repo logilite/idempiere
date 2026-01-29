@@ -512,8 +512,6 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			else
 				ApprovalColumn_ID = node.getAD_Column_ID();
 
-			
-
 			if (ApprovalColumn_ID >0)
 			{
 				MColumn column = MColumn.get(Env.getCtx(), ApprovalColumn_ID);
@@ -531,7 +529,15 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				}
 				else if (dt == DisplayType.List)
 				{
-					ValueNamePair[] values = MRefList.getList(Env.getCtx(), column.getAD_Reference_Value_ID(), false, "D");
+					String validationCode = column.getAD_Val_Rule_ID() > 0 ? column.getAD_Val_Rule().getCode() : "";
+					if (!Util.isEmpty(validationCode))
+					{
+						if (gridTab != null)
+							validationCode = Env.parseContext(Env.getCtx(), gridTab.getWindowNo(), gridTab.getTabNo(), validationCode, false);
+						else
+							validationCode = Env.parseContext(Env.getCtx(), m_WindowNo, 0, validationCode, false);
+					}
+					ValueNamePair[] values = MRefList.getList(Env.getCtx(), column.getAD_Reference_Value_ID(), false, validationCode, "D");
 					for (int i = 0; i < values.length; i++)
 					{
 						lstAnswer.appendItem(values[i].getName(), values[i].getValue());
