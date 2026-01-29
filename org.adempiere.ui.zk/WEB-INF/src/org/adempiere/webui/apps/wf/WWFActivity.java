@@ -572,7 +572,16 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 				}
 				else if (DisplayType.isList(dt))
 				{
-					ValueNamePair[] values = MRefList.getList(Env.getCtx(), m_column.getAD_Reference_Value_ID(), false);
+					String validationCode = m_column.getAD_Val_Rule_ID() > 0 && m_column.getAD_Val_Rule() != null ? m_column.getAD_Val_Rule().getCode() : "";
+					if (!Util.isEmpty(validationCode))
+					{
+						if (getGridTab() != null)
+							validationCode = Env.parseContext(Env.getCtx(), getGridTab().getWindowNo(), getGridTab().getTabNo(), validationCode, false);
+						else
+							validationCode = Env.parseContext(Env.getCtx(), m_WindowNo, 0, validationCode, false);
+					}
+
+					ValueNamePair[] values = MRefList.getList(Env.getCtx(), m_column.getAD_Reference_Value_ID(), false, validationCode, "D");
 					for(int i = 0; i < values.length; i++)
 					{
 						fAnswerList.appendItem(values[i].getName(), values[i].getValue());
