@@ -529,7 +529,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				}
 				else if (dt == DisplayType.List)
 				{
-					String validationCode = column.getAD_Val_Rule_ID() > 0 ? column.getAD_Val_Rule().getCode() : "";
+					String validationCode = column.getAD_Val_Rule_ID() > 0 && column.getAD_Val_Rule() != null ? column.getAD_Val_Rule().getCode() : "";
 					if (!Util.isEmpty(validationCode))
 					{
 						if (gridTab != null)

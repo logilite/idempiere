@@ -572,7 +572,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 				}
 				else if (DisplayType.isList(dt))
 				{
-					String validationCode = m_column.getAD_Val_Rule_ID() > 0 ? m_column.getAD_Val_Rule().getCode() : "";
+					String validationCode = m_column.getAD_Val_Rule_ID() > 0 && m_column.getAD_Val_Rule() != null ? m_column.getAD_Val_Rule().getCode() : "";
 					if (!Util.isEmpty(validationCode))
 					{
 						if (getGridTab() != null)
