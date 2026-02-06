@@ -1690,6 +1690,11 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		    	if (adTabbox.needSave(true, true))
 				{
 		    		onSave(false, true, callback);
+					if (adTabbox.getSelectedGridTab().hasChangedCurrentTabAndParents())
+					{
+						adTabbox.getSelectedGridTab().dataRefreshAll(true, true);
+						adTabbox.getSelectedGridTab().refreshParentTabs();
+					}
 				}
 				else
 				{
@@ -2844,8 +2849,6 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 				if (result) {
 					WindowValidatorEvent event = new WindowValidatorEvent(adwindow, WindowValidatorEventType.AFTER_SAVE.getName());
 			    	WindowValidatorManager.getInstance().fireWindowValidatorEvent(event, callback);
-					adTabbox.getSelectedGridTab().dataRefreshAll(true, true);
-					adTabbox.getSelectedGridTab().refreshParentTabs();
 				} else if (callback != null) {
 					callback.onCallback(result);
 				}
