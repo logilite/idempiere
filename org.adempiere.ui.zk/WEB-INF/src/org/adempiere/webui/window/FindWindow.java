@@ -2581,6 +2581,10 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 							whereClause = notInOperator + " REGEXP_LIKE (" + ColumnSQL + ",'(" + parsedValue + ")', 'i')";
 						}
 					}
+					
+					if (isExists && !isCompositeExists && !whereClause.isEmpty())
+						whereClause = "EXISTS(" + whereClause + ")";
+
 					m_query.addRestriction(whereClause, and, openBrackets);
 				}
 				else if (field != null && (field.getDisplayType() == DisplayType.ChosenMultipleSelectionList
