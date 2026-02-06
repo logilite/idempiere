@@ -2582,7 +2582,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 						}
 					}
 					
-					if (isExists && !isCompositeExists)
+					if (isExists && !isCompositeExists && !whereClause.isEmpty())
 						whereClause = "EXISTS(" + whereClause + ")";
 
 					m_query.addRestriction(whereClause, and, openBrackets);
