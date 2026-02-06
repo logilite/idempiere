@@ -2844,6 +2844,8 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 				if (result) {
 					WindowValidatorEvent event = new WindowValidatorEvent(adwindow, WindowValidatorEventType.AFTER_SAVE.getName());
 			    	WindowValidatorManager.getInstance().fireWindowValidatorEvent(event, callback);
+					adTabbox.getSelectedGridTab().dataRefreshAll(true, true);
+					adTabbox.getSelectedGridTab().refreshParentTabs();
 				} else if (callback != null) {
 					callback.onCallback(result);
 				}
