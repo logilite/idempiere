@@ -3794,9 +3794,19 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 						final Callback<Boolean> postCallback = new Callback<Boolean>() {
 							@Override
 							public void onCallback(Boolean result) {
-								if (result) {
+								if (result)
+								{
 									WindowValidatorEvent event = new WindowValidatorEvent(adwindow, WindowValidatorEventType.AFTER_DOC_ACTION.getName());
-							    	WindowValidatorManager.getInstance().fireWindowValidatorEvent(event, null);
+									WindowValidatorManager.getInstance().fireWindowValidatorEvent(event, null);
+									try
+									{
+										if (win.setNodeVarValue())
+											win.commitNodeVar();
+									}
+									catch (Exception e)
+									{
+										win.rollbackNodeVar();
+									}
 								}
 							}
 						};

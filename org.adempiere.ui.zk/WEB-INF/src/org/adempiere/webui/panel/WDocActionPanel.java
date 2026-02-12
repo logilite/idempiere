@@ -184,6 +184,11 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	/** Active roles assigned to substitute users. */
 	private final Set <Integer>		substituteRoleIDs	= new HashSet <>();
 
+	/** Workflow transaction instance used for node variable updates. */
+	private Trx						wfTrx							= null;
+	/** Workflow transaction name. */
+	private String					wfTrxName						= "";
+
 	private static final CLogger logger;
 
     static
@@ -719,7 +724,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 					try
 					{
 						m_activity.set_TrxName(trx.getTrxName());
-						setNodeVarValue();
+						if (setNodeVarValue())
+							commitNodeVar();
 					}
 					catch (Exception e)
 					{
@@ -1000,7 +1006,6 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			throw new IllegalStateException(Msg.getMsg(Env.getCtx(), "DocStatusChanged"));
 		}
 		m_OKpressed = true;
-		setNodeVarValue();
 		setValue();
 		detach();
 	}
@@ -1009,58 +1014,86 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	 * Sets workflow node variables based on the values provided in valMap.
 	 * Resolves context, transaction, PO, and workflow node, then assigns variables using MWFActivity.
 	 * Throws AdempiereException if any variable assignment fails.
+	 * 
+	 * @return {@code true} if variables are processed, {@code false} if no values exist
 	 */
-	private void setNodeVarValue( )
+	public boolean setNodeVarValue()
 	{
-		if (valMap != null)
+		if (valMap == null)
+			return false;
+
+		wfTrxName = m_activity != null ? m_activity.get_TrxName() : Trx.createTrxName("FWFA");
+		wfTrx = Trx.get(wfTrxName, true); // create new trx if needed
+		try
 		{
-			// Iterate through each column-value pair to be set
 			for (Entry <Integer, String> colValue : valMap.entrySet())
 			{
-				// transaction: use activity's trx or create a new one
-				String trxName = m_activity != null ? m_activity.get_TrxName() : null;// Trx.get(Trx.createTrxName("FWFA"), true);
-
-				// context: activity context or default context
 				Properties ctx = m_activity != null ? m_activity.getCtx() : Env.getCtx();
 
-				// PO object: from activity or table record
-				PO po = m_activity != null ? m_activity.getPO(Trx.get(trxName, true)) : MTable.get(Env.getCtx(), m_AD_Table_ID).getPO(gridTab.getRecord_ID(), trxName);
+				PO po = m_activity != null ? m_activity.getPO(Trx.get(wfTrxName, true)) : MTable.get(ctx, m_AD_Table_ID).getPO(gridTab.getRecord_ID(), wfTrxName);
 
 				MWFNode node = null;
-				// workflow node: from activity or process workflow
+
 				if (m_activity != null)
 					node = m_activity.getNode();
 				else if (m_Process_ID > 0)
 				{
-					MProcess pr = new MProcess(Env.getCtx(), m_Process_ID, trxName);
+					MProcess pr = new MProcess(ctx, m_Process_ID, wfTrxName);
 					node = (MWFNode) pr.getAD_Workflow().getAD_WF_Node();
 				}
 
-				if(node != null)
+				if (node != null)
 				{
-					try
-					{
-						// Get column based on ID
-						MColumn col = MColumn.get(ctx, colValue.getKey());
-						// Assign workflow variable using column ID, value, reference type, PO, and node
-						MWFActivity.setVariable(
-										colValue.getKey(), // Column ID
-										colValue.getValue(), // Value to set
-										col.getAD_Reference_ID(), // Column reference type
-										po, // Target PO
-										node, // Workflow node
-										trxName // Transaction
-						);
-					}
-					catch (Exception e)
-					{
-						throw new AdempiereException(e.getMessage(), e);
-					}
+					MColumn col = MColumn.get(ctx, colValue.getKey());
+
+					MWFActivity.setVariable(colValue.getKey(), colValue.getValue(), col.getAD_Reference_ID(), po, node, wfTrxName);
 				}
 			}
-
-			if (gridTab != null)
-				gridTab.dataRefresh();
+		}
+		catch (Exception e)
+		{
+			throw new AdempiereException(e.getMessage(), e);
+		}
+		return true;
+	}
+	
+	/**
+	 * Commits the workflow node variable transaction and closes it.
+	 */
+	public void commitNodeVar( )
+	{
+		if (wfTrx != null)
+		{
+			try
+			{
+				wfTrx.commit();
+			}
+			finally
+			{
+				wfTrx.close();
+				wfTrx = null;
+				wfTrxName = null;
+			}
+		}
+	}
+	
+	/**
+	 * Rolls back the workflow node variable transaction and closes it.
+	 */
+	public void rollbackNodeVar( )
+	{
+		if (wfTrx != null)
+		{
+			try
+			{
+				wfTrx.rollback();
+			}
+			finally
+			{
+				wfTrx.close();
+				wfTrx = null;
+				wfTrxName = null;
+			}
 		}
 	}
 
