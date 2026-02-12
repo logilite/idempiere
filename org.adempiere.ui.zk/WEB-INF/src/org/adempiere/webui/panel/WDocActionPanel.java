@@ -1067,21 +1067,22 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	{
 		if (wfTrx != null)
 		{
-			boolean success = false;
 			try
 			{
 				wfTrx.commit();
-				success = true;
+			}
+			catch (Exception e)
+			{
+				wfTrx.rollback();
+				throw new AdempiereException("Failed to commit workflow node variables", e);
 			}
 			finally
 			{
-				if (!success)
-					wfTrx.rollback();
 				wfTrx.close();
 				wfTrx = null;
 				wfTrxName = null;
-	            if (gridTab != null)
-	                gridTab.dataRefresh();
+				if (gridTab != null)
+					gridTab.dataRefresh();
 			}
 		}
 	}
