@@ -3805,6 +3805,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 									}
 									catch (Exception e)
 									{
+										logger.log(Level.SEVERE, "Error committing node variable", e);
 										win.rollbackNodeVar();
 									}
 								}

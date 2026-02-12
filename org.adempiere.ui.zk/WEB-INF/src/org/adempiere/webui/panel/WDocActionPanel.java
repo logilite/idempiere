@@ -1026,28 +1026,31 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		wfTrx = Trx.get(wfTrxName, true); // create new trx if needed
 		try
 		{
+			Properties ctx = m_activity != null ? m_activity.getCtx() : Env.getCtx();
+
+			PO po = m_activity != null ? m_activity.getPO(Trx.get(wfTrxName, true)) : MTable.get(ctx, m_AD_Table_ID).getPO(gridTab.getRecord_ID(), wfTrxName);
+
+			MWFNode node = null;
+
+			if (m_activity != null)
+				node = m_activity.getNode();
+			else if (m_Process_ID > 0)
+			{
+				MProcess pr = new MProcess(ctx, m_Process_ID, wfTrxName);
+				node = (MWFNode) pr.getAD_Workflow().getAD_WF_Node();
+			}
+
+			if (node == null)
+			{
+				logger.log(Level.SEVERE, "Cannot resolve workflow node for variable assignment");
+				return false;
+			}
+
 			for (Entry <Integer, String> colValue : valMap.entrySet())
 			{
-				Properties ctx = m_activity != null ? m_activity.getCtx() : Env.getCtx();
+				MColumn col = MColumn.get(ctx, colValue.getKey());
 
-				PO po = m_activity != null ? m_activity.getPO(Trx.get(wfTrxName, true)) : MTable.get(ctx, m_AD_Table_ID).getPO(gridTab.getRecord_ID(), wfTrxName);
-
-				MWFNode node = null;
-
-				if (m_activity != null)
-					node = m_activity.getNode();
-				else if (m_Process_ID > 0)
-				{
-					MProcess pr = new MProcess(ctx, m_Process_ID, wfTrxName);
-					node = (MWFNode) pr.getAD_Workflow().getAD_WF_Node();
-				}
-
-				if (node != null)
-				{
-					MColumn col = MColumn.get(ctx, colValue.getKey());
-
-					MWFActivity.setVariable(colValue.getKey(), colValue.getValue(), col.getAD_Reference_ID(), po, node, wfTrxName);
-				}
+				MWFActivity.setVariable(colValue.getKey(), colValue.getValue(), col.getAD_Reference_ID(), po, node, wfTrxName);
 			}
 		}
 		catch (Exception e)
@@ -1073,6 +1076,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				wfTrx.close();
 				wfTrx = null;
 				wfTrxName = null;
+	            if (gridTab != null)
+	                gridTab.dataRefresh();
 			}
 		}
 	}
@@ -1093,6 +1098,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				wfTrx.close();
 				wfTrx = null;
 				wfTrxName = null;
+	            if (gridTab != null)
+	                gridTab.dataRefresh();
 			}
 		}
 	}
