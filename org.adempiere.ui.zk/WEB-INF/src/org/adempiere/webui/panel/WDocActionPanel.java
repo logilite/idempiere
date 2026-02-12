@@ -187,7 +187,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	/** Workflow transaction instance used for node variable updates. */
 	private Trx						wfTrx							= null;
 	/** Workflow transaction name. */
-	private String					wfTrxName						= "";
+	private String					wfTrxName						= null;
 
 	private static final CLogger logger;
 
@@ -1043,7 +1043,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			if (node == null)
 			{
 				logger.log(Level.SEVERE, "Cannot resolve workflow node for variable assignment");
-				return false;
+				throw new AdempiereException("Cannot resolve workflow node for variable assignment");
 			}
 
 			for (Entry <Integer, String> colValue : valMap.entrySet())
@@ -1067,12 +1067,16 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	{
 		if (wfTrx != null)
 		{
+			boolean success = false;
 			try
 			{
 				wfTrx.commit();
+				success = true;
 			}
 			finally
 			{
+				if (!success)
+					wfTrx.rollback();
 				wfTrx.close();
 				wfTrx = null;
 				wfTrxName = null;
