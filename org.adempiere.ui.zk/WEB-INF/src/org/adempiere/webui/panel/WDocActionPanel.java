@@ -1028,7 +1028,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		{
 			Properties ctx = m_activity != null ? m_activity.getCtx() : Env.getCtx();
 
-			PO po = m_activity != null ? m_activity.getPO(Trx.get(wfTrxName, true)) : MTable.get(ctx, m_AD_Table_ID).getPO(gridTab.getRecord_ID(), wfTrxName);
+			PO po = m_activity != null ? m_activity.getPO(wfTrx) : MTable.get(ctx, m_AD_Table_ID).getPO(gridTab.getRecord_ID(), wfTrxName);
 
 			MWFNode node = null;
 
@@ -1055,6 +1055,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		}
 		catch (Exception e)
 		{
+			if (e instanceof AdempiereException)
+				throw (AdempiereException) e;
 			throw new AdempiereException(e.getMessage(), e);
 		}
 		return true;
