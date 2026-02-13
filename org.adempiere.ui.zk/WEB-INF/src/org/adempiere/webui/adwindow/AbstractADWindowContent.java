@@ -38,6 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.DBException;
 import org.adempiere.util.Callback;
 import org.adempiere.webui.AdempiereIdGenerator;
@@ -3806,7 +3807,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 									catch (Exception e)
 									{
 										logger.log(Level.SEVERE, "Error committing node variable", e);
-										win.rollbackNodeVar();
+										throw new AdempiereException(e.getMessage(), e);
 									}
 								}
 							}

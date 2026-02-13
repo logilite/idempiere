@@ -729,12 +729,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 					}
 					catch (Exception e)
 					{
-						// Ensure leaked transaction is cleaned up
-						if (trx != null)
-						{
-							trx.rollback();
-							trx.close();
-						}
+						// The transaction is already rolled back in setNodeVarValue if there is an error.
 						Throwable error = e.getCause();
 						logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
 						Dialog.error(m_WindowNo, "Error", error != null ? error.getLocalizedMessage() : e.getLocalizedMessage());
@@ -1055,6 +1050,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		}
 		catch (Exception e)
 		{
+			rollbackNodeVar();
 			if (e instanceof AdempiereException)
 				throw (AdempiereException) e;
 			throw new AdempiereException(e.getMessage(), e);
@@ -1105,8 +1101,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				wfTrx.close();
 				wfTrx = null;
 				wfTrxName = null;
-	            if (gridTab != null)
-	                gridTab.dataRefresh();
+				if (gridTab != null)
+					gridTab.dataRefresh();
 			}
 		}
 	}
