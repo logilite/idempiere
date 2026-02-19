@@ -1017,7 +1017,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		if (valMap == null)
 			return false;
 
-		wfTrxName = m_activity != null ? m_activity.get_TrxName() : Trx.createTrxName("FWFA");
+		wfTrxName = (m_activity != null && !Util.isEmpty(m_activity.get_TrxName())) ? m_activity.get_TrxName() : Trx.createTrxName("FWFA");
 		wfTrx = Trx.get(wfTrxName, true); // create new trx if needed
 		try
 		{
