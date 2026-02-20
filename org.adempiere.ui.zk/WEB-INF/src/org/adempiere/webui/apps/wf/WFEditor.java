@@ -71,13 +71,13 @@ import org.zkoss.zul.Vbox;
  * @author Low Heng Sin
  */
 @org.idempiere.ui.zk.annotation.Form(name = "org.compiere.apps.wf.WFPanel")
-public class WFEditor extends ADForm implements ValueChangeListener{
+public class WFEditor extends ADForm implements ValueChangeListener {
 	/**
 	 * generated serial id
 	 */
 	private static final long serialVersionUID = 4293422396394778274L;
 
-	/** Workflows dropdown list */
+	/** Workflow search editor */
 	private WSearchEditor workflowSearch;
 	private int m_workflowId = 0;
 	private Toolbarbutton zoomButton;
@@ -500,13 +500,18 @@ public class WFEditor extends ADForm implements ValueChangeListener{
 	{
 		if (evt.getSource() == workflowSearch)
 		{
-			center.removeChild(table);
-			createTable();
-			center.appendChild(table);
 			Object item = evt.getNewValue();
 			Integer kpn = (item instanceof Integer) ? (Integer) item : null;
 			if (kpn != null && kpn > 0)
-				load(kpn, true);
+				reload(kpn, true);
+			else
+			{
+				center.removeChild(table);
+				createTable();
+				center.appendChild(table);
+				m_workflowId = 0;
+				m_wf = null;
+			}
 		}
 	}
 }
