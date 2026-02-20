@@ -99,8 +99,12 @@ public class WFEditor extends ADForm implements ValueChangeListener {
 		Borderlayout layout = new Borderlayout();
 		layout.setStyle("width: 100%; height: 100%; position: relative;");
 		appendChild(layout);
-		MLookup lookup = MLookupFactory.get(Env.getCtx(), 0, 0, MColumn.getColumn_ID(MWorkflow.Table_Name, MWorkflow.COLUMNNAME_AD_Workflow_ID), DisplayType.Search);
+		
 		// Create WSearchEditor
+		int columnId = MColumn.getColumn_ID(MWorkflow.Table_Name, MWorkflow.COLUMNNAME_AD_Workflow_ID);
+		if (columnId <= 0)
+			throw new IllegalStateException("Column " + MWorkflow.COLUMNNAME_AD_Workflow_ID + " not found in " + MWorkflow.Table_Name);
+		MLookup lookup = MLookupFactory.get(Env.getCtx(), 0, 0, columnId, DisplayType.Search);
 		workflowSearch = new WSearchEditor(MWorkflow.COLUMNNAME_AD_Workflow_ID, false, false, true, lookup);
 		workflowSearch.addValueChangeListener(this);
 		ZKUpdateUtil.setWidth(workflowSearch.getComponent(), "40%");
