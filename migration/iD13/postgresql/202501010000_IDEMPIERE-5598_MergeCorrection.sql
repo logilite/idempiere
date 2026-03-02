@@ -2,6 +2,7 @@
 -- \i7.1z\*\202405141359_IDEMPIERE-5598.sql
 -- \iD13\*\202405141359_IDEMPIERE-5598.sql [ Removed ]
 
+
 -- IDEMPIERE-5598 Add new Accounting Dimensions
 SELECT register_migration_script('202501010000_IDEMPIERE-5598_MergeCorrection.sql') FROM dual;
 
@@ -11,7 +12,7 @@ INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,Help,AD_Table_ID,Co
 ;
 
 -- Feb 17, 2025, 11:46:10 AM IST
-ALTER TABLE T_Fact_Acct_History ADD COLUMN CustomFieldText1 VARCHAR(255) DEFAULT NULL 
+ALTER TABLE T_Fact_Acct_History ADD COLUMN IF NOT EXISTS CustomFieldText1 VARCHAR(255) DEFAULT NULL 
 ;
 
 -- Feb 17, 2025, 11:46:18 AM IST
@@ -19,7 +20,7 @@ INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,Help,AD_Table_ID,Co
 ;
 
 -- Feb 17, 2025, 11:46:20 AM IST
-ALTER TABLE T_Fact_Acct_History ADD COLUMN CustomFieldText2 VARCHAR(255) DEFAULT NULL 
+ALTER TABLE T_Fact_Acct_History ADD COLUMN IF NOT EXISTS CustomFieldText2 VARCHAR(255) DEFAULT NULL 
 ;
 
 -- Feb 17, 2025, 11:44:34 AM IST
@@ -27,7 +28,7 @@ INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,Help,AD_Table_ID,Co
 ;
 
 -- Feb 17, 2025, 11:44:36 AM IST
-ALTER TABLE T_Fact_Acct_History ADD COLUMN CustomFieldText3 VARCHAR(255) DEFAULT NULL 
+ALTER TABLE T_Fact_Acct_History ADD COLUMN IF NOT EXISTS CustomFieldText3 VARCHAR(255) DEFAULT NULL 
 ;
 
 -- Feb 17, 2025, 11:45:57 AM IST
@@ -35,7 +36,7 @@ INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,Help,AD_Table_ID,Co
 ;
 
 -- Feb 17, 2025, 11:45:59 AM IST
-ALTER TABLE T_Fact_Acct_History ADD COLUMN CustomFieldText4 VARCHAR(255) DEFAULT NULL 
+ALTER TABLE T_Fact_Acct_History ADD COLUMN IF NOT EXISTS CustomFieldText4 VARCHAR(255) DEFAULT NULL 
 ;
 
 -- Feb 17, 2025, 11:44:46 AM IST
@@ -47,7 +48,7 @@ UPDATE AD_Column SET FKConstraintName='CCharge_TFactAcctHistory', FKConstraintTy
 ;
 
 -- Feb 17, 2025, 11:44:50 AM IST
-ALTER TABLE T_Fact_Acct_History ADD COLUMN C_Charge_ID NUMERIC(10) DEFAULT NULL 
+ALTER TABLE T_Fact_Acct_History ADD COLUMN IF NOT EXISTS C_Charge_ID NUMERIC(10) DEFAULT NULL 
 ;
 
 -- Feb 17, 2025, 11:44:50 AM IST
@@ -63,7 +64,7 @@ UPDATE AD_Column SET FKConstraintName='MWarehouse_TFactAcctHistory', FKConstrain
 ;
 
 -- Feb 17, 2025, 11:45:18 AM IST
-ALTER TABLE T_Fact_Acct_History ADD COLUMN M_Warehouse_ID NUMERIC(10) DEFAULT NULL 
+ALTER TABLE T_Fact_Acct_History ADD COLUMN IF NOT EXISTS M_Warehouse_ID NUMERIC(10) DEFAULT NULL 
 ;
 
 -- Feb 17, 2025, 11:45:18 AM IST
@@ -79,7 +80,7 @@ UPDATE AD_Column SET FKConstraintName='CEmployee_TFactAcctHistory', FKConstraint
 ;
 
 -- Feb 17, 2025, 11:45:43 AM IST
-ALTER TABLE T_Fact_Acct_History ADD COLUMN C_Employee_ID NUMERIC(10) DEFAULT NULL 
+ALTER TABLE T_Fact_Acct_History ADD COLUMN IF NOT EXISTS C_Employee_ID NUMERIC(10) DEFAULT NULL 
 ;
 
 -- Feb 17, 2025, 11:45:43 AM IST
@@ -95,7 +96,7 @@ UPDATE AD_Column SET FKConstraintName='CDepartment_TFactAcctHistory', FKConstrai
 ;
 
 -- Feb 17, 2025, 11:45:30 AM IST
-ALTER TABLE T_Fact_Acct_History ADD COLUMN C_Department_ID NUMERIC(10) DEFAULT NULL 
+ALTER TABLE T_Fact_Acct_History ADD COLUMN IF NOT EXISTS C_Department_ID NUMERIC(10) DEFAULT NULL 
 ;
 
 -- Feb 17, 2025, 11:45:30 AM IST
@@ -111,7 +112,7 @@ UPDATE AD_Column SET FKConstraintName='CCostCenter_TFactAcctHistory', FKConstrai
 ;
 
 -- Feb 17, 2025, 11:44:08 AM IST
-ALTER TABLE T_Fact_Acct_History ADD COLUMN C_CostCenter_ID NUMERIC(10) DEFAULT NULL 
+ALTER TABLE T_Fact_Acct_History ADD COLUMN IF NOT EXISTS C_CostCenter_ID NUMERIC(10) DEFAULT NULL 
 ;
 
 -- Feb 17, 2025, 11:44:08 AM IST
@@ -127,7 +128,7 @@ UPDATE AD_Column SET FKConstraintName='MAttributeSetInstance_TFactAcctHistory', 
 ;
 
 -- Feb 17, 2025, 11:45:03 AM IST
-ALTER TABLE T_Fact_Acct_History ADD COLUMN M_AttributeSetInstance_ID NUMERIC(10) DEFAULT NULL 
+ALTER TABLE T_Fact_Acct_History ADD COLUMN IF NOT EXISTS M_AttributeSetInstance_ID NUMERIC(10) DEFAULT NULL 
 ;
 
 -- Feb 17, 2025, 11:45:03 AM IST
