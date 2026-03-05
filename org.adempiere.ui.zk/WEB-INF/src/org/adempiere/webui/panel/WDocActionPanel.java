@@ -510,7 +510,6 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		lstOption.setRows(0);
 		lstOption.setMold("select");
 		lstOption.setVisible(false);
-		lstOption.setVisible(false);
 		ZKUpdateUtil.setWidth(lstOption, "100%");
 		
 		if (m_activity != null && (m_activity.isUserApproval() || m_activity.isUserTask()))

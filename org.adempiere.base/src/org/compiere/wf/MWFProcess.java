@@ -420,7 +420,11 @@ public class MWFProcess extends X_AD_WF_Process
 				continue;
 			
 			if (!Util.isEmpty(nextOption) && !nextOption.equalsIgnoreCase(transitions[i].getValue()))
+			{
+				if (log.isLoggable(Level.FINE))
+					log.fine("Skipping transition " + transitions[i] + " - option mismatch: " + nextOption + " vs " + transitions[i].getValue());
 				continue;
+			}
 
 			//	Start new Activity...
 			MWFActivity activity = new MWFActivity (this, transitions[i].getAD_WF_Next_ID(), lastPO);

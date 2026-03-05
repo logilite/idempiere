@@ -2,7 +2,7 @@
 SELECT register_migration_script('202603031439_IDEMPIERE-6892.sql') FROM dual;
 
 -- 03/03/2026 14:39:34 IST
-INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,ColumnName,Name,Description,Help,PrintName,EntityType,AD_Element_UU) VALUES (204033,0,0,'Y',TO_TIMESTAMP('2026-03-03 14:39:13','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2026-03-03 14:39:13','YYYY-MM-DD HH24:MI:SS'),100,'IsShowTransitionsAsOptions','Show Transitions as Options','If enabled, the transitions of this workflow node will be pr','Enable this option to display all valid outgoing transitions from this node as selectable choices in the user interface.','Show Transitions as Options','D','ed0def34-4992-4ce9-ae69-88fb568c80fd')
+INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,ColumnName,Name,Description,Help,PrintName,EntityType,AD_Element_UU) VALUES (204033,0,0,'Y',TO_TIMESTAMP('2026-03-03 14:39:13','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2026-03-03 14:39:13','YYYY-MM-DD HH24:MI:SS'),100,'IsShowTransitionsAsOptions','Show Transitions as Options','If enabled, the transitions of this workflow node will be presented to the user as selectable options.','Enable this option to display all valid outgoing transitions from this node as selectable choices in the user interface.','Show Transitions as Options','D','ed0def34-4992-4ce9-ae69-88fb568c80fd')
 ;
 
 -- 03/03/2026 14:39:49 IST
@@ -49,3 +49,11 @@ SET
     Value = n.Value
 FROM AD_WF_Node n
 WHERE nn.AD_WF_Next_ID = n.AD_WF_Node_ID;
+
+-- 05/03/2026 18:12:48 IST
+UPDATE AD_Field SET DisplayLogic='@IsShowTransitionsAsOptions@=Y', MandatoryLogic='@IsShowTransitionsAsOptions@=Y',Updated=TO_TIMESTAMP('2026-03-05 18:12:48','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=209009
+;
+
+-- 05/03/2026 18:12:57 IST
+UPDATE AD_Field SET DisplayLogic='@IsShowTransitionsAsOptions@=Y', MandatoryLogic='@IsShowTransitionsAsOptions@=Y',Updated=TO_TIMESTAMP('2026-03-05 18:12:57','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=209008
+;
