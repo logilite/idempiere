@@ -34,7 +34,7 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20241001L;
+	private static final long serialVersionUID = 20260303L;
 
     /** Standard Constructor */
     public X_AD_WF_Node (Properties ctx, int AD_WF_Node_ID, String trxName)
@@ -52,6 +52,8 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 // @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
 			setIsCentrallyMaintained (true);
 // Y
+			setIsShowTransitionsAsOptions (false);
+// N
 			setJoinElement (null);
 // X
 			setLimit (0);
@@ -83,6 +85,8 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 // Y
 			setIsCentrallyMaintained (true);
 // Y
+			setIsShowTransitionsAsOptions (false);
+// N
 			setJoinElement (null);
 // X
 			setLimit (0);
@@ -114,6 +118,8 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 // Y
 			setIsCentrallyMaintained (true);
 // Y
+			setIsShowTransitionsAsOptions (false);
+// N
 			setJoinElement (null);
 // X
 			setLimit (0);
@@ -145,6 +151,8 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 // Y
 			setIsCentrallyMaintained (true);
 // Y
+			setIsShowTransitionsAsOptions (false);
+// N
 			setJoinElement (null);
 // X
 			setLimit (0);
@@ -968,6 +976,29 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	public boolean isMilestone()
 	{
 		Object oo = get_Value(COLUMNNAME_IsMilestone);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Show Transitions as Options.
+		@param IsShowTransitionsAsOptions If enabled, the transitions of this workflow node will be pr
+	*/
+	public void setIsShowTransitionsAsOptions (boolean IsShowTransitionsAsOptions)
+	{
+		set_Value (COLUMNNAME_IsShowTransitionsAsOptions, Boolean.valueOf(IsShowTransitionsAsOptions));
+	}
+
+	/** Get Show Transitions as Options.
+		@return If enabled, the transitions of this workflow node will be pr
+	  */
+	public boolean isShowTransitionsAsOptions()
+	{
+		Object oo = get_Value(COLUMNNAME_IsShowTransitionsAsOptions);
 		if (oo != null)
 		{
 			 if (oo instanceof Boolean)

@@ -523,6 +523,19 @@ public interface I_AD_WF_Node
 	/** Get Is Milestone	  */
 	public boolean isMilestone();
 
+    /** Column name IsShowTransitionsAsOptions */
+    public static final String COLUMNNAME_IsShowTransitionsAsOptions = "IsShowTransitionsAsOptions";
+
+	/** Set Show Transitions as Options.
+	  * If enabled, the transitions of this workflow node will be pr
+	  */
+	public void setIsShowTransitionsAsOptions (boolean IsShowTransitionsAsOptions);
+
+	/** Get Show Transitions as Options.
+	  * If enabled, the transitions of this workflow node will be pr
+	  */
+	public boolean isShowTransitionsAsOptions();
+
     /** Column name IsSubcontracting */
     public static final String COLUMNNAME_IsSubcontracting = "IsSubcontracting";
 

@@ -41,6 +41,7 @@ import org.adempiere.webui.component.ConfirmPanel;
 import org.adempiere.webui.component.Datebox;
 import org.adempiere.webui.component.Grid;
 import org.adempiere.webui.component.GridFactory;
+import org.adempiere.webui.component.Listbox;
 import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.Row;
 import org.adempiere.webui.component.Rows;
@@ -78,6 +79,7 @@ import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
 import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFNode;
+import org.compiere.wf.MWFNodeNext;
 import org.compiere.wf.MWFNodeVar;
 import org.compiere.wf.MWFProcess;
 import org.compiere.wf.MWFResponsible;
@@ -87,7 +89,6 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Label;
-import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Space;
 import org.zkoss.zul.Vlayout;
@@ -133,6 +134,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 	private Label lblAnswer;
 	private Listbox lstAnswer;
+	private Label lblOption;
+	private Listbox lstOption;
 	private Label lTextMsg = new Label(Msg.getMsg(Env.getCtx(), "Messages"));
 	private Textbox fTextMsg = new Textbox();
 	
@@ -502,6 +505,14 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 //		lstAnswer.appendItem("No", "N");
 //		lstAnswer.addEventListener(Events.ON_SELECT, this);
 		
+		lblOption = new Label(Msg.getMsg(Env.getCtx(), "Option"));
+		lstOption = new Listbox();
+		lstOption.setRows(0);
+		lstOption.setMold("select");
+		lstOption.setVisible(false);
+		lstOption.setVisible(false);
+		ZKUpdateUtil.setWidth(lstOption, "100%");
+		
 		if (m_activity != null && (m_activity.isUserApproval() || m_activity.isUserTask()))
 		{
 			MWFNode node = m_activity.getNode();
@@ -545,13 +556,43 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 					lstAnswer.setVisible(true);
 					lblAnswer.setVisible(true);
 				}
+
+				if (node.isShowTransitionsAsOptions() && lstAnswer.isVisible())
+					m_activity.getPO().set_ValueNoCheck(column.getColumnName(), lstAnswer.getValue());
+			}
+			
+			if (node.isShowTransitionsAsOptions())
+			{
+				loadOption(node);
 			}
 		}
 		lstAnswer.addEventListener(Events.ON_SELECT, this);
+		lstOption.addEventListener(Events.ON_SELECT, this);
 
 		confirmPanel = new ConfirmPanel(true);
 		confirmPanel.addActionListener(Events.ON_CLICK, this);
 		ZKUpdateUtil.setVflex(confirmPanel, "true");
+	}
+
+	private void loadOption(MWFNode node)
+	{
+		lstOption.removeAllItems();
+		boolean isShowOption = false;
+		MWFNodeNext[] mwfNodeNexts = node.getTransitions(Env.getAD_Client_ID(Env.getCtx()));
+		if (mwfNodeNexts != null && mwfNodeNexts.length > 1)
+		{
+			for (MWFNodeNext nodeNext : mwfNodeNexts)
+			{
+				// Is this a valid transition?
+				if (!nodeNext.isValidFor(m_activity))
+					continue;
+
+				isShowOption = true;
+				lstOption.appendItem(nodeNext.getName(), nodeNext.getValue());
+			}
+			lblOption.setVisible(isShowOption);
+			lstOption.setVisible(isShowOption);
+		}
 	}
 
 	/**
@@ -578,6 +619,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		Row rowSpacer = new Row();
 		Row rowUser = new Row();
 		Row rowAnswer = new Row();
+		Row rowOption = new Row();
 		Row rowTxtMsg = new Row();
 		
 		Row nodeVarRow = new Row();
@@ -603,6 +645,16 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			{
 				PO po = m_activity == null ? MTable.get(gridTab.getAD_Table_ID()).getPO(gridTab.getRecord_ID(), null) : m_activity.getPO();
 				nodeVarForm = new WFNodeVarForm(node, colms, po, gridTab);
+				if (lstAnswer.isVisible())
+				{
+					int ApprovalColumn_ID = 0;
+					if (node.getAD_Column_ID() == 0)
+						ApprovalColumn_ID = node.getApprovalColumn_ID();
+					else
+						ApprovalColumn_ID = node.getAD_Column_ID();
+					MColumn column = MColumn.get(Env.getCtx(), ApprovalColumn_ID);
+					Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), column.getColumnName(), (String) lstAnswer.getValue());
+				}
 				if (lstDocAction != null && lstDocAction.getSelectedItem() != null)
 					Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), "DocAction", s_value[getSelectedIndex()]);
 				nodeVarForm.setHeight(nodeVarForm.getHeight());
@@ -627,6 +679,11 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		rowUser.appendChild(fApprover.getComponent());
 		rowUser.appendCellChild(new Space());
 
+		// Option
+		rowOption.appendCellChild(lblOption);
+		rowOption.appendCellChild(lstOption);
+		rowOption.appendCellChild(new Space());
+		
 		// Answer
 		rowAnswer.appendCellChild(lblAnswer);
 		rowAnswer.appendCellChild(lstAnswer);
@@ -655,6 +712,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 		if (m_activity != null && (m_activity.isUserApproval() || m_activity.isUserTask()))
 		{
+			if (node.isShowTransitionsAsOptions())
+				rows.appendChild(rowOption);
 			rows.appendChild(rowAnswer);
 			rows.appendChild(rowTxtMsg);
 		}
@@ -795,7 +854,23 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 						MColumn column = MColumn.get(Env.getCtx(), ApprovalColumn_ID);
 						String value = lstAnswer.getSelectedItem().getValue();
 						Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), column.getColumnName(), value);
+						if (node.isShowTransitionsAsOptions())
+						{
+							m_activity.getPO().set_ValueNoCheck(column.getColumnName(), value);
+							loadOption(node);
+						}
 					}
+					nodeVarForm.dynamicDisplay();
+				}
+			}
+			else if (lstOption.equals(event.getTarget()))
+			{
+				if (nodeVarForm != null && m_activity != null)
+				{
+					String value = lstOption.getSelectedItem().getValue();
+					Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), MWFActivity.WF_Activity_Next_Node_Option, value);
+					if (m_activity.getPO() != null)
+						m_activity.getPO().set_Attribute(MWFActivity.WF_Activity_Next_Node_Option, value);
 					nodeVarForm.dynamicDisplay();
 				}
 			}

@@ -101,6 +101,9 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	/** Attribute name for pre-assigned workflow approver */
 	public static final String	WF_Activity_Manual_AD_User_ID		= "FWFA_AD_User_ID";
 	
+	/** Attribute name for assigned workflow Next Node */
+	public static final String	WF_Activity_Next_Node_Option		= "WF_Next_Node_Option";
+
 	public static final String	SUBSTITUTE_SUBQUERY 				= "COLUMN IN (SELECT AD_User_ID FROM AD_User_Substitute  WHERE Substitute_ID = ?  AND (ValidFrom IS NULL OR ValidFrom <= CURRENT_DATE)  AND (ValidTo IS NULL OR ValidTo >= CURRENT_DATE) AND IsActive = 'Y')";
 	
 	/**
