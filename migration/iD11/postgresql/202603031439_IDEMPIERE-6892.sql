@@ -1,3 +1,12 @@
+-- Migration: IDEMPIERE-6892
+-- Purpose: Show the transitions of the node as options
+-- Impact: Schema: Yes, Data: Yes, UI: Yes
+-- Details:
+-- - Adds IsShowTransitionsAsOptions column to AD_WF_Node
+-- - Adds Value and Name columns to AD_WF_NodeNext
+-- - Creates related AD_Element, AD_Column and AD_Field metadata
+-- - Updates workflow transition records and UI display logic
+
 -- IDEMPIERE-6892: Show the transitions of the node as options
 SELECT register_migration_script('202603031439_IDEMPIERE-6892.sql') FROM dual;
 
@@ -6,7 +15,7 @@ INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,Cr
 ;
 
 -- 03/03/2026 14:39:49 IST
-INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,Help,AD_Table_ID,ColumnName,DefaultValue,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,IsHtml,IsDisableZoomAcross,IsPartitionKey) VALUES (217382,0,'Show Transitions as Options','If enabled, the transitions of this workflow node will be pr','Enable this option to display all valid outgoing transitions from this node as selectable choices in the user interface.',129,'IsShowTransitionsAsOptions','N',1,'N','N','Y','N','N',0,'N',20,0,0,'Y',TO_TIMESTAMP('2026-03-03 14:39:48','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2026-03-03 14:39:48','YYYY-MM-DD HH24:MI:SS'),100,204033,'Y','N','D','N','N','N','Y','3c6d7f3c-3c47-4a12-8651-57b13e1a7d67','N',0,'N','N','N','N','N')
+INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,Help,AD_Table_ID,ColumnName,DefaultValue,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,IsHtml,IsDisableZoomAcross,IsPartitionKey) VALUES (217382,0,'Show Transitions as Options','If enabled, the transitions of this workflow node will be presented to the user as selectable options.','Enable this option to display all valid outgoing transitions from this node as selectable choices in the user interface.',129,'IsShowTransitionsAsOptions','N',1,'N','N','Y','N','N',0,'N',20,0,0,'Y',TO_TIMESTAMP('2026-03-03 14:39:48','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2026-03-03 14:39:48','YYYY-MM-DD HH24:MI:SS'),100,204033,'Y','N','D','N','N','N','Y','3c6d7f3c-3c47-4a12-8651-57b13e1a7d67','N',0,'N','N','N','N','N')
 ;
 
 -- 03/03/2026 14:39:54 IST

@@ -410,7 +410,7 @@ public class MWFProcess extends X_AD_WF_Process
 		last.setProcessed(true);
 		last.saveEx();
 
-		String nextOption = (String) lastPO.get_Attribute(MWFActivity.WF_Activity_Next_Node_Option);
+		String nextOption = lastPO != null ? (String) lastPO.get_Attribute(MWFActivity.WF_Activity_Next_Node_Option) : null;
 		//	Start next activity
 		String split = last.getNode().getSplitElement();
 		for (int i = 0; i < transitions.length; i++)

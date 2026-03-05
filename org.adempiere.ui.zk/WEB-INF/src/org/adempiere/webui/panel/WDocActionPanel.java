@@ -711,9 +711,10 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 		if (m_activity != null && (m_activity.isUserApproval() || m_activity.isUserTask()))
 		{
-			if (node.isShowTransitionsAsOptions())
+			if (node.isShowTransitionsAsOptions() && lstOption.isVisible())
 				rows.appendChild(rowOption);
-			rows.appendChild(rowAnswer);
+			if (lstAnswer.isVisible())
+				rows.appendChild(rowAnswer);
 			rows.appendChild(rowTxtMsg);
 		}
 		else
@@ -864,13 +865,17 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			}
 			else if (lstOption.equals(event.getTarget()))
 			{
-				if (nodeVarForm != null && m_activity != null)
+				if (m_activity != null && lstOption.getSelectedItem() != null)
 				{
 					String value = lstOption.getSelectedItem().getValue();
-					Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), MWFActivity.WF_Activity_Next_Node_Option, value);
 					if (m_activity.getPO() != null)
 						m_activity.getPO().set_Attribute(MWFActivity.WF_Activity_Next_Node_Option, value);
-					nodeVarForm.dynamicDisplay();
+
+					if (nodeVarForm != null)
+					{
+						Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), MWFActivity.WF_Activity_Next_Node_Option, value);
+						nodeVarForm.dynamicDisplay();
+					}
 				}
 			}
 		}
