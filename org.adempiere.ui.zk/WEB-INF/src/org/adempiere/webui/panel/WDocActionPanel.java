@@ -579,6 +579,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	private void loadOption(MWFNode node)
 	{
 		lstOption.removeAllItems();
+		if (m_activity.getPO() != null)
+			m_activity.getPO().set_Attribute(MWFActivity.WF_Activity_Next_Node_Option, null);
 		boolean isShowOption = false;
 		MWFNodeNext[] mwfNodeNexts = node.getTransitions(Env.getAD_Client_ID(Env.getCtx()));
 		if (mwfNodeNexts != null && mwfNodeNexts.length > 1)
@@ -595,7 +597,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		}
 		lblOption.setVisible(isShowOption);
 		lstOption.setVisible(isShowOption);
-		rowOption.setVisible(isShowOption);
+		if (rowOption != null)
+			rowOption.setVisible(isShowOption);
 	}
 
 	/**
@@ -830,7 +833,6 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		}
 		else if (Events.ON_SELECT.equals(eventName))
 		{
-
 			if (lstDocAction.equals(event.getTarget()))
 			{
 				label.setValue(s_description[getSelectedIndex()]);
@@ -862,6 +864,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 						{
 							m_activity.getPO().set_ValueNoCheck(column.getColumnName(), value);
 							loadOption(node);
+							String newValue = lstOption.getSelectedItem() != null ? lstOption.getSelectedItem().getValue() : null;
+							if (m_activity.getPO() != null)
+								m_activity.getPO().set_Attribute(MWFActivity.WF_Activity_Next_Node_Option, newValue);
 						}
 					}
 					nodeVarForm.dynamicDisplay();
