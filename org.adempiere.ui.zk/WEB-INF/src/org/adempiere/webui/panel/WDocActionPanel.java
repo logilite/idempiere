@@ -723,6 +723,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			if (lstAnswer.isVisible())
 				rows.appendChild(rowAnswer);
 			rows.appendChild(rowTxtMsg);
+			rowOption.setVisible(lstOption.isVisible());
 		}
 		else
 		{
