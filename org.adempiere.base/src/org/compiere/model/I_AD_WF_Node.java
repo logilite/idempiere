@@ -527,12 +527,12 @@ public interface I_AD_WF_Node
     public static final String COLUMNNAME_IsShowTransitionsAsOptions = "IsShowTransitionsAsOptions";
 
 	/** Set Show Transitions as Options.
-	  * If enabled, the transitions of this workflow node will be pr
+	  * If enabled, the transitions of this workflow node will be presented to the user as selectable options.
 	  */
 	public void setIsShowTransitionsAsOptions (boolean IsShowTransitionsAsOptions);
 
 	/** Get Show Transitions as Options.
-	  * If enabled, the transitions of this workflow node will be pr
+	  * If enabled, the transitions of this workflow node will be presented to the user as selectable options.
 	  */
 	public boolean isShowTransitionsAsOptions();
 

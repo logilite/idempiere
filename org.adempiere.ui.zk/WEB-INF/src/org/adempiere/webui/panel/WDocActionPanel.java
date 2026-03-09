@@ -180,6 +180,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	
 	private WFNodeVarForm			nodeVarForm;
 	
+	private Row						rowOption;
+	
 	private Map <Integer, String>	valMap;
 	
 	/** Active substitute users (including the current user). */
@@ -506,6 +508,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 //		lstAnswer.addEventListener(Events.ON_SELECT, this);
 		
 		lblOption = new Label(Msg.getMsg(Env.getCtx(), "Option"));
+		lblOption.setVisible(false);
 		lstOption = new Listbox();
 		lstOption.setRows(0);
 		lstOption.setMold("select");
@@ -589,9 +592,10 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				isShowOption = true;
 				lstOption.appendItem(nodeNext.getName(), nodeNext.getValue());
 			}
-			lblOption.setVisible(isShowOption);
-			lstOption.setVisible(isShowOption);
 		}
+		lblOption.setVisible(isShowOption);
+		lstOption.setVisible(isShowOption);
+		rowOption.setVisible(isShowOption);
 	}
 
 	/**
@@ -618,8 +622,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		Row rowSpacer = new Row();
 		Row rowUser = new Row();
 		Row rowAnswer = new Row();
-		Row rowOption = new Row();
 		Row rowTxtMsg = new Row();
+		rowOption = new Row();
 		
 		Row nodeVarRow = new Row();
 		Div nodeVarDiv = new Div();
@@ -711,7 +715,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 		if (m_activity != null && (m_activity.isUserApproval() || m_activity.isUserTask()))
 		{
-			if (node.isShowTransitionsAsOptions() && lstOption.isVisible())
+			if (node.isShowTransitionsAsOptions())
 				rows.appendChild(rowOption);
 			if (lstAnswer.isVisible())
 				rows.appendChild(rowAnswer);

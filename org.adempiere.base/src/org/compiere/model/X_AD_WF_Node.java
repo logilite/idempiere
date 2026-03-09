@@ -986,7 +986,7 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	}
 
 	/** Set Show Transitions as Options.
-		@param IsShowTransitionsAsOptions If enabled, the transitions of this workflow node will be pr
+		@param IsShowTransitionsAsOptions If enabled, the transitions of this workflow node will be presented to the user as selectable options.
 	*/
 	public void setIsShowTransitionsAsOptions (boolean IsShowTransitionsAsOptions)
 	{
@@ -994,7 +994,7 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	}
 
 	/** Get Show Transitions as Options.
-		@return If enabled, the transitions of this workflow node will be pr
+		@return If enabled, the transitions of this workflow node will be presented to the user as selectable options.
 	  */
 	public boolean isShowTransitionsAsOptions()
 	{
