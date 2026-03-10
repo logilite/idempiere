@@ -562,11 +562,6 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				if (node.isShowTransitionsAsOptions() && lstAnswer.isVisible())
 					m_activity.getPO().set_ValueNoCheck(column.getColumnName(), lstAnswer.getValue());
 			}
-			
-			if (node.isShowTransitionsAsOptions())
-			{
-				loadOption(node);
-			}
 		}
 		lstAnswer.addEventListener(Events.ON_SELECT, this);
 		lstOption.addEventListener(Events.ON_SELECT, this);
@@ -581,6 +576,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		lstOption.removeAllItems();
 		if (m_activity.getPO() != null)
 			m_activity.getPO().set_Attribute(MWFActivity.WF_Activity_Next_Node_Option, null);
+		if (nodeVarForm != null)
+			Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), MWFActivity.WF_Activity_Next_Node_Option, (String) null);
+
 		boolean isShowOption = false;
 		MWFNodeNext[] mwfNodeNexts = node.getTransitions(Env.getAD_Client_ID(Env.getCtx()));
 		if (mwfNodeNexts != null && mwfNodeNexts.length > 1)
@@ -599,6 +597,12 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		lstOption.setVisible(isShowOption);
 		if (rowOption != null)
 			rowOption.setVisible(isShowOption);
+
+		String newValue = lstOption.getSelectedItem() != null ? lstOption.getSelectedItem().getValue() : null;
+		if (nodeVarForm != null)
+			Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), MWFActivity.WF_Activity_Next_Node_Option, newValue);
+		if (m_activity.getPO() != null)
+			m_activity.getPO().set_Attribute(MWFActivity.WF_Activity_Next_Node_Option, newValue);
 	}
 
 	/**
@@ -651,6 +655,14 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			{
 				PO po = m_activity == null ? MTable.get(gridTab.getAD_Table_ID()).getPO(gridTab.getRecord_ID(), null) : m_activity.getPO();
 				nodeVarForm = new WFNodeVarForm(node, colms, po, gridTab);
+				nodeVarForm.setHeight(nodeVarForm.getHeight());
+				nodeVarDiv.setHeight(nodeVarForm.getHeight());
+				nodeVarDiv.appendChild(nodeVarForm);
+				ZKUpdateUtil.setWidth(nodeVarDiv, "100%");
+				colSpan = 3;
+
+				// Check if the answer list is visible in the UI
+				// Store selected value in the workflow context using column name
 				if (lstAnswer.isVisible())
 				{
 					int ApprovalColumn_ID = 0;
@@ -658,17 +670,27 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 						ApprovalColumn_ID = node.getApprovalColumn_ID();
 					else
 						ApprovalColumn_ID = node.getAD_Column_ID();
-					MColumn column = MColumn.get(Env.getCtx(), ApprovalColumn_ID);
-					Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), column.getColumnName(), (String) lstAnswer.getValue());
+					if (ApprovalColumn_ID > 0)
+					{
+						MColumn column = MColumn.get(Env.getCtx(), ApprovalColumn_ID);
+						Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), column.getColumnName(), (String) lstAnswer.getValue());
+					}
 				}
+
+				// Set the selected document action in the context if available
 				if (lstDocAction != null && lstDocAction.getSelectedItem() != null)
 					Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), "DocAction", s_value[getSelectedIndex()]);
-				nodeVarForm.setHeight(nodeVarForm.getHeight());
-				nodeVarDiv.setHeight(nodeVarForm.getHeight());
-				nodeVarDiv.appendChild(nodeVarForm);
+
+				// If workflow node is configured to show transitions as options,
+				// load available transition options
+				if (node.isShowTransitionsAsOptions())
+					loadOption(node);
+
 				nodeVarForm.dynamicDisplay();
-				ZKUpdateUtil.setWidth(nodeVarDiv, "100%");
-				colSpan = 3;
+			}
+			else if (node.isShowTransitionsAsOptions())
+			{
+				loadOption(node);
 			}
 		}
 		nodeVarRow.appendCellChild(nodeVarDiv, colSpan);
@@ -865,9 +887,6 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 						{
 							m_activity.getPO().set_ValueNoCheck(column.getColumnName(), value);
 							loadOption(node);
-							String newValue = lstOption.getSelectedItem() != null ? lstOption.getSelectedItem().getValue() : null;
-							if (m_activity.getPO() != null)
-								m_activity.getPO().set_Attribute(MWFActivity.WF_Activity_Next_Node_Option, newValue);
 						}
 					}
 					nodeVarForm.dynamicDisplay();
