@@ -448,6 +448,18 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
+		// If NOT Master Role, ensure no included roles exist
+		if (is_ValueChanged(COLUMNNAME_IsMasterRole) && !isMasterRole())
+		{
+			// Check if there are included roles linked to this role
+			int count = new Query(getCtx(), MRoleIncluded.Table_Name, "Included_Role_ID=?", get_TrxName()).setParameters(getAD_Role_ID()).count();
+			if (count > 0)
+			{
+				log.saveError("RoleHasIncludedRoles", Msg.getMsg(getCtx(), "RoleHasIncludedRoles"));
+				return false;
+			}
+		}
+
 		if (getAD_Client_ID() == 0)
 			setUserLevel(USERLEVEL_System);
 		else if (getUserLevel().equals(USERLEVEL_System))
