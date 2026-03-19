@@ -13,7 +13,12 @@
  *****************************************************************************/
 package org.adempiere.webui.theme;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Iterator;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
 
 import org.adempiere.webui.apps.AEnv;
 import org.apache.commons.codec.binary.Base64;
@@ -98,7 +103,24 @@ public final class ThemeManager {
 			MImage image = MImage.get(Env.getCtx(), logoID);
 			if (image.getData() != null)
 			{
-				String value = "data:image;base64," + new String(Base64.encodeBase64(image.getData()));
+			    byte[] data = image.getData();
+			    String mimeType = "png"; // default fallback
+
+				try
+				{
+					ByteArrayInputStream bis = new ByteArrayInputStream(data);
+					Iterator <ImageReader> readers = ImageIO.getImageReaders(ImageIO.createImageInputStream(bis));
+					if (readers.hasNext())
+						mimeType = readers.next().getFormatName().toLowerCase();
+					else
+						log.warning("No ImageReader found, using PNG fallback");
+				}
+				catch (Exception e)
+				{
+					log.warning("Error detecting image type: " + e.getMessage());
+				}
+
+				String value = "data:image/" + mimeType + ";base64," + new String(Base64.encodeBase64(data));
 				logoCache.put(logoID, value);
 				return value;
 			}
