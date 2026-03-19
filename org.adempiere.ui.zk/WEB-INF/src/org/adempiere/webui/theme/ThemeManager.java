@@ -113,7 +113,17 @@ public final class ThemeManager {
 				{
 					Iterator <ImageReader> readers = ImageIO.getImageReaders(iis);
 					if (readers.hasNext())
-						mimeType = readers.next().getFormatName().toLowerCase();
+					{
+						ImageReader reader = readers.next();
+						try
+						{
+							mimeType = reader.getFormatName().toLowerCase();
+						}
+						finally
+						{
+							reader.dispose();
+						}
+					}
 					else
 						log.log(Level.WARNING, "No ImageReader found, using PNG fallback");
 				}
@@ -122,7 +132,7 @@ public final class ThemeManager {
 					log.log(Level.SEVERE, "Error detecting image type", e);
 				}
 
-				String value = "data:image/" + mimeType + ";base64," + Base64.encodeBase64(data);
+				String value = "data:image/" + mimeType + ";base64," + Base64.encodeBase64String(data);
 				logoCache.put(logoID, value);
 				return value;
 			}
