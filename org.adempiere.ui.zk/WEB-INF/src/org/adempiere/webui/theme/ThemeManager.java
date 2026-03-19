@@ -16,9 +16,11 @@ package org.adempiere.webui.theme;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 
 import org.adempiere.webui.apps.AEnv;
 import org.apache.commons.codec.binary.Base64;
@@ -103,24 +105,24 @@ public final class ThemeManager {
 			MImage image = MImage.get(Env.getCtx(), logoID);
 			if (image.getData() != null)
 			{
-			    byte[] data = image.getData();
-			    String mimeType = "png"; // default fallback
+				byte[] data = image.getData();
+				String mimeType = "png"; // default fallback
 
-				try
+				try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
+								ImageInputStream iis = ImageIO.createImageInputStream(bis))
 				{
-					ByteArrayInputStream bis = new ByteArrayInputStream(data);
-					Iterator <ImageReader> readers = ImageIO.getImageReaders(ImageIO.createImageInputStream(bis));
+					Iterator <ImageReader> readers = ImageIO.getImageReaders(iis);
 					if (readers.hasNext())
 						mimeType = readers.next().getFormatName().toLowerCase();
 					else
-						log.warning("No ImageReader found, using PNG fallback");
+						log.log(Level.WARNING, "No ImageReader found, using PNG fallback");
 				}
-				catch (Exception e)
+				catch (IOException e)
 				{
-					log.warning("Error detecting image type: " + e.getMessage());
+					log.log(Level.SEVERE, "Error detecting image type", e);
 				}
 
-				String value = "data:image/" + mimeType + ";base64," + new String(Base64.encodeBase64(data));
+				String value = "data:image/" + mimeType + ";base64," + Base64.encodeBase64(data);
 				logoCache.put(logoID, value);
 				return value;
 			}
