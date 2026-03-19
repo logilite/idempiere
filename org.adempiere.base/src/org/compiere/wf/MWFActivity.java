@@ -1946,8 +1946,9 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			AD_Column_ID = getNode().getAD_Column_ID();
 		}
 		
-		setVariable(AD_Column_ID, value, displayType, getPO(trx), m_node, (trx != null ? trx.getTrxName() : null));
-		
+		if (AD_Column_ID > 0)
+			setVariable(AD_Column_ID, value, displayType, getPO(trx), m_node, (trx != null ? trx.getTrxName() : null));
+
 		//	Info
 		String msg = getNode().getAttributeName() + "=" + value;
 		if (textMsg != null && textMsg.length() > 0)

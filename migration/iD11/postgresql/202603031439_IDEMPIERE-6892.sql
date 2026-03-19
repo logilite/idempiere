@@ -66,3 +66,19 @@ UPDATE AD_Field SET DisplayLogic='@IsShowTransitionsAsOptions@=Y', MandatoryLogi
 -- 05/03/2026 18:12:57 IST
 UPDATE AD_Field SET DisplayLogic='@IsShowTransitionsAsOptions@=Y', MandatoryLogic='@IsShowTransitionsAsOptions@=Y',Updated=TO_TIMESTAMP('2026-03-05 18:12:57','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=209008
 ;
+
+-- 17/03/2026 19:08:16 IST
+INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('E','No valid workflow transition found for node: {0}. Please check the workflow configuration.',0,0,'Y',TO_TIMESTAMP('2026-03-17 19:08:15','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2026-03-17 19:08:15','YYYY-MM-DD HH24:MI:SS'),100,200995,'NoNextTransitionForNode','D','81d607d2-61d6-4c36-95b2-77837cb298f8')
+;
+
+-- 17/03/2026 19:08:41 IST
+INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('E','Please select a transition option to continue.',0,0,'Y',TO_TIMESTAMP('2026-03-17 19:08:41','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2026-03-17 19:08:41','YYYY-MM-DD HH24:MI:SS'),100,200996,'SelectTransitionOption','D','16f3d11e-b2f6-4056-89db-a575354af6d7')
+;
+
+-- 18/03/2026 15:08:18 IST
+UPDATE AD_Field SET DisplayLogic='@Action@=C & @IsShowTransitionsAsOptions@=N',Updated=TO_TIMESTAMP('2026-03-18 15:08:18','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=208471
+;
+
+-- 18/03/2026 15:08:47 IST
+UPDATE AD_Field SET DisplayLogic='@Action@=V | @Action@=C | @Action@=U  & @IsShowTransitionsAsOptions@=N',Updated=TO_TIMESTAMP('2026-03-18 15:08:47','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=10088
+;

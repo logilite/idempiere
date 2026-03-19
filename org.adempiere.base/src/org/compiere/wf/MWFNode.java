@@ -704,7 +704,7 @@ public class MWFNode extends X_AD_WF_Node implements ImmutablePOSupport
 				return false;
 			}
 		}
-		else if (action.equals(ACTION_SetVariable)) 
+		else if (action.equals(ACTION_SetVariable) && !isShowTransitionsAsOptions()) 
 		{
 			/* null is valid value for SetVariable
 			if (getAttributeValue() == null)
@@ -732,7 +732,7 @@ public class MWFNode extends X_AD_WF_Node implements ImmutablePOSupport
 				return false;
 			}
 		}
-		else if (action.equals(ACTION_UserChoice)) 
+		else if (action.equals(ACTION_UserChoice) && !isShowTransitionsAsOptions()) 
 		{
 			if (getAD_Column_ID() == 0 && getApprovalColumn_ID() == 0)
 			{
@@ -765,6 +765,12 @@ public class MWFNode extends X_AD_WF_Node implements ImmutablePOSupport
 			}
 		}
 		
+		if (isShowTransitionsAsOptions())
+		{
+			setAD_Column_ID(-1);
+			setApprovalColumn_ID(-1);
+		}
+
 		return true;
 	}	//	beforeSave
 	

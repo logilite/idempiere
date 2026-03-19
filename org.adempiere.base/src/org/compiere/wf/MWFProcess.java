@@ -415,16 +415,16 @@ public class MWFProcess extends X_AD_WF_Process
 		String split = last.getNode().getSplitElement();
 		for (int i = 0; i < transitions.length; i++)
 		{
-			//	Is this a valid transition?
-			if (!transitions[i].isValidFor(last))
-				continue;
-			
 			if (!Util.isEmpty(nextOption) && !nextOption.equalsIgnoreCase(transitions[i].getValue()))
 			{
 				if (log.isLoggable(Level.FINE))
 					log.fine("Skipping transition " + transitions[i] + " - option mismatch: " + nextOption + " vs " + transitions[i].getValue());
 				continue;
 			}
+
+			//	Is this a valid transition?
+			if (!transitions[i].isValidFor(last))
+				continue;
 
 			//	Start new Activity...
 			MWFActivity activity = new MWFActivity (this, transitions[i].getAD_WF_Next_ID(), lastPO);
