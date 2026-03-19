@@ -137,9 +137,9 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 	private ListModelTable model = null;
 	private WListbox listbox = new WListbox();
 
-	private Label					lblOption				= new Label(Msg.getMsg(Env.getCtx(), "Option"));
-	private Listbox					lstOption				= new Listbox();
-	private Row						rowOption;
+	private Label					lblAction				= new Label(Msg.getMsg(Env.getCtx(), "Action"));
+	private Listbox					lstAction				= new Listbox();
+	private Row						rowAction;
 
 	private final static String HISTORY_DIV_START_TAG = "<div style='overflow-y:scroll;height: 100px; border: 1px solid #7F9DB9;'>";
 	
@@ -160,7 +160,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
         loadActivities();
 
         fAnswerList.setMold("select");
-		lstOption.setMold("select");
+		lstAction.setMold("select");
 
 		if (ThemeManager.isUseFontIconForImage()) {
         	bZoom.setIconSclass("z-icon-Zoom");
@@ -259,18 +259,18 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 		row.appendChild(fHistory);
 		ZKUpdateUtil.setHflex(fHistory, "true");
 
-		rowOption = new Row();
-		rowOption.setVisible(false);
-		rows.appendChild(rowOption);
+		rowAction = new Row();
+		rowAction.setVisible(false);
+		rows.appendChild(rowAction);
 		div = new Div();
 		div.setStyle("text-align: right;");
-		div.appendChild(lblOption);
-		rowOption.appendChild(div);
+		div.appendChild(lblAction);
+		rowAction.appendChild(div);
 		Hbox hbox = new Hbox();
-		hbox.appendChild(lstOption);
-		ZKUpdateUtil.setHflex(lstOption, "true");
-		rowOption.appendChild(hbox);
-		lstOption.addEventListener(Events.ON_SELECT, this);
+		hbox.appendChild(lstAction);
+		ZKUpdateUtil.setHflex(lstAction, "true");
+		rowAction.appendChild(hbox);
+		lstAction.addEventListener(Events.ON_SELECT, this);
 
 		row = new Row();
 		rows.appendChild(row);
@@ -391,9 +391,9 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 			{
 				updateNodeVarFormDisplay();
 			}
-        	else if (lstOption.equals(comp))
+        	else if (lstAction.equals(comp))
 			{
-				updateNextNodeOption(lstOption.getSelectedItem() != null ? lstOption.getSelectedItem().getValue() : null);
+				updateNextNodeOption(lstAction.getSelectedItem() != null ? lstAction.getSelectedItem().getValue() : null);
 				updateNodeVarFormDisplay();
 			}
 		}
@@ -515,6 +515,12 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 	 */
 	private MWFActivity resetDisplay(int selIndex)
 	{
+		if (nodeVarForm != null)
+			Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), MWFActivity.WF_Activity_Next_Node_Option, (String) null);
+		lstAction.removeAllItems();
+		lblAction.setVisible(false);
+		lstAction.setVisible(false);
+		rowAction.setVisible(false);
 		fAnswerText.setVisible(false);
 		fAnswerList.setVisible(false);
 		fAnswerButton.setVisible(false);
@@ -660,7 +666,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 
 	private void loadOption(MWFNode node)
 	{
-		lstOption.removeAllItems();
+		lstAction.removeAllItems();
 		updateNextNodeOption(null);
 
 		boolean isHasValidOption = false;
@@ -675,15 +681,15 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 					if (!nodeNext.isValidFor(m_activity))
 						continue;
 					isHasValidOption = true;
-					lstOption.appendItem(nodeNext.getName(), nodeNext.getValue());
+					lstAction.appendItem(nodeNext.getName(), nodeNext.getValue());
 				}
 			}
-			updateNextNodeOption(lstOption.getSelectedItem() != null ? lstOption.getSelectedItem().getValue() : null);
+			updateNextNodeOption(lstAction.getSelectedItem() != null ? lstAction.getSelectedItem().getValue() : null);
 		}
 
-		lblOption.setVisible(isHasValidOption && node.isShowTransitionsAsOptions());
-		lstOption.setVisible(isHasValidOption && node.isShowTransitionsAsOptions());
-		rowOption.setVisible(isHasValidOption && node.isShowTransitionsAsOptions());
+		lblAction.setVisible(isHasValidOption && node.isShowTransitionsAsOptions());
+		lstAction.setVisible(isHasValidOption && node.isShowTransitionsAsOptions());
+		rowAction.setVisible(isHasValidOption && node.isShowTransitionsAsOptions());
 	}
 
 	private void updateNextNodeOption(String newValue)
@@ -703,6 +709,9 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 	{
 		if (nodeVarForm == null)
 			return;
+
+		if (m_activity.getNode() != null && m_activity.getNode().isShowTransitionsAsOptions())
+			updateNextNodeOption(lstAction.getSelectedItem() != null ? lstAction.getSelectedItem().getValue() : null);
 
 		if (m_column != null)
 			Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), m_column.getColumnName(), String.valueOf(fAnswerList.getValue()));
@@ -772,9 +781,9 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 		}
 		//
 		MWFNode node = m_activity.getNode();
-		if (node.isShowTransitionsAsOptions() && lstOption.getSelectedItem() == null)
+		if (node.isShowTransitionsAsOptions() && lstAction.getSelectedItem() == null)
 		{
-			String msg = lstOption.getItemCount() > 0 ? "SelectTransitionOption" : Msg.getMsg(Env.getCtx(), "NoNextTransitionForNode", new Object[] { node.getName() });
+			String msg = lstAction.getItemCount() > 0 ? "SelectTransitionOption" : Msg.getMsg(Env.getCtx(), "NoNextTransitionForNode", new Object[] { node.getName() });
 			Dialog.error(m_WindowNo, msg);
 			Clients.clearBusy();
 			return;

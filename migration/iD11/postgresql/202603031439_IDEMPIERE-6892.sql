@@ -79,6 +79,14 @@ INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,
 UPDATE AD_Field SET DisplayLogic='@Action@=C & @IsShowTransitionsAsOptions@=N',Updated=TO_TIMESTAMP('2026-03-18 15:08:18','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=208471
 ;
 
--- 18/03/2026 15:08:47 IST
-UPDATE AD_Field SET DisplayLogic='@Action@=V | @Action@=C | @Action@=U  & @IsShowTransitionsAsOptions@=N',Updated=TO_TIMESTAMP('2026-03-18 15:08:47','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=10088
+-- 19/03/2026 15:05:15 IST
+UPDATE AD_Field SET ReadOnlyLogic='@AD_Column_ID@>0 | @ApprovalColumn_ID@>0',Updated=TO_TIMESTAMP('2026-03-19 15:05:15','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=209007
+;
+
+-- 19/03/2026 15:30:16 IST
+UPDATE AD_Field SET DisplayLogic='@Action@=C | @Action@=U ',Updated=TO_TIMESTAMP('2026-03-19 15:30:16','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=209007
+;
+
+-- 19/03/2026 15:31:34 IST
+UPDATE AD_Field SET DisplayLogic='@Action@=V | @Action@=C | @Action@=U ', ReadOnlyLogic='@Action@=C | @Action@=U  & @IsShowTransitionsAsOptions@=Y',Updated=TO_TIMESTAMP('2026-03-19 15:31:34','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=10088
 ;
