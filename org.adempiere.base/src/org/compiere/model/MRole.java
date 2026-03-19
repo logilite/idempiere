@@ -451,11 +451,12 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 		// If NOT Master Role, ensure no included roles exist
 		if (is_ValueChanged(COLUMNNAME_IsMasterRole) && !isMasterRole())
 		{
-			// Check if there are included roles linked to this role
-			int count = new Query(getCtx(), MRoleIncluded.Table_Name, "Included_Role_ID=?", get_TrxName()).setParameters(getAD_Role_ID()).count();
-			if (count > 0)
+			// Get names of roles that include this role
+			String sql = "SELECT STRING_AGG(r.Name, ', ')  FROM AD_Role_Included ri  JOIN AD_Role r ON (ri.AD_Role_ID = r.AD_Role_ID)  WHERE ri.Included_Role_ID=?";
+			String roles = DB.getSQLValueStringEx(get_TrxName(), sql, getAD_Role_ID());
+			if (!Util.isEmpty(roles))
 			{
-				log.saveError("RoleHasIncludedRoles", Msg.getMsg(getCtx(), "RoleHasIncludedRoles"));
+				log.saveError("Error", Msg.getMsg(getCtx(), "RoleHasIncludedRoles", new Object[] { roles }));
 				return false;
 			}
 		}
