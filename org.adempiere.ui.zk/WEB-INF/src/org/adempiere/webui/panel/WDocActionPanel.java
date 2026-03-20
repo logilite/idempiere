@@ -81,6 +81,8 @@ import org.compiere.wf.MWFNode;
 import org.compiere.wf.MWFNodeVar;
 import org.compiere.wf.MWFProcess;
 import org.compiere.wf.MWFResponsible;
+import org.zkoss.zk.ui.Desktop;
+import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -724,8 +726,6 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 					try
 					{
 						m_activity.set_TrxName(trx.getTrxName());
-						if (setNodeVarValue())
-							commitNodeVar();
 					}
 					catch (Exception e)
 					{
@@ -835,6 +835,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 			MWFNode node = m_activity.getNode();
 			String textMsg = fTextMsg.getValue();
+
+			setNodeVarValue();
 
 			if (MWFNode.ACTION_UserChoice.equals(node.getAction()))
 			{
