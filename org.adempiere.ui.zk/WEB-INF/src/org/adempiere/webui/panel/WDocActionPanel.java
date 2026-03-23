@@ -96,7 +96,7 @@ import org.zkoss.zul.Vlayout;
 /**
  * Document action dialog
  */
-public class WDocActionPanel extends Window implements EventListener<Event>, DialogEvents
+public class WDocActionPanel extends Window implements EventListener <Event>, DialogEvents
 {
 	/**
 	 * generated serial id
@@ -311,7 +311,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	 */
 	public boolean isShowTransitionsAsOptionsValid( )
 	{
-		return currentNode == null || !currentNode.isShowTransitionsAsOptions() || isHasValidAction;
+		return currentNode == null || !currentNode.isShowTransitionsAsAction() || isHasValidAction;
 	}
 	
 	/**
@@ -321,7 +321,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	 */
 	private boolean isShowTransitionsAsOptions( )
 	{
-		return currentNode != null && currentNode.isShowTransitionsAsOptions();
+		return currentNode != null && currentNode.isShowTransitionsAsAction();
 	}
 
 	/**
@@ -603,7 +603,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		ZKUpdateUtil.setVflex(confirmPanel, "true");
 	}
 
-	private void loadOption(MWFNode node)
+	private void loadAction(MWFNode node)
 	{
 		lstAction.removeAllItems();
 		updateNextNodeOption(null);
@@ -624,6 +624,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		lblAction.setVisible(isHasValidAction);
 		lstAction.setVisible(isHasValidAction);
 		rowAction.setVisible(isHasValidAction);
+		confirmPanel.getButton("Ok").setEnabled(currentNode == null || !(currentNode.isShowTransitionsAsAction() && lstAction.getSelectedItem() == null));
 
 		updateNextNodeOption(lstAction.getSelectedItem() != null ? lstAction.getSelectedItem().getValue() : null);
 	}
@@ -631,9 +632,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	private void updateNextNodeOption(String newValue)
 	{
 		if (nodeVarForm != null)
-			Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), MWFActivity.WF_Activity_Next_Node_Option, newValue);
+			Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), MWFActivity.WF_Activity_Next_Node_Action, newValue);
 		if (m_activity != null && m_activity.getPO() != null)
-			m_activity.getPO().set_Attribute(MWFActivity.WF_Activity_Next_Node_Option, newValue);
+			m_activity.getPO().set_Attribute(MWFActivity.WF_Activity_Next_Node_Action, newValue);
 	}
 
 	/**
@@ -695,14 +696,14 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 				// If workflow node is configured to show transitions as options,
 				// load available transition options
-				if (currentNode.isShowTransitionsAsOptions())
-					loadOption(currentNode);
+				if (currentNode.isShowTransitionsAsAction())
+					loadAction(currentNode);
 
 				nodeVarForm.dynamicDisplay();
 			}
-			else if (currentNode.isShowTransitionsAsOptions())
+			else if (currentNode.isShowTransitionsAsAction())
 			{
-				loadOption(currentNode);
+				loadAction(currentNode);
 			}
 		}
 		nodeVarRow.appendCellChild(nodeVarDiv, colSpan);
@@ -803,12 +804,6 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		{
 			if (confirmPanel.getButton("Ok").equals(event.getTarget()))
 			{
-				if (isShowTransitionsAsOptions() && lstAction.getSelectedItem() == null)
-				{
-					Dialog.error(m_WindowNo, "SelectTransitionOption");
-					return;
-				}
-
 				valMap = null;
 				if (nodeVarForm != null)
 				{
@@ -903,6 +898,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				if (m_activity != null)
 				{
 					updateNextNodeOption(lstAction.getSelectedItem() != null ? lstAction.getSelectedItem().getValue() : null);
+					confirmPanel.getButton("Ok").setEnabled(currentNode == null || !(currentNode.isShowTransitionsAsAction() && lstAction.getSelectedItem() == null));
 					if (nodeVarForm != null)
 						nodeVarForm.dynamicDisplay();
 				}
@@ -1142,28 +1138,28 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		if (valMap != null)
 		{
 			// Iterate through each column-value pair to be set
-			for (Entry <Integer, String> colValue : valMap.entrySet())
+			String trxName = m_activity != null ? m_activity.get_TrxName() : null;// Trx.get(Trx.createTrxName("FWFA"), true);
+
+			// context: activity context or default context
+			Properties ctx = m_activity != null ? m_activity.getCtx() : Env.getCtx();
+
+			// PO object: from activity or table record
+			PO po = m_activity != null ? m_activity.getPO(Trx.get(trxName, true)) : MTable.get(Env.getCtx(), m_AD_Table_ID).getPO(gridTab.getRecord_ID(), trxName);
+
+			MWFNode node = null;
+			// workflow node: from activity or process workflow
+			if (m_activity != null)
+				node = m_activity.getNode();
+			else if (m_Process_ID > 0)
 			{
-				// transaction: use activity's trx or create a new one
-				String trxName = m_activity != null ? m_activity.get_TrxName() : null;// Trx.get(Trx.createTrxName("FWFA"), true);
+				MProcess pr = new MProcess(Env.getCtx(), m_Process_ID, trxName);
+				node = (MWFNode) pr.getAD_Workflow().getAD_WF_Node();
+			}
 
-				// context: activity context or default context
-				Properties ctx = m_activity != null ? m_activity.getCtx() : Env.getCtx();
-
-				// PO object: from activity or table record
-				PO po = m_activity != null ? m_activity.getPO(Trx.get(trxName, true)) : MTable.get(Env.getCtx(), m_AD_Table_ID).getPO(gridTab.getRecord_ID(), trxName);
-
-				MWFNode node = null;
-				// workflow node: from activity or process workflow
-				if (m_activity != null)
-					node = m_activity.getNode();
-				else if (m_Process_ID > 0)
-				{
-					MProcess pr = new MProcess(Env.getCtx(), m_Process_ID, trxName);
-					node = (MWFNode) pr.getAD_Workflow().getAD_WF_Node();
-				}
-
-				if(node != null)
+			// transaction: use activity's trx or create a new one
+			if (node != null)
+			{
+				for (Entry <Integer, String> colValue : valMap.entrySet())
 				{
 					try
 					{

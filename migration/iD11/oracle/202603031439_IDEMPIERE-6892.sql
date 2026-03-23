@@ -2,7 +2,7 @@
 -- Purpose: Show the transitions of the node as options
 -- Impact: Schema: Yes, Data: Yes, UI: Yes
 -- Details:
--- - Adds IsShowTransitionsAsOptions column to AD_WF_Node
+-- - Adds IsShowTransitionsAsAction column to AD_WF_Node
 -- - Adds Value and Name columns to AD_WF_NodeNext
 -- - Creates related AD_Element, AD_Column and AD_Field metadata
 -- - Updates workflow transition records and UI display logic
@@ -14,19 +14,19 @@ SET SQLBLANKLINES ON
 SET DEFINE OFF
 
 -- 03/03/2026 14:39:34 IST
-INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,ColumnName,Name,Description,Help,PrintName,EntityType,AD_Element_UU) VALUES (204033,0,0,'Y',TO_TIMESTAMP('2026-03-03 14:39:13','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2026-03-03 14:39:13','YYYY-MM-DD HH24:MI:SS'),100,'IsShowTransitionsAsOptions','Show Transitions as Options','If enabled, the transitions of this workflow node will be presented to the user as selectable options.','Enable this option to display all valid outgoing transitions from this node as selectable choices in the user interface.','Show Transitions as Options','D','ed0def34-4992-4ce9-ae69-88fb568c80fd')
+INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,ColumnName,Name,Description,Help,PrintName,EntityType,AD_Element_UU) VALUES (204033,0,0,'Y',TO_TIMESTAMP('2026-03-03 14:39:13','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2026-03-03 14:39:13','YYYY-MM-DD HH24:MI:SS'),100,'IsShowTransitionsAsAction','Show Transitions as Actions','If enabled, the transitions of this workflow node will be presented to the user as selectable Actions.','Enable this option to display all valid outgoing transitions from this node as selectable choices in the user interface.','Show Transitions as Actions','D','ed0def34-4992-4ce9-ae69-88fb568c80fd')
 ;
 
 -- 03/03/2026 14:39:49 IST
-INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,Help,AD_Table_ID,ColumnName,DefaultValue,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,IsHtml,IsDisableZoomAcross,IsPartitionKey) VALUES (217382,0,'Show Transitions as Options','If enabled, the transitions of this workflow node will be presented to the user as selectable options.','Enable this option to display all valid outgoing transitions from this node as selectable choices in the user interface.',129,'IsShowTransitionsAsOptions','N',1,'N','N','Y','N','N',0,'N',20,0,0,'Y',TO_TIMESTAMP('2026-03-03 14:39:48','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2026-03-03 14:39:48','YYYY-MM-DD HH24:MI:SS'),100,204033,'Y','N','D','N','N','N','Y','3c6d7f3c-3c47-4a12-8651-57b13e1a7d67','N',0,'N','N','N','N','N')
+INSERT INTO AD_Column (AD_Column_ID,Version,Name,Description,Help,AD_Table_ID,ColumnName,DefaultValue,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,SeqNo,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsSyncDatabase,IsAlwaysUpdateable,IsAutocomplete,IsAllowLogging,AD_Column_UU,IsAllowCopy,SeqNoSelection,IsToolbarButton,IsSecure,IsHtml,IsDisableZoomAcross,IsPartitionKey) VALUES (217382,0,'Show Transitions as Actions','If enabled, the transitions of this workflow node will be presented to the user as selectable Actions.','Enable this option to display all valid outgoing transitions from this node as selectable choices in the user interface.',129,'IsShowTransitionsAsAction','N',1,'N','N','Y','N','N',0,'N',20,0,0,'Y',TO_TIMESTAMP('2026-03-03 14:39:48','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2026-03-03 14:39:48','YYYY-MM-DD HH24:MI:SS'),100,204033,'Y','N','D','N','N','N','Y','3c6d7f3c-3c47-4a12-8651-57b13e1a7d67','N',0,'N','N','N','N','N')
 ;
 
 -- 03/03/2026 14:39:54 IST
-ALTER TABLE AD_WF_Node ADD IsShowTransitionsAsOptions CHAR(1) DEFAULT 'N' CHECK (IsShowTransitionsAsOptions IN ('Y','N')) NOT NULL
+ALTER TABLE AD_WF_Node ADD IsShowTransitionsAsAction CHAR(1) DEFAULT 'N' CHECK (IsShowTransitionsAsAction IN ('Y','N')) NOT NULL
 ;
 
 -- 03/03/2026 14:40:39 IST
-INSERT INTO AD_Field (AD_Field_ID,Name,Description,Help,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLength,SeqNo,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,SeqNoGrid,XPosition,ColumnSpan) VALUES (209007,'Show Transitions as Options','If enabled, the transitions of this workflow node will be presented to the user as selectable options.','Enable this option to display all valid outgoing transitions from this node as selectable choices in the user interface.',122,217382,'Y',1,186,'N','N','N','N',0,0,'Y',TO_TIMESTAMP('2026-03-03 14:40:39','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2026-03-03 14:40:39','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','512e01cf-6eda-48eb-90b9-8749f547182b','Y',186,2,2)
+INSERT INTO AD_Field (AD_Field_ID,Name,Description,Help,AD_Tab_ID,AD_Column_ID,IsDisplayed,DisplayLength,SeqNo,IsSameLine,IsHeading,IsFieldOnly,IsEncrypted,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,IsReadOnly,IsCentrallyMaintained,EntityType,AD_Field_UU,IsDisplayedGrid,SeqNoGrid,XPosition,ColumnSpan) VALUES (209007,'Show Transitions as Actions','If enabled, the transitions of this workflow node will be presented to the user as selectable Actions.','Enable this option to display all valid outgoing transitions from this node as selectable choices in the user interface.',122,217382,'Y',1,186,'N','N','N','N',0,0,'Y',TO_TIMESTAMP('2026-03-03 14:40:39','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2026-03-03 14:40:39','YYYY-MM-DD HH24:MI:SS'),100,'N','Y','D','512e01cf-6eda-48eb-90b9-8749f547182b','Y',186,2,2)
 ;
 
 -- 03/03/2026 14:48:21 IST
@@ -64,23 +64,19 @@ UPDATE SET
     nn.Value = n.Value;
 
 -- 05/03/2026 18:12:48 IST
-UPDATE AD_Field SET DisplayLogic='@IsShowTransitionsAsOptions@=Y', MandatoryLogic='@IsShowTransitionsAsOptions@=Y',Updated=TO_TIMESTAMP('2026-03-05 18:12:48','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=209009
+UPDATE AD_Field SET DisplayLogic='@IsShowTransitionsAsAction@=Y', MandatoryLogic='@IsShowTransitionsAsAction@=Y',Updated=TO_TIMESTAMP('2026-03-05 18:12:48','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=209009
 ;
 
 -- 05/03/2026 18:12:57 IST
-UPDATE AD_Field SET DisplayLogic='@IsShowTransitionsAsOptions@=Y', MandatoryLogic='@IsShowTransitionsAsOptions@=Y',Updated=TO_TIMESTAMP('2026-03-05 18:12:57','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=209008
+UPDATE AD_Field SET DisplayLogic='@IsShowTransitionsAsAction@=Y', MandatoryLogic='@IsShowTransitionsAsAction@=Y',Updated=TO_TIMESTAMP('2026-03-05 18:12:57','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=209008
 ;
 
 -- 17/03/2026 19:08:16 IST
 INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('E','No valid workflow transition found for node: {0}. Please check the workflow configuration.',0,0,'Y',TO_TIMESTAMP('2026-03-17 19:08:15','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2026-03-17 19:08:15','YYYY-MM-DD HH24:MI:SS'),100,200995,'NoNextTransitionForNode','D','81d607d2-61d6-4c36-95b2-77837cb298f8')
 ;
 
--- 17/03/2026 19:08:41 IST
-INSERT INTO AD_Message (MsgType,MsgText,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Message_ID,Value,EntityType,AD_Message_UU) VALUES ('E','Please select a transition option to continue.',0,0,'Y',TO_TIMESTAMP('2026-03-17 19:08:41','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2026-03-17 19:08:41','YYYY-MM-DD HH24:MI:SS'),100,200996,'SelectTransitionOption','D','16f3d11e-b2f6-4056-89db-a575354af6d7')
-;
-
 -- 18/03/2026 15:08:18 IST
-UPDATE AD_Field SET DisplayLogic='@Action@=C & @IsShowTransitionsAsOptions@=N',Updated=TO_TIMESTAMP('2026-03-18 15:08:18','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=208471
+UPDATE AD_Field SET DisplayLogic='@Action@=C & @IsShowTransitionsAsAction@=N',Updated=TO_TIMESTAMP('2026-03-18 15:08:18','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=208471
 ;
 
 -- 19/03/2026 15:05:15 IST
@@ -92,5 +88,5 @@ UPDATE AD_Field SET DisplayLogic='@Action@=C | @Action@=U ',Updated=TO_TIMESTAMP
 ;
 
 -- 19/03/2026 15:31:34 IST
-UPDATE AD_Field SET DisplayLogic='@Action@=V | @Action@=C | @Action@=U ', ReadOnlyLogic='=C | @Action@=U  & @IsShowTransitionsAsOptions@=Y',Updated=TO_TIMESTAMP('2026-03-19 15:31:34','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=10088
+UPDATE AD_Field SET DisplayLogic='@Action@=V | @Action@=C | @Action@=U ', ReadOnlyLogic='=C | @Action@=U  & @IsShowTransitionsAsAction@=Y',Updated=TO_TIMESTAMP('2026-03-19 15:31:34','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Field_ID=10088
 ;

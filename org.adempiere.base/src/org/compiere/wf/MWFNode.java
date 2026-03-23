@@ -732,7 +732,7 @@ public class MWFNode extends X_AD_WF_Node implements ImmutablePOSupport
 				return false;
 			}
 		}
-		else if (action.equals(ACTION_UserChoice) && !isShowTransitionsAsOptions()) 
+		else if (action.equals(ACTION_UserChoice) && !isShowTransitionsAsAction()) 
 		{
 			if (getAD_Column_ID() == 0 && getApprovalColumn_ID() == 0)
 			{
@@ -767,9 +767,9 @@ public class MWFNode extends X_AD_WF_Node implements ImmutablePOSupport
 
 		if (!action.equals(ACTION_UserChoice) && !action.equals(ACTION_UserTask))
 		{
-			setIsShowTransitionsAsOptions(false);
+			setIsShowTransitionsAsAction(false);
 		}
-		else if (isShowTransitionsAsOptions())
+		else if (isShowTransitionsAsAction())
 		{
 			if (getAD_Column_ID() > 0)
 				setAD_Column_ID(-1);

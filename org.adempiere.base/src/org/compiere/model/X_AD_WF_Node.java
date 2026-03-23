@@ -34,7 +34,7 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20260303L;
+	private static final long serialVersionUID = 20260323L;
 
     /** Standard Constructor */
     public X_AD_WF_Node (Properties ctx, int AD_WF_Node_ID, String trxName)
@@ -52,7 +52,7 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 // @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
 			setIsCentrallyMaintained (true);
 // Y
-			setIsShowTransitionsAsOptions (false);
+			setIsShowTransitionsAsAction (false);
 // N
 			setJoinElement (null);
 // X
@@ -85,7 +85,7 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 // Y
 			setIsCentrallyMaintained (true);
 // Y
-			setIsShowTransitionsAsOptions (false);
+			setIsShowTransitionsAsAction (false);
 // N
 			setJoinElement (null);
 // X
@@ -118,7 +118,7 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 // Y
 			setIsCentrallyMaintained (true);
 // Y
-			setIsShowTransitionsAsOptions (false);
+			setIsShowTransitionsAsAction (false);
 // N
 			setJoinElement (null);
 // X
@@ -151,7 +151,7 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 // Y
 			setIsCentrallyMaintained (true);
 // Y
-			setIsShowTransitionsAsOptions (false);
+			setIsShowTransitionsAsAction (false);
 // N
 			setJoinElement (null);
 // X
@@ -985,20 +985,20 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 		return false;
 	}
 
-	/** Set Show Transitions as Options.
-		@param IsShowTransitionsAsOptions If enabled, the transitions of this workflow node will be presented to the user as selectable options.
+	/** Set Show Transitions as Actions.
+		@param IsShowTransitionsAsAction If enabled, the transitions of this workflow node will be presented to the user as selectable Actions.
 	*/
-	public void setIsShowTransitionsAsOptions (boolean IsShowTransitionsAsOptions)
+	public void setIsShowTransitionsAsAction (boolean IsShowTransitionsAsAction)
 	{
-		set_Value (COLUMNNAME_IsShowTransitionsAsOptions, Boolean.valueOf(IsShowTransitionsAsOptions));
+		set_Value (COLUMNNAME_IsShowTransitionsAsAction, Boolean.valueOf(IsShowTransitionsAsAction));
 	}
 
-	/** Get Show Transitions as Options.
-		@return If enabled, the transitions of this workflow node will be presented to the user as selectable options.
+	/** Get Show Transitions as Actions.
+		@return If enabled, the transitions of this workflow node will be presented to the user as selectable Actions.
 	  */
-	public boolean isShowTransitionsAsOptions()
+	public boolean isShowTransitionsAsAction()
 	{
-		Object oo = get_Value(COLUMNNAME_IsShowTransitionsAsOptions);
+		Object oo = get_Value(COLUMNNAME_IsShowTransitionsAsAction);
 		if (oo != null)
 		{
 			 if (oo instanceof Boolean)
