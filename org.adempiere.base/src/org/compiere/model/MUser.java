@@ -61,6 +61,9 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	 * 
 	 */
 	private static final long serialVersionUID = 1351277092193923708L;
+	
+	private static final String	USER_SEARCHKEY_UPPERCASE	= "U";
+	private static final String	USER_SEARCHKEY_LOWERCASE	= "L";
 
 	/**
 	 * Get active Users of BPartner
@@ -443,7 +446,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}	//	getValue
 
 	/**
-	 * 	Set Value - 7 bit lower case alpha numerics max length 8
+	 * 	Set Value - 7 bit case alpha numerics max length 8
 	 *	@param Value
 	 */
 	public void setValue(String Value)
@@ -478,7 +481,10 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	/**
 	 * 	Clean Value
 	 *	@param value value
-	 *	@return lower case cleaned value
+	 *	@return as it is value if User_Searchkey_Allowed_Char system config value
+	 *         is Y or lower case cleaned value if User_Searchkey_Case system
+	 *         config value is L or upper case cleaned value if
+	 *         User_Searchkey_Case system config value is U
 	 */
 	private String cleanValue (String value)
 	{
@@ -487,9 +493,19 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 		for (int i = 0; i < chars.length; i++)
 		{
 			char ch = chars[i];
-			ch = Character.toLowerCase (ch);
-			if ((ch >= '0' && ch <= '9')		//	digits
-				|| (ch >= 'a' && ch <= 'z'))	//	characters
+			String searchKey_Case = MSysConfig.getValue(MSysConfig.USER_SEARCHKEY_CASE);
+			if (USER_SEARCHKEY_LOWERCASE.equals(searchKey_Case))
+			{
+				ch = Character.toLowerCase(ch);
+			}
+			if (USER_SEARCHKEY_UPPERCASE.equals(searchKey_Case))
+			{
+				ch = Character.toUpperCase(ch);
+			}
+			Boolean user_SearchKey_Allowed_Char = MSysConfig.getBooleanValue(MSysConfig.USER_SEARCHKEY_ALLOWED_CHAR, true);
+			if ((ch >= '0' && ch <= '9') // digits
+					|| (ch >= 'a' && ch <= 'z') // characters
+					|| (ch >= 'A' && ch <= 'Z') || user_SearchKey_Allowed_Char)
 				sb.append(ch);
 		}
 		return sb.toString ();

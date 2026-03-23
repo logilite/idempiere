@@ -302,6 +302,8 @@ public class MSysConfig extends X_AD_SysConfig
 	public static final String MAIL_SEND_COMMENTS = "MAIL_SEND_COMMENTS";
 	public static final String USE_SEARCH_KEY_FOR_LOGIN = "USE_SEARCH_KEY_FOR_LOGIN";
 	public static final String DEFAULT_REQUEST_HANDLER_DISABLED = "DEFAULT_REQUEST_HANDLER_DISABLED";
+	public static final String	USER_SEARCHKEY_CASE = "User_Searchkey_Case";
+	public static final String	USER_SEARCHKEY_ALLOWED_CHAR = "User_Searchkey_Allowed_Char";
 
     /**
      * UUID based Constructor
