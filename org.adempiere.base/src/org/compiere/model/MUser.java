@@ -64,6 +64,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	
 	private static final String	USER_SEARCHKEY_UPPERCASE	= "U";
 	private static final String	USER_SEARCHKEY_LOWERCASE	= "L";
+	private static final String	USER_SEARCHKEY_ANYCASE		= "N";
 
 	/**
 	 * Get active Users of BPartner
@@ -490,10 +491,13 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	{
 		char[] chars = value.toCharArray();
 		StringBuilder sb = new StringBuilder();
+		String searchKey_Case = MSysConfig.getValue(MSysConfig.USER_SEARCHKEY_CASE, USER_SEARCHKEY_ANYCASE,
+				getAD_Client_ID());
+		Boolean user_SearchKey_Allowed_Char = MSysConfig.getBooleanValue(MSysConfig.USER_SEARCHKEY_ALLOWED_CHAR, false,
+				getAD_Client_ID());
 		for (int i = 0; i < chars.length; i++)
 		{
 			char ch = chars[i];
-			String searchKey_Case = MSysConfig.getValue(MSysConfig.USER_SEARCHKEY_CASE);
 			if (USER_SEARCHKEY_LOWERCASE.equals(searchKey_Case))
 			{
 				ch = Character.toLowerCase(ch);
@@ -502,7 +506,6 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 			{
 				ch = Character.toUpperCase(ch);
 			}
-			Boolean user_SearchKey_Allowed_Char = MSysConfig.getBooleanValue(MSysConfig.USER_SEARCHKEY_ALLOWED_CHAR, true);
 			if ((ch >= '0' && ch <= '9') // digits
 					|| (ch >= 'a' && ch <= 'z') // characters
 					|| (ch >= 'A' && ch <= 'Z') || user_SearchKey_Allowed_Char)
