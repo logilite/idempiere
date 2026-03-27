@@ -1993,6 +1993,26 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	 */
 	public static boolean setVariable(int AD_Column_ID, String value, int displayType, PO po, MWFNode node, String trxName) throws Exception
 	{
+		return setVariable(AD_Column_ID, value, displayType, po, node, trxName, true);
+	}
+
+	/**
+	 * Sets a column value on a persistent object after converting the input based
+	 * on its display type. Validates foreign keys and ensures the value is saved
+	 * correctly.
+	 *
+	 * @param AD_Column_ID the ID of the column to update
+	 * @param value the raw input value to assign
+	 * @param displayType the display type used to interpret the value
+	 * @param po the PO to update
+	 * @param node workflow node
+	 * @param trxName the transaction
+	 * @param isSavePO 
+	 * @return true if the value was successfully set and verified
+	 * @throws Exception if the object is invalid, the value is invalid, or the update fails
+	 */
+	public static boolean setVariable(int AD_Column_ID, String value, int displayType, PO po, MWFNode node, String trxName, boolean isSavePO) throws Exception
+	{
 		if (po == null)
 			throw new Exception("Persistent Object not found ");
 
@@ -2082,14 +2102,17 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 								+ " - Value=" + value + " error : " + CLogger.retrieveErrorString("check logs"));
 		}
 
-		po.saveEx(); // persist change
+		if (isSavePO)
+		{
+			po.saveEx(); // persist change
 
-		// Verify the saved value matches what was written
-		Object savedValue = po.get_ValueOfColumn(AD_Column_ID);
-		if (dbValue != null && savedValue != null && !valuesMatch(dbValue, savedValue))
-			throw new Exception("Persistent Object not updated - AD_Table_ID="
-								+ po.get_Table_ID() + ", Record_ID=" + po.get_ID()
-								+ " - Should=" + value + ", Is=" + po.get_ValueOfColumn(AD_Column_ID));
+			// Verify the saved value matches what was written
+			Object savedValue = po.get_ValueOfColumn(AD_Column_ID);
+			if (dbValue != null && savedValue != null && !valuesMatch(dbValue, savedValue))
+				throw new Exception("Persistent Object not updated - AD_Table_ID="
+									+ po.get_Table_ID() + ", Record_ID=" + po.get_ID()
+									+ " - Should=" + value + ", Is=" + po.get_ValueOfColumn(AD_Column_ID));
+		}
 
 		return true;
 	}

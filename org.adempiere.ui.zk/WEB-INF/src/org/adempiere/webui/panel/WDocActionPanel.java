@@ -81,8 +81,6 @@ import org.compiere.wf.MWFNode;
 import org.compiere.wf.MWFNodeVar;
 import org.compiere.wf.MWFProcess;
 import org.compiere.wf.MWFResponsible;
-import org.zkoss.zk.ui.Desktop;
-import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -186,8 +184,6 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	/** Active roles assigned to substitute users. */
 	private final Set <Integer>		substituteRoleIDs	= new HashSet <>();
 
-	/** Workflow transaction instance used for node variable updates. */
-	private Trx						wfTrx							= null;
 	/** Workflow transaction name. */
 	private String					wfTrxName						= null;
 
@@ -719,23 +715,12 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 					}
 					valMap = nodeVarForm.getValuesMap();
 				}
-	
+
+				wfTrxName = Trx.createTrxName("FWFA");
 				if (isWFActivity())
 				{
-					Trx trx = Trx.get(Trx.createTrxName("FWFA"), true);
-					try
-					{
-						m_activity.set_TrxName(trx.getTrxName());
-					}
-					catch (Exception e)
-					{
-						// The transaction is already rolled back in setNodeVarValue if there is an error.
-						Throwable error = e.getCause();
-						logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
-						Dialog.error(m_WindowNo, "Error", error != null ? error.getLocalizedMessage() : e.getLocalizedMessage());
-						return;
-					}
-
+					setNodeVarValueInPO(false);
+					m_activity.set_TrxName(wfTrxName);
 					future = Adempiere.getThreadPoolExecutor().submit(new DesktopRunnable(new DocActionDialogRunnable(), getDesktop()));
 				}
 				else
@@ -835,8 +820,6 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 			MWFNode node = m_activity.getNode();
 			String textMsg = fTextMsg.getValue();
-
-			setNodeVarValue();
 
 			if (MWFNode.ACTION_UserChoice.equals(node.getAction()))
 			{
@@ -1011,21 +994,20 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	 * Sets workflow node variables based on the values provided in valMap.
 	 * Resolves context, transaction, PO, and workflow node, then assigns variables using MWFActivity.
 	 * Throws AdempiereException if any variable assignment fails.
+	 * @param isSavePO 
 	 * 
 	 * @return {@code true} if variables are processed, {@code false} if no values exist
 	 */
-	public boolean setNodeVarValue()
+	public boolean setNodeVarValueInPO(boolean isSavePO)
 	{
 		if (valMap == null)
 			return false;
 
-		wfTrxName = (m_activity != null && !Util.isEmpty(m_activity.get_TrxName())) ? m_activity.get_TrxName() : Trx.createTrxName("FWFA");
-		wfTrx = Trx.get(wfTrxName, true); // create new trx if needed
 		try
 		{
 			Properties ctx = m_activity != null ? m_activity.getCtx() : Env.getCtx();
 
-			PO po = m_activity != null ? m_activity.getPO(wfTrx) : MTable.get(ctx, m_AD_Table_ID).getPO(gridTab.getRecord_ID(), wfTrxName);
+			PO po = m_activity != null ? m_activity.getPO(Trx.get(wfTrxName, false)) : MTable.get(ctx, m_AD_Table_ID).getPO(gridTab.getRecord_ID(), wfTrxName);
 
 			MWFNode node = null;
 
@@ -1046,9 +1028,11 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			for (Entry <Integer, String> colValue : valMap.entrySet())
 			{
 				MColumn col = MColumn.get(ctx, colValue.getKey());
-
-				MWFActivity.setVariable(colValue.getKey(), colValue.getValue(), col.getAD_Reference_ID(), po, node, wfTrxName);
+				MWFActivity.setVariable(colValue.getKey(), colValue.getValue(), col.getAD_Reference_ID(), po, node, wfTrxName, isSavePO);
 			}
+
+			if (!isSavePO)
+				po.saveEx();
 		}
 		catch (Exception e)
 		{
@@ -1065,8 +1049,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	 */
 	public void commitNodeVar( )
 	{
-		if (wfTrx != null)
+		if (wfTrxName != null)
 		{
+			Trx wfTrx = Trx.get(wfTrxName, false);
 			try
 			{
 				wfTrx.commit();
@@ -1092,8 +1077,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	 */
 	public void rollbackNodeVar( )
 	{
-		if (wfTrx != null)
+		if (wfTrxName != null)
 		{
+			Trx wfTrx = Trx.get(wfTrxName, false);
 			try
 			{
 				wfTrx.rollback();
@@ -1326,4 +1312,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			}		
 		}
 	}// DocActionDialogRunnable
+
+	public String getWfTrxName( )
+	{
+		return wfTrxName;
+	}
 }
