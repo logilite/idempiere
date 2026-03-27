@@ -263,8 +263,11 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 
 			if (!isHasValidAction)
 			{
-				String msg = Msg.getMsg(Env.getCtx(), "NoNextTransitionForNode", new Object[] { currentNode.getName() });
-				Dialog.error(gridTab.getWindowNo(), msg);
+				if (!fromMenu)
+				{
+					String msg = Msg.getMsg(Env.getCtx(), "NoNextTransitionForNode", new Object[] { currentNode.getName() });
+					Dialog.error(gridTab.getWindowNo(), msg);
+				}
 				return;
 			}
 		}
@@ -292,7 +295,8 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 				msg.append(resp.getAD_User().getName());
 			}
 			// If Activity already suspended then show error
-			Dialog.error(gridTab.getWindowNo(), msg.toString(), m_activity.toStringX());
+			if (!fromMenu)
+				Dialog.error(gridTab.getWindowNo(), msg.toString(), m_activity.toStringX());
 			return;
 		}
 		readReference();
