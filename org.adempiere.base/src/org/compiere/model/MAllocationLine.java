@@ -287,7 +287,8 @@ public class MAllocationLine extends X_C_AllocationLine
 		if (C_Payment_ID != 0)
 		{
 			MPayment payment=(MPayment) MTable.get(getCtx(), MPayment.Table_ID).getPO(C_Payment_ID,get_TrxName());
-			if (getC_BPartner_ID() != payment.getC_BPartner_ID())
+			if (    getC_BPartner_ID() != payment.getC_BPartner_ID() 
+				&& !MBPRelation.canPay(getCtx(), payment.getC_BPartner_ID(), getC_BPartner_ID(), get_TrxName()))
 				log.warning("C_BPartner_ID different - Invoice=" + getC_BPartner_ID() + " - Payment=" + payment.getC_BPartner_ID());
 			if (reverse)
 			{

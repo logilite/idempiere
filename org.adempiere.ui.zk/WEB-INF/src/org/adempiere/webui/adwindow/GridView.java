@@ -1670,7 +1670,7 @@ public class GridView extends Vlayout implements EventListener<Event>, IdSpace, 
 	 * after movement between Header and DetailPane panel).<br/>
 	 * Re-position paging component.
 	 */
-	protected void onADTabPanelParentChanged() {
+	public void onADTabPanelParentChanged() {
 		positionPagingControl();
 	}
 

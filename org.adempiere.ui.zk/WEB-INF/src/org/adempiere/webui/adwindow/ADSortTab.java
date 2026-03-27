@@ -1174,5 +1174,13 @@ public class ADSortTab extends Panel implements IADTabpanel
 	{
 
 	}
-
+    /**
+     * Get window number
+     * @return windowNo
+     */
+    @Override
+    public int getWindowNo()
+    {
+        return m_WindowNo;
+    }
 }	//ADSortTab

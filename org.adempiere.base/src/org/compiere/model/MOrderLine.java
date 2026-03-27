@@ -925,7 +925,14 @@ public class MOrderLine extends X_C_OrderLine
 			log.saveError("Error", Msg.getMsg(getCtx(), "FreightOrderLineNotAllowed"));
 			return false;
 		}
-		
+
+		// See IDEMPIERE-6749 - price list including taxes combined with summary taxes are wrongly calculated
+		// forbid this operation until solved
+		if (isTaxIncluded() && getTax().isSummary()) {
+			log.saveError("Error", Msg.getMsg(getCtx(), "PriceListIncludingTaxWithSummaryTaxNotAllowed"));
+			return false;
+		}
+
 		return true;
 	}	//	beforeSave
 	

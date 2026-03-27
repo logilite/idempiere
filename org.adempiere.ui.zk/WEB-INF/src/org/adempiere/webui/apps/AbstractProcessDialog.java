@@ -79,6 +79,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
+import org.idempiere.db.util.SQLFragment;
 import org.zkoss.zk.au.out.AuEcho;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Desktop;
@@ -254,7 +255,7 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 		m_pi.setAD_Process_UU(m_AD_Process_UU);
 		
 		parameterPanel = new ProcessParameterPanel(m_WindowNo, m_TabNo, m_pi);
-		if ( !parameterPanel.init() ) {
+		if ( !parameterPanel.init(m_ShowHelp) ) {
 			//auto start if no parameters and DonTShowHelp.
 			if (m_ShowHelp != null && MProcess.SHOWHELP_DonTShowHelp.equals(m_ShowHelp))
 				autoStart = true;
@@ -875,19 +876,22 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 		if (fSavedName.getSelectedIndex() > -1 && savedParams != null) {
 			for (int i = 0; i < savedParams.size(); i++) {
 				if (savedParams.get(i).getName().equals(saveName)) {
-					getProcessInfo().setAD_PInstance_ID(savedParams.get(i)
-							.getAD_PInstance_ID());
-					for (MPInstancePara para : savedParams.get(i)
-							.getParameters()) {
-						para.deleteEx(true);
+					int currentPInstance_ID = getProcessInfo().getAD_PInstance_ID();
+					try {
+						getProcessInfo().setAD_PInstance_ID(savedParams.get(i)
+								.getAD_PInstance_ID());
+						for (MPInstancePara para : savedParams.get(i)
+								.getParameters()) {
+							para.deleteEx(true);
+						}
+						getParameterPanel().saveParameters();
+						
+						saveReportOptionToInstance(savedParams.get(i));
+						
+						savedParams.get(i).saveEx();
+					} finally {
+						getProcessInfo().setAD_PInstance_ID(currentPInstance_ID);
 					}
-					getParameterPanel().saveParameters();
-					
-					saveReportOptionToInstance(savedParams.get(i));
-					
-					savedParams.get(i).saveEx();
-					
-					getProcessInfo().setAD_PInstance_ID(0);
 				}
 			}
 		}
@@ -1464,6 +1468,13 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 	@Override
 	public void showInfoWindow(int WindowNo, String tableName, String keyColumn, String queryValue,
 			boolean multipleSelection, String whereClause, Integer AD_InfoWindow_ID, boolean lookup) {
+		showInfoWindow(WindowNo, tableName, keyColumn, queryValue, multipleSelection, AD_InfoWindow_ID, lookup, 
+				whereClause == null ? null : new SQLFragment(whereClause));
+	}
+	
+	@Override
+	public void showInfoWindow(int WindowNo, String tableName, String keyColumn, String queryValue,
+			boolean multipleSelection, Integer AD_InfoWindow_ID, boolean lookup, SQLFragment sqlFilter) {
 
 		if (AD_InfoWindow_ID <= 0)
 			return;
@@ -1473,7 +1484,7 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 			public void run() {
 				try {
 					Window win = new InfoWindow(WindowNo, tableName, keyColumn, queryValue, multipleSelection,
-							whereClause, AD_InfoWindow_ID, lookup);
+							AD_InfoWindow_ID, lookup, sqlFilter);
 
 					SessionManager.getAppDesktop().showWindow(win, "center");
 				} catch (Exception e) {

@@ -55,6 +55,7 @@ import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.model.POResultSet;
 import org.compiere.model.SystemIDs;
+import org.idempiere.db.util.SQLFragment;
 
 /**
  *  Static methods for JDBC interface
@@ -651,8 +652,8 @@ public final class DB
 			pstmt.setArray(index, buildDBArray(param));
 		else if (param instanceof String[])
 			pstmt.setArray(index, buildDBArray(param));
-		else
-			throw new DBException("Unknown parameter type "+index+" - "+param);
+		else //let jdbc driver handle the rest of types
+			pstmt.setObject(index, param);
 	}
 
 	/**
@@ -1712,6 +1713,20 @@ public final class DB
 	 */
 	public static boolean isSOTrx (String TableName, String whereClause, int windowNo)
 	{
+		return isSOTrx (TableName, whereClause, windowNo, List.of());
+	}
+	
+	/**
+	 * 	Is Sales Order Trx.<br/>
+	 * 	Assumes Sales Order. Query IsSOTrx value of table with where clause
+	 *	@param TableName table
+	 *	@param whereClause where clause
+	 *  @param windowNo
+	 *  @param params list of parameters
+	 *	@return true (default) or false if tested that not SO
+	 */
+	public static boolean isSOTrx (String TableName, String whereClause, int windowNo, List<Object> params)
+	{
         if (TableName == null || TableName.length() == 0)
         {
             log.severe("No TableName");
@@ -1735,6 +1750,9 @@ public final class DB
         	try
         	{
         		pstmt = DB.prepareStatement (sql, null);
+        		if (params != null && !params.isEmpty()) {
+					setParameters(pstmt, params);
+				}
         		rs = pstmt.executeQuery ();
         		if (rs.next ())
         			isSOTrx = Boolean.valueOf("Y".equals(rs.getString(1)));
@@ -1800,8 +1818,20 @@ public final class DB
 	 * @param whereClause
 	 * @return true (default) or false if tested that not SO
 	 */
-	public static boolean isSOTrx (String TableName, String whereClause) {
-		return isSOTrx (TableName, whereClause, -1);
+	public static boolean isSOTrx (String TableName, String whereClause)
+	{
+		return isSOTrx (TableName, whereClause, List.of());
+	}
+	
+	/**
+	 * Delegate to {@link #isSOTrx(String, String, int)} with -1 for windowNo parameter.
+	 * @param TableName
+	 * @param whereClause
+	 * @param params list of parameters
+	 * @return true (default) or false if tested that not SO
+	 */
+	public static boolean isSOTrx (String TableName, String whereClause, List<Object> params) {
+		return isSOTrx (TableName, whereClause, -1, params);
 	}
 
 	/**
@@ -2757,7 +2787,9 @@ public final class DB
 	 * @param columnName
 	 * @param csv comma separated value
 	 * @return IN clause
+	 * @deprecated use inFilterForCSV instead
 	 */
+	@Deprecated(since="13", forRemoval=true)
 	public static String inClauseForCSV(String columnName, String csv) 
 	{
 		return inClauseForCSV(columnName, csv, false);
@@ -2767,9 +2799,22 @@ public final class DB
 	 * Create IN clause for csv value
 	 * @param columnName
 	 * @param csv comma separated value
-	 * @param isNotClause true to append NOT before IN
 	 * @return IN clause
 	 */
+	public static SQLFragment inFilterForCSV(String columnName, String csv) 
+	{
+		return inFilterForCSV(columnName, csv, false);
+	}
+	
+	/**
+	 * Create IN clause for csv value
+	 * @param columnName
+	 * @param csv comma separated value
+	 * @param isNotClause true to append NOT before IN
+	 * @return IN clause
+	 * @deprecated use inFilterForCSV instead
+	 */
+	@Deprecated(since="13", forRemoval=true)
 	public static String inClauseForCSV(String columnName, String csv, boolean isNotClause) 
 	{
 		StringBuilder builder = new StringBuilder();
@@ -2825,11 +2870,66 @@ public final class DB
 	} // inClauseForCSV
 
 	/**
+	 * Create IN clause for csv value
+	 * @param columnName
+	 * @param csv
+	 * @param isNotClause
+	 * @return sql filter with IN clause
+	 */
+	public static SQLFragment inFilterForCSV(String columnName, String csv, boolean isNotClause) 
+	{
+		StringBuilder builder = new StringBuilder();
+		builder.append(columnName);
+		List<Object> params = new ArrayList<>();
+		
+		if(isNotClause)
+			builder.append(" NOT");
+		
+		builder.append(" IN (");
+		String[] values = csv.split("[,]");
+		for(int i = 0; i < values.length; i++)
+		{
+			String key = values[i];
+			if (i > 0)
+				builder.append(",");
+			if ("null".equalsIgnoreCase(key.trim())) {
+				builder.append("NULL");
+				continue;
+			}						
+			if (columnName.endsWith("_ID")) 
+			{
+				params.add(Integer.valueOf(key.trim()));
+			}
+			else
+			{
+				if (key.startsWith("\"") && key.endsWith("\"")) 
+				{
+					key = key.substring(1, key.length()-1);
+				}
+				//empty string means NULL in this context
+				if (Util.isEmpty(key)) {
+					builder.append("NULL");
+					continue;
+				} else {
+					params.add(key);
+				}
+			}
+			builder.append("?");
+		}
+		builder.append(")");
+		return new SQLFragment(builder.toString(), params);
+	}
+	
+	
+	/**
 	 * Create subset clause for csv value (i.e columnName is a subset of the csv value set)
 	 * @param columnName
 	 * @param csv
 	 * @return subset sql clause
+	 * @deprecated use subsetFilterForCSV instead
 	 */
+	@SuppressWarnings("removal")
+	@Deprecated(since="13", forRemoval=true)
 	public static String subsetClauseForCSV(String columnName, String csv)
 	{
 		return getDatabase().subsetClauseForCSV(columnName, csv);
@@ -2840,7 +2940,9 @@ public final class DB
 	 * @param columnName
 	 * @param csv
 	 * @return intersect sql clause
+	 * @deprecated use intersectFilterForCSV instead
 	 */
+	@Deprecated(since="13", forRemoval=true)
 	public static String intersectClauseForCSV(String columnName, String csv)
 	{
 		return intersectClauseForCSV(columnName, csv, false);
@@ -2850,12 +2952,38 @@ public final class DB
 	 * Create intersect clause for csv value (i.e columnName is an intersect with the csv value set)
 	 * @param columnName
 	 * @param csv
-	 * @param isNotClause true to append NOT before the intersect clause
 	 * @return intersect sql clause
 	 */
+	public static SQLFragment intersectFilterForCSV(String columnName, String csv)
+	{
+		return intersectFilterForCSV(columnName, csv, false);
+	}
+	
+	/**
+	 * Create intersect clause for csv value (i.e columnName is an intersect with the csv value set)
+	 * @param columnName
+	 * @param csv
+	 * @param isNotClause true to append NOT before the intersect clause
+	 * @return intersect sql clause
+	 * @deprecated use intersectFilterForCSV instead
+	 */
+	@SuppressWarnings("removal")
+	@Deprecated(since="13", forRemoval=true)
 	public static String intersectClauseForCSV(String columnName, String csv, boolean isNotClause)
 	{
 		return getDatabase().intersectClauseForCSV(columnName, csv, isNotClause);
+	}
+	
+	/**
+	 * Create intersect clause for csv value (i.e columnName is an intersect with the csv value set)
+	 * @param columnName
+	 * @param csv
+	 * @param isNotClause
+	 * @return intersect sql clause
+	 */
+	public static SQLFragment intersectFilterForCSV(String columnName, String csv, boolean isNotClause)
+	{
+		return getDatabase().intersectFilterForCSV(columnName, csv, isNotClause);
 	}
 	
 	/**
