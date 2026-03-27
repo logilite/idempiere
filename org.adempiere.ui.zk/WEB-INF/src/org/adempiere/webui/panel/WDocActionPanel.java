@@ -263,17 +263,20 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 
 			if (!isHasValidAction)
 			{
-				if (!fromMenu)
-				{
-					String msg = Msg.getMsg(Env.getCtx(), "NoNextTransitionForNode", new Object[] { currentNode.getName() });
-					Dialog.error(gridTab.getWindowNo(), msg);
-				}
+				if (fromMenu)
+					return;
+
+				String msg = Msg.getMsg(Env.getCtx(), "NoNextTransitionForNode", new Object[] { currentNode.getName() });
+				Dialog.error(gridTab.getWindowNo(), msg);
 				return;
+
 			}
 		}
 
 		if (!isValidApprover()) {
-			
+			if (fromMenu)
+				return;
+
 			StringBuilder msg = new StringBuilder(Msg.getMsg(Env.getCtx(), "AssignedToState", new Object[] { m_activity.getWFStateText(), m_activity.getNode().getName() }));
 			if (resp.isRole())
 			{
@@ -295,8 +298,7 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 				msg.append(resp.getAD_User().getName());
 			}
 			// If Activity already suspended then show error
-			if (!fromMenu)
-				Dialog.error(gridTab.getWindowNo(), msg.toString(), m_activity.toStringX());
+			Dialog.error(gridTab.getWindowNo(), msg.toString(), m_activity.toStringX());
 			return;
 		}
 		readReference();
