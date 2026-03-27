@@ -263,14 +263,20 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 
 			if (!isHasValidAction)
 			{
+				if (fromMenu)
+					return;
+
 				String msg = Msg.getMsg(Env.getCtx(), "NoNextTransitionForNode", new Object[] { currentNode.getName() });
 				Dialog.error(gridTab.getWindowNo(), msg);
 				return;
+
 			}
 		}
 
 		if (!isValidApprover()) {
-			
+			if (fromMenu)
+				return;
+
 			StringBuilder msg = new StringBuilder(Msg.getMsg(Env.getCtx(), "AssignedToState", new Object[] { m_activity.getWFStateText(), m_activity.getNode().getName() }));
 			if (resp.isRole())
 			{
