@@ -41,6 +41,7 @@ import org.adempiere.webui.component.ConfirmPanel;
 import org.adempiere.webui.component.Datebox;
 import org.adempiere.webui.component.Grid;
 import org.adempiere.webui.component.GridFactory;
+import org.adempiere.webui.component.Listbox;
 import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.Row;
 import org.adempiere.webui.component.Rows;
@@ -78,6 +79,7 @@ import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
 import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFNode;
+import org.compiere.wf.MWFNodeNext;
 import org.compiere.wf.MWFNodeVar;
 import org.compiere.wf.MWFProcess;
 import org.compiere.wf.MWFResponsible;
@@ -87,7 +89,6 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Label;
-import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Space;
 import org.zkoss.zul.Vlayout;
@@ -95,7 +96,7 @@ import org.zkoss.zul.Vlayout;
 /**
  * Document action dialog
  */
-public class WDocActionPanel extends Window implements EventListener<Event>, DialogEvents
+public class WDocActionPanel extends Window implements EventListener <Event>, DialogEvents
 {
 	/**
 	 * generated serial id
@@ -133,6 +134,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 	private Label lblAnswer;
 	private Listbox lstAnswer;
+	private Label lblAction;
+	private Listbox lstAction;
 	private Label lTextMsg = new Label(Msg.getMsg(Env.getCtx(), "Messages"));
 	private Textbox fTextMsg = new Textbox();
 	
@@ -153,6 +156,12 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 	/** Current Activity */
 	private MWFActivity m_activity = null;
+
+	private MWFNode					currentNode						= null;
+
+	private int						ApprovalColumn_ID				= 0;
+
+	private boolean					isHasValidAction				= false;
 
 	/** Current WF Process */
 	private MWFProcess m_WFProcess = null;
@@ -176,6 +185,8 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	private Future <?>				future;
 	
 	private WFNodeVarForm			nodeVarForm;
+	
+	private Row						rowAction;
 	
 	private Map <Integer, String>	valMap;
 	
@@ -239,6 +250,28 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		
 		loadSubstituteDetails();
 
+		if (m_activity != null && isShowTransitionsAsOptions())
+		{
+			MWFNodeNext[] mwfNodeNexts = currentNode.getTransitions(Env.getAD_Client_ID(Env.getCtx()));
+			if (mwfNodeNexts != null && mwfNodeNexts.length >= 1)
+			{
+				for (MWFNodeNext nodeNext : mwfNodeNexts)
+				{
+					// Is this a valid transition?
+					if (!nodeNext.isValidFor(m_activity))
+						continue;
+					isHasValidAction = true;
+				}
+			}
+
+			if (!isHasValidAction)
+			{
+				String msg = Msg.getMsg(Env.getCtx(), "NoNextTransitionForNode", new Object[] { currentNode.getName() });
+				Dialog.error(gridTab.getWindowNo(), msg);
+				return;
+			}
+		}
+
 		if (!isValidApprover()) {
 			
 			StringBuilder msg = new StringBuilder(Msg.getMsg(Env.getCtx(), "AssignedToState", new Object[] { m_activity.getWFStateText(), m_activity.getNode().getName() }));
@@ -270,6 +303,28 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		dynInit(fromMenu);
 
 		init();
+	}
+
+	/**
+	 * Validates whether transition options can be safely shown for the current node.  
+	 * Returns true if:
+	 * - there is no current node, or  
+	 * - the node is not configured to show transitions as options, or  
+	 * - at least one valid transition option exists.  
+	 */
+	public boolean isShowTransitionsAsOptionsValid( )
+	{
+		return currentNode == null || !currentNode.isShowTransitionsAsAction() || isHasValidAction;
+	}
+	
+	/**
+	 * Checks whether the current workflow node is configured to display
+	 * its transitions as selectable options in the UI.
+	 * Returns true if the node exists and has this configuration enabled.
+	 */
+	private boolean isShowTransitionsAsOptions( )
+	{
+		return currentNode != null && currentNode.isShowTransitionsAsAction();
 	}
 
 	/**
@@ -500,61 +555,89 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		lstAnswer.setVisible(false);
 		lblAnswer.setVisible(false);
 		ZKUpdateUtil.setWidth(lstAnswer, "100%");
-//		lstAnswer.appendItem("", "");
-//		lstAnswer.appendItem("Yes", "Y");
-//		lstAnswer.appendItem("No", "N");
-//		lstAnswer.addEventListener(Events.ON_SELECT, this);
 		
-		if (m_activity != null && (m_activity.isUserApproval() || m_activity.isUserTask()))
+		lblAction = new Label(Msg.getMsg(Env.getCtx(), "Action"));
+		lblAction.setVisible(false);
+		lstAction = new Listbox();
+		lstAction.setRows(0);
+		lstAction.setMold("select");
+		lstAction.setVisible(false);
+		ZKUpdateUtil.setWidth(lstAction, "100%");
+		
+		if (isActUserApprovalTask() && ApprovalColumn_ID >0)
 		{
-			MWFNode node = m_activity.getNode();
-			int ApprovalColumn_ID = 0;
+			MColumn column = MColumn.get(Env.getCtx(), ApprovalColumn_ID);
+			int dt = column.getAD_Reference_ID();
 
-			if (node.getAD_Column_ID() == 0)
-				ApprovalColumn_ID = node.getApprovalColumn_ID();
-			else
-				ApprovalColumn_ID = node.getAD_Column_ID();
-
-			if (ApprovalColumn_ID >0)
+			if (dt == DisplayType.YesNo)
 			{
-				MColumn column = MColumn.get(Env.getCtx(), ApprovalColumn_ID);
-				int dt = column.getAD_Reference_ID();
-
-				if (dt == DisplayType.YesNo)
+				ValueNamePair[] values = MRefList.getList(Env.getCtx(), 319, false);
+				for (int i = 0; i < values.length; i++)
 				{
-					ValueNamePair[] values = MRefList.getList(Env.getCtx(), 319, false);
-					for (int i = 0; i < values.length; i++)
-					{
-						lstAnswer.appendItem(values[i].getName(), values[i].getValue());
-					}
-					lstAnswer.setVisible(true);
-					lblAnswer.setVisible(true);
+					lstAnswer.appendItem(values[i].getName(), values[i].getValue());
 				}
-				else if (dt == DisplayType.List)
+				lstAnswer.setVisible(true);
+				lblAnswer.setVisible(true);
+			}
+			else if (dt == DisplayType.List)
+			{
+				String validationCode = column.getAD_Val_Rule_ID() > 0 && column.getAD_Val_Rule() != null ? column.getAD_Val_Rule().getCode() : "";
+				if (!Util.isEmpty(validationCode))
 				{
-					String validationCode = column.getAD_Val_Rule_ID() > 0 && column.getAD_Val_Rule() != null ? column.getAD_Val_Rule().getCode() : "";
-					if (!Util.isEmpty(validationCode))
-					{
-						if (gridTab != null)
-							validationCode = Env.parseContext(Env.getCtx(), gridTab.getWindowNo(), gridTab.getTabNo(), validationCode, false);
-						else
-							validationCode = Env.parseContext(Env.getCtx(), m_WindowNo, 0, validationCode, false);
-					}
-					ValueNamePair[] values = MRefList.getList(Env.getCtx(), column.getAD_Reference_Value_ID(), false, validationCode, "D");
-					for (int i = 0; i < values.length; i++)
-					{
-						lstAnswer.appendItem(values[i].getName(), values[i].getValue());
-					}
-					lstAnswer.setVisible(true);
-					lblAnswer.setVisible(true);
+					if (gridTab != null)
+						validationCode = Env.parseContext(Env.getCtx(), gridTab.getWindowNo(), gridTab.getTabNo(), validationCode, false);
+					else
+						validationCode = Env.parseContext(Env.getCtx(), m_WindowNo, 0, validationCode, false);
 				}
+				ValueNamePair[] values = MRefList.getList(Env.getCtx(), column.getAD_Reference_Value_ID(), false, validationCode, "D");
+				for (int i = 0; i < values.length; i++)
+				{
+					lstAnswer.appendItem(values[i].getName(), values[i].getValue());
+				}
+				lstAnswer.setVisible(true);
+				lblAnswer.setVisible(true);
 			}
 		}
 		lstAnswer.addEventListener(Events.ON_SELECT, this);
+		lstAction.addEventListener(Events.ON_SELECT, this);
 
 		confirmPanel = new ConfirmPanel(true);
 		confirmPanel.addActionListener(Events.ON_CLICK, this);
 		ZKUpdateUtil.setVflex(confirmPanel, "true");
+	}
+
+	private void loadAction(MWFNode node)
+	{
+		lstAction.removeAllItems();
+		updateNextNodeOption(null);
+
+		MWFNodeNext[] mwfNodeNexts = node.getTransitions(Env.getAD_Client_ID(Env.getCtx()));
+		if (mwfNodeNexts != null && mwfNodeNexts.length >= 1)
+		{
+			for (MWFNodeNext nodeNext : mwfNodeNexts)
+			{
+				// Is this a valid transition?
+				if (!nodeNext.isValidFor(m_activity))
+					continue;
+
+				lstAction.appendItem(nodeNext.getName(), nodeNext.getValue());
+			}
+		}
+
+		lblAction.setVisible(isHasValidAction);
+		lstAction.setVisible(isHasValidAction);
+		rowAction.setVisible(isHasValidAction);
+		confirmPanel.getButton("Ok").setEnabled(currentNode == null || !(currentNode.isShowTransitionsAsAction() && lstAction.getSelectedItem() == null));
+
+		updateNextNodeOption(lstAction.getSelectedItem() != null ? lstAction.getSelectedItem().getValue() : null);
+	}
+
+	private void updateNextNodeOption(String newValue)
+	{
+		if (nodeVarForm != null)
+			Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), MWFActivity.WF_Activity_Next_Node_Action, newValue);
+		if (m_activity != null && m_activity.getPO() != null)
+			m_activity.getPO().set_Attribute(MWFActivity.WF_Activity_Next_Node_Action, newValue);
 	}
 
 	/**
@@ -582,38 +665,48 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		Row rowUser = new Row();
 		Row rowAnswer = new Row();
 		Row rowTxtMsg = new Row();
+		rowAction = new Row();
 		
 		Row nodeVarRow = new Row();
 		Div nodeVarDiv = new Div();
-		MWFNode node = null;
 		nodeVarForm = null;
-		if (m_activity != null)
-		{
-			node = m_activity.getNode();
-		}
-		else if(org.compiere.process.DocAction.STATUS_Drafted.equals(DocStatus) && m_Process_ID > 0)
-		{
-			// Currently it only works for the DR state, because when the activity isn’t created yet, we don’t know which node will run.
-			MProcess pr = new MProcess(Env.getCtx(), m_Process_ID, null);
-			node = (MWFNode) pr.getAD_Workflow().getAD_WF_Node();
-		}
 		
 		int colSpan = 1;
-		if (node != null)
+		if (currentNode != null)
 		{
-			List <MColumn> colms = MWFNodeVar.getNodeVarsColumns(node.getCtx(), node.getAD_WF_Node_ID());
+			List <MColumn> colms = MWFNodeVar.getNodeVarsColumns(currentNode.getCtx(), currentNode.getAD_WF_Node_ID());
 			if (colms != null && !colms.isEmpty())
 			{
 				PO po = m_activity == null ? MTable.get(gridTab.getAD_Table_ID()).getPO(gridTab.getRecord_ID(), null) : m_activity.getPO();
-				nodeVarForm = new WFNodeVarForm(node, colms, po, gridTab);
-				if (lstDocAction != null && lstDocAction.getSelectedItem() != null)
-					Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), "DocAction", s_value[getSelectedIndex()]);
+				nodeVarForm = new WFNodeVarForm(currentNode, colms, po, gridTab);
 				nodeVarForm.setHeight(nodeVarForm.getHeight());
 				nodeVarDiv.setHeight(nodeVarForm.getHeight());
 				nodeVarDiv.appendChild(nodeVarForm);
-				nodeVarForm.dynamicDisplay();
 				ZKUpdateUtil.setWidth(nodeVarDiv, "100%");
 				colSpan = 3;
+
+				// Check if the answer list is visible in the UI
+				// Store selected value in the workflow context using column name
+				if (lstAnswer.isVisible() && ApprovalColumn_ID > 0)
+				{
+					MColumn column = MColumn.get(Env.getCtx(), ApprovalColumn_ID);
+					Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), column.getColumnName(), (String) lstAnswer.getValue());
+				}
+
+				// Set the selected document action in the context if available
+				if (lstDocAction != null && lstDocAction.getSelectedItem() != null)
+					Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), "DocAction", s_value[getSelectedIndex()]);
+
+				// If workflow node is configured to show transitions as options,
+				// load available transition options
+				if (currentNode.isShowTransitionsAsAction())
+					loadAction(currentNode);
+
+				nodeVarForm.dynamicDisplay();
+			}
+			else if (currentNode.isShowTransitionsAsAction())
+			{
+				loadAction(currentNode);
 			}
 		}
 		nodeVarRow.appendCellChild(nodeVarDiv, colSpan);
@@ -629,6 +722,12 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		rowUser.appendCellChild(lblUser, 1);
 		rowUser.appendChild(fApprover.getComponent());
 		rowUser.appendCellChild(new Space());
+
+		// Option
+		rowAction.appendCellChild(lblAction);
+		rowAction.appendCellChild(lstAction);
+		rowAction.appendCellChild(new Space());
+		rowAction.setVisible(lstAction.isVisible());
 
 		// Answer
 		rowAnswer.appendCellChild(lblAnswer);
@@ -656,9 +755,13 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		rowLabel.appendCellChild(label, colSpan);
 		rowSpacer.appendCellChild(new Space(), colSpan);
 
-		if (m_activity != null && (m_activity.isUserApproval() || m_activity.isUserTask()))
+		if (isActUserApprovalTask() || isCurNodeUserApprovalTask())
 		{
-			rows.appendChild(rowAnswer);
+			if (isShowTransitionsAsOptions())
+				rows.appendChild(rowAction);
+			else
+				rows.appendChild(rowAnswer);
+
 			rows.appendChild(rowTxtMsg);
 		}
 		else
@@ -753,7 +856,6 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		}
 		else if (Events.ON_SELECT.equals(eventName))
 		{
-
 			if (lstDocAction.equals(event.getTarget()))
 			{
 				label.setValue(s_description[getSelectedIndex()]);
@@ -768,14 +870,6 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			{
 				if (nodeVarForm != null && m_activity != null)
 				{
-					MWFNode node = m_activity.getNode();
-					int ApprovalColumn_ID = 0;
-
-					if (node.getAD_Column_ID() == 0)
-						ApprovalColumn_ID = node.getApprovalColumn_ID();
-					else
-						ApprovalColumn_ID = node.getAD_Column_ID();
-
 					if (ApprovalColumn_ID > 0)
 					{
 						MColumn column = MColumn.get(Env.getCtx(), ApprovalColumn_ID);
@@ -783,6 +877,16 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 						Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), column.getColumnName(), value);
 					}
 					nodeVarForm.dynamicDisplay();
+				}
+			}
+			else if (lstAction.equals(event.getTarget()))
+			{
+				if (m_activity != null)
+				{
+					updateNextNodeOption(lstAction.getSelectedItem() != null ? lstAction.getSelectedItem().getValue() : null);
+					confirmPanel.getButton("Ok").setEnabled(currentNode == null || !(currentNode.isShowTransitionsAsAction() && lstAction.getSelectedItem() == null));
+					if (nodeVarForm != null)
+						nodeVarForm.dynamicDisplay();
 				}
 			}
 		}
@@ -830,7 +934,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				if (m_column == null || node.getApprovalColumn_ID() <= 0)
 					m_column = node.getColumn();
 
-				int dt = m_column.getAD_Reference_ID();
+				int dt = m_column != null ? m_column.getAD_Reference_ID() : -1;
 
 				String value = null;
 
@@ -842,7 +946,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 						value = li.getValue().toString();
 				}
 
-				if (value == null || value.length() == 0)
+				if ((value == null || value.length() == 0) && dt > 0)
 					throw new AdempiereException("FillMandatory" + Msg.getMsg(Env.getCtx(), "Answer"));
 
 				//
@@ -925,7 +1029,26 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	 */
 	private boolean isWFActivity( )
 	{
-		return (lstAnswer.getSelectedItem() != null && lstAnswer.getSelectedItem().getValue() != null) || (m_activity != null && m_activity.isUserTask());
+		return (lstAnswer.getSelectedItem() != null && lstAnswer.getSelectedItem().getValue() != null) || (m_activity != null && (m_activity.isUserTask() || m_activity.isUserChoice()));
+	}
+
+	/**
+	 * Checks whether the current workflow activity represents a user interaction
+	 * Returns true if the activity exists and is either a user approval or user task.
+	 */
+	private boolean isActUserApprovalTask( )
+	{
+		return m_activity != null && (m_activity.isUserApproval() || m_activity.isUserTask());
+	}
+
+	/**
+	 * Checks whether the current workflow node represents a user interaction
+	 * Returns true if the node exists and is either a user approval or user task.
+	 * This is typically used as a fallback when no activity is available.
+	 */
+	private boolean isCurNodeUserApprovalTask( )
+	{
+		return currentNode != null && (currentNode.isUserApproval() || currentNode.isUserTask());
 	}
 
 	public void onOk(final Callback<Boolean> callback)
@@ -1195,6 +1318,25 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 				if (ovrResp != null)
 					resp = ovrResp;
 			}
+		}
+
+		if (m_activity != null)
+		{
+			currentNode = m_activity.getNode();
+		}
+		else if (org.compiere.process.DocAction.STATUS_Drafted.equals(DocStatus) && m_Process_ID > 0)
+		{
+			// Currently it only works for the DR state, because when the activity isn’t created yet, we don’t know which node will run.
+			MProcess pr = new MProcess(Env.getCtx(), m_Process_ID, null);
+			currentNode = (MWFNode) pr.getAD_Workflow().getAD_WF_Node();
+		}
+
+		if (isActUserApprovalTask() && currentNode != null)
+		{
+			if (currentNode.getAD_Column_ID() == 0)
+				ApprovalColumn_ID = currentNode.getApprovalColumn_ID();
+			else
+				ApprovalColumn_ID = currentNode.getAD_Column_ID();
 		}
 	}
 

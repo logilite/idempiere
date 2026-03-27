@@ -149,8 +149,7 @@ public class WFNodeVarForm extends Window implements ValueChangeListener
 				editors.add(editor);
 				editor.setReadWrite(true);
 				Object value = po.get_Value(column.getColumnName());
-				if (value != null)
-					Env.setContext(Env.getCtx(), m_WindowNo, editor.getGridField().getColumnName(), value.toString());
+				Env.setContext(Env.getCtx(), m_WindowNo, editor.getGridField().getColumnName(), value == null ? null : value.toString());
 				editor.setValue(value);
 				row.appendChild(editor.getComponent());
 				applyDynamicLogic(editor);

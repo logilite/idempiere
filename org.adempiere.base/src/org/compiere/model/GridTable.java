@@ -386,7 +386,7 @@ public class GridTable extends AbstractTableModel
 				where.append(m_whereClause);
 			else    //  replace variables
 			{
-				String context = Env.parseContext(m_ctx, m_WindowNo, m_whereClause, false);
+				String context = Env.parseContext(m_ctx, m_WindowNo, m_whereClause, false, false);
 				if(context != null && context.trim().length() > 0)
 				{
 					where.append(context);
