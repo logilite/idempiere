@@ -65,6 +65,7 @@ import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
 import org.compiere.wf.MWFActivity;
 import org.compiere.wf.MWFNode;
+import org.compiere.wf.MWFNodeNext;
 import org.compiere.wf.MWFNodeVar;
 import org.compiere.wf.MWFProcess;
 import org.zkoss.zk.ui.Component;
@@ -135,6 +136,10 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 	private ListModelTable model = null;
 	private WListbox listbox = new WListbox();
 
+	private Label					lblAction				= new Label(Msg.getMsg(Env.getCtx(), "Action"));
+	private Listbox					lstAction				= new Listbox();
+	private Row						rowAction;
+
 	private final static String HISTORY_DIV_START_TAG = "<div style='overflow-y:scroll;height: 100px; border: 1px solid #7F9DB9;'>";
 	
 	/**
@@ -154,6 +159,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
         loadActivities();
 
         fAnswerList.setMold("select");
+		lstAction.setMold("select");
 
 		if (ThemeManager.isUseFontIconForImage()) {
         	bZoom.setIconSclass(Icon.getIconSclass(Icon.ZOOM));
@@ -252,13 +258,26 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 		row.appendChild(fHistory);
 		ZKUpdateUtil.setHflex(fHistory, "true");
 
+		rowAction = new Row();
+		rowAction.setVisible(false);
+		rows.appendChild(rowAction);
+		div = new Div();
+		div.setStyle("text-align: right;");
+		div.appendChild(lblAction);
+		rowAction.appendChild(div);
+		Hbox hbox = new Hbox();
+		hbox.appendChild(lstAction);
+		ZKUpdateUtil.setHflex(lstAction, "true");
+		rowAction.appendChild(hbox);
+		lstAction.addEventListener(Events.ON_SELECT, this);
+
 		row = new Row();
 		rows.appendChild(row);
 		div = new Div();
 		div.setStyle("text-align: right;");
 		div.appendChild(lAnswer);
 		row.appendChild(div);
-		Hbox hbox = new Hbox();
+		hbox = new Hbox();
 		hbox.appendChild(fAnswerText);
 		ZKUpdateUtil.setHflex(fAnswerText, "true");
 		hbox.appendChild(fAnswerList);
@@ -365,10 +384,15 @@ public class WWFActivity extends ADForm implements EventListener<Event>
         	if (m_index >= 0)
     			display(m_index);
         }
-        else if (Events.ON_SELECT.equals(eventName) && comp == fAnswerList)
+        else if (Events.ON_SELECT.equals(eventName))
 		{
-			if (nodeVarForm != null)
+        	if(comp == fAnswerList)
 			{
+				updateNodeVarFormDisplay();
+			}
+        	else if (lstAction.equals(comp))
+			{
+				updateNextNodeOption(lstAction.getSelectedItem() != null ? lstAction.getSelectedItem().getValue() : null);
 				updateNodeVarFormDisplay();
 			}
 		}
@@ -490,6 +514,12 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 	 */
 	private MWFActivity resetDisplay(int selIndex)
 	{
+		if (nodeVarForm != null)
+			Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), MWFActivity.WF_Activity_Next_Node_Action, (String) null);
+		lstAction.removeAllItems();
+		lblAction.setVisible(false);
+		lstAction.setVisible(false);
+		rowAction.setVisible(false);
 		fAnswerText.setVisible(false);
 		fAnswerList.setVisible(false);
 		fAnswerButton.setVisible(false);
@@ -552,36 +582,49 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 		MWFNode node = m_activity.getNode();
 		if (MWFNode.ACTION_UserChoice.equals(node.getAction()) || node.isUserTask())
 		{
-			if (m_column == null)
-				m_column = (MColumn) node.getApprovalColumn();
-			if (m_column == null || node.getApprovalColumn_ID() <= 0)
-				m_column = node.getColumn();
-			if (m_column != null && m_column.get_ID() != 0)
+			loadActions(node);
+			if(!node.isShowTransitionsAsAction())
 			{
-				fAnswerList.removeAllItems();
-				int dt = m_column.getAD_Reference_ID();
-				if (dt == DisplayType.YesNo)
+				if (m_column == null)
+					m_column = (MColumn) node.getApprovalColumn();
+				if (m_column == null || node.getApprovalColumn_ID() <= 0)
+					m_column = node.getColumn();
+				if (m_column != null && m_column.get_ID() != 0)
 				{
-					ValueNamePair[] values = MRefList.getList(Env.getCtx(), 319, false);		//	_YesNo
-					for(int i = 0; i < values.length; i++)
+					fAnswerList.removeAllItems();
+					int dt = m_column.getAD_Reference_ID();
+					if (dt == DisplayType.YesNo)
 					{
-						fAnswerList.appendItem(values[i].getName(), values[i].getValue());
+						ValueNamePair[] values = MRefList.getList(Env.getCtx(), 319, false); // _YesNo
+						for (int i = 0; i < values.length; i++)
+						{
+							fAnswerList.appendItem(values[i].getName(), values[i].getValue());
+						}
+						fAnswerList.setVisible(true);
 					}
-					fAnswerList.setVisible(true);
-				}
-				else if (DisplayType.isList(dt))
-				{
-					ValueNamePair[] values = MRefList.getList(Env.getCtx(), m_column.getAD_Reference_Value_ID(), false);
-					for(int i = 0; i < values.length; i++)
+					else if (DisplayType.isList(dt))
 					{
-						fAnswerList.appendItem(values[i].getName(), values[i].getValue());
+						String validationCode = m_column.getAD_Val_Rule_ID() > 0 && m_column.getAD_Val_Rule() != null ? m_column.getAD_Val_Rule().getCode() : "";
+						if (!Util.isEmpty(validationCode))
+						{
+							if (getGridTab() != null)
+								validationCode = Env.parseContext(Env.getCtx(), getGridTab().getWindowNo(), getGridTab().getTabNo(), validationCode, false);
+							else
+								validationCode = Env.parseContext(Env.getCtx(), m_WindowNo, 0, validationCode, false);
+						}
+
+						ValueNamePair[] values = MRefList.getList(Env.getCtx(), m_column.getAD_Reference_Value_ID(), false, validationCode, "D");
+						for (int i = 0; i < values.length; i++)
+						{
+							fAnswerList.appendItem(values[i].getName(), values[i].getValue());
+						}
+						fAnswerList.setVisible(true);
 					}
-					fAnswerList.setVisible(true);
-				}
-				else	//	other display types come here
-				{
-					fAnswerText.setText ("");
-					fAnswerText.setVisible(true);
+					else // other display types come here
+					{
+						fAnswerText.setText("");
+						fAnswerText.setVisible(true);
+					}
 				}
 			}
 		}
@@ -620,6 +663,44 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 		}
 	}	//	display
 
+	private void loadActions(MWFNode node)
+	{
+		lstAction.removeAllItems();
+		updateNextNodeOption(null);
+
+		boolean isHasValidOption = false;
+		if (node.isShowTransitionsAsAction())
+		{
+			MWFNodeNext[] mwfNodeNexts = node.getTransitions(Env.getAD_Client_ID(Env.getCtx()));
+			if (mwfNodeNexts != null && mwfNodeNexts.length >= 1)
+			{
+				for (MWFNodeNext nodeNext : mwfNodeNexts)
+				{
+					// Is this a valid transition?
+					if (!nodeNext.isValidFor(m_activity))
+						continue;
+					isHasValidOption = true;
+					lstAction.appendItem(nodeNext.getName(), nodeNext.getValue());
+				}
+			}
+			updateNextNodeOption(lstAction.getSelectedItem() != null ? lstAction.getSelectedItem().getValue() : null);
+		}
+
+		boolean isVisible = isHasValidOption && node.isShowTransitionsAsAction();
+		lblAction.setVisible(isVisible);
+		lstAction.setVisible(isVisible);
+		rowAction.setVisible(isVisible);
+		bOK.setEnabled((m_activity.getNode() == null || !(m_activity.getNode().isShowTransitionsAsAction() && lstAction.getSelectedItem() == null)));
+	}
+
+	private void updateNextNodeOption(String newValue)
+	{
+		if (nodeVarForm != null)
+			Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), MWFActivity.WF_Activity_Next_Node_Action, newValue);
+		if (m_activity.getPO() != null)
+			m_activity.getPO().set_Attribute(MWFActivity.WF_Activity_Next_Node_Action, newValue);
+	}
+
 	/**
 	 * Updates the context with the selected value for the current column and
 	 * triggers a dynamic display refresh for the node variable form.
@@ -629,6 +710,9 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 	{
 		if (nodeVarForm == null)
 			return;
+
+		if (m_activity.getNode() != null && m_activity.getNode().isShowTransitionsAsAction())
+			updateNextNodeOption(lstAction.getSelectedItem() != null ? lstAction.getSelectedItem().getValue() : null);
 
 		if (m_column != null)
 			Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), m_column.getColumnName(), String.valueOf(fAnswerList.getValue()));
@@ -696,10 +780,10 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 			Clients.clearBusy();
 			return;
 		}
-		int AD_User_ID = Env.getAD_User_ID(Env.getCtx());
-		String textMsg = fTextMsg.getValue();
 		//
 		MWFNode node = m_activity.getNode();
+		int AD_User_ID = Env.getAD_User_ID(Env.getCtx());
+		String textMsg = fTextMsg.getValue();
 
 		Object forward = fForward.getValue();
 		

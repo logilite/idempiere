@@ -52,6 +52,8 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 // @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
 			setIsCentrallyMaintained (true);
 // Y
+			setIsShowTransitionsAsAction (false);
+// N
 			setJoinElement (null);
 // X
 			setLimit (0);
@@ -83,6 +85,8 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 // Y
 			setIsCentrallyMaintained (true);
 // Y
+			setIsShowTransitionsAsAction (false);
+// N
 			setJoinElement (null);
 // X
 			setLimit (0);
@@ -114,6 +118,8 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 // Y
 			setIsCentrallyMaintained (true);
 // Y
+			setIsShowTransitionsAsAction (false);
+// N
 			setJoinElement (null);
 // X
 			setLimit (0);
@@ -145,6 +151,8 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 // Y
 			setIsCentrallyMaintained (true);
 // Y
+			setIsShowTransitionsAsAction (false);
+// N
 			setJoinElement (null);
 // X
 			setLimit (0);
@@ -954,6 +962,29 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	public boolean isMilestone()
 	{
 		Object oo = get_Value(COLUMNNAME_IsMilestone);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Show Transitions as Actions.
+		@param IsShowTransitionsAsAction If enabled, the transitions of this workflow node will be presented to the user as selectable Actions.
+	*/
+	public void setIsShowTransitionsAsAction (boolean IsShowTransitionsAsAction)
+	{
+		set_Value (COLUMNNAME_IsShowTransitionsAsAction, Boolean.valueOf(IsShowTransitionsAsAction));
+	}
+
+	/** Get Show Transitions as Actions.
+		@return If enabled, the transitions of this workflow node will be presented to the user as selectable Actions.
+	  */
+	public boolean isShowTransitionsAsAction()
+	{
+		Object oo = get_Value(COLUMNNAME_IsShowTransitionsAsAction);
 		if (oo != null)
 		{
 			 if (oo instanceof Boolean)

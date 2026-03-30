@@ -324,6 +324,12 @@ public class MWFNodeNext extends X_AD_WF_NodeNext implements ImmutablePOSupport
 			int ii = DB.getSQLValue (get_TrxName(), sql, getAD_WF_Node_ID());
 			setSeqNo(ii);
 		}
+
+		if (Util.isEmpty(getValue()))
+			setValue(getAD_WF_Next().getValue());
+		if (Util.isEmpty(getName()))
+			setName(getAD_WF_Next().getName());
+
 		return true;
 	}
 

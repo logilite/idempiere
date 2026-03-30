@@ -39,8 +39,8 @@ public class SimplePDFViewer extends Window {
 	 * generated serial id
 	 */
 	private static final long serialVersionUID = -6417954023873414350L;
-	private AMedia media;
-	private int mediaVersion = 0;
+	protected AMedia media;
+	protected int mediaVersion = 0;
 
 	/**
 	 * @param title

@@ -46,7 +46,7 @@ public class MSysConfig extends X_AD_SysConfig
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -2345815648281241687L;
+	private static final long serialVersionUID = 5031038933191112097L;
 
 	/** Constant for Predefine System Configuration Names (in alphabetical order) */
 	

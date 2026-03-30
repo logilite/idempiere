@@ -129,7 +129,7 @@ public class X_AD_WF_NodeNext extends PO implements I_AD_WF_NodeNext, I_Persiste
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_AD_WF_NodeNext[")
-        .append(get_ID()).append("]");
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
@@ -294,6 +294,22 @@ public class X_AD_WF_NodeNext extends PO implements I_AD_WF_NodeNext, I_Persiste
 		return false;
 	}
 
+	/** Set Name.
+		@param Name Alphanumeric identifier of the entity
+	*/
+	public void setName (String Name)
+	{
+		set_Value (COLUMNNAME_Name, Name);
+	}
+
+	/** Get Name.
+		@return Alphanumeric identifier of the entity
+	  */
+	public String getName()
+	{
+		return (String)get_Value(COLUMNNAME_Name);
+	}
+
 	/** Set Sequence.
 		@param SeqNo Method of ordering records; lowest number comes first
 	*/
@@ -327,5 +343,21 @@ public class X_AD_WF_NodeNext extends PO implements I_AD_WF_NodeNext, I_Persiste
 	public String getTransitionCode()
 	{
 		return (String)get_Value(COLUMNNAME_TransitionCode);
+	}
+
+	/** Set Search Key.
+		@param Value Search key for the record in the format required - must be unique
+	*/
+	public void setValue (String Value)
+	{
+		set_Value (COLUMNNAME_Value, Value);
+	}
+
+	/** Get Search Key.
+		@return Search key for the record in the format required - must be unique
+	  */
+	public String getValue()
+	{
+		return (String)get_Value(COLUMNNAME_Value);
 	}
 }

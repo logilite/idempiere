@@ -21,23 +21,26 @@ import java.util.logging.Level;
 
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.ConfirmPanel;
-import org.adempiere.webui.component.ListItem;
-import org.adempiere.webui.component.Listbox;
-import org.adempiere.webui.component.ListboxFactory;
 import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.ToolBar;
 import org.adempiere.webui.component.Window;
+import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.event.DialogEvents;
+import org.adempiere.webui.event.ValueChangeEvent;
+import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.apps.wf.WFGraphLayout;
 import org.compiere.apps.wf.WFNodeWidget;
+import org.compiere.model.MColumn;
 import org.compiere.model.MEntityType;
+import org.compiere.model.MLookup;
+import org.compiere.model.MLookupFactory;
 import org.compiere.model.MSysConfig;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
-import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.compiere.wf.MWFNode;
@@ -69,14 +72,14 @@ import org.zkoss.zul.Vbox;
  * @author Low Heng Sin
  */
 @org.idempiere.ui.zk.annotation.Form(name = "org.compiere.apps.wf.WFPanel")
-public class WFEditor extends ADForm {
+public class WFEditor extends ADForm implements ValueChangeListener {
 	/**
 	 * generated serial id
 	 */
 	private static final long serialVersionUID = 4293422396394778274L;
 
-	/** Workflows dropdown list */
-	private Listbox workflowList;
+	/** Workflow search editor */
+	private WSearchEditor workflowSearch;
 	private int m_workflowId = 0;
 	private Toolbarbutton zoomButton;
 	private Toolbarbutton refreshButton;
@@ -97,19 +100,21 @@ public class WFEditor extends ADForm {
 		Borderlayout layout = new Borderlayout();
 		layout.setStyle("width: 100%; height: 100%; position: relative;");
 		appendChild(layout);
-		KeyNamePair[] pp = MWorkflow.getWorkflowKeyNamePairs(true);
-
-		workflowList = ListboxFactory.newDropdownListbox();
-		for (KeyNamePair knp : pp) {
-			workflowList.addItem(knp);
-		}
-		workflowList.addEventListener(Events.ON_SELECT, this);
+		
+		// Create WSearchEditor
+		int columnId = MColumn.getColumn_ID(MWorkflow.Table_Name, MWorkflow.COLUMNNAME_AD_Workflow_ID);
+		if (columnId <= 0)
+			throw new IllegalStateException("Column " + MWorkflow.COLUMNNAME_AD_Workflow_ID + " not found in " + MWorkflow.Table_Name);
+		MLookup lookup = MLookupFactory.get(Env.getCtx(), 0, 0, columnId, DisplayType.Search);
+		workflowSearch = new WSearchEditor(MWorkflow.COLUMNNAME_AD_Workflow_ID, false, false, true, lookup);
+		workflowSearch.addValueChangeListener(this);
+		ZKUpdateUtil.setWidth(workflowSearch.getComponent(), "40%");
 
 		North north = new North();
 		layout.appendChild(north);
 		ToolBar toolbar = new ToolBar();
 		north.appendChild(toolbar);
-		toolbar.appendChild(workflowList);
+		toolbar.appendChild(workflowSearch.getComponent());
 		// Zoom
 		zoomButton = new Toolbarbutton();
 		if (ThemeManager.isUseFontIconForImage())
@@ -172,26 +177,16 @@ public class WFEditor extends ADForm {
 			this.detach();
 		else if (event.getTarget().getId().equals(ConfirmPanel.A_OK))
 			this.detach();
-		else if (event.getTarget() == workflowList) {
-			center.removeChild(table);
-			createTable();
-			center.appendChild(table);
-			ListItem item = workflowList.getSelectedItem();
-			KeyNamePair knp = item != null ? item.toKeyNamePair() : null;
-			if (knp != null && knp.getKey() > 0) {
-				load(knp.getKey(), true);
-			}
-		}
 		else if (event.getTarget() == zoomButton) {
-			if (workflowList.getSelectedIndex() > 0)
+			if (workflowSearch.getValue() != null)
 				zoom();
 		}
 		else if (event.getTarget() == refreshButton) {
-			if (workflowList.getSelectedIndex() > 0)
+			if (workflowSearch.getValue() != null)
 				reload(m_workflowId, true);
 		}
 		else if (event.getTarget() == newButton) {
-			if (workflowList.getSelectedIndex() > 0)
+			if (workflowSearch.getValue() != null)
 				createNewNode();
 		}
 		else if (event.getTarget() instanceof WFPopupItem) {
@@ -504,4 +499,24 @@ public class WFEditor extends ADForm {
 		menu.appendChild(item);
 		item.addEventListener(Events.ON_CLICK, this);
 	}	//	addMenuItem
+
+	@Override
+	public void valueChange(ValueChangeEvent evt)
+	{
+		if (evt.getSource() == workflowSearch)
+		{
+			Object item = evt.getNewValue();
+			Integer kpn = (item instanceof Integer) ? (Integer) item : null;
+			if (kpn != null && kpn > 0)
+				reload(kpn, true);
+			else
+			{
+				center.removeChild(table);
+				createTable();
+				center.appendChild(table);
+				m_workflowId = 0;
+				m_wf = null;
+			}
+		}
+	}
 }
