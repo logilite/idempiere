@@ -25,8 +25,10 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 
@@ -489,26 +491,40 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	 */
 	private String cleanValue (String value)
 	{
-		char[] chars = value.toCharArray();
 		StringBuilder sb = new StringBuilder();
 		String searchKey_Case = MSysConfig.getValue(MSysConfig.USER_SEARCHKEY_CASE, USER_SEARCHKEY_ANYCASE,
 				getAD_Client_ID());
-		Boolean user_SearchKey_Allowed_Char = MSysConfig.getBooleanValue(MSysConfig.USER_SEARCHKEY_ALLOWED_CHAR, false,
+		String user_SearchKey_Allowed_Char = MSysConfig.getValue(MSysConfig.USER_SEARCHKEY_ALLOWED_CHAR, " ",
 				getAD_Client_ID());
+		if (USER_SEARCHKEY_LOWERCASE.equals(searchKey_Case))
+		{
+			value = value.toLowerCase();
+		}
+		if (USER_SEARCHKEY_UPPERCASE.equals(searchKey_Case))
+		{
+			value = value.toUpperCase();
+		}
+		char[] chars = value.toCharArray();
+		Set<Character> allowedSet = new HashSet<>();
+		if (user_SearchKey_Allowed_Char != null && !user_SearchKey_Allowed_Char.isEmpty())
+		{
+			String[] tokens = user_SearchKey_Allowed_Char.split(",");
+
+			for (String token : tokens)
+			{
+				if (!token.isEmpty())
+				{
+					allowedSet.add(token.charAt(0));
+				}
+			}
+		}
+
 		for (int i = 0; i < chars.length; i++)
 		{
 			char ch = chars[i];
-			if (USER_SEARCHKEY_LOWERCASE.equals(searchKey_Case))
-			{
-				ch = Character.toLowerCase(ch);
-			}
-			if (USER_SEARCHKEY_UPPERCASE.equals(searchKey_Case))
-			{
-				ch = Character.toUpperCase(ch);
-			}
 			if ((ch >= '0' && ch <= '9') // digits
 					|| (ch >= 'a' && ch <= 'z') // characters
-					|| (ch >= 'A' && ch <= 'Z') || user_SearchKey_Allowed_Char)
+					|| (ch >= 'A' && ch <= 'Z') || allowedSet.contains(ch))
 				sb.append(ch);
 		}
 		return sb.toString ();
