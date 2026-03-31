@@ -66,7 +66,6 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	
 	private static final String	USER_SEARCHKEY_UPPERCASE	= "U";
 	private static final String	USER_SEARCHKEY_LOWERCASE	= "L";
-	private static final String	USER_SEARCHKEY_ANYCASE		= "N";
 
 	/**
 	 * Get active Users of BPartner
@@ -492,7 +491,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	private String cleanValue (String value)
 	{
 		StringBuilder sb = new StringBuilder();
-		String searchKey_Case = MSysConfig.getValue(MSysConfig.USER_SEARCHKEY_CASE, USER_SEARCHKEY_ANYCASE,
+		String searchKey_Case = MSysConfig.getValue(MSysConfig.USER_SEARCHKEY_CASE, USER_SEARCHKEY_LOWERCASE,
 				getAD_Client_ID());
 		String user_SearchKey_Allowed_Char = MSysConfig.getValue(MSysConfig.USER_SEARCHKEY_ALLOWED_CHAR, " ",
 				getAD_Client_ID());
@@ -512,7 +511,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 
 			for (String token : tokens)
 			{
-				if (!token.isEmpty())
+				if (!Util.isEmpty(token, true))
 				{
 					allowedSet.add(token.charAt(0));
 				}
