@@ -180,8 +180,12 @@ public class ProcessInfo implements Serializable
 	
 	/** Report Override Tab */
 	private boolean				m_IsReplaceTabContent = false;
-	
+
+	/** Workflow Override Flag */
 	private boolean				m_IsWorkflowOverwrite = false;
+	
+	/** DocAction Process Flag */
+	private boolean				m_IsDocActionProcess = false;
 	
 	/** Row count */
 	private int m_rowCount;
@@ -1229,5 +1233,15 @@ public class ProcessInfo implements Serializable
 	public void setIsWorkflowOverwrite(boolean m_IsWorkflowOverwrite)
 	{
 		this.m_IsWorkflowOverwrite = m_IsWorkflowOverwrite;
+	}
+
+	public boolean isDocActionProcess( )
+	{
+		return m_IsDocActionProcess;
+	}
+
+	public void setIsDocActionProcess(boolean m_IsDocActionProcess)
+	{
+		this.m_IsDocActionProcess = m_IsDocActionProcess;
 	}
 }   //  ProcessInfo

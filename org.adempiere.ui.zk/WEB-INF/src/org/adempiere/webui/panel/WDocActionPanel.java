@@ -1158,10 +1158,7 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 			if (m_activity != null)
 				node = m_activity.getNode();
 			else if (m_Process_ID > 0)
-			{
-				MProcess pr = new MProcess(Env.getCtx(), m_Process_ID, trxName);
-				node = (MWFNode) pr.getAD_Workflow().getAD_WF_Node();
-			}
+				node = getNodeFromProcess();
 
 			// transaction: use activity's trx or create a new one
 			if (node != null)
@@ -1303,13 +1300,7 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 		else if (org.compiere.process.DocAction.STATUS_Drafted.equals(DocStatus) && m_Process_ID > 0)
 		{
 			// Currently it only works for the DR state, because when the activity isn’t created yet, we don’t know which node will run.
-			MProcess pr = new MProcess(Env.getCtx(), m_Process_ID, null);
-			int Workflow_ID = pr.getAD_Workflow_ID();
-			final int poWorkflow_ID = MWorkflow.getPODocWorkflow_ID(gridTab.getAD_Table_ID(), gridTab.getRecord_ID(), null);
-			if (poWorkflow_ID > 0)
-				Workflow_ID = poWorkflow_ID;
-
-			currentNode = (MWFNode) MWorkflow.get(Workflow_ID).getAD_WF_Node();
+			currentNode = getNodeFromProcess();
 		}
 
 		if (isActUserApprovalTask() && currentNode != null)
@@ -1319,6 +1310,25 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 			else
 				ApprovalColumn_ID = currentNode.getAD_Column_ID();
 		}
+	}
+
+	/**
+	 * Get workflow node from process or PO document workflow
+	 * 
+	 * @return workflow node or null if not found
+	 */
+	private MWFNode getNodeFromProcess( )
+	{
+		MProcess pr = new MProcess(Env.getCtx(), m_Process_ID, null);
+		int Workflow_ID = pr.getAD_Workflow_ID();
+		final int poWorkflow_ID = MWorkflow.getPODocWorkflow_ID(gridTab.getAD_Table_ID(), gridTab.getRecord_ID(), null);
+		if (poWorkflow_ID > 0)
+			Workflow_ID = poWorkflow_ID;
+		MWorkflow workflow = Workflow_ID > 0 ? MWorkflow.get(Workflow_ID) : null;
+		if (workflow != null)
+			return (MWFNode) workflow.getAD_WF_Node();
+
+		return null;
 	}
 
 	private boolean isValidApprover()

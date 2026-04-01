@@ -1018,7 +1018,7 @@ public class MWorkflow extends X_AD_Workflow implements ImmutablePOSupport
 					Integer ii = (Integer) po.get_Value(index);
 
 					// DocType does not exist - get DocTypeTarget
-					if (ii != null && ii == 0)
+					if (ii == null || ii.intValue() <= 0)
 					{
 						index = po.get_ColumnIndex("C_DocTypeTarget_ID");
 						if (index != -1)
