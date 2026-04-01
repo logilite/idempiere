@@ -810,7 +810,7 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 		{
 			if (confirmPanel.getButton("Ok").equals(event.getTarget()))
 			{
-				confirmPanel.getButton("Ok").setDisabled(false);
+				confirmPanel.getButton("Ok").setEnabled(false);
 				
 				valMap = null;
 				if (nodeVarForm != null)
@@ -818,7 +818,7 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 					String errorMsg = nodeVarForm.validateMandatory();
 					if (!Util.isEmpty(errorMsg, true))
 					{
-						confirmPanel.getButton("Ok").setDisabled(true);
+						confirmPanel.getButton("Ok").setEnabled(true);
 						Dialog.error(m_WindowNo, "Error", errorMsg);
 						return;
 					}
@@ -842,7 +842,7 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 							trx.close();
 						}
 						Throwable error = e.getCause();
-						confirmPanel.getButton("Ok").setDisabled(true);
+						confirmPanel.getButton("Ok").setEnabled(true);
 						logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
 						Dialog.error(m_WindowNo, "Error", error != null ? error.getLocalizedMessage() : e.getLocalizedMessage());
 						return;
