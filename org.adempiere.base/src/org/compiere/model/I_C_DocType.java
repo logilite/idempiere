@@ -77,6 +77,21 @@ public interface I_C_DocType
 
 	public org.compiere.model.I_AD_PrintFormat getAD_PrintFormat() throws RuntimeException;
 
+    /** Column name AD_Workflow_ID */
+    public static final String COLUMNNAME_AD_Workflow_ID = "AD_Workflow_ID";
+
+	/** Set Workflow.
+	  * Workflow or combination of tasks
+	  */
+	public void setAD_Workflow_ID (int AD_Workflow_ID);
+
+	/** Get Workflow.
+	  * Workflow or combination of tasks
+	  */
+	public int getAD_Workflow_ID();
+
+	public org.compiere.model.I_AD_Workflow getAD_Workflow() throws RuntimeException;
+
     /** Column name C_DocTypeDifference_ID */
     public static final String COLUMNNAME_C_DocTypeDifference_ID = "C_DocTypeDifference_ID";
 

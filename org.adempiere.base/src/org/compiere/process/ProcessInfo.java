@@ -181,6 +181,8 @@ public class ProcessInfo implements Serializable
 	/** Report Override Tab */
 	private boolean				m_IsReplaceTabContent = false;
 	
+	private boolean				m_IsWorkflowOverwrite = false;
+	
 	/** Row count */
 	private int m_rowCount;
 
@@ -1217,5 +1219,15 @@ public class ProcessInfo implements Serializable
 	 */
 	public void setInternalReportObject(Serializable reportObject) {
 		internalReportObject = reportObject;
+	}
+
+	public boolean isWorkflowOverwrite( )
+	{
+		return m_IsWorkflowOverwrite;
+	}
+
+	public void setIsWorkflowOverwrite(boolean m_IsWorkflowOverwrite)
+	{
+		this.m_IsWorkflowOverwrite = m_IsWorkflowOverwrite;
 	}
 }   //  ProcessInfo

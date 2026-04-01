@@ -83,6 +83,7 @@ import org.compiere.wf.MWFNodeNext;
 import org.compiere.wf.MWFNodeVar;
 import org.compiere.wf.MWFProcess;
 import org.compiere.wf.MWFResponsible;
+import org.compiere.wf.MWorkflow;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -1303,7 +1304,12 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 		{
 			// Currently it only works for the DR state, because when the activity isn’t created yet, we don’t know which node will run.
 			MProcess pr = new MProcess(Env.getCtx(), m_Process_ID, null);
-			currentNode = (MWFNode) pr.getAD_Workflow().getAD_WF_Node();
+			int Workflow_ID = pr.getAD_Workflow_ID();
+			final int poWorkflow_ID = MWorkflow.getPODocWorkflow_ID(gridTab.getAD_Table_ID(), gridTab.getRecord_ID(), null);
+			if (poWorkflow_ID > 0)
+				Workflow_ID = poWorkflow_ID;
+
+			currentNode = (MWFNode) MWorkflow.get(Workflow_ID).getAD_WF_Node();
 		}
 
 		if (isActUserApprovalTask() && currentNode != null)
