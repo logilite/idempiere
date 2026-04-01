@@ -513,7 +513,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 			{
 				if (!Util.isEmpty(token, true))
 				{
-					allowedSet.add(token.charAt(0));
+					allowedSet.add(token.trim().charAt(0));
 				}
 			}
 		}
