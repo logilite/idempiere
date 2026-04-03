@@ -1153,15 +1153,8 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 			// PO object: from activity or table record
 			PO po = m_activity != null ? m_activity.getPO(Trx.get(trxName, true)) : MTable.get(Env.getCtx(), m_AD_Table_ID).getPO(gridTab.getRecord_ID(), trxName);
 
-			MWFNode node = null;
-			// workflow node: from activity or process workflow
-			if (m_activity != null)
-				node = m_activity.getNode();
-			else if (m_Process_ID > 0)
-				node = getNodeFromProcess();
-
 			// transaction: use activity's trx or create a new one
-			if (node != null)
+			if (currentNode != null)
 			{
 				for (Entry <Integer, String> colValue : valMap.entrySet())
 				{
@@ -1175,7 +1168,7 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 										colValue.getValue(), // Value to set
 										col.getAD_Reference_ID(), // Column reference type
 										po, // Target PO
-										node, // Workflow node
+										currentNode, // Workflow node
 										trxName // Transaction
 						);
 					}
