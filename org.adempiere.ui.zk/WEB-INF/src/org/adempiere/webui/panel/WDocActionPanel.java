@@ -266,14 +266,20 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 
 			if (!isHasValidAction)
 			{
+				if (fromMenu)
+					return;
+
 				String msg = Msg.getMsg(Env.getCtx(), "NoNextTransitionForNode", new Object[] { currentNode.getName() });
 				Dialog.error(gridTab.getWindowNo(), msg);
 				return;
+
 			}
 		}
 
 		if (!isValidApprover()) {
-			
+			if (fromMenu)
+				return;
+
 			StringBuilder msg = new StringBuilder(Msg.getMsg(Env.getCtx(), "AssignedToState", new Object[] { m_activity.getWFStateText(), m_activity.getNode().getName() }));
 			if (resp.isRole())
 			{
@@ -807,12 +813,15 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 		{
 			if (confirmPanel.getButton("Ok").equals(event.getTarget()))
 			{
+				confirmPanel.getButton("Ok").setEnabled(false);
+				
 				valMap = null;
 				if (nodeVarForm != null)
 				{
 					String errorMsg = nodeVarForm.validateMandatory();
 					if (!Util.isEmpty(errorMsg, true))
 					{
+						confirmPanel.getButton("Ok").setEnabled(true);
 						Dialog.error(m_WindowNo, "Error", errorMsg);
 						return;
 					}
@@ -822,8 +831,8 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 				wfTrxName = Trx.createTrxName("FWFA");
 				if (isWFActivity())
 				{
-					setNodeVarValueInPO(false);
 					m_activity.set_TrxName(wfTrxName);
+          setNodeVarValueInPO(false);
 					future = Adempiere.getThreadPoolExecutor().submit(new DesktopRunnable(new DocActionDialogRunnable(), getDesktop()));
 				}
 				else
