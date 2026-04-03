@@ -1313,11 +1313,11 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 	private MWFNode getNodeFromProcess( )
 	{
 		MProcess pr = new MProcess(Env.getCtx(), m_Process_ID, null);
-		int Workflow_ID = pr.getAD_Workflow_ID();
-		final int poWorkflow_ID = MWorkflow.getPODocWorkflow_ID(gridTab.getAD_Table_ID(), gridTab.getRecord_ID(), null);
-		if (poWorkflow_ID > 0)
-			Workflow_ID = poWorkflow_ID;
-		MWorkflow workflow = Workflow_ID > 0 ? MWorkflow.get(Workflow_ID) : null;
+		int workflowID = pr.getAD_Workflow_ID();
+		final int poWorkflowID = MWorkflow.getPODocWorkflow_ID(gridTab.getAD_Table_ID(), gridTab.getRecord_ID(), null);
+		if (poWorkflowID > 0)
+			workflowID = poWorkflowID;
+		MWorkflow workflow = workflowID > 0 ? MWorkflow.get(workflowID) : null;
 		if (workflow != null)
 			return (MWFNode) workflow.getAD_WF_Node();
 
