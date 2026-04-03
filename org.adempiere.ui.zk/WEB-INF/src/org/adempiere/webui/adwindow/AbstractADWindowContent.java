@@ -90,10 +90,10 @@ import org.adempiere.webui.window.CustomizeGridViewDialog;
 import org.adempiere.webui.window.Dialog;
 import org.adempiere.webui.window.FindWindow;
 import org.adempiere.webui.window.LabelAction;
-import org.adempiere.webui.window.WTableAttribute;
 import org.adempiere.webui.window.WChat;
 import org.adempiere.webui.window.WPostIt;
 import org.adempiere.webui.window.WRecordAccessDialog;
+import org.adempiere.webui.window.WTableAttribute;
 import org.compiere.grid.ICreateFrom;
 import org.compiere.model.DataStatusEvent;
 import org.compiere.model.DataStatusListener;
@@ -3794,9 +3794,11 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 						final Callback<Boolean> postCallback = new Callback<Boolean>() {
 							@Override
 							public void onCallback(Boolean result) {
-								if (result) {
+								if (result)
+								{
+									win.commitNodeVar();
 									WindowValidatorEvent event = new WindowValidatorEvent(adwindow, WindowValidatorEventType.AFTER_DOC_ACTION.getName());
-							    	WindowValidatorManager.getInstance().fireWindowValidatorEvent(event, null);
+									WindowValidatorManager.getInstance().fireWindowValidatorEvent(event, null);
 								}
 							}
 						};
@@ -3806,7 +3808,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 								if (result) {
 									boolean startWOasking = true;
 									boolean isProcessMandatory = true;
-									executeButtonProcess(wButton, startWOasking, table_ID, recordIdParam, isProcessMandatory, postCallback);
+									executeButtonProcess(wButton, startWOasking, table_ID, recordIdParam, null, isProcessMandatory, postCallback, win);
 								}
 							}
 						};
@@ -3955,7 +3957,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 			@Override
 			public void onCallback(Boolean result) {
 				if (result) {
-					executeButtonProcess(wButton, startWOasking, table_ID, finalRecordId, finalRecordUU, isProcessMandatory, postCallback);
+					executeButtonProcess(wButton, startWOasking, table_ID, finalRecordId, finalRecordUU, isProcessMandatory, postCallback, null);
 				}
 			}
 		};
@@ -4062,23 +4064,26 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	public void executeButtonProcess(final IProcessButton wButton,
 			final boolean startWOasking, final int table_ID, final int record_ID,
 			boolean isProcessMandatory, Callback<Boolean> callback) {
-		executeButtonProcess(wButton, startWOasking, table_ID, record_ID, null, isProcessMandatory, callback);
+		executeButtonProcess(wButton, startWOasking, table_ID, record_ID, null, isProcessMandatory, callback, null);
 	}
 
 	/**
 	 * Show process, form or info window dialog for button.
-	 * Delegate to {@link #executeButtonProcess0(IProcessButton, boolean, int, int, String, Callback)} or {@link #executionButtonInfoWindow0(IProcessButton)}.
+	 * Delegate to {@link #executeButtonProcess0(IProcessButton, boolean, int, int, String, Callback)} or
+	 * {@link #executionButtonInfoWindow0(IProcessButton)}.
+	 * 
 	 * @param wButton
 	 * @param startWOasking
 	 * @param table_ID
 	 * @param record_ID
 	 * @param record_UU
 	 * @param isProcessMandatory
-	 * @param callback 
+	 * @param callback
+	 * @param actionPanel
 	 */
 	public void executeButtonProcess(final IProcessButton wButton,
 			final boolean startWOasking, final int table_ID, final int record_ID, final String record_UU,
-			boolean isProcessMandatory, Callback<Boolean> callback) {
+			boolean isProcessMandatory, Callback<Boolean> callback, WDocActionPanel actionPanel) {
 		/**
 		 *  Start Process ----
 		 */
@@ -4106,7 +4111,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 						if (wButton.getInfoWindow_ID() > 0)
 							executionButtonInfoWindow0(wButton);
 						else
-							executeButtonProcess0(wButton, startWOasking, table_ID, record_ID, callback);
+							executeButtonProcess0(wButton, startWOasking, table_ID, record_ID, null, callback, actionPanel);
 					}
 				}
 			});
@@ -4116,34 +4121,23 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 			if (wButton.getInfoWindow_ID() > 0)
 				executionButtonInfoWindow0(wButton);
 			else
-				executeButtonProcess0(wButton, startWOasking, table_ID, record_ID, record_UU, callback);
+				executeButtonProcess0(wButton, startWOasking, table_ID, record_ID, record_UU, callback, actionPanel);
 		}
 	}
 
 	/**
 	 * Show {@link ADForm} or {@link ProcessModalDialog}.
-	 * @param wButton
-	 * @param startWOasking
-	 * @param table_ID
-	 * @param record_ID
-	 * @param callback 
-	 */
-	private void executeButtonProcess0(final IProcessButton wButton,
-			boolean startWOasking, int table_ID, int record_ID, Callback<Boolean> callback) {
-		executeButtonProcess0(wButton, startWOasking, table_ID, record_ID, null, callback);	
-	}
-
-	/**
-	 * Show {@link ADForm} or {@link ProcessModalDialog}.
+	 * 
 	 * @param wButton
 	 * @param startWOasking
 	 * @param table_ID
 	 * @param record_ID
 	 * @param record_UU
-	 * @param callback 
+	 * @param callback
+	 * @param actionPanel
 	 */
 	public void executeButtonProcess0(final IProcessButton wButton,
-			boolean startWOasking, int table_ID, int record_ID, String record_UU, Callback<Boolean> callback) {
+			boolean startWOasking, int table_ID, int record_ID, String record_UU, Callback<Boolean> callback, WDocActionPanel actionPanel) {
 		// call form
 		MProcess pr = new MProcess(ctx, wButton.getProcess_ID(), null);
 		int adFormID = pr.getAD_Form_ID();
@@ -4198,6 +4192,12 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 				adtabPanel = findADTabpanel(wButton);
 
 			ProcessInfo pi = new ProcessInfo("", wButton.getProcess_ID(), table_ID, record_ID, record_UU);
+			if (actionPanel != null)
+			{
+				actionPanel.setNodeVarValueInPO(false);
+				pi.setTransactionName(actionPanel.getWfTrxName());
+			}
+
 			if (adtabPanel != null && adtabPanel.isGridView() && adtabPanel.getGridTab() != null)
 			{
 				int[] indices = adtabPanel.getGridTab().getSelection();
