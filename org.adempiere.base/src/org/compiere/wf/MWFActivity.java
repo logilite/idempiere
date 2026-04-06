@@ -105,7 +105,9 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	public static final String	WF_Activity_Next_Node_Action		= "WF_Next_Node_Action";
 
 	public static final String	SUBSTITUTE_SUBQUERY 				= "COLUMN IN (SELECT AD_User_ID FROM AD_User_Substitute  WHERE Substitute_ID = ?  AND (ValidFrom IS NULL OR ValidFrom <= CURRENT_DATE)  AND (ValidTo IS NULL OR ValidTo >= CURRENT_DATE) AND IsActive = 'Y')";
-	
+
+	private static final String	TableAttribute_AD_WF_Activity_Summary	= "AD_WF_Activity_Summary";
+
 	/**
 	 * 	Get Activities for table/record
 	 *	@param ctx context
@@ -2764,6 +2766,18 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		if (po == null)
 			return null;
 		StringBuilder sb = new StringBuilder();
+		
+		String activitySummary = (String) MTable.get(getCtx(), po.get_Table_ID()).get_TableAttribute(TableAttribute_AD_WF_Activity_Summary);
+		if (!Util.isEmpty(activitySummary))
+		{
+			activitySummary = Env.parseVariable(activitySummary, po, po.get_TrxName(), false);
+			if (!Util.isEmpty(activitySummary))
+			{
+				sb.append(activitySummary).append(" ");
+				return sb.toString();
+			}
+		}
+
 		String[] keyColumns = po.get_KeyColumns();
 		if ((keyColumns != null) && (keyColumns.length > 0))
 			sb.append(Msg.getElement(getCtx(), keyColumns[0])).append(" ");
