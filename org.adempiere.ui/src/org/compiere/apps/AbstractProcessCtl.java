@@ -144,7 +144,7 @@ public abstract class AbstractProcessCtl implements Runnable
 					if (poWorkflow_ID > 0)
 					{
 						AD_Workflow_ID = poWorkflow_ID;
-						m_pi.setIsWorkflowOverwrite(true);
+						m_pi.setIsWorkflowOverridden(true);
 					}
 				}
 				//
