@@ -122,7 +122,7 @@ public class MWFProcess extends X_AD_WF_Process
 		super.setWFState (WFSTATE_NotStarted);
 		
 		//	Document
-		setAD_Table_ID(m_pi.isWorkflowOverwrite() ? pi.getTable_ID() : wf.getAD_Table_ID());
+		setAD_Table_ID(m_pi.isWorkflowOverridden() ? pi.getTable_ID() : wf.getAD_Table_ID());
 
 		setRecord_ID(pi.getRecord_ID());
 		if (pi.getPO() != null)
