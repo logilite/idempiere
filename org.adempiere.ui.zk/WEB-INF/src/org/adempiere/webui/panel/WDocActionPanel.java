@@ -196,6 +196,9 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 	/** Active roles assigned to substitute users. */
 	private final Set <Integer>		substituteRoleIDs	= new HashSet <>();
 
+	/** Workflow transaction name. */
+	private String					wfTrxName						= null;
+
 	private static final CLogger logger;
 
     static
@@ -811,40 +814,26 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 		{
 			if (confirmPanel.getButton("Ok").equals(event.getTarget()))
 			{
+				confirmPanel.getButton("Ok").setEnabled(false);
+				
 				valMap = null;
 				if (nodeVarForm != null)
 				{
 					String errorMsg = nodeVarForm.validateMandatory();
 					if (!Util.isEmpty(errorMsg, true))
 					{
+						confirmPanel.getButton("Ok").setEnabled(true);
 						Dialog.error(m_WindowNo, "Error", errorMsg);
 						return;
 					}
 					valMap = nodeVarForm.getValuesMap();
 				}
 
+				wfTrxName = Trx.createTrxName("FWFA");
 				if (isWFActivity())
 				{
-					Trx trx = Trx.get(Trx.createTrxName("FWFA"), true);
-					try
-					{
-						m_activity.set_TrxName(trx.getTrxName());
-						setNodeVarValue();
-					}
-					catch (Exception e)
-					{
-						// Ensure leaked transaction is cleaned up
-						if (trx != null)
-						{
-							trx.rollback();
-							trx.close();
-						}
-						Throwable error = e.getCause();
-						logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
-						Dialog.error(m_WindowNo, "Error", error != null ? error.getLocalizedMessage() : e.getLocalizedMessage());
-						return;
-					}
-
+					m_activity.set_TrxName(wfTrxName);
+          setNodeVarValueInPO(false);
 					future = Adempiere.getThreadPoolExecutor().submit(new DesktopRunnable(new DocActionDialogRunnable(), getDesktop()));
 				}
 				else
@@ -1130,7 +1119,6 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 			throw new IllegalStateException(Msg.getMsg(Env.getCtx(), "DocStatusChanged"));
 		}
 		m_OKpressed = true;
-		setNodeVarValue();
 		setValue();
 		detach();
 	}
@@ -1139,48 +1127,104 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 	 * Sets workflow node variables based on the values provided in valMap.
 	 * Resolves context, transaction, PO, and workflow node, then assigns variables using MWFActivity.
 	 * Throws AdempiereException if any variable assignment fails.
+	 * @param isSavePO 
+	 * 
+	 * @return {@code true} if variables are processed, {@code false} if no values exist
 	 */
-	private void setNodeVarValue( )
+	public boolean setNodeVarValueInPO(boolean isSavePO)
 	{
-		if (valMap != null)
-		{
-			// Iterate through each column-value pair to be set
-			String trxName = m_activity != null ? m_activity.get_TrxName() : null;// Trx.get(Trx.createTrxName("FWFA"), true);
+		if (valMap == null)
+			return false;
 
-			// context: activity context or default context
+		try
+		{
 			Properties ctx = m_activity != null ? m_activity.getCtx() : Env.getCtx();
 
-			// PO object: from activity or table record
-			PO po = m_activity != null ? m_activity.getPO(Trx.get(trxName, true)) : MTable.get(Env.getCtx(), m_AD_Table_ID).getPO(gridTab.getRecord_ID(), trxName);
+			PO po = m_activity != null ? m_activity.getPO(Trx.get(wfTrxName, false)) : MTable.get(ctx, m_AD_Table_ID).getPO(gridTab.getRecord_ID(), wfTrxName);
 
-			// transaction: use activity's trx or create a new one
-			if (currentNode != null)
+			MWFNode node = null;
+
+			if (m_activity != null)
+				node = m_activity.getNode();
+			else if (m_Process_ID > 0)
 			{
-				for (Entry <Integer, String> colValue : valMap.entrySet())
-				{
-					try
-					{
-						// Get column based on ID
-						MColumn col = MColumn.get(ctx, colValue.getKey());
-						// Assign workflow variable using column ID, value, reference type, PO, and node
-						MWFActivity.setVariable(
-										colValue.getKey(), // Column ID
-										colValue.getValue(), // Value to set
-										col.getAD_Reference_ID(), // Column reference type
-										po, // Target PO
-										currentNode, // Workflow node
-										trxName // Transaction
-						);
-					}
-					catch (Exception e)
-					{
-						throw new AdempiereException(e.getMessage(), e);
-					}
-				}
+				MProcess pr = new MProcess(ctx, m_Process_ID, wfTrxName);
+				node = (MWFNode) pr.getAD_Workflow().getAD_WF_Node();
 			}
 
-			if (gridTab != null)
-				gridTab.dataRefresh();
+			if (node == null)
+			{
+				logger.log(Level.SEVERE, "Cannot resolve workflow node for variable assignment");
+				throw new AdempiereException("Cannot resolve workflow node for variable assignment");
+			}
+
+			for (Entry <Integer, String> colValue : valMap.entrySet())
+			{
+				MColumn col = MColumn.get(ctx, colValue.getKey());
+				MWFActivity.setVariable(colValue.getKey(), colValue.getValue(), col.getAD_Reference_ID(), po, node, wfTrxName, isSavePO);
+			}
+
+			if (!isSavePO)
+				po.saveEx();
+		}
+		catch (Exception e)
+		{
+			rollbackNodeVar();
+			if (e instanceof AdempiereException)
+				throw (AdempiereException) e;
+			throw new AdempiereException(e.getMessage(), e);
+		}
+		return true;
+	}
+	
+	/**
+	 * Commits the workflow node variable transaction and closes it.
+	 */
+	public void commitNodeVar( )
+	{
+		if (wfTrxName != null)
+		{
+			Trx wfTrx = Trx.get(wfTrxName, false);
+			try
+			{
+				wfTrx.commit();
+			}
+			catch (Exception e)
+			{
+				wfTrx.rollback();
+				throw new AdempiereException("Failed to commit workflow node variables", e);
+			}
+			finally
+			{
+				wfTrx.close();
+				wfTrx = null;
+				wfTrxName = null;
+				if (gridTab != null)
+					gridTab.dataRefresh();
+			}
+		}
+	}
+	
+	/**
+	 * Rolls back the workflow node variable transaction and closes it.
+	 */
+	public void rollbackNodeVar( )
+	{
+		if (wfTrxName != null)
+		{
+			Trx wfTrx = Trx.get(wfTrxName, false);
+			try
+			{
+				wfTrx.rollback();
+			}
+			finally
+			{
+				wfTrx.close();
+				wfTrx = null;
+				wfTrxName = null;
+				if (gridTab != null)
+					gridTab.dataRefresh();
+			}
 		}
 	}
 
@@ -1438,4 +1482,9 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 			}		
 		}
 	}// DocActionDialogRunnable
+
+	public String getWfTrxName( )
+	{
+		return wfTrxName;
+	}
 }
