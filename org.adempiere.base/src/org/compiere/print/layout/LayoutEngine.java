@@ -268,6 +268,9 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	public static Image			IMAGE_FALSE = null;
 	/** Image Size				*/
 	public static Dimension		IMAGE_SIZE = new Dimension(10,10);
+	
+	/** Footer safety margin to prevent content overlap (1/72 inch) */
+	private static final int FOOTER_SAFETY_MARGIN = 15;
 
 	private Map<MPrintFormatItem,PrintData> childPrintFormatDetails = new HashMap<MPrintFormatItem,PrintData>();
 	
@@ -505,11 +508,16 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		m_header.setBounds (x, y, w, height);
 		//
 		y += height;
-		height = h-m_headerHeight-m_footerHeight;
+		// Cap the safety margin so it never makes m_content height zero or negative.
+		// The effective margin is at most the space that would remain after reserving
+		// header + footer; if that remaining space is already <= 0 the margin is 0.
+		int availableForContent = h - m_headerHeight - m_footerHeight;
+		int effectiveSafetyMargin = Math.max(0, Math.min(FOOTER_SAFETY_MARGIN, availableForContent));
+		height = Math.max(1, availableForContent - effectiveSafetyMargin); // add buffer - never zero
 		m_content.setBounds (x, y, w, height);
 		//
 		y += height;
-		height = m_footerHeight;
+		height = m_footerHeight + effectiveSafetyMargin; // compensate here
 		m_footer.setBounds (x, y, w, height);
 	}	//	calculatePageSize
 
@@ -818,16 +826,11 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		if (m_tempNLPositon != 0)
 			xPos = m_tempNLPositon;
 
-		if (isYspaceFor(m_maxHeightSinceNewLine[m_area]))
+		if (m_area == AREA_CONTENT && !isYspaceFor(m_maxHeightSinceNewLine[m_area])) {
+	        newPage(true, false);
+	    } else if (isYspaceFor(m_maxHeightSinceNewLine[m_area]))
 		{
 			m_position[m_area].setLocation(xPos, m_position[m_area].y + m_maxHeightSinceNewLine[m_area]);
-			if (log.isLoggable(Level.FINEST)) log.finest("Page=" + m_pageNo + " [" + m_area + "] " + m_position[m_area].x + "/" + m_position[m_area].y);
-		}
-		else if (m_area == AREA_CONTENT)
-		{
-			if (log.isLoggable(Level.FINEST)) log.finest("Not enough Y space "
-				+ m_lastHeight[m_area] + " - remaining " + getYspace() + " - Area=" + m_area);
-			newPage(true, false);
 			if (log.isLoggable(Level.FINEST)) log.finest("Page=" + m_pageNo + " [" + m_area + "] " + m_position[m_area].x + "/" + m_position[m_area].y);
 		}
 		else	//	footer/header

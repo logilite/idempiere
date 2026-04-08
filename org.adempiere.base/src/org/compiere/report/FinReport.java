@@ -2023,7 +2023,7 @@ public class FinReport extends SvrProcess
 				log.fine("Name #=" + no + " - " + sql.toString());
 		}
 	
-		if (m_report.isListTrx() && !isDimensionLine)
+		if (m_report.isListTrx() && !isDimensionLine && p_PA_ReportCube_ID == 0)
 		{
 			if (isCombination)
 				insertLineTrx(line, srcLine, String.valueOf(combinationID), dimGroupVariable, whereComb.toString());
