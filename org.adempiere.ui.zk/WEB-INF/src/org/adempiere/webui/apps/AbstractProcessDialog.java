@@ -1096,7 +1096,7 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 	public void runProcess() 
 	{
 		Events.sendEvent(DialogEvents.ON_BEFORE_RUN_PROCESS, this, null);
-		future = Adempiere.getThreadPoolExecutor().submit(new DesktopRunnable(new ProcessDialogRunnable(null), getDesktop()));
+		future = Adempiere.getThreadPoolExecutor().submit(new DesktopRunnable(new ProcessDialogRunnable(getProcessInfo() != null && !Util.isEmpty(getProcessInfo().getTransactionName()) ? Trx.get(getProcessInfo().getTransactionName(), false) : null), getDesktop()));
 	}
 
 	/**

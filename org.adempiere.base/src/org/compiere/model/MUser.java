@@ -27,13 +27,16 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.management.Query;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.DBException;
@@ -64,9 +67,12 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 9139076628293770170L;
+	private static final long serialVersionUID = 1351277092193923708L;
 
 	public static final String SAVING_MIGRATE_USER_PASSWORD_IF_NEEDED = "SavingMigrateUserPasswordIfNeeded";
+	
+	private static final String	USER_SEARCHKEY_UPPERCASE	= "U";
+	private static final String	USER_SEARCHKEY_LOWERCASE	= "L";
 
 	/**
 	 * Get active Users of BPartner
@@ -471,8 +477,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}	//	getValue
 
 	/**
-	 * 	Set Value - lower case alpha numerics and max length of 8.<br/>
-	 *  If Value is null, use LDAPUser or Name or the "noname" string instead.
+	 * 	Set Value - 7 bit case alpha numerics max length 8
 	 *	@param Value
 	 */
 	@Override
@@ -508,20 +513,49 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}	//	setValue
 	
 	/**
-	 * 	Convert value to lower case and remove non-digit and non-alphabet character
-	 *	@param value
-	 *	@return lower case cleaned value
+	 * 	Clean Value
+	 *	@param value value
+	 *	@return as it is value if User_Searchkey_Allowed_Char system config value
+	 *         is Y or lower case cleaned value if User_Searchkey_Case system
+	 *         config value is L or upper case cleaned value if
+	 *         User_Searchkey_Case system config value is U
 	 */
 	private String cleanValue (String value)
 	{
-		char[] chars = value.toCharArray();
 		StringBuilder sb = new StringBuilder();
+		String searchKey_Case = MSysConfig.getValue(MSysConfig.USER_SEARCHKEY_CASE, USER_SEARCHKEY_LOWERCASE,
+				getAD_Client_ID());
+		String user_SearchKey_Allowed_Char = MSysConfig.getValue(MSysConfig.USER_SEARCHKEY_ALLOWED_CHAR, " ",
+				getAD_Client_ID());
+		if (USER_SEARCHKEY_LOWERCASE.equals(searchKey_Case))
+		{
+			value = value.toLowerCase();
+		}
+		if (USER_SEARCHKEY_UPPERCASE.equals(searchKey_Case))
+		{
+			value = value.toUpperCase();
+		}
+		char[] chars = value.toCharArray();
+		Set<Character> allowedSet = new HashSet<>();
+		if (user_SearchKey_Allowed_Char != null && !user_SearchKey_Allowed_Char.isEmpty())
+		{
+			String[] tokens = user_SearchKey_Allowed_Char.split(",");
+
+			for (String token : tokens)
+			{
+				if (!Util.isEmpty(token, true))
+				{
+					allowedSet.add(token.trim().charAt(0));
+				}
+			}
+		}
+
 		for (int i = 0; i < chars.length; i++)
 		{
 			char ch = chars[i];
-			ch = Character.toLowerCase (ch);
-			if ((ch >= '0' && ch <= '9')		//	digits
-				|| (ch >= 'a' && ch <= 'z'))	//	characters
+			if ((ch >= '0' && ch <= '9') // digits
+					|| (ch >= 'a' && ch <= 'z') // characters
+					|| (ch >= 'A' && ch <= 'Z') || allowedSet.contains(ch))
 				sb.append(ch);
 		}
 		return sb.toString ();
