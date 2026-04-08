@@ -38,6 +38,7 @@ import org.adempiere.base.sso.ISSOPrincipalService;
 import org.adempiere.base.sso.SSOUtils;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.Callback;
+import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.Extensions;
 import org.adempiere.webui.IWebClient;
 import org.adempiere.webui.component.Window;

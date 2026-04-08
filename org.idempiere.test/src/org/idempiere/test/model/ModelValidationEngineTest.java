@@ -148,19 +148,19 @@ public class ModelValidationEngineTest extends AbstractTestCase {
 		List<Fact> facts = new ArrayList<>();
 		
 		engine.addFactsValidate(MOrg.Table_Name, globalValidator);
-		engine.fireFactsValidate(as, facts, org);
+		engine.fireFactsValidate(as, facts, org, FactsValidator.TIME_AFTER_FACTCREATE);
 		assertEquals(1, globalValidator.factsValidateCount);
 		
 		engine.removeFactsValidate(MOrg.Table_Name, globalValidator);
-		engine.fireFactsValidate(as, facts, org);
+		engine.fireFactsValidate(as, facts, org, FactsValidator.TIME_AFTER_FACTCREATE);
 		assertEquals(1, globalValidator.factsValidateCount);
 		
 		engine.addFactsValidate(MOrg.Table_Name, clientValidator);
-		engine.fireFactsValidate(as, facts, org);
+		engine.fireFactsValidate(as, facts, org, FactsValidator.TIME_AFTER_FACTCREATE);
 		assertEquals(1, clientValidator.factsValidateCount);
 		
 		engine.removeFactsValidate(MOrg.Table_Name, clientValidator);
-		engine.fireFactsValidate(as, facts, org);
+		engine.fireFactsValidate(as, facts, org, FactsValidator.TIME_AFTER_FACTCREATE);
 		assertEquals(1, clientValidator.factsValidateCount);
 	}
 
@@ -206,7 +206,7 @@ public class ModelValidationEngineTest extends AbstractTestCase {
 		}
 
 		@Override
-		public String factsValidate(MAcctSchema schema, List<Fact> facts, PO po) {
+		public String factsValidate(MAcctSchema schema, List<Fact> facts, PO po, int timing) {
 			factsValidateCount++;
 			return null;
 		}

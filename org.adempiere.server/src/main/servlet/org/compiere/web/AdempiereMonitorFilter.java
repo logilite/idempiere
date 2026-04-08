@@ -31,9 +31,7 @@ import javax.servlet.http.HttpSession;
 
 import org.adempiere.base.sso.ISSOPrincipalService;
 import org.adempiere.base.sso.SSOUtils;
-import org.apache.commons.codec.binary.Base64;
 import org.compiere.model.MSSOPrincipalConfig;
-
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.util.CLogger;

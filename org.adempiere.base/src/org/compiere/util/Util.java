@@ -761,11 +761,6 @@ public class Util
 		}
 	}
 
-	public static int compareDate(Timestamp ts1, Timestamp ts2)
-	{
-		return Util.removeTime(ts1).compareTo(Util.removeTime(ts2));
-	}
-	
 	/**
 	 * Make filename safe (replace all unauthorized characters with safe ones)
 	 * @param input the filename to check
@@ -878,6 +873,11 @@ public class Util
 		if (CSV_ESCAPE_FORMULA_CHARACTERS.indexOf(value.charAt(0)) >= 0)
 			value = " " + value;
 		return value;
+	}
+
+	public static int compareDate(Timestamp ts1, Timestamp ts2)
+	{
+		return Util.removeTime(ts1).compareTo(Util.removeTime(ts2));
 	}
 
 	/**
@@ -1066,20 +1066,5 @@ public class Util
 		}
 		return sb.toString();
 	} // getPrintableNameFromMultiKey
-
-	public static final String CSV_ESCAPE_FORMULA_CHARACTERS = "=+-@";
-	/**
-	 * Sanitize a single value to prevent CSV Injection attacks (OWASP).
-	 * Prefixes values starting with =+-@ with a space
-	 * @param value the value to sanitize
-	 * @return sanitized value
-	 */
-	public static String sanitizeCsvValue(String value) {
-		if (value == null || value.isEmpty()) 
-			return value;
-		if (CSV_ESCAPE_FORMULA_CHARACTERS.indexOf(value.charAt(0)) >= 0)
-			value = " " + value;
-		return value;
-	}
 
 }   //  Util

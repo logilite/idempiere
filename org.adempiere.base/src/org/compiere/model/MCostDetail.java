@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import javax.management.Query;
-
 import org.adempiere.exceptions.DBException;
 import org.adempiere.exceptions.PeriodClosedException;
 import org.compiere.acct.Doc;

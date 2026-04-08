@@ -540,16 +540,5 @@ public class MInventoryLine extends X_M_InventoryLine
 			return cost.getCurrentCostPrice();
 		return null;
 	}
-
-	/**
-	 * Check is inventory line is import inventory line
-	 * @param M_InventoryLine_ID
-	 * @param trxName
-	 * @return I_Inventory_ID
-	 */
-	public static int getImportLine_ID(int M_InventoryLine_ID,String trxName) {
-		int importLine = DB.getSQLValue(trxName,"SELECT I_Inventory_ID from I_Inventory where M_inventoryLine_id=?",M_InventoryLine_ID);
-		return importLine;
-	}
 }	//	MInventoryLine
 

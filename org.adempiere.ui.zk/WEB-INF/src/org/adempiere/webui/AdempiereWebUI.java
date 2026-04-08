@@ -348,7 +348,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
         else
         	sessionId = "zkwebui";
 		MSession mSession = MSession.get (ctx, x_Forward_IP!=null ? x_Forward_IP : Executions.getCurrent().getRemoteAddr(),
-			Executions.getCurrent().getRemoteHost(), sessionId);
+			Executions.getCurrent().getRemoteHost(), sessionId, MSession.AD_SESSIONTYPE_Webui);
 		if (clientInfo.userAgent != null && MSysConfig.getBooleanValue(MSysConfig.ZK_SESSION_SAVE_USER_AGENT, false)) {
 			mSession.setDescription(mSession.getDescription() + "\n" + clientInfo.toString());
 			mSession.saveEx();
