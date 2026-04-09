@@ -17,6 +17,10 @@ html,body {
 	margin:0px;
 }
 
+.z-initing {
+    background-image: url(${c:encodeURL('~./theme/iceblue_c/images/zssosepowered.png')}) !important;
+}
+
 [class*="z-"]:not([class*="z-icon-"]):not([class*="z-group-icon-"]) {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
 }
@@ -57,6 +61,11 @@ html,body {
 <%-- vbox fix for firefox and ie --%>
 table.z-vbox > tbody > tr > td > table {
 	width: 100%;	
+}
+
+<%-- decorate file drop area --%>
+.attachment-drag-entered {
+    border: 5px dotted #00a7f6 !important;
 }
 
 <c:include page="fragment/login.css.dsp" />
@@ -114,6 +123,8 @@ table.z-vbox > tbody > tr > td > table {
 <c:include page="fragment/window-size.css.dsp" />
 
 <c:include page="fragment/font-icons.css.dsp" />
+
+<c:include page="fragment/keikai.css.dsp" />
 
 <c:include page="fragment/printformat.css.dsp" />
 

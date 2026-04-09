@@ -36,7 +36,6 @@ import java.util.logging.Level;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.management.Query;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.DBException;
@@ -67,10 +66,10 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1351277092193923708L;
+	private static final long serialVersionUID = 9139076628293770170L;
 
 	public static final String SAVING_MIGRATE_USER_PASSWORD_IF_NEEDED = "SavingMigrateUserPasswordIfNeeded";
-	
+
 	private static final String	USER_SEARCHKEY_UPPERCASE	= "U";
 	private static final String	USER_SEARCHKEY_LOWERCASE	= "L";
 
@@ -1133,7 +1132,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 		MUser retValue = null;
 		int AD_Client_ID = Env.getAD_Client_ID(ctx);
 
-		StringBuffer sql = new StringBuffer("SELECT DISTINCT u.AD_User_ID ")
+		StringBuilder sql = new StringBuilder("SELECT DISTINCT u.AD_User_ID ")
 			.append("FROM AD_User u")
 			.append(" INNER JOIN AD_User_Roles ur ON (u.AD_User_ID=ur.AD_User_ID AND ur.IsActive='Y')")
 			.append(" INNER JOIN AD_Role r ON (ur.AD_Role_ID=r.AD_Role_ID AND r.IsActive='Y') ");

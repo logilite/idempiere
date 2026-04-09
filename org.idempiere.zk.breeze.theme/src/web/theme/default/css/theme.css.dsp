@@ -59,20 +59,9 @@ table.z-vbox > tbody > tr > td > table {
 	width: 100%;	
 }
 
-<%-- workflow activity --%>
-.workflow-activity-form {
-}
-.workflow-panel-table {
-	border: 0px;
-}
-
-<%-- payment form --%>
-.payment-form-content {
-}
-
 <%-- decorate file drop area --%>
 .attachment-drag-entered {
-    border: 5px dashed #3fb900 !important;
+    border: 5px dotted #00a7f6 !important;
 }
 
 <c:include page="fragment/login.css.dsp" />
@@ -130,6 +119,8 @@ table.z-vbox > tbody > tr > td > table {
 <c:include page="fragment/window-size.css.dsp" />
 
 <c:include page="fragment/font-icons.css.dsp" />
+
+<c:include page="fragment/keikai.css.dsp" />
 
 <c:include page="fragment/printformat.css.dsp" />
 
