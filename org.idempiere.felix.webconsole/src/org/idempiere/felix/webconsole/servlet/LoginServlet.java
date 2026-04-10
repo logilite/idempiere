@@ -136,7 +136,7 @@ public class LoginServlet extends HttpServlet {
 		// Validate user credentials
 		MUser user = null;
 		try {
-			user = MUser.get(Env.getCtx(), username, password, false);
+			user = MUser.get(Env.getCtx(), username, password);
 		} catch (Exception e) {
 			log.log(Level.SEVERE, "Error validating user: " + username, e);
 		}

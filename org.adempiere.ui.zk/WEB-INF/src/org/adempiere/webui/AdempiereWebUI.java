@@ -571,8 +571,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
     	Env.getCtx().clear();
     	afterLogout(session);
     	desktop.setAttribute(DESKTOP_SESSION_INVALIDATED_ATTR, Boolean.TRUE);
-            	
-    	desktop.enableServerPush(false);
+
         //redirect to login page
     	if (isAdminLogin) 
     	{

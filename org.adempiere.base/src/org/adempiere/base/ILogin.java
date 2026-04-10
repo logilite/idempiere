@@ -27,6 +27,8 @@ public interface ILogin
 	KeyNamePair[] getClients(String userId, String userPassword, String roleTypes);
 
 	KeyNamePair[] getClients(String userId, String userPassword, String roleTypes, Object token);
+	
+	KeyNamePair[] getClients(String userId, String userPassword, String roleTypes, Object token, String tenant);
 
 	String getLoginErrMsg();
 

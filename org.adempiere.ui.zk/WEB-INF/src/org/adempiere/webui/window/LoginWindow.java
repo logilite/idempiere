@@ -166,7 +166,7 @@ public class LoginWindow extends Window implements EventListener<Event>
 			getDesktop().getSession().setAttribute(Attributes.PREFERRED_LOCALE, locale);
 
 			ILogin login = Core.getLogin(ctx);
-			MSSOPrincipalConfig ssoPrincipalConfig = MSSOPrincipalConfig.getSSOPrincipalConfig(provider, true);
+			MSSOPrincipalConfig ssoPrincipalConfig = MSSOPrincipalConfig.getSSOPrincipalConfig(provider);
 			login.setSSOPrincipalConfig(ssoPrincipalConfig);
 			boolean isShowRolePanel = MSysConfig.getBooleanValue(MSysConfig.SSO_SELECT_ROLE, true);
 			
@@ -228,23 +228,15 @@ public class LoginWindow extends Window implements EventListener<Event>
 	 * @param clientsKNPairs
 	 * @param principalConfig
 	 */
-/* //TODO Logilite-Review 
-    public void loginOk(String userName, boolean show, KeyNamePair[] clientsKNPairs, MSSOPrincipalConfig principalConfig)
+    public void loginOk(String userName, boolean showRolePanel, KeyNamePair[] clientsKNPairs, MSSOPrincipalConfig principalConfig)
 	{
 		boolean isClientDefined = (clientsKNPairs.length == 1 || !Util.isEmpty(Env.getContext(ctx, Env.AD_USER_ID)));
 		if (pnlRole == null)
-			pnlRole = new RolePanel(ctx, this, userName, show, clientsKNPairs, isClientDefined, principalConfig);
-		if (principalConfig != null)
-*/
-    public void loginOk(String userName, boolean showRolePanel, KeyNamePair[] clientsKNPairs, boolean isSSOLogin)
-	{
-		boolean isClientDefined = (clientsKNPairs.length == 1 || !Util.isEmpty(Env.getContext(ctx, Env.AD_USER_ID)));
-		if (pnlRole == null)
-			pnlRole = new RolePanel(ctx, this, userName, showRolePanel, clientsKNPairs, isClientDefined);
+			pnlRole = new RolePanel(ctx, this, userName, showRolePanel, clientsKNPairs, isClientDefined, principalConfig);
 		AtomicBoolean isChangeRoleRequest = new AtomicBoolean(false);
 		if(getDesktop().getSession().hasAttribute(SSOUtils.ISCHANGEROLE_REQUEST))
 			isChangeRoleRequest.set((boolean) getDesktop().getSession().getAttribute(SSOUtils.ISCHANGEROLE_REQUEST));
-		if (isSSOLogin)
+		if (principalConfig != null)
 		{
 			Executions.schedule(getDesktop(), e -> validateMFPanel(userName, showRolePanel, clientsKNPairs, isClientDefined, isChangeRoleRequest.get()), new Event(SSOUtils.EVENT_ON_AFTER_SSOLOGIN));
 		}
@@ -525,20 +517,17 @@ public class LoginWindow extends Window implements EventListener<Event>
 			loginName = user.getEMail();
 		else
 			loginName = user.getLDAPUser() != null ? user.getLDAPUser() : user.getName();
-/*	//TODO Logilite-Review
 		// If the current login is via SSO, the session will contain the authentication token
 		// and the selected SSO provider. Retrieve the appropriate ISSOPrincipalService based on the provider.
 		Object token = getDesktop().getSession().getAttribute(ISSOPrincipalService.SSO_PRINCIPAL_SESSION_TOKEN);
 		String provider = (String) getDesktop().getSession().getAttribute(ISSOPrincipalService.SSO_SELECTED_PROVIDER);
 		ISSOPrincipalService m_SSOPrincipal = SSOUtils.getSSOPrincipalService(provider);
-		MSSOPrincipalConfig ssoPrincipalConfig = MSSOPrincipalConfig.getSSOPrincipalConfig(provider, true);
+		MSSOPrincipalConfig ssoPrincipalConfig = MSSOPrincipalConfig.getSSOPrincipalConfig(provider);
 
 		loginOk(loginName, true, login.getClients(), ((token != null && m_SSOPrincipal != null) ? ssoPrincipalConfig : null));
 
     	getDesktop().getSession().setAttribute("Check_AD_User_ID", Env.getAD_User_ID(ctx));
-*/
-		boolean isSSOLogin = "Y".equals(Env.getContext(Env.getCtx(), Env.IS_SSO_LOGIN));
-    	loginOk(loginName, true, login.getClients(), isSSOLogin);
+    	loginOk(loginName, true, login.getClients(), ssoPrincipalConfig);
     	getDesktop().getSession().setAttribute(AdempiereWebUI.CHECK_AD_USER_ID_ATTR, Env.getAD_User_ID(ctx));
     	pnlRole.setChangeRole(true);
     	pnlRole.changeRole(ctx);
