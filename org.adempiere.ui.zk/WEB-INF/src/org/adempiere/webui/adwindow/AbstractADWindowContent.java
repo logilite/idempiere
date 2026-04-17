@@ -1643,7 +1643,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		else if (event.getName().equals(ON_AFTER_TOOLBAR_UPDATE_EVENT)) {
 			isAfterToolbarUpdateScheduled = false;
 			//
-			WindowValidatorEvent e = new WindowValidatorEvent(adwindow, WindowValidatorEventType.AFTER_DATA_LOAD.getName());
+			WindowValidatorEvent e = new WindowValidatorEvent(adwindow, WindowValidatorEventType.AFTER_DATA_LOAD.getName(), event.getData());
 			WindowValidatorManager.getInstance().fireWindowValidatorEvent(e, null);
 		}
     }
@@ -2300,8 +2300,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         // Schedule the toolbar update event only once (avoid duplicate echo events)
         if (!isAfterToolbarUpdateScheduled) {
             isAfterToolbarUpdateScheduled = true;
-            //
-            Events.echoEvent(ON_AFTER_TOOLBAR_UPDATE_EVENT, getComponent(), null);
+            Events.echoEvent(ON_AFTER_TOOLBAR_UPDATE_EVENT, getComponent(), e.isChanged());
         }
     }
 
