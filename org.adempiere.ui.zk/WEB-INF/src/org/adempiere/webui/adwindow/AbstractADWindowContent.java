@@ -185,6 +185,14 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     private static final String ON_FOCUS_DEFER_EVENT = "onFocusDefer";
 
     /**
+     * Fired after the toolbar update process completes.
+     * 
+     * This event allows listeners to execute post-update logic,
+     * such as refreshing UI components or triggering dependent actions.
+     */
+	private static final String ON_AFTER_TOOLBAR_UPDATE_EVENT = "onAfterToolbarUpdate";
+
+    /**
      * Event to set selected tab of detail pane. Defer behind other event using echo.<br/>
      * Event data: data[0] is tab index and data[1] is current row
      */
@@ -263,7 +271,10 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 
 	/** track last focus field editor component */
 	protected Component lastFocusEditor = null;
-	
+
+	/** Flag to avoid scheduling duplicate toolbar update events */
+	private boolean isAfterToolbarUpdateScheduled = false;
+
 	/**
 	 * Constructor
 	 * @param ctx
@@ -295,6 +306,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         comp.addEventListener(LayoutUtils.ON_REDRAW_EVENT, this);
         comp.addEventListener(ON_DEFER_SET_DETAILPANE_SELECTION_EVENT, this);
         comp.addEventListener(ON_FOCUS_DEFER_EVENT, this);
+        comp.addEventListener(ON_AFTER_TOOLBAR_UPDATE_EVENT, this);
         comp.setAttribute(ITabOnSelectHandler.ATTRIBUTE_KEY, this);
         
         return comp;
@@ -360,8 +372,6 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     public void focusToActivePanel() {
     	IADTabpanel adTabPanel = adTabbox.getSelectedTabpanel();
 		focusToTabpanel(adTabPanel);
-		WindowValidatorEvent event = new WindowValidatorEvent(adwindow, WindowValidatorEventType.AFTER_DATA_LOAD.getName());
-    	WindowValidatorManager.getInstance().fireWindowValidatorEvent(event, null);
 	}
 
     /**
@@ -1629,7 +1639,13 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     		else
     			comp.focus();
     		// 
-    	}    		
+    	}
+		else if (event.getName().equals(ON_AFTER_TOOLBAR_UPDATE_EVENT)) {
+			isAfterToolbarUpdateScheduled = false;
+			//
+			WindowValidatorEvent e = new WindowValidatorEvent(adwindow, WindowValidatorEventType.AFTER_DATA_LOAD.getName(), event.getData());
+			WindowValidatorManager.getInstance().fireWindowValidatorEvent(e, null);
+		}
     }
 
 	/**
@@ -2280,6 +2296,12 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         IADTabpanel adtab = adTabbox.getSelectedTabpanel();
         toolbar.enableProcessButton(!isNewRow && adtab != null && adtab.isEnableProcessButton());
         toolbar.enableCustomize(adtab.isEnableCustomizeButton());
+
+        // Schedule the toolbar update event only once (avoid duplicate echo events)
+        if (!isAfterToolbarUpdateScheduled) {
+            isAfterToolbarUpdateScheduled = true;
+            Events.echoEvent(ON_AFTER_TOOLBAR_UPDATE_EVENT, getComponent(), e.isChanged());
+        }
     }
 
 	/**
