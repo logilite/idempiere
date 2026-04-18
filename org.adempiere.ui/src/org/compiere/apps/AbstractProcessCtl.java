@@ -21,8 +21,8 @@ import java.util.logging.Level;
 import org.adempiere.util.IProcessUI;
 import org.adempiere.util.ProcessUtil;
 import org.compiere.model.MPInstance;
-import org.compiere.model.MRule;
 import org.compiere.model.MPInstance.PInstanceInfo;
+import org.compiere.model.MRule;
 import org.compiere.print.ReportCtl;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoUtil;
@@ -33,6 +33,7 @@ import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
 import org.compiere.wf.MWFProcess;
+import org.compiere.wf.MWorkflow;
 
 /**
  *	Process Interface Controller.
@@ -137,6 +138,15 @@ public abstract class AbstractProcessCtl implements Runnable
 				}
 				AD_ReportView_ID = info.AD_ReportView_ID;
 				AD_Workflow_ID = info.AD_Workflow_ID;
+				if (m_pi.isDocActionProcess())
+				{
+					final int poWorkflow_ID = MWorkflow.getPODocWorkflow_ID(m_pi.getTable_ID(), m_pi.getRecord_ID(), null);
+					if (poWorkflow_ID > 0)
+					{
+						AD_Workflow_ID = poWorkflow_ID;
+						m_pi.setIsDocTypeWorkflow(true);
+					}
+				}
 				//
 				int estimate = info.estimate;
 				if (estimate != 0)

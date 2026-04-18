@@ -4192,6 +4192,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 				adtabPanel = findADTabpanel(wButton);
 
 			ProcessInfo pi = new ProcessInfo("", wButton.getProcess_ID(), table_ID, record_ID, record_UU);
+			pi.setIsDocActionProcess(wButton.getColumnName().equalsIgnoreCase("DocAction"));
 			if (actionPanel != null)
 			{
 				actionPanel.setNodeVarValueInPO(false);
