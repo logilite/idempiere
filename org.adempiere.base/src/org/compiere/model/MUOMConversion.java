@@ -559,21 +559,6 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 	static public BigDecimal getProductRateTo (Properties ctx,
 		int M_Product_ID, int C_UOM_To_ID)
 	{
-		return getProductRateTo(ctx, M_Product_ID, C_UOM_To_ID, -1);
-	}	//	getProductRateTo
-
-	/**
-	 *	Get multiply rate to convert PRICE from price in entered UOM to price in product UOM <br/>
-	 *  OR multiply rate to convert QTY from product UOM to entered UOM
-	 *  @param ctx context
-	 *  @param M_Product_ID product
-	 *  @param C_UOM_To_ID entered UOM
-	 *  @param precision
-	 *  @return multiplier or null
-	 */
-	static public BigDecimal getProductRateTo (Properties ctx,
-		int M_Product_ID, int C_UOM_To_ID, int precision)
-	{
 		if (M_Product_ID == 0)
 			return null;
 
@@ -583,10 +568,7 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 			return Env.ONE;
 		}
 
-		if(precision < 0)
-		{
-			precision = 50;// get it with many decimals to minimize rounding issues
-		}
+		int precision = 50;// get it with many decimals to minimize rounding issues
 
 		//first check product specific conversion
 		MUOMConversion[] rates = getProductConversions(ctx, M_Product_ID);
@@ -698,9 +680,10 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 			}
 			else
 			{
-				MUOM uom = MUOM.get (ctx, C_UOM_To_ID);
-				if (uom != null)
-					return uom.round(retValue.multiply(qtyPrice), true);
+				MProduct product = MProduct.get(M_Product_ID);
+				MUOM inventoryUOM = MUOM.get(ctx, product.getC_UOM_ID());
+				if (inventoryUOM != null)
+					return inventoryUOM.round(retValue.multiply(qtyPrice), true);
 				return retValue.multiply(qtyPrice);
 			}
 		}
@@ -710,7 +693,7 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 
 	/**
 	 *	Get multiply rate to convert PRICE from price in entered UOM to price in product UOM <br/>
-	 *  OR multiply rate to convert QTY from product UOM to entered UOM
+	 *  OR multiply rate to convert QTY from product UOM to entered UOM.
 	 *  @param ctx context
 	 *  @param M_Product_ID product
 	 *  @param C_UOM_To_ID entered UOM
@@ -718,21 +701,6 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 	 */
 	static public BigDecimal getProductRateFrom (Properties ctx,
 		int M_Product_ID, int C_UOM_To_ID)
-	{
-		return getProductRateFrom(ctx, M_Product_ID, C_UOM_To_ID, -1);
-	}	//	getProductRateFrom
-
-	/**
-	 *	Get multiply rate to convert PRICE from price in entered UOM to price in product UOM <br/>
-	 *  OR multiply rate to convert QTY from product UOM to entered UOM.
-	 *  @param ctx context
-	 *  @param M_Product_ID product
-	 *  @param C_UOM_To_ID entered UOM
-	 *  @param precision
-	 *  @return multiplier or null
-	 */
-	static public BigDecimal getProductRateFrom (Properties ctx,
-		int M_Product_ID, int C_UOM_To_ID, int precision)
 	{
 		if (M_Product_ID == 0)
 			return null;
@@ -743,10 +711,7 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 			return Env.ONE;
 		}
 
-		if(precision < 0)
-		{
-			precision = 50;// get it with many decimals to minimize rounding issues
-		}
+		int precision = 50;// get it with many decimals to minimize rounding issues
 
 		//first, check product specific conversion
 		MUOMConversion[] rates = getProductConversions(ctx, M_Product_ID);
@@ -1108,12 +1073,7 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 
 		if (fromUOMRelatedUOMsWithRate.size() > 0)
 		{
-			int precision = 50;
-			MUOM toUOM = MUOM.get(ctx, C_UOM_To_ID);
-			if(toUOM != null && toUOM.getStdPrecision() >= 0)
-			{
-				precision = toUOM.getStdPrecision();
-			}
+			int precision = 50;// get it with many decimals to minimize rounding issues
 
 			conversions = new Query(ctx, Table_Name,
 					"(C_UOM_ID=? OR C_UOM_TO_ID=?) AND (M_Product_ID IS NULL OR M_Product_ID=?)", null)
