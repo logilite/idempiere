@@ -680,10 +680,9 @@ public class MUOMConversion extends X_C_UOM_Conversion implements ImmutablePOSup
 			}
 			else
 			{
-				MProduct product = MProduct.get(M_Product_ID);
-				MUOM inventoryUOM = MUOM.get(ctx, product.getC_UOM_ID());
-				if (inventoryUOM != null)
-					return inventoryUOM.round(retValue.multiply(qtyPrice), true);
+				MUOM uom = MUOM.get(ctx, C_UOM_To_ID);
+				if (uom != null)
+					return uom.round(retValue.multiply(qtyPrice), true);
 				return retValue.multiply(qtyPrice);
 			}
 		}
