@@ -2766,16 +2766,13 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		if (po == null)
 			return null;
 		StringBuilder sb = new StringBuilder();
-		
+
 		String activitySummary = (String) MTable.get(getCtx(), po.get_Table_ID()).get_TableAttribute(TableAttribute_AD_WF_Activity_Summary);
-		if (!Util.isEmpty(activitySummary))
+		activitySummary = Env.parseVariable(activitySummary, po, po.get_TrxName(), true);
+		if (!Util.isEmpty(activitySummary, true) && activitySummary.indexOf('@') < 0)
 		{
-			activitySummary = Env.parseVariable(activitySummary, po, po.get_TrxName(), false);
-			if (!Util.isEmpty(activitySummary))
-			{
-				sb.append(activitySummary).append(" ");
-				return sb.toString();
-			}
+			sb.append(activitySummary).append(" ");
+			return sb.toString();
 		}
 
 		String[] keyColumns = po.get_KeyColumns();
