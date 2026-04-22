@@ -299,6 +299,8 @@ public class PoExporter {
 					MColumn column = MColumn.get(ctx.ctx, info.getTableName(), columnName, trxName);
 					tableName = column.getReferenceTableName();
 				}
+				if ("Record_UU".equalsIgnoreCase(columnName) && tableName == null)
+					throw new AdempiereException("Could not find the related table for column " + po.get_TableName() + "." + columnName);
 				addTableReference(columnName, tableName, new AttributesImpl());
 			} else if (DisplayType.isList(displayType)) {
 				add(columnName, "", new AttributesImpl());
