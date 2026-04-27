@@ -1207,9 +1207,8 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 		if (wfTrxName != null)
 		{
 			Trx wfTrx = Trx.get(wfTrxName, false);
-			if (wfTrx.isActive())
+			if (wfTrx != null && wfTrx.isActive())
 				wfTrx.close();
-			wfTrx = null;
 			wfTrxName = null;
 		}
 	}
