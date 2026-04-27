@@ -859,6 +859,10 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 					Dialog.error(m_WindowNo, "Error", error != null ? error.getLocalizedMessage() : e.getLocalizedMessage());
 					logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
 				}
+				finally
+				{
+					closeNodeTrx();
+				}
 			}
 			future = null;
 			this.detach();
@@ -1192,6 +1196,20 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 				if (gridTab != null)
 					gridTab.dataRefresh();
 			}
+		}
+	}
+
+	/**
+	 * Close the workflow node variable transaction.
+	 */
+	public void closeNodeTrx( )
+	{
+		if (wfTrxName != null)
+		{
+			Trx wfTrx = Trx.get(wfTrxName, false);
+			if (wfTrx != null && wfTrx.isActive())
+				wfTrx.close();
+			wfTrxName = null;
 		}
 	}
 	

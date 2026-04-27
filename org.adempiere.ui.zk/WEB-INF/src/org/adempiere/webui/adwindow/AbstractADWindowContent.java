@@ -3822,6 +3822,10 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 									WindowValidatorEvent event = new WindowValidatorEvent(adwindow, WindowValidatorEventType.AFTER_DOC_ACTION.getName());
 									WindowValidatorManager.getInstance().fireWindowValidatorEvent(event, null);
 								}
+								else
+								{
+									win.closeNodeTrx();
+								}
 							}
 						};
 				    	Callback<Boolean> preCallback = new Callback<Boolean>() {
