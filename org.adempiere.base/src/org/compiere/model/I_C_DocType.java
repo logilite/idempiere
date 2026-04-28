@@ -347,8 +347,21 @@ public interface I_C_DocType
 	  * The record is active in the system
 	  */
 	public boolean isActive();
-	
-	/** Column name IsAlwaysPosted */
+
+    /** Column name IsAllowShipmentWithoutOrder */
+    public static final String COLUMNNAME_IsAllowShipmentWithoutOrder = "IsAllowShipmentWithoutOrder";
+
+	/** Set Allow Shipment without Sales Order.
+	  * Indicates whether shipment (material delivery) documents can be created without referencing a Sales Order line.
+	  */
+	public void setIsAllowShipmentWithoutOrder (boolean IsAllowShipmentWithoutOrder);
+
+	/** Get Allow Shipment without Sales Order.
+	  * Indicates whether shipment (material delivery) documents can be created without referencing a Sales Order line.
+	  */
+	public boolean isAllowShipmentWithoutOrder();
+
+    /** Column name IsAlwaysPosted */
     public static final String COLUMNNAME_IsAlwaysPosted = "IsAlwaysPosted";
 
 	/** Set Always Posted.

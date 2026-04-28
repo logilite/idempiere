@@ -31,7 +31,7 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20260330L;
+	private static final long serialVersionUID = 20260427L;
 
     /** Standard Constructor */
     public X_C_DocType (Properties ctx, int C_DocType_ID, String trxName)
@@ -45,6 +45,8 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 // 1
 			setGL_Category_ID (0);
 			setHasCharges (false);
+			setIsAllowShipmentWithoutOrder (false);
+// N
 			setIsAlwaysPosted (false);
 			setIsCanBeReactivated (false);
 // N
@@ -82,6 +84,8 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 // 1
 			setGL_Category_ID (0);
 			setHasCharges (false);
+			setIsAllowShipmentWithoutOrder (false);
+// N
 			setIsAlwaysPosted (false);
 // N
 			setIsCreateCounter (true);
@@ -116,6 +120,8 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 // 1
 			setGL_Category_ID (0);
 			setHasCharges (false);
+			setIsAllowShipmentWithoutOrder (false);
+// N
 			setIsAlwaysPosted (false);
 // N
 			setIsCreateCounter (true);
@@ -150,6 +156,8 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 // 1
 			setGL_Category_ID (0);
 			setHasCharges (false);
+			setIsAllowShipmentWithoutOrder (false);
+// N
 			setIsAlwaysPosted (false);
 // N
 			setIsCreateCounter (true);
@@ -721,6 +729,29 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 	public boolean isHasProforma()
 	{
 		Object oo = get_Value(COLUMNNAME_HasProforma);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Allow Shipment without Sales Order.
+		@param IsAllowShipmentWithoutOrder Indicates whether shipment (material delivery) documents can be created without referencing a Sales Order line.
+	*/
+	public void setIsAllowShipmentWithoutOrder (boolean IsAllowShipmentWithoutOrder)
+	{
+		set_Value (COLUMNNAME_IsAllowShipmentWithoutOrder, Boolean.valueOf(IsAllowShipmentWithoutOrder));
+	}
+
+	/** Get Allow Shipment without Sales Order.
+		@return Indicates whether shipment (material delivery) documents can be created without referencing a Sales Order line.
+	  */
+	public boolean isAllowShipmentWithoutOrder()
+	{
+		Object oo = get_Value(COLUMNNAME_IsAllowShipmentWithoutOrder);
 		if (oo != null)
 		{
 			 if (oo instanceof Boolean)
