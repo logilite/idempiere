@@ -664,7 +664,7 @@ public class MInOutLine extends X_M_InOutLine
 		//	Order/RMA Line
 		if (getC_OrderLine_ID() == 0 && getM_RMALine_ID() == 0)
 		{
-			if (getParent().isSOTrx())
+			if (getParent().isSOTrx() && !getParent().getC_DocType().isAllowShipmentWithoutOrder())
 			{
 				log.saveError("FillMandatory", Msg.translate(getCtx(), "C_OrderLine_ID"));
 				return false;
