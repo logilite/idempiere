@@ -2327,7 +2327,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(getCtx(), getAD_WF_Activity_ID(), get_TrxName());
 			if (approvers != null && approvers.length > 0)
 			{
-				Boolean isUserUpdated = false;
+				boolean isUserUpdated = false;
 				for (MWFActivityApprover approver : approvers)
 				{
 					if (approver.getAD_User_ID() == Env.getAD_User_ID(getCtx()))
@@ -2340,7 +2340,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 
 				if (!isUserUpdated)
 				{
-					log.log(Level.WARNING, "Does not exist approver - AD_User_ID=" + AD_User_ID);
+					log.log(Level.WARNING, "No matching approver found for user - AD_User_ID=" + AD_User_ID);
 					return false;
 				}
 			}
