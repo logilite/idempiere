@@ -2314,14 +2314,40 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			log.log(Level.WARNING, "Same User - AD_User_ID=" + AD_User_ID);
 			return false;
 		}
-		//
-		MUser oldUser = MUser.get(getCtx(), getAD_User_ID());
+
 		MUser user = MUser.get(getCtx(), AD_User_ID);
 		if (user == null || user.get_ID() == 0)
 		{
 			log.log(Level.WARNING, "Does not exist - AD_User_ID=" + AD_User_ID);
 			return false;
 		}
+
+		if (getAD_WF_Responsible_ID() > 0 && ((MWFResponsible) getAD_WF_Responsible()).isManual())
+		{
+			MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(getCtx(), getAD_WF_Activity_ID(), get_TrxName());
+			if (approvers != null && approvers.length > 0)
+			{
+				boolean isUserUpdated = false;
+				for (MWFActivityApprover approver : approvers)
+				{
+					if (approver.getAD_User_ID() == Env.getAD_User_ID(getCtx()))
+					{
+						approver.setAD_User_ID(AD_User_ID);
+						approver.saveEx();
+						isUserUpdated = true;
+					}
+				}
+
+				if (!isUserUpdated)
+				{
+					log.log(Level.WARNING, "No matching approver found for user - AD_User_ID=" + AD_User_ID);
+					return false;
+				}
+			}
+		}
+
+		//
+		MUser oldUser = MUser.get(getCtx(), getAD_User_ID());
 		//	Update
 		setAD_User_ID (user.getAD_User_ID());
 		setTextMsg(textMsg);
