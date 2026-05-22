@@ -12,8 +12,12 @@
  *****************************************************************************/
 package org.adempiere.webui.adwindow;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +46,7 @@ import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
 import org.compiere.model.MultiMap;
 import org.compiere.model.PO;
+import org.compiere.model.POInfo;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
@@ -132,6 +137,8 @@ public class WFNodeVarForm extends Window implements ValueChangeListener
 
 		Rows rows = new Rows();
 
+		loadPOContext(po);
+
 		Env.setContext(Env.getCtx(), m_WindowNo, 0, GridTab.CTX_KeyColumnName, po.get_KeyColumns()[0]);
 		Env.setContext(Env.getCtx(), m_WindowNo, 0, po.get_KeyColumns()[0], String.valueOf(po.get_Value(po.get_KeyColumns()[0])));
 		Env.setContext(Env.getCtx(), m_WindowNo, 0, "IsActive", po.isActive() ? "Y" : "N");
@@ -164,6 +171,63 @@ public class WFNodeVarForm extends Window implements ValueChangeListener
 		grid.appendChild(rows);
 		gridDiv.appendChild(grid);
 		pc.appendChild(gridDiv);
+	}
+
+	/**
+	 * Loads all column values from the given persistent object (PO)
+	 * into the application context.
+	 *
+	 * @param po the persistent object containing context values
+	 */
+	private void loadPOContext(PO po)
+	{
+		if (po != null)
+		{
+			POInfo poInfo = POInfo.getPOInfo(Env.getCtx(), po.get_Table_ID());
+			for (int i = 0; i < poInfo.getColumnCount(); i++)
+			{
+				String columnName = poInfo.getColumnName(i);
+				updateContext(po.get_Value(columnName), columnName);
+			}
+		}
+	}
+	
+	/**
+	 * Updates the application context for the given column name and value.
+	 * Supported values are converted into appropriate string formats
+	 * before being stored in the context.
+	 *
+	 * @param m_value    the value to store in the context
+	 * @param columnName the context column/key name
+	 */
+	public void updateContext(Object m_value, String columnName)
+	{
+		// Set Context
+		if (m_value instanceof Boolean)
+		{
+			Env.setContext(Env.getCtx(), m_WindowNo, 0, columnName, (((Boolean) m_value) ? "Y" : "N"));
+		}
+		else if (m_value instanceof Timestamp)
+		{
+			String stringValue = null;
+			if (m_value != null && !m_value.toString().equals(""))
+			{
+				Calendar c1 = Calendar.getInstance();
+				c1.setTime((Date) m_value);
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				stringValue = sdf.format(c1.getTime());
+			}
+			Env.setContext(Env.getCtx(), m_WindowNo, 0, columnName, stringValue);
+		}
+		else if (m_value instanceof Integer[] || m_value instanceof String[])
+		{
+			String value = Util.convertArrayToStringForDB(m_value);
+			Env.setContext(Env.getCtx(), m_WindowNo, 0, columnName, value.equals("NULL") ? null : value);
+		}
+		else
+		{
+			Env.setContext(Env.getCtx(), m_WindowNo, 0, columnName, m_value == null ? null : m_value.toString());
+		}
 	}
 
 	/**
