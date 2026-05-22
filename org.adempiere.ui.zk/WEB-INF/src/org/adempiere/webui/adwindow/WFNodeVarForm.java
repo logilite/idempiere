@@ -156,7 +156,7 @@ public class WFNodeVarForm extends Window implements ValueChangeListener
 				editors.add(editor);
 				editor.setReadWrite(true);
 				Object value = po.get_Value(column.getColumnName());
-				Env.setContext(Env.getCtx(), m_WindowNo, editor.getGridField().getColumnName(), value == null ? null : value.toString());
+				updateContext(value, editor.getGridField().getColumnName());
 				editor.setValue(value);
 				row.appendChild(editor.getComponent());
 				applyDynamicLogic(editor);
@@ -197,36 +197,36 @@ public class WFNodeVarForm extends Window implements ValueChangeListener
 	 * Supported values are converted into appropriate string formats
 	 * before being stored in the context.
 	 *
-	 * @param m_value    the value to store in the context
+	 * @param value    the value to store in the context
 	 * @param columnName the context column/key name
 	 */
-	public void updateContext(Object m_value, String columnName)
+	public void updateContext(Object value, String columnName)
 	{
 		// Set Context
-		if (m_value instanceof Boolean)
+		if (value instanceof Boolean)
 		{
-			Env.setContext(Env.getCtx(), m_WindowNo, 0, columnName, (((Boolean) m_value) ? "Y" : "N"));
+			Env.setContext(Env.getCtx(), m_WindowNo, 0, columnName, (((Boolean) value) ? "Y" : "N"));
 		}
-		else if (m_value instanceof Timestamp)
+		else if (value instanceof Timestamp)
 		{
 			String stringValue = null;
-			if (m_value != null && !m_value.toString().equals(""))
+			if (value != null && !value.toString().equals(""))
 			{
 				Calendar c1 = Calendar.getInstance();
-				c1.setTime((Date) m_value);
+				c1.setTime((Date) value);
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				stringValue = sdf.format(c1.getTime());
 			}
 			Env.setContext(Env.getCtx(), m_WindowNo, 0, columnName, stringValue);
 		}
-		else if (m_value instanceof Integer[] || m_value instanceof String[])
+		else if (value instanceof Integer[] || value instanceof String[])
 		{
-			String value = Util.convertArrayToStringForDB(m_value);
-			Env.setContext(Env.getCtx(), m_WindowNo, 0, columnName, value.equals("NULL") ? null : value);
+			String strValue = Util.convertArrayToStringForDB(value);
+			Env.setContext(Env.getCtx(), m_WindowNo, 0, columnName, strValue.equals("NULL") ? null : strValue);
 		}
 		else
 		{
-			Env.setContext(Env.getCtx(), m_WindowNo, 0, columnName, m_value == null ? null : m_value.toString());
+			Env.setContext(Env.getCtx(), m_WindowNo, 0, columnName, value == null ? null : value.toString());
 		}
 	}
 
