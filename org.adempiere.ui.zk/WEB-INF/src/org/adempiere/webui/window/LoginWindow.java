@@ -216,8 +216,7 @@ public class LoginWindow extends Window implements EventListener<Event>
     public void loginOk(String userName, boolean show, KeyNamePair[] clientsKNPairs, MSSOPrincipalConfig principalConfig)
 	{
 		boolean isClientDefined = (clientsKNPairs.length == 1 || !Util.isEmpty(Env.getContext(ctx, Env.AD_USER_ID)));
-		if (pnlRole == null)
-			pnlRole = new RolePanel(ctx, this, userName, show, clientsKNPairs, isClientDefined, principalConfig);
+		createRolePanel(userName, show, clientsKNPairs, isClientDefined, principalConfig);
 		if (principalConfig != null)
 		{
 			Executions.schedule(getDesktop(), e -> validateMFPanel(userName, show, clientsKNPairs, isClientDefined), new Event(SSOUtils.EVENT_ON_AFTER_SSOLOGIN));
