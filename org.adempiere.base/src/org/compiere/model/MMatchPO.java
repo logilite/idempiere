@@ -496,7 +496,12 @@ public class MMatchPO extends X_M_MatchPO
 						MMatchPO[] matchPOs = MMatchPO.getOrderLine(retValue.getCtx(), sLine.getC_OrderLine_ID(), retValue.get_TrxName());
 						for (MMatchPO matchPO : matchPOs)
 						{
-							if (matchPO.getC_InvoiceLine_ID() > 0 && matchPO.getM_InOutLine_ID() == 0 && matchPO.getReversal_ID() == 0 && matchPO.getQty().compareTo(retValue.getQty()) >=0 )
+							if (matchPO.getC_InvoiceLine_ID() > 0
+								&& matchPO.getM_InOutLine_ID() == 0
+									&& matchPO.getReversal_ID() == 0
+									&& matchPO.getQty().compareTo(retValue.getQty()) >= 0
+									&& (matchPO.getC_InvoiceLine().getM_AttributeSetInstance_ID() == 0
+										|| matchPO.getM_AttributeSetInstance_ID() == retValue.getM_AttributeSetInstance_ID()))
 							{
 								//check m_matchinv not created with different qty
 								int cnt = DB.getSQLValueEx(sLine.get_TrxName(), "SELECT Count(*) FROM M_MatchInv WHERE M_InOutLine_ID="+sLine.getM_InOutLine_ID()
