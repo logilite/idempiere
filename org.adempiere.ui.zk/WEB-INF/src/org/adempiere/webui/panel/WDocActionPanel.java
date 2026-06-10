@@ -281,26 +281,33 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 			if (fromMenu)
 				return;
 
-			StringBuilder msg = new StringBuilder(Msg.getMsg(Env.getCtx(), "AssignedToState", new Object[] { m_activity.getWFStateText(), m_activity.getNode().getName() }));
+			String respName = "";
 			if (resp.isRole())
 			{
-				msg.append(resp.getRole().getName());
+				respName = resp.getRole().getName();
 			}
 			else if (resp.isManual())
 			{
 				MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(m_activity.getCtx(), m_activity.getAD_WF_Activity_ID(), m_activity.get_TrxName());
 				String approverNames = Arrays.stream(approvers).map(a -> a.getAD_User().getName()).collect(Collectors.joining(", "));
-				msg.append(approverNames);
+				respName = approverNames;
 			}
 			// if activity has use then he as priority then responsible user
-			else if(m_activity.getAD_User_ID() > 0 )
+			else if (m_activity.getAD_User_ID() > 0)
 			{
-				msg.append(m_activity.getAD_User().getName());
+				respName = m_activity.getAD_User().getName();
 			}
 			else if (resp.isHuman())
 			{
-				msg.append(resp.getAD_User().getName());
+				respName = resp.getAD_User().getName();
 			}
+
+			if (Util.isEmpty(respName) && m_activity.getAD_User_ID() > 0)
+			{
+				respName = m_activity.getAD_User().getName();
+			}
+
+			StringBuilder msg = new StringBuilder(Msg.getMsg(Env.getCtx(), "AssignedToState", new Object[] { m_activity.getWFStateText(), m_activity.getNode().getName() , respName}));
 			// If Activity already suspended then show error
 			Dialog.error(gridTab.getWindowNo(), msg.toString(), m_activity.toStringX());
 			return;
@@ -837,7 +844,9 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 					future = Adempiere.getThreadPoolExecutor().submit(new DesktopRunnable(new DocActionDialogRunnable(), getDesktop()));
 				}
 				else
-					onOk(null);
+					onOk(result -> {
+						confirmPanel.getButton("Ok").setEnabled(true);
+					});
 			}
 			else if (confirmPanel.getButton("Cancel").equals(event.getTarget()))
 			{
@@ -1163,6 +1172,7 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 		}
 		catch (Exception e)
 		{
+			confirmPanel.getButton("Ok").setEnabled(true);
 			rollbackNodeVar();
 			if (e instanceof AdempiereException)
 				throw (AdempiereException) e;

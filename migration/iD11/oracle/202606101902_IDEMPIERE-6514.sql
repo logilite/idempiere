@@ -1,0 +1,10 @@
+-- IDEMPIERE-6514  Workflow Enhancement
+SELECT register_migration_script('202606101902_IDEMPIERE-6514.sql') FROM dual;
+
+SET SQLBLANKLINES ON
+SET DEFINE OFF
+
+-- 10/06/2026 19:02:07 IST
+UPDATE AD_Message SET MsgText='Assigned to {2}: {1}  {0}',Updated=TO_TIMESTAMP('2026-06-10 19:02:07','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Message_ID=200970
+;
+
