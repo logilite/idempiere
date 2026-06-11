@@ -844,9 +844,20 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 					future = Adempiere.getThreadPoolExecutor().submit(new DesktopRunnable(new DocActionDialogRunnable(), getDesktop()));
 				}
 				else
-					onOk(result -> {
+				{
+					try
+					{
+						onOk(result -> {
+							confirmPanel.getButton("Ok").setEnabled(true);
+						});
+					}
+					catch (Exception e)
+					{
+						// Ensure OK button is re-enabled if onOk() encounters an exception.
 						confirmPanel.getButton("Ok").setEnabled(true);
-					});
+						throw e;
+					}
+				}
 			}
 			else if (confirmPanel.getButton("Cancel").equals(event.getTarget()))
 			{
