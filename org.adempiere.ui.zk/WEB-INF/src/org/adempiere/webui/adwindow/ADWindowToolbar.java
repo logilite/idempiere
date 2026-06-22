@@ -47,6 +47,7 @@ import org.compiere.model.GridTab;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MToolBarButton;
+import org.compiere.model.MToolBarButtonRestrict;
 import org.compiere.model.MUserQuery;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -169,7 +170,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
     /** list of custom toolbar button (IsCustomization=Y) **/
     private List<ToolbarCustomButton> toolbarCustomButtons = new ArrayList<ToolbarCustomButton>();
     /** Restriction list for window, loaded from AD_ToolBarButtonRestrict **/
-    private List<String> restrictionList;
+    private Map <String, MToolBarButtonRestrict> restrictionList;
     /** List of toolbar button with IsAdvanced=Y **/
     private List<String> advancedList;
 
@@ -1080,7 +1081,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 		if (restrictionList == null)
 			restrictionList = adwindow.getWindowToolbarRestrictList();
 		
-		if (restrictionList.contains(buttonName))
+		if (restrictionList.containsKey(buttonName) && MToolBarButtonRestrict.ACTION_Window.equalsIgnoreCase(restrictionList.get(buttonName).getAction()) && restrictionList.get(buttonName).isExclude())
 			return false;
 		
 		if (!MRole.getDefault().isAccessAdvanced()) {
@@ -1141,9 +1142,11 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 	 * Dynamic update of each toolbar button state (Check restrictions).
 	 * For custom button, call {@link ToolbarCustomButton#dynamicDisplay()}, process pressedLogic and readOnlyLogic.
 	 */
-	public void dynamicDisplay() {
-		List<Toolbarbutton> customButtons = new ArrayList<Toolbarbutton>();
-		for(ToolbarCustomButton toolbarCustomBtn : toolbarCustomButtons) {
+	public void dynamicDisplay( )
+	{
+		List <Toolbarbutton> customButtons = new ArrayList <Toolbarbutton>();
+		for (ToolbarCustomButton toolbarCustomBtn : toolbarCustomButtons)
+		{
 			if (overflows != null)
 				toolbarCustomBtn.dynamicDisplay(overflows.contains(toolbarCustomBtn.getToolbarbutton()));
 			customButtons.add(toolbarCustomBtn.getToolbarbutton());
@@ -1151,48 +1154,106 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 		
 		ADWindow adwindow = ADWindow.findADWindow(this);
 		GridTab gridTab = adwindow.getADWindowContent().getActiveGridTab();
-		if (gridTab != null) {
+		if (gridTab != null)
+		{
 			int AD_Tab_ID = gridTab.getAD_Tab_ID();
-			List<String> restrictionList = adwindow.getTabToolbarRestrictList(AD_Tab_ID);
-			
-			for (Component p = this.getFirstChild(); p != null; p = p.getNextSibling()) {
-				if (p instanceof ToolBarButton) {
+			Map <String, MToolBarButtonRestrict> restrictionList = adwindow.getTabToolbarRestrictList(AD_Tab_ID);
+
+			for (Component p = this.getFirstChild(); p != null; p = p.getNextSibling())
+			{
+				if (p instanceof ToolBarButton)
+				{
 					if (!customButtons.contains(p) && !p.isVisible())
 						p.setVisible(true);
-				} else if (p instanceof Combobox && !p.isVisible()) {
+				}
+				else if (p instanceof Combobox && !p.isVisible())
+				{
 					p.setVisible(true);
 				}
 			}
-			
-			for (String restrictName : restrictionList)
+
+			for (String restrictName : restrictionList.keySet())
 			{
-				for (Component p = this.getFirstChild(); p != null; p = p.getNextSibling()) {
-					if (p instanceof ToolBarButton) {
-						if ( restrictName.equals(((ToolBarButton)p).getName()) ) {
-							p.setVisible(false);
-							break;
+				MToolBarButtonRestrict toolBarButtonRestrict = restrictionList.get(restrictName);
+				if (MToolBarButtonRestrict.ACTION_Window.equals(toolBarButtonRestrict.getAction()))
+				{
+					for (Component p = this.getFirstChild(); p != null; p = p.getNextSibling())
+					{
+						if (p instanceof ToolBarButton)
+						{
+							ToolBarButton btn = (ToolBarButton) p;
+							if (restrictName.equals(btn.getName()))
+							{
+								if (!toolBarButtonRestrict.isExclude())
+								{
+									if (!Util.isEmpty(toolBarButtonRestrict.getDisplayLogic(), true))
+									{
+										boolean isDisplayed = toolBarButtonRestrict.validateLogic(toolBarButtonRestrict.getDisplayLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
+										btn.setVisible(isDisplayed);
+									}
+									
+									if (!Util.isEmpty(toolBarButtonRestrict.getReadOnlyLogic(), true))
+									{
+										boolean isReadOnly = toolBarButtonRestrict.validateLogic(toolBarButtonRestrict.getReadOnlyLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
+										btn.setDisabled(isReadOnly);
+									}
+								}
+								else
+								{
+									btn.setVisible(false);
+								}
+								break;
+							}
 						}
-					} else if (p instanceof Combobox) {
-						if (restrictName.equals(((Combobox) p).getId())) {
-							p.setVisible(false);
-							break;
+						else if (p instanceof Combobox)
+						{
+							Combobox cbox = (Combobox) p;
+							if (restrictName.equals(cbox.getId()))
+							{
+								if (!toolBarButtonRestrict.isExclude())
+								{
+									if (!Util.isEmpty(toolBarButtonRestrict.getDisplayLogic(), true))
+									{
+										boolean isDisplayed = toolBarButtonRestrict.validateLogic(toolBarButtonRestrict.getDisplayLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
+										cbox.setVisible(isDisplayed);
+									}
+									else if (!Util.isEmpty(toolBarButtonRestrict.getReadOnlyLogic(), true))
+									{
+										boolean isReadOnly = toolBarButtonRestrict.validateLogic(toolBarButtonRestrict.getReadOnlyLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
+										cbox.setDisabled(isReadOnly);
+									}
+								}
+								else
+								{
+									cbox.setVisible(false);
+								}
+								break;
+							}
 						}
 					}
 				}
 
 			}
-			
-			if (overflows != null) {
-				//Set visible all overflow buttons with the same condition as above
+
+			if (overflows != null)
+			{
+				// Set visible all overflow buttons with the same condition as above
 				overflows.stream()
-				.filter(button -> !customButtons.contains(button) && !button.isVisible())
-				.forEach(button -> button.setVisible(true));
-				
-				for (String restrictName : restrictionList) {
-					for (ToolBarButton p : overflows) {
-						if (restrictName.equals(p.getName())) {
-							p.setVisible(false);
-							break;
+								.filter(button -> !customButtons.contains(button) && !button.isVisible())
+								.forEach(button -> button.setVisible(true));
+
+				for (String restrictName : restrictionList.keySet())
+				{
+					MToolBarButtonRestrict toolBarButtonRestrict = restrictionList.get(restrictName);
+					if (MToolBarButtonRestrict.ACTION_Window.equals(toolBarButtonRestrict.getAction()))
+					{
+						for (ToolBarButton p : overflows)
+						{
+							if (restrictName.equals(p.getName()))
+							{
+								p.setVisible(false);
+								break;
+							}
 						}
 					}
 				}

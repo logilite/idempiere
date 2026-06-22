@@ -1854,9 +1854,8 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 		if (ToolBarMenuRestictionLoaded)
 			return;
 		Properties m_ctx = Env.getCtx();
-		int ToolBarButton_ID = 0;
 
-		int[] restrictionList = AD_Window_ID > 0 
+		MToolBarButtonRestrict[] restrictionList = AD_Window_ID > 0 
 				? MToolBarButtonRestrict.getOfWindow(m_ctx, MRole.getDefault().getAD_Role_ID(), AD_Window_ID, true, null)
 				: MToolBarButtonRestrict.getOfReport(m_ctx, MRole.getDefault().getAD_Role_ID(), AD_Process_ID, null);
 		if (log.isLoggable(Level.INFO))
@@ -1864,8 +1863,8 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 
 		for (int i = 0; i < restrictionList.length; i++)
 		{
-			ToolBarButton_ID= restrictionList[i];
-			X_AD_ToolBarButton tbt = new X_AD_ToolBarButton(m_ctx, ToolBarButton_ID, null);
+			MToolBarButtonRestrict toolBarButtonRestrict = restrictionList[i];
+			X_AD_ToolBarButton tbt = new X_AD_ToolBarButton(m_ctx, toolBarButtonRestrict.getAD_ToolBarButton_ID(), null);
 			if (!"R".equals(tbt.getAction()))
 				continue;
 			
@@ -1875,7 +1874,30 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 			for (Component p = this.toolBar.getFirstChild(); p != null; p = p.getNextSibling()) {
 				if (p instanceof Toolbarbutton) {
 					if ( restrictName.equals(((ToolBarButton)p).getName()) ) {
-						this.toolBar.removeChild(p);
+						if (!toolBarButtonRestrict.isExclude())
+						{
+							if (!Util.isEmpty(toolBarButtonRestrict.getDisplayLogic(), true))
+							{
+								boolean isDisplayed = toolBarButtonRestrict.validateLogic(
+										toolBarButtonRestrict.getDisplayLogic(), m_WindowNo,
+										-1);
+								if(!isDisplayed)
+								{
+									this.toolBar.removeChild(p);
+								}
+							}
+							if (!Util.isEmpty(toolBarButtonRestrict.getReadOnlyLogic(), true))
+							{
+								boolean isReadOnly = toolBarButtonRestrict.validateLogic(
+										toolBarButtonRestrict.getReadOnlyLogic(), m_WindowNo,
+										-1);
+								((ToolBarButton) p).setDisabled(isReadOnly);
+							}
+						}
+						else
+						{
+							this.toolBar.removeChild(p);
+						}
 						break;
 					}
 				}

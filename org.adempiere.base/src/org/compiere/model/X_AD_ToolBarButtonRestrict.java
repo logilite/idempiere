@@ -30,7 +30,7 @@ public class X_AD_ToolBarButtonRestrict extends PO implements I_AD_ToolBarButton
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20231222L;
+	private static final long serialVersionUID = 20260622L;
 
     /** Standard Constructor */
     public X_AD_ToolBarButtonRestrict (Properties ctx, int AD_ToolBarButtonRestrict_ID, String trxName)
@@ -38,8 +38,8 @@ public class X_AD_ToolBarButtonRestrict extends PO implements I_AD_ToolBarButton
       super (ctx, AD_ToolBarButtonRestrict_ID, trxName);
       /** if (AD_ToolBarButtonRestrict_ID == 0)
         {
-			setAction (null);
 			setAD_ToolBarButtonRestrict_ID (0);
+			setAction (null);
 			setIsExclude (true);
 // Y
         } */
@@ -51,8 +51,8 @@ public class X_AD_ToolBarButtonRestrict extends PO implements I_AD_ToolBarButton
       super (ctx, AD_ToolBarButtonRestrict_ID, trxName, virtualColumns);
       /** if (AD_ToolBarButtonRestrict_ID == 0)
         {
-			setAction (null);
 			setAD_ToolBarButtonRestrict_ID (0);
+			setAction (null);
 			setIsExclude (true);
 // Y
         } */
@@ -64,8 +64,8 @@ public class X_AD_ToolBarButtonRestrict extends PO implements I_AD_ToolBarButton
       super (ctx, AD_ToolBarButtonRestrict_UU, trxName);
       /** if (AD_ToolBarButtonRestrict_UU == null)
         {
-			setAction (null);
 			setAD_ToolBarButtonRestrict_ID (0);
+			setAction (null);
 			setIsExclude (true);
 // Y
         } */
@@ -77,8 +77,8 @@ public class X_AD_ToolBarButtonRestrict extends PO implements I_AD_ToolBarButton
       super (ctx, AD_ToolBarButtonRestrict_UU, trxName, virtualColumns);
       /** if (AD_ToolBarButtonRestrict_UU == null)
         {
-			setAction (null);
 			setAD_ToolBarButtonRestrict_ID (0);
+			setAction (null);
 			setIsExclude (true);
 // Y
         } */
@@ -324,12 +324,28 @@ public class X_AD_ToolBarButtonRestrict extends PO implements I_AD_ToolBarButton
 		return ii.intValue();
 	}
 
+	/** Set Display Logic.
+		@param DisplayLogic If the Field is displayed, the result determines if the field is actually displayed
+	*/
+	public void setDisplayLogic (String DisplayLogic)
+	{
+		set_Value (COLUMNNAME_DisplayLogic, DisplayLogic);
+	}
+
+	/** Get Display Logic.
+		@return If the Field is displayed, the result determines if the field is actually displayed
+	  */
+	public String getDisplayLogic()
+	{
+		return (String)get_Value(COLUMNNAME_DisplayLogic);
+	}
+
 	/** Set Exclude.
 		@param IsExclude Exclude access to the data - if not selected Include access to the data
 	*/
 	public void setIsExclude (boolean IsExclude)
 	{
-		set_ValueNoCheck (COLUMNNAME_IsExclude, Boolean.valueOf(IsExclude));
+		set_Value (COLUMNNAME_IsExclude, Boolean.valueOf(IsExclude));
 	}
 
 	/** Get Exclude.
@@ -345,5 +361,21 @@ public class X_AD_ToolBarButtonRestrict extends PO implements I_AD_ToolBarButton
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	/** Set Read Only Logic.
+		@param ReadOnlyLogic Logic to determine if field is read only (applies only when field is read-write)
+	*/
+	public void setReadOnlyLogic (String ReadOnlyLogic)
+	{
+		set_Value (COLUMNNAME_ReadOnlyLogic, ReadOnlyLogic);
+	}
+
+	/** Get Read Only Logic.
+		@return Logic to determine if field is read only (applies only when field is read-write)
+	  */
+	public String getReadOnlyLogic()
+	{
+		return (String)get_Value(COLUMNNAME_ReadOnlyLogic);
 	}
 }

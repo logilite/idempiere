@@ -51,6 +51,7 @@ import org.adempiere.webui.window.WRecordInfo;
 import org.compiere.model.DataStatusEvent;
 import org.compiere.model.GridTab;
 import org.compiere.model.MToolBarButton;
+import org.compiere.model.MToolBarButtonRestrict;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
@@ -917,9 +918,9 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
         ADWindow adwindow = ADWindow.findADWindow(this);
         if (adwindow == null)
         	return;
-        List<String> tabRestrictList = adwindow.getTabToolbarRestrictList(adtab.getGridTab().getAD_Tab_ID());
-        List<String> windowRestrictList = adwindow.getWindowToolbarRestrictList();
-        
+		Map<String, MToolBarButtonRestrict> tabRestrictList = adwindow.getTabToolbarRestrictList(adtab.getGridTab().getAD_Tab_ID());
+        Map <String, MToolBarButtonRestrict> windowRestrictList = adwindow.getWindowToolbarRestrictList();
+
         for(Component c : toolbar.getChildren()) {
         	if (c instanceof ToolBarButton) {
         		ToolBarButton btn = (ToolBarButton) c;
@@ -943,11 +944,30 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
 					tabpanel.toolbarCustomButtons.get(btn).updateToolbarCustomBtn(adtab, changed, readOnly);
 				}
 
-        		if (windowRestrictList.contains(btn.getId())) {
-        			btn.setVisible(false);
-        		} else if (tabRestrictList.contains(btn.getId())) {
-        			btn.setVisible(false);
-        		} else if (tabpanel.toolbarCustomButtons.containsKey(btn)) {
+        		if (tabRestrictList.containsKey(btn.getId()) || windowRestrictList.containsKey(btn.getId()))
+				{
+					MToolBarButtonRestrict toolBarButtonRestrict = windowRestrictList.containsKey(btn.getId()) ? windowRestrictList.get(btn.getId()) : tabRestrictList.get(btn.getId());
+					if (MToolBarButtonRestrict.ACTION_Detail.equals(toolBarButtonRestrict.getAction()))
+					{
+						if (!toolBarButtonRestrict.isExclude())
+						{
+							if (!Util.isEmpty(toolBarButtonRestrict.getDisplayLogic(), true))
+							{
+								boolean isDisplayed = toolBarButtonRestrict.validateLogic(toolBarButtonRestrict.getDisplayLogic(), adtab.getGridTab().getWindowNo(), adtab.getGridTab().getTabNo());
+								btn.setVisible(isDisplayed);
+							}
+							if (!Util.isEmpty(toolBarButtonRestrict.getReadOnlyLogic(), true))
+							{
+								boolean isReadOnly = toolBarButtonRestrict.validateLogic(toolBarButtonRestrict.getReadOnlyLogic(), adtab.getGridTab().getWindowNo(), adtab.getGridTab().getTabNo());
+								btn.setDisabled(isReadOnly);
+							}
+						}
+						else
+						{
+							btn.setVisible(false);
+						}
+					}
+				} else if (tabpanel.toolbarCustomButtons.containsKey(btn)) {
         			ToolbarCustomButton customButton = tabpanel.toolbarCustomButtons.get(btn);
         			customButton.dynamicDisplay();
         		}else {
