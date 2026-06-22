@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -328,7 +329,7 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 				? MToolBarButtonRestrict.getOfWindow(m_ctx, MRole.getDefault().getAD_Role_ID(), AD_Window_ID, true, null)
 				: MToolBarButtonRestrict.getOfReport(m_ctx, MRole.getDefault().getAD_Role_ID(), AD_Process_ID, null);
 		if (log.isLoggable(Level.INFO))
-			log.info("restrictionList="+restrictionList.toString());
+			log.info("restrictionList=" + Arrays.toString(restrictionList));
 
 		for (int i = 0; i < restrictionList.length; i++)
 		{

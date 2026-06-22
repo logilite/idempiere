@@ -919,7 +919,7 @@ public class DetailPane extends Panel implements EventListener<Event>, IdSpace {
         if (adwindow == null)
         	return;
 		Map<String, MToolBarButtonRestrict> tabRestrictList = adwindow.getTabToolbarRestrictList(adtab.getGridTab().getAD_Tab_ID());
-        Map <String, MToolBarButtonRestrict> windowRestrictList = adwindow.getWindowToolbarRestrictList();
+		Map <String, MToolBarButtonRestrict> windowRestrictList = adwindow.getWindowToolbarRestrictList();
 
         for(Component c : toolbar.getChildren()) {
         	if (c instanceof ToolBarButton) {

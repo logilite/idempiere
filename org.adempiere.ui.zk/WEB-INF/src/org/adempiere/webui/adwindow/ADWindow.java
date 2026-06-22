@@ -64,7 +64,7 @@ public class ADWindow extends AbstractUIPart
 	private MImage image;
     /** AD_Tab_ID:BtnComponentName. List of toolbar buttons to exclude, loaded from AD_ToolBarButtonRestrict **/
 	private Map<Integer, Map<String, MToolBarButtonRestrict>> tabToolbarRestricMap = new HashMap<Integer, Map<String, MToolBarButtonRestrict>>();
-	/** List of BtnComponentName to exclude, loaded from AD_ToolBarButtonRestrict **/
+	/** BtnComponentName:MToolBarButtonRestrict. Map of window toolbar button restrictions, loaded from AD_ToolBarButtonRestrict **/
 	private Map<String, MToolBarButtonRestrict> windowToolbarRestrictList = null;
 	/** List of advanced (IsAdvancedButton=Y) window toolbar buttons. Accessible by advanced role only. **/
 	private List<String> windowToolbarAdvancedList = null;

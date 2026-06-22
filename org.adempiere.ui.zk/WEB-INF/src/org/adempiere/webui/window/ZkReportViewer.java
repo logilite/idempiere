@@ -1859,7 +1859,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 				? MToolBarButtonRestrict.getOfWindow(m_ctx, MRole.getDefault().getAD_Role_ID(), AD_Window_ID, true, null)
 				: MToolBarButtonRestrict.getOfReport(m_ctx, MRole.getDefault().getAD_Role_ID(), AD_Process_ID, null);
 		if (log.isLoggable(Level.INFO))
-			log.info("restrictionList="+restrictionList.toString());
+			log.info("restrictionList="+ Arrays.toString(restrictionList));
 
 		for (int i = 0; i < restrictionList.length; i++)
 		{
@@ -1876,6 +1876,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 					if ( restrictName.equals(((ToolBarButton)p).getName()) ) {
 						if (!toolBarButtonRestrict.isExclude())
 						{
+							boolean removed = false;
 							if (!Util.isEmpty(toolBarButtonRestrict.getDisplayLogic(), true))
 							{
 								boolean isDisplayed = toolBarButtonRestrict.validateLogic(
@@ -1884,9 +1885,10 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 								if(!isDisplayed)
 								{
 									this.toolBar.removeChild(p);
+									removed = true;
 								}
 							}
-							if (!Util.isEmpty(toolBarButtonRestrict.getReadOnlyLogic(), true))
+							if (!removed && !Util.isEmpty(toolBarButtonRestrict.getReadOnlyLogic(), true))
 							{
 								boolean isReadOnly = toolBarButtonRestrict.validateLogic(
 										toolBarButtonRestrict.getReadOnlyLogic(), m_WindowNo,

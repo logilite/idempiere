@@ -1217,7 +1217,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 										boolean isDisplayed = toolBarButtonRestrict.validateLogic(toolBarButtonRestrict.getDisplayLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
 										cbox.setVisible(isDisplayed);
 									}
-									else if (!Util.isEmpty(toolBarButtonRestrict.getReadOnlyLogic(), true))
+									if (!Util.isEmpty(toolBarButtonRestrict.getReadOnlyLogic(), true))
 									{
 										boolean isReadOnly = toolBarButtonRestrict.validateLogic(toolBarButtonRestrict.getReadOnlyLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
 										cbox.setDisabled(isReadOnly);

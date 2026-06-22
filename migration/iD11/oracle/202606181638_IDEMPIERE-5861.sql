@@ -4,18 +4,6 @@ SELECT register_migration_script('202606181638_IDEMPIERE-5861.sql') FROM dual;
 SET SQLBLANKLINES ON
 SET DEFINE OFF
 
--- 18/06/2026 16:38:47 IST
-UPDATE AD_Column SET AD_Val_Rule_ID=NULL, ColumnName='IsExclude', IsMandatory='Y', AD_Reference_Value_ID=NULL, IsUpdateable='Y', AD_Process_ID=NULL, IsSyncDatabase='Y', AD_Chart_ID=NULL, PA_DashboardContent_ID=NULL, AD_Val_Rule_Lookup_ID=NULL,Updated=TO_TIMESTAMP('2026-06-18 16:38:47','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID=200811
-;
-
--- 18/06/2026 17:15:40 IST
-UPDATE AD_SysConfig SET Value='dpansheriya',Updated=TO_TIMESTAMP('2026-06-18 17:15:40','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_SysConfig_ID=50001
-;
-
--- 18/06/2026 17:15:48 IST
-UPDATE AD_SysConfig SET Value='ThAs5fR5',Updated=TO_TIMESTAMP('2026-06-18 17:15:48','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_SysConfig_ID=50002
-;
-
 -- 18/06/2026 17:16:16 IST
 UPDATE AD_Column SET AD_Val_Rule_ID=NULL, ColumnName='IsExclude', IsMandatory='Y', AD_Reference_Value_ID=NULL, IsUpdateable='Y', AD_Process_ID=NULL, IsSyncDatabase='Y', AD_Chart_ID=NULL, PA_DashboardContent_ID=NULL, AD_Val_Rule_Lookup_ID=NULL,Updated=TO_TIMESTAMP('2026-06-18 17:16:16','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Column_ID=200811
 ;
