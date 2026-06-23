@@ -101,7 +101,9 @@ public class MDashboardContentAccess extends X_PA_DashboardContent_Access {
 		sql.append(" AND PA_DashboardContent_ID NOT IN (SELECT PA_DashboardContent_ID FROM PA_DashboardContent_Access ct2 WHERE ct2.IsActive='N' AND ct2.AD_Client_ID in (0,?)");
 		parameters.add(AD_Client_ID);
 		if (AD_Role >= 0) {
-			sql.append(" AND COALESCE(ct2.AD_Role_ID, ?) = ?");			  
+			sql.append(" AND (	COALESCE(ct2.AD_Role_ID, ?) = ?");
+			sql.append("		OR ct2.AD_Role_ID IN (SELECT  Included_Role_ID FROM AD_Role_Included inc WHERE inc.AD_Role_ID = ? AND inc.IsActive='Y'))");
+			parameters.add(AD_Role);
 			parameters.add(AD_Role);
 			parameters.add(AD_Role);
 		}
@@ -120,8 +122,11 @@ public class MDashboardContentAccess extends X_PA_DashboardContent_Access {
 		   .append(" WHERE cta.IsActive='Y'")
 		   .append(" AND ct.IsActive='Y'");
 				
-		if(AD_Role >= 0) {
-			sql.append(" AND COALESCE(cta.AD_Role_ID, ?) = ?");			  
+		if (AD_Role >= 0)
+		{
+			sql.append(" AND (	COALESCE(cta.AD_Role_ID, ?) = ?");
+			sql.append("		OR cta.AD_Role_ID IN (SELECT  Included_Role_ID FROM AD_Role_Included inc WHERE inc.AD_Role_ID = ? AND inc.IsActive='Y'))");
+			parameters.add(AD_Role);
 			parameters.add(AD_Role);
 			parameters.add(AD_Role);
 		}
