@@ -102,8 +102,7 @@ public class MDashboardContentAccess extends X_PA_DashboardContent_Access {
 		parameters.add(AD_Client_ID);
 		if (AD_Role >= 0) {
 			sql.append(" AND (	COALESCE(ct2.AD_Role_ID, ?) = ?");
-			sql.append("		OR COALESCE(ct2.AD_Role_ID, ?) IN (SELECT  Included_Role_ID FROM AD_Role_Included WHERE AD_Role_ID = ?))");
-			parameters.add(AD_Role);
+			sql.append("		OR ct2.AD_Role_ID IN (SELECT  Included_Role_ID FROM AD_Role_Included inc WHERE inc.AD_Role_ID = ? AND inc.IsActive='Y'))");
 			parameters.add(AD_Role);
 			parameters.add(AD_Role);
 			parameters.add(AD_Role);
@@ -126,8 +125,7 @@ public class MDashboardContentAccess extends X_PA_DashboardContent_Access {
 		if (AD_Role >= 0)
 		{
 			sql.append(" AND (	COALESCE(cta.AD_Role_ID, ?) = ?");
-			sql.append("		OR COALESCE(cta.AD_Role_ID, ?) IN (SELECT  Included_Role_ID FROM AD_Role_Included WHERE AD_Role_ID = ?))");
-			parameters.add(AD_Role);
+			sql.append("		OR cta.AD_Role_ID IN (SELECT  Included_Role_ID FROM AD_Role_Included inc WHERE inc.AD_Role_ID = ? AND inc.IsActive='Y'))");
 			parameters.add(AD_Role);
 			parameters.add(AD_Role);
 			parameters.add(AD_Role);
