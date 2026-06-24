@@ -335,7 +335,7 @@ public class ZkJRViewer extends Window implements EventListener<Event>, ITabOnCl
 		{
 			MToolBarButtonRestrict toolBarButtonRestrict= restrictionList[i];
 			X_AD_ToolBarButton tbt = new X_AD_ToolBarButton(m_ctx, toolBarButtonRestrict.getAD_ToolBarButton_ID(), null);
-			if (!"R".equals(tbt.getAction()))
+			if (!"R".equals(tbt.getAction()) || !toolBarButtonRestrict.isExclude())
 				continue;
 			
 			String restrictName = tbt.getComponentName();

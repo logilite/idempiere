@@ -26,6 +26,7 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Evaluator;
+import org.compiere.util.Msg;
 
 
 /**
@@ -37,6 +38,32 @@ public class MToolBarButtonRestrict extends X_AD_ToolBarButtonRestrict
 
 	/** Cache for toolbar button restricted */
 	private static CCache<String, Boolean>	cache_toolbarBtnRestriction		= new CCache<String, Boolean>("ToolbarButtonRestricted", 50);
+	
+	private static final String				CLIENT_OVERRIDE_CLAUSE
+																			= " AND NOT EXISTS ("
+																				+ "   SELECT 1"
+																					+ "   FROM AD_ToolBarButtonRestrict t2"
+																					+ "   WHERE t2.AD_ToolBarButton_ID = AD_ToolBarButtonRestrict.AD_ToolBarButton_ID"
+																					+ "     AND COALESCE(t2.AD_Window_ID, 0) = COALESCE(AD_ToolBarButtonRestrict.AD_Window_ID, 0)"
+																					+ "     AND COALESCE(t2.AD_Tab_ID, 0) = COALESCE(AD_ToolBarButtonRestrict.AD_Tab_ID, 0)"
+																					+ "     AND t2.AD_Client_ID <> 0"
+																					+ "     AND AD_ToolBarButtonRestrict.AD_Client_ID = 0"
+																					+ "     AND (t2.AD_Role_ID IS NULL OR t2.AD_Role_ID = ?)"
+																					+ " )";
+	private static final String				WINDOW_REPORT_BUTTON_CLAUSE
+																			= " AND AD_ToolBarButton_ID IN"
+																				+ " (SELECT AD_ToolBarButton_ID"
+																					+ "    FROM AD_ToolBarButton"
+																					+ "   WHERE AD_Tab_ID IS NULL"
+																					+ "     AND IsActive='Y'"
+																					+ "     AND Action=?)";
+
+	private static final String				TAB_BUTTON_CLAUSE
+																			= " AND AD_ToolBarButton_ID IN"
+																				+ " (SELECT AD_ToolBarButton_ID"
+																					+ "    FROM AD_ToolBarButton"
+																					+ "   WHERE AD_Process_ID IS NULL"
+																					+ "     AND IsActive='Y')";
 
 	private static final String				WHERE_CLAUSE_OF_WINDOW_SQL
 																			= "IsActive = 'Y'"
@@ -44,16 +71,15 @@ public class MToolBarButtonRestrict extends X_AD_ToolBarButtonRestrict
 																					+ " AND (AD_Role_ID IS NULL OR AD_Role_ID = ?)"
 																					+ " AND (AD_Window_ID IS NULL OR (Action='W' AND AD_Window_ID=?))"
 																					+ " AND AD_Tab_ID IS NULL"
-																					+ " AND AD_ToolBarButton_ID IN"
-																					+ " (SELECT AD_ToolBarButton_ID FROM AD_ToolBarButton WHERE AD_Tab_ID IS NULL AND IsActive='Y' AND Action=?)";
-
+																					+ WINDOW_REPORT_BUTTON_CLAUSE
+																					+ CLIENT_OVERRIDE_CLAUSE;
 	private static final String				WHERE_CLAUSE_OF_REPORT_SQL
 																			= "IsActive = 'Y'"
 																				+ " AND AD_Client_ID IN (0, ?)"
 																					+ " AND (AD_Role_ID IS NULL OR AD_Role_ID = ?)"
 																					+ " AND (AD_Process_ID IS NULL OR (Action='R' AND AD_Process_ID=?))"
-																					+ " AND AD_ToolBarButton_ID IN"
-																					+ " (SELECT AD_ToolBarButton_ID FROM AD_ToolBarButton WHERE AD_Tab_ID IS NULL AND IsActive='Y' AND Action=?)";
+																					+ WINDOW_REPORT_BUTTON_CLAUSE
+																					+ CLIENT_OVERRIDE_CLAUSE;
 
 	private static final String				WHERE_CLAUSE_OF_TAB_SQL
 																			= "IsActive = 'Y'"
@@ -61,8 +87,17 @@ public class MToolBarButtonRestrict extends X_AD_ToolBarButtonRestrict
 																					+ " AND (AD_Role_ID IS NULL OR AD_Role_ID = ?)"
 																					+ " AND AD_Window_ID=?"
 																					+ " AND AD_Tab_ID=?"
-																					+ " AND AD_ToolBarButton_ID IN"
-																					+ " (SELECT AD_ToolBarButton_ID FROM AD_ToolBarButton WHERE AD_Process_ID IS NULL AND IsActive='Y')";
+																					+ TAB_BUTTON_CLAUSE
+																					+ CLIENT_OVERRIDE_CLAUSE;
+	
+	private static final String				DUPLICATE_WHERE
+																			= "AD_Client_ID=? "
+																				+ "AND Action=? "
+																					+ "AND COALESCE(AD_Role_ID,0)=COALESCE(?,0) "
+																					+ "AND COALESCE(AD_Window_ID,0)=COALESCE(?,0) "
+																					+ "AND COALESCE(AD_Tab_ID,0)=COALESCE(?,0) "
+																					+ "AND COALESCE(AD_ToolBarButton_ID,0)=COALESCE(?,0) "
+																					+ "AND AD_ToolBarButtonRestrict_ID<>?";
 
 	private static final String GET_PROCESS_BUTTON_OF_TAB_SQL = "SELECT AD_ToolBarButton_ID FROM AD_ToolBarButtonRestrict WHERE IsActive = 'Y'"
 			+ " AND AD_Client_ID IN (0, ?)"
@@ -119,6 +154,22 @@ public class MToolBarButtonRestrict extends X_AD_ToolBarButtonRestrict
 	{
 		super(ctx, rs, trxName);
 	}	//	MToolBarButtonRestrict
+	
+	
+	@Override
+	protected boolean beforeSave(boolean newRecord)
+	{
+		boolean exists
+						= new Query(getCtx(), Table_Name, DUPLICATE_WHERE, get_TrxName()).setParameters(getAD_Client_ID(), getAction(), getAD_Role_ID(), getAD_Window_ID(), getAD_Tab_ID(),
+										getAD_ToolBarButton_ID(), get_ID()).match();
+		if (exists)
+		{
+			log.saveError("Error",  Msg.getMsg(getCtx(), "Duplicate_ToolBarButtonRestrict"));
+			return false;
+		}
+
+		return super.beforeSave(newRecord);
+	}
 
 	/** 
 	 * Returns a list of restrictions to be applied according to the role, the window of the form ...
@@ -133,7 +184,7 @@ public class MToolBarButtonRestrict extends X_AD_ToolBarButtonRestrict
 		if (s_log.isLoggable(Level.INFO)) s_log.info("sql="+WHERE_CLAUSE_OF_WINDOW_SQL);
 		
 		List<MToolBarButtonRestrict> list = new Query(ctx, Table_Name, WHERE_CLAUSE_OF_WINDOW_SQL, trxName)
-				.setParameters(Env.getAD_Client_ID(ctx), AD_Role_ID, AD_Window_ID, reportViewer ? MToolBarButtonRestrict.ACTION_Report: MToolBarButtonRestrict.ACTION_Window).list();
+				.setParameters(Env.getAD_Client_ID(ctx), AD_Role_ID, AD_Window_ID, reportViewer ? MToolBarButtonRestrict.ACTION_Report: MToolBarButtonRestrict.ACTION_Window, AD_Role_ID).list();
 		return list.toArray(new MToolBarButtonRestrict[list.size()]);
 	}	//	getOfWindow
 	
@@ -149,7 +200,7 @@ public class MToolBarButtonRestrict extends X_AD_ToolBarButtonRestrict
 	{		
 		if (s_log.isLoggable(Level.INFO)) s_log.info("sql="+WHERE_CLAUSE_OF_TAB_SQL);
 		List<MToolBarButtonRestrict> list = new Query(ctx, Table_Name, WHERE_CLAUSE_OF_TAB_SQL, trxName)
-				.setParameters(Env.getAD_Client_ID(ctx), AD_Role_ID, AD_Window_ID, AD_Tab_ID).list();
+				.setParameters(Env.getAD_Client_ID(ctx), AD_Role_ID, AD_Window_ID, AD_Tab_ID, AD_Role_ID).list();
 		return list.toArray(new MToolBarButtonRestrict[list.size()]);
 	}	//	getOfWindow
 	
@@ -165,7 +216,7 @@ public class MToolBarButtonRestrict extends X_AD_ToolBarButtonRestrict
 		if (s_log.isLoggable(Level.INFO)) s_log.info("sql="+WHERE_CLAUSE_OF_REPORT_SQL);
 		
 		List<MToolBarButtonRestrict> list = new Query(ctx, Table_Name, WHERE_CLAUSE_OF_REPORT_SQL, trxName)
-				.setParameters(Env.getAD_Client_ID(ctx), AD_Role_ID, AD_Process_ID, MToolBarButtonRestrict.ACTION_Report).list();
+				.setParameters(Env.getAD_Client_ID(ctx), AD_Role_ID, AD_Process_ID, MToolBarButtonRestrict.ACTION_Report, AD_Role_ID).list();
 		return list.toArray(new MToolBarButtonRestrict[list.size()]);
 	}	//	getOfReport
 	

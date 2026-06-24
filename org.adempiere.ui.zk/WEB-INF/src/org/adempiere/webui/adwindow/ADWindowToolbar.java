@@ -1156,9 +1156,6 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 		GridTab gridTab = adwindow.getADWindowContent().getActiveGridTab();
 		if (gridTab != null)
 		{
-			int AD_Tab_ID = gridTab.getAD_Tab_ID();
-			Map <String, MToolBarButtonRestrict> restrictionList = adwindow.getTabToolbarRestrictList(AD_Tab_ID);
-
 			for (Component p = this.getFirstChild(); p != null; p = p.getNextSibling())
 			{
 				if (p instanceof ToolBarButton)
@@ -1172,6 +1169,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 				}
 			}
 
+			Map <String, MToolBarButtonRestrict> restrictionList = adwindow.getTabToolbarRestrictList(gridTab.getAD_Tab_ID());
 			for (String restrictName : restrictionList.keySet())
 			{
 				MToolBarButtonRestrict toolBarButtonRestrict = restrictionList.get(restrictName);
@@ -1191,7 +1189,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 										boolean isDisplayed = toolBarButtonRestrict.validateLogic(toolBarButtonRestrict.getDisplayLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
 										btn.setVisible(isDisplayed);
 									}
-									
+
 									if (!Util.isEmpty(toolBarButtonRestrict.getReadOnlyLogic(), true))
 									{
 										boolean isReadOnly = toolBarButtonRestrict.validateLogic(toolBarButtonRestrict.getReadOnlyLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
@@ -1232,7 +1230,6 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 						}
 					}
 				}
-
 			}
 
 			if (overflows != null)

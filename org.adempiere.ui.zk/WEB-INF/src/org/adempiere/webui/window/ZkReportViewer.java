@@ -1879,10 +1879,8 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 							boolean removed = false;
 							if (!Util.isEmpty(toolBarButtonRestrict.getDisplayLogic(), true))
 							{
-								boolean isDisplayed = toolBarButtonRestrict.validateLogic(
-										toolBarButtonRestrict.getDisplayLogic(), m_WindowNo,
-										-1);
-								if(!isDisplayed)
+								boolean isDisplayed = toolBarButtonRestrict.validateLogic(toolBarButtonRestrict.getDisplayLogic(), m_WindowNo, -1);
+								if (!isDisplayed)
 								{
 									this.toolBar.removeChild(p);
 									removed = true;
@@ -1890,9 +1888,7 @@ public class ZkReportViewer extends Window implements EventListener<Event>, IRep
 							}
 							if (!removed && !Util.isEmpty(toolBarButtonRestrict.getReadOnlyLogic(), true))
 							{
-								boolean isReadOnly = toolBarButtonRestrict.validateLogic(
-										toolBarButtonRestrict.getReadOnlyLogic(), m_WindowNo,
-										-1);
+								boolean isReadOnly = toolBarButtonRestrict.validateLogic(toolBarButtonRestrict.getReadOnlyLogic(), m_WindowNo, -1);
 								((ToolBarButton) p).setDisabled(isReadOnly);
 							}
 						}
