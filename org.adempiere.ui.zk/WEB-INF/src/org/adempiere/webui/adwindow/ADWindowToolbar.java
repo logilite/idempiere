@@ -1298,7 +1298,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 		}
 		
 		MToolBarButtonRestrict restrict = effectiveRestrictList.get(fQueryName.getId());
-		if (restrict != null && MToolBarButtonRestrict.ACTION_Window.equals(restrict.getAction()))
+		if (restrict != null && MToolBarButtonRestrict.ACTION_Window.equals(restrict.getAction()) && !restrict.isExclude())
 		{
 			if (!Util.isEmpty(restrict.getDisplayLogic(), true))
 			{
