@@ -1218,6 +1218,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 		for (String restrictName : effectiveRestrictList.keySet())
 		{
 			MToolBarButtonRestrict toolBarButtonRestrict = effectiveRestrictList.get(restrictName);
+
 			if (!MToolBarButtonRestrict.ACTION_Window.equals(toolBarButtonRestrict.getAction()))
 				continue;
 
@@ -1271,6 +1272,12 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 			if (restrict == null || !MToolBarButtonRestrict.ACTION_Window.equals(restrict.getAction()))
 				continue;
 			
+			if (restrict.isExclude())
+			{
+				btn.setVisible(false);
+				continue;
+			}
+
 			if (!Util.isEmpty(restrict.getDisplayLogic(), true))
 			{
 				boolean display = restrict.validateLogic(restrict.getDisplayLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
@@ -1286,11 +1293,23 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 			if (!Util.isEmpty(restrict.getReadOnlyLogic(), true))
 			{
 				boolean readOnly = restrict.validateLogic(restrict.getReadOnlyLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
+				btn.setDisabled(readOnly);
+			}
+		}
+		
+		MToolBarButtonRestrict restrict = effectiveRestrictList.get(fQueryName.getId());
+		if (restrict != null && MToolBarButtonRestrict.ACTION_Window.equals(restrict.getAction()))
+		{
+			if (!Util.isEmpty(restrict.getDisplayLogic(), true))
+			{
+				boolean display = restrict.validateLogic(restrict.getDisplayLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
+				fQueryName.setVisible(display);
+			}
 
-				if (readOnly)
-				{
-					btn.setDisabled(true);
-				}
+			if (!Util.isEmpty(restrict.getReadOnlyLogic(), true))
+			{
+				boolean readOnly = restrict.validateLogic(restrict.getReadOnlyLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
+				fQueryName.setDisabled(readOnly);
 			}
 		}
 	}
