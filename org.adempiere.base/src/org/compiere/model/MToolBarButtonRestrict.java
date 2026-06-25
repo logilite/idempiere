@@ -46,7 +46,9 @@ public class MToolBarButtonRestrict extends X_AD_ToolBarButtonRestrict
 																					+ "   WHERE t2.AD_ToolBarButton_ID = AD_ToolBarButtonRestrict.AD_ToolBarButton_ID"
 																					+ "     AND COALESCE(t2.AD_Window_ID, 0) = COALESCE(AD_ToolBarButtonRestrict.AD_Window_ID, 0)"
 																					+ "     AND COALESCE(t2.AD_Tab_ID, 0) = COALESCE(AD_ToolBarButtonRestrict.AD_Tab_ID, 0)"
-																					+ "     AND t2.AD_Client_ID <> 0"
+																					+ "     AND COALESCE(t2.AD_Process_ID, 0) = COALESCE(AD_ToolBarButtonRestrict.AD_Process_ID, 0)"
+																					+ "     AND t2.AD_Client_ID = ? AND t2.IsActive='Y'"
+																					+ "		AND t2.Action = AD_ToolBarButtonRestrict.Action"
 																					+ "     AND AD_ToolBarButtonRestrict.AD_Client_ID = 0"
 																					+ "     AND (t2.AD_Role_ID IS NULL OR t2.AD_Role_ID = ?)"
 																					+ " )";
@@ -96,6 +98,7 @@ public class MToolBarButtonRestrict extends X_AD_ToolBarButtonRestrict
 																					+ "AND COALESCE(AD_Role_ID,0)=COALESCE(?,0) "
 																					+ "AND COALESCE(AD_Window_ID,0)=COALESCE(?,0) "
 																					+ "AND COALESCE(AD_Tab_ID,0)=COALESCE(?,0) "
+																					+ "AND COALESCE(AD_Process_ID,0)=COALESCE(?,0) "
 																					+ "AND COALESCE(AD_ToolBarButton_ID,0)=COALESCE(?,0) "
 																					+ "AND AD_ToolBarButtonRestrict_ID<>?";
 
@@ -161,7 +164,7 @@ public class MToolBarButtonRestrict extends X_AD_ToolBarButtonRestrict
 	{
 		boolean exists
 						= new Query(getCtx(), Table_Name, DUPLICATE_WHERE, get_TrxName()).setParameters(getAD_Client_ID(), getAction(), getAD_Role_ID(), getAD_Window_ID(), getAD_Tab_ID(),
-										getAD_ToolBarButton_ID(), get_ID()).match();
+										getAD_Process_ID(), getAD_ToolBarButton_ID(), get_ID()).match();
 		if (exists)
 		{
 			log.saveError("Error",  Msg.getMsg(getCtx(), "Duplicate_ToolBarButtonRestrict"));
@@ -183,8 +186,10 @@ public class MToolBarButtonRestrict extends X_AD_ToolBarButtonRestrict
 	{		
 		if (s_log.isLoggable(Level.INFO)) s_log.info("sql="+WHERE_CLAUSE_OF_WINDOW_SQL);
 		
-		List<MToolBarButtonRestrict> list = new Query(ctx, Table_Name, WHERE_CLAUSE_OF_WINDOW_SQL, trxName)
-				.setParameters(Env.getAD_Client_ID(ctx), AD_Role_ID, AD_Window_ID, reportViewer ? MToolBarButtonRestrict.ACTION_Report: MToolBarButtonRestrict.ACTION_Window, AD_Role_ID).list();
+		String action = reportViewer ? MToolBarButtonRestrict.ACTION_Report : MToolBarButtonRestrict.ACTION_Window;
+		List <MToolBarButtonRestrict> list = new Query(ctx, Table_Name, WHERE_CLAUSE_OF_WINDOW_SQL, trxName)
+															.setParameters(Env.getAD_Client_ID(ctx), AD_Role_ID, AD_Window_ID, action, Env.getAD_Client_ID(ctx), AD_Role_ID)
+															.setOrderBy("AD_Client_ID, COALESCE(AD_Role_ID,0), COALESCE(AD_Window_ID,0) ").list();
 		return list.toArray(new MToolBarButtonRestrict[list.size()]);
 	}	//	getOfWindow
 	
@@ -200,7 +205,8 @@ public class MToolBarButtonRestrict extends X_AD_ToolBarButtonRestrict
 	{		
 		if (s_log.isLoggable(Level.INFO)) s_log.info("sql="+WHERE_CLAUSE_OF_TAB_SQL);
 		List<MToolBarButtonRestrict> list = new Query(ctx, Table_Name, WHERE_CLAUSE_OF_TAB_SQL, trxName)
-				.setParameters(Env.getAD_Client_ID(ctx), AD_Role_ID, AD_Window_ID, AD_Tab_ID, AD_Role_ID).list();
+				.setParameters(Env.getAD_Client_ID(ctx), AD_Role_ID, AD_Window_ID, AD_Tab_ID, Env.getAD_Client_ID(ctx), AD_Role_ID)
+				.setOrderBy("AD_Client_ID, COALESCE(AD_Role_ID,0), COALESCE(AD_Window_ID,0), COALESCE(AD_Tab_ID,0)").list();
 		return list.toArray(new MToolBarButtonRestrict[list.size()]);
 	}	//	getOfWindow
 	
@@ -216,7 +222,8 @@ public class MToolBarButtonRestrict extends X_AD_ToolBarButtonRestrict
 		if (s_log.isLoggable(Level.INFO)) s_log.info("sql="+WHERE_CLAUSE_OF_REPORT_SQL);
 		
 		List<MToolBarButtonRestrict> list = new Query(ctx, Table_Name, WHERE_CLAUSE_OF_REPORT_SQL, trxName)
-				.setParameters(Env.getAD_Client_ID(ctx), AD_Role_ID, AD_Process_ID, MToolBarButtonRestrict.ACTION_Report, AD_Role_ID).list();
+				.setParameters(Env.getAD_Client_ID(ctx), AD_Role_ID, AD_Process_ID, MToolBarButtonRestrict.ACTION_Report,Env.getAD_Client_ID(ctx), AD_Role_ID)
+				.setOrderBy("AD_Client_ID, COALESCE(AD_Role_ID,0), COALESCE(AD_Process_ID,0) ").list();
 		return list.toArray(new MToolBarButtonRestrict[list.size()]);
 	}	//	getOfReport
 	

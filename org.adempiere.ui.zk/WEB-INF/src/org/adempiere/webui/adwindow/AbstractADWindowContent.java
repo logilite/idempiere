@@ -61,7 +61,6 @@ import org.adempiere.webui.apps.form.WQuickForm;
 import org.adempiere.webui.component.DesktopTabpanel;
 import org.adempiere.webui.component.Mask;
 import org.adempiere.webui.component.ProcessInfoDialog;
-import org.adempiere.webui.component.ToolBarButton;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.component.ZkCssHelper;
 import org.adempiere.webui.editor.IProcessButton;
@@ -1617,6 +1616,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     			toolbar.dynamicDisplay();
     			toolbar.pressedLogic();
     			toolbar.readOnlyLogic();
+    			toolbar.restrictionLogic();
     		}
     	}
     	else if (event.getTarget() == getComponent() && event.getName().equals(LayoutUtils.ON_REDRAW_EVENT)) {
@@ -2304,30 +2304,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
             Events.echoEvent(ON_AFTER_TOOLBAR_UPDATE_EVENT, getComponent(), e.isChanged());
         }
 
-		GridTab gridTab = tabPanel.getGridTab();
-		Map <String, MToolBarButtonRestrict> restrictionList = adwindow.getTabToolbarRestrictList(gridTab.getAD_Tab_ID());
-		for (String restrictName : restrictionList.keySet())
-		{
-			MToolBarButtonRestrict toolBarButtonRestrict = restrictionList.get(restrictName);
-			if (MToolBarButtonRestrict.ACTION_Window.equals(toolBarButtonRestrict.getAction()) && !toolBarButtonRestrict.isExclude())
-			{
-				ToolBarButton btn = toolbar.getButton(restrictName.replace(ADWindowToolbar.BTNPREFIX, ""));
-				if (btn != null)
-				{
-					if (!Util.isEmpty(toolBarButtonRestrict.getDisplayLogic(), true))
-					{
-						boolean isDisplayed = toolBarButtonRestrict.validateLogic(toolBarButtonRestrict.getDisplayLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
-						btn.setVisible(isDisplayed);
-					}
-
-					if (!Util.isEmpty(toolBarButtonRestrict.getReadOnlyLogic(), true))
-					{
-						boolean isReadOnly = toolBarButtonRestrict.validateLogic(toolBarButtonRestrict.getReadOnlyLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
-						btn.setDisabled(isReadOnly);
-					}
-				}
-			}
-		}
+		toolbar.applyToolbarRestrictions();
     }
 
 	/**

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import org.adempiere.base.IServiceHolder;
@@ -1103,10 +1104,10 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 			return;
 		
 		ADWindow adwindow = ADWindow.findADWindow(this);
-
 		dynamicDisplay();
 		pressedLogic();
 		readOnlyLogic();
+		restrictionLogic();
 		// If no workflow set for the table => disable btnWorkflow
 		if (!btnActiveWorkflows.isDisabled()) {
 			GridTab gridTab = adwindow.getADWindowContent().getActiveGridTab();
@@ -1169,69 +1170,6 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 				}
 			}
 
-			Map <String, MToolBarButtonRestrict> restrictionList = adwindow.getTabToolbarRestrictList(gridTab.getAD_Tab_ID());
-			for (String restrictName : restrictionList.keySet())
-			{
-				MToolBarButtonRestrict toolBarButtonRestrict = restrictionList.get(restrictName);
-				if (MToolBarButtonRestrict.ACTION_Window.equals(toolBarButtonRestrict.getAction()))
-				{
-					for (Component p = this.getFirstChild(); p != null; p = p.getNextSibling())
-					{
-						if (p instanceof ToolBarButton)
-						{
-							ToolBarButton btn = (ToolBarButton) p;
-							if (restrictName.equals(btn.getName()))
-							{
-								if (!toolBarButtonRestrict.isExclude())
-								{
-									if (!Util.isEmpty(toolBarButtonRestrict.getDisplayLogic(), true))
-									{
-										boolean isDisplayed = toolBarButtonRestrict.validateLogic(toolBarButtonRestrict.getDisplayLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
-										btn.setVisible(isDisplayed);
-									}
-
-									if (!Util.isEmpty(toolBarButtonRestrict.getReadOnlyLogic(), true))
-									{
-										boolean isReadOnly = toolBarButtonRestrict.validateLogic(toolBarButtonRestrict.getReadOnlyLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
-										btn.setDisabled(isReadOnly);
-									}
-								}
-								else
-								{
-									btn.setVisible(false);
-								}
-								break;
-							}
-						}
-						else if (p instanceof Combobox)
-						{
-							Combobox cbox = (Combobox) p;
-							if (restrictName.equals(cbox.getId()))
-							{
-								if (!toolBarButtonRestrict.isExclude())
-								{
-									if (!Util.isEmpty(toolBarButtonRestrict.getDisplayLogic(), true))
-									{
-										boolean isDisplayed = toolBarButtonRestrict.validateLogic(toolBarButtonRestrict.getDisplayLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
-										cbox.setVisible(isDisplayed);
-									}
-									if (!Util.isEmpty(toolBarButtonRestrict.getReadOnlyLogic(), true))
-									{
-										boolean isReadOnly = toolBarButtonRestrict.validateLogic(toolBarButtonRestrict.getReadOnlyLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
-										cbox.setDisabled(isReadOnly);
-									}
-								}
-								else
-								{
-									cbox.setVisible(false);
-								}
-								break;
-							}
-						}
-					}
-				}
-			}
-
 			if (overflows != null)
 			{
 				// Set visible all overflow buttons with the same condition as above
@@ -1258,6 +1196,103 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 		}
 		pressedLogic();
 		readOnlyLogic();
+	}
+
+	/**
+	 * Applies exclusion-based toolbar restrictions for the active window and tab.
+	 * Restricted components are hidden based on the configured settings.
+	 */
+	public void restrictionLogic()
+	{
+		ADWindow adwindow = ADWindow.findADWindow(this);
+		GridTab gridTab = adwindow.getADWindowContent().getActiveGridTab();
+		if (gridTab == null)
+			return;
+
+		Map <String, MToolBarButtonRestrict> effectiveRestrictList = new HashMap <>();
+		// put window restrictions first
+		effectiveRestrictList.putAll(adwindow.getWindowToolbarRestrictList());
+		// tab restrictions overwrite window restrictions
+		effectiveRestrictList.putAll(adwindow.getTabToolbarRestrictList(gridTab.getAD_Tab_ID()));
+
+		for (String restrictName : effectiveRestrictList.keySet())
+		{
+			MToolBarButtonRestrict toolBarButtonRestrict = effectiveRestrictList.get(restrictName);
+			if (!MToolBarButtonRestrict.ACTION_Window.equals(toolBarButtonRestrict.getAction()))
+				continue;
+
+			for (Component p = this.getFirstChild(); p != null; p = p.getNextSibling())
+			{
+				if (p instanceof ToolBarButton)
+				{
+					ToolBarButton btn = (ToolBarButton) p;
+					if (restrictName.equals(btn.getName()))
+					{
+						if (toolBarButtonRestrict.isExclude())
+							btn.setVisible(false);
+						break;
+					}
+				}
+				else if (p instanceof Combobox)
+				{
+					Combobox cbox = (Combobox) p;
+					if (restrictName.equals(cbox.getId()))
+					{
+						if (toolBarButtonRestrict.isExclude())
+							cbox.setVisible(false);
+						break;
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Evaluates and applies toolbar visibility and read-only restrictions
+	 * for the active window and tab.
+	 */
+	public void applyToolbarRestrictions()
+	{
+		ADWindow adwindow = ADWindow.findADWindow(this);
+		GridTab gridTab = adwindow.getADWindowContent().getActiveGridTab();
+		if (gridTab == null)
+			return;
+
+		Map <String, MToolBarButtonRestrict> effectiveRestrictList = new HashMap <>();
+		effectiveRestrictList.putAll(adwindow.getWindowToolbarRestrictList());
+		effectiveRestrictList.putAll(adwindow.getTabToolbarRestrictList(gridTab.getAD_Tab_ID()));
+
+		for (Entry <String, ToolBarButton> entry : buttons.entrySet())
+		{
+			ToolBarButton btn = entry.getValue();
+
+			MToolBarButtonRestrict restrict = effectiveRestrictList.get(BTNPREFIX + entry.getKey());
+
+			if (restrict == null || !MToolBarButtonRestrict.ACTION_Window.equals(restrict.getAction()))
+				continue;
+			
+			if (!Util.isEmpty(restrict.getDisplayLogic(), true))
+			{
+				boolean display = restrict.validateLogic(restrict.getDisplayLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
+				btn.setVisible(display);
+				if (!display)
+					continue;
+			}
+			
+			// Core already disabled it, don't touch it
+			if (btn.isDisabled())
+				continue;
+
+			if (!Util.isEmpty(restrict.getReadOnlyLogic(), true))
+			{
+				boolean readOnly = restrict.validateLogic(restrict.getReadOnlyLogic(), gridTab.getWindowNo(), gridTab.getTabNo());
+
+				if (readOnly)
+				{
+					btn.setDisabled(true);
+				}
+			}
+		}
 	}
 	
 	/**
