@@ -1219,7 +1219,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 		{
 			MToolBarButtonRestrict toolBarButtonRestrict = effectiveRestrictList.get(restrictName);
 
-			if (!MToolBarButtonRestrict.ACTION_Window.equals(toolBarButtonRestrict.getAction()))
+			if (!MToolBarButtonRestrict.ACTION_Window.equals(toolBarButtonRestrict.getAction()) || !toolBarButtonRestrict.isExclude())
 				continue;
 
 			for (Component p = this.getFirstChild(); p != null; p = p.getNextSibling())
