@@ -1616,6 +1616,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     			toolbar.dynamicDisplay();
     			toolbar.pressedLogic();
     			toolbar.readOnlyLogic();
+    			toolbar.restrictionLogic();
     		}
     	}
     	else if (event.getTarget() == getComponent() && event.getName().equals(LayoutUtils.ON_REDRAW_EVENT)) {
@@ -2302,6 +2303,8 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
             isAfterToolbarUpdateScheduled = true;
             Events.echoEvent(ON_AFTER_TOOLBAR_UPDATE_EVENT, getComponent(), e.isChanged());
         }
+
+		toolbar.applyToolbarRestrictions();
     }
 
 	/**
