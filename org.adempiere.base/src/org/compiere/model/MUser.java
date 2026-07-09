@@ -435,7 +435,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	
 		
 	/**
-	 * 	Get Value - 7 bit lower case alpha numerics max length 8
+	 * 	Get Value - 7 bit lower case alpha numerics max length 14
 	 *	@return value
 	 */
 	public String getValue()
@@ -448,7 +448,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}	//	getValue
 
 	/**
-	 * 	Set Value - 7 bit case alpha numerics max length 8
+	 * 	Set Value - 7 bit case alpha numerics max length 14
 	 *	@param Value
 	 */
 	public void setValue(String Value)
@@ -461,7 +461,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 			Value = "noname";
 		//
 		String result = cleanValue(Value);
-		if (result.length() > 8)
+		if (result.length() > 14)
 		{
 			String first = getName(Value, true);
 			String last = getName(Value, false);
@@ -475,8 +475,8 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 			else
 				result = cleanValue(first);
 		}
-		if (result.length() > 8)
-			result = result.substring (0, 8);
+		if (result.length() > 14)
+			result = result.substring (0, 14);
 		super.setValue(result);
 	}	//	setValue
 	
