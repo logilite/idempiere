@@ -649,7 +649,7 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 	private void updateNextNodeOption(String newValue)
 	{
 		if (nodeVarForm != null)
-			Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), MWFActivity.WF_Activity_Next_Node_Action, newValue);
+			nodeVarForm.updateContext(newValue, MWFActivity.WF_Activity_Next_Node_Action);
 		if (m_activity != null && m_activity.getPO() != null)
 			m_activity.getPO().set_Attribute(MWFActivity.WF_Activity_Next_Node_Action, newValue);
 	}
@@ -704,12 +704,12 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 				if (lstAnswer.isVisible() && ApprovalColumn_ID > 0)
 				{
 					MColumn column = MColumn.get(Env.getCtx(), ApprovalColumn_ID);
-					Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), column.getColumnName(), (String) lstAnswer.getValue());
+					nodeVarForm.updateContext((String) lstAnswer.getValue(), column.getColumnName());
 				}
 
 				// Set the selected document action in the context if available
 				if (lstDocAction != null && lstDocAction.getSelectedItem() != null)
-					Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), "DocAction", s_value[getSelectedIndex()]);
+					nodeVarForm.updateContext(s_value[getSelectedIndex()], "DocAction");
 
 				// If workflow node is configured to show transitions as options,
 				// load available transition options
@@ -896,7 +896,7 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 				setDateAcctVisible(s_value[getSelectedIndex()].equals(DocumentEngine.ACTION_Reverse_Accrual) && isAllowSetDateAcct);
 				if (nodeVarForm != null && lstDocAction.getSelectedItem() != null)
 				{
-					Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), "DocAction", s_value[getSelectedIndex()]);
+					nodeVarForm.updateContext(s_value[getSelectedIndex()], "DocAction");
 					nodeVarForm.dynamicDisplay();
 				}
 			}
@@ -908,7 +908,7 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 					{
 						MColumn column = MColumn.get(Env.getCtx(), ApprovalColumn_ID);
 						String value = lstAnswer.getSelectedItem().getValue();
-						Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), column.getColumnName(), value);
+						nodeVarForm.updateContext(value, column.getColumnName());
 					}
 					nodeVarForm.dynamicDisplay();
 				}
