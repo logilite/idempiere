@@ -177,6 +177,7 @@ public class WFNodeVarForm extends Window implements ValueChangeListener
 	{
 		Env.clearWinContext(Env.getCtx(), m_WindowNo);
 		Env.clearTabContext(Env.getCtx(), m_WindowNo, 0);
+		SessionManager.getAppDesktop().unregisterWindow(m_WindowNo);
 		super.detach();
 	}
 
