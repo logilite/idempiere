@@ -44,6 +44,7 @@ import org.adempiere.webui.component.Column;
 import org.adempiere.webui.component.Columns;
 import org.adempiere.webui.component.ConfirmPanel;
 import org.adempiere.webui.component.DatetimeBox;
+import org.adempiere.webui.component.FlexHlayout;
 import org.adempiere.webui.component.Grid;
 import org.adempiere.webui.component.GridFactory;
 import org.adempiere.webui.component.Label;
@@ -94,7 +95,6 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.OpenEvent;
 import org.zkoss.zk.ui.ext.render.DynamicMedia;
 import org.zkoss.zul.Cell;
-import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Iframe;
 import org.zkoss.zul.Popup;
 import org.zkoss.zul.Space;
@@ -496,7 +496,7 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 			row = new Row();
 			rows.appendChild(row);
 			row.appendChild(createdQLabel);
-			Hbox hbox = new Hbox();
+			FlexHlayout hbox = new FlexHlayout();
 			hbox.appendChild(createdQFrom.getComponent());
 			hbox.appendChild(createdQTo.getComponent());
 			DateRangeButton drb = (new DateRangeButton(createdQFrom, createdQTo));
@@ -598,7 +598,7 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 		
 		row = new Row();
 		rows.appendChild(row);		
-		Hbox hbox = new Hbox();
+		FlexHlayout hbox = new FlexHlayout();
 		hbox.appendChild(deleteArchive);
 		hbox.appendChild(bRefresh);
 		hbox.appendChild(bEmail);
@@ -618,7 +618,8 @@ public class WArchiveViewer extends Archive implements IFormController, EventLis
 		Tab tabView = new Tab(Msg.getMsg(Env.getCtx(), "ViewerResult"));
 		
 		Tabpanel tabViewPanel = new Tabpanel();
-		Hbox boxViewSeparator = new Hbox();
+		@SuppressWarnings("deprecation")
+		org.zkoss.zul.Hbox boxViewSeparator = new org.zkoss.zul.Hbox();
 		ZKUpdateUtil.setWidth(boxViewSeparator, "100%");
 		ZKUpdateUtil.setHeight(boxViewSeparator, "100%");			
 		cell = new Cell();

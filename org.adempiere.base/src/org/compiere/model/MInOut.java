@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import javax.management.Query;
+
 import org.adempiere.base.Core;
 import org.adempiere.base.CreditStatus;
 import org.adempiere.base.ICreditManager;
@@ -2401,18 +2403,21 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 							}
 							if (!po.isPosted())
 								addDocsPostProcess(po);
-							
+
 							//TODO Needs to check IDEMPIERE-4127 related enhancement for matchInvHdr
 							MMatchInv matchInv = po.getMatchInvCreated();
 							if(matchInv != null && matchInv.getM_MatchInvHdr_ID() > 0)
 							{
-								addDocsPostProcess((PO) matchInv.getM_MatchInvHdr());
+								if (!docsPostProcess.contains((PO) matchInv.getM_MatchInvHdr()))
+									addDocsPostProcess((PO) matchInv.getM_MatchInvHdr());
 							}
 							else
 							{
-								MMatchInv[] matchInvList = MMatchInv.getInOut(getCtx(), getM_InOut_ID(), get_TrxName());
-								for (MMatchInv matchInvCreated : matchInvList)
-									addDocsPostProcess(matchInvCreated);
+								MMatchInv[] matchInvList = MMatchInv.getInOutLine(getCtx(), sLine.getM_InOutLine_ID(), get_TrxName());
+								for (MMatchInv matchInvCreated : matchInvList) {
+									if (!docsPostProcess.contains(matchInvCreated))
+										addDocsPostProcess(matchInvCreated);
+								}
 							}
 						}
 						//	Update PO with ASI

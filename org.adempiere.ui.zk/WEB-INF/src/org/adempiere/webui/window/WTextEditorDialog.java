@@ -12,11 +12,8 @@
  *****************************************************************************/
 package org.adempiere.webui.window;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.adempiere.util.Callback;
-import org.adempiere.webui.ClientInfo;
+import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.ConfirmPanel;
 import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.Tab;
@@ -28,15 +25,11 @@ import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.CKEditor;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.MSysConfig;
 import org.compiere.util.Env;
-import org.compiere.util.Language;
 import org.compiere.util.Msg;
-import org.owasp.html.AttributePolicy;
-import org.owasp.html.HtmlPolicyBuilder;
-import org.owasp.html.PolicyFactory;
-import org.owasp.html.Sanitizers;
 import org.zkforge.ckez.CKeditor;
 import org.zkoss.zk.au.out.AuScript;
 import org.zkoss.zk.ui.event.Event;
@@ -72,45 +65,6 @@ public class WTextEditorDialog extends Window implements EventListener<Event>{
 	/* SysConfig USE_ESC_FOR_TAB_CLOSING */
 	private boolean isUseEscForTabClosing = MSysConfig.getBooleanValue(MSysConfig.USE_ESC_FOR_TAB_CLOSING, false, Env.getAD_Client_ID(Env.getCtx()));
 
-	private static final PolicyFactory TABLES = new HtmlPolicyBuilder()
-		    .allowStandardUrlProtocols()
-		    .allowElements(
-		                   "table", "tr", "td", "th",
-		                   "colgroup", "caption", "col",
-		                   "thead", "tbody", "tfoot")
-		    .allowAttributes("summary").onElements("table")
-		    .allowAttributes("align", "valign")
-		    .onElements("table", "tr", "td", "th",
-		                "colgroup", "col",
-		                "thead", "tbody", "tfoot")
-		    .allowAttributes("colspan","rowspan").onElements("td","th")
-		    .allowTextIn("table")  // WIDGY
-		    .toFactory();
-	private static final AttributePolicy INTEGER = new AttributePolicy() {
-	    public String apply(
-	        String elementName, String attributeName, String value) {
-	      int n = value.length();
-	      if (n == 0) { return null; }
-	      for (int i = 0; i < n; ++i) {
-	        char ch = value.charAt(i);
-	        if (ch == '.') {
-	          if (i == 0) { return null; }
-	          return value.substring(0, i);  // truncate to integer.
-	        } else if (!('0' <= ch && ch <= '9')) {
-	          return null;
-	        }
-	      }
-	      return value;
-	    }
-	  };
-	
-	  private static final PolicyFactory dataImg = new HtmlPolicyBuilder()
-      .allowUrlProtocols("http", "https","data").allowElements("img")
-      .allowAttributes("alt", "src").onElements("img")
-      .allowAttributes("border", "height", "width").matching(INTEGER)
-          .onElements("img")
-      .toFactory();
-	  
 	/**
 	 * @param title
 	 * @param text
@@ -256,15 +210,7 @@ public class WTextEditorDialog extends Window implements EventListener<Event>{
 	 * @param tabPanel
 	 */
 	private void createEditor(org.zkoss.zul.Tabpanel tabPanel) {		
-		editor = new CKeditor();
-		if (ClientInfo.isMobile())
-			editor.setCustomConfigurationsPath("/js/ckeditor/config-min.js");
-		else
-			editor.setCustomConfigurationsPath("/js/ckeditor/config.js");
-		editor.setToolbar("MyToolbar");
-		Map<String,Object> lang = new HashMap<String,Object>();
-		lang.put("language", Language.getLoginLanguage().getAD_Language());
-		editor.setConfig(lang);
+		editor = CKEditor.get();
 		tabPanel.appendChild(editor);
 		editor.setVflex("1");
 		editor.setWidth("100%");
@@ -354,7 +300,7 @@ public class WTextEditorDialog extends Window implements EventListener<Event>{
 		cancelled = true;
 		detach();
 	}
-
+	
 	/**
 	 * Handle onSize event
 	 */
@@ -402,18 +348,7 @@ public class WTextEditorDialog extends Window implements EventListener<Event>{
 	 * @return sanitized html content
 	 */
 	public static String sanitize(String untrustedHTML) {
-		
-		
-		final PolicyFactory policy = Sanitizers.BLOCKS
-				.and(Sanitizers.FORMATTING)
-				.and(dataImg)
-				.and(Sanitizers.LINKS)
-				.and(Sanitizers.STYLES)
-				.and(TABLES)
-				;
-
-		
-		String ret = policy.sanitize(untrustedHTML);
+		String ret = AEnv.sanitize(untrustedHTML);
 		ret = ret.replace("&#35;", "#");
 		ret = ret.replace("&#64;", "@");
 

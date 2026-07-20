@@ -60,6 +60,10 @@
    <plugin
          id="javax.websocket-api.fragment"
          version="0.0.0"/>
+   
+   <plugin
+         id="org.owasp.encoder"
+         version="0.0.0"/>
 
    <plugin
          id="org.idempiere.zk.iceblue_c.theme"

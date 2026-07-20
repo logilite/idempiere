@@ -44,7 +44,6 @@ import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
-import org.compiere.util.Util;
 
 /**
  *  Post Allocation Documents.
@@ -565,7 +564,7 @@ public class Doc_AllocationHdr extends Doc
 			for (FactLine factLine : factlines) {
 				netBalance = netBalance.add(factLine.getAmtSourceDr()).subtract(factLine.getAmtSourceCr());
 				if (prevFactLine != null) {
-					if (! equalFactLineIDs(prevFactLine, factLine)) {
+					if (!prevFactLine.hasSameAccountingDimensions(factLine)) {
 						allEquals = false;
 						break;
 					}

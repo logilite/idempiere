@@ -138,7 +138,7 @@ import org.zkoss.zul.Center;
 import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Datebox;
 import org.zkoss.zul.Div;
-import org.zkoss.zul.Hbox;
+import org.adempiere.webui.component.FlexHlayout;
 import org.zkoss.zul.ListModelList;
 import org.zkoss.zul.North;
 import org.zkoss.zul.Popup;
@@ -616,7 +616,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         pnlButtonLeft.appendChild(btnClear);
         ZKUpdateUtil.setHflex(pnlButtonLeft, "1");
 
-        Hbox hboxButton = new Hbox();
+        FlexHlayout hboxButton = new FlexHlayout();
         hboxButton.appendChild(pnlButtonLeft);
         hboxButton.appendChild(pnlButtonRight);
 
@@ -715,9 +715,9 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 
         fQueryName.addEventListener(Events.ON_SELECT, this);
 
-        Hbox confirmPanel = new Hbox();
+        FlexHlayout confirmPanel = new FlexHlayout();
         confirmPanel.appendChild(pnlButtonRight);
-        confirmPanel.setPack("end");
+        confirmPanel.setPack(FlexHlayout.PackType.END);
 
         advancedPanel = new Listbox();
         ListHead listhead = new ListHead();

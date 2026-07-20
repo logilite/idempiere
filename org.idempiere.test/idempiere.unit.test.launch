@@ -124,7 +124,7 @@
         <setEntry value="jakarta.xml.bind-api@default:default"/>
         <setEntry value="jakarta.xml.soap-api@default:default"/>
         <setEntry value="jakarta.xml.ws-api@default:default"/>
-        <setEntry value="javassist@default:default"/>
+        <setEntry value="javassist*3.30.2.GA@default:default"/>
         <setEntry value="javax.enterprise.cdi-api@default:default"/>
         <setEntry value="javax.interceptor-api@default:default"/>
         <setEntry value="javax.validation.api@default:default"/>
@@ -342,6 +342,7 @@
         <setEntry value="org.osgi.util.pushstream@default:default"/>
         <setEntry value="org.osgi.util.tracker@default:default"/>
         <setEntry value="org.osgi.util.xml@default:default"/>
+        <setEntry value="org.owasp.encoder@default:default"/>
         <setEntry value="org.passay@default:default"/>
         <setEntry value="org.postgresql.jdbc@default:default"/>
         <setEntry value="org.sat4j.core@default:default"/>

@@ -519,8 +519,11 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	 *         config value is L or upper case cleaned value if
 	 *         User_Searchkey_Case system config value is U
 	 */
-	private String cleanValue (String value)
+	public static String cleanValue (String value)
 	{
+		if (value == null)
+			return "";
+
 		StringBuilder sb = new StringBuilder();
 		String searchKey_Case = MSysConfig.getValue(MSysConfig.USER_SEARCHKEY_CASE, USER_SEARCHKEY_LOWERCASE,
 				getAD_Client_ID());

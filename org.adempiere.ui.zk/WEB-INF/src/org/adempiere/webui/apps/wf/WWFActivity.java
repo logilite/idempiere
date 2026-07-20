@@ -78,7 +78,7 @@ import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
 import org.zkoss.zul.Div;
-import org.zkoss.zul.Hbox;
+import org.adempiere.webui.component.FlexHlayout;
 import org.zkoss.zul.Html;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.North;
@@ -277,7 +277,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 		div.setStyle("text-align: right;");
 		div.appendChild(lAnswer);
 		row.appendChild(div);
-		hbox = new Hbox();
+		FlexHlayout hbox = new FlexHlayout();
 		hbox.appendChild(fAnswerText);
 		ZKUpdateUtil.setHflex(fAnswerText, "true");
 		hbox.appendChild(fAnswerList);
@@ -309,7 +309,7 @@ public class WWFActivity extends ADForm implements EventListener<Event>
 		div.setStyle("text-align: right;");
 		div.appendChild(lForward);
 		row.appendChild(div);
-		hbox = new Hbox();
+		hbox = new FlexHlayout();
 		hbox.appendChild(fForward.getComponent());
 		hbox.appendChild(bOK);
 		hbox.appendChild(bRefresh);
