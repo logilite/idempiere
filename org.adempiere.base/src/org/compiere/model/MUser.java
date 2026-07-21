@@ -462,7 +462,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	private MUserBPAccess[]	m_bpAccess = null;
 			
 	/**
-	 * 	Get Value
+	 * 	Get Value - 7 bit lower case alpha numerics max length 14
 	 *	@return value
 	 */
 	@Override
@@ -476,7 +476,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}	//	getValue
 
 	/**
-	 * 	Set Value - 7 bit case alpha numerics max length 8
+	 * 	Set Value - 7 bit case alpha numerics max length 14
 	 *	@param Value
 	 */
 	@Override
@@ -490,7 +490,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 			Value = "noname";
 		// lower case alpha numerics and max length of 8
 		String result = cleanValue(Value);
-		if (result.length() > 8)
+		if (result.length() > 14)
 		{
 			String first = getName(Value, true);
 			String last = getName(Value, false);
@@ -505,9 +505,8 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 			else
 				result = cleanValue(first);
 		}
-		// Truncate to 8 character
-		if (result.length() > 8)
-			result = result.substring (0, 8);
+		if (result.length() > 14)
+			result = result.substring (0, 14);
 		super.setValue(result);
 	}	//	setValue
 	

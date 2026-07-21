@@ -62,9 +62,9 @@ public class ADWindow extends AbstractUIPart
 	/** image for window (desktop tab) title **/
 	private MImage image;
     /** AD_Tab_ID:BtnComponentName. List of toolbar buttons to exclude, loaded from AD_ToolBarButtonRestrict **/
-	private Map<Integer, List<String>> tabToolbarRestricMap = new HashMap<Integer, List<String>>();
-	/** List of BtnComponentName to exclude, loaded from AD_ToolBarButtonRestrict **/
-	private List<String> windowToolbarRestrictList = null;
+	private Map<Integer, Map<String, MToolBarButtonRestrict>> tabToolbarRestricMap = new HashMap<Integer, Map<String, MToolBarButtonRestrict>>();
+	/** BtnComponentName:MToolBarButtonRestrict. Map of window toolbar button restrictions, loaded from AD_ToolBarButtonRestrict **/
+	private Map<String, MToolBarButtonRestrict> windowToolbarRestrictList = null;
 	/** List of advanced (IsAdvancedButton=Y) window toolbar buttons. Accessible by advanced role only. **/
 	private List<String> windowToolbarAdvancedList = null;
 	/** AD_Window_UU value **/
@@ -172,21 +172,21 @@ public class ADWindow extends AbstractUIPart
 	 * @param AD_Tab_ID
 	 * @return list of toolbar button to exclude/restrict for current login role
 	 */
-	public List<String> getTabToolbarRestrictList(int AD_Tab_ID) {
-		List<String> tabRestrictList = tabToolbarRestricMap.get(AD_Tab_ID);
+	public Map<String, MToolBarButtonRestrict> getTabToolbarRestrictList(int AD_Tab_ID) {
+		Map<String, MToolBarButtonRestrict> tabRestrictList = tabToolbarRestricMap.get(AD_Tab_ID);
         if (tabRestrictList == null) {
-        	tabRestrictList = new ArrayList<String>();
+        	tabRestrictList = new HashMap<>();
         	tabToolbarRestricMap.put(AD_Tab_ID, tabRestrictList);
-        	int[] restrictionList = MToolBarButtonRestrict.getOfTab(Env.getCtx(), MRole.getDefault().getAD_Role_ID(), 
+        	MToolBarButtonRestrict[] restrictionList = MToolBarButtonRestrict.getOfTab(Env.getCtx(), MRole.getDefault().getAD_Role_ID(), 
         			adWindowId, AD_Tab_ID, null);
     		
 			for (int i = 0; i < restrictionList.length; i++)
 			{
-				int ToolBarButton_ID= restrictionList[i];
+				MToolBarButtonRestrict toolBarButtonRestrict= restrictionList[i];
 
-				X_AD_ToolBarButton tbt = new X_AD_ToolBarButton(Env.getCtx(), ToolBarButton_ID, null);
+				X_AD_ToolBarButton tbt = new X_AD_ToolBarButton(Env.getCtx(), toolBarButtonRestrict.getAD_ToolBarButton_ID(), null);
 				String restrictName = ADWindowToolbar.BTNPREFIX + tbt.getComponentName();
-				tabRestrictList.add(restrictName);
+				tabRestrictList.put(restrictName, toolBarButtonRestrict);
 			}
         }
         return tabRestrictList;
@@ -196,19 +196,19 @@ public class ADWindow extends AbstractUIPart
 	 * Get list of window toolbar button to exclude/restrict for current login role
 	 * @return list of window toolbar button to exclude/restrict for current login role
 	 */
-	public List<String> getWindowToolbarRestrictList() {		
+	public Map<String, MToolBarButtonRestrict> getWindowToolbarRestrictList() {		
 		if (windowToolbarRestrictList == null) {
 			//load window restriction
-			windowToolbarRestrictList = new ArrayList<String>();
-	        int[] restrictionList = MToolBarButtonRestrict.getOfWindow(Env.getCtx(), MRole.getDefault().getAD_Role_ID(), adWindowId, false, null);
+			windowToolbarRestrictList = new HashMap<>();
+			MToolBarButtonRestrict[] restrictionList = MToolBarButtonRestrict.getOfWindow(Env.getCtx(), MRole.getDefault().getAD_Role_ID(), adWindowId, false, null);
 	
 			for (int i = 0; i < restrictionList.length; i++)
 			{
-				int ToolBarButton_ID= restrictionList[i];
+				MToolBarButtonRestrict toolBarButtonRestrict= restrictionList[i];
 	
-				X_AD_ToolBarButton tbt = new X_AD_ToolBarButton(Env.getCtx(), ToolBarButton_ID, null);
+				X_AD_ToolBarButton tbt = new X_AD_ToolBarButton(Env.getCtx(), toolBarButtonRestrict.getAD_ToolBarButton_ID(), null);
 				String restrictName = ADWindowToolbar.BTNPREFIX + tbt.getComponentName();
-				windowToolbarRestrictList.add(restrictName);		
+				windowToolbarRestrictList.put(restrictName, toolBarButtonRestrict);		
 			}	// All restrictions
 		}
 		return windowToolbarRestrictList;

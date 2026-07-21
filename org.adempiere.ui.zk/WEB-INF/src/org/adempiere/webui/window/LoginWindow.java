@@ -233,18 +233,14 @@ public class LoginWindow extends Window implements EventListener<Event>
     public void loginOk(String userName, boolean showRolePanel, KeyNamePair[] clientsKNPairs, MSSOPrincipalConfig principalConfig)
 	{
 		boolean isClientDefined = (clientsKNPairs.length == 1 || !Util.isEmpty(Env.getContext(ctx, Env.AD_USER_ID)));
-		if (pnlRole == null)
-			pnlRole = new RolePanel(ctx, this, userName, showRolePanel, clientsKNPairs, isClientDefined, principalConfig);
-		AtomicBoolean isChangeRoleRequest = new AtomicBoolean(false);
-		if(getDesktop().getSession().hasAttribute(SSOUtils.ISCHANGEROLE_REQUEST))
-			isChangeRoleRequest.set((boolean) getDesktop().getSession().getAttribute(SSOUtils.ISCHANGEROLE_REQUEST));
+		createRolePanel(userName, show, clientsKNPairs, isClientDefined, principalConfig);
 		if (principalConfig != null)
 		{
 			Executions.schedule(getDesktop(), e -> validateMFPanel(userName, showRolePanel, clientsKNPairs, isClientDefined, isChangeRoleRequest.get()), new Event(SSOUtils.EVENT_ON_AFTER_SSOLOGIN));
 		}
-		else
+		elsevalidateMFPanel
 		{
-			validateMFPanel(userName, showRolePanel, clientsKNPairs, isClientDefined, isChangeRoleRequest.get());
+			(userName, showRolePanel, clientsKNPairs, isClientDefined, isChangeRoleRequest.get());
 		}
 	}
 

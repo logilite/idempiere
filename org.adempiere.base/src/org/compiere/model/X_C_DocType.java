@@ -31,7 +31,7 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20260309L;
+	private static final long serialVersionUID = 20260427L;
 
     /** Standard Constructor */
     public X_C_DocType (Properties ctx, int C_DocType_ID, String trxName)
@@ -45,6 +45,8 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 // 1
 			setGL_Category_ID (0);
 			setHasCharges (false);
+			setIsAllowShipmentWithoutOrder (false);
+// N
 			setIsAlwaysPosted (false);
 // N
 			setIsAutoGenerateInout (false);
@@ -88,6 +90,8 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 // 1
 			setGL_Category_ID (0);
 			setHasCharges (false);
+			setIsAllowShipmentWithoutOrder (false);
+// N
 			setIsAlwaysPosted (false);
 // N
 			setIsAutoGenerateInout (false);
@@ -128,6 +132,8 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 // 1
 			setGL_Category_ID (0);
 			setHasCharges (false);
+			setIsAllowShipmentWithoutOrder (false);
+// N
 			setIsAlwaysPosted (false);
 // N
 			setIsAutoGenerateInout (false);
@@ -168,6 +174,8 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 // 1
 			setGL_Category_ID (0);
 			setHasCharges (false);
+			setIsAllowShipmentWithoutOrder (false);
+// N
 			setIsAlwaysPosted (false);
 // N
 			setIsAutoGenerateInout (false);
@@ -253,7 +261,34 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 		return ii.intValue();
 	}
 
-	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_AD_Workflow getAD_Workflow() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_Workflow)MTable.get(getCtx(), org.compiere.model.I_AD_Workflow.Table_ID)
+			.getPO(getAD_Workflow_ID(), get_TrxName());
+	}
+
+	/** Set Workflow.
+		@param AD_Workflow_ID Workflow or combination of tasks
+	*/
+	public void setAD_Workflow_ID (int AD_Workflow_ID)
+	{
+		if (AD_Workflow_ID < 1)
+			set_Value (COLUMNNAME_AD_Workflow_ID, null);
+		else
+			set_Value (COLUMNNAME_AD_Workflow_ID, Integer.valueOf(AD_Workflow_ID));
+	}
+
+	/** Get Workflow.
+		@return Workflow or combination of tasks
+	  */
+	public int getAD_Workflow_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Workflow_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_C_DocType getC_DocTypeDifference() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_ID)
@@ -725,6 +760,29 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 	public boolean isHasProforma()
 	{
 		Object oo = get_Value(COLUMNNAME_HasProforma);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Allow Shipment without Sales Order.
+		@param IsAllowShipmentWithoutOrder Indicates whether shipment (material delivery) documents can be created without referencing a Sales Order line.
+	*/
+	public void setIsAllowShipmentWithoutOrder (boolean IsAllowShipmentWithoutOrder)
+	{
+		set_Value (COLUMNNAME_IsAllowShipmentWithoutOrder, Boolean.valueOf(IsAllowShipmentWithoutOrder));
+	}
+
+	/** Get Allow Shipment without Sales Order.
+		@return Indicates whether shipment (material delivery) documents can be created without referencing a Sales Order line.
+	  */
+	public boolean isAllowShipmentWithoutOrder()
+	{
+		Object oo = get_Value(COLUMNNAME_IsAllowShipmentWithoutOrder);
 		if (oo != null)
 		{
 			 if (oo instanceof Boolean)

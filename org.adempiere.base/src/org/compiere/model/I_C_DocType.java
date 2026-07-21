@@ -78,6 +78,21 @@ public interface I_C_DocType
 	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_PrintFormat getAD_PrintFormat() throws RuntimeException;
 
+    /** Column name AD_Workflow_ID */
+    public static final String COLUMNNAME_AD_Workflow_ID = "AD_Workflow_ID";
+
+	/** Set Workflow.
+	  * Workflow or combination of tasks
+	  */
+	public void setAD_Workflow_ID (int AD_Workflow_ID);
+
+	/** Get Workflow.
+	  * Workflow or combination of tasks
+	  */
+	public int getAD_Workflow_ID();
+
+	public org.compiere.model.I_AD_Workflow getAD_Workflow() throws RuntimeException;
+
     /** Column name C_DocTypeDifference_ID */
     public static final String COLUMNNAME_C_DocTypeDifference_ID = "C_DocTypeDifference_ID";
 
@@ -340,8 +355,21 @@ public interface I_C_DocType
 	  * The record is active in the system
 	  */
 	public boolean isActive();
-	
-	/** Column name IsAlwaysPosted */
+
+    /** Column name IsAllowShipmentWithoutOrder */
+    public static final String COLUMNNAME_IsAllowShipmentWithoutOrder = "IsAllowShipmentWithoutOrder";
+
+	/** Set Allow Shipment without Sales Order.
+	  * Indicates whether shipment (material delivery) documents can be created without referencing a Sales Order line.
+	  */
+	public void setIsAllowShipmentWithoutOrder (boolean IsAllowShipmentWithoutOrder);
+
+	/** Get Allow Shipment without Sales Order.
+	  * Indicates whether shipment (material delivery) documents can be created without referencing a Sales Order line.
+	  */
+	public boolean isAllowShipmentWithoutOrder();
+
+    /** Column name IsAlwaysPosted */
     public static final String COLUMNNAME_IsAlwaysPosted = "IsAlwaysPosted";
 
 	/** Set Always Posted.

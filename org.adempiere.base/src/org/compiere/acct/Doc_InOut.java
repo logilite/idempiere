@@ -1200,9 +1200,14 @@ public class Doc_InOut extends Doc
 							}
 							if (costs == null || costs.signum() == 0)
 							{
+								// ok if purchase price is actually zero
+								costs = getCostsForZeroPricedLines(costs, (MInOutLine) originalInOutLine);
+								if (costs == null)
+								{
 									p_Error = Msg.getMsg(getCtx(),"Resubmit - No Costs for") + " " + product.getName();
-								log.log(Level.WARNING, p_Error);
-								return null;
+									log.log(Level.WARNING, p_Error);
+									return null;
+								}
 							}
 						}
 					}
@@ -1215,9 +1220,14 @@ public class Doc_InOut extends Doc
 						
 						if (costs == null || costs.signum() == 0)
 						{
-								p_Error = Msg.getMsg(getCtx(),"Resubmit - No Costs for") + " " + product.getName();
-							log.log(Level.WARNING, p_Error);
-							return null;
+							// ok if purchase price is actually zero
+							costs = getCostsForZeroPricedLines(costs, ioLine);
+							if (costs == null)
+							{
+								p_Error = Msg.getMsg(getCtx(), "No Costs for") + " " + line.getProduct().getName();
+								log.log(Level.WARNING, p_Error);
+								return null;
+							}
 						}
 					}
 				}
@@ -1306,6 +1316,29 @@ public class Doc_InOut extends Doc
 			return new ArrayList <Fact>();
 		return facts;
 	}   //  createFact
+
+	/**
+	 * Returns zero cost when the related order or invoice line
+	 * has a price of zero; otherwise returns the original cost.
+	 *
+	 * @param costs calculated costs
+	 * @param ioLine material receipt/shipment line
+	 * @return updated cost value
+	 */
+	private BigDecimal getCostsForZeroPricedLines(BigDecimal costs, MInOutLine ioLine)
+	{
+		MInvoiceLine invoiceLine = MInvoiceLine.getOfInOutLine((MInOutLine) ioLine);
+		if (invoiceLine == null)
+		{
+			invoiceLine = MInvoiceLine.getOfInOutLineFromMatchInv((MInOutLine) ioLine);
+		}
+		if ((ioLine.getC_OrderLine() != null && ioLine.getC_OrderLine().getPriceActual().signum() == 0)
+			|| (invoiceLine != null && invoiceLine.getPriceActual().signum() == 0))
+		{
+			costs = BigDecimal.ZERO;
+		}
+		return null;
+	}
 
 	/**
 	 * @param as

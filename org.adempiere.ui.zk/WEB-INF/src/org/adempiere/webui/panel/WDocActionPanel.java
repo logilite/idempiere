@@ -84,6 +84,7 @@ import org.compiere.wf.MWFNodeNext;
 import org.compiere.wf.MWFNodeVar;
 import org.compiere.wf.MWFProcess;
 import org.compiere.wf.MWFResponsible;
+import org.compiere.wf.MWorkflow;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -281,26 +282,33 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 			if (fromMenu)
 				return;
 
-			StringBuilder msg = new StringBuilder(Msg.getMsg(Env.getCtx(), "AssignedToState", new Object[] { m_activity.getWFStateText(), m_activity.getNode().getName() }));
+			String respName = "";
 			if (resp.isRole())
 			{
-				msg.append(resp.getRole().getName());
+				respName = resp.getRole().getName();
 			}
 			else if (resp.isManual())
 			{
 				MWFActivityApprover[] approvers = MWFActivityApprover.getOfActivity(m_activity.getCtx(), m_activity.getAD_WF_Activity_ID(), m_activity.get_TrxName());
 				String approverNames = Arrays.stream(approvers).map(a -> a.getAD_User().getName()).collect(Collectors.joining(", "));
-				msg.append(approverNames);
+				respName = approverNames;
 			}
 			// if activity has use then he as priority then responsible user
-			else if(m_activity.getAD_User_ID() > 0 )
+			else if (m_activity.getAD_User_ID() > 0)
 			{
-				msg.append(m_activity.getAD_User().getName());
+				respName = m_activity.getAD_User().getName();
 			}
 			else if (resp.isHuman())
 			{
-				msg.append(resp.getAD_User().getName());
+				respName = resp.getAD_User().getName();
 			}
+
+			if (Util.isEmpty(respName) && m_activity.getAD_User_ID() > 0)
+			{
+				respName = m_activity.getAD_User().getName();
+			}
+
+			StringBuilder msg = new StringBuilder(Msg.getMsg(Env.getCtx(), "AssignedToState", new Object[] { m_activity.getWFStateText(), m_activity.getNode().getName() , respName}));
 			// If Activity already suspended then show error
 			Dialog.error(gridTab.getWindowNo(), msg.toString(), m_activity.toStringX());
 			return;
@@ -645,7 +653,7 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 	private void updateNextNodeOption(String newValue)
 	{
 		if (nodeVarForm != null)
-			Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), MWFActivity.WF_Activity_Next_Node_Action, newValue);
+			nodeVarForm.updateContext(newValue, MWFActivity.WF_Activity_Next_Node_Action);
 		if (m_activity != null && m_activity.getPO() != null)
 			m_activity.getPO().set_Attribute(MWFActivity.WF_Activity_Next_Node_Action, newValue);
 	}
@@ -700,12 +708,12 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 				if (lstAnswer.isVisible() && ApprovalColumn_ID > 0)
 				{
 					MColumn column = MColumn.get(Env.getCtx(), ApprovalColumn_ID);
-					Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), column.getColumnName(), (String) lstAnswer.getValue());
+					nodeVarForm.updateContext((String) lstAnswer.getValue(), column.getColumnName());
 				}
 
 				// Set the selected document action in the context if available
 				if (lstDocAction != null && lstDocAction.getSelectedItem() != null)
-					Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), "DocAction", s_value[getSelectedIndex()]);
+					nodeVarForm.updateContext(s_value[getSelectedIndex()], "DocAction");
 
 				// If workflow node is configured to show transitions as options,
 				// load available transition options
@@ -836,11 +844,24 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 				if (isWFActivity())
 				{
 					m_activity.set_TrxName(wfTrxName);
-          setNodeVarValueInPO(false);
+					setNodeVarValueInPO(false);
 					future = Adempiere.getThreadPoolExecutor().submit(new DesktopRunnable(new DocActionDialogRunnable(), getDesktop()));
 				}
 				else
-					onOk(null);
+				{
+					try
+					{
+						onOk(result -> {
+							confirmPanel.getButton("Ok").setEnabled(true);
+						});
+					}
+					catch (Exception e)
+					{
+						// Ensure OK button is re-enabled if onOk() encounters an exception.
+						confirmPanel.getButton("Ok").setEnabled(true);
+						throw e;
+					}
+				}
 			}
 			else if (confirmPanel.getButton("Cancel").equals(event.getTarget()))
 			{
@@ -862,6 +883,10 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 					Dialog.error(m_WindowNo, "Error", error != null ? error.getLocalizedMessage() : e.getLocalizedMessage());
 					logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
 				}
+				finally
+				{
+					closeNodeTrx();
+				}
 			}
 			future = null;
 			this.detach();
@@ -875,7 +900,7 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 				setDateAcctVisible(s_value[getSelectedIndex()].equals(DocumentEngine.ACTION_Reverse_Accrual) && isAllowSetDateAcct);
 				if (nodeVarForm != null && lstDocAction.getSelectedItem() != null)
 				{
-					Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), "DocAction", s_value[getSelectedIndex()]);
+					nodeVarForm.updateContext(s_value[getSelectedIndex()], "DocAction");
 					nodeVarForm.dynamicDisplay();
 				}
 			}
@@ -887,7 +912,7 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 					{
 						MColumn column = MColumn.get(Env.getCtx(), ApprovalColumn_ID);
 						String value = lstAnswer.getSelectedItem().getValue();
-						Env.setContext(Env.getCtx(), nodeVarForm.getWindowNo(), column.getColumnName(), value);
+						nodeVarForm.updateContext(value, column.getColumnName());
 					}
 					nodeVarForm.dynamicDisplay();
 				}
@@ -1145,17 +1170,7 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 
 			PO po = m_activity != null ? m_activity.getPO(Trx.get(wfTrxName, false)) : MTable.get(ctx, m_AD_Table_ID).getPO(gridTab.getRecord_ID(), wfTrxName);
 
-			MWFNode node = null;
-
-			if (m_activity != null)
-				node = m_activity.getNode();
-			else if (m_Process_ID > 0)
-			{
-				MProcess pr = new MProcess(ctx, m_Process_ID, wfTrxName);
-				node = (MWFNode) pr.getAD_Workflow().getAD_WF_Node();
-			}
-
-			if (node == null)
+			if (currentNode == null)
 			{
 				logger.log(Level.SEVERE, "Cannot resolve workflow node for variable assignment");
 				throw new AdempiereException("Cannot resolve workflow node for variable assignment");
@@ -1164,7 +1179,7 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 			for (Entry <Integer, String> colValue : valMap.entrySet())
 			{
 				MColumn col = MColumn.get(ctx, colValue.getKey());
-				MWFActivity.setVariable(colValue.getKey(), colValue.getValue(), col.getAD_Reference_ID(), po, node, wfTrxName, isSavePO);
+				MWFActivity.setVariable(colValue.getKey(), colValue.getValue(), col.getAD_Reference_ID(), po, currentNode, wfTrxName, isSavePO);
 			}
 
 			if (!isSavePO)
@@ -1172,6 +1187,7 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 		}
 		catch (Exception e)
 		{
+			confirmPanel.getButton("Ok").setEnabled(true);
 			rollbackNodeVar();
 			if (e instanceof AdempiereException)
 				throw (AdempiereException) e;
@@ -1205,6 +1221,20 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 				if (gridTab != null)
 					gridTab.dataRefresh();
 			}
+		}
+	}
+
+	/**
+	 * Close the workflow node variable transaction.
+	 */
+	public void closeNodeTrx( )
+	{
+		if (wfTrxName != null)
+		{
+			Trx wfTrx = Trx.get(wfTrxName, false);
+			if (wfTrx != null && wfTrx.isActive())
+				wfTrx.close();
+			wfTrxName = null;
 		}
 	}
 	
@@ -1340,8 +1370,7 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 		else if (org.compiere.process.DocAction.STATUS_Drafted.equals(DocStatus) && m_Process_ID > 0)
 		{
 			// Currently it only works for the DR state, because when the activity isn’t created yet, we don’t know which node will run.
-			MProcess pr = new MProcess(Env.getCtx(), m_Process_ID, null);
-			currentNode = (MWFNode) pr.getAD_Workflow().getAD_WF_Node();
+			currentNode = getNodeFromProcess();
 		}
 
 		if (isActUserApprovalTask() && currentNode != null)
@@ -1351,6 +1380,25 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 			else
 				ApprovalColumn_ID = currentNode.getAD_Column_ID();
 		}
+	}
+
+	/**
+	 * Get workflow node from process or PO document workflow
+	 * 
+	 * @return workflow node or null if not found
+	 */
+	private MWFNode getNodeFromProcess( )
+	{
+		MProcess pr = new MProcess(Env.getCtx(), m_Process_ID, null);
+		int workflowId = pr.getAD_Workflow_ID();
+		final int poWorkflowId = MWorkflow.getPODocWorkflow_ID(gridTab.getAD_Table_ID(), gridTab.getRecord_ID(), null);
+		if (poWorkflowId > 0)
+			workflowId = poWorkflowId;
+		MWorkflow workflow = workflowId > 0 ? MWorkflow.get(workflowId) : null;
+		if (workflow != null)
+			return (MWFNode) workflow.getAD_WF_Node();
+
+		return null;
 	}
 
 	private boolean isValidApprover()
