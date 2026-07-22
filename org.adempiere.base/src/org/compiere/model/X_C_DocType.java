@@ -31,7 +31,7 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20260427L;
+	private static final long serialVersionUID = 20260721L;
 
     /** Standard Constructor */
     public X_C_DocType (Properties ctx, int C_DocType_ID, String trxName)
@@ -68,13 +68,14 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 // Y
 			setIsRADateSelectable (false);
 // N
-			setIsShipConfirm (false);
 			setIsSOTrx (false);
 			setIsShipConfirm (false);
 			setIsSplitWhenDifference (false);
 // N
 			setName (null);
 			setPrintName (null);
+			setisZeroQtyIgnored (false);
+// N
         } */
     }
 
@@ -111,12 +112,16 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 			setIsPickQAConfirm (false);
 			setIsPrepareSplitDocument (true);
 // Y
+			setIsRADateSelectable (false);
+// N
 			setIsSOTrx (false);
 			setIsShipConfirm (false);
 			setIsSplitWhenDifference (false);
 // N
 			setName (null);
 			setPrintName (null);
+			setisZeroQtyIgnored (false);
+// N
         } */
     }
 
@@ -153,12 +158,16 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 			setIsPickQAConfirm (false);
 			setIsPrepareSplitDocument (true);
 // Y
+			setIsRADateSelectable (false);
+// N
 			setIsSOTrx (false);
 			setIsShipConfirm (false);
 			setIsSplitWhenDifference (false);
 // N
 			setName (null);
 			setPrintName (null);
+			setisZeroQtyIgnored (false);
+// N
         } */
     }
 
@@ -195,12 +204,16 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 			setIsPickQAConfirm (false);
 			setIsPrepareSplitDocument (true);
 // Y
+			setIsRADateSelectable (false);
+// N
 			setIsSOTrx (false);
 			setIsShipConfirm (false);
 			setIsSplitWhenDifference (false);
 // N
 			setName (null);
 			setPrintName (null);
+			setisZeroQtyIgnored (false);
+// N
         } */
     }
 
@@ -261,6 +274,7 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Workflow getAD_Workflow() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_Workflow)MTable.get(getCtx(), org.compiere.model.I_AD_Workflow.Table_ID)
@@ -289,6 +303,7 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_DocType getC_DocTypeDifference() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_ID)
@@ -539,8 +554,8 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 	public static final String DOCBASETYPE_ManufacturingOrder = "MOP";
 	/** Quality Order = MQO */
 	public static final String DOCBASETYPE_QualityOrder = "MQO";
-	/** Match Workbench = MWB */
-	public static final String DOCBASETYPE_MatchInvHdr = "MWB";
+	/** Matching Invoice Header = MWB */
+	public static final String DOCBASETYPE_MatchingInvoiceHeader = "MWB";
 	/** Match Invoice = MXI */
 	public static final String DOCBASETYPE_MatchInvoice = "MXI";
 	/** Match PO = MXP */
@@ -1066,6 +1081,29 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 		return false;
 	}
 
+	/** Set Override Doc Control.
+		@param IsOverrideDocControl Allow posting to Document Controlled accounts from GL Journal
+	*/
+	public void setIsOverrideDocControl (boolean IsOverrideDocControl)
+	{
+		set_Value (COLUMNNAME_IsOverrideDocControl, Boolean.valueOf(IsOverrideDocControl));
+	}
+
+	/** Get Override Doc Control.
+		@return Allow posting to Document Controlled accounts from GL Journal
+	  */
+	public boolean isOverrideDocControl()
+	{
+		Object oo = get_Value(COLUMNNAME_IsOverrideDocControl);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Overwrite Date on Complete.
 		@param IsOverwriteDateOnComplete Overwrite Date on Complete
 	*/
@@ -1157,9 +1195,8 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 	}
 
 	/** Set Reverse Accrual Date Selectable.
-		@param IsRADateSelectable 
-		DocAction Reverse-Accrual allow to user selectable accounting date based on DocType
-	  */
+		@param IsRADateSelectable DocAction Reverse-Accrual allow to user selectable accounting date based on DocType
+	*/
 	public void setIsRADateSelectable (boolean IsRADateSelectable)
 	{
 		set_Value (COLUMNNAME_IsRADateSelectable, Boolean.valueOf(IsRADateSelectable));
@@ -1168,13 +1205,13 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 	/** Get Reverse Accrual Date Selectable.
 		@return DocAction Reverse-Accrual allow to user selectable accounting date based on DocType
 	  */
-	public boolean isRADateSelectable () 
+	public boolean isRADateSelectable()
 	{
 		Object oo = get_Value(COLUMNNAME_IsRADateSelectable);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1288,30 +1325,52 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 	{
 		return (String)get_Value(COLUMNNAME_PrintName);
 	}
-	
-	/**
-	 * Set Override Doc Control.
-	 * 
-	 * @param IsOverrideDocControl Allow posting to Document Controlled accounts
-	 *            from GL Journal
-	 */
-	public void setIsOverrideDocControl(boolean IsOverrideDocControl)
+
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_R_MailText getR_DefaultMailText() throws RuntimeException
 	{
-		set_Value(COLUMNNAME_IsOverrideDocControl, Boolean.valueOf(IsOverrideDocControl));
+		return (org.compiere.model.I_R_MailText)MTable.get(getCtx(), org.compiere.model.I_R_MailText.Table_ID)
+			.getPO(getR_DefaultMailText_ID(), get_TrxName());
 	}
 
-	/**
-	 * Get Override Doc Control.
-	 * 
-	 * @return Allow posting to Document Controlled accounts from GL Journal
-	 */
-	public boolean isOverrideDocControl()
+	/** Set Default mail template.
+		@param R_DefaultMailText_ID Default mail template
+	*/
+	public void setR_DefaultMailText_ID (int R_DefaultMailText_ID)
 	{
-		Object oo = get_Value(COLUMNNAME_IsOverrideDocControl);
+		if (R_DefaultMailText_ID < 1)
+			set_Value (COLUMNNAME_R_DefaultMailText_ID, null);
+		else
+			set_Value (COLUMNNAME_R_DefaultMailText_ID, Integer.valueOf(R_DefaultMailText_ID));
+	}
+
+	/** Get Default mail template.
+		@return Default mail template	  */
+	public int getR_DefaultMailText_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_R_DefaultMailText_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Stock Availability Check.
+		@param isStockAvailabilityCheck Stock Availability Check
+	*/
+	public void setisStockAvailabilityCheck (boolean isStockAvailabilityCheck)
+	{
+		set_Value (COLUMNNAME_isStockAvailabilityCheck, Boolean.valueOf(isStockAvailabilityCheck));
+	}
+
+	/** Get Stock Availability Check.
+		@return Stock Availability Check	  */
+	public boolean isStockAvailabilityCheck()
+	{
+		Object oo = get_Value(COLUMNNAME_isStockAvailabilityCheck);
 		if (oo != null)
 		{
-			if (oo instanceof Boolean)
-				return ((Boolean) oo).booleanValue();
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1319,7 +1378,7 @@ public class X_C_DocType extends PO implements I_C_DocType, I_Persistent
 
 	/** Set Zero Qty Ignored.
 		@param isZeroQtyIgnored Zero Qty Ignored
-	 */
+	*/
 	public void setisZeroQtyIgnored (boolean isZeroQtyIgnored)
 	{
 		set_Value (COLUMNNAME_isZeroQtyIgnored, Boolean.valueOf(isZeroQtyIgnored));

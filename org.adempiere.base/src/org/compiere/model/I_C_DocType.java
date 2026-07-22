@@ -91,6 +91,7 @@ public interface I_C_DocType
 	  */
 	public int getAD_Workflow_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Workflow getAD_Workflow() throws RuntimeException;
 
     /** Column name C_DocTypeDifference_ID */
@@ -373,12 +374,16 @@ public interface I_C_DocType
     public static final String COLUMNNAME_IsAlwaysPosted = "IsAlwaysPosted";
 
 	/** Set Always Posted.
-	  * Always set document status to posted.
+	  * Posts the document if &quot;
+AlwaysPosted&quot;
+ is checked, regardless of accounting schema.
 	  */
 	public void setIsAlwaysPosted (boolean IsAlwaysPosted);
 
 	/** Get Always Posted.
-	  * Always set document status to posted.
+	  * Posts the document if &quot;
+AlwaysPosted&quot;
+ is checked, regardless of accounting schema.
 	  */
 	public boolean isAlwaysPosted();
 
@@ -517,6 +522,19 @@ public interface I_C_DocType
 	/** Get Allow Product Without Price List	  */
 	public boolean isNoPriceListCheck();
 
+    /** Column name IsOverrideDocControl */
+    public static final String COLUMNNAME_IsOverrideDocControl = "IsOverrideDocControl";
+
+	/** Set Override Doc Control.
+	  * Allow posting to Document Controlled accounts from GL Journal
+	  */
+	public void setIsOverrideDocControl (boolean IsOverrideDocControl);
+
+	/** Get Override Doc Control.
+	  * Allow posting to Document Controlled accounts from GL Journal
+	  */
+	public boolean isOverrideDocControl();
+
     /** Column name IsOverwriteDateOnComplete */
     public static final String COLUMNNAME_IsOverwriteDateOnComplete = "IsOverwriteDateOnComplete";
 
@@ -639,6 +657,18 @@ public interface I_C_DocType
 	  */
 	public String getPrintName();
 
+    /** Column name R_DefaultMailText_ID */
+    public static final String COLUMNNAME_R_DefaultMailText_ID = "R_DefaultMailText_ID";
+
+	/** Set Default mail template	  */
+	public void setR_DefaultMailText_ID (int R_DefaultMailText_ID);
+
+	/** Get Default mail template	  */
+	public int getR_DefaultMailText_ID();
+
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_R_MailText getR_DefaultMailText() throws RuntimeException;
+
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";
 
@@ -654,22 +684,18 @@ public interface I_C_DocType
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
-	
-	/** Column name IsOverrideDocControl */
-    public static final String COLUMNNAME_IsOverrideDocControl = "IsOverrideDocControl";
 
-	/** Set Override Doc Control.
-	  * Allow posting to Document Controlled accounts from GL Journal
-	  */
-	public void setIsOverrideDocControl (boolean IsOverrideDocControl);
+    /** Column name isStockAvailabilityCheck */
+    public static final String COLUMNNAME_isStockAvailabilityCheck = "isStockAvailabilityCheck";
 
-	/** Get Override Doc Control.
-	  * Allow posting to Document Controlled accounts from GL Journal
-	  */
-	public boolean isOverrideDocControl();
+	/** Set Stock Availability Check	  */
+	public void setisStockAvailabilityCheck (boolean isStockAvailabilityCheck);
 
-   /** Column name isZeroQtyIgnored */
-   public static final String COLUMNNAME_isZeroQtyIgnored = "isZeroQtyIgnored";
+	/** Get Stock Availability Check	  */
+	public boolean isStockAvailabilityCheck();
+
+    /** Column name isZeroQtyIgnored */
+    public static final String COLUMNNAME_isZeroQtyIgnored = "isZeroQtyIgnored";
 
 	/** Set Zero Qty Ignored	  */
 	public void setisZeroQtyIgnored (boolean isZeroQtyIgnored);

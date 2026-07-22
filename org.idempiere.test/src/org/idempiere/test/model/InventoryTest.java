@@ -54,7 +54,6 @@ import org.compiere.model.MProduct;
 import org.compiere.model.MProductPrice;
 import org.compiere.model.MStorageOnHand;
 import org.compiere.model.MWarehouse;
-import org.compiere.model.MStorageOnHand;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
 import org.compiere.process.ProcessInfo;
@@ -364,7 +363,7 @@ public class InventoryTest extends AbstractTestCase {
 		order.setDatePromised(today);
 		order.saveEx();
 
-		MOrderLine line1 = MOrderLine.createFrom(order);
+		MOrderLine line1 = new MOrderLine(order);
 		line1.setLine(10);
 		line1.setProduct(new MProduct(Env.getCtx(), productId, getTrxName()));
 		line1.setQty(qty);
@@ -376,7 +375,7 @@ public class InventoryTest extends AbstractTestCase {
 		order.load(getTrxName());
 		assertEquals(DocAction.STATUS_Completed, order.getDocStatus());		
 		
-		MInOut receipt1 = MInOut.createFrom(order, DictionaryIDs.C_DocType.MM_RECEIPT.id, order.getDateOrdered());
+		MInOut receipt1 = new MInOut(order, DictionaryIDs.C_DocType.MM_RECEIPT.id, order.getDateOrdered());
 		receipt1.setDocStatus(DocAction.STATUS_Drafted);
 		receipt1.setDocAction(DocAction.ACTION_Complete);
 		receipt1.saveEx();
@@ -397,7 +396,7 @@ public class InventoryTest extends AbstractTestCase {
 			assertNull(error, error);
 		}
 	}
-	
+
 	@Test
 	public void testSkipProductWithSerial() {
 		Properties ctx = Env.getCtx();
@@ -444,7 +443,7 @@ public class InventoryTest extends AbstractTestCase {
 			asi.setSerNo("testSkipProductWithSerial #1");
 			asi.saveEx();
 			
-			createPOAndMRForProduct(product.get_ID(), asi);
+			createPOAndMRForProduct(product.get_ID(), asi, BigDecimal.ONE);
 			
 			MStorageOnHand[] onhands = MStorageOnHand.getOfProduct(Env.getCtx(), product.get_ID(), getTrxName());
 			assertEquals(1, onhands.length, "Unexpected number of on hand records");
@@ -481,7 +480,7 @@ public class InventoryTest extends AbstractTestCase {
 			}
 		}
 	}
-	
+
 	@Test
 	public void testSkipProductWithSerial2() {
 		Properties ctx = Env.getCtx();
@@ -528,7 +527,7 @@ public class InventoryTest extends AbstractTestCase {
 			asi.setSerNo("testSkipProductWithSerial #1");
 			asi.saveEx();
 			
-			createPOAndMRForProduct(product.get_ID(), asi);
+			createPOAndMRForProduct(product.get_ID(), asi, BigDecimal.ONE);
 						
 			MStorageOnHand[] onhands = MStorageOnHand.getOfProduct(Env.getCtx(), product.get_ID(), getTrxName());
 			assertEquals(1, onhands.length, "Unexpected number of on hand records");
@@ -538,7 +537,7 @@ public class InventoryTest extends AbstractTestCase {
 			asi1.setM_AttributeSet_ID(DictionaryIDs.M_AttributeSet.FERTILIZER_LOT.id);
 			asi1.saveEx();
 
-			createPOAndMRForProduct(product.get_ID(), asi1);
+			createPOAndMRForProduct(product.get_ID(), asi1, BigDecimal.ONE);
 			
 			onhands = MStorageOnHand.getOfProduct(Env.getCtx(), product.get_ID(), getTrxName());
 			assertEquals(2, onhands.length, "Unexpected number of on hand records");

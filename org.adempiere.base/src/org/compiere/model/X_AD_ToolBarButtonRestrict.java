@@ -30,7 +30,7 @@ public class X_AD_ToolBarButtonRestrict extends PO implements I_AD_ToolBarButton
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20260622L;
+	private static final long serialVersionUID = 20260721L;
 
     /** Standard Constructor */
     public X_AD_ToolBarButtonRestrict (Properties ctx, int AD_ToolBarButtonRestrict_ID, String trxName)
@@ -327,6 +327,8 @@ public class X_AD_ToolBarButtonRestrict extends PO implements I_AD_ToolBarButton
 	public String getAction()
 	{
 		return (String)get_Value(COLUMNNAME_Action);
+	}
+
 	/** Set Display Logic.
 		@param DisplayLogic If the Field is displayed, the result determines if the field is actually displayed
 	*/

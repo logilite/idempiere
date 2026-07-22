@@ -33,11 +33,11 @@ public class MMatchInvHdr extends X_M_MatchInvHdr implements DocAction
 		super(ctx, M_MatchInvHdr_ID, trxName);
 		setDateTrx(TimeUtil.getDay(System.currentTimeMillis()));
 		setDateAcct(getDateTrx());
-		if(MDocType.getDocType(MDocType.DOCBASETYPE_MatchInvHdr) <= 0)
+		if(MDocType.getDocType(MDocType.DOCBASETYPE_MatchingInvoiceHeader) <= 0)
 		{
 			throw new AdempiereException("Document type not available: 'Match Invoice Header'");
 		}
-		setC_DocType_ID(MDocType.getDocType(MDocType.DOCBASETYPE_MatchInvHdr));
+		setC_DocType_ID(MDocType.getDocType(MDocType.DOCBASETYPE_MatchingInvoiceHeader));
 	}
 
 	public MMatchInvHdr(Properties ctx, ResultSet rs, String trxName)
