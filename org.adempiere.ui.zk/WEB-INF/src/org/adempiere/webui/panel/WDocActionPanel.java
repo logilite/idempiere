@@ -940,6 +940,14 @@ public class WDocActionPanel extends Window implements EventListener <Event>, Di
 			}
 		}
 	}
+	
+	@Override
+	public void detach( )
+	{
+		if (nodeVarForm != null)
+			nodeVarForm.detach();
+		super.detach();
+	}
 
 	/**
 	 * Runs the workflow activity in a background transaction.  

@@ -105,7 +105,6 @@ public class WFNodeVarForm extends Window implements ValueChangeListener
 	 */
 	private void init(MWFNode node, List <MColumn> columns, PO po, GridTab gridTab)
 	{
-		// TODO future: To add support for the window record value parsing for mandatory and displaylogic
 		m_WindowNo = SessionManager.getAppDesktop().registerWindow(this);
 		setTitle(Msg.getMsg(Env.getCtx(), "WFNodeVariable"));
 		setWidth("100%");
@@ -171,6 +170,15 @@ public class WFNodeVarForm extends Window implements ValueChangeListener
 		grid.appendChild(rows);
 		gridDiv.appendChild(grid);
 		pc.appendChild(gridDiv);
+	}
+	
+	@Override
+	public void detach( )
+	{
+		Env.clearWinContext(Env.getCtx(), m_WindowNo);
+		Env.clearTabContext(Env.getCtx(), m_WindowNo, 0);
+		SessionManager.getAppDesktop().unregisterWindow(m_WindowNo);
+		super.detach();
 	}
 
 	/**
