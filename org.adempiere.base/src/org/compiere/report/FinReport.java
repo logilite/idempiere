@@ -1652,9 +1652,32 @@ public class FinReport extends SvrProcess
 
 		MReportSource[] sources = m_lines[line].getSources();
 		boolean isCombination = sources != null && sources.length > 0 ? sources[0].getElementType().equals("CO") : false;
-		//Insert
-		StringBuilder insert = new StringBuilder("INSERT INTO T_Report "
-			+ "(AD_PInstance_ID, PA_ReportLine_ID, Record_ID,Fact_Acct_ID,LevelNo ");
+
+		// 1. Check if ANY column requires the Balance Sheet CTE filter
+		boolean hasNaturalColumn = false;
+		for (MReportColumn col : m_columns)
+		{
+			if ((m_lines[line].getPAPeriodType() == null && col.getPAPeriodType() != null && (col.isNatural() || col.isNaturalYearOpening()))
+				|| (m_lines[line].getPAPeriodType() != null && (m_lines[line].isNatural() || m_lines[line].isNaturalYearOpening())))
+			{
+				hasNaturalColumn = true;
+				break;
+			}
+		}
+
+		StringBuilder insert = new StringBuilder();
+		
+		// Prepend CTE once at the top level
+		if (hasNaturalColumn)
+		{
+			insert.append("WITH TargetAccounts AS ( ")
+			      .append("  SELECT C_ElementValue_ID FROM C_ElementValue WHERE AccountType NOT IN ('R', 'E') ")
+			      .append(") ");
+		}
+
+		// 2. INSERT INTO Header
+		insert.append("INSERT INTO T_Report ")
+			  .append("(AD_PInstance_ID, PA_ReportLine_ID, Record_ID, Fact_Acct_ID, LevelNo ");
 		
         if (isCombination)
             insert.append(", C_ValidCombination_ID ");
@@ -1667,19 +1690,20 @@ public class FinReport extends SvrProcess
 			.append(m_lines[line].getPA_ReportLine_ID()).append(",");
 
 		if (isCombination)
-			insert.append("Account_ID");
+			insert.append("x.Account_ID");
 		else
-			insert.append(variable);
-		insert.append(",0,");
+			insert.append("x.").append(variable);
+		insert.append(", 0, ");
 
 		boolean listSourceNoTrx = m_report.isListSourcesXTrx() && variable.equalsIgnoreCase(I_C_ValidCombination.COLUMNNAME_Account_ID);
-		//SQL to get the Account Element which no transaction
+		
+		// UNION setup for zero-transaction accounts
 		StringBuffer unionInsert = listSourceNoTrx ? new StringBuffer() : null;
 		if (listSourceNoTrx) {
 			unionInsert.append(" UNION SELECT ")
-			.append(getAD_PInstance_ID()).append(",")
-			.append(m_lines[line].getPA_ReportLine_ID()).append(",")
-			.append(variable).append(",0,");
+				.append(getAD_PInstance_ID()).append(",")
+				.append(m_lines[line].getPA_ReportLine_ID()).append(",")
+				.append("x.").append(variable).append(", 0, ");
 		}
 		//
 		if (isDimensionLine)
@@ -1705,14 +1729,14 @@ public class FinReport extends SvrProcess
 					sources[srcLine].getC_Location_ID(), 0, sources[srcLine].getC_SalesRegion_ID(), sources[srcLine].getC_Project_ID(), sources[srcLine].getC_Campaign_ID(),
 					sources[srcLine].getC_Activity_ID(), sources[srcLine].getUser1_ID(), sources[srcLine].getUser2_ID(), sources[srcLine].getUserElement1_ID(),
 					sources[srcLine].getUserElement2_ID(), get_TrxName()).getC_ValidCombination_ID();
-			insert.append("," + combinationID + " ");
+			insert.append(", ").append(combinationID).append(" ");
 		}
 
 		if (!Util.isEmpty(dimGroupVariable) && isDimensionLine)
 		{
-			insert.append(",COALESCE(").append(dimGroupVariable).append(", 0)");
+			insert.append(", COALESCE(x.").append(dimGroupVariable).append(", 0)");
 			if (listSourceNoTrx)
-				unionInsert.append(",COALESCE(").append(dimGroupVariable).append(", 0)");
+				unionInsert.append(", COALESCE(x.").append(dimGroupVariable).append(", 0)");
 		}
 		else
 		{
@@ -1733,119 +1757,123 @@ public class FinReport extends SvrProcess
 				continue;
 			}
 
-			// SELECT SUM()
-			StringBuilder select = new StringBuilder ("SELECT ");
-			if (m_lines[line].getPAAmountType() != null) //	line amount type overwrites column
-				select.append (m_lines[line].getSelectClause(true));
+			// Pass 'false' to retrieve raw expression WITHOUT "SUM(" and ")"
+			String rawExpr = null;
+			if (m_lines[line].getPAAmountType() != null)
+				rawExpr = m_lines[line].getSelectClause(false);
 			else if (m_columns[col].getPAAmountType() != null)
-				select.append (m_columns[col].getSelectClause(true));
+				rawExpr = m_columns[col].getSelectClause(false);
 			else
 			{
 				insert.append(", Cast(NULL AS ").append(numericType).append(")");
 				continue;
 			}
 
-			if (p_PA_ReportCube_ID > 0) {
-				select.append(" FROM Fact_Acct_Summary fb WHERE ").append(p_AdjPeriodToExclude).append("DateAcct ");
-			} // report cube
-			else {
-			// Get Period info
-				select.append(" FROM Fact_Acct fb WHERE ").append(p_AdjPeriodToExclude).append("TRUNC(DateAcct) ");
+			if (rawExpr == null || rawExpr.equals("NULL"))
+			{
+				insert.append(", Cast(NULL AS ").append(numericType).append(")");
+				continue;
 			}
+
+			// Safely prefix database column names with x. using regex word boundaries
+			String expr = rawExpr.replaceAll("\\b(Account_ID|AmtAcctDr|AmtAcctCr|Qty)\\b", "x.$1");
+
+			StringBuilder caseCond = new StringBuilder();
 			FinReportPeriod frp = getPeriod(m_columns[col].getRelativePeriod());
 			FinReportPeriod frpTo = getPeriodTo(m_columns[col].getRelativePeriodTo());
-			if (m_lines[line].getPAPeriodType() != null) //	line amount type overwrites column
+
+			// Date condition mapping using outer table alias 'x'
+			if (m_lines[line].getPAPeriodType() != null)
 			{
-				if (m_lines[line].isPeriod())
-					select.append(frp.getPeriodWhere());
-				else if (m_lines[line].isYear())
-					select.append(frp.getYearWhere());
-				else if (m_lines[line].isNatural())
-					select.append(frp.getNaturalWhere("fb"));
-				else if (m_lines[line].isNaturalYearOpening())
-					select.append(frp.getNaturalYearOpeningWhere("fb"));
-				else
-					select.append(frp.getTotalWhere());
+				if (m_lines[line].isPeriod()) 
+					appendDateClause(caseCond, frp.getPeriodWhere());
+				else if (m_lines[line].isYear()) 
+					appendDateClause(caseCond, frp.getYearWhere());
+				else if (m_lines[line].isNatural()) 
+					appendDateClause(caseCond, hasNaturalColumn ? frp.getNaturalWITHWhere("x", "TargetAccounts") : frp.getNaturalWhere("x"));
+				else if (m_lines[line].isNaturalYearOpening()) 
+					appendDateClause(caseCond, hasNaturalColumn ? frp.getNaturalYearOpeningWITHWhere("TargetAccounts"): frp.getNaturalYearOpeningWhere("x"));
+				else 
+					appendDateClause(caseCond, frp.getTotalWhere());
 			}
 			else if (m_columns[col].getPAPeriodType() != null)
 			{
 				if (m_columns[col].isPeriod())
 				{
-					if (frpTo == null)
-						select.append(frp.getPeriodWhere());
-					else
-						select.append(" BETWEEN " + DB.TO_DATE(frp.getStartDate()) + " AND " + DB.TO_DATE(frpTo.getEndDate()));
+					if (frpTo == null) 
+						appendDateClause(caseCond, frp.getPeriodWhere());
+					else 
+						caseCond.append("TRUNC(x.DateAcct) BETWEEN ").append(DB.TO_DATE(frp.getStartDate())).append(" AND ").append(DB.TO_DATE(frpTo.getEndDate()));
 				}
 				else if (m_columns[col].isYear())
 				{
-					if (frpTo == null)
-						select.append(frp.getYearWhere());
-					else
-						select.append(" BETWEEN " + DB.TO_DATE(frp.getYearStartDate()) + " AND " + DB.TO_DATE(frpTo.getEndDate()));
+					if (frpTo == null) 
+						appendDateClause(caseCond, frp.getYearWhere());
+					else 
+						caseCond.append("TRUNC(x.DateAcct) BETWEEN ").append(DB.TO_DATE(frp.getYearStartDate())).append(" AND ").append(DB.TO_DATE(frpTo.getEndDate()));
 				}
 				else if (m_columns[col].isNatural())
 				{
-					if (frpTo == null)
-						select.append(frp.getNaturalWhere("fb"));
+					if (frpTo == null) 
+						appendDateClause(caseCond, hasNaturalColumn ? frp.getNaturalWITHWhere("x", "TargetAccounts") : frp.getNaturalWhere("x"));
 					else
 					{
 						String yearWhere = " BETWEEN " + DB.TO_DATE(frp.getYearStartDate()) + " AND " + DB.TO_DATE(frpTo.getEndDate());
-						String totalWhere = frpTo.getTotalWhere();
-						String bs = " EXISTS (SELECT C_ElementValue_ID FROM C_ElementValue WHERE C_ElementValue_ID = fb.Account_ID AND AccountType NOT IN ('R', 'E'))";
-						String full = totalWhere + " AND ( " + bs + " OR TRUNC(fb.DateAcct) " + yearWhere + " ) ";
-						select.append(full);
+						
+						// In-memory hash set lookup via CTE
+						String bs = hasNaturalColumn 
+								? " x.Account_ID IN (SELECT C_ElementValue_ID FROM TargetAccounts) "
+								: " EXISTS (SELECT 1 FROM C_ElementValue WHERE C_ElementValue_ID = x.Account_ID AND AccountType NOT IN ('R', 'E')) ";
+						
+						StringBuilder totalWhereClause = new StringBuilder();
+						appendDateClause(totalWhereClause, frpTo.getTotalWhere());
+						
+						caseCond.append(totalWhereClause).append(" AND ( ").append(bs).append(" OR TRUNC(x.DateAcct) ").append(yearWhere).append(" ) ");
 					}
 				}
 				else if (m_columns[col].isNaturalYearOpening())
 				{
-					select.append(frp.getNaturalYearOpeningWhere("fb"));
+					appendDateClause(caseCond, hasNaturalColumn ? frp.getNaturalYearOpeningWITHWhere("TargetAccounts"): frp.getNaturalYearOpeningWhere("x"));
 				}
 				else
 				{
-					if (frpTo == null)
-						select.append(frp.getTotalWhere());
-					else
-						select.append(frpTo.getTotalWhere());
+					if (frpTo == null) 
+						appendDateClause(caseCond, frp.getTotalWhere());
+					else 
+						appendDateClause(caseCond, frpTo.getTotalWhere());
 				}
 			}
-			// Link
+			
+			// Combination Filtering
 			if (isCombination)
-				select.append(m_lines[line].getSelectClauseCombination());
-			else
-				select.append(" AND fb.").append(variable).append("=x.").append(variable);
-			// PostingType
-			if (!m_lines[line].isPostingType()) // only if not defined on line
+			{
+				String comboSql = m_lines[line].getSelectClauseCombination();
+				if (!Util.isEmpty(comboSql))
+				{
+					caseCond.append(prepareCombinationClause(comboSql));
+				}
+			}
+
+			if (!m_lines[line].isPostingType())
 			{
 				String PostingType = m_columns[col].getPostingType();
 				if (PostingType != null && PostingType.length() > 0)
-					select.append(" AND fb.PostingType='").append(PostingType).append("'");
-				// globalqss - CarlosRuiz
-				if (MReportColumn.POSTINGTYPE_Budget.equals(PostingType)) {
+					caseCond.append(" AND x.PostingType='").append(PostingType).append("'");
+				if (MReportColumn.POSTINGTYPE_Budget.equals(PostingType)) 
+				{
 					if (m_columns[col].getGL_Budget_ID() > 0)
-						select.append(" AND GL_Budget_ID=" + m_columns[col].getGL_Budget_ID());
+						caseCond.append(" AND x.GL_Budget_ID=").append(m_columns[col].getGL_Budget_ID());
 				}
-				// end globalqss
 			}
-			// Report Where
-			String s = m_report.getWhereClause();
-			if (s != null && s.length() > 0)
-				select.append(" AND ").append(s);
-			// Limited Segment Values
-			if (m_columns[col].isColumnTypeSegmentValue() || m_columns[col].isWithSources())
-				select.append(m_columns[col].getWhereClause(p_PA_Hierarchy_ID));
 
-			// Add validation to handle cases where the dimension group value is null
-			if (!Util.isEmpty(dimGroupVariable) && isDimensionLine)
-				select.append(" AND COALESCE(fb.").append(dimGroupVariable).append(",0) = COALESCE(x.").append(dimGroupVariable).append(",0)");
-
-			// Parameter Where
-			select.append(m_parameterWhere);
-			if (log.isLoggable(Level.FINEST))
-				log.finest("Col=" + col + ", Line=" + line + ": " + select);
-			//
-			insert.append(", (").append(select).append(")");
+			insert.append(", SUM(CASE WHEN ").append(caseCond).append(" THEN ").append(expr).append(" ELSE 0 END)");
 		}
-		// WHERE (sources, posting type)
+
+		// 5. FROM Clause (Clean, single-table query, no redundant outer JOINs)
+		String factTable = (p_PA_ReportCube_ID > 0) ? "Fact_Acct_Summary" : "Fact_Acct";
+		insert.append(" FROM ").append(factTable).append(" x ");
+
+		// 6. Build WHERE clause
 		StringBuffer where = new StringBuffer("");
 		StringBuffer whereComb = new StringBuffer("");
 
@@ -1917,54 +1945,48 @@ public class FinReport extends SvrProcess
 			}
 
 		}
-		if (where.length() > 0 && !isCombination)
-			where.append(" AND ");
 		if (!isCombination)
-			where.append(variable).append(" IS NOT NULL");
+		{
+			if (where.length() > 0) where.append(" AND ");
+			where.append("x.").append(variable).append(" IS NOT NULL");
+		}
 		
-		if (p_PA_ReportCube_ID > 0)
-			insert.append(" FROM Fact_Acct_Summary x WHERE ").append(p_AdjPeriodToExclude).append(where);
-		else
-			// FROM .. WHERE
-			insert.append(" FROM Fact_Acct x WHERE ").append(p_AdjPeriodToExclude).append(where);	
-		//
-		insert.append(m_parameterWhere).append(" GROUP BY ");
+		insert.append(" WHERE ").append(p_AdjPeriodToExclude).append(where).append(m_parameterWhere);
+
+		// 7. GROUP BY Clause
+		insert.append(" GROUP BY ");
 		if (isCombination)
 		{
 			List<String> colNames = m_lines[line].getCombinationGroupByColumns();
 			StringBuffer groupBy = new StringBuffer("");
 			for (int j = 0; j < colNames.size(); j++)
 			{
-				groupBy.append(", " + colNames.get(j));
+				groupBy.append(", x." + colNames.get(j));
 			}
 			insert.append(groupBy.toString().replaceFirst(", ", ""));
 		}
 		else
-			insert.append(variable);
+			insert.append("x.").append(variable);
 
 		if (!Util.isEmpty(dimGroupVariable) && isDimensionLine)
-			insert.append(", ").append(dimGroupVariable);
+			insert.append(", x.").append(dimGroupVariable);
 
+		// 8. UNION Clause for accounts with zero transactions
 		if (listSourceNoTrx) {
-			if (unionWhere.length() > 0)
-				unionWhere.append(" AND ");
-			unionWhere.append(variable).append(" IS NOT NULL ");
+			if (unionWhere.length() > 0) unionWhere.append(" AND ");
+			unionWhere.append("x.C_ElementValue_ID IS NOT NULL ");
 			
-			unionWhere.append(" AND Account_ID not in (select Account_ID ");
-			if (p_PA_ReportCube_ID > 0)
-				unionWhere.append(" from Fact_Acct_Summary x WHERE ").append(p_AdjPeriodToExclude).append(where);
-			else
-				unionWhere.append(" from Fact_Acct x WHERE ").append(p_AdjPeriodToExclude).append(where);
-			//
+			unionWhere.append(" AND x.C_ElementValue_ID not in (select x.Account_ID ");
+			unionWhere.append(" from ").append(factTable).append(" x WHERE ").append(p_AdjPeriodToExclude).append(where);
 			unionWhere.append(m_parameterWhere).append(")");
 
-			unionInsert.append(" FROM (select c_elementvalue.c_elementvalue_id as Account_ID, c_acctschema_element.C_AcctSchema_ID ");
+			unionInsert.append(" FROM (select c_elementvalue.c_elementvalue_id as Account_ID, c_elementvalue.c_elementvalue_id as C_ElementValue_ID, c_acctschema_element.C_AcctSchema_ID ");
 			if (!Util.isEmpty(dimGroupVariable) && isDimensionLine)
 				unionInsert.append(", c_acctschema_element.").append(dimGroupVariable).append(" AS ").append(dimGroupVariable);
 			unionInsert.append(" from c_elementvalue inner join c_acctschema_element on (c_elementvalue.c_element_id = c_acctschema_element.c_element_id)) x WHERE ").append(unionWhere);
-			unionInsert.append(" GROUP BY ").append(variable);
+			unionInsert.append(" GROUP BY x.").append(variable);
 			if (!Util.isEmpty(dimGroupVariable) && isDimensionLine)
-				unionInsert.append(", ").append(dimGroupVariable);
+				unionInsert.append(", x.").append(dimGroupVariable);
 
 			insert.append(unionInsert);
 		}
@@ -2035,6 +2057,45 @@ public class FinReport extends SvrProcess
 			else
 				insertLineTrx(line, srcLine, variable, dimGroupVariable, null);
 		}
+	}
+	
+	/**
+	 * Safely appends date clauses returned by FinReportPeriod to case conditions,
+	 * ensuring TRUNC(x.DateAcct) is prepended if the clause starts with an operator like '<', '>', '=', or 'BETWEEN'.
+	 */
+	private void appendDateClause(StringBuilder target, String clause) 
+	{
+		if (clause == null || clause.trim().isEmpty())
+			return;
+
+		String trimmed = clause.trim();
+		if (trimmed.startsWith("<") || trimmed.startsWith(">") || trimmed.startsWith("=") || trimmed.startsWith("BETWEEN")) 
+		{
+			target.append("TRUNC(x.DateAcct) ").append(clause);
+		} 
+		else 
+		{
+			target.append(clause);
+		}
+	}
+	
+	/**
+	 * Converts combination SQL fragments to use outer alias 'x.'
+	 * and strips leading 'AND' if present.
+	 */
+	private String prepareCombinationClause(String combinationSql) {
+	    if (Util.isEmpty(combinationSql))
+	        return "";
+
+	    // Replace table alias fb. or standalone column names with x.
+	    String sql = combinationSql.replaceAll("\\bfb\\.", "x.")
+	                               .replaceAll("\\b(C_Activity_ID|C_BPartner_ID|M_Product_ID|AD_Org_ID|C_SalesRegion_ID|C_Project_ID|C_Campaign_ID|User1_ID|User2_ID)\\b", "x.$1");
+
+	    String trimmed = sql.trim();
+	    if (trimmed.toUpperCase().startsWith("AND ")) {
+	        return " " + trimmed; // Keeps " AND x.C_Activity_ID=..."
+	    }
+	    return " AND " + trimmed;
 	}
 
 	/**

@@ -168,6 +168,18 @@ public class FinReportPeriod
 	public String getNaturalWhere(String alias) {
 		return getTotalWhere() + " AND ( " + getNotPLAccountWhere(alias) + " OR TRUNC(" + alias + ".DateAcct) " + getYearWhere() + " ) ";
 	}
+	
+	/**
+	 * Get natural balance dateacct filter
+	 * 
+	 * @param alias
+	 *            table name or alias name
+	 * @return is balance sheet a/c and &lt;= end or BETWEEN start AND end
+	 */
+	public String getNaturalWITHWhere(String alias, String withAlias)
+	{
+		return getTotalWhere() + " AND ( " + getNotPLAccountWITHWhere(withAlias) + " OR TRUNC(" + alias + ".DateAcct) " + getYearWhere() + " ) ";
+	}
 
 	/**
 	 * Get natural year opening balance dateacct filter
@@ -178,6 +190,17 @@ public class FinReportPeriod
 	public String getNaturalYearOpeningWhere(String alias)
 	{
 		return getYearOpeningWhere() + " AND " + getNotPLAccountWhere(alias);
+	} // getNaturalOpeningWhere
+	
+	/**
+	 * Get natural year opening balance dateacct filter
+	 * 
+	 * @param  withAlias table name or alias name
+	 * @return       is balance sheet a/c and < start
+	 */
+	public String getNaturalYearOpeningWITHWhere(String withAlias)
+	{
+		return getYearOpeningWhere() + " AND " + getNotPLAccountWITHWhere(withAlias);
 	} // getNaturalOpeningWhere
 
 	/**
@@ -190,5 +213,16 @@ public class FinReportPeriod
 	{
 		return " EXISTS (SELECT C_ElementValue_ID FROM C_ElementValue WHERE C_ElementValue_ID = " + alias + ".Account_ID AND AccountType NOT IN ('R', 'E')) ";
 	} // getNotPLAccountWhere
+	
+	/**
+	 * Not P & L Account where
+	 * 
+	 * @param withAlias
+	 * @return
+	 */
+	private String getNotPLAccountWITHWhere(String withAlias)
+	{
+		return " EXISTS (SELECT C_ElementValue_ID FROM " + withAlias + " ) ";
+	} // getNotPLAccountWITHWhere
 
 }	//	FinReportPeriod
