@@ -1667,14 +1667,6 @@ public class FinReport extends SvrProcess
 
 		StringBuilder insert = new StringBuilder();
 		
-		// Prepend CTE once at the top level
-		if (hasNaturalColumn)
-		{
-			insert.append("WITH TargetAccounts AS ( ")
-			      .append("  SELECT C_ElementValue_ID FROM C_ElementValue WHERE AccountType NOT IN ('R', 'E') ")
-			      .append(") ");
-		}
-
 		// 2. INSERT INTO Header
 		insert.append("INSERT INTO T_Report ")
 			  .append("(AD_PInstance_ID, PA_ReportLine_ID, Record_ID, Fact_Acct_ID, LevelNo ");
@@ -1684,8 +1676,17 @@ public class FinReport extends SvrProcess
         insert.append(", DimensionGroupRecord_ID ");
 		for (int col = 0; col < m_columns.length; col++)
 			insert.append(",Col_").append(col);
+		
+		insert.append(")");
+		// Prepend CTE once at the top level
+		if (hasNaturalColumn)
+		{
+			insert.append(" WITH TargetAccounts AS ( ")
+			      .append("  SELECT C_ElementValue_ID FROM C_ElementValue WHERE AccountType NOT IN ('R', 'E') ")
+			      .append(") ");
+		}
 		//Select
-		insert.append(") SELECT ")
+		insert.append(" SELECT ")
 			.append(getAD_PInstance_ID()).append(",")
 			.append(m_lines[line].getPA_ReportLine_ID()).append(",");
 
