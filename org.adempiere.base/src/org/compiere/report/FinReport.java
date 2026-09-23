@@ -1870,13 +1870,13 @@ public class FinReport extends SvrProcess
 			// Report Where
 			String s = m_report.getWhereClause();
 			if (s != null && s.length() > 0)
-				caseCond.append(" AND ").append(s);
+				caseCond.append(" ").append(prepareCombinationClause(s));
 
 			if (m_columns[col].isColumnTypeSegmentValue() || m_columns[col].isWithSources())
 			{
 				String colWhere = m_columns[col].getWhereClause(p_PA_Hierarchy_ID);
 				if (!Util.isEmpty(colWhere))
-					caseCond.append(" ").append(colWhere);
+					caseCond.append(" ").append(prepareCombinationClause(colWhere));
 			}
 
 			insert.append(", SUM(CASE WHEN ").append(caseCond).append(" THEN ").append(expr).append(" ELSE 0 END)");
@@ -2094,21 +2094,25 @@ public class FinReport extends SvrProcess
 	
 	/**
 	 * Converts combination SQL fragments to use outer alias 'x.'
-	 * and strips leading 'AND' if present.
+	 * and formats leading 'AND'.
 	 */
-	private String prepareCombinationClause(String combinationSql) {
-	    if (Util.isEmpty(combinationSql))
-	        return "";
+	private String prepareCombinationClause(String combinationSql)
+	{
+		if (Util.isEmpty(combinationSql))
+			return "";
 
-	    // Replace table alias fb. or standalone column names with x.
-	    String sql = combinationSql.replaceAll("\\bfb\\.", "x.")
-	    				 .replaceAll("(?<!\\.)\\b(C_Activity_ID|C_BPartner_ID|M_Product_ID|AD_Org_ID|C_SalesRegion_ID|C_Project_ID|C_Campaign_ID|User1_ID|User2_ID)\\b", "x.$1");
+		// Replace table alias fb. or standalone column names with outer alias x.
+		String sql
+					= combinationSql.replaceAll("\\bfb\\.", "x.")
+									.replaceAll("(?<!\\.)\\b(Account_ID|AD_Org_ID|AD_OrgTrx_ID|C_Activity_ID|C_BPartner_ID|C_Campaign_ID|C_LocFrom_ID|C_Project_ID|C_SalesRegion_ID|M_Product_ID|User1_ID|User2_ID|UserElement1_ID|UserElement2_ID|C_AcctSchema_ID)\\b",
+													"x.$1");
 
-	    String trimmed = sql.trim();
-	    if (trimmed.toUpperCase().startsWith("AND ")) {
-	        return " " + trimmed; // Keeps " AND x.C_Activity_ID=..."
-	    }
-	    return " AND " + trimmed;
+		String trimmed = sql.trim();
+		if (trimmed.toUpperCase().startsWith("AND "))
+		{
+			return " " + trimmed; // Keeps " AND x.C_Activity_ID=..."
+		}
+		return " AND " + trimmed;
 	}
 
 	/**
