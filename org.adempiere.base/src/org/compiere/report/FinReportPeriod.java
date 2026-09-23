@@ -170,15 +170,17 @@ public class FinReportPeriod
 	}
 	
 	/**
-	 * Get natural balance dateacct filter
+	 * Returns WHERE predicate for Natural columns using CTE
 	 * 
 	 * @param alias
-	 *            table name or alias name
-	 * @return is balance sheet a/c and &lt;= end or BETWEEN start AND end
+	 *            Table alias for fact table (e.g., "x")
+	 * @param withAlias
+	 *            CTE name (e.g., "TargetAccounts")
+	 * @return SQL WHERE clause
 	 */
 	public String getNaturalWITHWhere(String alias, String withAlias)
 	{
-		return getTotalWhere() + " AND ( " + getNotPLAccountWITHWhere(withAlias) + " OR TRUNC(" + alias + ".DateAcct) " + getYearWhere() + " ) ";
+		return getTotalWhere() + " AND ( " + getNotPLAccountWITHWhere(alias, withAlias) + " OR TRUNC(" + alias + ".DateAcct) " + getYearWhere() + " ) ";
 	}
 
 	/**
@@ -193,15 +195,15 @@ public class FinReportPeriod
 	} // getNaturalOpeningWhere
 	
 	/**
-	 * Get natural year opening balance dateacct filter
-	 * 
-	 * @param  withAlias table name or alias name
-	 * @return       is balance sheet a/c and < start
+	 * Returns WHERE predicate for Natural-Year-Opening columns using CTE
+	 * @param alias Table alias for fact table (e.g., "x")
+	 * @param withAlias CTE name (e.g., "TargetAccounts")
+	 * @return SQL WHERE clause
 	 */
-	public String getNaturalYearOpeningWITHWhere(String withAlias)
+	public String getNaturalYearOpeningWITHWhere(String alias, String withAlias)
 	{
-		return getYearOpeningWhere() + " AND " + getNotPLAccountWITHWhere(withAlias);
-	} // getNaturalOpeningWhere
+	    return getYearOpeningWhere() + " AND " + getNotPLAccountWITHWhere(alias, withAlias);
+	}
 
 	/**
 	 * Not P & L Account where
@@ -213,16 +215,19 @@ public class FinReportPeriod
 	{
 		return " EXISTS (SELECT C_ElementValue_ID FROM C_ElementValue WHERE C_ElementValue_ID = " + alias + ".Account_ID AND AccountType NOT IN ('R', 'E')) ";
 	} // getNotPLAccountWhere
-	
+
 	/**
-	 * Not P & L Account where
+	 * Filters non-Profit & Loss accounts correlated with the fact table row
 	 * 
+	 * @param alias
+	 *            Table alias for fact table (e.g., "x")
 	 * @param withAlias
-	 * @return
+	 *            CTE name (e.g., "TargetAccounts")
+	 * @return SQL predicate
 	 */
-	private String getNotPLAccountWITHWhere(String withAlias)
+	private String getNotPLAccountWITHWhere(String alias, String withAlias)
 	{
-		return " EXISTS (SELECT C_ElementValue_ID FROM " + withAlias + " ) ";
+		return " " + alias + ".Account_ID IN (SELECT C_ElementValue_ID FROM " + withAlias + ") ";
 	} // getNotPLAccountWITHWhere
 
 }	//	FinReportPeriod

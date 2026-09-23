@@ -1793,7 +1793,7 @@ public class FinReport extends SvrProcess
 				else if (m_lines[line].isNatural()) 
 					appendDateClause(caseCond, hasNaturalColumn ? frp.getNaturalWITHWhere("x", "TargetAccounts") : frp.getNaturalWhere("x"));
 				else if (m_lines[line].isNaturalYearOpening()) 
-					appendDateClause(caseCond, hasNaturalColumn ? frp.getNaturalYearOpeningWITHWhere("TargetAccounts"): frp.getNaturalYearOpeningWhere("x"));
+					appendDateClause(caseCond, hasNaturalColumn ? frp.getNaturalYearOpeningWITHWhere("x", "TargetAccounts"): frp.getNaturalYearOpeningWhere("x"));
 				else 
 					appendDateClause(caseCond, frp.getTotalWhere());
 			}
@@ -1834,7 +1834,7 @@ public class FinReport extends SvrProcess
 				}
 				else if (m_columns[col].isNaturalYearOpening())
 				{
-					appendDateClause(caseCond, hasNaturalColumn ? frp.getNaturalYearOpeningWITHWhere("TargetAccounts"): frp.getNaturalYearOpeningWhere("x"));
+					appendDateClause(caseCond, hasNaturalColumn ? frp.getNaturalYearOpeningWITHWhere("x", "TargetAccounts"): frp.getNaturalYearOpeningWhere("x"));
 				}
 				else
 				{
@@ -1865,6 +1865,18 @@ public class FinReport extends SvrProcess
 					if (m_columns[col].getGL_Budget_ID() > 0)
 						caseCond.append(" AND x.GL_Budget_ID=").append(m_columns[col].getGL_Budget_ID());
 				}
+			}
+			
+			// Report Where
+			String s = m_report.getWhereClause();
+			if (s != null && s.length() > 0)
+				caseCond.append(" AND ").append(s);
+
+			if (m_columns[col].isColumnTypeSegmentValue() || m_columns[col].isWithSources())
+			{
+				String colWhere = m_columns[col].getWhereClause(p_PA_Hierarchy_ID);
+				if (!Util.isEmpty(colWhere))
+					caseCond.append(" ").append(colWhere);
 			}
 
 			insert.append(", SUM(CASE WHEN ").append(caseCond).append(" THEN ").append(expr).append(" ELSE 0 END)");
@@ -2090,7 +2102,7 @@ public class FinReport extends SvrProcess
 
 	    // Replace table alias fb. or standalone column names with x.
 	    String sql = combinationSql.replaceAll("\\bfb\\.", "x.")
-	                               .replaceAll("\\b(C_Activity_ID|C_BPartner_ID|M_Product_ID|AD_Org_ID|C_SalesRegion_ID|C_Project_ID|C_Campaign_ID|User1_ID|User2_ID)\\b", "x.$1");
+	    				 .replaceAll("(?<!\\.)\\b(C_Activity_ID|C_BPartner_ID|M_Product_ID|AD_Org_ID|C_SalesRegion_ID|C_Project_ID|C_Campaign_ID|User1_ID|User2_ID)\\b", "x.$1");
 
 	    String trimmed = sql.trim();
 	    if (trimmed.toUpperCase().startsWith("AND ")) {
