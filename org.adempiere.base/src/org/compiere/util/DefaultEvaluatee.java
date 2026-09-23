@@ -70,10 +70,14 @@ public class DefaultEvaluatee implements Evaluatee {
 	{
 		//ref column
 		String foreignColumn = "";
-		int f = variableName.indexOf('.');
-		if (f > 0) {
-			foreignColumn = variableName.substring(f+1, variableName.length());
-			variableName = variableName.substring(0, f);
+		if (!Env.isSysConfig(variableName))
+		{
+			int f = variableName.indexOf('.');
+			if (f > 0)
+			{
+				foreignColumn = variableName.substring(f + 1, variableName.length());
+				variableName = variableName.substring(0, f);
+			}
 		}
 		
 		String value = null;
