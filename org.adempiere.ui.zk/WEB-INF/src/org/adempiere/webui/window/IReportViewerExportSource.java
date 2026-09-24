@@ -33,11 +33,19 @@ import org.idempiere.ui.zk.media.Medias;
 import org.zkoss.util.media.AMedia;
 
 /**
- * 
+ * Media source interface for report viewer export
  * @author hengsin
- *
  */
 public interface IReportViewerExportSource {
+	/**
+	 * Builds the consistent, localized label used for report output formats.
+	 * @param extension file extension
+	 * @param description localized format description
+	 * @return format label
+	 */
+	static String getFormatLabel(String extension, String description) {
+		return extension.toLowerCase(java.util.Locale.ROOT) + " - " + description;
+	}
 	
 	public static final String CSV_MIME_TYPE = Medias.CSV_MIME_TYPE;
 	public static final String EXCEL_MIME_TYPE = Medias.EXCEL_MIME_TYPE;	

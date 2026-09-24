@@ -308,6 +308,7 @@ public class ReportEngine implements PrintServiceAttributeListener
 	public void setQuery (MQuery query)
 	{
 		m_query = query;
+		m_printData = null;
 		if (query == null)
 			return;
 		//
@@ -643,13 +644,13 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		catch (FileNotFoundException fnfe)
 		{
 			log.log(Level.SEVERE, "(f) - " + fnfe.toString());
+			throw new AdempiereException(fnfe);
 		}
 		catch (Exception e)
 		{
 			log.log(Level.SEVERE, "(f)", e);
 			throw new AdempiereException(e);
 		}
-		return false;
 	}	//	createHTML
 
 	/**
@@ -688,7 +689,10 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	public boolean createHTML (Writer writer, boolean onlyTable, Language language, IHTMLExtension extension, boolean isExport)
 	{		
 		HTMLReportRendererConfiguration config = new HTMLReportRendererConfiguration()
-				.setOutputWriter(writer).setOnlyTable(onlyTable).setExport(isExport).setExtension(extension)
+				.setOutputWriter(writer)
+				.setOnlyTable(onlyTable)
+				.setExport(isExport)
+				.setExtension(extension)
 				.setLanguage(language);
 		new HTMLReportRenderer().renderReport(this, config);
 		return true;
@@ -795,12 +799,15 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		catch (FileNotFoundException fnfe)
 		{
 			log.log(Level.SEVERE, "(f) - " + fnfe.toString());
+			throw new AdempiereException(fnfe);
 		}
 		catch (Exception e)
 		{
 			log.log(Level.SEVERE, "(f)", e);
+			if (e instanceof RuntimeException runtimeException)
+				throw runtimeException;
+			throw new AdempiereException(e);
 		}
-		return false;
 	}	//	createCSV
 
 	/**
@@ -899,7 +906,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 
 	/**
 	 * 	Create HTML file.
-	 * 	@param file file
+	 * 	@param file optional, null to use system generated temporary file
 	 *	@return HTML file
 	 */
 	public File getHTML(File file)
@@ -913,14 +920,12 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		{
 			log.log(Level.SEVERE, "", e);
 		}
-		if (createHTML(file, false, Env.getLanguage(getCtx())))
-			return file;
-		return null;
+		createHTML(file, false, Env.getLanguage(getCtx()));
+		return file;
 	}	//	getHTML
 	
 	/**
-	 * 	Create CSV file.
-	 * 	(created in temporary storage)
+	 * 	Create CSV file (created as temporary file).
 	 *	@return CSV file
 	 */
 	public File getCSV()
@@ -930,7 +935,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 
 	/**
 	 * 	Create CSV file.
-	 * 	@param file file
+	 * 	@param file optional, null to use system generated temporary file
 	 *	@return CSV file
 	 */
 	public File getCSV(File file)
@@ -944,14 +949,12 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		{
 			log.log(Level.SEVERE, "", e);
 		}
-		if (createCSV(file, ',', Env.getLanguage(getCtx())))
-			return file;
-		return null;
+		createCSV(file, ',', Env.getLanguage(getCtx()));
+		return file;
 	}	//	getCSV
 	
 	/**
-	 * 	Create XLS file.
-	 * 	(created in temporary storage)
+	 * 	Create XLS file (created as temporary file).
 	 *	@return XLS file
 	 */
 	public File getXLS()
@@ -961,7 +964,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 
 	/**
 	 * 	Create XLS file.
-	 * 	@param file file
+	 * 	@param file optional, null to use system generated temporary file
 	 *	@return XLS file
 	 */
 	public File getXLS(File file)
@@ -983,13 +986,14 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		catch (Exception e)
 		{
 			log.log(Level.SEVERE, "", e);
-			return null;
+			if (e instanceof RuntimeException runtimeException)
+				throw runtimeException;
+			throw new AdempiereException(e);
 		}
 	}	//	getXLS
 	
 	/**
-	 * 	Create XLSX file.
-	 * 	(created in temporary storage)
+	 * 	Create XLSX file (created as temporary file).
 	 *	@return XLSX file
 	 */
 	public File getXLSX()
@@ -999,7 +1003,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 
 	/**
 	 * 	Create XLSX file.
-	 * 	@param file file
+	 * 	@param file optional, null to use system generated temporary file
 	 *	@return XLSX file
 	 */
 	public File getXLSX(File file)
@@ -1021,13 +1025,15 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		catch (Exception e)
 		{
 			log.log(Level.SEVERE, "", e);
-			return null;
+			if (e instanceof RuntimeException runtimeException)
+				throw runtimeException;
+			throw new AdempiereException(e);
 		}
 	}	//	getXLSX
 	
 	/**
 	 * 	Create PDF File
-	 * 	@param file file
+	 * 	@param file optional, null to use system generated temporary file
 	 * 	@return true if success
 	 */
 	public boolean createPDF (File file)
@@ -1051,7 +1057,9 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		catch (Exception e)
 		{
 			log.log(Level.SEVERE, "file", e);
-			return false;
+			if (e instanceof RuntimeException runtimeException)
+				throw runtimeException;
+			throw new AdempiereException(e);
 		}
 			
 		if (log.isLoggable(Level.FINE)) log.fine(uri.toString());
