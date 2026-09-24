@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.adempiere.base.Core;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MClient;
 import org.compiere.model.MDunningLevel;
@@ -41,6 +42,8 @@ import org.compiere.util.AdempiereUserError;
 import org.compiere.util.EMail;
 import org.compiere.util.Language;
 import org.compiere.util.Util;
+import org.compiere.tools.FileUtil;
+import org.idempiere.print.ReportContentRequest;
 
 /**
  *	Dunning Letter Print
@@ -185,6 +188,7 @@ public class DunningPrint extends SvrProcess
 					lang = Language.getLanguage(bp.getAD_Language());
 				format.setLanguage(lang);
 				re = new ReportEngine(getCtx(), format, query, info);
+				re.setProcessInfo(getProcessInfo());
 			}
 			boolean printed = false;
 			if (p_EMailPDF)
@@ -210,14 +214,31 @@ public class DunningPrint extends SvrProcess
 					email.setMessageText (message);
 				}
 				//
-				if (re != null) {
-					File attachment = re.getPDF(File.createTempFile("Dunning", ".pdf"));
-					StringBuilder msglog = new StringBuilder().append(to.toString()).append(" - ").append(attachment);
-					if (log.isLoggable(Level.FINE)) log.fine(msglog.toString());
-					email.addAttachment(attachment);
+				File attachment = null;
+				File outputFile = null;
+				String msg;
+				try {
+					if (re != null) {
+						outputFile = FileUtil.createTempFile("Dunning", ".pdf");
+						attachment = Core.getReportContent(
+								new ReportContentRequest(re, getProcessInfo(), bp.getName()),
+								"application/pdf", "pdf", outputFile);
+						if (attachment == null) {
+							addLog(entry.get_ID(), null, null, "Unable to generate dunning report content");
+							errors++;
+							continue;
+						}
+						StringBuilder msglog = new StringBuilder().append(to.toString()).append(" - ").append(attachment);
+						if (log.isLoggable(Level.FINE)) log.fine(msglog.toString());
+						email.addAttachment(attachment);
+					}
+					//
+					msg = email.send();
+				} finally {
+					File cleanupFile = attachment != null ? attachment : outputFile;
+					if (cleanupFile != null && cleanupFile.exists() && !cleanupFile.delete())
+						cleanupFile.deleteOnExit();
 				}
-				//
-				String msg = email.send();
 				MUserMail um = new MUserMail(mText, entry.getAD_User_ID(), email);
 				um.saveEx();
 				if (msg.equals(EMail.SENT_OK))
@@ -238,7 +259,14 @@ public class DunningPrint extends SvrProcess
 			else
 			{
 				if (re != null) {
-					pdfList.add(re.getPDF());					
+					File content = Core.getReportContent(new ReportContentRequest(re, getProcessInfo(), bp.getName()),
+							"application/pdf", "pdf");
+					if (content == null) {
+						addLog(entry.get_ID(), null, null, "Unable to generate dunning report content");
+						errors++;
+						continue;
+					}
+					pdfList.add(content);
 					count++;
 					printed = true;
 				}
@@ -264,7 +292,7 @@ public class DunningPrint extends SvrProcess
 		if (processUI != null)
 		{
 			processUI.showReports(pdfList);
-			}
+		}
 		
 		StringBuilder msgreturn = new StringBuilder("@Printed@=").append(count);
 		return msgreturn.toString();

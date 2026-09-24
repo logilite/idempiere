@@ -53,6 +53,7 @@ import org.compiere.util.TimeUtil;
 import org.compiere.util.Util;
 import org.eevolution.model.MPPProductBOM;
 import org.eevolution.model.MPPProductBOMLine;
+import org.idempiere.print.ReportContentRequest;
 
 /**
  *  Order Model.
@@ -938,7 +939,8 @@ public class MOrder extends X_C_Order implements DocAction
 		ReportEngine re = ReportEngine.get (getCtx(), ReportEngine.ORDER, getC_Order_ID(), get_TrxName());
 		if (re == null)
 			return null;
-		return re.getPDF(file);
+		return Core.getReportContent(new ReportContentRequest(re, null, getDocumentInfo()),
+				"application/pdf", "pdf", file);
 	}	//	createPDF
 	
 	/**

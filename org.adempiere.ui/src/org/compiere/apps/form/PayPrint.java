@@ -35,10 +35,8 @@ import org.compiere.model.MLookupFactory;
 import org.compiere.model.MLookupInfo;
 import org.compiere.model.MPaySelectionCheck;
 import org.compiere.model.MPaymentBatch;
-import org.compiere.print.MPrintFormat;
 import org.compiere.print.ReportEngine;
-import org.compiere.process.ProcessInfo;
-import org.compiere.process.ServerProcessCtl;
+import org.compiere.tools.FileUtil;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -47,9 +45,13 @@ import org.compiere.util.Msg;
 import org.compiere.util.PaymentExport;
 import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
+import org.idempiere.print.ReportContentRequest;
 
 import com.lowagie.text.pdf.PdfReader;
 
+/**
+ * Form to Print and Export payment.
+ */
 public class PayPrint {
 
 	/**	Window No			*/
@@ -74,7 +76,7 @@ public class PayPrint {
 	protected PaymentExport m_PaymentExport;
 	
 	/**
-	 *  load pay selection details (bank info, balance and payment export class)
+	 *  Load pay selection (C_PaySelection) details (bank info, balance and payment export class)
 	 *  @param C_PaySelection_ID
 	 */
 	public void loadPaySelectInfo(int C_PaySelection_ID)
@@ -126,7 +128,7 @@ public class PayPrint {
 	}   //  loadPaySelectInfo
 
 	/**
-	 *  load payment rules that's applicable to pay selection
+	 *  Get payment rules that's applicable to a pay selection record
 	 *  @param C_PaySelection_ID
 	 *  @return list of applicable payment rules
 	 */
@@ -326,30 +328,25 @@ public class PayPrint {
 
 			//	ReportCtrl will check BankAccountDoc for PrintFormat
 			ReportEngine re = ReportEngine.get(Env.getCtx(), ReportEngine.CHECK, check.get_ID(), m_WindowNo);
-			MPrintFormat format = re.getPrintFormat();
+			File outputFile = FileUtil.createTempFile("WPayPrint", ".pdf");
 			File pdfFile = null;
-			if (format.getJasperProcess_ID() > 0)	
-			{
-				ProcessInfo pi = new ProcessInfo("", format.getJasperProcess_ID());
-				pi.setRecord_ID(check.get_ID());
-				pi.setIsBatch(true);
-									
-				ServerProcessCtl.process(pi, null);
-				pdfFile = pi.getPDFReport();
-			}
-			else
-			{
-				pdfFile = File.createTempFile("WPayPrint", null);
-				re.getPDF(pdfFile);
-			}
-			
-			if (pdfFile != null)
-			{
+			try {
+				pdfFile = Core.getReportContent(
+						new ReportContentRequest(re, null, check.getDocumentNo()),
+						"application/pdf", "pdf", outputFile);
+				if (pdfFile == null) {
+					if (outputFile.exists() && !outputFile.delete()) outputFile.deleteOnExit();
+					continue;
+				}
 				// increase the check document no by the number of pages of the generated pdf file
 				try (PdfReader document = new PdfReader(pdfFile.getAbsolutePath())) {
 					lastDocumentNo += document.getNumberOfPages();
 				}
 				pdfList.add(pdfFile);
+			} catch (Exception e) {
+				File cleanupFile = pdfFile != null ? pdfFile : outputFile;
+				if (cleanupFile.exists() && !cleanupFile.delete()) cleanupFile.deleteOnExit();
+				throw e;
 			}
 		}
 
@@ -371,42 +368,40 @@ public class PayPrint {
 	 * @return list of Remittance documents
 	 */
 	protected List<File> createRemittanceDocuments()
-	{
-		
+	{		
 		List<File> pdfList = new ArrayList<File>();
 		for (int i = 0; i < m_checks.length; i++)
 		{
 			MPaySelectionCheck check = m_checks[i];
 			ReportEngine re = ReportEngine.get(Env.getCtx(), ReportEngine.REMITTANCE, check.get_ID(), m_WindowNo);
+			File file = null;
 			try
 			{
-				MPrintFormat format = re.getPrintFormat();
-				if (format.getJasperProcess_ID() > 0)	
-				{
-					ProcessInfo pi = new ProcessInfo("", format.getJasperProcess_ID());
-					pi.setRecord_ID(check.get_ID());
-					pi.setIsBatch(true);
-					
-					ServerProcessCtl.process(pi, null);
-					pdfList.add(pi.getPDFReport());
-				}
-				else
-				{
-					File file = File.createTempFile("WPayPrint", null);
-					re.getPDF(file);
-					pdfList.add(file);
-				}
+				file = FileUtil.createTempFile("WPayPrint", ".pdf");
+				File content = Core.getReportContent(
+						new ReportContentRequest(re, null, check.getDocumentNo()),
+						"application/pdf", "pdf", file);
+				if (content != null)
+					pdfList.add(content);
+				else if (!file.delete())
+					file.deleteOnExit();
 			}
 			catch (Exception e)
 			{
+				if (file.exists() && !file.delete())
+					file.deleteOnExit();
 				log.log(Level.SEVERE, e.getLocalizedMessage(), e);
 			}
 		}
 		return pdfList;
 	}
-	/**************************************************************************
+	
+	/**
 	 *  Get Checks
 	 *  @param PaymentRule Payment Rule
+	 *  @param startDocumentNo
+	 *  @param error
+	 *  @param trxName
 	 *  @return true if payments were created
 	 */
 	protected boolean getChecks(String PaymentRule, BigDecimal startDocumentNo, AtomicReference<ValueNamePair> error, String trxName)
