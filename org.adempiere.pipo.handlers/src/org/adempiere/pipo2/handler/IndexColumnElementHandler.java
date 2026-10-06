@@ -79,7 +79,7 @@ public class IndexColumnElementHandler extends AbstractElementHandler {
 			excludes.add("AD_Column_ID");
 			int columnId = 0;
 			Element columnElement = element.properties.get("AD_Column_ID");
-			if (ReferenceUtils.isIDLookup(columnElement) || ReferenceUtils.isUUIDLookup(columnElement)) {
+			if (columnElement != null && (ReferenceUtils.isIDLookup(columnElement) || ReferenceUtils.isUUIDLookup(columnElement))) {
 				columnId = ReferenceUtils.resolveReferenceAsInt(ctx.ctx, columnElement, getTrxName(ctx));
 			}
 			if (columnId > 0)
