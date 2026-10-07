@@ -595,15 +595,9 @@ public abstract class AbstractElementHandler implements ElementHandler {
 				return false;
 			}
 		}
-		if (!ctx.packOut.isExportDictionaryEntity() && element.get_ColumnIndex("EntityType") >= 0) {
-			Object entityType = element.get_Value("EntityType");
-			if (PO.ENTITYTYPE_Dictionary.equals(entityType)
-				|| "EE01".equals(entityType)
-				|| "EE02".equals(entityType)
-				|| "EE04".equals(entityType)
-				|| "EE05".equals(entityType)) {
+		if (element.get_ColumnIndex("EntityType") >= 0) {
+			if (!ctx.packOut.isExportEntityType(element.get_Value("EntityType")))
 				return false;
-			}
 		}
 		return true;
 	}        

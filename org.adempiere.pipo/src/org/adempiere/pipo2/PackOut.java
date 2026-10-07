@@ -46,12 +46,14 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.compiere.model.MChangeLog;
 import org.compiere.model.MClient;
+import org.compiere.model.MEntityType;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.tools.FileUtil;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 import org.compiere.util.Util;
 import org.compiere.util.Trx;
 import org.xml.sax.SAXException;
@@ -91,6 +93,8 @@ public class PackOut
 	private Timestamp fromDate;
 	private boolean isExportDictionaryEntity = false;
 	private boolean isExportOnlyChangedValue = false;
+	/** Entity types to export. Empty to export all entity types */
+	private Set<String> entityTypes = new HashSet<String>();
 
 	public static final int MAX_OFFICIAL_ID = MTable.MAX_OFFICIAL_ID;
 
@@ -231,7 +235,7 @@ public class PackOut
 		atts.addAttribute("","","CreatedDate","CDATA",packoutDocument.getCreated().toString());
 		atts.addAttribute("","","UpdatedDate","CDATA",packoutDocument.getUpdated().toString());
 		atts.addAttribute("","","PackOutVersion","CDATA",PackOutVersion);
-		atts.addAttribute("","","UpdateDictionary","CDATA", isExportDictionaryEntity ? "true" : "false");
+		atts.addAttribute("","","UpdateDictionary","CDATA", isUpdateDictionary() ? "true" : "false");
 
 		MClient client = MClient.get(pipoContext.ctx);
 		StringBuilder sb = new StringBuilder ()
@@ -527,7 +531,9 @@ public class PackOut
 					return null;
 				if (MChangeLog.EVENTCHANGELOG_Delete.equals(event))
 					continue;
-				changedColumns.add(rs.getString(1).toUpperCase());
+				String columnName = rs.getString(1);
+				if (columnName != null)
+					changedColumns.add(columnName.toUpperCase());
 			}
 		} catch (Exception e) {
 			throw new AdempiereException(e.getLocalizedMessage(), e);
@@ -563,6 +569,77 @@ public class PackOut
 
 	public void setExportDictionaryEntity(boolean isExportDictionaryEntity) {
 		this.isExportDictionaryEntity = isExportDictionaryEntity;
+	}
+
+	/**
+	 * Limit the pack out to records of the given entity types (IDEMPIERE-7135).<br/>
+	 * When set, the Export Dictionary Entity flag is ignored.
+	 * @param entityTypes comma separated entity types (or entity type IDs), null or empty to export all entity types
+	 */
+	public void setEntityTypes(String entityTypes) {
+		this.entityTypes.clear();
+		if (!Util.isEmpty(entityTypes, true)) {
+			Properties ctx = getCtx() != null && getCtx().ctx != null ? getCtx().ctx : Env.getCtx();
+			for (String entityType : entityTypes.split("[,]")) {
+				if (!Util.isEmpty(entityType, true)) {
+					String value = entityType.trim();
+					try {
+						int id = Integer.parseInt(value);
+						MEntityType et = new MEntityType(ctx, id, null);
+						if (et.get_ID() > 0 && !Util.isEmpty(et.getEntityType()))
+							value = et.getEntityType();
+					} catch (Exception e) {
+						// value is already String entity type code
+					}
+					this.entityTypes.add(value);
+				}
+			}
+		}
+	}
+
+	/**
+	 * @return entity types to export, empty to export all entity types
+	 */
+	public Set<String> getEntityTypes() {
+		return entityTypes;
+	}
+
+	/**
+	 * @param entityType
+	 * @return true if entity type is a dictionary (system maintained) entity type
+	 */
+	public static boolean isDictionaryEntityType(Object entityType) {
+		return PO.ENTITYTYPE_Dictionary.equals(entityType)
+			|| "EE01".equals(entityType)
+			|| "EE02".equals(entityType)
+			|| "EE04".equals(entityType)
+			|| "EE05".equals(entityType);
+	}
+
+	/**
+	 * Is a record of the given entity type part of the pack out.<br/>
+	 * With an entity type filter, only the selected entity types are exported. Without it,
+	 * dictionary entity types are exported only when Export Dictionary Entity is set.
+	 * @param entityType entity type of the record
+	 * @return true if the record must be exported
+	 */
+	public boolean isExportEntityType(Object entityType) {
+		if (!entityTypes.isEmpty())
+			return entityType != null && entityTypes.contains(entityType.toString());
+		return isExportDictionaryEntity || !isDictionaryEntityType(entityType);
+	}
+
+	/**
+	 * @return true if the pack out can include records of a dictionary entity type
+	 */
+	private boolean isUpdateDictionary() {
+		if (entityTypes.isEmpty())
+			return isExportDictionaryEntity;
+		for (String entityType : entityTypes) {
+			if (isDictionaryEntityType(entityType))
+				return true;
+		}
+		return false;
 	}
 
 	/**

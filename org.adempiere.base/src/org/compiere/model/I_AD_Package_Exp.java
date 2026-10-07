@@ -144,6 +144,19 @@ public interface I_AD_Package_Exp
 	  */
 	public String getEMail();
 
+    /** Column name ExportEntityType */
+    public static final String COLUMNNAME_ExportEntityType = "ExportEntityType";
+
+	/** Set Export Entity Type.
+	  * Filter by Entity Type
+	  */
+	public void setExportEntityType (String ExportEntityType);
+
+	/** Get Export Entity Type.
+	  * Filter by Entity Type
+	  */
+	public String getExportEntityType();
+
     /** Column name File_Directory */
     public static final String COLUMNNAME_File_Directory = "File_Directory";
 

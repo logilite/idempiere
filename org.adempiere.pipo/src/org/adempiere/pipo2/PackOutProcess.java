@@ -139,6 +139,7 @@ public class PackOutProcess extends SvrProcess
 				
 				packOut.setExportDictionaryEntity(packageExp.isExportDictionaryEntity());
 				packOut.setExportOnlyChangedValue(packageExp.isExportOnlyChangedValue());
+				packOut.setEntityTypes(packageExp.getExportEntityType());
 				packOut.export(packoutDirectory, null, packoutDocument, packoutItems, get_TrxName());
 				processedCount = packOut.getExportCount();
 				exportFile = packOut.getExportFile();

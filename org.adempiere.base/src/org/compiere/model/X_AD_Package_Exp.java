@@ -32,7 +32,7 @@ public class X_AD_Package_Exp extends PO implements I_AD_Package_Exp, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20261006L;
+	private static final long serialVersionUID = 20261007L;
 
     /** Standard Constructor */
     public X_AD_Package_Exp (Properties ctx, int AD_Package_Exp_ID, String trxName)
@@ -236,6 +236,25 @@ public class X_AD_Package_Exp extends PO implements I_AD_Package_Exp, I_Persiste
 	public String getEMail()
 	{
 		return (String)get_Value(COLUMNNAME_EMail);
+	}
+
+	/** ExportEntityType AD_Reference_ID=389 */
+	public static final int EXPORTENTITYTYPE_AD_Reference_ID=389;
+	/** Set Export Entity Type.
+		@param ExportEntityType Filter by Entity Type
+	*/
+	public void setExportEntityType (String ExportEntityType)
+	{
+
+		set_Value (COLUMNNAME_ExportEntityType, ExportEntityType);
+	}
+
+	/** Get Export Entity Type.
+		@return Filter by Entity Type
+	  */
+	public String getExportEntityType()
+	{
+		return (String)get_Value(COLUMNNAME_ExportEntityType);
 	}
 
 	/** Set File_Directory.
