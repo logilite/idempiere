@@ -50,6 +50,7 @@ import javax.print.DocFlavor;
 import javax.print.attribute.DocAttributeSet;
 
 import org.adempiere.base.Core;
+import org.compiere.model.MColumn;
 import org.compiere.model.MQuery;
 import org.compiere.model.MTable;
 import org.compiere.model.PrintInfo;
@@ -2414,6 +2415,11 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	private boolean isDisplayed(PrintData data, MPrintFormatItem item) {
 		if ( Util.isEmpty(item.getDisplayLogic() ))
 			return true;
+
+		if (item.getDisplayLogic().startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX)) {
+			return Evaluator.parseSQLLogic(item.getDisplayLogic(), m_printCtx, m_windowNo, 0, item.getName());
+		}
+
 		boolean display = Evaluator.evaluateLogic(new PrintDataEvaluatee(getPage(getPageNo()), data), item.getDisplayLogic());
 		
 		return display;
