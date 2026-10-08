@@ -2417,7 +2417,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 			return true;
 
 		if (item.getDisplayLogic().startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX)) {
-			return Evaluator.parseSQLLogic(item.getDisplayLogic(), m_printCtx, m_windowNo, 0, null);
+			return Evaluator.parseSQLLogic(item.getDisplayLogic(), m_printCtx, m_windowNo, 0, item.getName());
 		}
 
 		boolean display = Evaluator.evaluateLogic(new PrintDataEvaluatee(getPage(getPageNo()), data), item.getDisplayLogic());
