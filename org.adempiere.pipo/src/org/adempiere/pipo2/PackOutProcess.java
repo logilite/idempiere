@@ -216,6 +216,8 @@ public class PackOutProcess extends SvrProcess
 			properties.put(SQLElementParameters.DB_TYPE, dtl.getDBType());
 		} else if (MPackageExpDetail.TYPE_ShellScript.equals(type) || MPackageExpDetail.TYPE_ScriptJSR223.equals(type)) {
 			properties.put(MPackageExpDetail.COLUMNNAME_ExecCode, dtl.getExecCode());
+		} else if (MPackageExpDetail.TYPE_EntityType.equals(type)) {
+			properties.put(MPackageExpDetail.COLUMNNAME_IsExportFullEntityChange, dtl.isExportFullEntityChange());
 		}
 		return properties;
 	}

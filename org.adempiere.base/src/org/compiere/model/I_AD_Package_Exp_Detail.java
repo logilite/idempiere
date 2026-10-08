@@ -441,6 +441,19 @@ public interface I_AD_Package_Exp_Detail
 	  */
 	public boolean isActive();
 
+    /** Column name IsExportFullEntityChange */
+    public static final String COLUMNNAME_IsExportFullEntityChange = "IsExportFullEntityChange";
+
+	/** Set Export Full Entity Change.
+	  * Export all dictionary records of the entity type
+	  */
+	public void setIsExportFullEntityChange (boolean IsExportFullEntityChange);
+
+	/** Get Export Full Entity Change.
+	  * Export all dictionary records of the entity type
+	  */
+	public boolean isExportFullEntityChange();
+
     /** Column name Line */
     public static final String COLUMNNAME_Line = "Line";
 

@@ -16,20 +16,27 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
 import javax.xml.transform.sax.TransformerHandler;
 
 import org.adempiere.pipo2.AbstractElementHandler;
+import org.adempiere.pipo2.DataElementParameters;
 import org.adempiere.pipo2.Element;
 import org.adempiere.pipo2.ElementHandler;
 import org.adempiere.pipo2.PIPOContext;
 import org.adempiere.pipo2.PackOut;
+import org.adempiere.pipo2.PackoutItem;
 import org.adempiere.pipo2.PoExporter;
 import org.adempiere.pipo2.PoFiller;
 import org.adempiere.pipo2.exception.DatabaseAccessException;
 import org.adempiere.pipo2.exception.POSaveFailedException;
+import org.compiere.model.I_AD_Package_Exp_Detail;
+import org.compiere.model.MTable;
 import org.compiere.model.X_AD_EntityType;
 import org.compiere.model.X_AD_Modification;
 import org.compiere.model.X_AD_Package_Imp_Detail;
@@ -48,6 +55,22 @@ public class EntityTypeElementHandler extends AbstractElementHandler{
 	private ModificationElementHandler modificationHandler = new ModificationElementHandler();
 	
 	private List<Integer> entityTypes = new ArrayList<Integer>();
+
+	/**
+	 * Dictionary tables exported first, in this order, from the highest to the lowest level element.
+	 * The handler of a higher level element exports the elements it depends on and its children
+	 * inside it and an element is never exported twice, so the original pack out structure
+	 * (Menu, Window, Tab, Field, ...) is kept. Other tables with an entity type follow.
+	 */
+	private static final List<String> DICTIONARY_TABLE_ORDER = Arrays.asList(
+			"AD_Menu", "AD_Window", "AD_Tab", "AD_Field", "AD_FieldGroup", "AD_ToolBarButton",
+			"AD_InfoWindow", "AD_InfoColumn", "AD_InfoProcess", "AD_InfoRelated",
+			"AD_Table", "AD_Column", "AD_TableIndex", "AD_IndexColumn", "AD_ViewComponent", "AD_ViewColumn",
+			"AD_Process", "AD_Process_Para", "AD_ReportView", "AD_Form", "AD_Task",
+			"AD_Workflow", "AD_WF_Node", "AD_WF_NodeNext", "AD_WF_NextCondition", "AD_WF_Node_Para",
+			"AD_WF_Node_Var", "AD_WF_Responsible",
+			"AD_Reference", "AD_Ref_List", "AD_Ref_Table", "AD_Val_Rule", "AD_Element",
+			"AD_Message", "AD_SysConfig", "AD_Rule", "AD_ModelValidator");
 	
 	@Override
 	public void startElement(PIPOContext ctx, Element element)
@@ -164,6 +187,96 @@ public class EntityTypeElementHandler extends AbstractElementHandler{
 		if (createElement) {
 			document.endElement("", "", X_AD_EntityType.Table_Name);
 		}
+
+		if (isExportFullEntityChange(packOut))
+			createDictionaryElements(ctx, document, m_EntityType.getEntityType());
+	}
+
+	/**
+	 * @param packOut
+	 * @return true if the current pack out line is an entity type line with Export Full Entity Change ticked
+	 */
+	private boolean isExportFullEntityChange(PackOut packOut) {
+		PackoutItem item = packOut.getCurrentPackoutItem();
+		return item != null && X_AD_EntityType.Table_Name.equals(item.getType())
+				&& Boolean.TRUE.equals(item.getProperty(I_AD_Package_Exp_Detail.COLUMNNAME_IsExportFullEntityChange));
+	}
+
+	/**
+	 * Export all application dictionary records of the entity type, when Export Full Entity Change
+	 * is ticked on the pack out line (IDEMPIERE-7144).<br/>
+	 * Only records of this entity type are exported, records updated before From Date of the pack out are skipped.
+	 * @param ctx
+	 * @param document
+	 * @param entityType
+	 * @throws SAXException
+	 */
+	private void createDictionaryElements(PIPOContext ctx, TransformerHandler document, String entityType) throws SAXException {
+		PackOut packOut = ctx.packOut;
+		Set<String> entityTypeFilter = new HashSet<String>(packOut.getEntityTypes());
+		//entity type is not part of the pack out
+		if (!entityTypeFilter.isEmpty() && !entityTypeFilter.contains(entityType))
+			return;
+
+		GenericPOElementHandler genericHandler = new GenericPOElementHandler();
+		try {
+			//don't export records of other entity type referenced by a record of this entity type
+			packOut.setEntityTypes(entityType);
+			for (String tableName : getDictionaryTableNames(ctx)) {
+				StringBuilder sql = new StringBuilder("SELECT * FROM ").append(tableName)
+						.append(" WHERE EntityType=").append(DB.TO_STRING(entityType));
+				if (packOut.getFromDate() != null)
+					sql.append(" AND Updated>=").append(DB.TO_DATE(packOut.getFromDate(), false));
+				sql.append(" ORDER BY Created, ").append(tableName).append("_ID");
+				ctx.ctx.put(DataElementParameters.AD_TABLE_ID, Integer.toString(MTable.getTable_ID(tableName)));
+				ctx.ctx.put(DataElementParameters.SQL_STATEMENT, sql.toString());
+				try {
+					genericHandler.create(ctx, document);
+				} finally {
+					ctx.ctx.remove(DataElementParameters.AD_TABLE_ID);
+					ctx.ctx.remove(DataElementParameters.SQL_STATEMENT);
+				}
+			}
+		} finally {
+			packOut.getEntityTypes().clear();
+			packOut.getEntityTypes().addAll(entityTypeFilter);
+		}
+	}
+
+	/**
+	 * Get the application dictionary tables that have an entity type and a single ID key.
+	 * @param ctx
+	 * @return table names, in the order to export
+	 */
+	private List<String> getDictionaryTableNames(PIPOContext ctx) {
+		//system level tables only, never transaction data
+		final String sql = "SELECT t.TableName FROM AD_Table t "
+				+ "WHERE t.IsActive='Y' AND t.IsView='N' AND t.AccessLevel IN ('4','6','7') "
+				+ "AND t.TableName NOT IN ('AD_EntityType','AD_Modification') "
+				+ "AND EXISTS (SELECT 1 FROM AD_Column c WHERE c.AD_Table_ID=t.AD_Table_ID AND c.IsActive='Y' AND c.ColumnName='EntityType') "
+				+ "AND EXISTS (SELECT 1 FROM AD_Column c WHERE c.AD_Table_ID=t.AD_Table_ID AND c.IsActive='Y' AND c.ColumnName=t.TableName||'_ID') "
+				+ "ORDER BY t.TableName";
+		List<String> found = new ArrayList<String>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try {
+			pstmt = DB.prepareStatement(sql, getTrxName(ctx));
+			rs = pstmt.executeQuery();
+			while (rs.next())
+				found.add(rs.getString(1));
+		} catch (SQLException e) {
+			throw new DatabaseAccessException("Failed to export EntityType.", e);
+		} finally {
+			DB.close(rs, pstmt);
+		}
+
+		List<String> tableNames = new ArrayList<String>();
+		for (String tableName : DICTIONARY_TABLE_ORDER) {
+			if (found.remove(tableName))
+				tableNames.add(tableName);
+		}
+		tableNames.addAll(found);
+		return tableNames;
 	}
 	
 	private void createModificaiton(PIPOContext ctx, TransformerHandler document,

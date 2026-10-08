@@ -31,7 +31,7 @@ public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Deta
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20231222L;
+	private static final long serialVersionUID = 20261007L;
 
     /** Standard Constructor */
     public X_AD_Package_Exp_Detail (Properties ctx, int AD_Package_Exp_Detail_ID, String trxName)
@@ -41,6 +41,8 @@ public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Deta
         {
 			setAD_Package_Exp_Detail_ID (0);
 			setAD_Package_Exp_ID (0);
+			setIsExportFullEntityChange (false);
+// N
 			setProcessing (false);
 			setType (null);
         } */
@@ -54,6 +56,8 @@ public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Deta
         {
 			setAD_Package_Exp_Detail_ID (0);
 			setAD_Package_Exp_ID (0);
+			setIsExportFullEntityChange (false);
+// N
 			setProcessing (false);
 			setType (null);
         } */
@@ -67,6 +71,8 @@ public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Deta
         {
 			setAD_Package_Exp_Detail_ID (0);
 			setAD_Package_Exp_ID (0);
+			setIsExportFullEntityChange (false);
+// N
 			setProcessing (false);
 			setType (null);
         } */
@@ -80,6 +86,8 @@ public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Deta
         {
 			setAD_Package_Exp_Detail_ID (0);
 			setAD_Package_Exp_ID (0);
+			setIsExportFullEntityChange (false);
+// N
 			setProcessing (false);
 			setType (null);
         } */
@@ -755,6 +763,22 @@ public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Deta
 		return (String)get_Value(COLUMNNAME_ExecCode);
 	}
 
+	/** Set File Name.
+		@param FileName Name of the local file or URL
+	*/
+	public void setFileName (String FileName)
+	{
+		set_Value (COLUMNNAME_FileName, FileName);
+	}
+
+	/** Get File Name.
+		@return Name of the local file or URL
+	  */
+	public String getFileName()
+	{
+		return (String)get_Value(COLUMNNAME_FileName);
+	}
+
 	/** Set File_Directory.
 		@param File_Directory File_Directory
 	*/
@@ -770,20 +794,27 @@ public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Deta
 		return (String)get_Value(COLUMNNAME_File_Directory);
 	}
 
-	/** Set File Name.
-		@param FileName Name of the local file or URL
+	/** Set Export Full Entity Change.
+		@param IsExportFullEntityChange Export all dictionary records of the entity type
 	*/
-	public void setFileName (String FileName)
+	public void setIsExportFullEntityChange (boolean IsExportFullEntityChange)
 	{
-		set_Value (COLUMNNAME_FileName, FileName);
+		set_Value (COLUMNNAME_IsExportFullEntityChange, Boolean.valueOf(IsExportFullEntityChange));
 	}
 
-	/** Get File Name.
-		@return Name of the local file or URL
+	/** Get Export Full Entity Change.
+		@return Export all dictionary records of the entity type
 	  */
-	public String getFileName()
+	public boolean isExportFullEntityChange()
 	{
-		return (String)get_Value(COLUMNNAME_FileName);
+		Object oo = get_Value(COLUMNNAME_IsExportFullEntityChange);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set Line No.
