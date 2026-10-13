@@ -63,13 +63,12 @@ public class EntityTypeElementHandler extends AbstractElementHandler{
 	 * (Menu, Window, Tab, Field, ...) is kept. Other tables with an entity type follow.
 	 */
 	private static final List<String> DICTIONARY_TABLE_ORDER = Arrays.asList(
-			"AD_Menu", "AD_Window", "AD_Tab", "AD_Field", "AD_FieldGroup", "AD_ToolBarButton",
+			"AD_Menu", "AD_Window", "AD_Tab","AD_Table","AD_Reference", "AD_Ref_List", "AD_Ref_Table", "AD_Val_Rule", "AD_Element", "AD_Column", "AD_Field", "AD_FieldGroup", "AD_ToolBarButton",
 			"AD_InfoWindow", "AD_InfoColumn", "AD_InfoProcess", "AD_InfoRelated",
-			"AD_Table", "AD_Column", "AD_TableIndex", "AD_IndexColumn", "AD_ViewComponent", "AD_ViewColumn",
+			 "AD_TableIndex", "AD_IndexColumn", "AD_ViewComponent", "AD_ViewColumn",
 			"AD_Process", "AD_Process_Para", "AD_ReportView", "AD_Form", "AD_Task",
 			"AD_Workflow", "AD_WF_Node", "AD_WF_NodeNext", "AD_WF_NextCondition", "AD_WF_Node_Para",
 			"AD_WF_Node_Var", "AD_WF_Responsible",
-			"AD_Reference", "AD_Ref_List", "AD_Ref_Table", "AD_Val_Rule", "AD_Element",
 			"AD_Message", "AD_SysConfig", "AD_Rule", "AD_ModelValidator");
 	
 	@Override
